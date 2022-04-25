@@ -1,0 +1,58 @@
+# Copyright (C) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+group("avession_server") {
+  deps = [
+    ":avsession_service",
+    "//foundation/multimedia/avsession_standard/sa_profile:avsession_sa_profile",
+    "//foundation/multimedia/avsession_standard/services/etc:avsession_service.rc",
+  ]
+}
+
+ohos_shared_library("avsession_service") {
+  install_enable = true
+
+  ipc_sources = [
+    "ipc/avsession_service_stub.cpp",
+    "ipc/avsession_stub.cpp",
+    "ipc/session_listener_proxy.cpp",
+  ]
+
+  service_sources = [
+    "server/avsession_item.cpp",
+    "server/avsession_service.cpp",
+  ]
+
+  sources = ipc_sources + service_sources
+
+  include_dirs = [
+    "//foundation/multimedia/avsession_standard/services/session/ipc/include",
+    "//foundation/multimedia/avsession_standard/interfaces/innerkits/native/session/include",
+    "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session/include",
+    "//utils/native/base/include",
+  ]
+
+  deps = [ "//utils/native/base:utils" ]
+
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
+  ]
+
+  subsystem_name = "multimedia"
+  part_name = "multimedia_avsession_standard"
+}

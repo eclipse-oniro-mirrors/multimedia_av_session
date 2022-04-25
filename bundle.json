@@ -1,0 +1,67 @@
+{
+    "name": "@ohos/avsession_standard",
+    "description": "Audio and Video Session Management",
+    "version": "4.0",
+    "license": "Apache License 2.0",
+    "publishAs": "code-segment",
+    "segment": {
+      "destPath": "foundation/multimedia/avsession_standard"
+    },
+    "dirs": {},
+    "scripts": {},
+    "component": {
+      "name": "multimedia_avsession_standard",
+      "subsystem": "multimedia",
+      "syscap": [
+        "SystemCapability.Multimedia.Media.Core",
+        "SystemCapability.Multimedia.Media.AudioPlayer",
+        "SystemCapability.Multimedia.Media.VideoPlayer",
+        "SystemCapability.Multimedia.Media.AudioRecorder",
+        "SystemCapability.Multimedia.Media.VideoRecorder",
+        "SystemCapability.Multimedia.Media.Codec",
+        "SystemCapability.Multimedia.Media.Spliter",
+        "SystemCapability.Multimedia.Media.Muxer"
+      ],
+      "features": [],
+      "adapted_system_type": [ "standard" ],
+      "rom": "10000KB",
+      "ram": "10000KB",
+      "deps": {
+        "components": [
+          "ace_napi",
+          "ipc_core",
+          "libhilog",
+          "samgr_proxy",
+          "system_ability_fwk",
+          "libaccesstoken_sdk",
+          "bytrace_core"
+        ],
+        "third_party": [
+        ]
+      },
+      "build": {
+        "sub_component": [
+          "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session:avsession_client",
+          "//foundation/multimedia/avsession_standard/frameworks/kitsimpl/js/session:avsession_napi",
+          "//foundation/multimedia/avsession_standard/services/session:avession_server"
+        ],
+        "inner_kits": [
+          {
+            "header": {
+              "header_files": [
+                  "avsession_manager.h",
+                  "avsession.h",
+                  "avsession_controller.h",
+                  "avsession_info.h",
+                  "avsession_errors.h"
+              ],
+              "header_base": "//foundation/multimedia/avsession_standard/interfaces/innerkits/native/session/include"
+            },
+            "name": "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session:avsession_client"
+          }
+        ],
+        "test": [
+        ]
+      }
+    }
+  }
