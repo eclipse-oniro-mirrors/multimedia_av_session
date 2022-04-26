@@ -21,7 +21,6 @@
 #include "avsession_errors.h"
 #include "session_listener_client.h"
 
-constexpr int AVSESSION_SERVICE_ID = 3010;
 namespace OHOS::AVSession {
 AVSessionManagerImpl::DeathRecipientImpl::DeathRecipientImpl(const DeathCallback& callback)
     : callback_(callback)

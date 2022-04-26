@@ -19,7 +19,6 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
-static constexpr int AVSESSION_SERVICE_ID = 3010;
 namespace OHOS::AVSession {
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
 
