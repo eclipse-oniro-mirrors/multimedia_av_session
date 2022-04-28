@@ -22,10 +22,10 @@ class AvsessionManagerTest : public testing::Test {
 public:
     static AVSessionManager manager;
     static std::string tag;
-    static void SetUpTestCase(void) {};
-    static void TearDownTestCase(void) {};
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
     AvsessionManagerTest();
 };
 
