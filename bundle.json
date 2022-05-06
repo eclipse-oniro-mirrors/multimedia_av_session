@@ -61,6 +61,8 @@
           }
         ],
         "test": [
+          "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session/test/unittest:unittest",
+          "//foundation/multimedia/avsession_standard/services/session/server/test:unittest"
         ]
       }
     }
