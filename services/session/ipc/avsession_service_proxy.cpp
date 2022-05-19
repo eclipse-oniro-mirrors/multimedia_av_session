@@ -40,7 +40,7 @@ sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string 
 
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_CREATE_TABLE, data, reply, option),
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_CREATE_TABLE, data, reply, option) == 0,
                              nullptr, "send request failed");
     return reply.ReadRemoteObject();
 }
@@ -54,7 +54,7 @@ int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListen
 
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_REGISTER_SESSION_LISTENER, data, reply, option),
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_REGISTER_SESSION_LISTENER, data, reply, option) == 0,
                              ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;

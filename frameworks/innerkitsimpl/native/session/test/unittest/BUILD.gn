@@ -32,7 +32,9 @@ ohos_unittest("AvsessionManagerTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "//third_party/googletest:gtest_main"
+    "//utils/native/base:utils",
+    "//third_party/googletest:gtest_main",
+    "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session:avsession_client",
   ]
 }
 
