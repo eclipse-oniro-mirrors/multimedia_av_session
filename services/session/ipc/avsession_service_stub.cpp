@@ -45,14 +45,14 @@ int AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Me
 
 int AVSessionServiceStub::HandleCreateSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto session = CreateSessionInner(data.ReadString(),data.ReadString(),data.ReadString(),data.ReadString());
+    auto session = CreateSessionInner(data.ReadString(), data.ReadString(), data.ReadString(), data.ReadString());
     reply.WriteRemoteObject(session);
     return ERR_NONE;
 }
 
 int AVSessionServiceStub::HandleGetSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto session = GetSessionInner(data.ReadString(),data.ReadString(),data.ReadString(),data.ReadString());
+    auto session = GetSessionInner(data.ReadString(), data.ReadString(), data.ReadString(), data.ReadString());
     reply.WriteRemoteObject(session);
     return ERR_NONE;
 }

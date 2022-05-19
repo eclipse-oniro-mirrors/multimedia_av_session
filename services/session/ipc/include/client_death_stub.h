@@ -16,7 +16,7 @@
 #ifndef OHOS_CLIENT_DEATH_STUB_H
 #define OHOS_CLIENT_DEATH_STUB_H
 
-#include "iclent_death.h"
+#include "iclient_death.h"
 #include "iremote_stub.h"
 
 namespace OHOS::AVSession {

@@ -31,19 +31,6 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
 AVSessionService::~AVSessionService()
 {
     SLOGD("destroy");
-    if (sessionContainer_ != nullptr) {
-    }
-    {
-        std::lock_guard<std::mutex> lockGuard(sessionListenersLock_);
-        sessionListeners_.erase(sessionListeners_.begin(), sessionListeners_.end());
-    {
-        std::lock_guard<std::mutex> lockGuard(controllersLock_);
-        controllers_.erase(controllers_.begin(), controllers_.end());
-    }
-    {
-        std::lock_guard<std::mutex> lockGuard(clientDeathObserversLock_);
-        clientDeathObservers_.erase(clientDeathObservers_.begin(), clientDeathObservers_.end());
-    }
 }
 
 void AVSessionService::OnStart()
@@ -94,7 +81,6 @@ sptr<IRemoteObject> AVSessionService::GetControllerInner(int32_t sessionId)
 
 std::vector<sptr<IRemoteObject>> AVSessionService::GetAllControllersInner()
 {
-
 }
 
 int32_t AVSessionService::RegisterSessionListenerInner(sptr<IRemoteObject>& listener)
@@ -114,12 +100,8 @@ int32_t AVSessionService::RegisterClientDeathObserver(sptr<IRemoteObject>& obser
 {
     return 0;
 }
-void AVSessionService::OnStart()
-{
 
-}
 void AVSessionService::OnClientDied(pid_t pid)
 {
-
 }
 } // namespace OHOS::AVSession

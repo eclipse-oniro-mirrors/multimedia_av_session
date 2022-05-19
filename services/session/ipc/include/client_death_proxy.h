@@ -16,7 +16,7 @@
 #ifndef OHOS_CLIENT_DEATH_PROXY_H
 #define OHOS_CLIENT_DEATH_PROXY_H
 
-#include "iclent_death.h"
+#include "iclient_death.h"
 #include "iremote_proxy.h"
 
 namespace OHOS::AVSession {
@@ -27,5 +27,5 @@ public:
 private:
     static inline BrokerDelegator<ClientDeathProxy> delegator_;
 };
-}// namespace OHOS::AVSession
+} // namespace OHOS::AVSession
 #endif // OHOS_CLIENT_DEATH_PROXY_H
