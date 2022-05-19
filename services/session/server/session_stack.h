@@ -13,26 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_SESSION_LISTENER_CLIENT_H
-#define OHOS_SESSION_LISTENER_CLIENT_H
+#ifndef OHOS_SESSION_STACK_H
+#define OHOS_SESSION_STACK_H
 
-#include <memory>
-#include "session_listener_stub.h"
-#include "avsession_info.h"
+#include <string>
+#include <list>
+#include <map>
+#include <mutex>
+#include "session_container.h"
 
 namespace OHOS::AVSession {
-class SessionListenerClient : public SessionListenerStub {
+class SessionStack : public SessionContainer {
 public:
-    explicit SessionListenerClient(std::shared_ptr<SessionListener>& listener);
-
-    void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
-
-    void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
-
-    void OnTopSessionChanged(const AVSessionDescriptor& descriptor) override;
+    virtual void AddSession(pid_t pid, sptr<AVSessionItem>& item) override;
+    virtual sptr<AVSessionItem> RemoveSession(pid_t pid) override;
+    virtual sptr<AVSessionItem> GetSession(pid_t pid) override;
+    virtual std::vector<sptr<AVSessionItem>> GetAllSessions() override;
 
 private:
-    std::shared_ptr<SessionListener> listener_;
+    std::mutex lock_;
+    std::map<pid_t,sptr<AVSessionItem>> sessions_;
+    std::list<sptr<AVSessionItem>> stack_;
 };
-}
-#endif // OHOS_SESSION_LISTENER_CLIENT_H
+} // namespace OHOS::AVSession
+#endif // OHOS_SESSION_STACK_H

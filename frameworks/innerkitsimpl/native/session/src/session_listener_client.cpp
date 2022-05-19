@@ -23,17 +23,24 @@ SessionListenerClient::SessionListenerClient(std::shared_ptr<SessionListener> &l
     SLOGD("construct");
 }
 
-void SessionListenerClient::OnSessionCreate(const SessionDescriptor &descriptor)
+void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor &descriptor)
 {
     if (listener_) {
         listener_->OnSessionCreate(descriptor);
     }
 }
 
-void SessionListenerClient::OnSessionRelease(const SessionDescriptor &descriptor)
+void SessionListenerClient::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
     if (listener_) {
         listener_->OnSessionRelease(descriptor);
+    }
+}
+
+void SessionListenerClient::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
+{
+    if (listener_) {
+        listener_->OnTopSessionChanged(descriptor);
     }
 }
 }

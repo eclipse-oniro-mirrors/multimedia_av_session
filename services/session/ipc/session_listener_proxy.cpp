@@ -23,13 +23,18 @@ SessionListenerProxy::SessionListenerProxy(const sptr<IRemoteObject> &impl)
     SLOGD("construct");
 }
 
-void SessionListenerProxy::OnSessionCreate(const SessionDescriptor &descriptor)
+void SessionListenerProxy::OnSessionCreate(const AVSessionDescriptor &descriptor)
 {
 
 }
 
-void SessionListenerProxy::OnSessionRelease(const SessionDescriptor &descriptor)
+void SessionListenerProxy::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
 
+}
+
+void SessionListenerProxy::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
+{
+    
 }
 }

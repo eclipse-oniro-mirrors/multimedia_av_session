@@ -42,15 +42,22 @@ int SessionListenerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mes
 
 int SessionListenerStub::HandleOnSessionCreate(MessageParcel &data, MessageParcel &reply)
 {
-    SessionDescriptor descriptor;
+    AVSessionDescriptor descriptor;
     OnSessionCreate(descriptor);
     return ERR_NONE;
 }
 
 int SessionListenerStub::HandleOnSessionRelease(MessageParcel &data, MessageParcel &reply)
 {
-    SessionDescriptor descriptor;
+    AVSessionDescriptor descriptor;
     OnSessionRelease(descriptor);
+    return ERR_NONE;
+}
+
+int SessionListenerStub::HandleOnTopSessionChanged(MessageParcel &data, MessageParcel &reply)
+{
+    AVSessionDescriptor descriptor;
+    OnTopSessionChanged(descriptor);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

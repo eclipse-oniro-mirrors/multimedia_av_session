@@ -13,25 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_SESSION_LISTENER_PROXY_H
-#define OHOS_SESSION_LISTENER_PROXY_H
+#ifndef OHOS_CLIENT_DEATH_PROXY_H
+#define OHOS_CLIENT_DEATH_PROXY_H
 
-#include "isession_listener.h"
+#include "iclent_death.h"
 #include "iremote_proxy.h"
 
 namespace OHOS::AVSession {
-class SessionListenerProxy : public IRemoteProxy<ISessionListener> {
+class ClientDeathProxy : public IRemoteProxy<IClientDeath>
+{
 public:
-    explicit SessionListenerProxy(const sptr<IRemoteObject>& impl);
-
-    void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
-
-    void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
-
-    void OnTopSessionChanged(const AVSessionDescriptor& descriptor) override;
+    explicit ClientDeathProxy(const sptr<IRemoteObject>& impl) {};
 
 private:
-    static inline BrokerDelegator<SessionListenerProxy> delegator_;
+    static inline BrokerDelegator<ClientDeathProxy> delegator_;
 };
-}
-#endif // OHOS_SESSION_LISTENER_PROXY_H
+}// namespace OHOS::AVSession
+#endif // OHOS_CLIENT_DEATH_PROXY_H

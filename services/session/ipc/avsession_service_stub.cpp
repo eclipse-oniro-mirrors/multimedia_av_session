@@ -17,6 +17,7 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "session_listener_proxy.h"
+#include "client_death_proxy.h"
 
 namespace OHOS::AVSession {
 bool AVSessionServiceStub::CheckInterfaceToken(MessageParcel &data)
@@ -42,14 +43,49 @@ int AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Me
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int AVSessionServiceStub::HandleCreateSession(MessageParcel &data, MessageParcel &reply)
+int AVSessionServiceStub::HandleCreateSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto session = CreateSessionInner(data.ReadString());
+    auto session = CreateSessionInner(data.ReadString(),data.ReadString(),data.ReadString(),data.ReadString());
     reply.WriteRemoteObject(session);
     return ERR_NONE;
 }
 
-int AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply)
+int AVSessionServiceStub::HandleGetSessionInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto session = GetSessionInner(data.ReadString(),data.ReadString(),data.ReadString(),data.ReadString());
+    reply.WriteRemoteObject(session);
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel &data, MessageParcel &reply)
+{
+    auto sessionDescriptors = GetAllSessionDescriptors();
+    reply.WriteRemoteObject(sessionDescriptors);
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto controller = CreateControllerInner(data.ReadInt32());
+    reply.WriteRemoteObject(controller);
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleGetControllerInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto controller = GetControllerInner(data.ReadInt32());
+    reply.WriteRemoteObject(controller);
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleGetAllControllersInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto controllers = GetAllControllersInner();
+    reply.WriteRemoteObject(controllers);
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleRegisterSessionListenerInner(MessageParcel &data, MessageParcel &reply)
 {
     auto remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
@@ -58,5 +94,27 @@ int AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel &data, Mes
     }
     auto listener = iface_cast<SessionListenerProxy>(remoteObject);
     return RegisterSessionListener(listener);
+}
+
+
+int AVSessionServiceStub::HandleSendSystemMediaKeyEvent(MessageParcel &data, MessageParcel &reply)
+{
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleSetSystemMediaVolume(MessageParcel &data, MessageParcel &reply)
+{
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel &data, MessageParcel &reply)
+{
+    auto remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        reply.WriteInt32(AVSESSION_ERROR);
+        return ERR_NONE;
+    }
+    auto clientDeathObserver = iface_cast<ClientDeathProxy>(remoteObject);
+    return RegisterClientDeathObserver(clientDeathObserver);
 }
 } // namespace OHOS::AVSession

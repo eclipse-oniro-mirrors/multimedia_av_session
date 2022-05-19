@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,15 +22,33 @@
 
 #include "avsession.h"
 #include "avsession_info.h"
+#include "key_event.h"
 
 namespace OHOS::AVSession {
 class AVSessionManager {
 public:
-    static std::shared_ptr<AVSession> CreateSession(const std::string& tag);
+    static std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
+                                                    const std::string& bundleName, const std::string& abilityName);
+
+    static std::shared_ptr<AVSession> GetSession();
+
+    static std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
+
+    static std::shared_ptr<AVSessionController> CreateController(int32_t sessionld);
+
+    static std::shared_ptr<AVSessionController> GetController(int32_t sessionld);
+
+    static std::vector<std::shared_ptr<AVSessionController>> GetAllControllers();
 
     static int32_t RegisterSessionListener(std::shared_ptr<SessionListener>& listener);
 
+    using DeathCallback = std::function<void>;
+
     static int32_t RegisterServiceDeathCallback(const DeathCallback& callback);
+
+    static int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent);
+
+    static int32_t SetSystemMediaVolume(int32_t volume);
 };
 } // namespace OHOS::AVSession
 

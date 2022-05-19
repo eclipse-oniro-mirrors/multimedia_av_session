@@ -24,6 +24,7 @@
 #include "avsession.h"
 #include "avsession_service_proxy.h"
 #include "avsession_info.h"
+#include "client_death_stub.h"
 #include "isession_listener.h"
 
 namespace OHOS::AVSession {
@@ -31,11 +32,28 @@ class AVSessionManagerImpl {
 public:
     static AVSessionManagerImpl& GetInstance();
 
-    std::shared_ptr<AVSession> CreateSession(const std::string& tag);
+    std::shared_ptr<AVSession> CreateSession(const std::string& tag, const std::string& type,
+                                             const std::string& bundleName, const std::string& abilityName);
+
+    std::shard_ptr<AVSession> GetSession();
+
+    std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
+
+    std::shared_ptr<AVSessionController> CreateController(int32_t sessionld);
+
+    std::shared_ptr<AVSessionController> GetController(int32_t sessionld);
+
+    std::vector<std::shared_ptr<AVSessionController>> GetAllControllers();
 
     int32_t RegisterSessionListener(std::shared_ptr<SessionListener>& listener);
 
+    using DeathCallback = std::function<void>;
+
     int32_t RegisterServiceDeathCallback(const DeathCallback& callback);
+
+    int32_t SendSystemMediaKeyEvent(KeyEvent& keyEvent);
+
+    int32_t SetSystemMediaVolume(int32_t volume);
 
 private:
     class DeathRecipientImpl : public IRemoteObject::DeathRecipient {
@@ -53,9 +71,12 @@ private:
 
     void OnServiceDied();
 
+    int32_t RegesterClientDeathObserver();
+
     std::mutex lock_;
     sptr<AVSessionServiceProxy> service_;
     sptr<ISessionListener> listener_;
+    sptr<ClientDeathStub> clientDeath_;
     DeathCallback deathCallback_;
 };
 } // namespace OHOS::AVSession

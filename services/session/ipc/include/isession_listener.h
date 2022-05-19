@@ -27,12 +27,15 @@ public:
     enum {
         LISTENER_CMD_ON_CREATE,
         LISTENER_CMD_ON_RELEASE,
+        LISTENER_CMD_TOP_CHANGED,
         LISTENER_CMD_MAX
     };
 
-    virtual void OnSessionCreate(const SessionDescriptor& descriptor) = 0;
+    virtual void OnSessionCreate(const AVSessionDescriptor& descriptor) = 0;
 
-    virtual void OnSessionRelease(const SessionDescriptor& descriptor) = 0;
+    virtual void OnSessionRelease(const AVSessionDescriptor& descriptor) = 0;
+
+    virtual void OnTopSessionChanged(const AVSessionDescriptor& descriptor) = 0;
 };
 }
 #endif // OHOS_ISESSION_LISTENER_H
