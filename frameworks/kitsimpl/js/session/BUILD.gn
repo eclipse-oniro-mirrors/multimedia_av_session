@@ -25,12 +25,14 @@ ohos_shared_library("avsession_napi") {
 
   deps = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-    "//foundation/ace/napi:ace_napi",
-    "//foundation/graphic/standard/frameworks/surface:surface",
+    "//foundation/arkui/napi:ace_napi",
     "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session:avsession_client",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+  ]
 
   relative_install_dir = "module/multimedia"
 

@@ -13,34 +13,33 @@
  * limitations under the License.
  */
 
-#include "session_listener_client.h"
+#include "session_stack.h"
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-SessionListenerClient::SessionListenerClient(std::shared_ptr<SessionListener> &listener)
-    : listener_(listener)
+void SessionStack::AddSession(pid_t pid, sptr<AVSessionItem>& item)
 {
-    SLOGD("construct");
-}
-
-void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor &descriptor)
-{
-    if (listener_) {
-        listener_->OnSessionCreate(descriptor);
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        sessions_[pid] = item;
+        stack_.push_front(item);
     }
 }
 
-void SessionListenerClient::OnSessionRelease(const AVSessionDescriptor &descriptor)
+sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid)
 {
-    if (listener_) {
-        listener_->OnSessionRelease(descriptor);
-    }
+    sptr<AVSessionItem> pAVSessionItem = nullptr;
+    return pAVSessionItem;
 }
 
-void SessionListenerClient::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
+sptr<AVSessionItem> SessionStack::GetSession(pid_t pid)
 {
-    if (listener_) {
-        listener_->OnTopSessionChanged(descriptor);
-    }
+    return nullptr; // sessions_.at(pid);
 }
+
+std::vector<sptr<AVSessionItem>> SessionStack::GetAllSessions()
+{
+    std::vector<sptr<AVSessionItem>> avSessions;
+    return avSessions;
 }
+} // namespace OHOS::AVSession

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ bool SessionListenerStub::CheckInterfaceToken(MessageParcel &data)
 }
 
 int SessionListenerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-                                          MessageOption &option)
+                                         MessageOption &option)
 {
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
@@ -42,15 +42,22 @@ int SessionListenerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mes
 
 int SessionListenerStub::HandleOnSessionCreate(MessageParcel &data, MessageParcel &reply)
 {
-    SessionDescriptor descriptor;
+    AVSessionDescriptor descriptor;
     OnSessionCreate(descriptor);
     return ERR_NONE;
 }
 
 int SessionListenerStub::HandleOnSessionRelease(MessageParcel &data, MessageParcel &reply)
 {
-    SessionDescriptor descriptor;
+    AVSessionDescriptor descriptor;
     OnSessionRelease(descriptor);
+    return ERR_NONE;
+}
+
+int SessionListenerStub::HandleOnTopSessionChanged(MessageParcel &data, MessageParcel &reply)
+{
+    AVSessionDescriptor descriptor;
+    OnTopSessionChanged(descriptor);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

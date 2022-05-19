@@ -16,7 +16,6 @@
 #ifndef OHOS_AVSESSION_INFO_H
 #define OHOS_AVSESSION_INFO_H
 
-#include <cinttypes>
 #include <functional>
 #include <string>
 
@@ -31,17 +30,6 @@ enum PlaybackState {
     PLAYBACK_STATE_RELEASED
 };
 
-/*
-enum AVMetadataKey {
-    METADATA_KEY_TITLE = "title",
-    METADATA_KEY_SUBTITLE = "subtitle",
-    METADATA_KEY_ARTIST = "artist",
-    METADATA_KEY_DURATION = "duration",
-    METADATA_KEY_DATE = "date",
-    METADATA_KEY_DISPLAY_ICON = "display_icon"
-};
-*/
-
 enum AVCommand {
     AV_CMD_STOP = 0,
     AV_CMD_PLAY,
@@ -52,7 +40,7 @@ enum AVCommand {
     AV_CMD_SET_SPEED
 };
 
-struct SessionDescriptor {
+struct AVSessionDescriptor {
     int32_t sessionId = -1;
     std::string tag;
     std::string bundleName;
@@ -69,13 +57,15 @@ struct AVPlaybackState {
     int32_t currentTime;
 };
 
-using DeathCallback = std::function<void()>;
 
+using DeathCallback = std::function<void()>;
 class SessionListener {
 public:
-    virtual void OnSessionCreate(const SessionDescriptor& descriptor) = 0;
+    virtual void OnSessionCreate(const AVSessionDescriptor& descriptor) = 0;
 
-    virtual void OnSessionRelease(const SessionDescriptor& descriptor) = 0;
+    virtual void OnSessionRelease(const AVSessionDescriptor& descriptor) = 0;
+
+    virtual void OnTopSessionChanged(const AVSessionDescriptor& descriptor) = 0;
 
     virtual ~SessionListener() = default;
 };
