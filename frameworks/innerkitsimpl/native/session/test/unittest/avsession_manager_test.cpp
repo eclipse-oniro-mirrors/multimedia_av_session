@@ -17,32 +17,21 @@
 #include "avsession_manager.h"
 using namespace testing::ext;
 using namespace OHOS::AVSession;
-using namespace OHOS;
 class AvsessionManagerTest : public testing::Test {
 public:
-    static AVSessionManager manager;
-    static std::string tag;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    AvsessionManagerTest();
 };
 
-AVSessionManager AVSessionManagerTest::manager;
-
 void AvsessionManagerTest::SetUpTestCase(void)
-{
-    tag = "Application A creat session";
-}
+{}
 
 void AvsessionManagerTest::TearDownTestCase(void)
 {}
 
 void AvsessionManagerTest::SetUp(void)
-{}
-
-AvsessionManagerTest::AvsessionManagerTest(void)
 {}
 
 void AvsessionManagerTest::TearDown(void)
@@ -58,7 +47,7 @@ HWTEST_F(AvsessionManagerTest, CreatSession001, TestSize.Level0)
 {
     ZLOGI("CreatSession001 begin.");
     std::shared_ptr<AVSession> avsession;
-    avsession = manager.CreateSession(tag);
+    avsession = AVSessionManager::CreateSession("Application A creat session");
     EXPECT_NE(avsession, nullptr);
 }
 
