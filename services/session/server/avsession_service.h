@@ -64,7 +64,7 @@ private:
     std::mutex controllersLock_;
     std::map<pid_t, std::list<sptr<AVControllerItem>> controllers_;
 
-    SessionContainer* sessionContainer_{};
+    SessionContainer* sessionContainer_ = nullptr;
 
     std::mutex clientDeathObserversLock_;
     std::map<pid_t, sptr<ClientDeathProxy>> clientDeathObservers_;

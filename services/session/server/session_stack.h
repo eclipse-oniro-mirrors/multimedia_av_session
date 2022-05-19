@@ -19,20 +19,19 @@
 #include <string>
 #include <list>
 #include <map>
-#include <mutex>
 #include "session_container.h"
 
 namespace OHOS::AVSession {
 class SessionStack : public SessionContainer {
 public:
-    virtual void AddSession(pid_t pid, sptr<AVSessionItem>& item) override;
-    virtual sptr<AVSessionItem> RemoveSession(pid_t pid) override;
-    virtual sptr<AVSessionItem> GetSession(pid_t pid) override;
-    virtual std::vector<sptr<AVSessionItem>> GetAllSessions() override;
+    void AddSession(pid_t pid, sptr<AVSessionItem>& item) override;
+    sptr<AVSessionItem> RemoveSession(pid_t pid) override;
+    sptr<AVSessionItem> GetSession(pid_t pid) override;
+    std::vector<sptr<AVSessionItem>> GetAllSessions() override;
 
 private:
     std::mutex lock_;
-    std::map<pid_t,sptr<AVSessionItem>> sessions_;
+    std::map<pid_t, sptr<AVSessionItem>> sessions_;
     std::list<sptr<AVSessionItem>> stack_;
 };
 } // namespace OHOS::AVSession

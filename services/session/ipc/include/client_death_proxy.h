@@ -20,8 +20,7 @@
 #include "iremote_proxy.h"
 
 namespace OHOS::AVSession {
-class ClientDeathProxy : public IRemoteProxy<IClientDeath>
-{
+class ClientDeathProxy : public IRemoteProxy<IClientDeath> {
 public:
     explicit ClientDeathProxy(const sptr<IRemoteObject>& impl) {};
 

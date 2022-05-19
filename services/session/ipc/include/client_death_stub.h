@@ -20,13 +20,12 @@
 #include "iremote_stub.h"
 
 namespace OHOS::AVSession {
-class ClientDeathStub : public IRemoteStub<IClientDeath>
-{
+class ClientDeathStub : public IRemoteStub<IClientDeath> {
 public:
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
         return 0;
     };
 };
-}// namespace OHOS::AVSession
+} // namespace OHOS::AVSession
 #endif // OHOS_CLIENT_DEATH_STUB_H

@@ -26,36 +26,20 @@ void SessionStack::AddSession(pid_t pid, sptr<AVSessionItem>& item)
     }
 }
 
-sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid) 
+sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid)
 {
     sptr<AVSessionItem> pAVSessionItem = nullptr;
-    {
-        // std::lock_guard<std::mutex> lockGuard(lock_);
-        // pAVSessionItem = sessions_.find(pid)->second;
-        // if (sessions_.erase(pid)) {
-        //     AUDIO_INFO_LOG("SessionStack::RemoveSession for client %{public}d done", pid);
-        // } else {
-        //     AUDIO_DEBUG_LOG("SessionStack::RemoveSession client %{public}d not present", pid);
-        // }
-        // stack_.pop();
-    }
     return pAVSessionItem;
 }
 
 sptr<AVSessionItem> SessionStack::GetSession(pid_t pid)
 {
-    return nullptr;//sessions_.at(pid);
+    return nullptr; // sessions_.at(pid);
 }
 
 std::vector<sptr<AVSessionItem>> SessionStack::GetAllSessions()
 {
     std::vector<sptr<AVSessionItem>> avSessions;
-    {
-        // std::lock_guard<std::mutex> lockGuard(lock_);
-        // for (auto iter = sessions_.begin(); iter != sessions_.end(); ++iter) {
-        //     avSessions.push_back(iter->second);
-        // }
-    }
     return avSessions;
 }
 } // namespace OHOS::AVSession

@@ -36,11 +36,6 @@ AVSessionService::~AVSessionService()
     {
         std::lock_guard<std::mutex> lockGuard(sessionListenersLock_);
         sessionListeners_.erase(sessionListeners_.begin(), sessionListeners_.end());
-        /* iter = sessionListeners_.begin();
-        while (iter != sessionListeners_.end()) {
-            iter = sessionListeners_.erase(iter)
-        } */
-    }
     {
         std::lock_guard<std::mutex> lockGuard(controllersLock_);
         controllers_.erase(controllers_.begin(), controllers_.end());
@@ -75,21 +70,12 @@ sptr<IRemoteObject>  AVSessionService::CreateSessionInner(const std::string& tag
     const std::string& bundleName, const std::string& abilityName)
 {
     auto id = AllocSessionId();
-    {
-        std::lock_guard<std::mutex> lockGuard(sessionsLock_);
-        //sessions_[id] = new(std::nothrow) AVSessionItem(tag, id);
-    }
-    return nullptr;//sessions_[id]->AsObject();
+    return nullptr;
 }
 
 sptr<AVSession> AVSessionService::GetSessionInner()
 {
-    sptr<IRemoteObject> avObjSession;
-    {
-        std::lock_guard<std::mutex> lockGuard(sessionsLock_);
-        //avObjSession = sessions_[sessionNumber_]->AsObject();
-    }
-    return nullptr;//(sptr<AVSession>&)avObjSession;
+    return nullptr;
 }
 
 sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
@@ -97,9 +83,7 @@ sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
     auto id = sessionId;
     {
         std::lock_guard<std::mutex> lockGuard(controllersLock_);
-        // controllers_[id] = new(std::nothrow) AVSessionItem(tag, id);
     }
-    // return sessions_[id]->AsObject();
     return nullptr;
 }
 
@@ -117,7 +101,7 @@ int32_t AVSessionService::RegisterSessionListenerInner(sptr<IRemoteObject>& list
 {
     return 0;
 }
-int32_t AVSessionService::SendSystemMediaKeyEvent(KeyEvent& keyEvent)
+int32_t AVSessionService::SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent)
 {
     return 0;
 }

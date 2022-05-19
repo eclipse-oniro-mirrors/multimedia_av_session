@@ -25,20 +25,16 @@ AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject> &impl)
     SLOGD("constructor");
 }
 
-std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::string& tag,
-                                                   const std::string& type,
-                                                   const std::string& bundleName,
-                                                   const std::string& abilityName)
+std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::string& tag, const std::string& type,
+    const std::string& bundleName, const std::string& abilityName)
 {
-    auto object = CreateSessionInner(tag,type,bundleName,abilityName);
+    auto object = CreateSessionInner(tag, type, bundleName, abilityName);
     auto session = iface_cast<AVSessionProxy>(object);
     return std::shared_ptr<AVSession>(session.GetRefPtr(), [holder = session](const auto*) {});
 }
 
-sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string& tag,
-                                                   const std::string& type,
-                                                   const std::string& bundleName,
-                                                   const std::string& abilityName)
+sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string& tag, const std::string& type,
+    const std::string& bundleName, const std::string& abilityName)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), nullptr, "write interface token failed");
@@ -85,9 +81,9 @@ std::vector<AVSessionDescriptor> AVSessionServiceProxy::GetAllSessionDescriptors
 
 std::shared_ptr<AVSessionController> AVSessionServiceProxy::CreateController(int32_t sessionId)
 {
-    auto control = CreateControllerInner();
-    auto sessionController = iface_cast<AVSessionControllerProxy>(control);
-    return std::shared_ptr<AVSessionController>(sessionController.GetRefPtr(), [holder = sessionController](const auto*) {});
+    auto remoteObject = CreateControllerInner();
+    auto controller = iface_cast<AVSessionControllerProxy>(remoteObject);
+    return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
 }
 
 sptr<IRemoteObject> AVSessionServiceProxy::CreateControllerInner(int32_t sessionId)
@@ -104,9 +100,9 @@ sptr<IRemoteObject> AVSessionServiceProxy::CreateControllerInner(int32_t session
 
 std::shared_ptr<AVSessionController> AVSessionServiceProxy::GetController(int32_t sessionId)
 {
-    auto control = GetControllerInner();
-    auto sessionController = iface_cast<AVSessionControllerProxy>(control);
-    return std::shared_ptr<AVSessionController>(sessionController.GetRefPtr(), [holder = sessionController](const auto*) {});
+    auto remoteObject = GetControllerInner();
+    auto controller = iface_cast<AVSessionControllerProxy>(remoteObject);
+    return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
 }
 
 sptr<IRemoteObject> AVSessionServiceProxy::GetControllerInner(int32_t sessionId)
@@ -123,7 +119,7 @@ sptr<IRemoteObject> AVSessionServiceProxy::GetControllerInner(int32_t sessionId)
 
 std::vector<std::shared_ptr<AVSessionController>> AVSessionServiceProxy::GetAllControllers()
 {
-    std::vector<std::shared_ptr<AVSessionController>> sessionControllers{};
+    std::vector<std::shared_ptr<AVSessionController>> sessionControllers;
     auto controls = GetControllerInner();
     for (auto& control : controls) {
         auto sessionController = iface_cast<AVSessionControllerProxy>(control);
@@ -173,4 +169,4 @@ int32_t AVSessionServiceProxy::RegisterClientDeathObserver(sptr<IRemoteObject>& 
 {
     return AVSESSION_ERROR;
 }
-} // namespace OHOS
+} // namespace OHOS::AVSession

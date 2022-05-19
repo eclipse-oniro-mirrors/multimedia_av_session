@@ -16,7 +16,6 @@
 #ifndef OHOS_AVSESSION_INFO_H
 #define OHOS_AVSESSION_INFO_H
 
-#include <cinttypes>
 #include <functional>
 #include <string>
 
@@ -30,17 +29,6 @@ enum PlaybackState {
     PLAYBACK_STATE_STOPPED,
     PLAYBACK_STATE_RELEASED
 };
-
-/*
-enum AVMetadataKey {
-    METADATA_KEY_TITLE = "title",
-    METADATA_KEY_SUBTITLE = "subtitle",
-    METADATA_KEY_ARTIST = "artist",
-    METADATA_KEY_DURATION = "duration",
-    METADATA_KEY_DATE = "date",
-    METADATA_KEY_DISPLAY_ICON = "display_icon"
-};
-*/
 
 enum AVCommand {
     AV_CMD_STOP = 0,
