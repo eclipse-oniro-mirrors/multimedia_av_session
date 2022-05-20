@@ -31,7 +31,7 @@ private:
     int HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply);
     int HandleGetControllerInner(MessageParcel &data, MessageParcel &reply);
     int HandleGetAllControllersInner(MessageParcel &data, MessageParcel &reply);
-    int HandleRegisterSessionListenerInner(MessageParcel &data, MessageParcel &reply);
+    int HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply);
     int HandleSendSystemMediaKeyEvent(MessageParcel &data, MessageParcel &reply);
     int HandleSetSystemMediaVolume(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterClientDeathObserver(MessageParcel &data, MessageParcel &reply);
@@ -45,7 +45,7 @@ private:
         [SERVICE_CMD_CREATE_CONTROLLER] = &AVSessionServiceStub::HandleCreateControllerInner,
         [SERVICE_CMD_GET_CONTROLLER] = &AVSessionServiceStub::HandleGetControllerInner,
         [SERVICE_CMD_GET_ALL_CONTROLLERS] = &AVSessionServiceStub::HandleGetAllControllersInner,
-        [SERVICE_CMD_REGISTER_SESSION_LISTENER] = &AVSessionServiceStub::HandleRegisterSessionListenerInner,
+        [SERVICE_CMD_REGISTER_SESSION_LISTENER] = &AVSessionServiceStub::HandleRegisterSessionListener,
         [SERVICE_CMD_SEND_SYSTEM_MEDIA_KEY_EVENT] = &AVSessionServiceStub::HandleSendSystemMediaKeyEvent,
         [SERVICE_CMD_SET_SYSTEM_MEDIA_VOLUEM] = &AVSessionServiceStub::HandleSetSystemMediaVolume,
         [SERVICE_CMD_REGISTER_CLIENT_DEATH] = &AVSessionServiceStub::HandleRegisterClientDeathObserver

@@ -25,7 +25,7 @@ AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject> &impl)
     SLOGD("constructor");
 }
 
-std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::string& tag, const std::string& type,
+std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::string& tag, int32_t type,
     const std::string& bundleName, const std::string& abilityName)
 {
     auto object = CreateSessionInner(tag, type, bundleName, abilityName);
@@ -33,13 +33,13 @@ std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::strin
     return std::shared_ptr<AVSession>(session.GetRefPtr(), [holder = session](const auto*) {});
 }
 
-sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string& tag, const std::string& type,
+sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string& tag, int32_t type,
     const std::string& bundleName, const std::string& abilityName)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), nullptr, "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteString(tag), nullptr, "write tag failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteString(type), nullptr, "write type failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(type), nullptr, "write type failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteString(bundleName), nullptr, "write bundleName failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteString(abilityName), nullptr, "write abilityName failed");
     MessageParcel reply;
@@ -51,12 +51,12 @@ sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string&
 
 std::shared_ptr<AVSession> AVSessionServiceProxy::GetSession()
 {
-    sptr<AVSession> avSession = GetSessionInner();
-    auto session = iface_cast<AVSessionProxy>(object->AsObject());
+    auto remoteObject = GetSessionInner();
+    auto session = iface_cast<AVSessionProxy>(remoteObject);
     return std::shared_ptr<AVSession>(session.GetRefPtr(), [holder = session](const auto*) {});
 }
 
-sptr<AVSession> AVSessionServiceProxy::GetSessionInner()
+sptr<IRemoteObject> AVSessionServiceProxy::GetSessionInner()
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), nullptr, "write interface token failed");
@@ -140,12 +140,12 @@ std::vector<sptr<IRemoteObject>> AVSessionServiceProxy::GetAllControllersInner()
     return reply.ReadRemoteObject();
 }
 
-int32_t AVSessionServiceProxy::RegisterSessionListenerInner(sptr<IRemoteObject>& listener)
+int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
                              "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(remoteObject->AsObject()), ERR_MARSHALLING, "write tag failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(listener->AsObject()), ERR_MARSHALLING, "write tag failed");
 
     MessageParcel reply;
     MessageOption option;
@@ -165,7 +165,7 @@ int32_t AVSessionServiceProxy::SetSystemMediaVolume(int32_t volume)
     return AVSESSION_ERROR;
 }
 
-int32_t AVSessionServiceProxy::RegisterClientDeathObserver(sptr<IRemoteObject>& observer)
+int32_t AVSessionServiceProxy::RegisterClientDeathObserver(const sptr<IRemoteObject>& observer)
 {
     return AVSESSION_ERROR;
 }

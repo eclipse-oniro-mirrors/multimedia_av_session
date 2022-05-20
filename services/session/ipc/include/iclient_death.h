@@ -21,7 +21,7 @@
 namespace OHOS::AVSession {
 class IClientDeath : public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR("ohos.avsession.IClientDeath");
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.avsession.IClientDeath");
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_ICLIENT_DEATH_H

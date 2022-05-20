@@ -30,12 +30,14 @@
 namespace OHOS::AVSession {
 class AVSessionManagerImpl {
 public:
+    using DeathCallback = std::function<void()>;
+
     static AVSessionManagerImpl& GetInstance();
 
-    std::shared_ptr<AVSession> CreateSession(const std::string& tag, const std::string& type,
+    std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                              const std::string& bundleName, const std::string& abilityName);
 
-    std::shard_ptr<AVSession> GetSession();
+    std::shared_ptr<AVSession> GetSession();
 
     std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
 
@@ -47,11 +49,9 @@ public:
 
     int32_t RegisterSessionListener(std::shared_ptr<SessionListener>& listener);
 
-    using DeathCallback = std::function<void>;
-
     int32_t RegisterServiceDeathCallback(const DeathCallback& callback);
 
-    int32_t SendSystemMediaKeyEvent(KeyEvent& keyEvent);
+    int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent);
 
     int32_t SetSystemMediaVolume(int32_t volume);
 
