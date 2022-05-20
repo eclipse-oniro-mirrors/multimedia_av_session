@@ -24,7 +24,10 @@ class AVSessionStub : public IRemoteStub<IAVSession> {
 public:
     int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
-    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override { return 0; };
+    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override
+    {
+        return 0;
+    };
 
 private:
     int HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
