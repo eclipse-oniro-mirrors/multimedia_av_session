@@ -24,6 +24,9 @@ group("avession_server") {
 ohos_shared_library("avsession_service") {
   install_enable = true
 
+  common_source =
+      [ "../../frameworks/innerkitsimpl/native/session/src/av_meta_data.cpp" ]
+
   ipc_sources = [
     "ipc/avsession_service_stub.cpp",
     "ipc/avsession_stub.cpp",
@@ -35,7 +38,7 @@ ohos_shared_library("avsession_service") {
     "server/avsession_service.cpp",
   ]
 
-  sources = ipc_sources + service_sources
+  sources = common_source + ipc_sources + service_sources
 
   include_dirs = [
     "//foundation/multimedia/avsession_standard/services/session/ipc/include",
@@ -48,8 +51,9 @@ ohos_shared_library("avsession_service") {
 
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
     "input:libmmi-client",
+    "ipc:ipc_core",
+    "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
   ]

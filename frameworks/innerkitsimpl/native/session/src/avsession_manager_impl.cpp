@@ -126,7 +126,7 @@ std::shared_ptr<AVSessionController> AVSessionManagerImpl::GetController(int32_t
 
 std::vector<std::shared_ptr<AVSessionController>> AVSessionManagerImpl::GetAllControllers()
 {
-    return nullptr;
+    return {};
 }
 
 int32_t AVSessionManagerImpl::RegisterSessionListener(std::shared_ptr<SessionListener> &listener)
