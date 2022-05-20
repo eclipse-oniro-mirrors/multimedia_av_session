@@ -25,6 +25,8 @@ ohos_shared_library("avsession_client") {
   install_enable = true
 
   ipc_sources = [
+    "//foundation/multimedia/avsession_standard/services/session/ipc/avcontroller_callback_stub.cpp",
+    "//foundation/multimedia/avsession_standard/services/session/ipc/avsession_controller_proxy.cpp",
     "//foundation/multimedia/avsession_standard/services/session/ipc/avsession_proxy.cpp",
     "//foundation/multimedia/avsession_standard/services/session/ipc/avsession_service_proxy.cpp",
     "//foundation/multimedia/avsession_standard/services/session/ipc/session_listener_stub.cpp",
@@ -32,6 +34,8 @@ ohos_shared_library("avsession_client") {
 
   client_sources = [
     "src/av_meta_data.cpp",
+    "src/avcontrol_command.cpp",
+    "src/avcontroller_callback_client.cpp",
     "src/avsession_manager.cpp",
     "src/avsession_manager_impl.cpp",
     "src/session_listener_client.cpp",
@@ -44,6 +48,8 @@ ohos_shared_library("avsession_client") {
   deps = [ "//utils/native/base:utils" ]
 
   external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",

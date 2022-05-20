@@ -16,7 +16,6 @@
 #ifndef OHOS_AVSESSION_INFO_H
 #define OHOS_AVSESSION_INFO_H
 
-#include <functional>
 #include <string>
 
 namespace OHOS::AVSession {
@@ -30,26 +29,11 @@ enum PlaybackState {
     PLAYBACK_STATE_RELEASED
 };
 
-enum AVCommand {
-    AV_CMD_STOP = 0,
-    AV_CMD_PLAY,
-    AV_CMD_PAUSE,
-    AV_CMD_PLAY_NEXT,
-    AV_CMD_PLAY_PREVIOUS,
-    AV_CMD_SEEK,
-    AV_CMD_SET_SPEED
-};
-
 struct AVSessionDescriptor {
     int32_t sessionId = -1;
     std::string tag;
     std::string bundleName;
     bool active {};
-};
-
-struct SessionCommand {
-    AVCommand cmd;
-    int32_t para;
 };
 
 struct AVPlaybackState {
@@ -79,11 +63,19 @@ public:
     virtual ~AVSessionCallback() = default;
 };
 
-class AVSessionControllerCallback {
+class AVControllerCallback {
 public:
-    virtual void OnSessionRelease() = 0;
+    virtual void OnVolumeInfoChange(const AVVolumeInfo &volumeInfo) = 0;
 
-    virtual ~AVSessionControllerCallback() = default;
+    virtual void OnSessionRelease(const AVSessionDescriptor &descriptor) = 0;
+
+    virtual void OnPlaybackStateUpdate(const AVPlaybackState &state) = 0;
+
+    virtual void OnMetaDataUpdate(const AVMetadata &data) = 0;
+
+    virtual void OnActiveStateChange(bool isActive) = 0;
+
+    virtual ~AVControllerCallback() = default;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

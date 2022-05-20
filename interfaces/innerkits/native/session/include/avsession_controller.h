@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,22 +16,43 @@
 #ifndef OHOS_AVSESSION_CONTROLLER_H
 #define OHOS_AVSESSION_CONTROLLER_H
 
-#include <string>
+#include <bitset>
 #include <memory>
+#include <string>
+#include <vector>
 
+#include "avcontrol_command.h"
 #include "avsession_info.h"
+#include "key_event.h"
+#include "want_agent.h"
 
 namespace OHOS::AVSession {
-class AVSessionControllerCallback;
 class AVSessionController {
 public:
-    virtual int32_t RegisterCallback(std::shared_ptr<AVSessionControllerCallback>& callback) = 0;
+    virtual int32_t GetAVPlaybackState(AVPlaybackState &state) = 0;
 
-    virtual void Release() = 0;
+    virtual int32_t GetAVMetaData(AVMetadata &data) = 0;
+
+    virtual int32_t GetAVVolumeInfo(AVVolumeInfo &info) = 0;
+
+    virtual int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent) = 0;
+
+    virtual int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) = 0;
+
+    virtual int32_t GetSupportedCommand(std::vector<int32_t> &cmds) = 0;
+
+    virtual int32_t IsSessionActive(bool &isActive) = 0;
+
+    virtual int32_t SendCommand(AVControlCommand &cmd) = 0;
+
+    virtual int32_t RegisterCallback(std::shared_ptr<AVControllerCallback> &callback) = 0;
+
+    virtual int32_t SetMetaFilter(std::bitset<AVMetadata::META_KEY_MAX> &filter) = 0;
+
+    virtual int32_t Release() = 0;
 
     virtual ~AVSessionController() = default;
 };
-
 } // namespace OHOS::AVSession
 
 #endif // OHOS_AVSESSION_CONTROLLER_H
