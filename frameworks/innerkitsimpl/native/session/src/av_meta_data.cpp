@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "avsession_metadata.h"
+#include "av_meta_data.h"
 
 namespace OHOS::AVSession {
 AVMetaData::AVMetaData()

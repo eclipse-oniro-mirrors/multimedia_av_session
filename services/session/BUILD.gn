@@ -24,9 +24,8 @@ group("avession_server") {
 ohos_shared_library("avsession_service") {
   install_enable = true
 
-  common_source = [
-    "../../frameworks/innerkitsimpl/native/session/src/avsession_metadata.cpp",
-  ]
+  common_source =
+      [ "../../frameworks/innerkitsimpl/native/session/src/av_meta_data.cpp" ]
 
   ipc_sources = [
     "ipc/avsession_service_stub.cpp",
