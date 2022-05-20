@@ -26,6 +26,7 @@
 #include "avsession_info.h"
 #include "client_death_stub.h"
 #include "isession_listener.h"
+#include "avsession_controller.h"
 
 namespace OHOS::AVSession {
 class AVSessionManagerImpl {

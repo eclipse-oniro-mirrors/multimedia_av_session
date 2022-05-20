@@ -30,12 +30,12 @@ public:
 
     void OnPlaybackStateUpdate(const AVPlaybackState &state) override;
 
-    void OnMetaDataUpdate(const AVMetadata &data) override;
+    void OnMetaDataUpdate(const AVMetaData &data) override;
 
     void OnActiveStateChange(bool isActive) override;
 
 private:
     static inline BrokerDelegator<AVControllerCallbackProxy> delegator_;
 };
-}
+} // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_CALLBACK_PROXY_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "iremote_broker.h"
 #include "iavsession.h"
+#include "iclient_death.h"
 #include "isession_listener.h"
 #include "key_event.h"
 
@@ -59,7 +60,7 @@ public:
 
     virtual int32_t SetSystemMediaVolume(int32_t volume) = 0;
 
-    virtual int32_t RegisterClientDeathObserver(const sptr<IRemoteObject>& observer) = 0;
+    virtual int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_SERVICE_H

@@ -26,7 +26,7 @@ public:
 
     int32_t GetAVPlaybackState(AVPlaybackState &state) override;
 
-    int32_t GetAVMetaData(AVMetadata &data) override;
+    int32_t GetAVMetaData(AVMetaData &data) override;
 
     int32_t GetAVVolumeInfo(AVVolumeInfo &info) override;
 
@@ -42,7 +42,7 @@ public:
 
     int32_t RegisterCallback(std::shared_ptr<AVControllerCallback> &callback) override;
 
-    int32_t SetMetaFilter(std::bitset<AVMetadata::META_KEY_MAX> &filter) override;
+    int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) override;
 
     int32_t Release() override;
 

@@ -17,17 +17,11 @@
 #define OHOS_AVSESSION_INFO_H
 
 #include <string>
+#include "avmeta_data.h"
+#include "avplayback_state.h"
 
 namespace OHOS::AVSession {
-enum PlaybackState {
-    PLAYBACK_STATE_INVALID = -1,
-    PLAYBACK_STATE_NEW,
-    PLAYBACK_STATE_PREPARED,
-    PLAYBACK_STATE_PLAYING,
-    PLAYBACK_STATE_PAUSED,
-    PLAYBACK_STATE_STOPPED,
-    PLAYBACK_STATE_RELEASED
-};
+using DeathCallback = std::function<void()>;
 
 struct AVSessionDescriptor {
     int32_t sessionId = -1;
@@ -36,13 +30,12 @@ struct AVSessionDescriptor {
     bool active {};
 };
 
-struct AVPlaybackState {
-    PlaybackState state;
-    int32_t currentTime;
+struct AVVolumeInfo {
+    int32_t currentVolume_;
+    int32_t maxVolume_;
+    int32_t volumeType_;
 };
 
-
-using DeathCallback = std::function<void()>;
 class SessionListener {
 public:
     virtual void OnSessionCreate(const AVSessionDescriptor& descriptor) = 0;
@@ -71,7 +64,7 @@ public:
 
     virtual void OnPlaybackStateUpdate(const AVPlaybackState &state) = 0;
 
-    virtual void OnMetaDataUpdate(const AVMetadata &data) = 0;
+    virtual void OnMetaDataUpdate(const AVMetaData &data) = 0;
 
     virtual void OnActiveStateChange(bool isActive) = 0;
 

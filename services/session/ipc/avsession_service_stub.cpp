@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ int AVSessionServiceStub::HandleCreateSessionInner(MessageParcel &data, MessageP
 
 int AVSessionServiceStub::HandleGetSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto session = GetSessionInner(data.ReadString(), data.ReadString(), data.ReadString(), data.ReadString());
+    auto session = GetSessionInner();
     reply.WriteRemoteObject(session);
     return ERR_NONE;
 }
@@ -60,7 +60,6 @@ int AVSessionServiceStub::HandleGetSessionInner(MessageParcel &data, MessageParc
 int AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel &data, MessageParcel &reply)
 {
     auto sessionDescriptors = GetAllSessionDescriptors();
-    reply.WriteRemoteObject(sessionDescriptors);
     return ERR_NONE;
 }
 
@@ -74,14 +73,12 @@ int AVSessionServiceStub::HandleCreateControllerInner(MessageParcel &data, Messa
 int AVSessionServiceStub::HandleGetControllerInner(MessageParcel &data, MessageParcel &reply)
 {
     auto controller = GetControllerInner(data.ReadInt32());
-    reply.WriteRemoteObject(controller);
     return ERR_NONE;
 }
 
 int AVSessionServiceStub::HandleGetAllControllersInner(MessageParcel &data, MessageParcel &reply)
 {
     auto controllers = GetAllControllersInner();
-    reply.WriteRemoteObject(controllers);
     return ERR_NONE;
 }
 
@@ -93,9 +90,9 @@ int AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel &data, Mes
         return ERR_NONE;
     }
     auto listener = iface_cast<SessionListenerProxy>(remoteObject);
-    return RegisterSessionListener(listener);
+    reply.WriteInt32(RegisterSessionListener(listener));
+    return ERR_NONE;
 }
-
 
 int AVSessionServiceStub::HandleSendSystemMediaKeyEvent(MessageParcel &data, MessageParcel &reply)
 {
@@ -115,6 +112,7 @@ int AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel &data,
         return ERR_NONE;
     }
     auto clientDeathObserver = iface_cast<ClientDeathProxy>(remoteObject);
-    return RegisterClientDeathObserver(clientDeathObserver);
+    reply.WriteInt32(RegisterClientDeathObserver(clientDeathObserver));
+    return ERR_NONE;
 }
 } // namespace OHOS::AVSession

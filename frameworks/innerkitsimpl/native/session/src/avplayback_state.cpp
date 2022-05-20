@@ -16,19 +16,19 @@
 #include "avplayback_state.h"
 
 namespace OHOS::AVSession {
-AVPlaybackState::AVPlaybackState() : Parcelable(true)
-{}
-AVPlaybackState::AVPlaybackState(int32_t state, float speed, int64_t etime, int64_t btime, int32_t loopMode, bool
-                                 isFavorite)
-               : state_(state),
-                 speed_(speed),
-                 etime_(etime),
-                 btime_(btime),
-                 loopMode_(loopMode),
-                 isFavorite_(isFavorite)
-{}
+AVPlaybackState::AVPlaybackState()
+    :Parcelable(true)
+{
+}
 
-bool AVPlaybackState::Marshalling(Parcel &parcel)
+AVPlaybackState::AVPlaybackState(int32_t state, float speed, int64_t etime, int64_t btime, int32_t loopMode,
+                                 bool isFavorite)
+    : state_(state), speed_(speed), elapsedTime_(etime), bufferedTime_(btime), loopMode_(loopMode),
+      isFavorite_(isFavorite)
+{
+}
+
+bool AVPlaybackState::Marshalling(Parcel &parcel) const
 {
     return false;
 }
@@ -53,9 +53,9 @@ void AVPlaybackState::SetElapsedTime(int64_t time)
     elapsedTime_ = time;
 }
 
-void AVPlaybackState::SetBufferredTime(int64_t time)
+void AVPlaybackState::SetBufferedTime(int64_t time)
 {
-    bufferredTime_ = time;
+    bufferedTime_ = time;
 }
 
 void AVPlaybackState::SetLoopMode(int32_t mode)
@@ -68,32 +68,32 @@ void AVPlaybackState::SetFavorite(bool isFavorite)
     isFavorite_ = isFavorite;
 }
 
-int32_t AVPlaybackState::GetState()
+int32_t AVPlaybackState::GetState() const
 {
     return state_;
 }
 
-float AVPlaybackState::GetSpeed()
+float AVPlaybackState::GetSpeed() const
 {
     return speed_;
 }
 
-int64_t AVPlaybackState::GetElapsedTime()
+int64_t AVPlaybackState::GetElapsedTime() const
 {
     return elapsedTime_;
 }
 
-int64_t AVPlaybackState::GetBufferredTime()
+int64_t AVPlaybackState::GetBufferedTime() const
 {
-    return bufferredTime_;
+    return bufferedTime_;
 }
 
-int32_t AVPlaybackState::GetLoopMode()
+int32_t AVPlaybackState::GetLoopMode() const
 {
     return loopMode_;
 }
 
-bool AVPlaybackState::GetFavorite()
+bool AVPlaybackState::GetFavorite() const
 {
     return isFavorite_;
 }

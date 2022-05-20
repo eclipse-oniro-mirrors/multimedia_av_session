@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,7 +117,7 @@ int32_t AVSessionControllerStub::HandleGetSupportedCommand(MessageParcel &data, 
 int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel &data, MessageParcel &reply)
 {
     std::string str = data.ReadString();
-    std::bitset<AVMetadata::META_KEY_MAX> filter(str);
+    AVMetaData::MetaMaskType filter(str);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetMetaFilter(filter)), ERR_MARSHALLING, "write int32 failed");
     return ERR_NONE;
 }
@@ -131,4 +131,4 @@ int32_t AVSessionControllerStub::HandleIsSessionActive(MessageParcel &data, Mess
     }
     return ret;
 }
-}
+} // OHOS::AVSession

@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "avsession.h"
+#include "avsession_controller.h"
 #include "avsession_info.h"
 #include "key_event.h"
 
@@ -42,8 +43,6 @@ public:
 
     static int32_t RegisterSessionListener(std::shared_ptr<SessionListener>& listener);
 
-    using DeathCallback = std::function<void>;
-
     static int32_t RegisterServiceDeathCallback(const DeathCallback& callback);
 
     static int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent);
@@ -51,5 +50,4 @@ public:
     static int32_t SetSystemMediaVolume(int32_t volume);
 };
 } // namespace OHOS::AVSession
-
 #endif // OHOS_AVSESSION_MANAGER_H

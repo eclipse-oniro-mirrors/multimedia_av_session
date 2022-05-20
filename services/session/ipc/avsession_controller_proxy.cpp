@@ -31,7 +31,7 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState &state)
     return 0;
 }
 
-int32_t AVSessionControllerProxy::GetAVMetaData(AVMetadata &data)
+int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData &data)
 {
     return 0;
 }
@@ -93,7 +93,7 @@ int32_t AVSessionControllerProxy::SendCommand(AVControlCommand &cmd)
     return reply.ReadInt32();
 }
 
-int32_t AVSessionControllerProxy::SetMetaFilter(std::bitset<AVMetadata::META_KEY_MAX> &filter)
+int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,

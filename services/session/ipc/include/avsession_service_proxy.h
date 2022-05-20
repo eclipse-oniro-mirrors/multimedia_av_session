@@ -19,6 +19,7 @@
 #include "iavsession_service.h"
 #include "iremote_proxy.h"
 #include "avsession.h"
+#include "avsession_controller.h"
 
 namespace OHOS::AVSession {
 class AVSessionServiceProxy : public IRemoteProxy<IAVSessionService> {
@@ -54,11 +55,10 @@ public:
 
     int32_t SetSystemMediaVolume(int32_t volume) override;
 
-    int32_t RegisterClientDeathObserver(const sptr<IRemoteObject>& observer) override;
+    int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
 private:
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;
 };
 } // namespace OHOS
-
 #endif // OHOS_AVSESSION_SERVICE_PROXY_H

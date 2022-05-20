@@ -41,7 +41,7 @@ int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState &state)
     return 0;
 }
 
-int32_t AVControllerItem::GetAVMetaData(AVMetadata &data)
+int32_t AVControllerItem::GetAVMetaData(AVMetaData &data)
 {
     return 0;
 }
@@ -76,7 +76,7 @@ int32_t AVControllerItem::SendCommand(AVControlCommand &cmd)
     return 0;
 }
 
-int32_t AVControllerItem::SetMetaFilter(std::bitset<AVMetadata::META_KEY_MAX> &filter)
+int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
 {
     metaMask_ = filter;
     return AVSESSION_SUCCESS;
@@ -98,7 +98,7 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
     callback_->OnPlaybackStateUpdate(state);
 }
 
-void AVControllerItem::HandleMetaDataChange(const AVMetadata &data)
+void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
 {
     callback_->OnMetaDataUpdate(data);
 }
@@ -117,4 +117,4 @@ void AVControllerItem::ClearSession()
 {
     session_ = nullptr;
 }
-} // namespace OHOS::AVSession
+} // OHOS::AVSession
