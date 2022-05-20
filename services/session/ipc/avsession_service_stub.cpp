@@ -45,7 +45,7 @@ int AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Me
 
 int AVSessionServiceStub::HandleCreateSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto session = CreateSessionInner(data.ReadString(), data.ReadString(), data.ReadString(), data.ReadString());
+    auto session = CreateSessionInner(data.ReadString(), data.ReadInt32(), data.ReadString(), data.ReadString());
     reply.WriteRemoteObject(session);
     return ERR_NONE;
 }
@@ -85,7 +85,7 @@ int AVSessionServiceStub::HandleGetAllControllersInner(MessageParcel &data, Mess
     return ERR_NONE;
 }
 
-int AVSessionServiceStub::HandleRegisterSessionListenerInner(MessageParcel &data, MessageParcel &reply)
+int AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply)
 {
     auto remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {

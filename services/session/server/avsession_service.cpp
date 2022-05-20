@@ -53,24 +53,24 @@ int32_t AVSessionService::AllocSessionId()
     return 0;
 }
 
-sptr<IRemoteObject>  AVSessionService::CreateSessionInner(const std::string& tag, const std::string& type,
+sptr<IRemoteObject>  AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
     const std::string& bundleName, const std::string& abilityName)
 {
-    auto id = AllocSessionId();
-    return nullptr;
+    return {};
 }
 
-sptr<AVSession> AVSessionService::GetSessionInner()
+sptr<IRemoteObject> AVSessionService::GetSessionInner()
 {
-    return nullptr;
+    return {};
+}
+
+std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
+{
+    return {};
 }
 
 sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
 {
-    auto id = sessionId;
-    {
-        std::lock_guard<std::mutex> lockGuard(controllersLock_);
-    }
     return nullptr;
 }
 
@@ -81,12 +81,14 @@ sptr<IRemoteObject> AVSessionService::GetControllerInner(int32_t sessionId)
 
 std::vector<sptr<IRemoteObject>> AVSessionService::GetAllControllersInner()
 {
+    return {};
 }
 
-int32_t AVSessionService::RegisterSessionListenerInner(sptr<IRemoteObject>& listener)
+int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
     return 0;
 }
+
 int32_t AVSessionService::SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent)
 {
     return 0;
@@ -96,7 +98,8 @@ int32_t AVSessionService::SetSystemMediaVolume(int32_t volume)
 {
     return 0;
 }
-int32_t AVSessionService::RegisterClientDeathObserver(sptr<IRemoteObject>& observer)
+
+int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IRemoteObject>& observer)
 {
     return 0;
 }

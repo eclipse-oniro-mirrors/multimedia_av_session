@@ -97,10 +97,36 @@ void AVSessionManagerImpl::OnServiceDied()
     }
 }
 
-std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string &tag)
+std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string &tag, int32_t type,
+    const std::string &bundleName, const std::string &abilityName)
 {
     auto service = GetService();
-    return service ? service->CreateSession(tag) : nullptr;
+    return service ? service->CreateSession(tag, type, bundleName, abilityName) : nullptr;
+}
+
+std::shared_ptr<AVSession> AVSessionManagerImpl::GetSession()
+{
+    return nullptr;
+}
+
+std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetAllSessionDescriptors()
+{
+    return {};
+}
+
+std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(int32_t sessionld)
+{
+    return nullptr;
+}
+
+std::shared_ptr<AVSessionController> AVSessionManagerImpl::GetController(int32_t sessionld)
+{
+    return nullptr;
+}
+
+std::vector<std::shared_ptr<AVSessionController>> AVSessionManagerImpl::GetAllControllers()
+{
+    return nullptr;
 }
 
 int32_t AVSessionManagerImpl::RegisterSessionListener(std::shared_ptr<SessionListener> &listener)
@@ -128,6 +154,21 @@ int32_t AVSessionManagerImpl::RegisterSessionListener(std::shared_ptr<SessionLis
 int32_t AVSessionManagerImpl::RegisterServiceDeathCallback(const DeathCallback &callback)
 {
     deathCallback_ = callback;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionManagerImpl::SendSystemMediaKeyEvent(MMI::KeyEvent &keyEvent)
+{
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionManagerImpl::SetSystemMediaVolume(int32_t volume)
+{
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionManagerImpl::RegesterClientDeathObserver()
+{
     return AVSESSION_SUCCESS;
 }
 } // namespace OHOS::AVSession

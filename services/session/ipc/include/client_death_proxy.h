@@ -22,7 +22,7 @@
 namespace OHOS::AVSession {
 class ClientDeathProxy : public IRemoteProxy<IClientDeath> {
 public:
-    explicit ClientDeathProxy(const sptr<IRemoteObject>& impl) {};
+    explicit ClientDeathProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IClientDeath>(impl) {};
 
 private:
     static inline BrokerDelegator<ClientDeathProxy> delegator_;
