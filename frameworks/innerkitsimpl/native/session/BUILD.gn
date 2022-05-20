@@ -33,6 +33,7 @@ ohos_shared_library("avsession_client") {
   client_sources = [
     "src/avsession_manager.cpp",
     "src/avsession_manager_impl.cpp",
+    "src/avsession_metadata.cpp",
     "src/session_listener_client.cpp",
   ]
 
@@ -44,8 +45,9 @@ ohos_shared_library("avsession_client") {
 
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
     "input:libmmi-client",
+    "ipc:ipc_core",
+    "multimedia_image_standard:image_native",
     "samgr_standard:samgr_proxy",
   ]
 
