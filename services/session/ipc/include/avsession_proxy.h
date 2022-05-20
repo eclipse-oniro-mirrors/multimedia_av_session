@@ -16,7 +16,7 @@
 #ifndef OHOS_AVSESSION_PROXY_H
 #define OHOS_AVSESSION_PROXY_H
 
-#include "iavsession.h"
+#include "iav_session.h"
 #include "iremote_proxy.h"
 
 namespace OHOS::AVSession {

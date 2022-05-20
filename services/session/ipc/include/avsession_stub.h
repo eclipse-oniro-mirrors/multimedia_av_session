@@ -16,7 +16,7 @@
 #ifndef OHOS_AVSESSION_STUB_H
 #define OHOS_AVSESSION_STUB_H
 
-#include "iavsession.h"
+#include "iav_session.h"
 #include "iremote_stub.h"
 
 namespace OHOS::AVSession {

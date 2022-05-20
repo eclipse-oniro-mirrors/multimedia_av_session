@@ -17,7 +17,7 @@
 #define OHOS_IAVSESSION_H
 
 #include "iremote_broker.h"
-#include "avsession.h"
+#include "av_session.h"
 
 namespace OHOS::AVSession {
 class IAVSession : public AVSession, public IRemoteBroker {

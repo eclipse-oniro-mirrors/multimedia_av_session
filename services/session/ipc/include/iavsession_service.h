@@ -17,7 +17,7 @@
 #define OHOS_IAVSESSION_SERVICE_H
 
 #include "iremote_broker.h"
-#include "iavsession.h"
+#include "iav_session.h"
 #include "iclient_death.h"
 #include "isession_listener.h"
 #include "key_event.h"

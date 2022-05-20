@@ -18,7 +18,7 @@
 
 #include "iavsession_service.h"
 #include "iremote_proxy.h"
-#include "avsession.h"
+#include "av_session.h"
 #include "avsession_controller.h"
 
 namespace OHOS::AVSession {
