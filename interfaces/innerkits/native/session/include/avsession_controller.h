@@ -31,7 +31,7 @@ class AVSessionController {
 public:
     virtual int32_t GetAVPlaybackState(AVPlaybackState &state) = 0;
 
-    virtual int32_t GetAVMetaData(AVMetadata &data) = 0;
+    virtual int32_t GetAVMetaData(AVMetaData &data) = 0;
 
     virtual int32_t GetAVVolumeInfo(AVVolumeInfo &info) = 0;
 
@@ -47,7 +47,7 @@ public:
 
     virtual int32_t RegisterCallback(std::shared_ptr<AVControllerCallback> &callback) = 0;
 
-    virtual int32_t SetMetaFilter(std::bitset<AVMetadata::META_KEY_MAX> &filter) = 0;
+    virtual int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) = 0;
 
     virtual int32_t Release() = 0;
 

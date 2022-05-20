@@ -43,7 +43,7 @@ public:
     };
 
     AVControlCommand();
-    ~AVControlCommand();
+    ~AVControlCommand() override;
     static AVControlCommand *Unmarshalling(MessageParcel &data);
     bool Marshalling(Parcel &parcel) const override;
 

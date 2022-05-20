@@ -30,7 +30,7 @@ public:
 
     int32_t GetAVPlaybackState(AVPlaybackState &state) override;
 
-    int32_t GetAVMetaData(AVMetadata &data) override;
+    int32_t GetAVMetaData(AVMetaData &data) override;
 
     int32_t GetAVVolumeInfo(AVVolumeInfo &info) override;
 
@@ -44,7 +44,7 @@ public:
 
     int32_t SendCommand(AVControlCommand &cmd) override;
 
-    int32_t SetMetaFilter(std::bitset<AVMetadata::META_KEY_MAX> &filter) override;
+    int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) override;
 
     int32_t Release() override;
 
@@ -52,7 +52,7 @@ public:
 
     void HandlePlaybackStateChange(const AVPlaybackState &state);
 
-    void HandleMetaDataChange(const AVMetadata &data);
+    void HandleMetaDataChange(const AVMetaData &data);
 
     void HandleVolumeInfoChange(const AVVolumeInfo &info);
 
@@ -67,7 +67,7 @@ private:
     pid_t pid_;
     sptr<AVSessionItem> session_;
     sptr<IAVControllerCallback> callback_;
-    std::bitset<AVMetadata::META_KEY_MAX> metaMask_;
+    AVMetaData::MetaMaskType metaMask_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_ITEM_H

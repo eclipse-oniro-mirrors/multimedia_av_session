@@ -21,11 +21,12 @@
 #include <mutex>
 
 #include "iremote_object.h"
-#include "avsession.h"
+#include "av_session.h"
 #include "avsession_service_proxy.h"
 #include "avsession_info.h"
 #include "client_death_stub.h"
 #include "isession_listener.h"
+#include "avsession_controller.h"
 
 namespace OHOS::AVSession {
 class AVSessionManagerImpl {

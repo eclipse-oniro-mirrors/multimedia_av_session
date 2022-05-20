@@ -35,7 +35,7 @@ void AVControllerCallbackClient::OnSessionRelease(const AVSessionDescriptor &des
     if (callback_) {
         callback_->OnSessionRelease(descriptor);
     }
-} 
+}
 
 void AVControllerCallbackClient::OnPlaybackStateUpdate(const AVPlaybackState &state)
 {
@@ -44,7 +44,7 @@ void AVControllerCallbackClient::OnPlaybackStateUpdate(const AVPlaybackState &st
     }
 }
 
-void AVControllerCallbackClient::OnMetaDataUpdate(const AVMetadata &data)
+void AVControllerCallbackClient::OnMetaDataUpdate(const AVMetaData &data)
 {
     if (callback_) {
         callback_->OnMetaDataUpdate(data);

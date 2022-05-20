@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AVSESSION_H
-#define OHOS_AVSESSION_H
+#ifndef OHOS_IAVSESSION_H
+#define OHOS_IAVSESSION_H
 
-#include <string>
-#include <memory>
-
-#include "avsession_info.h"
+#include "iremote_broker.h"
+#include "av_session.h"
 
 namespace OHOS::AVSession {
-class AVSession {
+class IAVSession : public AVSession, public IRemoteBroker {
 public:
-    virtual int32_t GetSessionId() = 0;
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.avsession.IAVSession");
 
-    virtual int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) = 0;
+    enum {
+        SESSION_CMD_GET_SESSION_ID,
+        SESSION_CMD_REGISTER_CALLBACK,
+        SESSION_CMD_RELEASE,
+        SESSION_CMD_MAX,
+    };
 
-    virtual void Release() = 0;
-
-    virtual ~AVSession() = default;;
+protected:
+    virtual int32_t RegisterCallbackInner(sptr<IRemoteObject>& callback) = 0;
 };
 } // namespace OHOS::AVSession
-#endif // OHOS_AVSESSION_H
+#endif // OHOS_IAVSESSION_H

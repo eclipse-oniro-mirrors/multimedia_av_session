@@ -35,7 +35,7 @@ void AVControllerCallbackProxy::OnPlaybackStateUpdate(const AVPlaybackState &sta
 {
 }
 
-void AVControllerCallbackProxy::OnMetaDataUpdate(const AVMetadata &data)
+void AVControllerCallbackProxy::OnMetaDataUpdate(const AVMetaData &data)
 {
 }
 

@@ -29,36 +29,36 @@ public:
         PLAYBACK_STATE_STOPPED,
         PLAYBACK_STATE_MAX
     };
-    AVPlaybackState() : Parcelable(true) {}
-    AVPlaybackState(int32_t state, float speed, int64_t etime, int64_t btime, int32_t loopMode, bool
-                    isFavorite);
+
+    AVPlaybackState();
+    AVPlaybackState(int32_t state, float speed, int64_t etime, int64_t btime, int32_t loopMode, bool isFavorite);
 
     static AVPlaybackState* Unmarshalling(Parcel& parcel);
-    bool Marshalling(Parcel& parcel);
+    bool Marshalling(Parcel& parcel) const override;
 
     void SetState(int32_t state);
-    int32_t GetState();
+    int32_t GetState() const;
 
     void SetSpeed(float speed);
-    float GetSpeed();
+    float GetSpeed() const;
 
     void SetElapsedTime(int64_t time);
-    int64_t GetElapsedTime();
+    int64_t GetElapsedTime() const;
 
-    void SetBufferredTime(int64_t time);
-    int64_t GetBufferredTime();
+    void SetBufferedTime(int64_t time);
+    int64_t GetBufferedTime() const;
 
     void SetLoopMode(int32_t mode);
-    int32_t GetLoopMode();
+    int32_t GetLoopMode() const;
 
     void SetFavorite(bool isFavorite);
-    bool GetFavorite();
+    bool GetFavorite() const;
 
 private:
     int32_t state_;
     float speed_;
     int64_t elapsedTime_;
-    int64_t bufferredTime_;
+    int64_t bufferedTime_;
     int32_t loopMode_;
     bool isFavorite_;
 };

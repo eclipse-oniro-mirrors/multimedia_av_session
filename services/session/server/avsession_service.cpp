@@ -18,6 +18,7 @@
 #include "avsession_log.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "session_stack.h"
 
 namespace OHOS::AVSession {
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
@@ -31,10 +32,16 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
 AVSessionService::~AVSessionService()
 {
     SLOGD("destroy");
+    delete sessionContainer_;
 }
 
 void AVSessionService::OnStart()
 {
+    sessionContainer_ = new(std::nothrow) SessionStack();
+    if (sessionContainer_ == nullptr) {
+        SLOGE("malloc session container failed");
+        return;
+    }
     if (!Publish(this)) {
         SLOGE("publish avsession service failed");
     }
@@ -99,7 +106,7 @@ int32_t AVSessionService::SetSystemMediaVolume(int32_t volume)
     return 0;
 }
 
-int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IRemoteObject>& observer)
+int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
     return 0;
 }

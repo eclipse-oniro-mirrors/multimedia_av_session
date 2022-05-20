@@ -19,14 +19,18 @@
 #include <string>
 #include <list>
 #include <map>
+
 #include "session_container.h"
 
 namespace OHOS::AVSession {
 class SessionStack : public SessionContainer {
 public:
     void AddSession(pid_t pid, sptr<AVSessionItem>& item) override;
+
     sptr<AVSessionItem> RemoveSession(pid_t pid) override;
+
     sptr<AVSessionItem> GetSession(pid_t pid) override;
+
     std::vector<sptr<AVSessionItem>> GetAllSessions() override;
 
 private:

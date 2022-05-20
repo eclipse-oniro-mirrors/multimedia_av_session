@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_proxy.h"
+#include "avsession_controller_proxy.h"
 
 namespace OHOS::AVSession {
 AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject> &impl)
@@ -71,17 +72,17 @@ sptr<IRemoteObject> AVSessionServiceProxy::GetSessionInner()
 std::vector<AVSessionDescriptor> AVSessionServiceProxy::GetAllSessionDescriptors()
 {
     MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), nullptr, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), {}, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS, data, reply, option) == 0,
-                             nullptr, "send request failed");
-    return reply.ReadRemoteObject();
+                             {}, "send request failed");
+    return {};
 }
 
 std::shared_ptr<AVSessionController> AVSessionServiceProxy::CreateController(int32_t sessionId)
 {
-    auto remoteObject = CreateControllerInner();
+    auto remoteObject = CreateControllerInner(sessionId);
     auto controller = iface_cast<AVSessionControllerProxy>(remoteObject);
     return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
 }
@@ -100,7 +101,7 @@ sptr<IRemoteObject> AVSessionServiceProxy::CreateControllerInner(int32_t session
 
 std::shared_ptr<AVSessionController> AVSessionServiceProxy::GetController(int32_t sessionId)
 {
-    auto remoteObject = GetControllerInner();
+    auto remoteObject = GetControllerInner(sessionId);
     auto controller = iface_cast<AVSessionControllerProxy>(remoteObject);
     return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
 }
@@ -120,7 +121,7 @@ sptr<IRemoteObject> AVSessionServiceProxy::GetControllerInner(int32_t sessionId)
 std::vector<std::shared_ptr<AVSessionController>> AVSessionServiceProxy::GetAllControllers()
 {
     std::vector<std::shared_ptr<AVSessionController>> sessionControllers;
-    auto controls = GetControllerInner();
+    auto controls = GetAllControllersInner();
     for (auto& control : controls) {
         auto sessionController = iface_cast<AVSessionControllerProxy>(control);
         sessionControllers.push_back(std::shared_ptr<AVSessionController>(
@@ -132,12 +133,12 @@ std::vector<std::shared_ptr<AVSessionController>> AVSessionServiceProxy::GetAllC
 std::vector<sptr<IRemoteObject>> AVSessionServiceProxy::GetAllControllersInner()
 {
     MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), nullptr, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), {}, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_GET_ALL_CONTROLLERS, data, reply, option) == 0,
-                             nullptr, "send request failed");
-    return reply.ReadRemoteObject();
+                             {}, "send request failed");
+    return {};
 }
 
 int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListener>& listener)
@@ -165,7 +166,7 @@ int32_t AVSessionServiceProxy::SetSystemMediaVolume(int32_t volume)
     return AVSESSION_ERROR;
 }
 
-int32_t AVSessionServiceProxy::RegisterClientDeathObserver(const sptr<IRemoteObject>& observer)
+int32_t AVSessionServiceProxy::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
     return AVSESSION_ERROR;
 }

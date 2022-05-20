@@ -41,7 +41,7 @@
             "header": {
               "header_files": [
                   "avsession_manager.h",
-                  "avsession.h",
+                  "av_session.h",
                   "avsession_controller.h",
                   "avsession_info.h",
                   "avsession_errors.h"

@@ -26,11 +26,11 @@ public:
 
     void OnVolumeInfoChange(const AVVolumeInfo &volumeInfo) override;
 
-    void OnSessionRelease(const AVSessionDescriptor &descriptor) override;   
+    void OnSessionRelease(const AVSessionDescriptor &descriptor) override;
 
     void OnPlaybackStateUpdate(const AVPlaybackState &state) override;
 
-    void OnMetaDataUpdate(const AVMetadata &data) override;
+    void OnMetaDataUpdate(const AVMetaData &data) override;
 
     void OnActiveStateChange(bool isActive) override;
 

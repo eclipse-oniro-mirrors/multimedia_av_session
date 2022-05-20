@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Huawei Device Co., Ltd.
+# Copyright (C) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,8 +24,11 @@ group("avession_server") {
 ohos_shared_library("avsession_service") {
   install_enable = true
 
-  common_source =
-      [ "../../frameworks/innerkitsimpl/native/session/src/av_meta_data.cpp" ]
+  common_source = [
+    "../../frameworks/innerkitsimpl/native/session/src/avmeta_data.cpp",
+    "../../frameworks/innerkitsimpl/native/session/src/avplayback_state.cpp",
+    "../../frameworks/innerkitsimpl/native/session/src/avcontrol_command.cpp",
+  ]
 
   ipc_sources = [
     "ipc/avcontroller_callback_proxy.cpp",
@@ -39,6 +42,7 @@ ohos_shared_library("avsession_service") {
     "server/avcontroller_item.cpp",
     "server/avsession_item.cpp",
     "server/avsession_service.cpp",
+    "server/session_stack.cpp",
   ]
 
   sources = common_source + ipc_sources + service_sources
@@ -51,8 +55,8 @@ ohos_shared_library("avsession_service") {
   ]
 
   deps = [
-    "//utils/native/base:utils",
     "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session:avsession_client",
+    "//utils/native/base:utils",
   ]
 
   external_deps = [

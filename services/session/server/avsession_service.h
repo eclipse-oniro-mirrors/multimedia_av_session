@@ -23,7 +23,10 @@
 #include "system_ability.h"
 #include "avsession_service_stub.h"
 #include "avsession_item.h"
+#include "avcontroller_item.h"
 #include "session_container.h"
+#include "iclient_death.h"
+#include "isession_listener.h"
 
 namespace OHOS::AVSession {
 class AVSessionService : public SystemAbility, public AVSessionServiceStub {
@@ -61,22 +64,23 @@ public:
 
     int32_t SetSystemMediaVolume(int32_t volume) override;
 
-    int32_t RegisterClientDeathObserver(const sptr<IRemoteObject>& observer) override;
+    int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
     void OnClientDied(pid_t pid);
 
 private:
     int32_t AllocSessionId();
+
     std::mutex controllersLock_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
 
-    SessionContainer* sessionContainer_ = nullptr;
+    SessionContainer* sessionContainer_ {};
 
     std::mutex clientDeathObserversLock_;
-    std::map<pid_t, sptr<ClientDeathProxy>> clientDeathObservers_;
+    std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
 
     std::mutex sessionListenersLock_;
-    std::map<pid_t, sptr<SessionListenerProxy>> sessionListeners_;
+    std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H
