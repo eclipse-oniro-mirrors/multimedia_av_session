@@ -28,12 +28,15 @@ ohos_shared_library("avsession_service") {
       [ "../../frameworks/innerkitsimpl/native/session/src/av_meta_data.cpp" ]
 
   ipc_sources = [
+    "ipc/avcontroller_callback_proxy.cpp",
+    "ipc/avsession_controller_stub.cpp",
     "ipc/avsession_service_stub.cpp",
     "ipc/avsession_stub.cpp",
     "ipc/session_listener_proxy.cpp",
   ]
 
   service_sources = [
+    "server/avcontroller_item.cpp",
     "server/avsession_item.cpp",
     "server/avsession_service.cpp",
   ]
@@ -47,9 +50,14 @@ ohos_shared_library("avsession_service") {
     "//utils/native/base/include",
   ]
 
-  deps = [ "//utils/native/base:utils" ]
+  deps = [
+    "//utils/native/base:utils",
+    "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session:avsession_client",
+  ]
 
   external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",

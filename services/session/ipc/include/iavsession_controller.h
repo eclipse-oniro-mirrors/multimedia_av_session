@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,32 @@
 #ifndef OHOS_IAVSESSION_CONTROLLER_H
 #define OHOS_IAVSESSION_CONTROLLER_H
 
-#include "iremote_broker.h"
 #include "avsession_controller.h"
+#include "iavcontroller_callback.h"
+#include "iremote_broker.h"
 
 namespace OHOS::AVSession {
 class IAVSessionController : public AVSessionController, public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR("ohos.avsession.IAVSessionController");
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.avsession.IAVSessionController");
 
     enum {
+        CONTROLLER_CMD_REGISTER_CALLBACK,
+        CONTROLLER_CMD_RELEASE,
+        CONTROLLER_CMD_GET_AV_PLAYBACK_STATE,
+        CONTROLLER_CMD_GET_AV_META_DATA,
+        CONTROLLER_CMD_SEND_MEDIA_KEYEVENT,
+        CONTROLLER_CMD_GET_AV_VOLUME_INFO,
+        CONTROLLER_CMD_GET_LAUNCH_ABILITY,
+        CONTROLLER_CMD_GET_SUPPORTED_COMMAND,
+        CONTROLLER_CMD_SEND_COMMAND,
+        CONTROLLER_CMD_SET_META_FILTER,
+        CONTROLLER_CMD_IS_SESSION_ACTIVE,
         CONTROLLER_CMD_MAX
     };
+
+protected:
+    virtual int32_t RegisterCallbackInner(const sptr<IAVControllerCallback>& callback) = 0;
 };
 }
 #endif // OHOS_IAVSESSION_CONTROLLER_H
