@@ -63,4 +63,4 @@ private:
     bool isFavorite_;
 };
 } // namespace OHOS::AVSession
-#endif //OHOS_AVPLAYBACK_STATE_H
+#endif // OHOS_AVPLAYBACK_STATE_H
