@@ -25,6 +25,7 @@ AVSessionItem::AVSessionItem(const std::string& tag, int32_t id)
 }
 
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
+    : tag_(descriptor.tag), sessionId_(descriptor.sessionId)
 {
 }
 
