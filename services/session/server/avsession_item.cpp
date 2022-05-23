@@ -152,11 +152,13 @@ void AVSessionItem::SetUid(uid_t uid)
     uid_ = uid;
 }
 
-pid_t AVSessionItem::GtePid(){
+pid_t AVSessionItem::GtePid()
+{
     return 0;
 }
 
-uid_t  AVSessionItem::GetUid(){
+uid_t  AVSessionItem::GetUid()
+{
     return 0;
 }
 } // namespace OHOS::AVSession

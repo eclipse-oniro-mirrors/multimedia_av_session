@@ -17,7 +17,6 @@
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
-#include "avsession_item.h"
 
 namespace OHOS::AVSession {
 AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)

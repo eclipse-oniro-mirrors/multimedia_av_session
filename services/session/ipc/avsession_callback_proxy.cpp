@@ -18,7 +18,7 @@
 
 namespace OHOS::AVSession {
 AVSessionCallbackProxy::AVSessionCallbackProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<IAVSessionCallback>(impl)
+    : IRemoteProxy<IAVSessionCallback>(impl)
 {
     SLOGD("construct");
 }
