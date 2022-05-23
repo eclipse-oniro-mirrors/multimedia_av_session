@@ -67,7 +67,5 @@ private:
     static inline const char DOBJECT_KEY_STATE[] = "state";
     static inline const char DOBJECT_KEY_CMD[] = "cmd";
 };
-
-
 }
 #endif // AVSESSION_DISTRIBUTEDOBJECT_ADAPTER_H
