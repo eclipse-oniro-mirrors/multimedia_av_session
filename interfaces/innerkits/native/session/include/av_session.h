@@ -20,17 +20,37 @@
 #include <memory>
 
 #include "avsession_info.h"
+#include "want_agent.h"
+#include "avsession_controller.h"
 
 namespace OHOS::AVSession {
 class AVSession {
 public:
     virtual int32_t GetSessionId() = 0;
 
+    virtual int32_t GetAVMetaData(AVMetaData& meta) = 0;
+
+    virtual int32_t SetAVMetaData(const AVMetaData& meta) = 0;
+
+    virtual int32_t GetAVPlaybackState(AVPlaybackState& state) = 0;
+
+    virtual int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) = 0;
+
+    virtual std::shared_ptr<AVSessionController> GetController() = 0;
+
     virtual int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) = 0;
 
-    virtual void Release() = 0;
+    virtual int32_t Active() = 0;
 
-    virtual ~AVSession() = default;;
+    virtual int32_t Disactive() = 0;
+
+    virtual bool IsActive() = 0;
+
+    virtual int32_t Release() = 0;
+
+    virtual int32_t AddSupportCommand(const std::string& cmd) = 0;
+
+    virtual ~AVSession() = default;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_H

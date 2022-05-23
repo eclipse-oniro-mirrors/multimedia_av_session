@@ -36,6 +36,8 @@ ohos_shared_library("avsession_service") {
     "ipc/avsession_service_stub.cpp",
     "ipc/avsession_stub.cpp",
     "ipc/session_listener_proxy.cpp",
+    "ipc/avsession_callback_proxy.cpp",
+    "ipc/avsession_callback_stub.cpp",
   ]
 
   service_sources = [

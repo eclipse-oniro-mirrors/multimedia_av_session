@@ -18,22 +18,84 @@
 
 #include <string>
 #include "avsession_stub.h"
+#include "avsession_controller.h"
+#include "avsession_callback_proxy.h"
 
 namespace OHOS::AVSession {
+class AVControllerItem;
 class AVSessionItem : public AVSessionStub {
 public:
     AVSessionItem(const std::string& tag, int32_t id);
+
+    explicit AVSessionItem(const AVSessionDescriptor& descriptor);
 
     ~AVSessionItem() override;
 
     int32_t GetSessionId() override;
 
-    void Release() override;
+    int32_t GetAVMetaData(AVMetaData& meta) override;
+
+    int32_t SetAVMetaData(const AVMetaData& meta) override;
+
+    int32_t GetAVPlaybackState(AVPlaybackState& state) override;
+
+    int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
+
+    std::shared_ptr<AVSessionController> GetController() override;
+
+    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override;
+
+    int32_t Active() override;
+
+    int32_t Disactive() override;
+
+    bool IsActive() override;
+
+    int32_t Release() override;
+
+    int32_t AddSupportCommand(const std::string& cmd) override;
+
+    AVSessionDescriptor GetDescriptor();
+
+    AVPlaybackState GetPlaybackState();
+
+    AVMetaData GetMetaData();
+
+    std::vector<std::string> GetSupportCommand();
+
+    void ExecuteControllerCommand(const AVControlCommand& cmd);
+
+    int32_t AddController(pid_t pid, sptr<AVControllerItem>& controller);
+
+    int32_t RemoveController(pid_t pid);
+
+    int32_t RegisterCallbackForRemote(std::shared_ptr<AVSessionCallback>& callback);
+
+    int32_t UnRegisterCallbackForRemote();
+
+    void SetPid(pid_t pid);
+
+    void SetUid(uid_t uid);
+
+    pid_t GtePid();
+
+    uid_t GetUid();
 
 protected:
     int32_t RegisterCallbackInner(sptr<IRemoteObject>& callback) override;
 
 private:
+    std::map<pid_t, sptr<AVControllerItem>> controllers_;
+    AVSessionDescriptor descriptor_;
+    AVPlaybackState playbackState_;
+    AVMetaData metaData_;
+    pid_t pid_;
+    uid_t uid_;
+    AbilityRuntime::WantAgent::WantAgent launchAbility_;
+    std::vector<std::string> supportedCmd_;
+    sptr<AVSessionCallbackProxy> callback_;
+    std::shared_ptr<AVSessionCallback> remoteCallback_;
+
     std::string tag_;
     int32_t sessionId_;
 };

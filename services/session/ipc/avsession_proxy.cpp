@@ -14,8 +14,7 @@
  */
 
 #include "avsession_proxy.h"
-#include "avsession_log.h"
-#include "avsession_errors.h"
+#include "avplayback_state.h"
 
 namespace OHOS::AVSession {
 AVSessionProxy::AVSessionProxy(const sptr<IRemoteObject> &impl)
@@ -40,8 +39,87 @@ int32_t AVSessionProxy::RegisterCallbackInner(sptr<IRemoteObject> &callback)
 {
     return AVSESSION_SUCCESS;
 }
-void AVSessionProxy::Release()
+
+int32_t AVSessionProxy::Release()
 {
     SLOGD("enter");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(AVSessionProxy::GetDescriptor())) {
+        SLOGE("Failed to write descriptor");
+        return AVSESSION_SUCCESS;
+    }
+
+    int32_t ret = Remote()->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("Init parameter failed, error: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(AVSessionProxy::GetDescriptor())) {
+        SLOGE("Failed to write descriptor");
+        return AVSESSION_ERROR;
+    }
+
+    data.WriteInt32(static_cast<int32_t>(state.GetState()));
+    data.WriteInt64(state.GetBufferedTime());
+
+    int32_t ret = Remote()->SendRequest(SESSION_CMD_GET_PLAYBACK_STATE, data, reply, option);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("Init parameter failed, error: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
+{
+    return 0;
+}
+
+int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
+{
+    return 0;
+}
+
+std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
+{
+    return nullptr;
+}
+
+int32_t AVSessionProxy::Active()
+{
+    return 0;
+}
+
+int32_t AVSessionProxy::Disactive()
+{
+    return 0;
+}
+
+bool AVSessionProxy::IsActive()
+{
+    return false;
+}
+
+
+int32_t AVSessionProxy::AddSupportCommand(const std::string& cmd)
+{
+    return 0;
 }
 }
