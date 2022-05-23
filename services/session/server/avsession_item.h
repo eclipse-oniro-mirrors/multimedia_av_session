@@ -85,7 +85,7 @@ protected:
     int32_t RegisterCallbackInner(sptr<IRemoteObject>& callback) override;
 
 private:
-    std::map<pid_t, sptr<AVControllerItem>&> controllers_;
+    std::map<pid_t, sptr<AVControllerItem>> controllers_;
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;

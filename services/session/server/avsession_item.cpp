@@ -15,6 +15,7 @@
 
 #include "avsession_item.h"
 #include "avsession_log.h"
+#include "avcontroller_item.h"
 
 namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const std::string& tag, int32_t id)
