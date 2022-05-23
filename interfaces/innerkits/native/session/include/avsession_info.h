@@ -19,6 +19,7 @@
 #include <string>
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "key_event.h"
 
 namespace OHOS::AVSession {
 using DeathCallback = std::function<void()>;
@@ -50,8 +51,20 @@ public:
 class AVSessionCallback {
 public:
     virtual void OnPlay() = 0;
-
+    virtual void OnPause() = 0;
     virtual void OnStop() = 0;
+    virtual void OnPlayNext() = 0;
+    virtual void OnPlayPrevious() = 0;
+    virtual void OnFastForward() = 0;
+    virtual void OnRewind() = 0;
+    virtual void OnSeek(int64_t time) = 0;
+    virtual void OnSetSpeed(int32_t speed) = 0;
+    virtual void OnSetLoopMode(int32_t loopMode) = 0;
+    virtual void OnToggleFavorite(const std::string& mediald) = 0;
+
+    virtual void OnVolumeChanged(const AVVolumeInfo& volume) = 0;
+
+    virtual void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
 
     virtual ~AVSessionCallback() = default;
 };

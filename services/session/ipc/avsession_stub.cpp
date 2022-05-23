@@ -61,4 +61,89 @@ int AVSessionStub::HandleRelease(MessageParcel &data, MessageParcel &reply)
     reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
+
+int AVSessionStub::HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply)
+{
+    AVPlaybackState avPlaybackState;
+    avPlaybackState.SetState(data.ReadInt32());
+    avPlaybackState.SetBufferedTime(data.ReadInt64());
+
+    reply.WriteInt32(GetAVPlaybackState(avPlaybackState));
+    return ERR_NONE;
+}
+
+int AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply)
+{
+    const AVMetaData* avMetaData = data.ReadParcelable<AVMetaData>();
+    reply.WriteInt32(SetAVMetaData(*avMetaData));
+    return ERR_NONE;
+}
+
+int AVSessionStub::HandleSetLaunchAbility(MessageParcel& data, MessageParcel& reply)
+{
+    const AbilityRuntime::WantAgent::WantAgent* want = data.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>();
+    reply.WriteInt32(SetLaunchAbility(*want));
+    return ERR_NONE;
+}
+
+
+int32_t AVSessionStub::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
+{
+    return 0;
+}
+
+std::shared_ptr<AVSessionController> AVSessionStub::GetController()
+{
+    return nullptr;
+}
+
+int32_t AVSessionStub::RegisterCallback(std::shared_ptr<AVSessionCallback>& callback)
+{
+    return 0;
+}
+
+int32_t AVSessionStub::Active()
+{
+    return 0;
+}
+
+int32_t AVSessionStub::Disactive()
+{
+    return 0;
+}
+
+bool AVSessionStub::IsActive()
+{
+    return false;
+}
+
+int32_t AVSessionStub::AddSupportCommand(const std::string& cmd)
+{
+    return 0;
+}
+
+int32_t AVSessionStub::Release()
+{
+    return 0;
+}
+
+int32_t AVSessionStub::GetSessionId()
+{
+    return 0;
+}
+
+int32_t AVSessionStub::GetAVMetaData(AVMetaData& meta)
+{
+    return 0;
+}
+
+int32_t AVSessionStub::SetAVMetaData(const AVMetaData& meta)
+{
+    return 0;
+}
+
+int32_t AVSessionStub::GetAVPlaybackState(AVPlaybackState& state)
+{
+    return 0;
+}
 }

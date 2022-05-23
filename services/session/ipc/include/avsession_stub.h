@@ -18,16 +18,36 @@
 
 #include "iav_session.h"
 #include "iremote_stub.h"
+#include "want_agent.h"
 
 namespace OHOS::AVSession {
 class AVSessionStub : public IRemoteStub<IAVSession> {
 public:
     int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
-    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override
-    {
-        return 0;
-    };
+    int32_t GetSessionId() override;
+
+    int32_t GetAVMetaData(AVMetaData& meta) override;
+
+    int32_t SetAVMetaData(const AVMetaData& meta) override;
+
+    int32_t GetAVPlaybackState(AVPlaybackState& state) override;
+
+    int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
+
+    std::shared_ptr<AVSessionController> GetController() override;
+
+    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override;
+
+    int32_t Active() override;
+
+    int32_t Disactive() override;
+
+    bool IsActive() override;
+
+    int32_t Release() override;
+
+    int32_t AddSupportCommand(const std::string& cmd) override;
 
 private:
     int HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
@@ -35,6 +55,12 @@ private:
     int HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
     int HandleRelease(MessageParcel& data, MessageParcel& reply);
+
+    int HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply);
+
+    int HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply);
+
+    int HandleSetLaunchAbility(MessageParcel& data, MessageParcel& reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
 

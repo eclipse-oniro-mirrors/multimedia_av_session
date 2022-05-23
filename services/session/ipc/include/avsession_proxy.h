@@ -18,6 +18,9 @@
 
 #include "iav_session.h"
 #include "iremote_proxy.h"
+#include "want_agent.h"
+#include "avsession_log.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 class AVSessionProxy : public IRemoteProxy<IAVSession> {
@@ -26,9 +29,27 @@ public:
 
     int32_t GetSessionId() override;
 
+    int32_t GetAVMetaData(AVMetaData& meta) override;
+
+    int32_t SetAVMetaData(const AVMetaData& meta) override;
+
+    int32_t GetAVPlaybackState(AVPlaybackState& state) override;
+
+    int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
+
+    std::shared_ptr<AVSessionController> GetController() override;
+
     int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override;
 
-    void Release() override;
+    int32_t Active() override;
+
+    int32_t Disactive() override;
+
+    bool IsActive() override;
+
+    int32_t Release() override;
+
+    int32_t AddSupportCommand(const std::string& cmd) override;
 
 protected:
     int32_t RegisterCallbackInner(sptr<IRemoteObject>& callback) override;
@@ -37,5 +58,4 @@ private:
     static inline BrokerDelegator<AVSessionProxy> delegator_;
 };
 }
-
 #endif // OHOS_AVSESSION_PROXY_H
