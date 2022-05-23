@@ -17,8 +17,8 @@
 #define OHOS_AVSESSION_ITEM_H
 
 #include <string>
+#include <map>
 #include "avsession_stub.h"
-#include "avsession_controller.h"
 #include "avsession_callback_proxy.h"
 
 namespace OHOS::AVSession {
