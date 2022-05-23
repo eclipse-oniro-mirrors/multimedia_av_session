@@ -44,7 +44,7 @@ int32_t AVSessionItem::RegisterCallbackInner(sptr<IRemoteObject> &callback)
     return 0;
 }
 
-    int32_t AVSessionItem::Release()
+int32_t AVSessionItem::Release()
 {
     SLOGD("enter");
     return 0;

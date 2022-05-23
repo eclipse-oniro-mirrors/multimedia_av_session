@@ -76,6 +76,7 @@ int AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply
 {
     const AVMetaData* avMetaData = data.ReadParcelable<AVMetaData>();
     reply.WriteInt32(SetAVMetaData(*avMetaData));
+    delete avMetaData;
     return ERR_NONE;
 }
 
@@ -83,6 +84,7 @@ int AVSessionStub::HandleSetLaunchAbility(MessageParcel& data, MessageParcel& re
 {
     const AbilityRuntime::WantAgent::WantAgent* want = data.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>();
     reply.WriteInt32(SetLaunchAbility(*want));
+    delete want;
     return ERR_NONE;
 }
 

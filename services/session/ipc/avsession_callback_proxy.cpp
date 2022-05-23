@@ -22,4 +22,56 @@ AVSessionCallbackProxy::AVSessionCallbackProxy(const sptr<IRemoteObject>& impl)
 {
     SLOGD("construct");
 }
+
+void AVSessionCallbackProxy::OnPlay()
+{
+}
+
+void AVSessionCallbackProxy::OnPause()
+{
+}
+
+void AVSessionCallbackProxy::OnStop()
+{
+}
+
+void AVSessionCallbackProxy::OnPlayNext()
+{
+}
+
+void AVSessionCallbackProxy::OnPlayPrevious()
+{
+}
+
+void AVSessionCallbackProxy::OnFastForward()
+{
+}
+
+void AVSessionCallbackProxy::OnRewind()
+{
+}
+
+void AVSessionCallbackProxy::OnSeek(int64_t time)
+{
+}
+
+void AVSessionCallbackProxy::OnSetSpeed(int32_t speed)
+{
+}
+
+void AVSessionCallbackProxy::OnSetLoopMode(int32_t loopMode)
+{
+}
+
+void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediald)
+{
+}
+
+void AVSessionCallbackProxy::OnVolumeChanged(const AVVolumeInfo& volume)
+{
+}
+
+void AVSessionCallbackProxy::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
+{
+}
 } // namespace OHOS::AVSession
