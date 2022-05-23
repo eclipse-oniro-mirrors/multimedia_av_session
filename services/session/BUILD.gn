@@ -47,10 +47,13 @@ ohos_shared_library("avsession_service") {
     "server/session_stack.cpp",
   ]
 
-  sources = common_source + ipc_sources + service_sources
+  adapter_sources = [ "adapter/distributed_object_adapter.cpp" ]
+
+  sources = common_source + ipc_sources + adapter_sources + service_sources
 
   include_dirs = [
     "//foundation/multimedia/avsession_standard/services/session/ipc/include",
+    "//foundation/multimedia/avsession_standard/services/session/ipc/adapter",
     "//foundation/multimedia/avsession_standard/interfaces/innerkits/native/session/include",
     "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session/include",
     "//utils/native/base/include",
@@ -64,6 +67,7 @@ ohos_shared_library("avsession_service") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "distributeddataobject:distributeddataobject_impl",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
