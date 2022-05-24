@@ -27,7 +27,7 @@ ohos_shared_library("avsession_utils") {
 
   include_dirs = [
     "//utils/native/base/include",
-    "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session/include/common",
+    "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session/include/common",
   ]
 
   cflags = [
@@ -42,5 +42,5 @@ ohos_shared_library("avsession_utils") {
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_avsession_standard"
+  part_name = "multimedia_avsession"
 }

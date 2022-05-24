@@ -17,8 +17,8 @@ import("//build/ohos/ace/ace.gni")
 ohos_shared_library("avsession_napi") {
   include_dirs = [
     "include",
-    "//foundation/multimedia/avsession_standard/interfaces/innerkits/native/session/include",
-    "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session/include",
+    "//foundation/multimedia/avsession/interfaces/innerkits/native/session/include",
+    "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session/include",
   ]
 
   sources = [ "src/napi_module.cpp" ]
@@ -26,7 +26,7 @@ ohos_shared_library("avsession_napi") {
   deps = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
     "//foundation/arkui/napi:ace_napi",
-    "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session:avsession_client",
+    "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session:avsession_client",
   ]
 
   external_deps = [
@@ -37,5 +37,5 @@ ohos_shared_library("avsession_napi") {
   relative_install_dir = "module/multimedia"
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_avsession_standard"
+  part_name = "multimedia_avsession"
 }

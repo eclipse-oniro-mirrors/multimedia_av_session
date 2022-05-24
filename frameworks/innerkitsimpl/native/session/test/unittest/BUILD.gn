@@ -12,7 +12,7 @@
 # limitations under the License.
 import("//build/test.gni")
 
-module_output_path = "multimedia_avsession_standard/session"
+module_output_path = "multimedia_avsession/session"
 
 ###############################################################################
 config("module_private_config") {
@@ -34,7 +34,7 @@ ohos_unittest("AvsessionManagerTest") {
   deps = [
     "//utils/native/base:utils",
     "//third_party/googletest:gtest_main",
-    "//foundation/multimedia/avsession_standard/frameworks/innerkitsimpl/native/session:avsession_client",
+    "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session:avsession_client",
   ]
 }
 
