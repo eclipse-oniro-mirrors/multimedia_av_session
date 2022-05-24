@@ -23,7 +23,7 @@
 仓目录结构如下：
 
 ```
-/foundation/multimedia/avsession_standard  # 会话部件业务代码
+/foundation/multimedia/avsession  # 会话部件业务代码
 ├── frameworks                             # 框架代码
 │   ├── innerkitsimpl                      # native框架实现
 │   └── kitsimpl                           # js框架实现
@@ -45,5 +45,5 @@
 
 ## 相关仓<a name="section1533973044317"></a>
 
-媒体组件仓：multimedia\avsession_standard
+媒体组件仓：multimedia\avsession
 
