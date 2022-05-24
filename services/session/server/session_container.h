@@ -23,11 +23,17 @@
 namespace OHOS::AVSession {
 class SessionContainer {
 public:
-    virtual void AddSession(pid_t pid, sptr<AVSessionItem>& item) = 0;
+    virtual int32_t AddSession(pid_t pid, sptr<AVSessionItem>& item) = 0;
+
     virtual sptr<AVSessionItem> RemoveSession(pid_t pid) = 0;
+
     virtual sptr<AVSessionItem> GetSession(pid_t pid) = 0;
+
     virtual std::vector<sptr<AVSessionItem>> GetAllSessions() = 0;
+
     virtual ~SessionContainer() = default;
+
+    static constexpr int32_t SESSION_NUM_MAX = 20;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_SESSION_CONTAINER_H

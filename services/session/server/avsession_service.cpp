@@ -42,6 +42,7 @@ void AVSessionService::OnStart()
         SLOGE("malloc session container failed");
         return;
     }
+
     if (!Publish(this)) {
         SLOGE("publish avsession service failed");
     }
@@ -57,13 +58,43 @@ void AVSessionService::OnStop()
 
 int32_t AVSessionService::AllocSessionId()
 {
-    return 0;
+    std::lock_guard lockGuard(sessionIdsLock_);
+    while (true) {
+        auto it = std::find_if(sessionIds_.begin(), sessionIds_.end(),
+                               [this](const auto id) { return id == sessionSeqNum_; });
+        if (it == sessionIds_.end()) {
+            sessionIds_.push_back(sessionSeqNum_);
+            return sessionSeqNum_;
+        }
+        if (++sessionSeqNum_ < 0) {
+            sessionSeqNum_ = 0;
+        }
+    }
 }
 
 sptr<IRemoteObject>  AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
     const std::string& bundleName, const std::string& abilityName)
 {
-    return {};
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = AllocSessionId();
+    descriptor.sessionTag_ = tag;
+    descriptor.sessionType_ = type;
+    descriptor.bundleName_ = bundleName;
+    descriptor.abilityName_ = abilityName;
+
+    sptr<AVSessionItem> session = new(std::nothrow) AVSessionItem(descriptor);
+    if (session == nullptr) {
+        return nullptr;
+    }
+    session->SetPid(GetCallingPid());
+    session->SetUid(GetCallingUid());
+    if (sessionContainer_ != nullptr) {
+        if (sessionContainer_->AddSession(session->GetPid(), session) != AVSESSION_SUCCESS) {
+            return nullptr;
+        }
+    }
+
+    return session;
 }
 
 sptr<IRemoteObject> AVSessionService::GetSessionInner()

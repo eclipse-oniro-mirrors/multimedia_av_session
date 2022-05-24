@@ -25,7 +25,7 @@
 namespace OHOS::AVSession {
 class SessionStack : public SessionContainer {
 public:
-    void AddSession(pid_t pid, sptr<AVSessionItem>& item) override;
+    int32_t AddSession(pid_t pid, sptr<AVSessionItem>& item) override;
 
     sptr<AVSessionItem> RemoveSession(pid_t pid) override;
 

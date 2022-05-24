@@ -71,6 +71,10 @@ public:
 private:
     int32_t AllocSessionId();
 
+    std::mutex sessionIdsLock_;
+    std::list<int32_t> sessionIds_;
+    int32_t sessionSeqNum_ {};
+
     std::mutex controllersLock_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
 

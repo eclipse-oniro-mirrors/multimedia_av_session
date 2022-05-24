@@ -16,17 +16,46 @@
 #ifndef OHOS_AVSESSION_DESCRIPTOR_H
 #define OHOS_AVSESSION_DESCRIPTOR_H
 
-namespace OHOS::AVSession {
-enum {
-    SESSION_TYPE_AUDIO,
-    SESSION_TYPE_VIDEO
-};
+#include "parcel.h"
 
+namespace OHOS::AVSession {
 struct AVSessionDescriptor {
+    enum {
+        SESSION_TYPE_AUDIO,
+        SESSION_TYPE_VIDEO
+    };
+
+    bool WriteToParcel(Parcel& out) const
+    {
+        return out.WriteInt32(sessionId_) &&
+            out.WriteInt32(sessionType_) &&
+            out.WriteString(sessionTag_) &&
+            out.WriteString(bundleName_) &&
+            out.WriteString(abilityName_) &&
+            out.WriteBool(isActive_) &&
+            out.WriteBool(isTopSession_) &&
+            out.WriteBool(isRemote_) &&
+            out.WriteString(remoteDeviceId_);
+    }
+
+    bool ReadFromParcel(Parcel &in)
+    {
+        return in.ReadInt32(sessionId_) &&
+            in.ReadInt32(sessionType_) &&
+            in.ReadString(sessionTag_) &&
+            in.ReadString(bundleName_) &&
+            in.ReadString(abilityName_) &&
+            in.ReadBool(isActive_) &&
+            in.ReadBool(isTopSession_) &&
+            in.ReadBool(isRemote_) &&
+            in.ReadString(remoteDeviceId_);
+    }
+
     int32_t sessionId_;
-    int32_t sessionType_; // audio/video
+    int32_t sessionType_;
     std::string sessionTag_;
     std::string bundleName_;
+    std::string abilityName_;
     bool isActive_;
     bool isTopSession_;
     bool isRemote_;
