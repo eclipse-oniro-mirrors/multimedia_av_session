@@ -15,31 +15,51 @@
 
 #include "session_stack.h"
 #include "avsession_log.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
-void SessionStack::AddSession(pid_t pid, sptr<AVSessionItem>& item)
+int32_t SessionStack::AddSession(pid_t pid, sptr<AVSessionItem>& item)
 {
-    {
-        std::lock_guard<std::mutex> lockGuard(lock_);
-        sessions_[pid] = item;
-        stack_.push_front(item);
+    std::lock_guard lockGuard(lock_);
+    if (sessions_.size() > SessionContainer::SESSION_NUM_MAX) {
+        SLOGE("session number exceed max");
+        return ERR_SESSION_EXCEED_MAX;
     }
+    sessions_[pid] = item;
+    stack_.push_front(item);
+    return AVSESSION_SUCCESS;
 }
 
 sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid)
 {
-    sptr<AVSessionItem> pAVSessionItem = nullptr;
-    return pAVSessionItem;
+    std::lock_guard lockGuard(lock_);
+    auto it = sessions_.find(pid);
+    if (it == sessions_.end()) {
+        return nullptr;
+    }
+    auto result = it->second;
+    sessions_.erase(it);
+    stack_.remove(result);
+    return result;
 }
 
 sptr<AVSessionItem> SessionStack::GetSession(pid_t pid)
 {
-    return nullptr; // sessions_.at(pid);
+    std::lock_guard lockGuard(lock_);
+    auto it = sessions_.find(pid);
+    if (it == sessions_.end()) {
+        return nullptr;
+    }
+    return it->second;
 }
 
 std::vector<sptr<AVSessionItem>> SessionStack::GetAllSessions()
 {
-    std::vector<sptr<AVSessionItem>> avSessions;
-    return avSessions;
+    std::lock_guard lockGuard(lock_);
+    std::vector<sptr<AVSessionItem>> result;
+    for (const auto& session : stack_) {
+        result.push_back(session);
+    }
+    return result;
 }
 } // namespace OHOS::AVSession

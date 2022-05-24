@@ -19,23 +19,12 @@
 #include <string>
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avsession_descriptor.h"
+#include "avvolume_info.h"
 #include "key_event.h"
 
 namespace OHOS::AVSession {
 using DeathCallback = std::function<void()>;
-
-struct AVSessionDescriptor {
-    int32_t sessionId = -1;
-    std::string tag;
-    std::string bundleName;
-    bool active {};
-};
-
-struct AVVolumeInfo {
-    int32_t currentVolume_;
-    int32_t maxVolume_;
-    int32_t volumeType_;
-};
 
 class SessionListener {
 public:

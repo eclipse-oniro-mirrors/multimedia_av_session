@@ -16,14 +16,27 @@
 #ifndef OHOS_AVVOLUME_INFO_H
 #define OHOS_AVVOLUME_INFO_H
 
-namespace OHOS::AVSession {
-enum {
-    VOLUME_TYPE_ABSOLUTE,
-    VOLUME_TYPE_RELATIVE,
-    VOLUME_TYPE_FIXED
-};
+#include "parcel.h"
 
+namespace OHOS::AVSession {
 struct AVVolumeInfo {
+public:
+    enum {
+        VOLUME_TYPE_ABSOLUTE,
+        VOLUME_TYPE_RELATIVE,
+        VOLUME_TYPE_FIXED
+    };
+
+    bool WriteToParcel(Parcel& out) const
+    {
+        return out.WriteInt32(currentVolume_) && out.WriteInt32(maxVolume_) && out.WriteInt32(volumeType);
+    }
+
+    bool ReadFromParcel(Parcel& in)
+    {
+        return in.ReadInt32(currentVolume_) && in.ReadInt32(maxVolume_) && in.ReadInt32(volumeType);
+    }
+
     int32_t currentVolume_;
     int32_t maxVolume_;
     int32_t volumeType;

@@ -18,25 +18,20 @@
 #include "avcontroller_item.h"
 
 namespace OHOS::AVSession {
-AVSessionItem::AVSessionItem(const std::string& tag, int32_t id)
-    : tag_(tag), sessionId_(id)
-{
-    SLOGD("construct");
-}
-
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
-    : tag_(descriptor.tag), sessionId_(descriptor.sessionId)
+    : descriptor_()
 {
+    SLOGD("constructor id=%{public}d", descriptor_.sessionId_);
 }
 
 AVSessionItem::~AVSessionItem()
 {
-    SLOGD("destroy");
+    SLOGD("destroy id=%{public}d", descriptor_.sessionId_);
 }
 
 int32_t AVSessionItem::GetSessionId()
 {
-    return sessionId_;
+    return descriptor_.sessionId_;
 }
 
 int32_t AVSessionItem::RegisterCallbackInner(sptr<IRemoteObject> &callback)
@@ -154,13 +149,13 @@ void AVSessionItem::SetUid(uid_t uid)
     uid_ = uid;
 }
 
-pid_t AVSessionItem::GtePid()
+pid_t AVSessionItem::GetPid()
 {
-    return 0;
+    return pid_;
 }
 
 uid_t  AVSessionItem::GetUid()
 {
-    return 0;
+    return uid_;
 }
 } // namespace OHOS::AVSession

@@ -25,8 +25,6 @@ namespace OHOS::AVSession {
 class AVControllerItem;
 class AVSessionItem : public AVSessionStub {
 public:
-    AVSessionItem(const std::string& tag, int32_t id);
-
     explicit AVSessionItem(const AVSessionDescriptor& descriptor);
 
     ~AVSessionItem() override;
@@ -77,7 +75,7 @@ public:
 
     void SetUid(uid_t uid);
 
-    pid_t GtePid();
+    pid_t GetPid();
 
     uid_t GetUid();
 
@@ -89,15 +87,12 @@ private:
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
-    pid_t pid_;
-    uid_t uid_;
+    pid_t pid_ {};
+    uid_t uid_ {};
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
     std::vector<std::string> supportedCmd_;
     sptr<AVSessionCallbackProxy> callback_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;
-
-    std::string tag_;
-    int32_t sessionId_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H
