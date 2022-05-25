@@ -22,10 +22,9 @@
 #include "avsession_item.h"
 
 namespace OHOS::AVSession {
-class AVSessionService;
 class AVControllerItem : public AVSessionControllerStub {
 public:
-    AVControllerItem(AVSessionService* service_, pid_t pid, sptr<AVSessionItem> &session);
+    AVControllerItem(pid_t pid, sptr<AVSessionItem> &session);
 
     ~AVControllerItem() override;
 
@@ -57,7 +56,7 @@ public:
 
     void HandleVolumeInfoChange(const AVVolumeInfo &info);
 
-    pid_t GetPid();
+    pid_t GetPid() const;
 
     void ClearSession();
 
@@ -65,15 +64,17 @@ public:
 
     void BeKilled();
 
+    void SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback);
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVControllerCallback>& callback) override;
 
 private:
-    AVSessionService* service_;
     pid_t pid_;
     sptr<AVSessionItem> session_;
     sptr<IAVControllerCallback> callback_;
     AVMetaData::MetaMaskType metaMask_;
+    std::function<void(AVControllerItem&)> serviceCallback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_ITEM_H

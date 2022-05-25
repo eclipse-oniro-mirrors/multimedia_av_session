@@ -20,8 +20,8 @@
 #include "avsession_errors.h"
 
 namespace OHOS::AVSession {
-AVSessionItem::AVSessionItem(AVSessionService* service, const AVSessionDescriptor& descriptor)
-    : service_(service), descriptor_()
+AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
+    : descriptor_()
 {
     SLOGD("constructor id=%{public}d", descriptor_.sessionId_);
 }
@@ -47,8 +47,8 @@ int32_t AVSessionItem::Release()
     for (const auto& [pid, controller] : controllers_) {
         controller->HandleSessionRelease(descriptor_);
     }
-    if (service_) {
-        service_->SessionRelease(*this);
+    if (serviceCallback_) {
+        serviceCallback_(*this);
     }
     return AVSESSION_SUCCESS;
 }
@@ -157,7 +157,7 @@ void AVSessionItem::SetUid(uid_t uid)
     uid_ = uid;
 }
 
-pid_t AVSessionItem::GetPid()
+pid_t AVSessionItem::GetPid() const
 {
     return pid_;
 }
@@ -172,5 +172,10 @@ void AVSessionItem::BeKilled()
     for (const auto& [pid, controller] : controllers_) {
         controller->HandleSessionRelease(descriptor_);
     }
+}
+
+void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem &)> &callback)
+{
+    serviceCallback_ = callback;
 }
 } // namespace OHOS::AVSession

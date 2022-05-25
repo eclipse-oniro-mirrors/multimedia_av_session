@@ -23,10 +23,9 @@
 
 namespace OHOS::AVSession {
 class AVControllerItem;
-class AVSessionService;
 class AVSessionItem : public AVSessionStub {
 public:
-    explicit AVSessionItem(AVSessionService* service, const AVSessionDescriptor& descriptor);
+    explicit AVSessionItem(const AVSessionDescriptor& descriptor);
 
     ~AVSessionItem() override;
 
@@ -76,17 +75,18 @@ public:
 
     void SetUid(uid_t uid);
 
-    pid_t GetPid();
+    pid_t GetPid() const;
 
     uid_t GetUid();
 
     void BeKilled();
 
+    void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);
+
 protected:
     int32_t RegisterCallbackInner(sptr<IRemoteObject>& callback) override;
 
 private:
-    AVSessionService* service_ {};
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
@@ -97,6 +97,7 @@ private:
     std::vector<std::string> supportedCmd_;
     sptr<AVSessionCallbackProxy> callback_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;
+    std::function<void(AVSessionItem&)> serviceCallback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H

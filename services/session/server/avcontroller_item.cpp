@@ -15,13 +15,12 @@
 
 #include "avcontroller_item.h"
 
-#include "avsession_service.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-AVControllerItem::AVControllerItem(AVSessionService* service, pid_t pid, sptr<AVSessionItem> &session)
-    : service_(service), pid_(pid), session_(session)
+AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
+    : pid_(pid), session_(session)
 {
     SLOGD("construct");
 }
@@ -90,8 +89,8 @@ int32_t AVControllerItem::Release()
         session_->RemoveController(pid_);
         session_.clear();
     }
-    if (service_) {
-        service_->ControllerRelease(*this);
+    if (serviceCallback_) {
+        serviceCallback_(*this);
     }
     return AVSESSION_SUCCESS;
 }
@@ -116,7 +115,7 @@ void AVControllerItem::HandleVolumeInfoChange(const AVVolumeInfo &info)
     callback_->OnVolumeInfoChange(info);
 }
 
-pid_t AVControllerItem::GetPid()
+pid_t AVControllerItem::GetPid() const
 {
     return pid_;
 }
@@ -140,5 +139,10 @@ void AVControllerItem::BeKilled()
         session_->RemoveController(pid_);
         session_.clear();
     }
+}
+
+void AVControllerItem::SetServiceCallbackForRelease(const std::function<void(AVControllerItem &)> &callback)
+{
+    serviceCallback_ = callback;
 }
 } // OHOS::AVSession

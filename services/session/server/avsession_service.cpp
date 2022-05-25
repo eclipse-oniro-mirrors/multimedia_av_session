@@ -125,21 +125,22 @@ sptr<IRemoteObject>  AVSessionService::CreateSessionInner(const std::string& tag
     descriptor.bundleName_ = bundleName;
     descriptor.abilityName_ = abilityName;
 
-    sptr<AVSessionItem> session = new(std::nothrow) AVSessionItem(this, descriptor);
-    if (session == nullptr) {
+    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor);
+    if (result == nullptr) {
         return nullptr;
     }
-    session->SetPid(pid);
-    session->SetUid(GetCallingUid());
+    result->SetPid(pid);
+    result->SetUid(GetCallingUid());
+    result->SetServiceCallbackForRelease([this](AVSessionItem& session) { SessionRelease(session); });
 
-    if (sessionContainer_->AddSession(pid, session) != AVSESSION_SUCCESS) {
+    if (sessionContainer_->AddSession(pid, result) != AVSESSION_SUCCESS) {
         SLOGE("session num exceed max");
         return nullptr;
     }
 
     NotifySessionCreate(descriptor);
     SLOGI("success");
-    return session;
+    return result;
 }
 
 sptr<IRemoteObject> AVSessionService::GetSessionInner()
@@ -180,16 +181,17 @@ sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
         return nullptr;
     }
 
-    sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(this, pid, session);
+    sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(pid, session);
     if (result == nullptr) {
         SLOGE("malloc controller failed");
         return nullptr;
     }
+    result->SetServiceCallbackForRelease([this](AVControllerItem& controller) { ControllerRelease(controller); });
 
     if (controllers_.find(pid) != controllers_.end()) {
         controllers_[pid].push_back(result);
     } else {
-        std::list<sptr<AVControllerItem>> list({result});
+        std::list<sptr<AVControllerItem>> list({ result });
         controllers_[pid] = std::move(list);
     }
     session->AddController(pid, result);
