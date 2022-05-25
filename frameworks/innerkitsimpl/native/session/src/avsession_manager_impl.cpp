@@ -101,19 +101,22 @@ std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetAllSessionDescriptors(
     return service ? service->GetAllSessionDescriptors() : std::vector<AVSessionDescriptor>();
 }
 
-std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(int32_t sessionld)
+std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(int32_t sessionId)
 {
-    return nullptr;
+    auto service = GetService();
+    return service ? service->CreateController(sessionId) : nullptr;
 }
 
-std::shared_ptr<AVSessionController> AVSessionManagerImpl::GetController(int32_t sessionld)
+std::shared_ptr<AVSessionController> AVSessionManagerImpl::GetController(int32_t sessionId)
 {
-    return nullptr;
+    auto service = GetService();
+    return service ? service->GetController(sessionId) : nullptr;
 }
 
 std::vector<std::shared_ptr<AVSessionController>> AVSessionManagerImpl::GetAllControllers()
 {
-    return {};
+    auto service = GetService();
+    return service ? service->GetAllControllers() : std::vector<std::shared_ptr<AVSessionController>>();
 }
 
 int32_t AVSessionManagerImpl::RegisterSessionListener(std::shared_ptr<SessionListener> &listener)

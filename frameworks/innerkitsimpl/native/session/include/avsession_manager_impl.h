@@ -42,9 +42,9 @@ public:
 
     std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
 
-    std::shared_ptr<AVSessionController> CreateController(int32_t sessionld);
+    std::shared_ptr<AVSessionController> CreateController(int32_t sessionId);
 
-    std::shared_ptr<AVSessionController> GetController(int32_t sessionld);
+    std::shared_ptr<AVSessionController> GetController(int32_t sessionId);
 
     std::vector<std::shared_ptr<AVSessionController>> GetAllControllers();
 
