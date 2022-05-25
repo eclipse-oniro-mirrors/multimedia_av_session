@@ -30,7 +30,7 @@ std::shared_ptr<AVSession> AVSessionManager::CreateSession(const std::string &ta
 
 std::shared_ptr<AVSession> AVSessionManager::GetSession()
 {
-    return nullptr;
+    return AVSessionManagerImpl::GetInstance().GetSession();
 }
 
 std::vector<AVSessionDescriptor> AVSessionManager::GetAllSessionDescriptors()

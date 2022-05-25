@@ -62,8 +62,6 @@ public:
 
     bool HasSession(int32_t sessionId);
 
-    void BeKilled();
-
     void SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback);
 
 protected:

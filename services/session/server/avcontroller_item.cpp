@@ -133,14 +133,6 @@ bool AVControllerItem::HasSession(int32_t sessionId)
     return false;
 }
 
-void AVControllerItem::BeKilled()
-{
-    if (session_) {
-        session_->RemoveController(pid_);
-        session_.clear();
-    }
-}
-
 void AVControllerItem::SetServiceCallbackForRelease(const std::function<void(AVControllerItem &)> &callback)
 {
     serviceCallback_ = callback;
