@@ -14,6 +14,8 @@
  */
 
 #include "avsession_service.h"
+
+#include <utility>
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "iservice_registry.h"
@@ -104,6 +106,27 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
     }
 }
 
+sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, int32_t type,
+                                                       const std::string &bundleName, const std::string &abilityName)
+{
+    SLOGI("%{public}s", tag.c_str());
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = AllocSessionId();
+    descriptor.sessionTag_ = tag;
+    descriptor.sessionType_ = type;
+    descriptor.bundleName_ = bundleName;
+    descriptor.abilityName_ = abilityName;
+
+    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor);
+    if (result == nullptr) {
+        return nullptr;
+    }
+    result->SetPid(GetCallingPid());
+    result->SetUid(GetCallingUid());
+    result->SetServiceCallbackForRelease([this](AVSessionItem& session) { SessionRelease(session); });
+    return result;
+}
+
 sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
     const std::string& bundleName, const std::string& abilityName)
 {
@@ -118,34 +141,29 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
         return nullptr;
     }
 
-    AVSessionDescriptor descriptor;
-    descriptor.sessionId_ = AllocSessionId();
-    descriptor.sessionTag_ = tag;
-    descriptor.sessionType_ = type;
-    descriptor.bundleName_ = bundleName;
-    descriptor.abilityName_ = abilityName;
-
-    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor);
+    auto result = CreateNewSession(tag, type, bundleName, abilityName);
     if (result == nullptr) {
+        SLOGE("create new session failed");
         return nullptr;
     }
-    result->SetPid(pid);
-    result->SetUid(GetCallingUid());
-    result->SetServiceCallbackForRelease([this](AVSessionItem& session) { SessionRelease(session); });
-
     if (sessionContainer_->AddSession(pid, result) != AVSESSION_SUCCESS) {
         SLOGE("session num exceed max");
         return nullptr;
     }
 
-    NotifySessionCreate(descriptor);
+    NotifySessionCreate(result->GetDescriptor());
     SLOGI("success");
     return result;
 }
 
 sptr<IRemoteObject> AVSessionService::GetSessionInner()
 {
-    return {};
+    if (sessionContainer_ == nullptr) {
+        return nullptr;
+    }
+
+    std::lock_guard lockGuard(lock_);
+    return sessionContainer_->GetSession(GetCallingPid());
 }
 
 std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
@@ -159,6 +177,19 @@ std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
     for (const auto& session: sessionContainer_->GetAllSessions()) {
         result.push_back(session->GetDescriptor());
     }
+    return result;
+}
+
+sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem> &session)
+{
+    SLOGI("pid=%{public}d sessionId=%{public}d", pid, session->GetSessionId());
+    sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(pid, session);
+    if (result == nullptr) {
+        SLOGE("malloc controller failed");
+        return nullptr;
+    }
+    result->SetServiceCallbackForRelease([this](AVControllerItem& controller) { ControllerRelease(controller); });
+    session->AddController(pid, result);
     return result;
 }
 
@@ -177,40 +208,71 @@ sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
 
     auto session = sessionContainer_->GetSessionById(sessionId);
     if (session == nullptr) {
-        SLOGE("not find session %{public}d", sessionId);
+        SLOGE("no session id %{public}d", sessionId);
         return nullptr;
     }
 
-    sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(pid, session);
+    auto result = CreateNewControllerForSession(pid, session);
     if (result == nullptr) {
-        SLOGE("malloc controller failed");
+        SLOGE("create new controller failed");
         return nullptr;
     }
-    result->SetServiceCallbackForRelease([this](AVControllerItem& controller) { ControllerRelease(controller); });
+
     controllers_[pid].push_back(result);
-    session->AddController(pid, result);
     SLOGI("success");
     return result;
 }
 
 sptr<IRemoteObject> AVSessionService::GetControllerInner(int32_t sessionId)
 {
+    std::lock_guard lockGuard(lock_);
+    auto it = controllers_.find(GetCallingPid());
+    if (it == controllers_.end()) {
+        SLOGE("not find");
+        return nullptr;
+    }
+    for (const auto& controller : it->second) {
+        if (controller->HasSession(sessionId)) {
+            return controller;
+        }
+    }
+    SLOGE("not find");
     return nullptr;
 }
 
 std::vector<sptr<IRemoteObject>> AVSessionService::GetAllControllersInner()
 {
-    return {};
+    std::vector<sptr<IRemoteObject>> result;
+    std::lock_guard lockGuard(lock_);
+    for (const auto& [pid, list]: controllers_) {
+        for (const auto& controller : list) {
+            result.emplace_back(controller);
+        }
+    }
+    return result;
+}
+
+void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener> &listener)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    sessionListeners_[pid] = listener;
+}
+
+void AVSessionService::RemoveSessionListener(pid_t pid)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    sessionListeners_.erase(pid);
 }
 
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    return 0;
+    AddSessionListener(GetCallingPid(), listener);
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionService::SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent)
 {
-    return 0;
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionService::SetSystemMediaVolume(int32_t volume)
@@ -218,37 +280,59 @@ int32_t AVSessionService::SetSystemMediaVolume(int32_t volume)
     return 0;
 }
 
+void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath> &observer)
+{
+    std::lock_guard lockGuard(clientDeathObserversLock_);
+    clientDeathObservers_[pid] = observer;
+}
+
+void AVSessionService::RemoveClientDeathObserver(pid_t pid)
+{
+    std::lock_guard lockGuard(clientDeathObserversLock_);
+    clientDeathObservers_.erase(pid);
+}
+
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
-    return 0;
+    auto pid = GetCallingPid();
+    auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
+    if (recipient == nullptr) {
+        SLOGE("malloc failed");
+        return AVSESSION_ERROR;
+    }
+
+    if (!observer->AsObject()->AddDeathRecipient(recipient)) {
+        SLOGE("add death recipient for %{public}d failed", pid);
+        return AVSESSION_ERROR;
+    }
+
+    AddClientDeathObserver(pid, observer);
+    return AVSESSION_SUCCESS;
 }
 
 void AVSessionService::OnClientDied(pid_t pid)
 {
+    SLOGI("client die %{public}d", pid);
+    RemoveSessionListener(pid);
+    RemoveClientDeathObserver(pid);
     if (!sessionContainer_) {
         return;
-    }
-    {
-        std::lock_guard lockGuard(sessionListenersLock_);
-        sessionListeners_.erase(pid);
     }
 
     std::lock_guard lockGuard(lock_);
     auto session = sessionContainer_->RemoveSession(pid);
-    std::list<sptr<AVControllerItem>> controllers;
-    auto it = controllers_.find(pid);
-    if (it != controllers_.end()) {
-        controllers = std::move(it->second);
-        controllers_.erase(it);
+    if (session != nullptr) {
+        session->Release();
     }
 
-    if (session != nullptr) {
-        NotifySessionRelease(session->GetDescriptor());
-        session->BeKilled();
-    }
-    if (!controllers.empty()) {
-        for (const auto& controller : controllers) {
-            controller->BeKilled();
+    auto it = controllers_.find(pid);
+    if (it != controllers_.end()) {
+        auto controllers = std::move(it->second);
+        controllers_.erase(it);
+        if (!controllers.empty()) {
+            for (const auto& controller : controllers) {
+                controller->Release();
+            }
         }
     }
 }
@@ -268,6 +352,19 @@ void AVSessionService::ControllerRelease(AVControllerItem &controller)
     list.remove(&controller);
     if (list.empty()) {
         controllers_.erase(pid);
+    }
+}
+
+ClientDeathRecipient::ClientDeathRecipient(const std::function<void()>& callback)
+    : callback_(callback)
+{
+    SLOGD("construct");
+}
+
+void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &object)
+{
+    if (callback_) {
+        callback_();
     }
 }
 } // namespace OHOS::AVSession

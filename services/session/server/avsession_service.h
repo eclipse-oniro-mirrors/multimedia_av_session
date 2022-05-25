@@ -80,6 +80,17 @@ private:
     void NotifySessionCreate(const AVSessionDescriptor& descriptor);
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
 
+    void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
+    void RemoveClientDeathObserver(pid_t pid);
+
+    void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener);
+    void RemoveSessionListener(pid_t pid);
+
+    sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type,
+                                         const std::string& bundleName, const std::string& abilityName);
+
+    sptr<AVControllerItem> CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session);
+
     std::recursive_mutex sessionIdsLock_;
     std::list<int32_t> sessionIds_;
     int32_t sessionSeqNum_ {};
@@ -93,6 +104,16 @@ private:
 
     std::recursive_mutex sessionListenersLock_;
     std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
+};
+
+class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    explicit ClientDeathRecipient(const std::function<void()>& callback);
+
+    void OnRemoteDied(const wptr<IRemoteObject> &object) override;
+
+private:
+    std::function<void()> callback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

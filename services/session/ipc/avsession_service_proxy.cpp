@@ -77,7 +77,20 @@ std::vector<AVSessionDescriptor> AVSessionServiceProxy::GetAllSessionDescriptors
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS, data, reply, option) == 0,
                              {}, "send request failed");
-    return {};
+
+    uint32_t size {};
+    if (!reply.ReadUint32(size)) {
+        SLOGE("read vector size failed");
+        return {};
+    }
+
+    std::vector<AVSessionDescriptor> result(size);
+    for (auto& descriptor : result) {
+        if (!descriptor.ReadFromParcel(reply)) {
+            return {};
+        }
+    }
+    return result;
 }
 
 std::shared_ptr<AVSessionController> AVSessionServiceProxy::CreateController(int32_t sessionId)

@@ -79,8 +79,6 @@ public:
 
     uid_t GetUid();
 
-    void BeKilled();
-
     void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);
 
 protected:

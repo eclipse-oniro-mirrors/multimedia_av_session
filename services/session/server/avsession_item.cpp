@@ -167,13 +167,6 @@ uid_t  AVSessionItem::GetUid()
     return uid_;
 }
 
-void AVSessionItem::BeKilled()
-{
-    for (const auto& [pid, controller] : controllers_) {
-        controller->HandleSessionRelease(descriptor_);
-    }
-}
-
 void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem &)> &callback)
 {
     serviceCallback_ = callback;

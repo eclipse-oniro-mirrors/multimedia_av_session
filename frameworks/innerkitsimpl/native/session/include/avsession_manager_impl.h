@@ -57,28 +57,29 @@ public:
     int32_t SetSystemMediaVolume(int32_t volume);
 
 private:
-    class DeathRecipientImpl : public IRemoteObject::DeathRecipient {
-    public:
-        explicit DeathRecipientImpl(const DeathCallback& callback);
-        ~DeathRecipientImpl() override;
-        void OnRemoteDied(const wptr<IRemoteObject> &object) override;
-    private:
-        const DeathCallback callback_;
-    };
-
     AVSessionManagerImpl();
 
     sptr<AVSessionServiceProxy> GetService();
 
     void OnServiceDied();
 
-    int32_t RegesterClientDeathObserver();
+    void RegisterClientDeathObserver();
 
     std::mutex lock_;
     sptr<AVSessionServiceProxy> service_;
     sptr<ISessionListener> listener_;
     sptr<ClientDeathStub> clientDeath_;
     DeathCallback deathCallback_;
+};
+
+class ServiceDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    explicit ServiceDeathRecipient(const std::function<void()>& callback);
+
+    void OnRemoteDied(const wptr<IRemoteObject> &object) override;
+
+private:
+    std::function<void()> callback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_IMPL_H

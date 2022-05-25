@@ -52,14 +52,17 @@ int AVSessionServiceStub::HandleCreateSessionInner(MessageParcel &data, MessageP
 
 int AVSessionServiceStub::HandleGetSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto session = GetSessionInner();
-    reply.WriteRemoteObject(session);
+    reply.WriteRemoteObject(GetSessionInner());
     return ERR_NONE;
 }
 
 int AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel &data, MessageParcel &reply)
 {
-    auto sessionDescriptors = GetAllSessionDescriptors();
+    auto descriptors = GetAllSessionDescriptors();
+    reply.WriteUint32(descriptors.size());
+    for (const auto& descriptor : descriptors) {
+        descriptor.WriteToParcel(reply);
+    }
     return ERR_NONE;
 }
 

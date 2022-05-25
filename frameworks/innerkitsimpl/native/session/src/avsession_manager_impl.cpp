@@ -14,6 +14,8 @@
  */
 
 #include "avsession_manager_impl.h"
+
+#include <utility>
 #include "iservice_registry.h"
 #include "ipc_skeleton.h"
 #include "system_ability_definition.h"
@@ -22,25 +24,6 @@
 #include "session_listener_client.h"
 
 namespace OHOS::AVSession {
-AVSessionManagerImpl::DeathRecipientImpl::DeathRecipientImpl(const DeathCallback& callback)
-    : callback_(callback)
-{
-    SLOGI("construct");
-}
-
-AVSessionManagerImpl::DeathRecipientImpl::~DeathRecipientImpl()
-{
-    SLOGI("destroy");
-}
-
-void AVSessionManagerImpl::DeathRecipientImpl::OnRemoteDied(const wptr<IRemoteObject> &object)
-{
-    SLOGI("enter");
-    if (callback_) {
-        callback_();
-    }
-}
-
 AVSessionManagerImpl& AVSessionManagerImpl::GetInstance()
 {
     static AVSessionManagerImpl instance;
@@ -71,13 +54,14 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
     }
     service_ = iface_cast<AVSessionServiceProxy>(object);
     if (service_ != nullptr) {
-        auto recipient = new(std::nothrow) DeathRecipientImpl([this] { OnServiceDied(); });
+        auto recipient = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDied(); });
         if (recipient != nullptr) {
             sptr<IAVSessionService> serviceBase = service_;
             serviceBase->AsObject()->AddDeathRecipient(recipient);
         }
+        SLOGD("get avsession service success");
+        RegisterClientDeathObserver();
     }
-    SLOGD("get avsession service success");
     return service_;
 }
 
@@ -88,8 +72,9 @@ void AVSessionManagerImpl::OnServiceDied()
     auto callback = deathCallback_;
     {
         std::lock_guard<std::mutex> lockGuard(lock_);
-        service_ = nullptr;
-        listener_ = nullptr;
+        service_.clear();
+        listener_.clear();
+        clientDeath_.clear();
         deathCallback_ = nullptr;
     }
     if (callback) {
@@ -106,12 +91,14 @@ std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string
 
 std::shared_ptr<AVSession> AVSessionManagerImpl::GetSession()
 {
-    return nullptr;
+    auto service = GetService();
+    return service ? service->GetSession() : nullptr;
 }
 
 std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetAllSessionDescriptors()
 {
-    return {};
+    auto service = GetService();
+    return service ? service->GetAllSessionDescriptors() : std::vector<AVSessionDescriptor>();
 }
 
 std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(int32_t sessionld)
@@ -167,8 +154,30 @@ int32_t AVSessionManagerImpl::SetSystemMediaVolume(int32_t volume)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionManagerImpl::RegesterClientDeathObserver()
+void AVSessionManagerImpl::RegisterClientDeathObserver()
 {
-    return AVSESSION_SUCCESS;
+    clientDeath_ = new(std::nothrow) ClientDeathStub();
+    if (clientDeath_ == nullptr) {
+        SLOGE("malloc failed");
+        return;
+    }
+    if (service_->RegisterClientDeathObserver(clientDeath_) != AVSESSION_SUCCESS) {
+        SLOGE("register failed");
+        return;
+    }
+    SLOGI("success");
+}
+
+ServiceDeathRecipient::ServiceDeathRecipient(const std::function<void()>& callback)
+    : callback_(callback)
+{
+    SLOGD("construct");
+}
+
+void ServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &object)
+{
+    if (callback_) {
+        callback_();
+    }
 }
 } // namespace OHOS::AVSession
