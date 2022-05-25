@@ -85,6 +85,13 @@ int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
 int32_t AVControllerItem::Release()
 {
     callback_ = nullptr;
+    if (session_) {
+        session_->RemoveController(pid_);
+        session_.clear();
+    }
+    if (serviceCallback_) {
+        serviceCallback_(*this);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -108,7 +115,7 @@ void AVControllerItem::HandleVolumeInfoChange(const AVVolumeInfo &info)
     callback_->OnVolumeInfoChange(info);
 }
 
-pid_t AVControllerItem::GetPid()
+pid_t AVControllerItem::GetPid() const
 {
     return pid_;
 }
@@ -116,5 +123,26 @@ pid_t AVControllerItem::GetPid()
 void AVControllerItem::ClearSession()
 {
     session_ = nullptr;
+}
+
+bool AVControllerItem::HasSession(int32_t sessionId)
+{
+    if (session_ != nullptr) {
+        return session_->GetSessionId() == sessionId;
+    }
+    return false;
+}
+
+void AVControllerItem::BeKilled()
+{
+    if (session_) {
+        session_->RemoveController(pid_);
+        session_.clear();
+    }
+}
+
+void AVControllerItem::SetServiceCallbackForRelease(const std::function<void(AVControllerItem &)> &callback)
+{
+    serviceCallback_ = callback;
 }
 } // OHOS::AVSession

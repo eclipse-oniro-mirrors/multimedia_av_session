@@ -14,8 +14,10 @@
  */
 
 #include "avsession_item.h"
-#include "avsession_log.h"
+#include "avsession_service.h"
 #include "avcontroller_item.h"
+#include "avsession_log.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
@@ -42,7 +44,13 @@ int32_t AVSessionItem::RegisterCallbackInner(sptr<IRemoteObject> &callback)
 int32_t AVSessionItem::Release()
 {
     SLOGD("enter");
-    return 0;
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleSessionRelease(descriptor_);
+    }
+    if (serviceCallback_) {
+        serviceCallback_(*this);
+    }
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
@@ -149,7 +157,7 @@ void AVSessionItem::SetUid(uid_t uid)
     uid_ = uid;
 }
 
-pid_t AVSessionItem::GetPid()
+pid_t AVSessionItem::GetPid() const
 {
     return pid_;
 }
@@ -157,5 +165,17 @@ pid_t AVSessionItem::GetPid()
 uid_t  AVSessionItem::GetUid()
 {
     return uid_;
+}
+
+void AVSessionItem::BeKilled()
+{
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleSessionRelease(descriptor_);
+    }
+}
+
+void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem &)> &callback)
+{
+    serviceCallback_ = callback;
 }
 } // namespace OHOS::AVSession

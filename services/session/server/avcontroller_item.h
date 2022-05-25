@@ -56,9 +56,15 @@ public:
 
     void HandleVolumeInfoChange(const AVVolumeInfo &info);
 
-    pid_t GetPid();
+    pid_t GetPid() const;
 
     void ClearSession();
+
+    bool HasSession(int32_t sessionId);
+
+    void BeKilled();
+
+    void SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback);
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVControllerCallback>& callback) override;
@@ -68,6 +74,7 @@ private:
     sptr<AVSessionItem> session_;
     sptr<IAVControllerCallback> callback_;
     AVMetaData::MetaMaskType metaMask_;
+    std::function<void(AVControllerItem&)> serviceCallback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_ITEM_H

@@ -68,22 +68,30 @@ public:
 
     void OnClientDied(pid_t pid);
 
+    void SessionRelease(AVSessionItem& session);
+
+    void ControllerRelease(AVControllerItem& controller);
+
 private:
     int32_t AllocSessionId();
 
-    std::mutex sessionIdsLock_;
+    sptr<AVControllerItem> GetPresentController(pid_t pid, int32_t sessionId);
+
+    void NotifySessionCreate(const AVSessionDescriptor& descriptor);
+    void NotifySessionRelease(const AVSessionDescriptor& descriptor);
+
+    std::recursive_mutex sessionIdsLock_;
     std::list<int32_t> sessionIds_;
     int32_t sessionSeqNum_ {};
 
-    std::mutex controllersLock_;
+    std::recursive_mutex lock_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
-
     SessionContainer* sessionContainer_ {};
 
-    std::mutex clientDeathObserversLock_;
+    std::recursive_mutex clientDeathObserversLock_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
 
-    std::mutex sessionListenersLock_;
+    std::recursive_mutex sessionListenersLock_;
     std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
 };
 } // namespace OHOS::AVSession

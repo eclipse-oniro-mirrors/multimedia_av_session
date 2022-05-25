@@ -29,6 +29,8 @@ public:
 
     virtual sptr<AVSessionItem> GetSession(pid_t pid) = 0;
 
+    virtual sptr<AVSessionItem> GetSessionById(int32_t sessionId) = 0;
+
     virtual std::vector<sptr<AVSessionItem>> GetAllSessions() = 0;
 
     virtual ~SessionContainer() = default;

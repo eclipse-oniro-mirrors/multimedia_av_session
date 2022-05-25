@@ -75,9 +75,13 @@ public:
 
     void SetUid(uid_t uid);
 
-    pid_t GetPid();
+    pid_t GetPid() const;
 
     uid_t GetUid();
+
+    void BeKilled();
+
+    void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);
 
 protected:
     int32_t RegisterCallbackInner(sptr<IRemoteObject>& callback) override;
@@ -93,6 +97,7 @@ private:
     std::vector<std::string> supportedCmd_;
     sptr<AVSessionCallbackProxy> callback_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;
+    std::function<void(AVSessionItem&)> serviceCallback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H
