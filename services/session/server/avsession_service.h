@@ -108,7 +108,7 @@ private:
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    explicit ClientDeathRecipient(std::function<void()> callback);
+    explicit ClientDeathRecipient(const std::function<void()>& callback);
 
     void OnRemoteDied(const wptr<IRemoteObject> &object) override;
 

@@ -168,8 +168,8 @@ void AVSessionManagerImpl::RegisterClientDeathObserver()
     SLOGI("success");
 }
 
-ServiceDeathRecipient::ServiceDeathRecipient(std::function<void()> callback)
-    : callback_(std::move(callback))
+ServiceDeathRecipient::ServiceDeathRecipient(const std::function<void()>& callback)
+    : callback_(callback)
 {
     SLOGD("construct");
 }

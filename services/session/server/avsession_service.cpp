@@ -355,8 +355,8 @@ void AVSessionService::ControllerRelease(AVControllerItem &controller)
     }
 }
 
-ClientDeathRecipient::ClientDeathRecipient(std::function<void()> callback)
-    : callback_(std::move(callback))
+ClientDeathRecipient::ClientDeathRecipient(const std::function<void()>& callback)
+    : callback_(callback)
 {
     SLOGD("construct");
 }
