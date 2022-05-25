@@ -79,7 +79,7 @@ std::vector<AVSessionDescriptor> AVSessionServiceProxy::GetAllSessionDescriptors
                              {}, "send request failed");
 
     uint32_t size {};
-    if (!reply.ReadUint32(size)) {
+    if (!reply.ReadUint32(size) || size == 0) {
         SLOGE("read vector size failed");
         return {};
     }
@@ -151,7 +151,17 @@ std::vector<sptr<IRemoteObject>> AVSessionServiceProxy::GetAllControllersInner()
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_GET_ALL_CONTROLLERS, data, reply, option) == 0,
                              {}, "send request failed");
-    return {};
+
+    uint32_t size {};
+    if (!reply.ReadUint32(size) || size == 0) {
+        SLOGE("read vector size failed");
+        return {};
+    }
+    std::vector<sptr<IRemoteObject>> result(size);
+    for (auto& controller : result) {
+        controller = reply.ReadRemoteObject();
+    }
+    return result;
 }
 
 int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListener>& listener)
@@ -181,6 +191,13 @@ int32_t AVSessionServiceProxy::SetSystemMediaVolume(int32_t volume)
 
 int32_t AVSessionServiceProxy::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
-    return AVSESSION_ERROR;
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(observer->AsObject()), AVSESSION_ERROR, "write observer failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_REGISTER_CLIENT_DEATH, data, reply, option) == 0,
+                             ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 } // namespace OHOS::AVSession

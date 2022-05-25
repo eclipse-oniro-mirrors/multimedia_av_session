@@ -68,20 +68,23 @@ int AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel &data, Me
 
 int AVSessionServiceStub::HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto controller = CreateControllerInner(data.ReadInt32());
-    reply.WriteRemoteObject(controller);
+    reply.WriteRemoteObject(CreateControllerInner(data.ReadInt32()));
     return ERR_NONE;
 }
 
 int AVSessionServiceStub::HandleGetControllerInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto controller = GetControllerInner(data.ReadInt32());
+    reply.WriteRemoteObject(GetControllerInner(data.ReadInt32()));
     return ERR_NONE;
 }
 
 int AVSessionServiceStub::HandleGetAllControllersInner(MessageParcel &data, MessageParcel &reply)
 {
     auto controllers = GetAllControllersInner();
+    reply.WriteUint32(controllers.size());
+    for (const auto& controller : controllers) {
+        reply.WriteRemoteObject(controller);
+    }
     return ERR_NONE;
 }
 
