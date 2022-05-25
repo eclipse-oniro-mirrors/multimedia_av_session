@@ -107,8 +107,7 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
 }
 
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, int32_t type,
-                                                       const std::string &bundleName, const std::string &abilityName,
-                                                       pid_t pid, uid_t uid)
+                                                       const std::string &bundleName, const std::string &abilityName)
 {
     SLOGI("%{public}s", tag.c_str());
     AVSessionDescriptor descriptor;
@@ -122,8 +121,8 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
     if (result == nullptr) {
         return nullptr;
     }
-    result->SetPid(pid);
-    result->SetUid(uid);
+    result->SetPid(GetCallingPid());
+    result->SetUid(GetCallingUid());
     result->SetServiceCallbackForRelease([this](AVSessionItem& session) { SessionRelease(session); });
     return result;
 }
@@ -142,7 +141,7 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
         return nullptr;
     }
 
-    auto result = CreateNewSession(tag, type, bundleName, abilityName, pid, GetCallingUid());
+    auto result = CreateNewSession(tag, type, bundleName, abilityName);
     if (result == nullptr) {
         SLOGE("create new session failed");
         return nullptr;

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include "avsession_service_proxy.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"

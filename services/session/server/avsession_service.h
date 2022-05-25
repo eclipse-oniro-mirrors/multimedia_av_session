@@ -87,8 +87,7 @@ private:
     void RemoveSessionListener(pid_t pid);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type,
-                                         const std::string& bundleName, const std::string& abilityName,
-                                         pid_t pid, uid_t uid);
+                                         const std::string& bundleName, const std::string& abilityName);
 
     sptr<AVControllerItem> CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session);
 

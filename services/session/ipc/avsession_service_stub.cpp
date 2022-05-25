@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include "avsession_service_stub.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
