@@ -104,7 +104,7 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
     }
 }
 
-sptr<IRemoteObject>  AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
+sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
     const std::string& bundleName, const std::string& abilityName)
 {
     if (sessionContainer_ == nullptr) {
@@ -187,13 +187,7 @@ sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
         return nullptr;
     }
     result->SetServiceCallbackForRelease([this](AVControllerItem& controller) { ControllerRelease(controller); });
-
-    if (controllers_.find(pid) != controllers_.end()) {
-        controllers_[pid].push_back(result);
-    } else {
-        std::list<sptr<AVControllerItem>> list( {result} );
-        controllers_[pid] = std::move(list);
-    }
+    controllers_[pid].push_back(result);
     session->AddController(pid, result);
     SLOGI("success");
     return result;
