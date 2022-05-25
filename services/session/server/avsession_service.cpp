@@ -191,7 +191,7 @@ sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
     if (controllers_.find(pid) != controllers_.end()) {
         controllers_[pid].push_back(result);
     } else {
-        std::list<sptr<AVControllerItem>> list({ result });
+        std::list<sptr<AVControllerItem>> list( {result} );
         controllers_[pid] = std::move(list);
     }
     session->AddController(pid, result);
