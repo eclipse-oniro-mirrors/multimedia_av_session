@@ -31,10 +31,11 @@ public:
 
     sptr<AVSessionItem> GetSession(pid_t pid) override;
 
+    sptr<AVSessionItem> GetSessionById(int32_t sessionId) override;
+
     std::vector<sptr<AVSessionItem>> GetAllSessions() override;
 
 private:
-    std::mutex lock_;
     std::map<pid_t, sptr<AVSessionItem>> sessions_;
     std::list<sptr<AVSessionItem>> stack_;
 };

@@ -22,9 +22,10 @@
 #include "avsession_item.h"
 
 namespace OHOS::AVSession {
+class AVSessionService;
 class AVControllerItem : public AVSessionControllerStub {
 public:
-    AVControllerItem(pid_t pid, sptr<AVSessionItem> &session);
+    AVControllerItem(AVSessionService* service_, pid_t pid, sptr<AVSessionItem> &session);
 
     ~AVControllerItem() override;
 
@@ -60,10 +61,15 @@ public:
 
     void ClearSession();
 
+    bool HasSession(int32_t sessionId);
+
+    void BeKilled();
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVControllerCallback>& callback) override;
 
 private:
+    AVSessionService* service_;
     pid_t pid_;
     sptr<AVSessionItem> session_;
     sptr<IAVControllerCallback> callback_;

@@ -15,12 +15,13 @@
 
 #include "avcontroller_item.h"
 
+#include "avsession_service.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
-    : pid_(pid), session_(session)
+AVControllerItem::AVControllerItem(AVSessionService* service, pid_t pid, sptr<AVSessionItem> &session)
+    : service_(service), pid_(pid), session_(session)
 {
     SLOGD("construct");
 }
@@ -85,6 +86,13 @@ int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
 int32_t AVControllerItem::Release()
 {
     callback_ = nullptr;
+    if (session_) {
+        session_->RemoveController(pid_);
+        session_.clear();
+    }
+    if (service_) {
+        service_->ControllerRelease(*this);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -116,5 +124,21 @@ pid_t AVControllerItem::GetPid()
 void AVControllerItem::ClearSession()
 {
     session_ = nullptr;
+}
+
+bool AVControllerItem::HasSession(int32_t sessionId)
+{
+    if (session_ != nullptr) {
+        return session_->GetSessionId() == sessionId;
+    }
+    return false;
+}
+
+void AVControllerItem::BeKilled()
+{
+    if (session_) {
+        session_->RemoveController(pid_);
+        session_.clear();
+    }
 }
 } // OHOS::AVSession

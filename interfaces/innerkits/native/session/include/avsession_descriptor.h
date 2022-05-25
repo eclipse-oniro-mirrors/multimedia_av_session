@@ -51,14 +51,14 @@ struct AVSessionDescriptor {
             in.ReadString(remoteDeviceId_);
     }
 
-    int32_t sessionId_;
-    int32_t sessionType_;
+    int32_t sessionId_ = -1;
+    int32_t sessionType_ {};
     std::string sessionTag_;
     std::string bundleName_;
     std::string abilityName_;
-    bool isActive_;
-    bool isTopSession_;
-    bool isRemote_;
+    bool isActive_ {};
+    bool isTopSession_ {};
+    bool isRemote_ {};
     std::string remoteDeviceId_;
 };
 } // namespace OHOS::AVSession

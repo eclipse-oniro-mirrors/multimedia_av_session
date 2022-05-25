@@ -14,12 +14,14 @@
  */
 
 #include "avsession_item.h"
-#include "avsession_log.h"
+#include "avsession_service.h"
 #include "avcontroller_item.h"
+#include "avsession_log.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
-AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
-    : descriptor_()
+AVSessionItem::AVSessionItem(AVSessionService* service, const AVSessionDescriptor& descriptor)
+    : service_(service), descriptor_()
 {
     SLOGD("constructor id=%{public}d", descriptor_.sessionId_);
 }
@@ -42,7 +44,13 @@ int32_t AVSessionItem::RegisterCallbackInner(sptr<IRemoteObject> &callback)
 int32_t AVSessionItem::Release()
 {
     SLOGD("enter");
-    return 0;
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleSessionRelease(descriptor_);
+    }
+    if (service_) {
+        service_->SessionRelease(*this);
+    }
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
@@ -157,5 +165,12 @@ pid_t AVSessionItem::GetPid()
 uid_t  AVSessionItem::GetUid()
 {
     return uid_;
+}
+
+void AVSessionItem::BeKilled()
+{
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleSessionRelease(descriptor_);
+    }
 }
 } // namespace OHOS::AVSession
