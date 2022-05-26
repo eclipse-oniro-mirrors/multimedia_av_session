@@ -137,7 +137,6 @@ int AVSessionStub::HandleIsActive(MessageParcel& data, MessageParcel& reply)
 
 int AVSessionStub::HandleAddSupportCommand(MessageParcel& data, MessageParcel& reply)
 {
-
     reply.WriteInt32(AddSupportCommand(data.ReadInt32()));
     return ERR_NONE;
 }

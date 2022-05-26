@@ -31,7 +31,7 @@ int32_t AVSessionProxy::GetSessionId()
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING,"GetSessionId write interface token failed");
+        ERR_MARSHALLING, "GetSessionId write interface token failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_SESSION_ID, data, reply, option) == 0,
