@@ -83,15 +83,14 @@ sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, int32_t
 {
     std::lock_guard lockGuard(lock_);
     auto it = controllers_.find(pid);
-    if (it == controllers_.end()) {
-        return nullptr;
-    }
-
-    for (const auto& controller: it->second) {
-        if (controller->HasSession(sessionId)) {
-            return controller;
+    if (it != controllers_.end()) {
+        for (const auto &controller: it->second) {
+            if (controller->HasSession(sessionId)) {
+                return controller;
+            }
         }
     }
+    SLOGE("not found");
     return nullptr;
 }
 
@@ -214,19 +213,7 @@ sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
 
 sptr<IRemoteObject> AVSessionService::GetControllerInner(int32_t sessionId)
 {
-    std::lock_guard lockGuard(lock_);
-    auto it = controllers_.find(GetCallingPid());
-    if (it == controllers_.end()) {
-        SLOGE("not find");
-        return nullptr;
-    }
-    for (const auto& controller : it->second) {
-        if (controller->HasSession(sessionId)) {
-            return controller;
-        }
-    }
-    SLOGE("not find");
-    return nullptr;
+    return GetPresentController(GetCallingPid(), sessionId);
 }
 
 std::vector<sptr<IRemoteObject>> AVSessionService::GetAllControllersInner()

@@ -25,13 +25,28 @@ SessionListenerProxy::SessionListenerProxy(const sptr<IRemoteObject> &impl)
 
 void SessionListenerProxy::OnSessionCreate(const AVSessionDescriptor &descriptor)
 {
+    MessageParcel data;
+    descriptor.WriteToParcel(data);
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    CHECK_AND_RETURN_LOG(!Remote()->SendRequest(LISTENER_CMD_ON_CREATE, data, reply, option), "send request fail");
 }
 
 void SessionListenerProxy::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
+    MessageParcel data;
+    descriptor.WriteToParcel(data);
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    CHECK_AND_RETURN_LOG(!Remote()->SendRequest(LISTENER_CMD_ON_RELEASE, data, reply, option), "send request fail");
 }
 
 void SessionListenerProxy::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
 {
+    MessageParcel data;
+    descriptor.WriteToParcel(data);
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    CHECK_AND_RETURN_LOG(!Remote()->SendRequest(LISTENER_CMD_TOP_CHANGED, data, reply, option), "send request fail");
 }
 }
