@@ -14,12 +14,134 @@
  */
 
 #include "avsession_callback_stub.h"
+#include "avsession_errors.h"
 #include "iavsession_callback.h"
+#include "key_event.h"
+#include "avsession_log.h"
+#include "avvolume_info.h"
 
 namespace OHOS::AVSession {
 int AVSessionCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
-    return 0;
+    if (!CheckInterfaceToken(data)) {
+        return AVSESSION_ERROR;
+    }
+    if (code >= 0 && code < SESSION_CALLBACK_MAX) {
+        return (this->*handlers[code])(data, reply);
+    }
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+}
+
+bool AVSessionCallbackStub::CheckInterfaceToken(MessageParcel& data)
+{
+    auto localDescriptor = IAVSessionCallback::GetDescriptor();
+    auto remoteDescriptor = data.ReadInterfaceToken();
+    if (remoteDescriptor != localDescriptor) {
+        SLOGE("interface token is not equal");
+        return false;
+    }
+    return true;
+}
+
+int AVSessionCallbackStub::HandleOnPlay(MessageParcel& data, MessageParcel& reply)
+{
+    OnPlay();
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnPause(MessageParcel& data, MessageParcel& reply)
+{
+    OnPause();
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnStop(MessageParcel& data, MessageParcel& reply)
+{
+    OnStop();
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnPlayNext(MessageParcel& data, MessageParcel& reply)
+{
+    OnPlayNext();
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnPlayPrevious(MessageParcel& data, MessageParcel& reply)
+{
+    OnPlayPrevious();
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnFastForward(MessageParcel& data, MessageParcel& reply)
+{
+    OnFastForward();
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnRewind(MessageParcel& data, MessageParcel& reply)
+{
+    OnRewind();
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnSeek(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t time = data.ReadInt64();
+    OnSeek(time);
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnSetSpeed(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t speed = data.ReadInt32();
+    OnSetSpeed(speed);
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnSetLoopMode(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t loopMode = data.ReadInt32();
+    OnSetLoopMode(loopMode);
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply)
+{
+    std::string mediald(data.ReadString());
+    OnToggleFavorite(mediald);
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnVolumeChanged(MessageParcel& data, MessageParcel& reply)
+{
+    AVVolumeInfo avVolumeInfo;
+    avVolumeInfo.currentVolume_ = data.ReadInt32();
+    avVolumeInfo.maxVolume_ = data.ReadInt32();
+    avVolumeInfo.volumeType_ = data.ReadInt32();
+    OnVolumeChanged(avVolumeInfo);
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int AVSessionCallbackStub::HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent(MMI::KeyEvent::Create());
+    (*keyEvent).ReadFromParcel(data);
+    OnMediaKeyEvent(*keyEvent);
+    reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
 }
 } // namespace OHOS::AVSession

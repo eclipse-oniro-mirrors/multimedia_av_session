@@ -17,6 +17,7 @@
 
 #include "iremote_proxy.h"
 #include "iavsession_callback.h"
+#include "avvolume_info.h"
 
 namespace OHOS::AVSession {
 class AVSessionCallbackProxy : public IRemoteProxy<IAVSessionCallback> {

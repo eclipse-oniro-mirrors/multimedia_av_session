@@ -16,6 +16,7 @@
 #include "avsession_stub.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_callback_proxy.h"
 
 namespace OHOS::AVSession {
 bool AVSessionStub::CheckInterfaceToken(MessageParcel &data)
@@ -47,11 +48,15 @@ int AVSessionStub::HandleGetSessionId(MessageParcel &data, MessageParcel &reply)
     return ERR_NONE;
 }
 
-int AVSessionStub::HandleRegisterCallbackInner(MessageParcel &data, MessageParcel &reply)
+int AVSessionStub::HandleRegisterCallback(MessageParcel &data, MessageParcel &reply)
 {
-    auto callback = data.ReadRemoteObject();
-    RegisterCallbackInner(callback);
-    reply.WriteInt32(AVSESSION_SUCCESS);
+    auto remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        reply.WriteInt32(AVSESSION_ERROR);
+        return ERR_NONE;
+    }
+    auto callback = iface_cast<AVSessionCallbackProxy>(remoteObject);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(RegisterCallbackInner(callback)), ERR_MARSHALLING, "write int failed");
     return ERR_NONE;
 }
 
@@ -67,8 +72,16 @@ int AVSessionStub::HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& 
     AVPlaybackState avPlaybackState;
     avPlaybackState.SetState(data.ReadInt32());
     avPlaybackState.SetBufferedTime(data.ReadInt64());
-
     reply.WriteInt32(GetAVPlaybackState(avPlaybackState));
+    return ERR_NONE;
+}
+
+int AVSessionStub::HandleSetAVPlaybackState(MessageParcel& data, MessageParcel& reply)
+{
+    AVPlaybackState* avPlaybackState = data.ReadParcelable<AVPlaybackState>();
+    reply.WriteInt32(GetAVPlaybackState(*avPlaybackState));
+    delete avPlaybackState;
+    avPlaybackState = nullptr;
     return ERR_NONE;
 }
 
@@ -77,6 +90,7 @@ int AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply
     const AVMetaData* avMetaData = data.ReadParcelable<AVMetaData>();
     reply.WriteInt32(SetAVMetaData(*avMetaData));
     delete avMetaData;
+    avMetaData = nullptr;
     return ERR_NONE;
 }
 
@@ -85,66 +99,50 @@ int AVSessionStub::HandleSetLaunchAbility(MessageParcel& data, MessageParcel& re
     const AbilityRuntime::WantAgent::WantAgent* want = data.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>();
     reply.WriteInt32(SetLaunchAbility(*want));
     delete want;
+    want = nullptr;
     return ERR_NONE;
 }
 
-
-int32_t AVSessionStub::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
+int AVSessionStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
-    return 0;
+    AVMetaData* avMetaData = data.ReadParcelable<AVMetaData>();
+    reply.WriteInt32(GetAVMetaData(*avMetaData));
+    delete avMetaData;
+    avMetaData = nullptr;
+    return ERR_NONE;
 }
 
-std::shared_ptr<AVSessionController> AVSessionStub::GetController()
+int AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& reply)
 {
-    return nullptr;
+    return ERR_NONE;
+}
+
+int AVSessionStub::HandleActive(MessageParcel& data, MessageParcel& reply)
+{
+    reply.WriteInt32(Active());
+    return ERR_NONE;
+}
+
+int AVSessionStub::HandleDisactive(MessageParcel& data, MessageParcel& reply)
+{
+    reply.WriteInt32(Disactive());
+    return ERR_NONE;
+}
+
+int AVSessionStub::HandleIsActive(MessageParcel& data, MessageParcel& reply)
+{
+    reply.WriteBool(IsActive());
+    return ERR_NONE;
+}
+
+int AVSessionStub::HandleAddSupportCommand(MessageParcel& data, MessageParcel& reply)
+{
+
+    reply.WriteInt32(AddSupportCommand(data.ReadInt32()));
+    return ERR_NONE;
 }
 
 int32_t AVSessionStub::RegisterCallback(std::shared_ptr<AVSessionCallback>& callback)
-{
-    return 0;
-}
-
-int32_t AVSessionStub::Active()
-{
-    return 0;
-}
-
-int32_t AVSessionStub::Disactive()
-{
-    return 0;
-}
-
-bool AVSessionStub::IsActive()
-{
-    return false;
-}
-
-int32_t AVSessionStub::AddSupportCommand(const std::string& cmd)
-{
-    return 0;
-}
-
-int32_t AVSessionStub::Release()
-{
-    return 0;
-}
-
-int32_t AVSessionStub::GetSessionId()
-{
-    return 0;
-}
-
-int32_t AVSessionStub::GetAVMetaData(AVMetaData& meta)
-{
-    return 0;
-}
-
-int32_t AVSessionStub::SetAVMetaData(const AVMetaData& meta)
-{
-    return 0;
-}
-
-int32_t AVSessionStub::GetAVPlaybackState(AVPlaybackState& state)
 {
     return 0;
 }

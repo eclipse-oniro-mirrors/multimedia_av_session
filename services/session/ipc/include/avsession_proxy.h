@@ -35,6 +35,8 @@ public:
 
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
+    int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
+
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
     std::shared_ptr<AVSessionController> GetController() override;
@@ -49,10 +51,10 @@ public:
 
     int32_t Release() override;
 
-    int32_t AddSupportCommand(const std::string& cmd) override;
+    int32_t AddSupportCommand(const int32_t cmd) override;
 
 protected:
-    int32_t RegisterCallbackInner(sptr<IRemoteObject>& callback) override;
+    int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
 
 private:
     static inline BrokerDelegator<AVSessionProxy> delegator_;

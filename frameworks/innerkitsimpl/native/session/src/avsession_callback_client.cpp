@@ -17,7 +17,59 @@
 
 namespace OHOS::AVSession {
 AVSessionCallbackClient::AVSessionCallbackClient(std::shared_ptr<AVSessionCallback>& callback)
+    : callback_(callback)
 {
 }
 
+void AVSessionCallbackClient::OnPlay()
+{
+}
+
+void AVSessionCallbackClient::OnPause()
+{
+}
+
+void AVSessionCallbackClient::OnStop()
+{
+}
+
+void AVSessionCallbackClient::OnPlayNext()
+{
+}
+
+void AVSessionCallbackClient::OnPlayPrevious()
+{
+}
+
+void AVSessionCallbackClient::OnFastForward()
+{
+}
+
+void AVSessionCallbackClient::OnRewind()
+{
+}
+
+void AVSessionCallbackClient::OnSeek(int64_t time)
+{
+}
+
+void AVSessionCallbackClient::OnSetSpeed(int32_t speed)
+{
+}
+
+void AVSessionCallbackClient::OnSetLoopMode(int32_t loopMode)
+{
+}
+
+void AVSessionCallbackClient::OnToggleFavorite(const std::string& mediald)
+{
+}
+
+void AVSessionCallbackClient::OnVolumeChanged(const AVVolumeInfo& volume)
+{
+}
+
+void AVSessionCallbackClient::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
+{
+}
 }

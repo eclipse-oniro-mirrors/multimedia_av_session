@@ -18,6 +18,7 @@
 
 #include "iremote_broker.h"
 #include "av_session.h"
+#include "iavsession_callback.h"
 
 namespace OHOS::AVSession {
 class IAVSession : public AVSession, public IRemoteBroker {
@@ -35,13 +36,14 @@ public:
         SESSION_CMD_REGISTER_CALLBACK,
         SESSION_CMD_ACTIVE,
         SESSION_CMD_DISACTIVE,
+        SESSION_CMD_ISACTIVE,
         SESSION_CMD_RELEASE,
         SESSION_CMD_ADDSUPPORTCOMMAND,
         SESSION_CMD_MAX,
     };
 
 protected:
-    virtual int32_t RegisterCallbackInner(sptr<IRemoteObject>& callback) = 0;
+    virtual int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_H

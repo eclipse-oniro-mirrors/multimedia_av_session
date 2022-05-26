@@ -16,10 +16,29 @@
 #ifndef OHOS_AVSESSION_CALLBACK_CLIENT_H
 #define OHOS_AVSESSION_CALLBACK_CLIENT_H
 
+#include "avsession_callback_stub.h"
+#include "avsession_info.h"
+#include "key_event.h"
+
 namespace OHOS::AVSession {
 class AVSessionCallbackClient : public AVSessionCallbackStub {
 public:
     AVSessionCallbackClient(std::shared_ptr<AVSessionCallback>& callback);
+    void OnPlay() override;
+    void OnPause() override;
+    void OnStop() override;
+    void OnPlayNext() override;
+    void OnPlayPrevious() override;
+    void OnFastForward() override;
+    void OnRewind() override;
+    void OnSeek(int64_t time) override;
+    void OnSetSpeed(int32_t speed) override;
+    void OnSetLoopMode(int32_t loopMode) override;
+    void OnToggleFavorite(const std::string& mediald) override;
+
+    void OnVolumeChanged(const AVVolumeInfo& volume) override;
+
+    void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;
