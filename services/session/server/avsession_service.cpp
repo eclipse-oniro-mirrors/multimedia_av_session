@@ -34,17 +34,10 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
 AVSessionService::~AVSessionService()
 {
     SLOGD("destroy");
-    delete sessionContainer_;
 }
 
 void AVSessionService::OnStart()
 {
-    sessionContainer_ = new(std::nothrow) SessionStack();
-    if (sessionContainer_ == nullptr) {
-        SLOGE("malloc session container failed");
-        return;
-    }
-
     if (!Publish(this)) {
         SLOGE("publish avsession service failed");
     }
@@ -56,6 +49,12 @@ void AVSessionService::OnDump()
 
 void AVSessionService::OnStop()
 {
+}
+
+SessionContainer& AVSessionService::GetContainer()
+{
+    static SessionStack sessionStack;
+    return sessionStack;
 }
 
 int32_t AVSessionService::AllocSessionId()
@@ -72,6 +71,12 @@ int32_t AVSessionService::AllocSessionId()
             sessionSeqNum_ = 0;
         }
     }
+}
+
+bool AVSessionService::ClientHasSession(pid_t pid)
+{
+    std::lock_guard lockGuard(lock_);
+    return GetContainer().GetSession(pid) != nullptr;
 }
 
 sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, int32_t sessionId)
@@ -123,20 +128,16 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
     }
     result->SetPid(GetCallingPid());
     result->SetUid(GetCallingUid());
-    result->SetServiceCallbackForRelease([this](AVSessionItem& session) { SessionRelease(session); });
+    result->SetServiceCallbackForRelease([this](AVSessionItem& session) { HandleSessionRelease(session); });
     return result;
 }
 
 sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
     const std::string& bundleName, const std::string& abilityName)
 {
-    if (sessionContainer_ == nullptr) {
-        return nullptr;
-    }
-
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(lock_);
-    if (sessionContainer_->GetSession(pid) != nullptr) {
+    if (ClientHasSession(pid)) {
         SLOGE("%{public}d already has a session", pid);
         return nullptr;
     }
@@ -146,7 +147,7 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
         SLOGE("create new session failed");
         return nullptr;
     }
-    if (sessionContainer_->AddSession(pid, result) != AVSESSION_SUCCESS) {
+    if (GetContainer().AddSession(pid, result) != AVSESSION_SUCCESS) {
         SLOGE("session num exceed max");
         return nullptr;
     }
@@ -158,23 +159,15 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
 
 sptr<IRemoteObject> AVSessionService::GetSessionInner()
 {
-    if (sessionContainer_ == nullptr) {
-        return nullptr;
-    }
-
     std::lock_guard lockGuard(lock_);
-    return sessionContainer_->GetSession(GetCallingPid());
+    return GetContainer().GetSession(GetCallingPid());
 }
 
 std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
 {
-    if (sessionContainer_ == nullptr) {
-        return {};
-    }
-
     std::vector<AVSessionDescriptor> result;
     std::lock_guard lockGuard(lock_);
-    for (const auto& session: sessionContainer_->GetAllSessions()) {
+    for (const auto& session: GetContainer().GetAllSessions()) {
         result.push_back(session->GetDescriptor());
     }
     return result;
@@ -188,17 +181,13 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
         SLOGE("malloc controller failed");
         return nullptr;
     }
-    result->SetServiceCallbackForRelease([this](AVControllerItem& controller) { ControllerRelease(controller); });
+    result->SetServiceCallbackForRelease([this](AVControllerItem& controller) { HandleControllerRelease(controller); });
     session->AddController(pid, result);
     return result;
 }
 
 sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
 {
-    if (sessionContainer_ == nullptr) {
-        return nullptr;
-    }
-
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(lock_);
     if (GetPresentController(pid, sessionId) != nullptr) {
@@ -206,7 +195,7 @@ sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
         return nullptr;
     }
 
-    auto session = sessionContainer_->GetSessionById(sessionId);
+    auto session = GetContainer().GetSessionById(sessionId);
     if (session == nullptr) {
         SLOGE("no session id %{public}d", sessionId);
         return nullptr;
@@ -315,16 +304,40 @@ void AVSessionService::OnClientDied(pid_t pid)
     SLOGI("client die %{public}d", pid);
     RemoveSessionListener(pid);
     RemoveClientDeathObserver(pid);
-    if (!sessionContainer_) {
-        return;
-    }
 
     std::lock_guard lockGuard(lock_);
-    auto session = sessionContainer_->RemoveSession(pid);
+    ClearSessionForClientDied(pid);
+    ClearControllerForClientDied(pid);
+}
+
+void AVSessionService::HandleSessionRelease(AVSessionItem &session)
+{
+    NotifySessionRelease(session.GetDescriptor());
+    std::lock_guard lockGuard(lock_);
+    GetContainer().RemoveSession(session.GetPid());
+}
+
+void AVSessionService::HandleControllerRelease(AVControllerItem &controller)
+{
+    auto pid = controller.GetPid();
+    std::lock_guard lockGuard(lock_);
+    auto list = controllers_[pid];
+    list.remove(&controller);
+    if (list.empty()) {
+        controllers_.erase(pid);
+    }
+}
+
+void AVSessionService::ClearSessionForClientDied(pid_t pid)
+{
+    auto session = GetContainer().RemoveSession(pid);
     if (session != nullptr) {
         session->Release();
     }
+}
 
+void AVSessionService::ClearControllerForClientDied(pid_t pid)
+{
     auto it = controllers_.find(pid);
     if (it != controllers_.end()) {
         auto controllers = std::move(it->second);
@@ -334,24 +347,6 @@ void AVSessionService::OnClientDied(pid_t pid)
                 controller->Release();
             }
         }
-    }
-}
-
-void AVSessionService::SessionRelease(AVSessionItem &session)
-{
-    NotifySessionRelease(session.GetDescriptor());
-    std::lock_guard lockGuard(lock_);
-    sessionContainer_->RemoveSession(session.GetPid());
-}
-
-void AVSessionService::ControllerRelease(AVControllerItem &controller)
-{
-    auto pid = controller.GetPid();
-    std::lock_guard lockGuard(lock_);
-    auto list = controllers_[pid];
-    list.remove(&controller);
-    if (list.empty()) {
-        controllers_.erase(pid);
     }
 }
 

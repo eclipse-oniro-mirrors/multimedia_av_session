@@ -68,12 +68,16 @@ public:
 
     void OnClientDied(pid_t pid);
 
-    void SessionRelease(AVSessionItem& session);
+    void HandleSessionRelease(AVSessionItem& session);
 
-    void ControllerRelease(AVControllerItem& controller);
+    void HandleControllerRelease(AVControllerItem& controller);
 
 private:
+    SessionContainer& GetContainer();
+
     int32_t AllocSessionId();
+
+    bool ClientHasSession(pid_t pid);
 
     sptr<AVControllerItem> GetPresentController(pid_t pid, int32_t sessionId);
 
@@ -91,13 +95,16 @@ private:
 
     sptr<AVControllerItem> CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session);
 
+    void ClearSessionForClientDied(pid_t pid);
+
+    void ClearControllerForClientDied(pid_t pid);
+
     std::recursive_mutex sessionIdsLock_;
     std::list<int32_t> sessionIds_;
     int32_t sessionSeqNum_ {};
 
     std::recursive_mutex lock_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
-    SessionContainer* sessionContainer_ {};
 
     std::recursive_mutex clientDeathObserversLock_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
