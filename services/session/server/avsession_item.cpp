@@ -139,7 +139,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& contoller)
 {
-    controllers_.insert( {pid, contoller} );
+    controllers_.insert({ pid, contoller });
     return AVSESSION_SUCCESS;
 }
 
