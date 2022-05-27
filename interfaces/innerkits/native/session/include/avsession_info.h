@@ -60,8 +60,6 @@ public:
 
 class AVControllerCallback {
 public:
-    virtual void OnVolumeInfoChange(const AVVolumeInfo &volumeInfo) = 0;
-
     virtual void OnSessionRelease(const AVSessionDescriptor &descriptor) = 0;
 
     virtual void OnPlaybackStateUpdate(const AVPlaybackState &state) = 0;

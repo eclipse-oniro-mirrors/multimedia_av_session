@@ -17,7 +17,6 @@
 
 namespace OHOS::AVSession {
 AVPlaybackState::AVPlaybackState()
-    :Parcelable(true)
 {
 }
 

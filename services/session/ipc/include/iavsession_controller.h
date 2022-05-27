@@ -31,7 +31,6 @@ public:
         CONTROLLER_CMD_GET_AV_PLAYBACK_STATE,
         CONTROLLER_CMD_GET_AV_META_DATA,
         CONTROLLER_CMD_SEND_MEDIA_KEYEVENT,
-        CONTROLLER_CMD_GET_AV_VOLUME_INFO,
         CONTROLLER_CMD_GET_LAUNCH_ABILITY,
         CONTROLLER_CMD_GET_SUPPORTED_COMMAND,
         CONTROLLER_CMD_SEND_COMMAND,
@@ -41,7 +40,7 @@ public:
     };
 
 protected:
-    virtual int32_t RegisterCallbackInner(const sptr<IAVControllerCallback>& callback) = 0;
+    virtual int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) = 0;
 };
 }
 #endif // OHOS_IAVSESSION_CONTROLLER_H

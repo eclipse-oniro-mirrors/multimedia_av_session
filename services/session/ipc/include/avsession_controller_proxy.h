@@ -28,9 +28,7 @@ public:
 
     int32_t GetAVMetaData(AVMetaData &data) override;
 
-    int32_t GetAVVolumeInfo(AVVolumeInfo &info) override;
-
-    int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent) override;
+    int32_t sendMediaButtonEvent(MMI::KeyEvent& keyEvent) override;
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
 
@@ -47,7 +45,7 @@ public:
     int32_t Release() override;
 
 protected:
-    int32_t RegisterCallbackInner(const sptr<IAVControllerCallback>& callback) override;
+    int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 
 private:
     static inline BrokerDelegator<AVSessionControllerProxy> delegator_;

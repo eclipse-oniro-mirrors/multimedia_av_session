@@ -32,8 +32,6 @@ private:
 
     int32_t HandleOnMetadataChange(MessageParcel &data, MessageParcel &reply);
 
-    int32_t HandleOnVolumeInfoChange(MessageParcel &data, MessageParcel &reply);
-
     int32_t HandleOnActiveStateChange(MessageParcel &data, MessageParcel &reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
@@ -43,7 +41,6 @@ private:
         [CONTROLLER_CMD_ON_SESSION_RELEASE] = &AVControllerCallbackStub::HandleOnSessionRelease,
         [CONTROLLER_CMD_ON_PLAYBACK_STATE_CHANGE] = &AVControllerCallbackStub::HandleOnPlaybackStateChange,
         [CONTROLLER_CMD_ON_METADATA_CHANGE] = &AVControllerCallbackStub::HandleOnMetadataChange,
-        [CONTROLLER_CMD_ON_VOLUME_INFO_CHANGE] = &AVControllerCallbackStub::HandleOnVolumeInfoChange,
         [CONTROLLER_CMD_ON_ACTIVE_STATE_CHANGE] = &AVControllerCallbackStub::HandleOnActiveStateChange,
     };
 };

@@ -23,13 +23,6 @@ AVControllerCallbackClient::AVControllerCallbackClient(std::shared_ptr<AVControl
     SLOGD("construct");
 }
 
-void AVControllerCallbackClient::OnVolumeInfoChange(const AVVolumeInfo &volumeInfo)
-{
-    if (callback_) {
-        callback_->OnVolumeInfoChange(volumeInfo);
-    }
-}
-
 void AVControllerCallbackClient::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
     if (callback_) {

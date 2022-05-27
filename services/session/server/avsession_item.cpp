@@ -123,6 +123,18 @@ std::vector<std::string> AVSessionItem::GetSupportCommand()
     return supportedCmd_;
 }
 
+AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
+{
+    return launchAbility_;
+}
+
+void AVSessionItem::HandleMediaButtonEvent(const MMI::KeyEvent& keyEvent)
+{
+    if (callback_ != nullptr) {
+        callback_->OnMediaKeyEvent(keyEvent);
+    }
+}
+
 void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 {
 }

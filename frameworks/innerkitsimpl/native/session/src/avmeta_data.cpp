@@ -18,7 +18,6 @@
 
 namespace OHOS::AVSession {
 AVMetaData::AVMetaData()
-    : Parcelable(true)
 {
 }
 

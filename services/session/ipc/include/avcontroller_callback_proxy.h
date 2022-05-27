@@ -24,8 +24,6 @@ class AVControllerCallbackProxy : public IRemoteProxy<IAVControllerCallback> {
 public:
     explicit AVControllerCallbackProxy(const sptr<IRemoteObject>& impl);
 
-    void OnVolumeInfoChange(const AVVolumeInfo &volumeInfo) override;
-
     void OnSessionRelease(const AVSessionDescriptor &descriptor) override;
 
     void OnPlaybackStateUpdate(const AVPlaybackState &state) override;
