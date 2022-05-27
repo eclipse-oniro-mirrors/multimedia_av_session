@@ -142,7 +142,6 @@ int32_t AVSessionControllerProxy::Release()
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
-
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(CONTROLLER_CMD_RELEASE, data, reply, option) == 0,

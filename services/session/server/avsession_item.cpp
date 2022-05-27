@@ -22,9 +22,9 @@
 
 namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
+    : descriptor_(descriptor)
 {
     SLOGD("constructor id=%{public}d", descriptor_.sessionId_);
-    descriptor_.isActive_ = false;
 }
 
 AVSessionItem::~AVSessionItem()
@@ -57,7 +57,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
-    metaData_ = meta;
+    metaData_.CopyFrom(meta);
     return AVSESSION_SUCCESS;
 }
 
@@ -79,9 +79,13 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
     return AVSESSION_SUCCESS;
 }
 
-std::shared_ptr<AVSessionController> AVSessionItem::GetController()
+sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 {
-    return nullptr;
+    auto iter = controllers_.find(GetPid());
+    if(iter == controllers_.end()) {
+        return nullptr;
+    }
+    return iter->second;
 }
 
 int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback> &callback)

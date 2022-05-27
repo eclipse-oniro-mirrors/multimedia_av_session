@@ -48,7 +48,7 @@ int AVSessionStub::HandleGetSessionId(MessageParcel &data, MessageParcel &reply)
     return ERR_NONE;
 }
 
-int AVSessionStub::HandleRegisterCallback(MessageParcel &data, MessageParcel &reply)
+int AVSessionStub::HandleRegisterCallbackInner(MessageParcel &data, MessageParcel &reply)
 {
     auto remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
@@ -70,16 +70,15 @@ int AVSessionStub::HandleRelease(MessageParcel &data, MessageParcel &reply)
 int AVSessionStub::HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply)
 {
     AVPlaybackState avPlaybackState;
-    avPlaybackState.SetState(data.ReadInt32());
-    avPlaybackState.SetBufferedTime(data.ReadInt64());
-    reply.WriteInt32(GetAVPlaybackState(avPlaybackState));
+    GetAVPlaybackState(avPlaybackState);
+    reply.WriteParcelable(&avPlaybackState);
     return ERR_NONE;
 }
 
 int AVSessionStub::HandleSetAVPlaybackState(MessageParcel& data, MessageParcel& reply)
 {
     AVPlaybackState* avPlaybackState = data.ReadParcelable<AVPlaybackState>();
-    reply.WriteInt32(GetAVPlaybackState(*avPlaybackState));
+    reply.WriteInt32(SetAVPlaybackState(*avPlaybackState));
     delete avPlaybackState;
     avPlaybackState = nullptr;
     return ERR_NONE;
@@ -105,15 +104,16 @@ int AVSessionStub::HandleSetLaunchAbility(MessageParcel& data, MessageParcel& re
 
 int AVSessionStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
-    AVMetaData* avMetaData = data.ReadParcelable<AVMetaData>();
-    reply.WriteInt32(GetAVMetaData(*avMetaData));
-    delete avMetaData;
-    avMetaData = nullptr;
+    AVMetaData avMetaData;
+    GetAVMetaData(avMetaData);
+    reply.WriteParcelable(&avMetaData);
     return ERR_NONE;
 }
 
 int AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& reply)
 {
+    sptr<IRemoteObject>  controller = GetControllerInner();
+    reply.WriteRemoteObject(controller);
     return ERR_NONE;
 }
 
@@ -139,10 +139,5 @@ int AVSessionStub::HandleAddSupportCommand(MessageParcel& data, MessageParcel& r
 {
     reply.WriteInt32(AddSupportCommand(data.ReadInt32()));
     return ERR_NONE;
-}
-
-int32_t AVSessionStub::RegisterCallback(std::shared_ptr<AVSessionCallback>& callback)
-{
-    return 0;
 }
 }

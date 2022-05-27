@@ -14,8 +14,8 @@
  */
 
 #include "avsession_proxy.h"
-#include "avplayback_state.h"
 #include "avsession_callback_client.h"
+#include "avsession_controller_proxy.h"
 #include "iavsession_callback.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
@@ -72,11 +72,11 @@ int32_t AVSessionProxy::Release()
     SLOGD("Release enter");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "Release write interface token failed");
+        ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_RELEASE, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "Release send request failed");
+        ERR_IPC_SEND_REQUEST, "send request failed");
     return reply.ReadInt32();
 }
 
@@ -84,41 +84,13 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "SetAVMetaData write interface token failed");
+        ERR_MARSHALLING, "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&meta),
-        ERR_MARSHALLING, "SetAVMetaData WriteParcelable failed");
+        ERR_MARSHALLING, "WriteParcelable failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "SetAVMetaData send request failed");
-    return reply.ReadInt32();
-}
-
-int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
-{
-    MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "GetAVPlaybackState write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(state.Marshalling(data),
-        ERR_MARSHALLING, "GetAVPlaybackState Write state failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_PLAYBACK_STATE, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "GetAVPlaybackState send request failed");
-    return reply.ReadInt32();
-}
-
-int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
-{
-    MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "SetAVPlaybackState write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(state.Marshalling(data),
-        ERR_MARSHALLING, "SetAVPlaybackState Write state failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_SET_PLAYBACK_STATE, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "SetAVPlaybackState send request failed");
+        ERR_IPC_SEND_REQUEST, "send request failed");
     return reply.ReadInt32();
 }
 
@@ -126,13 +98,41 @@ int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "GetAVMetaData write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(meta.Marshalling(data),
-        ERR_MARSHALLING, "GetAVMetaData Write AVMetaData failed");
+                             ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_META_DATA, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "GetAVMetaData send request failed");
+                             ERR_IPC_SEND_REQUEST, "send request failed");
+    std::shared_ptr<AVMetaData> metaData(reply.ReadParcelable<AVMetaData>());
+    meta = *metaData;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_PLAYBACK_STATE, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    std::shared_ptr<AVPlaybackState> playbackState(reply.ReadParcelable<AVPlaybackState>());
+    state = *playbackState;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&state),
+        ERR_MARSHALLING, "Write state failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_SET_PLAYBACK_STATE, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     return reply.ReadInt32();
 }
 
@@ -140,38 +140,44 @@ int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAg
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "SetLaunchAbility write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(ability.Marshalling(data),
-        ERR_MARSHALLING, "SetLaunchAbility Write WantAgent failed");
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&ability),
+        ERR_MARSHALLING, "Write WantAgent failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_SET_LAUNCH_ABILITY, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "SetLaunchAbility send request failed");
+        ERR_IPC_SEND_REQUEST, "send request failed");
     return reply.ReadInt32();
+}
+
+sptr<IRemoteObject> AVSessionProxy::GetControllerInner() {
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+                             nullptr, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_CONTROLLER, data, reply, option) == 0,
+                             nullptr, "send request failed");
+    sptr <IRemoteObject> controller = reply.ReadRemoteObject();
+    return controller;
 }
 
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
-    MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        nullptr, "GetController write interface token failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_CONTROLLER, data, reply, option) == 0,
-        nullptr, "GetController send request failed");
-
-    return std::shared_ptr<AVSessionController>();
+    auto object = GetControllerInner();
+    auto controllerProxy = iface_cast<AVSessionControllerProxy>(object);
+    return std::shared_ptr<AVSessionController>(controllerProxy.GetRefPtr(), [proxyHolder = controllerProxy](const auto*) {});
 }
 
 int32_t AVSessionProxy::Active()
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "Active write interface token failed");
+        ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_ACTIVE, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "Active send request failed");
+        ERR_IPC_SEND_REQUEST, "send request failed");
     return reply.ReadInt32();
 }
 
@@ -179,11 +185,11 @@ int32_t AVSessionProxy::Disactive()
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "Disactive write interface token failed");
+        ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_DISACTIVE, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "Disactive send request failed");
+        ERR_IPC_SEND_REQUEST, "send request failed");
     return reply.ReadInt32();
 }
 
@@ -191,11 +197,11 @@ bool AVSessionProxy::IsActive()
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "IsActive write interface token failed");
+        ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_ISACTIVE, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "IsActive send request failed");
+        ERR_IPC_SEND_REQUEST, "send request failed");
     return reply.ReadBool();
 }
 
@@ -203,13 +209,13 @@ int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "AddSupportCommand write interface token failed");
+        ERR_MARSHALLING, "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(cmd),
-        ERR_MARSHALLING, "AddSupportCommand Write cmd failed");
+        ERR_MARSHALLING, "Write cmd failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_ADDSUPPORTCOMMAND, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "AddSupportCommand send request failed");
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_ADDSUPPORT_COMMAND, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     return reply.ReadInt32();
 }
 }

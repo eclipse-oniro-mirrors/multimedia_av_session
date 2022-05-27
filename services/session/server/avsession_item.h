@@ -39,7 +39,10 @@ public:
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
-    std::shared_ptr<AVSessionController> GetController() override;
+    std::shared_ptr<AVSessionController> GetController() override
+    {
+        return nullptr;
+    }
 
     int32_t Active() override;
 
@@ -83,6 +86,7 @@ public:
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
+    sptr<IRemoteObject> GetControllerInner() override;
 
 private:
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
@@ -94,7 +98,7 @@ private:
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
     std::vector<int32_t> supportedCmd_;
     sptr<IAVSessionCallback> callback_;
-    std::shared_ptr<IAVSessionCallback> remoteCallback_;
+    std::shared_ptr<AVSessionCallback> remoteCallback_;
     std::function<void(AVSessionItem&)> serviceCallback_;
 };
 } // namespace OHOS::AVSession

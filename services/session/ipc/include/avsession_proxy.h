@@ -21,6 +21,8 @@
 #include "want_agent.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avmeta_data.h"
+#include "avplayback_state.h"
 
 namespace OHOS::AVSession {
 class AVSessionProxy : public IRemoteProxy<IAVSession> {
@@ -55,6 +57,7 @@ public:
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
+    sptr<IRemoteObject> GetControllerInner() override;
 
 private:
     static inline BrokerDelegator<AVSessionProxy> delegator_;

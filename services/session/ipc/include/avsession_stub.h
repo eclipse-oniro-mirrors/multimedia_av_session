@@ -25,7 +25,10 @@ class AVSessionStub : public IRemoteStub<IAVSession> {
 public:
     int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
-    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override;
+    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override
+    {
+        return ERR_NONE;
+    }
 
 private:
     int HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
@@ -42,7 +45,7 @@ private:
 
     int HandleGetController(MessageParcel& data, MessageParcel& reply);
 
-    int HandleRegisterCallback(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
     int HandleActive(MessageParcel& data, MessageParcel& reply);
 
@@ -65,12 +68,12 @@ private:
         [SESSION_CMD_SET_PLAYBACK_STATE] = &AVSessionStub::HandleSetAVPlaybackState,
         [SESSION_CMD_SET_LAUNCH_ABILITY] = &AVSessionStub::HandleSetLaunchAbility,
         [SESSION_CMD_GET_CONTROLLER] = &AVSessionStub::HandleGetController,
-        [SESSION_CMD_REGISTER_CALLBACK] = &AVSessionStub::HandleRegisterCallback,
+        [SESSION_CMD_REGISTER_CALLBACK] = &AVSessionStub::HandleRegisterCallbackInner,
         [SESSION_CMD_ACTIVE] = &AVSessionStub::HandleActive,
         [SESSION_CMD_DISACTIVE] = &AVSessionStub::HandleDisactive,
         [SESSION_CMD_ISACTIVE] = &AVSessionStub::HandleIsActive,
         [SESSION_CMD_RELEASE] = &AVSessionStub::HandleRelease,
-        [SESSION_CMD_ADDSUPPORTCOMMAND] = &AVSessionStub::HandleAddSupportCommand,
+        [SESSION_CMD_ADDSUPPORT_COMMAND] = &AVSessionStub::HandleAddSupportCommand,
     };
 };
 }

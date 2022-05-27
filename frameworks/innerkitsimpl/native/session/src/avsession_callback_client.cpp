@@ -23,53 +23,66 @@ AVSessionCallbackClient::AVSessionCallbackClient(std::shared_ptr<AVSessionCallba
 
 void AVSessionCallbackClient::OnPlay()
 {
+    callback_->OnPlay();
 }
 
 void AVSessionCallbackClient::OnPause()
 {
+    callback_->OnPause();
 }
 
 void AVSessionCallbackClient::OnStop()
 {
+    callback_->OnStop();
 }
 
 void AVSessionCallbackClient::OnPlayNext()
 {
+    callback_->OnPlayNext();
 }
 
 void AVSessionCallbackClient::OnPlayPrevious()
 {
+    callback_->OnPlayPrevious();
 }
 
 void AVSessionCallbackClient::OnFastForward()
 {
+    callback_->OnFastForward();
 }
 
 void AVSessionCallbackClient::OnRewind()
 {
+    callback_->OnRewind();
 }
 
 void AVSessionCallbackClient::OnSeek(int64_t time)
 {
+    callback_->OnSeek(time);
 }
 
 void AVSessionCallbackClient::OnSetSpeed(int32_t speed)
 {
+    callback_->OnSetSpeed(speed);
 }
 
 void AVSessionCallbackClient::OnSetLoopMode(int32_t loopMode)
 {
+    callback_->OnSetLoopMode(loopMode);
 }
 
 void AVSessionCallbackClient::OnToggleFavorite(const std::string& mediald)
 {
+    callback_->OnToggleFavorite(mediald);
 }
 
 void AVSessionCallbackClient::OnVolumeChanged(const AVVolumeInfo& volume)
 {
+    callback_->OnVolumeChanged(volume);
 }
 
 void AVSessionCallbackClient::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
+    callback_->OnMediaKeyEvent(keyEvent);
 }
 }

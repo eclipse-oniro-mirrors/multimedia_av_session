@@ -40,6 +40,8 @@ public:
 
     virtual std::shared_ptr<AVSessionController> GetController() = 0;
 
+    virtual sptr<IRemoteObject> GetControllerInner() = 0;
+
     virtual int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) = 0;
 
     virtual int32_t Active() = 0;

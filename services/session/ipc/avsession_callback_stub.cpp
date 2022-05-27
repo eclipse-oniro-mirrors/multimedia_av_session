@@ -47,49 +47,42 @@ bool AVSessionCallbackStub::CheckInterfaceToken(MessageParcel& data)
 int AVSessionCallbackStub::HandleOnPlay(MessageParcel& data, MessageParcel& reply)
 {
     OnPlay();
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
 int AVSessionCallbackStub::HandleOnPause(MessageParcel& data, MessageParcel& reply)
 {
     OnPause();
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
 int AVSessionCallbackStub::HandleOnStop(MessageParcel& data, MessageParcel& reply)
 {
     OnStop();
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
 int AVSessionCallbackStub::HandleOnPlayNext(MessageParcel& data, MessageParcel& reply)
 {
     OnPlayNext();
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
 int AVSessionCallbackStub::HandleOnPlayPrevious(MessageParcel& data, MessageParcel& reply)
 {
     OnPlayPrevious();
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
 int AVSessionCallbackStub::HandleOnFastForward(MessageParcel& data, MessageParcel& reply)
 {
     OnFastForward();
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
 int AVSessionCallbackStub::HandleOnRewind(MessageParcel& data, MessageParcel& reply)
 {
     OnRewind();
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
@@ -97,7 +90,6 @@ int AVSessionCallbackStub::HandleOnSeek(MessageParcel& data, MessageParcel& repl
 {
     int32_t time = data.ReadInt64();
     OnSeek(time);
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
@@ -105,7 +97,6 @@ int AVSessionCallbackStub::HandleOnSetSpeed(MessageParcel& data, MessageParcel& 
 {
     int32_t speed = data.ReadInt32();
     OnSetSpeed(speed);
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
@@ -113,7 +104,6 @@ int AVSessionCallbackStub::HandleOnSetLoopMode(MessageParcel& data, MessageParce
 {
     int32_t loopMode = data.ReadInt32();
     OnSetLoopMode(loopMode);
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
@@ -121,27 +111,22 @@ int AVSessionCallbackStub::HandleOnToggleFavorite(MessageParcel& data, MessagePa
 {
     std::string mediald(data.ReadString());
     OnToggleFavorite(mediald);
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
 int AVSessionCallbackStub::HandleOnVolumeChanged(MessageParcel& data, MessageParcel& reply)
 {
     AVVolumeInfo avVolumeInfo;
-    avVolumeInfo.currentVolume_ = data.ReadInt32();
-    avVolumeInfo.maxVolume_ = data.ReadInt32();
-    avVolumeInfo.volumeType_ = data.ReadInt32();
+    avVolumeInfo.ReadFromParcel(data);
     OnVolumeChanged(avVolumeInfo);
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
 int AVSessionCallbackStub::HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply)
 {
-    std::shared_ptr<MMI::KeyEvent> keyEvent(MMI::KeyEvent::Create());
+    auto keyEvent = MMI::KeyEvent::Create();
     (*keyEvent).ReadFromParcel(data);
     OnMediaKeyEvent(*keyEvent);
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession
