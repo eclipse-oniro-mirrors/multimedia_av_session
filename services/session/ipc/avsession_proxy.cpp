@@ -150,7 +150,8 @@ int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAg
     return reply.ReadInt32();
 }
 
-sptr<IRemoteObject> AVSessionProxy::GetControllerInner() {
+sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
+{
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
                              nullptr, "write interface token failed");
@@ -165,8 +166,8 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner() {
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
     auto object = GetControllerInner();
-    auto controllerProxy = iface_cast<AVSessionControllerProxy>(object);
-    return std::shared_ptr<AVSessionController>(controllerProxy.GetRefPtr(), [proxyHolder = controllerProxy](const auto*) {});
+    auto controller = iface_cast<AVSessionControllerProxy>(object);
+    return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
 }
 
 int32_t AVSessionProxy::Active()
