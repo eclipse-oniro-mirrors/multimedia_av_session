@@ -113,7 +113,7 @@ public:
 
     std::string GetLyric() const;
 
-    void ClearChange();
+    void Reset();
 
     void SetMetaMask(const MetaMaskType metaMask);
 
@@ -121,11 +121,14 @@ public:
 
     /*
      * copy meta item to @metaOut according to intersection of meta mask.
+     * @return true if intersection is not empty, else return false.
      */
     bool CopyToByMask(AVMetaData& metaOut);
 
     /*
-     * copy meta item from @metaIn according to set bit of @metaIn meta mask, keeping meta item of self.
+     * copy meta item from @metaIn according to set bit of @metaIn meta mask, keeping self other meta item of self
+     * not changed, when both mediaId is equal. Otherwise, just do object assignment.
+     * @return true if this meta changed.
      */
     bool CopyFrom(const AVMetaData& metaIn);
 
@@ -149,10 +152,38 @@ private:
     std::string lyric_;
 
     static void CloneMediaId(const AVMetaData& from, AVMetaData& to);
+    static void CloneTitile(const AVMetaData& from, AVMetaData& to);
+    static void CloneArtist(const AVMetaData& from, AVMetaData& to);
+    static void CloneAuthor(const AVMetaData& from, AVMetaData& to);
+    static void CloneAlbum(const AVMetaData& from, AVMetaData& to);
+    static void CloneWriter(const AVMetaData& from, AVMetaData& to);
+    static void CloneComposer(const AVMetaData& from, AVMetaData& to);
+    static void CloneDuration(const AVMetaData& from, AVMetaData& to);
+    static void CloneMediaImage(const AVMetaData& from, AVMetaData& to);
+    static void CloneMediaImageUri(const AVMetaData& from, AVMetaData& to);
+    static void CloneAppIcon(const AVMetaData& from, AVMetaData& to);
+    static void CloneAppIconUri(const AVMetaData& from, AVMetaData& to);
+    static void CloneSubTitile(const AVMetaData& from, AVMetaData& to);
+    static void CloneDescriptiion(const AVMetaData& from, AVMetaData& to);
+    static void CloneLyric(const AVMetaData& from, AVMetaData& to);
 
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
         [META_KEY_MEDIA_ID] = &AVMetaData::CloneMediaId,
+        [META_KEY_TITLE] = &AVMetaData::CloneTitile,
+        [META_KEY_ARTIST] = &AVMetaData::CloneArtist,
+        [META_KEY_AUTHOR] = &AVMetaData::CloneAuthor,
+        [META_KEY_ALBUM] = &AVMetaData::CloneAlbum,
+        [META_KEY_WRITER] = &AVMetaData::CloneWriter,
+        [META_KEY_COMPOSER] = &AVMetaData::CloneComposer,
+        [META_KEY_DURATION] = &AVMetaData::CloneDuration,
+        [META_KEY_MEDIA_IMAGE] = &AVMetaData::CloneMediaImage,
+        [META_KEY_MEDIA_IMAGE_URI] = &AVMetaData::CloneMediaImageUri,
+        [META_KEY_APP_ICON] = &AVMetaData::CloneAppIcon,
+        [META_KEY_APP_ICON_URI] = &AVMetaData::CloneAppIconUri,
+        [META_KEY_SUBTITLE] = &AVMetaData::CloneSubTitile,
+        [META_KEY_DESCRIPTION] = &AVMetaData::CloneDescriptiion,
+        [META_KEY_LYRIC] = &AVMetaData::CloneLyric,
     };
 };
 } // namespace OHOS::AVSession
