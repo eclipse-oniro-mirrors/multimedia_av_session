@@ -14,6 +14,7 @@
  */
 
 #include "avcontroller_callback_proxy.h"
+
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
@@ -23,31 +24,59 @@ AVControllerCallbackProxy::AVControllerCallbackProxy(const sptr<IRemoteObject> &
     SLOGD("construct");
 }
 
-void AVControllerCallbackProxy::OnVolumeInfoChange(const AVVolumeInfo &volumeInfo)
-{
-}
-
 void AVControllerCallbackProxy::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
+    MessageParcel parcel;
+    CHECK_AND_PRINT_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_PRINT_LOG(descriptor.WriteToParcel(parcel), "write AVSessionDescriptor failed");
+
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_PRINT_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_PRINT_LOG(remote->SendRequest(CONTROLLER_CMD_ON_SESSION_RELEASE, parcel, reply, option) == 0,
+                        "send request failed");
 }
 
 void AVControllerCallbackProxy::OnPlaybackStateUpdate(const AVPlaybackState &state)
 {
+    MessageParcel parcel;
+    CHECK_AND_PRINT_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_PRINT_LOG(parcel.WriteParcelable(&state), "write PlaybackState failed");
+
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_PRINT_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_PRINT_LOG(remote->SendRequest(CONTROLLER_CMD_ON_PLAYBACK_STATE_CHANGE, parcel, reply, option) == 0,
+                        "send request failed");
 }
 
 void AVControllerCallbackProxy::OnMetaDataUpdate(const AVMetaData &data)
 {
+    MessageParcel parcel;
+    CHECK_AND_PRINT_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_PRINT_LOG(parcel.WriteParcelable(&data), "write AVMetaData failed");
+
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_PRINT_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_PRINT_LOG(remote->SendRequest(CONTROLLER_CMD_ON_METADATA_CHANGE, parcel, reply, option) == 0,
+                        "send request failed");
 }
 
 void AVControllerCallbackProxy::OnActiveStateChange(bool isActive)
 {
-    MessageParcel data;
-    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(data.WriteBool(isActive), "write bool failed");
+    MessageParcel parcel;
+    CHECK_AND_PRINT_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_PRINT_LOG(parcel.WriteBool(isActive), "write bool failed");
 
     MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_PRINT_LOG(Remote()->SendRequest(CONTROLLER_CMD_ON_ACTIVE_STATE_CHANGE, data, reply, option) == 0,
+    MessageOption option { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_PRINT_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_PRINT_LOG(remote->SendRequest(CONTROLLER_CMD_ON_ACTIVE_STATE_CHANGE, parcel, reply, option) == 0,
                         "send request failed");
 }
 }

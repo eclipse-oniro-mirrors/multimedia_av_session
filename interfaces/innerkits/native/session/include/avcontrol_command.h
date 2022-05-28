@@ -21,7 +21,6 @@
 #include <string>
 #include <variant>
 
-#include "message_parcel.h"
 #include "parcel.h"
 
 namespace OHOS::AVSession {
@@ -42,16 +41,37 @@ public:
         SESSION_CMD_MAX,
     };
 
+    enum {
+        LOOP_MODE_SEQUENCE,
+        LOOP_MODE_SINGLE,
+        LOOP_MODE_LIST,
+        LOOP_MODE_SHUFFLE,
+    };
+
     AVControlCommand();
     ~AVControlCommand() override;
-    static AVControlCommand *Unmarshalling(MessageParcel &data);
+    static AVControlCommand *Unmarshalling(Parcel &data);
     bool Marshalling(Parcel &parcel) const override;
 
     int32_t SetCommand(int32_t cmd);
-    void SetSpeed(float speed);
-    void SetSeekTime(int64_t time);
-    void SetLoopMode(int32_t mode);
-    void SetMediaId(const std::string &mediaId);
+
+    int32_t GetCommand() const;
+
+    int32_t SetSpeed(float speed);
+
+    int32_t GetSpeed(float &speed) const;
+
+    int32_t SetSeekTime(int64_t time);
+
+    int32_t GetSeekTime(int64_t &time) const;
+
+    int32_t SetLoopMode(int32_t mode);
+
+    int32_t GetLoopMode(int32_t &mode) const;
+
+    int32_t SetMediaId(const std::string &mediaId);
+
+    int32_t GetMediaId(std::string &mediaId) const;
 
 private:
     int32_t cmd_;

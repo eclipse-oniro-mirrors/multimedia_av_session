@@ -18,15 +18,16 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-AVControlCommand::AVControlCommand() : Parcelable(true)
+AVControlCommand::AVControlCommand()
 {
+    cmd_ = SESSION_CMD_MAX;
 }
 
 AVControlCommand::~AVControlCommand()
 {
 }
 
-AVControlCommand *AVControlCommand::Unmarshalling(MessageParcel &data)
+AVControlCommand *AVControlCommand::Unmarshalling(Parcel &data)
 {
     auto objptr = new (std::nothrow) AVControlCommand();
     if (objptr != nullptr) {
@@ -89,23 +90,80 @@ int32_t AVControlCommand::SetCommand(int32_t cmd)
     return AVSESSION_SUCCESS;
 }
 
-void AVControlCommand::SetSpeed(float speed)
+int32_t AVControlCommand::GetCommand() const
 {
+    return cmd_;
+}
+
+int32_t AVControlCommand::SetSpeed(float speed)
+{
+    if (speed < 0) {
+        return ERR_INVALID_PARAM;
+    }
     param_ = speed;
+    return AVSESSION_SUCCESS;
 }
 
-void AVControlCommand::SetSeekTime(int64_t time)
+int32_t AVControlCommand::GetSpeed(float &speed) const
 {
+    if (!std::holds_alternative<float>(param_)) {
+        return AVSESSION_ERROR;
+    }
+    speed = std::get<float>(param_);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::SetSeekTime(int64_t time)
+{
+    if (time < 0) {
+        return ERR_INVALID_PARAM;
+    }
     param_ = time;
+    return AVSESSION_SUCCESS;
 }
 
-void AVControlCommand::SetLoopMode(int32_t mode)
+int32_t AVControlCommand::GetSeekTime(int64_t &time) const
 {
+    if (!std::holds_alternative<int64_t>(param_)) {
+        return AVSESSION_ERROR;
+    }
+    time = std::get<int64_t>(param_);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::SetLoopMode(int32_t mode)
+{
+    if (mode < LOOP_MODE_SEQUENCE || mode > LOOP_MODE_SHUFFLE) {
+        return ERR_INVALID_PARAM;
+    }
     param_ = mode;
+    return AVSESSION_SUCCESS;
 }
 
-void AVControlCommand::SetMediaId(const std::string &mediaId)
+int32_t AVControlCommand::GetLoopMode(int32_t &mode) const
 {
+    if (!std::holds_alternative<int32_t>(param_)) {
+        return AVSESSION_ERROR;
+    }
+    mode = std::get<int32_t>(param_);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::SetMediaId(const std::string &mediaId)
+{
+    if (mediaId.empty()) {
+        return ERR_INVALID_PARAM;
+    }
     param_ = mediaId;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::GetMediaId(std::string &mediaId) const
+{
+    if (!std::holds_alternative<std::string>(param_)) {
+        return AVSESSION_ERROR;
+    }
+    mediaId = std::get<std::string>(param_);
+    return AVSESSION_SUCCESS;
 }
 } // OHOS::AVSession

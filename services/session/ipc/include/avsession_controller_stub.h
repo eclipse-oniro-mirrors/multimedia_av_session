@@ -24,7 +24,10 @@ class AVSessionControllerStub : public IRemoteStub<IAVSessionController> {
 public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
-    int32_t RegisterCallback(std::shared_ptr<AVControllerCallback> &callback) override;
+    int32_t RegisterCallback(std::shared_ptr<AVControllerCallback> &callback) override
+    {
+        return 0;
+    }
 
 private:
     int32_t HandleRegisterCallbackInner(MessageParcel &data, MessageParcel &reply);
@@ -36,8 +39,6 @@ private:
     int32_t HandleSendCommand(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleGetAVMetaData(MessageParcel &data, MessageParcel &reply);
-
-    int32_t HandleGetAVVolumeInfo(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleSendMediaKeyEvent(MessageParcel &data, MessageParcel &reply);
 
@@ -59,7 +60,6 @@ private:
         [CONTROLLER_CMD_SEND_COMMAND] = &AVSessionControllerStub::HandleSendCommand,
         [CONTROLLER_CMD_GET_AV_META_DATA] = &AVSessionControllerStub::HandleGetAVMetaData,
         [CONTROLLER_CMD_SEND_MEDIA_KEYEVENT] = &AVSessionControllerStub::HandleSendMediaKeyEvent,
-        [CONTROLLER_CMD_GET_AV_VOLUME_INFO] = &AVSessionControllerStub::HandleGetAVVolumeInfo,
         [CONTROLLER_CMD_GET_LAUNCH_ABILITY] = &AVSessionControllerStub::HandleGetLaunchAbility,
         [CONTROLLER_CMD_GET_SUPPORTED_COMMAND] = &AVSessionControllerStub::HandleGetSupportedCommand,
         [CONTROLLER_CMD_SET_META_FILTER] = &AVSessionControllerStub::HandleSetMetaFilter,

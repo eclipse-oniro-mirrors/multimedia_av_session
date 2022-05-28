@@ -61,6 +61,10 @@ public:
 
     std::vector<std::string> GetSupportCommand();
 
+    AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
+
+    void HandleMediaButtonEvent(const MMI::KeyEvent& keyEvent);
+
     void ExecuteControllerCommand(const AVControlCommand& cmd);
 
     int32_t AddController(pid_t pid, sptr<AVControllerItem>& controller);

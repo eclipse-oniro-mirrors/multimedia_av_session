@@ -33,9 +33,7 @@ public:
 
     virtual int32_t GetAVMetaData(AVMetaData &data) = 0;
 
-    virtual int32_t GetAVVolumeInfo(AVVolumeInfo &info) = 0;
-
-    virtual int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent) = 0;
+    virtual int32_t sendMediaButtonEvent(MMI::KeyEvent& keyEvent) = 0;
 
     virtual int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) = 0;
 

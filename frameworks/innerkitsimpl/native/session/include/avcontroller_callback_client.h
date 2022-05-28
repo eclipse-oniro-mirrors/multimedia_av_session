@@ -24,8 +24,6 @@ class AVControllerCallbackClient : public AVControllerCallbackStub {
 public:
     explicit AVControllerCallbackClient(std::shared_ptr<AVControllerCallback>& callback);
 
-    void OnVolumeInfoChange(const AVVolumeInfo &volumeInfo) override;
-
     void OnSessionRelease(const AVSessionDescriptor &descriptor) override;
 
     void OnPlaybackStateUpdate(const AVPlaybackState &state) override;

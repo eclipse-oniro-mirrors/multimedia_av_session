@@ -17,6 +17,7 @@
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_item.h"
 
 namespace OHOS::AVSession {
 AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
@@ -30,50 +31,73 @@ AVControllerItem::~AVControllerItem()
     SLOGD("destroy");
 }
 
-int32_t AVControllerItem::RegisterCallbackInner(const sptr<IAVControllerCallback> &callback)
+int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject> &callback)
 {
-    callback_ = callback;
-    return 0;
+    callback_ = iface_cast<AVControllerCallbackProxy>(callback);
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState &state)
 {
-    return 0;
+    if (session_ == nullptr) {
+        return ERR_SESSION_NOT_EXIST;
+    }
+    state = session_->GetPlaybackState();
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVControllerItem::GetAVMetaData(AVMetaData &data)
 {
-    return 0;
+    if (session_ == nullptr) {
+        return ERR_SESSION_NOT_EXIST;
+    }
+    data.CopyFrom(session_->GetMetaData());
+    return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::GetAVVolumeInfo(AVVolumeInfo &info)
+int32_t AVControllerItem::sendMediaButtonEvent(MMI::KeyEvent& keyEvent)
 {
-    return 0;
-}
-
-int32_t AVControllerItem::SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent)
-{
-    return 0;
+    if (session_ == nullptr) {
+        return ERR_SESSION_NOT_EXIST;
+    }
+    session_->HandleMediaButtonEvent(keyEvent);
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability)
 {
-    return 0;
+    if (session_ == nullptr) {
+        return ERR_SESSION_NOT_EXIST;
+    }
+    ability = session_->GetLaunchAbility();
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVControllerItem::GetSupportedCommand(std::vector<int32_t> &cmds)
 {
-    return 0;
+    if (session_ == nullptr) {
+        return ERR_SESSION_NOT_EXIST;
+    }
+    cmds = session_->GetSupportCommand();
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVControllerItem::IsSessionActive(bool &isActive)
 {
-    return 0;
+    if (session_ == nullptr) {
+        return ERR_SESSION_NOT_EXIST;
+    }
+    isActive = session_->IsActive();
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVControllerItem::SendCommand(AVControlCommand &cmd)
 {
-    return 0;
+    if (session_ == nullptr) {
+        return ERR_SESSION_NOT_EXIST;
+    }
+    session_->ExecuteControllerCommand(cmd);
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
@@ -84,11 +108,10 @@ int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
 
 int32_t AVControllerItem::Release()
 {
-    callback_ = nullptr;
-    if (session_) {
-        session_->RemoveController(pid_);
-        session_.clear();
+    if (callback_ != nullptr) {
+        callback_.clear();
     }
+    ClearSession();
     if (serviceCallback_) {
         serviceCallback_(*this);
     }
@@ -97,22 +120,36 @@ int32_t AVControllerItem::Release()
 
 void AVControllerItem::HandleSessionRelease(const AVSessionDescriptor &descriptor)
 {
-    callback_->OnSessionRelease(descriptor);
+    if (callback_ != nullptr) {
+        callback_->OnSessionRelease(descriptor);
+    }
+    ClearSession();
 }
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
 {
-    callback_->OnPlaybackStateUpdate(state);
+    if (callback_ != nullptr) {
+        callback_->OnPlaybackStateUpdate(state);
+    }
 }
 
 void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
 {
-    callback_->OnMetaDataUpdate(data);
+    if (callback_ == nullptr) {
+        return;
+    }
+    AVMetaData metaOut;
+    metaOut.SetMetaMask(metaMask_);
+    if (data.CopyToByMask(metaOut)) {
+        callback_->OnMetaDataUpdate(metaOut);
+    }
 }
 
-void AVControllerItem::HandleVolumeInfoChange(const AVVolumeInfo &info)
+void AVControllerItem::HandleActiveStateChange(bool isActive)
 {
-    callback_->OnVolumeInfoChange(info);
+    if (callback_ != nullptr) {
+        callback_->OnActiveStateChange(isActive);
+    }
 }
 
 pid_t AVControllerItem::GetPid() const
@@ -122,7 +159,10 @@ pid_t AVControllerItem::GetPid() const
 
 void AVControllerItem::ClearSession()
 {
-    session_ = nullptr;
+    if (session_ != nullptr) {
+        session_->RemoveController(pid_);
+        session_.clear();
+    }
 }
 
 bool AVControllerItem::HasSession(int32_t sessionId)

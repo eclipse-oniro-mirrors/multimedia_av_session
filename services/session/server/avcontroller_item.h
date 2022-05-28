@@ -18,10 +18,11 @@
 
 #include <string>
 
+#include "avcontroller_callback_proxy.h"
 #include "avsession_controller_stub.h"
-#include "avsession_item.h"
 
 namespace OHOS::AVSession {
+class AVSessionItem;
 class AVControllerItem : public AVSessionControllerStub {
 public:
     AVControllerItem(pid_t pid, sptr<AVSessionItem> &session);
@@ -32,9 +33,7 @@ public:
 
     int32_t GetAVMetaData(AVMetaData &data) override;
 
-    int32_t GetAVVolumeInfo(AVVolumeInfo &info) override;
-
-    int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent) override;
+    int32_t sendMediaButtonEvent(MMI::KeyEvent& keyEvent) override;
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
 
@@ -54,7 +53,7 @@ public:
 
     void HandleMetaDataChange(const AVMetaData &data);
 
-    void HandleVolumeInfoChange(const AVVolumeInfo &info);
+    void HandleActiveStateChange(bool isActive);
 
     pid_t GetPid() const;
 
@@ -65,7 +64,7 @@ public:
     void SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback);
 
 protected:
-    int32_t RegisterCallbackInner(const sptr<IAVControllerCallback>& callback) override;
+    int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 
 private:
     pid_t pid_;

@@ -29,7 +29,7 @@ bool AVControllerCallbackStub::CheckInterfaceToken(MessageParcel &data)
     return true;
 }
 
-int AVControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+int32_t AVControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
     if (!CheckInterfaceToken(data)) {
@@ -43,27 +43,36 @@ int AVControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data
 
 int32_t AVControllerCallbackStub::HandleOnSessionRelease(MessageParcel &data, MessageParcel &reply)
 {
-    return 0;
+    AVSessionDescriptor descriptor;
+    CHECK_AND_RETURN_RET_LOG(descriptor.ReadFromParcel(data), ERR_NONE, "read AVSessionDescriptor failed");
+
+    OnSessionRelease(descriptor);
+    return ERR_NONE;
 }
 
 int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel &data, MessageParcel &reply)
 {
-    return 0;
+    sptr<AVPlaybackState> state = data.ReadParcelable<AVPlaybackState>();
+
+    CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read PlaybackState failed");
+    OnPlaybackStateUpdate(*state);
+    return ERR_NONE;
 }
 
 int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel &data, MessageParcel &reply)
 {
-    return 0;
-}
+    sptr<AVMetaData> metaData = data.ReadParcelable<AVMetaData>();
 
-int32_t AVControllerCallbackStub::HandleOnVolumeInfoChange(MessageParcel &data, MessageParcel &reply)
-{
-    return 0;
+    CHECK_AND_RETURN_RET_LOG(metaData != nullptr, ERR_NONE, "read MetaData failed");
+    OnMetaDataUpdate(*metaData);
+    return ERR_NONE;
 }
 
 int32_t AVControllerCallbackStub::HandleOnActiveStateChange(MessageParcel &data, MessageParcel &reply)
 {
-    bool isActive = data.ReadBool();
+    bool isActive = false;
+    CHECK_AND_RETURN_RET_LOG(data.ReadBool(isActive), ERR_NONE, "read isActive failed");
+
     OnActiveStateChange(isActive);
     return ERR_NONE;
 }
