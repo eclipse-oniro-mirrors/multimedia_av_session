@@ -21,24 +21,24 @@
 namespace OHOS::AVSession {
 class AVSessionCallbackStub : public IRemoteStub<IAVSessionCallback> {
 public:
-    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    int HandleOnPlay(MessageParcel& data, MessageParcel& reply);
-    int HandleOnPause(MessageParcel& data, MessageParcel& reply);
-    int HandleOnStop(MessageParcel& data, MessageParcel& reply);
-    int HandleOnPlayNext(MessageParcel& data, MessageParcel& reply);
-    int HandleOnPlayPrevious(MessageParcel& data, MessageParcel& reply);
-    int HandleOnFastForward(MessageParcel& data, MessageParcel& reply);
-    int HandleOnRewind(MessageParcel& data, MessageParcel& reply);
-    int HandleOnSeek(MessageParcel& data, MessageParcel& reply);
-    int HandleOnSetSpeed(MessageParcel& data, MessageParcel& reply);
-    int HandleOnSetLoopMode(MessageParcel& data, MessageParcel& reply);
-    int HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply);
-    int HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply);
-    using HanlerFunc = int(AVSessionCallbackStub::*)(MessageParcel&, MessageParcel&);
+    int32_t HandleOnPlay(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnPause(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnStop(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnPlayNext(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnPlayPrevious(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnFastForward(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnRewind(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnSeek(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnSetSpeed(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnSetLoopMode(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply);
+    using HanlerFunc = int32_t(AVSessionCallbackStub::*)(MessageParcel&, MessageParcel&);
     static inline HanlerFunc handlers[] = {
         [SESSION_CALLBACK_ON_PLAY] = &AVSessionCallbackStub::HandleOnPlay,
         [SESSION_CALLBACK_ON_PAUSE] = &AVSessionCallbackStub::HandleOnPause,

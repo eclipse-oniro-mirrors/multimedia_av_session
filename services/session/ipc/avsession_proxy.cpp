@@ -203,7 +203,7 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), nullptr, "read int32 failed");
-	sptr <IRemoteObject> controller = nullptr;
+    sptr <IRemoteObject> controller = nullptr;
     if (ret == AVSESSION_SUCCESS) {
         controller = reply.ReadRemoteObject();
         CHECK_AND_RETURN_RET_LOG(controller != nullptr, nullptr, "read IRemoteObject failed");
