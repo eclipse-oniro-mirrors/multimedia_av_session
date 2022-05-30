@@ -60,6 +60,7 @@ protected:
     sptr<IRemoteObject> GetControllerInner() override;
 
 private:
+    sptr<IAVSessionCallback> callback_;
     static inline BrokerDelegator<AVSessionProxy> delegator_;
 };
 }

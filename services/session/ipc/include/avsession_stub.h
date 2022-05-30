@@ -32,6 +32,10 @@ public:
         return ERR_NONE;
     }
 
+    std::shared_ptr<AVSessionController> GetController() override
+    {
+        return nullptr;
+    }
 private:
     int32_t HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
 

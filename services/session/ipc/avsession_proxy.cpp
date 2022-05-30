@@ -31,22 +31,21 @@ int32_t AVSessionProxy::GetSessionId()
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "GetSessionId write interface token failed");
+        ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_SESSION_ID, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "GetSessionId send request failed");
+        ERR_IPC_SEND_REQUEST, "send request failed");
 
-    int32_t sessionId = -1;
+    int32_t sessionId = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(sessionId), AVSESSION_ERROR, "read sessionId failed");
     return sessionId;
 }
 
 int32_t AVSessionProxy::RegisterCallback(std::shared_ptr<AVSessionCallback> &callback)
 {
-    sptr<IAVSessionCallback> callback_;
     callback_ = new(std::nothrow) AVSessionCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVSessionCallbackClient failed");
     if (RegisterCallbackInner(callback_) != AVSESSION_SUCCESS) {
@@ -76,7 +75,7 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &ca
 
 int32_t AVSessionProxy::Release()
 {
-    SLOGD("Release enter");
+    SLOGD("enter");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -124,11 +123,11 @@ int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        std::shared_ptr <AVMetaData> metaData(reply.ReadParcelable<AVMetaData>());
+        std::shared_ptr<AVMetaData> metaData(reply.ReadParcelable<AVMetaData>());
         CHECK_AND_RETURN_RET_LOG(metaData != nullptr, ERR_UNMARSHALLING, "read metaData failed");
         meta = *metaData;
     }
-    return AVSESSION_SUCCESS;
+    return ret;
 }
 
 int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
@@ -146,11 +145,11 @@ int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        std::shared_ptr <AVPlaybackState> playbackState(reply.ReadParcelable<AVPlaybackState>());
+        std::shared_ptr<AVPlaybackState> playbackState(reply.ReadParcelable<AVPlaybackState>());
         CHECK_AND_RETURN_RET_LOG(playbackState != nullptr, ERR_UNMARSHALLING, "read playbackState failed");
         state = *playbackState;
     }
-    return AVSESSION_SUCCESS;
+    return ret;
 }
 
 int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
@@ -264,7 +263,7 @@ bool AVSessionProxy::IsActive()
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     bool ret = false;
-    return reply.ReadBool(ret) ? ret : AVSESSION_ERROR;
+    return reply.ReadBool(ret) ? ret : false;
 }
 
 int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)

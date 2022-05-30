@@ -39,11 +39,6 @@ public:
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
-    std::shared_ptr<AVSessionController> GetController() override
-    {
-        return nullptr;
-    }
-
     int32_t Active() override;
 
     int32_t Disactive() override;

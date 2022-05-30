@@ -28,8 +28,7 @@ bool AVSessionStub::CheckInterfaceToken(MessageParcel &data)
     return true;
 }
 
-int32_t AVSessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int32_t AVSessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
@@ -42,7 +41,7 @@ int32_t AVSessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messa
 
 int32_t AVSessionStub::HandleGetSessionId(MessageParcel &data, MessageParcel &reply)
 {
-    reply.WriteInt32(GetSessionId());
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(GetSessionId()), ERR_NONE, "write int32_t failed");
     return ERR_NONE;
 }
 
@@ -50,7 +49,7 @@ int32_t AVSessionStub::HandleRegisterCallbackInner(MessageParcel &data, MessageP
 {
     auto remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
-        reply.WriteInt32(AVSESSION_ERROR);
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32_t failed");
         return ERR_NONE;
     }
     auto callback = iface_cast<AVSessionCallbackProxy>(remoteObject);
@@ -62,7 +61,7 @@ int32_t AVSessionStub::HandleRegisterCallbackInner(MessageParcel &data, MessageP
 int32_t AVSessionStub::HandleRelease(MessageParcel &data, MessageParcel &reply)
 {
     Release();
-    reply.WriteInt32(AVSESSION_SUCCESS);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_SUCCESS), ERR_NONE, "write int32_t failed");
     return ERR_NONE;
 }
 
@@ -70,41 +69,42 @@ int32_t AVSessionStub::HandleGetAVPlaybackState(MessageParcel& data, MessageParc
 {
     AVPlaybackState avPlaybackState;
     int32_t ret = GetAVPlaybackState(avPlaybackState);
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "write int32 failed");
-    CHECK_AND_PRINT_LOG(reply.WriteParcelable(&avPlaybackState), "write avPlaybackState failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE,"GetAVPlaybackState failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteParcelable(&avPlaybackState), ERR_NONE, "write avPlaybackState failed");
     return ERR_NONE;
 }
 
 int32_t AVSessionStub::HandleSetAVPlaybackState(MessageParcel& data, MessageParcel& reply)
 {
     sptr avPlaybackState = data.ReadParcelable<AVPlaybackState>();
-    if (avPlaybackState != nullptr) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(SetAVPlaybackState(*avPlaybackState)), "WriteInt32 result failed");
-    } else {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "WriteInt32 result failed");
+    if (avPlaybackState == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
     }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetAVPlaybackState(*avPlaybackState)), ERR_NONE, "WriteInt32 result failed");
     return ERR_NONE;
 }
 
 int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
     sptr avMetaData = data.ReadParcelable<AVMetaData>();
-    if (avMetaData != nullptr) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(SetAVMetaData(*avMetaData)), "WriteInt32 result failed");
-    } else {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "WriteInt32 result failed");
+    if (avMetaData == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
     }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetAVMetaData(*avMetaData)), ERR_NONE, "WriteInt32 result failed");
     return ERR_NONE;
 }
 
 int32_t AVSessionStub::HandleSetLaunchAbility(MessageParcel& data, MessageParcel& reply)
 {
     sptr want = data.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>();
-    if (want != nullptr) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(SetLaunchAbility(*want)), "WriteInt32 result failed");
-    } else {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "WriteInt32 result failed");
+    if (want == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
     }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetLaunchAbility(*want)), ERR_NONE, "WriteInt32 result failed");
     return ERR_NONE;
 }
 
@@ -112,40 +112,33 @@ int32_t AVSessionStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& r
 {
     AVMetaData avMetaData;
     int32_t ret = GetAVMetaData(avMetaData);
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "write int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_PRINT_LOG(reply.WriteParcelable(&avMetaData), "write avMetaData failed");
-    }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteParcelable(&avMetaData), ERR_NONE, "write avMetaData failed");
     return ERR_NONE;
 }
 
 int32_t AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject>  controller = GetControllerInner();
-    if (controller != nullptr) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(AVSESSION_SUCCESS), "write int32 failed");
-        CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(controller), "write object failed");
-    } else {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(AVSESSION_ERROR), "write int32 failed");
+    if (controller == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
     }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_SUCCESS), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteRemoteObject(controller), ERR_NONE, "write object failed");
     return ERR_NONE;
 }
 
 int32_t AVSessionStub::HandleActive(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t ret = Active();
-    if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "WriteInt32 failed");
-    }
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(Active()), "WriteInt32 failed");
     return ERR_NONE;
 }
 
 int32_t AVSessionStub::HandleDisactive(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t ret = Disactive();
-    if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "WriteInt32 failed");
-    }
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(Disactive()), "WriteInt32 failed");
     return ERR_NONE;
 }
 
@@ -157,10 +150,7 @@ int32_t AVSessionStub::HandleIsActive(MessageParcel& data, MessageParcel& reply)
 
 int32_t AVSessionStub::HandleAddSupportCommand(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t ret = AddSupportCommand(data.ReadInt32());
-    if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "WriteInt32 failed");
-    }
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(AddSupportCommand(data.ReadInt32())), "WriteInt32 failed");
     return ERR_NONE;
 }
 }
