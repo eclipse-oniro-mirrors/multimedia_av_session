@@ -70,7 +70,7 @@ int32_t AVSessionStub::HandleGetAVPlaybackState(MessageParcel& data, MessageParc
     AVPlaybackState avPlaybackState;
     int32_t ret = GetAVPlaybackState(avPlaybackState);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE,"GetAVPlaybackState failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVPlaybackState failed");
     CHECK_AND_RETURN_RET_LOG(reply.WriteParcelable(&avPlaybackState), ERR_NONE, "write avPlaybackState failed");
     return ERR_NONE;
 }
@@ -82,7 +82,8 @@ int32_t AVSessionStub::HandleSetAVPlaybackState(MessageParcel& data, MessageParc
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
         return ERR_NONE;
     }
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetAVPlaybackState(*avPlaybackState)), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetAVPlaybackState(*avPlaybackState)), ERR_NONE,
+        "WriteInt32 result failed");
     return ERR_NONE;
 }
 
