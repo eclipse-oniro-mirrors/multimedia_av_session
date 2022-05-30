@@ -39,10 +39,6 @@ public:
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
-    std::shared_ptr<AVSessionController> GetController() override;
-
-    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override;
-
     int32_t Active() override;
 
     int32_t Disactive() override;
@@ -51,15 +47,17 @@ public:
 
     int32_t Release() override;
 
-    int32_t AddSupportCommand(const std::string& cmd) override;
+    int32_t AddSupportCommand(const int32_t cmd) override;
 
     AVSessionDescriptor GetDescriptor();
+
+    int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
 
     AVPlaybackState GetPlaybackState();
 
     AVMetaData GetMetaData();
 
-    std::vector<std::string> GetSupportCommand();
+    std::vector<int32_t> GetSupportCommand();
 
     AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
 
@@ -86,7 +84,8 @@ public:
     void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);
 
 protected:
-    int32_t RegisterCallbackInner(sptr<IRemoteObject>& callback) override;
+    int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
+    sptr<IRemoteObject> GetControllerInner() override;
 
 private:
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
@@ -96,8 +95,8 @@ private:
     pid_t pid_ {};
     uid_t uid_ {};
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
-    std::vector<std::string> supportedCmd_;
-    sptr<AVSessionCallbackProxy> callback_;
+    std::vector<int32_t> supportedCmd_;
+    sptr<IAVSessionCallback> callback_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;
     std::function<void(AVSessionItem&)> serviceCallback_;
 };

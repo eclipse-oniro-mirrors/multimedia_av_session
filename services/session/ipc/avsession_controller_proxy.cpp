@@ -228,7 +228,6 @@ int32_t AVSessionControllerProxy::Release()
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
-
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();

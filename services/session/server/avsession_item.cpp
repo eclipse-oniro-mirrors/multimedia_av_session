@@ -18,10 +18,11 @@
 #include "avcontroller_item.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_descriptor.h"
 
 namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
-    : descriptor_()
+    : descriptor_(descriptor)
 {
     SLOGD("constructor id=%{public}d", descriptor_.sessionId_);
 }
@@ -34,11 +35,6 @@ AVSessionItem::~AVSessionItem()
 int32_t AVSessionItem::GetSessionId()
 {
     return descriptor_.sessionId_;
-}
-
-int32_t AVSessionItem::RegisterCallbackInner(sptr<IRemoteObject> &callback)
-{
-    return 0;
 }
 
 int32_t AVSessionItem::Release()
@@ -55,52 +51,70 @@ int32_t AVSessionItem::Release()
 
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
-    return 0;
+    meta = metaData_;
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
-    return 0;
+    metaData_.CopyFrom(meta);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t  AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
+{
+    playbackState_ = state;
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 {
-    return 0;
+    state = playbackState_;
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
-    return 0;
+    launchAbility_ = ability;
+    return AVSESSION_SUCCESS;
 }
 
-std::shared_ptr<AVSessionController> AVSessionItem::GetController()
+sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 {
-    return nullptr;
+    auto iter = controllers_.find(GetPid());
+    if(iter == controllers_.end()) {
+        return nullptr;
+    }
+    return iter->second;
 }
 
-int32_t AVSessionItem::RegisterCallback(std::shared_ptr<AVSessionCallback>& callback)
+int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback> &callback)
 {
-    return 0;
+    callback_ = callback;
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::Active()
 {
-    return 0;
+    descriptor_.isActive_ = true;
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::Disactive()
 {
-    return 0;
+    descriptor_.isActive_ = false;
+    return AVSESSION_SUCCESS;
 }
 
 bool AVSessionItem::IsActive()
 {
-    return false;
+    return descriptor_.isActive_;
 }
 
-int32_t AVSessionItem::AddSupportCommand(const std::string& cmd)
+int32_t AVSessionItem::AddSupportCommand(const int32_t cmd)
 {
-    return 0;
+    supportedCmd_.push_back(cmd);
+    return AVSESSION_SUCCESS;
 }
 
 AVSessionDescriptor AVSessionItem::GetDescriptor()
@@ -118,7 +132,7 @@ AVMetaData AVSessionItem::GetMetaData()
     return metaData_;
 }
 
-std::vector<std::string> AVSessionItem::GetSupportCommand()
+std::vector<int32_t> AVSessionItem::GetSupportCommand()
 {
     return supportedCmd_;
 }
@@ -141,22 +155,24 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& contoller)
 {
-    return 0;
+    controllers_.insert({ pid, contoller });
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::RemoveController(pid_t pid)
 {
-    return 0;
+    controllers_.erase(pid);
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::RegisterCallbackForRemote(std::shared_ptr<AVSessionCallback>& callback)
 {
-    return 0;
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::UnRegisterCallbackForRemote()
 {
-    return 0;
+    return AVSESSION_SUCCESS;
 }
 
 void AVSessionItem::SetPid(pid_t pid)

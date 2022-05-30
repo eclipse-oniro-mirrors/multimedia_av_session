@@ -26,6 +26,7 @@ ohos_shared_library("avsession_client") {
 
   ipc_sources = [
     "//foundation/multimedia/avsession/services/session/ipc/avcontroller_callback_stub.cpp",
+    "//foundation/multimedia/avsession/services/session/ipc/avsession_callback_stub.cpp",
     "//foundation/multimedia/avsession/services/session/ipc/avsession_controller_proxy.cpp",
     "//foundation/multimedia/avsession/services/session/ipc/avsession_proxy.cpp",
     "//foundation/multimedia/avsession/services/session/ipc/avsession_service_proxy.cpp",
@@ -37,6 +38,7 @@ ohos_shared_library("avsession_client") {
     "src/avcontroller_callback_client.cpp",
     "src/avmeta_data.cpp",
     "src/avplayback_state.cpp",
+    "src/avsession_callback_client.cpp",
     "src/avsession_manager.cpp",
     "src/avsession_manager_impl.cpp",
     "src/session_listener_client.cpp",

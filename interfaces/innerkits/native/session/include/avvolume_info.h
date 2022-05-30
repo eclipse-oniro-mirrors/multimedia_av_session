@@ -29,17 +29,17 @@ public:
 
     bool WriteToParcel(Parcel& out) const
     {
-        return out.WriteInt32(currentVolume_) && out.WriteInt32(maxVolume_) && out.WriteInt32(volumeType);
+        return out.WriteInt32(currentVolume_) && out.WriteInt32(maxVolume_) && out.WriteInt32(volumeType_);
     }
 
     bool ReadFromParcel(Parcel& in)
     {
-        return in.ReadInt32(currentVolume_) && in.ReadInt32(maxVolume_) && in.ReadInt32(volumeType);
+        return in.ReadInt32(currentVolume_) && in.ReadInt32(maxVolume_) && in.ReadInt32(volumeType_);
     }
 
     int32_t currentVolume_;
     int32_t maxVolume_;
-    int32_t volumeType;
+    int32_t volumeType_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVVOLUME_INFO_H

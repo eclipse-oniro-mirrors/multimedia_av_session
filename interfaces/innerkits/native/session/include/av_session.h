@@ -34,9 +34,13 @@ public:
 
     virtual int32_t GetAVPlaybackState(AVPlaybackState& state) = 0;
 
+    virtual int32_t SetAVPlaybackState(const AVPlaybackState& state) = 0;
+
     virtual int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) = 0;
 
     virtual std::shared_ptr<AVSessionController> GetController() = 0;
+
+    virtual sptr<IRemoteObject> GetControllerInner() = 0;
 
     virtual int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) = 0;
 
@@ -48,7 +52,7 @@ public:
 
     virtual int32_t Release() = 0;
 
-    virtual int32_t AddSupportCommand(const std::string& cmd) = 0;
+    virtual int32_t AddSupportCommand(const int32_t cmd) = 0;
 
     virtual ~AVSession() = default;
 };
