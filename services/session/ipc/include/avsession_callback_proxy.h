@@ -17,7 +17,6 @@
 
 #include "iremote_proxy.h"
 #include "iavsession_callback.h"
-#include "avvolume_info.h"
 
 namespace OHOS::AVSession {
 class AVSessionCallbackProxy : public IRemoteProxy<IAVSessionCallback> {
@@ -34,9 +33,6 @@ public:
     void OnSetSpeed(int32_t speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
-
-    void OnVolumeChanged(const AVVolumeInfo& volume) override;
-
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
 private:
     static inline BrokerDelegator<AVSessionCallbackProxy> delegator_;

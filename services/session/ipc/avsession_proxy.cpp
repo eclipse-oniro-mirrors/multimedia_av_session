@@ -34,18 +34,21 @@ int32_t AVSessionProxy::GetSessionId()
         ERR_MARSHALLING, "GetSessionId write interface token failed");
     MessageParcel reply;
     MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_SESSION_ID, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "GetSessionId send request failed");
-    return reply.ReadInt32();
+
+    int32_t sessionId = -1;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(sessionId), AVSESSION_ERROR, "read sessionId failed");
+    return sessionId;
 }
 
 int32_t AVSessionProxy::RegisterCallback(std::shared_ptr<AVSessionCallback> &callback)
 {
     sptr<IAVSessionCallback> callback_;
     callback_ = new(std::nothrow) AVSessionCallbackClient(callback);
-    if (callback_ == nullptr) {
-        return ERR_NO_MEMORY;
-    }
+    CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVSessionCallbackClient failed");
     if (RegisterCallbackInner(callback_) != AVSESSION_SUCCESS) {
         callback_.clear();
         return AVSESSION_ERROR;
@@ -62,9 +65,13 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &ca
                              "write remote object failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_REGISTER_CALLBACK, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_REGISTER_CALLBACK, data, reply, option) == 0,
                              ERR_IPC_SEND_REQUEST, "send request failed");
-    return reply.ReadInt32();
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
 int32_t AVSessionProxy::Release()
@@ -75,9 +82,13 @@ int32_t AVSessionProxy::Release()
         ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_RELEASE, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_RELEASE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    return reply.ReadInt32();
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
 int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
@@ -89,9 +100,13 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
         ERR_MARSHALLING, "WriteParcelable failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    return reply.ReadInt32();
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
 int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
@@ -101,10 +116,18 @@ int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
                              ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_META_DATA, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_META_DATA, data, reply, option) == 0,
                              ERR_IPC_SEND_REQUEST, "send request failed");
-    std::shared_ptr<AVMetaData> metaData(reply.ReadParcelable<AVMetaData>());
-    meta = *metaData;
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        std::shared_ptr <AVMetaData> metaData(reply.ReadParcelable<AVMetaData>());
+        CHECK_AND_RETURN_RET_LOG(metaData != nullptr, ERR_UNMARSHALLING, "read metaData failed");
+        meta = *metaData;
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -115,10 +138,18 @@ int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
         ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_PLAYBACK_STATE, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_PLAYBACK_STATE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    std::shared_ptr<AVPlaybackState> playbackState(reply.ReadParcelable<AVPlaybackState>());
-    state = *playbackState;
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        std::shared_ptr <AVPlaybackState> playbackState(reply.ReadParcelable<AVPlaybackState>());
+        CHECK_AND_RETURN_RET_LOG(playbackState != nullptr, ERR_UNMARSHALLING, "read playbackState failed");
+        state = *playbackState;
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -131,9 +162,13 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
         ERR_MARSHALLING, "Write state failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_SET_PLAYBACK_STATE, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_PLAYBACK_STATE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    return reply.ReadInt32();
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
 int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
@@ -145,9 +180,13 @@ int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAg
         ERR_MARSHALLING, "Write WantAgent failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_SET_LAUNCH_ABILITY, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_LAUNCH_ABILITY, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    return reply.ReadInt32();
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
 sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
@@ -157,15 +196,25 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
                              nullptr, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_CONTROLLER, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, nullptr, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_CONTROLLER, data, reply, option) == 0,
                              nullptr, "send request failed");
-    sptr <IRemoteObject> controller = reply.ReadRemoteObject();
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), nullptr, "read int32 failed");
+	sptr <IRemoteObject> controller = nullptr;
+    if (ret == AVSESSION_SUCCESS) {
+        controller = reply.ReadRemoteObject();
+        CHECK_AND_RETURN_RET_LOG(controller != nullptr, nullptr, "read IRemoteObject failed");
+    }
     return controller;
 }
 
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
-    auto object = GetControllerInner();
+    sptr <IRemoteObject> object = GetControllerInner();
+    CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
     auto controller = iface_cast<AVSessionControllerProxy>(object);
     return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
 }
@@ -177,9 +226,13 @@ int32_t AVSessionProxy::Active()
         ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_ACTIVE, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ACTIVE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    return reply.ReadInt32();
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
 int32_t AVSessionProxy::Disactive()
@@ -189,9 +242,13 @@ int32_t AVSessionProxy::Disactive()
         ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_DISACTIVE, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_DISACTIVE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    return reply.ReadInt32();
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
 bool AVSessionProxy::IsActive()
@@ -201,9 +258,13 @@ bool AVSessionProxy::IsActive()
         ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_ISACTIVE, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ISACTIVE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    return reply.ReadBool();
+
+    bool ret = false;
+    return reply.ReadBool(ret) ? ret : AVSESSION_ERROR;
 }
 
 int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
@@ -215,8 +276,12 @@ int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
         ERR_MARSHALLING, "Write cmd failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_ADDSUPPORT_COMMAND, data, reply, option) == 0,
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ADDSUPPORT_COMMAND, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    return reply.ReadInt32();
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 }

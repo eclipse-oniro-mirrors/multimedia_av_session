@@ -50,11 +50,7 @@ public:
     virtual void OnSetSpeed(int32_t speed) = 0;
     virtual void OnSetLoopMode(int32_t loopMode) = 0;
     virtual void OnToggleFavorite(const std::string& mediald) = 0;
-
-    virtual void OnVolumeChanged(const AVVolumeInfo& volume) = 0;
-
     virtual void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
-
     virtual ~AVSessionCallback() = default;
 };
 

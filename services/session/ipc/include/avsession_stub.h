@@ -19,11 +19,13 @@
 #include "iav_session.h"
 #include "iremote_stub.h"
 #include "want_agent.h"
+#include "avsession_log.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 class AVSessionStub : public IRemoteStub<IAVSession> {
 public:
-    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
     int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override
     {
@@ -31,35 +33,35 @@ public:
     }
 
 private:
-    int HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
 
-    int HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
-    int HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
-    int HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply);
 
-    int HandleSetAVPlaybackState(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleSetAVPlaybackState(MessageParcel& data, MessageParcel& reply);
 
-    int HandleSetLaunchAbility(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleSetLaunchAbility(MessageParcel& data, MessageParcel& reply);
 
-    int HandleGetController(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetController(MessageParcel& data, MessageParcel& reply);
 
-    int HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
-    int HandleActive(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleActive(MessageParcel& data, MessageParcel& reply);
 
-    int HandleDisactive(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleDisactive(MessageParcel& data, MessageParcel& reply);
 
-    int HandleIsActive(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleIsActive(MessageParcel& data, MessageParcel& reply);
 
-    int HandleRelease(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleRelease(MessageParcel& data, MessageParcel& reply);
 
-    int HandleAddSupportCommand(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleAddSupportCommand(MessageParcel& data, MessageParcel& reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HanlerFunc = int(AVSessionStub::*)(MessageParcel&, MessageParcel&);
+    using HanlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
     static inline HanlerFunc handlers[] = {
         [SESSION_CMD_GET_SESSION_ID] = &AVSessionStub::HandleGetSessionId,
         [SESSION_CMD_GET_META_DATA] = &AVSessionStub::HandleGetAVMetaData,

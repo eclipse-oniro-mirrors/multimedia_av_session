@@ -18,7 +18,6 @@
 #include "iavsession_callback.h"
 #include "key_event.h"
 #include "avsession_log.h"
-#include "avvolume_info.h"
 
 namespace OHOS::AVSession {
 int AVSessionCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -111,14 +110,6 @@ int AVSessionCallbackStub::HandleOnToggleFavorite(MessageParcel& data, MessagePa
 {
     std::string mediald(data.ReadString());
     OnToggleFavorite(mediald);
-    return ERR_NONE;
-}
-
-int AVSessionCallbackStub::HandleOnVolumeChanged(MessageParcel& data, MessageParcel& reply)
-{
-    AVVolumeInfo avVolumeInfo;
-    avVolumeInfo.ReadFromParcel(data);
-    OnVolumeChanged(avVolumeInfo);
     return ERR_NONE;
 }
 

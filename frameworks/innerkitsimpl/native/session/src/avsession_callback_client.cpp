@@ -23,66 +23,133 @@ AVSessionCallbackClient::AVSessionCallbackClient(std::shared_ptr<AVSessionCallba
 
 void AVSessionCallbackClient::OnPlay()
 {
-    callback_->OnPlay();
+    if (callback_) {
+        callback_->OnPlay();
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnPause()
 {
-    callback_->OnPause();
+    if (callback_) {
+        callback_->OnPause();
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnStop()
 {
-    callback_->OnStop();
+    if (callback_) {
+        callback_->OnStop();
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnPlayNext()
 {
-    callback_->OnPlayNext();
+    if (callback_) {
+        callback_->OnPlayNext();
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnPlayPrevious()
 {
-    callback_->OnPlayPrevious();
+    if (callback_) {
+        callback_->OnPlayPrevious();
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnFastForward()
 {
-    callback_->OnFastForward();
+    if (callback_) {
+        callback_->OnFastForward();
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnRewind()
 {
-    callback_->OnRewind();
+    if (callback_) {
+        callback_->OnRewind();
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnSeek(int64_t time)
 {
-    callback_->OnSeek(time);
+    if (callback_) {
+        callback_->OnSeek(time);
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnSetSpeed(int32_t speed)
 {
-    callback_->OnSetSpeed(speed);
+    if (callback_) {
+        callback_->OnSetSpeed(speed);
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnSetLoopMode(int32_t loopMode)
 {
-    callback_->OnSetLoopMode(loopMode);
+    if (callback_) {
+        callback_->OnSetLoopMode(loopMode);
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnToggleFavorite(const std::string& mediald)
 {
-    callback_->OnToggleFavorite(mediald);
-}
-
-void AVSessionCallbackClient::OnVolumeChanged(const AVVolumeInfo& volume)
-{
-    callback_->OnVolumeChanged(volume);
+    if (callback_) {
+        callback_->OnToggleFavorite(mediald);
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 
 void AVSessionCallbackClient::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    callback_->OnMediaKeyEvent(keyEvent);
+    if (callback_) {
+        callback_->OnMediaKeyEvent(keyEvent);
+    }
+    else
+    {
+        SLOGE("callback_ is null");
+    }
 }
 }

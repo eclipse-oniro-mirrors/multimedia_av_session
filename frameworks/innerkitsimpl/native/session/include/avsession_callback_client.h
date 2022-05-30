@@ -19,6 +19,7 @@
 #include "avsession_callback_stub.h"
 #include "avsession_info.h"
 #include "key_event.h"
+#include "avsession_log.h"
 
 namespace OHOS::AVSession {
 class AVSessionCallbackClient : public AVSessionCallbackStub {
@@ -35,9 +36,6 @@ public:
     void OnSetSpeed(int32_t speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
-
-    void OnVolumeChanged(const AVVolumeInfo& volume) override;
-
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
 private:

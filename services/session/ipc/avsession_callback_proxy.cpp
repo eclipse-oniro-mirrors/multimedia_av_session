@@ -137,17 +137,6 @@ void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediald)
         "send request failed");
 }
 
-void AVSessionCallbackProxy::OnVolumeChanged(const AVVolumeInfo& volume)
-{
-    MessageParcel data;
-    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(volume.WriteToParcel(data), "write volume currentVolume failed");
-    MessageParcel reply;
-    MessageOption option = { MessageOption::TF_ASYNC };
-    CHECK_AND_RETURN_LOG(Remote()->SendRequest(SESSION_CALLBACK_ON_VOLUME_CHANGED, data, reply, option) == 0,
-        "send request failed");
-}
-
 void AVSessionCallbackProxy::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     MessageParcel data;

@@ -29,22 +29,15 @@ private:
     int HandleOnPlay(MessageParcel& data, MessageParcel& reply);
     int HandleOnPause(MessageParcel& data, MessageParcel& reply);
     int HandleOnStop(MessageParcel& data, MessageParcel& reply);
-
     int HandleOnPlayNext(MessageParcel& data, MessageParcel& reply);
     int HandleOnPlayPrevious(MessageParcel& data, MessageParcel& reply);
-
     int HandleOnFastForward(MessageParcel& data, MessageParcel& reply);
     int HandleOnRewind(MessageParcel& data, MessageParcel& reply);
     int HandleOnSeek(MessageParcel& data, MessageParcel& reply);
-
     int HandleOnSetSpeed(MessageParcel& data, MessageParcel& reply);
     int HandleOnSetLoopMode(MessageParcel& data, MessageParcel& reply);
     int HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply);
-
-    int HandleOnVolumeChanged(MessageParcel& data, MessageParcel& reply);
-
     int HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply);
-
     using HanlerFunc = int(AVSessionCallbackStub::*)(MessageParcel&, MessageParcel&);
     static inline HanlerFunc handlers[] = {
         [SESSION_CALLBACK_ON_PLAY] = &AVSessionCallbackStub::HandleOnPlay,
@@ -58,7 +51,6 @@ private:
         [SESSION_CALLBACK_ON_SET_SPEED] = &AVSessionCallbackStub::HandleOnSetSpeed,
         [SESSION_CALLBACK_ON_SET_LOOPMODE] = &AVSessionCallbackStub::HandleOnSetLoopMode,
         [SESSION_CALLBACK_ON_TOGGLE_FAVORITE] = &AVSessionCallbackStub::HandleOnToggleFavorite,
-        [SESSION_CALLBACK_ON_VOLUME_CHANGED] = &AVSessionCallbackStub::HandleOnVolumeChanged,
         [SESSION_CALLBACK_ON_MEDIA_KEY_EVENT] = &AVSessionCallbackStub::HandleOnMediaKeyEvent
     };
 };
