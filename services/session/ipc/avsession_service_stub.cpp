@@ -50,12 +50,6 @@ int AVSessionServiceStub::HandleCreateSessionInner(MessageParcel &data, MessageP
     return ERR_NONE;
 }
 
-int AVSessionServiceStub::HandleGetSessionInner(MessageParcel &data, MessageParcel &reply)
-{
-    reply.WriteRemoteObject(GetSessionInner());
-    return ERR_NONE;
-}
-
 int AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel &data, MessageParcel &reply)
 {
     auto descriptors = GetAllSessionDescriptors();
@@ -72,41 +66,51 @@ int AVSessionServiceStub::HandleCreateControllerInner(MessageParcel &data, Messa
     return ERR_NONE;
 }
 
-int AVSessionServiceStub::HandleGetControllerInner(MessageParcel &data, MessageParcel &reply)
-{
-    reply.WriteRemoteObject(GetControllerInner(data.ReadInt32()));
-    return ERR_NONE;
-}
-
-int AVSessionServiceStub::HandleGetAllControllersInner(MessageParcel &data, MessageParcel &reply)
-{
-    auto controllers = GetAllControllersInner();
-    reply.WriteUint32(controllers.size());
-    for (const auto& controller : controllers) {
-        reply.WriteRemoteObject(controller);
-    }
-    return ERR_NONE;
-}
-
 int AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply)
 {
     auto remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
-        reply.WriteInt32(AVSESSION_ERROR);
+        SLOGE("read remote object failed");
+        reply.WriteInt32(ERR_UNMARSHALLING);
         return ERR_NONE;
     }
     auto listener = iface_cast<SessionListenerProxy>(remoteObject);
-    reply.WriteInt32(RegisterSessionListener(listener));
+    if (!reply.WriteInt32(RegisterSessionListener(listener))) {
+        SLOGE("reply write int32 failed");
+    }
     return ERR_NONE;
 }
 
 int AVSessionServiceStub::HandleSendSystemMediaKeyEvent(MessageParcel &data, MessageParcel &reply)
 {
+    auto keyEvent = MMI::KeyEvent::Create();
+    if (keyEvent == nullptr) {
+        SLOGE("create keyEvent failed");
+        reply.WriteInt32(ERR_NO_MEMORY);
+        return ERR_NONE;
+    }
+    if (!keyEvent->ReadFromParcel(data)) {
+        SLOGE("read keyEvent failed");
+        reply.WriteInt32(ERR_UNMARSHALLING);
+        return ERR_NONE;
+    }
+    if (!reply.WriteInt32(SendSystemMediaKeyEvent(*keyEvent))) {
+        SLOGE("reply write int32 failed");
+    }
     return ERR_NONE;
 }
 
-int AVSessionServiceStub::HandleSetSystemMediaVolume(MessageParcel &data, MessageParcel &reply)
+int AVSessionServiceStub::HandleSendSystemControlCommand(MessageParcel &data, MessageParcel &reply)
 {
+    sptr command = data.ReadParcelable<AVControlCommand>();
+    if (command == nullptr) {
+        SLOGE("read command failed");
+        reply.WriteInt32(ERR_UNMARSHALLING);
+        return ERR_NONE;
+    }
+    if (!reply.WriteInt32(SendSystemControlCommand(*command))) {
+        SLOGE("reply write int32 failed");
+    }
     return ERR_NONE;
 }
 
@@ -114,7 +118,8 @@ int AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel &data,
 {
     auto remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
-        reply.WriteInt32(AVSESSION_ERROR);
+        SLOGE("read remote object failed");
+        reply.WriteInt32(ERR_UNMARSHALLING);
         return ERR_NONE;
     }
     auto clientDeathObserver = iface_cast<ClientDeathProxy>(remoteObject);

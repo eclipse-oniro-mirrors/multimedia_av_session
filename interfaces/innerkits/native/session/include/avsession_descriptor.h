@@ -20,11 +20,6 @@
 
 namespace OHOS::AVSession {
 struct AVSessionDescriptor {
-    enum {
-        SESSION_TYPE_AUDIO,
-        SESSION_TYPE_VIDEO
-    };
-
     bool WriteToParcel(Parcel& out) const
     {
         return out.WriteInt32(sessionId_) &&

@@ -18,11 +18,11 @@
 
 #include <string>
 
+#include "avsession_item.h"
 #include "avcontroller_callback_proxy.h"
 #include "avsession_controller_stub.h"
 
 namespace OHOS::AVSession {
-class AVSessionItem;
 class AVControllerItem : public AVSessionControllerStub {
 public:
     AVControllerItem(pid_t pid, sptr<AVSessionItem> &session);
@@ -33,7 +33,7 @@ public:
 
     int32_t GetAVMetaData(AVMetaData &data) override;
 
-    int32_t sendMediaButtonEvent(MMI::KeyEvent& keyEvent) override;
+    int32_t SendMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
 
@@ -41,7 +41,7 @@ public:
 
     int32_t IsSessionActive(bool &isActive) override;
 
-    int32_t SendCommand(AVControlCommand &cmd) override;
+    int32_t SendCommand(const AVControlCommand &cmd) override;
 
     int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) override;
 

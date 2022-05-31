@@ -26,28 +26,22 @@ public:
 
 private:
     int HandleCreateSessionInner(MessageParcel &data, MessageParcel &reply);
-    int HandleGetSessionInner(MessageParcel &data, MessageParcel &reply);
     int HandleGetAllSessionDescriptors(MessageParcel &data, MessageParcel &reply);
     int HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply);
-    int HandleGetControllerInner(MessageParcel &data, MessageParcel &reply);
-    int HandleGetAllControllersInner(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply);
     int HandleSendSystemMediaKeyEvent(MessageParcel &data, MessageParcel &reply);
-    int HandleSetSystemMediaVolume(MessageParcel &data, MessageParcel &reply);
+    int HandleSendSystemControlCommand(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterClientDeathObserver(MessageParcel &data, MessageParcel &reply);
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HanlerFunc = int(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
     static inline HanlerFunc handlers[] = {
         [SERVICE_CMD_CREATE_SESSION] = &AVSessionServiceStub::HandleCreateSessionInner,
-        [SERVICE_CMD_GET_SESSION] = &AVSessionServiceStub::HandleGetSessionInner,
         [SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS] = &AVSessionServiceStub::HandleGetAllSessionDescriptors,
         [SERVICE_CMD_CREATE_CONTROLLER] = &AVSessionServiceStub::HandleCreateControllerInner,
-        [SERVICE_CMD_GET_CONTROLLER] = &AVSessionServiceStub::HandleGetControllerInner,
-        [SERVICE_CMD_GET_ALL_CONTROLLERS] = &AVSessionServiceStub::HandleGetAllControllersInner,
         [SERVICE_CMD_REGISTER_SESSION_LISTENER] = &AVSessionServiceStub::HandleRegisterSessionListener,
         [SERVICE_CMD_SEND_SYSTEM_MEDIA_KEY_EVENT] = &AVSessionServiceStub::HandleSendSystemMediaKeyEvent,
-        [SERVICE_CMD_SET_SYSTEM_MEDIA_VOLUEM] = &AVSessionServiceStub::HandleSetSystemMediaVolume,
+        [SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND] = &AVSessionServiceStub::HandleSendSystemControlCommand,
         [SERVICE_CMD_REGISTER_CLIENT_DEATH] = &AVSessionServiceStub::HandleRegisterClientDeathObserver
     };
 };

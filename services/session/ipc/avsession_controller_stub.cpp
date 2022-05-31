@@ -98,16 +98,16 @@ int32_t AVSessionControllerStub::HandleSendMediaKeyEvent(MessageParcel &data, Me
     std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
     if (event == nullptr) {
         SLOGD("malloc keyEvent failed");
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_NO_MEMORY), "write sendMediaButtonEvent ret failed");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_NO_MEMORY), "write SendMediaKeyEvent ret failed");
         return ERR_NONE;
     }
 
     event->ReadFromParcel(data);
     if (!event->IsValid()) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write sendMediaButtonEvent ret failed");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SendMediaKeyEvent ret failed");
     } else {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(sendMediaButtonEvent(*(event.get()))),
-            "write sendMediaButtonEvent ret failed");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(SendMediaKeyEvent(*(event.get()))),
+            "write SendMediaKeyEvent ret failed");
     }
     return ERR_NONE;
 }

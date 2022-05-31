@@ -31,23 +31,19 @@ public:
     static std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                                     const std::string& bundleName, const std::string& abilityName);
 
-    static std::shared_ptr<AVSession> GetSession();
-
     static std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
 
     static std::shared_ptr<AVSessionController> CreateController(int32_t sessionld);
-
-    static std::shared_ptr<AVSessionController> GetController(int32_t sessionld);
-
-    static std::vector<std::shared_ptr<AVSessionController>> GetAllControllers();
 
     static int32_t RegisterSessionListener(std::shared_ptr<SessionListener>& listener);
 
     static int32_t RegisterServiceDeathCallback(const DeathCallback& callback);
 
-    static int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent);
+    static int32_t UnregisterServiceDeathCallback();
 
-    static int32_t SetSystemMediaVolume(int32_t volume);
+    static int32_t SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent);
+
+    static int32_t SendSystemControlCommand(const AVControlCommand& command);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

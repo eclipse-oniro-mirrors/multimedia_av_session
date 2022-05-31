@@ -30,7 +30,15 @@ std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::strin
     const std::string& bundleName, const std::string& abilityName)
 {
     auto object = CreateSessionInner(tag, type, bundleName, abilityName);
+    if (object == nullptr) {
+        SLOGE("object is nullptr");
+        return nullptr;
+    }
     auto session = iface_cast<AVSessionProxy>(object);
+    if (session == nullptr) {
+        SLOGE("session is nullptr");
+        return nullptr;
+    }
     return std::shared_ptr<AVSession>(session.GetRefPtr(), [holder = session](const auto*) {});
 }
 
@@ -46,25 +54,6 @@ sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string&
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_CREATE_SESSION, data, reply, option) == 0,
-                             nullptr, "send request failed");
-    return reply.ReadRemoteObject();
-}
-
-std::shared_ptr<AVSession> AVSessionServiceProxy::GetSession()
-{
-    auto remoteObject = GetSessionInner();
-    auto session = iface_cast<AVSessionProxy>(remoteObject);
-    return std::shared_ptr<AVSession>(session.GetRefPtr(), [holder = session](const auto*) {});
-}
-
-sptr<IRemoteObject> AVSessionServiceProxy::GetSessionInner()
-{
-    MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), nullptr, "write interface token failed");
-
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_GET_SESSION, data, reply, option) == 0,
                              nullptr, "send request failed");
     return reply.ReadRemoteObject();
 }
@@ -95,8 +84,16 @@ std::vector<AVSessionDescriptor> AVSessionServiceProxy::GetAllSessionDescriptors
 
 std::shared_ptr<AVSessionController> AVSessionServiceProxy::CreateController(int32_t sessionId)
 {
-    auto remoteObject = CreateControllerInner(sessionId);
-    auto controller = iface_cast<AVSessionControllerProxy>(remoteObject);
+    auto object = CreateControllerInner(sessionId);
+    if (object == nullptr) {
+        SLOGE("object is nullptr");
+        return nullptr;
+    }
+    auto controller = iface_cast<AVSessionControllerProxy>(object);
+    if (controller == nullptr) {
+        SLOGE("controller is nullptr");
+        return nullptr;
+    }
     return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
 }
 
@@ -110,58 +107,6 @@ sptr<IRemoteObject> AVSessionServiceProxy::CreateControllerInner(int32_t session
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_CREATE_CONTROLLER, data, reply, option) == 0,
                              nullptr, "send request failed");
     return reply.ReadRemoteObject();
-}
-
-std::shared_ptr<AVSessionController> AVSessionServiceProxy::GetController(int32_t sessionId)
-{
-    auto remoteObject = GetControllerInner(sessionId);
-    auto controller = iface_cast<AVSessionControllerProxy>(remoteObject);
-    return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
-}
-
-sptr<IRemoteObject> AVSessionServiceProxy::GetControllerInner(int32_t sessionId)
-{
-    MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), nullptr, "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionId), nullptr, "write sessionId failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_GET_CONTROLLER, data, reply, option) == 0,
-                             nullptr, "send request failed");
-    return reply.ReadRemoteObject();
-}
-
-std::vector<std::shared_ptr<AVSessionController>> AVSessionServiceProxy::GetAllControllers()
-{
-    std::vector<std::shared_ptr<AVSessionController>> sessionControllers;
-    auto controls = GetAllControllersInner();
-    for (auto& control : controls) {
-        auto sessionController = iface_cast<AVSessionControllerProxy>(control);
-        sessionControllers.push_back(std::shared_ptr<AVSessionController>(
-            sessionController.GetRefPtr(), [holder = sessionController](const auto*) {}));
-    }
-    return sessionControllers;
-}
-
-std::vector<sptr<IRemoteObject>> AVSessionServiceProxy::GetAllControllersInner()
-{
-    MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), {}, "write interface token failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_GET_ALL_CONTROLLERS, data, reply, option) == 0,
-                             {}, "send request failed");
-
-    uint32_t size {};
-    if (!reply.ReadUint32(size) || size == 0) {
-        SLOGE("read vector size failed");
-        return {};
-    }
-    std::vector<sptr<IRemoteObject>> result(size);
-    for (auto& controller : result) {
-        controller = reply.ReadRemoteObject();
-    }
-    return result;
 }
 
 int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListener>& listener)
@@ -179,14 +124,34 @@ int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListen
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
-int32_t AVSessionServiceProxy::SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent)
+int32_t AVSessionServiceProxy::SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    return AVSESSION_ERROR;
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(keyEvent.WriteToParcel(data), ERR_MARSHALLING, "write keyEvent failed");
+
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_SEND_SYSTEM_MEDIA_KEY_EVENT, data, reply, option) == 0,
+                             ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
-int32_t AVSessionServiceProxy::SetSystemMediaVolume(int32_t volume)
+int32_t AVSessionServiceProxy::SendSystemControlCommand(const AVControlCommand &command)
 {
-    return AVSESSION_ERROR;
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&command), ERR_MARSHALLING, "write keyEvent failed");
+
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_SEND_SYSTEM_MEDIA_KEY_EVENT, data, reply, option) == 0,
+                             ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
 int32_t AVSessionServiceProxy::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)

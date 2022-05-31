@@ -33,7 +33,7 @@ public:
 
     virtual int32_t GetAVMetaData(AVMetaData &data) = 0;
 
-    virtual int32_t sendMediaButtonEvent(MMI::KeyEvent& keyEvent) = 0;
+    virtual int32_t SendMediaKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
 
     virtual int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) = 0;
 
@@ -41,7 +41,7 @@ public:
 
     virtual int32_t IsSessionActive(bool &isActive) = 0;
 
-    virtual int32_t SendCommand(AVControlCommand &cmd) = 0;
+    virtual int32_t SendCommand(const AVControlCommand &cmd) = 0;
 
     virtual int32_t RegisterCallback(std::shared_ptr<AVControllerCallback> &callback) = 0;
 

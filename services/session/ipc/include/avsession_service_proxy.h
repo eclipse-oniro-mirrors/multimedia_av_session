@@ -25,15 +25,12 @@ namespace OHOS::AVSession {
 class AVSessionServiceProxy : public IRemoteProxy<IAVSessionService> {
 public:
     explicit AVSessionServiceProxy(const sptr<IRemoteObject>& impl);
+
     std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                              const std::string& bundleName, const std::string& abilityName);
 
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                            const std::string& bundleName, const std::string& abilityName) override;
-
-    std::shared_ptr<AVSession> GetSession();
-
-    sptr<IRemoteObject> GetSessionInner() override;
 
     std::vector<AVSessionDescriptor> GetAllSessionDescriptors() override;
 
@@ -41,19 +38,11 @@ public:
 
     sptr<IRemoteObject> CreateControllerInner(int32_t sessionId) override;
 
-    std::shared_ptr<AVSessionController> GetController(int32_t sessionId);
-
-    sptr<IRemoteObject> GetControllerInner(int32_t sessionId) override;
-
-    std::vector<std::shared_ptr<AVSessionController>> GetAllControllers();
-
-    std::vector<sptr<IRemoteObject>> GetAllControllersInner() override;
-
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
-    int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent) override;
+    int32_t SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
-    int32_t SetSystemMediaVolume(int32_t volume) override;
+    int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
