@@ -126,7 +126,7 @@ void AVSessionCallbackProxy::OnSetLoopMode(int32_t loopMode)
         "send request failed");
 }
 
-void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediald)
+void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediaId)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
