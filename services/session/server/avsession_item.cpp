@@ -226,7 +226,7 @@ void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand &cmd)
 void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand &cmd)
 {
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    std::string mediaId = "";
+    std::string mediaId;
     CHECK_AND_RETURN_LOG(cmd.GetMediaId(mediaId) == AVSESSION_SUCCESS, "GetMediaId failed");
     callback_->OnToggleFavorite(mediaId);
 }

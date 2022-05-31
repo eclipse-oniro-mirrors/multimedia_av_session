@@ -89,17 +89,6 @@ protected:
     sptr<IRemoteObject> GetControllerInner() override;
 
 private:
-    std::map<pid_t, sptr<AVControllerItem>> controllers_;
-    AVSessionDescriptor descriptor_;
-    AVPlaybackState playbackState_;
-    AVMetaData metaData_;
-    pid_t pid_ {};
-    uid_t uid_ {};
-    AbilityRuntime::WantAgent::WantAgent launchAbility_;
-    std::vector<int32_t> supportedCmd_;
-    sptr<IAVSessionCallback> callback_;
-    std::shared_ptr<AVSessionCallback> remoteCallback_;
-    std::function<void(AVSessionItem&)> serviceCallback_;
     void HandleOnPlay(const AVControlCommand& cmd);
     void HandleOnPause(const AVControlCommand& cmd);
     void HandleOnStop(const AVControlCommand& cmd);
@@ -111,20 +100,33 @@ private:
     void HandleOnSetSpeed(const AVControlCommand& cmd);
     void HandleOnSetLoopMode(const AVControlCommand& cmd);
     void HandleOnToggleFavorite(const AVControlCommand& cmd);
-    using HanlerFunc = void(AVSessionItem::*)(const AVControlCommand&);
-    static inline HanlerFunc cmdHandlers[] = {
-        [AVControlCommand::SESSION_CMD_PLAY] = &AVSessionItem::HandleOnPlay,
-        [AVControlCommand::SESSION_CMD_PAUSE] = &AVSessionItem::HandleOnPause,
-        [AVControlCommand::SESSION_CMD_STOP] = &AVSessionItem::HandleOnStop,
-        [AVControlCommand::SESSION_CMD_PLAY_NEXT] = &AVSessionItem::HandleOnPlayNext,
-        [AVControlCommand::SESSION_CMD_PLAY_PREVIOUS] = &AVSessionItem::HandleOnPlayPrevious,
-        [AVControlCommand::SESSION_CMD_FAST_FORWARD] = &AVSessionItem::HandleOnFastForward,
-        [AVControlCommand::SESSION_CMD_REWIND] = &AVSessionItem::HandleOnRewind,
-        [AVControlCommand::SESSION_CMD_SEEK] = &AVSessionItem::HandleOnSeek,
-        [AVControlCommand::SESSION_CMD_SET_SPEED] = &AVSessionItem::HandleOnSetSpeed,
-        [AVControlCommand::SESSION_CMD_SET_LOOP_MODE] = &AVSessionItem::HandleOnSetLoopMode,
-        [AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE] = &AVSessionItem::HandleOnToggleFavorite,
+
+    using HandlerFuncType = void(AVSessionItem::*)(const AVControlCommand&);
+    static inline HandlerFuncType cmdHandlers[] = {
+            [AVControlCommand::SESSION_CMD_PLAY] = &AVSessionItem::HandleOnPlay,
+            [AVControlCommand::SESSION_CMD_PAUSE] = &AVSessionItem::HandleOnPause,
+            [AVControlCommand::SESSION_CMD_STOP] = &AVSessionItem::HandleOnStop,
+            [AVControlCommand::SESSION_CMD_PLAY_NEXT] = &AVSessionItem::HandleOnPlayNext,
+            [AVControlCommand::SESSION_CMD_PLAY_PREVIOUS] = &AVSessionItem::HandleOnPlayPrevious,
+            [AVControlCommand::SESSION_CMD_FAST_FORWARD] = &AVSessionItem::HandleOnFastForward,
+            [AVControlCommand::SESSION_CMD_REWIND] = &AVSessionItem::HandleOnRewind,
+            [AVControlCommand::SESSION_CMD_SEEK] = &AVSessionItem::HandleOnSeek,
+            [AVControlCommand::SESSION_CMD_SET_SPEED] = &AVSessionItem::HandleOnSetSpeed,
+            [AVControlCommand::SESSION_CMD_SET_LOOP_MODE] = &AVSessionItem::HandleOnSetLoopMode,
+            [AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE] = &AVSessionItem::HandleOnToggleFavorite,
     };
+
+    std::map<pid_t, sptr<AVControllerItem>> controllers_;
+    AVSessionDescriptor descriptor_;
+    AVPlaybackState playbackState_;
+    AVMetaData metaData_;
+    pid_t pid_ {};
+    uid_t uid_ {};
+    AbilityRuntime::WantAgent::WantAgent launchAbility_;
+    std::vector<int32_t> supportedCmd_;
+    sptr<IAVSessionCallback> callback_;
+    std::shared_ptr<AVSessionCallback> remoteCallback_;
+    std::function<void(AVSessionItem&)> serviceCallback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H
