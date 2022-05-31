@@ -58,12 +58,18 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     metaData_.CopyFrom(meta);
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleMetaDataChange(metaData_);
+    }
     return AVSESSION_SUCCESS;
 }
 
 int32_t  AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     playbackState_ = state;
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandlePlaybackStateChange(state);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -97,12 +103,18 @@ int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback> &cal
 int32_t AVSessionItem::Active()
 {
     descriptor_.isActive_ = true;
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleActiveStateChange(true);
+    }
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::Disactive()
 {
     descriptor_.isActive_ = false;
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleActiveStateChange(false);
+    }
     return AVSESSION_SUCCESS;
 }
 
