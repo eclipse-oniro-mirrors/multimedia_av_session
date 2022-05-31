@@ -55,12 +55,12 @@ public:
     bool GetFavorite() const;
 
 private:
-    int32_t state_;
-    float speed_;
-    int64_t elapsedTime_;
-    int64_t bufferedTime_;
-    int32_t loopMode_;
-    bool isFavorite_;
+    int32_t state_ = PLAYBACK_STATE_INVALID;
+    float speed_ {};
+    int64_t elapsedTime_ {};
+    int64_t bufferedTime_ {};
+    int32_t loopMode_ {};
+    bool isFavorite_ {};
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVPLAYBACK_STATE_H

@@ -39,17 +39,17 @@ bool AVPlaybackState::Marshalling(Parcel &parcel) const
 
 AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
 {
-    AVPlaybackState *avplaybackState = new (std::nothrow) AVPlaybackState();
-    if (avplaybackState == nullptr) {
+    auto *result = new (std::nothrow) AVPlaybackState();
+    if (result == nullptr) {
         return nullptr;
     }
-    avplaybackState->state_ = parcel.ReadInt32();
-    avplaybackState->speed_ = parcel.ReadFloat();
-    avplaybackState->elapsedTime_ = parcel.ReadInt64();
-    avplaybackState->bufferedTime_ = parcel.ReadInt64();
-    avplaybackState->loopMode_ = parcel.ReadInt32();
-    avplaybackState->isFavorite_ = parcel.ReadBool();
-    return avplaybackState;
+    result->state_ = parcel.ReadInt32();
+    result->speed_ = parcel.ReadFloat();
+    result->elapsedTime_ = parcel.ReadInt64();
+    result->bufferedTime_ = parcel.ReadInt64();
+    result->loopMode_ = parcel.ReadInt32();
+    result->isFavorite_ = parcel.ReadBool();
+    return result;
 }
 
 void AVPlaybackState::SetState(int32_t state)
