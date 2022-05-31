@@ -126,11 +126,11 @@ void AVSessionCallbackProxy::OnSetLoopMode(int32_t loopMode)
         "send request failed");
 }
 
-void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediald)
+void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediaId)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(data.WriteString(mediald), "write mediald failed");
+    CHECK_AND_RETURN_LOG(data.WriteString(mediaId), "write mediaId failed");
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     CHECK_AND_RETURN_LOG(Remote()->SendRequest(SESSION_CALLBACK_ON_TOGGLE_FAVORITE, data, reply, option) == 0,

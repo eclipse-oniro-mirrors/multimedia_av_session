@@ -144,13 +144,91 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
 
 void AVSessionItem::HandleMediaButtonEvent(const MMI::KeyEvent& keyEvent)
 {
-    if (callback_ != nullptr) {
-        callback_->OnMediaKeyEvent(keyEvent);
-    }
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnMediaKeyEvent(keyEvent);
 }
 
 void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 {
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    int32_t code = cmd.GetCommand();
+    if (code >= 0 && code < SESSION_CMD_MAX) {
+        return (this->*cmdHandlers[code])(cmd);
+    }
+}
+
+void AVSessionItem::HandleOnPlay(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnPlay();
+}
+
+void AVSessionItem::HandleOnPause(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnPause();
+}
+
+void AVSessionItem::HandleOnStop(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnStop();
+}
+
+void AVSessionItem::HandleOnPlayNext(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnPlayNext();
+}
+
+void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnPlayPrevious();
+}
+
+void AVSessionItem::HandleOnFastForward(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnFastForward();
+}
+
+void AVSessionItem::HandleOnRewind(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnRewind();
+}
+
+void AVSessionItem::HandleOnSeek(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    int64_t time = AVSESSION_ERROR;
+    CHECK_AND_RETURN_LOG(cmd.GetSeekTime(time) == AVSESSION_SUCCESS, "GetSeekTime failed");
+    callback_->OnSeek(time);
+}
+
+void AVSessionItem::HandleOnSetSpeed(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    float speed = AVSESSION_ERROR;
+    CHECK_AND_RETURN_LOG(cmd.GetSpeed(speed) == AVSESSION_SUCCESS, "GetSpeed failed");
+    callback_->OnSetSpeed(speed);
+}
+
+void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    int32_t loopMode = AVSESSION_ERROR;
+    CHECK_AND_RETURN_LOG(cmd.GetLoopMode(loopMode) == AVSESSION_SUCCESS, "GetLoopMode failed");
+    callback_->OnSetLoopMode(loopMode);
+}
+
+void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand &cmd)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::string mediaId;
+    CHECK_AND_RETURN_LOG(cmd.GetMediaId(mediaId) == AVSESSION_SUCCESS, "GetMediaId failed");
+    callback_->OnToggleFavorite(mediaId);
 }
 
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& contoller)

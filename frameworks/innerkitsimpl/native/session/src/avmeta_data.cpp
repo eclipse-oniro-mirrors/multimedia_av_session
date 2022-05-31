@@ -263,7 +263,7 @@ void AVMetaData::Reset()
     lyric_ = "";
 }
 
-bool AVMetaData::CopyToByMask(AVMetaData &metaOut)
+bool AVMetaData::CopyToByMask(AVMetaData &metaOut) const
 {
     bool result = false;
     auto intersection = metaMask_ & metaOut.metaMask_;

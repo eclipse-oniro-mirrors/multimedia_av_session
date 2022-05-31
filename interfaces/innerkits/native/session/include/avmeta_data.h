@@ -123,7 +123,7 @@ public:
      * copy meta item to @metaOut according to intersection of meta mask.
      * @return true if intersection is not empty, else return false.
      */
-    bool CopyToByMask(AVMetaData& metaOut);
+    bool CopyToByMask(AVMetaData& metaOut) const;
 
     /*
      * copy meta item from @metaIn according to set bit of @metaIn meta mask, keeping self other meta item of self

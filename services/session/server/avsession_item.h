@@ -20,6 +20,7 @@
 #include <map>
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
+#include "avcontrol_command.h"
 
 namespace OHOS::AVSession {
 class AVControllerItem;
@@ -88,6 +89,33 @@ protected:
     sptr<IRemoteObject> GetControllerInner() override;
 
 private:
+    void HandleOnPlay(const AVControlCommand& cmd);
+    void HandleOnPause(const AVControlCommand& cmd);
+    void HandleOnStop(const AVControlCommand& cmd);
+    void HandleOnPlayNext(const AVControlCommand& cmd);
+    void HandleOnPlayPrevious(const AVControlCommand& cmd);
+    void HandleOnFastForward(const AVControlCommand& cmd);
+    void HandleOnRewind(const AVControlCommand& cmd);
+    void HandleOnSeek(const AVControlCommand& cmd);
+    void HandleOnSetSpeed(const AVControlCommand& cmd);
+    void HandleOnSetLoopMode(const AVControlCommand& cmd);
+    void HandleOnToggleFavorite(const AVControlCommand& cmd);
+
+    using HandlerFuncType = void(AVSessionItem::*)(const AVControlCommand&);
+    static inline HandlerFuncType cmdHandlers[] = {
+        [AVControlCommand::SESSION_CMD_PLAY] = &AVSessionItem::HandleOnPlay,
+        [AVControlCommand::SESSION_CMD_PAUSE] = &AVSessionItem::HandleOnPause,
+        [AVControlCommand::SESSION_CMD_STOP] = &AVSessionItem::HandleOnStop,
+        [AVControlCommand::SESSION_CMD_PLAY_NEXT] = &AVSessionItem::HandleOnPlayNext,
+        [AVControlCommand::SESSION_CMD_PLAY_PREVIOUS] = &AVSessionItem::HandleOnPlayPrevious,
+        [AVControlCommand::SESSION_CMD_FAST_FORWARD] = &AVSessionItem::HandleOnFastForward,
+        [AVControlCommand::SESSION_CMD_REWIND] = &AVSessionItem::HandleOnRewind,
+        [AVControlCommand::SESSION_CMD_SEEK] = &AVSessionItem::HandleOnSeek,
+        [AVControlCommand::SESSION_CMD_SET_SPEED] = &AVSessionItem::HandleOnSetSpeed,
+        [AVControlCommand::SESSION_CMD_SET_LOOP_MODE] = &AVSessionItem::HandleOnSetLoopMode,
+        [AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE] = &AVSessionItem::HandleOnToggleFavorite,
+    };
+
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
