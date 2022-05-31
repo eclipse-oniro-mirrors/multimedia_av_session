@@ -50,27 +50,23 @@ public:
 
     AVControlCommand();
     ~AVControlCommand() override;
+
     static AVControlCommand *Unmarshalling(Parcel &data);
     bool Marshalling(Parcel &parcel) const override;
 
     int32_t SetCommand(int32_t cmd);
-
     int32_t GetCommand() const;
 
     int32_t SetSpeed(float speed);
-
     int32_t GetSpeed(float &speed) const;
 
     int32_t SetSeekTime(int64_t time);
-
     int32_t GetSeekTime(int64_t &time) const;
 
     int32_t SetLoopMode(int32_t mode);
-
     int32_t GetLoopMode(int32_t &mode) const;
 
     int32_t SetMediaId(const std::string &mediaId);
-
     int32_t GetMediaId(std::string &mediaId) const;
 
 private:

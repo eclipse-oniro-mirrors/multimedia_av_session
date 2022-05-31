@@ -142,7 +142,7 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
     return launchAbility_;
 }
 
-void AVSessionItem::HandleMediaButtonEvent(const MMI::KeyEvent& keyEvent)
+void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnMediaKeyEvent(keyEvent);

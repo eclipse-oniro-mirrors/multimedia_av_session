@@ -38,23 +38,19 @@ public:
     std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                              const std::string& bundleName, const std::string& abilityName);
 
-    std::shared_ptr<AVSession> GetSession();
-
     std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
 
     std::shared_ptr<AVSessionController> CreateController(int32_t sessionId);
-
-    std::shared_ptr<AVSessionController> GetController(int32_t sessionId);
-
-    std::vector<std::shared_ptr<AVSessionController>> GetAllControllers();
 
     int32_t RegisterSessionListener(std::shared_ptr<SessionListener>& listener);
 
     int32_t RegisterServiceDeathCallback(const DeathCallback& callback);
 
-    int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent);
+    int32_t UnregisterServiceDeathCallback();
 
-    int32_t SetSystemMediaVolume(int32_t volume);
+    int32_t SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent);
+
+    int32_t SendSystemControlCommand(const AVControlCommand& command);
 
 private:
     AVSessionManagerImpl();

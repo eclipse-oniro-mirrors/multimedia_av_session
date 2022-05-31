@@ -48,21 +48,15 @@ public:
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                            const std::string& bundleName, const std::string& abilityName) override;
 
-    sptr<IRemoteObject> GetSessionInner() override;
-
     std::vector<AVSessionDescriptor> GetAllSessionDescriptors() override;
 
     sptr<IRemoteObject> CreateControllerInner(int32_t sessionId) override;
 
-    sptr<IRemoteObject> GetControllerInner(int32_t sessionId) override;
-
-    std::vector<sptr<IRemoteObject>> GetAllControllersInner() override;
-
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
-    int32_t SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent) override;
+    int32_t SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
-    int32_t SetSystemMediaVolume(int32_t volume) override;
+    int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
@@ -73,7 +67,7 @@ public:
     void HandleControllerRelease(AVControllerItem& controller);
 
 private:
-    SessionContainer& GetContainer();
+    static SessionContainer& GetContainer();
 
     int32_t AllocSessionId();
 
@@ -104,6 +98,7 @@ private:
     int32_t sessionSeqNum_ {};
 
     std::recursive_mutex lock_;
+    sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
 
     std::recursive_mutex clientDeathObserversLock_;

@@ -65,6 +65,7 @@ int32_t AVSessionService::AllocSessionId()
                                [this](const auto id) { return id == sessionSeqNum_; });
         if (it == sessionIds_.end()) {
             sessionIds_.push_back(sessionSeqNum_);
+            SLOGI("sessionId=%{public}d", sessionSeqNum_);
             return sessionSeqNum_;
         }
         if (++sessionSeqNum_ < 0) {
@@ -128,12 +129,14 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
     result->SetPid(GetCallingPid());
     result->SetUid(GetCallingUid());
     result->SetServiceCallbackForRelease([this](AVSessionItem& session) { HandleSessionRelease(session); });
+    SLOGI("success sessionId=%{public}d", result->GetSessionId());
     return result;
 }
 
 sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
     const std::string& bundleName, const std::string& abilityName)
 {
+    SLOGI("enter");
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(lock_);
     if (ClientHasSession(pid)) {
@@ -156,12 +159,6 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
     return result;
 }
 
-sptr<IRemoteObject> AVSessionService::GetSessionInner()
-{
-    std::lock_guard lockGuard(lock_);
-    return GetContainer().GetSession(GetCallingPid());
-}
-
 std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
 {
     std::vector<AVSessionDescriptor> result;
@@ -169,6 +166,7 @@ std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
     for (const auto& session: GetContainer().GetAllSessions()) {
         result.push_back(session->GetDescriptor());
     }
+    SLOGI("size=%{public}d", static_cast<int>(result.size()));
     return result;
 }
 
@@ -211,23 +209,6 @@ sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
     return result;
 }
 
-sptr<IRemoteObject> AVSessionService::GetControllerInner(int32_t sessionId)
-{
-    return GetPresentController(GetCallingPid(), sessionId);
-}
-
-std::vector<sptr<IRemoteObject>> AVSessionService::GetAllControllersInner()
-{
-    std::vector<sptr<IRemoteObject>> result;
-    std::lock_guard lockGuard(lock_);
-    for (const auto& [pid, list]: controllers_) {
-        for (const auto& controller : list) {
-            result.emplace_back(controller);
-        }
-    }
-    return result;
-}
-
 void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener> &listener)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
@@ -242,18 +223,27 @@ void AVSessionService::RemoveSessionListener(pid_t pid)
 
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
+    SLOGI("enter");
     AddSessionListener(GetCallingPid(), listener);
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::SendSystemMediaKeyEvent(MMI::KeyEvent& keyEvent)
+int32_t AVSessionService::SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
+    SLOGI("cmd=%{public}d", keyEvent.GetKeyCode());
+    if (topSession_) {
+        topSession_->HandleMediaKeyEvent(keyEvent);
+    }
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::SetSystemMediaVolume(int32_t volume)
+int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
-    return 0;
+    SLOGI("cmd=%{public}d", command.GetCommand());
+    if (topSession_) {
+        topSession_->ExecuteControllerCommand(command);
+    }
+    return AVSESSION_SUCCESS;
 }
 
 void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath> &observer)
@@ -270,6 +260,7 @@ void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
+    SLOGI("enter");
     auto pid = GetCallingPid();
     auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
@@ -299,6 +290,7 @@ void AVSessionService::OnClientDied(pid_t pid)
 
 void AVSessionService::HandleSessionRelease(AVSessionItem &session)
 {
+    SLOGI("enter");
     NotifySessionRelease(session.GetDescriptor());
     std::lock_guard lockGuard(lock_);
     GetContainer().RemoveSession(session.GetPid());
@@ -306,6 +298,7 @@ void AVSessionService::HandleSessionRelease(AVSessionItem &session)
 
 void AVSessionService::HandleControllerRelease(AVControllerItem &controller)
 {
+    SLOGI("enter");
     auto pid = controller.GetPid();
     std::lock_guard lockGuard(lock_);
     auto list = controllers_[pid];

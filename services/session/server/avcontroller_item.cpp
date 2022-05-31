@@ -17,7 +17,6 @@
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
-#include "avsession_item.h"
 
 namespace OHOS::AVSession {
 AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
@@ -55,12 +54,12 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData &data)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::sendMediaButtonEvent(MMI::KeyEvent& keyEvent)
+int32_t AVControllerItem::SendMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     if (session_ == nullptr) {
         return ERR_SESSION_NOT_EXIST;
     }
-    session_->HandleMediaButtonEvent(keyEvent);
+    session_->HandleMediaKeyEvent(keyEvent);
     return AVSESSION_SUCCESS;
 }
 
@@ -91,7 +90,7 @@ int32_t AVControllerItem::IsSessionActive(bool &isActive)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::SendCommand(AVControlCommand &cmd)
+int32_t AVControllerItem::SendCommand(const AVControlCommand &cmd)
 {
     if (session_ == nullptr) {
         return ERR_SESSION_NOT_EXIST;

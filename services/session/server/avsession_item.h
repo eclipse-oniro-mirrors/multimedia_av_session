@@ -62,7 +62,7 @@ public:
 
     AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
 
-    void HandleMediaButtonEvent(const MMI::KeyEvent& keyEvent);
+    void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
     void ExecuteControllerCommand(const AVControlCommand& cmd);
 

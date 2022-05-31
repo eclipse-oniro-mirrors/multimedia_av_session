@@ -72,7 +72,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData &data)
     return ret;
 }
 
-int32_t AVSessionControllerProxy::sendMediaButtonEvent(MMI::KeyEvent& keyEvent)
+int32_t AVSessionControllerProxy::SendMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     CHECK_AND_RETURN_RET_LOG(keyEvent.IsValid(), ERR_INVALID_PARAM, "keyEvent not valid");
 
@@ -158,7 +158,7 @@ int32_t AVSessionControllerProxy::IsSessionActive(bool &isActive)
     return ret;
 }
 
-int32_t AVSessionControllerProxy::SendCommand(AVControlCommand &cmd)
+int32_t AVSessionControllerProxy::SendCommand(const AVControlCommand &cmd)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,

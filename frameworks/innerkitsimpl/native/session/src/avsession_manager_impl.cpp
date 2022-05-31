@@ -15,7 +15,6 @@
 
 #include "avsession_manager_impl.h"
 
-#include <utility>
 #include "iservice_registry.h"
 #include "ipc_skeleton.h"
 #include "system_ability_definition.h"
@@ -42,14 +41,14 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
         return service_;
     }
 
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        SLOGE("failed to get samgr");
+    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (mgr == nullptr) {
+        SLOGE("failed to get sa mgr");
         return nullptr;
     }
-    auto object = samgr->GetSystemAbility(AVSESSION_SERVICE_ID);
+    auto object = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
     if (object == nullptr) {
-        SLOGE("failed to get avsession service");
+        SLOGE("failed to get service");
         return nullptr;
     }
     service_ = iface_cast<AVSessionServiceProxy>(object);
@@ -59,7 +58,7 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
             sptr<IAVSessionService> serviceBase = service_;
             serviceBase->AsObject()->AddDeathRecipient(recipient);
         }
-        SLOGD("get avsession service success");
+        SLOGD("get service success");
         RegisterClientDeathObserver();
     }
     return service_;
@@ -89,12 +88,6 @@ std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string
     return service ? service->CreateSession(tag, type, bundleName, abilityName) : nullptr;
 }
 
-std::shared_ptr<AVSession> AVSessionManagerImpl::GetSession()
-{
-    auto service = GetService();
-    return service ? service->GetSession() : nullptr;
-}
-
 std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetAllSessionDescriptors()
 {
     auto service = GetService();
@@ -105,18 +98,6 @@ std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(int3
 {
     auto service = GetService();
     return service ? service->CreateController(sessionId) : nullptr;
-}
-
-std::shared_ptr<AVSessionController> AVSessionManagerImpl::GetController(int32_t sessionId)
-{
-    auto service = GetService();
-    return service ? service->GetController(sessionId) : nullptr;
-}
-
-std::vector<std::shared_ptr<AVSessionController>> AVSessionManagerImpl::GetAllControllers()
-{
-    auto service = GetService();
-    return service ? service->GetAllControllers() : std::vector<std::shared_ptr<AVSessionController>>();
 }
 
 int32_t AVSessionManagerImpl::RegisterSessionListener(std::shared_ptr<SessionListener> &listener)
@@ -147,14 +128,22 @@ int32_t AVSessionManagerImpl::RegisterServiceDeathCallback(const DeathCallback &
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionManagerImpl::SendSystemMediaKeyEvent(MMI::KeyEvent &keyEvent)
+int32_t AVSessionManagerImpl::UnregisterServiceDeathCallback()
 {
+    deathCallback_ = nullptr;
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionManagerImpl::SetSystemMediaVolume(int32_t volume)
+int32_t AVSessionManagerImpl::SendSystemMediaKeyEvent(const MMI::KeyEvent &keyEvent)
 {
-    return AVSESSION_SUCCESS;
+    auto service = GetService();
+    return service ? service->SendSystemMediaKeyEvent(keyEvent) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand &command)
+{
+    auto service = GetService();
+    return service ? service->SendSystemControlCommand(command) : ERR_SERVICE_NOT_EXIST;
 }
 
 void AVSessionManagerImpl::RegisterClientDeathObserver()
