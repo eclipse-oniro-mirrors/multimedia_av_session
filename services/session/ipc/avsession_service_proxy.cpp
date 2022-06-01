@@ -157,7 +157,9 @@ int32_t AVSessionServiceProxy::SendSystemControlCommand(const AVControlCommand &
 int32_t AVSessionServiceProxy::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
     MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(observer->AsObject()), AVSESSION_ERROR, "write observer failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(observer->AsObject()), ERR_MARSHALLING, "write observer failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_REGISTER_CLIENT_DEATH, data, reply, option) == 0,
