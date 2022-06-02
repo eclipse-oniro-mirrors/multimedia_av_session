@@ -20,7 +20,7 @@
 namespace OHOS::AVSession {
 AVControlCommand::AVControlCommand()
 {
-    cmd_ = SESSION_CMD_MAX;
+    cmd_ = SESSION_CMD_INVALID;
 }
 
 AVControlCommand::~AVControlCommand()
@@ -29,28 +29,28 @@ AVControlCommand::~AVControlCommand()
 
 AVControlCommand *AVControlCommand::Unmarshalling(Parcel &data)
 {
-    auto objptr = new (std::nothrow) AVControlCommand();
-    if (objptr != nullptr) {
+    auto result = new (std::nothrow) AVControlCommand();
+    if (result != nullptr) {
         int32_t cmd = data.ReadInt32();
-        objptr->SetCommand(cmd);
+        result->SetCommand(cmd);
         switch (cmd) {
             case SESSION_CMD_SEEK:
-                objptr->SetSeekTime(data.ReadInt64());
+                result->SetSeekTime(data.ReadInt64());
                 break;
             case SESSION_CMD_SET_SPEED:
-                objptr->SetSpeed(data.ReadFloat());
+                result->SetSpeed(data.ReadFloat());
                 break;
             case SESSION_CMD_SET_LOOP_MODE:
-                objptr->SetLoopMode(data.ReadInt32());
+                result->SetLoopMode(data.ReadInt32());
                 break;
             case SESSION_CMD_TOGGLE_FAVORITE:
-                objptr->SetMediaId(data.ReadString());
+                result->SetMediaId(data.ReadString());
                 break;
             default:
                 break;
         }
     }
-    return objptr;
+    return result;
 }
 
 bool AVControlCommand::Marshalling(Parcel &parcel) const
@@ -88,7 +88,7 @@ bool AVControlCommand::IsValid() const
 
 int32_t AVControlCommand::SetCommand(int32_t cmd)
 {
-    if (cmd < SESSION_CMD_PLAY || cmd >= SESSION_CMD_MAX) {
+    if (cmd <= SESSION_CMD_INVALID || cmd >= SESSION_CMD_MAX) {
         return ERR_INVALID_PARAM;
     }
     cmd_ = cmd;

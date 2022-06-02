@@ -209,7 +209,7 @@ HWTEST_F(AVSessionManagerTest, CreateController002, TestSize.Level1)
 * @tc.name: RegisterSessionListener001
 * @tc.desc: register nullptr listener
 * @tc.type: FUNC
-* @tc.require: AR000H31JI
+* @tc.require: AR000H31JD
 */
 HWTEST_F(AVSessionManagerTest, RegisterSessionListener001, TestSize.Level1)
 {
@@ -224,7 +224,7 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener001, TestSize.Level1)
 * @tc.name: RegisterSessionListener002
 * @tc.desc: register listener
 * @tc.type: FUNC
-* @tc.require: AR000H31JI
+* @tc.require: AR000H31JD
 */
 HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
 {
@@ -244,4 +244,118 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
         session->Release();
     }
     SLOGI("RegisterSessionListener001 end");
+}
+
+/**
+* @tc.name: RegisterServiceDeathCallback001
+* @tc.desc: register service death listener
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, RegisterServiceDeathCallback001, TestSize.Level1)
+{
+    SLOGI("RegisterServiceDeathCallback001 begin");
+    bool isDead = false;
+    auto result = AVSessionManager::RegisterServiceDeathCallback([&isDead]() { isDead = true; });
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+
+    system("killall -9 avsession_servi");
+    sleep(1);
+    EXPECT_EQ(isDead, true);
+    SLOGI("RegisterServiceDeathCallback001 end");
+}
+
+/**
+* @tc.name: UnregisterServiceDeathCallback001
+* @tc.desc: unregister service death listener
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, UnregisterServiceDeathCallback001, TestSize.Level1)
+{
+    SLOGI("UnregisterServiceDeathCallback001 begin");
+    bool isDead = false;
+    auto result = AVSessionManager::RegisterServiceDeathCallback([&isDead]() { isDead = true; });
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+
+    result = AVSessionManager::UnregisterServiceDeathCallback();
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+
+    system("killall -9 avsession_servi");
+    sleep(1);
+    EXPECT_EQ(isDead, false);
+    SLOGI("UnregisterServiceDeathCallback001 end");
+}
+
+/**
+* @tc.name: SendSystemMediaKeyEvent001
+* @tc.desc: invalid keyEvent
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, SendSystemMediaKeyEvent001, TestSize.Level1)
+{
+    SLOGI("SendSystemMediaKeyEvent001 begin");
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+
+    auto result = AVSessionManager::SendSystemMediaKeyEvent(*keyEvent);
+    EXPECT_NE(result, AVSESSION_SUCCESS);
+    SLOGI("SendSystemMediaKeyEvent001 end");
+}
+
+/**
+* @tc.name: SendSystemMediaKeyEvent002
+* @tc.desc: valid keyEvent
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, SendSystemMediaKeyEvent002, TestSize.Level1)
+{
+    SLOGI("SendSystemMediaKeyEvent002 begin");
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_MEDIA_PLAY);
+    keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_DOWN);
+    keyEvent->SetActionTime(1000);
+    auto keyItem = OHOS::MMI::KeyEvent::KeyItem();
+    keyItem.SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_MEDIA_PLAY);
+    keyItem.SetDownTime(1000);
+    keyItem.SetPressed(true);
+    keyEvent->AddKeyItem(keyItem);
+
+    auto result = AVSessionManager::SendSystemMediaKeyEvent(*keyEvent);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGI("SendSystemMediaKeyEvent002 end");
+}
+
+/**
+* @tc.name: SendSystemControlCommand001
+* @tc.desc: invalid command
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, SendSystemControlCommand001, TestSize.Level1)
+{
+    SLOGI("SendSystemControlCommand001 begin");
+    AVControlCommand command;
+    auto result = AVSessionManager::SendSystemControlCommand(command);
+    EXPECT_NE(result, AVSESSION_SUCCESS);
+    SLOGI("SendSystemControlCommand001 end");
+}
+
+/**
+* @tc.name: SendSystemControlCommand002
+* @tc.desc: valid command
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, SendSystemControlCommand002, TestSize.Level1)
+{
+    SLOGI("SendSystemControlCommand002 begin");
+    AVControlCommand command;
+    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    auto result = AVSessionManager::SendSystemControlCommand(command);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGI("SendSystemControlCommand002 end");
 }
