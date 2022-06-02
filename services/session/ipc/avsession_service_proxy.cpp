@@ -152,7 +152,7 @@ int32_t AVSessionServiceProxy::SendSystemControlCommand(const AVControlCommand &
 
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_SEND_SYSTEM_MEDIA_KEY_EVENT, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND, data, reply, option) == 0,
                              ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;

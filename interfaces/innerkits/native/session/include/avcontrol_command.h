@@ -73,7 +73,7 @@ public:
     int32_t GetMediaId(std::string &mediaId) const;
 
 private:
-    int32_t cmd_;
+    int32_t cmd_ = SESSION_CMD_INVALID;
     std::variant<int32_t, float, int64_t, std::string> param_;
 };
 }
