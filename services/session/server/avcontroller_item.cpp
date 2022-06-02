@@ -50,7 +50,9 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData &data)
     if (session_ == nullptr) {
         return ERR_SESSION_NOT_EXIST;
     }
-    data.CopyFrom(session_->GetMetaData());
+    if (!data.CopyFrom(session_->GetMetaData())) {
+        return AVSESSION_ERROR;
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -122,7 +124,9 @@ void AVControllerItem::HandleSessionRelease(const AVSessionDescriptor &descripto
     if (callback_ != nullptr) {
         callback_->OnSessionRelease(descriptor);
     }
-    ClearSession();
+    if (session_ != nullptr) {
+        session_.clear();
+    }
 }
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
