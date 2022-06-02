@@ -27,6 +27,7 @@ namespace OHOS::AVSession {
 class AVControlCommand : public Parcelable {
 public:
     enum {
+        SESSION_CMD_INVALID = -1,
         SESSION_CMD_PLAY,
         SESSION_CMD_PAUSE,
         SESSION_CMD_STOP,
@@ -53,6 +54,8 @@ public:
 
     static AVControlCommand *Unmarshalling(Parcel &data);
     bool Marshalling(Parcel &parcel) const override;
+
+    bool IsValid() const;
 
     int32_t SetCommand(int32_t cmd);
     int32_t GetCommand() const;

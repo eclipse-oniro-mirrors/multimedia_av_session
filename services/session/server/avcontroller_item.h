@@ -57,8 +57,6 @@ public:
 
     pid_t GetPid() const;
 
-    void ClearSession();
-
     bool HasSession(int32_t sessionId);
 
     void SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback);
@@ -68,6 +66,7 @@ protected:
 
 private:
     pid_t pid_;
+    int32_t sessionId_ = -1;
     sptr<AVSessionItem> session_;
     sptr<IAVControllerCallback> callback_;
     AVMetaData::MetaMaskType metaMask_;

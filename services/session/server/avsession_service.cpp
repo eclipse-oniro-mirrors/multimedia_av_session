@@ -114,7 +114,7 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, int32_t type,
                                                        const std::string &bundleName, const std::string &abilityName)
 {
-    SLOGI("%{public}s", tag.c_str());
+    SLOGI("%{public}s %{public}d %{public}s %{public}s", tag.c_str(), type, bundleName.c_str(), abilityName.c_str());
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = AllocSessionId();
     descriptor.sessionTag_ = tag;
@@ -279,18 +279,18 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
 
 void AVSessionService::OnClientDied(pid_t pid)
 {
-    SLOGI("client die %{public}d", pid);
+    SLOGI("pid=%{public}d", pid);
     RemoveSessionListener(pid);
     RemoveClientDeathObserver(pid);
 
     std::lock_guard lockGuard(lock_);
-    ClearSessionForClientDied(pid);
-    ClearControllerForClientDied(pid);
+    ClearSessionForClientDiedNoLock(pid);
+    ClearControllerForClientDiedNoLock(pid);
 }
 
 void AVSessionService::HandleSessionRelease(AVSessionItem &session)
 {
-    SLOGI("enter");
+    SLOGI("sessionId=%{public}d", session.GetSessionId());
     NotifySessionRelease(session.GetDescriptor());
     std::lock_guard lockGuard(lock_);
     GetContainer().RemoveSession(session.GetPid());
@@ -298,29 +298,34 @@ void AVSessionService::HandleSessionRelease(AVSessionItem &session)
 
 void AVSessionService::HandleControllerRelease(AVControllerItem &controller)
 {
-    SLOGI("enter");
     auto pid = controller.GetPid();
     std::lock_guard lockGuard(lock_);
-    auto list = controllers_[pid];
-    list.remove(&controller);
-    if (list.empty()) {
+    auto it = controllers_.find(pid);
+    if (it == controllers_.end()) {
+        return;
+    }
+    SLOGI("remove controller");
+    it->second.remove(&controller);
+    if (it->second.empty()) {
         controllers_.erase(pid);
     }
 }
 
-void AVSessionService::ClearSessionForClientDied(pid_t pid)
+void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid)
 {
     auto session = GetContainer().RemoveSession(pid);
     if (session != nullptr) {
+        SLOGI("remove sessionId=%{public}d", session->GetSessionId());
         session->Release();
     }
 }
 
-void AVSessionService::ClearControllerForClientDied(pid_t pid)
+void AVSessionService::ClearControllerForClientDiedNoLock(pid_t pid)
 {
     auto it = controllers_.find(pid);
     if (it != controllers_.end()) {
         auto controllers = std::move(it->second);
+        SLOGI("remove controllers size=%{public}d", static_cast<int>(controllers.size()));
         controllers_.erase(it);
         if (!controllers.empty()) {
             for (const auto& controller : controllers) {

@@ -17,7 +17,7 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-SessionListenerClient::SessionListenerClient(std::shared_ptr<SessionListener> &listener)
+SessionListenerClient::SessionListenerClient(const std::shared_ptr<SessionListener> &listener)
     : listener_(listener)
 {
     SLOGD("construct");

@@ -22,12 +22,13 @@ namespace OHOS::AVSession {
 AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
     : pid_(pid), session_(session)
 {
-    SLOGD("construct");
+    sessionId_ = session_->GetSessionId();
+    SLOGI("construct sessionId=%{public}d", sessionId_);
 }
 
 AVControllerItem::~AVControllerItem()
 {
-    SLOGD("destroy");
+    SLOGI("destroy sessionId=%{public}d", sessionId_);
 }
 
 int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject> &callback)
@@ -110,9 +111,12 @@ int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
 int32_t AVControllerItem::Release()
 {
     if (callback_ != nullptr) {
-        callback_.clear();
+        callback_ = nullptr;
     }
-    ClearSession();
+    if (session_ != nullptr) {
+        session_->HandleControllerRelease(pid_);
+        session_ = nullptr;
+    }
     if (serviceCallback_) {
         serviceCallback_(*this);
     }
@@ -125,7 +129,7 @@ void AVControllerItem::HandleSessionRelease(const AVSessionDescriptor &descripto
         callback_->OnSessionRelease(descriptor);
     }
     if (session_ != nullptr) {
-        session_.clear();
+        session_ = nullptr;
     }
 }
 
@@ -158,14 +162,6 @@ void AVControllerItem::HandleActiveStateChange(bool isActive)
 pid_t AVControllerItem::GetPid() const
 {
     return pid_;
-}
-
-void AVControllerItem::ClearSession()
-{
-    if (session_ != nullptr) {
-        session_->RemoveController(pid_);
-        session_.clear();
-    }
 }
 
 bool AVControllerItem::HasSession(int32_t sessionId)

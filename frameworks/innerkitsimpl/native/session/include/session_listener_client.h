@@ -23,7 +23,7 @@
 namespace OHOS::AVSession {
 class SessionListenerClient : public SessionListenerStub {
 public:
-    explicit SessionListenerClient(std::shared_ptr<SessionListener>& listener);
+    explicit SessionListenerClient(const std::shared_ptr<SessionListener>& listener);
 
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
 
