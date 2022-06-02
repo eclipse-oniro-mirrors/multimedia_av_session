@@ -40,8 +40,9 @@ int32_t AVSessionItem::GetSessionId()
 int32_t AVSessionItem::Release()
 {
     SLOGD("enter");
-    for (const auto& [pid, controller] : controllers_) {
-        controller->HandleSessionRelease(descriptor_);
+    for (auto iter = controllers_.begin(); iter != controllers_.end();) {
+        iter->second->HandleSessionRelease(descriptor_);
+        controllers_.erase(iter++);
     }
     if (serviceCallback_) {
         serviceCallback_(*this);

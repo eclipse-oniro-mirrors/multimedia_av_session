@@ -26,13 +26,6 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.AVSession.IAVSessionCallback");
 
     enum {
-        LOOP_MODE_SEQUENCE,
-        LOOP_MODE_SINGLE,
-        LOOP_MODE_LIST,
-        LOOP_MODE_SHUFFLE
-    };
-
-    enum {
         SESSION_CALLBACK_ON_PLAY,
         SESSION_CALLBACK_ON_PAUSE,
         SESSION_CALLBACK_ON_STOP,
