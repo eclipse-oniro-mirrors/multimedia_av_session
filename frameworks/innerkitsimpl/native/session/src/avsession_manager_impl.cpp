@@ -100,7 +100,7 @@ std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(int3
     return service ? service->CreateController(sessionId) : nullptr;
 }
 
-int32_t AVSessionManagerImpl::RegisterSessionListener(std::shared_ptr<SessionListener> &listener)
+int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener> &listener)
 {
     auto service = GetService();
     if (service == nullptr) {

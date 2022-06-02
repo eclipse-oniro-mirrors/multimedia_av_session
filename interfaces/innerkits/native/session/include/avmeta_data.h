@@ -126,7 +126,7 @@ public:
     bool CopyToByMask(AVMetaData& metaOut) const;
 
     /*
-     * copy meta item from @metaIn according to set bit of @metaIn meta mask, keeping self other meta item of self
+     * copy meta item from @metaIn according to set bit of @metaIn meta mask, keeping other meta item of self
      * not changed, when both mediaId is equal. Otherwise, just do object assignment.
      * @return true if this meta changed.
      */

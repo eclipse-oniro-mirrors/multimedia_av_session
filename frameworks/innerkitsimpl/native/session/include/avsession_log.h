@@ -27,17 +27,11 @@
 
 #define __FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#ifndef OHOS_DEBUG
 #define DECORATOR_HILOG(func, fmt, args...)                                                      \
     do {                                                                                         \
-        (void)func(LOG_CORE, "{%{public}s():%{public}d} " fmt, __FUNCTION__, __LINE__, ##args);  \
+        (void)func(LOG_CORE, "[%{public}s()-%{public}s:%{public}d] " fmt, __FUNCTION__, __FILENAME__, __LINE__, \
+                   ##args); \
     } while (0)
-#else
-#define DECORATOR_HILOG(func, fmt, args...)                                                      \
-    do {                                                                                         \
-        (void)func(LOG_CORE, "{%{public}s()-%{public}s:%{public}d} " fmt, __FUNCTION__, __FILENAME__, __LINE__, ##args); \
-    } while (0)
-#endif
 
 #define SLOGD(fmt, ...) DECORATOR_HILOG(HILOG_DEBUG, fmt, ##__VA_ARGS__)
 #define SLOGI(fmt, ...) DECORATOR_HILOG(HILOG_INFO, fmt, ##__VA_ARGS__)

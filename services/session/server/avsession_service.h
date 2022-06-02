@@ -89,9 +89,9 @@ private:
 
     sptr<AVControllerItem> CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session);
 
-    void ClearSessionForClientDied(pid_t pid);
+    void ClearSessionForClientDiedNoLock(pid_t pid);
 
-    void ClearControllerForClientDied(pid_t pid);
+    void ClearControllerForClientDiedNoLock(pid_t pid);
 
     std::recursive_mutex sessionIdsLock_;
     std::list<int32_t> sessionIds_;

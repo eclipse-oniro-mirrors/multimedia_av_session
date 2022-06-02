@@ -14,40 +14,25 @@
  */
 
 #include <gtest/gtest.h>
-#include "avsession_service.h"
+
 using namespace testing::ext;
-using namespace OHOS::AVSession;
-using namespace OHOS;
+
 class AvsessionServiceTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
 };
 
-void AvsessionServiceTest::SetUpTestCase(void)
+void AvsessionServiceTest::SetUpTestCase()
 {}
 
-void AvsessionServiceTest::TearDownTestCase(void)
+void AvsessionServiceTest::TearDownTestCase()
 {}
 
-void AvsessionServiceTest::SetUp(void)
+void AvsessionServiceTest::SetUp()
 {}
 
-void AvsessionServiceTest::TearDown(void)
+void AvsessionServiceTest::TearDown()
 {}
-
-/**
-* @tc.name: SessionInner001
-* @tc.desc: Return session_inner
-* @tc.type: FUNC
-* @tc.require: XXXX
-*/
-HWTEST_F(AvsessionServiceTest, SessionInner001, TestSize.Level0)
-{
-    // step 1:Call the interface to obtain the actual result.
-    
-    // step 2:Using the assertions to compare the expected and actual result.
-}
-

@@ -35,7 +35,7 @@ public:
 
     static std::shared_ptr<AVSessionController> CreateController(int32_t sessionld);
 
-    static int32_t RegisterSessionListener(std::shared_ptr<SessionListener>& listener);
+    static int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener);
 
     static int32_t RegisterServiceDeathCallback(const DeathCallback& callback);
 

@@ -48,7 +48,7 @@ public:
 
     int32_t Release() override;
 
-    int32_t AddSupportCommand(const int32_t cmd) override;
+    int32_t AddSupportCommand(int32_t cmd) override;
 
     AVSessionDescriptor GetDescriptor();
 
@@ -68,8 +68,6 @@ public:
 
     int32_t AddController(pid_t pid, sptr<AVControllerItem>& controller);
 
-    int32_t RemoveController(pid_t pid);
-
     int32_t RegisterCallbackForRemote(std::shared_ptr<AVSessionCallback>& callback);
 
     int32_t UnRegisterCallbackForRemote();
@@ -81,6 +79,8 @@ public:
     pid_t GetPid() const;
 
     uid_t GetUid();
+
+    void HandleControllerRelease(pid_t pid);
 
     void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);
 
@@ -116,6 +116,7 @@ private:
         [AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE] = &AVSessionItem::HandleOnToggleFavorite,
     };
 
+    std::recursive_mutex lock_;
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;

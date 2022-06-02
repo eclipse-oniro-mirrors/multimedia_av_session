@@ -48,7 +48,7 @@ std::shared_ptr<AVSessionController> AVSessionManager::CreateController(int32_t 
     return AVSessionManagerImpl::GetInstance().CreateController(sessionId);
 }
 
-int32_t AVSessionManager::RegisterSessionListener(std::shared_ptr<SessionListener> &listener)
+int32_t AVSessionManager::RegisterSessionListener(const std::shared_ptr<SessionListener> &listener)
 {
     if (listener == nullptr) {
         SLOGE("listener is nullptr");
@@ -69,11 +69,19 @@ int32_t AVSessionManager::UnregisterServiceDeathCallback()
 
 int32_t AVSessionManager::SendSystemMediaKeyEvent(const MMI::KeyEvent &keyEvent)
 {
+    if (!keyEvent.IsValid()) {
+        SLOGE("keyEvent is invalid");
+        return ERR_INVALID_PARAM;
+    }
     return AVSessionManagerImpl::GetInstance().SendSystemMediaKeyEvent(keyEvent);
 }
 
 int32_t AVSessionManager::SendSystemControlCommand(const AVControlCommand &command)
 {
+    if (!command.IsValid()) {
+        SLOGE("command is invalid");
+        return ERR_INVALID_PARAM;
+    }
     return AVSessionManagerImpl::GetInstance().SendSystemControlCommand(command);
 }
 } // OHOS::AVSession

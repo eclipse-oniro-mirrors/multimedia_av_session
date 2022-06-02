@@ -68,8 +68,12 @@ std::vector<AVSessionDescriptor> AVSessionServiceProxy::GetAllSessionDescriptors
                              {}, "send request failed");
 
     uint32_t size {};
-    if (!reply.ReadUint32(size) || size == 0) {
+    if (!reply.ReadUint32(size)) {
         SLOGE("read vector size failed");
+        return {};
+    }
+    if (!size) {
+        SLOGI("size=0");
         return {};
     }
 

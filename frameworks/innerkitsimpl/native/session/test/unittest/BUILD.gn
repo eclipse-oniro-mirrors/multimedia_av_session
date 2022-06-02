@@ -20,21 +20,31 @@ config("module_private_config") {
 
   include_dirs = [
     "../../include/",
-    "../../../../../../interfaces/innerkits/native/session/include/"
+    "../../../../../../interfaces/innerkits/native/session/include/",
   ]
 }
 
-ohos_unittest("AvsessionManagerTest") {
+ohos_unittest("AVSessionManagerTest") {
   module_out_path = module_output_path
-  
+
   sources = [ "avsession_manager_test.cpp" ]
 
   configs = [ ":module_private_config" ]
 
   deps = [
-    "//utils/native/base:utils",
-    "//third_party/googletest:gtest_main",
     "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session:avsession_client",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "multimedia_image_standard:image_native",
+    "samgr_standard:samgr_proxy",
   ]
 }
 
@@ -42,10 +52,6 @@ ohos_unittest("AvsessionManagerTest") {
 group("unittest") {
   testonly = true
 
-  deps = []
-
-  deps += [
-    ":AvsessionManagerTest"
-  ]
+  deps = [ ":AVSessionManagerTest" ]
 }
 ###############################################################################

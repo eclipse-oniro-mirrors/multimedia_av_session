@@ -81,6 +81,11 @@ bool AVControlCommand::Marshalling(Parcel &parcel) const
     return true;
 }
 
+bool AVControlCommand::IsValid() const
+{
+    return cmd_ > SESSION_CMD_INVALID && cmd_ < SESSION_CMD_MAX;
+}
+
 int32_t AVControlCommand::SetCommand(int32_t cmd)
 {
     if (cmd < SESSION_CMD_PLAY || cmd >= SESSION_CMD_MAX) {

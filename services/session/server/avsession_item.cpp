@@ -24,12 +24,12 @@ namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
     : descriptor_(descriptor)
 {
-    SLOGD("constructor id=%{public}d", descriptor_.sessionId_);
+    SLOGI("constructor id=%{public}d", descriptor_.sessionId_);
 }
 
 AVSessionItem::~AVSessionItem()
 {
-    SLOGD("destroy id=%{public}d", descriptor_.sessionId_);
+    SLOGI("destroy id=%{public}d", descriptor_.sessionId_);
 }
 
 int32_t AVSessionItem::GetSessionId()
@@ -39,14 +39,24 @@ int32_t AVSessionItem::GetSessionId()
 
 int32_t AVSessionItem::Release()
 {
-    SLOGD("enter");
-    for (auto iter = controllers_.begin(); iter != controllers_.end();) {
-        iter->second->HandleSessionRelease(descriptor_);
-        controllers_.erase(iter++);
+    if (callback_) {
+        callback_.clear();
     }
+
+    SLOGI("size=%{public}d", static_cast<int>(controllers_.size()));
+    {
+        std::lock_guard lockGuard(lock_);
+        for (auto it = controllers_.begin(); it != controllers_.end();) {
+            SLOGI("pid=%{public}d", it->first);
+            it->second->HandleSessionRelease(descriptor_);
+            controllers_.erase(it++);
+        }
+    }
+
     if (serviceCallback_) {
         serviceCallback_(*this);
     }
+
     return AVSESSION_SUCCESS;
 }
 
@@ -59,6 +69,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     metaData_.CopyFrom(meta);
+    std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         controller->HandleMetaDataChange(metaData_);
     }
@@ -68,7 +79,9 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 int32_t  AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     playbackState_ = state;
+    std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
+        SLOGI("pid=%{public}d", pid);
         controller->HandlePlaybackStateChange(state);
     }
     return AVSESSION_SUCCESS;
@@ -88,6 +101,7 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
 
 sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 {
+    std::lock_guard lockGuard(lock_);
     auto iter = controllers_.find(GetPid());
     if(iter == controllers_.end()) {
         return nullptr;
@@ -104,7 +118,9 @@ int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback> &cal
 int32_t AVSessionItem::Active()
 {
     descriptor_.isActive_ = true;
+    std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
+        SLOGI("pid=%{pubic}d", pid);
         controller->HandleActiveStateChange(true);
     }
     return AVSESSION_SUCCESS;
@@ -113,7 +129,9 @@ int32_t AVSessionItem::Active()
 int32_t AVSessionItem::Disactive()
 {
     descriptor_.isActive_ = false;
+    std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
+        SLOGI("pid=%{pubic}d", pid);
         controller->HandleActiveStateChange(false);
     }
     return AVSESSION_SUCCESS;
@@ -124,7 +142,7 @@ bool AVSessionItem::IsActive()
     return descriptor_.isActive_;
 }
 
-int32_t AVSessionItem::AddSupportCommand(const int32_t cmd)
+int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 {
     supportedCmd_.push_back(cmd);
     return AVSESSION_SUCCESS;
@@ -246,13 +264,8 @@ void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand &cmd)
 
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& contoller)
 {
+    std::lock_guard lockGuard(lock_);
     controllers_.insert({ pid, contoller });
-    return AVSESSION_SUCCESS;
-}
-
-int32_t AVSessionItem::RemoveController(pid_t pid)
-{
-    controllers_.erase(pid);
     return AVSESSION_SUCCESS;
 }
 
@@ -284,6 +297,12 @@ pid_t AVSessionItem::GetPid() const
 uid_t  AVSessionItem::GetUid()
 {
     return uid_;
+}
+
+void AVSessionItem::HandleControllerRelease(pid_t pid)
+{
+    std::lock_guard lockGuard(lock_);
+    controllers_.erase(pid);
 }
 
 void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem &)> &callback)
