@@ -24,7 +24,7 @@ AVMetaData::AVMetaData()
 bool AVMetaData::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(metaMask_.to_string()) &&
-        parcel.WriteString(mediaId_) &&
+        parcel.WriteString(assetId_) &&
         parcel.WriteString(title_) &&
         parcel.WriteString(artist_) &&
         parcel.WriteString(author_) &&
@@ -34,8 +34,6 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteInt64(duration_) &&
         parcel.WriteParcelable(mediaImage_.get()) &&
         parcel.WriteString(mediaImageUri_) &&
-        parcel.WriteParcelable(appIcon_.get()) &&
-        parcel.WriteString(appIconUri_) &&
         parcel.WriteString(subTitle_) &&
         parcel.WriteString(description_) &&
         parcel.WriteString(lyric_);
@@ -49,7 +47,7 @@ AVMetaData* AVMetaData::Unmarshalling(Parcel& data)
     }
 
     result->metaMask_ = MetaMaskType(data.ReadString());
-    result->mediaId_ = data.ReadString();
+    result->assetId_ = data.ReadString();
     result->title_ = data.ReadString();
     result->artist_ = data.ReadString();
     result->author_ = data.ReadString();
@@ -59,8 +57,6 @@ AVMetaData* AVMetaData::Unmarshalling(Parcel& data)
     result->duration_ = data.ReadInt64();
     result->mediaImage_ = std::shared_ptr<Media::PixelMap>(data.ReadParcelable<Media::PixelMap>());
     result->mediaImageUri_ = data.ReadString();
-    result->appIcon_ = std::shared_ptr<Media::PixelMap>(data.ReadParcelable<Media::PixelMap>());
-    result->appIconUri_ = data.ReadString();
     result->subTitle_ = data.ReadString();
     result->description_ = data.ReadString();
     result->lyric_ = data.ReadString();
@@ -68,15 +64,15 @@ AVMetaData* AVMetaData::Unmarshalling(Parcel& data)
     return result;
 }
 
-void AVMetaData::SetMediaId(const std::string &mediaId)
+void AVMetaData::SetAssetId(const std::string &assetId)
 {
-    mediaId_ = mediaId;
-    metaMask_.set(META_KEY_MEDIA_ID);
+    assetId_ = assetId;
+    metaMask_.set(META_KEY_ASSET_ID);
 }
 
-std::string AVMetaData::GetMediaId() const
+std::string AVMetaData::GetAssetId() const
 {
-    return mediaId_;
+    return assetId_;
 }
 
 void AVMetaData::SetTitle(const std::string& title)
@@ -178,29 +174,17 @@ std::string AVMetaData::GetMediaImageUri() const
     return mediaImageUri_;
 }
 
-void AVMetaData::SetAppIcon(const std::shared_ptr<Media::PixelMap> &appIcon)
+void AVMetaData::SetPublishDate(double date)
 {
-    appIcon_ = appIcon;
-    metaMask_.set(META_KEY_APP_ICON);
+    publishDate_ = date;
 }
 
-std::shared_ptr<Media::PixelMap> AVMetaData::GetAppIcon() const
+double AVMetaData::GetPublishDate() const
 {
-    return appIcon_;
+    return publishDate_;
 }
 
-void AVMetaData::SetAppIconUri(const std::string& appIconUri)
-{
-    appIconUri_ = appIconUri;
-    metaMask_.set(META_KEY_APP_ICON_URI);
-}
-
-std::string AVMetaData::GetAppIconUri() const
-{
-    return appIconUri_;
-}
-
-void AVMetaData::SetSubTitle(const std :: string & subTitle)
+void AVMetaData::SetSubTitle(const std::string& subTitle)
 {
     subTitle_ = subTitle;
     metaMask_.set(META_KEY_SUBTITLE);
@@ -211,7 +195,7 @@ std::string AVMetaData::GetSubTitle() const
     return subTitle_;
 }
 
-void AVMetaData::SetDescription(const std :: string & description)
+void AVMetaData::SetDescription(const std::string& description)
 {
     description_ = description;
     metaMask_.set(META_KEY_DESCRIPTION);
@@ -233,6 +217,26 @@ std::string AVMetaData::GetLyric() const
     return lyric_;
 }
 
+void AVMetaData::SetPreviosAssetId(const std::string &assetId)
+{
+    previousAssetId_ = assetId;
+}
+
+std::string AVMetaData::GetPreviosAssetId() const
+{
+    return previousAssetId_;
+}
+
+void AVMetaData::SetNextAssetId(const std::string &assetId)
+{
+    nextAssetId_ = assetId;
+}
+
+std::string AVMetaData::GetNextAssetId() const
+{
+    return nextAssetId_;
+}
+
 void AVMetaData::SetMetaMask(const MetaMaskType metaMask)
 {
     metaMask_ = metaMask;
@@ -246,7 +250,7 @@ AVMetaData::MetaMaskType AVMetaData::GetMetaMask() const
 void AVMetaData::Reset()
 {
     metaMask_.reset();
-    mediaId_ = "";
+    assetId_ = "";
     title_ = "";
     artist_ = "";
     author_ = "";
@@ -256,11 +260,11 @@ void AVMetaData::Reset()
     duration_ = 0;
     mediaImage_ = nullptr;
     mediaImageUri_ = "";
-    appIcon_ = nullptr;
-    appIconUri_ = "";
     subTitle_ = "";
     description_ = "";
     lyric_ = "";
+    previousAssetId_ = "";
+    nextAssetId_ = "";
 }
 
 bool AVMetaData::CopyToByMask(AVMetaData &metaOut) const
@@ -279,13 +283,13 @@ bool AVMetaData::CopyToByMask(AVMetaData &metaOut) const
 
 bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
 {
-    if (metaIn.mediaId_.empty()) {
-        SLOGE("mediaId is empty");
+    if (metaIn.assetId_.empty()) {
+        SLOGE("assetId is empty");
         return false;
     }
 
-    if (metaIn.mediaId_ != mediaId_) {
-        SLOGD("mediaId not equal");
+    if (metaIn.assetId_ != assetId_) {
+        SLOGD("assetId not equal");
         *this = metaIn;
         return true;
     }
@@ -302,9 +306,9 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
     return result;
 }
 
-void AVMetaData::CloneMediaId(const AVMetaData &from, AVMetaData &to)
+void AVMetaData::CloneAssetId(const AVMetaData &from, AVMetaData &to)
 {
-    to.mediaId_ = from.mediaId_;
+    to.assetId_ = from.assetId_;
 }
 
 void AVMetaData::CloneTitile(const AVMetaData& from, AVMetaData& to)
@@ -352,14 +356,9 @@ void AVMetaData::CloneMediaImageUri(const AVMetaData& from, AVMetaData& to)
     to.mediaImageUri_ = from.mediaImageUri_;
 }
 
-void AVMetaData::CloneAppIcon(const AVMetaData& from, AVMetaData& to)
+void AVMetaData::ClonePublishData(const AVMetaData &from, AVMetaData &to)
 {
-    to.appIcon_ = from.appIcon_;
-}
-
-void AVMetaData::CloneAppIconUri(const AVMetaData& from, AVMetaData& to)
-{
-    to.appIconUri_ = from.appIconUri_;
+    to.publishDate_ = from.publishDate_;
 }
 
 void AVMetaData::CloneSubTitile(const AVMetaData& from, AVMetaData& to)
@@ -375,5 +374,15 @@ void AVMetaData::CloneDescriptiion(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneLyric(const AVMetaData& from, AVMetaData& to)
 {
     to.lyric_ = from.lyric_;
+}
+
+void AVMetaData::ClonePreviousAssetId(const AVMetaData &from, AVMetaData &to)
+{
+    to.previousAssetId_ = from.assetId_;
+}
+
+void AVMetaData::CloneNextAssetId(const AVMetaData &from, AVMetaData &to)
+{
+    to.nextAssetId_ = from.nextAssetId_;
 }
 } // namespace OHOS::AVSession

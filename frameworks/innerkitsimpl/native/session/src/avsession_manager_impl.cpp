@@ -82,10 +82,10 @@ void AVSessionManagerImpl::OnServiceDied()
 }
 
 std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string &tag, int32_t type,
-    const std::string &bundleName, const std::string &abilityName)
+                                                               const AppExecFwk::ElementName& elementName)
 {
     auto service = GetService();
-    return service ? service->CreateSession(tag, type, bundleName, abilityName) : nullptr;
+    return service ? service->CreateSession(tag, type, elementName) : nullptr;
 }
 
 std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetAllSessionDescriptors()
@@ -134,10 +134,10 @@ int32_t AVSessionManagerImpl::UnregisterServiceDeathCallback()
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionManagerImpl::SendSystemMediaKeyEvent(const MMI::KeyEvent &keyEvent)
+int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent &keyEvent)
 {
     auto service = GetService();
-    return service ? service->SendSystemMediaKeyEvent(keyEvent) : ERR_SERVICE_NOT_EXIST;
+    return service ? service->SendSystemAVKeyEvent(keyEvent) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand &command)

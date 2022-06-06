@@ -20,21 +20,15 @@ AVPlaybackState::AVPlaybackState()
 {
 }
 
-AVPlaybackState::AVPlaybackState(int32_t state, float speed, int64_t etime, int64_t btime, int32_t loopMode,
-                                 bool isFavorite)
-    : state_(state), speed_(speed), elapsedTime_(etime), bufferedTime_(btime), loopMode_(loopMode),
-      isFavorite_(isFavorite)
-{
-}
-
 bool AVPlaybackState::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteInt32(state_) &&
-    parcel.WriteFloat(speed_) &&
-    parcel.WriteInt64(elapsedTime_) &&
-    parcel.WriteInt64(bufferedTime_) &&
-    parcel.WriteInt32(loopMode_) &&
-    parcel.WriteBool(isFavorite_);
+        parcel.WriteFloat(speed_) &&
+        parcel.WriteInt64(elapsedTime_) &&
+        parcel.WriteInt64(updateTime_) &&
+        parcel.WriteInt64(bufferedTime_) &&
+        parcel.WriteInt32(loopMode_) &&
+        parcel.WriteBool(isFavorite_);
 }
 
 AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
@@ -46,6 +40,7 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
     result->state_ = parcel.ReadInt32();
     result->speed_ = parcel.ReadFloat();
     result->elapsedTime_ = parcel.ReadInt64();
+    result->updateTime_ = parcel.ReadInt64();
     result->bufferedTime_ = parcel.ReadInt64();
     result->loopMode_ = parcel.ReadInt32();
     result->isFavorite_ = parcel.ReadBool();
@@ -65,6 +60,11 @@ void AVPlaybackState::SetSpeed(float speed)
 void AVPlaybackState::SetElapsedTime(int64_t time)
 {
     elapsedTime_ = time;
+}
+
+void AVPlaybackState::SetUpdateTime(int64_t time)
+{
+    updateTime_ = time;
 }
 
 void AVPlaybackState::SetBufferedTime(int64_t time)
@@ -95,6 +95,11 @@ float AVPlaybackState::GetSpeed() const
 int64_t AVPlaybackState::GetElapsedTime() const
 {
     return elapsedTime_;
+}
+
+int64_t AVPlaybackState::GetUpdateTime() const
+{
+    return updateTime_;
 }
 
 int64_t AVPlaybackState::GetBufferedTime() const

@@ -36,7 +36,7 @@ public:
     static AVSessionManagerImpl& GetInstance();
 
     std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
-                                             const std::string& bundleName, const std::string& abilityName);
+                                             const AppExecFwk::ElementName& elementName);
 
     std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
 
@@ -48,7 +48,7 @@ public:
 
     int32_t UnregisterServiceDeathCallback();
 
-    int32_t SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent);
+    int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent);
 
     int32_t SendSystemControlCommand(const AVControlCommand& command);
 

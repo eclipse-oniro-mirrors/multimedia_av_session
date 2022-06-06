@@ -26,7 +26,7 @@ namespace OHOS::AVSession {
 class AVMetaData : public Parcelable {
 public:
     enum {
-        META_KEY_MEDIA_ID,
+        META_KEY_ASSET_ID,
         META_KEY_TITLE,
         META_KEY_ARTIST,
         META_KEY_AUTHOR,
@@ -36,12 +36,12 @@ public:
         META_KEY_DURATION,
         META_KEY_MEDIA_IMAGE,
         META_KEY_MEDIA_IMAGE_URI,
-        META_KEY_APP_ICON,
-        META_KEY_APP_ICON_URI,
-        META_KEY_PUBLISH_DATA,
+        META_KEY_PUBLISH_DATE,
         META_KEY_SUBTITLE,
         META_KEY_DESCRIPTION,
         META_KEY_LYRIC,
+        META_KEY_PREVIOUS_ASSET_ID,
+        META_KEY_NEXT_ASSET_ID,
         META_KEY_MAX
     };
 
@@ -53,65 +53,53 @@ public:
 
     bool Marshalling(Parcel& parcel) const override;
 
-    void SetMediaId(const std::string& mediaId);
-
-    std::string GetMediaId() const ;
+    void SetAssetId(const std::string& assetId);
+    std::string GetAssetId() const ;
 
     void SetTitle(const std::string& title);
-
     std::string GetTitle() const;
 
     void SetArtist(const std::string& artist);
-
     std::string GetArtist() const;
 
     void SetAuthor(const std::string& author);
-
     std::string GetAuthor() const;
 
     void SetAlbum(const std::string& album);
-
     std::string GetAlbum() const;
 
     void SetWriter(const std::string& wrtier);
-
     std::string GetWriter() const;
 
     void SetComposer(const std::string& composer);
-
     std::string GetComposer() const;
 
     void SetDuration(int64_t duration);
-
     int64_t GetDuration() const;
 
     void SetMediaImage(const std::shared_ptr<Media::PixelMap>& mediaImage);
-
     std::shared_ptr<Media::PixelMap> GetMediaImage() const;
 
     void SetMediaImageUri(const std::string& mediaImageUri);
-
     std::string GetMediaImageUri() const;
 
-    void SetAppIcon(const std::shared_ptr<Media::PixelMap>& appIcon);
-
-    std::shared_ptr<Media::PixelMap> GetAppIcon() const;
-
-    void SetAppIconUri(const std::string& appIconUri);
-
-    std::string GetAppIconUri() const;
+    void SetPublishDate(double date);
+    double GetPublishDate() const;
 
     void SetSubTitle(const std::string& subTitle);
-
     std::string GetSubTitle() const;
 
     void SetDescription(const std::string& description);
-
     std::string GetDescription() const;
 
     void SetLyric(const std::string& lyric);
-
     std::string GetLyric() const;
+
+    void SetPreviosAssetId(const std::string& assetId);
+    std::string GetPreviosAssetId() const;
+
+    void SetNextAssetId(const std::string& assetId);
+    std::string GetNextAssetId() const;
 
     void Reset();
 
@@ -135,7 +123,7 @@ public:
 private:
     MetaMaskType metaMask_;
 
-    std::string mediaId_;
+    std::string assetId_;
     std::string title_;
     std::string artist_;
     std::string author_;
@@ -145,13 +133,14 @@ private:
     int64_t duration_ = 0;
     std::shared_ptr<Media::PixelMap> mediaImage_;
     std::string mediaImageUri_;
-    std::shared_ptr<Media::PixelMap> appIcon_;
-    std::string appIconUri_;
+    double publishDate_ = 0;
     std::string subTitle_;
     std::string description_;
     std::string lyric_;
+    std::string previousAssetId_;
+    std::string nextAssetId_;
 
-    static void CloneMediaId(const AVMetaData& from, AVMetaData& to);
+    static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneTitile(const AVMetaData& from, AVMetaData& to);
     static void CloneArtist(const AVMetaData& from, AVMetaData& to);
     static void CloneAuthor(const AVMetaData& from, AVMetaData& to);
@@ -161,15 +150,16 @@ private:
     static void CloneDuration(const AVMetaData& from, AVMetaData& to);
     static void CloneMediaImage(const AVMetaData& from, AVMetaData& to);
     static void CloneMediaImageUri(const AVMetaData& from, AVMetaData& to);
-    static void CloneAppIcon(const AVMetaData& from, AVMetaData& to);
-    static void CloneAppIconUri(const AVMetaData& from, AVMetaData& to);
+    static void ClonePublishData(const AVMetaData& from, AVMetaData& to);
     static void CloneSubTitile(const AVMetaData& from, AVMetaData& to);
     static void CloneDescriptiion(const AVMetaData& from, AVMetaData& to);
     static void CloneLyric(const AVMetaData& from, AVMetaData& to);
+    static void ClonePreviousAssetId(const AVMetaData& from, AVMetaData& to);
+    static void CloneNextAssetId(const AVMetaData& from, AVMetaData& to);
 
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
-        [META_KEY_MEDIA_ID] = &AVMetaData::CloneMediaId,
+        [META_KEY_ASSET_ID] = &AVMetaData::CloneAssetId,
         [META_KEY_TITLE] = &AVMetaData::CloneTitile,
         [META_KEY_ARTIST] = &AVMetaData::CloneArtist,
         [META_KEY_AUTHOR] = &AVMetaData::CloneAuthor,
@@ -179,11 +169,12 @@ private:
         [META_KEY_DURATION] = &AVMetaData::CloneDuration,
         [META_KEY_MEDIA_IMAGE] = &AVMetaData::CloneMediaImage,
         [META_KEY_MEDIA_IMAGE_URI] = &AVMetaData::CloneMediaImageUri,
-        [META_KEY_APP_ICON] = &AVMetaData::CloneAppIcon,
-        [META_KEY_APP_ICON_URI] = &AVMetaData::CloneAppIconUri,
+        [META_KEY_PUBLISH_DATE] = &AVMetaData::ClonePublishData,
         [META_KEY_SUBTITLE] = &AVMetaData::CloneSubTitile,
         [META_KEY_DESCRIPTION] = &AVMetaData::CloneDescriptiion,
         [META_KEY_LYRIC] = &AVMetaData::CloneLyric,
+        [META_KEY_PREVIOUS_ASSET_ID] = &AVMetaData::ClonePreviousAssetId,
+        [META_KEY_NEXT_ASSET_ID] = &AVMetaData::CloneNextAssetId,
     };
 };
 } // namespace OHOS::AVSession

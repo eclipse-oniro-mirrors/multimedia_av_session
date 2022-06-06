@@ -29,7 +29,7 @@ private:
     int HandleGetAllSessionDescriptors(MessageParcel &data, MessageParcel &reply);
     int HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply);
-    int HandleSendSystemMediaKeyEvent(MessageParcel &data, MessageParcel &reply);
+    int HandleSendSystemAVKeyEvent(MessageParcel &data, MessageParcel &reply);
     int HandleSendSystemControlCommand(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterClientDeathObserver(MessageParcel &data, MessageParcel &reply);
     static bool CheckInterfaceToken(MessageParcel& data);
@@ -40,7 +40,7 @@ private:
         [SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS] = &AVSessionServiceStub::HandleGetAllSessionDescriptors,
         [SERVICE_CMD_CREATE_CONTROLLER] = &AVSessionServiceStub::HandleCreateControllerInner,
         [SERVICE_CMD_REGISTER_SESSION_LISTENER] = &AVSessionServiceStub::HandleRegisterSessionListener,
-        [SERVICE_CMD_SEND_SYSTEM_MEDIA_KEY_EVENT] = &AVSessionServiceStub::HandleSendSystemMediaKeyEvent,
+        [SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT] = &AVSessionServiceStub::HandleSendSystemAVKeyEvent,
         [SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND] = &AVSessionServiceStub::HandleSendSystemControlCommand,
         [SERVICE_CMD_REGISTER_CLIENT_DEATH] = &AVSessionServiceStub::HandleRegisterClientDeathObserver
     };

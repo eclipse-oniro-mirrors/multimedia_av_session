@@ -112,15 +112,15 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
 }
 
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, int32_t type,
-                                                       const std::string &bundleName, const std::string &abilityName)
+                                                       const AppExecFwk::ElementName& elementName)
 {
-    SLOGI("%{public}s %{public}d %{public}s %{public}s", tag.c_str(), type, bundleName.c_str(), abilityName.c_str());
+    SLOGI("%{public}s %{public}d %{public}s %{public}s", tag.c_str(), type,
+          elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str());
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = AllocSessionId();
     descriptor.sessionTag_ = tag;
     descriptor.sessionType_ = type;
-    descriptor.bundleName_ = bundleName;
-    descriptor.abilityName_ = abilityName;
+    descriptor.elementName_ = elementName;
 
     sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor);
     if (result == nullptr) {
@@ -134,7 +134,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
 }
 
 sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
-    const std::string& bundleName, const std::string& abilityName)
+                                                         const AppExecFwk::ElementName& elementName)
 {
     SLOGI("enter");
     auto pid = GetCallingPid();
@@ -144,7 +144,7 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
         return nullptr;
     }
 
-    auto result = CreateNewSession(tag, type, bundleName, abilityName);
+    auto result = CreateNewSession(tag, type, elementName);
     if (result == nullptr) {
         SLOGE("create new session failed");
         return nullptr;
@@ -228,7 +228,7 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent)
+int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     SLOGI("cmd=%{public}d", keyEvent.GetKeyCode());
     if (topSession_) {

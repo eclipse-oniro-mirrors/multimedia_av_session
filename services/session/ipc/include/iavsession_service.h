@@ -32,14 +32,14 @@ public:
         SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS,
         SERVICE_CMD_CREATE_CONTROLLER,
         SERVICE_CMD_REGISTER_SESSION_LISTENER,
-        SERVICE_CMD_SEND_SYSTEM_MEDIA_KEY_EVENT,
+        SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT,
         SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND,
         SERVICE_CMD_REGISTER_CLIENT_DEATH,
         SERVICE_CMD_MAX
     };
 
     virtual sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
-                                                   const std::string& bundleName, const std::string& abilityName) = 0;
+                                                   const AppExecFwk::ElementName& elementName) = 0;
 
     virtual std::vector<AVSessionDescriptor> GetAllSessionDescriptors() = 0;
 
@@ -47,7 +47,7 @@ public:
 
     virtual int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
 
-    virtual int32_t SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
+    virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
 
     virtual int32_t SendSystemControlCommand(const AVControlCommand& command) = 0;
 
