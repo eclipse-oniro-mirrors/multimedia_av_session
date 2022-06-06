@@ -26,6 +26,7 @@ ohos_shared_library("avsession_service") {
 
   common_source = [
     "../../frameworks/innerkitsimpl/native/session/src/avmeta_data.cpp",
+    "../../frameworks/innerkitsimpl/native/session/src/avsession_descriptor.cpp",
     "../../frameworks/innerkitsimpl/native/session/src/avplayback_state.cpp",
     "../../frameworks/innerkitsimpl/native/session/src/avcontrol_command.cpp",
   ]

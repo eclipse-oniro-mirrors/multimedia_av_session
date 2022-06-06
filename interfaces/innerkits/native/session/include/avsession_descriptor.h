@@ -17,44 +17,22 @@
 #define OHOS_AVSESSION_DESCRIPTOR_H
 
 #include "parcel.h"
+#include "element_name.h"
 
 namespace OHOS::AVSession {
 struct AVSessionDescriptor {
-    bool WriteToParcel(Parcel& out) const
-    {
-        return out.WriteInt32(sessionId_) &&
-            out.WriteInt32(sessionType_) &&
-            out.WriteString(sessionTag_) &&
-            out.WriteString(bundleName_) &&
-            out.WriteString(abilityName_) &&
-            out.WriteBool(isActive_) &&
-            out.WriteBool(isTopSession_) &&
-            out.WriteBool(isRemote_) &&
-            out.WriteString(remoteDeviceId_);
-    }
-
-    bool ReadFromParcel(Parcel &in)
-    {
-        return in.ReadInt32(sessionId_) &&
-            in.ReadInt32(sessionType_) &&
-            in.ReadString(sessionTag_) &&
-            in.ReadString(bundleName_) &&
-            in.ReadString(abilityName_) &&
-            in.ReadBool(isActive_) &&
-            in.ReadBool(isTopSession_) &&
-            in.ReadBool(isRemote_) &&
-            in.ReadString(remoteDeviceId_);
-    }
+    bool WriteToParcel(Parcel& out) const;
+    bool ReadFromParcel(Parcel &in);
 
     int32_t sessionId_ = -1;
     int32_t sessionType_ {};
     std::string sessionTag_;
-    std::string bundleName_;
-    std::string abilityName_;
+    AppExecFwk::ElementName elementName_;
     bool isActive_ {};
     bool isTopSession_ {};
     bool isRemote_ {};
-    std::string remoteDeviceId_;
+    std::vector<std::string> deviceIds_;
+    std::vector<std::string> deviceNames_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_DESCRIPTOR_H

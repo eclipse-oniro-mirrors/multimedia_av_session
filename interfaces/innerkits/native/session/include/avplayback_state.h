@@ -22,16 +22,17 @@ namespace OHOS::AVSession {
 class AVPlaybackState : public Parcelable {
 public:
     enum {
-        PLAYBACK_STATE_INVALID = -1,
+        PLAYBACK_STATE_INITIAL,
         PLAYBACK_STATE_PREPARING,
         PLAYBACK_STATE_PLAYING,
         PLAYBACK_STATE_PAUSED,
-        PLAYBACK_STATE_STOPPED,
+        PLAYBACK_STATE_FAST_FORWARD,
+        PLAYBACK_STATE_REWIND,
+        PLAYBACK_STATE_STOP,
         PLAYBACK_STATE_MAX
     };
 
     AVPlaybackState();
-    AVPlaybackState(int32_t state, float speed, int64_t etime, int64_t btime, int32_t loopMode, bool isFavorite);
 
     static AVPlaybackState* Unmarshalling(Parcel& parcel);
     bool Marshalling(Parcel& parcel) const override;
@@ -45,6 +46,9 @@ public:
     void SetElapsedTime(int64_t time);
     int64_t GetElapsedTime() const;
 
+    void SetUpdateTime(int64_t time);
+    int64_t GetUpdateTime() const;
+
     void SetBufferedTime(int64_t time);
     int64_t GetBufferedTime() const;
 
@@ -55,9 +59,10 @@ public:
     bool GetFavorite() const;
 
 private:
-    int32_t state_ = PLAYBACK_STATE_INVALID;
+    int32_t state_ = PLAYBACK_STATE_INITIAL;
     float speed_ {};
     int64_t elapsedTime_ {};
+    int64_t updateTime_ {};
     int64_t bufferedTime_ {};
     int32_t loopMode_ {};
     bool isFavorite_ {};

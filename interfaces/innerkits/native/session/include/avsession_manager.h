@@ -29,7 +29,7 @@ namespace OHOS::AVSession {
 class AVSessionManager {
 public:
     static std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
-                                                    const std::string& bundleName, const std::string& abilityName);
+                                                    const AppExecFwk::ElementName& elementName);
 
     static std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
 
@@ -41,7 +41,7 @@ public:
 
     static int32_t UnregisterServiceDeathCallback();
 
-    static int32_t SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent);
+    static int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent);
 
     static int32_t SendSystemControlCommand(const AVControlCommand& command);
 };

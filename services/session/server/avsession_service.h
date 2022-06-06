@@ -46,7 +46,7 @@ public:
     void OnStop() override;
 
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
-                                           const std::string& bundleName, const std::string& abilityName) override;
+                                           const AppExecFwk::ElementName& elementName) override;
 
     std::vector<AVSessionDescriptor> GetAllSessionDescriptors() override;
 
@@ -54,7 +54,7 @@ public:
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
-    int32_t SendSystemMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
+    int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
@@ -85,7 +85,7 @@ private:
     void RemoveSessionListener(pid_t pid);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type,
-                                         const std::string& bundleName, const std::string& abilityName);
+                                         const AppExecFwk::ElementName& elementName);
 
     sptr<AVControllerItem> CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session);
 

@@ -45,7 +45,21 @@ int AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Me
 
 int AVSessionServiceStub::HandleCreateSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto session = CreateSessionInner(data.ReadString(), data.ReadInt32(), data.ReadString(), data.ReadString());
+    auto sessionTag = data.ReadString();
+    auto sessionType = data.ReadInt32();
+    sptr elementName = data.ReadParcelable<AppExecFwk::ElementName>();
+    if (elementName == nullptr) {
+        SLOGE("read element name failed");
+        reply.WriteInt32(ERR_UNMARSHALLING);
+        return ERR_NONE;
+    }
+    auto session = CreateSessionInner(sessionTag, sessionType, *elementName);
+    if (session == nullptr) {
+        SLOGE("session is nullptr");
+        reply.WriteInt32(ERR_UNMARSHALLING);
+        return ERR_NONE;
+    }
+    reply.WriteInt32(AVSESSION_SUCCESS);
     reply.WriteRemoteObject(session);
     return ERR_NONE;
 }
@@ -55,7 +69,10 @@ int AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel &data, Me
     auto descriptors = GetAllSessionDescriptors();
     reply.WriteUint32(descriptors.size());
     for (const auto& descriptor : descriptors) {
-        descriptor.WriteToParcel(reply);
+        if (!descriptor.WriteToParcel(reply)) {
+            SLOGE("write descriptor failed");
+            break;
+        }
     }
     return ERR_NONE;
 }
@@ -81,7 +98,7 @@ int AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
-int AVSessionServiceStub::HandleSendSystemMediaKeyEvent(MessageParcel &data, MessageParcel &reply)
+int AVSessionServiceStub::HandleSendSystemAVKeyEvent(MessageParcel &data, MessageParcel &reply)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     if (keyEvent == nullptr) {
@@ -94,7 +111,7 @@ int AVSessionServiceStub::HandleSendSystemMediaKeyEvent(MessageParcel &data, Mes
         reply.WriteInt32(ERR_UNMARSHALLING);
         return ERR_NONE;
     }
-    if (!reply.WriteInt32(SendSystemMediaKeyEvent(*keyEvent))) {
+    if (!reply.WriteInt32(SendSystemAVKeyEvent(*keyEvent))) {
         SLOGE("reply write int32 failed");
     }
     return ERR_NONE;

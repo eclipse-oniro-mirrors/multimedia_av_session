@@ -20,10 +20,9 @@
 
 namespace OHOS::AVSession {
 std::shared_ptr<AVSession> AVSessionManager::CreateSession(const std::string &tag, int32_t type,
-                                                           const std::string &bundleName,
-                                                           const std::string &abilityName)
+                                                           const AppExecFwk::ElementName& elementName)
 {
-    if (tag.empty() || bundleName.empty() || abilityName.empty()) {
+    if (tag.empty() || elementName.GetBundleName().empty() || elementName.GetAbilityName().empty()) {
         SLOGE("param is invalid");
         return nullptr;
     }
@@ -31,7 +30,7 @@ std::shared_ptr<AVSession> AVSessionManager::CreateSession(const std::string &ta
         SLOGE("type is invalid");
         return nullptr;
     }
-    return AVSessionManagerImpl::GetInstance().CreateSession(tag, type, bundleName, abilityName);
+    return AVSessionManagerImpl::GetInstance().CreateSession(tag, type, elementName);
 }
 
 std::vector<AVSessionDescriptor> AVSessionManager::GetAllSessionDescriptors()
@@ -67,13 +66,13 @@ int32_t AVSessionManager::UnregisterServiceDeathCallback()
     return AVSessionManagerImpl::GetInstance().UnregisterServiceDeathCallback();
 }
 
-int32_t AVSessionManager::SendSystemMediaKeyEvent(const MMI::KeyEvent &keyEvent)
+int32_t AVSessionManager::SendSystemAVKeyEvent(const MMI::KeyEvent &keyEvent)
 {
     if (!keyEvent.IsValid()) {
         SLOGE("keyEvent is invalid");
         return ERR_INVALID_PARAM;
     }
-    return AVSessionManagerImpl::GetInstance().SendSystemMediaKeyEvent(keyEvent);
+    return AVSessionManagerImpl::GetInstance().SendSystemAVKeyEvent(keyEvent);
 }
 
 int32_t AVSessionManager::SendSystemControlCommand(const AVControlCommand &command)
