@@ -24,6 +24,22 @@ config("module_private_config") {
   ]
 }
 
+common_deps = [
+  "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session:avsession_client",
+  "//third_party/googletest:gtest_main",
+  "//utils/native/base:utils",
+]
+
+common_external_deps = [
+  "ability_base:want",
+  "ability_runtime:wantagent_innerkits",
+  "hiviewdfx_hilog_native:libhilog",
+  "input:libmmi-client",
+  "ipc:ipc_core",
+  "multimedia_image_standard:image_native",
+  "samgr_standard:samgr_proxy",
+]
+
 ohos_unittest("AVSessionManagerTest") {
   module_out_path = module_output_path
 
@@ -31,27 +47,30 @@ ohos_unittest("AVSessionManagerTest") {
 
   configs = [ ":module_private_config" ]
 
-  deps = [
-    "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session:avsession_client",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
-  ]
+  deps = common_deps
 
-  external_deps = [
-    "ability_base:want",
-    "ability_runtime:wantagent_innerkits",
-    "hiviewdfx_hilog_native:libhilog",
-    "input:libmmi-client",
-    "ipc:ipc_core",
-    "multimedia_image_standard:image_native",
-    "samgr_standard:samgr_proxy",
-  ]
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVSessionControllerTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_controller_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
 }
 
 ###############################################################################
 group("unittest") {
   testonly = true
 
-  deps = [ ":AVSessionManagerTest" ]
+  deps = [
+    ":AVSessionManagerTest",
+    ":AVSessionControllerTest",
+  ]
 }
 ###############################################################################

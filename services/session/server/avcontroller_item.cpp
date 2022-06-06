@@ -98,6 +98,10 @@ int32_t AVControllerItem::SendCommand(const AVControlCommand &cmd)
     if (session_ == nullptr) {
         return ERR_SESSION_NOT_EXIST;
     }
+    std::vector<int32_t> cmds = session_->GetSupportCommand();
+    if (std::find(cmds.begin(), cmds.end(), cmd.GetCommand()) == cmds.end()) {
+        return ERR_COMMAND_NOT_SUPPORT;
+    }
     session_->ExecuteControllerCommand(cmd);
     return AVSESSION_SUCCESS;
 }

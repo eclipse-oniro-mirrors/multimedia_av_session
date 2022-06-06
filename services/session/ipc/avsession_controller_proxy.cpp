@@ -160,6 +160,7 @@ int32_t AVSessionControllerProxy::IsSessionActive(bool &isActive)
 
 int32_t AVSessionControllerProxy::SendCommand(const AVControlCommand &cmd)
 {
+    CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_INVALID_PARAM, "command not valid");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
