@@ -48,13 +48,16 @@ ohos_shared_library("avsession_service") {
     "server/session_stack.cpp",
   ]
 
-  adapter_sources = [ "adapter/distributed_object_adapter.cpp" ]
+  adapter_sources = [
+    "adapter/distributed_object_adapter.cpp",
+    "adapter/key_event_adapter.cpp",
+  ]
 
   sources = common_source + ipc_sources + adapter_sources + service_sources
 
   include_dirs = [
     "//foundation/multimedia/avsession/services/session/ipc/include",
-    "//foundation/multimedia/avsession/services/session/ipc/adapter",
+    "//foundation/multimedia/avsession/services/session/adapter",
     "//foundation/multimedia/avsession/interfaces/innerkits/native/session/include",
     "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session/include",
     "//utils/native/base/include",

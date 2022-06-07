@@ -19,6 +19,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "iservice_registry.h"
+#include "key_event_adapter.h"
 #include "system_ability_definition.h"
 #include "session_stack.h"
 
@@ -41,6 +42,9 @@ void AVSessionService::OnStart()
     if (!Publish(this)) {
         SLOGE("publish avsession service failed");
     }
+
+    AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
+    AddSystemAbilityListener(DISTRIBUTED_HARDWARE_AUDIO_SOURCE_SA_ID);
 }
 
 void AVSessionService::OnDump()
@@ -49,6 +53,41 @@ void AVSessionService::OnDump()
 
 void AVSessionService::OnStop()
 {
+}
+
+void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    switch (systemAbilityId) {
+        case MULTIMODAL_INPUT_SERVICE_ID:
+            InitKeyEvent();
+            break;
+        case DISTRIBUTED_HARDWARE_AUDIO_SOURCE_SA_ID:
+            InitAudio();
+            break;
+        default:
+            SLOGE("undefined system ability %{public}d", systemAbilityId);
+    }
+}
+
+void AVSessionService::InitKeyEvent()
+{
+    SLOGI("enter");
+    std::vector<int32_t> keyCodes = {
+        MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE,
+        MMI::KeyEvent::KEYCODE_MEDIA_STOP,
+        MMI::KeyEvent::KEYCODE_MEDIA_NEXT,
+        MMI::KeyEvent::KEYCODE_MEDIA_PREVIOUS,
+        MMI::KeyEvent::KEYCODE_MEDIA_REWIND,
+        MMI::KeyEvent::KEYCODE_MEDIA_FAST_FORWARD,
+    };
+
+    KeyEventAdapter::GetInstance().SubscribeKeyEvent(
+        keyCodes, [this](const auto& keyEvent) { SendSystemAVKeyEvent(*keyEvent); });
+}
+
+void AVSessionService::InitAudio()
+{
+    SLOGI("enter");
 }
 
 SessionContainer& AVSessionService::GetContainer()
@@ -230,7 +269,7 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    SLOGI("cmd=%{public}d", keyEvent.GetKeyCode());
+    SLOGI("key=%{public}d", keyEvent.GetKeyCode());
     if (topSession_) {
         topSession_->HandleMediaKeyEvent(keyEvent);
     }
