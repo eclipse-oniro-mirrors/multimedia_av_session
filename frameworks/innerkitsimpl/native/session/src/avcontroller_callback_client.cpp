@@ -17,7 +17,7 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-AVControllerCallbackClient::AVControllerCallbackClient(std::shared_ptr<AVControllerCallback>& callback)
+AVControllerCallbackClient::AVControllerCallbackClient(const std::shared_ptr<AVControllerCallback>& callback)
     : callback_(callback)
 {
     SLOGD("construct");
