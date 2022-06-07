@@ -195,7 +195,7 @@ int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType &
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVSessionControllerProxy::RegisterCallback(std::shared_ptr<AVControllerCallback> &callback)
+int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback)
 {
     sptr<IRemoteObject> callback_;
 

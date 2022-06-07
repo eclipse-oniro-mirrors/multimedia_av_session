@@ -20,7 +20,6 @@
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
-int32_t g_state = AVSESSION_ERROR;
 
 class AVSessionControllerTest : public testing::Test {
 public:
@@ -43,7 +42,10 @@ void AVSessionControllerTest::TearDownTestCase()
 
 void AVSessionControllerTest::SetUp()
 {
-    avsession_ = AVSessionManager::CreateSession("Application A create session", 1, "demo", "demo");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("demo");
+    elementName.SetAbilityName("demo");
+    avsession_ = AVSessionManager::CreateSession("Application", AVSession::SESSION_TYPE_AUDIO, elementName);
     ASSERT_NE(avsession_, nullptr);
 
     controller_ = AVSessionManager::CreateController(avsession_->GetSessionId());
@@ -69,6 +71,11 @@ public:
     void OnActiveStateChange(bool isActive) override;
 
     ~AVControllerCallbackImpl() override;
+
+    bool isActive_ = false;
+    AVMetaData data_;
+    AVPlaybackState state_;
+    std::string sessionTag_;
 };
 
 AVControllerCallbackImpl::~AVControllerCallbackImpl()
@@ -77,22 +84,22 @@ AVControllerCallbackImpl::~AVControllerCallbackImpl()
 
 void AVControllerCallbackImpl::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
-    g_state = AVSESSION_SUCCESS;
+    sessionTag_ = descriptor.sessionTag_;
 }
 
 void AVControllerCallbackImpl::OnPlaybackStateUpdate(const AVPlaybackState &state)
 {
-    g_state = AVSESSION_SUCCESS;
+    state_ = state;
 }
 
 void AVControllerCallbackImpl::OnMetaDataUpdate(const AVMetaData &data)
 {
-    g_state = AVSESSION_SUCCESS;
+    data_ = data;
 }
 
 void AVControllerCallbackImpl::OnActiveStateChange(bool isActive)
 {
-    g_state = AVSESSION_SUCCESS;
+    isActive_ = isActive;
 }
 
 bool IsAVPlaybackStateEqual(AVPlaybackState& state1,  AVPlaybackState& state2)
@@ -156,7 +163,13 @@ HWTEST_F(AVSessionControllerTest, IsSessionActive003, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetAVPlaybackState001, TestSize.Level1)
 {
-    AVPlaybackState state(1, 1, 1, 1, 1, true);
+    AVPlaybackState state;
+    state.SetState(1);
+    state.SetSpeed(1);
+    state.SetBufferedTime(1);
+    state.SetElapsedTime(1);
+    state.SetLoopMode(1);
+    state.SetFavorite(true);
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
     AVPlaybackState resultState;
     EXPECT_EQ(controller_->GetAVPlaybackState(resultState), AVSESSION_SUCCESS);
@@ -186,13 +199,13 @@ HWTEST_F(AVSessionControllerTest, GetAVMetaData001, TestSize.Level1)
 {
     AVMetaData metaData;
     metaData.Reset();
-    metaData.SetMediaId("001");
+    metaData.SetAssetId("001");
     metaData.SetTitle("123456");
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     AVMetaData resultMetaData;
     resultMetaData.Reset();
     EXPECT_EQ(controller_->GetAVMetaData(resultMetaData), AVSESSION_SUCCESS);
-    EXPECT_EQ(resultMetaData.GetMediaId(), "001");
+    EXPECT_EQ(resultMetaData.GetAssetId(), "001");
     EXPECT_EQ(resultMetaData.GetTitle(), "123456");
 }
 
@@ -536,7 +549,7 @@ HWTEST_F(AVSessionControllerTest, SendCommand011, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, RegisterCallback001, TestSize.Level1)
 {
-    std::shared_ptr<AVControllerCallback> callback = std::make_shared<AVControllerCallbackImpl>();
+    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 }
@@ -549,7 +562,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, RegisterCallback002, TestSize.Level1)
 {
-    std::shared_ptr<AVControllerCallback> callback = nullptr;
+    std::shared_ptr<AVControllerCallbackImpl> callback = nullptr;
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 }
 
@@ -561,11 +574,11 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback002, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, RegisterCallback003, TestSize.Level1)
 {
-    std::shared_ptr<AVControllerCallback> callback = std::make_shared<AVControllerCallbackImpl>();
+    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
-    std::shared_ptr<AVControllerCallback> callbackNew = std::make_shared<AVControllerCallbackImpl>();
+    std::shared_ptr<AVControllerCallbackImpl> callbackNew = std::make_shared<AVControllerCallbackImpl>();
     EXPECT_EQ(controller_->RegisterCallback(callbackNew), AVSESSION_SUCCESS);
 }
 
@@ -577,14 +590,13 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback003, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, RegisterCallback004, TestSize.Level1)
 {
-    g_state = AVSESSION_ERROR;
-    std::shared_ptr<AVControllerCallback> callback = std::make_shared<AVControllerCallbackImpl>();
+    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 
     EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
     sleep(1);
-    EXPECT_EQ(g_state, AVSESSION_SUCCESS);
+    EXPECT_EQ(callback->sessionTag_, "Application");
 }
 
 /**
@@ -595,14 +607,13 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback004, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, RegisterCallback005, TestSize.Level1)
 {
-    g_state = AVSESSION_ERROR;
-    std::shared_ptr<AVControllerCallback> callback = std::make_shared<AVControllerCallbackImpl>();
+    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 
     EXPECT_EQ(avsession_->Active(), AVSESSION_SUCCESS);
     sleep(1);
-    EXPECT_EQ(g_state, AVSESSION_SUCCESS);
+    EXPECT_EQ(callback->isActive_, true);
 }
 
 /**
@@ -613,15 +624,20 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback005, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, RegisterCallback006, TestSize.Level1)
 {
-    g_state = AVSESSION_ERROR;
-    std::shared_ptr<AVControllerCallback> callback = std::make_shared<AVControllerCallbackImpl>();
+    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 
-    AVPlaybackState state(1, 1, 1, 1, 1, true);
+    AVPlaybackState state;
+    state.SetState(1);
+    state.SetSpeed(1);
+    state.SetBufferedTime(1);
+    state.SetElapsedTime(1);
+    state.SetLoopMode(1);
+    state.SetFavorite(true);
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
     sleep(1);
-    EXPECT_EQ(g_state, AVSESSION_SUCCESS);
+    EXPECT_EQ(IsAVPlaybackStateEqual(callback->state_, state), true);
 }
 
 /**
@@ -632,21 +648,21 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback006, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, SetMetaFilter001, TestSize.Level1)
 {
-    g_state = AVSESSION_ERROR;
-    std::shared_ptr<AVControllerCallback> callback = std::make_shared<AVControllerCallbackImpl>();
+    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
     AVMetaData::MetaMaskType filter;
-    filter.set(AVMetaData::META_KEY_MEDIA_ID);
+    filter.set(AVMetaData::META_KEY_TITLE);
     EXPECT_EQ(controller_->SetMetaFilter(filter), AVSESSION_SUCCESS);
     AVMetaData metaData;
     metaData.Reset();
-    metaData.SetMediaId("001");
+    metaData.SetAssetId("001");
     metaData.SetTitle("123456");
     avsession_->SetAVMetaData(metaData);
 
     sleep(1);
-    EXPECT_EQ(g_state, AVSESSION_SUCCESS);
+    EXPECT_EQ(callback->data_.GetAssetId(), "");
+    EXPECT_EQ(callback->data_.GetTitle(), "123456");
 }
 
 /**
@@ -657,18 +673,18 @@ HWTEST_F(AVSessionControllerTest, SetMetaFilter001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, SetMetaFilter002, TestSize.Level1)
 {
-    g_state = AVSESSION_ERROR;
-    std::shared_ptr<AVControllerCallback> callback = std::make_shared<AVControllerCallbackImpl>();
+    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
     AVMetaData::MetaMaskType filter;
     EXPECT_EQ(controller_->SetMetaFilter(filter), AVSESSION_SUCCESS);
     AVMetaData metaData;
     metaData.Reset();
-    metaData.SetMediaId("001");
+    metaData.SetAssetId("001");
     metaData.SetTitle("123456");
     avsession_->SetAVMetaData(metaData);
 
     sleep(1);
-    EXPECT_EQ(g_state, AVSESSION_ERROR);
+    EXPECT_EQ(callback->data_.GetAssetId(), "");
+    EXPECT_EQ(callback->data_.GetTitle(), "");
 }

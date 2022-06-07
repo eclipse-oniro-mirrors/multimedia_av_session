@@ -38,7 +38,7 @@ public:
 
     int32_t SendCommand(const AVControlCommand &cmd) override;
 
-    int32_t RegisterCallback(std::shared_ptr<AVControllerCallback> &callback) override;
+    int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback) override;
 
     int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) override;
 

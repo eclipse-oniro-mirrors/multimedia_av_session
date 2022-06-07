@@ -43,7 +43,7 @@ public:
 
     virtual int32_t SendCommand(const AVControlCommand &cmd) = 0;
 
-    virtual int32_t RegisterCallback(std::shared_ptr<AVControllerCallback> &callback) = 0;
+    virtual int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback) = 0;
 
     virtual int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) = 0;
 
