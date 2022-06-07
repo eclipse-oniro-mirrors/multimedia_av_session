@@ -45,6 +45,8 @@ public:
 
     void OnStop() override;
 
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                            const AppExecFwk::ElementName& elementName) override;
 
@@ -92,6 +94,10 @@ private:
     void ClearSessionForClientDiedNoLock(pid_t pid);
 
     void ClearControllerForClientDiedNoLock(pid_t pid);
+
+    void InitKeyEvent();
+
+    void InitAudio();
 
     std::recursive_mutex sessionIdsLock_;
     std::list<int32_t> sessionIds_;
