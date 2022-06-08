@@ -144,6 +144,8 @@ bool AVSessionItem::IsActive()
 
 int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 {
+    CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
+    CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     supportedCmd_.push_back(cmd);
     return AVSESSION_SUCCESS;
 }
