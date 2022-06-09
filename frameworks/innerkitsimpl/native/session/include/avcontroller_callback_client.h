@@ -24,16 +24,21 @@ class AVControllerCallbackClient : public AVControllerCallbackStub {
 public:
     explicit AVControllerCallbackClient(const std::shared_ptr<AVControllerCallback>& callback);
 
-    void OnSessionRelease(const AVSessionDescriptor &descriptor) override;
+    void OnSessionDestroy() override;
 
-    void OnPlaybackStateUpdate(const AVPlaybackState &state) override;
+    void OnPlaybackStateChange(const AVPlaybackState &state) override;
 
-    void OnMetaDataUpdate(const AVMetaData &data) override;
+    void OnMetaDataChange(const AVMetaData &data) override;
 
     void OnActiveStateChange(bool isActive) override;
 
+    void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
+
+    void AddlistenerForPlaybackState(const std::function<void(const AVPlaybackState&)> &listener);
+
 private:
     std::shared_ptr<AVControllerCallback> callback_;
+    std::function<void(const AVPlaybackState&)> playbackStateListener_;
 };
 }
 #endif // OHOS_AVCONTROLLER_CALLBACK_CLIENT_H

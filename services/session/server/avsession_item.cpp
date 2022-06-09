@@ -48,7 +48,7 @@ int32_t AVSessionItem::Release()
         std::lock_guard lockGuard(lock_);
         for (auto it = controllers_.begin(); it != controllers_.end();) {
             SLOGI("pid=%{public}d", it->first);
-            it->second->HandleSessionRelease(descriptor_);
+            it->second->HandleSessionDestory();
             controllers_.erase(it++);
         }
     }
@@ -76,7 +76,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     return AVSESSION_SUCCESS;
 }
 
-int32_t  AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
+int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     playbackState_ = state;
     std::lock_guard lockGuard(lock_);
@@ -145,6 +145,11 @@ bool AVSessionItem::IsActive()
 int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 {
     supportedCmd_.push_back(cmd);
+    std::lock_guard lockGuard(lock_);
+    for (const auto& [pid, controller] : controllers_) {
+        SLOGI("pid=%{pubic}d", pid);
+        controller->HandleValidCommandChange(supportedCmd_);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -233,7 +238,7 @@ void AVSessionItem::HandleOnRewind(const AVControlCommand &cmd)
 void AVSessionItem::HandleOnSeek(const AVControlCommand &cmd)
 {
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    int64_t time = AVSESSION_ERROR;
+    uint64_t time = 0;
     CHECK_AND_RETURN_LOG(cmd.GetSeekTime(time) == AVSESSION_SUCCESS, "GetSeekTime failed");
     callback_->OnSeek(time);
 }
@@ -257,9 +262,9 @@ void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand &cmd)
 void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand &cmd)
 {
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    std::string mediaId;
-    CHECK_AND_RETURN_LOG(cmd.GetMediaId(mediaId) == AVSESSION_SUCCESS, "GetMediaId failed");
-    callback_->OnToggleFavorite(mediaId);
+    std::string assetId;
+    CHECK_AND_RETURN_LOG(cmd.GetAssetId(assetId) == AVSESSION_SUCCESS, "GetMediaId failed");
+    callback_->OnToggleFavorite(assetId);
 }
 
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& contoller)

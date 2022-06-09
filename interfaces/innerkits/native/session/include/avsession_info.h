@@ -56,13 +56,15 @@ public:
 
 class AVControllerCallback {
 public:
-    virtual void OnSessionRelease(const AVSessionDescriptor &descriptor) = 0;
+    virtual void OnSessionDestroy() = 0;
 
-    virtual void OnPlaybackStateUpdate(const AVPlaybackState &state) = 0;
+    virtual void OnPlaybackStateChange(const AVPlaybackState &state) = 0;
 
-    virtual void OnMetaDataUpdate(const AVMetaData &data) = 0;
+    virtual void OnMetaDataChange(const AVMetaData &data) = 0;
 
     virtual void OnActiveStateChange(bool isActive) = 0;
+
+    virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
     virtual ~AVControllerCallback() = default;
 };

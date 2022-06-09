@@ -29,6 +29,11 @@ public:
         return 0;
     }
 
+    uint64_t GetRealPlaybackPosition() override
+    {
+        return 0;
+    }
+
 private:
     int32_t HandleRegisterCallbackInner(MessageParcel &data, MessageParcel &reply);
 
@@ -36,19 +41,21 @@ private:
 
     int32_t HandleGetAVPlaybackState(MessageParcel &data, MessageParcel &reply);
 
-    int32_t HandleSendCommand(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSendControlCommand(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleGetAVMetaData(MessageParcel &data, MessageParcel &reply);
 
-    int32_t HandleSendMediaKeyEvent(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSendAVKeyEvent(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleGetLaunchAbility(MessageParcel &data, MessageParcel &reply);
 
-    int32_t HandleGetSupportedCommand(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetValidCommands(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleSetMetaFilter(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleIsSessionActive(MessageParcel &data, MessageParcel &reply);
+
+    int32_t HandleGetSessionId(MessageParcel &data, MessageParcel &reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
@@ -57,13 +64,14 @@ private:
         [CONTROLLER_CMD_REGISTER_CALLBACK] = &AVSessionControllerStub::HandleRegisterCallbackInner,
         [CONTROLLER_CMD_RELEASE] = &AVSessionControllerStub::HandleRelease,
         [CONTROLLER_CMD_GET_AV_PLAYBACK_STATE] = &AVSessionControllerStub::HandleGetAVPlaybackState,
-        [CONTROLLER_CMD_SEND_COMMAND] = &AVSessionControllerStub::HandleSendCommand,
+        [CONTROLLER_CMD_SEND_CONTROL_COMMAND] = &AVSessionControllerStub::HandleSendControlCommand,
         [CONTROLLER_CMD_GET_AV_META_DATA] = &AVSessionControllerStub::HandleGetAVMetaData,
-        [CONTROLLER_CMD_SEND_MEDIA_KEYEVENT] = &AVSessionControllerStub::HandleSendMediaKeyEvent,
+        [CONTROLLER_CMD_SEND_AV_KEYEVENT] = &AVSessionControllerStub::HandleSendAVKeyEvent,
         [CONTROLLER_CMD_GET_LAUNCH_ABILITY] = &AVSessionControllerStub::HandleGetLaunchAbility,
-        [CONTROLLER_CMD_GET_SUPPORTED_COMMAND] = &AVSessionControllerStub::HandleGetSupportedCommand,
+        [CONTROLLER_CMD_GET_VALID_COMMANDS] = &AVSessionControllerStub::HandleGetValidCommands,
         [CONTROLLER_CMD_SET_META_FILTER] = &AVSessionControllerStub::HandleSetMetaFilter,
         [CONTROLLER_CMD_IS_SESSION_ACTIVE] = &AVSessionControllerStub::HandleIsSessionActive,
+        [CONTROLLER_CMD_GET_SESSION_ID] = &AVSessionControllerStub::HandleGetSessionId,
     };
 };
 } // namespace OHOS::AVSession

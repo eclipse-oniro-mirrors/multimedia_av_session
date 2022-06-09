@@ -45,6 +45,7 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState &state)
         sptr<AVPlaybackState> state_ = reply.ReadParcelable<AVPlaybackState>();
         CHECK_AND_RETURN_RET_LOG(state_ != nullptr, ERR_UNMARSHALLING, "read AVPlaybackState failed");
         state = *state_;
+        currentState_ = *state_;
     }
     return ret;
 }
@@ -72,7 +73,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData &data)
     return ret;
 }
 
-int32_t AVSessionControllerProxy::SendMediaKeyEvent(const MMI::KeyEvent& keyEvent)
+int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     CHECK_AND_RETURN_RET_LOG(keyEvent.IsValid(), ERR_INVALID_PARAM, "keyEvent not valid");
 
@@ -85,7 +86,7 @@ int32_t AVSessionControllerProxy::SendMediaKeyEvent(const MMI::KeyEvent& keyEven
     MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_MEDIA_KEYEVENT, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_AV_KEYEVENT, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
@@ -116,7 +117,7 @@ int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::Wa
     return ret;
 }
 
-int32_t AVSessionControllerProxy::GetSupportedCommand(std::vector<int32_t> &cmds)
+int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t> &cmds)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -126,7 +127,7 @@ int32_t AVSessionControllerProxy::GetSupportedCommand(std::vector<int32_t> &cmds
     MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_SUPPORTED_COMMAND, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_VALID_COMMANDS, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
@@ -153,12 +154,12 @@ int32_t AVSessionControllerProxy::IsSessionActive(bool &isActive)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_RETURN_RET_LOG(reply.ReadBool(isActive), ERR_UNMARSHALLING, "read LaunchAbility failed");
+        CHECK_AND_RETURN_RET_LOG(reply.ReadBool(isActive), ERR_UNMARSHALLING, "read bool failed");
     }
     return ret;
 }
 
-int32_t AVSessionControllerProxy::SendCommand(const AVControlCommand &cmd)
+int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand &cmd)
 {
     CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_INVALID_PARAM, "command not valid");
     MessageParcel parcel;
@@ -170,7 +171,7 @@ int32_t AVSessionControllerProxy::SendCommand(const AVControlCommand &cmd)
     MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_COMMAND, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_CONTROL_COMMAND, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
@@ -197,10 +198,12 @@ int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType &
 
 int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback)
 {
-    sptr<IRemoteObject> callback_;
+    sptr<AVControllerCallbackClient> callback_;
 
     callback_ = new(std::nothrow) AVControllerCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVControllerCallbackClient failed");
+
+    callback_->AddlistenerForPlaybackState([this](const AVPlaybackState &state) { currentState_ = state; });
 
     return RegisterCallbackInner(callback_);
 }
@@ -238,5 +241,34 @@ int32_t AVSessionControllerProxy::Release()
 
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionControllerProxy::GetSessionId()
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_SESSION_ID, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+uint64_t AVSessionControllerProxy::GetRealPlaybackPosition()
+{
+    CHECK_AND_RETURN_RET_LOG(currentState_.GetUpdateTime() > 0, 0, "playbackState not update");
+    auto now = std::chrono::system_clock::now();
+    auto nowMS = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+
+    uint64_t currentSysTime = nowMS.time_since_epoch().count();
+    SLOGI("elapsedTime:%{public}" PRIu64 ", currentSysTime:%{public}" PRIu64 ", updateTime:%{public}" PRIu64,
+        currentState_.GetElapsedTime(), currentSysTime, currentState_.GetUpdateTime());
+
+    return (currentState_.GetElapsedTime() + (currentSysTime - currentState_.GetUpdateTime()));
 }
 }

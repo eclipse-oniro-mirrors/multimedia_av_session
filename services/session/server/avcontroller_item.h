@@ -33,27 +33,31 @@ public:
 
     int32_t GetAVMetaData(AVMetaData &data) override;
 
-    int32_t SendMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
+    int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
 
-    int32_t GetSupportedCommand(std::vector<int32_t> &cmds) override;
+    int32_t GetValidCommands(std::vector<int32_t> &cmds) override;
 
     int32_t IsSessionActive(bool &isActive) override;
 
-    int32_t SendCommand(const AVControlCommand &cmd) override;
+    int32_t SendControlCommand(const AVControlCommand &cmd) override;
 
     int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) override;
 
     int32_t Release() override;
 
-    void HandleSessionRelease(const AVSessionDescriptor &descriptor);
+    int32_t GetSessionId() override;
+
+    void HandleSessionDestory();
 
     void HandlePlaybackStateChange(const AVPlaybackState &state);
 
     void HandleMetaDataChange(const AVMetaData &data);
 
     void HandleActiveStateChange(bool isActive);
+
+    void HandleValidCommandChange(const std::vector<int32_t> &cmds);
 
     pid_t GetPid() const;
 
