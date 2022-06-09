@@ -35,18 +35,15 @@ int32_t AVControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code >= CONTROLLER_CMD_ON_SESSION_RELEASE && code < CONTROLLER_CMD_MAX) {
+    if (code >= 0 && code < CONTROLLER_CMD_MAX) {
         return (this->*handlers[code])(data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t AVControllerCallbackStub::HandleOnSessionRelease(MessageParcel &data, MessageParcel &reply)
+int32_t AVControllerCallbackStub::HandleOnSessionDestroy(MessageParcel &data, MessageParcel &reply)
 {
-    AVSessionDescriptor descriptor;
-    CHECK_AND_RETURN_RET_LOG(descriptor.ReadFromParcel(data), ERR_NONE, "read AVSessionDescriptor failed");
-
-    OnSessionRelease(descriptor);
+    OnSessionDestroy();
     return ERR_NONE;
 }
 
@@ -55,7 +52,7 @@ int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel &dat
     sptr<AVPlaybackState> state = data.ReadParcelable<AVPlaybackState>();
 
     CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read PlaybackState failed");
-    OnPlaybackStateUpdate(*state);
+    OnPlaybackStateChange(*state);
     return ERR_NONE;
 }
 
@@ -64,7 +61,7 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel &data, Me
     sptr<AVMetaData> metaData = data.ReadParcelable<AVMetaData>();
 
     CHECK_AND_RETURN_RET_LOG(metaData != nullptr, ERR_NONE, "read MetaData failed");
-    OnMetaDataUpdate(*metaData);
+    OnMetaDataChange(*metaData);
     return ERR_NONE;
 }
 
@@ -74,6 +71,15 @@ int32_t AVControllerCallbackStub::HandleOnActiveStateChange(MessageParcel &data,
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(isActive), ERR_NONE, "read isActive failed");
 
     OnActiveStateChange(isActive);
+    return ERR_NONE;
+}
+
+int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<int32_t> cmds;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32Vector(&cmds), ERR_NONE, "read int32 vector failed");
+
+    OnValidCommandChange(cmds);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

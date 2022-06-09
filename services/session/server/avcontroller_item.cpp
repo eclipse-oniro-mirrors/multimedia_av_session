@@ -57,7 +57,7 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData &data)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::SendMediaKeyEvent(const MMI::KeyEvent& keyEvent)
+int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     if (session_ == nullptr) {
         return ERR_SESSION_NOT_EXIST;
@@ -75,7 +75,7 @@ int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent 
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::GetSupportedCommand(std::vector<int32_t> &cmds)
+int32_t AVControllerItem::GetValidCommands(std::vector<int32_t> &cmds)
 {
     if (session_ == nullptr) {
         return ERR_SESSION_NOT_EXIST;
@@ -93,7 +93,7 @@ int32_t AVControllerItem::IsSessionActive(bool &isActive)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::SendCommand(const AVControlCommand &cmd)
+int32_t AVControllerItem::SendControlCommand(const AVControlCommand &cmd)
 {
     if (session_ == nullptr) {
         return ERR_SESSION_NOT_EXIST;
@@ -120,6 +120,7 @@ int32_t AVControllerItem::Release()
     if (session_ != nullptr) {
         session_->HandleControllerRelease(pid_);
         session_ = nullptr;
+        sessionId_ = -1;
     }
     if (serviceCallback_) {
         serviceCallback_(*this);
@@ -127,20 +128,26 @@ int32_t AVControllerItem::Release()
     return AVSESSION_SUCCESS;
 }
 
-void AVControllerItem::HandleSessionRelease(const AVSessionDescriptor &descriptor)
+int32_t AVControllerItem::GetSessionId()
+{
+    return sessionId_;
+}
+
+void AVControllerItem::HandleSessionDestory()
 {
     if (callback_ != nullptr) {
-        callback_->OnSessionRelease(descriptor);
+        callback_->OnSessionDestroy();
     }
     if (session_ != nullptr) {
         session_ = nullptr;
+        sessionId_ = -1;
     }
 }
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
 {
     if (callback_ != nullptr) {
-        callback_->OnPlaybackStateUpdate(state);
+        callback_->OnPlaybackStateChange(state);
     }
 }
 
@@ -152,7 +159,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
     AVMetaData metaOut;
     metaOut.SetMetaMask(metaMask_);
     if (data.CopyToByMask(metaOut)) {
-        callback_->OnMetaDataUpdate(metaOut);
+        callback_->OnMetaDataChange(metaOut);
     }
 }
 
@@ -163,6 +170,13 @@ void AVControllerItem::HandleActiveStateChange(bool isActive)
     }
 }
 
+void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t> &cmds)
+{
+    if (callback_ != nullptr) {
+        callback_->OnValidCommandChange(cmds);
+    }
+}
+
 pid_t AVControllerItem::GetPid() const
 {
     return pid_;
@@ -170,10 +184,7 @@ pid_t AVControllerItem::GetPid() const
 
 bool AVControllerItem::HasSession(int32_t sessionId)
 {
-    if (session_ != nullptr) {
-        return session_->GetSessionId() == sessionId;
-    }
-    return false;
+    return sessionId_ == sessionId;
 }
 
 void AVControllerItem::SetServiceCallbackForRelease(const std::function<void(AVControllerItem &)> &callback)

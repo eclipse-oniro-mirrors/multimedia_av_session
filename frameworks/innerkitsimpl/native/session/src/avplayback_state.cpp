@@ -24,9 +24,9 @@ bool AVPlaybackState::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteInt32(state_) &&
         parcel.WriteFloat(speed_) &&
-        parcel.WriteInt64(elapsedTime_) &&
-        parcel.WriteInt64(updateTime_) &&
-        parcel.WriteInt64(bufferedTime_) &&
+        parcel.WriteUint64(elapsedTime_) &&
+        parcel.WriteUint64(updateTime_) &&
+        parcel.WriteUint64(bufferedTime_) &&
         parcel.WriteInt32(loopMode_) &&
         parcel.WriteBool(isFavorite_);
 }
@@ -39,9 +39,9 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
     }
     result->state_ = parcel.ReadInt32();
     result->speed_ = parcel.ReadFloat();
-    result->elapsedTime_ = parcel.ReadInt64();
-    result->updateTime_ = parcel.ReadInt64();
-    result->bufferedTime_ = parcel.ReadInt64();
+    result->elapsedTime_ = parcel.ReadUint64();
+    result->updateTime_ = parcel.ReadUint64();
+    result->bufferedTime_ = parcel.ReadUint64();
     result->loopMode_ = parcel.ReadInt32();
     result->isFavorite_ = parcel.ReadBool();
     return result;
@@ -57,17 +57,17 @@ void AVPlaybackState::SetSpeed(float speed)
     speed_ = speed;
 }
 
-void AVPlaybackState::SetElapsedTime(int64_t time)
+void AVPlaybackState::SetElapsedTime(uint64_t time)
 {
     elapsedTime_ = time;
 }
 
-void AVPlaybackState::SetUpdateTime(int64_t time)
+void AVPlaybackState::SetUpdateTime(uint64_t time)
 {
     updateTime_ = time;
 }
 
-void AVPlaybackState::SetBufferedTime(int64_t time)
+void AVPlaybackState::SetBufferedTime(uint64_t time)
 {
     bufferedTime_ = time;
 }
@@ -92,17 +92,17 @@ float AVPlaybackState::GetSpeed() const
     return speed_;
 }
 
-int64_t AVPlaybackState::GetElapsedTime() const
+uint64_t AVPlaybackState::GetElapsedTime() const
 {
     return elapsedTime_;
 }
 
-int64_t AVPlaybackState::GetUpdateTime() const
+uint64_t AVPlaybackState::GetUpdateTime() const
 {
     return updateTime_;
 }
 
-int64_t AVPlaybackState::GetBufferedTime() const
+uint64_t AVPlaybackState::GetBufferedTime() const
 {
     return bufferedTime_;
 }

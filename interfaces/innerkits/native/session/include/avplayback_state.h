@@ -43,14 +43,14 @@ public:
     void SetSpeed(float speed);
     float GetSpeed() const;
 
-    void SetElapsedTime(int64_t time);
-    int64_t GetElapsedTime() const;
+    void SetElapsedTime(uint64_t time);
+    uint64_t GetElapsedTime() const;
 
-    void SetUpdateTime(int64_t time);
-    int64_t GetUpdateTime() const;
+    void SetUpdateTime(uint64_t time);
+    uint64_t GetUpdateTime() const;
 
-    void SetBufferedTime(int64_t time);
-    int64_t GetBufferedTime() const;
+    void SetBufferedTime(uint64_t time);
+    uint64_t GetBufferedTime() const;
 
     void SetLoopMode(int32_t mode);
     int32_t GetLoopMode() const;
@@ -61,9 +61,9 @@ public:
 private:
     int32_t state_ = PLAYBACK_STATE_INITIAL;
     float speed_ {};
-    int64_t elapsedTime_ {};
-    int64_t updateTime_ {};
-    int64_t bufferedTime_ {};
+    uint64_t elapsedTime_ {};
+    uint64_t updateTime_ {};
+    uint64_t bufferedTime_ {};
     int32_t loopMode_ {};
     bool isFavorite_ {};
 };

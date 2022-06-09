@@ -64,20 +64,20 @@ int32_t AVSessionControllerStub::HandleGetAVPlaybackState(MessageParcel &data, M
 {
     AVPlaybackState state;
     int32_t ret = GetAVPlaybackState(state);
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_PRINT_LOG(reply.WriteParcelable(&state), "write AVPlaybackState failed");
     }
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleSendCommand(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleSendControlCommand(MessageParcel &data, MessageParcel &reply)
 {
     sptr<AVControlCommand> cmd = data.ReadParcelable<AVControlCommand>();
     if (cmd == nullptr) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SendCommand ret failed");
     } else {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(SendCommand(*cmd)), "write SendCommand ret failed");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(SendControlCommand(*cmd)), "write SendCommand ret failed");
     }
     return ERR_NONE;
 }
@@ -86,28 +86,28 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel &data, Messag
 {
     AVMetaData metaData;
     int32_t ret = GetAVMetaData(metaData);
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_PRINT_LOG(reply.WriteParcelable(&metaData), "write AVMetaData failed");
     }
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleSendMediaKeyEvent(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel &data, MessageParcel &reply)
 {
     std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
     if (event == nullptr) {
         SLOGD("malloc keyEvent failed");
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_NO_MEMORY), "write SendMediaKeyEvent ret failed");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_NO_MEMORY), "write SendAVKeyEvent ret failed");
         return ERR_NONE;
     }
 
     event->ReadFromParcel(data);
     if (!event->IsValid()) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SendMediaKeyEvent ret failed");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SendAVKeyEvent ret failed");
     } else {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(SendMediaKeyEvent(*(event.get()))),
-            "write SendMediaKeyEvent ret failed");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(SendAVKeyEvent(*(event.get()))),
+            "write SendAVKeyEvent ret failed");
     }
     return ERR_NONE;
 }
@@ -116,18 +116,18 @@ int32_t AVSessionControllerStub::HandleGetLaunchAbility(MessageParcel &data, Mes
 {
     AbilityRuntime::WantAgent::WantAgent ability;
     int32_t ret = GetLaunchAbility(ability);
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_PRINT_LOG(reply.WriteParcelable(&ability), "write LaunchAbility failed");
     }
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleGetSupportedCommand(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleGetValidCommands(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<int32_t> cmds;
-    int32_t ret = GetSupportedCommand(cmds);
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "write int32 failed");
+    int32_t ret = GetValidCommands(cmds);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32Vector(cmds), "write int32 vector failed");
     }
@@ -150,10 +150,16 @@ int32_t AVSessionControllerStub::HandleIsSessionActive(MessageParcel &data, Mess
 {
     bool isActive = false;
     int32_t ret = IsSessionActive(isActive);
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(ret), "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_PRINT_LOG(reply.WriteBool(isActive), "write bool failed");
     }
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleGetSessionId(MessageParcel &data, MessageParcel &reply)
+{
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(GetSessionId()), "write int32_t failed");
     return ERR_NONE;
 }
 } // OHOS::AVSession

@@ -26,7 +26,7 @@ public:
 
 private:
 
-    int32_t HandleOnSessionRelease(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnSessionDestroy(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleOnPlaybackStateChange(MessageParcel &data, MessageParcel &reply);
 
@@ -34,14 +34,17 @@ private:
 
     int32_t HandleOnActiveStateChange(MessageParcel &data, MessageParcel &reply);
 
+    int32_t HandleOnValidCommandChange(MessageParcel &data, MessageParcel &reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HanlerFunc = int32_t (AVControllerCallbackStub::*)(MessageParcel &data, MessageParcel &reply);
     static inline HanlerFunc handlers[] = {
-        [CONTROLLER_CMD_ON_SESSION_RELEASE] = &AVControllerCallbackStub::HandleOnSessionRelease,
+        [CONTROLLER_CMD_ON_SESSION_DESTROY] = &AVControllerCallbackStub::HandleOnSessionDestroy,
         [CONTROLLER_CMD_ON_PLAYBACK_STATE_CHANGE] = &AVControllerCallbackStub::HandleOnPlaybackStateChange,
         [CONTROLLER_CMD_ON_METADATA_CHANGE] = &AVControllerCallbackStub::HandleOnMetadataChange,
         [CONTROLLER_CMD_ON_ACTIVE_STATE_CHANGE] = &AVControllerCallbackStub::HandleOnActiveStateChange,
+        [CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE] = &AVControllerCallbackStub::HandleOnValidCommandChange,
     };
 };
 }

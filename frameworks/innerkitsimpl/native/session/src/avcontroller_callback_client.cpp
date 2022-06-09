@@ -23,24 +23,27 @@ AVControllerCallbackClient::AVControllerCallbackClient(const std::shared_ptr<AVC
     SLOGD("construct");
 }
 
-void AVControllerCallbackClient::OnSessionRelease(const AVSessionDescriptor &descriptor)
+void AVControllerCallbackClient::OnSessionDestroy()
 {
     if (callback_) {
-        callback_->OnSessionRelease(descriptor);
+        callback_->OnSessionDestroy();
     }
 }
 
-void AVControllerCallbackClient::OnPlaybackStateUpdate(const AVPlaybackState &state)
+void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState &state)
 {
     if (callback_) {
-        callback_->OnPlaybackStateUpdate(state);
+        callback_->OnPlaybackStateChange(state);
+    }
+    if (playbackStateListener_) {
+        playbackStateListener_(state);
     }
 }
 
-void AVControllerCallbackClient::OnMetaDataUpdate(const AVMetaData &data)
+void AVControllerCallbackClient::OnMetaDataChange(const AVMetaData &data)
 {
     if (callback_) {
-        callback_->OnMetaDataUpdate(data);
+        callback_->OnMetaDataChange(data);
     }
 }
 
@@ -49,5 +52,18 @@ void AVControllerCallbackClient::OnActiveStateChange(bool isActive)
     if (callback_) {
         callback_->OnActiveStateChange(isActive);
     }
+}
+
+void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t> &cmds)
+{
+    if (callback_) {
+        callback_->OnValidCommandChange(cmds);
+    }
+}
+
+void AVControllerCallbackClient::AddlistenerForPlaybackState(const std::function<void(const AVPlaybackState&)>
+    &listener)
+{
+    playbackStateListener_ = listener;
 }
 }

@@ -28,15 +28,15 @@ public:
 
     int32_t GetAVMetaData(AVMetaData &data) override;
 
-    int32_t SendMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
+    int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
 
-    int32_t GetSupportedCommand(std::vector<int32_t> &cmds) override;
+    int32_t GetValidCommands(std::vector<int32_t> &cmds) override;
 
     int32_t IsSessionActive(bool &isActive) override;
 
-    int32_t SendCommand(const AVControlCommand &cmd) override;
+    int32_t SendControlCommand(const AVControlCommand &cmd) override;
 
     int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback) override;
 
@@ -44,11 +44,16 @@ public:
 
     int32_t Release() override;
 
+    int32_t GetSessionId() override;
+
+    uint64_t GetRealPlaybackPosition() override;
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 
 private:
     static inline BrokerDelegator<AVSessionControllerProxy> delegator_;
+    AVPlaybackState currentState_;
 };
 }
 

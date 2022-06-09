@@ -24,13 +24,15 @@ class AVControllerCallbackProxy : public IRemoteProxy<IAVControllerCallback> {
 public:
     explicit AVControllerCallbackProxy(const sptr<IRemoteObject>& impl);
 
-    void OnSessionRelease(const AVSessionDescriptor &descriptor) override;
+    void OnSessionDestroy() override;
 
-    void OnPlaybackStateUpdate(const AVPlaybackState &state) override;
+    void OnPlaybackStateChange(const AVPlaybackState &state) override;
 
-    void OnMetaDataUpdate(const AVMetaData &data) override;
+    void OnMetaDataChange(const AVMetaData &data) override;
 
     void OnActiveStateChange(bool isActive) override;
+
+    void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
 
 private:
     static inline BrokerDelegator<AVControllerCallbackProxy> delegator_;
