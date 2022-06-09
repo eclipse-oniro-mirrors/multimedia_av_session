@@ -73,6 +73,19 @@ ohos_unittest("AVPlaybackStateTest") {
 
   deps = common_deps
 }
+
+ohos_unittest("AVSessionTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
 ###############################################################################
 group("unittest") {
   testonly = true
@@ -81,6 +94,7 @@ group("unittest") {
     ":AVSessionManagerTest",
     ":AVSessionControllerTest",
     ":AVPlaybackStateTest",
+    ":AVSessionTest",
   ]
 }
 ###############################################################################

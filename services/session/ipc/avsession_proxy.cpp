@@ -46,6 +46,7 @@ int32_t AVSessionProxy::GetSessionId()
 
 int32_t AVSessionProxy::RegisterCallback(std::shared_ptr<AVSessionCallback> &callback)
 {
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AVSESSION_ERROR, "callback is nullptr");
     callback_ = new(std::nothrow) AVSessionCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVSessionCallbackClient failed");
     if (RegisterCallbackInner(callback_) != AVSESSION_SUCCESS) {
@@ -268,6 +269,8 @@ bool AVSessionProxy::IsActive()
 
 int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 {
+    CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
+    CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
