@@ -351,6 +351,25 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
 }
 
 /**
+* @tc.name: RegisterCallback004
+* @tc.desc: register avsession callback
+* @tc.type: FUNC
+* @tc.require: AR000H31JG
+*/
+HWTEST_F(AvsessionTest, RegisterCallback004, TestSize.Level1)
+{
+    SLOGE("RegisterCallback004 Begin");
+    std::shared_ptr<AVSessionCallback> callback001 = std::make_shared<AVSessionCallbackImpl>();
+    EXPECT_NE(callback001, nullptr);
+    EXPECT_EQ(avsession_->RegisterCallback(callback001), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->RegisterCallback(callback001), AVSESSION_SUCCESS);
+    std::shared_ptr<AVSessionCallback> callback002 = std::make_shared<AVSessionCallbackImpl>();
+    EXPECT_NE(callback002, nullptr);
+    EXPECT_EQ(avsession_->RegisterCallback(callback002), AVSESSION_SUCCESS);
+    SLOGE("RegisterCallback004 End");
+}
+
+/**
 * @tc.name: Active001
 * @tc.desc: Return the active result
 * @tc.type: FUNC
@@ -418,7 +437,7 @@ HWTEST_F(AvsessionTest, AddSupportCommand002, TestSize.Level1)
 */
 HWTEST_F(AvsessionTest, Release001, TestSize.Level1)
 {
-    SLOGE("AddSupportCommand002 Begin");
+    SLOGE("Release001 Begin");
     EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
-    SLOGE("AddSupportCommand002 Begin");
+    SLOGE("Release001 End");
 }
