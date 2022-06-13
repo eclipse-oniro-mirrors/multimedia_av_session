@@ -278,7 +278,7 @@ HWTEST_F(AVSessionManagerTest, RegisterServiceDeathCallback001, TestSize.Level1)
     auto result = AVSessionManager::RegisterServiceDeathCallback([&isDead]() { isDead = true; });
     EXPECT_EQ(result, AVSESSION_SUCCESS);
 
-    system("killall -9 avsession_servi");
+    system("killall -9 av_session");
     sleep(1);
     EXPECT_EQ(isDead, true);
     SLOGI("RegisterServiceDeathCallback001 end");
@@ -300,7 +300,7 @@ HWTEST_F(AVSessionManagerTest, UnregisterServiceDeathCallback001, TestSize.Level
     result = AVSessionManager::UnregisterServiceDeathCallback();
     EXPECT_EQ(result, AVSESSION_SUCCESS);
 
-    system("killall -9 avsession_servi");
+    system("killall -9 av_session");
     sleep(1);
     EXPECT_EQ(isDead, false);
     SLOGI("UnregisterServiceDeathCallback001 end");

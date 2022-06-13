@@ -11,12 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-service avsession_service /system/bin/sa_main /system/profile/avsession_service.xml
+service av_session /system/bin/sa_main /system/profile/av_session.xml
     class z_core
     user system
     group system shell
     seclabel u:r:audiodistributedservice:s0
 
 on boot
-    start avsession_service
-
+    start av_session

@@ -15,5 +15,5 @@ import("//build/ohos/sa_profile/sa_profile.gni")
 
 ohos_sa_profile("avsession_sa_profile") {
   sources = [ "3010.xml" ]
-  part_name = "multimedia_avsession"
+  part_name = "multimedia_av_session"
 }

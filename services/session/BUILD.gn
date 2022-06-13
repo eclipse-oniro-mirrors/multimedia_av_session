@@ -16,8 +16,8 @@ import("//build/ohos.gni")
 group("avession_server") {
   deps = [
     ":avsession_service",
-    "//foundation/multimedia/avsession/sa_profile:avsession_sa_profile",
-    "//foundation/multimedia/avsession/services/etc:avsession_service.rc",
+    "//foundation/multimedia/av_session/sa_profile:avsession_sa_profile",
+    "//foundation/multimedia/av_session/services/etc:avsession_service.rc",
   ]
 }
 
@@ -56,15 +56,15 @@ ohos_shared_library("avsession_service") {
   sources = common_source + ipc_sources + adapter_sources + service_sources
 
   include_dirs = [
-    "//foundation/multimedia/avsession/services/session/ipc/include",
-    "//foundation/multimedia/avsession/services/session/adapter",
-    "//foundation/multimedia/avsession/interfaces/innerkits/native/session/include",
-    "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session/include",
+    "//foundation/multimedia/av_session/services/session/ipc/include",
+    "//foundation/multimedia/av_session/services/session/adapter",
+    "//foundation/multimedia/av_session/interfaces/innerkits/native/session/include",
+    "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session/include",
     "//utils/native/base/include",
   ]
 
   deps = [
-    "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session:avsession_client",
+    "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client",
     "//utils/native/base:utils",
   ]
 
@@ -81,5 +81,5 @@ ohos_shared_library("avsession_service") {
   ]
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_avsession"
+  part_name = "multimedia_av_session"
 }
