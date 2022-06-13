@@ -12,7 +12,7 @@
 # limitations under the License.
 import("//build/test.gni")
 
-module_output_path = "multimedia_avsession/session"
+module_output_path = "multimedia_av_session/session"
 
 ###############################################################################
 config("module_private_config") {

@@ -326,7 +326,7 @@ HWTEST_F(AvsessionTest, RegisterCallback002, TestSize.Level1)
 {
     SLOGE("RegisterCallback002 Begin");
     std::shared_ptr<AVSessionCallback> callback = nullptr;
-    EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
+    EXPECT_NE(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
     SLOGE("RegisterCallback002 End");
 }
 
@@ -344,7 +344,7 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
     AVControlCommand cmd;
     EXPECT_EQ(cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
-    EXPECT_EQ(controller_->SendCommand(cmd), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->SendControlCommand(cmd), AVSESSION_SUCCESS);
     sleep(1);
     EXPECT_EQ(g_onCall, AVSESSION_SUCCESS);
     SLOGE("RegisterCallback003 End");

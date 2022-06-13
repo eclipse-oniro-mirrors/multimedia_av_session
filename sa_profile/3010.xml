@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <info>
-    <process>avsession_service</process>
+    <process>av_session</process>
     <loadlibs>
         <libpath>libavsession_service.z.so</libpath>
     </loadlibs>

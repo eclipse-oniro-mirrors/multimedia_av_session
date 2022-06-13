@@ -12,7 +12,7 @@
 # limitations under the License.
 import("//build/test.gni")
 
-module_output_path = "multimedia_avsession/session"
+module_output_path = "multimedia_av_session/session"
 
 ###############################################################################
 config("module_private_config") {
@@ -25,7 +25,7 @@ config("module_private_config") {
 }
 
 common_deps = [
-  "//foundation/multimedia/avsession/frameworks/innerkitsimpl/native/session:avsession_client",
+  "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client",
   "//third_party/googletest:gtest_main",
   "//utils/native/base:utils",
 ]
