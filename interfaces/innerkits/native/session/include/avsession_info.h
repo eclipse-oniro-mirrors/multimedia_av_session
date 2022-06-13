@@ -20,7 +20,6 @@
 #include "avmeta_data.h"
 #include "avplayback_state.h"
 #include "avsession_descriptor.h"
-#include "avvolume_info.h"
 #include "key_event.h"
 
 namespace OHOS::AVSession {
