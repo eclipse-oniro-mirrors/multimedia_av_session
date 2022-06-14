@@ -21,7 +21,17 @@ ohos_shared_library("avsession_napi") {
     "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session/include",
   ]
 
-  sources = [ "src/napi_module.cpp" ]
+  sources = [ 
+    "src/utils/avsession_napi_utils.cpp",
+    "src/utils/uv_queue.cpp",
+    "src/napi_module.cpp",
+    "src/napi_avsession.cpp",
+    "src/napi_avsession_manager.cpp",
+    "src/napi_avsession_controller.cpp",
+    "src/callback/napi_sessionlistener_callback.cpp",
+    "src/callback/napi_avcontroller_callback.cpp",
+    "src/callback/napi_avsession_callback.cpp",
+     ]
 
   deps = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
@@ -30,8 +40,22 @@ ohos_shared_library("avsession_napi") {
   ]
 
   external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_manager",
+    "ability_runtime:napi_base_context",
+    "bundle_framework:appexecfwk_base",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
+    "ipc:ipc_core",
+    "multimedia_image_standard:image_native",
+    "samgr_standard:samgr_proxy",
+    "distributeddataobject:distributeddataobject_impl",
+    "safwk:system_ability_fwk",
+
   ]
 
   relative_install_dir = "module/multimedia"
