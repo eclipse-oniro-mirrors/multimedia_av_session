@@ -60,7 +60,6 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", On),
         DECLARE_NAPI_FUNCTION("off", Off),
     };
-
     napi_status status = AVSessionNapiUtils::CreateJSObject(env,
         exports,
         AVSESSION_CONTROLLER_NAPI_CLASS_NAME,
@@ -68,7 +67,6 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         avsession_controller_prop_desc,
         sizeof(avsession_controller_prop_desc) / sizeof(avsession_controller_prop_desc[0]),
         &g_avsessionControllerConstructor);
-
     if (status == napi_ok) {
         return exports;
     }
@@ -82,39 +80,40 @@ napi_value NapiAVSessionController::JsObjectConstruct(napi_env env, napi_callbac
     size_t argc = 1;
     napi_value argv[1] = { 0 };
     napi_status status = napi_get_cb_info(env, info, &argc, argv, &jsThis, nullptr);
-    if (status == napi_ok) {
-        unique_ptr<NapiAVSessionController> obj = make_unique<NapiAVSessionController>();
-        if (obj != nullptr) {
-            obj->env_ = env;
-            int32_t sessionId;
-            if (argc > 0) {
-                napi_get_value_int32(env, argv[0], &sessionId);
-                obj->avsessionController_ = AVSessionManager::CreateController(sessionId);
-                if (obj->avsessionController_ == nullptr) {
-                    SLOGE("native CreateController fail ");
-                    return AVSessionNapiUtils::NapiUndefined(env);
-                }
-                SLOGI("AVSessionManager::CreateController success ");
-            } else {
-                SLOGE("NapiAVSessionController::CreateController No parameters ");
-                status = napi_invalid_arg;
-            }
-
-            status = napi_wrap(env, jsThis, static_cast<void*>(obj.get()),
-                NapiAVSessionController::Destructor, nullptr, &(obj->wrapper_));
-            if (status == napi_ok) {
-                status = AVSessionNapiUtils::SetValueInt32(env, "sessionId", sessionId, jsThis);
-            }
-            if (status == napi_ok) {
-                obj.release();
-                return jsThis;
-            }
-        }
+    if (status != napi_ok) {
+        SLOGE("napi_get_cb_info error");
+        return AVSessionNapiUtils::NapiUndefined(env);
     }
-
-    SLOGE("Failed in NapiAVSessionController::Construct()!");
-
-    return AVSessionNapiUtils::NapiUndefined(env);
+    unique_ptr<NapiAVSessionController> obj = make_unique<NapiAVSessionController>();
+    if (obj == nullptr) {
+        SLOGE("obj is nullptr");
+        return AVSessionNapiUtils::NapiUndefined(env);
+    }
+    obj->env_ = env;
+    int32_t sessionId;
+    if (argc > 0) {
+        napi_get_value_int32(env, argv[0], &sessionId);
+        obj->avsessionController_ = AVSessionManager::CreateController(sessionId);
+        if (obj->avsessionController_ == nullptr) {
+            SLOGE("native CreateController fail ");
+            return AVSessionNapiUtils::NapiUndefined(env);
+        }
+        SLOGI("AVSessionManager::CreateController success ");
+    } else {
+        SLOGE("NapiAVSessionController::CreateController No parameters ");
+        status = napi_invalid_arg;
+    }
+    status = napi_wrap(env, jsThis, static_cast<void*>(obj.get()),
+        NapiAVSessionController::Destructor, nullptr, &(obj->wrapper_));
+    if (status == napi_ok) {
+        status = AVSessionNapiUtils::SetValueInt32(env, "sessionId", sessionId, jsThis);
+    }
+    if (status != napi_ok) {
+        SLOGE("SetValueInt32 error");
+        return AVSessionNapiUtils::NapiUndefined(env);
+    }
+    obj.release();
+    return jsThis;
 }
 
 void NapiAVSessionController::Destructor(napi_env env, void* nativeObject, void* finalizeHint)
@@ -159,7 +158,6 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
             }
             return OK;
         },
-
         [](AVSessionControllerAsyncContext* asyncContext, napi_value& output) {
             AVSessionNapiUtils::WrapAVPlaybackStateToNapi(asyncContext->env, *asyncContext->aVPlaybackState, output);
             return OK;
@@ -190,21 +188,13 @@ napi_value NapiAVSessionController::GetAVMetadata(napi_env env, napi_callback_in
             AVSessionNapiUtils::WrapAVMetadataToNapi(asyncContext->env, *asyncContext->aVMetaData, output);
             std::string getAVMetadataAssetId = AVSessionNapiUtils::GetValueString(asyncContext->env, "assetId", output);
             SLOGE(" WrapAVMetadataToNapi getAVMetadataAssetId assetId = %{public}s", getAVMetadataAssetId.c_str());
-
             return OK;
         });
 }
 
 void GetKeyEvent(const napi_env& env, const napi_value& object, AVSessionControllerAsyncContext* asyncContext)
 {
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, object, &valueType);
-    if (valueType == napi_object) {
-        napi_status status = napi_unwrap(env, object, reinterpret_cast<void**>(&asyncContext->keyEvent));
-        if (status != napi_ok || asyncContext->keyEvent == nullptr) {
-            SLOGE("napi_unwrap asyncContext->keyEvent error");
-        }
-    }
+    AVSessionNapiUtils::WrapNapiToKeyEvent(env, object, asyncContext->keyEvent);
 }
 
 napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_info info)
@@ -263,7 +253,6 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
             SLOGE("NapiAVSessionController::GetLaunchAbility avsessionController_ is nullptr");
             return ERR;
         },
-
         [](AVSessionControllerAsyncContext* asyncContext, napi_value& output) {
             napi_value wantAgentClass = nullptr;
             napi_define_class(asyncContext->env, "WantAgentClass", NAPI_AUTO_LENGTH,
@@ -273,11 +262,9 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
                     return thisVar;
                 },
                 nullptr, 0, nullptr, &wantAgentClass);
-
             napi_new_instance(asyncContext->env, wantAgentClass, 0, nullptr, &output);
             napi_wrap(asyncContext->env, output, (void*)asyncContext->wantAgent.get(),
                 [](napi_env env, void* data, void* hint) {}, nullptr, nullptr);
-
             return OK;
         });
 }
@@ -319,12 +306,10 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
         [](AVSessionControllerAsyncContext* asyncContext) {
             return OK;
         },
-
         [](AVSessionControllerAsyncContext* asyncContext, napi_value& output) {
             SLOGI(" NapiAVSessionController::Destroy() ");
             NapiAVSessionController* napiController = static_cast<NapiAVSessionController*>(asyncContext->objectInfo);
             int32_t ret = napiController->avsessionController_->Release();
-
             if (ret) {
                 SLOGE(" native avsessionController::Release() fail ");
                 return ERR;
@@ -353,10 +338,10 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
             }
             return OK;
         },
-
         [](AVSessionControllerAsyncContext* asyncContext, napi_value& output) {
             napi_status status;
             size_t size = asyncContext->cmds.size();
+            SLOGI("GetValidCommands size = %{public}zu", size);
             napi_create_array_with_length(asyncContext->env, size, &output);
             for (size_t i = 0; i < size; i ++) {
                 napi_value valueParam = nullptr;
@@ -368,6 +353,7 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
                 }
                 status = napi_set_element(asyncContext->env, output, i, valueParam);
                 if (status != napi_ok) {
+                    SLOGE(" wrap  cmds to napi_value fail ");
                     return ERR;
                 }
             }
@@ -380,43 +366,48 @@ void GetArgvAVControlCommand(const napi_env& env, const napi_value& object,
 {
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, object, &valueType);
-    if (valueType == napi_object) {
-        std::string strCommand = AVSessionNapiUtils::GetValueString(env,"command", object);
-        if (strCommand.empty()) {
-            SLOGE("SendControlCommand:: get param command  fail ");
-            return ;
-        }
-        int32_t command = AVControlCommand::SESSION_CMD_MAX;
-        if (aVControlCommandMap.find(strCommand) != aVControlCommandMap.end()) {
-            command = aVControlCommandMap[strCommand];
-            asyncContext->aVControlCommand = make_shared<AVControlCommand>();
-            SLOGI("get command: %{public}d",command);
-            asyncContext->aVControlCommand->SetCommand(command);
-
-            napi_value res = nullptr;
-            if (napi_get_named_property(env, object, "parameter", &res) == napi_ok) {
-                napi_typeof(env, res, &valueType);
-                if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SEEK) {
-                    int64_t time = 0;
-                    napi_get_value_int64(env, res, &time);
-                    asyncContext->aVControlCommand->SetSeekTime(time);
-                }
-                if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_SPEED) {
-                    double speed = 0;
-                    napi_get_value_double(env, res, &speed);
-                    asyncContext->aVControlCommand->SetSpeed((float)speed);
-                }
-                if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_LOOP_MODE) {
-                    int32_t loopMode = 0;
-                    napi_get_value_int32(env, res, &loopMode);
-                    asyncContext->aVControlCommand->SetLoopMode(loopMode);
-                }
-                if (valueType == napi_string && command == AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE) {
-                    std::string mediald = AVSessionNapiUtils::GetStringArgument(env, res);
-                    asyncContext->aVControlCommand->SetAssetId(mediald);
-                }
-            }
-        }
+    if (valueType != napi_object) {
+        SLOGE("SendControlCommand valueType incorrect");
+        return ;
+    }
+    std::string strCommand = AVSessionNapiUtils::GetValueString(env, "command", object);
+    if (strCommand.empty()) {
+        SLOGE("SendControlCommand get param command  fail ");
+        return ;
+    }
+    int32_t command = AVControlCommand::SESSION_CMD_MAX;
+    if (aVControlCommandMap.find(strCommand) == aVControlCommandMap.end()) {
+        SLOGE("SendControlCommand can not find %{public}s", strCommand.c_str());
+        return ;
+    }
+    command = aVControlCommandMap[strCommand];
+    asyncContext->aVControlCommand = make_shared<AVControlCommand>();
+    SLOGI("get command: %{public}d", command);
+    asyncContext->aVControlCommand->SetCommand(command);
+    napi_value res = nullptr;
+    if (napi_get_named_property(env, object, "parameter", &res) != napi_ok) {
+        SLOGE("SendControlCommand napi_get_named_property error");
+        return ;
+    }
+    napi_typeof(env, res, &valueType);
+    if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SEEK) {
+        int64_t time = 0;
+        napi_get_value_int64(env, res, &time);
+        asyncContext->aVControlCommand->SetSeekTime(time);
+    }
+    if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_SPEED) {
+        double speed = 0;
+        napi_get_value_double(env, res, &speed);
+        asyncContext->aVControlCommand->SetSpeed((float)speed);
+    }
+    if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_LOOP_MODE) {
+        int32_t loopMode = 0;
+        napi_get_value_int32(env, res, &loopMode);
+        asyncContext->aVControlCommand->SetLoopMode(loopMode);
+    }
+    if (valueType == napi_string && command == AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE) {
+        std::string mediald = AVSessionNapiUtils::GetStringArgument(env, res);
+        asyncContext->aVControlCommand->SetAssetId(mediald);
     }
 }
 
@@ -437,7 +428,7 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
             SLOGI(" NapiAVSession::SendControlCommand()");
             output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
             NapiAVSessionController* napiController = static_cast<NapiAVSessionController*>(asyncContext->objectInfo);
-            SLOGI(" NapiAVSession::SendControlCommand() command: %{public}d ", asyncContext->aVControlCommand->GetCommand());
+            SLOGI("SendControlCommand : %{public}d ", asyncContext->aVControlCommand->GetCommand());
             int32_t ret = napiController->avsessionController_->SendControlCommand(*asyncContext->aVControlCommand);
             if (ret) {
                 SLOGE(" native SendControlCommand fail ");
@@ -457,24 +448,20 @@ napi_value NapiAVSessionController::RegisterCallback(napi_env env,
     napi_status status = napi_unwrap(env, jsThis, reinterpret_cast<void**>(&napiController));
     if (status != napi_ok || napiController == nullptr) {
         SLOGE("unwrap napiController error");
-        return AVSessionNapiUtils::NapiUndefined(env);;
+        return AVSessionNapiUtils::NapiUndefined(env);
     }
-
     if (napiController->avcontrollerCallback_ == nullptr) {
         napiController->avcontrollerCallback_ = std::make_shared<NapiAVControllerCallback>();
     }
-
     if (napiController->avsessionController_ == nullptr) {
         SLOGE("controller did not create .");
-        return AVSessionNapiUtils::NapiUndefined(env);;
+        return AVSessionNapiUtils::NapiUndefined(env);
     }
-
     int32_t ret = napiController->avsessionController_->RegisterCallback(napiController->avcontrollerCallback_);
     if (ret) {
         SLOGE("native RegisterSessionListener Failed");
         return AVSessionNapiUtils::NapiUndefined(env);
     }
-
     if (!callbackName.compare(AVCONTROLLER_SESSIONRELEASED_CALLBACK) ||
         !callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK) ||
         !callbackName.compare(METADATACHANGED_CALLBACK) ||
@@ -486,7 +473,7 @@ napi_value NapiAVSessionController::RegisterCallback(napi_env env,
         cb->SaveCallbackReference(callbackName, callbackRef, env);
         if (!callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK) ||
             !callbackName.compare(METADATACHANGED_CALLBACK)) {
-            cb->SaveFilter(callbackName, filter, env);
+            cb->SaveFilter(napiController->avsessionController_, callbackName, filter, env);
         }
     }
     return AVSessionNapiUtils::NapiUndefined(env);
@@ -495,22 +482,18 @@ napi_value NapiAVSessionController::RegisterCallback(napi_env env,
 napi_value NapiAVSessionController::On(napi_env env, napi_callback_info info)
 {
     napi_value undefinedResult = AVSessionNapiUtils::NapiUndefined(env);
-
     const size_t minArgCount = 3;
     size_t argCount = 3;
     napi_value args[minArgCount] = { nullptr, nullptr, nullptr };
     napi_value jsThis = nullptr;
     napi_status status = napi_get_cb_info(env, info, &argCount, args, &jsThis, nullptr);
-
     napi_valuetype eventType = napi_undefined;
     if (napi_typeof(env, args[0], &eventType) != napi_ok || eventType != napi_string) {
         SLOGE("first parameter is not string");
         return undefinedResult;
     }
-
     std::string callbackName = AVSessionNapiUtils::GetStringArgument(env, args[0]);
     SLOGI("NapiAVSessionController::On callbackName: %{public}s", callbackName.c_str());
-
     if (!callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK) ||
         !callbackName.compare(METADATACHANGED_CALLBACK)) {
         if (status != napi_ok || argCount < minArgCount) {
@@ -523,30 +506,27 @@ napi_value NapiAVSessionController::On(napi_env env, napi_callback_info info)
             return undefinedResult;
         }
     }
-
     napi_value callbackRef = nullptr;
     if (!callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK) ||
         !callbackName.compare(METADATACHANGED_CALLBACK)) {
-        if (napi_typeof(env, args[2], &eventType) != napi_ok || eventType != napi_function) {
+        if (napi_typeof(env, args[minArgCount - 1], &eventType) != napi_ok || eventType != napi_function) {
             SLOGE("The third argument is not a function .");
             return undefinedResult;
         }
-        callbackRef = args[2];
+        callbackRef = args[minArgCount - 1];
     } else {
-         if (napi_typeof(env, args[1], &eventType) != napi_ok || eventType != napi_function) {
+        if (napi_typeof(env, args[1], &eventType) != napi_ok || eventType != napi_function) {
             SLOGE("The second argument is not a function .");
             return undefinedResult;
         }
         callbackRef = args[1];
     }
-
     return RegisterCallback(env, jsThis, callbackRef, args[1], callbackName);
 }
 
 napi_value NapiAVSessionController::Off(napi_env env, napi_callback_info info)
 {
     napi_value undefinedResult = AVSessionNapiUtils::NapiUndefined(env);
-
     const size_t minArgCount = 1;
     size_t argCount = 1;
     napi_value args[minArgCount] = {nullptr};
@@ -556,26 +536,21 @@ napi_value NapiAVSessionController::Off(napi_env env, napi_callback_info info)
         SLOGE("Less than two parameters");
         return undefinedResult;
     }
-
     napi_valuetype eventType = napi_undefined;
     if (napi_typeof(env, args[0], &eventType) != napi_ok || eventType != napi_string) {
         return undefinedResult;
     }
-
     std::string callbackName = AVSessionNapiUtils::GetStringArgument(env, args[0]);
     SLOGI("NapiAVSessionController::On callbackName: %{public}s", callbackName.c_str());
-
     NapiAVSessionController *napiController = nullptr;
     status = napi_unwrap(env, jsThis, reinterpret_cast<void **>(&napiController));
     if (status != napi_ok || napiController == nullptr) {
         SLOGE("napi_unwrap napiController error");
     }
-
     if (napiController->avcontrollerCallback_ == nullptr) {
         SLOGE("NapiAVSessionController: Off Failed");
         return undefinedResult;
     }
-
     if (!callbackName.compare(AVCONTROLLER_SESSIONRELEASED_CALLBACK) ||
         !callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK) ||
         !callbackName.compare(METADATACHANGED_CALLBACK) ||
@@ -585,7 +560,6 @@ napi_value NapiAVSessionController::Off(napi_env env, napi_callback_info info)
             std::static_pointer_cast<NapiAVControllerCallback>(napiController->avcontrollerCallback_);
         cb->ReleaseCallbackReference(callbackName);
     }
-
     return AVSessionNapiUtils::NapiUndefined(env);
 }
 
