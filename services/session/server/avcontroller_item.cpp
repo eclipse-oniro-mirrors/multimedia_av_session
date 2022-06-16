@@ -40,6 +40,7 @@ int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject> &callb
 int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState &state)
 {
     if (session_ == nullptr) {
+        SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
     state = session_->GetPlaybackState();
@@ -49,17 +50,17 @@ int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState &state)
 int32_t AVControllerItem::GetAVMetaData(AVMetaData &data)
 {
     if (session_ == nullptr) {
+        SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
-    if (!data.CopyFrom(session_->GetMetaData())) {
-        return AVSESSION_ERROR;
-    }
+    data = session_->GetMetaData();
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     if (session_ == nullptr) {
+        SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
     session_->HandleMediaKeyEvent(keyEvent);
@@ -69,6 +70,7 @@ int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability)
 {
     if (session_ == nullptr) {
+        SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
     ability = session_->GetLaunchAbility();
@@ -78,6 +80,7 @@ int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent 
 int32_t AVControllerItem::GetValidCommands(std::vector<int32_t> &cmds)
 {
     if (session_ == nullptr) {
+        SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
     cmds = session_->GetSupportCommand();
@@ -87,6 +90,7 @@ int32_t AVControllerItem::GetValidCommands(std::vector<int32_t> &cmds)
 int32_t AVControllerItem::IsSessionActive(bool &isActive)
 {
     if (session_ == nullptr) {
+        SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
     isActive = session_->IsActive();
@@ -96,10 +100,12 @@ int32_t AVControllerItem::IsSessionActive(bool &isActive)
 int32_t AVControllerItem::SendControlCommand(const AVControlCommand &cmd)
 {
     if (session_ == nullptr) {
+        SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
     std::vector<int32_t> cmds = session_->GetSupportCommand();
     if (std::find(cmds.begin(), cmds.end(), cmd.GetCommand()) == cmds.end()) {
+        SLOGI("command not support");
         return ERR_COMMAND_NOT_SUPPORT;
     }
     session_->ExecuteControllerCommand(cmd);

@@ -71,7 +71,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     metaData_.CopyFrom(meta);
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
-        controller->HandleMetaDataChange(metaData_);
+        controller->HandleMetaDataChange(meta);
     }
     return AVSESSION_SUCCESS;
 }
