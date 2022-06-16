@@ -184,7 +184,7 @@ void NapiAVSessionCallback::OnSeek(int64_t time)
         [time](napi_env env, int& argc, napi_value* argv)
         {
             argc = 1;
-            napi_create_int32(env, time, &argv[0]);
+            napi_create_int64(env, time, &argv[0]);
         });
 }
 
