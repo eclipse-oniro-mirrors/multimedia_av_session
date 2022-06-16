@@ -28,9 +28,9 @@ int32_t g_onCall = AVSESSION_ERROR;
 int32_t g_sessionId = AVSESSION_ERROR;
 AVMetaData g_metaData;
 AVPlaybackState g_playbackState;
-static char TestSessionTag[] = "test";
-static char TestBundleName[] = "test.ohos.avsession";
-static char TestAbilityName[] = "test.ability";
+static char g_testSessionTag[] = "test";
+static char g_testBundleName[] = "test.ohos.avsession";
+static char g_testAbilityName[] = "test.ability";
 
 class AvsessionTest : public testing::Test {
 public:
@@ -52,9 +52,9 @@ void AvsessionTest::TearDownTestCase(void)
 void AvsessionTest::SetUp(void)
 {
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
-    avsession_ = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    avsession_ = AVSessionManager::CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
     ASSERT_NE(avsession_, nullptr);
     g_sessionId++;
     controller_ = AVSessionManager::CreateController(avsession_->GetSessionId());

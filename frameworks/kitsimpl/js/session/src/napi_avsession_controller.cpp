@@ -94,6 +94,7 @@ napi_value NapiAVSessionController::JsObjectConstruct(napi_env env, napi_callbac
                     SLOGE("native CreateController fail ");
                     return AVSessionNapiUtils::NapiUndefined(env);
                 }
+                SLOGI("AVSessionManager::CreateController success ");
             } else {
                 SLOGE("NapiAVSessionController::CreateController No parameters ");
                 status = napi_invalid_arg;
@@ -148,6 +149,7 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
     return avsessionControllerProxy.DoAsyncWork(
         "GetAVPlaybackState",
         [](AVSessionControllerAsyncContext* asyncContext) {
+            SLOGI(" NapiAVSessionController::GetAVPlaybackState async ");
             asyncContext->aVPlaybackState = make_shared<AVPlaybackState>();
             NapiAVSessionController* napiController = static_cast<NapiAVSessionController*>(asyncContext->objectInfo);
             int32_t ret = napiController->avsessionController_->GetAVPlaybackState(*asyncContext->aVPlaybackState);
@@ -174,6 +176,7 @@ napi_value NapiAVSessionController::GetAVMetadata(napi_env env, napi_callback_in
     return avsessionControllerProxy.DoAsyncWork(
         "GetAVMetadata",
         [](AVSessionControllerAsyncContext* asyncContext) {
+            SLOGI(" NapiAVSessionController::GetAVMetadata async ");
             asyncContext->aVMetaData = make_shared<AVMetaData>();
             NapiAVSessionController* napiController = static_cast<NapiAVSessionController*>(asyncContext->objectInfo);
             int32_t ret = napiController->avsessionController_->GetAVMetaData(*asyncContext->aVMetaData);
@@ -185,6 +188,9 @@ napi_value NapiAVSessionController::GetAVMetadata(napi_env env, napi_callback_in
         },
         [](AVSessionControllerAsyncContext* asyncContext, napi_value& output) {
             AVSessionNapiUtils::WrapAVMetadataToNapi(asyncContext->env, *asyncContext->aVMetaData, output);
+            std::string getAVMetadataAssetId = AVSessionNapiUtils::GetValueString(asyncContext->env, "assetId", output);
+            SLOGE(" WrapAVMetadataToNapi getAVMetadataAssetId assetId = %{public}s", getAVMetadataAssetId.c_str());
+
             return OK;
         });
 }
@@ -212,6 +218,15 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
     return avsessionControllerProxy.DoAsyncWork(
         "SendAVKeyEvent",
         [](AVSessionControllerAsyncContext* asyncContext) {
+            if (asyncContext->keyEvent == nullptr) {
+                SLOGE("get param keyEvent fail");
+                return ERR;
+            }
+            return OK;
+        },
+        [](AVSessionControllerAsyncContext* asyncContext, napi_value& output) {
+            SLOGI("NapiAVSessionController::SendAVKeyEvent() async");
+            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
             NapiAVSessionController* napiController = static_cast<NapiAVSessionController*>(asyncContext->objectInfo);
             if (napiController->avsessionController_ != nullptr) {
                 int32_t ret = napiController->avsessionController_->SendAVKeyEvent(*asyncContext->keyEvent);
@@ -223,10 +238,6 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
             }
             SLOGE("NapiAVSessionController::SendAVKeyEvent avsessionController_ is nullptr");
             return ERR;
-        },
-        [](AVSessionControllerAsyncContext* asyncContext, napi_value& output) {
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
         });
 }
 
@@ -286,14 +297,12 @@ napi_value NapiAVSessionController::IsActive(napi_env env, napi_callback_info in
         [](AVSessionControllerAsyncContext* asyncContext, napi_value& output) {
             SLOGI(" NapiAVSessionController::IsActive() async ");
             NapiAVSessionController* napiController = static_cast<NapiAVSessionController*>(asyncContext->objectInfo);
-            SLOGI(" native IsActive() start ");
             int32_t ret = napiController->avsessionController_->IsSessionActive(asyncContext->isActive);
-            SLOGI(" native IsActive() end ");
             if (ret) {
                 SLOGE(" native IsActive() fail ");
                 return ERR;
             }
-            napi_get_boolean(asyncContext->env, &(asyncContext->isActive), &output);
+            napi_get_boolean(asyncContext->env, asyncContext->isActive, &output);
             return OK;
         });
 }
@@ -317,10 +326,11 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
             int32_t ret = napiController->avsessionController_->Release();
 
             if (ret) {
-                SLOGE(" native Release() fail ");
+                SLOGE(" native avsessionController::Release() fail ");
                 return ERR;
             }
-            napi_get_boolean(asyncContext->env, &(asyncContext->isActive), &output);
+            SLOGI(" native avsessionController::Release() success ");
+            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
             return OK;
         });
 }
@@ -373,13 +383,14 @@ void GetArgvAVControlCommand(const napi_env& env, const napi_value& object,
     if (valueType == napi_object) {
         std::string strCommand = AVSessionNapiUtils::GetValueString(env,"command", object);
         if (strCommand.empty()) {
-            SLOGE("SendSystemControlCommand:: get param command  fail ");
+            SLOGE("SendControlCommand:: get param command  fail ");
             return ;
         }
         int32_t command = AVControlCommand::SESSION_CMD_MAX;
         if (aVControlCommandMap.find(strCommand) != aVControlCommandMap.end()) {
             command = aVControlCommandMap[strCommand];
             asyncContext->aVControlCommand = make_shared<AVControlCommand>();
+            SLOGI("get command: %{public}d",command);
             asyncContext->aVControlCommand->SetCommand(command);
 
             napi_value res = nullptr;

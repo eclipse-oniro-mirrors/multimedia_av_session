@@ -293,6 +293,7 @@ void AVSessionNapiUtils::WrapNapiToAVMetadata(napi_env env, napi_value object, A
 
 void AVSessionNapiUtils::WrapAVMetadataToNapi(napi_env env, const AVMetaData& aVMetaData, napi_value& result)
 {
+    napi_create_object(env, &result);
     AVSessionNapiUtils::SetValueString(env, "assetId", aVMetaData.GetAssetId(), result);
     AVSessionNapiUtils::SetValueString(env, "title", aVMetaData.GetTitle(), result);
     AVSessionNapiUtils::SetValueString(env, "artist", aVMetaData.GetArtist(), result);
@@ -302,35 +303,7 @@ void AVSessionNapiUtils::WrapAVMetadataToNapi(napi_env env, const AVMetaData& aV
     AVSessionNapiUtils::SetValueString(env, "composer", aVMetaData.GetComposer(), result);
     AVSessionNapiUtils::SetValueInt64(env, "duration", aVMetaData.GetDuration(), result);
 
-    std::string metaMask = aVMetaData.GetMetaMask().to_string();
-    AVMetaData::MetaMaskType metaMaskType;
 
-    metaMaskType.set(AVMetaData::META_KEY_MEDIA_IMAGE_URI);
-    if (metaMask.compare(metaMaskType.to_string()) == 0) {
-        AVSessionNapiUtils::SetValueString(env, "mediaImage", aVMetaData.GetMediaImageUri(), result);
-    }
-
-    metaMaskType.set(AVMetaData::META_KEY_MEDIA_IMAGE);
-    if (metaMask.compare(metaMaskType.to_string()) == 0) {
-        // mediaImage ? : image.PixelMap
-        napi_value pixelMapClass = nullptr;
-        napi_define_class(env, "PixelMapClass", NAPI_AUTO_LENGTH,
-            [](napi_env env, napi_callback_info info) -> napi_value {
-                napi_value thisVar = nullptr;
-                napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
-                return thisVar;
-            },
-            nullptr, 0, nullptr, & pixelMapClass);
-
-        napi_new_instance(env, pixelMapClass, 0, nullptr, &result);
-        napi_wrap(env, result, (void*)(aVMetaData.GetMediaImage().get()),
-            [](napi_env env, void* data, void* hint) {}, nullptr, nullptr);
-
-        napi_status status = napi_set_named_property(env, result, "mediaImage", pixelMapClass);
-        if (status != napi_ok) {
-            return;
-        }
-    }
 
     napi_value publishDateValue = nullptr;
     napi_status status = napi_create_date(env,
@@ -403,6 +376,7 @@ void AVSessionNapiUtils::WrapAVPlaybackStateToNapi(napi_env env,
                                                    const AVPlaybackState& aVPlaybackState,
                                                    napi_value& result)
 {
+    napi_create_object(env, &result);
     AVSessionNapiUtils::SetValueInt32(env, "state", aVPlaybackState.GetState(), result);
     AVSessionNapiUtils::SetValueDouble(env, "speed", aVPlaybackState.GetSpeed(), result);
     AVSessionNapiUtils::SetValueInt64(env, "bufferedTime", aVPlaybackState.GetBufferedTime(), result);
@@ -421,6 +395,7 @@ void AVSessionNapiUtils::WrapAVSessionDescriptorToNapi(napi_env env,
                                                        const AVSessionDescriptor& descriptor,
                                                        napi_value& result)
 {
+    napi_create_object(env, &result);
     AVSessionNapiUtils::SetValueInt32(env, "sessionId", descriptor.sessionId_, result);
     AVSessionNapiUtils::SetValueString(env, "type", GetSessionType(descriptor.sessionType_), result);
     AVSessionNapiUtils::SetValueString(env, "sessionTag", descriptor.sessionTag_, result);

@@ -162,7 +162,6 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
             napi_status status;
             napi_create_array_with_length(asyncContext->env, size, &output);
             for (size_t i = 0; i < size; i ++) {
-                (void)napi_create_object(asyncContext->env, &valueParam);
                 AVSessionNapiUtils::WrapAVSessionDescriptorToNapi(asyncContext->env, descriptor[i], valueParam);
                 status = napi_set_element(asyncContext->env, output, i, valueParam);
                 if (status != napi_ok) {
@@ -448,9 +447,14 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
     return proxy.DoAsyncWork(
         "SendSystemAVKeyEvent",
         [](ManagerAsyncContext* asyncContext) {
+            if (asyncContext->keyEvent == nullptr) {
+                SLOGE("get param keyEvent fail");
+                return ERR;
+            }
             return OK;
         },
         [](ManagerAsyncContext* asyncContext, napi_value& output) {
+            SLOGI("NapiAVSession::SendSystemAVKeyEvent() async");
             int32_t ret = AVSessionManager::SendSystemAVKeyEvent(*(asyncContext->keyEvent.get()));
             if (ret) {
                 SLOGE("native SendSystemAVKeyEvent Failed");

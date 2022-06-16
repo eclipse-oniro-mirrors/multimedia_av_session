@@ -103,7 +103,7 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 {
     std::lock_guard lockGuard(lock_);
     auto iter = controllers_.find(GetPid());
-    if(iter == controllers_.end()) {
+    if (iter == controllers_.end()) {
         return nullptr;
     }
     return iter->second;
