@@ -38,6 +38,9 @@ static const std::string SETSPEED_CALLBACK = "setSpeed";
 static const std::string SETLOOPMODE_CALLBACK = "setLoopMode";
 static const std::string TOGGLEFAVORITE_CALLBACK = "toggleFavorite";
 static const std::string OUTPUTDEVICECHANGED_CALLBACK = "outputDeviceChanged";
+static const std::vector<std::string> CALLBACK_VECTOR{PLAY_CALLBACK, PAUSE_CALLBACK, STOP_CALLBACK, PLAYNEXT_CALLBACK,
+    PLAYPREVIOUS_CALLBACK, FASTFORWARD_CALLBACK, REWIND_CALLBACK, HANDLEKEYEVENT_CALLBACK, SEEK_CALLBACK,
+    SETSPEED_CALLBACK, SETLOOPMODE_CALLBACK, TOGGLEFAVORITE_CALLBACK, OUTPUTDEVICECHANGED_CALLBACK};
 
 class NapiAVSessionCallback : public AVSessionCallback, public std::enable_shared_from_this<NapiAVSessionCallback> {
 public:

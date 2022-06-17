@@ -45,7 +45,8 @@ public:
     void OnActiveStateChange(bool isActive) override;
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
     void SaveCallbackReference(const std::string& callbackName, napi_value callback, napi_env env);
-    void SaveFilter(const std::string& callbackName, napi_value filter, napi_env env);
+    void SaveFilter(std::shared_ptr<AVSessionController>& avsessionController, const std::string& callbackName,
+                    napi_value filter, napi_env env);
     void ReleaseCallbackReference(const std::string& callbackName);
 
 private:

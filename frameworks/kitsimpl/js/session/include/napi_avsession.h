@@ -28,7 +28,7 @@
 #include "utils/napi_async_proxy.h"
 
 namespace OHOS::AVSession {
-class NapiAVSession{
+class NapiAVSession {
 public:
     NapiAVSession();
     ~NapiAVSession();

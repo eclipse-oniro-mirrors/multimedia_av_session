@@ -57,10 +57,8 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("off", Off),
         DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice)
     };
-
     napi_status status = AVSessionNapiUtils::CreateJSObject(env, exports, AVSESSION_NAPI_CLASS_NAME, JsObjectConstruct,
         avsession_prop_desc, sizeof(avsession_prop_desc) / sizeof(avsession_prop_desc[0]), &g_avsessionConstructor);
-
     if (status == napi_ok) {
         return exports;
     }
@@ -73,31 +71,25 @@ napi_value NapiAVSession::JsObjectConstruct(napi_env env, napi_callback_info inf
 {
     napi_value jsThis;
     size_t argc = 2;
-    napi_value argv[2] = { nullptr, nullptr};;
+    napi_value argv[2] = { nullptr, nullptr };
     napi_status status = napi_get_cb_info(env, info, &argc, argv, &jsThis, nullptr);
     if (status == napi_ok) {
         unique_ptr<NapiAVSession> obj = make_unique<NapiAVSession>();
         if (obj != nullptr) {
             obj->env_ = env;
             std::string tag = AVSessionNapiUtils::GetStringArgument(env, argv[0]);
-
             int32_t type;
             napi_get_value_int32(env, argv[1], &type);
-
             auto ability = OHOS::AbilityRuntime::GetCurrentAbility(env);
             string bundleName = ability->GetWant()->GetElement().GetBundleName();
             string abilityName = ability->GetWant()->GetElement().GetAbilityName();
-
             SLOGI("abilityName %{public}s ,bundleName %{public}s ,tag: %{public}s ,type:%{public}d ",
                 abilityName.c_str(), bundleName.c_str(), tag.c_str(), type);
-
             obj->avsession_ = AVSessionManager::CreateSession(tag, type, ability->GetWant()->GetElement());
-
             if (obj->avsession_ == nullptr) {
                 SLOGE("native CreateSession fail.");
                 return AVSessionNapiUtils::NapiUndefined(env);
             }
-
             status = napi_wrap(env, jsThis, static_cast<void*>(obj.get()),
                                NapiAVSession::Destructor, nullptr, &(obj->wrapper_));
             if (status == napi_ok) {
@@ -239,9 +231,9 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
         },
         [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
             auto context = static_cast<NapiAVSession*>(asyncContext->objectInfo);
-            napi_status status =NapiAVSessionController::NewInstance(asyncContext->env,
-                                                                     &output,
-                                                                     context->avsession_->GetSessionId());
+            napi_status status = NapiAVSessionController::NewInstance(asyncContext->env,
+                                                                      &output,
+                                                                      context->avsession_->GetSessionId());
             if (status == napi_ok) {
                 return OK;
             }
@@ -327,7 +319,6 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
 napi_value NapiAVSession::On(napi_env env, napi_callback_info info)
 {
     napi_value undefinedResult = AVSessionNapiUtils::NapiUndefined(env);
-
     const size_t minArgCount = 2;
     size_t argCount = 2;
     napi_value args[minArgCount] = {nullptr, nullptr};
@@ -337,26 +328,21 @@ napi_value NapiAVSession::On(napi_env env, napi_callback_info info)
         SLOGE("Less than two parameters");
         return undefinedResult;
     }
-
     napi_valuetype eventType = napi_undefined;
     if (napi_typeof(env, args[0], &eventType) != napi_ok || eventType != napi_string) {
         return undefinedResult;
     }
-
     if (napi_typeof(env, args[1], &eventType) != napi_ok || eventType != napi_function) {
         SLOGE("The second argument is not a function .");
         return undefinedResult;
     }
-
     std::string callbackName = AVSessionNapiUtils::GetStringArgument(env, args[0]);
     SLOGI("NapiAVSession::On callbackName: %{public}s", callbackName.c_str());
-
     NapiAVSession *napiAVSession = nullptr;
     status = napi_unwrap(env, jsThis, reinterpret_cast<void **>(&napiAVSession));
     if (status != napi_ok || napiAVSession == nullptr) {
         SLOGE("napi_unwrap napiAVSession error");
     }
-
     if (napiAVSession->avsessionCallback_ == nullptr) {
         napiAVSession->avsessionCallback_ = std::make_shared<NapiAVSessionCallback>();
         int32_t ret = napiAVSession->avsession_->RegisterCallback(napiAVSession->avsessionCallback_);
@@ -365,32 +351,18 @@ napi_value NapiAVSession::On(napi_env env, napi_callback_info info)
             return undefinedResult;
         }
     }
-
-    if (!callbackName.compare(PLAY_CALLBACK) ||
-        !callbackName.compare(PAUSE_CALLBACK) ||
-        !callbackName.compare(STOP_CALLBACK) ||
-        !callbackName.compare(PLAYNEXT_CALLBACK) ||
-        !callbackName.compare(PLAYPREVIOUS_CALLBACK) ||
-        !callbackName.compare(FASTFORWARD_CALLBACK) ||
-        !callbackName.compare(REWIND_CALLBACK) ||
-        !callbackName.compare(HANDLEKEYEVENT_CALLBACK) ||
-        !callbackName.compare(SEEK_CALLBACK)||
-        !callbackName.compare(SETSPEED_CALLBACK) ||
-        !callbackName.compare(SETLOOPMODE_CALLBACK) ||
-        !callbackName.compare(TOGGLEFAVORITE_CALLBACK) ||
-        !callbackName.compare(OUTPUTDEVICECHANGED_CALLBACK)) {
+    auto iter = find(CALLBACK_VECTOR.begin(), CALLBACK_VECTOR.end(), callbackName);
+    if (iter != CALLBACK_VECTOR.end()) {
         std::shared_ptr<NapiAVSessionCallback> cb =
             std::static_pointer_cast<NapiAVSessionCallback>(napiAVSession->avsessionCallback_);
         cb->SaveCallbackReference(callbackName, args[1], env);
     }
-
     return AVSessionNapiUtils::NapiUndefined(env);
 }
 
 napi_value NapiAVSession::Off(napi_env env, napi_callback_info info)
 {
     napi_value undefinedResult = AVSessionNapiUtils::NapiUndefined(env);
-
     const size_t minArgCount = 1;
     size_t argCount = 1;
     napi_value args[minArgCount] = {nullptr};
@@ -400,43 +372,27 @@ napi_value NapiAVSession::Off(napi_env env, napi_callback_info info)
         SLOGE("Less than one parameters");
         return undefinedResult;
     }
-
     napi_valuetype eventType = napi_undefined;
     if (napi_typeof(env, args[0], &eventType) != napi_ok || eventType != napi_string) {
         return undefinedResult;
     }
-
     std::string callbackName = AVSessionNapiUtils::GetStringArgument(env, args[0]);
     SLOGI("NapiAVSession::On callbackName: %{public}s", callbackName.c_str());
-
     NapiAVSession *napiAVSession = nullptr;
     status = napi_unwrap(env, jsThis, reinterpret_cast<void **>(&napiAVSession));
     if (status != napi_ok || napiAVSession == nullptr) {
         SLOGE("napi_unwrap napiAVSession error");
     }
-
     if (napiAVSession->avsessionCallback_ == nullptr) {
         SLOGE("NapiAVSession: off Failed");
         return undefinedResult;
     }
-
-    if (!callbackName.compare(PLAY_CALLBACK) ||
-        !callbackName.compare(PAUSE_CALLBACK) ||
-        !callbackName.compare(STOP_CALLBACK) ||
-        !callbackName.compare(PLAYNEXT_CALLBACK) ||
-        !callbackName.compare(PLAYPREVIOUS_CALLBACK) ||
-        !callbackName.compare(FASTFORWARD_CALLBACK) ||
-        !callbackName.compare(REWIND_CALLBACK) ||
-        !callbackName.compare(HANDLEKEYEVENT_CALLBACK) ||
-        !callbackName.compare(SEEK_CALLBACK)||
-        !callbackName.compare(SETSPEED_CALLBACK) ||
-        !callbackName.compare(SETLOOPMODE_CALLBACK) ||
-        !callbackName.compare(TOGGLEFAVORITE_CALLBACK)) {
+    auto iter = find(CALLBACK_VECTOR.begin(), CALLBACK_VECTOR.end(), callbackName);
+    if (iter != CALLBACK_VECTOR.end()) {
         std::shared_ptr<NapiAVSessionCallback> cb =
             std::static_pointer_cast<NapiAVSessionCallback>(napiAVSession->avsessionCallback_);
         cb->ReleaseCallbackReference(callbackName);
     }
-
     return AVSessionNapiUtils::NapiUndefined(env);
 }
 
@@ -445,18 +401,17 @@ napi_status NapiAVSession::NewInstance(napi_env env, napi_value * result, std::s
     napi_value constructor;
     napi_status status = napi_get_reference_value(env, g_avsessionConstructor, &constructor);
     if (status == napi_ok) {
-        napi_value args[2] = { nullptr };
+        const int32_t argNum = 2;
+        napi_value args[argNum] = { nullptr, nullptr };
         status = napi_create_string_utf8(env, tag.c_str(), NAPI_AUTO_LENGTH, &args[0]);
         if (status != napi_ok) {
             return status;
         }
-
         status = napi_create_int32(env, type, &args[1]);
         if (status != napi_ok) {
             return status;
         }
-
-        status = napi_new_instance(env, constructor, 2, args, result);
+        status = napi_new_instance(env, constructor, argNum, args, result);
     }
     return status;
 }
@@ -465,7 +420,6 @@ void GetArgvStreamIds(const napi_env& env, const napi_value& object, NapiAVSessi
 {
     bool isArray = false;
     uint32_t len = 0;
-
     if ((napi_is_array(env, object, &isArray) != napi_ok) || (isArray == false)) {
         SLOGE("GetArgvStreamIds object not an array");
         return;
@@ -474,9 +428,7 @@ void GetArgvStreamIds(const napi_env& env, const napi_value& object, NapiAVSessi
         SLOGE("GetArgvStreamIds get array length error");
         return;
     }
-
     SLOGD("GetArgvStreamIds array length :%{public}d.", len);
-
     for (uint32_t i = 0; i < len; i++) {
         napi_value streamIdItem = nullptr;
         napi_valuetype valueType = napi_undefined;
@@ -489,7 +441,6 @@ void GetArgvStreamIds(const napi_env& env, const napi_value& object, NapiAVSessi
             asyncContext->streamIds.push_back(streamId);
         }
     }
-
     SLOGD("GetArgvStreamIds execute success");
 }
 

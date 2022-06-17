@@ -32,8 +32,7 @@ void NapiSessionListenerCallback::OnSessionCreate(const AVSessionDescriptor& des
     SLOGI("NapiSessionListenerCallback::OnSessionCreate");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
-        [napiSessionListenerCallback = shared_from_this()](napi_env env) -> napi_value
-        {
+        [napiSessionListenerCallback = shared_from_this()](napi_env env) -> napi_value {
             if (napiSessionListenerCallback->sessionCreate_callback_ == nullptr) {
                 SLOGE("NapiSessionListenerCallback::OnSessionCreate no sessionCreate_callback_");
                 return nullptr;
@@ -42,8 +41,7 @@ void NapiSessionListenerCallback::OnSessionCreate(const AVSessionDescriptor& des
             napi_get_reference_value(env, napiSessionListenerCallback->sessionCreate_callback_, &callback);
             return callback;
         },
-        [descriptor](napi_env env, int& argc, napi_value* argv)
-        {
+        [descriptor](napi_env env, int& argc, napi_value* argv) {
             argc = 1;
             AVSessionNapiUtils::WrapAVSessionDescriptorToNapi(env, descriptor, argv[0]);
         });
@@ -54,8 +52,7 @@ void NapiSessionListenerCallback::OnSessionRelease(const AVSessionDescriptor& de
     SLOGI("NapiSessionListenerCallback::OnSessionRelease");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
-        [napiSessionListenerCallback = shared_from_this()](napi_env env) -> napi_value
-        {
+        [napiSessionListenerCallback = shared_from_this()](napi_env env) -> napi_value {
             if (napiSessionListenerCallback->sessionReleased_callback_ == nullptr) {
                 SLOGE("NapiSessionListenerCallback::OnSessionRelease no sessionReleased_callback_");
                 return nullptr;
@@ -64,8 +61,7 @@ void NapiSessionListenerCallback::OnSessionRelease(const AVSessionDescriptor& de
             napi_get_reference_value(env, napiSessionListenerCallback->sessionReleased_callback_, &callback);
             return callback;
         },
-        [descriptor](napi_env env, int& argc, napi_value* argv)
-        {
+        [descriptor](napi_env env, int& argc, napi_value* argv) {
             argc = 1;
             AVSessionNapiUtils::WrapAVSessionDescriptorToNapi(env, descriptor, argv[0]);
         });
@@ -76,8 +72,7 @@ void NapiSessionListenerCallback::OnTopSessionChanged(const AVSessionDescriptor&
     SLOGI("NapiSessionListenerCallback::OnTopSessionChanged");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
-        [napiSessionListenerCallback = shared_from_this()](napi_env env) -> napi_value
-        {
+        [napiSessionListenerCallback = shared_from_this()](napi_env env) -> napi_value {
             if (napiSessionListenerCallback->topSessionChanged_callback_ == nullptr) {
                 SLOGE("NapiSessionListenerCallback::OnTopSessionChanged no topSessionChanged_callback_");
                 return nullptr;
@@ -86,8 +81,7 @@ void NapiSessionListenerCallback::OnTopSessionChanged(const AVSessionDescriptor&
             napi_get_reference_value(env, napiSessionListenerCallback->topSessionChanged_callback_, &callback);
             return callback;
         },
-        [descriptor](napi_env env, int& argc, napi_value* argv)
-        {
+        [descriptor](napi_env env, int& argc, napi_value* argv) {
             argc = 1;
             AVSessionNapiUtils::WrapAVSessionDescriptorToNapi(env, descriptor, argv[0]);
         });
@@ -98,8 +92,7 @@ void NapiSessionListenerCallback::OnSessionServiceDied()
     SLOGI("NapiSessionListenerCallback::OnSessionServiceDied");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
-        [napiSessionListenerCallback = shared_from_this()](napi_env env) -> napi_value
-        {
+        [napiSessionListenerCallback = shared_from_this()](napi_env env) -> napi_value {
             if (napiSessionListenerCallback->sessionServiceDied_callback_ == nullptr) {
                 SLOGE("NapiSessionListenerCallback::OnSessionServiceDied no sessionServiceDied_callback_");
                 return nullptr;
@@ -108,10 +101,7 @@ void NapiSessionListenerCallback::OnSessionServiceDied()
             napi_get_reference_value(env, napiSessionListenerCallback->sessionServiceDied_callback_, &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv)
-        {
-            argc = 0;
-        });
+        [](napi_env env, int& argc, napi_value* argv) { argc = 0; });
 }
 
 void NapiSessionListenerCallback::SaveCallbackReference(const std::string& callbackName, napi_value args, napi_env env)

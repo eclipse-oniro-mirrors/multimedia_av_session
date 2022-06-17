@@ -82,7 +82,6 @@ public:
         if (asyncContext == nullptr) {
             return;
         }
-
         napi_value thisObj = nullptr;
         size_t argc = parsers.size() + 1;
         napi_value args[MAX_INPUT_COUNT] = { 0 };
@@ -109,14 +108,12 @@ public:
         if (asyncContext == nullptr) {
             return nullptr;
         }
-
         napi_value ret = nullptr;
         if (asyncContext->callbackRef == nullptr) {
             napi_create_promise(asyncContext->env, &asyncContext->deferred, &ret);
         } else {
             napi_get_undefined(asyncContext->env, &ret);
         }
-
         napi_value resource = nullptr;
         napi_create_string_utf8(asyncContext->env, resourceName.c_str(), NAPI_AUTO_LENGTH, &resource);
         asyncContext->execFunc = execFunc;
