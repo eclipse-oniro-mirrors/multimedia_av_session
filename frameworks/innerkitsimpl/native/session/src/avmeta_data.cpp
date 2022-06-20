@@ -263,7 +263,7 @@ bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
 {
     bool result = false;
     auto intersection = metaMask_ & mask;
-    for (int i = 0; i < META_KEY_MAX; i++ ) {
+    for (int i = 0; i < META_KEY_MAX; i++) {
         if (intersection.test(i)) {
             cloneActions[i](*this, metaOut);
             result = true;
@@ -287,7 +287,7 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
     }
 
     bool result = false;
-    for (int i = 0; i < META_KEY_MAX; i++ ) {
+    for (int i = 0; i < META_KEY_MAX; i++) {
         if (metaIn.GetMetaMask().test(i)) {
             cloneActions[i](metaIn, *this);
             metaMask_.set(i);
@@ -377,5 +377,5 @@ void AVMetaData::CloneNextAssetId(const AVMetaData &from, AVMetaData &to)
 {
     to.nextAssetId_ = from.nextAssetId_;
 }
-} //AVSession
-}// namespace OHOS
+} // namespace AVSession
+} // namespace OHOS
