@@ -95,8 +95,8 @@ int32_t AVSessionCallbackStub::HandleOnSeek(MessageParcel& data, MessageParcel& 
 
 int32_t AVSessionCallbackStub::HandleOnSetSpeed(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t speed = -1;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(speed), ERR_NONE, "read speed failed");
+    double speed = 0.0;
+    CHECK_AND_RETURN_RET_LOG(data.ReadDouble(speed), ERR_NONE, "read speed failed");
     OnSetSpeed(speed);
     return ERR_NONE;
 }

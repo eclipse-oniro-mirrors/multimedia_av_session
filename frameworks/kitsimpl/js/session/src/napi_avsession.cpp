@@ -351,10 +351,14 @@ napi_value NapiAVSession::On(napi_env env, napi_callback_info info)
             return undefinedResult;
         }
     }
-    auto iter = find(CALLBACK_VECTOR.begin(), CALLBACK_VECTOR.end(), callbackName);
-    if (iter != CALLBACK_VECTOR.end()) {
-        std::shared_ptr<NapiAVSessionCallback> cb =
+    
+     std::shared_ptr<NapiAVSessionCallback> cb =
             std::static_pointer_cast<NapiAVSessionCallback>(napiAVSession->avsessionCallback_);
+    if (cb->hasCallback(callbackName)) {
+        if (callbackName.compare(OUTPUTDEVICECHANGED_CALLBACK)) {
+            SLOGI("AddSupportCommand command: %{public}s", callbackName.c_str());
+            napiAVSession->avsession_->AddSupportCommand(aVControlCommandMap[callbackName]);
+        }
         cb->SaveCallbackReference(callbackName, args[1], env);
     }
     return AVSessionNapiUtils::NapiUndefined(env);
@@ -387,10 +391,9 @@ napi_value NapiAVSession::Off(napi_env env, napi_callback_info info)
         SLOGE("NapiAVSession: off Failed");
         return undefinedResult;
     }
-    auto iter = find(CALLBACK_VECTOR.begin(), CALLBACK_VECTOR.end(), callbackName);
-    if (iter != CALLBACK_VECTOR.end()) {
-        std::shared_ptr<NapiAVSessionCallback> cb =
-            std::static_pointer_cast<NapiAVSessionCallback>(napiAVSession->avsessionCallback_);
+    std::shared_ptr<NapiAVSessionCallback> cb =
+        std::static_pointer_cast<NapiAVSessionCallback>(napiAVSession->avsessionCallback_);
+    if (cb->hasCallback(callbackName)) {
         cb->ReleaseCallbackReference(callbackName);
     }
     return AVSessionNapiUtils::NapiUndefined(env);

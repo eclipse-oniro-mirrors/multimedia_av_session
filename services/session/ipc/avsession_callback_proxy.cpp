@@ -104,11 +104,11 @@ void AVSessionCallbackProxy::OnSeek(int64_t time)
         "OnSeek send request failed");
 }
 
-void AVSessionCallbackProxy::OnSetSpeed(int32_t speed)
+void AVSessionCallbackProxy::OnSetSpeed(double speed)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(data.WriteInt32(speed), "write speed failed");
+    CHECK_AND_RETURN_LOG(data.WriteDouble(speed), "write speed failed");
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     CHECK_AND_RETURN_LOG(Remote()->SendRequest(SESSION_CALLBACK_ON_SEEK, data, reply, option) == 0,

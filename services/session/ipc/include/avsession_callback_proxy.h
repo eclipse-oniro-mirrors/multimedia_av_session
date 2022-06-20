@@ -30,7 +30,7 @@ public:
     void OnFastForward() override;
     void OnRewind() override;
     void OnSeek(int64_t time) override;
-    void OnSetSpeed(int32_t speed) override;
+    void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediaId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;

@@ -17,6 +17,7 @@
 #define OHOS_NAPI_SESSIONLISTENER_CALLBACK_H
 
 #include <memory>
+#include <map>
 #include "avsession_info.h"
 #include "avsession_manager.h"
 #include "napi/native_api.h"
@@ -43,15 +44,18 @@ public:
     void OnSessionServiceDied();
     void SaveCallbackReference(const std::string& callbackName, napi_value callback, napi_env env);
     void ReleaseCallbackReference(const std::string& callbackName);
+    bool hasCallback(const std::string& callbackName); 
 
 private:
     napi_env env_;
     std::mutex mutex_;
     std::shared_ptr<UvQueue> uvQueue_;
-    napi_ref sessionCreate_callback_;
-    napi_ref sessionReleased_callback_;
-    napi_ref topSessionChanged_callback_;
-    napi_ref sessionServiceDied_callback_;
+    std::map<std::string, napi_ref> bindCallbackMap = {
+        {SESSIONCREATED_CALLBACK, nullptr},
+        {SESSIONRELEASED_CALLBACK, nullptr},
+        {TOPSESSIONCHANGED_CALLBACK, nullptr},
+        {SESSIONSERVICEDIED_CALLBACK, nullptr}
+    };
 };
 } // namespace AVSession
 } // namespace OHOS

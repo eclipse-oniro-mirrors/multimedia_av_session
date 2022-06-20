@@ -396,9 +396,9 @@ void GetArgvAVControlCommand(const napi_env& env, const napi_value& object,
         asyncContext->aVControlCommand->SetSeekTime(time);
     }
     if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_SPEED) {
-        double speed = 0;
+        double speed = 1.0;
         napi_get_value_double(env, res, &speed);
-        asyncContext->aVControlCommand->SetSpeed((float)speed);
+        asyncContext->aVControlCommand->SetSpeed(speed);
     }
     if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_LOOP_MODE) {
         int32_t loopMode = 0;
@@ -462,14 +462,9 @@ napi_value NapiAVSessionController::RegisterCallback(napi_env env,
         SLOGE("native RegisterSessionListener Failed");
         return AVSessionNapiUtils::NapiUndefined(env);
     }
-    if (!callbackName.compare(AVCONTROLLER_SESSIONRELEASED_CALLBACK) ||
-        !callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK) ||
-        !callbackName.compare(METADATACHANGED_CALLBACK) ||
-        !callbackName.compare(ACTIVESTATECHANGED_CALLBACK) ||
-        !callbackName.compare(VALIDCOMMANDCHANGED_CALLBACK) ||
-        !callbackName.compare(AVCONTROLLER_OUTPUTDEVICECHANGED_CALLBACK)) {
-        std::shared_ptr<NapiAVControllerCallback> cb =
-            std::static_pointer_cast<NapiAVControllerCallback>(napiController->avcontrollerCallback_);
+    std::shared_ptr<NapiAVControllerCallback> cb =
+        std::static_pointer_cast<NapiAVControllerCallback>(napiController->avcontrollerCallback_);
+    if (cb->hasCallback(callbackName)) {
         cb->SaveCallbackReference(callbackName, callbackRef, env);
         if (!callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK) ||
             !callbackName.compare(METADATACHANGED_CALLBACK)) {
@@ -551,13 +546,9 @@ napi_value NapiAVSessionController::Off(napi_env env, napi_callback_info info)
         SLOGE("NapiAVSessionController: Off Failed");
         return undefinedResult;
     }
-    if (!callbackName.compare(AVCONTROLLER_SESSIONRELEASED_CALLBACK) ||
-        !callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK) ||
-        !callbackName.compare(METADATACHANGED_CALLBACK) ||
-        !callbackName.compare(ACTIVESTATECHANGED_CALLBACK) ||
-        !callbackName.compare(AVCONTROLLER_OUTPUTDEVICECHANGED_CALLBACK)) {
-        std::shared_ptr<NapiAVControllerCallback> cb =
-            std::static_pointer_cast<NapiAVControllerCallback>(napiController->avcontrollerCallback_);
+    std::shared_ptr<NapiAVControllerCallback> cb =
+        std::static_pointer_cast<NapiAVControllerCallback>(napiController->avcontrollerCallback_);
+    if (cb->hasCallback(callbackName)) {
         cb->ReleaseCallbackReference(callbackName);
     }
     return AVSessionNapiUtils::NapiUndefined(env);

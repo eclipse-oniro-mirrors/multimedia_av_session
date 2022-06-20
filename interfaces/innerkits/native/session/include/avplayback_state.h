@@ -40,8 +40,8 @@ public:
     void SetState(int32_t state);
     int32_t GetState() const;
 
-    void SetSpeed(float speed);
-    float GetSpeed() const;
+    void SetSpeed(double speed);
+    double GetSpeed() const;
 
     void SetElapsedTime(uint64_t time);
     uint64_t GetElapsedTime() const;
@@ -60,7 +60,7 @@ public:
 
 private:
     int32_t state_ = PLAYBACK_STATE_INITIAL;
-    float speed_ {};
+    double speed_ {};
     uint64_t elapsedTime_ {};
     uint64_t updateTime_ {};
     uint64_t bufferedTime_ {};

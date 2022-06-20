@@ -135,5 +135,26 @@ static std::map<int32_t, std::string> aVControlCommandToStrMap = {
     {AVControlCommand::SESSION_CMD_SET_LOOP_MODE, "setLoopMode"},
     {AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE, "toggleFavorite"}
 };
+
+/**
+ * There is no mediaImage?: image.PixelMap | string;
+ */
+static std::map<std::string, int32_t> aVMetaDataMap = {
+    {"assetId", AVMetaData::META_KEY_ASSET_ID},
+    {"title", AVMetaData::META_KEY_TITLE},
+    {"artist", AVMetaData::META_KEY_ARTIST},
+    {"author", AVMetaData::META_KEY_AUTHOR},
+    {"album", AVMetaData::META_KEY_ALBUM},
+    {"writer", AVMetaData::META_KEY_WRITER},
+    {"composer", AVMetaData::META_KEY_COMPOSER},
+    {"duration", AVMetaData::META_KEY_DURATION},
+    {"publishDate", AVMetaData::META_KEY_PUBLISH_DATE},
+    {"subtitle", AVMetaData::META_KEY_SUBTITLE},
+    {"description", AVMetaData::META_KEY_DESCRIPTION},
+    {"lyric", AVMetaData::META_KEY_LYRIC},
+    {"previousAssetId", AVMetaData::META_KEY_PREVIOUS_ASSET_ID},
+    {"nextAssetId", AVMetaData::META_KEY_NEXT_ASSET_ID}
+};
+
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_NAPI_UTILS_H

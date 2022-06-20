@@ -280,13 +280,13 @@ void AVSessionNapiUtils::WrapNapiToAVPlaybackState(napi_env env, napi_value obje
     napi_value res = nullptr;
     int32_t state = 0;
     WRAP_NAPI_TO_VALUE(env, object, result, "state", res, state, napi_get_value_int32, SetSpeed);
-    double speed = 0;
+    double speed = 0.0;
     WRAP_NAPI_TO_VALUE(env, object, result, "speed", res, speed, napi_get_value_double, SetSpeed);
     int64_t time = 0;
     WRAP_NAPI_TO_VALUE(env, object, result, "bufferedTime", res, time, napi_get_value_int64, SetBufferedTime);
     int32_t loopMode = 0;
     WRAP_NAPI_TO_VALUE(env, object, result, "loopMode", res, loopMode, napi_get_value_int32, SetLoopMode);
-    bool isFavorite = 0;
+    bool isFavorite = false;
     WRAP_NAPI_TO_VALUE(env, object, result, "isFavorite", res, isFavorite, napi_get_value_bool, SetFavorite);
 
     napi_value positionObject = nullptr;

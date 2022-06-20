@@ -19,44 +19,44 @@
 namespace OHOS::AVSession {
 NapiAVSessionCallback::NapiAVSessionCallback()
 {
-    SLOGD("NapiAVSessionCallback::Constructor");
+    SLOGI("NapiAVSessionCallback::Constructor");
 }
 
 NapiAVSessionCallback::~NapiAVSessionCallback()
 {
-    SLOGD("NapiAVSessionCallback::Destructor");
+    SLOGI("NapiAVSessionCallback::Destructor");
 }
 
 void NapiAVSessionCallback::OnPlay()
 {
-    SLOGD("NapiAVSessionCallback::OnPlay");
+    SLOGI("NapiAVSessionCallback::OnPlay");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->play_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[PLAY_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->play_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[PLAY_CALLBACK], &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) { argc = 0; });
+        [](napi_env env, int& argc, napi_value* argv) {});
 }
 
 void NapiAVSessionCallback::OnPause()
 {
-    SLOGD("NapiAVSessionCallback::OnPause");
+    SLOGI("NapiAVSessionCallback::OnPause");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->pause_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[PAUSE_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->pause_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[PAUSE_CALLBACK], &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) { argc = 0; });
+        [](napi_env env, int& argc, napi_value* argv) {});
 }
 
 void NapiAVSessionCallback::OnStop()
@@ -65,14 +65,14 @@ void NapiAVSessionCallback::OnStop()
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->stop_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[STOP_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->stop_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[STOP_CALLBACK], &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) { argc = 0; });
+        [](napi_env env, int& argc, napi_value* argv) {});
 }
 
 void NapiAVSessionCallback::OnPlayNext()
@@ -81,14 +81,14 @@ void NapiAVSessionCallback::OnPlayNext()
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->playnext_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[PLAYNEXT_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->playnext_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[PLAYNEXT_CALLBACK], &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) { argc = 0; });
+        [](napi_env env, int& argc, napi_value* argv) {});
 }
 
 void NapiAVSessionCallback::OnPlayPrevious()
@@ -97,14 +97,14 @@ void NapiAVSessionCallback::OnPlayPrevious()
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->playprevious_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[PLAYPREVIOUS_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->playprevious_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[PLAYPREVIOUS_CALLBACK], &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) { argc = 0; });
+        [](napi_env env, int& argc, napi_value* argv) {});
 }
 
 void NapiAVSessionCallback::OnFastForward()
@@ -113,14 +113,14 @@ void NapiAVSessionCallback::OnFastForward()
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->fastforward_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[FASTFORWARD_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->fastforward_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[FASTFORWARD_CALLBACK], &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) { argc = 0; });
+        [](napi_env env, int& argc, napi_value* argv) {});
 }
 
 void NapiAVSessionCallback::OnRewind()
@@ -129,14 +129,14 @@ void NapiAVSessionCallback::OnRewind()
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->rewind_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[REWIND_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->rewind_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[REWIND_CALLBACK], &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) { argc = 0; });
+        [](napi_env env, int& argc, napi_value* argv) {});
 }
 
 void NapiAVSessionCallback::OnSeek(int64_t time)
@@ -145,11 +145,11 @@ void NapiAVSessionCallback::OnSeek(int64_t time)
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->seek_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[SEEK_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->seek_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[SEEK_CALLBACK], &callback);
             return callback;
         },
         [time](napi_env env, int& argc, napi_value* argv) {
@@ -158,22 +158,22 @@ void NapiAVSessionCallback::OnSeek(int64_t time)
         });
 }
 
-void NapiAVSessionCallback::OnSetSpeed(int32_t speed)
+void NapiAVSessionCallback::OnSetSpeed(double speed)
 {
     SLOGD("NapiAVSessionCallback::OnSetSpeed");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->setspeed_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[SETSPEED_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->setspeed_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[SETSPEED_CALLBACK], &callback);
             return callback;
         },
         [speed](napi_env env, int& argc, napi_value* argv) {
             argc = 1;
-            napi_create_int32(env, speed, &argv[0]);
+            napi_create_double(env, speed, &argv[0]);
         });
 }
 
@@ -183,11 +183,11 @@ void NapiAVSessionCallback::OnSetLoopMode(int32_t loopMode)
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->setloopmode_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[SETLOOPMODE_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->setloopmode_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[SETLOOPMODE_CALLBACK], &callback);
             return callback;
         },
         [loopMode](napi_env env, int& argc, napi_value* argv) {
@@ -202,11 +202,11 @@ void NapiAVSessionCallback::OnToggleFavorite(const std::string& mediald)
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->togglefavorite_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[TOGGLEFAVORITE_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->togglefavorite_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[TOGGLEFAVORITE_CALLBACK], &callback);
             return callback;
         },
         [mediald](napi_env env, int& argc, napi_value* argv) {
@@ -221,83 +221,36 @@ void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVSessionCallback->mediakeyevent_callback_ == nullptr) {
+            if (napiAVSessionCallback->bindCallbackMap[HANDLEKEYEVENT_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVSessionCallback->mediakeyevent_callback_, &callback);
+            napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[HANDLEKEYEVENT_CALLBACK], &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) { argc = 0; });
+        [](napi_env env, int& argc, napi_value* argv) {});
 }
 
 void NapiAVSessionCallback::SaveCallbackReference(const std::string& callbackName, napi_value args, napi_env env)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     napi_ref callback = nullptr;
-    const int32_t refCount = 1;
-    napi_status status = napi_create_reference(env, args, refCount, &callback);
+    napi_status status = napi_create_reference(env, args, 1, &callback);
     env_ = env;
-    if (status == napi_ok) {
-        if (!callbackName.compare(PLAY_CALLBACK)) {
-            play_callback_ = callback;
-        } else if (!callbackName.compare(PAUSE_CALLBACK)) {
-            pause_callback_ = callback;
-        } else if (!callbackName.compare(STOP_CALLBACK)) {
-            stop_callback_ = callback;
-        } else if (!callbackName.compare(PLAYNEXT_CALLBACK)) {
-            playnext_callback_ = callback;
-        } else if (!callbackName.compare(PLAYPREVIOUS_CALLBACK)) {
-            playprevious_callback_ = callback;
-        } else if (!callbackName.compare(FASTFORWARD_CALLBACK)) {
-            fastforward_callback_ = callback;
-        } else if (!callbackName.compare(REWIND_CALLBACK)) {
-            rewind_callback_ = callback;
-        } else if (!callbackName.compare(HANDLEKEYEVENT_CALLBACK)) {
-            mediakeyevent_callback_ = callback;
-        } else if (!callbackName.compare(SEEK_CALLBACK)) {
-            seek_callback_ = callback;
-        } else if (!callbackName.compare(SETSPEED_CALLBACK)) {
-            setspeed_callback_ = callback;
-        } else if (!callbackName.compare(SETLOOPMODE_CALLBACK)) {
-            setloopmode_callback_ = callback;
-        } else if (!callbackName.compare(TOGGLEFAVORITE_CALLBACK)) {
-            togglefavorite_callback_ = callback;
-        } else if (!callbackName.compare(OUTPUTDEVICECHANGED_CALLBACK)) {
-            outputDeviceChanged_callback_ = callback;
-        }
-    }
+    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr , "get callback fail ");
+    CHECK_AND_RETURN_LOG(bindCallbackMap.count(callbackName) != 0, "The callbackName parameter is invalid ");
+    bindCallbackMap[callbackName] = callback ;
 }
 
 void NapiAVSessionCallback::ReleaseCallbackReference(const std::string& callbackName)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (!callbackName.compare(PLAY_CALLBACK)) {
-        play_callback_ = nullptr;
-    } else if (!callbackName.compare(PAUSE_CALLBACK)) {
-        pause_callback_ = nullptr;
-    } else if (!callbackName.compare(STOP_CALLBACK)) {
-        stop_callback_ = nullptr;
-    } else if (!callbackName.compare(PLAYNEXT_CALLBACK)) {
-        playnext_callback_ = nullptr;
-    } else if (!callbackName.compare(PLAYPREVIOUS_CALLBACK)) {
-        playprevious_callback_ = nullptr;
-    } else if (!callbackName.compare(FASTFORWARD_CALLBACK)) {
-        fastforward_callback_ = nullptr;
-    } else if (!callbackName.compare(REWIND_CALLBACK)) {
-        rewind_callback_ = nullptr;
-    } else if (!callbackName.compare(HANDLEKEYEVENT_CALLBACK)) {
-        mediakeyevent_callback_ = nullptr;
-    } else if (!callbackName.compare(SEEK_CALLBACK)) {
-        seek_callback_ = nullptr;
-    } else if (!callbackName.compare(SETSPEED_CALLBACK)) {
-        setspeed_callback_ = nullptr;
-    } else if (!callbackName.compare(SETLOOPMODE_CALLBACK)) {
-        setloopmode_callback_ = nullptr;
-    } else if (!callbackName.compare(TOGGLEFAVORITE_CALLBACK)) {
-        togglefavorite_callback_ = nullptr;
-    } else if (!callbackName.compare(OUTPUTDEVICECHANGED_CALLBACK)) {
-        outputDeviceChanged_callback_ = nullptr;
-    }
+    CHECK_AND_RETURN_LOG(bindCallbackMap.count(callbackName) != 0, "The callbackName parameter is invalid ");
+    napi_delete_reference(env_, bindCallbackMap[callbackName]);
+}
+
+bool NapiAVSessionCallback::hasCallback(const std::string& callbackName)
+{
+    return bindCallbackMap.count(callbackName) != 0 ;
 }
 }

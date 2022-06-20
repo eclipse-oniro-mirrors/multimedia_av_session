@@ -23,7 +23,7 @@ AVPlaybackState::AVPlaybackState()
 bool AVPlaybackState::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteInt32(state_) &&
-        parcel.WriteFloat(speed_) &&
+        parcel.WriteDouble(speed_) &&
         parcel.WriteUint64(elapsedTime_) &&
         parcel.WriteUint64(updateTime_) &&
         parcel.WriteUint64(bufferedTime_) &&
@@ -38,7 +38,7 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     result->state_ = parcel.ReadInt32();
-    result->speed_ = parcel.ReadFloat();
+    result->speed_ = parcel.ReadDouble();
     result->elapsedTime_ = parcel.ReadUint64();
     result->updateTime_ = parcel.ReadUint64();
     result->bufferedTime_ = parcel.ReadUint64();
@@ -52,7 +52,7 @@ void AVPlaybackState::SetState(int32_t state)
     state_ = state;
 }
 
-void AVPlaybackState::SetSpeed(float speed)
+void AVPlaybackState::SetSpeed(double speed)
 {
     speed_ = speed;
 }
@@ -87,7 +87,7 @@ int32_t AVPlaybackState::GetState() const
     return state_;
 }
 
-float AVPlaybackState::GetSpeed() const
+double AVPlaybackState::GetSpeed() const
 {
     return speed_;
 }
