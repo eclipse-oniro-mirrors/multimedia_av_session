@@ -22,8 +22,7 @@
 #include "parcel.h"
 #include "pixel_map.h"
 
-namespace OHOS {
-namespace AVSession {
+namespace OHOS::AVSession {
 class AVMetaData : public Parcelable {
 public:
     enum {
@@ -166,6 +165,5 @@ private:
         [META_KEY_NEXT_ASSET_ID] = &AVMetaData::CloneNextAssetId,
     };
 };
-} // namespace AVSession
-} // namespace OHOS
+} // namespace OHOS::AVSession
 #endif // OHOS_AVMETA_DATA_H
