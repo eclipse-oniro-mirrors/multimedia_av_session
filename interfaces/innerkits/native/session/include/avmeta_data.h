@@ -50,7 +50,7 @@ public:
     AVMetaData() = default;
     ~AVMetaData() = default;
 
-    static sptr<AVMetaData> Unmarshalling(Parcel& data);
+    static AVMetaData *Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& data) const override;
 
     void SetAssetId(const std::string& assetId);
