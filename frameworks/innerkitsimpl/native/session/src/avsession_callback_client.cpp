@@ -70,7 +70,7 @@ void AVSessionCallbackClient::OnSeek(int64_t time)
     callback_->OnSeek(time);
 }
 
-void AVSessionCallbackClient::OnSetSpeed(int32_t speed)
+void AVSessionCallbackClient::OnSetSpeed(double speed)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
     callback_->OnSetSpeed(speed);

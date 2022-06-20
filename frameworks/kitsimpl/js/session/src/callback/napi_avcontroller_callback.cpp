@@ -19,43 +19,45 @@
 namespace OHOS::AVSession {
 NapiAVControllerCallback::NapiAVControllerCallback()
 {
-    SLOGD("NapiAVControllerCallback::Constructor");
+    SLOGI("NapiAVControllerCallback::Constructor");
 }
 
 NapiAVControllerCallback::~NapiAVControllerCallback()
 {
-    SLOGD("NapiAVControllerCallback::Destructor");
+    SLOGI("NapiAVControllerCallback::Destructor");
 }
 
 void NapiAVControllerCallback::OnSessionDestroy()
 {
-    SLOGD("NapiAVControllerCallback::OnSessionDestroy");
+    SLOGI("NapiAVControllerCallback::OnSessionDestroy");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVControllerCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVControllerCallback->sessionReleased_callback_ == nullptr) {
+            if (napiAVControllerCallback->bindCallbackMap[AVCONTROLLER_SESSIONRELEASED_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVControllerCallback->sessionReleased_callback_, &callback);
+            napi_get_reference_value(env,
+                                     napiAVControllerCallback->bindCallbackMap[AVCONTROLLER_SESSIONRELEASED_CALLBACK],
+                                     &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) {
-            argc = 0;
-        });
+        [](napi_env env, int& argc, napi_value* argv) {});
 }
 
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
-    SLOGD("NapiAVControllerCallback::OnPlaybackStateChange");
+    SLOGI("NapiAVControllerCallback::OnPlaybackStateChange");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVControllerCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVControllerCallback->playbackStateChanged_callback_ == nullptr) {
+            if (napiAVControllerCallback->bindCallbackMap[PLAYBACKSTATECHANGED_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVControllerCallback->playbackStateChanged_callback_, &callback);
+            napi_get_reference_value(env,
+                                     napiAVControllerCallback->bindCallbackMap[PLAYBACKSTATECHANGED_CALLBACK],
+                                     &callback);
             return callback;
         },
         [&state](napi_env env, int& argc, napi_value* argv) {
@@ -66,34 +68,44 @@ void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& stat
 
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 {
-    SLOGD("NapiAVControllerCallback::OnMetaDataChange");
+    SLOGI("NapiAVControllerCallback::OnMetaDataChange");
     uvQueue_ = std::make_shared<UvQueue>(env_);
+    aVMetaData_ = std::make_shared<AVMetaData>();
+    aVMetaData_->CopyFrom(data);
     uvQueue_->AsyncCall(
         [napiAVControllerCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVControllerCallback->metaDataChanged_callback_ == nullptr) {
+            if (napiAVControllerCallback->bindCallbackMap[METADATACHANGED_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVControllerCallback->metaDataChanged_callback_, &callback);
+            napi_get_reference_value(env,
+                                     napiAVControllerCallback->bindCallbackMap[METADATACHANGED_CALLBACK],
+                                     &callback);
             return callback;
         },
-        [&data](napi_env env, int& argc, napi_value* argv) {
+        [napiAVControllerCallback = shared_from_this()](napi_env env, int& argc, napi_value* argv) {
+            if (napiAVControllerCallback->aVMetaData_ == nullptr) {
+                SLOGE("OnMetaDataChange AVMetaData is nullptr");
+                return;
+            }
             argc = 1;
-            AVSessionNapiUtils::WrapAVMetadataToNapi(env, data, argv[0]);
+            AVSessionNapiUtils::WrapAVMetadataToNapi(env, *napiAVControllerCallback->aVMetaData_, argv[0]);
         });
 }
 
 void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
 {
-    SLOGD("NapiAVControllerCallback::OnActiveStateChange");
+    SLOGI("NapiAVControllerCallback::OnActiveStateChange");
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVControllerCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVControllerCallback->activeStateChanged_callback_ == nullptr) {
+            if (napiAVControllerCallback->bindCallbackMap[ACTIVESTATECHANGED_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVControllerCallback->activeStateChanged_callback_, &callback);
+            napi_get_reference_value(env,
+                                     napiAVControllerCallback->bindCallbackMap[ACTIVESTATECHANGED_CALLBACK],
+                                     &callback);
             return callback;
         },
         [isActive](napi_env env, int& argc, napi_value* argv) {
@@ -108,11 +120,13 @@ void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& 
     uvQueue_ = std::make_shared<UvQueue>(env_);
     uvQueue_->AsyncCall(
         [napiAVControllerCallback = shared_from_this()](napi_env env) -> napi_value {
-            if (napiAVControllerCallback->validCommandChanged_callback_ == nullptr) {
+            if (napiAVControllerCallback->bindCallbackMap[VALIDCOMMANDCHANGED_CALLBACK] == nullptr) {
                 return nullptr;
             }
             napi_value callback = nullptr;
-            napi_get_reference_value(env, napiAVControllerCallback->validCommandChanged_callback_, &callback);
+            napi_get_reference_value(env,
+                                     napiAVControllerCallback->bindCallbackMap[VALIDCOMMANDCHANGED_CALLBACK],
+                                     &callback);
             return callback;
         },
         [&cmds](napi_env env, int& argc, napi_value* argv) {
@@ -136,38 +150,28 @@ void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& 
         });
 }
 
-void NapiAVControllerCallback::SaveCallbackReference(const std::string& callbackName,
-                                                     napi_value callback,
-                                                     napi_env env)
+void NapiAVControllerCallback::SaveCallbackReference(const std::string& callbackName, napi_value args, napi_env env)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    napi_ref callbackRef = nullptr;
-    const int32_t refCount = 1;
-    napi_status status = napi_create_reference(env, callback, refCount, &callbackRef);
+    napi_ref callback = nullptr;
+    napi_status status = napi_create_reference(env, args, 1, &callback);
     env_ = env;
-    if (status == napi_ok) {
-        if (!callbackName.compare(AVCONTROLLER_SESSIONRELEASED_CALLBACK)) {
-            sessionReleased_callback_ = callbackRef;
-        } else if (!callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK)) {
-            playbackStateChanged_callback_ = callbackRef;
-        } else if (!callbackName.compare(METADATACHANGED_CALLBACK)) {
-            metaDataChanged_callback_ = callbackRef;
-        } else if (!callbackName.compare(ACTIVESTATECHANGED_CALLBACK)) {
-            activeStateChanged_callback_ = callbackRef;
-        } else if (!callbackName.compare(VALIDCOMMANDCHANGED_CALLBACK)) {
-            validCommandChanged_callback_ = callbackRef;
-        } else if (!callbackName.compare(AVCONTROLLER_OUTPUTDEVICECHANGED_CALLBACK)) {
-            outputDeviceChanged_callback_ = callbackRef;
-        }
-    }
+    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr , "get callback fail ");
+    CHECK_AND_RETURN_LOG(bindCallbackMap.count(callbackName) != 0, "The callbackName parameter is invalid ");
+    bindCallbackMap[callbackName] = callback ;
 }
 
-#define CHECK_AND_SET_MASK(env, arrayData, propertyName, res, mask)                   \
-    do {                                                                              \
-        if (napi_get_named_property(env, arrayData, propertyName, &res) == napi_ok) { \
-            metaMaskType.set((mask));                                                 \
-        }                                                                             \
-    } while (0)
+void NapiAVControllerCallback::ReleaseCallbackReference(const std::string& callbackName)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    CHECK_AND_RETURN_LOG(bindCallbackMap.count(callbackName) != 0, "The callbackName parameter is invalid ");
+    napi_delete_reference(env_, bindCallbackMap[callbackName]);
+}
+
+bool NapiAVControllerCallback::hasCallback(const std::string& callbackName)
+{
+    return bindCallbackMap.count(callbackName) != 0 ;
+}
 
 void NapiAVControllerCallback::SaveFilter(std::shared_ptr<AVSessionController>& avsessionController,
                                           const std::string& callbackName,
@@ -176,15 +180,31 @@ void NapiAVControllerCallback::SaveFilter(std::shared_ptr<AVSessionController>& 
 {
     std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_LOG(avsessionController != nullptr, "avsessionController is nullptr");
-    CHECK_AND_RETURN_LOG(callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK), "no playbackStateChanged filter");
-    CHECK_AND_RETURN_LOG(callbackName.compare(METADATACHANGED_CALLBACK), "no metadataChange filter");
+    if (!callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK)) {
+        SetPlaybackStateFilter(avsessionController, filter, env);
+    } else if (!callbackName.compare(METADATACHANGED_CALLBACK)) {
+        SetMetaFilter(avsessionController, filter, env);
+    }
+}
+
+void NapiAVControllerCallback::SetPlaybackStateFilter(std::shared_ptr<AVSessionController>& avsessionController,
+                                                      napi_value filter,
+                                                      napi_env env)
+{
+    CHECK_AND_RETURN_LOG(false, "playbackStateChange no filter method for now");
+}
+
+void NapiAVControllerCallback::SetMetaFilter(std::shared_ptr<AVSessionController>& avsessionController,
+                                             napi_value filter,
+                                             napi_env env)
+{
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, filter, &valueType);
     AVMetaData::MetaMaskType metaMaskType;
     if (valueType == napi_string) {
         std::string filterStr = AVSessionNapiUtils::GetStringArgument(env, filter);
-        CHECK_AND_RETURN_LOG(FILTER_ALL.compare(filterStr) == 0, "metadataChanged string filter Invalid .");
-        metaMaskType.set();
+        CHECK_AND_RETURN_LOG(!FILTER_ALL.compare(filterStr), "string filter Only support all");
+        GenerateAllMetaMaskType(metaMaskType);
         avsessionController->SetMetaFilter(metaMaskType);
         return;
     }
@@ -193,48 +213,41 @@ void NapiAVControllerCallback::SaveFilter(std::shared_ptr<AVSessionController>& 
     uint32_t arrayLength = 0;
     napi_get_array_length(env, filter, &arrayLength);
     for (uint32_t i = 0; i < arrayLength; i++) {
-        napi_value arrayData = nullptr;
-        napi_value res = nullptr;
-        napi_get_element(env, filter, i, &arrayData);
-        CHECK_AND_SET_MASK(env, arrayData, "assetId", res, AVMetaData::META_KEY_ASSET_ID);
-        CHECK_AND_SET_MASK(env, arrayData, "title", res, AVMetaData::META_KEY_TITLE);
-        CHECK_AND_SET_MASK(env, arrayData, "artist", res, AVMetaData::META_KEY_ARTIST);
-        CHECK_AND_SET_MASK(env, arrayData, "author", res, AVMetaData::META_KEY_AUTHOR);
-        CHECK_AND_SET_MASK(env, arrayData, "album", res, AVMetaData::META_KEY_ALBUM);
-        CHECK_AND_SET_MASK(env, arrayData, "writer", res, AVMetaData::META_KEY_WRITER);
-        CHECK_AND_SET_MASK(env, arrayData, "composer", res, AVMetaData::META_KEY_COMPOSER);
-        CHECK_AND_SET_MASK(env, arrayData, "duration", res, AVMetaData::META_KEY_DURATION);
-        CHECK_AND_SET_MASK(env, arrayData, "publishDate", res, AVMetaData::META_KEY_PUBLISH_DATE);
-        CHECK_AND_SET_MASK(env, arrayData, "subtitle", res, AVMetaData::META_KEY_SUBTITLE);
-        CHECK_AND_SET_MASK(env, arrayData, "description", res, AVMetaData::META_KEY_DESCRIPTION);
-        CHECK_AND_SET_MASK(env, arrayData, "lyric", res, AVMetaData::META_KEY_LYRIC);
-        CHECK_AND_SET_MASK(env, arrayData, "previousAssetId", res, AVMetaData::META_KEY_PREVIOUS_ASSET_ID);
-        CHECK_AND_SET_MASK(env, arrayData, "nextAssetId", res, AVMetaData::META_KEY_NEXT_ASSET_ID);
-        if (napi_get_named_property(env, arrayData, "mediaImage", &res) == napi_ok) {
-            napi_typeof(env, res, &valueType);
-            if (valueType == napi_string) {
-                metaMaskType.set(AVMetaData::META_KEY_MEDIA_IMAGE_URI);
-            } else {
-                metaMaskType.set(AVMetaData::META_KEY_MEDIA_IMAGE);
-            }
-        }
+        napi_value napiMetaData = nullptr;
+        napi_get_element(env, filter, i, &napiMetaData);
+        SetMetaMaskTypeByNapi(metaMaskType, napiMetaData, env);
     }
     avsessionController->SetMetaFilter(metaMaskType);
 }
 
-void NapiAVControllerCallback::ReleaseCallbackReference(const std::string& callbackName)
+void NapiAVControllerCallback::GenerateAllMetaMaskType(AVMetaData::MetaMaskType & metaMaskType)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (!callbackName.compare(AVCONTROLLER_SESSIONRELEASED_CALLBACK)) {
-        sessionReleased_callback_ = nullptr;
-    } else if (!callbackName.compare(PLAYBACKSTATECHANGED_CALLBACK)) {
-        playbackStateChanged_callback_ = nullptr;
-    } else if (!callbackName.compare(METADATACHANGED_CALLBACK)) {
-        metaDataChanged_callback_ = nullptr;
-    } else if (!callbackName.compare(ACTIVESTATECHANGED_CALLBACK)) {
-        activeStateChanged_callback_ = nullptr;
-    } else if (!callbackName.compare(AVCONTROLLER_OUTPUTDEVICECHANGED_CALLBACK)) {
-        outputDeviceChanged_callback_ = nullptr;
+    for (int8_t i = AVMetaData::META_KEY_ASSET_ID; i < AVMetaData::META_KEY_MAX; i++) {
+        metaMaskType.set(i);
+    }
+}
+
+void NapiAVControllerCallback::SetMetaMaskTypeByNapi(AVMetaData::MetaMaskType & metaMaskType,
+                                                     napi_value napiMetaData,
+                                                     napi_env env)
+{
+    bool hasProperty = false;
+    std::map<std::string, int32_t>::reverse_iterator   iter;
+    for(iter = aVMetaDataMap.rbegin(); iter != aVMetaDataMap.rend(); iter++){
+        if (napi_has_named_property(env, napiMetaData, iter->first.c_str(), &hasProperty) == napi_ok && hasProperty) {
+            metaMaskType.set(iter->second);
+        }
+    }
+
+    napi_value res = nullptr;
+    if (napi_get_named_property(env, napiMetaData, "mediaImage", &res) == napi_ok) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, res, &valueType);
+        if (valueType == napi_string) {
+            metaMaskType.set(AVMetaData::META_KEY_MEDIA_IMAGE_URI);
+        } else {
+            metaMaskType.set(AVMetaData::META_KEY_MEDIA_IMAGE);
+        }
     }
 }
 }

@@ -85,7 +85,7 @@ public:
     void OnFastForward() override;
     void OnRewind() override;
     void OnSeek(int64_t time) override;
-    void OnSetSpeed(int32_t speed) override;
+    void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
@@ -133,9 +133,9 @@ void AVSessionCallbackImpl::OnSeek(int64_t time)
     SLOGE("OnSeek %{public}" PRIu64, time);
     g_onCall = AVSESSION_SUCCESS;
 }
-void AVSessionCallbackImpl::OnSetSpeed(int32_t speed)
+void AVSessionCallbackImpl::OnSetSpeed(double speed)
 {
-    SLOGE("OnSetSpeed %{public}d", speed);
+    SLOGE("OnSetSpeed %{public}f", speed);
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnSetSpeed %{public}d", g_onCall);
 }

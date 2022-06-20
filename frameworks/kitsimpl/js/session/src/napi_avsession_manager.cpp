@@ -339,10 +339,9 @@ napi_value NapiAVSessionManager::On(napi_env env, napi_callback_info info)
         }
         SLOGI(" create NapiSessionListenerCallback ");
     }
-    if (!callbackName.compare(SESSIONCREATED_CALLBACK) || !callbackName.compare(SESSIONRELEASED_CALLBACK) ||
-        !callbackName.compare(TOPSESSIONCHANGED_CALLBACK) || !callbackName.compare(SESSIONSERVICEDIED_CALLBACK)) {
-        std::shared_ptr<NapiSessionListenerCallback> cb =
-            std::static_pointer_cast<NapiSessionListenerCallback>(managerNapi->sessionListenerCallback_);
+    std::shared_ptr<NapiSessionListenerCallback> cb = 
+        std::static_pointer_cast<NapiSessionListenerCallback>(managerNapi->sessionListenerCallback_);
+    if (cb->hasCallback(callbackName)) {
         cb->SaveCallbackReference(callbackName, args[1], env);
         SLOGI("SaveCallbackReference end");
     }
@@ -376,12 +375,10 @@ napi_value NapiAVSessionManager::Off(napi_env env, napi_callback_info info)
         SLOGI("NapiAVSessionManager::Off no callback ref ");
         return undefinedResult;
     }
-    if (!callbackName.compare(SESSIONCREATED_CALLBACK) ||
-        !callbackName.compare(SESSIONRELEASED_CALLBACK) ||
-        !callbackName.compare(TOPSESSIONCHANGED_CALLBACK) ||
-        !callbackName.compare(SESSIONSERVICEDIED_CALLBACK)) {
-        std::shared_ptr<NapiSessionListenerCallback> cb =
-            std::static_pointer_cast<NapiSessionListenerCallback>(managerNapi->sessionListenerCallback_);
+    std::shared_ptr<NapiSessionListenerCallback> cb =
+        std::static_pointer_cast<NapiSessionListenerCallback>(managerNapi->sessionListenerCallback_);
+    if (cb->hasCallback(callbackName)) {
+        SLOGE(" cb->hasCallback(callbackName) is true ");
         cb->ReleaseCallbackReference(callbackName);
     }
     return AVSessionNapiUtils::NapiUndefined(env);
@@ -454,9 +451,9 @@ void GetArgvAVControlCommand(const napi_env& env, const napi_value& object, Mana
         asyncContext->aVControlCommand->SetSeekTime(time);
     }
     if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_SPEED) {
-        double speed = 0;
+        double speed = 1.0;
         napi_get_value_double(env, res, &speed);
-        asyncContext->aVControlCommand->SetSpeed((float)speed);
+        asyncContext->aVControlCommand->SetSpeed(speed);
     }
     if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_LOOP_MODE) {
         int32_t loopMode = 0;

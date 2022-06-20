@@ -64,8 +64,8 @@ bool AVControlCommand::Marshalling(Parcel &parcel) const
                 && parcel.WriteInt64(std::get<uint64_t>(param_)), false, "write seek time failed");
             break;
         case SESSION_CMD_SET_SPEED:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<float>(param_)
-                && parcel.WriteFloat(std::get<float>(param_)), false, "write speed failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<double>(param_)
+                && parcel.WriteDouble(std::get<double>(param_)), false, "write speed failed");
             break;
         case SESSION_CMD_SET_LOOP_MODE:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
@@ -100,7 +100,7 @@ int32_t AVControlCommand::GetCommand() const
     return cmd_;
 }
 
-int32_t AVControlCommand::SetSpeed(float speed)
+int32_t AVControlCommand::SetSpeed(double speed)
 {
     if (speed < 0) {
         return ERR_INVALID_PARAM;
@@ -109,12 +109,12 @@ int32_t AVControlCommand::SetSpeed(float speed)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControlCommand::GetSpeed(float &speed) const
+int32_t AVControlCommand::GetSpeed(double &speed) const
 {
-    if (!std::holds_alternative<float>(param_)) {
+    if (!std::holds_alternative<double>(param_)) {
         return AVSESSION_ERROR;
     }
-    speed = std::get<float>(param_);
+    speed = std::get<double>(param_);
     return AVSESSION_SUCCESS;
 }
 

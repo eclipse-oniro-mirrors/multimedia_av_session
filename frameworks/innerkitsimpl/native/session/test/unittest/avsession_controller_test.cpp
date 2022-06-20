@@ -382,7 +382,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand002, TestSize.Level1)
 {
     AVControlCommand command;
     int32_t mode = 0;
-    float speed = 0;
+    double speed = 0.0;
     uint64_t time = 0;
     std::string assetId;
     EXPECT_EQ(command.SetLoopMode(AVControlCommand::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
@@ -403,7 +403,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand003, TestSize.Level1)
 {
     AVControlCommand command;
     int32_t mode = 0;
-    float speed = 0;
+    double speed = 0.0;
     uint64_t time = 0;
     std::string assetId;
     EXPECT_EQ(command.SetAssetId("123456"), AVSESSION_SUCCESS);
@@ -424,7 +424,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand004, TestSize.Level1)
 {
     AVControlCommand command;
     int32_t mode = 0;
-    float speed = 0;
+    double speed = 0.0;
     uint64_t time = 0;
     std::string assetId;
     EXPECT_EQ(command.SetSpeed(1.0), AVSESSION_SUCCESS);
@@ -445,7 +445,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand005, TestSize.Level1)
 {
     AVControlCommand command;
     int32_t mode = 0;
-    float speed = 0;
+    double speed = 0.0;
     uint64_t time = 0;
     std::string assetId;
     command.SetSeekTime(1);

@@ -38,9 +38,6 @@ static const std::string SETSPEED_CALLBACK = "setSpeed";
 static const std::string SETLOOPMODE_CALLBACK = "setLoopMode";
 static const std::string TOGGLEFAVORITE_CALLBACK = "toggleFavorite";
 static const std::string OUTPUTDEVICECHANGED_CALLBACK = "outputDeviceChanged";
-static const std::vector<std::string> CALLBACK_VECTOR{PLAY_CALLBACK, PAUSE_CALLBACK, STOP_CALLBACK, PLAYNEXT_CALLBACK,
-    PLAYPREVIOUS_CALLBACK, FASTFORWARD_CALLBACK, REWIND_CALLBACK, HANDLEKEYEVENT_CALLBACK, SEEK_CALLBACK,
-    SETSPEED_CALLBACK, SETLOOPMODE_CALLBACK, TOGGLEFAVORITE_CALLBACK, OUTPUTDEVICECHANGED_CALLBACK};
 
 class NapiAVSessionCallback : public AVSessionCallback, public std::enable_shared_from_this<NapiAVSessionCallback> {
 public:
@@ -55,30 +52,33 @@ public:
     void OnFastForward() override;
     void OnRewind() override;
     void OnSeek(int64_t time) override;
-    void OnSetSpeed(int32_t speed) override;
+    void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
     void SaveCallbackReference(const std::string& callbackName, napi_value callback, napi_env env);
     void ReleaseCallbackReference(const std::string& callbackName);
+    bool hasCallback(const std::string& callbackName);
 
 private:
     napi_env env_;
     std::mutex mutex_;
     std::shared_ptr<UvQueue> uvQueue_;
-    napi_ref play_callback_;
-    napi_ref pause_callback_;
-    napi_ref stop_callback_;
-    napi_ref playnext_callback_;
-    napi_ref playprevious_callback_;
-    napi_ref fastforward_callback_;
-    napi_ref rewind_callback_;
-    napi_ref mediakeyevent_callback_;
-    napi_ref seek_callback_;
-    napi_ref setspeed_callback_;
-    napi_ref setloopmode_callback_;
-    napi_ref togglefavorite_callback_;
-    napi_ref outputDeviceChanged_callback_;
+    std::map<std::string, napi_ref> bindCallbackMap = {
+        {PLAY_CALLBACK, nullptr},
+        {PAUSE_CALLBACK, nullptr},
+        {STOP_CALLBACK, nullptr},
+        {PLAYNEXT_CALLBACK, nullptr},
+        {PLAYPREVIOUS_CALLBACK, nullptr},
+        {FASTFORWARD_CALLBACK, nullptr},
+        {REWIND_CALLBACK, nullptr},
+        {HANDLEKEYEVENT_CALLBACK, nullptr},
+        {SEEK_CALLBACK, nullptr},
+        {SETSPEED_CALLBACK, nullptr},
+        {SETLOOPMODE_CALLBACK, nullptr},
+        {TOGGLEFAVORITE_CALLBACK, nullptr},
+        {OUTPUTDEVICECHANGED_CALLBACK, nullptr}
+    };
 };
 } // namespace AVSession
 } // namespace OHOS

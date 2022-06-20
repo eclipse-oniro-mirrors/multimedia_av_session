@@ -48,19 +48,30 @@ public:
     void SaveFilter(std::shared_ptr<AVSessionController>& avsessionController, const std::string& callbackName,
                     napi_value filter, napi_env env);
     void ReleaseCallbackReference(const std::string& callbackName);
+    bool hasCallback(const std::string& callbackName);
 
 private:
+    void SetMetaFilter(std::shared_ptr<AVSessionController>& avsessionController,
+                       napi_value filter,
+                       napi_env env);
+    void SetPlaybackStateFilter(std::shared_ptr<AVSessionController>& avsessionController,
+                                napi_value filter,
+                                napi_env env);
+    void GenerateAllMetaMaskType(AVMetaData::MetaMaskType & metaMaskType);
+    void SetMetaMaskTypeByNapi(AVMetaData::MetaMaskType & metaMaskType, napi_value napiMetaData, napi_env env);
+
     napi_env env_;
     std::mutex mutex_;
     std::shared_ptr<UvQueue> uvQueue_;
-    napi_ref sessionReleased_callback_;
-    napi_ref playbackStateChanged_callback_;
-    napi_ref metaDataChanged_callback_;
-    napi_ref activeStateChanged_callback_;
-    napi_ref validCommandChanged_callback_;
-    napi_ref outputDeviceChanged_callback_;
-
-    std::vector<AVMetaData> filterAVMetaDatas_;
+    std::shared_ptr<AVMetaData> aVMetaData_ = nullptr;
+    std::map<std::string, napi_ref> bindCallbackMap = {
+        {AVCONTROLLER_SESSIONRELEASED_CALLBACK, nullptr},
+        {PLAYBACKSTATECHANGED_CALLBACK, nullptr},
+        {METADATACHANGED_CALLBACK, nullptr},
+        {ACTIVESTATECHANGED_CALLBACK, nullptr},
+        {VALIDCOMMANDCHANGED_CALLBACK, nullptr},
+        {AVCONTROLLER_OUTPUTDEVICECHANGED_CALLBACK, nullptr},
+    };
 };
 } // namespace AVSession
 } // namespace OHOS

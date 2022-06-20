@@ -248,7 +248,7 @@ void AVSessionItem::HandleOnSeek(const AVControlCommand &cmd)
 void AVSessionItem::HandleOnSetSpeed(const AVControlCommand &cmd)
 {
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    float speed = AVSESSION_ERROR;
+    double speed = 0.0;
     CHECK_AND_RETURN_LOG(cmd.GetSpeed(speed) == AVSESSION_SUCCESS, "GetSpeed failed");
     callback_->OnSetSpeed(speed);
 }
