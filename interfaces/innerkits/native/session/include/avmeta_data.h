@@ -166,6 +166,6 @@ private:
         [META_KEY_NEXT_ASSET_ID] = &AVMetaData::CloneNextAssetId,
     };
 };
-} //AVSession
-} //namespace OHOS
+} // namespace AVSession
+} // namespace OHOS
 #endif // OHOS_AVMETA_DATA_H
