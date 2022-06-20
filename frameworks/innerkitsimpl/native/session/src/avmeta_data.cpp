@@ -16,35 +16,29 @@
 #include "avmeta_data.h"
 #include "avsession_log.h"
 
-namespace OHOS::AVSession {
-AVMetaData::AVMetaData()
+namespace OHOS {
+namespace AVSession {
+bool AVMetaData::Marshalling(Parcel& data) const
 {
+    return data.WriteString(metaMask_.to_string()) &&
+        data.WriteString(assetId_) &&
+        data.WriteString(title_) &&
+        data.WriteString(artist_) &&
+        data.WriteString(author_) &&
+        data.WriteString(album_) &&
+        data.WriteString(writer_) &&
+        data.WriteString(composer_) &&
+        data.WriteInt64(duration_) &&
+        data.WriteParcelable(mediaImage_.get()) &&
+        data.WriteString(mediaImageUri_) &&
+        data.WriteString(subTitle_) &&
+        data.WriteString(description_) &&
+        data.WriteString(lyric_);
 }
 
-bool AVMetaData::Marshalling(Parcel& parcel) const
+std::shared_ptr<AVMetaData> AVMetaData::Unmarshalling(Parcel& data)
 {
-    return parcel.WriteString(metaMask_.to_string()) &&
-        parcel.WriteString(assetId_) &&
-        parcel.WriteString(title_) &&
-        parcel.WriteString(artist_) &&
-        parcel.WriteString(author_) &&
-        parcel.WriteString(album_) &&
-        parcel.WriteString(writer_) &&
-        parcel.WriteString(composer_) &&
-        parcel.WriteInt64(duration_) &&
-        parcel.WriteParcelable(mediaImage_.get()) &&
-        parcel.WriteString(mediaImageUri_) &&
-        parcel.WriteString(subTitle_) &&
-        parcel.WriteString(description_) &&
-        parcel.WriteString(lyric_);
-}
-
-AVMetaData* AVMetaData::Unmarshalling(Parcel& data)
-{
-    auto result = new(std::nothrow) AVMetaData;
-    if (result == nullptr) {
-        return nullptr;
-    }
+    std::shared_ptr<AVMetaData> result = std::make_shared<AVMetaData>();
 
     result->metaMask_ = MetaMaskType(data.ReadString());
     result->assetId_ = data.ReadString();
@@ -64,7 +58,7 @@ AVMetaData* AVMetaData::Unmarshalling(Parcel& data)
     return result;
 }
 
-void AVMetaData::SetAssetId(const std::string &assetId)
+void AVMetaData::SetAssetId(const std::string& assetId)
 {
     assetId_ = assetId;
     metaMask_.set(META_KEY_ASSET_ID);
@@ -86,7 +80,7 @@ std::string AVMetaData::GetTitle() const
     return title_;
 }
 
-void AVMetaData::SetArtist(const std::string & artist)
+void AVMetaData::SetArtist(const std::string& artist)
 {
     artist_ = artist;
     metaMask_.set(META_KEY_ARTIST);
@@ -97,7 +91,7 @@ std::string AVMetaData::GetArtist() const
     return artist_;
 }
 
-void AVMetaData::SetAuthor(const std::string &author)
+void AVMetaData::SetAuthor(const std::string& author)
 {
     author_ = author;
     metaMask_.set(META_KEY_AUTHOR);
@@ -108,7 +102,7 @@ std::string AVMetaData::GetAuthor() const
     return author_;
 }
 
-void AVMetaData::SetAlbum(const std :: string & album)
+void AVMetaData::SetAlbum(const std::string& album)
 {
     album_ = album;
     metaMask_.set(META_KEY_ALBUM);
@@ -119,9 +113,9 @@ std::string AVMetaData::GetAlbum() const
     return album_;
 }
 
-void AVMetaData::SetWriter(const std::string &wrtier)
+void AVMetaData::SetWriter(const std::string& writer)
 {
-    writer_ = wrtier;
+    writer_ = writer;
     metaMask_.set(META_KEY_WRITER);
 }
 
@@ -130,7 +124,7 @@ std::string AVMetaData::GetWriter() const
     return writer_;
 }
 
-void AVMetaData::SetComposer(const std::string &composer)
+void AVMetaData::SetComposer(const std::string& composer)
 {
     composer_ = composer;
     metaMask_.set(META_KEY_COMPOSER);
@@ -152,7 +146,7 @@ int64_t AVMetaData::GetDuration() const
     return duration_;
 }
 
-void AVMetaData::SetMediaImage(const std::shared_ptr<Media::PixelMap> &mediaImage)
+void AVMetaData::SetMediaImage(const std::shared_ptr<Media::PixelMap>& mediaImage)
 {
     mediaImage_ = mediaImage;
     metaMask_.set(META_KEY_MEDIA_IMAGE);
@@ -163,7 +157,7 @@ std::shared_ptr<Media::PixelMap> AVMetaData::GetMediaImage() const
     return mediaImage_;
 }
 
-void AVMetaData::SetMediaImageUri(const std::string &mediaImageUri)
+void AVMetaData::SetMediaImageUri(const std::string& mediaImageUri)
 {
     mediaImageUri_ = mediaImageUri;
     metaMask_.set(META_KEY_MEDIA_IMAGE_URI);
@@ -206,7 +200,7 @@ std::string AVMetaData::GetDescription() const
     return description_;
 }
 
-void AVMetaData::SetLyric(const std :: string & lyric)
+void AVMetaData::SetLyric(const std::string& lyric)
 {
     lyric_ = lyric;
     metaMask_.set(META_KEY_LYRIC);
@@ -217,7 +211,7 @@ std::string AVMetaData::GetLyric() const
     return lyric_;
 }
 
-void AVMetaData::SetPreviosAssetId(const std::string &assetId)
+void AVMetaData::SetPreviosAssetId(const std::string& assetId)
 {
     previousAssetId_ = assetId;
 }
@@ -227,7 +221,7 @@ std::string AVMetaData::GetPreviosAssetId() const
     return previousAssetId_;
 }
 
-void AVMetaData::SetNextAssetId(const std::string &assetId)
+void AVMetaData::SetNextAssetId(const std::string& assetId)
 {
     nextAssetId_ = assetId;
 }
@@ -235,11 +229,6 @@ void AVMetaData::SetNextAssetId(const std::string &assetId)
 std::string AVMetaData::GetNextAssetId() const
 {
     return nextAssetId_;
-}
-
-void AVMetaData::SetMetaMask(const MetaMaskType metaMask)
-{
-    metaMask_ = metaMask;
 }
 
 AVMetaData::MetaMaskType AVMetaData::GetMetaMask() const
@@ -267,11 +256,11 @@ void AVMetaData::Reset()
     nextAssetId_ = "";
 }
 
-bool AVMetaData::CopyToByMask(AVMetaData &metaOut) const
+bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
 {
     bool result = false;
-    auto intersection = metaMask_ & metaOut.metaMask_;
-    for (int i = 0; i < META_KEY_MAX; i++ ) {
+    auto intersection = metaMask_ & mask;
+    for (auto i = META_KEY_ASSET_ID; i < META_KEY_MAX; i++ ) {
         if (intersection.test(i)) {
             cloneActions[i](*this, metaOut);
             result = true;
@@ -295,8 +284,8 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
     }
 
     bool result = false;
-    for (int i = 0; i < META_KEY_MAX; i++ ) {
-        if (metaIn.metaMask_.test(i)) {
+    for (auto i = META_KEY_ASSET_ID; i < META_KEY_MAX; i++ ) {
+        if (metaIn.GetMetaMask().test(i)) {
             cloneActions[i](metaIn, *this);
             metaMask_.set(i);
             result = true;
@@ -306,7 +295,7 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
     return result;
 }
 
-void AVMetaData::CloneAssetId(const AVMetaData &from, AVMetaData &to)
+void AVMetaData::CloneAssetId(const AVMetaData& from, AVMetaData& to)
 {
     to.assetId_ = from.assetId_;
 }
@@ -385,4 +374,5 @@ void AVMetaData::CloneNextAssetId(const AVMetaData &from, AVMetaData &to)
 {
     to.nextAssetId_ = from.nextAssetId_;
 }
-} // namespace OHOS::AVSession
+} //AVSession
+}// namespace OHOS
