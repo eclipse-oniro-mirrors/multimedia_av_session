@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 XXXX Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ using namespace OHOS::AVSession;
 AVMetaData g_metaDataCloneTest;
 AVMetaData g_metaData;
 OHOS::Parcel g_parcel;
+constexpr int64_t DURATION = 40000;
 
 class AVMetaDataTest : public testing::Test {
 public:
@@ -38,12 +39,10 @@ public:
 
 void AVMetaDataTest::SetUpTestCase(void)
 {
-
 }
 
 void AVMetaDataTest::TearDownTestCase(void)
 {
-
 }
 
 void AVMetaDataTest::SetUp(void)
@@ -56,7 +55,7 @@ void AVMetaDataTest::SetUp(void)
     g_metaData.SetAlbum("Jay");
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
-    g_metaData.SetDuration(40000);
+    g_metaData.SetDuration(DURATION);
     g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
