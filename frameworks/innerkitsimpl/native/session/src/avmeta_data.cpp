@@ -36,9 +36,12 @@ bool AVMetaData::Marshalling(Parcel& data) const
         data.WriteString(lyric_);
 }
 
-std::shared_ptr<AVMetaData> AVMetaData::Unmarshalling(Parcel& data)
+sptr<AVMetaData> AVMetaData::Unmarshalling(Parcel& data)
 {
-    std::shared_ptr<AVMetaData> result = std::make_shared<AVMetaData>();
+    sptr<AVMetaData> result = (std::make_unique<AVMetaData>()).release();
+    if (result == nullptr) {
+        return nullptr;
+    }
 
     result->metaMask_ = MetaMaskType(data.ReadString());
     result->assetId_ = data.ReadString();
@@ -260,7 +263,7 @@ bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
 {
     bool result = false;
     auto intersection = metaMask_ & mask;
-    for (auto i = META_KEY_ASSET_ID; i < META_KEY_MAX; i++ ) {
+    for (int i = 0; i < META_KEY_MAX; i++ ) {
         if (intersection.test(i)) {
             cloneActions[i](*this, metaOut);
             result = true;
@@ -284,7 +287,7 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
     }
 
     bool result = false;
-    for (auto i = META_KEY_ASSET_ID; i < META_KEY_MAX; i++ ) {
+    for (int i = 0; i < META_KEY_MAX; i++ ) {
         if (metaIn.GetMetaMask().test(i)) {
             cloneActions[i](metaIn, *this);
             metaMask_.set(i);

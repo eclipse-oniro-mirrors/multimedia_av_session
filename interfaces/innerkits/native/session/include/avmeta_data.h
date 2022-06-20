@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AVSession {
 class AVMetaData : public Parcelable {
 public:
-    enum AVMetaDataKey : int32_t {
+    enum {
         META_KEY_ASSET_ID,
         META_KEY_TITLE,
         META_KEY_ARTIST,
@@ -51,8 +51,8 @@ public:
     AVMetaData() = default;
     ~AVMetaData() = default;
 
-    std::shared_ptr<AVMetaData> Unmarshalling(Parcel& data);
-    bool Marshalling(Parcel& data) const;
+    static sptr<AVMetaData> Unmarshalling(Parcel& data);
+    bool Marshalling(Parcel& data) const override;
 
     void SetAssetId(const std::string& assetId);
     std::string GetAssetId() const;
