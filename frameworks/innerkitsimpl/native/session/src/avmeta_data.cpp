@@ -16,8 +16,7 @@
 #include "avmeta_data.h"
 #include "avsession_log.h"
 
-namespace OHOS {
-namespace AVSession {
+namespace OHOS::AVSession {
 bool AVMetaData::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(metaMask_.to_string()) &&
@@ -377,5 +376,4 @@ void AVMetaData::CloneNextAssetId(const AVMetaData &from, AVMetaData &to)
 {
     to.nextAssetId_ = from.nextAssetId_;
 }
-} // namespace AVSession
-} // namespace OHOS
+} // namespace OHOS::AVSession

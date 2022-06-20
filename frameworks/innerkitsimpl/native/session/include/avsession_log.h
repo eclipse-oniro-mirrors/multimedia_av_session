@@ -25,11 +25,11 @@
 #undef LOG_TAG
 #define LOG_TAG "AVSession"
 
-#define __FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
+#define AV_SESSION_FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #define DECORATOR_HILOG(func, fmt, args...)                                                      \
     do {                                                                                         \
-        (void)func(LOG_CORE, "[%{public}s()-%{public}s:%{public}d] " fmt, __FUNCTION__, __FILENAME__, __LINE__, \
+        (void)func(LOG_CORE, "[%{public}s()-%{public}s:%{public}d] " fmt, __FUNCTION__, AV_SESSION_FILENAME, __LINE__, \
                    ##args); \
     } while (0)
 
