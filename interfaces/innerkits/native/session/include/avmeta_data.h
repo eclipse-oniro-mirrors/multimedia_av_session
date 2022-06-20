@@ -12,17 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_AVSESSION_METADATA_H
-#define OHOS_AVSESSION_METADATA_H
+#ifndef OHOS_AVMETA_DATA_H
+#define OHOS_AVMETA_DATA_H
 
 #include <bitset>
 #include <memory>
 #include <string>
-
+#include <map>
 #include "parcel.h"
 #include "pixel_map.h"
 
-namespace OHOS::AVSession {
+namespace OHOS {
+namespace AVSession {
 class AVMetaData : public Parcelable {
 public:
     enum {
@@ -47,14 +48,14 @@ public:
 
     using MetaMaskType = std::bitset<META_KEY_MAX>;
 
-    AVMetaData();
+    AVMetaData() = default;
+    ~AVMetaData() = default;
 
-    static AVMetaData *Unmarshalling(Parcel& parcel);
-
-    bool Marshalling(Parcel& parcel) const override;
+    static sptr<AVMetaData> Unmarshalling(Parcel& data);
+    bool Marshalling(Parcel& data) const override;
 
     void SetAssetId(const std::string& assetId);
-    std::string GetAssetId() const ;
+    std::string GetAssetId() const;
 
     void SetTitle(const std::string& title);
     std::string GetTitle() const;
@@ -68,7 +69,7 @@ public:
     void SetAlbum(const std::string& album);
     std::string GetAlbum() const;
 
-    void SetWriter(const std::string& wrtier);
+    void SetWriter(const std::string& writer);
     std::string GetWriter() const;
 
     void SetComposer(const std::string& composer);
@@ -103,21 +104,9 @@ public:
 
     void Reset();
 
-    void SetMetaMask(const MetaMaskType metaMask);
-
     MetaMaskType GetMetaMask() const;
 
-    /*
-     * copy meta item to @metaOut according to intersection of meta mask.
-     * @return true if intersection is not empty, else return false.
-     */
-    bool CopyToByMask(AVMetaData& metaOut) const;
-
-    /*
-     * copy meta item from @metaIn according to set bit of @metaIn meta mask, keeping other meta item of self
-     * not changed, when both mediaId is equal. Otherwise, just do object assignment.
-     * @return true if this meta changed.
-     */
+    bool CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const;
     bool CopyFrom(const AVMetaData& metaIn);
 
 private:
@@ -177,5 +166,6 @@ private:
         [META_KEY_NEXT_ASSET_ID] = &AVMetaData::CloneNextAssetId,
     };
 };
-} // namespace OHOS::AVSession
-#endif // OHOS_AVSESSION_METADATA_H
+} // namespace AVSession
+} // namespace OHOS
+#endif // OHOS_AVMETA_DATA_H

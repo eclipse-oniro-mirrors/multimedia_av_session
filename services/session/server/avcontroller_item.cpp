@@ -163,8 +163,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
         return;
     }
     AVMetaData metaOut;
-    metaOut.SetMetaMask(metaMask_);
-    if (data.CopyToByMask(metaOut)) {
+    if (data.CopyToByMask(metaMask_, metaOut)) {
         callback_->OnMetaDataChange(metaOut);
     }
 }
