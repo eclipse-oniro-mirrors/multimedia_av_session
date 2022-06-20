@@ -18,22 +18,22 @@
 
 namespace OHOS {
 namespace AVSession {
-bool AVMetaData::Marshalling(Parcel& data) const
+bool AVMetaData::Marshalling(Parcel& parcel) const
 {
-    return data.WriteString(metaMask_.to_string()) &&
-        data.WriteString(assetId_) &&
-        data.WriteString(title_) &&
-        data.WriteString(artist_) &&
-        data.WriteString(author_) &&
-        data.WriteString(album_) &&
-        data.WriteString(writer_) &&
-        data.WriteString(composer_) &&
-        data.WriteInt64(duration_) &&
-        data.WriteParcelable(mediaImage_.get()) &&
-        data.WriteString(mediaImageUri_) &&
-        data.WriteString(subTitle_) &&
-        data.WriteString(description_) &&
-        data.WriteString(lyric_);
+    return parcel.WriteString(metaMask_.to_string()) &&
+        parcel.WriteString(assetId_) &&
+        parcel.WriteString(title_) &&
+        parcel.WriteString(artist_) &&
+        parcel.WriteString(author_) &&
+        parcel.WriteString(album_) &&
+        parcel.WriteString(writer_) &&
+        parcel.WriteString(composer_) &&
+        parcel.WriteInt64(duration_) &&
+        parcel.WriteParcelable(mediaImage_.get()) &&
+        parcel.WriteString(mediaImageUri_) &&
+        parcel.WriteString(subTitle_) &&
+        parcel.WriteString(description_) &&
+        parcel.WriteString(lyric_);
 }
 
 sptr<AVMetaData> AVMetaData::Unmarshalling(Parcel& data)
