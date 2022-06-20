@@ -35,9 +35,9 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(lyric_);
 }
 
-sptr<AVMetaData> AVMetaData::Unmarshalling(Parcel& data)
+AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
 {
-    sptr<AVMetaData> result = (std::make_unique<AVMetaData>()).release();
+    auto *result = new (std::nothrow) AVMetaData();
     if (result == nullptr) {
         return nullptr;
     }
