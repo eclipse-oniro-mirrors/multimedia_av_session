@@ -279,7 +279,7 @@ void AVSessionNapiUtils::WrapNapiToAVPlaybackState(napi_env env, napi_value obje
     }
     napi_value res = nullptr;
     int32_t state = 0;
-    WRAP_NAPI_TO_VALUE(env, object, result, "state", res, state, napi_get_value_int32, SetSpeed);
+    WRAP_NAPI_TO_VALUE(env, object, result, "state", res, state, napi_get_value_int32, SetState);
     double speed = 0.0;
     WRAP_NAPI_TO_VALUE(env, object, result, "speed", res, speed, napi_get_value_double, SetSpeed);
     int64_t time = 0;
@@ -417,21 +417,21 @@ void AVSessionNapiUtils::WrapNapiToKeyEvent(napi_env env, napi_value object, std
 }
 
 void AVSessionNapiUtils::WrapKeyEventToNapi(napi_env env,
-                                            const std::shared_ptr<OHOS::MMI::KeyEvent> &keyEvent,
+                                            const OHOS::MMI::KeyEvent& keyEvent,
                                             napi_value& result)
 {
     napi_create_object(env, &result);
     napi_value keyCode;
-    NAPI_CALL_RETURN_VOID(env, napi_create_int32(env, keyEvent->GetKeyCode(), &keyCode));
+    NAPI_CALL_RETURN_VOID(env, napi_create_int32(env, keyEvent.GetKeyCode(), &keyCode));
     NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, result, "keyCode", keyCode));
 
     napi_value keyAction;
-    NAPI_CALL_RETURN_VOID(env, napi_create_int32(env, keyEvent->GetKeyAction(), &keyAction));
+    NAPI_CALL_RETURN_VOID(env, napi_create_int32(env, keyEvent.GetKeyAction(), &keyAction));
     NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, result, "keyAction", keyAction));
 
     napi_value keys;
     uint32_t idx = 0;
-    std::vector<OHOS::MMI::KeyEvent::KeyItem> keyItems = keyEvent->GetKeyItems();
+    std::vector<OHOS::MMI::KeyEvent::KeyItem> keyItems = keyEvent.GetKeyItems();
     NAPI_CALL_RETURN_VOID(env, napi_create_array(env, &keys));
     for (auto &key : keyItems) {
         napi_value keyItem = nullptr;

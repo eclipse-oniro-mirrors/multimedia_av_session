@@ -219,7 +219,6 @@ void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     SLOGD("NapiAVSessionCallback::OnMediaKeyEvent");
     uvQueue_ = std::make_shared<UvQueue>(env_);
-    keyEvent_ = std::shared_ptr<MMI::KeyEvent>(new (std::nothrow) MMI::KeyEvent(keyEvent));
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
             if (napiAVSessionCallback->bindCallbackMap[HANDLEKEYEVENT_CALLBACK] == nullptr) {
@@ -230,9 +229,9 @@ void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
             napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[HANDLEKEYEVENT_CALLBACK], &callback);
             return callback;
         },
-        [napiAVSessionCallback = shared_from_this()](napi_env env, int& argc, napi_value* argv) {
+        [&keyEvent](napi_env env, int& argc, napi_value* argv) {
             argc = 1;
-            AVSessionNapiUtils::WrapKeyEventToNapi(env, napiAVSessionCallback->keyEvent_, argv[0]);
+            AVSessionNapiUtils::WrapKeyEventToNapi(env, keyEvent, argv[0]);
         });
 }
 
@@ -242,7 +241,7 @@ void NapiAVSessionCallback::SaveCallbackReference(const std::string& callbackNam
     napi_ref callback = nullptr;
     napi_status status = napi_create_reference(env, args, 1, &callback);
     env_ = env;
-    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr , "get callback fail ");
+    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr, "get callback fail ");
     CHECK_AND_RETURN_LOG(bindCallbackMap.count(callbackName) != 0, "The callbackName parameter is invalid ");
     bindCallbackMap[callbackName] = callback ;
 }
