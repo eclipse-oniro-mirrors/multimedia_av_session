@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "avmeta_data.h"
 #include "avsession_log.h"
+#include "avsession_manager.h"
 #include "av_session.h"
 #include "avsession_errors.h"
 
@@ -26,6 +27,9 @@ AVMetaData g_metaDataCloneTest;
 AVMetaData g_metaData;
 OHOS::Parcel g_parcel;
 constexpr int64_t DURATION = 40000;
+static char g_testSessionTag[] = "test";
+static char g_testBundleName[] = "test.ohos.avsession";
+static char g_testAbilityName[] = "test.ability";
 
 class AVMetaDataTest : public testing::Test {
 public:
@@ -60,6 +64,11 @@ void AVMetaDataTest::SetUp(void)
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("https://baidu.yinyue.com");
+
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    avsession_ = AVSessionManager::CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
     EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
 }
 
@@ -81,7 +90,6 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
     SLOGE("SetAVMetaData001 Begin");
     AVMetaData metaData;
     metaData.Reset();
-
     metaData.SetAssetId("123");
     metaData.SetTitle("Black Humor");
     metaData.SetArtist("zhoujielun");
@@ -89,7 +97,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
     metaData.SetAlbum("Jay");
     metaData.SetWriter("zhoujielun");
     metaData.SetComposer("zhoujielun");
-    metaData.SetDuration(40000);
+    metaData.SetDuration(DURATION);
     metaData.SetMediaImageUri("https://baidu.yinyue.com");
     metaData.SetSubTitle("fac");
     metaData.SetDescription("for friends");
@@ -107,10 +115,9 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
 HWTEST_F(AVMetaDataTest, GetAVMetaData001, TestSize.Level1)
 {
     SLOGE("GetAVMetaData001 Begin");
-
     AVMetaData metaData;
     metaData.Reset();
-
+    metaData.CopyFrom(g_metaData);
     EXPECT_EQ(metaData.GetAssetId(), g_metaData.GetAssetId());
     std::string title1 = metaData.GetTitle();
     SLOGE("title1 %{public}s", title1.c_str());
@@ -137,15 +144,12 @@ HWTEST_F(AVMetaDataTest, GetAVMetaData001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST(AVMetaDataTest, AVMetaDataMarshalling001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling001, TestSize.Level1)
 {
     SLOGI("AVMetaDataMarshalling001 end");
-
     OHOS::Parcel& parcel = g_parcel;
     auto ret = g_metaData.Marshalling(parcel);
-
     EXPECT_EQ(ret, true);
-
     SLOGI("AVMetaDataMarshalling001 end");
 }
 
@@ -155,15 +159,12 @@ HWTEST(AVMetaDataTest, AVMetaDataMarshalling001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST(AVMetaDataTest, AVMetaDataUnmarshalling001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling001, TestSize.Level1)
 {
     SLOGI("AVMetaDataUnmarshalling001 begin");
-
     OHOS::Parcel& parcel = g_parcel;
     auto unmarshallingPtr = g_metaData.Unmarshalling(parcel);
-
-    EXPECT_EQ(unmarshallingPtr, nullptr);
-
+    EXPECT_NE(unmarshallingPtr, nullptr);
     SLOGI("AVMetaDataUnmarshalling001 end");
 }
 
@@ -173,16 +174,13 @@ HWTEST(AVMetaDataTest, AVMetaDataUnmarshalling001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST(AVMetaDataTest, AVMetaDataGetMask001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataGetMask001, TestSize.Level1)
 {
     SLOGI("AVMetaDataGetMask001 begin");
-
     AVMetaData metaData;
-    auto ret = metaData.GetMetaMask();
-
-
-    EXPECT_EQ(g_metaData.GetMetaMask().to_string(), ret.to_string());
-
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    EXPECT_NE(metaData.GetMetaMask().to_string(), "");
     SLOGI("AVMetaDataGetMask001 end");
 }
 
@@ -192,20 +190,15 @@ HWTEST(AVMetaDataTest, AVMetaDataGetMask001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST(AVMetaDataTest, AVMetaDataCopyDataFromMetaIn001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataFromMetaIn001, TestSize.Level1)
 {
     SLOGI("AVMetaDataCopyDataFromMetaIn001 begin");
-
     AVMetaData metaData;
-
     g_metaDataCloneTest.SetAssetId("1118");
     g_metaDataCloneTest.SetWriter("Jay Chou");
-    g_metaDataCloneTest.SetDuration(40000);
-
+    g_metaDataCloneTest.SetDuration(DURATION);
     auto ret = metaData.CopyFrom(g_metaDataCloneTest);
-
     EXPECT_EQ(ret, true);
-
     SLOGI("AVMetaDataCopyDataFromMetaIn001 end");
 }
 
@@ -215,20 +208,17 @@ HWTEST(AVMetaDataTest, AVMetaDataCopyDataFromMetaIn001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST(AVMetaDataTest, AVMetaDataCopyDataByMask001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataByMask001, TestSize.Level1)
 {
     SLOGI("AVMetaDataCopyDataByMask001 begin");
-
     AVMetaData metaOut;
-    metaOut.GetMetaMask().set(AVMetaData::META_KEY_ASSET_ID);
-    metaOut.GetMetaMask().set(AVMetaData::META_KEY_WRITER);
-    metaOut.GetMetaMask().set(AVMetaData::META_KEY_DURATION);
+    metaOut.SetAssetId("a");
+    metaOut.SetWriter("b");
+    metaOut.SetDuration(0);
     AVMetaData::MetaMaskType mask = metaOut.GetMetaMask();
-    metaOut.CopyToByMask(mask, metaOut);
-
+    g_metaDataCloneTest.CopyToByMask(mask, metaOut);
     EXPECT_EQ(metaOut.GetAssetId(), g_metaDataCloneTest.GetAssetId());
     EXPECT_EQ(metaOut.GetWriter(), g_metaDataCloneTest.GetWriter());
     EXPECT_EQ(metaOut.GetDuration(), g_metaDataCloneTest.GetDuration());
-
     SLOGI("AVMetaDataCopyDataByMask001 end");
 }
