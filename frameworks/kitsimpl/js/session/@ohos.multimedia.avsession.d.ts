@@ -16,10 +16,10 @@
 
 import { AsyncCallback } from './basic';
 import { WantAgent } from '@ohos.wantAgent';
-import inputEventClient from './@ohos.multimodalInput.inputEventClient'
-import { ElementName } from './bundle/elementName'
+import KeyEvent from './@ohos.multimodalInput.KeyEvent';
+import { ElementName } from './bundle/elementName';
 import image from './@ohos.multimedia.image';
-import audio from './@ohos.multimedia.audio.d.ts'
+import audio from './@ohos.multimedia.audio';
 
 /**
  * @name avsession
@@ -27,54 +27,51 @@ import audio from './@ohos.multimedia.audio.d.ts'
  * @import import avsession from '@ohos.multimedia.avsession';
  * @since 10
  */
-declare namespace avsessionManager {
-    /**
-     * Create an avsession instance. An ability can only create one AVSession
-     *
-     * @param tag A user-defined name for this session
-     * @param type The type of session, currently supports audio and video
-     * @return The instance of {@link AVSession}
-     * @since 10
-     * @syscap SystemCapability.Multimedia.AVSession.Core
-    */
+declare namespace avsession {
+  /**
+   * Create an avsession instance. An ability can only create one AVSession
+   *
+   * @param tag A user-defined name for this session
+   * @param type The type of session, currently supports audio and video
+   * @return The instance of {@link AVSession}
+   * @since 10
+   * @syscap SystemCapability.Multimedia.AVSession.Core
+  */
 
-    function createAVSession(tag: string, type: AVSessionType, callback: AsyncCallback<AVSession>): void;
-    function createAVSession(tag: string, type: AVSessionType): Promise<AVSession>;
+  function createAVSession(tag: string, type: AVSessionType, callback: AsyncCallback<AVSession>): void;
+  function createAVSession(tag: string, type: AVSessionType): Promise<AVSession>;
 
-    function getAllSessionDescriptors(callback: AsyncCallback<Array<Readonly<AVSessionDescriptor>>>): void;
-    function getAllSessionDescriptors(): Promise<Array<Readonly<AVSessionDescriptor>>>;
+  function getAllSessionDescriptors(callback: AsyncCallback<Array<Readonly<AVSessionDescriptor>>>): void;
+  function getAllSessionDescriptors(): Promise<Array<Readonly<AVSessionDescriptor>>>;
 
-    function createController(sessionId: number, callback: AsyncCallback<AVSessionController>): void;
-    function createController(sessionId: number): Promise<AVSessionController>;
+  function createController(sessionId: number, callback: AsyncCallback<AVSessionController>): void;
+  function createController(sessionId: number): Promise<AVSessionController>;
 
-    function castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDescriptor>, callback: AsyncCallback<void>): void;
-    function castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDescriptor>): Promise<void>;
+  function castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDescriptor>, callback: AsyncCallback<void>): void;
+  function castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDescriptor>): Promise<void>;
 
-    interface SessionToken {
-      sessionId: number;
-      pid: number;
-      uid: number;
-    }
+  interface SessionToken {
+    sessionId: number;
+    pid: number;
+    uid: number;
+  }
 
-    function on(type: 'sessionCreated' | 'sessionDestroyed', callback: (session: AVSessionDescriptor) => void): void;
-    function on(type: 'topSessionChanged', callback: (session: AVSessionDescriptor) => void): void;
-    function on(type: 'sessionServiceDied', callback: () => void): void;
+  function on(type: 'sessionCreated' | 'sessionDestroyed', callback: (session: AVSessionDescriptor) => void): void;
+  function on(type: 'topSessionChanged', callback: (session: AVSessionDescriptor) => void): void;
+  function on(type: 'sessionServiceDied', callback: () => void): void;
 
-    function off(type: 'sessionServiceDied'): void;
-    function off(type: 'sessionCreated' | 'sessionDestroyed' | 'topSessionChanged'): void;
+  function off(type: 'sessionServiceDied'): void;
+  function off(type: 'sessionCreated' | 'sessionDestroyed' | 'topSessionChanged'): void;
 
-    function sendSystemAVKeyEvent(event: KeyEvent, callback: AsyncCallback<void>): void;
-    function sendSystemAVKeyEvent(event: KeyEvent): Promise<void>;
+  function sendSystemAVKeyEvent(event: KeyEvent, callback: AsyncCallback<void>): void;
+  function sendSystemAVKeyEvent(event: KeyEvent): Promise<void>;
 
-    function sendSystemControlCommand(command: AVControlCommand, callback: AsyncCallback<void>): void;
-    function sendSystemControlCommand(command: AVControlCommand): Promise<void>;
-}
+  function sendSystemControlCommand(command: AVControlCommand, callback: AsyncCallback<void>): void;
+  function sendSystemControlCommand(command: AVControlCommand): Promise<void>;
 
-export type KeyEvent = inputEventClient.KeyEvent;
+  type AVSessionType = 'audio' | 'video';
 
-export type AVSessionType = 'audio' | 'video';
-
-export interface AVSession {
+  interface AVSession {
     readonly sessionId: number;
 
     setAVMetadata(data: AVMetadata, callback: AsyncCallback<void>): void;
@@ -120,9 +117,9 @@ export interface AVSession {
 
     destroy(callback: AsyncCallback<void>): void;
     destroy(): Promise<void>;
-}
+  }
 
-export interface AVMetadata {
+  interface AVMetadata {
     assetId: string;
     title?: string;
     artist?: string;
@@ -138,36 +135,36 @@ export interface AVMetadata {
     lyric?: string;
     previousAssetId?: string;
     nextAssetId?: string;
-}
+  }
 
-export interface AVPlaybackState {
+  interface AVPlaybackState {
     state?: PlaybackState;
     speed?: number;
     position?: PlaybackPosition;
     bufferedTime?: number;
     loopMode?: LoopMode;
     isFavorite?: boolean;
-}
+  }
 
-export interface PlaybackPosition {
+  interface PlaybackPosition {
     elapsedTime: number;
     updateTime: number;
-}
+  }
 
-export interface OutputDeviceInfo {
+  interface OutputDeviceInfo {
     isRemote: boolean;
     deviceId: Array<string>;
     deviceName: Array<string>;
-}
+  }
 
-export enum LoopMode {
+  enum LoopMode {
     LOOP_MODE_SEQUENCE = 0,
     LOOP_MODE_SINGLE,
     LOOP_MODE_LIST,
     LOOP_MODE_SHUFFLE,
-}
+  }
 
-export enum PlaybackState {
+  enum PlaybackState {
     PLAYBACK_STATE_INITIAL = 0,
     PLAYBACK_STATE_PREPARE,
     PLAYBACK_STATE_PLAY,
@@ -175,9 +172,9 @@ export enum PlaybackState {
     PLAYBACK_STATE_FAST_FORWARD,
     PLAYBACK_STATE_REWIND,
     PLAYBACK_STATE_STOP,
-}
+  }
 
-export interface AVSessionDescriptor {
+  interface AVSessionDescriptor {
     sessionId: number;
     type: AVSessionType;
     sessionTag: string;
@@ -185,9 +182,9 @@ export interface AVSessionDescriptor {
     isActive: boolean;
     isTopSession: boolean;
     outputDevice: OutputDeviceInfo;
-}
+  }
 
-export interface AVSessionController {
+  interface AVSessionController {
     readonly sessionId: number;
     getAVPlaybackState(callback: AsyncCallback<AVPlaybackState>): void;
     getAVPlaybackState(): Promise<AVPlaybackState>;
@@ -226,22 +223,23 @@ export interface AVSessionController {
     on(type: 'outputDeviceChanged', callback: (device: OutputDeviceInfo) => void): void;
 
     off(type: 'metadataChanged'|'playbackStateChanged'|'sessionDestroyed'|'activeStateChanged'|'validCommandChanged'|'outputDeviceChanged'): void;
-}
+  }
 
-export type AVControlCommandType = 'play'|'pause'|'stop'|'playNext'|'playPrevious'|'fastForward'|'rewind'|'seek'|'setSpeed'|'setLoopMode'|'toggleFavorite';
+  type AVControlCommandType = 'play'|'pause'|'stop'|'playNext'|'playPrevious'|'fastForward'|'rewind'|'seek'|'setSpeed'|'setLoopMode'|'toggleFavorite';
 
-export interface AVControlCommand {
+  interface AVControlCommand {
     command: AVControlCommandType;
     parameter?: LoopMode | string | number;
-}
+  }
 
-export enum AVSessionErrorCode {
+  enum AVSessionErrorCode {
     ERR_CODE_UNKNOWN = 6600100,
     ERR_CODE_SERVICE_EXCEPTION,
     ERR_CODE_SESSION_NOT_EXIST,
     ERR_CODE_CONTROLLER_NOT_EXIST,
     ERR_CODE_REMOTE_CONNECTION_ERR,
     ERR_CODE_COMMAND_INVALID,
+  }
 }
 
-export default avsessionManager;
+export default avsession;
