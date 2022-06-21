@@ -111,7 +111,7 @@ void AVSessionCallbackProxy::OnSetSpeed(double speed)
     CHECK_AND_RETURN_LOG(data.WriteDouble(speed), "write speed failed");
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
-    CHECK_AND_RETURN_LOG(Remote()->SendRequest(SESSION_CALLBACK_ON_SEEK, data, reply, option) == 0,
+    CHECK_AND_RETURN_LOG(Remote()->SendRequest(SESSION_CALLBACK_ON_SET_SPEED, data, reply, option) == 0,
         "OnSetSpeed send request failed");
 }
 
