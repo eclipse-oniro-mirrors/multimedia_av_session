@@ -310,7 +310,7 @@ void AVSessionNapiUtils::WrapNapiToAVPlaybackState(napi_env env, napi_value obje
         uint64_t updateTime = 0;
         bool lossless = false;
         napi_get_value_bigint_uint64(env, positionRes, &updateTime, &lossless);
-        result.SetElapsedTime(lossless ? updateTime:0);
+        result.SetUpdateTime(lossless ? updateTime : 0);
     }
 }
 
@@ -414,6 +414,49 @@ void AVSessionNapiUtils::WrapNapiToKeyEvent(napi_env env, napi_value object, std
     item.SetPressed(isPressed);
     item.SetDownTime(static_cast<int64_t>(keyDownDuration));
     result->AddKeyItem(item);
+}
+
+void AVSessionNapiUtils::WrapKeyEventToNapi(napi_env env,
+                                            const std::shared_ptr<OHOS::MMI::KeyEvent> &keyEvent,
+                                            napi_value& result)
+{
+    napi_create_object(env, &result);
+    napi_value keyCode;
+    NAPI_CALL_RETURN_VOID(env, napi_create_int32(env, keyEvent->GetKeyCode(), &keyCode));
+    NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, result, "keyCode", keyCode));
+
+    napi_value keyAction;
+    NAPI_CALL_RETURN_VOID(env, napi_create_int32(env, keyEvent->GetKeyAction(), &keyAction));
+    NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, result, "keyAction", keyAction));
+
+    napi_value keys;
+    uint32_t idx = 0;
+    std::vector<OHOS::MMI::KeyEvent::KeyItem> keyItems = keyEvent->GetKeyItems();
+    NAPI_CALL_RETURN_VOID(env, napi_create_array(env, &keys));
+    for (auto &key : keyItems) {
+        napi_value keyItem = nullptr;
+        NAPI_CALL_RETURN_VOID(env, napi_create_object(env, &keyItem));
+
+        napi_value pressed;
+        NAPI_CALL_RETURN_VOID(env, napi_get_boolean(env, key.IsPressed(), &pressed));
+        NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, keyItem, "pressed", pressed));
+
+        napi_value downTime;
+        NAPI_CALL_RETURN_VOID(env, napi_get_boolean(env, key.GetDownTime(), &downTime));
+        NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, keyItem, "downTime", downTime));
+
+        napi_value deviceId;
+        NAPI_CALL_RETURN_VOID(env, napi_get_boolean(env, key.GetDeviceId(), &deviceId));
+        NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, keyItem, "deviceId", deviceId));
+
+        napi_value itemKeyCode;
+        NAPI_CALL_RETURN_VOID(env, napi_get_boolean(env, key.GetKeyCode(), &itemKeyCode));
+        NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, keyItem, "keyCode", itemKeyCode));
+
+        NAPI_CALL_RETURN_VOID(env, napi_set_element(env, keys, idx, keyItem));
+        idx++;
+    }
+    NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, result, "keys", keys));
 }
 
 void AVSessionNapiUtils::WrapAssetId(napi_env env, const AVMetaData& value, napi_value& result)

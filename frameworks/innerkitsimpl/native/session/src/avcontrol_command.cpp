@@ -38,7 +38,7 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel &data)
                 result->SetSeekTime(data.ReadUint64());
                 break;
             case SESSION_CMD_SET_SPEED:
-                result->SetSpeed(data.ReadFloat());
+                result->SetSpeed(data.ReadDouble());
                 break;
             case SESSION_CMD_SET_LOOP_MODE:
                 result->SetLoopMode(data.ReadInt32());

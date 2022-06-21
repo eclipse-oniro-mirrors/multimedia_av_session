@@ -219,16 +219,21 @@ void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     SLOGD("NapiAVSessionCallback::OnMediaKeyEvent");
     uvQueue_ = std::make_shared<UvQueue>(env_);
+    keyEvent_ = std::shared_ptr<MMI::KeyEvent>(new (std::nothrow) MMI::KeyEvent(keyEvent));
     uvQueue_->AsyncCall(
         [napiAVSessionCallback = shared_from_this()](napi_env env) -> napi_value {
             if (napiAVSessionCallback->bindCallbackMap[HANDLEKEYEVENT_CALLBACK] == nullptr) {
+                SLOGE("NapiAVSessionCallback::OnMediaKeyEvent callback is null");
                 return nullptr;
             }
             napi_value callback = nullptr;
             napi_get_reference_value(env, napiAVSessionCallback->bindCallbackMap[HANDLEKEYEVENT_CALLBACK], &callback);
             return callback;
         },
-        [](napi_env env, int& argc, napi_value* argv) {});
+        [napiAVSessionCallback = shared_from_this()](napi_env env, int& argc, napi_value* argv) {
+            argc = 1;
+            AVSessionNapiUtils::WrapKeyEventToNapi(env, napiAVSessionCallback->keyEvent_, argv[0]);
+        });
 }
 
 void NapiAVSessionCallback::SaveCallbackReference(const std::string& callbackName, napi_value args, napi_env env)

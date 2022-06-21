@@ -342,6 +342,10 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
             napi_status status;
             size_t size = asyncContext->cmds.size();
             SLOGI("GetValidCommands size = %{public}zu", size);
+            if (size == 0) {
+                napi_create_string_utf8(asyncContext->env, "", NAPI_AUTO_LENGTH, &output);
+                return OK;
+            }
             napi_create_array_with_length(asyncContext->env, size, &output);
             for (size_t i = 0; i < size; i ++) {
                 napi_value valueParam = nullptr;

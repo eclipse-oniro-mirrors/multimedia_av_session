@@ -63,6 +63,7 @@ public:
     static void WrapAVPlaybackStateToNapi(napi_env env, const AVPlaybackState& aVPlaybackState, napi_value& result);
     static void WrapAVSessionDescriptorToNapi(napi_env env, const AVSessionDescriptor& descriptor, napi_value& result);
     static void WrapNapiToKeyEvent(napi_env env, napi_value object, std::shared_ptr<MMI::KeyEvent>& result);
+    static void WrapKeyEventToNapi(napi_env env, const std::shared_ptr<OHOS::MMI::KeyEvent> &keyEvent, napi_value& result);
 
     static const int ARGS_ONE = 1;
     static const int ARGS_TWO = 2;
