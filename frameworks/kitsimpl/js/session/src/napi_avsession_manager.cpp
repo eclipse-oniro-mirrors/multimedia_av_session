@@ -339,7 +339,7 @@ napi_value NapiAVSessionManager::On(napi_env env, napi_callback_info info)
         }
         SLOGI(" create NapiSessionListenerCallback ");
     }
-    std::shared_ptr<NapiSessionListenerCallback> cb = 
+    std::shared_ptr<NapiSessionListenerCallback> cb =
         std::static_pointer_cast<NapiSessionListenerCallback>(managerNapi->sessionListenerCallback_);
     if (cb->hasCallback(callbackName)) {
         cb->SaveCallbackReference(callbackName, args[1], env);

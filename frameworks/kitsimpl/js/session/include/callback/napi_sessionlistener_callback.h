@@ -44,7 +44,7 @@ public:
     void OnSessionServiceDied();
     void SaveCallbackReference(const std::string& callbackName, napi_value callback, napi_env env);
     void ReleaseCallbackReference(const std::string& callbackName);
-    bool hasCallback(const std::string& callbackName); 
+    bool hasCallback(const std::string& callbackName);
 
 private:
     napi_env env_;

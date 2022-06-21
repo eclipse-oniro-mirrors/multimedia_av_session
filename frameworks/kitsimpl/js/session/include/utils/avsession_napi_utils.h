@@ -63,14 +63,13 @@ public:
     static void WrapAVPlaybackStateToNapi(napi_env env, const AVPlaybackState& aVPlaybackState, napi_value& result);
     static void WrapAVSessionDescriptorToNapi(napi_env env, const AVSessionDescriptor& descriptor, napi_value& result);
     static void WrapNapiToKeyEvent(napi_env env, napi_value object, std::shared_ptr<MMI::KeyEvent>& result);
-    static void WrapKeyEventToNapi(napi_env env, const std::shared_ptr<OHOS::MMI::KeyEvent> &keyEvent, napi_value& result);
+    static void WrapKeyEventToNapi(napi_env env, const OHOS::MMI::KeyEvent& keyEvent, napi_value& result);
 
     static const int ARGS_ONE = 1;
     static const int ARGS_TWO = 2;
     static const int PARAM0 = 0;
-    
-private:
 
+private:
     static void WrapAssetId(napi_env env, const AVMetaData& value, napi_value& result);
     static void WrapTitile(napi_env env, const AVMetaData& value, napi_value& result);
     static void WrapArtist(napi_env env, const AVMetaData& value, napi_value& result);
@@ -156,6 +155,5 @@ static std::map<std::string, int32_t> aVMetaDataMap = {
     {"previousAssetId", AVMetaData::META_KEY_PREVIOUS_ASSET_ID},
     {"nextAssetId", AVMetaData::META_KEY_NEXT_ASSET_ID}
 };
-
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_NAPI_UTILS_H

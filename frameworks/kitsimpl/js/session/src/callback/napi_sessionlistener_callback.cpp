@@ -118,7 +118,7 @@ void NapiSessionListenerCallback::SaveCallbackReference(const std::string& callb
     napi_ref callback = nullptr;
     napi_status status = napi_create_reference(env, args, 1, &callback);
     env_ = env;
-    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr , "get callback fail ");
+    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr, "get callback fail ");
     CHECK_AND_RETURN_LOG(bindCallbackMap.count(callbackName) != 0, "The callbackName parameter is invalid ");
     bindCallbackMap[callbackName] = callback ;
     if (!SESSIONSERVICEDIED_CALLBACK.compare(callbackName)) {
