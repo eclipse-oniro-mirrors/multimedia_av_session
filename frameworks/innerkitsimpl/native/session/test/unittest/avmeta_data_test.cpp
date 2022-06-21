@@ -26,6 +26,9 @@ AVMetaData g_metaDataCloneTest;
 AVMetaData g_metaData;
 OHOS::Parcel g_parcel;
 constexpr int64_t DURATION = 40000;
+static char g_testSessionTag[] = "test";
+static char g_testBundleName[] = "test.ohos.avsession";
+static char g_testAbilityName[] = "test.ability";
 
 class AVMetaDataTest : public testing::Test {
 public:
@@ -60,6 +63,11 @@ void AVMetaDataTest::SetUp(void)
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("https://baidu.yinyue.com");
+
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    avsession_ = AVSessionManager::CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
     EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
 }
 
