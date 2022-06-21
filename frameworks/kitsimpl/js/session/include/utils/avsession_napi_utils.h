@@ -68,9 +68,8 @@ public:
     static const int ARGS_ONE = 1;
     static const int ARGS_TWO = 2;
     static const int PARAM0 = 0;
-    
-private:
 
+private:
     static void WrapAssetId(napi_env env, const AVMetaData& value, napi_value& result);
     static void WrapTitile(napi_env env, const AVMetaData& value, napi_value& result);
     static void WrapArtist(napi_env env, const AVMetaData& value, napi_value& result);

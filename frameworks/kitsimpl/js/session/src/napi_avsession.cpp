@@ -351,8 +351,8 @@ napi_value NapiAVSession::On(napi_env env, napi_callback_info info)
             return undefinedResult;
         }
     }
-    
-     std::shared_ptr<NapiAVSessionCallback> cb =
+
+    std::shared_ptr<NapiAVSessionCallback> cb =
             std::static_pointer_cast<NapiAVSessionCallback>(napiAVSession->avsessionCallback_);
     if (cb->hasCallback(callbackName)) {
         if (callbackName.compare(OUTPUTDEVICECHANGED_CALLBACK) &&

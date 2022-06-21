@@ -245,7 +245,7 @@ void NapiAVControllerCallback::SetMetaMaskTypeByNapi(AVMetaData::MetaMaskType& m
 {
     bool hasProperty = false;
     std::map<std::string, int32_t>::reverse_iterator   iter;
-    for(iter = aVMetaDataMap.rbegin(); iter != aVMetaDataMap.rend(); iter++) {
+    for (iter = aVMetaDataMap.rbegin(); iter != aVMetaDataMap.rend(); iter++) {
         if (napi_has_named_property(env, napiMetaData, iter->first.c_str(), &hasProperty) == napi_ok && hasProperty) {
             metaMaskType.set(iter->second);
         }

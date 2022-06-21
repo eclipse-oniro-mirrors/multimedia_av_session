@@ -21,7 +21,7 @@ ohos_shared_library("avsession_napi") {
     "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session/include",
   ]
 
-  sources = [ 
+  sources = [
     "src/utils/avsession_napi_utils.cpp",
     "src/utils/uv_queue.cpp",
     "src/napi_module.cpp",
