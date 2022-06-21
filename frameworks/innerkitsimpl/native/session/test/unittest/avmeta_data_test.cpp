@@ -164,7 +164,7 @@ HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling001, TestSize.Level1)
     SLOGI("AVMetaDataUnmarshalling001 begin");
     OHOS::Parcel& parcel = g_parcel;
     auto unmarshallingPtr = g_metaData.Unmarshalling(parcel);
-    EXPECT_EQ(unmarshallingPtr, nullptr);
+    EXPECT_NE(unmarshallingPtr, nullptr);
     SLOGI("AVMetaDataUnmarshalling001 end");
 }
 
@@ -178,8 +178,9 @@ HWTEST_F(AVMetaDataTest, AVMetaDataGetMask001, TestSize.Level1)
 {
     SLOGI("AVMetaDataGetMask001 begin");
     AVMetaData metaData;
-    auto ret = metaData.GetMetaMask();
-    EXPECT_EQ(g_metaData.GetMetaMask().to_string(), ret.to_string());
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    EXPECT_NE(metaData.GetMetaMask().to_string(), "");
     SLOGI("AVMetaDataGetMask001 end");
 }
 
@@ -211,11 +212,11 @@ HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataByMask001, TestSize.Level1)
 {
     SLOGI("AVMetaDataCopyDataByMask001 begin");
     AVMetaData metaOut;
-    metaOut.GetMetaMask().set(AVMetaData::META_KEY_ASSET_ID);
-    metaOut.GetMetaMask().set(AVMetaData::META_KEY_WRITER);
-    metaOut.GetMetaMask().set(AVMetaData::META_KEY_DURATION);
+    metaOut.SetAssetId("a");
+    metaOut.SetWriter("b");
+    metaOut.SetDuration(0);
     AVMetaData::MetaMaskType mask = metaOut.GetMetaMask();
-    metaOut.CopyToByMask(mask, metaOut);
+    g_metaDataCloneTest.CopyToByMask(mask, metaOut);
     EXPECT_EQ(metaOut.GetAssetId(), g_metaDataCloneTest.GetAssetId());
     EXPECT_EQ(metaOut.GetWriter(), g_metaDataCloneTest.GetWriter());
     EXPECT_EQ(metaOut.GetDuration(), g_metaDataCloneTest.GetDuration());
