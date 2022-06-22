@@ -20,6 +20,12 @@
 #include "element_name.h"
 
 namespace OHOS::AVSession {
+struct OutputDeviceInfo {
+    bool isRemote_ {};
+    std::vector<std::string> deviceIds_;
+    std::vector<std::string> deviceNames_;
+};
+
 struct AVSessionDescriptor {
     bool WriteToParcel(Parcel& out) const;
     bool ReadFromParcel(Parcel &in);
@@ -30,9 +36,7 @@ struct AVSessionDescriptor {
     AppExecFwk::ElementName elementName_;
     bool isActive_ {};
     bool isTopSession_ {};
-    bool isRemote_ {};
-    std::vector<std::string> deviceIds_;
-    std::vector<std::string> deviceNames_;
+    OutputDeviceInfo outputDeviceInfo_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_DESCRIPTOR_H

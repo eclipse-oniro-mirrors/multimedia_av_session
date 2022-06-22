@@ -27,6 +27,7 @@ namespace OHOS::AVSession {
 class AVSession {
 public:
     enum {
+        SESSION_TYPE_INVALID = -1,
         SESSION_TYPE_AUDIO,
         SESSION_TYPE_VIDEO
     };

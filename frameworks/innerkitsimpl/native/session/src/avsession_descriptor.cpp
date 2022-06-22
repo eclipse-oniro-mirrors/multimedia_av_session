@@ -24,9 +24,9 @@ bool AVSessionDescriptor::WriteToParcel(Parcel &out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteString(sessionTag_), false, "write sessionTag failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isActive_), false, "write isActive failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isTopSession_), false, "write isTopSession failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteBool(isRemote_), false, "write isRemote failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteStringVector(deviceIds_), false, "write deviceIds failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteStringVector(deviceNames_), false, "write deviceNames failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteBool(outputDeviceInfo_.isRemote_), false, "write isRemote failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteStringVector(outputDeviceInfo_.deviceIds_), false, "write deviceIds failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteStringVector(outputDeviceInfo_.deviceNames_), false, "write deviceNames failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
 }
@@ -38,9 +38,9 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel &in)
     CHECK_AND_RETURN_RET_LOG(in.ReadString(sessionTag_), false, "Read sessionTag failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isActive_), false, "Read isActive failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isTopSession_), false, "Read isTopSession failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadBool(isRemote_), false, "Read isRemote failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadStringVector(&deviceIds_), false, "Read deviceIds failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadStringVector(&deviceNames_), false, "Read deviceNames failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadBool(outputDeviceInfo_.isRemote_), false, "Read isRemote failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadStringVector(&outputDeviceInfo_.deviceIds_), false, "Read deviceIds failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadStringVector(&outputDeviceInfo_.deviceNames_), false, "Read deviceNames failed");
 
     sptr elementName = in.ReadParcelable<AppExecFwk::ElementName>();
     if (elementName == nullptr) {
