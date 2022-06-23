@@ -71,6 +71,14 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
                                   NapiAsyncExecute execute, NapiAsyncComplete complete)
 {
     SLOGD("name=%{public}s", name.c_str());
+    if (ctxt->status != napi_ok) {
+        SLOGE("parse napi_callback_info failed");
+        napi_throw_error(env, nullptr, ctxt->error.c_str());
+        napi_value undefined {};
+        napi_get_undefined(env, &undefined);
+        return undefined;
+    }
+
     ctxt->execute = std::move(execute);
     ctxt->complete = std::move(complete);
 
