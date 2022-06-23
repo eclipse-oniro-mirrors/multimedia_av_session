@@ -146,6 +146,8 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 {
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
+    CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
     supportedCmd_.push_back(cmd);
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
