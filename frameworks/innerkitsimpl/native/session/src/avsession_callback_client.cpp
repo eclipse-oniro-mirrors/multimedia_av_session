@@ -16,7 +16,7 @@
 #include "avsession_callback_client.h"
 
 namespace OHOS::AVSession {
-AVSessionCallbackClient::AVSessionCallbackClient(std::shared_ptr<AVSessionCallback>& callback)
+AVSessionCallbackClient::AVSessionCallbackClient(const std::shared_ptr<AVSessionCallback>& callback)
     : callback_(callback)
 {
     SLOGI("construct");

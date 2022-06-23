@@ -23,6 +23,8 @@
 #include "av_session.h"
 #include "avsession_info.h"
 #include "avsession_log.h"
+#include "avcontrol_command.h"
+#include "avsession_errors.h"
 #include "napi_avsession_callback.h"
 #include "want_agent.h"
 
