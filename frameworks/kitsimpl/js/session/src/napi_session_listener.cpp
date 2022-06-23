@@ -29,16 +29,17 @@ NapiSessionListener::~NapiSessionListener()
     SLOGI("destroy");
 }
 
-void NapiSessionListener::HandleEvent(int32_t event, const AVSessionDescriptor &descriptor)
+template<typename T>
+void NapiSessionListener::HandleEvent(int32_t event, const T &param)
 {
     if (callbacks_[event] == nullptr) {
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
 
-    asyncCallback_->Call(callbacks_[event], [descriptor](napi_env env, int &argc, napi_value *argv) {
+    asyncCallback_->Call(callbacks_[event], [param](napi_env env, int &argc, napi_value *argv) {
         argc = 1;
-        NapiUtils::SetValue(env, descriptor, *argv);
+        NapiUtils::SetValue(env, param, *argv);
     });
 }
 

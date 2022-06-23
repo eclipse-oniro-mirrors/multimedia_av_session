@@ -17,6 +17,8 @@
 #include "securec.h"
 #include "avsession_log.h"
 #include "av_session.h"
+#include "napi_meta_data.h"
+#include "napi_playback_state.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 4096;
@@ -361,13 +363,35 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AbilityRuntime::Wan
     return status;
 }
 
-napi_status NapiUtils::SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent& in, napi_value& out)
+napi_status NapiUtils::SetValue(napi_env env, const AbilityRuntime::WantAgent::WantAgent& in, napi_value& out)
 {
     auto status = napi_create_object(env, &out);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    status = napi_wrap(env, out, &in, nullptr, nullptr, nullptr);
+    status = napi_wrap(env, out, (void *)&in, nullptr, nullptr, nullptr);
     CHECK_RETURN(status == napi_ok, "wrap object failed", napi_generic_failure);
     return status;
+}
+
+/* napi_value <-> AVMetaData */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVMetaData& out)
+{
+    return NapiMetaData::GetValue(env, in, out);
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    return NapiMetaData::SetValue(env, in, out);
+}
+
+/* napi_value <-> AVPlaybackState */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVPlaybackState& out)
+{
+    return NapiPlaybackState::GetValue(env, in, out);
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AVPlaybackState& in, napi_value& out)
+{
+    return NapiPlaybackState::SetValue(env, in, out);
 }
 
 /* napi_value <-> std::vector<std::string> */

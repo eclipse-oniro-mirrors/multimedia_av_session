@@ -64,6 +64,9 @@ public:
 private:
     void HandleEvent(int32_t event);
 
+    template<typename T>
+    void HandleEvent(int32_t event, const T& param);
+
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     napi_ref callbacks_[EVENT_TYPE_MAX] {};
