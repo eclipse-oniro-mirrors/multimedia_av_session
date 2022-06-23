@@ -16,43 +16,50 @@
 #ifndef OHOS_NAPI_AVSESSION_MANAGER_H
 #define OHOS_NAPI_AVSESSION_MANAGER_H
 
-#include "avsession_log.h"
-#include "avsession_manager.h"
-#include "callback/napi_sessionlistener_callback.h"
-#include "napi_avsession.h"
-#include "napi_avsession_controller.h"
+#include <map>
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "utils/avsession_napi_utils.h"
-#include "utils/napi_async_proxy.h"
+#include "avsession_log.h"
+#include "avsession_manager.h"
+#include "napi_session_listener.h"
 
 namespace OHOS::AVSession {
 class NapiAVSessionManager {
 public:
     static napi_value Init(napi_env env, napi_value exports);
 
-    NapiAVSessionManager();
-    ~NapiAVSessionManager();
+    using OnEventHandlerType = std::function<napi_status(napi_env, napi_value)>;
+    using OffEventHandlerType = std::function<napi_status(napi_env)>;
 
 private:
-    static void Destructor(napi_env env, void *nativeObject, void *finalizeHint);
     static napi_value CreateAVSession(napi_env env, napi_callback_info info);
     static napi_value GetAllSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value CreateController(napi_env env, napi_callback_info info);
+    static napi_value CastAudio(napi_env env, napi_callback_info info);
     static napi_value SendSystemAVKeyEvent(napi_env env, napi_callback_info info);
     static napi_value SendSystemControlCommand(napi_env env, napi_callback_info info);
-    static napi_value On(napi_env env, napi_callback_info info);
-    static napi_value Off(napi_env env, napi_callback_info info);
-    static napi_value CreateLoopModeObject(napi_env env);
-    static napi_value CreatePlaybackStateObject(napi_env env);
-    static napi_value CastAudio(napi_env env, napi_callback_info info);
 
-    napi_env env_;
-    napi_ref wrapper_;
-    static napi_ref loopModeTypeRef_;
-    static napi_ref playbackStateTypeRef_;
-    std::shared_ptr<AVSessionController> avSessionController_;
-    std::shared_ptr<NapiSessionListenerCallback> sessionListenerCallback_;
+
+    static napi_value OnEvent(napi_env env, napi_callback_info info);
+    static napi_value OffEvent(napi_env env, napi_callback_info info);
+
+    static napi_status OnSessionCreated(napi_env env, napi_value callback);
+    static napi_status OnSessionDestroyed(napi_env env, napi_value callback);
+    static napi_status OnTopSessionChanged(napi_env env, napi_value callback);
+    static napi_status OnServiceDied(napi_env env, napi_value callback);
+
+    static napi_status OffSessionCreated(napi_env env);
+    static napi_status OffSessionDestroyed(napi_env env);
+    static napi_status OffTopSessionChanged(napi_env env);
+    static napi_status OffServiceDied(napi_env env);
+
+    static void HandleServiceDied();
+
+    static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> eventHandlers_;
+
+    static std::shared_ptr<NapiSessionListener> listener_;
+    static std::shared_ptr<NapiAsyncCallback> asyncCallback_;
+    static napi_ref serviceDiedCallback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_MANAGER_H

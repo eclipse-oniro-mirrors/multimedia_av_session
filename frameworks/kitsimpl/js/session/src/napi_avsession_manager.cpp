@@ -13,553 +13,347 @@
  * limitations under the License.
  */
 
-#include "cstring"
+#include "napi_avsession_manager.h"
 #include "avcontrol_command.h"
 #include "avplayback_state.h"
+#include "avsession_errors.h"
 #include "key_event.h"
-#include "napi_avsession_manager.h"
-
-using namespace std;
+#include "ability.h"
+#include "napi_base_context.h"
+#include "napi_utils.h"
+#include "napi_async_work.h"
+#include "napi_avsession.h"
+#include "napi_avsession_controller.h"
+#include "napi_control_command.h"
 
 namespace OHOS::AVSession {
-struct AudioDeviceDescriptor {
-    int32_t deviceRole;
-    int32_t deviceType;
+std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAVSessionManager::OffEventHandlerType>>
+    NapiAVSessionManager::eventHandlers_ = {
+    { "sessionCreated", { OnSessionCreated, OffSessionCreated } },
+    { "sessionDestroyed", { OnSessionDestroyed, OffSessionDestroyed } },
+    { "topSessionChanged", { OnTopSessionChanged, OffTopSessionChanged } },
+    { "sessionServiceDied", { OnServiceDied, OffServiceDied } },
 };
 
-struct ManagerAsyncContext : NapiAsyncProxy<ManagerAsyncContext>::AysncContext {
-    std::string tag;
-    int32_t type = -1;
-    int32_t sessionId;
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
-    std::shared_ptr<AVControlCommand> aVControlCommand = nullptr;
-    pid_t pid;
-    uid_t uid;
-    std::string session;
-    std::vector<AudioDeviceDescriptor> audioDeviceDescriptors;
-};
-
-napi_ref NapiAVSessionManager::loopModeTypeRef_ = nullptr;
-napi_ref NapiAVSessionManager::playbackStateTypeRef_ = nullptr;
-
-NapiAVSessionManager::NapiAVSessionManager()
-    : env_(nullptr), wrapper_(nullptr), avSessionController_(nullptr), sessionListenerCallback_(nullptr) {}
-
-NapiAVSessionManager::~NapiAVSessionManager()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
-
-void GetTag(const napi_env& env, const napi_value& object, ManagerAsyncContext* asyncContext)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, object, &valueType);
-    if (valueType == napi_string) {
-        asyncContext->tag = AVSessionNapiUtils::GetStringArgument(env, object);
-    }
-}
-
-void GetType(const napi_env& env, const napi_value& object, ManagerAsyncContext* asyncContext)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, object, &valueType);
-    if (valueType == napi_string) {
-        std::string value = AVSessionNapiUtils::GetStringArgument(env, object);
-        if (!value.empty() && !value.compare("audio")) {
-            asyncContext->type = AVSession::SESSION_TYPE_AUDIO;
-        } else if (!value.empty() && !value.compare("video")) {
-            asyncContext->type = AVSession::SESSION_TYPE_VIDEO;
-        }
-    }
-}
+std::shared_ptr<NapiSessionListener> NapiAVSessionManager::listener_;
+std::shared_ptr<NapiAsyncCallback> NapiAVSessionManager::asyncCallback_;
+napi_ref NapiAVSessionManager::serviceDiedCallback_;
 
 napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 {
-    napi_property_descriptor static_prop[] = {
+    napi_property_descriptor descriptors[] = {
         DECLARE_NAPI_STATIC_FUNCTION("createAVSession", CreateAVSession),
         DECLARE_NAPI_STATIC_FUNCTION("getAllSessionDescriptors", GetAllSessionDescriptors),
         DECLARE_NAPI_STATIC_FUNCTION("createController", CreateController),
         DECLARE_NAPI_STATIC_FUNCTION("castAudio", CastAudio),
+        DECLARE_NAPI_STATIC_FUNCTION("on", OnEvent),
+        DECLARE_NAPI_STATIC_FUNCTION("off", OffEvent),
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemAVKeyEvent", SendSystemAVKeyEvent),
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemControlCommand", SendSystemControlCommand),
-        DECLARE_NAPI_STATIC_FUNCTION("on", On),
-        DECLARE_NAPI_STATIC_FUNCTION("off", Off),
-        DECLARE_NAPI_PROPERTY("LoopMode", CreateLoopModeObject(env)),
-        DECLARE_NAPI_PROPERTY("PlaybackState", CreatePlaybackStateObject(env))
     };
 
-    napi_status status = napi_define_properties(env, exports,
-        sizeof(static_prop) / sizeof(static_prop[AVSessionNapiUtils::PARAM0]), static_prop);
-    if (status == napi_ok) {
-        return exports;
+    napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
+                                                descriptors);
+    if (status != napi_ok) {
+        SLOGE("define manager properties failed");
+        return NapiUtils::GetUndefinedValue(env);
     }
-    SLOGE("Failure in NapiAVSessionManager::Init()");
-    return AVSessionNapiUtils::NapiUndefined(env);
+    return exports;
 }
 
 napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_info info)
 {
-    NapiAsyncProxy<ManagerAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<ManagerAsyncContext>::InputParser> parsers;
-    parsers.push_back(GetTag);
-    parsers.push_back(GetType);
-    proxy.ParseInputs(parsers);
+    struct ConcreteContext : public ContextBase {
+        std::string tag_;
+        int32_t type_{};
+        AppExecFwk::ElementName elementName_;
+        std::shared_ptr<AVSession> session_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
 
-    return proxy.DoAsyncWork(
-        "CreateAVSession",
-        [](ManagerAsyncContext* asyncContext) {
-            if (asyncContext->tag.empty()) {
-                SLOGE("createSession tag is null");
-                return ERR;
-            }
-            if (asyncContext->type < 0) {
-                SLOGE("createSession type is not 'audio' | 'video' ");
-                return ERR;
-            }
-            return OK;
-        },
-        [](ManagerAsyncContext* asyncContext, napi_value& output) {
-            napi_status status = NapiAVSession::NewInstance(asyncContext->env,
-                &output, asyncContext->tag, asyncContext->type);
-            if (status == napi_ok) {
-                return OK;
-            }
-            SLOGE("CreateAVSession fail ");
-            return ERR;
-        });
+    auto inputParser = [env, context](size_t argc, napi_value *argv) {
+        // require 2 arguments <tag> <type>
+        CHECK_ARGS_RETURN_VOID(context, argc == 2, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[0], context->tag_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->tag_.empty(), "invalid tag");
+        std::string typeString;
+        context->status = NapiUtils::GetValue(env, argv[1], typeString);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !typeString.empty(), "invalid type");
+        context->type_ = NapiUtils::ConvertSessionType(typeString);
+        CHECK_ARGS_RETURN_VOID(context, context->type_ >= 0, "wrong session type");
+        auto *ability = AbilityRuntime::GetCurrentAbility(env);
+        if (ability == nullptr) {
+            context->status = napi_generic_failure;
+            CHECK_STATUS_RETURN_VOID(context, "get current ability failed");
+        }
+        context->status = napi_ok;
+        context->elementName_ = ability->GetWant()->GetElement();
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        context->session_ = AVSessionManager::CreateSession(context->tag_, context->type_, context->elementName_);
+        if (context->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native create session failed";
+        }
+    };
+
+    auto complete = [context](napi_value &output) {
+        context->status = NapiAVSession::NewInstance(context->env, context->session_, output);
+        CHECK_STATUS_RETURN_VOID(context, "create new javascript object failed");
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "CreateAVSession", executor, complete);
 }
 
 napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_callback_info info)
 {
-    NapiAsyncProxy<ManagerAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<ManagerAsyncContext>::InputParser> parsers;
-    proxy.ParseInputs(parsers);
+    struct ConcreteContext : public ContextBase {
+        std::vector<AVSessionDescriptor> descriptors_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
 
-    return proxy.DoAsyncWork(
-        "GetAllSessionDescriptors",
-        [](ManagerAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](ManagerAsyncContext* asyncContext, napi_value& output) {
-            std::vector<AVSessionDescriptor> descriptor =  AVSessionManager::GetAllSessionDescriptors();
-            size_t size = descriptor.size();
-            SLOGI("AVSessionDescriptor size = %{public}zu", size);
-            napi_value valueParam = nullptr;
-            napi_status status;
-            napi_create_array_with_length(asyncContext->env, size, &output);
-            for (size_t i = 0; i < size; i ++) {
-                AVSessionNapiUtils::WrapAVSessionDescriptorToNapi(asyncContext->env, descriptor[i], valueParam);
-                status = napi_set_element(asyncContext->env, output, i, valueParam);
-                if (status != napi_ok) {
-                    return ERR;
-                }
-            }
-            return OK;
-        });
-}
+    auto executor = [context]() {
+        context->descriptors_ = AVSessionManager::GetAllSessionDescriptors();
+    };
 
-void GetSessionId(const napi_env& env, const napi_value& object, ManagerAsyncContext* asyncContext)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(asyncContext->env, object, &valueType);
-    if (valueType == napi_number) {
-        napi_get_value_int32(env, object, &asyncContext->sessionId);
-        SLOGI("NapiAVSessionManager::GetSessionId() sessionId : %{public}d ", asyncContext->sessionId);
-    }
+    auto complete = [env, context](napi_value &output) {
+        context->status = NapiUtils::SetValue(env, context->descriptors_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "GetAllSessionDescriptors", executor, complete);
 }
 
 napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_info info)
 {
-    NapiAsyncProxy<ManagerAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<ManagerAsyncContext>::InputParser> parsers;
-    parsers.push_back(GetSessionId);
-    proxy.ParseInputs(parsers);
+    struct ConcreteContext : public ContextBase {
+        int32_t sessionId_ {};
+        std::shared_ptr<AVSessionController> controller_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        // require 1 arguments <sessionId>
+        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[0], context->sessionId_);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->sessionId_ >= 0),
+                               "invalid sessionId");
+    };
+    context->GetCbInfo(env, info, input);
 
-    return proxy.DoAsyncWork(
-        "CreateController",
-        [](ManagerAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](ManagerAsyncContext* asyncContext, napi_value& output) {
-            napi_status status = NapiAVSessionController::NewInstance(
-                asyncContext->env, &output, asyncContext->sessionId);
-            if (status == napi_ok) {
-                return OK;
-            }
-            SLOGE(" CreateController fail ");
-            return ERR;
-        });
-}
-
-napi_value NapiAVSessionManager::CreateLoopModeObject(napi_env env)
-{
-    napi_value result = nullptr;
-    napi_status status;
-    int32_t refCount = 1;
-    string propName;
-    status = napi_create_object(env, &result);
-    if (status == napi_ok) {
-        for (int i = AVControlCommand::LOOP_MODE_SEQUENCE; i <= AVControlCommand::LOOP_MODE_SHUFFLE; i++) {
-            switch (i) {
-                case AVControlCommand::LOOP_MODE_SEQUENCE:
-                    propName = "LOOP_MODE_SEQUENCE";
-                    break;
-                case AVControlCommand::LOOP_MODE_SINGLE:
-                    propName = "LOOP_MODE_SINGLE";
-                    break;
-                case AVControlCommand::LOOP_MODE_LIST:
-                    propName = "LOOP_MODE_LIST";
-                    break;
-                case AVControlCommand::LOOP_MODE_SHUFFLE:
-                    propName = "LOOP_MODE_SHUFFLE";
-                    break;
-                default:
-                    SLOGE("CreateDeviceRoleObject: No prob with this value try next value!");
-                    continue;
-            }
-            status = AVSessionNapiUtils::SetValueInt32(env, propName, i, result);
-            if (status != napi_ok) {
-                SLOGE("Failed to add named prop!");
-                break;
-            }
-            propName.clear();
+    auto executor = [context]() {
+        context->controller_ = AVSessionManager::CreateController(context->sessionId_);
+        if (context->controller_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "nattive create controller failed";
         }
-        if (status == napi_ok) {
-            status = napi_create_reference(env, result, refCount, &loopModeTypeRef_);
-            if (status == napi_ok) {
-                return result;
-            }
-        }
-    }
-    SLOGE("CreateLoopModeObject is Failed!");
-    napi_get_undefined(env, &result);
+    };
 
-    return result;
-}
+    auto complete = [env, context](napi_value &output) {
+        output = NapiUtils::GetUndefinedValue(env);
+        context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+    };
 
-napi_value NapiAVSessionManager::CreatePlaybackStateObject(napi_env env)
-{
-    napi_value result = nullptr;
-    napi_status status;
-    int32_t refCount = 1;
-    string propName;
-    status = napi_create_object(env, &result);
-    if (status == napi_ok) {
-        for (int i = AVPlaybackState::PLAYBACK_STATE_INITIAL + 1; i < AVPlaybackState::PLAYBACK_STATE_MAX; i++) {
-            switch (i) {
-                case AVPlaybackState::PLAYBACK_STATE_INITIAL : propName = "PLAYBACK_STATE_INITIAL";
-                    break;
-                case AVPlaybackState::PLAYBACK_STATE_PREPARING : propName = "PLAYBACK_STATE_PREPARE";
-                    break;
-                case AVPlaybackState::PLAYBACK_STATE_PLAYING : propName = "PLAYBACK_STATE_PLAY";
-                    break;
-                case AVPlaybackState::PLAYBACK_STATE_PAUSED : propName = "PLAYBACK_STATE_PAUSE";
-                    break;
-                case AVPlaybackState::PLAYBACK_STATE_FAST_FORWARD : propName = "PLAYBACK_STATE_FAST_FORWARD";
-                    break;
-                case AVPlaybackState::PLAYBACK_STATE_REWIND : propName = "PLAYBACK_STATE_REWIND";
-                    break;
-                case AVPlaybackState::PLAYBACK_STATE_STOP : propName = "PLAYBACK_STATE_STOP";
-                    break;
-                default:
-                    SLOGE("CreatePlaybackStateObject: No prob with this value try next value!");
-                    continue;
-            }
-            status = AVSessionNapiUtils::SetValueInt32(env, propName, i, result);
-            if (status != napi_ok) {
-                SLOGE("Failed to add named prop!");
-                break;
-            }
-            propName.clear();
-        }
-        if (status == napi_ok) {
-            status = napi_create_reference(env, result, refCount, &playbackStateTypeRef_);
-            if (status == napi_ok) {
-                return result;
-            }
-        }
-    }
-    napi_get_undefined(env, &result);
-    return result;
-}
-
-void NapiAVSessionManager::Destructor(napi_env env, void* nativeObject, void* finalizeHint)
-{
-    if (nativeObject != nullptr) {
-        auto obj = static_cast<NapiAVSessionManager*>(nativeObject);
-        obj->sessionListenerCallback_ = nullptr;
-        delete obj;
-        obj = nullptr;
-        SLOGI("NapiAVSessionManager::Destructor delete NapiAVSessionManager obj done");
-    }
-}
-
-napi_value NapiAVSessionManager::On(napi_env env, napi_callback_info info)
-{
-    napi_value undefinedResult = AVSessionNapiUtils::NapiUndefined(env);
-    const size_t minArgCount = 2;
-    size_t argCount = 2;
-    napi_value args[minArgCount] = {nullptr, nullptr};
-    napi_value jsThis = nullptr;
-    napi_status status = napi_get_cb_info(env, info, &argCount, args, &jsThis, nullptr);
-    if (status != napi_ok || argCount < minArgCount) {
-        SLOGE("Less than two parameters");
-        return undefinedResult;
-    }
-    napi_valuetype eventType = napi_undefined;
-    if (napi_typeof(env, args[0], &eventType) != napi_ok || eventType != napi_string) {
-        SLOGE("The first argument is not string");
-        return undefinedResult;
-    }
-    if (napi_typeof(env, args[1], &eventType) != napi_ok || eventType != napi_function) {
-        SLOGE("The second argument is not a function .");
-        return undefinedResult;
-    }
-    std::string callbackName = AVSessionNapiUtils::GetStringArgument(env, args[0]);
-    SLOGI("NapiAVSessionManager::On callbackName: %{public}s", callbackName.c_str());
-    NapiAVSessionManager* managerNapi = nullptr;
-    status = napi_unwrap(env, jsThis, reinterpret_cast<void **>(&managerNapi));
-    if (managerNapi == nullptr) {
-        SLOGI("There is no NapiAVSessionManager. create NapiAVSessionManager!");
-        managerNapi = new NapiAVSessionManager();
-        status = napi_wrap(env, jsThis, static_cast<void*>(managerNapi),
-                           NapiAVSessionManager::Destructor, nullptr, &(managerNapi->wrapper_));
-    }
-    if (managerNapi->sessionListenerCallback_ == nullptr) {
-        managerNapi->sessionListenerCallback_ = std::make_shared<NapiSessionListenerCallback>();
-        int32_t ret = AVSessionManager::RegisterSessionListener(managerNapi->sessionListenerCallback_);
-        if (ret) {
-            SLOGE("NapiAVSessionManager: RegisterSessionListener Failed");
-            return undefinedResult;
-        }
-        SLOGI(" create NapiSessionListenerCallback ");
-    }
-    std::shared_ptr<NapiSessionListenerCallback> cb =
-        std::static_pointer_cast<NapiSessionListenerCallback>(managerNapi->sessionListenerCallback_);
-    if (cb->hasCallback(callbackName)) {
-        cb->SaveCallbackReference(callbackName, args[1], env);
-        SLOGI("SaveCallbackReference end");
-    }
-    return AVSessionNapiUtils::NapiUndefined(env);
-}
-
-napi_value NapiAVSessionManager::Off(napi_env env, napi_callback_info info)
-{
-    napi_value undefinedResult = AVSessionNapiUtils::NapiUndefined(env);
-    const size_t minArgCount = 1;
-    size_t argCount = 1;
-    napi_value args[minArgCount] = {nullptr};
-    napi_value jsThis = nullptr;
-    napi_status status = napi_get_cb_info(env, info, &argCount, args, &jsThis, nullptr);
-    if (status != napi_ok || argCount < minArgCount) {
-        SLOGE("Less than one parameters");
-        return undefinedResult;
-    }
-    napi_valuetype eventType = napi_undefined;
-    if (napi_typeof(env, args[0], &eventType) != napi_ok || eventType != napi_string) {
-        return undefinedResult;
-    }
-    std::string callbackName = AVSessionNapiUtils::GetStringArgument(env, args[0]);
-    SLOGI("NapiAVSessionManager::Off callbackName: %{public}s", callbackName.c_str());
-    NapiAVSessionManager* managerNapi = nullptr;
-    status = napi_unwrap(env, jsThis, reinterpret_cast<void **>(&managerNapi));
-    if (status != napi_ok || managerNapi == nullptr) {
-        SLOGE("napi_unwrap managerNapi error");
-    }
-    if (managerNapi->sessionListenerCallback_ == nullptr) {
-        SLOGI("NapiAVSessionManager::Off no callback ref ");
-        return undefinedResult;
-    }
-    std::shared_ptr<NapiSessionListenerCallback> cb =
-        std::static_pointer_cast<NapiSessionListenerCallback>(managerNapi->sessionListenerCallback_);
-    if (cb->hasCallback(callbackName)) {
-        SLOGE(" cb->hasCallback(callbackName) is true ");
-        cb->ReleaseCallbackReference(callbackName);
-    }
-    return AVSessionNapiUtils::NapiUndefined(env);
-}
-
-void GetKeyEvent(const napi_env& env, const napi_value& object, ManagerAsyncContext* asyncContext)
-{
-    AVSessionNapiUtils::WrapNapiToKeyEvent(env, object, asyncContext->keyEvent);
-}
-
-napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callback_info info)
-{
-    NapiAsyncProxy<ManagerAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<ManagerAsyncContext>::InputParser> parsers;
-    parsers.push_back(GetKeyEvent);
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "SendSystemAVKeyEvent",
-        [](ManagerAsyncContext* asyncContext) {
-            if (asyncContext->keyEvent == nullptr) {
-                SLOGE("get param keyEvent fail");
-                return ERR;
-            }
-            return OK;
-        },
-        [](ManagerAsyncContext* asyncContext, napi_value& output) {
-            SLOGI("NapiAVSession::SendSystemAVKeyEvent() async");
-            int32_t ret = AVSessionManager::SendSystemAVKeyEvent(*(asyncContext->keyEvent.get()));
-            if (ret) {
-                SLOGE("native SendSystemAVKeyEvent Failed");
-                return ERR;
-            }
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
-        });
-}
-
-void GetArgvAVControlCommand(const napi_env& env, const napi_value& object, ManagerAsyncContext* asyncContext)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, object, &valueType);
-    if (valueType != napi_object) {
-        SLOGE("SendSystemControlCommand valueType error");
-        return ;
-    }
-    std::string strCommand = AVSessionNapiUtils::GetValueString(env, "command", object);
-    if (strCommand.empty()) {
-        SLOGE("SendSystemControlCommand get param command  fail ");
-        return ;
-    }
-    int32_t command = AVControlCommand::SESSION_CMD_MAX;
-    if (aVControlCommandMap.find(strCommand) == aVControlCommandMap.end()) {
-        SLOGE("SendSystemControlCommand not found %{public}s", strCommand.c_str());
-        return ;
-    }
-    command = aVControlCommandMap[strCommand];
-    asyncContext->aVControlCommand = make_shared<AVControlCommand>();
-    asyncContext->aVControlCommand->SetCommand(command);
-    napi_value res = nullptr;
-    if (napi_get_named_property(env, object, "parameter", &res) != napi_ok) {
-        SLOGE("SendSystemControlCommand napi_get_named_property error");
-        return ;
-    }
-    napi_typeof(env, res, &valueType);
-    if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SEEK) {
-        int64_t time = 0;
-        napi_get_value_int64(env, res, &time);
-        asyncContext->aVControlCommand->SetSeekTime(time);
-    }
-    if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_SPEED) {
-        double speed = 1.0;
-        napi_get_value_double(env, res, &speed);
-        asyncContext->aVControlCommand->SetSpeed(speed);
-    }
-    if (valueType == napi_number && command == AVControlCommand::SESSION_CMD_SET_LOOP_MODE) {
-        int32_t loopMode = 0;
-        napi_get_value_int32(env, res, &loopMode);
-        asyncContext->aVControlCommand->SetLoopMode(loopMode);
-    }
-    if (valueType == napi_string && command == AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE) {
-        std::string mediald = AVSessionNapiUtils::GetStringArgument(env, res);
-        asyncContext->aVControlCommand->SetAssetId(mediald);
-    }
-}
-
-napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_callback_info info)
-{
-    NapiAsyncProxy<ManagerAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<ManagerAsyncContext>::InputParser> parsers;
-    parsers.push_back(GetArgvAVControlCommand);
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "SendSystemControlCommand",
-        [](ManagerAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](ManagerAsyncContext* asyncContext, napi_value& output) {
-            SLOGI(" NapiAVSession::SendSystemControlCommand() async");
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            int32_t ret = AVSessionManager::SendSystemControlCommand(*asyncContext->aVControlCommand);
-            if (ret) {
-                SLOGE(" native SendSystemControlCommand fail ");
-                return ERR;
-            }
-            return OK;
-        });
-}
-
-void GetArgvSession(const napi_env& env, const napi_value& object, ManagerAsyncContext* asyncContext)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, object, &valueType);
-    if (valueType == napi_object) {
-        asyncContext->sessionId = AVSessionNapiUtils::GetValueInt32(env, "sessionId", object);
-        asyncContext->pid = AVSessionNapiUtils::GetValueInt32(env, "pid", object);
-        asyncContext->uid = AVSessionNapiUtils::GetValueInt32(env, "uid", object);
-    } else if (valueType == napi_string) {
-        std::string session = AVSessionNapiUtils::GetValueString(env, "session", object);
-        if (session.empty()) {
-            SLOGI("GetArgvSession:: get param fail ");
-        } else if (!session.compare("all")) {
-            asyncContext->session = session;
-        }
-    }
-}
-
-void GetArgvAudioDevices(const napi_env& env, const napi_value& object, ManagerAsyncContext* asyncContext)
-{
-    bool present = false;
-    bool isArray = false;
-    uint32_t len = 0;
-    AudioDeviceDescriptor descriptor;
-    napi_value property = nullptr;
-    napi_value deviceDescriptorItem = nullptr;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, object, &valueType);
-    if (valueType != napi_object) {
-        SLOGE("GetArgvAudioDevices:: valueType error ");
-        return;
-    }
-    napi_has_named_property(env, object, "audioDevices", &present);
-    if (!present || napi_get_named_property(env, object, "audioDevices", &property) != napi_ok ||
-        napi_is_array(env, property, &isArray) != napi_ok || !isArray) {
-        SLOGE("GetArgvAudioDevices:: get param fail ");
-        return;
-    }
-    napi_get_array_length(env, property, &len);
-    for (size_t i = 0; i < len; i++) {
-        napi_get_element(env, property, i, &deviceDescriptorItem);
-        valueType = napi_undefined;
-        napi_typeof(env, deviceDescriptorItem, &valueType);
-        if (valueType == napi_object) {
-            descriptor.deviceRole = AVSessionNapiUtils::GetValueInt32(env, "deviceRole", deviceDescriptorItem);
-            descriptor.deviceType = AVSessionNapiUtils::GetValueInt32(env, "deviceType", deviceDescriptorItem);
-            asyncContext->audioDeviceDescriptors.push_back(descriptor);
-        }
-    }
+    return NapiAsyncWork::Enqueue(env, context, "CreateController", executor, complete);
 }
 
 napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info)
 {
-    NapiAsyncProxy<ManagerAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<ManagerAsyncContext>::InputParser> parsers;
-    parsers.push_back(GetArgvSession);
-    parsers.push_back(GetArgvAudioDevices);
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "CastAudio",
-        [](ManagerAsyncContext* asyncContext) {
-            SLOGE("No local CastAudio methods .");
-            return ERR;
-        },
-        [](ManagerAsyncContext* asyncContext, napi_value& output) {
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
-        });
+    SLOGI("not implement");
+    napi_throw_error(env, nullptr, "not implement");
+    return nullptr;
 }
-} // namespace OHOS
+
+napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    std::string eventName;
+    napi_value callback {};
+    auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
+        /* require 2 arguments <event, callback> */
+        CHECK_ARGS_RETURN_VOID(context, argc == 2, "invalid argument number");
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[0], &type);
+        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
+        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+
+        context->status = napi_typeof(env, argv[1], &type);
+        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_function), "callback type invalid");
+        callback = argv[1];
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        napi_throw_error(env, nullptr, context->error.c_str());
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto it = eventHandlers_.find(eventName);
+    if (it == eventHandlers_.end()) {
+        SLOGE("event name invalid");
+        napi_throw_error(env, nullptr, "event name invalid");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    if (listener_ == nullptr) {
+        listener_ = std::make_shared<NapiSessionListener>();
+        SLOGE("no memory");
+        napi_throw_error(env, nullptr, "no memory");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (it->second.first(env, callback) != napi_ok) {
+        napi_throw_error(env, nullptr, "add event callback failed");
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    std::string eventName;
+    auto input = [&eventName, env, &context](size_t argc, napi_value* argv) {
+        /* require 1 arguments <event> */
+        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid argument number");
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[0], &type);
+        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
+        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        napi_throw_error(env, nullptr, context->error.c_str());
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto it = eventHandlers_.find(eventName);
+    if (it == eventHandlers_.end()) {
+        SLOGE("event name invalid");
+        napi_throw_error(env, nullptr, "event name invalid");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (it->second.second(env) != napi_ok) {
+        napi_throw_error(env, nullptr, "remove event callback failed");
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        MMI::KeyEvent* keyEvent_ {};
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        // require 1 arguments <sessionId>
+        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[0], context->keyEvent_);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->keyEvent_ != nullptr),
+                               "invalid keyEvent");
+    };
+    context->GetCbInfo(env, info, input);
+
+    auto executor = [context]() {
+        if (AVSessionManager::SendSystemAVKeyEvent(*context->keyEvent_) != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "native send keyEvent failed";
+        }
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "SendSystemAVKeyEvent", executor);
+}
+
+napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_callback_info info)
+{
+    struct ConcrentContext : public ContextBase {
+        AVControlCommand command;
+    };
+    auto context = std::make_shared<ConcrentContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        // require 1 arguments <command>
+        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
+        context->status = NapiControlCommand::GetValue(env, argv[0], context->command);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command");
+    };
+    context->GetCbInfo(env, info, input);
+
+    auto executor = [context]() {
+        if (AVSessionManager::SendSystemControlCommand(context->command) != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "native send control command failed";
+        }
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "SendSystemControlCommand", executor);
+}
+
+napi_status NapiAVSessionManager::OnSessionCreated(napi_env env, napi_value callback)
+{
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_SESSION_CREATED, callback);
+}
+
+napi_status NapiAVSessionManager::OnSessionDestroyed(napi_env env, napi_value callback)
+{
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_SESSION_DESTROYED, callback);
+}
+
+napi_status NapiAVSessionManager::OnTopSessionChanged(napi_env env, napi_value callback)
+{
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED, callback);
+}
+
+napi_status NapiAVSessionManager::OnServiceDied(napi_env env, napi_value callback)
+{
+    NAPI_CALL_BASE(env, napi_create_reference(env, callback, 1, &serviceDiedCallback_), napi_generic_failure);
+    if (asyncCallback_ == nullptr) {
+        asyncCallback_ = std::make_shared<NapiAsyncCallback>(env);
+        if (asyncCallback_ == nullptr) {
+            SLOGE("no memory");
+            return napi_generic_failure;
+        }
+    }
+    if (AVSessionManager::RegisterServiceDeathCallback(HandleServiceDied) != AVSESSION_SUCCESS) {
+        return napi_generic_failure;
+    }
+    return napi_ok;
+}
+
+void NapiAVSessionManager::HandleServiceDied()
+{
+    if (serviceDiedCallback_ != nullptr && asyncCallback_ != nullptr) {
+
+        asyncCallback_->Call(serviceDiedCallback_);
+    }
+}
+
+napi_status NapiAVSessionManager::OffSessionCreated(napi_env env)
+{
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SESSION_CREATED);
+}
+
+napi_status NapiAVSessionManager::OffSessionDestroyed(napi_env env)
+{
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SESSION_DESTROYED);
+}
+
+napi_status NapiAVSessionManager::OffTopSessionChanged(napi_env env)
+{
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED);
+}
+
+napi_status NapiAVSessionManager::OffServiceDied(napi_env env)
+{
+    AVSessionManager::UnregisterServiceDeathCallback();
+    auto status = napi_delete_reference(env, serviceDiedCallback_);
+    serviceDiedCallback_ = nullptr;
+    return status;
+}
+}

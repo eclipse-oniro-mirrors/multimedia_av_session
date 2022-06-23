@@ -213,12 +213,12 @@ std::string AVMetaData::GetLyric() const
     return lyric_;
 }
 
-void AVMetaData::SetPreviosAssetId(const std::string& assetId)
+void AVMetaData::SetPreviousAssetId(const std::string& assetId)
 {
     previousAssetId_ = assetId;
 }
 
-std::string AVMetaData::GetPreviosAssetId() const
+std::string AVMetaData::GetPreviousAssetId() const
 {
     return previousAssetId_;
 }

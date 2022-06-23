@@ -13,18 +13,17 @@
  * limitations under the License.
  */
 
-#include "napi_avsession.h"
-#include "napi_avsession_controller.h"
-#include "napi_avsession_manager.h"
 #include "napi/native_api.h"
-#include "napi/native_common.h"
+#include "napi_avsession_manager.h"
+#include "napi_avsession.h"
+#include "napi_avsession_enum.h"
 
 namespace OHOS::AVSession {
 static napi_value Export(napi_env env, napi_value exports)
 {
+    InitEnums(env, exports);
     NapiAVSessionManager::Init(env, exports);
     NapiAVSession::Init(env, exports);
-    NapiAVSessionController::Init(env, exports);
 
     return exports;
 }

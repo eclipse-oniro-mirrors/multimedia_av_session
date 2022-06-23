@@ -261,14 +261,15 @@ int32_t AVSessionControllerProxy::GetSessionId()
 
 uint64_t AVSessionControllerProxy::GetRealPlaybackPosition()
 {
-    CHECK_AND_RETURN_RET_LOG(currentState_.GetUpdateTime() > 0, 0, "playbackState not update");
+    auto position = currentState_.GetPosistion();
+    CHECK_AND_RETURN_RET_LOG(position.updateTime_ > 0, 0, "playbackState not update");
     auto now = std::chrono::system_clock::now();
     auto nowMS = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
 
     uint64_t currentSysTime = nowMS.time_since_epoch().count();
     SLOGI("elapsedTime:%{public}" PRIu64 ", currentSysTime:%{public}" PRIu64 ", updateTime:%{public}" PRIu64,
-        currentState_.GetElapsedTime(), currentSysTime, currentState_.GetUpdateTime());
+          position.elapsedTime_, currentSysTime, position.updateTime_);
 
-    return (currentState_.GetElapsedTime() + (currentSysTime - currentState_.GetUpdateTime()));
+    return (position.elapsedTime_ + (currentSysTime - position.updateTime_));
 }
 }

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_UV_QUEUE_H
-#define OHOS_UV_QUEUE_H
+#ifndef OHOS_NAPI_UV_QUEUE_H
+#define OHOS_NAPI_UV_QUEUE_H
 
 #include <functional>
 #include "avsession_log.h"
@@ -24,24 +24,29 @@
 #include "uv.h"
 
 namespace OHOS::AVSession {
-constexpr size_t ARGC_MAX = 6;
-class UvQueue final {
+class NapiAsyncCallback final {
 public:
-    using NapiArgsGenerator = std::function<void(napi_env env, int& argc, napi_value* argv)>;
-    using NapiCallbackGetter = std::function<napi_value(napi_env env)>;
-    UvQueue(napi_env env);
-    ~UvQueue();
+    using NapiArgsGetter = std::function<void(napi_env env, int& argc, napi_value* argv)>;
 
-    napi_env GetEnv();
-    void AsyncCall(NapiCallbackGetter getter, NapiArgsGenerator genArgs = NapiArgsGenerator());
+    NapiAsyncCallback(napi_env env);
+    ~NapiAsyncCallback();
+
+    napi_env GetEnv() const;
+
+    void Call(napi_ref method, NapiArgsGetter getter = NapiArgsGetter());
+
 private:
-    struct UvEntry {
+    static void AfterWorkCallback(uv_work_t* work, int status);
+
+    struct DataContext {
         napi_env env;
-        NapiCallbackGetter callback;
-        NapiArgsGenerator args;
+        napi_ref method;
+        NapiArgsGetter getter;
     };
     napi_env env_ = nullptr;
     uv_loop_s* loop_ = nullptr;
+
+    static constexpr size_t ARGC_MAX = 6;
 };
 } // namespace OHOS::AVSession
-#endif // OHOS_UV_QUEUE_H
+#endif

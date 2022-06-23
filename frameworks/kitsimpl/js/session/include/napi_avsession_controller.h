@@ -19,42 +19,39 @@
 #include "avsession_controller.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"
-#include "callback/napi_avcontroller_callback.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "utils/avsession_napi_utils.h"
-#include "utils/napi_async_proxy.h"
+#include "napi_avcontroller_callback.h"
 
 namespace OHOS::AVSession {
 class NapiAVSessionController {
 public:
     NapiAVSessionController();
     ~NapiAVSessionController();
+
     static napi_value Init(napi_env env, napi_value exports);
-    static napi_status NewInstance(napi_env env, napi_value* instance, int32_t sessionId);
+    static napi_status NewInstance(napi_env env, std::shared_ptr<AVSessionController>& nativeController,
+                                   napi_value& out);
+
+    using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*, napi_value)>;
+    using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*)>;
 
 private:
-    static void Destructor(napi_env env, void* nativeObject, void* finalizeHint);
-    static napi_value JsObjectConstruct(napi_env env, napi_callback_info info);
-    static napi_value GetAVPlaybackState(napi_env env, napi_callback_info info);
-    static napi_value GetAVMetadata(napi_env env, napi_callback_info info);
-    static napi_value SendAVKeyEvent(napi_env env, napi_callback_info info);
-    static napi_value GetLaunchAbility(napi_env env, napi_callback_info info);
-    static napi_value IsActive(napi_env env, napi_callback_info info);
-    static napi_value Destroy(napi_env env, napi_callback_info info);
-    static napi_value GetValidCommands(napi_env env, napi_callback_info info);
-    static napi_value SendControlCommand(napi_env env, napi_callback_info info);
-    static napi_value On(napi_env env, napi_callback_info info);
-    static napi_value Off(napi_env env, napi_callback_info info);
-    static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
-    static napi_value GetRealPlaybackPositionSync(napi_env env, napi_callback_info info);
-    static napi_value RegisterCallback(napi_env env, napi_value& jsThis, napi_value& callbackRef,
-                                       napi_value& filter, std::string& callbackName);
+    static napi_value ConstructorCallback(napi_env env, napi_callback_info info);
+    static napi_value OnEvent(napi_env env, napi_callback_info info);
+    static napi_value OffEvent(napi_env env, napi_callback_info info);
 
-    napi_env env_;
-    napi_ref wrapper_;
-    std::shared_ptr<AVSessionController> avsessionController_;
-    std::shared_ptr<NapiAVControllerCallback> avcontrollerCallback_;
+    static napi_status OnSessionDestroy(napi_env env, NapiAVSessionController* napiController, napi_value callback);
+
+    static napi_status OffSessionDestroy(napi_env env, NapiAVSessionController* napiController);
+
+    napi_ref wrapperRef_ {};
+    int32_t sessionId_ = -1;
+    std::shared_ptr<AVSessionController> controller_;
+    std::shared_ptr<NapiAVControllerCallback> callback_;
+
+    static std::map<std::string, OnEventHandlerType> onEventHandlers_;
+    static std::map<std::string, OffEventHandlerType> offEventHandlers_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_CONTROLLER_H
