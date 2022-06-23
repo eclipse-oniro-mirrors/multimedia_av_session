@@ -227,19 +227,130 @@ napi_status NapiUtils::SetValue(napi_env env, const AVSessionDescriptor& in, nap
     return napi_ok;
 }
 
-/* napi_value <-> MMI::KeyEvent */
-napi_status NapiUtils::GetValue(napi_env env, napi_value in, MMI::KeyEvent*& out)
+/* napi_value <-> MMI::KeyEvent::KeyItem */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, MMI::KeyEvent::KeyItem& out)
 {
-    napi_valuetype valueType = napi_undefined;
-    auto status = napi_typeof(env, in, &valueType);
-    CHECK_RETURN(status == napi_ok && valueType == napi_object, "not object", napi_invalid_arg);
-    status = napi_unwrap(env, in, reinterpret_cast<void **>(&out));
+    int32_t code {};
+    auto status = GetNamedProperty(env, in, "code", code);
+    CHECK_RETURN(status == napi_ok, "get code property failed", status);
+    out.SetKeyCode(code);
+
+    int64_t pressedTime {};
+    status = GetNamedProperty(env, in, "pressedTime", code);
+    CHECK_RETURN(status == napi_ok, "get pressedTime property failed", status);
+    out.SetDownTime(pressedTime);
+
+    int32_t deviceId {};
+    status = GetNamedProperty(env, in, "deviceId", deviceId);
+    CHECK_RETURN(status == napi_ok, "get deviceId property failed", status);
+    out.SetDeviceId(deviceId);
+
     return status;
 }
 
-napi_status NapiUtils::SetValue(napi_env env, MMI::KeyEvent& in, napi_value& out)
+napi_status NapiUtils::SetValue(napi_env env, const MMI::KeyEvent::KeyItem& in, napi_value& out)
 {
+    auto status = napi_create_object(env, &out);
+    CHECK_RETURN(status == napi_ok, "create object failed", status);
+
+    napi_value code {};
+    status = SetValue(env, in.GetKeyCode(), code);
+    CHECK_RETURN(status == napi_ok, "create property failed", status);
+    status = napi_set_named_property(env, out, "code", code);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+
+    napi_value pressedTime {};
+    status = SetValue(env, in.GetDownTime(), pressedTime);
+    CHECK_RETURN(status == napi_ok, "create property failed", status);
+    status = napi_set_named_property(env, out, "pressedTime", pressedTime);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+
+    napi_value deviceId {};
+    status = SetValue(env, in.GetDeviceId(), deviceId);
+    CHECK_RETURN(status == napi_ok, "create property failed", status);
+    status = napi_set_named_property(env, out, "deviceId", deviceId);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+
+    return status;
+}
+
+/* napi_value <-> MMI::KeyEvent */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::shared_ptr<MMI::KeyEvent>& out)
+{
+    napi_valuetype valueType = napi_undefined;
+    auto status = napi_typeof(env, in, &valueType);
+    CHECK_RETURN((status == napi_ok) && (valueType == napi_object), "object type invalid", status);
+
+    out = MMI::KeyEvent::Create();
+    CHECK_RETURN(out != nullptr, "create keyEvent failed", napi_generic_failure);
+
+    int32_t action {};
+    status = GetNamedProperty(env, in, "action", action);
+    CHECK_RETURN(status == napi_ok, "get action property failed", napi_generic_failure);
+    out->SetAction(action);
+
+    MMI::KeyEvent::KeyItem key;
+    status = GetNamedProperty(env, in, "key", key);
+    CHECK_RETURN(status == napi_ok, "get action property failed", napi_generic_failure);
+    out->SetKeyCode(key.GetKeyCode());
+
+    napi_value keyItems {};
+    status = napi_get_named_property(env, in, "keys", &keyItems);
+    CHECK_RETURN((status == napi_ok) && (keyItems != nullptr), "get keys property failed", status);
+
+    uint32_t length {};
+    status = napi_get_array_length(env, keyItems, &length);
+    CHECK_RETURN(status == napi_ok, "get array length failed", status);
+
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value keyItem {};
+        status = napi_get_element(env, keyItems, i, &keyItem);
+        CHECK_RETURN((status == napi_ok) && (keyItem != nullptr), "get element failed", status);
+        MMI::KeyEvent::KeyItem item;
+        status = GetValue(env, keyItem, item);
+        CHECK_RETURN(status == napi_ok, "get KeyItem failed", status);
+        out->AddKeyItem(item);
+    }
+
     return napi_ok;
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEvent>& in, napi_value& out)
+{
+    auto status = napi_create_object(env, &out);
+    CHECK_RETURN(status == napi_ok, "create object failed", status);
+
+    napi_value action {};
+    status = SetValue(env, in->GetKeyAction(), action);
+    CHECK_RETURN(status == napi_ok, "create action property failed", status);
+    status = napi_set_named_property(env, out, "action", action);
+    CHECK_RETURN(status == napi_ok, "set action property failed", status);
+
+    napi_value key {};
+    status = SetValue(env, *in->GetKeyItem(), key);
+    CHECK_RETURN(status == napi_ok, "create key property failed", status);
+    status = napi_set_named_property(env, out, "key", key);
+    CHECK_RETURN(status == napi_ok, "set key property failed", status);
+
+    napi_value keys {};
+    status = napi_create_array(env, &keys);
+    CHECK_RETURN(status == napi_ok, "create array failed", status);
+
+    uint32_t idx = 0;
+    std::vector<MMI::KeyEvent::KeyItem> keyItems = in->GetKeyItems();
+    for (const auto &keyItem : keyItems) {
+        napi_value item {};
+        status = SetValue(env, keyItem, item);
+        CHECK_RETURN(status == napi_ok, "create keyItem failed", status);
+
+        status = napi_set_element(env, keys, idx, item);
+        CHECK_RETURN(status == napi_ok, "set element failed", status);
+        ++idx;
+    }
+
+    status = napi_set_named_property(env, out, "keys", keys);
+    CHECK_RETURN(status == napi_ok, "set keys property failed", status);
+    return status;
 }
 
 /* napi_value <-> AbilityRuntime::WantAgent::WantAgent */

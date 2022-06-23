@@ -249,7 +249,7 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
 napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
-        MMI::KeyEvent* keyEvent_ {};
+        std::shared_ptr<MMI::KeyEvent> keyEvent_;
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
