@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "session_container.h"
 #include "iclient_death.h"
 #include "isession_listener.h"
+#include "focus_session_strategy.h"
 
 namespace OHOS::AVSession {
 class AVSessionService : public SystemAbility, public AVSessionServiceStub {
@@ -79,6 +80,7 @@ private:
 
     void NotifySessionCreate(const AVSessionDescriptor& descriptor);
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
+    void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
     void RemoveClientDeathObserver(pid_t pid);
@@ -97,13 +99,15 @@ private:
 
     void InitKeyEvent();
 
-    void InitAudio();
+    void InitFocusSessionStrategy();
+
+    void HandleTopSessionChanged(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 
     std::recursive_mutex sessionIdsLock_;
     std::list<int32_t> sessionIds_;
     int32_t sessionSeqNum_ {};
 
-    std::recursive_mutex lock_;
+    std::recursive_mutex sessionAndControllerLock_;
     sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
 
@@ -112,6 +116,8 @@ private:
 
     std::recursive_mutex sessionListenersLock_;
     std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
+
+    FocusSessionStrategy focusSessionStrategy_;
 };
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {

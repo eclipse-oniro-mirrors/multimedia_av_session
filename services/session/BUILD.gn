@@ -46,6 +46,7 @@ ohos_shared_library("avsession_service") {
     "server/avsession_item.cpp",
     "server/avsession_service.cpp",
     "server/session_stack.cpp",
+    "server/focus_session_strategy.cpp",
   ]
 
   adapter_sources = [
@@ -78,6 +79,7 @@ ohos_shared_library("avsession_service") {
     "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
+    "multimedia_audio_framework:audio_client",
   ]
 
   subsystem_name = "multimedia"
