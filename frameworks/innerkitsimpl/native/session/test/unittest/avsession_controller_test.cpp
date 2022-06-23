@@ -718,6 +718,54 @@ HWTEST_F(AVSessionControllerTest, SetMetaFilter002, TestSize.Level1)
 }
 
 /**
+* @tc.name: SetPlaybackFilter001
+* @tc.desc: set playback filter,the func GetAVPlaybackData will return the item which is not in the playback filter
+* @tc.type: FUNC
+* @tc.require: AR000H31JK
+*/
+HWTEST_F(AVSessionControllerTest, SetPlaybackFilter001, TestSize.Level1)
+{
+    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
+    EXPECT_NE(callback, nullptr);
+    EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
+    AVPlaybackState::PlaybackStateMaskType filter;
+    filter.set(AVPlaybackState::PLAYBACK_KEY_LOOP_MODE);
+    filter.set(AVPlaybackState::PLAYBACK_KEY_STATE);
+    EXPECT_EQ(controller_->SetPlaybackFilter(filter), AVSESSION_SUCCESS);
+    AVPlaybackState state;
+    state.SetLoopMode(AVControlCommand::LOOP_MODE_LIST);
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARING);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
+
+    sleep(1);
+    EXPECT_EQ(callback->state_.GetState(), AVPlaybackState::PLAYBACK_STATE_PREPARING);
+    EXPECT_EQ(callback->state_.GetLoopMode(), AVControlCommand::LOOP_MODE_LIST);
+}
+
+/**
+* @tc.name: SetPlaybackFilter002
+* @tc.desc: set meta filter,the func GetAVPlaybackData will return the item which is not in the playback filter
+* @tc.type: FUNC
+* @tc.require: AR000H31JK
+*/
+HWTEST_F(AVSessionControllerTest, SetPlaybackFilter002, TestSize.Level1)
+{
+    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
+    EXPECT_NE(callback, nullptr);
+    EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
+    AVPlaybackState::PlaybackStateMaskType filter;
+    EXPECT_EQ(controller_->SetPlaybackFilter(filter), AVSESSION_SUCCESS);
+    AVPlaybackState state;
+    state.SetLoopMode(AVControlCommand::LOOP_MODE_LIST);
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARING);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
+
+    sleep(1);
+    EXPECT_NE(callback->state_.GetState(), AVPlaybackState::PLAYBACK_STATE_PREPARING);
+    EXPECT_NE(callback->state_.GetLoopMode(), AVControlCommand::LOOP_MODE_LIST);
+}
+
+/**
 * @tc.name: GetSessionId001
 * @tc.desc: Get SessionId bind with controller, check if GetSessionId is valid
 * @tc.type: FUNC

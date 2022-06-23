@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -142,6 +142,18 @@ int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel &data, Messag
     } else {
         AVMetaData::MetaMaskType filter(str);
         CHECK_AND_PRINT_LOG(reply.WriteInt32(SetMetaFilter(filter)), "write int32 failed");
+    }
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleSetPlaybackFilter(MessageParcel &data, MessageParcel &reply)
+{
+    std::string str = data.ReadString();
+    if (str.empty()) {
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SetPlaybackFilter ret failed");
+    } else {
+        AVPlaybackState::PlaybackStateMaskType filter(str);
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(SetPlaybackFilter(filter)), "write int32 failed");
     }
     return ERR_NONE;
 }

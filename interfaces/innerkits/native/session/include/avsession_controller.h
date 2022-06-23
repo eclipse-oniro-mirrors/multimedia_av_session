@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,8 @@ public:
     virtual int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback) = 0;
 
     virtual int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) = 0;
+
+    virtual int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter) = 0;
 
     virtual int32_t Release() = 0;
 
