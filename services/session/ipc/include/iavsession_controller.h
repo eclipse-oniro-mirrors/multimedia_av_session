@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,7 @@ public:
         CONTROLLER_CMD_GET_VALID_COMMANDS,
         CONTROLLER_CMD_SEND_CONTROL_COMMAND,
         CONTROLLER_CMD_SET_META_FILTER,
+        CONTROLLER_CMD_SET_PLAYBACK_FILTER,
         CONTROLLER_CMD_IS_SESSION_ACTIVE,
         CONTROLLER_CMD_GET_SESSION_ID,
         CONTROLLER_CMD_MAX

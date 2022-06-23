@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,6 +118,12 @@ int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter)
+{
+    playbackMask_ = filter;
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::Release()
 {
     if (callback_ != nullptr) {
@@ -152,8 +158,12 @@ void AVControllerItem::HandleSessionDestory()
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
 {
-    if (callback_ != nullptr) {
-        callback_->OnPlaybackStateChange(state);
+    if (callback_ == nullptr) {
+        return;
+    }
+    AVPlaybackState stateOut;
+    if (state.CopyToByMask(playbackMask_, stateOut)) {
+        callback_->OnPlaybackStateChange(stateOut);
     }
 }
 

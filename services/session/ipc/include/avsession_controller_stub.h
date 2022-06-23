@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,8 @@ private:
 
     int32_t HandleSetMetaFilter(MessageParcel &data, MessageParcel &reply);
 
+    int32_t HandleSetPlaybackFilter(MessageParcel &data, MessageParcel &reply);
+
     int32_t HandleIsSessionActive(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleGetSessionId(MessageParcel &data, MessageParcel &reply);
@@ -70,6 +72,7 @@ private:
         [CONTROLLER_CMD_GET_LAUNCH_ABILITY] = &AVSessionControllerStub::HandleGetLaunchAbility,
         [CONTROLLER_CMD_GET_VALID_COMMANDS] = &AVSessionControllerStub::HandleGetValidCommands,
         [CONTROLLER_CMD_SET_META_FILTER] = &AVSessionControllerStub::HandleSetMetaFilter,
+        [CONTROLLER_CMD_SET_PLAYBACK_FILTER] = &AVSessionControllerStub::HandleSetPlaybackFilter,
         [CONTROLLER_CMD_IS_SESSION_ACTIVE] = &AVSessionControllerStub::HandleIsSessionActive,
         [CONTROLLER_CMD_GET_SESSION_ID] = &AVSessionControllerStub::HandleGetSessionId,
     };
