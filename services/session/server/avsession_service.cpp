@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ void AVSessionService::OnStart()
     }
 
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
-    AddSystemAbilityListener(DISTRIBUTED_HARDWARE_AUDIO_SOURCE_SA_ID);
+    AddSystemAbilityListener(AUDIO_POLICY_SERVICE_ID);
 }
 
 void AVSessionService::OnDump()
@@ -61,8 +61,8 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         case MULTIMODAL_INPUT_SERVICE_ID:
             InitKeyEvent();
             break;
-        case DISTRIBUTED_HARDWARE_AUDIO_SOURCE_SA_ID:
-            InitAudio();
+        case AUDIO_POLICY_SERVICE_ID:
+            InitFocusSessionStrategy();
             break;
         default:
             SLOGE("undefined system ability %{public}d", systemAbilityId);
@@ -85,9 +85,33 @@ void AVSessionService::InitKeyEvent()
         keyCodes, [this](const auto& keyEvent) { SendSystemAVKeyEvent(*keyEvent); });
 }
 
-void AVSessionService::InitAudio()
+void AVSessionService::HandleTopSessionChanged(const FocusSessionStrategy::FocusSessionChangeInfo &info)
+{
+    bool found {};
+    {
+        std::lock_guard lockGuard(sessionAndControllerLock_);
+        for (const auto& session : GetContainer().GetAllSessions()) {
+            if (session->GetUid() == info.uid_) {
+                topSession_ = session;
+                found = true;
+                break;
+            }
+        }
+    }
+    if (found) {
+        SLOGI("sessionTag=%{public}s sessionId=%{public}d", topSession_->GetDescriptor().sessionTag_.c_str(),
+              topSession_->GetDescriptor().sessionId_);
+        NotifyTopSessionChanged(topSession_->GetDescriptor());
+    }
+}
+
+void AVSessionService::InitFocusSessionStrategy()
 {
     SLOGI("enter");
+    focusSessionStrategy_.Init();
+    focusSessionStrategy_.RegisterFocusSessionChangeCallback([this] (const auto &info) {
+        HandleTopSessionChanged(info);
+    });
 }
 
 SessionContainer& AVSessionService::GetContainer()
@@ -115,13 +139,13 @@ int32_t AVSessionService::AllocSessionId()
 
 bool AVSessionService::ClientHasSession(pid_t pid)
 {
-    std::lock_guard lockGuard(lock_);
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     return GetContainer().GetSession(pid) != nullptr;
 }
 
 sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, int32_t sessionId)
 {
-    std::lock_guard lockGuard(lock_);
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     auto it = controllers_.find(pid);
     if (it != controllers_.end()) {
         for (const auto &controller: it->second) {
@@ -147,6 +171,14 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
         listener->OnSessionRelease(descriptor);
+    }
+}
+
+void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor &descriptor)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    for (const auto& [pid, listener] : sessionListeners_) {
+        listener->OnTopSessionChanged(descriptor);
     }
 }
 
@@ -177,7 +209,7 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
 {
     SLOGI("enter");
     auto pid = GetCallingPid();
-    std::lock_guard lockGuard(lock_);
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (ClientHasSession(pid)) {
         SLOGE("%{public}d already has a session", pid);
         return nullptr;
@@ -201,7 +233,7 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
 std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
 {
     std::vector<AVSessionDescriptor> result;
-    std::lock_guard lockGuard(lock_);
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     for (const auto& session: GetContainer().GetAllSessions()) {
         result.push_back(session->GetDescriptor());
     }
@@ -225,7 +257,7 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
 sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
 {
     auto pid = GetCallingPid();
-    std::lock_guard lockGuard(lock_);
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (GetPresentController(pid, sessionId) != nullptr) {
         SLOGI("controller already exist");
         return nullptr;
@@ -322,7 +354,7 @@ void AVSessionService::OnClientDied(pid_t pid)
     RemoveSessionListener(pid);
     RemoveClientDeathObserver(pid);
 
-    std::lock_guard lockGuard(lock_);
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     ClearSessionForClientDiedNoLock(pid);
     ClearControllerForClientDiedNoLock(pid);
 }
@@ -331,14 +363,14 @@ void AVSessionService::HandleSessionRelease(AVSessionItem &session)
 {
     SLOGI("sessionId=%{public}d", session.GetSessionId());
     NotifySessionRelease(session.GetDescriptor());
-    std::lock_guard lockGuard(lock_);
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     GetContainer().RemoveSession(session.GetPid());
 }
 
 void AVSessionService::HandleControllerRelease(AVControllerItem &controller)
 {
     auto pid = controller.GetPid();
-    std::lock_guard lockGuard(lock_);
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     auto it = controllers_.find(pid);
     if (it == controllers_.end()) {
         return;
