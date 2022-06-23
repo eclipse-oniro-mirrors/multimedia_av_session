@@ -16,6 +16,7 @@
 #ifndef OHOS_AVPLAYBACK_STATE_H
 #define OHOS_AVPLAYBACK_STATE_H
 
+#include <bitset>
 #include <parcel.h>
 
 namespace OHOS::AVSession {
@@ -32,6 +33,23 @@ public:
         PLAYBACK_STATE_MAX
     };
 
+    enum {
+        PLAYBACK_KEY_STATE,
+        PLAYBACK_KEY_SPEED,
+        PLAYBACK_KEY_POSITION,
+        PLAYBACK_KEY_BUFFERD_TIME,
+        PLAYBACK_KEY_LOOP_MODE,
+        PLAYBACK_KEY_IS_FAVORITE,
+        PLAYBACK_KEY_MAX
+    };
+
+    struct Position {
+        uint64_t elapsedTime_ {};
+        uint64_t updateTime_ {};
+    };
+
+    using PlaybackStateMaskType = std::bitset<PLAYBACK_KEY_MAX>;
+
     AVPlaybackState();
 
     static AVPlaybackState* Unmarshalling(Parcel& parcel);
@@ -43,11 +61,8 @@ public:
     void SetSpeed(double speed);
     double GetSpeed() const;
 
-    void SetElapsedTime(uint64_t time);
-    uint64_t GetElapsedTime() const;
-
-    void SetUpdateTime(uint64_t time);
-    uint64_t GetUpdateTime() const;
+    void SetPosition(const Position& position);
+    Position GetPosistion() const;
 
     void SetBufferedTime(uint64_t time);
     uint64_t GetBufferedTime() const;
@@ -58,14 +73,37 @@ public:
     void SetFavorite(bool isFavorite);
     bool GetFavorite() const;
 
+    PlaybackStateMaskType GetMask() const;
+
+    bool CopyToByMask(PlaybackStateMaskType& mask, AVPlaybackState& out) const;
+    bool CopyFrom(const AVPlaybackState& in);
+
 private:
+    PlaybackStateMaskType mask_;
+
     int32_t state_ = PLAYBACK_STATE_INITIAL;
     double speed_ {};
-    uint64_t elapsedTime_ {};
-    uint64_t updateTime_ {};
+    Position position_;
     uint64_t bufferedTime_ {};
     int32_t loopMode_ {};
     bool isFavorite_ {};
+
+    static void CloneState(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneSpeed(const AVPlaybackState& from, AVPlaybackState& to);
+    static void ClonePosition(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneBufferedTime(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneLoopMode(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneIsFavorite(const AVPlaybackState& from, AVPlaybackState& to);
+
+    using CloneActionType = void(*)(const AVPlaybackState& from, AVPlaybackState& to);
+    static inline CloneActionType cloneActions[PLAYBACK_KEY_MAX] = {
+        [PLAYBACK_KEY_STATE] = &AVPlaybackState::CloneState,
+        [PLAYBACK_KEY_SPEED] = &AVPlaybackState::CloneSpeed,
+        [PLAYBACK_KEY_POSITION] = &AVPlaybackState::ClonePosition,
+        [PLAYBACK_KEY_BUFFERD_TIME] = &AVPlaybackState::CloneBufferedTime,
+        [PLAYBACK_KEY_LOOP_MODE] = &AVPlaybackState::CloneLoopMode,
+        [PLAYBACK_KEY_IS_FAVORITE] = &AVPlaybackState::CloneIsFavorite,
+    };
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVPLAYBACK_STATE_H

@@ -13,476 +13,182 @@
  * limitations under the License.
  */
 
-#include "avsession_controller.h"
 #include "napi_avsession.h"
-#include "napi_avsession_controller.h"
+#include "avsession_controller.h"
+#include "napi_async_work.h"
+#include "napi_utils.h"
 #include "want_agent.h"
 
-using namespace std;
-
 namespace OHOS::AVSession {
-static __thread napi_ref g_avsessionConstructor = nullptr;
-static const std::string AVSESSION_NAPI_CLASS_NAME = "AVSession";
-
-struct NapiAVSessionAsyncContext : NapiAsyncProxy<NapiAVSessionAsyncContext>::AysncContext {
-    AbilityRuntime::WantAgent::WantAgent *wantAgent = nullptr;
-    std::shared_ptr<AVSessionController> avSessionController = nullptr;
-    std::vector<int32_t> streamIds;
-    std::shared_ptr<AVMetaData> aVMetaData = nullptr;
-    std::shared_ptr<AVPlaybackState> aVPlaybackState = nullptr;
+static __thread napi_ref AVSessionConstructorRef = nullptr;
+std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventHandlers_ = {
+    { "play", OnPlay },
+};
+std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
+    { "play", OffPlay },
 };
 
 NapiAVSession::NapiAVSession()
-    : env_(nullptr), wrapper_(nullptr), avsession_(nullptr), avsessionCallback_(nullptr) {}
+{
+    SLOGI("construct");
+}
 
 NapiAVSession::~NapiAVSession()
 {
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
+    SLOGI("destroy");
 }
 
 napi_value NapiAVSession::Init(napi_env env, napi_value exports)
 {
-    napi_property_descriptor avsession_prop_desc[] = {
-        DECLARE_NAPI_FUNCTION("setAVMetadata", SetAVMetadata),
-        DECLARE_NAPI_FUNCTION("setAVPlaybackState", SetAVPlaybackState),
-        DECLARE_NAPI_FUNCTION("setLaunchAbility", SetLaunchAbility),
-        DECLARE_NAPI_FUNCTION("setAudioStreamId", SetAudioStreamId),
-        DECLARE_NAPI_FUNCTION("getController", GetController),
-        DECLARE_NAPI_FUNCTION("activate", Activate),
-        DECLARE_NAPI_FUNCTION("deactivate", Deactivate),
-        DECLARE_NAPI_FUNCTION("destroy", Destroy),
-        DECLARE_NAPI_FUNCTION("on", On),
-        DECLARE_NAPI_FUNCTION("off", Off),
-        DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice)
+    napi_property_descriptor descriptors[] = {
+        DECLARE_NAPI_STATIC_FUNCTION("on", OnEvent),
+        DECLARE_NAPI_STATIC_FUNCTION("off", OffEvent),
     };
-    napi_status status = AVSessionNapiUtils::CreateJSObject(env, exports, AVSESSION_NAPI_CLASS_NAME, JsObjectConstruct,
-        avsession_prop_desc, sizeof(avsession_prop_desc) / sizeof(avsession_prop_desc[0]), &g_avsessionConstructor);
-    if (status == napi_ok) {
-        return exports;
+
+    auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
+    napi_value constructor{};
+    auto status = napi_define_class(env, "AVSession", NAPI_AUTO_LENGTH, ConstructorCallback, nullptr,
+                                    property_count, descriptors, &constructor);
+    if (status != napi_ok) {
+        SLOGE("define class failed");
+        return NapiUtils::GetUndefinedValue(env);
     }
-    SLOGE("Failure in NapiAVSession::Init()");
-    return AVSessionNapiUtils::NapiUndefined(env);
+    napi_create_reference(env, constructor, 1, &AVSessionConstructorRef);
+    return exports;
 }
 
 // Constructor callback
-napi_value NapiAVSession::JsObjectConstruct(napi_env env, napi_callback_info info)
+napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info info)
 {
-    napi_value jsThis;
-    size_t argc = 2;
-    napi_value argv[2] = { nullptr, nullptr };
-    napi_status status = napi_get_cb_info(env, info, &argc, argv, &jsThis, nullptr);
-    if (status == napi_ok) {
-        unique_ptr<NapiAVSession> obj = make_unique<NapiAVSession>();
-        if (obj != nullptr) {
-            obj->env_ = env;
-            std::string tag = AVSessionNapiUtils::GetStringArgument(env, argv[0]);
-            int32_t type;
-            napi_get_value_int32(env, argv[1], &type);
-            auto ability = OHOS::AbilityRuntime::GetCurrentAbility(env);
-            string bundleName = ability->GetWant()->GetElement().GetBundleName();
-            string abilityName = ability->GetWant()->GetElement().GetAbilityName();
-            SLOGI("abilityName %{public}s ,bundleName %{public}s ,tag: %{public}s ,type:%{public}d ",
-                abilityName.c_str(), bundleName.c_str(), tag.c_str(), type);
-            obj->avsession_ = AVSessionManager::CreateSession(tag, type, ability->GetWant()->GetElement());
-            if (obj->avsession_ == nullptr) {
-                SLOGE("native CreateSession fail.");
-                return AVSessionNapiUtils::NapiUndefined(env);
-            }
-            status = napi_wrap(env, jsThis, static_cast<void*>(obj.get()),
-                               NapiAVSession::Destructor, nullptr, &(obj->wrapper_));
-            if (status == napi_ok) {
-                status = AVSessionNapiUtils::SetValueInt32(env, "sessionId", obj->avsession_->GetSessionId(), jsThis);
-            }
-            if (status == napi_ok) {
-                obj.release();
-                return jsThis;
-            }
-        }
+    napi_value self;
+    NAPI_CALL_BASE(env, napi_get_cb_info(env, info, nullptr, nullptr, &self, nullptr), nullptr);
+
+    auto finalize = [](napi_env env, void *data, void *hint) {
+        auto *napiSession = reinterpret_cast<NapiAVSession *>(data);
+        napi_delete_reference(env, napiSession->wrapperRef_);
+        delete napiSession;
+    };
+
+    auto *napiSession = new(std::nothrow) NapiAVSession();
+    if (napiSession == nullptr) {
+        SLOGE("no memory");
+        return nullptr;
     }
-    SLOGE("Failed in NapiAVSession::Construct()!");
-    return AVSessionNapiUtils::NapiUndefined(env);
+    if (napi_wrap(env, self, static_cast<void *>(napiSession), finalize, nullptr,
+                  &(napiSession->wrapperRef_)) != napi_ok) {
+        SLOGE("wrap failed");
+        return nullptr;
+    }
+    return self;
 }
 
-void NapiAVSession::Destructor(napi_env env, void* nativeObject, void* finalizeHint)
+napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession> &nativeSession, napi_value &out)
 {
-    if (nativeObject != nullptr) {
-        auto obj = static_cast<NapiAVSession*>(nativeObject);
-        delete obj;
-        obj = nullptr;
-        SLOGI("NapiAVSession::Destructor delete NapiAVSession obj done");
-    }
+    napi_value constructor{};
+    NAPI_CALL_BASE(env, napi_get_reference_value(env, AVSessionConstructorRef, &constructor), napi_generic_failure);
+    napi_value instance{};
+    NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
+    NapiAVSession *napiAvSession{};
+    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void **>(&napiAvSession)), napi_generic_failure);
+    napiAvSession->session_ = std::move(nativeSession);
+    napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
+
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, napiAvSession->sessionId_, property);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionId", property), napi_generic_failure);
+    out = instance;
+    return napi_ok;
 }
 
-void GetNapiAVMetadata(const napi_env& env, const napi_value& object, NapiAVSessionAsyncContext* asyncContext)
+napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
 {
-    asyncContext->aVMetaData = make_shared<AVMetaData>();
-    AVSessionNapiUtils::WrapNapiToAVMetadata(env, object, *asyncContext->aVMetaData);
+    auto context = std::make_shared<ContextBase>();
+    std::string eventName;
+    napi_value callback {};
+    auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
+        /* require 2 arguments <event, callback> */
+        CHECK_ARGS_RETURN_VOID(context, argc == 2, "invalid argument number");
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[0], &type);
+        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
+        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+
+        context->status = napi_typeof(env, argv[1], &type);
+        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_function), "callback type invalid");
+        callback = argv[1];
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        napi_throw_error(env, nullptr, context->error.c_str());
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto it = onEventHandlers_.find(eventName);
+    if (it == onEventHandlers_.end()) {
+        SLOGE("event name invalid");
+        napi_throw_error(env, nullptr, "event name invalid");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession->callback_ == nullptr) {
+         napiSession->callback_= std::make_shared<NapiAVSessionCallback>();
+        SLOGE("no memory");
+        napi_throw_error(env, nullptr, "no memory");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (it->second(env, napiSession, callback) != napi_ok) {
+        napi_throw_error(env, nullptr, "add event callback failed");
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
 }
 
-napi_value NapiAVSession::SetAVMetadata(napi_env env, napi_callback_info info)
+napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
 {
-    SLOGI(" NapiAVSession::SetAVMetadata entry");
-    NapiAsyncProxy<NapiAVSessionAsyncContext> avsessionProxy;
-    avsessionProxy.Init(env, info);
-    std::vector<NapiAsyncProxy<NapiAVSessionAsyncContext>::InputParser> parsers;
-    parsers.push_back(GetNapiAVMetadata);
-    avsessionProxy.ParseInputs(parsers);
+    auto context = std::make_shared<ContextBase>();
+    std::string eventName;
+    auto input = [&eventName, env, &context](size_t argc, napi_value* argv) {
+        /* require 1 arguments <event> */
+        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid argument number");
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[0], &type);
+        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
+        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+    };
 
-    return avsessionProxy.DoAsyncWork(
-        "SetAVMetadata",
-        [](NapiAVSessionAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
-            SLOGI(" NapiAVSession::SetAVMetadata Async");
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        napi_throw_error(env, nullptr, context->error.c_str());
+        return NapiUtils::GetUndefinedValue(env);
+    }
 
-            NapiAVSession* napiAVSession = static_cast<NapiAVSession*>(asyncContext->objectInfo);
-            int32_t ret = napiAVSession->avsession_->SetAVMetaData(*asyncContext->aVMetaData);
-            if (ret) {
-                SLOGE(" native SetAVMetaData fail ");
-                return ERR;
-            }
-            return OK;
-        });
+    auto it = offEventHandlers_.find(eventName);
+    if (it == offEventHandlers_.end()) {
+        SLOGE("event name invalid");
+        napi_throw_error(env, nullptr, "event name invalid");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (it->second(env, napiSession) != napi_ok) {
+        napi_throw_error(env, nullptr, "remove event callback failed");
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
 }
 
-void GetArgvAVPlaybackState(const napi_env& env, const napi_value& object, NapiAVSessionAsyncContext* asyncContext)
+napi_status NapiAVSession::OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    asyncContext->aVPlaybackState = make_shared<AVPlaybackState>();
-    AVSessionNapiUtils::WrapNapiToAVPlaybackState(env, object, *asyncContext->aVPlaybackState);
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_PLAY, callback);
 }
 
-napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info info)
+napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession)
 {
-    NapiAsyncProxy<NapiAVSessionAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<NapiAVSessionAsyncContext>::InputParser> parsers;
-    parsers.push_back(GetArgvAVPlaybackState);
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "SetAVPlaybackState",
-        [](NapiAVSessionAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
-            NapiAVSession* napiAVSession = static_cast<NapiAVSession*>(asyncContext->objectInfo);
-            int32_t ret = napiAVSession->avsession_->SetAVPlaybackState(*asyncContext->aVPlaybackState);
-            if (ret) {
-                SLOGE(" native SetAVPlaybackState fail ");
-                return ERR;
-            }
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
-        });
-}
-
-void GetWantAgent(const napi_env& env, const napi_value& object, NapiAVSessionAsyncContext* asyncContext)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, object, &valueType);
-    if (valueType == napi_object) {
-        napi_status status = napi_unwrap(env, object, reinterpret_cast<void**>(&asyncContext->wantAgent));
-        if (status != napi_ok || asyncContext->wantAgent == nullptr) {
-            SLOGE("napi_unwrap asyncContext->wantAgent error");
-        }
-    }
-}
-
-napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info)
-{
-    NapiAsyncProxy<NapiAVSessionAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<NapiAVSessionAsyncContext>::InputParser> parsers;
-    parsers.push_back(GetWantAgent);
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "SetAVPlaybackState",
-        [](NapiAVSessionAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
-            NapiAVSession* napiAVSession = static_cast<NapiAVSession*>(asyncContext->objectInfo);
-            int32_t ret = napiAVSession->avsession_->SetLaunchAbility(*(asyncContext->wantAgent));
-            if (ret) {
-                SLOGE(" native SetLaunchAbility fail");
-                return ERR;
-            }
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
-        });
-}
-
-napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
-{
-    NapiAsyncProxy<NapiAVSessionAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<NapiAVSessionAsyncContext>::InputParser> parsers;
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "GetController",
-        [](NapiAVSessionAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
-            auto context = static_cast<NapiAVSession*>(asyncContext->objectInfo);
-            napi_status status = NapiAVSessionController::NewInstance(asyncContext->env,
-                                                                      &output,
-                                                                      context->avsession_->GetSessionId());
-            if (status == napi_ok) {
-                return OK;
-            }
-            return ERR;
-        });
-}
-
-napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
-{
-    NapiAsyncProxy<NapiAVSessionAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<NapiAVSessionAsyncContext>::InputParser> parsers;
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "Activate",
-        [](NapiAVSessionAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
-            SLOGI(" NapiAVSession::Activate() ");
-            NapiAVSession* napiAVSession = static_cast<NapiAVSession*>(asyncContext->objectInfo);
-            int32_t ret = napiAVSession->avsession_->Active();
-            if (ret) {
-                SLOGE(" native Active fail ");
-                return ERR;
-            }
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
-        });
-}
-
-napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
-{
-    NapiAsyncProxy<NapiAVSessionAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<NapiAVSessionAsyncContext>::InputParser> parsers;
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "Deactivate",
-        [](NapiAVSessionAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
-            SLOGI(" NapiAVSession::Deactivate() ");
-            NapiAVSession* napiAVSession = static_cast<NapiAVSession*>(asyncContext->objectInfo);
-            int32_t ret = napiAVSession->avsession_->Disactive();
-            if (ret) {
-                SLOGE(" native Disactive fail ");
-                return ERR;
-            }
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
-        });
-}
-
-napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
-{
-    NapiAsyncProxy<NapiAVSessionAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<NapiAVSessionAsyncContext>::InputParser> parsers;
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "Destroy",
-        [](NapiAVSessionAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
-            SLOGI(" NapiAVSession::Destroy() ");
-            NapiAVSession* napiAVSession = static_cast<NapiAVSession*>(asyncContext->objectInfo);
-            int32_t ret = napiAVSession->avsession_->Release();
-            if (ret) {
-                SLOGE(" native Release fail ");
-                return ERR;
-            }
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
-        });
-}
-
-napi_value NapiAVSession::On(napi_env env, napi_callback_info info)
-{
-    napi_value undefinedResult = AVSessionNapiUtils::NapiUndefined(env);
-    const size_t minArgCount = 2;
-    size_t argCount = 2;
-    napi_value args[minArgCount] = {nullptr, nullptr};
-    napi_value jsThis = nullptr;
-    napi_status status = napi_get_cb_info(env, info, &argCount, args, &jsThis, nullptr);
-    if (status != napi_ok || argCount < minArgCount) {
-        SLOGE("Less than two parameters");
-        return undefinedResult;
-    }
-    napi_valuetype eventType = napi_undefined;
-    if (napi_typeof(env, args[0], &eventType) != napi_ok || eventType != napi_string) {
-        return undefinedResult;
-    }
-    if (napi_typeof(env, args[1], &eventType) != napi_ok || eventType != napi_function) {
-        SLOGE("The second argument is not a function .");
-        return undefinedResult;
-    }
-    std::string callbackName = AVSessionNapiUtils::GetStringArgument(env, args[0]);
-    SLOGI("NapiAVSession::On callbackName: %{public}s", callbackName.c_str());
-    NapiAVSession *napiAVSession = nullptr;
-    status = napi_unwrap(env, jsThis, reinterpret_cast<void **>(&napiAVSession));
-    if (status != napi_ok || napiAVSession == nullptr) {
-        SLOGE("napi_unwrap napiAVSession error");
-    }
-    if (napiAVSession->avsessionCallback_ == nullptr) {
-        napiAVSession->avsessionCallback_ = std::make_shared<NapiAVSessionCallback>();
-        int32_t ret = napiAVSession->avsession_->RegisterCallback(napiAVSession->avsessionCallback_);
-        if (ret) {
-            SLOGE("NapiAVSessionController: avsessionController_ RegisterCallback Failed");
-            return undefinedResult;
-        }
-    }
-
-    std::shared_ptr<NapiAVSessionCallback> cb =
-            std::static_pointer_cast<NapiAVSessionCallback>(napiAVSession->avsessionCallback_);
-    if (cb->hasCallback(callbackName)) {
-        if (callbackName.compare(OUTPUTDEVICECHANGED_CALLBACK) &&
-            callbackName.compare(HANDLEKEYEVENT_CALLBACK)) {
-            SLOGI("AddSupportCommand command: %{public}s", callbackName.c_str());
-            napiAVSession->avsession_->AddSupportCommand(aVControlCommandMap[callbackName]);
-        }
-        cb->SaveCallbackReference(callbackName, args[1], env);
-    }
-    return AVSessionNapiUtils::NapiUndefined(env);
-}
-
-napi_value NapiAVSession::Off(napi_env env, napi_callback_info info)
-{
-    napi_value undefinedResult = AVSessionNapiUtils::NapiUndefined(env);
-    const size_t minArgCount = 1;
-    size_t argCount = 1;
-    napi_value args[minArgCount] = {nullptr};
-    napi_value jsThis = nullptr;
-    napi_status status = napi_get_cb_info(env, info, &argCount, args, &jsThis, nullptr);
-    if (status != napi_ok || argCount < minArgCount) {
-        SLOGE("Less than one parameters");
-        return undefinedResult;
-    }
-    napi_valuetype eventType = napi_undefined;
-    if (napi_typeof(env, args[0], &eventType) != napi_ok || eventType != napi_string) {
-        return undefinedResult;
-    }
-    std::string callbackName = AVSessionNapiUtils::GetStringArgument(env, args[0]);
-    SLOGI("NapiAVSession::On callbackName: %{public}s", callbackName.c_str());
-    NapiAVSession *napiAVSession = nullptr;
-    status = napi_unwrap(env, jsThis, reinterpret_cast<void **>(&napiAVSession));
-    if (status != napi_ok || napiAVSession == nullptr) {
-        SLOGE("napi_unwrap napiAVSession error");
-    }
-    if (napiAVSession->avsessionCallback_ == nullptr) {
-        SLOGE("NapiAVSession: off Failed");
-        return undefinedResult;
-    }
-    std::shared_ptr<NapiAVSessionCallback> cb =
-        std::static_pointer_cast<NapiAVSessionCallback>(napiAVSession->avsessionCallback_);
-    if (cb->hasCallback(callbackName)) {
-        cb->ReleaseCallbackReference(callbackName);
-    }
-    return AVSessionNapiUtils::NapiUndefined(env);
-}
-
-napi_status NapiAVSession::NewInstance(napi_env env, napi_value * result, std::string tag, int32_t type)
-{
-    napi_value constructor;
-    napi_status status = napi_get_reference_value(env, g_avsessionConstructor, &constructor);
-    if (status == napi_ok) {
-        const int32_t argNum = 2;
-        napi_value args[argNum] = { nullptr, nullptr };
-        status = napi_create_string_utf8(env, tag.c_str(), NAPI_AUTO_LENGTH, &args[0]);
-        if (status != napi_ok) {
-            return status;
-        }
-        status = napi_create_int32(env, type, &args[1]);
-        if (status != napi_ok) {
-            return status;
-        }
-        status = napi_new_instance(env, constructor, argNum, args, result);
-    }
-    return status;
-}
-
-void GetArgvStreamIds(const napi_env& env, const napi_value& object, NapiAVSessionAsyncContext* asyncContext)
-{
-    bool isArray = false;
-    uint32_t len = 0;
-    if ((napi_is_array(env, object, &isArray) != napi_ok) || (isArray == false)) {
-        SLOGE("GetArgvStreamIds object not an array");
-        return;
-    }
-    if (napi_get_array_length(env, object, &len) != napi_ok) {
-        SLOGE("GetArgvStreamIds get array length error");
-        return;
-    }
-    SLOGD("GetArgvStreamIds array length :%{public}d.", len);
-    for (uint32_t i = 0; i < len; i++) {
-        napi_value streamIdItem = nullptr;
-        napi_valuetype valueType = napi_undefined;
-
-        napi_get_element(env, object, i, &streamIdItem);
-        napi_typeof(env, streamIdItem, &valueType);
-        if (valueType == napi_number) {
-            int32_t streamId = 0;
-            napi_get_value_int32(env, streamIdItem, &streamId);
-            asyncContext->streamIds.push_back(streamId);
-        }
-    }
-    SLOGD("GetArgvStreamIds execute success");
-}
-
-napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info)
-{
-    NapiAsyncProxy<NapiAVSessionAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<NapiAVSessionAsyncContext>::InputParser> parsers;
-    parsers.push_back(GetArgvStreamIds);
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "SetAudioStreamId",
-        [](NapiAVSessionAsyncContext* asyncContext) {
-            SLOGE("No native methods: SetAudioStreamId .");
-            return OK;
-        },
-        [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
-        });
-}
-
-napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
-{
-    NapiAsyncProxy<NapiAVSessionAsyncContext> proxy;
-    proxy.Init(env, info);
-    std::vector<NapiAsyncProxy<NapiAVSessionAsyncContext>::InputParser> parsers;
-    proxy.ParseInputs(parsers);
-
-    return proxy.DoAsyncWork(
-        "GetOutputDevice",
-        [](NapiAVSessionAsyncContext* asyncContext) {
-            return OK;
-        },
-        [](NapiAVSessionAsyncContext* asyncContext, napi_value& output) {
-            output = AVSessionNapiUtils::WrapVoidToJS(asyncContext->env);
-            return OK;
-        });
+    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY);
 }
 }

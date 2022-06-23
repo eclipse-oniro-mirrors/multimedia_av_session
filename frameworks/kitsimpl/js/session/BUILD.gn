@@ -22,16 +22,21 @@ ohos_shared_library("avsession_napi") {
   ]
 
   sources = [
-    "src/utils/avsession_napi_utils.cpp",
-    "src/utils/uv_queue.cpp",
+    "src/napi_utils.cpp",
+    "src/napi_async_work.cpp",
+    "src/napi_async_callback.cpp",
     "src/napi_module.cpp",
-    "src/napi_avsession.cpp",
+    "src/napi_avsession_enum.cpp",
     "src/napi_avsession_manager.cpp",
+    "src/napi_session_listener.cpp",
+    "src/napi_avsession.cpp",
+    "src/napi_avsession_callback.cpp",
     "src/napi_avsession_controller.cpp",
-    "src/callback/napi_sessionlistener_callback.cpp",
-    "src/callback/napi_avcontroller_callback.cpp",
-    "src/callback/napi_avsession_callback.cpp",
-     ]
+    "src/napi_avcontroller_callback.cpp",
+    "src/napi_control_command.cpp",
+    "src/napi_meta_data.cpp",
+    "src/napi_playback_state.cpp",
+  ]
 
   deps = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
@@ -51,9 +56,9 @@ ohos_shared_library("avsession_napi") {
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
+    "multimedia_image_standard:image",
     "multimedia_image_standard:image_native",
     "samgr_standard:samgr_proxy",
-    "distributeddataobject:distributeddataobject_impl",
     "safwk:system_ability_fwk",
 
   ]

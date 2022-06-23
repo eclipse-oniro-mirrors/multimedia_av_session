@@ -95,8 +95,8 @@ public:
     void SetLyric(const std::string& lyric);
     std::string GetLyric() const;
 
-    void SetPreviosAssetId(const std::string& assetId);
-    std::string GetPreviosAssetId() const;
+    void SetPreviousAssetId(const std::string& assetId);
+    std::string GetPreviousAssetId() const;
 
     void SetNextAssetId(const std::string& assetId);
     std::string GetNextAssetId() const;
