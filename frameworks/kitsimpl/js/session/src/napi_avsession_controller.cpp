@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "avsession_errors.h"
 #include "key_event.h"
 #include "napi_async_work.h"
 #include "napi_avcontroller_callback.h"
@@ -23,8 +22,7 @@
 #include "napi_playback_state.h"
 #include "napi_utils.h"
 #include "want_agent.h"
-
-using namespace std;
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 static __thread napi_ref AVControllerConstructorRef = nullptr;
