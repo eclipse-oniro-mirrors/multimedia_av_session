@@ -245,7 +245,7 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState001, TestSize.Level1)
     SLOGE("SetAVPlaybackState001 Begin");
     g_playbackState.SetState(1);
     g_playbackState.SetSpeed(1.5);
-    g_playbackState.SetElapsedTime(80000);
+    g_playbackState.SetPosition({ 80000, 0 });
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
@@ -267,7 +267,7 @@ HWTEST_F(AvsessionTest, GetAVPlaybackState001, TestSize.Level1)
     EXPECT_EQ(avsession_->GetAVPlaybackState(state), AVSESSION_SUCCESS);
     EXPECT_EQ(state.GetState(), g_playbackState.GetState());
     EXPECT_EQ(state.GetSpeed(), g_playbackState.GetSpeed());
-    EXPECT_EQ(state.GetElapsedTime(), g_playbackState.GetElapsedTime());
+    EXPECT_EQ(state.GetPosistion().elapsedTime_, g_playbackState.GetPosistion().elapsedTime_);
     EXPECT_EQ(state.GetBufferedTime(), g_playbackState.GetBufferedTime());
     EXPECT_EQ(state.GetLoopMode(), g_playbackState.GetLoopMode());
     EXPECT_EQ(state.GetFavorite(), g_playbackState.GetFavorite());

@@ -116,7 +116,7 @@ bool IsAVPlaybackStateEqual(AVPlaybackState& state1,  AVPlaybackState& state2)
 {
     return state1.GetState() == state2.GetState() &&
         std::fabs(state1.GetSpeed() - state2.GetSpeed()) < 1e-6 &&
-        state1.GetElapsedTime() == state2.GetElapsedTime() &&
+        state1.GetPosistion().elapsedTime_ == state2.GetPosistion().elapsedTime_ &&
         state1.GetBufferedTime() == state2.GetBufferedTime() &&
         state1.GetLoopMode() == state2.GetLoopMode() &&
         state1.GetFavorite() == state2.GetFavorite();
@@ -177,7 +177,7 @@ HWTEST_F(AVSessionControllerTest, GetAVPlaybackState001, TestSize.Level1)
     state.SetState(1);
     state.SetSpeed(1);
     state.SetBufferedTime(1);
-    state.SetElapsedTime(1);
+    state.SetPosition({ 1, 0 });
     state.SetLoopMode(1);
     state.SetFavorite(true);
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
@@ -188,7 +188,7 @@ HWTEST_F(AVSessionControllerTest, GetAVPlaybackState001, TestSize.Level1)
 
 /**
 * @tc.name: GetAVPlaybackState002
-* @tc.desc: Return AVPlaybackState 
+* @tc.desc: Return AVPlaybackState
 * @tc.type: FUNC
 * @tc.require: AR000H31JI
 */
@@ -542,7 +542,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand010, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, SendControlCommand011, TestSize.Level1)
 {
-    AVControlCommand command; 
+    AVControlCommand command;
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.SetAssetId("123456"), AVSESSION_SUCCESS);
 
@@ -552,7 +552,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand011, TestSize.Level1)
 
 /**
 * @tc.name: RegisterCallback001
-* @tc.desc: register AVControllerCallback 
+* @tc.desc: register AVControllerCallback
 * @tc.type: FUNC
 * @tc.require: AR000H31JK
 */
@@ -565,7 +565,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback001, TestSize.Level1)
 
 /**
 * @tc.name: RegisterCallback002
-* @tc.desc: register AVControllerCallback 
+* @tc.desc: register AVControllerCallback
 * @tc.type: FUNC
 * @tc.require: AR000H31JK
 */
@@ -577,7 +577,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback002, TestSize.Level1)
 
 /**
 * @tc.name: RegisterCallback003
-* @tc.desc: register AVControllerCallback 
+* @tc.desc: register AVControllerCallback
 * @tc.type: FUNC
 * @tc.require: AR000H31JK
 */
@@ -593,7 +593,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback003, TestSize.Level1)
 
 /**
 * @tc.name: RegisterCallback004
-* @tc.desc: register AVControllerCallback 
+* @tc.desc: register AVControllerCallback
 * @tc.type: FUNC
 * @tc.require: AR000H31JK
 */
@@ -610,7 +610,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback004, TestSize.Level1)
 
 /**
 * @tc.name: RegisterCallback005
-* @tc.desc: register AVControllerCallback 
+* @tc.desc: register AVControllerCallback
 * @tc.type: FUNC
 * @tc.require: AR000H31JK
 */
@@ -627,7 +627,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback005, TestSize.Level1)
 
 /**
 * @tc.name: RegisterCallback006
-* @tc.desc: register AVControllerCallback 
+* @tc.desc: register AVControllerCallback
 * @tc.type: FUNC
 * @tc.require: AR000H31JK
 */
@@ -641,7 +641,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback006, TestSize.Level1)
     state.SetState(1);
     state.SetSpeed(1);
     state.SetBufferedTime(1);
-    state.SetElapsedTime(1);
+    state.SetPosition({ 1, 0 });
     state.SetLoopMode(1);
     state.SetFavorite(true);
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
@@ -651,7 +651,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback006, TestSize.Level1)
 
 /**
 * @tc.name: RegisterCallback007
-* @tc.desc: register AVControllerCallback 
+* @tc.desc: register AVControllerCallback
 * @tc.type: FUNC
 * @tc.require: AR000H31JK
 */
@@ -763,8 +763,7 @@ HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition001, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition002, TestSize.Level1)
 {
     AVPlaybackState state;
-    state.SetUpdateTime(TestMicroSecond);
-    state.SetElapsedTime(TestMicroSecond * TestMicroSecond);
+    state.SetPosition({ TestMicroSecond * TestMicroSecond, TestMicroSecond });
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
     AVPlaybackState resultState;
     EXPECT_EQ(controller_->GetAVPlaybackState(resultState), AVSESSION_SUCCESS);
@@ -784,8 +783,7 @@ HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition003, TestSize.Level1)
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 
     AVPlaybackState state;
-    state.SetUpdateTime(TestMicroSecond);
-    state.SetElapsedTime(TestMicroSecond * TestMicroSecond);
+    state.SetPosition({ TestMicroSecond * TestMicroSecond, TestMicroSecond });
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
     sleep(1);
     EXPECT_EQ(controller_->GetRealPlaybackPosition() > 0, true);
