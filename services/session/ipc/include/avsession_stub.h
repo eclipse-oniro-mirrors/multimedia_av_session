@@ -27,7 +27,7 @@ class AVSessionStub : public IRemoteStub<IAVSession> {
 public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
-    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override
+    int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) override
     {
         return ERR_NONE;
     }
@@ -63,6 +63,8 @@ private:
 
     int32_t HandleAddSupportCommand(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleDeleteSupportCommand(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HanlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
@@ -79,7 +81,8 @@ private:
         [SESSION_CMD_DISACTIVE] = &AVSessionStub::HandleDisactive,
         [SESSION_CMD_ISACTIVE] = &AVSessionStub::HandleIsActive,
         [SESSION_CMD_RELEASE] = &AVSessionStub::HandleRelease,
-        [SESSION_CMD_ADDSUPPORT_COMMAND] = &AVSessionStub::HandleAddSupportCommand,
+        [SESSION_CMD_ADD_SUPPORT_COMMAND] = &AVSessionStub::HandleAddSupportCommand,
+        [SESSION_CMD_DELETE_SUPPORT_COMMAND] = &AVSessionStub::HandleDeleteSupportCommand,
     };
 };
 }

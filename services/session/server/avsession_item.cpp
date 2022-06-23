@@ -37,7 +37,7 @@ int32_t AVSessionItem::GetSessionId()
     return descriptor_.sessionId_;
 }
 
-int32_t AVSessionItem::Release()
+int32_t AVSessionItem::Destroy()
 {
     if (callback_) {
         callback_.clear();
@@ -115,7 +115,7 @@ int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback> &cal
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionItem::Active()
+int32_t AVSessionItem::Activate()
 {
     descriptor_.isActive_ = true;
     std::lock_guard lockGuard(lock_);
@@ -126,7 +126,7 @@ int32_t AVSessionItem::Active()
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionItem::Disactive()
+int32_t AVSessionItem::Deactivate()
 {
     descriptor_.isActive_ = false;
     std::lock_guard lockGuard(lock_);
@@ -147,6 +147,19 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     supportedCmd_.push_back(cmd);
+    std::lock_guard lockGuard(lock_);
+    for (const auto& [pid, controller] : controllers_) {
+        SLOGI("pid=%{pubic}d", pid);
+        controller->HandleValidCommandChange(supportedCmd_);
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
+{
+    CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
+    CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{pubic}d", pid);

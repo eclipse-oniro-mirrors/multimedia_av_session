@@ -161,10 +161,17 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiSession->callback_ == nullptr) {
-         napiSession->callback_= std::make_shared<NapiAVSessionCallback>();
-        SLOGE("no memory");
-        napi_throw_error(env, nullptr, "no memory");
-        return NapiUtils::GetUndefinedValue(env);
+        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+        if (napiSession->callback_ == nullptr) {
+            SLOGE("no memory");
+            napi_throw_error(env, nullptr, "no memory");
+            return NapiUtils::GetUndefinedValue(env);
+        }
+        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            napi_throw_error(env, nullptr, "native register callback failed");
+            return NapiUtils::GetUndefinedValue(env);
+        }
     }
     if (it->second(env, napiSession, callback) != napi_ok) {
         napi_throw_error(env, nullptr, "add event callback failed");
@@ -197,7 +204,7 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
         return NapiUtils::GetUndefinedValue(env);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (it->second(env, napiSession) != napi_ok) {
+    if (napiSession != nullptr && it->second(env, napiSession) != napi_ok) {
         napi_throw_error(env, nullptr, "remove event callback failed");
     }
     return NapiUtils::GetUndefinedValue(env);
@@ -325,7 +332,7 @@ napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        int32_t ret = napiSession->session_->Active();
+        int32_t ret = napiSession->session_->Activate();
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "activate session failed";
@@ -343,7 +350,7 @@ napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        int32_t ret = napiSession->session_->Disactive();
+        int32_t ret = napiSession->session_->Deactivate();
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "deactivate session failed";
@@ -361,7 +368,7 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        int32_t ret = napiSession->session_->Release();
+        int32_t ret = napiSession->session_->Destroy();
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "destroy session failed";
@@ -375,56 +382,78 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
 
 napi_status NapiAVSession::OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_PLAY, callback);
 }
 
 napi_status NapiAVSession::OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PAUSE);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_PAUSE, callback);
 }
 
 napi_status NapiAVSession::OnStop(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_STOP);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_STOP, callback);
 }
 
 napi_status NapiAVSession::OnPlayNext(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_PLAY_NEXT, callback);
 }
 
 napi_status NapiAVSession::OnPlayPrevious(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_PLAY_PREVIOUS, callback);
 }
 
 napi_status NapiAVSession::OnFastForward(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_FAST_FORWARD);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_FAST_FORWARD, callback);
 }
 
 napi_status NapiAVSession::OnRewind(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_REWIND);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_REWIND, callback);
 }
 
 napi_status NapiAVSession::OnSeek(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_SEEK);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_SEEK, callback);
 }
 
 napi_status NapiAVSession::OnSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_SPEED);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_SET_SPEED, callback);
 }
 
 napi_status NapiAVSession::OnSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_SET_LOOP_MODE, callback);
 }
 
 napi_status NapiAVSession::OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE, callback);
 }
 
@@ -440,57 +469,78 @@ napi_status NapiAVSession::OnoutputDeviceChanged(napi_env env, NapiAVSession* na
 
 napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY);
 }
 
-
 napi_status NapiAVSession::OffPause(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PAUSE);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PAUSE);
 }
 
 napi_status NapiAVSession::OffStop(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_STOP);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_STOP);
 }
 
 napi_status NapiAVSession::OffPlayNext(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_NEXT);
 }
 
 napi_status NapiAVSession::OffPlayPrevious(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_PREVIOUS);
 }
 
 napi_status NapiAVSession::OffFastForward(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_FAST_FORWARD);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_FAST_FORWARD);
 }
 
 napi_status NapiAVSession::OffRewind(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_REWIND);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_REWIND);
 }
 
 napi_status NapiAVSession::OffSeek(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_SEEK);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SEEK);
 }
 
 napi_status NapiAVSession::OffSetSpeed(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_SET_SPEED);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SET_SPEED);
 }
 
 napi_status NapiAVSession::OffSetLoopMode(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SET_LOOP_MODE);
 }
 
 napi_status NapiAVSession::OffToggleFavorite(napi_env env, NapiAVSession* napiSession)
 {
+    int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE);
 }
 

@@ -387,7 +387,7 @@ void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid)
     auto session = GetContainer().RemoveSession(pid);
     if (session != nullptr) {
         SLOGI("remove sessionId=%{public}d", session->GetSessionId());
-        session->Release();
+        session->Destroy();
     }
 }
 

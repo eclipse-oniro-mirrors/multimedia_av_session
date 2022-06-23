@@ -46,19 +46,19 @@ public:
 
     virtual std::shared_ptr<AVSessionController> GetController() = 0;
 
-    virtual sptr<IRemoteObject> GetControllerInner() = 0;
+    virtual int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) = 0;
 
-    virtual int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) = 0;
+    virtual int32_t Activate() = 0;
 
-    virtual int32_t Active() = 0;
-
-    virtual int32_t Disactive() = 0;
+    virtual int32_t Deactivate() = 0;
 
     virtual bool IsActive() = 0;
 
-    virtual int32_t Release() = 0;
+    virtual int32_t Destroy() = 0;
 
     virtual int32_t AddSupportCommand(const int32_t cmd) = 0;
+
+    virtual int32_t DeleteSupportCommand(const int32_t cmd) = 0;
 
     virtual ~AVSession() = default;
 };

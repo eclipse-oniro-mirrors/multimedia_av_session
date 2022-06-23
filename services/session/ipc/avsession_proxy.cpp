@@ -44,7 +44,7 @@ int32_t AVSessionProxy::GetSessionId()
     return sessionId;
 }
 
-int32_t AVSessionProxy::RegisterCallback(std::shared_ptr<AVSessionCallback> &callback)
+int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback> &callback)
 {
     CHECK_AND_RETURN_RET_LOG(callback != nullptr, AVSESSION_ERROR, "callback is nullptr");
     callback_ = new(std::nothrow) AVSessionCallbackClient(callback);
@@ -74,7 +74,7 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &ca
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVSessionProxy::Release()
+int32_t AVSessionProxy::Destroy()
 {
     SLOGD("enter");
     MessageParcel data;
@@ -219,7 +219,7 @@ std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
     return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
 }
 
-int32_t AVSessionProxy::Active()
+int32_t AVSessionProxy::Activate()
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -235,7 +235,7 @@ int32_t AVSessionProxy::Active()
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVSessionProxy::Disactive()
+int32_t AVSessionProxy::Deactivate()
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -280,8 +280,28 @@ int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
     MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ADDSUPPORT_COMMAND, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ADD_SUPPORT_COMMAND, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionProxy::DeleteSupportCommand(const int32_t cmd)
+{
+    CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
+    CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+                             ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(cmd),
+                             ERR_MARSHALLING, "Write cmd failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_DELETE_SUPPORT_COMMAND, data, reply, option) == 0,
+                             ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;

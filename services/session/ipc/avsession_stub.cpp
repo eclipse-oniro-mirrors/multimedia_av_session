@@ -61,7 +61,7 @@ int32_t AVSessionStub::HandleRegisterCallbackInner(MessageParcel &data, MessageP
 
 int32_t AVSessionStub::HandleRelease(MessageParcel &data, MessageParcel &reply)
 {
-    Release();
+    Destroy();
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_SUCCESS), ERR_NONE, "write int32_t failed");
     return ERR_NONE;
 }
@@ -134,13 +134,13 @@ int32_t AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& r
 
 int32_t AVSessionStub::HandleActive(MessageParcel& data, MessageParcel& reply)
 {
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(Active()), "WriteInt32 failed");
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(Activate()), "WriteInt32 failed");
     return ERR_NONE;
 }
 
 int32_t AVSessionStub::HandleDisactive(MessageParcel& data, MessageParcel& reply)
 {
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(Disactive()), "WriteInt32 failed");
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(Deactivate()), "WriteInt32 failed");
     return ERR_NONE;
 }
 
@@ -153,6 +153,12 @@ int32_t AVSessionStub::HandleIsActive(MessageParcel& data, MessageParcel& reply)
 int32_t AVSessionStub::HandleAddSupportCommand(MessageParcel& data, MessageParcel& reply)
 {
     CHECK_AND_PRINT_LOG(reply.WriteInt32(AddSupportCommand(data.ReadInt32())), "WriteInt32 failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleDeleteSupportCommand(MessageParcel& data, MessageParcel& reply)
+{
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(DeleteSupportCommand(data.ReadInt32())), "WriteInt32 failed");
     return ERR_NONE;
 }
 }

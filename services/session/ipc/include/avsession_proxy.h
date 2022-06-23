@@ -43,17 +43,19 @@ public:
 
     std::shared_ptr<AVSessionController> GetController() override;
 
-    int32_t RegisterCallback(std::shared_ptr<AVSessionCallback>& callback) override;
+    int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) override;
 
-    int32_t Active() override;
+    int32_t Activate() override;
 
-    int32_t Disactive() override;
+    int32_t Deactivate() override;
 
     bool IsActive() override;
 
-    int32_t Release() override;
+    int32_t Destroy() override;
 
     int32_t AddSupportCommand(const int32_t cmd) override;
+
+    int32_t DeleteSupportCommand(int32_t cmd) override;
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;

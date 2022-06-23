@@ -38,12 +38,14 @@ public:
         SESSION_CMD_DISACTIVE,
         SESSION_CMD_ISACTIVE,
         SESSION_CMD_RELEASE,
-        SESSION_CMD_ADDSUPPORT_COMMAND,
+        SESSION_CMD_ADD_SUPPORT_COMMAND,
+        SESSION_CMD_DELETE_SUPPORT_COMMAND,
         SESSION_CMD_MAX,
     };
 
 protected:
     virtual int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) = 0;
+    virtual sptr<IRemoteObject> GetControllerInner() = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_H

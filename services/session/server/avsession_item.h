@@ -40,15 +40,17 @@ public:
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
-    int32_t Active() override;
+    int32_t Activate() override;
 
-    int32_t Disactive() override;
+    int32_t Deactivate() override;
 
     bool IsActive() override;
 
-    int32_t Release() override;
+    int32_t Destroy() override;
 
     int32_t AddSupportCommand(int32_t cmd) override;
+
+    int32_t DeleteSupportCommand(int32_t cmd) override;
 
     AVSessionDescriptor GetDescriptor();
 
