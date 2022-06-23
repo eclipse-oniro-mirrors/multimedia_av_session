@@ -24,6 +24,7 @@
 #include "avsession_info.h"
 #include "avsession_log.h"
 #include "napi_avsession_callback.h"
+#include "want_agent.h"
 
 namespace OHOS::AVSession {
 class NapiAVSession{
@@ -43,10 +44,43 @@ private:
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
+    static napi_value SetAVMetaData(napi_env env, napi_callback_info info);
+    static napi_value SetAVPlaybackState(napi_env env, napi_callback_info info);
+    static napi_value SetLaunchAbility(napi_env env, napi_callback_info info);
+    static napi_value SetAudioStreamId(napi_env env, napi_callback_info info);
+    static napi_value GetController(napi_env env, napi_callback_info info);
+    static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
+    static napi_value Activate(napi_env env, napi_callback_info info);
+    static napi_value Deactivate(napi_env env, napi_callback_info info);
+    static napi_value Destroy(napi_env env, napi_callback_info info);
+
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnStop(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnPlayNext(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnPlayPrevious(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnFastForward(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnRewind(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnSeek(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnoutputDeviceChanged(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession);
-
+    static napi_status OffPause(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffStop(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffPlayNext(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffPlayPrevious(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffFastForward(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffRewind(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffSeek(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffSetSpeed(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffSetLoopMode(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffToggleFavorite(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffoutputDeviceChanged(napi_env env, NapiAVSession* napiSession);
 
     napi_ref wrapperRef_ {};
     int32_t sessionId_ = -1;
