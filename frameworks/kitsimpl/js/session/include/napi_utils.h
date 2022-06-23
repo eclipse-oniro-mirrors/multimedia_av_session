@@ -23,7 +23,9 @@
 #include "napi/native_node_api.h"
 #include "avsession_log.h"
 #include "avsession_descriptor.h"
+#include "avmeta_data.h"
 #include "avcontrol_command.h"
+#include "avplayback_state.h"
 #include "key_event.h"
 #include "want_agent.h"
 
@@ -113,7 +115,15 @@ public:
 
     /* napi_value <-> AbilityRuntime::WantAgent::WantAgent */
     static napi_status GetValue(napi_env env, napi_value in, AbilityRuntime::WantAgent::WantAgent*& out);
-    static napi_status SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent& in, napi_value& out);
+    static napi_status SetValue(napi_env env, const AbilityRuntime::WantAgent::WantAgent& in, napi_value& out);
+
+    /* napi_value <-> AVMetaData */
+    static napi_status GetValue(napi_env env, napi_value in, AVMetaData& out);
+    static napi_status SetValue(napi_env env, const AVMetaData& in, napi_value& out);
+
+    /* napi_value <-> AVPlaybackState */
+    static napi_status GetValue(napi_env env, napi_value in, AVPlaybackState& out);
+    static napi_status SetValue(napi_env env, const AVPlaybackState& in, napi_value& out);
 
     /* napi_value <-> std::vector<std::string> */
     static napi_status GetValue(napi_env env, napi_value in, std::vector<std::string>& out);

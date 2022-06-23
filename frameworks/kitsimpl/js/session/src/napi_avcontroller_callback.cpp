@@ -30,70 +30,51 @@ NapiAVControllerCallback::~NapiAVControllerCallback()
     SLOGI("destroy");
 }
 
-void NapiAVControllerCallback::OnSessionDestroy()
+void NapiAVControllerCallback::HandleEvent(int32_t event)
 {
-    if (callbacks_[EVENT_SESSION_DESTROY] == nullptr) {
-        SLOGE("not register callback event=%{public}d", EVENT_SESSION_DESTROY);
+    if (callbacks_[event] == nullptr) {
+        SLOGE("not register callback event=%{public}d", event);
         return;
     }
+    asyncCallback_->Call(callbacks_[event]);
+}
 
-    asyncCallback_->Call(callbacks_[EVENT_SESSION_DESTROY]);
+template<typename T>
+void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
+{
+    if (callbacks_[event] == nullptr) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+    asyncCallback_->Call(callbacks_[event], [param](napi_env env, int &argc, napi_value *argv) {
+        argc = 1;
+        NapiUtils::SetValue(env, param, *argv);
+    });
+}
+
+void NapiAVControllerCallback::OnSessionDestroy()
+{
+    HandleEvent(EVENT_SESSION_DESTROY);
 }
 
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
-    if (callbacks_[EVENT_PLAYBACK_STATE_CHANGE] == nullptr) {
-        SLOGE("not register callback event=%{public}d", EVENT_PLAYBACK_STATE_CHANGE);
-        return;
-    }
-
-    auto getter = [state](napi_env env, int &argc, napi_value *argv) {
-        argc = 1;
-        NapiPlaybackState::SetValue(env, state, *argv);
-    };
-    asyncCallback_->Call(callbacks_[EVENT_PLAYBACK_STATE_CHANGE], getter);
+    HandleEvent(EVENT_PLAYBACK_STATE_CHANGE, state);
 }
 
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 {
-    if (callbacks_[EVENT_META_DATA_CHANGE] == nullptr) {
-        SLOGE("not register callback event=%{public}d", EVENT_META_DATA_CHANGE);
-        return;
-    }
-
-    auto getter = [data](napi_env env, int &argc, napi_value *argv) {
-        argc = 1;
-        NapiMetaData::SetValue(env, data, *argv);
-    };
-    asyncCallback_->Call(callbacks_[EVENT_META_DATA_CHANGE], getter);
+    HandleEvent(EVENT_META_DATA_CHANGE, data);
 }
 
 void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
 {
-    if (callbacks_[EVENT_ACTIVE_STATE_CHANGE] == nullptr) {
-        SLOGE("not register callback event=%{public}d", EVENT_ACTIVE_STATE_CHANGE);
-        return;
-    }
-
-    auto getter = [isActive](napi_env env, int &argc, napi_value *argv) {
-        argc = 1;
-        NapiUtils::SetValue(env, isActive, *argv);
-    };
-    asyncCallback_->Call(callbacks_[EVENT_ACTIVE_STATE_CHANGE], getter);
+    HandleEvent(EVENT_ACTIVE_STATE_CHANGE, isActive);
 }
 
 void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
-    if (callbacks_[EVENT_VALID_COMMAND_CHANGE] == nullptr) {
-        SLOGE("not register callback event=%{public}d", EVENT_VALID_COMMAND_CHANGE);
-        return;
-    }
-
-    auto getter = [cmds](napi_env env, int &argc, napi_value *argv) {
-        argc = 1;
-        NapiUtils::SetValue(env, cmds, *argv);
-    };
-    asyncCallback_->Call(callbacks_[EVENT_VALID_COMMAND_CHANGE], getter);
+    HandleEvent(EVENT_VALID_COMMAND_CHANGE, cmds);
 }
 
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)

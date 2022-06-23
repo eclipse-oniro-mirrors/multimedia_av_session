@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "avsession_log.h"
 #include "napi_avsession_callback.h"
+#include "avsession_log.h"
+#include "napi_utils.h"
 
 namespace OHOS::AVSession {
 NapiAVSessionCallback::NapiAVSessionCallback()
@@ -35,6 +36,19 @@ void NapiAVSessionCallback::HandleEvent(int32_t event)
     }
 
     asyncCallback_->Call(callbacks_[event]);
+}
+
+template<typename T>
+void NapiAVSessionCallback::HandleEvent(int32_t event, const T& param)
+{
+    if (callbacks_[event] == nullptr) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+    asyncCallback_->Call(callbacks_[EVENT_SEEK], [param](napi_env env, int &argc, napi_value *argv) {
+        argc = 1;
+        NapiUtils::SetValue(env, param, *argv);
+    });
 }
 
 void NapiAVSessionCallback::OnPlay()
@@ -74,22 +88,27 @@ void NapiAVSessionCallback::OnRewind()
 
 void NapiAVSessionCallback::OnSeek(int64_t time)
 {
+    HandleEvent(EVENT_SEEK, time);
 }
 
 void NapiAVSessionCallback::OnSetSpeed(double speed)
 {
+    HandleEvent(EVENT_SET_SPEED, speed);
 }
 
 void NapiAVSessionCallback::OnSetLoopMode(int32_t loopMode)
 {
+    HandleEvent(EVENT_SET_LOOP_MODE, loopMode);
 }
 
 void NapiAVSessionCallback::OnToggleFavorite(const std::string &assertId)
 {
+    HandleEvent(EVENT_TOGGLE_FAVORITE, assertId);
 }
 
 void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent &keyEvent)
 {
+    HandleEvent(EVENT_MEDIA_KEY_EVENT, std::make_shared<MMI::KeyEvent>(keyEvent));
 }
 
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)

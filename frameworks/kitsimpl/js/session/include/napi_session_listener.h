@@ -45,7 +45,8 @@ public:
     napi_status RemoveCallback(napi_env env, int32_t event);
 
 private:
-    void HandleEvent(int32_t event, const AVSessionDescriptor& descriptor);
+    template<typename T>
+    void HandleEvent(int32_t event, const T& param);
 
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::mutex lock_;
