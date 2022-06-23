@@ -152,7 +152,6 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
     };
 
     auto complete = [env, context](napi_value &output) {
-        output = NapiUtils::GetUndefinedValue(env);
         context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
     };
@@ -175,12 +174,9 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
         /* require 2 arguments <event, callback> */
         CHECK_ARGS_RETURN_VOID(context, argc == 2, "invalid argument number");
-        napi_valuetype type = napi_undefined;
-        context->status = napi_typeof(env, argv[0], &type);
-        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
         context->status = NapiUtils::GetValue(env, argv[0], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
-
+        napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[1], &type);
         CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_function), "callback type invalid");
         callback = argv[1];
@@ -200,9 +196,16 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     }
     if (listener_ == nullptr) {
         listener_ = std::make_shared<NapiSessionListener>();
-        SLOGE("no memory");
-        napi_throw_error(env, nullptr, "no memory");
-        return NapiUtils::GetUndefinedValue(env);
+        if (listener_ == nullptr) {
+            SLOGE("no memory");
+            napi_throw_error(env, nullptr, "no memory");
+            return NapiUtils::GetUndefinedValue(env);
+        }
+        if (AVSessionManager::RegisterSessionListener(listener_) != AVSESSION_SUCCESS) {
+            SLOGE("native register session listener failed");
+            napi_throw_error(env, nullptr, "native register session listener failed");
+            return NapiUtils::GetUndefinedValue(env);
+        }
     }
 
     if (it->second.first(env, callback) != napi_ok) {
@@ -219,9 +222,6 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
     auto input = [&eventName, env, &context](size_t argc, napi_value* argv) {
         /* require 1 arguments <event> */
         CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid argument number");
-        napi_valuetype type = napi_undefined;
-        context->status = napi_typeof(env, argv[0], &type);
-        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
         context->status = NapiUtils::GetValue(env, argv[0], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
     };

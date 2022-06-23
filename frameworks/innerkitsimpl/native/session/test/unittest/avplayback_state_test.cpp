@@ -51,8 +51,7 @@ HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level1)
     avp->SetSpeed(3.0);
     avp->SetLoopMode(1);
     avp->SetBufferedTime(40);
-    avp->SetUpdateTime(10);
-    avp->SetElapsedTime(10);
+    avp->SetPosition({ 10, 10 });
     avp->SetFavorite(true);
     auto *parcel = new (std::nothrow) OHOS::Parcel();
     bool boo = avp->Marshalling(*parcel);
