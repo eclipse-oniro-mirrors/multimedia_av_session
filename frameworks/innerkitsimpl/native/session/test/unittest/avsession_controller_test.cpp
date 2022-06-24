@@ -637,30 +637,6 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback006, TestSize.Level1)
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 
-    AVPlaybackState state;
-    state.SetState(1);
-    state.SetSpeed(1);
-    state.SetBufferedTime(1);
-    state.SetPosition({ 1, 0 });
-    state.SetLoopMode(1);
-    state.SetFavorite(true);
-    EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
-    sleep(1);
-    EXPECT_EQ(IsAVPlaybackStateEqual(callback->state_, state), true);
-}
-
-/**
-* @tc.name: RegisterCallback007
-* @tc.desc: register AVControllerCallback
-* @tc.type: FUNC
-* @tc.require: AR000H31JK
-*/
-HWTEST_F(AVSessionControllerTest, RegisterCallback007, TestSize.Level1)
-{
-    std::shared_ptr<AVControllerCallbackImpl> callback = std::make_shared<AVControllerCallbackImpl>();
-    EXPECT_NE(callback, nullptr);
-    EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
-
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
     sleep(1);
     std::vector<int32_t> cmds = callback->cmds_;
@@ -729,8 +705,7 @@ HWTEST_F(AVSessionControllerTest, SetPlaybackFilter001, TestSize.Level1)
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
     AVPlaybackState::PlaybackStateMaskType filter;
-    filter.set(AVPlaybackState::PLAYBACK_KEY_LOOP_MODE);
-    filter.set(AVPlaybackState::PLAYBACK_KEY_STATE);
+    filter.set();
     EXPECT_EQ(controller_->SetPlaybackFilter(filter), AVSESSION_SUCCESS);
     AVPlaybackState state;
     state.SetLoopMode(AVControlCommand::LOOP_MODE_LIST);
@@ -830,6 +805,9 @@ HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition003, TestSize.Level1)
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 
+    AVPlaybackState::PlaybackStateMaskType filter;
+    filter.set();
+    EXPECT_EQ(controller_->SetPlaybackFilter(filter), AVSESSION_SUCCESS);
     AVPlaybackState state;
     state.SetPosition({ TestMicroSecond * TestMicroSecond, TestMicroSecond });
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);

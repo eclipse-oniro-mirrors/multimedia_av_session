@@ -22,7 +22,8 @@ AVPlaybackState::AVPlaybackState()
 
 bool AVPlaybackState::Marshalling(Parcel &parcel) const
 {
-    return parcel.WriteInt32(state_) &&
+    return parcel.WriteString(mask_.to_string()) &&
+        parcel.WriteInt32(state_) &&
         parcel.WriteDouble(speed_) &&
         parcel.WriteUint64(position_.elapsedTime_) &&
         parcel.WriteUint64(position_.updateTime_) &&
@@ -37,6 +38,7 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
     if (result == nullptr) {
         return nullptr;
     }
+    result->mask_ = PlaybackStateMaskType(parcel.ReadString());
     result->state_ = parcel.ReadInt32();
     result->speed_ = parcel.ReadDouble();
     result->position_.elapsedTime_ = parcel.ReadUint64();
