@@ -78,7 +78,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
-    playbackState_ = state;
+    playbackState_.CopyFrom(state);
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);
