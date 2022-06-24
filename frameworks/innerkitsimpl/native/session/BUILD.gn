@@ -49,8 +49,6 @@ ohos_shared_library("avsession_client") {
 
   public_configs = [ ":avsession_client_config" ]
 
-  deps = [ "//utils/native/base:utils" ]
-
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
@@ -59,6 +57,7 @@ ohos_shared_library("avsession_client") {
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "samgr_standard:samgr_proxy",
+    "utils_base:utils",
   ]
 
   subsystem_name = "multimedia"

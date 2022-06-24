@@ -176,6 +176,9 @@ public:
     static napi_value GetUndefinedValue(napi_env env);
 
     static napi_status GetPropertyNames(napi_env env, napi_value in, std::vector<std::string>& out);
+
+    static napi_status GetDateValue(napi_env env, napi_value value, double& result);
+    static napi_status SetDateValue(napi_env env, double in, napi_value& out);
 };
 }
 #endif // NAPI_UTILS_H
