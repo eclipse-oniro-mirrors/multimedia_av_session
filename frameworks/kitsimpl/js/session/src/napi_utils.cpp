@@ -237,16 +237,19 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, MMI::KeyEvent::KeyI
     int32_t code {};
     auto status = GetNamedProperty(env, in, "code", code);
     CHECK_RETURN(status == napi_ok, "get code property failed", status);
+    SLOGI("code=%{public}d", code);
     out.SetKeyCode(code);
 
     int64_t pressedTime {};
-    status = GetNamedProperty(env, in, "pressedTime", code);
+    status = GetNamedProperty(env, in, "pressedTime", pressedTime);
     CHECK_RETURN(status == napi_ok, "get pressedTime property failed", status);
+    SLOGI("pressedTime=%{public}" PRIu64, pressedTime);
     out.SetDownTime(pressedTime);
 
     int32_t deviceId {};
     status = GetNamedProperty(env, in, "deviceId", deviceId);
     CHECK_RETURN(status == napi_ok, "get deviceId property failed", status);
+    SLOGI("deviceId=%{public}d", deviceId);
     out.SetDeviceId(deviceId);
 
     return status;
@@ -291,7 +294,8 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::shared_ptr<MMI
     int32_t action {};
     status = GetNamedProperty(env, in, "action", action);
     CHECK_RETURN(status == napi_ok, "get action property failed", napi_generic_failure);
-    out->SetAction(action);
+    SLOGI("action=%{public}d", action);
+    out->SetKeyAction(action);
 
     MMI::KeyEvent::KeyItem key;
     status = GetNamedProperty(env, in, "key", key);
