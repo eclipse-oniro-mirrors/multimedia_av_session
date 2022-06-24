@@ -43,5 +43,5 @@ ohos_shared_library("avsession_utils") {
   ]
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_avsession"
+  part_name = "multimedia_av_session"
 }
