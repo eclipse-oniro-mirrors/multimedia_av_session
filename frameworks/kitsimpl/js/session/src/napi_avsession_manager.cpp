@@ -147,7 +147,7 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
         context->controller_ = AVSessionManager::CreateController(context->sessionId_);
         if (context->controller_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "nattive create controller failed";
+            context->error = "native create controller failed";
         }
     };
 

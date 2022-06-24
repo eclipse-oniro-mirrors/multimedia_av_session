@@ -15,6 +15,7 @@
 
 #include "napi_control_command.h"
 #include "avsession_log.h"
+#include "avsession_errors.h"
 #include "napi_utils.h"
 
 namespace OHOS::AVSession {
@@ -62,12 +63,16 @@ napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlC
         return status;
     }
 
+    SLOGI("cmd=%{public}s", cmd.c_str());
     auto it = commandMap_.find(cmd);
     if (it == commandMap_.end()) {
         SLOGE("cmd is invalid");
         return napi_invalid_arg;
     }
-
+    if (out.SetCommand(std::get<ENUM_INDEX>(it->second)) != AVSESSION_SUCCESS) {
+        SLOGE("native set command failed");
+        return napi_invalid_arg;
+    }
     auto getter = std::get<GETTER_INDEX>(it->second);
     return getter(env, in, out);
 }

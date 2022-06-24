@@ -123,6 +123,8 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession> 
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void **>(&napiAvSession)), napi_generic_failure);
     napiAvSession->session_ = std::move(nativeSession);
     napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
+    SLOGI("sessionId=%{public}d", napiAvSession->sessionId_);
+
     napi_value property {};
     auto status = NapiUtils::SetValue(env, napiAvSession->sessionId_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
