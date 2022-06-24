@@ -75,7 +75,7 @@ void AVMetaDataTest::SetUp(void)
 void AVMetaDataTest::TearDown(void)
 {
     if (avsession_ != nullptr) {
-        ASSERT_EQ(AVSESSION_SUCCESS, avsession_->Release());
+        ASSERT_EQ(AVSESSION_SUCCESS, avsession_->Destroy());
     }
 }
 

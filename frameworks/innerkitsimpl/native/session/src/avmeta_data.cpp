@@ -287,7 +287,7 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
 
     bool result = false;
     for (int i = 0; i < META_KEY_MAX; i++) {
-        if (metaIn.GetMetaMask().test(i)) {
+        if (metaIn.metaMask_.test(i)) {
             cloneActions[i](metaIn, *this);
             metaMask_.set(i);
             result = true;
