@@ -49,18 +49,18 @@ NapiAVSessionController::~NapiAVSessionController()
 napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor descriptors[] = {
-        DECLARE_NAPI_STATIC_FUNCTION("on", OnEvent),
-        DECLARE_NAPI_STATIC_FUNCTION("off", OffEvent),
-        DECLARE_NAPI_STATIC_FUNCTION("getAVPlaybackState", GetAVPlaybackState),
-        DECLARE_NAPI_STATIC_FUNCTION("getAVMetadata", GetAVMetaData),
-        DECLARE_NAPI_STATIC_FUNCTION("getOutputDevice", GetOutputDevice),
-        DECLARE_NAPI_STATIC_FUNCTION("sendAVKeyEvent", SendAVKeyEvent),
-        DECLARE_NAPI_STATIC_FUNCTION("getLaunchAbility", GetLaunchAbility),
-        DECLARE_NAPI_STATIC_FUNCTION("getRealPlaybackPositionSync", GetRealPlaybackPosition),
-        DECLARE_NAPI_STATIC_FUNCTION("isActive", IsSessionActive),
-        DECLARE_NAPI_STATIC_FUNCTION("destroy", Release),
-        DECLARE_NAPI_STATIC_FUNCTION("getValidCommands", GetValidCommands),
-        DECLARE_NAPI_STATIC_FUNCTION("sendControlCommand", SendControlCommand),
+        DECLARE_NAPI_FUNCTION("on", OnEvent),
+        DECLARE_NAPI_FUNCTION("off", OffEvent),
+        DECLARE_NAPI_FUNCTION("getAVPlaybackState", GetAVPlaybackState),
+        DECLARE_NAPI_FUNCTION("getAVMetadata", GetAVMetaData),
+        DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice),
+        DECLARE_NAPI_FUNCTION("sendAVKeyEvent", SendAVKeyEvent),
+        DECLARE_NAPI_FUNCTION("getLaunchAbility", GetLaunchAbility),
+        DECLARE_NAPI_FUNCTION("getRealPlaybackPositionSync", GetRealPlaybackPosition),
+        DECLARE_NAPI_FUNCTION("isActive", IsSessionActive),
+        DECLARE_NAPI_FUNCTION("destroy", Release),
+        DECLARE_NAPI_FUNCTION("getValidCommands", GetValidCommands),
+        DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
