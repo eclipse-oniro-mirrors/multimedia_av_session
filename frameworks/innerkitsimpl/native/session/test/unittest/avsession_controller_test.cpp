@@ -56,7 +56,7 @@ void AVSessionControllerTest::SetUp()
 
 void AVSessionControllerTest::TearDown()
 {
-    auto ret = avsession_->Release();
+    auto ret = avsession_->Destroy();
     ASSERT_EQ(AVSESSION_SUCCESS, ret);
     controller_->Release();
     ASSERT_EQ(AVSESSION_SUCCESS, ret);
@@ -133,7 +133,7 @@ HWTEST_F(AVSessionControllerTest, IsSessionActive001, TestSize.Level1)
     bool active = true;
     EXPECT_EQ(controller_->IsSessionActive(active), AVSESSION_SUCCESS);
     EXPECT_EQ(active, false);
-    EXPECT_EQ(avsession_->Active(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Activate(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->IsSessionActive(active), AVSESSION_SUCCESS);
     EXPECT_EQ(active, true);
 }
@@ -147,7 +147,7 @@ HWTEST_F(AVSessionControllerTest, IsSessionActive001, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, IsSessionActive002, TestSize.Level1)
 {
     bool active = true;
-    EXPECT_EQ(avsession_->Disactive(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->IsSessionActive(active), AVSESSION_SUCCESS);
     EXPECT_EQ(active, false);
 }
@@ -161,7 +161,7 @@ HWTEST_F(AVSessionControllerTest, IsSessionActive002, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, IsSessionActive003, TestSize.Level1)
 {
     bool active = false;
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->IsSessionActive(active), ERR_SESSION_NOT_EXIST);
 }
 
@@ -195,7 +195,7 @@ HWTEST_F(AVSessionControllerTest, GetAVPlaybackState001, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, GetAVPlaybackState002, TestSize.Level1)
 {
     AVPlaybackState state;
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->GetAVPlaybackState(state), ERR_SESSION_NOT_EXIST);
 }
 
@@ -228,7 +228,7 @@ HWTEST_F(AVSessionControllerTest, GetAVMetaData001, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, GetAVMetaData002, TestSize.Level1)
 {
     AVMetaData metaData;
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->GetAVMetaData(metaData), ERR_SESSION_NOT_EXIST);
 }
 
@@ -293,7 +293,7 @@ HWTEST_F(AVSessionControllerTest, SendMediaButtonEvent003, TestSize.Level1)
     keyEvent->AddKeyItem(item);
     ASSERT_EQ(keyEvent->IsValid(), true);
 
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->SendAVKeyEvent(*(keyEvent.get())), ERR_SESSION_NOT_EXIST);
 }
 
@@ -318,7 +318,7 @@ HWTEST_F(AVSessionControllerTest, GetLaunchAbility001, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, GetLaunchAbility002, TestSize.Level1)
 {
     OHOS::AbilityRuntime::WantAgent::WantAgent ability;
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->GetLaunchAbility(ability), ERR_SESSION_NOT_EXIST);
 }
 
@@ -351,7 +351,7 @@ HWTEST_F(AVSessionControllerTest, GetValidCommands001, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, GetValidCommands002, TestSize.Level1)
 {
     std::vector<int32_t> cmds;
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->GetValidCommands(cmds), ERR_SESSION_NOT_EXIST);
 }
 
@@ -546,7 +546,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand011, TestSize.Level1)
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.SetAssetId("123456"), AVSESSION_SUCCESS);
 
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->SendControlCommand(command), ERR_SESSION_NOT_EXIST);
 }
 
@@ -603,7 +603,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback004, TestSize.Level1)
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     sleep(1);
     EXPECT_EQ(callback->isDestory_, true);
 }
@@ -620,7 +620,7 @@ HWTEST_F(AVSessionControllerTest, RegisterCallback005, TestSize.Level1)
     EXPECT_NE(callback, nullptr);
     EXPECT_EQ(controller_->RegisterCallback(callback), AVSESSION_SUCCESS);
 
-    EXPECT_EQ(avsession_->Active(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Activate(), AVSESSION_SUCCESS);
     sleep(1);
     EXPECT_EQ(callback->isActive_, true);
 }
@@ -786,7 +786,7 @@ HWTEST_F(AVSessionControllerTest, GetSessionId001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetSessionId002, TestSize.Level1)
 {
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     int32_t id = controller_->GetSessionId();
     EXPECT_EQ(id, AVSESSION_ERROR);
 }

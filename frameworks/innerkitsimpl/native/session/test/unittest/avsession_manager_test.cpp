@@ -119,7 +119,7 @@ HWTEST_F(AVSessionManagerTest, CreatSession002, TestSize.Level1)
     auto session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
     EXPECT_NE(session, nullptr);
     if (session != nullptr) {
-        session->Release();
+        session->Destroy();
     }
     SLOGI("CreatSession002 end");
 }
@@ -143,7 +143,7 @@ HWTEST_F(AVSessionManagerTest, CreatSession003, TestSize.Level1)
     EXPECT_EQ(session2, nullptr);
 
     if (session1 != nullptr) {
-        session1->Release();
+        session1->Destroy();
     }
     SLOGI("CreatSession003 end");
 }
@@ -175,7 +175,7 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
     EXPECT_EQ(descriptors[0].isActive_, false);
 
     if (session != nullptr) {
-        session->Release();
+        session->Destroy();
     }
     SLOGI("GetAllSessionDescriptors001 end");
 }
@@ -214,7 +214,7 @@ HWTEST_F(AVSessionManagerTest, CreateController002, TestSize.Level1)
     EXPECT_NE(controller, nullptr);
 
     if (session != nullptr) {
-        session->Release();
+        session->Destroy();
     }
     if (controller != nullptr) {
         controller->Release();
@@ -260,7 +260,7 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
     EXPECT_EQ(session->GetSessionId(), listener->GetSessionId());
 
     if (session != nullptr) {
-        session->Release();
+        session->Destroy();
     }
     SLOGI("RegisterSessionListener001 end");
 }

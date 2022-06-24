@@ -65,7 +65,7 @@ void AvsessionTest::TearDown(void)
 {
     int32_t ret = AVSESSION_ERROR;
     if (avsession_ != nullptr) {
-        ret = avsession_->Release();
+        ret = avsession_->Destroy();
         ASSERT_EQ(AVSESSION_SUCCESS, ret);
     }
     if (controller_ != nullptr) {
@@ -379,7 +379,7 @@ HWTEST_F(AvsessionTest, Active001, TestSize.Level1)
 {
     SLOGE("Active001 Begin");
     bool isActive = false;
-    EXPECT_EQ(avsession_->Active(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Activate(), AVSESSION_SUCCESS);
     isActive = avsession_->IsActive();
     EXPECT_EQ(isActive, true);
     SLOGE("Active001 End");
@@ -395,7 +395,7 @@ HWTEST_F(AvsessionTest, Disactive001, TestSize.Level1)
 {
     SLOGE("Disactive001 Begin");
     bool isActive = true;
-    EXPECT_EQ(avsession_->Disactive(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
     isActive = avsession_->IsActive();
     EXPECT_EQ(isActive, false);
     SLOGE("Disactive001 End");
@@ -430,14 +430,14 @@ HWTEST_F(AvsessionTest, AddSupportCommand002, TestSize.Level1)
 }
 
 /**
-* @tc.name: Release001
+* @tc.name: Destroy001
 * @tc.desc: Return is Session Actived
 * @tc.type: FUNC
 * @tc.require: AR000H31JF
 */
-HWTEST_F(AvsessionTest, Release001, TestSize.Level1)
+HWTEST_F(AvsessionTest, Destroy001, TestSize.Level1)
 {
-    SLOGE("Release001 Begin");
-    EXPECT_EQ(avsession_->Release(), AVSESSION_SUCCESS);
-    SLOGE("Release001 End");
+    SLOGE("Destroy001 Begin");
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
+    SLOGE("Destroy001 End");
 }
