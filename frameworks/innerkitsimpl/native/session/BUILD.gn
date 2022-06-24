@@ -54,7 +54,7 @@ ohos_shared_library("avsession_client") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
-    "hitrace_native:hitrace_meter"
+    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
