@@ -346,7 +346,7 @@ napi_status NapiMetaData::GetPublishDate(napi_env env, napi_value in, AVMetaData
     auto status = napi_get_named_property(env, in, "publishDate", &property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     double date {};
-    status = napi_get_date_value(env, property, &date);
+    status = NapiUtils::GetDateValue(env, property, date);
     CHECK_RETURN(status == napi_ok, "get date value failed", status);
     out.SetPublishDate(date);
     return status;
@@ -355,7 +355,7 @@ napi_status NapiMetaData::GetPublishDate(napi_env env, napi_value in, AVMetaData
 napi_status NapiMetaData::SetPublishDate(napi_env env, const AVMetaData &in, napi_value &out)
 {
     napi_value property{};
-    auto status = napi_create_date(env, in.GetPublishDate(), &property);
+    auto status = NapiUtils::SetDateValue(env, in.GetPublishDate(), property);
     CHECK_RETURN(status == napi_ok, "create date object failed", status);
     status = napi_set_named_property(env, out, "publishDate", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);

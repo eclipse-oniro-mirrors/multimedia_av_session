@@ -19,6 +19,8 @@
 #include "av_session.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
+#include "native_engine/native_value.h"
+#include "native_engine/native_engine.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 4096;
@@ -753,6 +755,36 @@ napi_status NapiUtils::GetPropertyNames(napi_env env, napi_value in, std::vector
         out.push_back(nameString);
     }
 
+    return napi_ok;
+}
+
+napi_status NapiUtils::GetDateValue(napi_env env, napi_value value, double& result)
+{
+    CHECK_RETURN(env != nullptr, "env is nullptr", napi_invalid_arg);
+    CHECK_RETURN(value != nullptr, "value is nullptr", napi_invalid_arg);
+
+    auto engine = reinterpret_cast<NativeEngine*>(env);
+    auto nativeValue = reinterpret_cast<NativeValue*>(value);
+    auto isDate = nativeValue->IsDate();
+    if (isDate) {
+        auto nativeDate = reinterpret_cast<NativeDate*>(nativeValue->GetInterface(NativeDate::INTERFACE_ID));
+        result = nativeDate->GetTime();
+        engine->ClearLastError();
+        return napi_ok;
+    } else {
+        SLOGE("value is not date type");
+        return napi_date_expected;
+    }
+}
+
+napi_status NapiUtils::SetDateValue(napi_env env, double time, napi_value& result)
+{
+    CHECK_RETURN(env != nullptr, "env is nullptr", napi_invalid_arg);
+
+    auto engine = reinterpret_cast<NativeEngine*>(env);
+    auto resultValue = engine->CreateDate(time);
+    result = reinterpret_cast<napi_value>(resultValue);
+    engine->ClearLastError();
     return napi_ok;
 }
 }

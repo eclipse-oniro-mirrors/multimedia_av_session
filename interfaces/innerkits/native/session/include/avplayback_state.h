@@ -51,6 +51,7 @@ public:
     using PlaybackStateMaskType = std::bitset<PLAYBACK_KEY_MAX>;
 
     AVPlaybackState();
+    ~AVPlaybackState() override = default;
 
     static AVPlaybackState* Unmarshalling(Parcel& parcel);
     bool Marshalling(Parcel& parcel) const override;

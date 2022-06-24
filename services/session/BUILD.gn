@@ -45,8 +45,8 @@ ohos_shared_library("avsession_service") {
     "server/avcontroller_item.cpp",
     "server/avsession_item.cpp",
     "server/avsession_service.cpp",
-    "server/session_stack.cpp",
     "server/focus_session_strategy.cpp",
+    "server/session_stack.cpp",
   ]
 
   adapter_sources = [
@@ -64,10 +64,7 @@ ohos_shared_library("avsession_service") {
     "//utils/native/base/include",
   ]
 
-  deps = [
-    "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client" ]
 
   external_deps = [
     "ability_base:want",
@@ -76,10 +73,11 @@ ohos_shared_library("avsession_service") {
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
+    "multimedia_audio_framework:audio_client",
     "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
-    "multimedia_audio_framework:audio_client",
+    "utils_base:utils",
   ]
 
   subsystem_name = "multimedia"

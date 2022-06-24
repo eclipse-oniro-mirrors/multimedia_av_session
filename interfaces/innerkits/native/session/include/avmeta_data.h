@@ -48,7 +48,7 @@ public:
     using MetaMaskType = std::bitset<META_KEY_MAX>;
 
     AVMetaData() = default;
-    ~AVMetaData() = default;
+    ~AVMetaData() override = default;
 
     static AVMetaData *Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& data) const override;
