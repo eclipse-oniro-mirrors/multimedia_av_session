@@ -67,17 +67,17 @@ NapiAVSession::~NapiAVSession()
 napi_value NapiAVSession::Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor descriptors[] = {
-        DECLARE_NAPI_STATIC_FUNCTION("setAVMetadata", SetAVMetaData),
-        DECLARE_NAPI_STATIC_FUNCTION("setAVPlaybackState", SetAVPlaybackState),
-        DECLARE_NAPI_STATIC_FUNCTION("setLaunchAbility", SetLaunchAbility),
-        DECLARE_NAPI_STATIC_FUNCTION("setAudioStreamId", SetAudioStreamId),
-        DECLARE_NAPI_STATIC_FUNCTION("getController", GetController),
-        DECLARE_NAPI_STATIC_FUNCTION("activate", Activate),
-        DECLARE_NAPI_STATIC_FUNCTION("deactivate", Deactivate),
-        DECLARE_NAPI_STATIC_FUNCTION("destroy", Destroy),
-        DECLARE_NAPI_STATIC_FUNCTION("on", OnEvent),
-        DECLARE_NAPI_STATIC_FUNCTION("off", OffEvent),
-        DECLARE_NAPI_STATIC_FUNCTION("getOutputDevice", GetOutputDevice)
+        DECLARE_NAPI_FUNCTION("setAVMetadata", SetAVMetaData),
+        DECLARE_NAPI_FUNCTION("setAVPlaybackState", SetAVPlaybackState),
+        DECLARE_NAPI_FUNCTION("setLaunchAbility", SetLaunchAbility),
+        DECLARE_NAPI_FUNCTION("setAudioStreamId", SetAudioStreamId),
+        DECLARE_NAPI_FUNCTION("getController", GetController),
+        DECLARE_NAPI_FUNCTION("activate", Activate),
+        DECLARE_NAPI_FUNCTION("deactivate", Deactivate),
+        DECLARE_NAPI_FUNCTION("destroy", Destroy),
+        DECLARE_NAPI_FUNCTION("on", OnEvent),
+        DECLARE_NAPI_FUNCTION("off", OffEvent),
+        DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice)
     };
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor{};
