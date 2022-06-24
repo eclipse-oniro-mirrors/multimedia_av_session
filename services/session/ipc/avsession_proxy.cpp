@@ -19,6 +19,7 @@
 #include "iavsession_callback.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 AVSessionProxy::AVSessionProxy(const sptr<IRemoteObject> &impl)
@@ -29,6 +30,7 @@ AVSessionProxy::AVSessionProxy(const sptr<IRemoteObject> &impl)
 
 int32_t AVSessionProxy::GetSessionId()
 {
+    AVSessionTrace trace("AVSessionProxy::GetSessionId");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -46,6 +48,7 @@ int32_t AVSessionProxy::GetSessionId()
 
 int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback> &callback)
 {
+    AVSessionTrace trace("AVSessionProxy::RegisterCallback");
     CHECK_AND_RETURN_RET_LOG(callback != nullptr, AVSESSION_ERROR, "callback is nullptr");
     callback_ = new(std::nothrow) AVSessionCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVSessionCallbackClient failed");
@@ -58,6 +61,7 @@ int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback
 
 int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &callback)
 {
+    AVSessionTrace trace("AVSessionProxy::RegisterCallbackInner");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
                              "write interface token failed");
@@ -76,7 +80,9 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &ca
 
 int32_t AVSessionProxy::Destroy()
 {
+    AVSessionTrace::TraceBegin("AVControllerCallback::OnSessionDestroy", ON_SESSION_DESTROY_TASK_ID);
     SLOGD("enter");
+    AVSessionTrace trace("AVSessionProxy::Release");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -93,6 +99,8 @@ int32_t AVSessionProxy::Destroy()
 
 int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
+    AVSessionTrace::TraceBegin("AVControllerCallback::OnMetaDataChange", ON_MEDA_DATA_CHANGE_TASK_ID);
+    AVSessionTrace trace("AVSessionProxy::SetAVMetaData");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -111,6 +119,7 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 
 int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
 {
+    AVSessionTrace trace("AVSessionProxy::GetAVMetaData");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
                              ERR_MARSHALLING, "write interface token failed");
@@ -133,6 +142,7 @@ int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
 
 int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
 {
+    AVSessionTrace trace("AVSessionProxy::GetAVPlaybackState");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -155,6 +165,8 @@ int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
 
 int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
 {
+    AVSessionTrace::TraceBegin("AVControllerCallback::OnPlaybackStateChange", ON_PLAYBACK_STATE_CHANGE_TASK_ID);
+    AVSessionTrace trace("AVSessionProxy::SetAVPlaybackState");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -173,6 +185,7 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
 
 int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
+    AVSessionTrace trace("AVSessionProxy::SetLaunchAbility");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -191,6 +204,7 @@ int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAg
 
 sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 {
+    AVSessionTrace trace("AVSessionProxy::GetControllerInner");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
                              nullptr, "write interface token failed");
@@ -213,6 +227,7 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
+    AVSessionTrace trace("AVSessionProxy::GetController");
     sptr <IRemoteObject> object = GetControllerInner();
     CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
     auto controller = iface_cast<AVSessionControllerProxy>(object);
@@ -221,6 +236,8 @@ std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 
 int32_t AVSessionProxy::Activate()
 {
+    AVSessionTrace::TraceBegin("AVControllerCallback::OnActiveStateChange", ON_ACTIVE_STATE_CHANGE_TASK_ID);
+    AVSessionTrace trace("AVSessionProxy::Active");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -237,6 +254,7 @@ int32_t AVSessionProxy::Activate()
 
 int32_t AVSessionProxy::Deactivate()
 {
+    AVSessionTrace trace("AVSessionProxy::Disactive");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -253,6 +271,7 @@ int32_t AVSessionProxy::Deactivate()
 
 bool AVSessionProxy::IsActive()
 {
+    AVSessionTrace trace("AVSessionProxy::IsActive");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -269,6 +288,8 @@ bool AVSessionProxy::IsActive()
 
 int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 {
+    AVSessionTrace::TraceBegin("AVControllerCallback::OnValidCommandChange", ON_VALID_COMMAND_CHANGE_TASK_ID);
+    AVSessionTrace trace("AVSessionProxy::AddSupportCommand");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     MessageParcel data;
