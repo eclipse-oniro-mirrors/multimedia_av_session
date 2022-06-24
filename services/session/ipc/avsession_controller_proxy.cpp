@@ -18,6 +18,7 @@
 #include "avcontroller_callback_client.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 AVSessionControllerProxy::AVSessionControllerProxy(const sptr<IRemoteObject> &impl)
@@ -75,6 +76,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData &data)
 
 int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
+    AVSessionTrace trace("AVSessionControllerProxy::SendAVKeyEvent");
     CHECK_AND_RETURN_RET_LOG(keyEvent.IsValid(), ERR_INVALID_PARAM, "keyEvent not valid");
 
     MessageParcel parcel;
@@ -161,6 +163,7 @@ int32_t AVSessionControllerProxy::IsSessionActive(bool &isActive)
 
 int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand &cmd)
 {
+    AVSessionTrace trace("AVSessionControllerProxy::SendControlCommand");
     CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_INVALID_PARAM, "command not valid");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,

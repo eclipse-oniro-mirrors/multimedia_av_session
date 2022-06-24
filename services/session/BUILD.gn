@@ -64,12 +64,16 @@ ohos_shared_library("avsession_service") {
     "//utils/native/base/include",
   ]
 
-  deps = [ "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client" ]
+  deps = [
+    "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client",
+    "//foundation/multimedia/av_session/utils:avsession_utils",
+  ]
 
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "distributeddataobject:distributeddataobject_impl",
+    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",

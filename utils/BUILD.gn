@@ -21,8 +21,6 @@ ohos_shared_library("avsession_utils") {
   install_enable = true
 
   sources = [
-    "src/avsession_event.cpp",
-    "src/avsession_metadata.cpp",
   ]
 
   include_dirs = [
@@ -35,11 +33,14 @@ ohos_shared_library("avsession_utils") {
     "-FPIC",
   ]
 
-  configs = [ ":avsession_utils_config" ]
+  public_configs = [ ":avsession_utils_config" ]
 
   deps = [ "//utils/native/base:utils" ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "hitrace_native:hitrace_meter",  
+    "hiviewdfx_hilog_native:libhilog" 
+  ]
 
   subsystem_name = "multimedia"
   part_name = "multimedia_avsession"

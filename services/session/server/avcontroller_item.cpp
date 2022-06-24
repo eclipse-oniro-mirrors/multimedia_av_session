@@ -17,6 +17,7 @@
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
@@ -63,6 +64,7 @@ int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
         SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
+    AVSessionTrace trace("AVControllerItem::SendAVKeyEvent");
     session_->HandleMediaKeyEvent(keyEvent);
     return AVSESSION_SUCCESS;
 }
@@ -103,6 +105,7 @@ int32_t AVControllerItem::SendControlCommand(const AVControlCommand &cmd)
         SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
+    AVSessionTrace trace("AVControllerItem::SendControlCommand");
     std::vector<int32_t> cmds = session_->GetSupportCommand();
     if (std::find(cmds.begin(), cmds.end(), cmd.GetCommand()) == cmds.end()) {
         SLOGI("command not support");

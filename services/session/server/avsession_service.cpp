@@ -22,6 +22,7 @@
 #include "key_event_adapter.h"
 #include "system_ability_definition.h"
 #include "session_stack.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
@@ -207,6 +208,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
 sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
                                                          const AppExecFwk::ElementName& elementName)
 {
+    AVSessionTrace mAVSessionTrace("AVSessionService::CreateSessionInner");
     SLOGI("enter");
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
@@ -232,6 +234,7 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
 
 std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
 {
+    AVSessionTrace mAVSessionTrace("AVSessionService::GetAllSessionDescriptors");
     std::vector<AVSessionDescriptor> result;
     std::lock_guard lockGuard(sessionAndControllerLock_);
     for (const auto& session: GetContainer().GetAllSessions()) {
@@ -256,6 +259,7 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
 
 sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
 {
+    AVSessionTrace mAVSessionTrace("AVSessionService::CreateControllerInner");
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (GetPresentController(pid, sessionId) != nullptr) {
@@ -301,6 +305,7 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
+    AVSessionTrace mAVSessionTrace("AVSessionService::SendSystemAVKeyEvent");
     SLOGI("key=%{public}d", keyEvent.GetKeyCode());
     if (topSession_) {
         topSession_->HandleMediaKeyEvent(keyEvent);
@@ -310,6 +315,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
+    AVSessionTrace mAVSessionTrace("AVSessionService::SendSystemControlCommand");
     SLOGI("cmd=%{public}d", command.GetCommand());
     if (topSession_) {
         topSession_->ExecuteControllerCommand(command);
@@ -333,6 +339,7 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
 {
     SLOGI("enter");
     auto pid = GetCallingPid();
+    AVSessionTrace::TraceBegin("AVSessionService::OnClientDied", ON_SESSIONSERVICE_CLIENTDIEDTASK_ID);
     auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
         SLOGE("malloc failed");
@@ -350,6 +357,7 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
 
 void AVSessionService::OnClientDied(pid_t pid)
 {
+    AVSessionTrace::TraceEnd("AVSessionService::OnClientDied", ON_SESSIONSERVICE_CLIENTDIEDTASK_ID);
     SLOGI("pid=%{public}d", pid);
     RemoveSessionListener(pid);
     RemoveClientDeathObserver(pid);
