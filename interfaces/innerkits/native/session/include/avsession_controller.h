@@ -49,7 +49,7 @@ public:
 
     virtual int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter) = 0;
 
-    virtual int32_t Release() = 0;
+    virtual int32_t Destroy() = 0;
 
     virtual int32_t GetSessionId() = 0;
 

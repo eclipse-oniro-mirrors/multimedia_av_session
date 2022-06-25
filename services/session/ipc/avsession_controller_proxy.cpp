@@ -248,7 +248,7 @@ int32_t AVSessionControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVSessionControllerProxy::Release()
+int32_t AVSessionControllerProxy::Destroy()
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -257,7 +257,7 @@ int32_t AVSessionControllerProxy::Release()
     MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_RELEASE, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_DESTROY, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;

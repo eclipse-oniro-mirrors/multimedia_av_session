@@ -49,8 +49,8 @@ private:
     static napi_value GetValidCommands(napi_env env, napi_callback_info info);
     static napi_value IsSessionActive(napi_env env, napi_callback_info info);
     static napi_value SendControlCommand(napi_env env, napi_callback_info info);
-    static napi_value Release(napi_env env, napi_callback_info info);
-    static napi_value GetRealPlaybackPosition(napi_env env, napi_callback_info info);
+    static napi_value Destroy(napi_env env, napi_callback_info info);
+    static napi_value GetRealPlaybackPositionSync(napi_env env, napi_callback_info info);
     static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
 
     static napi_status OnSessionDestroy(napi_env env, NapiAVSessionController* napiController,

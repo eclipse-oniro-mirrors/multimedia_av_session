@@ -44,7 +44,7 @@ public:
 
     int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter) override;
 
-    int32_t Release() override;
+    int32_t Destroy() override;
 
     int32_t GetSessionId() override;
 

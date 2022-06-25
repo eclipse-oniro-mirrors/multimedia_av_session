@@ -58,7 +58,7 @@ void AVSessionControllerTest::TearDown()
 {
     auto ret = avsession_->Destroy();
     ASSERT_EQ(AVSESSION_SUCCESS, ret);
-    controller_->Release();
+    controller_->Destroy();
     ASSERT_EQ(AVSESSION_SUCCESS, ret);
 }
 

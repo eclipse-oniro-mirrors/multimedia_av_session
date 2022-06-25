@@ -56,9 +56,9 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice),
         DECLARE_NAPI_FUNCTION("sendAVKeyEvent", SendAVKeyEvent),
         DECLARE_NAPI_FUNCTION("getLaunchAbility", GetLaunchAbility),
-        DECLARE_NAPI_FUNCTION("getRealPlaybackPositionSync", GetRealPlaybackPosition),
+        DECLARE_NAPI_FUNCTION("getRealPlaybackPositionSync", GetRealPlaybackPositionSync),
         DECLARE_NAPI_FUNCTION("isActive", IsSessionActive),
-        DECLARE_NAPI_FUNCTION("destroy", Release),
+        DECLARE_NAPI_FUNCTION("destroy", Destroy),
         DECLARE_NAPI_FUNCTION("getValidCommands", GetValidCommands),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
     };
@@ -345,7 +345,7 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
     return NapiAsyncWork::Enqueue(env, context, "SendControlCommand", executor);
 }
 
-napi_value NapiAVSessionController::Release(napi_env env, napi_callback_info info)
+napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info);
@@ -358,42 +358,38 @@ napi_value NapiAVSessionController::Release(napi_env env, napi_callback_info inf
             SLOGE("native controller is nullptr");
             return;
         }
-        int32_t ret = napiController->controller_->Release();
+        int32_t ret = napiController->controller_->Destroy();
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
-            context->error = "controller Release failed";
-            SLOGE("controller Release failed:%{public}d", ret);
+            context->error = "controller Destroy failed";
+            SLOGE("controller Destroy failed:%{public}d", ret);
         }
     };
 
     return NapiAsyncWork::Enqueue(env, context, "IsSessionActive", executor);
 }
 
-napi_value NapiAVSessionController::GetRealPlaybackPosition(napi_env env, napi_callback_info info)
+napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, napi_callback_info info)
 {
-    struct ConcreteContext : public ContextBase {
-        uint64_t position;
-    };
-    auto context = std::make_shared<ConcreteContext>();
+    auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
-    auto executor = [context]() {
-        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
-            context->status = napi_generic_failure;
-            context->error = "no controller";
-            SLOGE("native controller is nullptr");
-            return;
-        }
-        context->position = napiController->controller_->GetRealPlaybackPosition();
-    };
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController->controller_ == nullptr) {
+        SLOGI("no controller");
+        napi_throw_error(env, nullptr, "no controller");
+        return NapiUtils::GetUndefinedValue(env);
+    }
 
-    auto complete = [env, context](napi_value &output) {
-        context->status = NapiUtils::SetValue(env, static_cast<int64_t>(context->position), output);
-        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
-    };
-
-    return NapiAsyncWork::Enqueue(env, context, "GetRealPlaybackPosition", executor, complete);
+    auto position = napiController->controller_->GetRealPlaybackPosition();
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, static_cast<int64_t>(position), output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        napi_throw_error(env, nullptr, "convert native object to javascript object failed");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
 }
 
 napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_info info)

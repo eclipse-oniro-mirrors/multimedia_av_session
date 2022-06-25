@@ -127,7 +127,7 @@ int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackState
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::Release()
+int32_t AVControllerItem::Destroy()
 {
     if (callback_ != nullptr) {
         callback_ = nullptr;
