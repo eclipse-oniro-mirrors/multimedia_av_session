@@ -60,6 +60,14 @@ private:
     static std::shared_ptr<NapiSessionListener> listener_;
     static std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     static napi_ref serviceDiedCallback_;
+
+    static constexpr size_t ARGC_ONE = 1;
+    static constexpr size_t ARGC_TWO = 2;
+    static constexpr size_t ARGC_THERE = 3;
+
+    static constexpr size_t ARGV_FIRST = 0;
+    static constexpr size_t ARGV_SECOND = 1;
+    static constexpr size_t ARGV_THIRD = 2;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_MANAGER_H

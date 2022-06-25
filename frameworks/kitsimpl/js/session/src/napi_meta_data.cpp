@@ -75,17 +75,42 @@ std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
     { "nextAssetId", AVMetaData::META_KEY_NEXT_ASSET_ID }
 };
 
-AVMetaData::MetaMaskType NapiMetaData::ConvertFilter(const std::vector<std::string> &filter)
+napi_status NapiMetaData::ConvertFilter(napi_env env, napi_value filter, AVMetaData::MetaMaskType& mask)
 {
-    AVMetaData::MetaMaskType mask;
-    for (const auto& metaKey : filter) {
+    napi_valuetype type = napi_undefined;
+    auto status = napi_typeof(env, filter, &type);
+    CHECK_RETURN(status == napi_ok, "napi_typeof failed", status);
+
+    std::string stringFilter;
+    if (type == napi_string) {
+        status = NapiUtils::GetValue(env, filter, stringFilter);
+        CHECK_RETURN(status == napi_ok, "get string filter failed", status);
+        if (stringFilter != "all") {
+            SLOGE("string filter only support all") ;
+            return napi_invalid_arg;
+        }
+        mask.set();
+        return napi_ok;
+    }
+
+    uint32_t count = 0;
+    status = napi_get_array_length(env, filter, &count);
+    CHECK_RETURN(status == napi_ok, "get array length failed", status);
+    for (uint32_t i = 0; i < count; i++) {
+        napi_value value {};
+        status = napi_get_element(env, filter, i, &value);
+        CHECK_RETURN(status == napi_ok, "get element failed", status);
+        std::string metaKey;
+        status = NapiUtils::GetValue(env, value, metaKey);
+        CHECK_RETURN(status == napi_ok, "get string value failed", status);
         for (auto & pair : filterMap_) {
             if (pair.first == metaKey) {
                 mask.set(pair.second);
             }
         }
     }
-    return mask;
+
+    return napi_ok;
 }
 
 napi_status NapiMetaData::GetValue(napi_env env, napi_value in, AVMetaData &out)
