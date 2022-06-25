@@ -408,7 +408,7 @@ void AVSessionService::ClearControllerForClientDiedNoLock(pid_t pid)
         controllers_.erase(it);
         if (!controllers.empty()) {
             for (const auto& controller : controllers) {
-                controller->Release();
+                controller->Destroy();
             }
         }
     }
