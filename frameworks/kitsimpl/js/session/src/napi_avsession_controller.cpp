@@ -133,13 +133,14 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
         if (napiController->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "no controller";
-        } else {
-            int32_t ret = napiController->controller_->GetAVPlaybackState(context->state);
-            if (ret != AVSESSION_SUCCESS) {
-                context->status = napi_generic_failure;
-                context->error = "controller GetAVPlaybackState failed";
-                SLOGE("controller GetAVPlaybackState failed:%{public}d", ret);
-            }
+            SLOGE("native controller is nullptr");
+            return;
+        }
+        int32_t ret = napiController->controller_->GetAVPlaybackState(context->state);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "controller GetAVPlaybackState failed";
+            SLOGE("controller GetAVPlaybackState failed:%{public}d", ret);
         }
     };
 
@@ -164,13 +165,14 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
         if (napiController->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "no controller";
-        } else {
-            int32_t ret = napiController->controller_->GetAVMetaData(context->data);
-            if (ret != AVSESSION_SUCCESS) {
-                context->status = napi_generic_failure;
-                context->error = "controller GetAVMetaData failed";
-                SLOGE("controller GetAVMetaData failed:%{public}d", ret);
-            }
+            SLOGE("native controller is nullptr");
+            return;
+        }
+        int32_t ret = napiController->controller_->GetAVMetaData(context->data);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "controller GetAVMetaData failed";
+            SLOGE("controller GetAVMetaData failed:%{public}d", ret);
         }
     };
 
@@ -189,9 +191,8 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        // require 1 arguments <sessionId>
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
-        context->status = NapiUtils::GetValue(env, argv[0], context->keyEvent_);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->keyEvent_);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->keyEvent_ != nullptr),
             "invalid keyEvent");
     };
@@ -202,13 +203,14 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
         if (napiController->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "no controller";
-        } else {
-            int32_t ret = napiController->controller_->SendAVKeyEvent(*context->keyEvent_);
-            if (ret != AVSESSION_SUCCESS) {
-                context->status = napi_generic_failure;
-                context->error = "controller SendAVKeyEvent failed";
-                SLOGE("controller SendAVKeyEvent failed:%{public}d", ret);
-            }
+            SLOGE("native controller is nullptr");
+            return;
+        }
+        int32_t ret = napiController->controller_->SendAVKeyEvent(*context->keyEvent_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "controller SendAVKeyEvent failed";
+            SLOGE("controller SendAVKeyEvent failed:%{public}d", ret);
         }
     };
 
@@ -228,13 +230,14 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
         if (napiController->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "no controller";
-        } else {
-            int32_t ret = napiController->controller_->GetLaunchAbility(*context->ability);
-            if (ret != AVSESSION_SUCCESS) {
-                context->status = napi_generic_failure;
-                context->error = "controller GetLaunchAbility failed";
-                SLOGE("controller GetLaunchAbility failed:%{public}d", ret);
-            }
+            SLOGE("native controller is nullptr");
+            return;
+        }
+        int32_t ret = napiController->controller_->GetLaunchAbility(*context->ability);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "controller GetLaunchAbility failed";
+            SLOGE("controller GetLaunchAbility failed:%{public}d", ret);
         }
     };
 
@@ -259,13 +262,14 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
         if (napiController->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "no controller";
-        } else {
-            int32_t ret = napiController->controller_->GetValidCommands(context->cmds);
-            if (ret != AVSESSION_SUCCESS) {
-                context->status = napi_generic_failure;
-                context->error = "controller GetValidCommands failed";
-                SLOGE("controller GetValidCommands failed:%{public}d", ret);
-            }
+            SLOGE("native controller is nullptr");
+            return;
+        }
+        int32_t ret = napiController->controller_->GetValidCommands(context->cmds);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "controller GetValidCommands failed";
+            SLOGE("controller GetValidCommands failed:%{public}d", ret);
         }
     };
 
@@ -290,13 +294,14 @@ napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_
         if (napiController->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "no controller";
-        } else {
-            int32_t ret = napiController->controller_->IsSessionActive(context->isActive);
-            if (ret != AVSESSION_SUCCESS) {
-                context->status = napi_generic_failure;
-                context->error = "controller IsSessionActive failed";
-                SLOGE("controller IsSessionActive failed:%{public}d", ret);
-            }
+            SLOGE("native controller is nullptr");
+            return;
+        }
+        int32_t ret = napiController->controller_->IsSessionActive(context->isActive);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "controller IsSessionActive failed";
+            SLOGE("controller IsSessionActive failed:%{public}d", ret);
         }
     };
 
@@ -315,9 +320,8 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
     };
     auto context = std::make_shared<ConcrentContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        // require 1 arguments <command>
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
-        context->status = NapiControlCommand::GetValue(env, argv[0], context->command);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        context->status = NapiControlCommand::GetValue(env, argv[ARGV_FIRST], context->command);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command");
     };
     context->GetCbInfo(env, info, input);
@@ -327,13 +331,14 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
         if (napiController->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "no controller";
-        } else {
-            int32_t ret = napiController->controller_->SendControlCommand(context->command);
-            if (ret != AVSESSION_SUCCESS) {
-                context->status = napi_generic_failure;
-                context->error = "controller SendControlCommand failed";
-                SLOGE("controller SendControlCommand failed:%{public}d", ret);
-            }
+            SLOGE("native controller is nullptr");
+            return;
+        }
+        int32_t ret = napiController->controller_->SendControlCommand(context->command);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "controller SendControlCommand failed";
+            SLOGE("controller SendControlCommand failed:%{public}d", ret);
         }
     };
 
@@ -350,13 +355,14 @@ napi_value NapiAVSessionController::Release(napi_env env, napi_callback_info inf
         if (napiController->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "no controller";
-        } else {
-            int32_t ret = napiController->controller_->Release();
-            if (ret != AVSESSION_SUCCESS) {
-                context->status = napi_generic_failure;
-                context->error = "controller Release failed";
-                SLOGE("controller Release failed:%{public}d", ret);
-            }
+            SLOGE("native controller is nullptr");
+            return;
+        }
+        int32_t ret = napiController->controller_->Release();
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "controller Release failed";
+            SLOGE("controller Release failed:%{public}d", ret);
         }
     };
 
@@ -376,9 +382,10 @@ napi_value NapiAVSessionController::GetRealPlaybackPosition(napi_env env, napi_c
         if (napiController->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "no controller";
-        } else {
-            context->position = napiController->controller_->GetRealPlaybackPosition();
+            SLOGE("native controller is nullptr");
+            return;
         }
+        context->position = napiController->controller_->GetRealPlaybackPosition();
     };
 
     auto complete = [env, context](napi_value &output) {
@@ -396,51 +403,13 @@ napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_
     return NapiUtils::GetUndefinedValue(env);
 }
 
-napi_status NapiAVSessionController::GetfiltersByNapi(napi_env env, std::vector<std::string> &filters,
-    napi_value filter)
-{
-    napi_value value {};
-    uint32_t count = 0;
-    std::string res;
-    auto status = napi_get_array_length(env, filter, &count);
-    CHECK_RETURN(status == napi_ok, "get array length failed", status);
-    for (uint32_t i = 0; i < count; i++) {
-        status = napi_get_element(env, filter, i, &value);
-        CHECK_RETURN(status == napi_ok, "get element failed", status);
-        status = NapiUtils::GetValue(env, value, res);
-        CHECK_RETURN(status == napi_ok, "get string value failed", status);
-        filters.push_back(res);
-    }
-    return napi_ok;
-}
-
 napi_status NapiAVSessionController::SetPlaybackStateFilter(napi_env env, NapiAVSessionController *napiController,
-    napi_value filter)
+                                                            napi_value filter)
 {
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, filter, &valueType);
-    AVPlaybackState::PlaybackStateMaskType playbackMaskType;
-    std::vector<std::string> filters;
-    int32_t ret = 0;
-    napi_status status = napi_ok;
-    if (valueType == napi_string) {
-        std::string filterStr;
-        status = NapiUtils::GetValue(env, filter, filterStr);
-        CHECK_RETURN(status == napi_ok && !filterStr.empty(), "get property failed", status);
-        CHECK_RETURN(filterStr == "all", "string filter Only support all", napi_generic_failure);
-        playbackMaskType.set();
-        ret = napiController->controller_->SetPlaybackFilter(playbackMaskType);
-        if (ret != AVSESSION_SUCCESS) {
-            SLOGE("controller SetPlaybackFilter failed:%{public}d", ret);
-            status = napi_generic_failure;
-        }
-        return status;
-    }
-
-    status = GetfiltersByNapi(env, filters, filter);
-    CHECK_RETURN(status == napi_ok, "GetfiltersByNapi failed", status);
-    playbackMaskType = NapiPlaybackState::ConvertFilter(filters);
-    ret = napiController->controller_->SetPlaybackFilter(playbackMaskType);
+    AVPlaybackState::PlaybackStateMaskType playbackMask;
+    auto status = NapiPlaybackState::ConvertFilter(env, filter, playbackMask);
+    CHECK_RETURN(status == napi_ok, "convert filter failed", status);
+    auto ret = napiController->controller_->SetPlaybackFilter(playbackMask);
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("controller SetPlaybackFilter failed:%{public}d", ret);
         status = napi_generic_failure;
@@ -448,32 +417,13 @@ napi_status NapiAVSessionController::SetPlaybackStateFilter(napi_env env, NapiAV
     return status;
 }
 
-napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionController *napiController, napi_value filter)
+napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionController *napiController,
+                                                   napi_value filter)
 {
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, filter, &valueType);
-    AVMetaData::MetaMaskType metaMaskType;
-    std::vector<std::string> filters;
-    int32_t ret = 0;
-    napi_status status = napi_ok;
-    if (valueType == napi_string) {
-        std::string filterStr;
-        status = NapiUtils::GetValue(env, filter, filterStr);
-        CHECK_RETURN(status == napi_ok && !filterStr.empty(), "get property failed", status);
-        CHECK_RETURN(filterStr == "all", "string filter Only support all", napi_generic_failure);
-        metaMaskType.set();
-        ret = napiController->controller_->SetMetaFilter(metaMaskType);
-        if (ret != AVSESSION_SUCCESS) {
-            SLOGE("controller SetMetaFilter failed:%{public}d", ret);
-            status = napi_generic_failure;
-        }
-        return status;
-    }
-
-    status = GetfiltersByNapi(env, filters, filter);
-    CHECK_RETURN(status == napi_ok, "GetfiltersByNapi failed", status);
-    metaMaskType = NapiMetaData::ConvertFilter(filters);
-    ret = napiController->controller_->SetMetaFilter(metaMaskType);
+    AVMetaData::MetaMaskType metaMask;
+    auto status = NapiMetaData::ConvertFilter(env, filter, metaMask);
+    CHECK_RETURN(status == napi_ok, "convert filter failed", status);
+    auto ret = napiController->controller_->SetMetaFilter(metaMask);
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("controller SetMetaFilter failed:%{public}d", ret);
         status = napi_generic_failure;
@@ -481,90 +431,82 @@ napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionCo
     return status;
 }
 
-napi_status NapiAVSessionController::RegisterCallback(napi_env env, NapiAVSessionController *napiController,
-    std::string eventName, napi_value filter, napi_value callback)
+napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
+    const std::string& event, napi_value filter, napi_value callback)
 {
-    auto it = EventHandlers_.find(eventName);
+    auto it = EventHandlers_.find(event);
     if (it == EventHandlers_.end()) {
         SLOGE("event name invalid");
         return napi_generic_failure;
     }
-
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
     if (napiController->controller_ == nullptr) {
-        SLOGE("no controller");
+        SLOGE("native controller is nullptr");
         return napi_generic_failure;
     }
-
-    if (eventName == "playbackStateChanged" &&
-        SetPlaybackStateFilter(env, napiController, filter) != napi_ok) {
-        SLOGE("controller SetPlaybackStateFilter failed");
-        return napi_generic_failure;
-    } else if (eventName == "metadataChanged" &&
-        SetMetaFilter(env, napiController, filter) != napi_ok) {
-        SLOGE("controller SetMetaFilter failed");
-        return napi_generic_failure;
-    }
-
     if (napiController->callback_ == nullptr) {
         napiController->callback_= std::make_shared<NapiAVControllerCallback>();
         if (napiController->callback_ == nullptr) {
             SLOGE("no memory");
             return napi_generic_failure;
         }
-        int32_t ret = napiController->controller_->RegisterCallback(napiController->callback_);
+        auto ret = napiController->controller_->RegisterCallback(napiController->callback_);
         if (ret != AVSESSION_SUCCESS) {
             SLOGE("controller RegisterCallback failed:%{public}d", ret);
             return napi_generic_failure;
         }
     }
-
-    if (it->second.first(env, napiController, callback) != napi_ok) {
+    if (it->second.first(env, napiController, filter, callback) != napi_ok) {
         SLOGE("add event callback failed");
         return napi_generic_failure;
     }
     return napi_ok;
 }
 
+static bool IsThreeParamForOnEvent(const std::string& event)
+{
+    return event == "metadataChanged" || event == "playbackStateChanged";
+}
+
 napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
-    napi_value callback {};
     napi_value filter {};
+    napi_value callback {};
     auto input = [&eventName, &callback, &filter, env, &context](size_t argc, napi_value* argv) {
-        /* require 2 or 3 arguments <event, callback> */
-        CHECK_ARGS_RETURN_VOID(context, argc >= ARGC_TWO, "invalid argument number");
-        CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_THERE, "invalid argument number");
-        napi_valuetype type = napi_undefined;
-        context->status = napi_typeof(env, argv[0], &type);
-        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
-        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_ARGS_RETURN_VOID(context, argc >= ARGC_ONE, "invalid argument number");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
-        if (argc == 2) {
-            context->status = napi_typeof(env, argv[1], &type);
-            CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_function), "callback type invalid");
-            callback = argv[1];
-            return;
+        napi_valuetype type = napi_undefined;
+        if (!IsThreeParamForOnEvent(eventName)) {
+            CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number");
+            context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                                   "callback type invalid");
+            callback = argv[ARGV_SECOND];
+        } else {
+            CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THERE, "invalid argument number");
+            context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
+            CHECK_ARGS_RETURN_VOID(
+                context, (context->status == napi_ok) && (type == napi_object || type == napi_string),
+                "filter type invalid");
+            filter = argv[ARGV_SECOND];
+            context->status = napi_typeof(env, argv[ARGV_THIRD], &type);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                                   "callback type invalid");
+            callback = argv[ARGV_THIRD];
         }
-        context->status = napi_typeof(env, argv[2], &type);
-        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_function), "callback type invalid");
-        callback = argv[2];
-        filter = argv[1];
     };
-
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
         napi_throw_error(env, nullptr, context->error.c_str());
         return NapiUtils::GetUndefinedValue(env);
     }
 
-    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-
-    napi_status ret = RegisterCallback(env, napiController, eventName, filter, callback);
-    if (ret != napi_ok) {
+    if (RegisterCallback(env, context, eventName, filter, callback) != napi_ok) {
         napi_throw_error(env, nullptr, "OnEvent RegisterCallback fail");
     }
-
     return NapiUtils::GetUndefinedValue(env);
 }
 
@@ -573,12 +515,8 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
     auto input = [&eventName, env, &context](size_t argc, napi_value* argv) {
-        /* require 1 arguments <event> */
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid argument number");
-        napi_valuetype type = napi_undefined;
-        context->status = napi_typeof(env, argv[0], &type);
-        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
-        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
     };
 
@@ -608,39 +546,45 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
 }
 
 napi_status NapiAVSessionController::OnSessionDestroy(napi_env env, NapiAVSessionController *napiController,
-    napi_value callback)
+                                                      napi_value param, napi_value callback)
 {
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_SESSION_DESTROY, callback);
 }
 
 napi_status NapiAVSessionController::OnPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
-    napi_value callback)
+                                                           napi_value param, napi_value callback)
 {
+    if (SetPlaybackStateFilter(env, napiController, param) != napi_ok) {
+        return napi_generic_failure;
+    }
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE,
-        callback);
+                                                  callback);
 }
 
 napi_status NapiAVSessionController::OnMetaDataChange(napi_env env, NapiAVSessionController* napiController,
-    napi_value callback)
+                                                      napi_value param, napi_value callback)
 {
+    if (SetMetaFilter(env, napiController, param) != napi_ok) {
+        return napi_generic_failure;
+    }
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_META_DATA_CHANGE, callback);
 }
 
 napi_status NapiAVSessionController::OnActiveStateChange(napi_env env, NapiAVSessionController* napiController,
-    napi_value callback)
+                                                         napi_value param, napi_value callback)
 {
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_ACTIVE_STATE_CHANGE, callback);
 }
 
 napi_status NapiAVSessionController::OnValidCommandChange(napi_env env, NapiAVSessionController* napiController,
-    napi_value callback)
+                                                          napi_value param, napi_value callback)
 {
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_VALID_COMMAND_CHANGE,
         callback);
 }
 
 napi_status NapiAVSessionController::OnOutputDeviceChanged(napi_env env, NapiAVSessionController* napiController,
-    napi_value callback)
+                                                           napi_value param, napi_value callback)
 {
     return napi_generic_failure;
 }

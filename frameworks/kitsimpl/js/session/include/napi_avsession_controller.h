@@ -22,6 +22,7 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "napi_avcontroller_callback.h"
+#include "napi_async_work.h"
 
 namespace OHOS::AVSession {
 class NapiAVSessionController {
@@ -33,7 +34,7 @@ public:
     static napi_status NewInstance(napi_env env, std::shared_ptr<AVSessionController>& nativeController,
         napi_value& out);
 
-    using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*, napi_value)>;
+    using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*, napi_value, napi_value)>;
     using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*)>;
 
 private:
@@ -52,16 +53,18 @@ private:
     static napi_value GetRealPlaybackPosition(napi_env env, napi_callback_info info);
     static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
 
-    static napi_status OnSessionDestroy(napi_env env, NapiAVSessionController* napiController, napi_value callback);
+    static napi_status OnSessionDestroy(napi_env env, NapiAVSessionController* napiController,
+                                        napi_value param, napi_value callback);
     static napi_status OnPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
-        napi_value callback);
-    static napi_status OnMetaDataChange(napi_env env, NapiAVSessionController* napiController, napi_value callback);
+                                             napi_value param, napi_value callback);
+    static napi_status OnMetaDataChange(napi_env env, NapiAVSessionController* napiController,
+                                        napi_value param, napi_value callback);
     static napi_status OnActiveStateChange(napi_env env, NapiAVSessionController* napiController,
-        napi_value callback);
+                                           napi_value param, napi_value callback);
     static napi_status OnValidCommandChange(napi_env env, NapiAVSessionController* napiController,
-        napi_value callback);
+                                            napi_value param, napi_value callback);
     static napi_status OnOutputDeviceChanged(napi_env env, NapiAVSessionController* napiController,
-        napi_value callback);
+                                             napi_value param, napi_value callback);
 
     static napi_status OffSessionDestroy(napi_env env, NapiAVSessionController* napiController);
     static napi_status OffPlaybackStateChange(napi_env env, NapiAVSessionController* napiController);
@@ -70,20 +73,24 @@ private:
     static napi_status OffValidCommandChange(napi_env env, NapiAVSessionController* napiController);
     static napi_status OffOutputDeviceChanged(napi_env env, NapiAVSessionController* napiController);
 
-    static napi_status GetfiltersByNapi(napi_env env, std::vector<std::string> &filters, napi_value filter);
     static napi_status SetPlaybackStateFilter(napi_env env, NapiAVSessionController *napiController,
-        napi_value filter);
+                                              napi_value filter);
     static napi_status SetMetaFilter(napi_env env, NapiAVSessionController *napiController, napi_value filter);
-    static napi_status RegisterCallback(napi_env env, NapiAVSessionController *napiController, std::string eventName,
-        napi_value filter, napi_value callback);
+    static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
+                                        const std::string& eventName, napi_value filter, napi_value callback);
 
     napi_ref wrapperRef_ {};
     int32_t sessionId_ = -1;
     std::shared_ptr<AVSessionController> controller_;
     std::shared_ptr<NapiAVControllerCallback> callback_;
 
+    static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
     static constexpr size_t ARGC_THERE = 3;
+
+    static constexpr size_t ARGV_FIRST = 0;
+    static constexpr size_t ARGV_SECOND = 1;
+    static constexpr size_t ARGV_THIRD = 2;
 
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> EventHandlers_;
 };

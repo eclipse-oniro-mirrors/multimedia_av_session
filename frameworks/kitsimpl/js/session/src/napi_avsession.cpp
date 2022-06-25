@@ -36,7 +36,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "setLoopMode", OnSetLoopMode },
     { "toggleFavorite", OnToggleFavorite },
     { "handleKeyEvent", OnMediaKeyEvent },
-    { "outputDeviceChanged", OnoutputDeviceChanged },
+    { "outputDeviceChanged", OnOutputDeviceChanged },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
     { "play", OffPlay },
@@ -51,7 +51,7 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "setLoopMode", OffSetLoopMode },
     { "toggleFavorite", OffToggleFavorite },
     { "handleKeyEvent", OffMediaKeyEvent },
-    { "outputDeviceChanged", OffoutputDeviceChanged }
+    { "outputDeviceChanged", OffOutputDeviceChanged }
 };
 
 NapiAVSession::NapiAVSession()
@@ -140,15 +140,13 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     napi_value callback {};
     auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
         /* require 2 arguments <event, callback> */
-        CHECK_ARGS_RETURN_VOID(context, argc == 2, "invalid argument number");
-        napi_valuetype type = napi_undefined;
-        context->status = napi_typeof(env, argv[0], &type);
-        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
-        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
-        context->status = napi_typeof(env, argv[1], &type);
-        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_function), "callback type invalid");
-        callback = argv[1];
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
+        CHECK_ARGS_RETURN_VOID((context->status == napi_ok) && (type == napi_function), "callback type invalid");
+        callback = argv[ARGV_SECOND];
     };
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
@@ -186,12 +184,8 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
     auto input = [&eventName, env, &context](size_t argc, napi_value* argv) {
-        /* require 1 arguments <event> */
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid argument number");
-        napi_valuetype type = napi_undefined;
-        context->status = napi_typeof(env, argv[0], &type);
-        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_string), "event name type invalid");
-        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
     };
     context->GetCbInfo(env, info, input, true);
@@ -220,8 +214,8 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     auto context = std::make_shared<ConcreteContext>();
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
-        context->status = NapiMetaData::GetValue(env, argv[0], context->metaData_);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        context->status = NapiMetaData::GetValue(env, argv[ARGV_FIRST], context->metaData_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get metaData failed");
     };
     context->GetCbInfo(env, info, inputParser);
@@ -246,8 +240,8 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
     };
     auto context = std::make_shared<ConcreteContext>();
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
-        context->status = NapiPlaybackState::GetValue(env, argv[0], context->playBackState_);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        context->status = NapiPlaybackState::GetValue(env, argv[ARGV_FIRST], context->playBackState_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get playBackState failed");
     };
     context->GetCbInfo(env, info, inputParser);
@@ -273,8 +267,8 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
     auto context = std::make_shared<ConcreteContext>();
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
-        context->status = NapiUtils::GetValue(env, argv[0], context->wantAgent_);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->wantAgent_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get  wantAgent failed");
     };
     context->GetCbInfo(env, info, inputParser);
@@ -464,7 +458,7 @@ napi_status NapiAVSession::OnMediaKeyEvent(napi_env env, NapiAVSession* napiSess
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_MEDIA_KEY_EVENT, callback);
 }
 
-napi_status NapiAVSession::OnoutputDeviceChanged(napi_env env, NapiAVSession* napiSession, napi_value callback)
+napi_status NapiAVSession::OnOutputDeviceChanged(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGED, callback);
 }
@@ -551,7 +545,7 @@ napi_status NapiAVSession::OffMediaKeyEvent(napi_env env, NapiAVSession* napiSes
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_MEDIA_KEY_EVENT);
 }
 
-napi_status NapiAVSession::OffoutputDeviceChanged(napi_env env, NapiAVSession* napiSession)
+napi_status NapiAVSession::OffOutputDeviceChanged(napi_env env, NapiAVSession* napiSession)
 {
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGED);
 }

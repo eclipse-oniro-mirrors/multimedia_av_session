@@ -68,7 +68,7 @@ private:
     static napi_status OnSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
-    static napi_status OnoutputDeviceChanged(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnOutputDeviceChanged(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession);
     static napi_status OffPause(napi_env env, NapiAVSession* napiSession);
@@ -82,7 +82,7 @@ private:
     static napi_status OffSetLoopMode(napi_env env, NapiAVSession* napiSession);
     static napi_status OffToggleFavorite(napi_env env, NapiAVSession* napiSession);
     static napi_status OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffoutputDeviceChanged(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffOutputDeviceChanged(napi_env env, NapiAVSession* napiSession);
 
     napi_ref wrapperRef_ {};
     int32_t sessionId_ = -1;
@@ -91,6 +91,14 @@ private:
 
     static std::map<std::string, OnEventHandlerType> onEventHandlers_;
     static std::map<std::string, OffEventHandlerType> offEventHandlers_;
+
+    static constexpr size_t ARGC_ONE = 1;
+    static constexpr size_t ARGC_TWO = 2;
+    static constexpr size_t ARGC_THERE = 3;
+
+    static constexpr size_t ARGV_FIRST = 0;
+    static constexpr size_t ARGV_SECOND = 1;
+    static constexpr size_t ARGV_THIRD = 2;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_H

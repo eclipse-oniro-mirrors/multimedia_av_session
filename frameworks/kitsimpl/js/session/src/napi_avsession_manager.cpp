@@ -73,11 +73,11 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
 
     auto inputParser = [env, context](size_t argc, napi_value *argv) {
         // require 2 arguments <tag> <type>
-        CHECK_ARGS_RETURN_VOID(context, argc == 2, "invalid arguments");
-        context->status = NapiUtils::GetValue(env, argv[0], context->tag_);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->tag_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->tag_.empty(), "invalid tag");
         std::string typeString;
-        context->status = NapiUtils::GetValue(env, argv[1], typeString);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], typeString);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !typeString.empty(), "invalid type");
         context->type_ = NapiUtils::ConvertSessionType(typeString);
         CHECK_ARGS_RETURN_VOID(context, context->type_ >= 0, "wrong session type");
@@ -135,9 +135,8 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        // require 1 arguments <sessionId>
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
-        context->status = NapiUtils::GetValue(env, argv[0], context->sessionId_);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionId_);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->sessionId_ >= 0),
                                "invalid sessionId");
     };
@@ -173,13 +172,14 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     napi_value callback {};
     auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
         /* require 2 arguments <event, callback> */
-        CHECK_ARGS_RETURN_VOID(context, argc == 2, "invalid argument number");
-        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
         napi_valuetype type = napi_undefined;
-        context->status = napi_typeof(env, argv[1], &type);
-        CHECK_RETURN_VOID((context->status == napi_ok) && (type == napi_function), "callback type invalid");
-        callback = argv[1];
+        context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid");
+        callback = argv[ARGV_SECOND];
     };
 
     context->GetCbInfo(env, info, input, true);
@@ -220,9 +220,8 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
     auto input = [&eventName, env, &context](size_t argc, napi_value* argv) {
-        /* require 1 arguments <event> */
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid argument number");
-        context->status = NapiUtils::GetValue(env, argv[0], eventName);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
     };
 
@@ -253,9 +252,8 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        // require 1 arguments <sessionId>
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
-        context->status = NapiUtils::GetValue(env, argv[0], context->keyEvent_);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->keyEvent_);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->keyEvent_ != nullptr),
                                "invalid keyEvent");
     };
@@ -278,9 +276,8 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
     };
     auto context = std::make_shared<ConcrentContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        // require 1 arguments <command>
-        CHECK_ARGS_RETURN_VOID(context, argc == 1, "invalid arguments");
-        context->status = NapiControlCommand::GetValue(env, argv[0], context->command);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        context->status = NapiControlCommand::GetValue(env, argv[ARGV_FIRST], context->command);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command");
     };
     context->GetCbInfo(env, info, input);

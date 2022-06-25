@@ -22,7 +22,7 @@
 namespace OHOS::AVSession {
 class NapiMetaData {
 public:
-    static AVMetaData::MetaMaskType ConvertFilter(const std::vector<std::string>& filter);
+    static napi_status ConvertFilter(napi_env env, napi_value filter, AVMetaData::MetaMaskType& mask);
 
     static napi_status GetValue(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetValue(napi_env env, const AVMetaData& in, napi_value& out);

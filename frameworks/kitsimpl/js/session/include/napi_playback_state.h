@@ -25,7 +25,7 @@
 namespace OHOS::AVSession {
 class NapiPlaybackState {
 public:
-    static AVPlaybackState::PlaybackStateMaskType ConvertFilter(const std::vector<std::string>& filter);
+    static napi_status  ConvertFilter(napi_env env, napi_value filter, AVPlaybackState::PlaybackStateMaskType& mask);
 
     static napi_status GetValue(napi_env env, napi_value in, AVPlaybackState& out);
     static napi_status SetValue(napi_env env, const AVPlaybackState& in, napi_value& out);
