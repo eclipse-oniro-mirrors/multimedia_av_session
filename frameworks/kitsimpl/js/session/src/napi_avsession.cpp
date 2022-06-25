@@ -145,7 +145,8 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
-        CHECK_ARGS_RETURN_VOID((context->status == napi_ok) && (type == napi_function), "callback type invalid");
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid");
         callback = argv[ARGV_SECOND];
     };
     context->GetCbInfo(env, info, input, true);
