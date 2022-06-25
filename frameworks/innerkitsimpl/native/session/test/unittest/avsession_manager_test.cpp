@@ -217,7 +217,7 @@ HWTEST_F(AVSessionManagerTest, CreateController002, TestSize.Level1)
         session->Destroy();
     }
     if (controller != nullptr) {
-        controller->Release();
+        controller->Destroy();
     }
     SLOGI("CreateController002 end");
 }
