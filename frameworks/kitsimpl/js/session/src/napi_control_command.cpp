@@ -69,7 +69,7 @@ napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlC
         SLOGE("cmd is invalid");
         return napi_invalid_arg;
     }
-    if (out.SetCommand(std::get<ENUM_INDEX>(it->second)) != AVSESSION_SUCCESS) {
+    if (out.SetCommand(ConvertCommandToEnum(cmd)) != AVSESSION_SUCCESS) {
         SLOGE("native set command failed");
         return napi_invalid_arg;
     }

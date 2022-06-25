@@ -48,7 +48,8 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
     }
     asyncCallback_->Call(callbacks_[event], [param](napi_env env, int &argc, napi_value *argv) {
         argc = 1;
-        NapiUtils::SetValue(env, param, *argv);
+        auto status = NapiUtils::SetValue(env, param, *argv);
+        CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
     });
 }
 

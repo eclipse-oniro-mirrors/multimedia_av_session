@@ -265,6 +265,7 @@ bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
     for (int i = 0; i < META_KEY_MAX; i++) {
         if (intersection.test(i)) {
             cloneActions[i](*this, metaOut);
+            metaOut.metaMask_.set(i);
             result = true;
         }
     }

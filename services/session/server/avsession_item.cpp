@@ -71,7 +71,10 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     AVSessionTrace avSessionTrace("AVSessionItem::SetAVMetaData");
-    metaData_.CopyFrom(meta);
+    if (!metaData_.CopyFrom(meta)) {
+        SLOGI("AVMetaData set error");
+        return AVSESSION_ERROR;
+    }
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         controller->HandleMetaDataChange(meta);
@@ -82,7 +85,10 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     AVSessionTrace avSessionTrace("AVSessionItem::SetAVPlaybackState");
-    playbackState_.CopyFrom(state);
+    if (!playbackState_.CopyFrom(state)) {
+        SLOGI("AVMetaData set error");
+        return AVSESSION_ERROR;
+    }
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);

@@ -127,6 +127,7 @@ bool AVPlaybackState::CopyToByMask(PlaybackStateMaskType& mask, AVPlaybackState&
     for (int i = 0; i < PLAYBACK_KEY_MAX; i++) {
         if (intersection.test(i)) {
             cloneActions[i](*this, out);
+            out.mask_.set(i);
             result = true;
         }
     }
