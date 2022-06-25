@@ -37,7 +37,7 @@ public:
 private:
     int32_t HandleRegisterCallbackInner(MessageParcel &data, MessageParcel &reply);
 
-    int32_t HandleRelease(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleDestroy(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleGetAVPlaybackState(MessageParcel &data, MessageParcel &reply);
 
@@ -64,7 +64,7 @@ private:
     using HanlerFunc = int32_t (AVSessionControllerStub::*)(MessageParcel &data, MessageParcel &reply);
     static inline HanlerFunc handlers[] = {
         [CONTROLLER_CMD_REGISTER_CALLBACK] = &AVSessionControllerStub::HandleRegisterCallbackInner,
-        [CONTROLLER_CMD_RELEASE] = &AVSessionControllerStub::HandleRelease,
+        [CONTROLLER_CMD_DESTROY] = &AVSessionControllerStub::HandleDestroy,
         [CONTROLLER_CMD_GET_AV_PLAYBACK_STATE] = &AVSessionControllerStub::HandleGetAVPlaybackState,
         [CONTROLLER_CMD_SEND_CONTROL_COMMAND] = &AVSessionControllerStub::HandleSendControlCommand,
         [CONTROLLER_CMD_GET_AV_META_DATA] = &AVSessionControllerStub::HandleGetAVMetaData,

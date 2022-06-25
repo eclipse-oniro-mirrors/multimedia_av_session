@@ -69,7 +69,7 @@ void AvsessionTest::TearDown(void)
         ASSERT_EQ(AVSESSION_SUCCESS, ret);
     }
     if (controller_ != nullptr) {
-        ret = controller_->Release();
+        ret = controller_->Destroy();
         ASSERT_EQ(AVSESSION_SUCCESS, ret);
     }
     g_onCall = AVSESSION_ERROR;

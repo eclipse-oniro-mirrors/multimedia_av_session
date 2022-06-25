@@ -54,9 +54,9 @@ int32_t AVSessionControllerStub::HandleRegisterCallbackInner(MessageParcel &data
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleRelease(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleDestroy(MessageParcel &data, MessageParcel &reply)
 {
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(Release()), "write release() ret failed");
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(Destroy()), "write release() ret failed");
     return ERR_NONE;
 }
 
