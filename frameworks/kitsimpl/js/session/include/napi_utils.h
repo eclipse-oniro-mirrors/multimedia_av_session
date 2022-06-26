@@ -179,6 +179,8 @@ public:
 
     static napi_status GetDateValue(napi_env env, napi_value value, double& result);
     static napi_status SetDateValue(napi_env env, double in, napi_value& out);
+
+    static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
 };
 }
 #endif // NAPI_UTILS_H
