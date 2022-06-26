@@ -251,6 +251,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, MMI::KeyEvent::KeyI
     CHECK_RETURN(status == napi_ok, "get deviceId property failed", status);
     SLOGI("deviceId=%{public}d", deviceId);
     out.SetDeviceId(deviceId);
+    out.SetPressed(true);
 
     return status;
 }
@@ -295,6 +296,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::shared_ptr<MMI
     status = GetNamedProperty(env, in, "action", action);
     CHECK_RETURN(status == napi_ok, "get action property failed", napi_generic_failure);
     SLOGI("action=%{public}d", action);
+    action += KEYEVENT_ACTION_JS_NATIVE_DELTA;
     out->SetKeyAction(action);
 
     MMI::KeyEvent::KeyItem key;
@@ -317,6 +319,9 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::shared_ptr<MMI
         MMI::KeyEvent::KeyItem item;
         status = GetValue(env, keyItem, item);
         CHECK_RETURN(status == napi_ok, "get KeyItem failed", status);
+        if ((key.GetKeyCode() == item.GetKeyCode()) && (action == MMI::KeyEvent::KEY_ACTION_UP)) {
+            item.SetPressed(false);
+        }
         out->AddKeyItem(item);
     }
 
@@ -329,7 +334,7 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEven
     CHECK_RETURN(status == napi_ok, "create object failed", status);
 
     napi_value action {};
-    status = SetValue(env, in->GetKeyAction(), action);
+    status = SetValue(env, in->GetKeyAction() - KEYEVENT_ACTION_JS_NATIVE_DELTA, action);
     CHECK_RETURN(status == napi_ok, "create action property failed", status);
     status = napi_set_named_property(env, out, "action", action);
     CHECK_RETURN(status == napi_ok, "set action property failed", status);
