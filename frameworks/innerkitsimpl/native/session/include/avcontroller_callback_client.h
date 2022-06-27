@@ -34,7 +34,7 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
 
-    void AddlistenerForPlaybackState(const std::function<void(const AVPlaybackState&)> &listener);
+    void AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)> &listener);
 
 private:
     std::shared_ptr<AVControllerCallback> callback_;

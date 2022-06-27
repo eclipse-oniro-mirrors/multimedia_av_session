@@ -252,7 +252,7 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
 napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
-        std::vector<int32_t> cmds;
+        std::vector<std::string> stringCmds;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
@@ -265,16 +265,18 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
             SLOGE("native controller is nullptr");
             return;
         }
-        int32_t ret = napiController->controller_->GetValidCommands(context->cmds);
+        std::vector<int32_t> cmds;
+        int32_t ret = napiController->controller_->GetValidCommands(cmds);
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "controller GetValidCommands failed";
             SLOGE("controller GetValidCommands failed:%{public}d", ret);
         }
+        context->stringCmds = NapiControlCommand::ConvertCommands(cmds);
     };
 
     auto complete = [env, context](napi_value &output) {
-        context->status = NapiUtils::SetValue(env, context->cmds, output);
+        context->status = NapiUtils::SetValue(env, context->stringCmds, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
     };
 
@@ -284,7 +286,7 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
 napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
-        bool isActive;
+        bool isActive {};
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);

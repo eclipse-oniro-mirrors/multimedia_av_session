@@ -224,7 +224,7 @@ int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVContr
     callback_ = new(std::nothrow) AVControllerCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVControllerCallbackClient failed");
 
-    callback_->AddlistenerForPlaybackState([this](const AVPlaybackState &state) { currentState_ = state; });
+    callback_->AddListenerForPlaybackState([this](const AVPlaybackState &state) { currentState_ = state; });
 
     return RegisterCallbackInner(callback_);
 }

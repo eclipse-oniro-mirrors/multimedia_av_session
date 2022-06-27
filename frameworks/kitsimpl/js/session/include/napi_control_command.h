@@ -27,8 +27,9 @@ public:
     using GetterType = std::function<napi_status(napi_env, napi_value, AVControlCommand&)>;
     using SetterType = std::function<napi_status(napi_env, AVControlCommand&, napi_value&)>;
 
-    static std::string ConvertCommandToString(int32_t cmd);
-    static int32_t ConvertCommandToEnum(const std::string& cmd);
+    static std::string ConvertCommand(int32_t cmd);
+    static int32_t ConvertCommand(const std::string& cmd);
+    static std::vector<std::string> ConvertCommands(const std::vector<int32_t>& cmds);
 
     static napi_status GetValue(napi_env env, napi_value in, AVControlCommand& out);
     static napi_status SetValue(napi_env env, AVControlCommand& in, napi_value& out);

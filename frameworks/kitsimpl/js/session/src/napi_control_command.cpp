@@ -34,7 +34,7 @@ std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlComm
     { "toggleFavorite", { GetAssetId, SetAssetId, AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE } },
 };
 
-int32_t NapiControlCommand::ConvertCommandToEnum(const std::string &cmd)
+int32_t NapiControlCommand::ConvertCommand(const std::string &cmd)
 {
     for (const auto& [key, value] : commandMap_) {
         if (key == cmd) {
@@ -44,7 +44,7 @@ int32_t NapiControlCommand::ConvertCommandToEnum(const std::string &cmd)
     return AVControlCommand::SESSION_CMD_INVALID;
 }
 
-std::string NapiControlCommand::ConvertCommandToString(int32_t cmd)
+std::string NapiControlCommand::ConvertCommand(int32_t cmd)
 {
     for (const auto& [key, value] : commandMap_) {
         if (std::get<ENUM_INDEX>(value) == cmd) {
@@ -52,6 +52,18 @@ std::string NapiControlCommand::ConvertCommandToString(int32_t cmd)
         }
     }
     return {};
+}
+
+std::vector<std::string> NapiControlCommand::ConvertCommands(const std::vector<int32_t>& cmds)
+{
+    std::vector<std::string> result;
+    for (const auto& cmd : cmds) {
+        auto stringCmd = ConvertCommand(cmd);
+        if (!stringCmd.empty()) {
+            result.push_back(stringCmd);
+        }
+    }
+    return result;
 }
 
 napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlCommand &out)
@@ -69,7 +81,7 @@ napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlC
         SLOGE("cmd is invalid");
         return napi_invalid_arg;
     }
-    if (out.SetCommand(ConvertCommandToEnum(cmd)) != AVSESSION_SUCCESS) {
+    if (out.SetCommand(ConvertCommand(cmd)) != AVSESSION_SUCCESS) {
         SLOGE("native set command failed");
         return napi_invalid_arg;
     }
@@ -82,7 +94,7 @@ napi_status NapiControlCommand::SetValue(napi_env env, AVControlCommand &in, nap
     napi_status status = napi_create_object(env, &out);
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
 
-    auto cmd = ConvertCommandToString(in.GetCommand());
+    auto cmd = ConvertCommand(in.GetCommand());
     napi_value property {};
     status = NapiUtils::SetValue(env, cmd, property);
     CHECK_RETURN(status == napi_ok, "create command property failed", status);
