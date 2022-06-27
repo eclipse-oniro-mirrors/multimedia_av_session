@@ -161,6 +161,11 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
         return NapiUtils::GetUndefinedValue(env);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession->session_ == nullptr) {
+        SLOGE("native session is nullptr");
+        napi_throw_error(env, nullptr, "native session is nullptr");
+        return NapiUtils::GetUndefinedValue(env);
+    }
     if (napiSession->callback_ == nullptr) {
         napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
         if (napiSession->callback_ == nullptr) {
@@ -201,6 +206,11 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
         return NapiUtils::GetUndefinedValue(env);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession->session_ == nullptr) {
+        SLOGE("native session is nullptr");
+        napi_throw_error(env, nullptr, "native session is nullptr");
+        return NapiUtils::GetUndefinedValue(env);
+    }
     if (napiSession != nullptr && it->second(env, napiSession) != napi_ok) {
         napi_throw_error(env, nullptr, "remove event callback failed");
     }
@@ -222,6 +232,11 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info, inputParser);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native session is nullptr";
+            return;
+        }
         int32_t ret = napiSession->session_->SetAVMetaData(context->metaData_);
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
@@ -248,6 +263,11 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
     context->GetCbInfo(env, info, inputParser);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native session is nullptr";
+            return;
+        }
         int32_t ret = napiSession->session_->SetAVPlaybackState(context->playBackState_);
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
@@ -275,6 +295,11 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
     context->GetCbInfo(env, info, inputParser);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native session is nullptr";
+            return;
+        }
         int32_t ret = napiSession->session_->SetLaunchAbility(*context->wantAgent_);
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
@@ -292,6 +317,12 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
     auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info);
     auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native session is nullptr";
+            return;
+        }
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
@@ -304,6 +335,12 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
     auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info);
     auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native session is nullptr";
+            return;
+        }
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
@@ -316,6 +353,12 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
     auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info);
     auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native session is nullptr";
+            return;
+        }
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
@@ -329,6 +372,11 @@ napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native session is nullptr";
+            return;
+        }
         int32_t ret = napiSession->session_->Activate();
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
@@ -347,6 +395,11 @@ napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native session is nullptr";
+            return;
+        }
         int32_t ret = napiSession->session_->Deactivate();
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
@@ -365,8 +418,16 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native session is nullptr";
+            return;
+        }
         int32_t ret = napiSession->session_->Destroy();
-        if (ret != AVSESSION_SUCCESS) {
+        if (ret == AVSESSION_SUCCESS) {
+            napiSession->session_ = nullptr;
+            napiSession->callback_ = nullptr;
+        } else {
             context->status = napi_generic_failure;
             context->error = "destroy session failed";
         }

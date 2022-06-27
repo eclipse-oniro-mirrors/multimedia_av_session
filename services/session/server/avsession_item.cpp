@@ -58,7 +58,7 @@ int32_t AVSessionItem::Destroy()
     if (serviceCallback_) {
         serviceCallback_(*this);
     }
-
+    SLOGI("Destroy success");
     return AVSESSION_SUCCESS;
 }
 

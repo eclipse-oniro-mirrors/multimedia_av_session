@@ -64,6 +64,7 @@ protected:
 private:
     sptr<IAVSessionCallback> callback_;
     static inline BrokerDelegator<AVSessionProxy> delegator_;
+    bool isDestroyed_ = {};
 };
 }
 #endif // OHOS_AVSESSION_PROXY_H
