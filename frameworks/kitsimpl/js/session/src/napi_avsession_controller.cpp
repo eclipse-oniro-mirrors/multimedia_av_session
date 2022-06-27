@@ -365,7 +365,10 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
             context->status = napi_generic_failure;
             context->error = "controller Destroy failed";
             SLOGE("controller Destroy failed:%{public}d", ret);
+            return;
         }
+        napiController->controller_ = nullptr;
+        napiController->callback_ = nullptr;
     };
 
     return NapiAsyncWork::Enqueue(env, context, "IsSessionActive", executor);

@@ -15,6 +15,7 @@
 
 #include "avsession_log.h"
 #include "napi_avcontroller_callback.h"
+#include "napi_control_command.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
 #include "napi_utils.h"
@@ -75,7 +76,8 @@ void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
 
 void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
-    HandleEvent(EVENT_VALID_COMMAND_CHANGE, cmds);
+    std::vector<std::string> stringCmds = NapiControlCommand::ConvertCommands(cmds);
+    HandleEvent(EVENT_VALID_COMMAND_CHANGE, stringCmds);
 }
 
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)

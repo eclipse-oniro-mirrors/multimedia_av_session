@@ -56,6 +56,7 @@ protected:
 private:
     static inline BrokerDelegator<AVSessionControllerProxy> delegator_;
     AVPlaybackState currentState_;
+    bool isDestroy_ = false;
 };
 }
 
