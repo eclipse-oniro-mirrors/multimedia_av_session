@@ -32,7 +32,9 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(mediaImageUri_) &&
         parcel.WriteString(subTitle_) &&
         parcel.WriteString(description_) &&
-        parcel.WriteString(lyric_);
+        parcel.WriteString(lyric_) &&
+        parcel.WriteString(previousAssetId_) &&
+        parcel.WriteString(nextAssetId_);
 }
 
 AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
@@ -56,6 +58,8 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
     result->subTitle_ = data.ReadString();
     result->description_ = data.ReadString();
     result->lyric_ = data.ReadString();
+    result->previousAssetId_ = data.ReadString();
+    result->nextAssetId_ = data.ReadString();
 
     return result;
 }
@@ -173,6 +177,7 @@ std::string AVMetaData::GetMediaImageUri() const
 void AVMetaData::SetPublishDate(double date)
 {
     publishDate_ = date;
+    metaMask_.set(META_KEY_PUBLISH_DATE);
 }
 
 double AVMetaData::GetPublishDate() const
@@ -216,6 +221,7 @@ std::string AVMetaData::GetLyric() const
 void AVMetaData::SetPreviousAssetId(const std::string& assetId)
 {
     previousAssetId_ = assetId;
+    metaMask_.set(META_KEY_PREVIOUS_ASSET_ID);
 }
 
 std::string AVMetaData::GetPreviousAssetId() const
@@ -226,6 +232,7 @@ std::string AVMetaData::GetPreviousAssetId() const
 void AVMetaData::SetNextAssetId(const std::string& assetId)
 {
     nextAssetId_ = assetId;
+    metaMask_.set(META_KEY_NEXT_ASSET_ID);
 }
 
 std::string AVMetaData::GetNextAssetId() const
@@ -370,7 +377,7 @@ void AVMetaData::CloneLyric(const AVMetaData& from, AVMetaData& to)
 
 void AVMetaData::ClonePreviousAssetId(const AVMetaData &from, AVMetaData &to)
 {
-    to.previousAssetId_ = from.assetId_;
+    to.previousAssetId_ = from.previousAssetId_;
 }
 
 void AVMetaData::CloneNextAssetId(const AVMetaData &from, AVMetaData &to)
