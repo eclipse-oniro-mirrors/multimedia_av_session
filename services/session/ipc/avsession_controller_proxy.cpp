@@ -29,14 +29,15 @@ AVSessionControllerProxy::AVSessionControllerProxy(const sptr<IRemoteObject> &im
 
 int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState &state)
 {
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AV_PLAYBACK_STATE, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -53,14 +54,15 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState &state)
 
 int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData &data)
 {
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AV_META_DATA, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -77,6 +79,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData &data)
 int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSessionTrace trace("AVSessionControllerProxy::SendAVKeyEvent");
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     CHECK_AND_RETURN_RET_LOG(keyEvent.IsValid(), ERR_INVALID_PARAM, "keyEvent not valid");
 
     MessageParcel parcel;
@@ -84,10 +87,10 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(keyEvent.WriteToParcel(parcel), ERR_MARSHALLING, "write keyEvent failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_AV_KEYEVENT, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -97,14 +100,15 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 
 int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability)
 {
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_LAUNCH_ABILITY, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -121,14 +125,15 @@ int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::Wa
 
 int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t> &cmds)
 {
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_VALID_COMMANDS, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -142,14 +147,15 @@ int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t> &cmds)
 
 int32_t AVSessionControllerProxy::IsSessionActive(bool &isActive)
 {
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_IS_SESSION_ACTIVE, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -164,16 +170,17 @@ int32_t AVSessionControllerProxy::IsSessionActive(bool &isActive)
 int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand &cmd)
 {
     AVSessionTrace trace("AVSessionControllerProxy::SendControlCommand");
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_INVALID_PARAM, "command not valid");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&cmd), ERR_MARSHALLING, "write cmd failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_CONTROL_COMMAND, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -183,15 +190,16 @@ int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand &cmd
 
 int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
 {
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteString(filter.to_string()), ERR_MARSHALLING, "write filter failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_META_FILTER, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -201,15 +209,16 @@ int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType &
 
 int32_t AVSessionControllerProxy::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter)
 {
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteString(filter.to_string()), ERR_MARSHALLING, "write filter failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_PLAYBACK_FILTER, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -219,8 +228,9 @@ int32_t AVSessionControllerProxy::SetPlaybackFilter(const AVPlaybackState::Playb
 
 int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback)
 {
-    sptr<AVControllerCallbackClient> callback_;
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
 
+    sptr<AVControllerCallbackClient> callback_;
     callback_ = new(std::nothrow) AVControllerCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVControllerCallbackClient failed");
 
@@ -237,10 +247,10 @@ int32_t AVSessionControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject
     CHECK_AND_RETURN_RET_LOG(parcel.WriteRemoteObject(callback), ERR_MARSHALLING,
         "write remote object failed");
 
-    MessageParcel reply;
-    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_REGISTER_CALLBACK, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -250,15 +260,18 @@ int32_t AVSessionControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject
 
 int32_t AVSessionControllerProxy::Destroy()
 {
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
-    MessageParcel reply;
-    MessageOption option;
+
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_DESTROY, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
+    isDestroy_ = true;
 
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
@@ -266,13 +279,15 @@ int32_t AVSessionControllerProxy::Destroy()
 
 int32_t AVSessionControllerProxy::GetSessionId()
 {
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
-    MessageParcel reply;
-    MessageOption option;
+
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_SESSION_ID, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
