@@ -67,7 +67,7 @@ void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t>
     AVSessionTrace::TraceEnd("AVControllerCallback::OnValidCommandChange", ON_VALID_COMMAND_CHANGE_TASK_ID);
 }
 
-void AVControllerCallbackClient::AddlistenerForPlaybackState(const std::function<void(const AVPlaybackState&)>
+void AVControllerCallbackClient::AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>
     &listener)
 {
     playbackStateListener_ = listener;

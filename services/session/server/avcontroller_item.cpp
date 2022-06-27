@@ -166,6 +166,7 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
     }
     AVPlaybackState stateOut;
     if (state.CopyToByMask(playbackMask_, stateOut)) {
+        SLOGI("update playback state");
         callback_->OnPlaybackStateChange(stateOut);
     }
 }
@@ -177,6 +178,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
     }
     AVMetaData metaOut;
     if (data.CopyToByMask(metaMask_, metaOut)) {
+        SLOGI("update meta data");
         callback_->OnMetaDataChange(metaOut);
     }
 }
