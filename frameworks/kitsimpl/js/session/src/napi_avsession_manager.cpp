@@ -326,7 +326,6 @@ napi_status NapiAVSessionManager::OnServiceDied(napi_env env, napi_value callbac
 void NapiAVSessionManager::HandleServiceDied()
 {
     if (serviceDiedCallback_ != nullptr && asyncCallback_ != nullptr) {
-
         asyncCallback_->Call(serviceDiedCallback_);
     }
 }

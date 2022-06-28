@@ -112,21 +112,15 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::string& out)
 
     size_t maxLen = STR_MAX_LENGTH;
     status = napi_get_value_string_utf8(env, in, nullptr, 0, &maxLen);
-    if (maxLen <= 0) {
-        return status;
+    if (maxLen <= 0 || maxLen >= STR_MAX_LENGTH) {
+        return napi_invalid_arg;
     }
-    SLOGD("napi_value -> std::string get length %{public}d", (int)maxLen);
-    char* buf = new (std::nothrow) char[maxLen + STR_TAIL_LENGTH];
-    if (buf != nullptr) {
-        size_t len = 0;
-        status = napi_get_value_string_utf8(env, in, buf, maxLen + STR_TAIL_LENGTH, &len);
-        if (status == napi_ok) {
-            buf[len] = 0;
-            out = std::string(buf);
-        }
-        delete[] buf;
-    } else {
-        status = napi_generic_failure;
+
+    char buf[STR_MAX_LENGTH + STR_TAIL_LENGTH] {};
+    size_t len = 0;
+    status = napi_get_value_string_utf8(env, in, buf, maxLen + STR_TAIL_LENGTH, &len);
+    if (status == napi_ok) {
+        out = std::string(buf);
     }
     return status;
 }

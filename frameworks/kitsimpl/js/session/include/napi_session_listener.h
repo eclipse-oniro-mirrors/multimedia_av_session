@@ -25,7 +25,7 @@
 #include "napi_async_callback.h"
 
 namespace OHOS::AVSession {
-class NapiSessionListener: public SessionListener {
+class NapiSessionListener : public SessionListener {
 public:
     enum {
         EVENT_SESSION_CREATED,

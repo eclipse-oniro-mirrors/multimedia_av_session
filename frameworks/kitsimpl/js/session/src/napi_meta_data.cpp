@@ -103,7 +103,7 @@ napi_status NapiMetaData::ConvertFilter(napi_env env, napi_value filter, AVMetaD
         std::string metaKey;
         status = NapiUtils::GetValue(env, value, metaKey);
         CHECK_RETURN(status == napi_ok, "get string value failed", status);
-        for (auto & pair : filterMap_) {
+        for (const auto& pair : filterMap_) {
             if (pair.first == metaKey) {
                 mask.set(pair.second);
             }

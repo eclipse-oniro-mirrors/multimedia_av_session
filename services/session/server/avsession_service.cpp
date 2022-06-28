@@ -92,7 +92,7 @@ void AVSessionService::HandleTopSessionChanged(const FocusSessionStrategy::Focus
     {
         std::lock_guard lockGuard(sessionAndControllerLock_);
         for (const auto& session : GetContainer().GetAllSessions()) {
-            if (session->GetUid() == info.uid_) {
+            if (session->GetUid() == info.uid) {
                 topSession_ = session;
                 found = true;
                 break;

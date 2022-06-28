@@ -29,7 +29,7 @@
 #include "want_agent.h"
 
 namespace OHOS::AVSession {
-class NapiAVSession{
+class NapiAVSession {
 public:
     static napi_value Init(napi_env env, napi_value exports);
     static napi_status NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out);
