@@ -122,7 +122,7 @@ private:
 
     FocusSessionStrategy focusSessionStrategy_;
 
-    std::unique_ptr<AVSessionDumper> dumpHelper_{};
+    std::unique_ptr<AVSessionDumper> dumpHelper_ {};
 };
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {

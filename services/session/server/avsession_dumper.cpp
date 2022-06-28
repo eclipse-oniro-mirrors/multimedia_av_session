@@ -16,8 +16,7 @@
 #include "avsession_dumper.h"
 #include "avsession_errors.h"
 
-namespace OHOS {
-namespace AVSession {
+namespace OHOS::AVSession {
 const std::string ARGS_HELP = "-h";
 const std::string ARGS_AVSESSION_METADATA = "-avsession_metadata";
 const std::string ILLEGAL_INFORMATION = "AVSession service, enter '-h' for usage.\n";
@@ -58,7 +57,7 @@ void AVSessionDumper::ShowMetaData(std::string& result,
             result.append("        subtitle: " + metaData.GetSubTitle() + "\n");
             result.append("        description: " + metaData.GetDescription() + "\n");
             result.append("        lyric: " + metaData.GetLyric() + "\n");
-            result.append("        previosassetid: " + metaData.GetPreviosAssetId() + "\n");
+            result.append("        previosassetid: " + metaData.GetPreviousAssetId() + "\n");
         }
     }
 }
@@ -91,6 +90,4 @@ void AVSessionDumper::Dump(const std::vector<std::string>& args, std::string& re
         ShowIllegalInfo(result);
     }
 }
-
-} // namespace AVSession
-} // namespace OHOS
+} // namespace OHOS::AVSession

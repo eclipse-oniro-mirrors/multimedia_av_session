@@ -19,8 +19,7 @@
 #include <string>
 #include "avcontroller_item.h"
 
-namespace OHOS {
-namespace AVSession {
+namespace OHOS::AVSession {
 class AVSessionDumper {
 public:
     AVSessionDumper()= default;
@@ -34,9 +33,6 @@ private:
     void ProcessParameter(const std::string& arg, std::string& result,
         std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers) const;
     void ShowIllegalInfo(std::string& result) const;
-
 };
-}  // namespace AVSession
-}  // namespace OHOS
-
-#endif  // OHOS_AVSESSION_DUMP_HELPER_H
+} // namespace OHOS::AVSession
+#endif // OHOS_AVSESSION_DUMP_HELPER_H
