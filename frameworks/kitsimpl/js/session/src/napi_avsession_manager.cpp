@@ -113,7 +113,7 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
 napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_callback_info info)
 {
     AVSessionTrace::TraceBegin("NapiAVSessionManager::GetAllSessionDescriptors",
-                               NAPI_GET_ALL_SESSION_DESCRIPTORS_TASK_ID);
+        NAPI_GET_ALL_SESSION_DESCRIPTORS_TASK_ID);
     struct ConcreteContext : public ContextBase {
         std::vector<AVSessionDescriptor> descriptors_;
     };
@@ -277,7 +277,7 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
             context->status = napi_generic_failure;
             context->error = "native send keyEvent failed";
             AVSessionTrace::TraceEnd("NapiAVSessionManager::SendSystemAVKeyEvent",
-                                     NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID);
+                NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID);
         }
     };
 
@@ -287,7 +287,7 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
 napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_callback_info info)
 {
     AVSessionTrace::TraceBegin("NapiAVSessionManager::SendSystemControlCommand",
-                               NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID);
+        NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID);
     struct ConcrentContext : public ContextBase {
         AVControlCommand command;
     };
@@ -304,7 +304,7 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
             context->status = napi_generic_failure;
             context->error = "native send control command failed";
             AVSessionTrace::TraceEnd("NapiAVSessionManager::SendSystemControlCommand",
-                                     NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID);
+                NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID);
         }
     };
 
