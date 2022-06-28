@@ -14,6 +14,7 @@
  */
 
 #include "avsession_log.h"
+#include "avsession_trace.h"
 #include "napi_avcontroller_callback.h"
 #include "napi_control_command.h"
 #include "napi_meta_data.h"
@@ -56,32 +57,38 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
 
 void NapiAVControllerCallback::OnSessionDestroy()
 {
+    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnSessionDestroy");
     HandleEvent(EVENT_SESSION_DESTROY);
 }
 
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
+    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnPlaybackStateChange");
     HandleEvent(EVENT_PLAYBACK_STATE_CHANGE, state);
 }
 
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 {
+    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnMetaDataChange");
     HandleEvent(EVENT_META_DATA_CHANGE, data);
 }
 
 void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
 {
+    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnActiveStateChange");
     HandleEvent(EVENT_ACTIVE_STATE_CHANGE, isActive);
 }
 
 void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
+    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnValidCommandChange");
     std::vector<std::string> stringCmds = NapiControlCommand::ConvertCommands(cmds);
     HandleEvent(EVENT_VALID_COMMAND_CHANGE, stringCmds);
 }
 
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
+    AVSessionTrace avSessionTrace("NapiAVControllerCallback::AddCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     napi_ref ref = nullptr;
     napi_status status = napi_create_reference(env, callback, 1, &ref);
@@ -98,6 +105,7 @@ napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, n
 
 napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event)
 {
+    AVSessionTrace avSessionTrace("NapiAVControllerCallback::RemoveCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     auto ref = callbacks_[event];
     callbacks_[event] = nullptr;

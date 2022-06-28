@@ -82,7 +82,6 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &ca
 
 int32_t AVSessionProxy::Destroy()
 {
-    AVSessionTrace::TraceBegin("AVControllerCallback::OnSessionDestroy", ON_SESSION_DESTROY_TASK_ID);
     AVSessionTrace trace("AVSessionProxy::Release");
     SLOGD("enter");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
@@ -108,7 +107,6 @@ int32_t AVSessionProxy::Destroy()
 
 int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
-    AVSessionTrace::TraceBegin("AVControllerCallback::OnMetaDataChange", ON_MEDA_DATA_CHANGE_TASK_ID);
     AVSessionTrace trace("AVSessionProxy::SetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
     MessageParcel data;
@@ -177,7 +175,6 @@ int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
 
 int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
 {
-    AVSessionTrace::TraceBegin("AVControllerCallback::OnPlaybackStateChange", ON_PLAYBACK_STATE_CHANGE_TASK_ID);
     AVSessionTrace trace("AVSessionProxy::SetAVPlaybackState");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
     MessageParcel data;
@@ -252,7 +249,6 @@ std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 
 int32_t AVSessionProxy::Activate()
 {
-    AVSessionTrace::TraceBegin("AVControllerCallback::OnActiveStateChange", ON_ACTIVE_STATE_CHANGE_TASK_ID);
     AVSessionTrace trace("AVSessionProxy::Active");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
     MessageParcel data;
@@ -307,7 +303,6 @@ bool AVSessionProxy::IsActive()
 
 int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 {
-    AVSessionTrace::TraceBegin("AVControllerCallback::OnValidCommandChange", ON_VALID_COMMAND_CHANGE_TASK_ID);
     AVSessionTrace trace("AVSessionProxy::AddSupportCommand");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");

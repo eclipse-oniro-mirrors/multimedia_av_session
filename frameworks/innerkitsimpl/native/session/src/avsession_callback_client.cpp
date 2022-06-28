@@ -26,84 +26,84 @@ AVSessionCallbackClient::AVSessionCallbackClient(const std::shared_ptr<AVSession
 void AVSessionCallbackClient::OnPlay()
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnPlay", ON_SESSIONCALLBACK_PLAYTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnPlay", ON_SESSION_CALLBACK_PLAY_TASK_ID);
     callback_->OnPlay();
 }
 
 void AVSessionCallbackClient::OnPause()
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnPause", ON_SESSIONCALLBACK_PAUSETASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnPause", ON_SESSION_CALLBACK_PAUSE_TASK_ID);
     callback_->OnPause();
 }
 
 void AVSessionCallbackClient::OnStop()
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnStop", ON_SESSIONCALLBACK_STOPTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnStop", ON_SESSION_CALLBACK_STOP_TASK_ID);
     callback_->OnStop();
 }
 
 void AVSessionCallbackClient::OnPlayNext()
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnPlayNext", ON_SESSIONCALLBACK_PLAYNEXTTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnPlayNext", ON_SESSION_CALLBACK_PLAY_NEXT_TASK_ID);
     callback_->OnPlayNext();
 }
 
 void AVSessionCallbackClient::OnPlayPrevious()
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnPlayPrevious", ON_SESSIONCALLBACK_PLAYPREVIOUSTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnPlayPrevious", ON_SESSION_CALLBACK_PLAY_PREVIOUS_TASK_ID);
     callback_->OnPlayPrevious();
 }
 
 void AVSessionCallbackClient::OnFastForward()
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnFastForward", ON_SESSIONCALLBACK_FASTFORWARDTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnFastForward", ON_SESSION_CALLBACK_FAST_FORWARD_TASK_ID);
     callback_->OnFastForward();
 }
 
 void AVSessionCallbackClient::OnRewind()
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnRewind", ON_SESSIONCALLBACK_REWINDTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnRewind", ON_SESSION_CALLBACK_REWIND_TASK_ID);
     callback_->OnRewind();
 }
 
 void AVSessionCallbackClient::OnSeek(int64_t time)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnSeek", ON_SESSIONCALLBACK_SEEKTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnSeek", ON_SESSION_CALLBACK_SEEK_TASK_ID);
     callback_->OnSeek(time);
 }
 
 void AVSessionCallbackClient::OnSetSpeed(double speed)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnSetSpeed", ON_SESSIONCALLBACK_SETSPEEDTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnSetSpeed", ON_SESSION_CALLBACK_SET_SPEED_TASK_ID);
     callback_->OnSetSpeed(speed);
 }
 
 void AVSessionCallbackClient::OnSetLoopMode(int32_t loopMode)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnSetLoopMode", ON_SESSIONCALLBACK_SETLOOPMODETASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnSetLoopMode", ON_SESSION_CALLBACK_SET_LOOP_MODE_TASK_ID);
     callback_->OnSetLoopMode(loopMode);
 }
 
 void AVSessionCallbackClient::OnToggleFavorite(const std::string& mediald)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnToggleFavorite", ON_SESSIONCALLBACK_TOGGLEFAVORITETASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnToggleFavorite", ON_SESSION_CALLBACK_TOGGLE_FAVORITE_TASK_ID);
     callback_->OnToggleFavorite(mediald);
 }
 
 void AVSessionCallbackClient::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-    AVSessionTrace::TraceEnd("AVSessionCallbackClient::OnMediaKeyEvent", ON_SESSIONCALLBACK_MEDIAKEYEVENTTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionCallback_OnMediaKeyEvent", ON_SESSION_CALLBACK_MEDIA_KEY_EVENT_TASK_ID);
     callback_->OnMediaKeyEvent(keyEvent);
 }
 }
