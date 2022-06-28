@@ -78,22 +78,19 @@ void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRenderer
 
 bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info)
 {
-    if ((info.rendererState == AudioStandard::RendererState::RENDERER_RUNNING) &&
-        (info.rendererInfo.streamUsage == AudioStandard::StreamUsage::STREAM_USAGE_MEDIA) &&
-        ((info.rendererInfo.contentType == AudioStandard::ContentType::CONTENT_TYPE_MUSIC) ||
-        (info.rendererInfo.contentType == AudioStandard::ContentType::CONTENT_TYPE_MOVIE))) {
-        return true;
-    }
-    return false;
+    return info.rendererState == AudioStandard::RendererState::RENDERER_RUNNING ||
+        info.rendererState == AudioStandard::RendererState::RENDERER_RELEASED;
 }
 
 bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos &infos,
                                               FocusSessionChangeInfo& sessionInfo)
 {
+    SLOGI("size=%{public}d", static_cast<int>(infos.size()));
     for (const auto& info : infos) {
+        SLOGI("clientUID=%{public}d rendererState=%{public}d", info->clientUID, info->rendererState);
         if (IsFocusSession(*info)) {
-            sessionInfo.uid_ = info->clientUID;
-            SLOGI("uid=%{public}d is focus session", sessionInfo.uid_);
+            sessionInfo.uid = info->clientUID;
+            SLOGI("uid=%{public}d is focus session", sessionInfo.uid);
             return true;
         }
     }

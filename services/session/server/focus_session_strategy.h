@@ -17,6 +17,7 @@
 #define OHOS_FOCUS_SESSION_STRATEGY_H
 
 #include <functional>
+#include <memory>
 #include "audio_stream_manager.h"
 
 namespace OHOS::AVSession {
@@ -24,7 +25,7 @@ using AudioRendererChangeInfos = std::vector<std::unique_ptr<AudioStandard::Audi
 class FocusSessionStrategy {
 public:
     struct FocusSessionChangeInfo {
-        int32_t uid_ {};
+        int32_t uid {};
     };
     using FocusSessionChangeCallback = std::function<void(const FocusSessionChangeInfo&)>;
 

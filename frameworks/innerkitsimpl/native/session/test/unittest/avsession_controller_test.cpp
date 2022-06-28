@@ -774,7 +774,7 @@ HWTEST_F(AVSessionControllerTest, GetSessionId002, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition001, TestSize.Level1)
 {
-    EXPECT_EQ(controller_->GetRealPlaybackPosition() , 0);
+    EXPECT_EQ(controller_->GetRealPlaybackPosition(), 0);
 }
 
 /**
