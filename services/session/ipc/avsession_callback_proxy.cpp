@@ -146,7 +146,7 @@ void AVSessionCallbackProxy::OnSetLoopMode(int32_t loopMode)
 void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediaId)
 {
     AVSessionTrace::TraceBegin("AVSessionCallback_OnToggleFavorite", ON_SESSION_CALLBACK_TOGGLE_FAVORITE_TASK_ID);
-    
+
     MessageParcel data;
     AVSessionTrace mAVSessionTrace("AVSessionCallbackProxy::OnToggleFavorite");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -160,7 +160,7 @@ void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediaId)
 void AVSessionCallbackProxy::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSessionTrace::TraceBegin("AVSessionCallback_OnMediaKeyEvent", ON_SESSION_CALLBACK_MEDIA_KEY_EVENT_TASK_ID);
-    
+
     MessageParcel data;
     AVSessionTrace mAVSessionTrace("AVSessionCallbackProxy::OnMediaKeyEvent");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
