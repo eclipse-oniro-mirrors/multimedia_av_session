@@ -31,6 +31,7 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate)
 {
     SLOGD("construct");
+    dumpHelper_ = std::make_unique<AVSessionDumper>();
 }
 
 AVSessionService::~AVSessionService()
@@ -391,6 +392,34 @@ void AVSessionService::HandleControllerRelease(AVControllerItem &controller)
     if (it->second.empty()) {
         controllers_.erase(pid);
     }
+}
+
+std::int32_t AVSessionService::Dump(std::int32_t fd, const std::vector<std::u16string> &args)
+{
+    if (fd < 0) {
+        SLOGE("dump fd invalid");
+        return ERR_INVALID_PARAM;
+    }
+
+    if (dumpHelper_ == nullptr) {
+        SLOGE("dumpHelper_ is nullptr!");
+        return ERR_INVALID_PARAM;
+    }
+
+    std::vector<std::string> argsInStr;
+    for (const auto &arg : args) {
+        SLOGD("Dump args: %s", Str16ToStr8(arg).c_str());
+        argsInStr.emplace_back(Str16ToStr8(arg));
+    }
+
+    std::string result;
+    dumpHelper_->Dump(argsInStr, result, controllers_);
+    std::int32_t ret = dprintf(fd, "%s", result.c_str());
+    if (ret < 0) {
+        SLOGE("dprintf to dump fd failed");
+        return ERR_INVALID_PARAM;
+    }
+    return AVSESSION_SUCCESS;
 }
 
 void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid)

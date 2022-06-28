@@ -21,6 +21,7 @@
 
 #include "iremote_stub.h"
 #include "system_ability.h"
+#include "avsession_dumper.h"
 #include "avsession_service_stub.h"
 #include "avsession_item.h"
 #include "avcontroller_item.h"
@@ -68,6 +69,8 @@ public:
     void HandleSessionRelease(AVSessionItem& session);
 
     void HandleControllerRelease(AVControllerItem& controller);
+
+    std::int32_t Dump(std::int32_t fd, const std::vector<std::u16string> &args) override;
 
 private:
     static SessionContainer& GetContainer();
@@ -118,6 +121,8 @@ private:
     std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
 
     FocusSessionStrategy focusSessionStrategy_;
+
+    std::unique_ptr<AVSessionDumper> dumpHelper_ {};
 };
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
