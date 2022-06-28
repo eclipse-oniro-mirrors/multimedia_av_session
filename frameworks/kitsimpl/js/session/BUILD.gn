@@ -38,7 +38,10 @@ ohos_shared_library("avsession_napi") {
     "src/napi_utils.cpp",
   ]
 
-  deps = [ "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client" ]
+  deps = [
+    "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client",
+    "//foundation/multimedia/av_session/utils:avsession_utils",
+  ]
 
   external_deps = [
     "ability_base:base",
@@ -57,6 +60,7 @@ ohos_shared_library("avsession_napi") {
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "utils_base:utils",
+    "hitrace_native:hitrace_meter",
   ]
 
   relative_install_dir = "module/multimedia"

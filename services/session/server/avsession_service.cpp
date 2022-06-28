@@ -163,6 +163,7 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor &descriptor
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
+        AVSessionTrace::TraceBegin("SessionListener_OnSessionCreate", ON_SESSION_CREATE_TASK_ID);
         listener->OnSessionCreate(descriptor);
     }
 }
@@ -171,6 +172,7 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
+        AVSessionTrace::TraceBegin("SessionListener_OnSessionRelease", ON_SESSION_RELEASE_TASK_ID);
         listener->OnSessionRelease(descriptor);
     }
 }
@@ -179,6 +181,7 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor &descri
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
+        AVSessionTrace::TraceBegin("SessionListener_OnTopSessionChanged", ON_SESSION_RELEASE_TASK_ID);
         listener->OnTopSessionChanged(descriptor);
     }
 }
@@ -339,7 +342,7 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
 {
     SLOGI("enter");
     auto pid = GetCallingPid();
-    AVSessionTrace::TraceBegin("AVSessionService::OnClientDied", ON_SESSIONSERVICE_CLIENTDIEDTASK_ID);
+    AVSessionTrace::TraceBegin("AVSessionService_OnClientDied", ON_SESSION_SERVICE_CLIENT_DIED_TASK_ID);
     auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
         SLOGE("malloc failed");
@@ -357,7 +360,7 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
 
 void AVSessionService::OnClientDied(pid_t pid)
 {
-    AVSessionTrace::TraceEnd("AVSessionService::OnClientDied", ON_SESSIONSERVICE_CLIENTDIEDTASK_ID);
+    AVSessionTrace::TraceEnd("AVSessionService_OnClientDied", ON_SESSION_SERVICE_CLIENT_DIED_TASK_ID);
     SLOGI("pid=%{public}d", pid);
     RemoveSessionListener(pid);
     RemoveClientDeathObserver(pid);

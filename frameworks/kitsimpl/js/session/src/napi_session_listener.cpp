@@ -17,6 +17,7 @@
 #include <memory>
 #include "avsession_log.h"
 #include "avsession_info.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 NapiSessionListener::NapiSessionListener()
@@ -45,24 +46,28 @@ void NapiSessionListener::HandleEvent(int32_t event, const T &param)
 
 void NapiSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
+    AVSessionTrace avSessionTrace("NapiSessionListener::OnSessionCreate");
     SLOGI("sessionId=%{public}d", descriptor.sessionId_);
     HandleEvent(EVENT_SESSION_CREATED, descriptor);
 }
 
 void NapiSessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
+    AVSessionTrace avSessionTrace("NapiSessionListener::OnSessionRelease");
     SLOGI("sessionId=%{public}d", descriptor.sessionId_);
     HandleEvent(EVENT_SESSION_DESTROYED, descriptor);
 }
 
 void NapiSessionListener::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
 {
+    AVSessionTrace avSessionTrace("NapiSessionListener::OnTopSessionChanged");
     SLOGI("sessionId=%{public}d", descriptor.sessionId_);
     HandleEvent(EVENT_TOP_SESSION_CHANGED, descriptor);
 }
 
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
+    AVSessionTrace avSessionTrace("NapiSessionListener::AddCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     napi_ref ref = nullptr;
     napi_status status = napi_create_reference(env, callback, 1, &ref);
@@ -79,6 +84,7 @@ napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_v
 
 napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event)
 {
+    AVSessionTrace avSessionTrace("NapiSessionListener::RemoveCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     auto ref = callbacks_[event];
     callbacks_[event] = nullptr;

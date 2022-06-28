@@ -23,6 +23,7 @@
 #include "napi_utils.h"
 #include "want_agent.h"
 #include "avsession_errors.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 static __thread napi_ref AVControllerConstructorRef = nullptr;
@@ -77,6 +78,7 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
 
 napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace avSessionTrace("NapiAVSessionController::ConstructorCallback");
     napi_value self;
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, nullptr, nullptr, &self, nullptr), nullptr);
 
@@ -102,6 +104,7 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
 napi_status NapiAVSessionController::NewInstance(napi_env env, std::shared_ptr<AVSessionController> &nativeController,
     napi_value &out)
 {
+    AVSessionTrace avSessionTrace("NapiAVSessionController::NewInstance");
     napi_value constructor{};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVControllerConstructorRef, &constructor), napi_generic_failure);
     napi_value instance{};
@@ -122,6 +125,7 @@ napi_status NapiAVSessionController::NewInstance(napi_env env, std::shared_ptr<A
 
 napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace::TraceBegin("NapiAVSessionController::GetAVPlaybackState", NAPI_GET_AV_PLAYBACK_STATE_TASK_ID);
     struct ConcreteContext : public ContextBase {
         AVPlaybackState state;
     };
@@ -147,6 +151,7 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
     auto complete = [env, context](napi_value &output) {
         context->status = NapiPlaybackState::SetValue(env, context->state, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+        AVSessionTrace::TraceEnd("NapiAVSessionController::GetAVPlaybackState", NAPI_GET_AV_PLAYBACK_STATE_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetAVPlaybackState", executor, complete);
@@ -154,6 +159,7 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
 
 napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace::TraceBegin("NapiAVSessionController::GetAVMetadata", NAPI_GET_AV_META_DATA_TASK_ID);
     struct ConcreteContext : public ContextBase {
         AVMetaData data;
     };
@@ -179,6 +185,7 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
     auto complete = [env, context](napi_value &output) {
         context->status = NapiMetaData::SetValue(env, context->data, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+        AVSessionTrace::TraceEnd("NapiAVSessionController::GetAVMetadata", NAPI_GET_AV_META_DATA_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetAVMetaData", executor, complete);
@@ -186,6 +193,7 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
 
 napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace::TraceBegin("NapiAVSessionController::SendAVKeyEvent", NAPI_SEND_AV_KEY_EVENT_TASK_ID);
     struct ConcreteContext : public ContextBase {
         std::shared_ptr<MMI::KeyEvent> keyEvent_;
     };
@@ -212,6 +220,7 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
             context->error = "controller SendAVKeyEvent failed";
             SLOGE("controller SendAVKeyEvent failed:%{public}d", ret);
         }
+        AVSessionTrace::TraceEnd("NapiAVSessionController::SendAVKeyEvent", NAPI_SEND_AV_KEY_EVENT_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "SendAVKeyEvent", executor);
@@ -219,6 +228,7 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
 
 napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace::TraceBegin("NapiAVSessionController::GetLaunchAbility", NAPI_GET_LAUNCH_ABILITY_TASK_ID);
     struct ConcreteContext : public ContextBase {
         AbilityRuntime::WantAgent::WantAgent *ability {};
     };
@@ -244,6 +254,7 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
     auto complete = [env, context](napi_value &output) {
         context->status = NapiUtils::SetValue(env, context->ability, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+        AVSessionTrace::TraceEnd("NapiAVSessionController::GetLaunchAbility", NAPI_GET_LAUNCH_ABILITY_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetLaunchAbility", executor, complete);
@@ -251,6 +262,7 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
 
 napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace::TraceBegin("NapiAVSessionController::GetValidCommands", NAPI_GET_VALID_COMMANDS_TASK_ID);
     struct ConcreteContext : public ContextBase {
         std::vector<std::string> stringCmds;
     };
@@ -278,6 +290,7 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
     auto complete = [env, context](napi_value &output) {
         context->status = NapiUtils::SetValue(env, context->stringCmds, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+        AVSessionTrace::TraceEnd("NapiAVSessionController::GetValidCommands", NAPI_GET_VALID_COMMANDS_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetValidCommands", executor, complete);
@@ -285,6 +298,7 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
 
 napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace::TraceBegin("NapiAVSessionController::IsSessionActive", NAPI_IS_ACTIVE_TASK_ID);
     struct ConcreteContext : public ContextBase {
         bool isActive {};
     };
@@ -310,6 +324,7 @@ napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_
     auto complete = [env, context](napi_value &output) {
         context->status = NapiUtils::SetValue(env, context->isActive, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+        AVSessionTrace::TraceEnd("NapiAVSessionController::IsSessionActive", NAPI_IS_ACTIVE_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "IsSessionActive", executor, complete);
@@ -317,6 +332,7 @@ napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_
 
 napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace::TraceBegin("NapiAVSessionController::SendControlCommand", NAPI_SEND_CONTROL_COMMAND_TASK_ID);
     struct ConcrentContext : public ContextBase {
         AVControlCommand command;
     };
@@ -342,6 +358,7 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
             context->error = "controller SendControlCommand failed";
             SLOGE("controller SendControlCommand failed:%{public}d", ret);
         }
+        AVSessionTrace::TraceEnd("NapiAVSessionController::SendControlCommand", NAPI_SEND_CONTROL_COMMAND_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "SendControlCommand", executor);
@@ -349,6 +366,7 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
 
 napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace::TraceBegin("NapiAVSessionController::Destroy", NAPI_AVSESSION_CONTROLLER_DESTROY_TASK_ID);
     auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info);
 
@@ -369,6 +387,7 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
         }
         napiController->controller_ = nullptr;
         napiController->callback_ = nullptr;
+		AVSessionTrace::TraceEnd("NapiAVSessionController::Destroy", NAPI_AVSESSION_CONTROLLER_DESTROY_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "IsSessionActive", executor);
@@ -376,6 +395,7 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
 
 napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace avSessionTrace("NapiAVSessionController::GetRealPlaybackPositionSync");
     auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
@@ -399,6 +419,7 @@ napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, na
 
 napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace avSessionTrace("NapiAVSessionController::GetOutputDevice");
     SLOGI("not implement");
     napi_throw_error(env, nullptr, "not implement");
     return NapiUtils::GetUndefinedValue(env);
@@ -421,6 +442,7 @@ napi_status NapiAVSessionController::SetPlaybackStateFilter(napi_env env, NapiAV
 napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionController *napiController,
                                                    napi_value filter)
 {
+    AVSessionTrace avSessionTrace("NapiAVSessionController::SetMetaFilter");
     AVMetaData::MetaMaskType metaMask;
     auto status = NapiMetaData::ConvertFilter(env, filter, metaMask);
     CHECK_RETURN(status == napi_ok, "convert filter failed", status);
@@ -435,6 +457,7 @@ napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionCo
 napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
     const std::string& event, napi_value filter, napi_value callback)
 {
+    AVSessionTrace avSessionTrace("NapiAVSessionController::RegisterCallback");
     auto it = EventHandlers_.find(event);
     if (it == EventHandlers_.end()) {
         SLOGE("event name invalid");
@@ -471,6 +494,7 @@ static bool IsThreeParamForOnEvent(const std::string& event)
 
 napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace avSessionTrace("NapiAVSessionController::OnEvent");
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
     napi_value filter {};
@@ -513,6 +537,7 @@ napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info inf
 
 napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info info)
 {
+    AVSessionTrace avSessionTrace("NapiAVSessionController::OffEvent");
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
     auto input = [&eventName, env, &context](size_t argc, napi_value* argv) {

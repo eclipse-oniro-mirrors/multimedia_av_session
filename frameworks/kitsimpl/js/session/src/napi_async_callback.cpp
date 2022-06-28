@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "avsession_trace.h"
 #include "napi_async_callback.h"
 #include <memory>
 
@@ -37,6 +38,7 @@ napi_env NapiAsyncCallback::GetEnv() const
 
 void NapiAsyncCallback::AfterWorkCallback(uv_work_t *work, int aStatus)
 {
+    AVSessionTrace avSessionTrace("NapiAsyncCallback::AfterWorkCallback");
     std::shared_ptr<DataContext> context(static_cast<DataContext*>(work->data), [work](DataContext* ptr) {
         delete ptr;
         delete work;
@@ -63,6 +65,7 @@ void NapiAsyncCallback::AfterWorkCallback(uv_work_t *work, int aStatus)
 
 void NapiAsyncCallback::Call(napi_ref method, NapiArgsGetter getter)
 {
+    AVSessionTrace avSessionTrace("NapiAsyncCallback::Call");
     if (loop_ == nullptr) {
         SLOGE("loop_ is nullptr");
         return;

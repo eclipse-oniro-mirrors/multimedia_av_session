@@ -26,7 +26,6 @@ SessionListenerProxy::SessionListenerProxy(const sptr<IRemoteObject> &impl)
 
 void SessionListenerProxy::OnSessionCreate(const AVSessionDescriptor &descriptor)
 {
-    AVSessionTrace avSessionTrace("SessionListenerProxy::OnSessionCreate");
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     descriptor.WriteToParcel(data);
@@ -37,7 +36,6 @@ void SessionListenerProxy::OnSessionCreate(const AVSessionDescriptor &descriptor
 
 void SessionListenerProxy::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
-    AVSessionTrace avSessionTrace("SessionListenerProxy::OnSessionRelease");
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     descriptor.WriteToParcel(data);
@@ -48,7 +46,6 @@ void SessionListenerProxy::OnSessionRelease(const AVSessionDescriptor &descripto
 
 void SessionListenerProxy::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
 {
-    AVSessionTrace avSessionTrace("SessionListenerProxy::OnTopSessionChanged");
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     descriptor.WriteToParcel(data);
