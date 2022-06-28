@@ -18,14 +18,14 @@
 
 namespace OHOS::AVSession {
 const std::string ARGS_HELP = "-h";
-const std::string ARGS_AVSESSION_METADATA = "-avsession_metadata";
+const std::string ARGS_SHOW_METADATA = "-show_metadata";
 const std::string ILLEGAL_INFORMATION = "AVSession service, enter '-h' for usage.\n";
 
 void AVSessionDumper::ShowHelp(std::string& result) const
 {
     result.append("Usage:dump <command> [options]\n")
         .append("Description:\n")
-        .append("-avsession_metadata          :")
+        .append("-show_metadata          :")
         .append("dump all avsession metadata in the system\n");
 }
 
@@ -67,7 +67,7 @@ void AVSessionDumper::ProcessParameter(const std::string& arg, std::string& resu
 {
     if (arg == ARGS_HELP) {
         ShowHelp(result);
-    } else if (arg == ARGS_AVSESSION_METADATA) {
+    } else if (arg == ARGS_SHOW_METADATA) {
         ShowMetaData(result, controllers);
     } else {
         ShowHelp(result);
