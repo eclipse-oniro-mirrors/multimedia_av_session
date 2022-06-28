@@ -21,7 +21,7 @@ AVSession部件为系统提供了统一的媒体控制能力，当三方应用�
 
 ## 逻辑架构<a name="avsession_arch"></a>
 
-![](figures\frameworkimage.png)
+![逻辑架构图](figures/frameworkimage.png)
 
 媒体会话承载应用与系统服务间的数据和命令交互功能，应用通过会话将信息保存在系统服务内，系统服务接收系统应用或者外部的控制命令，并转发到应用端，由应用实现对应的功能。
 
