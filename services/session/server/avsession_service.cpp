@@ -163,8 +163,7 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor &descriptor
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
-        AVSessionTrace::TraceBegin("SessionListener_OnSessionCreate", 
-        ON_SESSION_CREATE_TASK_ID);
+        AVSessionTrace::TraceBegin("SessionListener_OnSessionCreate", ON_SESSION_CREATE_TASK_ID);
         listener->OnSessionCreate(descriptor);
     }
 }
@@ -173,8 +172,7 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
-        AVSessionTrace::TraceBegin("SessionListener_OnSessionRelease",
-        ON_SESSION_RELEASE_TASK_ID);
+        AVSessionTrace::TraceBegin("SessionListener_OnSessionRelease", ON_SESSION_RELEASE_TASK_ID);
         listener->OnSessionRelease(descriptor);
     }
 }
@@ -183,8 +181,7 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor &descri
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
-        AVSessionTrace::TraceBegin("SessionListener_OnTopSessionChanged",
-        ON_SESSION_RELEASE_TASK_ID);
+        AVSessionTrace::TraceBegin("SessionListener_OnTopSessionChanged", ON_SESSION_RELEASE_TASK_ID);
         listener->OnTopSessionChanged(descriptor);
     }
 }
