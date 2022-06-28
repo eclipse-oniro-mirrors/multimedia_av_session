@@ -43,6 +43,7 @@ ohos_shared_library("avsession_service") {
 
   service_sources = [
     "server/avcontroller_item.cpp",
+    "server/avsession_dumper.cpp",
     "server/avsession_item.cpp",
     "server/avsession_service.cpp",
     "server/focus_session_strategy.cpp",
