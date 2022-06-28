@@ -387,7 +387,7 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
         }
         napiController->controller_ = nullptr;
         napiController->callback_ = nullptr;
-		AVSessionTrace::TraceEnd("NapiAVSessionController::Destroy", NAPI_AVSESSION_CONTROLLER_DESTROY_TASK_ID);
+        AVSessionTrace::TraceEnd("NapiAVSessionController::Destroy", NAPI_AVSESSION_CONTROLLER_DESTROY_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "IsSessionActive", executor);
