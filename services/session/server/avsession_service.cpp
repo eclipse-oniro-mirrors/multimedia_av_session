@@ -90,20 +90,21 @@ void AVSessionService::InitKeyEvent()
 void AVSessionService::HandleTopSessionChanged(const FocusSessionStrategy::FocusSessionChangeInfo &info)
 {
     bool found {};
+    AVSessionDescriptor descriptor;
     {
         std::lock_guard lockGuard(sessionAndControllerLock_);
         for (const auto& session : GetContainer().GetAllSessions()) {
             if (session->GetUid() == info.uid) {
                 topSession_ = session;
+                descriptor = topSession_->GetDescriptor();
                 found = true;
                 break;
             }
         }
     }
     if (found) {
-        SLOGI("sessionTag=%{public}s sessionId=%{public}d", topSession_->GetDescriptor().sessionTag_.c_str(),
-              topSession_->GetDescriptor().sessionId_);
-        NotifyTopSessionChanged(topSession_->GetDescriptor());
+        SLOGI("sessionTag=%{public}s sessionId=%{public}d", descriptor.sessionTag_.c_str(), descriptor.sessionId_);
+        NotifyTopSessionChanged(descriptor);
     }
 }
 
@@ -205,6 +206,10 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
     result->SetPid(GetCallingPid());
     result->SetUid(GetCallingUid());
     result->SetServiceCallbackForRelease([this](AVSessionItem& session) { HandleSessionRelease(session); });
+    if (topSession_ == nullptr) {
+        SLOGI("set topSession");
+        topSession_ = result;
+    }
     SLOGI("success sessionId=%{public}d", result->GetSessionId());
     return result;
 }
