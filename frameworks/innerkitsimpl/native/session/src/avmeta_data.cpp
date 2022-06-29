@@ -30,6 +30,7 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteInt64(duration_) &&
         parcel.WriteParcelable(mediaImage_.get()) &&
         parcel.WriteString(mediaImageUri_) &&
+        parcel.WriteDouble(publishDate_) &&
         parcel.WriteString(subTitle_) &&
         parcel.WriteString(description_) &&
         parcel.WriteString(lyric_) &&
@@ -55,6 +56,7 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
     result->duration_ = data.ReadInt64();
     result->mediaImage_ = std::shared_ptr<Media::PixelMap>(data.ReadParcelable<Media::PixelMap>());
     result->mediaImageUri_ = data.ReadString();
+    result->publishDate_ = data.ReadDouble();
     result->subTitle_ = data.ReadString();
     result->description_ = data.ReadString();
     result->lyric_ = data.ReadString();
@@ -143,6 +145,9 @@ std::string AVMetaData::GetComposer() const
 
 void AVMetaData::SetDuration(int64_t duration)
 {
+    if (duration < 0) {
+        SLOGW("invalid duration");
+    }
     duration_ = duration;
     metaMask_.set(META_KEY_DURATION);
 }
@@ -176,6 +181,9 @@ std::string AVMetaData::GetMediaImageUri() const
 
 void AVMetaData::SetPublishDate(double date)
 {
+    if (date < 0) {
+        SLOGW("invalid publish date");
+    }
     publishDate_ = date;
     metaMask_.set(META_KEY_PUBLISH_DATE);
 }
@@ -303,6 +311,11 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
     }
 
     return result;
+}
+
+bool AVMetaData::IsValid() const
+{
+    return duration_ >= 0 && publishDate_ >= 0;
 }
 
 void AVMetaData::CloneAssetId(const AVMetaData& from, AVMetaData& to)

@@ -108,6 +108,8 @@ public:
     bool CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const;
     bool CopyFrom(const AVMetaData& metaIn);
 
+    bool IsValid() const;
+
 private:
     MetaMaskType metaMask_;
 

@@ -108,6 +108,7 @@ int32_t AVSessionProxy::Destroy()
 int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
     AVSessionTrace trace("AVSessionProxy::SetAVMetaData");
+    CHECK_AND_RETURN_RET_LOG(meta.IsValid(), AVSESSION_ERROR, "invalid meta data");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
