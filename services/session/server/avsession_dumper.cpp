@@ -30,7 +30,7 @@ void AVSessionDumper::ShowHelp(std::string& result) const
 }
 
 void AVSessionDumper::ShowMetaData(std::string& result,
-                                   std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers) const
+    std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers) const
 {
     int32_t controllerIndex = 0;
     int32_t itemIndex = 0;
@@ -52,18 +52,19 @@ void AVSessionDumper::ShowMetaData(std::string& result,
             result.append("        writer: " + metaData.GetWriter() + "\n");
             result.append("        composer: " + metaData.GetComposer() + "\n");
             result.append("        duration: " + std::to_string(metaData.GetDuration()) + "\n");
-            result.append("        mediaimageurl: " + metaData.GetMediaImageUri() + "\n");
-            result.append("        publishdate: " + std::to_string(metaData.GetPublishDate()) + "\n");
+            result.append("        media image url: " + metaData.GetMediaImageUri() + "\n");
+            result.append("        publish date: " + std::to_string(metaData.GetPublishDate()) + "\n");
             result.append("        subtitle: " + metaData.GetSubTitle() + "\n");
             result.append("        description: " + metaData.GetDescription() + "\n");
             result.append("        lyric: " + metaData.GetLyric() + "\n");
-            result.append("        previosassetid: " + metaData.GetPreviousAssetId() + "\n");
+            result.append("        previous assetid: " + metaData.GetPreviousAssetId() + "\n");
+            result.append("        next assetid: " + metaData.GetNextAssetId() + "\n");
         }
     }
 }
 
 void AVSessionDumper::ProcessParameter(const std::string& arg, std::string& result,
-                                       std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers) const
+    std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers) const
 {
     if (arg == ARGS_HELP) {
         ShowHelp(result);

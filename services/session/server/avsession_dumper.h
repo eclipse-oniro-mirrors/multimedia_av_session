@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ public:
     AVSessionDumper()= default;
     ~AVSessionDumper() = default;
     void Dump(const std::vector<std::string>& args, std::string& result, std::map<pid_t,
-              std::list<sptr<AVControllerItem>>> controllers) const;
+        std::list<sptr<AVControllerItem>>> controllers) const;
 
 private:
     void ShowHelp(std::string& result) const;
