@@ -42,6 +42,10 @@ public:
 
     std::shared_ptr<AVSessionController> CreateController(int32_t sessionId);
 
+    std::vector<AVSessionDescriptor> GetActivatedSessionDescriptors();
+
+    int32_t GetSessionDescriptorsBySessionId(int32_t sessionId, AVSessionDescriptor& descriptor);
+
     int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener);
 
     int32_t RegisterServiceDeathCallback(const DeathCallback& callback);

@@ -33,6 +33,10 @@ public:
 
     static std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
 
+    static std::vector<AVSessionDescriptor> GetActivatedSessionDescriptors();
+
+    static int32_t GetSessionDescriptorsBySessionId(int32_t sessionId, AVSessionDescriptor& descriptor);
+
     static std::shared_ptr<AVSessionController> CreateController(int32_t sessionld);
 
     static int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener);

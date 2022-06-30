@@ -66,9 +66,13 @@ void AvsessionTest::TearDown()
     int32_t ret = AVSESSION_ERROR;
     if (avsession_ != nullptr) {
         ret = avsession_->Destroy();
+        ASSERT_EQ(AVSESSION_SUCCESS, ret);
+        avsession_ = nullptr;
     }
     if (controller_ != nullptr) {
         ret = controller_->Destroy();
+        ASSERT_EQ(AVSESSION_SUCCESS, ret);
+        controller_ = nullptr;
     }
     g_onCall = AVSESSION_ERROR;
 }
@@ -437,5 +441,21 @@ HWTEST_F(AvsessionTest, Destroy001, TestSize.Level1)
 {
     SLOGE("Destroy001 Begin");
     EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
+    avsession_ = nullptr;
+    SLOGE("Destroy001 End");
+}
+
+/**
+* @tc.name: Destroy002
+* @tc.desc: Return is Session Actived
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, Destroy002, TestSize.Level1)
+{
+    SLOGE("Destroy001 Begin");
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_ERROR);
+    avsession_ = nullptr;
     SLOGE("Destroy001 End");
 }

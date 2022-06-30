@@ -64,7 +64,6 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
     return service_;
 }
 
-
 void AVSessionManagerImpl::OnServiceDied()
 {
     SLOGI("enter");
@@ -92,6 +91,31 @@ std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetAllSessionDescriptors(
 {
     auto service = GetService();
     return service ? service->GetAllSessionDescriptors() : std::vector<AVSessionDescriptor>();
+}
+
+std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetActivatedSessionDescriptors()
+{
+    std::vector<AVSessionDescriptor> descriptors = GetAllSessionDescriptors();
+    std::vector<AVSessionDescriptor> activatedSessions;
+    for (const auto& descriptor : descriptors) {
+        if (descriptor.isActive_) {
+            activatedSessions.push_back(descriptor);
+        }
+    }
+    return activatedSessions;
+}
+
+int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(int32_t sessionId, AVSessionDescriptor& descriptor)
+{
+    std::vector<AVSessionDescriptor> allDescriptors = GetAllSessionDescriptors();
+    for (const auto& oneDescriptor : allDescriptors) {
+        if (oneDescriptor.sessionId_ == sessionId) {
+            descriptor = oneDescriptor;
+            return AVSESSION_SUCCESS;
+        }
+    }
+    SLOGI("sessionId %{public}d is not exist", sessionId);
+    return AVSESSION_ERROR;
 }
 
 std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(int32_t sessionId)

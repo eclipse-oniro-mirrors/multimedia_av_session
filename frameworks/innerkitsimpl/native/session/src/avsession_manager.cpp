@@ -38,6 +38,16 @@ std::vector<AVSessionDescriptor> AVSessionManager::GetAllSessionDescriptors()
     return AVSessionManagerImpl::GetInstance().GetAllSessionDescriptors();
 }
 
+std::vector<AVSessionDescriptor> AVSessionManager::GetActivatedSessionDescriptors()
+{
+    return AVSessionManagerImpl::GetInstance().GetActivatedSessionDescriptors();
+}
+
+int32_t AVSessionManager::GetSessionDescriptorsBySessionId(int32_t sessionId, AVSessionDescriptor& descriptor)
+{
+    return AVSessionManagerImpl::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
+}
+
 std::shared_ptr<AVSessionController> AVSessionManager::CreateController(int32_t sessionId)
 {
     if (sessionId < 0) {
