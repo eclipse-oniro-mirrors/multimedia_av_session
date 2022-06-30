@@ -67,6 +67,7 @@ HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level1)
 HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
 {
     auto *parcel = new (std::nothrow) OHOS::Parcel();
+    parcel->WriteString("0110");
     parcel->WriteInt32(0);
     parcel->WriteDouble(3.0);
     parcel->WriteUint64(30);

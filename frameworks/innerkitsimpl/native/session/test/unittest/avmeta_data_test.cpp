@@ -23,9 +23,9 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
-AVMetaData g_metaDataCloneTest;
-AVMetaData g_metaData;
-OHOS::Parcel g_parcel;
+static AVMetaData g_metaDataCloneTest;
+static AVMetaData g_metaData;
+static OHOS::Parcel g_parcel;
 constexpr int64_t DURATION = 40000;
 static char g_testSessionTag[] = "test";
 static char g_testBundleName[] = "test.ohos.avsession";
@@ -33,23 +33,23 @@ static char g_testAbilityName[] = "test.ability";
 
 class AVMetaDataTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
 
     std::shared_ptr<AVSession> avsession_ = nullptr;
 };
 
-void AVMetaDataTest::SetUpTestCase(void)
+void AVMetaDataTest::SetUpTestCase()
 {
 }
 
-void AVMetaDataTest::TearDownTestCase(void)
+void AVMetaDataTest::TearDownTestCase()
 {
 }
 
-void AVMetaDataTest::SetUp(void)
+void AVMetaDataTest::SetUp()
 {
     g_metaData.Reset();
     g_metaData.SetAssetId("123");
@@ -72,7 +72,7 @@ void AVMetaDataTest::SetUp(void)
     EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
 }
 
-void AVMetaDataTest::TearDown(void)
+void AVMetaDataTest::TearDown()
 {
     if (avsession_ != nullptr) {
         ASSERT_EQ(AVSESSION_SUCCESS, avsession_->Destroy());

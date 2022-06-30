@@ -31,6 +31,8 @@ public:
     using SetterType = std::function<napi_status(napi_env env, const AVMetaData& in, napi_value& out)>;
 
 private:
+    static napi_status SetUndefinedMeta(napi_env env, napi_value& meta);
+
     static napi_status GetAssetId(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetAssetId(napi_env env, const AVMetaData& in, napi_value& out);
 

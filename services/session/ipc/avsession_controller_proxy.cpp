@@ -297,7 +297,7 @@ int32_t AVSessionControllerProxy::GetSessionId()
 
 uint64_t AVSessionControllerProxy::GetRealPlaybackPosition()
 {
-    auto position = currentState_.GetPosistion();
+    auto position = currentState_.GetPosition();
     CHECK_AND_RETURN_RET_LOG(position.updateTime_ > 0, 0, "playbackState not update");
     auto now = std::chrono::system_clock::now();
     auto nowMS = std::chrono::time_point_cast<std::chrono::milliseconds>(now);

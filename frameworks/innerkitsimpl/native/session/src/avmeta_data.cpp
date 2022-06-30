@@ -40,7 +40,7 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
 
 AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
 {
-    std::string mask {};
+    std::string mask;
     CHECK_AND_RETURN_RET_LOG(data.ReadString(mask) && mask.length() == META_KEY_MAX, nullptr, "mask not valid");
     CHECK_AND_RETURN_RET_LOG(mask.find_first_not_of("01") == std::string::npos, nullptr, "mask string not 0 or 1");
 
@@ -332,7 +332,7 @@ void AVMetaData::CloneAssetId(const AVMetaData& from, AVMetaData& to)
     to.assetId_ = from.assetId_;
 }
 
-void AVMetaData::CloneTitile(const AVMetaData& from, AVMetaData& to)
+void AVMetaData::CloneTitle(const AVMetaData& from, AVMetaData& to)
 {
     to.title_ = from.title_;
 }
@@ -382,12 +382,12 @@ void AVMetaData::ClonePublishData(const AVMetaData &from, AVMetaData &to)
     to.publishDate_ = from.publishDate_;
 }
 
-void AVMetaData::CloneSubTitile(const AVMetaData& from, AVMetaData& to)
+void AVMetaData::CloneSubTitle(const AVMetaData& from, AVMetaData& to)
 {
     to.subTitle_ = from.subTitle_;
 }
 
-void AVMetaData::CloneDescriptiion(const AVMetaData& from, AVMetaData& to)
+void AVMetaData::CloneDescription(const AVMetaData& from, AVMetaData& to)
 {
     to.description_ = from.description_;
 }

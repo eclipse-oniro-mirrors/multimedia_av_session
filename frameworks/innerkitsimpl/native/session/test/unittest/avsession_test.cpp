@@ -34,22 +34,22 @@ static char g_testAbilityName[] = "test.ability";
 
 class AvsessionTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
 
     std::shared_ptr<AVSession> avsession_ = nullptr;
     std::shared_ptr<AVSessionController> controller_ = nullptr;
 };
 
-void AvsessionTest::SetUpTestCase(void)
+void AvsessionTest::SetUpTestCase()
 {}
 
-void AvsessionTest::TearDownTestCase(void)
+void AvsessionTest::TearDownTestCase()
 {}
 
-void AvsessionTest::SetUp(void)
+void AvsessionTest::SetUp()
 {
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
@@ -61,16 +61,14 @@ void AvsessionTest::SetUp(void)
     ASSERT_NE(controller_, nullptr);
 }
 
-void AvsessionTest::TearDown(void)
+void AvsessionTest::TearDown()
 {
     int32_t ret = AVSESSION_ERROR;
     if (avsession_ != nullptr) {
         ret = avsession_->Destroy();
-        ASSERT_EQ(AVSESSION_SUCCESS, ret);
     }
     if (controller_ != nullptr) {
         ret = controller_->Destroy();
-        ASSERT_EQ(AVSESSION_SUCCESS, ret);
     }
     g_onCall = AVSESSION_ERROR;
 }
@@ -267,7 +265,7 @@ HWTEST_F(AvsessionTest, GetAVPlaybackState001, TestSize.Level1)
     EXPECT_EQ(avsession_->GetAVPlaybackState(state), AVSESSION_SUCCESS);
     EXPECT_EQ(state.GetState(), g_playbackState.GetState());
     EXPECT_EQ(state.GetSpeed(), g_playbackState.GetSpeed());
-    EXPECT_EQ(state.GetPosistion().elapsedTime_, g_playbackState.GetPosistion().elapsedTime_);
+    EXPECT_EQ(state.GetPosition().elapsedTime_, g_playbackState.GetPosition().elapsedTime_);
     EXPECT_EQ(state.GetBufferedTime(), g_playbackState.GetBufferedTime());
     EXPECT_EQ(state.GetLoopMode(), g_playbackState.GetLoopMode());
     EXPECT_EQ(state.GetFavorite(), g_playbackState.GetFavorite());
