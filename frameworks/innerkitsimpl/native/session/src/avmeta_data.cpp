@@ -28,41 +28,50 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(writer_) &&
         parcel.WriteString(composer_) &&
         parcel.WriteInt64(duration_) &&
-        parcel.WriteParcelable(mediaImage_.get()) &&
         parcel.WriteString(mediaImageUri_) &&
         parcel.WriteDouble(publishDate_) &&
         parcel.WriteString(subTitle_) &&
         parcel.WriteString(description_) &&
         parcel.WriteString(lyric_) &&
         parcel.WriteString(previousAssetId_) &&
-        parcel.WriteString(nextAssetId_);
+        parcel.WriteString(nextAssetId_) &&
+        parcel.WriteParcelable(mediaImage_.get());
 }
 
 AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
 {
+    std::string mask {};
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(mask) && mask.length() == META_KEY_MAX, nullptr, "mask not valid");
+    CHECK_AND_RETURN_RET_LOG(mask.find_first_not_of("01") == std::string::npos, nullptr, "mask string not 0 or 1");
+
     auto *result = new (std::nothrow) AVMetaData();
-    if (result == nullptr) {
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVMetaData failed");
+    result->metaMask_ = MetaMaskType(mask);
+    if (!data.ReadString(result->assetId_) ||
+        !data.ReadString(result->title_) ||
+        !data.ReadString(result->artist_) ||
+        !data.ReadString(result->author_) ||
+        !data.ReadString(result->album_) ||
+        !data.ReadString(result->writer_) ||
+        !data.ReadString(result->composer_) ||
+        !data.ReadInt64(result->duration_) ||
+        !data.ReadString(result->mediaImageUri_) ||
+        !data.ReadDouble(result->publishDate_) ||
+        !data.ReadString(result->subTitle_) ||
+        !data.ReadString(result->description_) ||
+        !data.ReadString(result->lyric_) ||
+        !data.ReadString(result->previousAssetId_) ||
+        !data.ReadString(result->nextAssetId_)) {
+        SLOGE("read AVMetaData failed");
+        delete result;
         return nullptr;
     }
-
-    result->metaMask_ = MetaMaskType(data.ReadString());
-    result->assetId_ = data.ReadString();
-    result->title_ = data.ReadString();
-    result->artist_ = data.ReadString();
-    result->author_ = data.ReadString();
-    result->album_ = data.ReadString();
-    result->writer_ = data.ReadString();
-    result->composer_ = data.ReadString();
-    result->duration_ = data.ReadInt64();
     result->mediaImage_ = std::shared_ptr<Media::PixelMap>(data.ReadParcelable<Media::PixelMap>());
-    result->mediaImageUri_ = data.ReadString();
-    result->publishDate_ = data.ReadDouble();
-    result->subTitle_ = data.ReadString();
-    result->description_ = data.ReadString();
-    result->lyric_ = data.ReadString();
-    result->previousAssetId_ = data.ReadString();
-    result->nextAssetId_ = data.ReadString();
-
+    if (result->metaMask_.test(META_KEY_MEDIA_IMAGE) && result->mediaImage_ == nullptr) {
+        SLOGE("read PixelMap failed");
+        delete result;
+        return nullptr;
+    }
     return result;
 }
 
