@@ -14,6 +14,7 @@
  */
 
 #include "avplayback_state.h"
+#include "avsession_log.h"
 
 namespace OHOS::AVSession {
 AVPlaybackState::AVPlaybackState()
@@ -34,18 +35,24 @@ bool AVPlaybackState::Marshalling(Parcel &parcel) const
 
 AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
 {
+    std::string mask {};
+    CHECK_AND_RETURN_RET_LOG(parcel.ReadString(mask) && mask.length() == PLAYBACK_KEY_MAX, nullptr, "mask not valid");
+    CHECK_AND_RETURN_RET_LOG(mask.find_first_not_of("01") == std::string::npos, nullptr, "mask string not 0 or 1");
+
     auto *result = new (std::nothrow) AVPlaybackState();
-    if (result == nullptr) {
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVPlaybackState failed");
+    result->mask_ = PlaybackStateMaskType(mask);
+    if (!parcel.ReadInt32(result->state_) ||
+        !parcel.ReadDouble(result->speed_) ||
+        !parcel.ReadUint64(result->position_.elapsedTime_) ||
+        !parcel.ReadUint64(result->position_.updateTime_) ||
+        !parcel.ReadUint64(result->bufferedTime_) ||
+        !parcel.ReadInt32(result->loopMode_) ||
+        !parcel.ReadBool(result->isFavorite_)) {
+        SLOGE("Read AVPlaybackState failed");
+        delete result;
         return nullptr;
     }
-    result->mask_ = PlaybackStateMaskType(parcel.ReadString());
-    result->state_ = parcel.ReadInt32();
-    result->speed_ = parcel.ReadDouble();
-    result->position_.elapsedTime_ = parcel.ReadUint64();
-    result->position_.updateTime_ = parcel.ReadUint64();
-    result->bufferedTime_ = parcel.ReadUint64();
-    result->loopMode_ = parcel.ReadInt32();
-    result->isFavorite_ = parcel.ReadBool();
     return result;
 }
 

@@ -137,24 +137,34 @@ int32_t AVSessionControllerStub::HandleGetValidCommands(MessageParcel &data, Mes
 int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel &data, MessageParcel &reply)
 {
     std::string str = data.ReadString();
-    if (str.empty()) {
+    if (str.length() != AVMetaData::META_KEY_MAX) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SetMetaFilter ret failed");
-    } else {
-        AVMetaData::MetaMaskType filter(str);
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(SetMetaFilter(filter)), "write int32 failed");
+        return ERR_NONE;
     }
+    if (str.find_first_not_of("01") != std::string::npos) {
+        SLOGE("mask string not 0 or 1");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write int32 failed");
+        return ERR_NONE;
+    }
+    AVMetaData::MetaMaskType filter(str);
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(SetMetaFilter(filter)), "write int32 failed");
     return ERR_NONE;
 }
 
 int32_t AVSessionControllerStub::HandleSetPlaybackFilter(MessageParcel &data, MessageParcel &reply)
 {
     std::string str = data.ReadString();
-    if (str.empty()) {
+    if (str.length() != AVPlaybackState::PLAYBACK_KEY_MAX) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SetPlaybackFilter ret failed");
-    } else {
-        AVPlaybackState::PlaybackStateMaskType filter(str);
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(SetPlaybackFilter(filter)), "write int32 failed");
+        return ERR_NONE;
     }
+    if (str.find_first_not_of("01") != std::string::npos) {
+        SLOGE("mask string not all 0 or 1");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write int32 failed");
+        return ERR_NONE;
+    }
+    AVPlaybackState::PlaybackStateMaskType filter(str);
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(SetPlaybackFilter(filter)), "write int32 failed");
     return ERR_NONE;
 }
 
