@@ -56,10 +56,8 @@ void AVSessionControllerTest::SetUp()
 
 void AVSessionControllerTest::TearDown()
 {
-    auto ret = avsession_->Destroy();
-    ASSERT_EQ(AVSESSION_SUCCESS, ret);
+    avsession_->Destroy();
     controller_->Destroy();
-    ASSERT_EQ(AVSESSION_SUCCESS, ret);
 }
 
 class AVControllerCallbackImpl : public AVControllerCallback {
