@@ -141,6 +141,11 @@ napi_status NapiMetaData::SetValue(napi_env env, const AVMetaData &in, napi_valu
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
 
     auto mask = in.GetMetaMask();
+    if (mask.none()) {
+        SLOGI("undefined meta");
+        return SetUndefinedMeta(env, out);
+    }
+
     for (int i = 0; i < AVMetaData::META_KEY_MAX; ++i) {
         if (!mask.test(i)) {
             continue;
@@ -152,6 +157,13 @@ napi_status NapiMetaData::SetValue(napi_env env, const AVMetaData &in, napi_valu
         }
     }
 
+    return napi_ok;
+}
+
+napi_status NapiMetaData::SetUndefinedMeta(napi_env env, napi_value &meta)
+{
+    auto status = napi_set_named_property(env, meta, "assetId", NapiUtils::GetUndefinedValue(env));
+    CHECK_RETURN(status == napi_ok, "set assetId to undefined failed", status);
     return napi_ok;
 }
 

@@ -93,6 +93,10 @@ void AVSessionService::HandleTopSessionChanged(const FocusSessionStrategy::Focus
     AVSessionDescriptor descriptor;
     {
         std::lock_guard lockGuard(sessionAndControllerLock_);
+        if (topSession_ && topSession_->GetUid() == info.uid) {
+            SLOGI("same session");
+            return;
+        }
         for (const auto& session : GetContainer().GetAllSessions()) {
             if (session->GetUid() == info.uid) {
                 topSession_ = session;
@@ -297,6 +301,9 @@ void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     sessionListeners_[pid] = listener;
+    if (topSession_ != nullptr) {
+        listener->OnTopSessionChanged(topSession_->GetDescriptor());
+    }
 }
 
 void AVSessionService::RemoveSessionListener(pid_t pid)

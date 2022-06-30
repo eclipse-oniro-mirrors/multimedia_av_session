@@ -42,13 +42,6 @@ public:
         SESSION_CMD_MAX,
     };
 
-    enum {
-        LOOP_MODE_SEQUENCE,
-        LOOP_MODE_SINGLE,
-        LOOP_MODE_LIST,
-        LOOP_MODE_SHUFFLE,
-    };
-
     AVControlCommand();
     ~AVControlCommand() override;
 

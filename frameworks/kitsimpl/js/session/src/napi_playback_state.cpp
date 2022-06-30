@@ -30,7 +30,7 @@ std::map<int32_t, NapiPlaybackState::SetterType> NapiPlaybackState::setterMap_ =
     { AVPlaybackState::PLAYBACK_KEY_STATE, SetState },
     { AVPlaybackState::PLAYBACK_KEY_SPEED, SetSpeed },
     { AVPlaybackState::PLAYBACK_KEY_POSITION, SetPosition },
-    { AVPlaybackState::PLAYBACK_KEY_BUFFERD_TIME, SetBufferedTime },
+    { AVPlaybackState::PLAYBACK_KEY_BUFFERED_TIME, SetBufferedTime },
     { AVPlaybackState::PLAYBACK_KEY_LOOP_MODE, SetLoopMode },
     { AVPlaybackState::PLAYBACK_KEY_IS_FAVORITE, SetIsFavorite },
 };
@@ -39,7 +39,7 @@ std::map<std::string, int32_t> NapiPlaybackState::filterMap_ = {
     { "state", AVPlaybackState::PLAYBACK_KEY_STATE },
     { "speed", AVPlaybackState::PLAYBACK_KEY_SPEED },
     { "position", AVPlaybackState::PLAYBACK_KEY_POSITION },
-    { "bufferedTime", AVPlaybackState::PLAYBACK_KEY_BUFFERD_TIME },
+    { "bufferedTime", AVPlaybackState::PLAYBACK_KEY_BUFFERED_TIME },
     { "loopMode", AVPlaybackState::PLAYBACK_KEY_LOOP_MODE },
     { "isFavorite", AVPlaybackState::PLAYBACK_KEY_IS_FAVORITE },
 };
@@ -184,7 +184,7 @@ napi_status NapiPlaybackState::SetPosition(napi_env env, const AVPlaybackState &
     napi_status status = napi_create_object(env, &positionProperty);
     CHECK_RETURN((status == napi_ok) && (positionProperty != nullptr), "create object failed", status);
 
-    auto position = in.GetPosistion();
+    auto position = in.GetPosition();
     napi_value elapsedProperty {};
     status = NapiUtils::SetValue(env, static_cast<int64_t>(position.elapsedTime_), elapsedProperty);
     CHECK_RETURN((status == napi_ok) && (elapsedProperty != nullptr), "create property failed", status);

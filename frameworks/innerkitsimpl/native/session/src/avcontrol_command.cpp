@@ -14,6 +14,7 @@
  */
 
 #include "avcontrol_command.h"
+#include "avplayback_state.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 
@@ -134,7 +135,7 @@ int32_t AVControlCommand::GetSeekTime(uint64_t &time) const
 
 int32_t AVControlCommand::SetLoopMode(int32_t mode)
 {
-    if (mode < LOOP_MODE_SEQUENCE || mode > LOOP_MODE_SHUFFLE) {
+    if (mode < AVPlaybackState::LOOP_MODE_SEQUENCE || mode > AVPlaybackState::LOOP_MODE_SHUFFLE) {
         return ERR_INVALID_PARAM;
     }
     param_ = mode;

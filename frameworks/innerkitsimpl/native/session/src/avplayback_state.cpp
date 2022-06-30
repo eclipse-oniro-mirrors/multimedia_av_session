@@ -35,7 +35,7 @@ bool AVPlaybackState::Marshalling(Parcel &parcel) const
 
 AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
 {
-    std::string mask {};
+    std::string mask;
     CHECK_AND_RETURN_RET_LOG(parcel.ReadString(mask) && mask.length() == PLAYBACK_KEY_MAX, nullptr, "mask not valid");
     CHECK_AND_RETURN_RET_LOG(mask.find_first_not_of("01") == std::string::npos, nullptr, "mask string not 0 or 1");
 
@@ -76,7 +76,7 @@ void AVPlaybackState::SetPosition(const Position &position)
 
 void AVPlaybackState::SetBufferedTime(uint64_t time)
 {
-    mask_.set(PLAYBACK_KEY_BUFFERD_TIME);
+    mask_.set(PLAYBACK_KEY_BUFFERED_TIME);
     bufferedTime_ = time;
 }
 
@@ -102,7 +102,7 @@ double AVPlaybackState::GetSpeed() const
     return speed_;
 }
 
-AVPlaybackState::Position AVPlaybackState::GetPosistion() const
+AVPlaybackState::Position AVPlaybackState::GetPosition() const
 {
     return position_;
 }

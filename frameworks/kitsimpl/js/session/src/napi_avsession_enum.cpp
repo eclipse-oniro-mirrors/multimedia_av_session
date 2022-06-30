@@ -40,10 +40,10 @@ static napi_value ExportLoopMode(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
 
-    (void)SetNamedProperty(env, result, "LOOP_MODE_SEQUENCE", AVControlCommand::LOOP_MODE_SEQUENCE);
-    (void)SetNamedProperty(env, result, "LOOP_MODE_SINGLE", AVControlCommand::LOOP_MODE_SINGLE);
-    (void)SetNamedProperty(env, result, "LOOP_MODE_LIST", AVControlCommand::LOOP_MODE_LIST);
-    (void)SetNamedProperty(env, result, "LOOP_MODE_SHUFFLE", AVControlCommand::LOOP_MODE_SHUFFLE);
+    (void)SetNamedProperty(env, result, "LOOP_MODE_SEQUENCE", AVPlaybackState::LOOP_MODE_SEQUENCE);
+    (void)SetNamedProperty(env, result, "LOOP_MODE_SINGLE", AVPlaybackState::LOOP_MODE_SINGLE);
+    (void)SetNamedProperty(env, result, "LOOP_MODE_LIST", AVPlaybackState::LOOP_MODE_LIST);
+    (void)SetNamedProperty(env, result, "LOOP_MODE_SHUFFLE", AVPlaybackState::LOOP_MODE_SHUFFLE);
 
     napi_object_freeze(env, result);
     return result;

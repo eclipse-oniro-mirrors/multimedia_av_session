@@ -120,10 +120,10 @@ private:
     std::string album_;
     std::string writer_;
     std::string composer_;
-    int64_t duration_ = 0;
+    int64_t duration_ {};
     std::shared_ptr<Media::PixelMap> mediaImage_;
     std::string mediaImageUri_;
-    double publishDate_ = 0;
+    double publishDate_ {};
     std::string subTitle_;
     std::string description_;
     std::string lyric_;
@@ -131,7 +131,7 @@ private:
     std::string nextAssetId_;
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
-    static void CloneTitile(const AVMetaData& from, AVMetaData& to);
+    static void CloneTitle(const AVMetaData& from, AVMetaData& to);
     static void CloneArtist(const AVMetaData& from, AVMetaData& to);
     static void CloneAuthor(const AVMetaData& from, AVMetaData& to);
     static void CloneAlbum(const AVMetaData& from, AVMetaData& to);
@@ -141,8 +141,8 @@ private:
     static void CloneMediaImage(const AVMetaData& from, AVMetaData& to);
     static void CloneMediaImageUri(const AVMetaData& from, AVMetaData& to);
     static void ClonePublishData(const AVMetaData& from, AVMetaData& to);
-    static void CloneSubTitile(const AVMetaData& from, AVMetaData& to);
-    static void CloneDescriptiion(const AVMetaData& from, AVMetaData& to);
+    static void CloneSubTitle(const AVMetaData& from, AVMetaData& to);
+    static void CloneDescription(const AVMetaData& from, AVMetaData& to);
     static void CloneLyric(const AVMetaData& from, AVMetaData& to);
     static void ClonePreviousAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneNextAssetId(const AVMetaData& from, AVMetaData& to);
@@ -150,7 +150,7 @@ private:
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
         [META_KEY_ASSET_ID] = &AVMetaData::CloneAssetId,
-        [META_KEY_TITLE] = &AVMetaData::CloneTitile,
+        [META_KEY_TITLE] = &AVMetaData::CloneTitle,
         [META_KEY_ARTIST] = &AVMetaData::CloneArtist,
         [META_KEY_AUTHOR] = &AVMetaData::CloneAuthor,
         [META_KEY_ALBUM] = &AVMetaData::CloneAlbum,
@@ -160,8 +160,8 @@ private:
         [META_KEY_MEDIA_IMAGE] = &AVMetaData::CloneMediaImage,
         [META_KEY_MEDIA_IMAGE_URI] = &AVMetaData::CloneMediaImageUri,
         [META_KEY_PUBLISH_DATE] = &AVMetaData::ClonePublishData,
-        [META_KEY_SUBTITLE] = &AVMetaData::CloneSubTitile,
-        [META_KEY_DESCRIPTION] = &AVMetaData::CloneDescriptiion,
+        [META_KEY_SUBTITLE] = &AVMetaData::CloneSubTitle,
+        [META_KEY_DESCRIPTION] = &AVMetaData::CloneDescription,
         [META_KEY_LYRIC] = &AVMetaData::CloneLyric,
         [META_KEY_PREVIOUS_ASSET_ID] = &AVMetaData::ClonePreviousAssetId,
         [META_KEY_NEXT_ASSET_ID] = &AVMetaData::CloneNextAssetId,

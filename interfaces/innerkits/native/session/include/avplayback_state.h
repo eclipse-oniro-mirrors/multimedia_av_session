@@ -37,10 +37,17 @@ public:
         PLAYBACK_KEY_STATE,
         PLAYBACK_KEY_SPEED,
         PLAYBACK_KEY_POSITION,
-        PLAYBACK_KEY_BUFFERD_TIME,
+        PLAYBACK_KEY_BUFFERED_TIME,
         PLAYBACK_KEY_LOOP_MODE,
         PLAYBACK_KEY_IS_FAVORITE,
         PLAYBACK_KEY_MAX
+    };
+
+    enum {
+        LOOP_MODE_SEQUENCE,
+        LOOP_MODE_SINGLE,
+        LOOP_MODE_LIST,
+        LOOP_MODE_SHUFFLE,
     };
 
     struct Position {
@@ -63,7 +70,7 @@ public:
     double GetSpeed() const;
 
     void SetPosition(const Position& position);
-    Position GetPosistion() const;
+    Position GetPosition() const;
 
     void SetBufferedTime(uint64_t time);
     uint64_t GetBufferedTime() const;
@@ -83,10 +90,10 @@ private:
     PlaybackStateMaskType mask_;
 
     int32_t state_ = PLAYBACK_STATE_INITIAL;
-    double speed_ {};
+    double speed_ = 1.0;
     Position position_;
     uint64_t bufferedTime_ {};
-    int32_t loopMode_ {};
+    int32_t loopMode_ = LOOP_MODE_SEQUENCE;
     bool isFavorite_ {};
 
     static void CloneState(const AVPlaybackState& from, AVPlaybackState& to);
@@ -101,7 +108,7 @@ private:
         [PLAYBACK_KEY_STATE] = &AVPlaybackState::CloneState,
         [PLAYBACK_KEY_SPEED] = &AVPlaybackState::CloneSpeed,
         [PLAYBACK_KEY_POSITION] = &AVPlaybackState::ClonePosition,
-        [PLAYBACK_KEY_BUFFERD_TIME] = &AVPlaybackState::CloneBufferedTime,
+        [PLAYBACK_KEY_BUFFERED_TIME] = &AVPlaybackState::CloneBufferedTime,
         [PLAYBACK_KEY_LOOP_MODE] = &AVPlaybackState::CloneLoopMode,
         [PLAYBACK_KEY_IS_FAVORITE] = &AVPlaybackState::CloneIsFavorite,
     };
