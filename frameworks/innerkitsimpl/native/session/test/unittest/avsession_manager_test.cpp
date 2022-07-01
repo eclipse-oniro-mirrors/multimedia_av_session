@@ -181,6 +181,74 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
 }
 
 /**
+* @tc.name: GetActivatedSessionDescriptors001
+* @tc.desc: Get all activated session descriptors
+* @tc.type: FUNC
+* @tc.require: AR000H31JC
+*/
+HWTEST_F(AVSessionManagerTest, GetActivatedSessionDescriptors001, TestSize.Level1)
+{
+    SLOGI("GetActivatedSessionDescriptors001 begin");
+    auto descriptors = AVSessionManager::GetActivatedSessionDescriptors();
+    EXPECT_EQ(descriptors.size(), 0);
+
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(TestBundleName);
+    elementName.SetAbilityName(TestAbilityName);
+    auto session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    EXPECT_NE(session, nullptr);
+    session->Activate();
+
+    descriptors = AVSessionManager::GetActivatedSessionDescriptors();
+    EXPECT_EQ(descriptors.size(), 1);
+    EXPECT_EQ(descriptors[0].sessionTag_, TestSessionTag);
+    EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
+    EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), TestBundleName);
+    EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), TestAbilityName);
+    EXPECT_EQ(descriptors[0].isActive_, true);
+
+    if (session != nullptr) {
+        session->Destroy();
+    }
+    SLOGI("GetActivatedSessionDescriptors001 end");
+}
+
+/**
+* @tc.name: GetSessionDescriptorsBySessionId001
+* @tc.desc: Get session descriptors by sessionId
+* @tc.type: FUNC
+* @tc.require: AR000H31JC
+*/
+HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsBySessionId001, TestSize.Level1)
+{
+    SLOGI("GetSessionDescriptorsBySessionId001 begin");
+    auto descriptors = AVSessionManager::GetActivatedSessionDescriptors();
+    EXPECT_EQ(descriptors.size(), 0);
+
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(TestBundleName);
+    elementName.SetAbilityName(TestAbilityName);
+    auto session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    EXPECT_NE(session, nullptr);
+    session->Activate();
+    int32_t sessionId = session->GetSessionId();
+    AVSessionDescriptor descriptor {};
+    int32_t ret = AVSessionManager::GetSessionDescriptorsBySessionId(sessionId, descriptor);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptor.sessionTag_, TestSessionTag);
+    EXPECT_EQ(descriptor.sessionType_, AVSession::SESSION_TYPE_AUDIO);
+    EXPECT_EQ(descriptor.elementName_.GetBundleName(), TestBundleName);
+    EXPECT_EQ(descriptor.elementName_.GetAbilityName(), TestAbilityName);
+    EXPECT_EQ(descriptor.isActive_, true);
+    ret = AVSessionManager::GetSessionDescriptorsBySessionId(sessionId + 1, descriptor);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    if (session != nullptr) {
+        session->Destroy();
+    }
+    SLOGI("GetSessionDescriptorsBySessionId001 end");
+}
+
+/**
 * @tc.name: CreateController001
 * @tc.desc: create session controller by wrong sessionId.
 * @tc.type: FUNC
