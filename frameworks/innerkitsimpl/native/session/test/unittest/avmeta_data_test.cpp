@@ -70,16 +70,8 @@ void AVMetaDataTest::SetUp()
     if (bufferSize <= 0) {
         return;
     }
-    void *buffer = malloc(bufferSize);
-    if (buffer == nullptr) {
-        return;
-    }
-    char *ch = reinterpret_cast<char *>(buffer);
-    for (unsigned int i = 0; i < bufferSize; i++) {
-        *(ch++) = (char)i;
-    }
-
-    pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, AllocatorType::HEAP_ALLOC, nullptr);
+    std::vector<std::uint8_t> buffer(bufferSize, 0x03);
+    pixelMap->SetPixelsAddr(buffer.data(), nullptr, bufferSize, AllocatorType::HEAP_ALLOC, nullptr);
     g_metaData.Reset();
     g_metaData.SetAssetId("123");
     g_metaData.SetTitle("Black Humor");
