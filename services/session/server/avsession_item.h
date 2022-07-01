@@ -82,6 +82,8 @@ public:
 
     uid_t GetUid();
 
+    void SetTop(bool top);
+
     void HandleControllerRelease(pid_t pid);
 
     void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);

@@ -28,6 +28,7 @@ public:
         int32_t uid {};
     };
     using FocusSessionChangeCallback = std::function<void(const FocusSessionChangeInfo&)>;
+    using FocusSessionSelector = std::function<bool(const FocusSessionChangeInfo&)>;
 
     FocusSessionStrategy();
     ~FocusSessionStrategy();
@@ -35,14 +36,16 @@ public:
     void Init();
 
     void RegisterFocusSessionChangeCallback(const FocusSessionChangeCallback& callback);
+    void RegisterFocusSessionSelector(const FocusSessionSelector& selector);
 
 private:
     void HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos &infos);
 
-    static bool IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info);
-    static bool SelectFocusSession(const AudioRendererChangeInfos &infos, FocusSessionChangeInfo& sessionInfo);
+    bool IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info) const;
+    bool SelectFocusSession(const AudioRendererChangeInfos &infos, FocusSessionChangeInfo& sessionInfo);
 
     FocusSessionChangeCallback callback_;
+    FocusSessionSelector selector_;
     std::shared_ptr<AudioStandard::AudioRendererStateChangeCallback> audioRendererStateChangeCallback_;
 };
 

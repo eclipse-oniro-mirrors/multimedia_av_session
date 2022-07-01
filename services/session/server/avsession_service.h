@@ -104,7 +104,11 @@ private:
 
     void InitFocusSessionStrategy();
 
-    void HandleTopSessionChanged(const FocusSessionStrategy::FocusSessionChangeInfo& info);
+    bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
+
+    void UpdateTopSession(const sptr<AVSessionItem>& newTopSession);
+
+    void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 
     std::recursive_mutex sessionIdsLock_;
     std::list<int32_t> sessionIds_;

@@ -87,29 +87,57 @@ void AVSessionService::InitKeyEvent()
         keyCodes, [this](const auto& keyEvent) { SendSystemAVKeyEvent(*keyEvent); });
 }
 
-void AVSessionService::HandleTopSessionChanged(const FocusSessionStrategy::FocusSessionChangeInfo &info)
+void AVSessionService::UpdateTopSession(const sptr<AVSessionItem> &newTopSession)
 {
-    bool found {};
+    if (newTopSession == nullptr) {
+        std::lock_guard lockGuard(sessionAndControllerLock_);
+        if (topSession_ != nullptr) {
+            topSession_->SetTop(false);
+        }
+        topSession_ = nullptr;
+        SLOGI("set topSession to nullptr");
+        return;
+    }
+
+    SLOGI("uid=%{public}d sessionId=%{public}d", newTopSession->GetUid(), newTopSession->GetSessionId());
     AVSessionDescriptor descriptor;
     {
         std::lock_guard lockGuard(sessionAndControllerLock_);
-        if (topSession_ && topSession_->GetUid() == info.uid) {
-            SLOGI("same session");
+        if (topSession_ != nullptr) {
+            topSession_->SetTop(false);
+        }
+        topSession_ = newTopSession;
+        topSession_->SetTop(true);
+        descriptor = topSession_->GetDescriptor();
+    }
+    NotifyTopSessionChanged(descriptor);
+}
+
+void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo &info)
+{
+    std::lock_guard lockGuard(sessionAndControllerLock_);
+    if (topSession_ && topSession_->GetUid() == info.uid) {
+        SLOGI("same session");
+        return;
+    }
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session->GetUid() == info.uid) {
+            UpdateTopSession(session);
             return;
         }
-        for (const auto& session : GetContainer().GetAllSessions()) {
-            if (session->GetUid() == info.uid) {
-                topSession_ = session;
-                descriptor = topSession_->GetDescriptor();
-                found = true;
-                break;
-            }
+    }
+}
+
+bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo &info)
+{
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session->GetUid() == info.uid) {
+            SLOGI("true");
+            return true;
         }
     }
-    if (found) {
-        SLOGI("sessionTag=%{public}s sessionId=%{public}d", descriptor.sessionTag_.c_str(), descriptor.sessionId_);
-        NotifyTopSessionChanged(descriptor);
-    }
+    SLOGI("false");
+    return false;
 }
 
 void AVSessionService::InitFocusSessionStrategy()
@@ -117,7 +145,10 @@ void AVSessionService::InitFocusSessionStrategy()
     SLOGI("enter");
     focusSessionStrategy_.Init();
     focusSessionStrategy_.RegisterFocusSessionChangeCallback([this] (const auto &info) {
-        HandleTopSessionChanged(info);
+        HandleFocusSession(info);
+    });
+    focusSessionStrategy_.RegisterFocusSessionSelector([this] (const auto& info) {
+        return SelectFocusSession(info);
     });
 }
 
@@ -210,11 +241,13 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
     result->SetPid(GetCallingPid());
     result->SetUid(GetCallingUid());
     result->SetServiceCallbackForRelease([this](AVSessionItem& session) { HandleSessionRelease(session); });
-    if (topSession_ == nullptr) {
-        SLOGI("set topSession");
-        topSession_ = result;
-    }
     SLOGI("success sessionId=%{public}d", result->GetSessionId());
+    {
+        std::lock_guard lockGuard(sessionAndControllerLock_);
+        if (topSession_ == nullptr) {
+            UpdateTopSession(result);
+        }
+    }
     return result;
 }
 
@@ -301,9 +334,6 @@ void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     sessionListeners_[pid] = listener;
-    if (topSession_ != nullptr) {
-        listener->OnTopSessionChanged(topSession_->GetDescriptor());
-    }
 }
 
 void AVSessionService::RemoveSessionListener(pid_t pid)
@@ -325,6 +355,8 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
     SLOGI("key=%{public}d", keyEvent.GetKeyCode());
     if (topSession_) {
         topSession_->HandleMediaKeyEvent(keyEvent);
+    } else {
+        SLOGI("topSession is nullptr");
     }
     return AVSESSION_SUCCESS;
 }
@@ -389,6 +421,9 @@ void AVSessionService::HandleSessionRelease(AVSessionItem &session)
     NotifySessionRelease(session.GetDescriptor());
     std::lock_guard lockGuard(sessionAndControllerLock_);
     GetContainer().RemoveSession(session.GetPid());
+    if (topSession_.GetRefPtr() == &session) {
+        UpdateTopSession(nullptr);
+    }
 }
 
 void AVSessionService::HandleControllerRelease(AVControllerItem &controller)
@@ -440,6 +475,9 @@ void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid)
     if (session != nullptr) {
         SLOGI("remove sessionId=%{public}d", session->GetSessionId());
         session->Destroy();
+    }
+    if (topSession_ == session) {
+        UpdateTopSession(nullptr);
     }
 }
 
