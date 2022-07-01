@@ -349,6 +349,11 @@ uid_t  AVSessionItem::GetUid()
     return uid_;
 }
 
+void AVSessionItem::SetTop(bool top)
+{
+    descriptor_.isTopSession_ = top;
+}
+
 void AVSessionItem::HandleControllerRelease(pid_t pid)
 {
     AVSessionTrace avSessionTrace("AVSessionItem::HandleControllerRelease");

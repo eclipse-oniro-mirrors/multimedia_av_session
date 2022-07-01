@@ -65,6 +65,11 @@ void FocusSessionStrategy::RegisterFocusSessionChangeCallback(const FocusSession
     callback_ = callback;
 }
 
+void FocusSessionStrategy::RegisterFocusSessionSelector(const FocusSessionSelector &selector)
+{
+    selector_ = selector;
+}
+
 void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos &infos)
 {
     SLOGI("enter");
@@ -76,10 +81,9 @@ void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRenderer
     }
 }
 
-bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info)
+bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info) const
 {
-    return info.rendererState == AudioStandard::RendererState::RENDERER_RUNNING ||
-        info.rendererState == AudioStandard::RendererState::RENDERER_RELEASED;
+    return info.rendererState == AudioStandard::RendererState::RENDERER_RUNNING;
 }
 
 bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos &infos,
@@ -88,11 +92,15 @@ bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos &in
     SLOGI("size=%{public}d", static_cast<int>(infos.size()));
     for (const auto& info : infos) {
         SLOGI("clientUID=%{public}d rendererState=%{public}d", info->clientUID, info->rendererState);
-        if (IsFocusSession(*info)) {
-            sessionInfo.uid = info->clientUID;
-            SLOGI("uid=%{public}d is focus session", sessionInfo.uid);
-            return true;
+        if (!IsFocusSession(*info)) {
+            continue;
         }
+        sessionInfo.uid = info->clientUID;
+        if (selector_ != nullptr && !selector_(sessionInfo)) {
+            continue;
+        }
+        SLOGI("uid=%{public}d is focus session", sessionInfo.uid);
+        return true;
     }
     return false;
 }
