@@ -25,6 +25,7 @@
 namespace OHOS::AVSession {
 class AVMetaData : public Parcelable {
 public:
+    static constexpr std::int64_t DURATION_ALWAYS_PLAY = -1;
     enum {
         META_KEY_ASSET_ID,
         META_KEY_TITLE,
@@ -113,22 +114,22 @@ public:
 private:
     MetaMaskType metaMask_;
 
-    std::string assetId_;
-    std::string title_;
-    std::string artist_;
-    std::string author_;
-    std::string album_;
-    std::string writer_;
-    std::string composer_;
-    int64_t duration_ {};
-    std::shared_ptr<Media::PixelMap> mediaImage_;
-    std::string mediaImageUri_;
-    double publishDate_ {};
-    std::string subTitle_;
-    std::string description_;
-    std::string lyric_;
-    std::string previousAssetId_;
-    std::string nextAssetId_;
+    std::string assetId_ = "";
+    std::string title_ = "";
+    std::string artist_ = "";
+    std::string author_ = "";
+    std::string album_ = "";
+    std::string writer_ = "";
+    std::string composer_ = "";
+    int64_t duration_ = 0;
+    std::shared_ptr<Media::PixelMap> mediaImage_ = nullptr;
+    std::string mediaImageUri_ = "";
+    double publishDate_ = 0;
+    std::string subTitle_ = "";
+    std::string description_ = "";
+    std::string lyric_ = "";
+    std::string previousAssetId_ = "";
+    std::string nextAssetId_ = "";
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneTitle(const AVMetaData& from, AVMetaData& to);

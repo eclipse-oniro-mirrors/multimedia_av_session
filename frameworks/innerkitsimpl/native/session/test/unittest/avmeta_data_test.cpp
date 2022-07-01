@@ -22,11 +22,16 @@
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
+using namespace OHOS::Media;
 
 static AVMetaData g_metaDataCloneTest;
 static AVMetaData g_metaData;
 static OHOS::Parcel g_parcel;
 constexpr int64_t DURATION = 40000;
+constexpr int64_t DURATION_PLAYBACK_SCENE_LIVE = -1;
+constexpr int64_t DURATION_PLAYBACK_SCENE_INVALID = -2;
+constexpr double PUBLISHDATE = 886291200000;
+constexpr double PUBLISHDATE_INVALID_DATE = -1;
 static char g_testSessionTag[] = "test";
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
@@ -51,6 +56,30 @@ void AVMetaDataTest::TearDownTestCase()
 
 void AVMetaDataTest::SetUp()
 {
+    int32_t pixelMapWidth = 4;
+    int32_t pixelMapHeight = 3;
+    const std::shared_ptr<OHOS::Media::PixelMap>& pixelMap = std::make_shared<OHOS::Media::PixelMap>();
+    ImageInfo info;
+    info.size.width = pixelMapWidth;
+    info.size.height = pixelMapHeight;
+    info.pixelFormat = PixelFormat::RGB_888;
+    info.colorSpace = ColorSpace::SRGB;
+    pixelMap->SetImageInfo(info);
+    int32_t rowDataSize = pixelMapWidth;
+    uint32_t bufferSize = rowDataSize * pixelMapHeight;
+    if (bufferSize <= 0) {
+        return;
+    }
+    void *buffer = malloc(bufferSize);
+    if (buffer == nullptr) {
+        return;
+    }
+    char *ch = reinterpret_cast<char *>(buffer);
+    for (unsigned int i = 0; i < bufferSize; i++) {
+        *(ch++) = (char)i;
+    }
+
+    pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, AllocatorType::HEAP_ALLOC, nullptr);
     g_metaData.Reset();
     g_metaData.SetAssetId("123");
     g_metaData.SetTitle("Black Humor");
@@ -60,7 +89,9 @@ void AVMetaDataTest::SetUp()
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(DURATION);
+    g_metaData.SetMediaImage(pixelMap);
     g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetPublishDate(PUBLISHDATE);
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("https://baidu.yinyue.com");
@@ -88,6 +119,31 @@ void AVMetaDataTest::TearDown()
 HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
 {
     SLOGE("SetAVMetaData001 Begin");
+    int32_t pixelMapWidth = 4;
+    int32_t pixelMapHeight = 3;
+    const std::shared_ptr<OHOS::Media::PixelMap>& pixelMap = std::make_shared<OHOS::Media::PixelMap>();
+    ImageInfo info;
+    info.size.width = pixelMapWidth;
+    info.size.height = pixelMapHeight;
+    info.pixelFormat = PixelFormat::RGB_888;
+    info.colorSpace = ColorSpace::SRGB;
+    pixelMap->SetImageInfo(info);
+    int32_t rowDataSize = pixelMapWidth;
+    uint32_t bufferSize = rowDataSize * pixelMapHeight;
+    if (bufferSize <= 0) {
+        return;
+    }
+    void *buffer = malloc(bufferSize);
+    if (buffer == nullptr) {
+        return;
+    }
+    char *ch = reinterpret_cast<char *>(buffer);
+    for (unsigned int i = 0; i < bufferSize; i++) {
+        *(ch++) = (char)i;
+    }
+
+    pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, AllocatorType::HEAP_ALLOC, nullptr);
+
     AVMetaData metaData;
     metaData.Reset();
     metaData.SetAssetId("123");
@@ -98,7 +154,9 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
     metaData.SetWriter("zhoujielun");
     metaData.SetComposer("zhoujielun");
     metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(pixelMap);
     metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    metaData.SetPublishDate(PUBLISHDATE);
     metaData.SetSubTitle("fac");
     metaData.SetDescription("for friends");
     metaData.SetLyric("https://baidu.yinyue.com");
@@ -106,6 +164,59 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
     SLOGE("SetAVMetaData001 End");
 }
 
+/**
+* @tc.name: SetAVMetaData002
+* @tc.desc: set av meta data boundary duration
+* @tc.type: FUNC
+* @tc.require: AR000H31JO
+*/
+HWTEST_F(AVMetaDataTest, SetAVMetaData002, TestSize.Level1)
+{
+    SLOGE("SetAVMetaData002 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetDuration(DURATION_PLAYBACK_SCENE_LIVE);
+
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    SLOGE("SetAVMetaData002 End");
+}
+
+/**
+* @tc.name: SetAVMetaData003
+* @tc.desc: set av meta data error duration
+* @tc.type: FUNC
+* @tc.require: AR000H31JO
+*/
+HWTEST_F(AVMetaDataTest, SetAVMetaData003, TestSize.Level1)
+{
+    SLOGE("SetAVMetaData003 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetDuration(DURATION_PLAYBACK_SCENE_INVALID);
+
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    SLOGE("SetAVMetaData003 End");
+}
+
+/**
+* @tc.name: SetAVMetaData004
+* @tc.desc: set av meta data error publish date
+* @tc.type: FUNC
+* @tc.require: AR000H31JO
+*/
+HWTEST_F(AVMetaDataTest, SetAVMetaData004, TestSize.Level1)
+{
+    SLOGE("SetAVMetaData004 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetPublishDate(PUBLISHDATE_INVALID_DATE);
+
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    SLOGE("SetAVMetaData004 End");
+}
 /**
 * @tc.name: GetAVMetaData001
 * @tc.desc: get av meta data result
@@ -131,7 +242,9 @@ HWTEST_F(AVMetaDataTest, GetAVMetaData001, TestSize.Level1)
     EXPECT_EQ(metaData.GetWriter(), g_metaData.GetWriter());
     EXPECT_EQ(metaData.GetComposer(), g_metaData.GetComposer());
     EXPECT_EQ(metaData.GetDuration(), g_metaData.GetDuration());
+    EXPECT_EQ(metaData.GetMediaImage(), g_metaData.GetMediaImage());
     EXPECT_EQ(metaData.GetMediaImageUri(), g_metaData.GetMediaImageUri());
+    EXPECT_EQ(metaData.GetPublishDate(), g_metaData.GetPublishDate());
     EXPECT_EQ(metaData.GetSubTitle(), g_metaData.GetSubTitle());
     EXPECT_EQ(metaData.GetDescription(), g_metaData.GetDescription());
     EXPECT_EQ(metaData.GetLyric(), g_metaData.GetLyric());
