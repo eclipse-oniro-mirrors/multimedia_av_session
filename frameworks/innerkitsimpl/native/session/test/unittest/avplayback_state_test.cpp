@@ -67,7 +67,9 @@ HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level1)
 HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
 {
     auto *parcel = new (std::nothrow) OHOS::Parcel();
-    parcel->WriteString("0110");
+    AVPlaybackState::PlaybackStateMaskType mask;
+    mask.set();
+    parcel->WriteString(mask.to_string());
     parcel->WriteInt32(0);
     parcel->WriteDouble(3.0);
     parcel->WriteUint64(30);
@@ -76,6 +78,7 @@ HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
     parcel->WriteInt32(3);
     parcel->WriteBool(true);
     AVPlaybackState *result = AVPlaybackState::Unmarshalling(*parcel);
+    ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetFavorite(), true);
 }
 
@@ -93,5 +96,6 @@ HWTEST_F(AVPlaybackStateTest, GetState002, TestSize.Level1)
     bool boo = avp->Marshalling(*parcel);
     ASSERT_EQ(boo, true);
     AVPlaybackState *result = AVPlaybackState::Unmarshalling(*parcel);
+    ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetSpeed(), 3.0);
 }
