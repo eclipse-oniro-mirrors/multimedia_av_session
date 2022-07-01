@@ -154,8 +154,9 @@ std::string AVMetaData::GetComposer() const
 
 void AVMetaData::SetDuration(int64_t duration)
 {
-    if (duration < 0) {
-        SLOGW("invalid duration");
+    if (duration < AVMetaData::DURATION_ALWAYS_PLAY) {
+        SLOGE("invalid duration");
+        return;
     }
     duration_ = duration;
     metaMask_.set(META_KEY_DURATION);
@@ -191,7 +192,8 @@ std::string AVMetaData::GetMediaImageUri() const
 void AVMetaData::SetPublishDate(double date)
 {
     if (date < 0) {
-        SLOGW("invalid publish date");
+        SLOGE("invalid publish date");
+        return;
     }
     publishDate_ = date;
     metaMask_.set(META_KEY_PUBLISH_DATE);
@@ -275,6 +277,7 @@ void AVMetaData::Reset()
     duration_ = 0;
     mediaImage_ = nullptr;
     mediaImageUri_ = "";
+    publishDate_ = 0;
     subTitle_ = "";
     description_ = "";
     lyric_ = "";
@@ -324,7 +327,7 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
 
 bool AVMetaData::IsValid() const
 {
-    return duration_ >= 0 && publishDate_ >= 0;
+    return duration_ >= AVMetaData::DURATION_ALWAYS_PLAY && publishDate_ >= 0;
 }
 
 void AVMetaData::CloneAssetId(const AVMetaData& from, AVMetaData& to)
