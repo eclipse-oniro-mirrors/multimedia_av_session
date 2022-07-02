@@ -325,7 +325,6 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
 
 napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace::TraceBegin("NapiAVSession::SetAudioStreamId", NAPI_SET_AUDIO_STREAM_ID_TASK_ID);
     auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info);
     auto executor = [context]() {
@@ -338,7 +337,6 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
-        AVSessionTrace::TraceEnd("NapiAVSession::SetAudioStreamId", NAPI_SET_AUDIO_STREAM_ID_TASK_ID);
     };
     return NapiAsyncWork::Enqueue(env, context, "SetAudioStreamId", executor, complete);
 }

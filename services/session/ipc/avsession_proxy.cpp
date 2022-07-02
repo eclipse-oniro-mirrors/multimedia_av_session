@@ -82,7 +82,7 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &ca
 
 int32_t AVSessionProxy::Destroy()
 {
-    AVSessionTrace trace("AVSessionProxy::Release");
+    AVSessionTrace trace("AVSessionProxy::Destroy");
     SLOGD("enter");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
     MessageParcel data;
@@ -250,7 +250,7 @@ std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 
 int32_t AVSessionProxy::Activate()
 {
-    AVSessionTrace trace("AVSessionProxy::Active");
+    AVSessionTrace trace("AVSessionProxy::Activate");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -268,7 +268,7 @@ int32_t AVSessionProxy::Activate()
 
 int32_t AVSessionProxy::Deactivate()
 {
-    AVSessionTrace trace("AVSessionProxy::Disactive");
+    AVSessionTrace trace("AVSessionProxy::Deactivate");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
