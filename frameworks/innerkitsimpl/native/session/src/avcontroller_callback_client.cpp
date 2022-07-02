@@ -15,7 +15,6 @@
 
 #include "avcontroller_callback_client.h"
 #include "avsession_log.h"
-#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 AVControllerCallbackClient::AVControllerCallbackClient(const std::shared_ptr<AVControllerCallback>& callback)
@@ -29,7 +28,6 @@ void AVControllerCallbackClient::OnSessionDestroy()
     if (callback_) {
         callback_->OnSessionDestroy();
     }
-    AVSessionTrace::TraceEnd("AVControllerCallback_OnSessionDestroy", ON_SESSION_DESTROY_TASK_ID);
 }
 
 void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState &state)
@@ -40,7 +38,6 @@ void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState &st
     if (playbackStateListener_) {
         playbackStateListener_(state);
     }
-    AVSessionTrace::TraceEnd("AVControllerCallback_OnPlaybackStateChange", ON_PLAYBACK_STATE_CHANGE_TASK_ID);
 }
 
 void AVControllerCallbackClient::OnMetaDataChange(const AVMetaData &data)
@@ -48,7 +45,6 @@ void AVControllerCallbackClient::OnMetaDataChange(const AVMetaData &data)
     if (callback_) {
         callback_->OnMetaDataChange(data);
     }
-    AVSessionTrace::TraceEnd("AVControllerCallback_OnMetaDataChange", ON_MEDA_DATA_CHANGE_TASK_ID);
 }
 
 void AVControllerCallbackClient::OnActiveStateChange(bool isActive)
@@ -56,7 +52,6 @@ void AVControllerCallbackClient::OnActiveStateChange(bool isActive)
     if (callback_) {
         callback_->OnActiveStateChange(isActive);
     }
-    AVSessionTrace::TraceEnd("AVControllerCallback_OnActiveStateChange", ON_ACTIVE_STATE_CHANGE_TASK_ID);
 }
 
 void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t> &cmds)
@@ -64,7 +59,6 @@ void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t>
     if (callback_) {
         callback_->OnValidCommandChange(cmds);
     }
-    AVSessionTrace::TraceEnd("AVControllerCallback_OnValidCommandChange", ON_VALID_COMMAND_CHANGE_TASK_ID);
 }
 
 void AVControllerCallbackClient::AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>

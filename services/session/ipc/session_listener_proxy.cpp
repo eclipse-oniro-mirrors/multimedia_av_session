@@ -15,7 +15,6 @@
 
 #include "session_listener_proxy.h"
 #include "avsession_log.h"
-#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 SessionListenerProxy::SessionListenerProxy(const sptr<IRemoteObject> &impl)

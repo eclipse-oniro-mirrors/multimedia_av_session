@@ -151,7 +151,7 @@ int32_t AVControllerItem::GetSessionId()
 void AVControllerItem::HandleSessionDestory()
 {
     if (callback_ != nullptr) {
-        AVSessionTrace::TraceBegin("AVControllerCallback_OnSessionDestroy", ON_SESSION_DESTROY_TASK_ID);
+        AVSessionTrace trace("AVControllerItem::OnSessionDestroy");
         callback_->OnSessionDestroy();
     }
     if (session_ != nullptr) {
@@ -168,7 +168,7 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
     AVPlaybackState stateOut;
     if (state.CopyToByMask(playbackMask_, stateOut)) {
         SLOGI("update playback state");
-        AVSessionTrace::TraceBegin("AVControllerCallback_OnPlaybackStateChange", ON_PLAYBACK_STATE_CHANGE_TASK_ID);
+        AVSessionTrace trace("AVControllerItem::OnPlaybackStateChange");
         callback_->OnPlaybackStateChange(stateOut);
     }
 }
@@ -181,7 +181,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
     AVMetaData metaOut;
     if (data.CopyToByMask(metaMask_, metaOut)) {
         SLOGI("update meta data");
-        AVSessionTrace::TraceBegin("AVControllerCallback_OnMetaDataChange", ON_MEDA_DATA_CHANGE_TASK_ID);
+        AVSessionTrace trace("AVControllerItem::OnMetaDataChange");
         callback_->OnMetaDataChange(metaOut);
     }
 }
@@ -189,7 +189,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
 void AVControllerItem::HandleActiveStateChange(bool isActive)
 {
     if (callback_ != nullptr) {
-        AVSessionTrace::TraceBegin("AVControllerCallback_OnActiveStateChange", ON_ACTIVE_STATE_CHANGE_TASK_ID);
+        AVSessionTrace trace("AVControllerItem::OnActiveStateChange");
         callback_->OnActiveStateChange(isActive);
     }
 }
@@ -197,7 +197,7 @@ void AVControllerItem::HandleActiveStateChange(bool isActive)
 void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t> &cmds)
 {
     if (callback_ != nullptr) {
-        AVSessionTrace::TraceBegin("AVControllerCallback_OnValidCommandChange", ON_VALID_COMMAND_CHANGE_TASK_ID);
+        AVSessionTrace trace("AVControllerItem::OnValidCommandChange");
         callback_->OnValidCommandChange(cmds);
     }
 }

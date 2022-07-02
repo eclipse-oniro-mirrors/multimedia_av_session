@@ -26,7 +26,7 @@ AVSessionCallbackProxy::AVSessionCallbackProxy(const sptr<IRemoteObject>& impl)
 
 void AVSessionCallbackProxy::OnPlay()
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnPlay", ON_SESSION_CALLBACK_PLAY_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnPlay");
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     MessageParcel reply;
@@ -37,7 +37,7 @@ void AVSessionCallbackProxy::OnPlay()
 
 void AVSessionCallbackProxy::OnPause()
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnPause", ON_SESSION_CALLBACK_PAUSE_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnPause");
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     MessageParcel reply;
@@ -48,7 +48,7 @@ void AVSessionCallbackProxy::OnPause()
 
 void AVSessionCallbackProxy::OnStop()
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnStop", ON_SESSION_CALLBACK_STOP_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnStop");
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     MessageParcel reply;
@@ -59,7 +59,7 @@ void AVSessionCallbackProxy::OnStop()
 
 void AVSessionCallbackProxy::OnPlayNext()
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnPlayNext", ON_SESSION_CALLBACK_PLAY_NEXT_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnPlayNext");
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     MessageParcel reply;
@@ -70,9 +70,8 @@ void AVSessionCallbackProxy::OnPlayNext()
 
 void AVSessionCallbackProxy::OnPlayPrevious()
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnPlayPrevious", ON_SESSION_CALLBACK_PLAY_PREVIOUS_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnPlayPrevious");
     MessageParcel data;
-    AVSessionTrace mAVSessionTrace("Proxy::OnPlayPrevious");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
@@ -82,9 +81,8 @@ void AVSessionCallbackProxy::OnPlayPrevious()
 
 void AVSessionCallbackProxy::OnFastForward()
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnFastForward", ON_SESSION_CALLBACK_FAST_FORWARD_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnFastForward");
     MessageParcel data;
-    AVSessionTrace mAVSessionTrace("AVSessionCallbackProxy::OnFastForward");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
@@ -94,9 +92,8 @@ void AVSessionCallbackProxy::OnFastForward()
 
 void AVSessionCallbackProxy::OnRewind()
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnRewind", ON_SESSION_CALLBACK_REWIND_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnRewind");
     MessageParcel data;
-    AVSessionTrace mAVSessionTrace("AVSessionCallbackProxy::OnRewind");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
@@ -106,9 +103,8 @@ void AVSessionCallbackProxy::OnRewind()
 
 void AVSessionCallbackProxy::OnSeek(int64_t time)
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnSeek", ON_SESSION_CALLBACK_SEEK_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnSeek");
     MessageParcel data;
-    AVSessionTrace mAVSessionTrace("AVSessionCallbackProxy::OnSeek");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(data.WriteInt64(time), "write time failed");
     MessageParcel reply;
@@ -119,9 +115,8 @@ void AVSessionCallbackProxy::OnSeek(int64_t time)
 
 void AVSessionCallbackProxy::OnSetSpeed(double speed)
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnSetSpeed", ON_SESSION_CALLBACK_SET_SPEED_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnSetSpeed");
     MessageParcel data;
-    AVSessionTrace mAVSessionTrace("AVSessionCallbackProxy::OnSetSpeed");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(data.WriteDouble(speed), "write speed failed");
     MessageParcel reply;
@@ -132,9 +127,8 @@ void AVSessionCallbackProxy::OnSetSpeed(double speed)
 
 void AVSessionCallbackProxy::OnSetLoopMode(int32_t loopMode)
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnSetLoopMode", ON_SESSION_CALLBACK_SET_LOOP_MODE_TASK_ID);
+    AVSessionTrace trace("AVSessionCallbackProxy::OnSetLoopMode");
     MessageParcel data;
-    AVSessionTrace mAVSessionTrace("AVSessionCallbackProxy::OnSetLoopMode");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(data.WriteInt32(loopMode), "write loopMode failed");
     MessageParcel reply;
@@ -145,10 +139,8 @@ void AVSessionCallbackProxy::OnSetLoopMode(int32_t loopMode)
 
 void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediaId)
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnToggleFavorite", ON_SESSION_CALLBACK_TOGGLE_FAVORITE_TASK_ID);
-
+    AVSessionTrace trace("AVSessionCallbackProxy::OnToggleFavorite");
     MessageParcel data;
-    AVSessionTrace mAVSessionTrace("AVSessionCallbackProxy::OnToggleFavorite");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(data.WriteString(mediaId), "write mediaId failed");
     MessageParcel reply;
@@ -159,10 +151,8 @@ void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediaId)
 
 void AVSessionCallbackProxy::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    AVSessionTrace::TraceBegin("AVSessionCallback_OnMediaKeyEvent", ON_SESSION_CALLBACK_MEDIA_KEY_EVENT_TASK_ID);
-
+    AVSessionTrace trace("AVSessionCallbackProxy::OnMediaKeyEvent");
     MessageParcel data;
-    AVSessionTrace mAVSessionTrace("AVSessionCallbackProxy::OnMediaKeyEvent");
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(keyEvent.WriteToParcel(data), "write keyEvent failed");
     MessageParcel reply;

@@ -15,7 +15,6 @@
 
 #include "session_listener_client.h"
 #include "avsession_log.h"
-#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 SessionListenerClient::SessionListenerClient(const std::shared_ptr<SessionListener> &listener)
@@ -26,7 +25,6 @@ SessionListenerClient::SessionListenerClient(const std::shared_ptr<SessionListen
 
 void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor &descriptor)
 {
-    AVSessionTrace::TraceEnd("SessionListener_OnSessionCreate", ON_SESSION_CREATE_TASK_ID);
     if (listener_) {
         listener_->OnSessionCreate(descriptor);
     }
@@ -34,7 +32,6 @@ void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor &descripto
 
 void SessionListenerClient::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
-    AVSessionTrace::TraceEnd("SessionListener_OnSessionCreate", ON_SESSION_RELEASE_TASK_ID);
     if (listener_) {
         listener_->OnSessionRelease(descriptor);
     }
@@ -42,7 +39,6 @@ void SessionListenerClient::OnSessionRelease(const AVSessionDescriptor &descript
 
 void SessionListenerClient::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
 {
-    AVSessionTrace::TraceEnd("SessionListener_OnSessionCreate", ON_TOP_SESSION_CHANGED_TASK_ID);
     if (listener_) {
         listener_->OnTopSessionChanged(descriptor);
     }

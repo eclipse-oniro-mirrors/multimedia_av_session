@@ -16,6 +16,7 @@
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 bool AVControllerCallbackStub::CheckInterfaceToken(MessageParcel &data)
@@ -43,6 +44,7 @@ int32_t AVControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
 
 int32_t AVControllerCallbackStub::HandleOnSessionDestroy(MessageParcel &data, MessageParcel &reply)
 {
+    AVSessionTrace trace("AVControllerCallbackStub::OnSessionDestroy");
     OnSessionDestroy();
     return ERR_NONE;
 }
@@ -52,6 +54,7 @@ int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel &dat
     sptr<AVPlaybackState> state = data.ReadParcelable<AVPlaybackState>();
 
     CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read PlaybackState failed");
+    AVSessionTrace trace("AVControllerCallbackStub::OnPlaybackStateChange");
     OnPlaybackStateChange(*state);
     return ERR_NONE;
 }
@@ -61,6 +64,7 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel &data, Me
     sptr<AVMetaData> metaData = data.ReadParcelable<AVMetaData>();
 
     CHECK_AND_RETURN_RET_LOG(metaData != nullptr, ERR_NONE, "read MetaData failed");
+    AVSessionTrace trace("AVControllerCallbackStub::OnMetaDataChange");
     OnMetaDataChange(*metaData);
     return ERR_NONE;
 }
@@ -69,7 +73,7 @@ int32_t AVControllerCallbackStub::HandleOnActiveStateChange(MessageParcel &data,
 {
     bool isActive = false;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(isActive), ERR_NONE, "read isActive failed");
-
+    AVSessionTrace trace("AVControllerCallbackStub::OnActiveStateChange");
     OnActiveStateChange(isActive);
     return ERR_NONE;
 }
@@ -78,7 +82,7 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel &data
 {
     std::vector<int32_t> cmds;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32Vector(&cmds), ERR_NONE, "read int32 vector failed");
-
+    AVSessionTrace trace("AVControllerCallbackStub::OnValidCommandChange");
     OnValidCommandChange(cmds);
     return ERR_NONE;
 }

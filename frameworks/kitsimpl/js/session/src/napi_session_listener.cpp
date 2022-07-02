@@ -53,7 +53,7 @@ void NapiSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
 
 void NapiSessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
-    AVSessionTrace avSessionTrace("NapiSessionListener::OnSessionRelease");
+    AVSessionTrace avSessionTrace("NapiSessionListener::OnSessionDestroy");
     SLOGI("sessionId=%{public}d", descriptor.sessionId_);
     HandleEvent(EVENT_SESSION_DESTROYED, descriptor);
 }
