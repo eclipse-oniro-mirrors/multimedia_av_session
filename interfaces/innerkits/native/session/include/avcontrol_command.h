@@ -56,8 +56,8 @@ public:
     int32_t SetSpeed(double speed);
     int32_t GetSpeed(double &speed) const;
 
-    void SetSeekTime(uint64_t time);
-    int32_t GetSeekTime(uint64_t &time) const;
+    int32_t SetSeekTime(int64_t time);
+    int32_t GetSeekTime(int64_t &time) const;
 
     int32_t SetLoopMode(int32_t mode);
     int32_t GetLoopMode(int32_t &mode) const;
@@ -67,7 +67,7 @@ public:
 
 private:
     int32_t cmd_ = SESSION_CMD_INVALID;
-    std::variant<int32_t, double, uint64_t, std::string> param_;
+    std::variant<int32_t, double, int64_t, std::string> param_;
 };
 }
 #endif // OHOS_AVCONTROL_COMMAND_H

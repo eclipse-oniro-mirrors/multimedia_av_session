@@ -36,7 +36,7 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel &data)
         result->SetCommand(cmd);
         switch (cmd) {
             case SESSION_CMD_SEEK:
-                result->SetSeekTime(data.ReadUint64());
+                result->SetSeekTime(data.ReadInt64());
                 break;
             case SESSION_CMD_SET_SPEED:
                 result->SetSpeed(data.ReadDouble());
@@ -61,8 +61,8 @@ bool AVControlCommand::Marshalling(Parcel &parcel) const
     }
     switch (cmd_) {
         case SESSION_CMD_SEEK:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<uint64_t>(param_)
-                && parcel.WriteInt64(std::get<uint64_t>(param_)), false, "write seek time failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_)
+                && parcel.WriteInt64(std::get<int64_t>(param_)), false, "write seek time failed");
             break;
         case SESSION_CMD_SET_SPEED:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<double>(param_)
@@ -103,7 +103,7 @@ int32_t AVControlCommand::GetCommand() const
 
 int32_t AVControlCommand::SetSpeed(double speed)
 {
-    if (speed < 0) {
+    if (speed <= 0) {
         return ERR_INVALID_PARAM;
     }
     param_ = speed;
@@ -119,17 +119,21 @@ int32_t AVControlCommand::GetSpeed(double &speed) const
     return AVSESSION_SUCCESS;
 }
 
-void AVControlCommand::SetSeekTime(uint64_t time)
+int32_t AVControlCommand::SetSeekTime(int64_t time)
 {
+    if (time < 0) {
+        return ERR_INVALID_PARAM;
+    }
     param_ = time;
+    return AVSESSION_SUCCESS;
 }
 
-int32_t AVControlCommand::GetSeekTime(uint64_t &time) const
+int32_t AVControlCommand::GetSeekTime(int64_t &time) const
 {
-    if (!std::holds_alternative<uint64_t>(param_)) {
+    if (!std::holds_alternative<int64_t>(param_)) {
         return AVSESSION_ERROR;
     }
-    time = std::get<uint64_t>(param_);
+    time = std::get<int64_t>(param_);
     return AVSESSION_SUCCESS;
 }
 

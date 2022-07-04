@@ -21,7 +21,7 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
-constexpr uint64_t TestMicroSecond = 1000;
+constexpr int64_t TestMicroSecond = 1000;
 
 class AVSessionControllerTest : public testing::Test {
 public:
@@ -381,7 +381,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand002, TestSize.Level1)
     AVControlCommand command;
     int32_t mode = 0;
     double speed = 0.0;
-    uint64_t time = 0;
+    int64_t time = 0;
     std::string assetId;
     EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.GetSpeed(speed), AVSESSION_ERROR);
@@ -402,7 +402,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand003, TestSize.Level1)
     AVControlCommand command;
     int32_t mode = 0;
     double speed = 0.0;
-    uint64_t time = 0;
+    int64_t time = 0;
     std::string assetId;
     EXPECT_EQ(command.SetAssetId("123456"), AVSESSION_SUCCESS);
     EXPECT_EQ(command.GetSpeed(speed), AVSESSION_ERROR);
@@ -423,7 +423,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand004, TestSize.Level1)
     AVControlCommand command;
     int32_t mode = 0;
     double speed = 0.0;
-    uint64_t time = 0;
+    int64_t time = 0;
     std::string assetId;
     EXPECT_EQ(command.SetSpeed(1.0), AVSESSION_SUCCESS);
     EXPECT_EQ(command.GetSeekTime(time), AVSESSION_ERROR);
@@ -444,7 +444,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand005, TestSize.Level1)
     AVControlCommand command;
     int32_t mode = 0;
     double speed = 0.0;
-    uint64_t time = 0;
+    int64_t time = 0;
     std::string assetId;
     command.SetSeekTime(1);
     EXPECT_EQ(command.GetAssetId(assetId), AVSESSION_ERROR);

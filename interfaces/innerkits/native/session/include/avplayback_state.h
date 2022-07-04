@@ -51,8 +51,8 @@ public:
     };
 
     struct Position {
-        uint64_t elapsedTime_ {};
-        uint64_t updateTime_ {};
+        int64_t elapsedTime_ {};
+        int64_t updateTime_ {};
     };
 
     using PlaybackStateMaskType = std::bitset<PLAYBACK_KEY_MAX>;
@@ -63,6 +63,8 @@ public:
     static AVPlaybackState* Unmarshalling(Parcel& parcel);
     bool Marshalling(Parcel& parcel) const override;
 
+    bool IsValid() const;
+
     void SetState(int32_t state);
     int32_t GetState() const;
 
@@ -72,8 +74,8 @@ public:
     void SetPosition(const Position& position);
     Position GetPosition() const;
 
-    void SetBufferedTime(uint64_t time);
-    uint64_t GetBufferedTime() const;
+    void SetBufferedTime(int64_t time);
+    int64_t GetBufferedTime() const;
 
     void SetLoopMode(int32_t mode);
     int32_t GetLoopMode() const;
@@ -92,7 +94,7 @@ private:
     int32_t state_ = PLAYBACK_STATE_INITIAL;
     double speed_ = 1.0;
     Position position_;
-    uint64_t bufferedTime_ {};
+    int64_t bufferedTime_ {};
     int32_t loopMode_ = LOOP_MODE_SEQUENCE;
     bool isFavorite_ {};
 

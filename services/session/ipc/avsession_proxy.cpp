@@ -177,6 +177,7 @@ int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
 int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
 {
     AVSessionTrace trace("AVSessionProxy::SetAVPlaybackState");
+    CHECK_AND_RETURN_RET_LOG(state.IsValid(), ERR_INVALID_PARAM, "state not valid");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, AVSESSION_ERROR, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
