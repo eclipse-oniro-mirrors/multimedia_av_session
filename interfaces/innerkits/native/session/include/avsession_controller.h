@@ -53,7 +53,7 @@ public:
 
     virtual int32_t GetSessionId() = 0;
 
-    virtual uint64_t GetRealPlaybackPosition() = 0;
+    virtual int64_t GetRealPlaybackPosition() = 0;
 
     virtual ~AVSessionController() = default;
 };

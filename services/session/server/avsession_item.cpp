@@ -280,7 +280,7 @@ void AVSessionItem::HandleOnSeek(const AVControlCommand &cmd)
 {
     AVSessionTrace avSessionTrace("AVSessionItem::OnSeek");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    uint64_t time = 0;
+    int64_t time = 0;
     CHECK_AND_RETURN_LOG(cmd.GetSeekTime(time) == AVSESSION_SUCCESS, "GetSeekTime failed");
     callback_->OnSeek(time);
 }

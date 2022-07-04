@@ -174,7 +174,7 @@ napi_status NapiPlaybackState::GetPosition(napi_env env, napi_value in, AVPlayba
     int64_t elapsedTime {};
     status = NapiUtils::GetNamedProperty(env, result, "elapsedTime", elapsedTime);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
-    out.SetPosition({ static_cast<uint64_t>(elapsedTime), static_cast<uint64_t>(updateTime) });
+    out.SetPosition({ elapsedTime, updateTime });
     return status;
 }
 
@@ -186,13 +186,13 @@ napi_status NapiPlaybackState::SetPosition(napi_env env, const AVPlaybackState &
 
     auto position = in.GetPosition();
     napi_value elapsedProperty {};
-    status = NapiUtils::SetValue(env, static_cast<int64_t>(position.elapsedTime_), elapsedProperty);
+    status = NapiUtils::SetValue(env, position.elapsedTime_, elapsedProperty);
     CHECK_RETURN((status == napi_ok) && (elapsedProperty != nullptr), "create property failed", status);
     status = napi_set_named_property(env, positionProperty, "elapsedTime", elapsedProperty);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
 
     napi_value updateProperty {};
-    status = NapiUtils::SetValue(env, static_cast<int64_t>(position.updateTime_), updateProperty);
+    status = NapiUtils::SetValue(env, position.updateTime_, updateProperty);
     CHECK_RETURN((status == napi_ok) && (elapsedProperty != nullptr), "create property failed", status);
     status = napi_set_named_property(env, positionProperty, "updateTime", updateProperty);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
@@ -215,7 +215,7 @@ napi_status NapiPlaybackState::GetBufferedTime(napi_env env, napi_value in, AVPl
 napi_status NapiPlaybackState::SetBufferedTime(napi_env env, const AVPlaybackState &in, napi_value &out)
 {
     napi_value property {};
-    auto status = NapiUtils::SetValue(env, static_cast<int64_t>(in.GetBufferedTime()), property);
+    auto status = NapiUtils::SetValue(env, in.GetBufferedTime(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "bufferedTime", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);

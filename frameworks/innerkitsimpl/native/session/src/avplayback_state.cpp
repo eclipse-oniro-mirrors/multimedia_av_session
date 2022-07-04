@@ -26,9 +26,9 @@ bool AVPlaybackState::Marshalling(Parcel &parcel) const
     return parcel.WriteString(mask_.to_string()) &&
         parcel.WriteInt32(state_) &&
         parcel.WriteDouble(speed_) &&
-        parcel.WriteUint64(position_.elapsedTime_) &&
-        parcel.WriteUint64(position_.updateTime_) &&
-        parcel.WriteUint64(bufferedTime_) &&
+        parcel.WriteInt64(position_.elapsedTime_) &&
+        parcel.WriteInt64(position_.updateTime_) &&
+        parcel.WriteInt64(bufferedTime_) &&
         parcel.WriteInt32(loopMode_) &&
         parcel.WriteBool(isFavorite_);
 }
@@ -44,9 +44,9 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
     result->mask_ = PlaybackStateMaskType(mask);
     if (!parcel.ReadInt32(result->state_) ||
         !parcel.ReadDouble(result->speed_) ||
-        !parcel.ReadUint64(result->position_.elapsedTime_) ||
-        !parcel.ReadUint64(result->position_.updateTime_) ||
-        !parcel.ReadUint64(result->bufferedTime_) ||
+        !parcel.ReadInt64(result->position_.elapsedTime_) ||
+        !parcel.ReadInt64(result->position_.updateTime_) ||
+        !parcel.ReadInt64(result->bufferedTime_) ||
         !parcel.ReadInt32(result->loopMode_) ||
         !parcel.ReadBool(result->isFavorite_)) {
         SLOGE("Read AVPlaybackState failed");
@@ -54,6 +54,18 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     return result;
+}
+
+bool AVPlaybackState::IsValid() const
+{
+    return state_ >= PLAYBACK_STATE_INITIAL &&
+        state_ < PLAYBACK_STATE_MAX &&
+        speed_ > 0 &&
+        position_.elapsedTime_ >= 0 &&
+        position_.updateTime_ >= 0 &&
+        bufferedTime_ >= 0 &&
+        loopMode_ >= LOOP_MODE_SEQUENCE &&
+        loopMode_ <= LOOP_MODE_SHUFFLE;
 }
 
 void AVPlaybackState::SetState(int32_t state)
@@ -74,7 +86,7 @@ void AVPlaybackState::SetPosition(const Position &position)
     position_ = position;
 }
 
-void AVPlaybackState::SetBufferedTime(uint64_t time)
+void AVPlaybackState::SetBufferedTime(int64_t time)
 {
     mask_.set(PLAYBACK_KEY_BUFFERED_TIME);
     bufferedTime_ = time;
@@ -107,7 +119,7 @@ AVPlaybackState::Position AVPlaybackState::GetPosition() const
     return position_;
 }
 
-uint64_t AVPlaybackState::GetBufferedTime() const
+int64_t AVPlaybackState::GetBufferedTime() const
 {
     return bufferedTime_;
 }

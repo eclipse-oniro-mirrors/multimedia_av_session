@@ -72,9 +72,9 @@ HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
     parcel->WriteString(mask.to_string());
     parcel->WriteInt32(0);
     parcel->WriteDouble(3.0);
-    parcel->WriteUint64(30);
-    parcel->WriteUint64(3);
-    parcel->WriteUint64(3);
+    parcel->WriteInt64(30);
+    parcel->WriteInt64(3);
+    parcel->WriteInt64(3);
     parcel->WriteInt32(3);
     parcel->WriteBool(true);
     AVPlaybackState *result = AVPlaybackState::Unmarshalling(*parcel);

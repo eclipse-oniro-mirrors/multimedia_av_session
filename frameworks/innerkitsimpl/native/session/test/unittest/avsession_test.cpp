@@ -132,7 +132,7 @@ void AVSessionCallbackImpl::OnRewind()
 }
 void AVSessionCallbackImpl::OnSeek(int64_t time)
 {
-    SLOGE("OnSeek %{public}" PRIu64, time);
+    SLOGE("OnSeek %{public}" PRId64, time);
     g_onCall = AVSESSION_SUCCESS;
 }
 void AVSessionCallbackImpl::OnSetSpeed(double speed)

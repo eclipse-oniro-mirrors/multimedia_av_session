@@ -408,7 +408,7 @@ napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, na
 
     auto position = napiController->controller_->GetRealPlaybackPosition();
     napi_value output {};
-    auto status = NapiUtils::SetValue(env, static_cast<int64_t>(position), output);
+    auto status = NapiUtils::SetValue(env, position, output);
     if (status != napi_ok) {
         SLOGE("convert native object to javascript object failed");
         napi_throw_error(env, nullptr, "convert native object to javascript object failed");
