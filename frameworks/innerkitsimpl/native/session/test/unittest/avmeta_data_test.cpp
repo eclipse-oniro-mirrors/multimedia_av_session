@@ -183,7 +183,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData003, TestSize.Level1)
     metaData.SetAssetId("123");
     metaData.SetDuration(DURATION_PLAYBACK_SCENE_INVALID);
 
-    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    EXPECT_NE(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     SLOGE("SetAVMetaData003 End");
 }
 
@@ -201,7 +201,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData004, TestSize.Level1)
     metaData.SetAssetId("123");
     metaData.SetPublishDate(PUBLISHDATE_INVALID_DATE);
 
-    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    EXPECT_NE(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     SLOGE("SetAVMetaData004 End");
 }
 /**
