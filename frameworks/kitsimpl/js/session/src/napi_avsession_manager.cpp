@@ -276,9 +276,8 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
         if (AVSessionManager::SendSystemAVKeyEvent(*context->keyEvent_) != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native send keyEvent failed";
-            AVSessionTrace::TraceEnd("NapiAVSessionManager::SendSystemAVKeyEvent",
-                NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID);
         }
+        AVSessionTrace::TraceEnd("NapiAVSessionManager::SendSystemAVKeyEvent", NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "SendSystemAVKeyEvent", executor);
@@ -303,9 +302,9 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
         if (AVSessionManager::SendSystemControlCommand(context->command) != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native send control command failed";
-            AVSessionTrace::TraceEnd("NapiAVSessionManager::SendSystemControlCommand",
-                NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID);
         }
+        AVSessionTrace::TraceEnd("NapiAVSessionManager::SendSystemControlCommand",
+            NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "SendSystemControlCommand", executor);
