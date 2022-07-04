@@ -71,10 +71,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     AVSessionTrace avSessionTrace("AVSessionItem::SetAVMetaData");
-    if (!metaData_.CopyFrom(meta)) {
-        SLOGI("AVMetaData set error");
-        return AVSESSION_ERROR;
-    }
+    CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         controller->HandleMetaDataChange(meta);
@@ -85,10 +82,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     AVSessionTrace avSessionTrace("AVSessionItem::SetAVPlaybackState");
-    if (!playbackState_.CopyFrom(state)) {
-        SLOGI("AVMetaData set error");
-        return AVSESSION_ERROR;
-    }
+    CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);
@@ -115,9 +109,7 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     AVSessionTrace avSessionTrace("AVSessionItem::GetControllerInner");
     std::lock_guard lockGuard(lock_);
     auto iter = controllers_.find(GetPid());
-    if (iter == controllers_.end()) {
-        return nullptr;
-    }
+    CHECK_AND_RETURN_RET_LOG(iter != controllers_.end(), nullptr, "controller is nullptr");
     return iter->second;
 }
 
@@ -176,7 +168,8 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
 {
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
-    std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
+    auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
+    supportedCmd_.erase(iter, supportedCmd_.end());
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{pubic}d", pid);

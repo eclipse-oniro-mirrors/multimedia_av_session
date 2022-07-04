@@ -171,6 +171,11 @@ HWTEST_F(AVSessionControllerTest, IsSessionActive003, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetAVPlaybackState001, TestSize.Level1)
 {
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("001");
+    metaData.SetDuration(10);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     AVPlaybackState state;
     state.SetState(1);
     state.SetSpeed(1);
@@ -783,6 +788,11 @@ HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition002, TestSize.Level1)
 {
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("GetRealPlaybackPosition");
+    metaData.SetDuration(TestMicroSecond * TestMicroSecond + TestMicroSecond);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     AVPlaybackState state;
     state.SetPosition({ TestMicroSecond * TestMicroSecond, TestMicroSecond });
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
@@ -806,9 +816,26 @@ HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition003, TestSize.Level1)
     AVPlaybackState::PlaybackStateMaskType filter;
     filter.set();
     EXPECT_EQ(controller_->SetPlaybackFilter(filter), AVSESSION_SUCCESS);
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("GetRealPlaybackPosition");
+    metaData.SetDuration(TestMicroSecond * TestMicroSecond + TestMicroSecond);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     AVPlaybackState state;
     state.SetPosition({ TestMicroSecond * TestMicroSecond, TestMicroSecond });
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
     sleep(1);
     EXPECT_EQ(controller_->GetRealPlaybackPosition() > 0, true);
+}
+
+/**
+* @tc.name: Destroy001
+* @tc.desc: Return is controller destroy success
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, Destroy001, TestSize.Level1)
+{
+    EXPECT_EQ(controller_->Destroy(), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->Destroy(), ERR_CONTROLLER_NOT_EXIST);
 }

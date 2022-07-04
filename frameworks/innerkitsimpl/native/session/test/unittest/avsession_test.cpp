@@ -66,12 +66,10 @@ void AvsessionTest::TearDown()
     int32_t ret = AVSESSION_ERROR;
     if (avsession_ != nullptr) {
         ret = avsession_->Destroy();
-        ASSERT_EQ(AVSESSION_SUCCESS, ret);
         avsession_ = nullptr;
     }
     if (controller_ != nullptr) {
         ret = controller_->Destroy();
-        ASSERT_EQ(AVSESSION_SUCCESS, ret);
         controller_ = nullptr;
     }
     g_onCall = AVSESSION_ERROR;
@@ -187,6 +185,32 @@ HWTEST_F(AvsessionTest, SetAVMetaData001, TestSize.Level1)
 {
     SLOGE("SetAVMetaData001 Begin");
     g_metaData.Reset();
+    g_metaData.SetAssetId("");
+    g_metaData.SetTitle("Black Humor");
+    g_metaData.SetArtist("zhoujielun");
+    g_metaData.SetAuthor("zhoujielun");
+    g_metaData.SetAlbum("Jay");
+    g_metaData.SetWriter("zhoujielun");
+    g_metaData.SetComposer("zhoujielun");
+    g_metaData.SetDuration(40000);
+    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetSubTitle("fac");
+    g_metaData.SetDescription("for friends");
+    g_metaData.SetLyric("https://baidu.yinyue.com");
+    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_ERROR);
+    SLOGE("SetAVMetaData001 End");
+}
+
+/**
+* @tc.name: SetAVMetaData002
+* @tc.desc: Return the result of set av meta data
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, SetAVMetaData002, TestSize.Level1)
+{
+    SLOGE("SetAVMetaData002 Begin");
+    g_metaData.Reset();
     g_metaData.SetAssetId("123");
     g_metaData.SetTitle("Black Humor");
     g_metaData.SetArtist("zhoujielun");
@@ -200,7 +224,7 @@ HWTEST_F(AvsessionTest, SetAVMetaData001, TestSize.Level1)
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("https://baidu.yinyue.com");
     EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
-    SLOGE("SetAVMetaData001 End");
+    SLOGE("SetAVMetaData002 End");
 }
 
 /**
@@ -245,6 +269,11 @@ HWTEST_F(AvsessionTest, GetAVMetaData001, TestSize.Level1)
 HWTEST_F(AvsessionTest, SetAVPlaybackState001, TestSize.Level1)
 {
     SLOGE("SetAVPlaybackState001 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     g_playbackState.SetState(1);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({ 80000, 0 });
@@ -256,6 +285,73 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState001, TestSize.Level1)
 }
 
 /**
+* @tc.name: SetAVPlaybackState002
+* @tc.desc: Return the result of set av playback state
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, SetAVPlaybackState002, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState002 Begin");
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetBufferedTime(700000);
+    g_playbackState.SetLoopMode(1);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState002 End");
+}
+
+/**
+* @tc.name: SetAVPlaybackState003
+* @tc.desc: Return the result of set av playback state
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, SetAVPlaybackState003, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState003 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(2000000);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetBufferedTime(17000);
+    g_playbackState.SetLoopMode(1);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState003 End");
+}
+
+/**
+* @tc.name: SetAVPlaybackState004
+* @tc.desc: Return the result of set av playback state
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, SetAVPlaybackState004, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState004 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(2000000);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({ 10000, 0 });
+    g_playbackState.SetBufferedTime(17000);
+    g_playbackState.SetLoopMode(1);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState004 End");
+}
+
+/**
 * @tc.name: GetAVPlaybackState001
 * @tc.desc: Return the result of get av playback state
 * @tc.type: FUNC
@@ -264,6 +360,17 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState001, TestSize.Level1)
 HWTEST_F(AvsessionTest, GetAVPlaybackState001, TestSize.Level1)
 {
     SLOGE("GetAVPlaybackState001 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(2000000);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetBufferedTime(87000);
+    g_playbackState.SetLoopMode(1);
+    g_playbackState.SetFavorite(true);
     EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
     AVPlaybackState state;
     EXPECT_EQ(avsession_->GetAVPlaybackState(state), AVSESSION_SUCCESS);
@@ -343,12 +450,27 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
     SLOGE("RegisterCallback003 Begin");
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
     EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
-    EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
-    AVControlCommand cmd;
-    EXPECT_EQ(cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
-    EXPECT_EQ(controller_->SendControlCommand(cmd), AVSESSION_SUCCESS);
-    sleep(1);
-    EXPECT_EQ(g_onCall, AVSESSION_SUCCESS);
+    for (int32_t cmd = AVControlCommand::SESSION_CMD_PLAY; cmd < AVControlCommand::SESSION_CMD_MAX; cmd++) {
+        AVControlCommand controlCommand;
+        EXPECT_EQ(avsession_->AddSupportCommand(cmd), AVSESSION_SUCCESS);
+        EXPECT_EQ(controlCommand.SetCommand(cmd), AVSESSION_SUCCESS);
+        switch (cmd) {
+            case AVControlCommand::SESSION_CMD_SEEK : controlCommand.SetSeekTime(100000);
+                break;
+            case AVControlCommand::SESSION_CMD_SET_SPEED : controlCommand.SetSpeed(1.5);
+                break;
+            case AVControlCommand::SESSION_CMD_SET_LOOP_MODE : controlCommand.SetLoopMode(2);
+                break;
+            case AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE : controlCommand.SetAssetId("callback");
+                break;
+            default:
+                break;
+        }
+        EXPECT_EQ(controller_->SendControlCommand(controlCommand), AVSESSION_SUCCESS);
+        sleep(1);
+        EXPECT_EQ(g_onCall, AVSESSION_SUCCESS);
+        g_onCall = false;
+    }
     SLOGE("RegisterCallback003 End");
 }
 
@@ -429,6 +551,89 @@ HWTEST_F(AvsessionTest, AddSupportCommand002, TestSize.Level1)
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_INVALID), AVSESSION_ERROR);
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_MAX), AVSESSION_ERROR);
     SLOGE("AddSupportCommand002 End");
+
+}
+
+/**
+* @tc.name: AddSupportCommand003
+* @tc.desc: add supported commands
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, AddSupportCommand003, TestSize.Level1)
+{
+    SLOGE("AddSupportCommand003 Begin");
+    for (int32_t cmd = AVControlCommand::SESSION_CMD_PLAY; cmd < AVControlCommand::SESSION_CMD_MAX; cmd++) {
+        EXPECT_EQ(avsession_->AddSupportCommand(cmd), AVSESSION_SUCCESS);
+    }
+    std::vector<int32_t> cmds;
+    EXPECT_EQ(controller_->GetValidCommands(cmds), AVSESSION_SUCCESS);
+    EXPECT_EQ(cmds.size(), AVControlCommand::SESSION_CMD_MAX);
+    for (int32_t index = 0; index < cmds.size(); index++) {
+        EXPECT_EQ(cmds[index] > AVControlCommand::SESSION_CMD_INVALID, true);
+        EXPECT_EQ(cmds[index] < AVControlCommand::SESSION_CMD_MAX, true);
+        EXPECT_EQ(cmds[index], index);
+    }
+    SLOGE("AddSupportCommand003 End");
+}
+
+/**
+* @tc.name: deleteSupportCommand001
+* @tc.desc: delete supported commands
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, deleteSupportCommand001, TestSize.Level1)
+{
+    SLOGE("deleteSupportCommand001 Begin");
+    for (int32_t cmd = AVControlCommand::SESSION_CMD_PLAY; cmd < AVControlCommand::SESSION_CMD_MAX; cmd++) {
+        EXPECT_EQ(avsession_->AddSupportCommand(cmd), AVSESSION_SUCCESS);
+    }
+    std::vector<int32_t> cmds;
+    EXPECT_EQ(controller_->GetValidCommands(cmds), AVSESSION_SUCCESS);
+    EXPECT_EQ(cmds.size(), AVControlCommand::SESSION_CMD_MAX);
+    for (int32_t cmd = AVControlCommand::SESSION_CMD_PLAY; cmd < AVControlCommand::SESSION_CMD_MAX; cmd++) {
+        EXPECT_EQ(avsession_->DeleteSupportCommand(cmd), AVSESSION_SUCCESS);
+    }
+    cmds.clear();
+    EXPECT_EQ(controller_->GetValidCommands(cmds), AVSESSION_SUCCESS);
+    EXPECT_EQ(cmds.size(), 0);
+    SLOGE("deleteSupportCommand001 End");
+}
+
+/**
+* @tc.name: deleteSupportCommand002
+* @tc.desc: delete supported commands
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, deleteSupportCommand002, TestSize.Level1)
+{
+    SLOGE("deleteSupportCommand002 Begin");
+    for (int32_t cmd = AVControlCommand::SESSION_CMD_PLAY; cmd < AVControlCommand::SESSION_CMD_MAX; cmd++) {
+        EXPECT_EQ(avsession_->DeleteSupportCommand(cmd), AVSESSION_SUCCESS);
+    }
+    SLOGE("deleteSupportCommand002 End");
+}
+
+/**
+* @tc.name: deleteSupportCommand003
+* @tc.desc: delete supported commands
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, deleteSupportCommand003, TestSize.Level1)
+{
+    SLOGE("deleteSupportCommand003 Begin");
+    for (int32_t cmd = AVControlCommand::SESSION_CMD_PLAY; cmd < AVControlCommand::SESSION_CMD_MAX; cmd++) {
+        EXPECT_EQ(avsession_->AddSupportCommand(cmd), AVSESSION_SUCCESS);
+    }
+    std::vector<int32_t> cmds;
+    EXPECT_EQ(controller_->GetValidCommands(cmds), AVSESSION_SUCCESS);
+    EXPECT_EQ(cmds.size(), AVControlCommand::SESSION_CMD_MAX);
+    EXPECT_EQ(avsession_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_INVALID), AVSESSION_ERROR);
+    EXPECT_EQ(avsession_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_MAX), AVSESSION_ERROR);
+    SLOGE("deleteSupportCommand003 End");
 }
 
 /**
@@ -453,9 +658,9 @@ HWTEST_F(AvsessionTest, Destroy001, TestSize.Level1)
 */
 HWTEST_F(AvsessionTest, Destroy002, TestSize.Level1)
 {
-    SLOGE("Destroy001 Begin");
+    SLOGE("Destroy002 Begin");
     EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
-    EXPECT_EQ(avsession_->Destroy(), AVSESSION_ERROR);
+    EXPECT_EQ(avsession_->Destroy(), ERR_SESSION_NOT_EXIST);
     avsession_ = nullptr;
-    SLOGE("Destroy001 End");
+    SLOGE("Destroy002 End");
 }
