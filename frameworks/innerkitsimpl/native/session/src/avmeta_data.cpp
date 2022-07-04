@@ -155,8 +155,7 @@ std::string AVMetaData::GetComposer() const
 void AVMetaData::SetDuration(int64_t duration)
 {
     if (duration < AVMetaData::DURATION_ALWAYS_PLAY) {
-        SLOGE("invalid duration");
-        return;
+        SLOGW("invalid duration");
     }
     duration_ = duration;
     metaMask_.set(META_KEY_DURATION);
@@ -192,8 +191,7 @@ std::string AVMetaData::GetMediaImageUri() const
 void AVMetaData::SetPublishDate(double date)
 {
     if (date < 0) {
-        SLOGE("invalid publish date");
-        return;
+        SLOGW("invalid publish date");
     }
     publishDate_ = date;
     metaMask_.set(META_KEY_PUBLISH_DATE);
