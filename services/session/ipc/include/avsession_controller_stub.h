@@ -29,7 +29,7 @@ public:
         return 0;
     }
 
-    uint64_t GetRealPlaybackPosition() override
+    int64_t GetRealPlaybackPosition() override
     {
         return 0;
     }

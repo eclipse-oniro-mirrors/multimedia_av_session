@@ -48,7 +48,7 @@ public:
 
     int32_t GetSessionId() override;
 
-    uint64_t GetRealPlaybackPosition() override;
+    int64_t GetRealPlaybackPosition() override;
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
