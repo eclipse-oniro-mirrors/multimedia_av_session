@@ -25,7 +25,9 @@ config("module_private_config") {
 }
 
 common_deps = [
+  "//foundation/multimedia/av_session/frameworks/common:avsession_common",
   "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
+  "//foundation/multimedia/av_session/utils:avsession_utils",
   "//third_party/googletest:gtest_main",
   "//utils/native/base:utils",
 ]
