@@ -47,7 +47,7 @@ ohos_shared_library("avsession_client") {
 
   public_configs = [ ":avsession_client_config" ]
 
-  deps = [
+  public_deps = [
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/utils:avsession_utils"
   ]
