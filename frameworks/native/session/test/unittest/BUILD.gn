@@ -20,12 +20,12 @@ config("module_private_config") {
 
   include_dirs = [
     "../../include/",
-    "../../../../../../interfaces/innerkits/native/session/include/",
+    "../../../../../../interfaces/inner_api/native/session/include/",
   ]
 }
 
 common_deps = [
-  "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client",
+  "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
   "//third_party/googletest:gtest_main",
   "//utils/native/base:utils",
 ]
