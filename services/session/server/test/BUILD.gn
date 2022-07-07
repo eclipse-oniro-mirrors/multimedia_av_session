@@ -19,10 +19,12 @@ config("module_private_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "../../ipc/base/",
+    "../../ipc/proxy/",
+    "../../ipc/stub/",
     "../../server/",
-    "../../ipc/include/",
-    "../../../../interfaces/innerkits/native/session/include/",
-    "../../../../frameworks/innerkitsimpl/native/session/include",
+    "../../../../interfaces/inner_api/native/session/include/",
+    "../../../../frameworks/native/session/include",
   ]
 }
 

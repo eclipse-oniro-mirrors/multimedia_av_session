@@ -24,21 +24,14 @@ group("avession_server") {
 ohos_shared_library("avsession_service") {
   install_enable = true
 
-  common_source = [
-    "../../frameworks/innerkitsimpl/native/session/src/avmeta_data.cpp",
-    "../../frameworks/innerkitsimpl/native/session/src/avsession_descriptor.cpp",
-    "../../frameworks/innerkitsimpl/native/session/src/avplayback_state.cpp",
-    "../../frameworks/innerkitsimpl/native/session/src/avcontrol_command.cpp",
-  ]
-
   ipc_sources = [
-    "ipc/avcontroller_callback_proxy.cpp",
-    "ipc/avsession_callback_proxy.cpp",
-    "ipc/avsession_callback_stub.cpp",
-    "ipc/avsession_controller_stub.cpp",
-    "ipc/avsession_service_stub.cpp",
-    "ipc/avsession_stub.cpp",
-    "ipc/session_listener_proxy.cpp",
+    "ipc/proxy/avcontroller_callback_proxy.cpp",
+    "ipc/proxy/avsession_callback_proxy.cpp",
+    "ipc/proxy/session_listener_proxy.cpp",
+    "ipc/stub/avsession_callback_stub.cpp",
+    "ipc/stub/avsession_controller_stub.cpp",
+    "ipc/stub/avsession_service_stub.cpp",
+    "ipc/stub/avsession_stub.cpp",
   ]
 
   service_sources = [
@@ -55,18 +48,20 @@ ohos_shared_library("avsession_service") {
     "adapter/key_event_adapter.cpp",
   ]
 
-  sources = common_source + ipc_sources + adapter_sources + service_sources
+  sources = ipc_sources + adapter_sources + service_sources
 
   include_dirs = [
-    "//foundation/multimedia/av_session/services/session/ipc/include",
+    "//foundation/multimedia/av_session/frameworks/native/session/include",
+    "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
+    "//foundation/multimedia/av_session/services/session/ipc/base",
+    "//foundation/multimedia/av_session/services/session/ipc/proxy",
+    "//foundation/multimedia/av_session/services/session/ipc/stub",
     "//foundation/multimedia/av_session/services/session/adapter",
-    "//foundation/multimedia/av_session/interfaces/innerkits/native/session/include",
-    "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session/include",
     "//utils/native/base/include",
   ]
 
   deps = [
-    "//foundation/multimedia/av_session/frameworks/innerkitsimpl/native/session:avsession_client",
+    "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/utils:avsession_utils",
   ]
 
