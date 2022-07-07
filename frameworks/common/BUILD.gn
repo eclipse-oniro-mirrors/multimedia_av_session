@@ -35,7 +35,7 @@ ohos_shared_library("avsession_common") {
 
   public_configs = [ ":avsession_common_config" ]
 
-  deps = [ "//foundation/multimedia/av_session/utils:avsession_utils" ]
+  public_deps = [ "//foundation/multimedia/av_session/utils:avsession_utils" ]
 
   external_deps = [
     "ability_base:want",
