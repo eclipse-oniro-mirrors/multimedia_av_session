@@ -31,20 +31,20 @@ int32_t AVSessionServiceFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
         return AVSESSION_ERROR;
     }
     if (size > MAX_CODE_LEN) {
-		return AVSESSION_ERROR;
-	}
+        return AVSESSION_ERROR;
+    }
     MessageParcel dataMessageParcel;
     auto localDescriptor = IAVSessionService::GetDescriptor();
-	if (!dataMessageParcel.WriteInterfaceToken(localDescriptor)) {
-		return AVSESSION_ERROR;
-	}
+    if (!dataMessageParcel.WriteInterfaceToken(localDescriptor)) {
+        return AVSESSION_ERROR;
+    }
 
-	uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
 
-	size -= sizeof(uint32_t);
+    size -= sizeof(uint32_t);
 
-	dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
-	dataMessageParcel.RewindRead(0);
+    dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
+    dataMessageParcel.RewindRead(0);
     sptr<AVSessionService> mAVSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
 
     MessageParcel reply;
