@@ -181,7 +181,7 @@ int32_t AVSessionControllerStub::HandleIsSessionActive(MessageParcel &data, Mess
 
 int32_t AVSessionControllerStub::HandleGetSessionId(MessageParcel &data, MessageParcel &reply)
 {
-    CHECK_AND_PRINT_LOG(reply.WriteInt32(GetSessionId()), "write int32_t failed");
+    CHECK_AND_PRINT_LOG(reply.WriteString(GetSessionId()), "write int32_t failed");
     return ERR_NONE;
 }
 } // OHOS::AVSession

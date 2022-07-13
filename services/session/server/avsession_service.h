@@ -16,6 +16,7 @@
 #ifndef OHOS_AVSESSION_SERVICE_H
 #define OHOS_AVSESSION_SERVICE_H
 
+#include <atomic>
 #include <mutex>
 #include <map>
 
@@ -54,7 +55,7 @@ public:
 
     std::vector<AVSessionDescriptor> GetAllSessionDescriptors() override;
 
-    sptr<IRemoteObject> CreateControllerInner(int32_t sessionId) override;
+    sptr<IRemoteObject> CreateControllerInner(const std::string& sessionId) override;
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
@@ -75,11 +76,11 @@ public:
 private:
     static SessionContainer& GetContainer();
 
-    int32_t AllocSessionId();
+    std::string AllocSessionId();
 
-    bool ClientHasSession(pid_t pid);
+    bool AbilityHasSession(pid_t pid, const std::string& abilityName);
 
-    sptr<AVControllerItem> GetPresentController(pid_t pid, int32_t sessionId);
+    sptr<AVControllerItem> GetPresentController(pid_t pid, const std::string& sessionId);
 
     void NotifySessionCreate(const AVSessionDescriptor& descriptor);
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
@@ -110,9 +111,7 @@ private:
 
     void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 
-    std::recursive_mutex sessionIdsLock_;
-    std::list<int32_t> sessionIds_;
-    int32_t sessionSeqNum_ {};
+    std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
     sptr<AVSessionItem> topSession_;

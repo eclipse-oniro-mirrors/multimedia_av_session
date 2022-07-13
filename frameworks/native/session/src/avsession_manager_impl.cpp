@@ -23,12 +23,6 @@
 #include "session_listener_client.h"
 
 namespace OHOS::AVSession {
-AVSessionManagerImpl& AVSessionManagerImpl::GetInstance()
-{
-    static AVSessionManagerImpl instance;
-    return instance;
-}
-
 AVSessionManagerImpl::AVSessionManagerImpl()
 {
     SLOGD("constructor");
@@ -83,6 +77,15 @@ void AVSessionManagerImpl::OnServiceDied()
 std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string &tag, int32_t type,
                                                                const AppExecFwk::ElementName& elementName)
 {
+    if (tag.empty() || elementName.GetBundleName().empty() || elementName.GetAbilityName().empty()) {
+        SLOGE("param is invalid");
+        return nullptr;
+    }
+    if (type != AVSession::SESSION_TYPE_AUDIO && type != AVSession::SESSION_TYPE_VIDEO) {
+        SLOGE("type is invalid");
+        return nullptr;
+    }
+
     auto service = GetService();
     return service ? service->CreateSession(tag, type, elementName) : nullptr;
 }
@@ -105,7 +108,8 @@ std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetActivatedSessionDescri
     return activatedSessions;
 }
 
-int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(int32_t sessionId, AVSessionDescriptor& descriptor)
+int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(const std::string& sessionId,
+                                                               AVSessionDescriptor& descriptor)
 {
     std::vector<AVSessionDescriptor> allDescriptors = GetAllSessionDescriptors();
     for (const auto& oneDescriptor : allDescriptors) {
@@ -114,18 +118,28 @@ int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(int32_t sessionId
             return AVSESSION_SUCCESS;
         }
     }
-    SLOGI("sessionId %{public}d is not exist", sessionId);
+    SLOGI("sessionId %{public}s is not exist", sessionId.c_str());
     return AVSESSION_ERROR;
 }
 
-std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(int32_t sessionId)
+std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(const std::string& sessionId)
 {
+    if (sessionId.empty()) {
+        SLOGE("sessionId is invalid");
+        return nullptr;
+    }
+
     auto service = GetService();
     return service ? service->CreateController(sessionId) : nullptr;
 }
 
 int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener> &listener)
 {
+    if (listener == nullptr) {
+        SLOGE("listener is nullptr");
+        return ERR_INVALID_PARAM;
+    }
+
     auto service = GetService();
     if (service == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
@@ -160,12 +174,22 @@ int32_t AVSessionManagerImpl::UnregisterServiceDeathCallback()
 
 int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent &keyEvent)
 {
+    if (!keyEvent.IsValid()) {
+        SLOGE("keyEvent is invalid");
+        return ERR_INVALID_PARAM;
+    }
+
     auto service = GetService();
     return service ? service->SendSystemAVKeyEvent(keyEvent) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand &command)
 {
+    if (!command.IsValid()) {
+        SLOGE("command is invalid");
+        return ERR_INVALID_PARAM;
+    }
+
     auto service = GetService();
     return service ? service->SendSystemControlCommand(command) : ERR_SERVICE_NOT_EXIST;
 }

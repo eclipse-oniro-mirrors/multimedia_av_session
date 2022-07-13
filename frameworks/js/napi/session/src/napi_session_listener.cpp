@@ -47,21 +47,21 @@ void NapiSessionListener::HandleEvent(int32_t event, const T &param)
 void NapiSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     AVSessionTrace avSessionTrace("NapiSessionListener::OnSessionCreate");
-    SLOGI("sessionId=%{public}d", descriptor.sessionId_);
+    SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
     HandleEvent(EVENT_SESSION_CREATED, descriptor);
 }
 
 void NapiSessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
     AVSessionTrace avSessionTrace("NapiSessionListener::OnSessionDestroy");
-    SLOGI("sessionId=%{public}d", descriptor.sessionId_);
+    SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
     HandleEvent(EVENT_SESSION_DESTROYED, descriptor);
 }
 
 void NapiSessionListener::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
 {
     AVSessionTrace avSessionTrace("NapiSessionListener::OnTopSessionChanged");
-    SLOGI("sessionId=%{public}d", descriptor.sessionId_);
+    SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
     HandleEvent(EVENT_TOP_SESSION_CHANGED, descriptor);
 }
 

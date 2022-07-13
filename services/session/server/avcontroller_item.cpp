@@ -24,12 +24,12 @@ AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
     : pid_(pid), session_(session)
 {
     sessionId_ = session_->GetSessionId();
-    SLOGI("construct sessionId=%{public}d", sessionId_);
+    SLOGI("construct sessionId=%{public}s", sessionId_.c_str());
 }
 
 AVControllerItem::~AVControllerItem()
 {
-    SLOGI("destroy sessionId=%{public}d", sessionId_);
+    SLOGI("destroy sessionId=%{public}s", sessionId_.c_str());
 }
 
 int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject> &callback)
@@ -135,7 +135,7 @@ int32_t AVControllerItem::Destroy()
     if (session_ != nullptr) {
         session_->HandleControllerRelease(pid_);
         session_ = nullptr;
-        sessionId_ = -1;
+        sessionId_.clear();
     }
     if (serviceCallback_) {
         serviceCallback_(*this);
@@ -143,12 +143,12 @@ int32_t AVControllerItem::Destroy()
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::GetSessionId()
+std::string AVControllerItem::GetSessionId()
 {
     return sessionId_;
 }
 
-void AVControllerItem::HandleSessionDestory()
+void AVControllerItem::HandleSessionDestroy()
 {
     if (callback_ != nullptr) {
         AVSessionTrace trace("AVControllerItem::OnSessionDestroy");
@@ -156,8 +156,8 @@ void AVControllerItem::HandleSessionDestory()
     }
     if (session_ != nullptr) {
         session_ = nullptr;
-        sessionId_ = -1;
     }
+    sessionId_.clear();
 }
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
@@ -207,7 +207,7 @@ pid_t AVControllerItem::GetPid() const
     return pid_;
 }
 
-bool AVControllerItem::HasSession(int32_t sessionId)
+bool AVControllerItem::HasSession(const std::string& sessionId)
 {
     return sessionId_ == sessionId;
 }

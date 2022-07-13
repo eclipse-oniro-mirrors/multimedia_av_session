@@ -57,7 +57,6 @@ ohos_shared_library("avsession_service") {
     "//foundation/multimedia/av_session/services/session/ipc/proxy",
     "//foundation/multimedia/av_session/services/session/ipc/stub",
     "//foundation/multimedia/av_session/services/session/adapter",
-    "//utils/native/base/include",
   ]
 
   deps = [

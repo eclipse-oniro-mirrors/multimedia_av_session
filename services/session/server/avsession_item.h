@@ -30,7 +30,7 @@ public:
 
     ~AVSessionItem() override;
 
-    int32_t GetSessionId() override;
+    std::string GetSessionId() override;
 
     int32_t GetAVMetaData(AVMetaData& meta) override;
 
@@ -80,7 +80,9 @@ public:
 
     pid_t GetPid() const;
 
-    uid_t GetUid();
+    pid_t GetUid() const;
+
+    std::string GetAbilityName() const;
 
     void SetTop(bool top);
 
@@ -125,8 +127,6 @@ private:
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
-    pid_t pid_ {};
-    uid_t uid_ {};
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
     std::vector<int32_t> supportedCmd_;
     sptr<IAVSessionCallback> callback_;

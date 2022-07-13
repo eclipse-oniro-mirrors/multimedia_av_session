@@ -85,7 +85,7 @@ private:
     static napi_status OffOutputDeviceChanged(napi_env env, NapiAVSession* napiSession);
 
     napi_ref wrapperRef_ {};
-    int32_t sessionId_ = -1;
+    std::string sessionId_ ;
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
 

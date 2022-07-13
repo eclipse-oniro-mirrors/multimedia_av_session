@@ -94,7 +94,8 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
     context->GetCbInfo(env, info, inputParser);
 
     auto executor = [context]() {
-        context->session_ = AVSessionManager::CreateSession(context->tag_, context->type_, context->elementName_);
+        context->session_ = AVSessionManager::GetInstance().CreateSession(context->tag_, context->type_,
+                                                                          context->elementName_);
         if (context->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "native create session failed";
@@ -121,7 +122,7 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
-        context->descriptors_ = AVSessionManager::GetAllSessionDescriptors();
+        context->descriptors_ = AVSessionManager::GetInstance().GetAllSessionDescriptors();
     };
 
     auto complete = [env, context](napi_value &output) {
@@ -138,20 +139,20 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
 {
     AVSessionTrace::TraceBegin("NapiAVSessionManager::CreateController", NAPI_CREATE_CONTROLLER_TASK_ID);
     struct ConcreteContext : public ContextBase {
-        int32_t sessionId_ {};
+        std::string sessionId_ {};
         std::shared_ptr<AVSessionController> controller_;
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionId_);
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->sessionId_ >= 0),
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (!context->sessionId_.empty()),
                                "invalid sessionId");
     };
     context->GetCbInfo(env, info, input);
 
     auto executor = [context]() {
-        context->controller_ = AVSessionManager::CreateController(context->sessionId_);
+        context->controller_ = AVSessionManager::GetInstance().CreateController(context->sessionId_);
         if (context->controller_ == nullptr) {
             context->status = napi_generic_failure;
             context->error = "native create controller failed";
@@ -212,7 +213,7 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
             napi_throw_error(env, nullptr, "no memory");
             return NapiUtils::GetUndefinedValue(env);
         }
-        if (AVSessionManager::RegisterSessionListener(listener_) != AVSESSION_SUCCESS) {
+        if (AVSessionManager::GetInstance().RegisterSessionListener(listener_) != AVSESSION_SUCCESS) {
             SLOGE("native register session listener failed");
             napi_throw_error(env, nullptr, "native register session listener failed");
             return NapiUtils::GetUndefinedValue(env);
@@ -273,7 +274,7 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
     context->GetCbInfo(env, info, input);
 
     auto executor = [context]() {
-        if (AVSessionManager::SendSystemAVKeyEvent(*context->keyEvent_) != AVSESSION_SUCCESS) {
+        if (AVSessionManager::GetInstance().SendSystemAVKeyEvent(*context->keyEvent_) != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native send keyEvent failed";
         }
@@ -299,7 +300,7 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
     context->GetCbInfo(env, info, input);
 
     auto executor = [context]() {
-        if (AVSessionManager::SendSystemControlCommand(context->command) != AVSESSION_SUCCESS) {
+        if (AVSessionManager::GetInstance().SendSystemControlCommand(context->command) != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native send control command failed";
         }
@@ -335,7 +336,7 @@ napi_status NapiAVSessionManager::OnServiceDied(napi_env env, napi_value callbac
             return napi_generic_failure;
         }
     }
-    if (AVSessionManager::RegisterServiceDeathCallback(HandleServiceDied) != AVSESSION_SUCCESS) {
+    if (AVSessionManager::GetInstance().RegisterServiceDeathCallback(HandleServiceDied) != AVSESSION_SUCCESS) {
         return napi_generic_failure;
     }
     return napi_ok;
@@ -365,7 +366,7 @@ napi_status NapiAVSessionManager::OffTopSessionChanged(napi_env env)
 
 napi_status NapiAVSessionManager::OffServiceDied(napi_env env)
 {
-    AVSessionManager::UnregisterServiceDeathCallback();
+    AVSessionManager::GetInstance().UnregisterServiceDeathCallback();
     auto status = napi_delete_reference(env, serviceDiedCallback_);
     serviceDiedCallback_ = nullptr;
     return status;

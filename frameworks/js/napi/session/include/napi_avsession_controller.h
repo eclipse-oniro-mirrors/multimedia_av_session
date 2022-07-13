@@ -80,7 +80,7 @@ private:
                                         const std::string& eventName, napi_value filter, napi_value callback);
 
     napi_ref wrapperRef_ {};
-    int32_t sessionId_ = -1;
+    std::string sessionId_;
     std::shared_ptr<AVSessionController> controller_;
     std::shared_ptr<NapiAVControllerCallback> callback_;
 

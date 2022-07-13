@@ -17,26 +17,25 @@
 #define OHOS_SESSION_STACK_H
 
 #include <string>
-#include <list>
-#include <map>
-
 #include "session_container.h"
 
 namespace OHOS::AVSession {
 class SessionStack : public SessionContainer {
 public:
-    int32_t AddSession(pid_t pid, sptr<AVSessionItem>& item) override;
+    int32_t AddSession(pid_t pid, const std::string& abilityName, sptr<AVSessionItem>& item) override;
 
-    sptr<AVSessionItem> RemoveSession(pid_t pid) override;
+    std::vector<sptr<AVSessionItem>> RemoveSession(pid_t pid) override;
 
-    sptr<AVSessionItem> GetSession(pid_t pid) override;
+    sptr<AVSessionItem> RemoveSession(pid_t pid, const std::string& abilityName) override;
 
-    sptr<AVSessionItem> GetSessionById(int32_t sessionId) override;
+    sptr<AVSessionItem> GetSession(pid_t pid, const std::string& abilityName) override;
+
+    sptr<AVSessionItem> GetSessionById(const std::string& sessionId) override;
 
     std::vector<sptr<AVSessionItem>> GetAllSessions() override;
 
 private:
-    std::map<pid_t, sptr<AVSessionItem>> sessions_;
+    std::map<std::pair<pid_t, std::string>, sptr<AVSessionItem>> sessions_;
     std::list<sptr<AVSessionItem>> stack_;
 };
 } // namespace OHOS::AVSession

@@ -29,22 +29,22 @@ class TestSessionListener : public SessionListener {
 public:
     void OnSessionCreate(const AVSessionDescriptor &descriptor) override
     {
-        SLOGI("sessionId=%{public}d created", descriptor.sessionId_);
+        SLOGI("sessionId=%{public}s created", descriptor.sessionId_.c_str());
         descriptor_ = descriptor;
     }
 
     void OnSessionRelease(const AVSessionDescriptor &descriptor) override
     {
-        SLOGI("sessionId=%{public}d released", descriptor.sessionId_);
+        SLOGI("sessionId=%{public}s released", descriptor.sessionId_.c_str());
         descriptor_ = descriptor;
     }
 
     void OnTopSessionChanged(const AVSessionDescriptor &descriptor) override
     {
-        SLOGI("sessionId=%{public}d be top session", descriptor.sessionId_);
+        SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }
 
-    int32_t GetSessionId() const
+    std::string GetSessionId() const
     {
         return descriptor_.sessionId_;
     }

@@ -24,10 +24,10 @@
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
-int32_t g_onCall = AVSESSION_ERROR;
-int32_t g_sessionId = AVSESSION_ERROR;
-AVMetaData g_metaData;
-AVPlaybackState g_playbackState;
+static int32_t g_onCall = AVSESSION_ERROR;
+static int32_t g_sessionId = AVSESSION_ERROR;
+static AVMetaData g_metaData;
+static AVPlaybackState g_playbackState;
 static char g_testSessionTag[] = "test";
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
@@ -41,6 +41,8 @@ public:
 
     std::shared_ptr<AVSession> avsession_ = nullptr;
     std::shared_ptr<AVSessionController> controller_ = nullptr;
+
+    static constexpr int SESSION_LEN = 64;
 };
 
 void AvsessionTest::SetUpTestCase()
@@ -54,10 +56,11 @@ void AvsessionTest::SetUp()
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
     elementName.SetAbilityName(g_testAbilityName);
-    avsession_ = AVSessionManager::CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    avsession_ = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                               elementName);
     ASSERT_NE(avsession_, nullptr);
     g_sessionId++;
-    controller_ = AVSessionManager::CreateController(avsession_->GetSessionId());
+    controller_ = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId());
     ASSERT_NE(controller_, nullptr);
 }
 
@@ -169,9 +172,8 @@ AVSessionCallbackImpl::~AVSessionCallbackImpl()
 HWTEST_F(AvsessionTest, GetSessionId001, TestSize.Level1)
 {
     SLOGE("GetSessionId001 Begin");
-    int32_t ret = -1;
-    ret = avsession_->GetSessionId();
-    EXPECT_EQ(g_sessionId >= 0, true);
+    auto sessionId = avsession_->GetSessionId();
+    EXPECT_EQ(sessionId.length() == SESSION_LEN, true);
     SLOGE("GetSessionId001 End");
 }
 
@@ -551,7 +553,6 @@ HWTEST_F(AvsessionTest, AddSupportCommand002, TestSize.Level1)
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_INVALID), AVSESSION_ERROR);
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_MAX), AVSESSION_ERROR);
     SLOGE("AddSupportCommand002 End");
-
 }
 
 /**

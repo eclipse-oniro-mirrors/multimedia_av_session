@@ -51,7 +51,7 @@ public:
 
     virtual int32_t Destroy() = 0;
 
-    virtual int32_t GetSessionId() = 0;
+    virtual std::string GetSessionId() = 0;
 
     virtual int64_t GetRealPlaybackPosition() = 0;
 
