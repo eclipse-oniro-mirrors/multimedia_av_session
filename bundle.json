@@ -56,7 +56,7 @@
         "test": [
           "//foundation/multimedia/av_session/frameworks/native/session/test/unittest:unittest",
           "//foundation/multimedia/av_session/services/session/server/test:unittest",
-		  "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest:fuzztest",
+          "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest:fuzztest",
           "//foundation/multimedia/av_session/services/session/server/test/fuzztest:fuzztest"
         ]
       }
