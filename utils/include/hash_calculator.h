@@ -13,12 +13,29 @@
  * limitations under the License.
  */
 
-#include "avsession_manager_impl.h"
+#ifndef AV_SESSION_HASH_CALCULATOR_H
+#define AV_SESSION_HASH_CALCULATOR_H
+
+#include <vector>
+#include <openssl/sha.h>
+#include "avsession_errors.h"
+#include "avsession_log.h"
 
 namespace OHOS::AVSession {
-AVSessionManager& AVSessionManager::GetInstance()
-{
-    static AVSessionManagerImpl avSessionManager;
-    return avSessionManager;
+class HashCalculator {
+public:
+    HashCalculator() = default;
+
+    ~HashCalculator();
+
+    int32_t Init();
+
+    int32_t Update(const std::vector<uint8_t> &value);
+
+    int32_t GetResult(std::vector<uint8_t> &value);
+
+private:
+    SHA256_CTX *context_ = nullptr;
+};
 }
-} // OHOS::AVSession
+#endif // AV_SESSION_HASH_CALCULATOR_H

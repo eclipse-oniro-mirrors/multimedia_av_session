@@ -22,9 +22,9 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
-static char TestSessionTag[] = "test";
-static char TestBundleName[] = "test.ohos.avsession";
-static char TestAbilityName[] = "test.ability";
+static char g_testSessionTag[] = "test";
+static char g_testBundleName[] = "test.ohos.avsession";
+static char g_testAbilityName[] = "test.ability";
 
 class AVSessionManagerTest : public testing::Test {
 public:
@@ -32,6 +32,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+    static constexpr int SESSION_LEN = 64;
 };
 
 void AVSessionManagerTest::SetUpTestCase()
@@ -50,22 +52,22 @@ class TestSessionListener : public SessionListener {
 public:
     void OnSessionCreate(const AVSessionDescriptor &descriptor) override
     {
-        SLOGI("sessionId=%{public}d created", descriptor.sessionId_);
+        SLOGI("sessionId=%{public}s created", descriptor.sessionId_.c_str());
         descriptor_ = descriptor;
     }
 
     void OnSessionRelease(const AVSessionDescriptor &descriptor) override
     {
-        SLOGI("sessionId=%{public}d released", descriptor.sessionId_);
+        SLOGI("sessionId=%{public}s released", descriptor.sessionId_.c_str());
         descriptor_ = descriptor;
     }
 
     void OnTopSessionChanged(const AVSessionDescriptor &descriptor) override
     {
-        SLOGI("sessionId=%{public}d be top session", descriptor.sessionId_);
+        SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }
 
-    int32_t GetSessionId() const
+    std::string GetSessionId() const
     {
         return descriptor_.sessionId_;
     }
@@ -84,22 +86,24 @@ HWTEST_F(AVSessionManagerTest, CreatSession001, TestSize.Level1)
 {
     SLOGI("CreatSession001 begin");
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
-    auto session = AVSessionManager::CreateSession("", AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession("", AVSession::SESSION_TYPE_AUDIO, elementName);
     EXPECT_EQ(session, nullptr);
 
-    session = AVSessionManager::CreateSession(TestSessionTag, ERANGE, elementName);
+    session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, ERANGE, elementName);
     EXPECT_EQ(session, nullptr);
 
     elementName.SetBundleName("");
-    elementName.SetAbilityName(TestAbilityName);
-    session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetAbilityName(g_testAbilityName);
+    session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                            elementName);
     EXPECT_EQ(session, nullptr);
 
-    elementName.SetBundleName(TestBundleName);
+    elementName.SetBundleName(g_testBundleName);
     elementName.SetAbilityName("");
-    session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                            elementName);
     EXPECT_EQ(session, nullptr);
     SLOGI("CreatSession001 end");
 }
@@ -114,9 +118,10 @@ HWTEST_F(AVSessionManagerTest, CreatSession002, TestSize.Level1)
 {
     SLOGI("CreatSession002 begin");
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
-    auto session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
     EXPECT_NE(session, nullptr);
     if (session != nullptr) {
         session->Destroy();
@@ -134,12 +139,14 @@ HWTEST_F(AVSessionManagerTest, CreatSession003, TestSize.Level1)
 {
     SLOGI("CreatSession003 begin");
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
-    auto session1 = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session1 = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                  elementName);
     EXPECT_NE(session1, nullptr);
 
-    auto session2 = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_VIDEO, elementName);
+    auto session2 = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO,
+                                                                  elementName);
     EXPECT_EQ(session2, nullptr);
 
     if (session1 != nullptr) {
@@ -157,21 +164,22 @@ HWTEST_F(AVSessionManagerTest, CreatSession003, TestSize.Level1)
 HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
 {
     SLOGI("GetAllSessionDescriptors001 begin");
-    auto descriptors = AVSessionManager::GetAllSessionDescriptors();
+    auto descriptors = AVSessionManager::GetInstance().GetAllSessionDescriptors();
     EXPECT_EQ(descriptors.size(), 0);
 
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
-    auto session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
     EXPECT_NE(session, nullptr);
 
-    descriptors = AVSessionManager::GetAllSessionDescriptors();
+    descriptors = AVSessionManager::GetInstance().GetAllSessionDescriptors();
     EXPECT_EQ(descriptors.size(), 1);
-    EXPECT_EQ(descriptors[0].sessionTag_, TestSessionTag);
+    EXPECT_EQ(descriptors[0].sessionTag_, g_testSessionTag);
     EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
-    EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), TestBundleName);
-    EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), TestAbilityName);
+    EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), g_testBundleName);
+    EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), g_testAbilityName);
     EXPECT_EQ(descriptors[0].isActive_, false);
 
     if (session != nullptr) {
@@ -189,22 +197,23 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
 HWTEST_F(AVSessionManagerTest, GetActivatedSessionDescriptors001, TestSize.Level1)
 {
     SLOGI("GetActivatedSessionDescriptors001 begin");
-    auto descriptors = AVSessionManager::GetActivatedSessionDescriptors();
+    auto descriptors = AVSessionManager::GetInstance().GetActivatedSessionDescriptors();
     EXPECT_EQ(descriptors.size(), 0);
 
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
-    auto session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
     EXPECT_NE(session, nullptr);
     session->Activate();
 
-    descriptors = AVSessionManager::GetActivatedSessionDescriptors();
+    descriptors = AVSessionManager::GetInstance().GetActivatedSessionDescriptors();
     EXPECT_EQ(descriptors.size(), 1);
-    EXPECT_EQ(descriptors[0].sessionTag_, TestSessionTag);
+    EXPECT_EQ(descriptors[0].sessionTag_, g_testSessionTag);
     EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
-    EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), TestBundleName);
-    EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), TestAbilityName);
+    EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), g_testBundleName);
+    EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), g_testAbilityName);
     EXPECT_EQ(descriptors[0].isActive_, true);
 
     if (session != nullptr) {
@@ -222,25 +231,26 @@ HWTEST_F(AVSessionManagerTest, GetActivatedSessionDescriptors001, TestSize.Level
 HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsBySessionId001, TestSize.Level1)
 {
     SLOGI("GetSessionDescriptorsBySessionId001 begin");
-    auto descriptors = AVSessionManager::GetActivatedSessionDescriptors();
+    auto descriptors = AVSessionManager::GetInstance().GetActivatedSessionDescriptors();
     EXPECT_EQ(descriptors.size(), 0);
 
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
-    auto session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
     EXPECT_NE(session, nullptr);
     session->Activate();
-    int32_t sessionId = session->GetSessionId();
+    auto sessionId = session->GetSessionId();
     AVSessionDescriptor descriptor {};
-    int32_t ret = AVSessionManager::GetSessionDescriptorsBySessionId(sessionId, descriptor);
+    int32_t ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_EQ(descriptor.sessionTag_, TestSessionTag);
+    EXPECT_EQ(descriptor.sessionTag_, g_testSessionTag);
     EXPECT_EQ(descriptor.sessionType_, AVSession::SESSION_TYPE_AUDIO);
-    EXPECT_EQ(descriptor.elementName_.GetBundleName(), TestBundleName);
-    EXPECT_EQ(descriptor.elementName_.GetAbilityName(), TestAbilityName);
+    EXPECT_EQ(descriptor.elementName_.GetBundleName(), g_testBundleName);
+    EXPECT_EQ(descriptor.elementName_.GetAbilityName(), g_testAbilityName);
     EXPECT_EQ(descriptor.isActive_, true);
-    ret = AVSessionManager::GetSessionDescriptorsBySessionId(sessionId + 1, descriptor);
+    ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId + '1', descriptor);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     if (session != nullptr) {
         session->Destroy();
@@ -257,7 +267,7 @@ HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsBySessionId001, TestSize.Lev
 HWTEST_F(AVSessionManagerTest, CreateController001, TestSize.Level1)
 {
     SLOGI("CreateController001 begin");
-    auto controller = AVSessionManager::CreateController(100);
+    auto controller = AVSessionManager::GetInstance().CreateController("100");
     EXPECT_EQ(controller, nullptr);
     SLOGI("CreateController001 end");
 }
@@ -272,13 +282,14 @@ HWTEST_F(AVSessionManagerTest, CreateController002, TestSize.Level1)
 {
     SLOGI("CreateController002 begin");
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
-    auto session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
     EXPECT_NE(session, nullptr);
-    ASSERT_GE(session->GetSessionId(), 0);
+    ASSERT_EQ(session->GetSessionId().length(), SESSION_LEN);
 
-    auto controller = AVSessionManager::CreateController(session->GetSessionId());
+    auto controller = AVSessionManager::GetInstance().CreateController(session->GetSessionId());
     EXPECT_NE(controller, nullptr);
 
     if (session != nullptr) {
@@ -300,7 +311,7 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener001, TestSize.Level1)
 {
     SLOGI("RegisterSessionListener001 begin");
     std::shared_ptr<SessionListener> listener;
-    auto result = AVSessionManager::RegisterSessionListener(listener);
+    auto result = AVSessionManager::GetInstance().RegisterSessionListener(listener);
     EXPECT_NE(result, AVSESSION_SUCCESS);
     SLOGI("RegisterSessionListener001 end");
 }
@@ -315,15 +326,16 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
 {
     SLOGI("RegisterSessionListener002 begin");
     std::shared_ptr<TestSessionListener> listener = std::make_shared<TestSessionListener>();
-    auto result = AVSessionManager::RegisterSessionListener(listener);
+    auto result = AVSessionManager::GetInstance().RegisterSessionListener(listener);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
 
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
-    auto session = AVSessionManager::CreateSession(TestSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
     ASSERT_NE(session, nullptr);
-    ASSERT_GE(session->GetSessionId(), 0);
+    ASSERT_EQ(session->GetSessionId().length(), SESSION_LEN);
     sleep(1);
     EXPECT_EQ(session->GetSessionId(), listener->GetSessionId());
 
@@ -343,7 +355,7 @@ HWTEST_F(AVSessionManagerTest, RegisterServiceDeathCallback001, TestSize.Level1)
 {
     SLOGI("RegisterServiceDeathCallback001 begin");
     bool isDead = false;
-    auto result = AVSessionManager::RegisterServiceDeathCallback([&isDead]() { isDead = true; });
+    auto result = AVSessionManager::GetInstance().RegisterServiceDeathCallback([&isDead]() { isDead = true; });
     EXPECT_EQ(result, AVSESSION_SUCCESS);
 
     system("killall -9 av_session");
@@ -362,10 +374,10 @@ HWTEST_F(AVSessionManagerTest, UnregisterServiceDeathCallback001, TestSize.Level
 {
     SLOGI("UnregisterServiceDeathCallback001 begin");
     bool isDead = false;
-    auto result = AVSessionManager::RegisterServiceDeathCallback([&isDead]() { isDead = true; });
+    auto result = AVSessionManager::GetInstance().RegisterServiceDeathCallback([&isDead]() { isDead = true; });
     EXPECT_EQ(result, AVSESSION_SUCCESS);
 
-    result = AVSessionManager::UnregisterServiceDeathCallback();
+    result = AVSessionManager::GetInstance().UnregisterServiceDeathCallback();
     EXPECT_EQ(result, AVSESSION_SUCCESS);
 
     system("killall -9 av_session");
@@ -386,7 +398,7 @@ HWTEST_F(AVSessionManagerTest, SendSystemMediaKeyEvent001, TestSize.Level1)
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
 
-    auto result = AVSessionManager::SendSystemAVKeyEvent(*keyEvent);
+    auto result = AVSessionManager::GetInstance().SendSystemAVKeyEvent(*keyEvent);
     EXPECT_NE(result, AVSESSION_SUCCESS);
     SLOGI("SendSystemMediaKeyEvent001 end");
 }
@@ -411,7 +423,7 @@ HWTEST_F(AVSessionManagerTest, SendSystemMediaKeyEvent002, TestSize.Level1)
     keyItem.SetPressed(true);
     keyEvent->AddKeyItem(keyItem);
 
-    auto result = AVSessionManager::SendSystemAVKeyEvent(*keyEvent);
+    auto result = AVSessionManager::GetInstance().SendSystemAVKeyEvent(*keyEvent);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGI("SendSystemMediaKeyEvent002 end");
 }
@@ -426,7 +438,7 @@ HWTEST_F(AVSessionManagerTest, SendSystemControlCommand001, TestSize.Level1)
 {
     SLOGI("SendSystemControlCommand001 begin");
     AVControlCommand command;
-    auto result = AVSessionManager::SendSystemControlCommand(command);
+    auto result = AVSessionManager::GetInstance().SendSystemControlCommand(command);
     EXPECT_NE(result, AVSESSION_SUCCESS);
     SLOGI("SendSystemControlCommand001 end");
 }
@@ -442,7 +454,7 @@ HWTEST_F(AVSessionManagerTest, SendSystemControlCommand002, TestSize.Level1)
     SLOGI("SendSystemControlCommand002 begin");
     AVControlCommand command;
     command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
-    auto result = AVSessionManager::SendSystemControlCommand(command);
+    auto result = AVSessionManager::GetInstance().SendSystemControlCommand(command);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGI("SendSystemControlCommand002 end");
 }

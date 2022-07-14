@@ -26,39 +26,36 @@
 #include "avsession_info.h"
 #include "client_death_stub.h"
 #include "isession_listener.h"
+#include "avsession_manager.h"
 #include "avsession_controller.h"
 
 namespace OHOS::AVSession {
-class AVSessionManagerImpl {
+class AVSessionManagerImpl : public AVSessionManager {
 public:
-    using DeathCallback = std::function<void()>;
-
-    static AVSessionManagerImpl& GetInstance();
-
-    std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
-                                             const AppExecFwk::ElementName& elementName);
-
-    std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
-
-    std::shared_ptr<AVSessionController> CreateController(int32_t sessionId);
-
-    std::vector<AVSessionDescriptor> GetActivatedSessionDescriptors();
-
-    int32_t GetSessionDescriptorsBySessionId(int32_t sessionId, AVSessionDescriptor& descriptor);
-
-    int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener);
-
-    int32_t RegisterServiceDeathCallback(const DeathCallback& callback);
-
-    int32_t UnregisterServiceDeathCallback();
-
-    int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent);
-
-    int32_t SendSystemControlCommand(const AVControlCommand& command);
-
-private:
     AVSessionManagerImpl();
 
+    std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
+                                             const AppExecFwk::ElementName& elementName) override;
+
+    std::vector<AVSessionDescriptor> GetAllSessionDescriptors() override;
+
+    std::shared_ptr<AVSessionController> CreateController(const std::string& sessionId) override;
+
+    std::vector<AVSessionDescriptor> GetActivatedSessionDescriptors() override;
+
+    int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
+
+    int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) override;
+
+    int32_t RegisterServiceDeathCallback(const DeathCallback& callback) override;
+
+    int32_t UnregisterServiceDeathCallback() override;
+
+    int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
+
+    int32_t SendSystemControlCommand(const AVControlCommand& command) override;
+
+private:
     sptr<AVSessionServiceProxy> GetService();
 
     void OnServiceDied();

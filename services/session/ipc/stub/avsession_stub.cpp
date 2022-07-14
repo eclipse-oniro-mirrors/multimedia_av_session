@@ -44,7 +44,7 @@ int32_t AVSessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messa
 int32_t AVSessionStub::HandleGetSessionId(MessageParcel &data, MessageParcel &reply)
 {
     AVSessionTrace avSessionTrace("AVSessionStub::GetSessionId");
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(GetSessionId()), ERR_NONE, "write int32_t failed");
+    CHECK_AND_PRINT_LOG(reply.WriteString(GetSessionId()), "write int32_t failed");
     return ERR_NONE;
 }
 
@@ -58,7 +58,7 @@ int32_t AVSessionStub::HandleRegisterCallbackInner(MessageParcel &data, MessageP
     }
     auto callback = iface_cast<AVSessionCallbackProxy>(remoteObject);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(RegisterCallbackInner(callback)),
-        ERR_MARSHALLING, "write int32_t failed");
+                             ERR_NONE, "write int32_t failed");
     return ERR_NONE;
 }
 

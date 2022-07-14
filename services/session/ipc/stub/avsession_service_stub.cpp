@@ -79,7 +79,7 @@ int AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel &data, Me
 
 int AVSessionServiceStub::HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply)
 {
-    reply.WriteRemoteObject(CreateControllerInner(data.ReadInt32()));
+    reply.WriteRemoteObject(CreateControllerInner(data.ReadString()));
     return ERR_NONE;
 }
 

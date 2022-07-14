@@ -28,22 +28,21 @@ AVSessionProxy::AVSessionProxy(const sptr<IRemoteObject> &impl)
     SLOGD("construct");
 }
 
-int32_t AVSessionProxy::GetSessionId()
+std::string AVSessionProxy::GetSessionId()
 {
     AVSessionTrace trace("AVSessionProxy::GetSessionId");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, "", "session is destroyed");
     MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
-        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), "", "write interface token failed");
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, "", "remote is nullptr");
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_SESSION_ID, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "send request failed");
+        "", "send request failed");
 
-    int32_t sessionId = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(sessionId), AVSESSION_ERROR, "read sessionId failed");
+    std::string sessionId;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadString(sessionId), "", "read sessionId failed");
     return sessionId;
 }
 

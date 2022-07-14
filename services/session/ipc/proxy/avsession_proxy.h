@@ -29,7 +29,7 @@ class AVSessionProxy : public IRemoteProxy<IAVSession> {
 public:
     explicit AVSessionProxy(const sptr<IRemoteObject> &impl);
 
-    int32_t GetSessionId() override;
+    std::string GetSessionId() override;
 
     int32_t GetAVMetaData(AVMetaData& meta) override;
 

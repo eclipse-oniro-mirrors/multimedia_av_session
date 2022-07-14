@@ -17,19 +17,34 @@
 #include "avsession_errors.h"
 
 namespace OHOS::AVSession {
-int32_t SessionStack::AddSession(pid_t pid, sptr<AVSessionItem>& item)
+int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr<AVSessionItem>& item)
 {
     if (sessions_.size() > SessionContainer::SESSION_NUM_MAX) {
         return ERR_SESSION_EXCEED_MAX;
     }
-    sessions_[pid] = item;
+    sessions_.insert(std::make_pair(std::make_pair(pid, abilityName), item));
     stack_.push_front(item);
     return AVSESSION_SUCCESS;
 }
 
-sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid)
+std::vector<sptr<AVSessionItem>> SessionStack::RemoveSession(pid_t pid)
 {
-    auto it = sessions_.find(pid);
+    std::vector<sptr<AVSessionItem>> result;
+    for (auto it = sessions_.begin(); it != sessions_.end();) {
+        if (it->first.first == pid) {
+            result.push_back(it->second);
+            stack_.remove(it->second);
+            it = sessions_.erase(it);
+        } else {
+            it++;
+        }
+    }
+    return result;
+}
+
+sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid, const std::string &abilityName)
+{
+    auto it = sessions_.find(std::make_pair(pid, abilityName));
     if (it == sessions_.end()) {
         return nullptr;
     }
@@ -39,16 +54,16 @@ sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid)
     return result;
 }
 
-sptr<AVSessionItem> SessionStack::GetSession(pid_t pid)
+sptr<AVSessionItem> SessionStack::GetSession(pid_t pid, const std::string& abilityName)
 {
-    auto it = sessions_.find(pid);
+    auto it = sessions_.find(std::make_pair(pid, abilityName));
     if (it == sessions_.end()) {
         return nullptr;
     }
     return it->second;
 }
 
-sptr<AVSessionItem> SessionStack::GetSessionById(int32_t sessionId)
+sptr<AVSessionItem> SessionStack::GetSessionById(const std::string& sessionId)
 {
     for (const auto& session : stack_) {
         if (session->GetSessionId() == sessionId) {

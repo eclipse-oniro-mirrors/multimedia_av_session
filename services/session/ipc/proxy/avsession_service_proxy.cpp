@@ -90,7 +90,7 @@ std::vector<AVSessionDescriptor> AVSessionServiceProxy::GetAllSessionDescriptors
     return result;
 }
 
-std::shared_ptr<AVSessionController> AVSessionServiceProxy::CreateController(int32_t sessionId)
+std::shared_ptr<AVSessionController> AVSessionServiceProxy::CreateController(const std::string& sessionId)
 {
     auto object = CreateControllerInner(sessionId);
     if (object == nullptr) {
@@ -105,11 +105,11 @@ std::shared_ptr<AVSessionController> AVSessionServiceProxy::CreateController(int
     return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
 }
 
-sptr<IRemoteObject> AVSessionServiceProxy::CreateControllerInner(int32_t sessionId)
+sptr<IRemoteObject> AVSessionServiceProxy::CreateControllerInner(const std::string& sessionId)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), nullptr, "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionId), nullptr, "write sessionId failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(sessionId), nullptr, "write sessionId failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_CREATE_CONTROLLER, data, reply, option) == 0,

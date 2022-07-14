@@ -46,7 +46,7 @@ public:
 
     int32_t Destroy() override;
 
-    int32_t GetSessionId() override;
+    std::string GetSessionId() override;
 
     int64_t GetRealPlaybackPosition() override;
 

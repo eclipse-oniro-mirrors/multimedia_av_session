@@ -28,26 +28,28 @@
 namespace OHOS::AVSession {
 class AVSessionManager {
 public:
-    static std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
-                                                    const AppExecFwk::ElementName& elementName);
+    static AVSessionManager& GetInstance();
 
-    static std::vector<AVSessionDescriptor> GetAllSessionDescriptors();
+    virtual std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
+                                                     const AppExecFwk::ElementName& elementName) = 0;
 
-    static std::vector<AVSessionDescriptor> GetActivatedSessionDescriptors();
+    virtual std::vector<AVSessionDescriptor> GetAllSessionDescriptors() = 0;
 
-    static int32_t GetSessionDescriptorsBySessionId(int32_t sessionId, AVSessionDescriptor& descriptor);
+    virtual std::vector<AVSessionDescriptor> GetActivatedSessionDescriptors() = 0;
 
-    static std::shared_ptr<AVSessionController> CreateController(int32_t sessionld);
+    virtual int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) = 0;
 
-    static int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener);
+    virtual std::shared_ptr<AVSessionController> CreateController(const std::string& sessionId) = 0;
 
-    static int32_t RegisterServiceDeathCallback(const DeathCallback& callback);
+    virtual int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) = 0;
 
-    static int32_t UnregisterServiceDeathCallback();
+    virtual int32_t RegisterServiceDeathCallback(const DeathCallback& callback) = 0;
 
-    static int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent);
+    virtual int32_t UnregisterServiceDeathCallback() = 0;
 
-    static int32_t SendSystemControlCommand(const AVControlCommand& command);
+    virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
+
+    virtual int32_t SendSystemControlCommand(const AVControlCommand& command) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

@@ -25,15 +25,15 @@ namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
     : descriptor_(descriptor)
 {
-    SLOGI("constructor id=%{public}d", descriptor_.sessionId_);
+    SLOGI("constructor id=%{public}s", descriptor_.sessionId_.c_str());
 }
 
 AVSessionItem::~AVSessionItem()
 {
-    SLOGI("destroy id=%{public}d", descriptor_.sessionId_);
+    SLOGI("destroy id=%{public}s", descriptor_.sessionId_.c_str());
 }
 
-int32_t AVSessionItem::GetSessionId()
+std::string AVSessionItem::GetSessionId()
 {
     return descriptor_.sessionId_;
 }
@@ -50,7 +50,7 @@ int32_t AVSessionItem::Destroy()
         std::lock_guard lockGuard(lock_);
         for (auto it = controllers_.begin(); it != controllers_.end();) {
             SLOGI("pid=%{public}d", it->first);
-            it->second->HandleSessionDestory();
+            it->second->HandleSessionDestroy();
             controllers_.erase(it++);
         }
     }
@@ -325,22 +325,27 @@ int32_t AVSessionItem::UnRegisterCallbackForRemote()
 
 void AVSessionItem::SetPid(pid_t pid)
 {
-    pid_ = pid;
+    descriptor_.pid_ = pid;
 }
 
 void AVSessionItem::SetUid(uid_t uid)
 {
-    uid_ = uid;
+    descriptor_.uid_ = uid;
 }
 
 pid_t AVSessionItem::GetPid() const
 {
-    return pid_;
+    return descriptor_.pid_;
 }
 
-uid_t  AVSessionItem::GetUid()
+pid_t AVSessionItem::GetUid() const
 {
-    return uid_;
+    return descriptor_.uid_;
+}
+
+std::string AVSessionItem::GetAbilityName() const
+{
+    return descriptor_.elementName_.GetAbilityName();
 }
 
 void AVSessionItem::SetTop(bool top)

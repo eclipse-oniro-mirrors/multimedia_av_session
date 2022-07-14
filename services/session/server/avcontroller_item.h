@@ -49,9 +49,9 @@ public:
 
     int32_t Destroy() override;
 
-    int32_t GetSessionId() override;
+    std::string GetSessionId() override;
 
-    void HandleSessionDestory();
+    void HandleSessionDestroy();
 
     void HandlePlaybackStateChange(const AVPlaybackState &state);
 
@@ -63,7 +63,7 @@ public:
 
     pid_t GetPid() const;
 
-    bool HasSession(int32_t sessionId);
+    bool HasSession(const std::string& sessionId);
 
     void SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback);
 
@@ -72,7 +72,7 @@ protected:
 
 private:
     pid_t pid_;
-    int32_t sessionId_ = -1;
+    std::string sessionId_;
     sptr<AVSessionItem> session_;
     sptr<IAVControllerCallback> callback_;
     AVMetaData::MetaMaskType metaMask_;

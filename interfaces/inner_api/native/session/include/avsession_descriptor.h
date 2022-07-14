@@ -30,10 +30,12 @@ struct AVSessionDescriptor {
     bool WriteToParcel(Parcel& out) const;
     bool ReadFromParcel(Parcel &in);
 
-    int32_t sessionId_ = -1;
+    std::string sessionId_;
     int32_t sessionType_ {};
     std::string sessionTag_;
     AppExecFwk::ElementName elementName_;
+    pid_t pid_ {};
+    pid_t uid_ {};
     bool isActive_ {};
     bool isTopSession_ {};
     OutputDeviceInfo outputDeviceInfo_;

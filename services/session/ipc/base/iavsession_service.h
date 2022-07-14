@@ -43,7 +43,7 @@ public:
 
     virtual std::vector<AVSessionDescriptor> GetAllSessionDescriptors() = 0;
 
-    virtual sptr<IRemoteObject> CreateControllerInner(int32_t sessionId) = 0;
+    virtual sptr<IRemoteObject> CreateControllerInner(const std::string& sessionId) = 0;
 
     virtual int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
 

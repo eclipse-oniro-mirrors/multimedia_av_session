@@ -19,9 +19,11 @@
 namespace OHOS::AVSession {
 bool AVSessionDescriptor::WriteToParcel(Parcel &out) const
 {
-    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(sessionId_), false, "write sessionId failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(sessionId_), false, "write sessionId failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(sessionType_), false, "write sessionType failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(sessionTag_), false, "write sessionTag failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(pid_), false, "write pid failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(uid_), false, "write uid failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isActive_), false, "write isActive failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isTopSession_), false, "write isTopSession failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(outputDeviceInfo_.isRemote_), false, "write isRemote failed");
@@ -33,9 +35,11 @@ bool AVSessionDescriptor::WriteToParcel(Parcel &out) const
 
 bool AVSessionDescriptor::ReadFromParcel(Parcel &in)
 {
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(sessionId_), false, "Read sessionId failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(sessionId_), false, "Read sessionId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(sessionType_), false, "Read sessionType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(sessionTag_), false, "Read sessionTag failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(pid_), false, "Read pid failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(uid_), false, "Read uid failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isActive_), false, "Read isActive failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isTopSession_), false, "Read isTopSession failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(outputDeviceInfo_.isRemote_), false, "Read isRemote failed");

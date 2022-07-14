@@ -14,8 +14,8 @@
  */
 
 #include "avsession_service.h"
-
-#include <utility>
+#include <sstream>
+#include <iomanip>
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "iservice_registry.h"
@@ -23,6 +23,7 @@
 #include "system_ability_definition.h"
 #include "session_stack.h"
 #include "avsession_trace.h"
+#include "hash_calculator.h"
 
 namespace OHOS::AVSession {
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
@@ -99,7 +100,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem> &newTopSession
         return;
     }
 
-    SLOGI("uid=%{public}d sessionId=%{public}d", newTopSession->GetUid(), newTopSession->GetSessionId());
+    SLOGI("uid=%{public}d sessionId=%{public}s", newTopSession->GetUid(), newTopSession->GetSessionId().c_str());
     AVSessionDescriptor descriptor;
     {
         std::lock_guard lockGuard(sessionAndControllerLock_);
@@ -158,30 +159,34 @@ SessionContainer& AVSessionService::GetContainer()
     return sessionStack;
 }
 
-int32_t AVSessionService::AllocSessionId()
+std::string AVSessionService::AllocSessionId()
 {
-    std::lock_guard lockGuard(sessionIdsLock_);
-    while (true) {
-        auto it = std::find_if(sessionIds_.begin(), sessionIds_.end(),
-                               [this](const auto id) { return id == sessionSeqNum_; });
-        if (it == sessionIds_.end()) {
-            sessionIds_.push_back(sessionSeqNum_);
-            SLOGI("sessionId=%{public}d", sessionSeqNum_);
-            return sessionSeqNum_;
-        }
-        if (++sessionSeqNum_ < 0) {
-            sessionSeqNum_ = 0;
-        }
+    auto curNum = sessionSeqNum_++;
+    std::string id = std::to_string(GetCallingPid()) + "-" + std::to_string(GetCallingUid()) + "-" +
+                     std::to_string(curNum);
+    SLOGI("%{public}s", id.c_str());
+
+    HashCalculator hashCalculator;
+    CHECK_AND_RETURN_RET_LOG(hashCalculator.Init() == AVSESSION_SUCCESS, "", "hash init failed");
+    CHECK_AND_RETURN_RET_LOG(hashCalculator.Update(std::vector<uint8_t>(id.begin(), id.end())) == AVSESSION_SUCCESS,
+                             "", "hash update failed");
+    std::vector<uint8_t> hash;
+    CHECK_AND_RETURN_RET_LOG(hashCalculator.GetResult(hash) == AVSESSION_SUCCESS, "", "hash get result failed");
+
+    std::stringstream stream;
+    for (const auto byte : hash) {
+        stream << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(byte);
     }
+    return stream.str();
 }
 
-bool AVSessionService::ClientHasSession(pid_t pid)
+bool AVSessionService::AbilityHasSession(pid_t pid, const std::string& abilityName)
 {
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    return GetContainer().GetSession(pid) != nullptr;
+    return GetContainer().GetSession(pid, abilityName) != nullptr;
 }
 
-sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, int32_t sessionId)
+sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const std::string& sessionId)
 {
     std::lock_guard lockGuard(sessionAndControllerLock_);
     auto it = controllers_.find(pid);
@@ -230,6 +235,10 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
           elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str());
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = AllocSessionId();
+    if (descriptor.sessionId_.empty()) {
+        SLOGE("alloc session id failed");
+        return nullptr;
+    }
     descriptor.sessionTag_ = tag;
     descriptor.sessionType_ = type;
     descriptor.elementName_ = elementName;
@@ -241,7 +250,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
     result->SetPid(GetCallingPid());
     result->SetUid(GetCallingUid());
     result->SetServiceCallbackForRelease([this](AVSessionItem& session) { HandleSessionRelease(session); });
-    SLOGI("success sessionId=%{public}d", result->GetSessionId());
+    SLOGI("success sessionId=%{public}s", result->GetSessionId().c_str());
     {
         std::lock_guard lockGuard(sessionAndControllerLock_);
         if (topSession_ == nullptr) {
@@ -258,8 +267,8 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
     SLOGI("enter");
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    if (ClientHasSession(pid)) {
-        SLOGE("%{public}d already has a session", pid);
+    if (AbilityHasSession(pid, elementName.GetAbilityName())) {
+        SLOGE("process %{public}d %{public}s already has one session", pid, elementName.GetAbilityName().c_str());
         return nullptr;
     }
 
@@ -268,7 +277,7 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
         SLOGE("create new session failed");
         return nullptr;
     }
-    if (GetContainer().AddSession(pid, result) != AVSESSION_SUCCESS) {
+    if (GetContainer().AddSession(pid, elementName.GetAbilityName(), result) != AVSESSION_SUCCESS) {
         SLOGE("session num exceed max");
         return nullptr;
     }
@@ -292,7 +301,7 @@ std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
 
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem> &session)
 {
-    SLOGI("pid=%{public}d sessionId=%{public}d", pid, session->GetSessionId());
+    SLOGI("pid=%{public}d sessionId=%{public}s", pid, session->GetSessionId().c_str());
     sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(pid, session);
     if (result == nullptr) {
         SLOGE("malloc controller failed");
@@ -303,7 +312,7 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
     return result;
 }
 
-sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
+sptr<IRemoteObject> AVSessionService::CreateControllerInner(const std::string& sessionId)
 {
     AVSessionTrace mAVSessionTrace("AVSessionService::CreateControllerInner");
     auto pid = GetCallingPid();
@@ -315,7 +324,7 @@ sptr<IRemoteObject> AVSessionService::CreateControllerInner(int32_t sessionId)
 
     auto session = GetContainer().GetSessionById(sessionId);
     if (session == nullptr) {
-        SLOGE("no session id %{public}d", sessionId);
+        SLOGE("no session id %{public}s", sessionId.c_str());
         return nullptr;
     }
 
@@ -416,10 +425,10 @@ void AVSessionService::OnClientDied(pid_t pid)
 
 void AVSessionService::HandleSessionRelease(AVSessionItem &session)
 {
-    SLOGI("sessionId=%{public}d", session.GetSessionId());
+    SLOGI("sessionId=%{public}s", session.GetSessionId().c_str());
     NotifySessionRelease(session.GetDescriptor());
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    GetContainer().RemoveSession(session.GetPid());
+    GetContainer().RemoveSession(session.GetPid(), session.GetAbilityName());
     if (topSession_.GetRefPtr() == &session) {
         UpdateTopSession(nullptr);
     }
@@ -470,13 +479,13 @@ std::int32_t AVSessionService::Dump(std::int32_t fd, const std::vector<std::u16s
 
 void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid)
 {
-    auto session = GetContainer().RemoveSession(pid);
-    if (session != nullptr) {
-        SLOGI("remove sessionId=%{public}d", session->GetSessionId());
+    auto sessions = GetContainer().RemoveSession(pid);
+    for (const auto& session : sessions) {
+        if (topSession_ == session) {
+            UpdateTopSession(nullptr);
+        }
+        SLOGI("remove sessionId=%{public}s", session->GetSessionId().c_str());
         session->Destroy();
-    }
-    if (topSession_ == session) {
-        UpdateTopSession(nullptr);
     }
 }
 

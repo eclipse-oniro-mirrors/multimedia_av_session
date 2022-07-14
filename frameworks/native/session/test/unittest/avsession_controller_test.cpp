@@ -21,8 +21,6 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
-constexpr int64_t TestMicroSecond = 1000;
-
 class AVSessionControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -32,6 +30,9 @@ public:
 
     std::shared_ptr<AVSession> avsession_ = nullptr;
     std::shared_ptr<AVSessionController> controller_ = nullptr;
+
+    static constexpr int64_t TestMicroSecond = 1000;
+    static constexpr int SESSION_LEN = 64;
 };
 
 void AVSessionControllerTest::SetUpTestCase()
@@ -47,10 +48,11 @@ void AVSessionControllerTest::SetUp()
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName("demo");
     elementName.SetAbilityName("demo");
-    avsession_ = AVSessionManager::CreateSession("Application", AVSession::SESSION_TYPE_AUDIO, elementName);
+    avsession_ = AVSessionManager::GetInstance().CreateSession("Application", AVSession::SESSION_TYPE_AUDIO,
+                                                               elementName);
     ASSERT_NE(avsession_, nullptr);
 
-    controller_ = AVSessionManager::CreateController(avsession_->GetSessionId());
+    controller_ = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId());
     ASSERT_NE(controller_, nullptr);
 }
 
@@ -751,8 +753,8 @@ HWTEST_F(AVSessionControllerTest, SetPlaybackFilter002, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetSessionId001, TestSize.Level1)
 {
-    int32_t id = controller_->GetSessionId();
-    EXPECT_EQ(id >= 0, true);
+    std::string id = controller_->GetSessionId();
+    EXPECT_EQ(id.length() == SESSION_LEN, true);
     EXPECT_EQ(id, avsession_->GetSessionId());
 }
 
@@ -765,8 +767,8 @@ HWTEST_F(AVSessionControllerTest, GetSessionId001, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, GetSessionId002, TestSize.Level1)
 {
     EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
-    int32_t id = controller_->GetSessionId();
-    EXPECT_EQ(id, AVSESSION_ERROR);
+    std::string id = controller_->GetSessionId();
+    EXPECT_EQ(id, "");
 }
 
 /**

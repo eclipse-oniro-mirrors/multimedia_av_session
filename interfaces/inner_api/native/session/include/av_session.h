@@ -32,7 +32,7 @@ public:
         SESSION_TYPE_VIDEO
     };
 
-    virtual int32_t GetSessionId() = 0;
+    virtual std::string GetSessionId() = 0;
 
     virtual int32_t GetAVMetaData(AVMetaData& meta) = 0;
 
