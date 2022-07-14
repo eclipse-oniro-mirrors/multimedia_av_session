@@ -14,13 +14,7 @@
 import("//build/ohos.gni")
 
 config("avsession_common_config") {
-  include_dirs = [
-    "//foundation/multimedia/av_session/frameworks/native/session/include",
-    "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
-    "//foundation/multimedia/av_session/services/session/ipc/base",
-    "//foundation/multimedia/av_session/services/session/ipc/proxy",
-    "//foundation/multimedia/av_session/services/session/ipc/stub",
-  ]
+  include_dirs = [ "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include" ]
 }
 
 ohos_shared_library("avsession_common") {
@@ -39,13 +33,8 @@ ohos_shared_library("avsession_common") {
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:wantagent_innerkits",
-    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
-    "input:libmmi-client",
-    "ipc:ipc_core",
     "multimedia_image_standard:image_native",
-    "samgr_standard:samgr_proxy",
     "utils_base:utils",
   ]
 
