@@ -111,15 +111,13 @@ std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetActivatedSessionDescri
 int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(const std::string& sessionId,
                                                                AVSessionDescriptor& descriptor)
 {
-    std::vector<AVSessionDescriptor> allDescriptors = GetAllSessionDescriptors();
-    for (const auto& oneDescriptor : allDescriptors) {
-        if (oneDescriptor.sessionId_ == sessionId) {
-            descriptor = oneDescriptor;
-            return AVSESSION_SUCCESS;
-        }
+    if (sessionId.empty()) {
+        SLOGE("sessionId is invalid");
+        return ERR_INVALID_PARAM;
     }
-    SLOGI("sessionId %{public}s is not exist", sessionId.c_str());
-    return AVSESSION_ERROR;
+
+    auto service = GetService();
+    return service ? service->GetSessionDescriptorsBySessionId(sessionId, descriptor) : ERR_SERVICE_NOT_EXIST;
 }
 
 std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(const std::string& sessionId)
@@ -153,9 +151,10 @@ int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<Sess
     if (listener_ == nullptr) {
         return ERR_NO_MEMORY;
     }
-    if (service->RegisterSessionListener(listener_) != AVSESSION_SUCCESS) {
+    auto ret = service->RegisterSessionListener(listener_);
+    if (ret != AVSESSION_SUCCESS) {
         listener_.clear();
-        return AVSESSION_ERROR;
+        return ret;
     }
     return AVSESSION_SUCCESS;
 }

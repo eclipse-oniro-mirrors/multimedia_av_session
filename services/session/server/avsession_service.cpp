@@ -20,6 +20,7 @@
 #include "avsession_log.h"
 #include "iservice_registry.h"
 #include "key_event_adapter.h"
+#include "permission_checker.h"
 #include "system_ability_definition.h"
 #include "session_stack.h"
 #include "avsession_trace.h"
@@ -291,12 +292,38 @@ std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
 {
     AVSessionTrace mAVSessionTrace("AVSessionService::GetAllSessionDescriptors");
     std::vector<AVSessionDescriptor> result;
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        return result;
+    }
+
     std::lock_guard lockGuard(sessionAndControllerLock_);
     for (const auto& session: GetContainer().GetAllSessions()) {
         result.push_back(session->GetDescriptor());
     }
     SLOGI("size=%{public}d", static_cast<int>(result.size()));
     return result;
+}
+
+int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& sessionId,
+    AVSessionDescriptor& descriptor)
+{
+    AVSessionTrace mAVSessionTrace("AVSessionService::GetSessionDescriptorsBySessionId");
+    std::lock_guard lockGuard(sessionAndControllerLock_);
+    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "session not exist");
+
+    auto pid = GetCallingPid();
+    if (pid == session->GetPid()) {
+        descriptor = session->GetDescriptor();
+        return AVSESSION_SUCCESS;
+    }
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    descriptor = session->GetDescriptor();
+    return AVSESSION_SUCCESS;
 }
 
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem> &session)
@@ -315,6 +342,10 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
 sptr<IRemoteObject> AVSessionService::CreateControllerInner(const std::string& sessionId)
 {
     AVSessionTrace mAVSessionTrace("AVSessionService::CreateControllerInner");
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        return nullptr;
+    }
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (GetPresentController(pid, sessionId) != nullptr) {
@@ -354,6 +385,10 @@ void AVSessionService::RemoveSessionListener(pid_t pid)
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
     SLOGI("enter");
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        return ERR_NO_PERMISSION;
+    }
     AddSessionListener(GetCallingPid(), listener);
     return AVSESSION_SUCCESS;
 }
@@ -361,6 +396,10 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSessionTrace mAVSessionTrace("AVSessionService::SendSystemAVKeyEvent");
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SLOGI("key=%{public}d", keyEvent.GetKeyCode());
     if (topSession_) {
         topSession_->HandleMediaKeyEvent(keyEvent);
@@ -373,6 +412,10 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
     AVSessionTrace mAVSessionTrace("AVSessionService::SendSystemControlCommand");
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SLOGI("cmd=%{public}d", command.GetCommand());
     if (topSession_) {
         topSession_->ExecuteControllerCommand(command);

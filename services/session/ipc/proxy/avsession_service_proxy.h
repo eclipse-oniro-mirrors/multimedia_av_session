@@ -34,6 +34,8 @@ public:
 
     std::vector<AVSessionDescriptor> GetAllSessionDescriptors() override;
 
+    int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
+
     std::shared_ptr<AVSessionController> CreateController(const std::string& sessionId);
 
     sptr<IRemoteObject> CreateControllerInner(const std::string& sessionId) override;
