@@ -109,8 +109,15 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     AVSessionTrace avSessionTrace("AVSessionItem::GetControllerInner");
     std::lock_guard lockGuard(lock_);
     auto iter = controllers_.find(GetPid());
-    CHECK_AND_RETURN_RET_LOG(iter != controllers_.end(), nullptr, "controller is nullptr");
-    return iter->second;
+    if (iter != controllers_.end()) {
+        return iter->second;
+    }
+
+    sptr<AVSessionItem> session(this);
+    sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(GetPid(), session);
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "malloc controller failed");
+    controllers_.insert({ GetPid(), result });
+    return result;
 }
 
 int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback> &callback)

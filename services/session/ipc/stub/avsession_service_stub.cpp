@@ -77,6 +77,17 @@ int AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel &data, Me
     return ERR_NONE;
 }
 
+int AVSessionServiceStub::HandleGetSessionDescriptorsById(MessageParcel &data, MessageParcel &reply)
+{
+    AVSessionDescriptor descriptor;
+    int32_t ret = GetSessionDescriptorsBySessionId(data.ReadString(), descriptor);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(descriptor.WriteToParcel(reply), "write AVSessionDescriptor failed");
+    }
+    return ERR_NONE;
+}
+
 int AVSessionServiceStub::HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply)
 {
     reply.WriteRemoteObject(CreateControllerInner(data.ReadString()));

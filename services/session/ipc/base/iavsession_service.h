@@ -30,6 +30,7 @@ public:
     enum {
         SERVICE_CMD_CREATE_SESSION,
         SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS,
+        SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID,
         SERVICE_CMD_CREATE_CONTROLLER,
         SERVICE_CMD_REGISTER_SESSION_LISTENER,
         SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT,
@@ -42,6 +43,9 @@ public:
                                                    const AppExecFwk::ElementName& elementName) = 0;
 
     virtual std::vector<AVSessionDescriptor> GetAllSessionDescriptors() = 0;
+
+    virtual int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId,
+        AVSessionDescriptor& descriptor) = 0;
 
     virtual sptr<IRemoteObject> CreateControllerInner(const std::string& sessionId) = 0;
 

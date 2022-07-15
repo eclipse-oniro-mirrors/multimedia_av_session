@@ -27,6 +27,7 @@ public:
 private:
     int HandleCreateSessionInner(MessageParcel &data, MessageParcel &reply);
     int HandleGetAllSessionDescriptors(MessageParcel &data, MessageParcel &reply);
+    int HandleGetSessionDescriptorsById(MessageParcel &data, MessageParcel &reply);
     int HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply);
     int HandleSendSystemAVKeyEvent(MessageParcel &data, MessageParcel &reply);
@@ -38,6 +39,7 @@ private:
     static inline HanlerFunc handlers[] = {
         [SERVICE_CMD_CREATE_SESSION] = &AVSessionServiceStub::HandleCreateSessionInner,
         [SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS] = &AVSessionServiceStub::HandleGetAllSessionDescriptors,
+        [SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID] = &AVSessionServiceStub::HandleGetSessionDescriptorsById,
         [SERVICE_CMD_CREATE_CONTROLLER] = &AVSessionServiceStub::HandleCreateControllerInner,
         [SERVICE_CMD_REGISTER_SESSION_LISTENER] = &AVSessionServiceStub::HandleRegisterSessionListener,
         [SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT] = &AVSessionServiceStub::HandleSendSystemAVKeyEvent,

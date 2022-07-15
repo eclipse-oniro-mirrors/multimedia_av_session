@@ -43,7 +43,10 @@ ohos_shared_library("avsession_service") {
     "server/session_stack.cpp",
   ]
 
-  adapter_sources = [ "adapter/key_event_adapter.cpp" ]
+  adapter_sources = [
+    "adapter/key_event_adapter.cpp",
+    "adapter/permission_checker.cpp",
+  ]
 
   sources = ipc_sources + adapter_sources + service_sources
 
@@ -64,6 +67,7 @@ ohos_shared_library("avsession_service") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",

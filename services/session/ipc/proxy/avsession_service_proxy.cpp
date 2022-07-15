@@ -90,6 +90,29 @@ std::vector<AVSessionDescriptor> AVSessionServiceProxy::GetAllSessionDescriptors
     return result;
 }
 
+int32_t AVSessionServiceProxy::GetSessionDescriptorsBySessionId(const std::string& sessionId,
+    AVSessionDescriptor& descriptor)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(sessionId), ERR_MARSHALLING, "write sessionId failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(descriptor.ReadFromParcel(reply), ERR_UNMARSHALLING, "read descriptor failed");
+    }
+    return ret;
+}
+
 std::shared_ptr<AVSessionController> AVSessionServiceProxy::CreateController(const std::string& sessionId)
 {
     auto object = CreateControllerInner(sessionId);
