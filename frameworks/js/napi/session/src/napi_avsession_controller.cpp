@@ -230,7 +230,7 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
 {
     AVSessionTrace::TraceBegin("NapiAVSessionController::GetLaunchAbility", NAPI_GET_LAUNCH_ABILITY_TASK_ID);
     struct ConcreteContext : public ContextBase {
-        AbilityRuntime::WantAgent::WantAgent *ability {};
+        AbilityRuntime::WantAgent::WantAgent ability;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
@@ -243,7 +243,7 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
             SLOGE("native controller is nullptr");
             return;
         }
-        int32_t ret = napiController->controller_->GetLaunchAbility(*context->ability);
+        int32_t ret = napiController->controller_->GetLaunchAbility(context->ability);
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "controller GetLaunchAbility failed";
