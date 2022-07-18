@@ -372,7 +372,8 @@ napi_status NapiUtils::SetValue(napi_env env, const AbilityRuntime::WantAgent::W
 {
     auto status = napi_create_object(env, &out);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    status = napi_wrap(env, out, (void *)&in, nullptr, nullptr, nullptr);
+    auto finalizecb = [](napi_env env, void *data, void *hint) {};
+    status = napi_wrap(env, out, (void *)&in, finalizecb, nullptr, nullptr);
     CHECK_RETURN(status == napi_ok, "wrap object failed", napi_generic_failure);
     return status;
 }
