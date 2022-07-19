@@ -31,7 +31,7 @@ public:
 
     virtual void OnSessionRelease(const AVSessionDescriptor& descriptor) = 0;
 
-    virtual void OnTopSessionChanged(const AVSessionDescriptor& descriptor) = 0;
+    virtual void OnTopSessionChange(const AVSessionDescriptor& descriptor) = 0;
 
     virtual ~SessionListener() = default;
 };

@@ -47,7 +47,7 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
     }
     service_ = iface_cast<AVSessionServiceProxy>(object);
     if (service_ != nullptr) {
-        auto recipient = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDied(); });
+        auto recipient = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDie(); });
         if (recipient != nullptr) {
             sptr<IAVSessionService> serviceBase = service_;
             serviceBase->AsObject()->AddDeathRecipient(recipient);
@@ -58,7 +58,7 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
     return service_;
 }
 
-void AVSessionManagerImpl::OnServiceDied()
+void AVSessionManagerImpl::OnServiceDie()
 {
     SLOGI("enter");
     auto callback = deathCallback_;

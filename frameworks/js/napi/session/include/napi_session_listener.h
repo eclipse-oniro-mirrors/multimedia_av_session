@@ -16,6 +16,7 @@
 #ifndef OHOS_NAPI_SESSIONLISTENER_H
 #define OHOS_NAPI_SESSIONLISTENER_H
 
+#include <list>
 #include <memory>
 #include "avsession_info.h"
 #include "avsession_manager.h"
@@ -39,10 +40,10 @@ public:
 
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
     void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
-    void OnTopSessionChanged(const AVSessionDescriptor& descriptor) override;
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
-    napi_status RemoveCallback(napi_env env, int32_t event);
+    napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
 
 private:
     template<typename T>
@@ -50,7 +51,7 @@ private:
 
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::mutex lock_;
-    napi_ref callbacks_[EVENT_TYPE_MAX] {};
+    std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_SESSIONLISTENER_H

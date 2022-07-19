@@ -62,7 +62,7 @@ public:
         descriptor_ = descriptor;
     }
 
-    void OnTopSessionChanged(const AVSessionDescriptor &descriptor) override
+    void OnTopSessionChange(const AVSessionDescriptor &descriptor) override
     {
         SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }

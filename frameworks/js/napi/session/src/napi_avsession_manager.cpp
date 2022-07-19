@@ -30,15 +30,15 @@
 namespace OHOS::AVSession {
 std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAVSessionManager::OffEventHandlerType>>
     NapiAVSessionManager::eventHandlers_ = {
-    { "sessionCreated", { OnSessionCreated, OffSessionCreated } },
-    { "sessionDestroyed", { OnSessionDestroyed, OffSessionDestroyed } },
-    { "topSessionChanged", { OnTopSessionChanged, OffTopSessionChanged } },
-    { "sessionServiceDied", { OnServiceDied, OffServiceDied } },
+    { "sessionCreate", { OnSessionCreate, OffSessionCreate } },
+    { "sessionDestroy", { OnSessionDestroy, OffSessionDestroy } },
+    { "topSessionChange", { OnTopSessionChange, OffTopSessionChange } },
+    { "sessionServiceDie", { OnServiceDie, OffServiceDie } },
 };
 
 std::shared_ptr<NapiSessionListener> NapiAVSessionManager::listener_;
 std::shared_ptr<NapiAsyncCallback> NapiAVSessionManager::asyncCallback_;
-napi_ref NapiAVSessionManager::serviceDiedCallback_;
+std::list<napi_ref> NapiAVSessionManager::serviceDiedCallbacks_;
 
 napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 {
@@ -232,10 +232,14 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
     AVSessionTrace avSessionTrace("NapiAVSessionManager::OffEvent");
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
-    auto input = [&eventName, env, &context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number");
+    napi_value callback = nullptr;
+    auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number");
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+        if (argc == ARGC_TWO) {
+            callback = argv[ARGV_SECOND];
+        }
     };
 
     context->GetCbInfo(env, info, input, true);
@@ -251,7 +255,7 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
         return NapiUtils::GetUndefinedValue(env);
     }
 
-    if (it->second.second(env) != napi_ok) {
+    if (it->second.second(env, callback) != napi_ok) {
         napi_throw_error(env, nullptr, "remove event callback failed");
     }
 
@@ -311,24 +315,32 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
     return NapiAsyncWork::Enqueue(env, context, "SendSystemControlCommand", executor);
 }
 
-napi_status NapiAVSessionManager::OnSessionCreated(napi_env env, napi_value callback)
+napi_status NapiAVSessionManager::OnSessionCreate(napi_env env, napi_value callback)
 {
     return listener_->AddCallback(env, NapiSessionListener::EVENT_SESSION_CREATED, callback);
 }
 
-napi_status NapiAVSessionManager::OnSessionDestroyed(napi_env env, napi_value callback)
+napi_status NapiAVSessionManager::OnSessionDestroy(napi_env env, napi_value callback)
 {
     return listener_->AddCallback(env, NapiSessionListener::EVENT_SESSION_DESTROYED, callback);
 }
 
-napi_status NapiAVSessionManager::OnTopSessionChanged(napi_env env, napi_value callback)
+napi_status NapiAVSessionManager::OnTopSessionChange(napi_env env, napi_value callback)
 {
     return listener_->AddCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED, callback);
 }
 
-napi_status NapiAVSessionManager::OnServiceDied(napi_env env, napi_value callback)
+napi_status NapiAVSessionManager::OnServiceDie(napi_env env, napi_value callback)
 {
-    NAPI_CALL_BASE(env, napi_create_reference(env, callback, 1, &serviceDiedCallback_), napi_generic_failure);
+    napi_ref ref = nullptr;
+    CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, serviceDiedCallbacks_, callback, ref),
+                             napi_generic_failure, "get callback reference failed");
+    CHECK_AND_RETURN_RET_LOG(ref == nullptr, napi_ok, "callback has been registered");
+    napi_status status = napi_create_reference(env, callback, ARGC_ONE, &ref);
+    if (status != napi_ok) {
+        SLOGE("napi_create_reference failed");
+        return status;
+    }
     if (asyncCallback_ == nullptr) {
         asyncCallback_ = std::make_shared<NapiAsyncCallback>(env);
         if (asyncCallback_ == nullptr) {
@@ -336,6 +348,7 @@ napi_status NapiAVSessionManager::OnServiceDied(napi_env env, napi_value callbac
             return napi_generic_failure;
         }
     }
+    serviceDiedCallbacks_.push_back(ref);
     if (AVSessionManager::GetInstance().RegisterServiceDeathCallback(HandleServiceDied) != AVSESSION_SUCCESS) {
         return napi_generic_failure;
     }
@@ -344,31 +357,46 @@ napi_status NapiAVSessionManager::OnServiceDied(napi_env env, napi_value callbac
 
 void NapiAVSessionManager::HandleServiceDied()
 {
-    if (serviceDiedCallback_ != nullptr && asyncCallback_ != nullptr) {
-        asyncCallback_->Call(serviceDiedCallback_);
+    if (!serviceDiedCallbacks_.empty() && asyncCallback_ != nullptr) {
+        for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
+             ++callbackRef) {
+            asyncCallback_->Call(*callbackRef);
+        }
     }
 }
 
-napi_status NapiAVSessionManager::OffSessionCreated(napi_env env)
+napi_status NapiAVSessionManager::OffSessionCreate(napi_env env, napi_value callback)
 {
-    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SESSION_CREATED);
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SESSION_CREATED, callback);
 }
 
-napi_status NapiAVSessionManager::OffSessionDestroyed(napi_env env)
+napi_status NapiAVSessionManager::OffSessionDestroy(napi_env env, napi_value callback)
 {
-    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SESSION_DESTROYED);
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SESSION_DESTROYED, callback);
 }
 
-napi_status NapiAVSessionManager::OffTopSessionChanged(napi_env env)
+napi_status NapiAVSessionManager::OffTopSessionChange(napi_env env, napi_value callback )
 {
-    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED);
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED, callback);
 }
 
-napi_status NapiAVSessionManager::OffServiceDied(napi_env env)
+napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)
 {
     AVSessionManager::GetInstance().UnregisterServiceDeathCallback();
-    auto status = napi_delete_reference(env, serviceDiedCallback_);
-    serviceDiedCallback_ = nullptr;
-    return status;
+    if (callback == nullptr) {
+        for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
+             ++callbackRef) {
+            napi_status ret = napi_delete_reference(env, *callbackRef);
+            CHECK_AND_RETURN_RET_LOG(napi_ok == ret, ret, "delete callback reference failed");
+        }
+        serviceDiedCallbacks_.clear();
+        return napi_ok;
+    }
+    napi_ref ref = nullptr;
+    CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, serviceDiedCallbacks_, callback, ref),
+                             napi_generic_failure, "get callback reference failed");
+    CHECK_AND_RETURN_RET_LOG(ref != nullptr, napi_ok, "callback has been remove");
+    serviceDiedCallbacks_.remove(ref);
+    return napi_delete_reference(env, ref);
 }
 }

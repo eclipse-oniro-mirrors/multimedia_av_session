@@ -16,6 +16,7 @@
 #ifndef OHOS_NAPI_AVSESSION_CALLBACK_H
 #define OHOS_NAPI_AVSESSION_CALLBACK_H
 
+#include <list>
 #include "avsession_info.h"
 #include "key_event.h"
 #include "napi/native_api.h"
@@ -59,7 +60,7 @@ public:
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
-    napi_status RemoveCallback(napi_env env, int32_t event);
+    napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
 
 private:
     void HandleEvent(int32_t event);
@@ -69,7 +70,7 @@ private:
 
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
-    napi_ref callbacks_[EVENT_TYPE_MAX] {};
+    std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_CALLBACK_H
