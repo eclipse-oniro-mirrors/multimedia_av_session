@@ -14,30 +14,10 @@
  */
 
 #include "focus_session_strategy.h"
-
-#include <sys/types.h>
-#include <unistd.h>
 #include "avsession_log.h"
+#include "audio_adapter.h"
 
 namespace OHOS::AVSession {
-AVSessionAudioRendererStateChangeCallback::AVSessionAudioRendererStateChangeCallback(
-    const StateChangeNotifier &notifier) : notifier_(notifier)
-{
-    SLOGI("construct");
-}
-
-AVSessionAudioRendererStateChangeCallback::~AVSessionAudioRendererStateChangeCallback()
-{
-    SLOGI("destroy");
-}
-
-void AVSessionAudioRendererStateChangeCallback::OnRendererStateChange(const AudioRendererChangeInfos& infos)
-{
-    if (notifier_) {
-        notifier_(infos);
-    }
-}
-
 FocusSessionStrategy::FocusSessionStrategy()
 {
     SLOGI("construct");
@@ -51,13 +31,9 @@ FocusSessionStrategy::~FocusSessionStrategy()
 
 void FocusSessionStrategy::Init()
 {
-    SLOGI("register audio renderer event listener");
-    audioRendererStateChangeCallback_ = std::make_shared<AVSessionAudioRendererStateChangeCallback>(
-        [this](const auto &infos) { HandleAudioRenderStateChangeEvent(infos); }
-    );
-
-    AudioStandard::AudioStreamManager::GetInstance()->RegisterAudioRendererEventListener(
-        getpid(), audioRendererStateChangeCallback_);
+    AudioAdapter::GetInstance().AddStreamRendererStateListener([this](const auto& infos) {
+        HandleAudioRenderStateChangeEvent(infos);
+    });
 }
 
 void FocusSessionStrategy::RegisterFocusSessionChangeCallback(const FocusSessionChangeCallback &callback)
@@ -72,7 +48,6 @@ void FocusSessionStrategy::RegisterFocusSessionSelector(const FocusSessionSelect
 
 void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos &infos)
 {
-    SLOGI("enter");
     FocusSessionChangeInfo focusSessionChangeInfo;
     if (SelectFocusSession(infos, focusSessionChangeInfo)) {
         if (callback_) {
@@ -81,20 +56,35 @@ void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRenderer
     }
 }
 
-bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info) const
+bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info)
 {
-    return info.rendererState == AudioStandard::RendererState::RENDERER_RUNNING;
+    if (info.rendererState == AudioStandard::RendererState::RENDERER_RUNNING) {
+        std::lock_guard lockGuard(stateLock_);
+        auto it = lastStates_.find(info.clientUID);
+        if (it == lastStates_.end()) {
+            return true;
+        }
+        if (it->second != AudioStandard::RendererState::RENDERER_RUNNING) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos &infos,
                                               FocusSessionChangeInfo& sessionInfo)
 {
-    SLOGI("size=%{public}d", static_cast<int>(infos.size()));
     for (const auto& info : infos) {
-        SLOGI("clientUID=%{public}d rendererState=%{public}d", info->clientUID, info->rendererState);
         if (!IsFocusSession(*info)) {
+            std::lock_guard lockGuard(stateLock_);
+            lastStates_[info->clientUID] = info->rendererState;
             continue;
         }
+        {
+            std::lock_guard lockGuard(stateLock_);
+            lastStates_[info->clientUID] = info->rendererState;
+        }
+        SLOGI("uid=%{public}d state=%{public}d", info->clientUID, info->rendererState);
         sessionInfo.uid = info->clientUID;
         if (selector_ != nullptr && !selector_(sessionInfo)) {
             continue;

@@ -38,6 +38,7 @@ struct AVSessionDescriptor {
     pid_t uid_ {};
     bool isActive_ {};
     bool isTopSession_ {};
+    bool thirdPartyApp {};
     OutputDeviceInfo outputDeviceInfo_;
 };
 } // namespace OHOS::AVSession

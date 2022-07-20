@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/multimedia/av_session/config.gni")
 
 group("avession_server") {
   deps = [
@@ -39,11 +40,14 @@ ohos_shared_library("avsession_service") {
     "server/avsession_dumper.cpp",
     "server/avsession_item.cpp",
     "server/avsession_service.cpp",
+    "server/background_audio_controller.cpp",
     "server/focus_session_strategy.cpp",
     "server/session_stack.cpp",
   ]
 
   adapter_sources = [
+    "adapter/app_manager_adapter.cpp",
+    "adapter/audio_adapter.cpp",
     "adapter/key_event_adapter.cpp",
     "adapter/permission_checker.cpp",
   ]
@@ -59,6 +63,10 @@ ohos_shared_library("avsession_service") {
     "//foundation/multimedia/av_session/services/session/adapter",
   ]
 
+  if (multimedia_av_session_enable_background_audio_control) {
+    cflags = [ "-DENABLE_BACKGROUND_AUDIO_CONTROL" ]
+  }
+
   deps = [
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/utils:avsession_utils",
@@ -66,6 +74,7 @@ ohos_shared_library("avsession_service") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "hitrace_native:hitrace_meter",

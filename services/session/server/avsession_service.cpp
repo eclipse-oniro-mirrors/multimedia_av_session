@@ -16,6 +16,9 @@
 #include "avsession_service.h"
 #include <sstream>
 #include <iomanip>
+#include "accesstoken_kit.h"
+#include "app_manager_adapter.h"
+#include "audio_adapter.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "iservice_registry.h"
@@ -47,8 +50,13 @@ void AVSessionService::OnStart()
         SLOGE("publish avsession service failed");
     }
 
+#ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
+    backgroundAudioController_.Init();
+    AddInnerSessionListener(&backgroundAudioController_);
+#endif
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     AddSystemAbilityListener(AUDIO_POLICY_SERVICE_ID);
+    AddSystemAbilityListener(APP_MGR_SERVICE_ID);
 }
 
 void AVSessionService::OnDump()
@@ -66,7 +74,10 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             InitKeyEvent();
             break;
         case AUDIO_POLICY_SERVICE_ID:
-            InitFocusSessionStrategy();
+            InitAudio();
+            break;
+        case APP_MGR_SERVICE_ID:
+            InitAMS();
             break;
         default:
             SLOGE("undefined system ability %{public}d", systemAbilityId);
@@ -142,9 +153,10 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
     return false;
 }
 
-void AVSessionService::InitFocusSessionStrategy()
+void AVSessionService::InitAudio()
 {
     SLOGI("enter");
+    AudioAdapter::GetInstance().Init();
     focusSessionStrategy_.Init();
     focusSessionStrategy_.RegisterFocusSessionChangeCallback([this] (const auto &info) {
         HandleFocusSession(info);
@@ -152,6 +164,12 @@ void AVSessionService::InitFocusSessionStrategy()
     focusSessionStrategy_.RegisterFocusSessionSelector([this] (const auto& info) {
         return SelectFocusSession(info);
     });
+}
+
+void AVSessionService::InitAMS()
+{
+    SLOGI("enter");
+    AppManagerAdapter::GetInstance().Init();
 }
 
 SessionContainer& AVSessionService::GetContainer()
@@ -205,6 +223,9 @@ sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const s
 void AVSessionService::NotifySessionCreate(const AVSessionDescriptor &descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
+    for (const auto& listener : innerSessionListeners_) {
+        listener->OnSessionCreate(descriptor);
+    }
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSessionTrace trace("AVSessionService::OnSessionCreate");
         listener->OnSessionCreate(descriptor);
@@ -214,6 +235,9 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor &descriptor
 void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
+    for (const auto& listener : innerSessionListeners_) {
+        listener->OnSessionRelease(descriptor);
+    }
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSessionTrace trace("AVSessionService::OnSessionDestroy");
         listener->OnSessionRelease(descriptor);
@@ -223,13 +247,16 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
 void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor &descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
+    for (const auto& listener : innerSessionListeners_) {
+        listener->OnTopSessionChanged(descriptor);
+    }
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSessionTrace trace("AVSessionService::OnTopSessionChanged");
         listener->OnTopSessionChanged(descriptor);
     }
 }
 
-sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, int32_t type,
+sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
 {
     SLOGI("%{public}s %{public}d %{public}s %{public}s", tag.c_str(), type,
@@ -243,6 +270,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
     descriptor.sessionTag_ = tag;
     descriptor.sessionType_ = type;
     descriptor.elementName_ = elementName;
+    descriptor.thirdPartyApp = thirdPartyApp;
 
     sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor);
     if (result == nullptr) {
@@ -273,7 +301,7 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
         return nullptr;
     }
 
-    auto result = CreateNewSession(tag, type, elementName);
+    auto result = CreateNewSession(tag, type, !PermissionChecker::GetInstance().CheckSystemPermission(), elementName);
     if (result == nullptr) {
         SLOGE("create new session failed");
         return nullptr;
@@ -380,6 +408,12 @@ void AVSessionService::RemoveSessionListener(pid_t pid)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     sessionListeners_.erase(pid);
+}
+
+void AVSessionService::AddInnerSessionListener(SessionListener *listener)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    innerSessionListeners_.push_back(listener);
 }
 
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
