@@ -21,14 +21,14 @@ import image from './@ohos.multimedia.image';
 import audio from './@ohos.multimedia.audio';
 
 /**
- * @name avsession
+ * @name avSession
  * @syscap SystemCapability.Multimedia.AVSession.Core
  * @import import avsession from '@ohos.multimedia.avsession';
  * @since 9
  */
-declare namespace avsession {
+declare namespace avSession {
   /**
-   * Create an avsession instance. An ability can only create one AVSession
+   * Create an AVSession instance. An ability can only create one AVSession
    * @param tag A user-defined name for this session
    * @param type The type of session {@link AVSessionType}
    * @param {AsyncCallback<AVSession>} [callback] - callback.
@@ -36,8 +36,8 @@ declare namespace avsession {
    * @syscap SystemCapability.Multimedia.AVSession.Core
    * @since 9
    */
-  function createAVSession(tag: string, type: AVSessionType, callback: AsyncCallback<AVSession>): void;
-  function createAVSession(tag: string, type: AVSessionType): Promise<AVSession>;
+  function createAVSession(context: Context, tag: string, type: AVSessionType, callback: AsyncCallback<AVSession>): void;
+  function createAVSession(context: Context, tag: string, type: AVSessionType): Promise<AVSession>;
 
   /**
    * Get all avsession descriptors of the system
@@ -106,54 +106,26 @@ declare namespace avsession {
     uid: number;
   }
   /**
-   * Register system session creation or deletion callback
-   * @param type Registration Type, session creation or deletion
+   * Register or unregister system session changed callback
+   * @param type Registration Type, session creation, deletion or top priority session changed
    * @param callback Used to return the descriptor of created or delete session
    * @since 9
    * @syscap SystemCapability.Multimedia.AVSession.Manager
    * @systemapi Hide this for inner system use
    * @permission ohos.permission.MANAGE_MEDIA_RESOURCES
    */
-  function on(type: 'sessionCreated' | 'sessionDestroyed', callback: (session: AVSessionDescriptor) => void): void;
+  function on(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback: (session: AVSessionDescriptor) => void): void;
+  function off(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback?: (session: AVSessionDescriptor) => void): void;
 
   /**
-   * Register the top priority session change callback
-   * @param type Registration Type
-   * @param callback Used to return the descriptor of the top priority session
-   * @since 9
-   * @syscap SystemCapability.Multimedia.AVSession.Manager
-   * @systemapi Hide this for inner system use
-   * @permission ohos.permission.MANAGE_MEDIA_RESOURCES
-   */
-  function on(type: 'topSessionChanged', callback: (session: AVSessionDescriptor) => void): void;
-
-  /**
-   * Session service death callback, notifying the application to clean up resources.
+   * Register or unregister Session service death callback, notifying the application to clean up resources.
    * @param type Registration Type
    * @param callback Used to handle the session service death event.
    * @since 9
    * @syscap SystemCapability.Multimedia.AVSession.Core
    */
-  function on(type: 'sessionServiceDied', callback: () => void): void;
-
-  /**
-   * Unregister sessionServiceDied callback.
-   * @param type Registration Type
-   * @since 9
-   * @syscap SystemCapability.Multimedia.AVSession.Core
-   */
-  function off(type: 'sessionServiceDied'): void;
-
-  /**
-   * Unregister callback
-   * @param type Registration Type
-   * @return -
-   * @since 9
-   * @syscap SystemCapability.Multimedia.AVSession.Manager
-   * @systemapi Hide this for inner system use
-   * @permission ohos.permission.MANAGE_MEDIA_RESOURCES
-   */
-  function off(type: 'sessionCreated' | 'sessionDestroyed' | 'topSessionChanged'): void;
+  function on(type: 'sessionServiceDie', callback: () => void): void;
+  function off(type: 'sessionServiceDie', callback?: () => void): void;
 
   /**
    * Send system media key event.The system automatically selects the recipient.
@@ -185,7 +157,7 @@ declare namespace avsession {
   /**
    * session type.
    */
-  type AVSessionType = 'audio'|'video';
+  type AVSessionType = 'audio' | 'video';
   /**
    * AVSession object.
    * @since 9
@@ -268,7 +240,7 @@ declare namespace avsession {
     getOutputDevice(): Promise<OutputDeviceInfo>;
 
     /**
-     * Register playback command callback.
+     * Register or unregister playback command callback.
      * As long as it is registered, it means that the ability supports this command.
      * If you cancel the callback, you need to call off {@link off}
      * When canceling the callback, need to update the supported commands list.
@@ -279,37 +251,41 @@ declare namespace avsession {
      * @since 9
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
-    on(type: 'play'|'pause'|'stop'|'playNext'|'playPrevious'|'fastForward'|'rewind', callback: () => void):void;
+    on(type: 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward' | 'rewind', callback: () => void): void;
+    off(type: 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward' | 'rewind', callback?: () => void): void;
 
     /**
-     * Register seek command callback
+     * Register or unregister seek command callback
      * @param type Registration Type 'seek'
      * @param callback Used to handle seek command.The callback provide the seek time(ms)
      * @since 9
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     on(type: 'seek', callback: (time: number) => void): void;
+    off(type: 'seek', callback?: (time: number) => void): void;
 
     /**
-     * Register setSpeed command callback
+     * Register or unregister setSpeed command callback
      * @param type Registration Type 'setSpeed'
      * @param callback Used to handle setSpeed command.The callback provide the speed value
      * @since 9
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     on(type: 'setSpeed', callback: (speed: number) => void): void;
+    off(type: 'setSpeed', callback?: (speed: number) => void): void;
 
     /**
-     * Register setLoopMode command callback
+     * Register or unregister setLoopMode command callback
      * @param type Registration Type 'setLoopMode'
      * @param callback Used to handle setLoopMode command.The callback provide the {@link LoopMode}
      * @since 9
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     on(type: 'setLoopMode', callback: (mode: LoopMode) => void): void;
+    off(type: 'setLoopMode', callback?: (mode: LoopMode) => void): void;
 
     /**
-     * Register toggle favorite command callback
+     * Register or unregister toggle favorite command callback
      * @param type Registration Type 'toggleFavorite'
      * @param callback Used to handle toggleFavorite command.The callback provide
      * the assetId for which the favorite status needs to be switched.
@@ -317,34 +293,29 @@ declare namespace avsession {
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     on(type: 'toggleFavorite', callback: (assetId: string) => void): void;
+    off(type: 'toggleFavorite', callback?: (assetId: string) => void): void;
 
     /**
-     * Register media key handling callback
+     * Register or unregister media key handling callback
      * @param type Registration Type
      * @param callback Used to handle key events.The callback provide the KeyEvent
      * @since 9
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     on(type: 'handleKeyEvent', callback: (event: KeyEvent) => void): void;
+    off(type: 'handleKeyEvent', callback?: (event: KeyEvent) => void): void;
 
     /**
-     * Register session output device change callback
+     * Register or unregister session output device change callback
      * @param type Registration Type
      * @param callback Used to handle output device changed.
      * The callback provide the new device info {@link OutputDeviceInfo}
      * @since 9
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
-    on(type: 'outputDeviceChanged', callback: (device: OutputDeviceInfo) => void): void;
+    on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): void;
+    off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): void;
 
-    /**
-     * Unregister avsession callback.
-     * @param type Callback type
-     * @since 9
-     * @syscap SystemCapability.Multimedia.AVSession.Core
-     */
-    off(type: 'play'|'pause'|'stop'|'playNext'|'playPrevious'|'fastForward'|'rewind'|'seek'|'setSpeed'|'setLoopMode'
-        |'toggleFavorite'|'handleKeyEvent'|'outputDeviceChanged'): void;
     /**
      * Activate the session, indicating that the session can accept control commands
      * @param -
@@ -554,11 +525,11 @@ declare namespace avsession {
      */
     isRemote: boolean;
     /**
-     * Device id.The length of the deviceId array is greater than 1
+     * Audio device id.The length of the audioDeviceId array is greater than 1
      * if output to multiple devices at the same time.
      * @since 9
      */
-    deviceId: Array<string>;
+    audioDeviceId: Array<number>;
     /**
      * Device name. The length of the deviceName array is greater than 1
      * if output to multiple devices at the same time.
@@ -777,11 +748,11 @@ declare namespace avsession {
     /**
      * Get commands supported by the current session
      * @param -
-     * @return A set of AVControlCommandType {@link AVControlCommandType}
+     * @return An array of AVControlCommandType {@link AVControlCommandType}
      * @since 9
      */
-    getValidCommands(callback: AsyncCallback<Set<AVControlCommandType>>): void;
-    getValidCommands(): Promise<Set<AVControlCommandType>>;
+    getValidCommands(callback: AsyncCallback<Array<AVControlCommandType>>): void;
+    getValidCommands(): Promise<Array<AVControlCommandType>>;
 
     /**
      * Send control commands to this session
@@ -793,7 +764,7 @@ declare namespace avsession {
     sendControlCommand(command: AVControlCommand): Promise<void>;
 
     /**
-     * Register metadata changed callback
+     * Register or unregister metadata changed callback
      * @param type 'metadataChanged'
      * @param filter The properties of {@link AVMetadata} that you cared about
      * @param callback The callback used to handle metadata changed event.
@@ -802,10 +773,11 @@ declare namespace avsession {
      * @return -
      * @since 9
      */
-    on(type: 'metadataChanged', filter: Set<keyof AVMetadata> | 'all', callback: (data: AVMetadata) => void);
+    on(type: 'metadataChange', filter: Array<keyof AVMetadata> | 'all', callback: (data: AVMetadata) => void);
+    off(type: 'metadataChange', callback?: (data: AVMetadata) => void);
 
     /**
-     * Register playback state changed callback
+     * Register or unregister playback state changed callback
      * @param type 'playbackStateChanged'
      * @param filter The properties of {@link AVPlaybackState} that you cared about
      * @param callback The callback used to handle playback state changed event.
@@ -813,63 +785,59 @@ declare namespace avsession {
      * @return -
      * @since 9
      */
-    on(type: 'playbackStateChanged', filter: Set<keyof AVPlaybackState> | 'all', callback: (state: AVPlaybackState) => void);
+    on(type: 'playbackStateChange', filter: Array<keyof AVPlaybackState> | 'all', callback: (state: AVPlaybackState) => void);
+    off(type: 'playbackStateChange', callback?: (state: AVPlaybackState) => void);
 
     /**
-     * Register current session destroyed callback
+     * Register or unregister current session destroyed callback
      * @param type 'sessionDestroyed'
      * @param callback The callback used to handle current session destroyed event.
      * @return -
      * @since 9
      */
-    on(type: 'sessionDestroyed', callback: () => void);
+    on(type: 'sessionDestroy', callback: () => void);
+    off(type: 'sessionDestroy', callback?: () => void);
 
     /**
-     * Register the active state of this session changed callback
+     * Register or unregister the active state of this session changed callback
      * @param type 'sessionDestroyed'
      * @param callback The callback used to handle the active state of this session changed event.
      * The callback function provides the changed session state.
      * @return -
      * @since 9
      */
-    on(type: 'activeStateChanged', callback: (isActive: boolean) => void);
+    on(type: 'activeStateChange', callback: (isActive: boolean) => void);
+    off(type: 'activeStateChange', callback?: (isActive: boolean) => void);
 
     /**
-     * Register the valid commands of the session changed callback
+     * Register or unregister the valid commands of the session changed callback
      * @param type 'validCommandChanged'
      * @param callback The callback used to handle the changes.
-     * The callback function provides a nes set of AVControlCommandType.
+     * The callback function provides an array of AVControlCommandType.
      * @return -
      * @since 9
      */
-    on(type: 'validCommandChanged', callback: (commands: Set<AVControlCommandType>) => void);
+    on(type: 'validCommandChange', callback: (commands: Array<AVControlCommandType>) => void);
+    off(type: 'validCommandChange', callback?: (commands: Array<AVControlCommandType>) => void);
 
     /**
-     * Register session output device change callback
+     * Register or unregister session output device change callback
      * @param type Registration Type
      * @param callback Used to handle output device changed.
      * The callback provide the new device info {@link OutputDeviceInfo}
      * @since 9
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
-    on(type: 'outputDeviceChanged', callback: (device: OutputDeviceInfo) => void): void;
-
-    /**
-     * Unregister callback
-     * @param type Callback type
-     * @return -
-     * @since 9
-     */
-    off(type: 'metadataChanged'|'playbackStateChanged'|'sessionDestroyed'|'activeStateChanged'|'validCommandChanged'|'outputDeviceChanged'): void;
-  }
+    on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): void;
+    off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): void;
 
   /**
    * The type of control command
    * @syscap SystemCapability.Multimedia.AVSession.Core
    * @since 9
    */
-  type AVControlCommandType = 'play'|'pause'|'stop'|'playNext'|'playPrevious'|'fastForward'|'rewind'|
-                              'seek'|'setSpeed'|'setLoopMode'|'toggleFavorite';
+  type AVControlCommandType = 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward' | 'rewind' |
+                              'seek' | 'setSpeed' | 'setLoopMode' | 'toggleFavorite';
 
   /**
    * The defination of command to be send to the session
@@ -936,4 +904,4 @@ declare namespace avsession {
   }
 }
 
-export default avsession;
+export default avSession;
