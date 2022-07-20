@@ -19,35 +19,36 @@ module_output_path = "multimedia_av_session/sessionfuzzer"
 ##############################fuzztest##########################################
 ohos_fuzztest("AVSessionItemFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file =
-    "//foundation/multimedia/av_session/services/session/server/test/fuzztest/avsessionitem_fuzzer"
+  fuzz_config_file = "//foundation/multimedia/av_session/services/session/server/test/fuzztest/avsessionitem_fuzzer"
   include_dirs = [
+    "//foundation/multimedia/av_session/services/session/adapter",
     "//foundation/multimedia/av_session/services/session/server/test/fuzztest/",
-    "//foundation/multimedia/av_session/services/session/server"
+    "//foundation/multimedia/av_session/services/session/server",
   ]
-  cflags = ["-g","-O0","-Wno-unused-variable","-fno-omit-frame-pointer"]
-  sources = [
-    "avsessionitem_fuzzer.cpp",
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
   ]
+  sources = [ "avsessionitem_fuzzer.cpp" ]
   deps = [
     "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
     "//foundation/multimedia/av_session/services/session:avsession_service",
-    "//utils/native/base:utils"
+    "//utils/native/base:utils",
   ]
-   external_deps = [
+  external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
-    "hiviewdfx_hilog_native:libhilog",
     "distributeddataobject:distributeddataobject_impl",
-    "safwk:system_ability_fwk",
+    "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "multimedia_image_standard:image_native",
     "multimedia_audio_framework:audio_client",
+    "multimedia_image_standard:image_native",
+    "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
-    "hitrace_native:hitrace_meter",
   ]
 }
-
 ###############################################################################
-

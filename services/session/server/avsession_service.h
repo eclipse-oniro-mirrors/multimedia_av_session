@@ -30,6 +30,7 @@
 #include "iclient_death.h"
 #include "isession_listener.h"
 #include "focus_session_strategy.h"
+#include "background_audio_controller.h"
 
 namespace OHOS::AVSession {
 class AVSessionService : public SystemAbility, public AVSessionServiceStub {
@@ -94,7 +95,9 @@ private:
     void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener);
     void RemoveSessionListener(pid_t pid);
 
-    sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type,
+    void AddInnerSessionListener(SessionListener* listener);
+
+    sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                          const AppExecFwk::ElementName& elementName);
 
     sptr<AVControllerItem> CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session);
@@ -105,7 +108,9 @@ private:
 
     void InitKeyEvent();
 
-    void InitFocusSessionStrategy();
+    void InitAudio();
+
+    void InitAMS();
 
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 
@@ -124,8 +129,10 @@ private:
 
     std::recursive_mutex sessionListenersLock_;
     std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
+    std::list<SessionListener*> innerSessionListeners_;
 
     FocusSessionStrategy focusSessionStrategy_;
+    BackgroundAudioController backgroundAudioController_;
 
     std::unique_ptr<AVSessionDumper> dumpHelper_ {};
 };

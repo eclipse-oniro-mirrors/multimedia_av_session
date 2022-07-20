@@ -17,11 +17,12 @@
 #define OHOS_FOCUS_SESSION_STRATEGY_H
 
 #include <functional>
+#include <map>
 #include <memory>
 #include "audio_stream_manager.h"
+#include "audio_adapter.h"
 
 namespace OHOS::AVSession {
-using AudioRendererChangeInfos = std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>>;
 class FocusSessionStrategy {
 public:
     struct FocusSessionChangeInfo {
@@ -41,25 +42,14 @@ public:
 private:
     void HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos &infos);
 
-    bool IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info) const;
+    bool IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info);
     bool SelectFocusSession(const AudioRendererChangeInfos &infos, FocusSessionChangeInfo& sessionInfo);
 
     FocusSessionChangeCallback callback_;
     FocusSessionSelector selector_;
     std::shared_ptr<AudioStandard::AudioRendererStateChangeCallback> audioRendererStateChangeCallback_;
-};
-
-class AVSessionAudioRendererStateChangeCallback : public AudioStandard::AudioRendererStateChangeCallback {
-public:
-    using StateChangeNotifier = std::function<void(const AudioRendererChangeInfos&)>;
-
-    explicit AVSessionAudioRendererStateChangeCallback(const StateChangeNotifier& notifier);
-    ~AVSessionAudioRendererStateChangeCallback() override;
-
-    void OnRendererStateChange(const AudioRendererChangeInfos& infos) override;
-
-private:
-    StateChangeNotifier notifier_;
+    std::recursive_mutex stateLock_;
+    std::map<int32_t, AudioStandard::RendererState> lastStates_;
 };
 }
 #endif // OHOS_FOCUS_SESSION_STRATEGY_H
