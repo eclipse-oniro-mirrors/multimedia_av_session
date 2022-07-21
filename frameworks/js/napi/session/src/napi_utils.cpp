@@ -21,6 +21,8 @@
 #include "napi_playback_state.h"
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
+#include "extension_context.h"
+#include "ability_context.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 4096;
@@ -802,6 +804,47 @@ napi_status NapiUtils::GetRefByCallback(napi_env env, std::list<napi_ref> callba
             callbackRef = *ref;
             break;
         }
+    }
+    return napi_ok;
+}
+
+/* napi_value is napi stage context */
+napi_status NapiUtils::GetStageElementName(napi_env env, napi_value in, AppExecFwk::ElementName& out)
+{
+    std::shared_ptr<AbilityRuntime::Context> stageContext = AbilityRuntime::GetStageModeContext(env, in);
+    CHECK_RETURN(stageContext != nullptr, "get StagContext failed", napi_generic_failure);
+    std::shared_ptr <AppExecFwk::AbilityInfo> abilityInfo;
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(stageContext);
+    if (abilityContext != nullptr) {
+        abilityInfo = abilityContext->GetAbilityInfo();
+    } else {
+        auto extensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::ExtensionContext>(stageContext);
+        CHECK_RETURN(extensionContext != nullptr, "context ConvertTo AbilityContext and ExtensionContext fail",
+                     napi_generic_failure);
+        abilityInfo = extensionContext->GetAbilityInfo();
+    }
+    out.SetBundleName(abilityInfo->bundleName);
+    out.SetAbilityName(abilityInfo->name);
+    return napi_ok;
+}
+
+napi_status NapiUtils::GetFaElementName(napi_env env, AppExecFwk::ElementName& out)
+{
+    auto *ability = AbilityRuntime::GetCurrentAbility(env);
+    CHECK_RETURN(ability != nullptr, "get feature ability failed", napi_generic_failure);
+    out = ability->GetWant()->GetElement();
+    return napi_ok;
+}
+
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AppExecFwk::ElementName& out)
+{
+    bool isStageMode = false;
+    CHECK_RETURN(napi_ok == AbilityRuntime::IsStageContext(env, in, isStageMode), "get context type failed",
+                 napi_generic_failure);
+    if (isStageMode) {
+        CHECK_RETURN(napi_ok == GetStageElementName(env, in, out), "get StagContext failed", napi_generic_failure);
+    } else {
+        CHECK_RETURN(napi_ok == GetFaElementName(env, out), "get FaContext failed", napi_generic_failure);
     }
     return napi_ok;
 }
