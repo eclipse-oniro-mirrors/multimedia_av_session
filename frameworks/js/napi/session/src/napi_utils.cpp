@@ -727,9 +727,11 @@ bool NapiUtils::Equals(napi_env env, napi_value value, napi_ref copy)
 
     napi_value copyValue = nullptr;
     napi_get_reference_value(env, copy, &copyValue);
-
+    CHECK_RETURN((napi_ok == napi_get_reference_value(env, copy, &copyValue)),
+                 "get ref value failed", napi_generic_failure);
     bool isEquals = false;
-    napi_strict_equals(env, value, copyValue, &isEquals);
+    CHECK_RETURN(napi_ok == napi_strict_equals(env, value, copyValue, &isEquals),
+                 "get equals result failed", napi_generic_failure);
     return isEquals;
 }
 
@@ -795,11 +797,8 @@ napi_status NapiUtils::SetDateValue(napi_env env, double time, napi_value& resul
 napi_status NapiUtils::GetRefByCallback(napi_env env, std::list<napi_ref> callbackList, napi_value callback,
                                         napi_ref& callbackRef)
 {
-    napi_value registeredCallback = nullptr;
     for(auto ref = callbackList.begin(); ref != callbackList.end(); ++ref) {
-        CHECK_AND_RETURN_RET_LOG((napi_ok == napi_get_reference_value(env, *ref, &registeredCallback)),
-                                 napi_generic_failure, "get ref value failed");
-        if (*callback == *registeredCallback) {
+        if (Equals(env, callback, *ref)) {
             callbackRef = *ref;
             break;
         }
