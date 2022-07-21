@@ -62,7 +62,7 @@ int32_t AVSessionStub::HandleRegisterCallbackInner(MessageParcel &data, MessageP
     return ERR_NONE;
 }
 
-int32_t AVSessionStub::HandleRelease(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionStub::HandleDestroy(MessageParcel &data, MessageParcel &reply)
 {
     AVSessionTrace avSessionTrace("AVSessionStub::Destroy");
     Destroy();
@@ -142,14 +142,14 @@ int32_t AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& r
     return ERR_NONE;
 }
 
-int32_t AVSessionStub::HandleActive(MessageParcel& data, MessageParcel& reply)
+int32_t AVSessionStub::HandleActivate(MessageParcel& data, MessageParcel& reply)
 {
     AVSessionTrace avSessionTrace("AVSessionStub::Activate");
     CHECK_AND_PRINT_LOG(reply.WriteInt32(Activate()), "WriteInt32 failed");
     return ERR_NONE;
 }
 
-int32_t AVSessionStub::HandleDisactive(MessageParcel& data, MessageParcel& reply)
+int32_t AVSessionStub::HandleDeactivate(MessageParcel& data, MessageParcel& reply)
 {
     AVSessionTrace avSessionTrace("AVSessionStub::Deactivate");
     CHECK_AND_PRINT_LOG(reply.WriteInt32(Deactivate()), "WriteInt32 failed");

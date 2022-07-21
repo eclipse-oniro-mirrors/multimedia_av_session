@@ -53,13 +53,13 @@ private:
 
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleActive(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleActivate(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleDisactive(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleDeactivate(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleIsActive(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleRelease(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleDestroy(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleAddSupportCommand(MessageParcel& data, MessageParcel& reply);
 
@@ -77,10 +77,10 @@ private:
         [SESSION_CMD_SET_LAUNCH_ABILITY] = &AVSessionStub::HandleSetLaunchAbility,
         [SESSION_CMD_GET_CONTROLLER] = &AVSessionStub::HandleGetController,
         [SESSION_CMD_REGISTER_CALLBACK] = &AVSessionStub::HandleRegisterCallbackInner,
-        [SESSION_CMD_ACTIVE] = &AVSessionStub::HandleActive,
-        [SESSION_CMD_DISACTIVE] = &AVSessionStub::HandleDisactive,
+        [SESSION_CMD_ACTIVATE] = &AVSessionStub::HandleActivate,
+        [SESSION_CMD_DEACTIVATE] = &AVSessionStub::HandleDeactivate,
         [SESSION_CMD_ISACTIVE] = &AVSessionStub::HandleIsActive,
-        [SESSION_CMD_RELEASE] = &AVSessionStub::HandleRelease,
+        [SESSION_CMD_DESTROY] = &AVSessionStub::HandleDestroy,
         [SESSION_CMD_ADD_SUPPORT_COMMAND] = &AVSessionStub::HandleAddSupportCommand,
         [SESSION_CMD_DELETE_SUPPORT_COMMAND] = &AVSessionStub::HandleDeleteSupportCommand,
     };

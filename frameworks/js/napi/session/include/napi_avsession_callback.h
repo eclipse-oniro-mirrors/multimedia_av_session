@@ -62,6 +62,8 @@ public:
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
 
+    bool IsCallbacksEmpty(int32_t event);
+
 private:
     void HandleEvent(int32_t event);
 
