@@ -170,4 +170,10 @@ napi_status NapiAVSessionCallback::RemoveCallback(napi_env env, int32_t event, n
     callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);
 }
+
+bool NapiAVSessionCallback::IsCallbacksEmpty(int32_t event)
+{
+    AVSessionTrace avSessionTrace("NapiAVSessionCallback::isCallbacksEmpty");
+    return callbacks_[event].empty();
+}
 }

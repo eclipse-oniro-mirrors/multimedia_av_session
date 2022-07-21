@@ -501,9 +501,9 @@ HWTEST_F(AvsessionTest, RegisterCallback004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31JF
 */
-HWTEST_F(AvsessionTest, Active001, TestSize.Level1)
+HWTEST_F(AvsessionTest, Activate001, TestSize.Level1)
 {
-    SLOGE("Active001 Begin");
+    SLOGE("Activate001 Begin");
     bool isActive = false;
     EXPECT_EQ(avsession_->Activate(), AVSESSION_SUCCESS);
     isActive = avsession_->IsActive();
@@ -517,9 +517,9 @@ HWTEST_F(AvsessionTest, Active001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31JF
 */
-HWTEST_F(AvsessionTest, Disactive001, TestSize.Level1)
+HWTEST_F(AvsessionTest, Deactivate001, TestSize.Level1)
 {
-    SLOGE("Disactive001 Begin");
+    SLOGE("Deactivate001 Begin");
     bool isActive = true;
     EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
     isActive = avsession_->IsActive();

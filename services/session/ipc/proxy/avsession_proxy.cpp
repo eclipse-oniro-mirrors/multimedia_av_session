@@ -91,7 +91,7 @@ int32_t AVSessionProxy::Destroy()
     MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_RELEASE, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_DESTROY, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
@@ -259,7 +259,7 @@ int32_t AVSessionProxy::Activate()
     MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ACTIVE, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ACTIVATE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
@@ -277,7 +277,7 @@ int32_t AVSessionProxy::Deactivate()
     MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_DISACTIVE, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_DEACTIVATE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
