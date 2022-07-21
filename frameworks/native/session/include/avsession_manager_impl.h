@@ -58,7 +58,7 @@ public:
 private:
     sptr<AVSessionServiceProxy> GetService();
 
-    void OnServiceDied();
+    void OnServiceDie();
 
     void RegisterClientDeathObserver();
 

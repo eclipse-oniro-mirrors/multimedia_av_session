@@ -17,6 +17,7 @@
 #define OHOS_NAPI_AVSESSION_MANAGER_H
 
 #include <map>
+#include <list>
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "avsession_log.h"
@@ -29,7 +30,7 @@ public:
     static napi_value Init(napi_env env, napi_value exports);
 
     using OnEventHandlerType = std::function<napi_status(napi_env, napi_value)>;
-    using OffEventHandlerType = std::function<napi_status(napi_env)>;
+    using OffEventHandlerType = std::function<napi_status(napi_env, napi_value)>;
 
 private:
     static napi_value CreateAVSession(napi_env env, napi_callback_info info);
@@ -42,15 +43,15 @@ private:
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
-    static napi_status OnSessionCreated(napi_env env, napi_value callback);
-    static napi_status OnSessionDestroyed(napi_env env, napi_value callback);
-    static napi_status OnTopSessionChanged(napi_env env, napi_value callback);
-    static napi_status OnServiceDied(napi_env env, napi_value callback);
+    static napi_status OnSessionCreate(napi_env env, napi_value callback);
+    static napi_status OnSessionDestroy(napi_env env, napi_value callback);
+    static napi_status OnTopSessionChange(napi_env env, napi_value callback);
+    static napi_status OnServiceDie(napi_env env, napi_value callback);
 
-    static napi_status OffSessionCreated(napi_env env);
-    static napi_status OffSessionDestroyed(napi_env env);
-    static napi_status OffTopSessionChanged(napi_env env);
-    static napi_status OffServiceDied(napi_env env);
+    static napi_status OffSessionCreate(napi_env env, napi_value callback);
+    static napi_status OffSessionDestroy(napi_env env, napi_value callback);
+    static napi_status OffTopSessionChange(napi_env env, napi_value callback);
+    static napi_status OffServiceDie(napi_env env, napi_value callback);
 
     static void HandleServiceDied();
 
@@ -58,7 +59,7 @@ private:
 
     static std::shared_ptr<NapiSessionListener> listener_;
     static std::shared_ptr<NapiAsyncCallback> asyncCallback_;
-    static napi_ref serviceDiedCallback_;
+    static std::list<napi_ref> serviceDiedCallbacks_;
 
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;

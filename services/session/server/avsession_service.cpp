@@ -251,8 +251,8 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor &descri
         listener->OnTopSessionChanged(descriptor);
     }
     for (const auto& [pid, listener] : sessionListeners_) {
-        AVSessionTrace trace("AVSessionService::OnTopSessionChanged");
-        listener->OnTopSessionChanged(descriptor);
+        AVSessionTrace trace("AVSessionService::OnTopSessionChange");
+        listener->OnTopSessionChange(descriptor);
     }
 }
 

@@ -791,4 +791,19 @@ napi_status NapiUtils::SetDateValue(napi_env env, double time, napi_value& resul
     engine->ClearLastError();
     return napi_ok;
 }
+
+napi_status NapiUtils::GetRefByCallback(napi_env env, std::list<napi_ref> callbackList, napi_value callback,
+                                        napi_ref& callbackRef)
+{
+    napi_value registeredCallback = nullptr;
+    for(auto ref = callbackList.begin(); ref != callbackList.end(); ++ref) {
+        CHECK_AND_RETURN_RET_LOG((napi_ok == napi_get_reference_value(env, *ref, &registeredCallback)),
+                                 napi_generic_failure, "get ref value failed");
+        if (*callback == *registeredCallback) {
+            callbackRef = *ref;
+            break;
+        }
+    }
+    return napi_ok;
+}
 }

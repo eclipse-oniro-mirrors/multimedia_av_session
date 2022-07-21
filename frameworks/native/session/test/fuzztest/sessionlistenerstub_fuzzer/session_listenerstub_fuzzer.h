@@ -28,9 +28,9 @@ class TestSessionListener : public SessionListener{
         SLOGI("Enter into TestSessionListener::OnSessionRelease.");
     }
 
-    void OnTopSessionChanged(const AVSessionDescriptor& descriptor) override
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override
     {
-        SLOGI("Enter into TestSessionListener::OnTopSessionChanged.");
+        SLOGI("Enter into TestSessionListener::OnTopSessionChange.");
     }
 };
 int32_t SessionListenerStubRemoteRequestTest(uint8_t* data, size_t size);

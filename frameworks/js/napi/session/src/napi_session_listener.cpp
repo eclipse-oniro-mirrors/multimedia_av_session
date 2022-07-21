@@ -33,15 +33,16 @@ NapiSessionListener::~NapiSessionListener()
 template<typename T>
 void NapiSessionListener::HandleEvent(int32_t event, const T &param)
 {
-    if (callbacks_[event] == nullptr) {
+    if (callbacks_[event].empty()) {
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
-
-    asyncCallback_->Call(callbacks_[event], [param](napi_env env, int &argc, napi_value *argv) {
-        argc = 1;
-        NapiUtils::SetValue(env, param, *argv);
-    });
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        asyncCallback_->Call(*ref, [param](napi_env env, int &argc, napi_value *argv) {
+            argc = 1;
+            NapiUtils::SetValue(env, param, *argv);
+        });
+    }
 }
 
 void NapiSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
@@ -58,9 +59,9 @@ void NapiSessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor
     HandleEvent(EVENT_SESSION_DESTROYED, descriptor);
 }
 
-void NapiSessionListener::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
+void NapiSessionListener::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
-    AVSessionTrace avSessionTrace("NapiSessionListener::OnTopSessionChanged");
+    AVSessionTrace avSessionTrace("NapiSessionListener::OnTopSessionChange");
     SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
     HandleEvent(EVENT_TOP_SESSION_CHANGED, descriptor);
 }
@@ -70,6 +71,9 @@ napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_v
     AVSessionTrace avSessionTrace("NapiSessionListener::AddCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     napi_ref ref = nullptr;
+    CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
+                             napi_generic_failure, "get callback reference failed");
+    CHECK_AND_RETURN_RET_LOG(ref == nullptr, napi_ok, "callback has been registered");
     napi_status status = napi_create_reference(env, callback, 1, &ref);
     if (status != napi_ok) {
         SLOGE("napi_create_reference failed");
@@ -78,16 +82,27 @@ napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_v
     if (asyncCallback_ == nullptr) {
         asyncCallback_ = std::make_shared<NapiAsyncCallback>(env);
     }
-    callbacks_[event] = ref;
+    callbacks_[event].push_back(ref);
     return napi_ok;
 }
 
-napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event)
+napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, napi_value callback)
 {
     AVSessionTrace avSessionTrace("NapiSessionListener::RemoveCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
-    auto ref = callbacks_[event];
-    callbacks_[event] = nullptr;
+    if (callback == nullptr) {
+        for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
+            napi_status ret = napi_delete_reference(env, *callbackRef);
+            CHECK_AND_RETURN_RET_LOG(napi_ok == ret, ret, "delete callback reference failed");
+        }
+        callbacks_[event].clear();
+        return napi_ok;
+    }
+    napi_ref ref = nullptr;
+    CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
+                             napi_generic_failure, "get callback reference failed");
+    CHECK_AND_RETURN_RET_LOG(ref != nullptr, napi_ok, "callback has been remove");
+    callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);
 }
 }

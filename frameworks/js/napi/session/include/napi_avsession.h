@@ -38,7 +38,7 @@ public:
     ~NapiAVSession();
 
     using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
-    using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*)>;
+    using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
 
 private:
     static napi_value ConstructorCallback(napi_env env, napi_callback_info info);
@@ -68,21 +68,21 @@ private:
     static napi_status OnSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
-    static napi_status OnOutputDeviceChanged(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
-    static napi_status OffPlay(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffPause(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffStop(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffPlayNext(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffPlayPrevious(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffFastForward(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffRewind(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffSeek(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffSetSpeed(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffSetLoopMode(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffToggleFavorite(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession);
-    static napi_status OffOutputDeviceChanged(napi_env env, NapiAVSession* napiSession);
+    static napi_status OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffStop(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffPlayNext(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffPlayPrevious(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffFastForward(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffRewind(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffSeek(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     napi_ref wrapperRef_ {};
     std::string sessionId_ ;

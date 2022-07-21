@@ -37,10 +37,10 @@ void SessionListenerClient::OnSessionRelease(const AVSessionDescriptor &descript
     }
 }
 
-void SessionListenerClient::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
+void SessionListenerClient::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
     if (listener_) {
-        listener_->OnTopSessionChanged(descriptor);
+        listener_->OnTopSessionChange(descriptor);
     }
 }
 }

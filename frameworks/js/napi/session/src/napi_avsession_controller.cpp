@@ -29,12 +29,12 @@ namespace OHOS::AVSession {
 static __thread napi_ref AVControllerConstructorRef = nullptr;
 std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     NapiAVSessionController::OffEventHandlerType>> NapiAVSessionController::EventHandlers_ = {
-    { "sessionDestroyed", { OnSessionDestroy, OffSessionDestroy } },
-    { "metadataChanged", { OnMetaDataChange, OffMetaDataChange } },
-    { "playbackStateChanged", { OnPlaybackStateChange, OffPlaybackStateChange } },
-    { "activeStateChanged", { OnActiveStateChange, OffActiveStateChange } },
-    { "validCommandChanged", { OnValidCommandChange, OffValidCommandChange } },
-    { "outputDeviceChanged", { OnOutputDeviceChanged, OffOutputDeviceChanged } },
+    { "sessionDestroy", { OnSessionDestroy, OffSessionDestroy } },
+    { "metadataChange", { OnMetaDataChange, OffMetaDataChange } },
+    { "playbackStateChange", { OnPlaybackStateChange, OffPlaybackStateChange } },
+    { "activeStateChange", { OnActiveStateChange, OffActiveStateChange } },
+    { "validCommandChange", { OnValidCommandChange, OffValidCommandChange } },
+    { "outputDeviceChange", { OnOutputDeviceChange, OffOutputDeviceChange } },
 };
 
 NapiAVSessionController::NapiAVSessionController()
@@ -540,10 +540,14 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     AVSessionTrace avSessionTrace("NapiAVSessionController::OffEvent");
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
-    auto input = [&eventName, env, &context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number");
+    napi_value callback = nullptr;
+    auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number");
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+        if (argc == ARGC_TWO) {
+            callback = argv[ARGV_SECOND];
+        }
     };
 
     context->GetCbInfo(env, info, input, true);
@@ -565,7 +569,7 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
         return NapiUtils::GetUndefinedValue(env);
     }
 
-    if (it->second.second(env, napiController) != napi_ok) {
+    if (it->second.second(env, napiController, callback) != napi_ok) {
         napi_throw_error(env, nullptr, "remove event callback failed");
     }
     return NapiUtils::GetUndefinedValue(env);
@@ -609,38 +613,47 @@ napi_status NapiAVSessionController::OnValidCommandChange(napi_env env, NapiAVSe
         callback);
 }
 
-napi_status NapiAVSessionController::OnOutputDeviceChanged(napi_env env, NapiAVSessionController* napiController,
+napi_status NapiAVSessionController::OnOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
                                                            napi_value param, napi_value callback)
 {
     return napi_generic_failure;
 }
 
-napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessionController *napiController)
+napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessionController *napiController,
+                                                       napi_value callback)
 {
-    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_SESSION_DESTROY);
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_SESSION_DESTROY, callback);
 }
 
-napi_status NapiAVSessionController::OffPlaybackStateChange(napi_env env, NapiAVSessionController* napiController)
+napi_status NapiAVSessionController::OffPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
+                                                            napi_value callback)
 {
-    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE);
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE,
+                                                     callback);
 }
 
-napi_status NapiAVSessionController::OffMetaDataChange(napi_env env, NapiAVSessionController* napiController)
+napi_status NapiAVSessionController::OffMetaDataChange(napi_env env, NapiAVSessionController* napiController,
+                                                       napi_value callback)
 {
-    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_META_DATA_CHANGE);
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_META_DATA_CHANGE, callback);
 }
 
-napi_status NapiAVSessionController::OffActiveStateChange(napi_env env, NapiAVSessionController* napiController)
+napi_status NapiAVSessionController::OffActiveStateChange(napi_env env, NapiAVSessionController* napiController,
+                                                          napi_value callback)
 {
-    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_ACTIVE_STATE_CHANGE);
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_ACTIVE_STATE_CHANGE,
+                                                     callback);
 }
 
-napi_status NapiAVSessionController::OffValidCommandChange(napi_env env, NapiAVSessionController* napiController)
+napi_status NapiAVSessionController::OffValidCommandChange(napi_env env, NapiAVSessionController* napiController,
+                                                           napi_value callback)
 {
-    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_VALID_COMMAND_CHANGE);
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_VALID_COMMAND_CHANGE,
+                                                     callback);
 }
 
-napi_status NapiAVSessionController::OffOutputDeviceChanged(napi_env env, NapiAVSessionController* napiController)
+napi_status NapiAVSessionController::OffOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
+                                                            napi_value callback)
 {
     return napi_generic_failure;
 }

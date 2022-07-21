@@ -29,7 +29,7 @@ private:
 
     int HandleOnSessionRelease(MessageParcel &data, MessageParcel &reply);
 
-    int HandleOnTopSessionChanged(MessageParcel &data, MessageParcel &reply);
+    int HandleOnTopSessionChange(MessageParcel &data, MessageParcel &reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
@@ -37,7 +37,7 @@ private:
     static inline HanlerFunc handlers[] = {
         [LISTENER_CMD_ON_CREATE] = &SessionListenerStub::HandleOnSessionCreate,
         [LISTENER_CMD_ON_RELEASE] = &SessionListenerStub::HandleOnSessionRelease,
-        [LISTENER_CMD_TOP_CHANGED] = &SessionListenerStub::HandleOnTopSessionChanged,
+        [LISTENER_CMD_TOP_CHANGED] = &SessionListenerStub::HandleOnTopSessionChange,
     };
 };
 }

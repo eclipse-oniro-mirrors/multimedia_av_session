@@ -35,7 +35,7 @@ public:
         napi_value& out);
 
     using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*, napi_value, napi_value)>;
-    using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*)>;
+    using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*, napi_value)>;
 
 private:
     static napi_value ConstructorCallback(napi_env env, napi_callback_info info);
@@ -63,15 +63,15 @@ private:
                                            napi_value param, napi_value callback);
     static napi_status OnValidCommandChange(napi_env env, NapiAVSessionController* napiController,
                                             napi_value param, napi_value callback);
-    static napi_status OnOutputDeviceChanged(napi_env env, NapiAVSessionController* napiController,
+    static napi_status OnOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
                                              napi_value param, napi_value callback);
 
-    static napi_status OffSessionDestroy(napi_env env, NapiAVSessionController* napiController);
-    static napi_status OffPlaybackStateChange(napi_env env, NapiAVSessionController* napiController);
-    static napi_status OffMetaDataChange(napi_env env, NapiAVSessionController* napiController);
-    static napi_status OffActiveStateChange(napi_env env, NapiAVSessionController* napiController);
-    static napi_status OffValidCommandChange(napi_env env, NapiAVSessionController* napiController);
-    static napi_status OffOutputDeviceChanged(napi_env env, NapiAVSessionController* napiController);
+    static napi_status OffSessionDestroy(napi_env env, NapiAVSessionController* napiController, napi_value callback);
+    static napi_status OffPlaybackStateChange(napi_env env, NapiAVSessionController* napiController, napi_value callback);
+    static napi_status OffMetaDataChange(napi_env env, NapiAVSessionController* napiController, napi_value callback);
+    static napi_status OffActiveStateChange(napi_env env, NapiAVSessionController* napiController, napi_value callback);
+    static napi_status OffValidCommandChange(napi_env env, NapiAVSessionController* napiController, napi_value callback);
+    static napi_status OffOutputDeviceChange(napi_env env, NapiAVSessionController* napiController, napi_value callback);
 
     static napi_status SetPlaybackStateFilter(napi_env env, NapiAVSessionController *napiController,
                                               napi_value filter);

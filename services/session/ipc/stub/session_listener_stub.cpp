@@ -59,12 +59,12 @@ int SessionListenerStub::HandleOnSessionRelease(MessageParcel &data, MessageParc
     return ERR_NONE;
 }
 
-int SessionListenerStub::HandleOnTopSessionChanged(MessageParcel &data, MessageParcel &reply)
+int SessionListenerStub::HandleOnTopSessionChange(MessageParcel &data, MessageParcel &reply)
 {
-    AVSessionTrace avSessionTrace("SessionListenerStub::OnTopSessionChanged");
+    AVSessionTrace avSessionTrace("SessionListenerStub::OnTopSessionChange");
     AVSessionDescriptor descriptor;
     descriptor.ReadFromParcel(data);
-    OnTopSessionChanged(descriptor);
+    OnTopSessionChange(descriptor);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

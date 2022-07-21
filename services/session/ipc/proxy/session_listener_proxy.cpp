@@ -43,7 +43,7 @@ void SessionListenerProxy::OnSessionRelease(const AVSessionDescriptor &descripto
     CHECK_AND_RETURN_LOG(!Remote()->SendRequest(LISTENER_CMD_ON_RELEASE, data, reply, option), "send request fail");
 }
 
-void SessionListenerProxy::OnTopSessionChanged(const AVSessionDescriptor& descriptor)
+void SessionListenerProxy::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");

@@ -179,8 +179,18 @@ public:
 
     static napi_status GetDateValue(napi_env env, napi_value value, double& result);
     static napi_status SetDateValue(napi_env env, double in, napi_value& out);
+    static napi_status GetRefByCallback(napi_env env, std::list<napi_ref> callbackList, napi_value callback,
+        napi_ref& callbackRef);
 
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
+
+    static constexpr size_t ARGC_ONE = 1;
+    static constexpr size_t ARGC_TWO = 2;
+    static constexpr size_t ARGC_THERE = 3;
+
+    static constexpr size_t ARGV_FIRST = 0;
+    static constexpr size_t ARGV_SECOND = 1;
+    static constexpr size_t ARGV_THIRD = 2;
 };
 }
 #endif // NAPI_UTILS_H
