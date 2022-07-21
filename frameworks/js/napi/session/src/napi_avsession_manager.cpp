@@ -74,22 +74,18 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
     auto context = std::make_shared<ConcreteContext>();
 
     auto inputParser = [env, context](size_t argc, napi_value *argv) {
-        // require 2 arguments <tag> <type>
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments");
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->tag_);
+        // require 3 arguments <context> <tag> <type>
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THERE, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->elementName_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok , "invalid context");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->tag_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->tag_.empty(), "invalid tag");
         std::string typeString;
-        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], typeString);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_THIRD], typeString);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !typeString.empty(), "invalid type");
         context->type_ = NapiUtils::ConvertSessionType(typeString);
         CHECK_ARGS_RETURN_VOID(context, context->type_ >= 0, "wrong session type");
-        auto *ability = AbilityRuntime::GetCurrentAbility(env);
-        if (ability == nullptr) {
-            context->status = napi_generic_failure;
-            CHECK_STATUS_RETURN_VOID(context, "get current ability failed");
-        }
         context->status = napi_ok;
-        context->elementName_ = ability->GetWant()->GetElement();
     };
     context->GetCbInfo(env, info, inputParser);
 

@@ -29,6 +29,8 @@
 #include "avplayback_state.h"
 #include "key_event.h"
 #include "want_agent.h"
+#include "napi_base_context.h"
+#include "ability.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message)               \
@@ -183,6 +185,10 @@ public:
     static napi_status GetRefByCallback(napi_env env, std::list<napi_ref> callbackList, napi_value callback,
         napi_ref& callbackRef);
 
+    static napi_status GetStageElementName(napi_env env, napi_value in, AppExecFwk::ElementName& out);
+    static napi_status GetFaElementName(napi_env env, AppExecFwk::ElementName& out);
+    static napi_status GetValue(napi_env env, napi_value in, AppExecFwk::ElementName& out);
+	
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
 
     static constexpr size_t ARGC_ONE = 1;
