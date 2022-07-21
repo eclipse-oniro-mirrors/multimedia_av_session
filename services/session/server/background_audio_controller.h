@@ -30,7 +30,7 @@ public:
 
     void OnSessionCreate(const AVSessionDescriptor &descriptor) override;
     void OnSessionRelease(const AVSessionDescriptor &descriptor) override;
-    void OnTopSessionChanged(const AVSessionDescriptor &descriptor) override {}
+    void OnTopSessionChange(const AVSessionDescriptor &descriptor) override {}
 
     void Init();
 
