@@ -248,7 +248,7 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor &descri
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& listener : innerSessionListeners_) {
-        listener->OnTopSessionChanged(descriptor);
+        listener->OnTopSessionChange(descriptor);
     }
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSessionTrace trace("AVSessionService::OnTopSessionChange");
