@@ -765,7 +765,7 @@ declare namespace avSession {
 
     /**
      * Register or unregister metadata changed callback
-     * @param type 'metadataChanged'
+     * @param type 'metadataChange'
      * @param filter The properties of {@link AVMetadata} that you cared about
      * @param callback The callback used to handle metadata changed event.
      * The callback function provides the {@link AVMetadata} parameter.
@@ -778,7 +778,7 @@ declare namespace avSession {
 
     /**
      * Register or unregister playback state changed callback
-     * @param type 'playbackStateChanged'
+     * @param type 'playbackStateChange'
      * @param filter The properties of {@link AVPlaybackState} that you cared about
      * @param callback The callback used to handle playback state changed event.
      * The callback function provides the {@link AVPlaybackState} parameter.
@@ -790,7 +790,7 @@ declare namespace avSession {
 
     /**
      * Register or unregister current session destroyed callback
-     * @param type 'sessionDestroyed'
+     * @param type 'sessionDestroy'
      * @param callback The callback used to handle current session destroyed event.
      * @return -
      * @since 9
@@ -800,7 +800,7 @@ declare namespace avSession {
 
     /**
      * Register or unregister the active state of this session changed callback
-     * @param type 'sessionDestroyed'
+     * @param type 'activeStateChange'
      * @param callback The callback used to handle the active state of this session changed event.
      * The callback function provides the changed session state.
      * @return -
@@ -811,7 +811,7 @@ declare namespace avSession {
 
     /**
      * Register or unregister the valid commands of the session changed callback
-     * @param type 'validCommandChanged'
+     * @param type 'validCommandChange'
      * @param callback The callback used to handle the changes.
      * The callback function provides an array of AVControlCommandType.
      * @return -
