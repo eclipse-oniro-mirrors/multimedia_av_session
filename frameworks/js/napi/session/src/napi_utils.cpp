@@ -799,7 +799,7 @@ napi_status NapiUtils::SetDateValue(napi_env env, double time, napi_value& resul
 napi_status NapiUtils::GetRefByCallback(napi_env env, std::list<napi_ref> callbackList, napi_value callback,
                                         napi_ref& callbackRef)
 {
-    for(auto ref = callbackList.begin(); ref != callbackList.end(); ++ref) {
+    for (auto ref = callbackList.begin(); ref != callbackList.end(); ++ref) {
         if (Equals(env, callback, *ref)) {
             callbackRef = *ref;
             break;

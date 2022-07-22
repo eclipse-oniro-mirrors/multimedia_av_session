@@ -614,7 +614,7 @@ napi_status NapiAVSessionController::OnValidCommandChange(napi_env env, NapiAVSe
 }
 
 napi_status NapiAVSessionController::OnOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
-                                                           napi_value param, napi_value callback)
+                                                          napi_value param, napi_value callback)
 {
     return napi_generic_failure;
 }
@@ -653,7 +653,7 @@ napi_status NapiAVSessionController::OffValidCommandChange(napi_env env, NapiAVS
 }
 
 napi_status NapiAVSessionController::OffOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
-                                                            napi_value callback)
+                                                           napi_value callback)
 {
     return napi_generic_failure;
 }
