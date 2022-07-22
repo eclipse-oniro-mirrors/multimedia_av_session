@@ -41,6 +41,8 @@ public:
         CONTROLLER_CMD_MAX
     };
 
+    virtual int32_t GetLaunchAbilityInner(sptr<IRemoteObject> &ability) = 0;
+
 protected:
     virtual int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) = 0;
 };

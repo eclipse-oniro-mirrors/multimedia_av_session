@@ -109,12 +109,10 @@ int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& r
 int32_t AVSessionStub::HandleSetLaunchAbility(MessageParcel& data, MessageParcel& reply)
 {
     AVSessionTrace avSessionTrace("AVSessionStub::SetLaunchAbility");
-    sptr want = data.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>();
-    if (want == nullptr) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
-        return ERR_NONE;
-    }
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetLaunchAbility(*want)), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32() != 0, ERR_NONE, "read int32 failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32() != 0, ERR_NONE, "read int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetLaunchAbilityInner(data.ReadRemoteObject())),
+        ERR_NONE, "Write LaunchAbility failed");
     return ERR_NONE;
 }
 

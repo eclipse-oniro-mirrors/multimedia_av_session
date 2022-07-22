@@ -43,6 +43,8 @@ public:
         SESSION_CMD_MAX,
     };
 
+    virtual int32_t SetLaunchAbilityInner(const sptr<IRemoteObject>& ability) = 0;
+
 protected:
     virtual int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) = 0;
     virtual sptr<IRemoteObject> GetControllerInner() = 0;

@@ -35,7 +35,7 @@ public:
 
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
-    int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
+    int32_t GetLaunchAbilityInner(sptr<IRemoteObject> &ability) override;
 
     int32_t GetValidCommands(std::vector<int32_t> &cmds) override;
 
