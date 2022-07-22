@@ -38,9 +38,10 @@ struct ContextBase {
     napi_value output = nullptr;
     napi_status status = napi_invalid_arg;
     std::string error;
-
     napi_value self = nullptr;
     void* native = nullptr;
+    int32_t taskId = -1;
+    std::string taskName;
 
 private:
     napi_deferred deferred = nullptr;

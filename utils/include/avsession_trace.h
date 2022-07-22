@@ -21,6 +21,7 @@
 
 namespace OHOS::AVSession {
 enum AVSessionTraceTaskId : int32_t {
+    INVALID_TASK_ID = -1,
     NAPI_SET_AV_META_DATA_TASK_ID,
     NAPI_SET_AV_PLAYBACK_STATE_TASK_ID,
     NAPI_SET_LAUNCH_ABILITY_TASK_ID,
@@ -42,6 +43,7 @@ enum AVSessionTraceTaskId : int32_t {
     NAPI_CREATE_CONTROLLER_TASK_ID,
     NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID,
     NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID,
+    NAPI_SET_AUDIO_STREAM_ID_TASK_ID
 };
 
 class __attribute__((visibility("default"))) AVSessionTrace {
@@ -56,6 +58,9 @@ public:
 
     static void TraceBegin(const std::string& traceName, int32_t taskId)
     {
+        if (taskId <= INVALID_TASK_ID) {
+            return;
+        }
         std::string traceBegin("AVSession:");
         traceBegin += traceName;
         StartAsyncTrace(HITRACE_TAG_ZMEDIA, traceBegin, taskId);
@@ -63,6 +68,9 @@ public:
 
     static void TraceEnd(const std::string& traceName, int32_t taskId)
     {
+        if (taskId <= INVALID_TASK_ID) {
+            return;
+        }
         std::string traceEnd("AVSession:");
         traceEnd += traceName;
         FinishAsyncTrace(HITRACE_TAG_ZMEDIA, traceEnd, taskId);

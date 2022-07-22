@@ -15,6 +15,7 @@
 
 #include "napi_async_work.h"
 #include "napi_utils.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 ContextBase::~ContextBase()
@@ -73,7 +74,7 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
     SLOGI("name=%{public}s", name.c_str());
     ctxt->execute = std::move(execute);
     ctxt->complete = std::move(complete);
-
+    ctxt->taskName = name;
     napi_value promise = nullptr;
     if (ctxt->callbackRef == nullptr) {
         napi_create_promise(ctxt->env, &ctxt->deferred, &promise);
@@ -90,6 +91,9 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
             CHECK_RETURN_VOID(data != nullptr, "napi_async_execute_callback nullptr");
             auto ctxt = reinterpret_cast<ContextBase *>(data);
             SLOGD("napi_async_execute_callback ctxt->status=%{public}d", ctxt->status);
+            if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
+                AVSessionTrace::TraceBegin("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
+            }
             if (ctxt->execute && ctxt->status == napi_ok) {
                 ctxt->execute();
             }
@@ -103,6 +107,9 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
             }
             if ((ctxt->complete) && (status == napi_ok) && (ctxt->status == napi_ok)) {
                 ctxt->complete(ctxt->output);
+            }
+            if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
+                AVSessionTrace::TraceEnd("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
             }
             GenerateOutput(ctxt);
         },
