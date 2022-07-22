@@ -508,7 +508,7 @@ HWTEST_F(AvsessionTest, Activate001, TestSize.Level1)
     EXPECT_EQ(avsession_->Activate(), AVSESSION_SUCCESS);
     isActive = avsession_->IsActive();
     EXPECT_EQ(isActive, true);
-    SLOGE("Active001 End");
+    SLOGE("Activate001 End");
 }
 
 /**
@@ -524,7 +524,7 @@ HWTEST_F(AvsessionTest, Deactivate001, TestSize.Level1)
     EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
     isActive = avsession_->IsActive();
     EXPECT_EQ(isActive, false);
-    SLOGE("Disactive001 End");
+    SLOGE("Deactivate001 End");
 }
 
 /**

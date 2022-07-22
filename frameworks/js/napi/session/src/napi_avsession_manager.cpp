@@ -77,7 +77,7 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
         // require 3 arguments <context> <tag> <type>
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THERE, "invalid arguments");
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->elementName_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok , "invalid context");
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid context");
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->tag_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->tag_.empty(), "invalid tag");
         std::string typeString;
@@ -371,7 +371,7 @@ napi_status NapiAVSessionManager::OffSessionDestroy(napi_env env, napi_value cal
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SESSION_DESTROYED, callback);
 }
 
-napi_status NapiAVSessionManager::OffTopSessionChange(napi_env env, napi_value callback )
+napi_status NapiAVSessionManager::OffTopSessionChange(napi_env env, napi_value callback)
 {
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED, callback);
 }
