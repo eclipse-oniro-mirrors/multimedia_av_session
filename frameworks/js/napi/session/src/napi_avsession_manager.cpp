@@ -64,7 +64,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 
 napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace::TraceBegin("NapiAVSessionManager::CreateAVSession", NAPI_CREATE_AVSESSION_TASK_ID);
+    AVSessionTrace trace("NapiAVSessionManager::CreateAVSession");
     struct ConcreteContext : public ContextBase {
         std::string tag_;
         int32_t type_{};
@@ -72,6 +72,7 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
         std::shared_ptr<AVSession> session_;
     };
     auto context = std::make_shared<ConcreteContext>();
+    context->taskId = NAPI_CREATE_AVSESSION_TASK_ID;
 
     auto inputParser = [env, context](size_t argc, napi_value *argv) {
         // require 3 arguments <context> <tag> <type>
@@ -101,7 +102,6 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
     auto complete = [context](napi_value &output) {
         context->status = NapiAVSession::NewInstance(context->env, context->session_, output);
         CHECK_STATUS_RETURN_VOID(context, "create new javascript object failed");
-        AVSessionTrace::TraceEnd("NapiAVSessionManager::CreateAVSession", NAPI_CREATE_AVSESSION_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "CreateAVSession", executor, complete);
@@ -109,13 +109,13 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
 
 napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace::TraceBegin("NapiAVSessionManager::GetAllSessionDescriptors",
-        NAPI_GET_ALL_SESSION_DESCRIPTORS_TASK_ID);
+    AVSessionTrace trace("NapiAVSessionManager::GetAllSessionDescriptors");
     struct ConcreteContext : public ContextBase {
         std::vector<AVSessionDescriptor> descriptors_;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
+    context->taskId = NAPI_GET_ALL_SESSION_DESCRIPTORS_TASK_ID;
 
     auto executor = [context]() {
         context->descriptors_ = AVSessionManager::GetInstance().GetAllSessionDescriptors();
@@ -124,8 +124,6 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
     auto complete = [env, context](napi_value &output) {
         context->status = NapiUtils::SetValue(env, context->descriptors_, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
-        AVSessionTrace::TraceEnd("NapiAVSessionManager::GetAllSessionDescriptors",
-            NAPI_GET_ALL_SESSION_DESCRIPTORS_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetAllSessionDescriptors", executor, complete);
@@ -133,7 +131,7 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
 
 napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace::TraceBegin("NapiAVSessionManager::CreateController", NAPI_CREATE_CONTROLLER_TASK_ID);
+    AVSessionTrace trace("NapiAVSessionManager::CreateController");
     struct ConcreteContext : public ContextBase {
         std::string sessionId_ {};
         std::shared_ptr<AVSessionController> controller_;
@@ -146,6 +144,7 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
                                "invalid sessionId");
     };
     context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_CREATE_CONTROLLER_TASK_ID;
 
     auto executor = [context]() {
         context->controller_ = AVSessionManager::GetInstance().CreateController(context->sessionId_);
@@ -158,7 +157,6 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
     auto complete = [env, context](napi_value &output) {
         context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
-        AVSessionTrace::TraceEnd("NapiAVSessionManager::CreateController", NAPI_CREATE_CONTROLLER_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "CreateController", executor, complete);
@@ -191,6 +189,7 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     };
 
     context->GetCbInfo(env, info, input, true);
+    AVSessionTrace trace("NapiAVSessionManager::OnEvent_" + eventName);
     if (context->status != napi_ok) {
         napi_throw_error(env, nullptr, context->error.c_str());
         return NapiUtils::GetUndefinedValue(env);
@@ -239,6 +238,7 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
     };
 
     context->GetCbInfo(env, info, input, true);
+    AVSessionTrace trace("NapiAVSessionManager::OffEvent_" + eventName);
     if (context->status != napi_ok) {
         napi_throw_error(env, nullptr, context->error.c_str());
         return NapiUtils::GetUndefinedValue(env);
@@ -260,7 +260,7 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
 
 napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace::TraceBegin("NapiAVSessionManager::SendSystemAVKeyEvent", NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID);
+    AVSessionTrace trace("NapiAVSessionManager::SendSystemAVKeyEvent");
     struct ConcreteContext : public ContextBase {
         std::shared_ptr<MMI::KeyEvent> keyEvent_;
     };
@@ -272,13 +272,13 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
                                "invalid keyEvent");
     };
     context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID;
 
     auto executor = [context]() {
         if (AVSessionManager::GetInstance().SendSystemAVKeyEvent(*context->keyEvent_) != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native send keyEvent failed";
         }
-        AVSessionTrace::TraceEnd("NapiAVSessionManager::SendSystemAVKeyEvent", NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "SendSystemAVKeyEvent", executor);
@@ -286,8 +286,7 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
 
 napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace::TraceBegin("NapiAVSessionManager::SendSystemControlCommand",
-        NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID);
+    AVSessionTrace trace("NapiAVSessionManager::SendSystemControlCommand");
     struct ConcrentContext : public ContextBase {
         AVControlCommand command;
     };
@@ -298,14 +297,13 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command");
     };
     context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID;
 
     auto executor = [context]() {
         if (AVSessionManager::GetInstance().SendSystemControlCommand(context->command) != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native send control command failed";
         }
-        AVSessionTrace::TraceEnd("NapiAVSessionManager::SendSystemControlCommand",
-            NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "SendSystemControlCommand", executor);
