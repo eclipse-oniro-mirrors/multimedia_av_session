@@ -21,6 +21,7 @@
 #include "iavsession_callback.h"
 
 namespace OHOS::AVSession {
+class WantAgentAdapter;
 class IAVSession : public AVSession, public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.avsession.IAVSession");
@@ -42,6 +43,8 @@ public:
         SESSION_CMD_DELETE_SUPPORT_COMMAND,
         SESSION_CMD_MAX,
     };
+
+    virtual int32_t SetLaunchAbilityInner(const WantAgentAdapter& ability) = 0;
 
 protected:
     virtual int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) = 0;
