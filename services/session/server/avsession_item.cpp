@@ -98,7 +98,7 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionItem::SetLaunchAbilityInner(const sptr<IRemoteObject>& ability)
+int32_t AVSessionItem::SetLaunchAbilityInner(const WantAgentAdapter& ability)
 {
     launchAbility_ = ability;
     return AVSESSION_SUCCESS;
@@ -205,7 +205,7 @@ std::vector<int32_t> AVSessionItem::GetSupportCommand()
     return supportedCmd_;
 }
 
-sptr<IRemoteObject> AVSessionItem::GetLaunchAbility()
+WantAgentAdapter AVSessionItem::GetLaunchAbility()
 {
     return launchAbility_;
 }

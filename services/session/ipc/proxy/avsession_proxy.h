@@ -25,6 +25,7 @@
 #include "avplayback_state.h"
 
 namespace OHOS::AVSession {
+class WantAgentAdapter;
 class AVSessionProxy : public IRemoteProxy<IAVSession> {
 public:
     explicit AVSessionProxy(const sptr<IRemoteObject> &impl);
@@ -41,7 +42,7 @@ public:
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
-    int32_t SetLaunchAbilityInner(const sptr<IRemoteObject>& ability) override
+    int32_t SetLaunchAbilityInner(const WantAgentAdapter& ability) override
     {
         return ERR_NONE;
     }

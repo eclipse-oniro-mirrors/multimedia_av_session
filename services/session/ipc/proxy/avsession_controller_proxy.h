@@ -20,6 +20,7 @@
 #include "iremote_proxy.h"
 
 namespace OHOS::AVSession {
+class WantAgentAdapter;
 class AVSessionControllerProxy : public IRemoteProxy<IAVSessionController> {
 public:
     explicit AVSessionControllerProxy(const sptr<IRemoteObject> &impl);
@@ -32,7 +33,7 @@ public:
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
 
-    int32_t GetLaunchAbilityInner(sptr<IRemoteObject> &ability) override
+    int32_t GetLaunchAbilityInner(WantAgentAdapter &ability) override
     {
         return ERR_NONE;
     }

@@ -17,6 +17,7 @@
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "want_agent_adapter.h"
 
 namespace OHOS::AVSession {
 bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel &data)
@@ -114,13 +115,11 @@ int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel &data, Messa
 
 int32_t AVSessionControllerStub::HandleGetLaunchAbility(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<IRemoteObject> ability = nullptr;
+    WantAgentAdapter ability;
     int32_t ret = GetLaunchAbilityInner(ability);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(1), "write int32 failed");
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(1), "write int32 failed");
-        CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(ability), "write LaunchAbility failed");
+        CHECK_AND_PRINT_LOG(reply.WriteParcelable(&ability), "write LaunchAbility failed");
     }
     return ERR_NONE;
 }

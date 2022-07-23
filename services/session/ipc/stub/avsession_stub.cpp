@@ -16,6 +16,7 @@
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
 #include "avsession_trace.h"
+#include "want_agent_adapter.h"
 
 namespace OHOS::AVSession {
 bool AVSessionStub::CheckInterfaceToken(MessageParcel &data)
@@ -109,10 +110,12 @@ int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& r
 int32_t AVSessionStub::HandleSetLaunchAbility(MessageParcel& data, MessageParcel& reply)
 {
     AVSessionTrace avSessionTrace("AVSessionStub::SetLaunchAbility");
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32() != 0, ERR_NONE, "read int32 failed");
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32() != 0, ERR_NONE, "read int32 failed");
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetLaunchAbilityInner(data.ReadRemoteObject())),
-        ERR_NONE, "Write LaunchAbility failed");
+    sptr want = data.ReadParcelable<WantAgentAdapter>();
+    if (want == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
+    }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetLaunchAbilityInner(*want)), ERR_NONE, "Write LaunchAbility failed");
     return ERR_NONE;
 }
 
