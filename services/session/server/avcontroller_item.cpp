@@ -69,7 +69,7 @@ int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::GetLaunchAbilityInner(WantAgentAdapter &ability)
+int32_t AVControllerItem::GetLaunchAbilityInner(sptr<WantAgentAdapter> &ability)
 {
     if (session_ == nullptr) {
         SLOGI("session not exist");

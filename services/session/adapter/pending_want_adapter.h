@@ -53,7 +53,7 @@ public:
     }
 
 private:
-    sptr<IRemoteObject> target_ = nullptr;
+    sptr<IRemoteObject> target_;
 };
 } // namespace OHOS::AVSession
 #endif // AVSESSION_PENDING_WANT_ADAPTER_H

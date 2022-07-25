@@ -39,8 +39,6 @@ public:
 
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
-    int32_t SetLaunchAbilityInner(const WantAgentAdapter& ability) override;
-
     int32_t Activate() override;
 
     int32_t Deactivate() override;
@@ -63,7 +61,7 @@ public:
 
     std::vector<int32_t> GetSupportCommand();
 
-    WantAgentAdapter GetLaunchAbility();
+    sptr<WantAgentAdapter> GetLaunchAbility();
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
@@ -94,6 +92,7 @@ public:
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
+    int32_t SetLaunchAbilityInner(const sptr<WantAgentAdapter>& ability) override;
 
 private:
     void HandleOnPlay(const AVControlCommand& cmd);
@@ -128,7 +127,7 @@ private:
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
-    WantAgentAdapter launchAbility_;
+    sptr<WantAgentAdapter> launchAbility_;
     std::vector<int32_t> supportedCmd_;
     sptr<IAVSessionCallback> callback_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;

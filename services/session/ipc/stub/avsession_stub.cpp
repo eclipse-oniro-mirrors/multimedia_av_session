@@ -115,7 +115,7 @@ int32_t AVSessionStub::HandleSetLaunchAbility(MessageParcel& data, MessageParcel
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
         return ERR_NONE;
     }
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetLaunchAbilityInner(*want)), ERR_NONE, "Write LaunchAbility failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetLaunchAbilityInner(want)), ERR_NONE, "Write LaunchAbility failed");
     return ERR_NONE;
 }
 

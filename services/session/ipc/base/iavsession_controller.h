@@ -42,10 +42,9 @@ public:
         CONTROLLER_CMD_MAX
     };
 
-    virtual int32_t GetLaunchAbilityInner(WantAgentAdapter &ability) = 0;
-
 protected:
     virtual int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) = 0;
+    virtual int32_t GetLaunchAbilityInner(sptr<WantAgentAdapter> &ability) = 0;
 };
 }
 #endif // OHOS_IAVSESSION_CONTROLLER_H
