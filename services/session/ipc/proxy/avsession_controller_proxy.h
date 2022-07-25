@@ -33,11 +33,6 @@ public:
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
 
-    int32_t GetLaunchAbilityInner(WantAgentAdapter &ability) override
-    {
-        return ERR_NONE;
-    }
-
     int32_t GetValidCommands(std::vector<int32_t> &cmds) override;
 
     int32_t IsSessionActive(bool &isActive) override;
@@ -58,6 +53,10 @@ public:
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
+    int32_t GetLaunchAbilityInner(sptr<WantAgentAdapter> &ability) override
+    {
+        return ERR_NONE;
+    }
 
 private:
     static inline BrokerDelegator<AVSessionControllerProxy> delegator_;

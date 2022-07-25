@@ -42,11 +42,6 @@ public:
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
-    int32_t SetLaunchAbilityInner(const WantAgentAdapter& ability) override
-    {
-        return ERR_NONE;
-    }
-
     std::shared_ptr<AVSessionController> GetController() override;
 
     int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) override;
@@ -66,6 +61,10 @@ public:
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
+    int32_t SetLaunchAbilityInner(const sptr<WantAgentAdapter>& ability) override
+    {
+        return ERR_NONE;
+    }
 
 private:
     sptr<IAVSessionCallback> callback_;

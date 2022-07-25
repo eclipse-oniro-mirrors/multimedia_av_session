@@ -98,7 +98,7 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionItem::SetLaunchAbilityInner(const WantAgentAdapter& ability)
+int32_t AVSessionItem::SetLaunchAbilityInner(const sptr<WantAgentAdapter>& ability)
 {
     launchAbility_ = ability;
     return AVSESSION_SUCCESS;
@@ -205,7 +205,7 @@ std::vector<int32_t> AVSessionItem::GetSupportCommand()
     return supportedCmd_;
 }
 
-WantAgentAdapter AVSessionItem::GetLaunchAbility()
+sptr<WantAgentAdapter> AVSessionItem::GetLaunchAbility()
 {
     return launchAbility_;
 }

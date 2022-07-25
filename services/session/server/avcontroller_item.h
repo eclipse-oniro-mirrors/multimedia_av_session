@@ -36,8 +36,6 @@ public:
 
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
-    int32_t GetLaunchAbilityInner(WantAgentAdapter &ability) override;
-
     int32_t GetValidCommands(std::vector<int32_t> &cmds) override;
 
     int32_t IsSessionActive(bool &isActive) override;
@@ -70,6 +68,7 @@ public:
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
+    int32_t GetLaunchAbilityInner(sptr<WantAgentAdapter> &ability) override;
 
 private:
     pid_t pid_;

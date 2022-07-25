@@ -61,7 +61,7 @@ public:
     }
 
 private:
-    std::shared_ptr<PendingWantAdapter> pendingWant_ = nullptr;
+    std::shared_ptr<PendingWantAdapter> pendingWant_;
 };
 } // namespace OHOS::AVSession
 #endif // AVSESSION_WANT_AGENT_ADAPTER_H
