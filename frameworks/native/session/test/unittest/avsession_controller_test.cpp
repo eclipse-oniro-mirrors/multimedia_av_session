@@ -310,8 +310,10 @@ HWTEST_F(AVSessionControllerTest, SendMediaButtonEvent003, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetLaunchAbility001, TestSize.Level1)
 {
-    OHOS::AbilityRuntime::WantAgent::WantAgent ability;
-    EXPECT_EQ(controller_->GetLaunchAbility(ability), AVSESSION_SUCCESS);
+    OHOS::AbilityRuntime::WantAgent::WantAgent ability1;
+    EXPECT_EQ(avsession_->SetLaunchAbility(ability1), AVSESSION_SUCCESS);
+    OHOS::AbilityRuntime::WantAgent::WantAgent ability2;
+    EXPECT_EQ(controller_->GetLaunchAbility(ability2), AVSESSION_SUCCESS);
 }
 
 /**
