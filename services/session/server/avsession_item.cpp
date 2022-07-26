@@ -214,6 +214,7 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSessionTrace avSessionTrace("AVSessionItem::MediaKeyEvent");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
     callback_->OnMediaKeyEvent(keyEvent);
 }
 
@@ -221,6 +222,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 {
     AVSessionTrace avSessionTrace("AVSessionItem::ExecuteControllerCommand");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
     int32_t code = cmd.GetCommand();
     if (code >= 0 && code < SESSION_CMD_MAX) {
         return (this->*cmdHandlers[code])(cmd);
