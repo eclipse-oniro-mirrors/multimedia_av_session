@@ -20,7 +20,6 @@
 #include "iremote_proxy.h"
 
 namespace OHOS::AVSession {
-class WantAgentAdapter;
 class AVSessionControllerProxy : public IRemoteProxy<IAVSessionController> {
 public:
     explicit AVSessionControllerProxy(const sptr<IRemoteObject> &impl);
@@ -53,10 +52,6 @@ public:
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
-    int32_t GetLaunchAbilityInner(sptr<WantAgentAdapter> &ability) override
-    {
-        return ERR_NONE;
-    }
 
 private:
     static inline BrokerDelegator<AVSessionControllerProxy> delegator_;

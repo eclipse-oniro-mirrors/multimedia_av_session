@@ -21,7 +21,6 @@
 #include "iremote_broker.h"
 
 namespace OHOS::AVSession {
-class WantAgentAdapter;
 class IAVSessionController : public AVSessionController, public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.avsession.IAVSessionController");
@@ -44,7 +43,6 @@ public:
 
 protected:
     virtual int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) = 0;
-    virtual int32_t GetLaunchAbilityInner(sptr<WantAgentAdapter> &ability) = 0;
 };
 }
 #endif // OHOS_IAVSESSION_CONTROLLER_H

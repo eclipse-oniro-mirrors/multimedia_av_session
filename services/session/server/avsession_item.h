@@ -21,7 +21,6 @@
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
 #include "avcontrol_command.h"
-#include "want_agent_adapter.h"
 
 namespace OHOS::AVSession {
 class AVControllerItem;
@@ -38,6 +37,8 @@ public:
     int32_t SetAVMetaData(const AVMetaData& meta) override;
 
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
+
+    int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
     int32_t Activate() override;
 
@@ -61,7 +62,7 @@ public:
 
     std::vector<int32_t> GetSupportCommand();
 
-    sptr<WantAgentAdapter> GetLaunchAbility();
+    AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
@@ -92,7 +93,6 @@ public:
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
-    int32_t SetLaunchAbilityInner(const sptr<WantAgentAdapter>& ability) override;
 
 private:
     void HandleOnPlay(const AVControlCommand& cmd);
@@ -127,7 +127,7 @@ private:
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
-    sptr<WantAgentAdapter> launchAbility_;
+    AbilityRuntime::WantAgent::WantAgent launchAbility_;
     std::vector<int32_t> supportedCmd_;
     sptr<IAVSessionCallback> callback_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;
