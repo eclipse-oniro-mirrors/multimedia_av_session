@@ -34,11 +34,6 @@ public:
         return 0;
     }
 
-    int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override
-    {
-        return ERR_NONE;
-    }
-
 private:
     int32_t HandleRegisterCallbackInner(MessageParcel &data, MessageParcel &reply);
 

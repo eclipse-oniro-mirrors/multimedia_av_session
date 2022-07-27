@@ -36,11 +36,6 @@ public:
     {
         return nullptr;
     }
-
-    int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override
-    {
-        return ERR_NONE;
-    }
 private:
     int32_t HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
 

@@ -21,7 +21,6 @@
 #include "avsession_item.h"
 #include "avcontroller_callback_proxy.h"
 #include "avsession_controller_stub.h"
-#include "want_agent_adapter.h"
 
 namespace OHOS::AVSession {
 class AVControllerItem : public AVSessionControllerStub {
@@ -35,6 +34,8 @@ public:
     int32_t GetAVMetaData(AVMetaData &data) override;
 
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
+
+    int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
 
     int32_t GetValidCommands(std::vector<int32_t> &cmds) override;
 
@@ -68,7 +69,6 @@ public:
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
-    int32_t GetLaunchAbilityInner(sptr<WantAgentAdapter> &ability) override;
 
 private:
     pid_t pid_;
