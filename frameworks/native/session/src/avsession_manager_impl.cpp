@@ -92,24 +92,26 @@ std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string
     return service ? service->CreateSession(tag, type, elementName) : nullptr;
 }
 
-std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetAllSessionDescriptors()
+int32_t AVSessionManagerImpl::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {
     AVSessionTrace trace("AVSessionManagerImpl::GetAllSessionDescriptors");
     auto service = GetService();
-    return service ? service->GetAllSessionDescriptors() : std::vector<AVSessionDescriptor>();
+    return service ? service->GetAllSessionDescriptors(descriptors) : ERR_SERVICE_NOT_EXIST;
 }
 
-std::vector<AVSessionDescriptor> AVSessionManagerImpl::GetActivatedSessionDescriptors()
+int32_t AVSessionManagerImpl::GetActivatedSessionDescriptors(std::vector<AVSessionDescriptor>& activatedSessions)
 {
     AVSessionTrace trace("AVSessionManagerImpl::GetActivatedSessionDescriptors");
-    std::vector<AVSessionDescriptor> descriptors = GetAllSessionDescriptors();
-    std::vector<AVSessionDescriptor> activatedSessions;
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = GetAllSessionDescriptors(descriptors);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAllSessionDescriptors failed");
+
     for (const auto& descriptor : descriptors) {
         if (descriptor.isActive_) {
             activatedSessions.push_back(descriptor);
         }
     }
-    return activatedSessions;
+    return ret;
 }
 
 int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(const std::string& sessionId,
@@ -125,16 +127,17 @@ int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(const std::string
     return service ? service->GetSessionDescriptorsBySessionId(sessionId, descriptor) : ERR_SERVICE_NOT_EXIST;
 }
 
-std::shared_ptr<AVSessionController> AVSessionManagerImpl::CreateController(const std::string& sessionId)
+int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
+    std::shared_ptr<AVSessionController>& controller)
 {
     AVSessionTrace trace("AVSessionManagerImpl::CreateController");
     if (sessionId.empty()) {
         SLOGE("sessionId is invalid");
-        return nullptr;
+        return ERR_INVALID_PARAM;
     }
 
     auto service = GetService();
-    return service ? service->CreateController(sessionId) : nullptr;
+    return service ? service->CreateController(sessionId, controller) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener> &listener)

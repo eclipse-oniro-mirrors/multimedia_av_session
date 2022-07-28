@@ -66,8 +66,10 @@ int AVSessionServiceStub::HandleCreateSessionInner(MessageParcel &data, MessageP
 
 int AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel &data, MessageParcel &reply)
 {
-    auto descriptors = GetAllSessionDescriptors();
-    reply.WriteUint32(descriptors.size());
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = GetAllSessionDescriptors(descriptors);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(descriptors.size()), ERR_NONE, "write size failed");
     for (const auto& descriptor : descriptors) {
         if (!descriptor.WriteToParcel(reply)) {
             SLOGE("write descriptor failed");
@@ -90,7 +92,12 @@ int AVSessionServiceStub::HandleGetSessionDescriptorsById(MessageParcel &data, M
 
 int AVSessionServiceStub::HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply)
 {
-    reply.WriteRemoteObject(CreateControllerInner(data.ReadString()));
+    sptr<IRemoteObject> object;
+    int32_t ret = CreateControllerInner(data.ReadString(), object);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");
+    }
     return ERR_NONE;
 }
 

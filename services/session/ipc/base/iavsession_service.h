@@ -42,12 +42,12 @@ public:
     virtual sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                                    const AppExecFwk::ElementName& elementName) = 0;
 
-    virtual std::vector<AVSessionDescriptor> GetAllSessionDescriptors() = 0;
+    virtual int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) = 0;
 
     virtual int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId,
         AVSessionDescriptor& descriptor) = 0;
 
-    virtual sptr<IRemoteObject> CreateControllerInner(const std::string& sessionId) = 0;
+    virtual int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
 
     virtual int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
 

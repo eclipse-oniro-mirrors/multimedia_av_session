@@ -118,7 +118,14 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
     context->taskId = NAPI_GET_ALL_SESSION_DESCRIPTORS_TASK_ID;
 
     auto executor = [context]() {
-        context->descriptors_ = AVSessionManager::GetInstance().GetAllSessionDescriptors();
+        int32_t ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(context->descriptors_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "native GetAllSessionDescriptors failed";
+        }
+        if (ret == ERR_NO_PERMISSION) {
+            context->error = "native GetAllSessionDescriptors no permission";
+        }
     };
 
     auto complete = [env, context](napi_value &output) {
@@ -147,10 +154,13 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
     context->taskId = NAPI_CREATE_CONTROLLER_TASK_ID;
 
     auto executor = [context]() {
-        context->controller_ = AVSessionManager::GetInstance().CreateController(context->sessionId_);
-        if (context->controller_ == nullptr) {
+        int32_t ret = AVSessionManager::GetInstance().CreateController(context->sessionId_, context->controller_);
+        if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native create controller failed";
+        }
+        if (ret == ERR_NO_PERMISSION) {
+            context->error = "native create controller no permission";
         }
     };
 
@@ -208,9 +218,14 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
             napi_throw_error(env, nullptr, "no memory");
             return NapiUtils::GetUndefinedValue(env);
         }
-        if (AVSessionManager::GetInstance().RegisterSessionListener(listener_) != AVSESSION_SUCCESS) {
+        int32_t ret = AVSessionManager::GetInstance().RegisterSessionListener(listener_);
+        if (ret != AVSESSION_SUCCESS) {
             SLOGE("native register session listener failed");
-            napi_throw_error(env, nullptr, "native register session listener failed");
+            if (ret == ERR_NO_PERMISSION) {
+                napi_throw_error(env, nullptr, "native register session listener no permission");
+            } else {
+                napi_throw_error(env, nullptr, "native register session listener failed");
+            }
             return NapiUtils::GetUndefinedValue(env);
         }
     }
@@ -275,9 +290,13 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
     context->taskId = NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID;
 
     auto executor = [context]() {
-        if (AVSessionManager::GetInstance().SendSystemAVKeyEvent(*context->keyEvent_) != AVSESSION_SUCCESS) {
+        int32_t ret = AVSessionManager::GetInstance().SendSystemAVKeyEvent(*context->keyEvent_);
+        if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native send keyEvent failed";
+        }
+        if (ret == ERR_NO_PERMISSION) {
+            context->error = "native send keyEvent no permission";
         }
     };
 
@@ -300,9 +319,13 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
     context->taskId = NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID;
 
     auto executor = [context]() {
-        if (AVSessionManager::GetInstance().SendSystemControlCommand(context->command) != AVSESSION_SUCCESS) {
+        int32_t ret = AVSessionManager::GetInstance().SendSystemControlCommand(context->command);
+        if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native send control command failed";
+        }
+        if (ret == ERR_NO_PERMISSION) {
+            context->error = "native send control command no permission";
         }
     };
 

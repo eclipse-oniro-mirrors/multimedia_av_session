@@ -52,7 +52,8 @@ void AVSessionControllerTest::SetUp()
                                                                elementName);
     ASSERT_NE(avsession_, nullptr);
 
-    controller_ = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId());
+    auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller_);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
     ASSERT_NE(controller_, nullptr);
 }
 

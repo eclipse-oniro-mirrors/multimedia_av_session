@@ -145,8 +145,9 @@ HWTEST_F(AVSessionPermissionTest, GetAllSessionDescriptorsWithNoPerm001, TestSiz
     auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
     ASSERT_NE(session, nullptr);
 
-    auto descriptors = AVSessionManager::GetInstance().GetAllSessionDescriptors();
-    EXPECT_EQ(descriptors.size(), 0);
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, ERR_NO_PERMISSION);
     if (session != nullptr) {
         session->Destroy();
     }
@@ -169,8 +170,9 @@ HWTEST_F(AVSessionPermissionTest, GetActivatedSessionDescriptorsWithNoPerm001, T
     ASSERT_NE(session, nullptr);
     session->Activate();
 
-    auto descriptors = AVSessionManager::GetInstance().GetActivatedSessionDescriptors();
-    EXPECT_EQ(descriptors.size(), 0);
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, ERR_NO_PERMISSION);
 
     if (session != nullptr) {
         session->Destroy();
@@ -223,8 +225,9 @@ HWTEST_F(AVSessionPermissionTest, CreateControllerWithNoPerm001, TestSize.Level1
     auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
     ASSERT_NE(session, nullptr);
 
-    auto controller = AVSessionManager::GetInstance().CreateController(session->GetSessionId());
-    EXPECT_EQ(controller, nullptr);
+    std::shared_ptr<AVSessionController> controller;
+    auto ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller);
+    EXPECT_EQ(ret, ERR_NO_PERMISSION);
     if (session != nullptr) {
         session->Destroy();
     }
@@ -302,7 +305,9 @@ HWTEST_F(AVSessionPermissionTest, GetAllSessionDescriptorsWithPerm001, TestSize.
     auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
     ASSERT_NE(session, nullptr);
 
-    auto descriptors = AVSessionManager::GetInstance().GetAllSessionDescriptors();
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptors.size(), 1);
     if (session != nullptr) {
         session->Destroy();
@@ -326,7 +331,9 @@ HWTEST_F(AVSessionPermissionTest, GetActivatedSessionDescriptorsWithPerm001, Tes
     ASSERT_NE(session, nullptr);
     session->Activate();
 
-    auto descriptors = AVSessionManager::GetInstance().GetActivatedSessionDescriptors();
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptors.size(), 1);
 
     if (session != nullptr) {
@@ -350,7 +357,9 @@ HWTEST_F(AVSessionPermissionTest, CreateControllerWithPerm001, TestSize.Level1)
     auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
     ASSERT_NE(session, nullptr);
 
-    auto controller = AVSessionManager::GetInstance().CreateController(session->GetSessionId());
+    std::shared_ptr<AVSessionController> controller;
+    auto ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_NE(controller, nullptr);
     if (session != nullptr) {
         session->Destroy();
