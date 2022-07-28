@@ -33,13 +33,14 @@ public:
     virtual std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                                      const AppExecFwk::ElementName& elementName) = 0;
 
-    virtual std::vector<AVSessionDescriptor> GetAllSessionDescriptors() = 0;
+    virtual int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) = 0;
 
-    virtual std::vector<AVSessionDescriptor> GetActivatedSessionDescriptors() = 0;
+    virtual int32_t GetActivatedSessionDescriptors(std::vector<AVSessionDescriptor>& activatedSessions) = 0;
 
     virtual int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) = 0;
 
-    virtual std::shared_ptr<AVSessionController> CreateController(const std::string& sessionId) = 0;
+    virtual int32_t CreateController(const std::string& sessionId,
+        std::shared_ptr<AVSessionController>& controller) = 0;
 
     virtual int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) = 0;
 

@@ -37,11 +37,11 @@ public:
     std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                              const AppExecFwk::ElementName& elementName) override;
 
-    std::vector<AVSessionDescriptor> GetAllSessionDescriptors() override;
+    int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
-    std::shared_ptr<AVSessionController> CreateController(const std::string& sessionId) override;
+    int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller) override;
 
-    std::vector<AVSessionDescriptor> GetActivatedSessionDescriptors() override;
+    int32_t GetActivatedSessionDescriptors(std::vector<AVSessionDescriptor>& activatedSessions) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 

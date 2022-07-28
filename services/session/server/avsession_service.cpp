@@ -316,21 +316,20 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
     return result;
 }
 
-std::vector<AVSessionDescriptor> AVSessionService::GetAllSessionDescriptors()
+int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {
     AVSessionTrace mAVSessionTrace("AVSessionService::GetAllSessionDescriptors");
-    std::vector<AVSessionDescriptor> result;
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
-        return result;
+        return ERR_NO_PERMISSION;
     }
 
     std::lock_guard lockGuard(sessionAndControllerLock_);
     for (const auto& session: GetContainer().GetAllSessions()) {
-        result.push_back(session->GetDescriptor());
+        descriptors.push_back(session->GetDescriptor());
     }
-    SLOGI("size=%{public}d", static_cast<int>(result.size()));
-    return result;
+    SLOGI("size=%{public}d", static_cast<int>(descriptors.size()));
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& sessionId,
@@ -367,35 +366,36 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
     return result;
 }
 
-sptr<IRemoteObject> AVSessionService::CreateControllerInner(const std::string& sessionId)
+int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
     AVSessionTrace mAVSessionTrace("AVSessionService::CreateControllerInner");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
-        return nullptr;
+        return ERR_NO_PERMISSION;
     }
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (GetPresentController(pid, sessionId) != nullptr) {
         SLOGI("controller already exist");
-        return nullptr;
+        return ERR_CONTROLLER_IS_EXIST;
     }
 
     auto session = GetContainer().GetSessionById(sessionId);
     if (session == nullptr) {
         SLOGE("no session id %{public}s", sessionId.c_str());
-        return nullptr;
+        return ERR_SESSION_NOT_EXIST;
     }
 
     auto result = CreateNewControllerForSession(pid, session);
     if (result == nullptr) {
         SLOGE("create new controller failed");
-        return nullptr;
+        return ERR_NO_MEMORY;
     }
 
     controllers_[pid].push_back(result);
+    object = result;
     SLOGI("success");
-    return result;
+    return AVSESSION_SUCCESS;
 }
 
 void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener> &listener)

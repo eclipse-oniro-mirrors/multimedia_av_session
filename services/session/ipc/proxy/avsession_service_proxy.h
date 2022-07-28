@@ -32,13 +32,13 @@ public:
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                            const AppExecFwk::ElementName& elementName) override;
 
-    std::vector<AVSessionDescriptor> GetAllSessionDescriptors() override;
+    int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
-    std::shared_ptr<AVSessionController> CreateController(const std::string& sessionId);
+    int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller);
 
-    sptr<IRemoteObject> CreateControllerInner(const std::string& sessionId) override;
+    int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 

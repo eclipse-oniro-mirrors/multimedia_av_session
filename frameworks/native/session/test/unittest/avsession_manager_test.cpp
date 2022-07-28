@@ -164,7 +164,9 @@ HWTEST_F(AVSessionManagerTest, CreatSession003, TestSize.Level1)
 HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
 {
     SLOGI("GetAllSessionDescriptors001 begin");
-    auto descriptors = AVSessionManager::GetInstance().GetAllSessionDescriptors();
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptors.size(), 0);
 
     OHOS::AppExecFwk::ElementName elementName;
@@ -174,7 +176,8 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
                                                                  elementName);
     EXPECT_NE(session, nullptr);
 
-    descriptors = AVSessionManager::GetInstance().GetAllSessionDescriptors();
+    ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptors.size(), 1);
     EXPECT_EQ(descriptors[0].sessionTag_, g_testSessionTag);
     EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
@@ -197,7 +200,9 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
 HWTEST_F(AVSessionManagerTest, GetActivatedSessionDescriptors001, TestSize.Level1)
 {
     SLOGI("GetActivatedSessionDescriptors001 begin");
-    auto descriptors = AVSessionManager::GetInstance().GetActivatedSessionDescriptors();
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptors.size(), 0);
 
     OHOS::AppExecFwk::ElementName elementName;
@@ -208,7 +213,8 @@ HWTEST_F(AVSessionManagerTest, GetActivatedSessionDescriptors001, TestSize.Level
     EXPECT_NE(session, nullptr);
     session->Activate();
 
-    descriptors = AVSessionManager::GetInstance().GetActivatedSessionDescriptors();
+    ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptors.size(), 1);
     EXPECT_EQ(descriptors[0].sessionTag_, g_testSessionTag);
     EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
@@ -231,7 +237,9 @@ HWTEST_F(AVSessionManagerTest, GetActivatedSessionDescriptors001, TestSize.Level
 HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsBySessionId001, TestSize.Level1)
 {
     SLOGI("GetSessionDescriptorsBySessionId001 begin");
-    auto descriptors = AVSessionManager::GetInstance().GetActivatedSessionDescriptors();
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptors.size(), 0);
 
     OHOS::AppExecFwk::ElementName elementName;
@@ -243,7 +251,7 @@ HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsBySessionId001, TestSize.Lev
     session->Activate();
     auto sessionId = session->GetSessionId();
     AVSessionDescriptor descriptor {};
-    int32_t ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
+    ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptor.sessionTag_, g_testSessionTag);
     EXPECT_EQ(descriptor.sessionType_, AVSession::SESSION_TYPE_AUDIO);
@@ -267,8 +275,9 @@ HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsBySessionId001, TestSize.Lev
 HWTEST_F(AVSessionManagerTest, CreateController001, TestSize.Level1)
 {
     SLOGI("CreateController001 begin");
-    auto controller = AVSessionManager::GetInstance().CreateController("100");
-    EXPECT_EQ(controller, nullptr);
+    std::shared_ptr<AVSessionController> controller;
+    auto ret = AVSessionManager::GetInstance().CreateController("100", controller);
+    EXPECT_EQ(ret, ERR_SESSION_NOT_EXIST);
     SLOGI("CreateController001 end");
 }
 
@@ -289,7 +298,9 @@ HWTEST_F(AVSessionManagerTest, CreateController002, TestSize.Level1)
     EXPECT_NE(session, nullptr);
     ASSERT_EQ(session->GetSessionId().length(), SESSION_LEN);
 
-    auto controller = AVSessionManager::GetInstance().CreateController(session->GetSessionId());
+    std::shared_ptr<AVSessionController> controller;
+    auto ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_NE(controller, nullptr);
 
     if (session != nullptr) {
