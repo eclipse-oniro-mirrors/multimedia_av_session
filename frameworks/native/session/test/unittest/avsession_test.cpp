@@ -469,6 +469,11 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
             default:
                 break;
         }
+        bool isActive {};
+        controller_->IsSessionActive(isActive);
+        if (!isActive) {
+            avsession_->Activate();
+        }
         EXPECT_EQ(controller_->SendControlCommand(controlCommand), AVSESSION_SUCCESS);
         sleep(1);
         EXPECT_EQ(g_onCall, AVSESSION_SUCCESS);

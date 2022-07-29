@@ -27,23 +27,23 @@ class AVMetaData : public Parcelable {
 public:
     static constexpr std::int64_t DURATION_ALWAYS_PLAY = -1;
     enum {
-        META_KEY_ASSET_ID,
-        META_KEY_TITLE,
-        META_KEY_ARTIST,
-        META_KEY_AUTHOR,
-        META_KEY_ALBUM,
-        META_KEY_WRITER,
-        META_KEY_COMPOSER,
-        META_KEY_DURATION,
-        META_KEY_MEDIA_IMAGE,
-        META_KEY_MEDIA_IMAGE_URI,
-        META_KEY_PUBLISH_DATE,
-        META_KEY_SUBTITLE,
-        META_KEY_DESCRIPTION,
-        META_KEY_LYRIC,
-        META_KEY_PREVIOUS_ASSET_ID,
-        META_KEY_NEXT_ASSET_ID,
-        META_KEY_MAX
+        META_KEY_ASSET_ID = 0,
+        META_KEY_TITLE = 1,
+        META_KEY_ARTIST = 2,
+        META_KEY_AUTHOR = 3,
+        META_KEY_ALBUM = 4,
+        META_KEY_WRITER = 5,
+        META_KEY_COMPOSER = 6,
+        META_KEY_DURATION = 7,
+        META_KEY_MEDIA_IMAGE = 8,
+        META_KEY_MEDIA_IMAGE_URI = 9,
+        META_KEY_PUBLISH_DATE = 10,
+        META_KEY_SUBTITLE = 11,
+        META_KEY_DESCRIPTION = 12,
+        META_KEY_LYRIC = 13,
+        META_KEY_PREVIOUS_ASSET_ID = 14,
+        META_KEY_NEXT_ASSET_ID = 15,
+        META_KEY_MAX = 16
     };
 
     using MetaMaskType = std::bitset<META_KEY_MAX>;
