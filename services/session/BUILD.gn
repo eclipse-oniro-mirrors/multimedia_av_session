@@ -63,9 +63,29 @@ ohos_shared_library("avsession_service") {
     "//foundation/multimedia/av_session/services/session/adapter",
   ]
 
+  cflags = [
+    "-fPIC",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
+    "-fvisibility=hidden",
+    "-Os",
+  ]
+
   if (multimedia_av_session_enable_background_audio_control) {
-    cflags = [ "-DENABLE_BACKGROUND_AUDIO_CONTROL" ]
+    cflags += [ "-DENABLE_BACKGROUND_AUDIO_CONTROL" ]
   }
+
+  if (!use_libfuzzer) {
+    cflags += ["-flto"]
+    ldflags = [
+      "-flto",
+      "-Wl,--gc-sections",
+    ]
+  }
+  cflags_cc = cflags
+  cflags_cc += [ "-fvisibility-inlines-hidden" ]
 
   deps = [
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
