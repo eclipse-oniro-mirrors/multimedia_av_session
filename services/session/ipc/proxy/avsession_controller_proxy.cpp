@@ -82,10 +82,10 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSessionTrace trace("AVSessionControllerProxy::SendAVKeyEvent");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_RETURN_RET_LOG(keyEvent.IsValid(), ERR_INVALID_PARAM, "keyEvent not valid");
     bool isActive {};
     CHECK_AND_RETURN_RET_LOG(IsSessionActive(isActive) == AVSESSION_SUCCESS &&
-        isActive, ERR_SESSION_DEACTIVE, "session is deactive");
-    CHECK_AND_RETURN_RET_LOG(keyEvent.IsValid(), ERR_INVALID_PARAM, "keyEvent not valid");
+        isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
 
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -179,10 +179,10 @@ int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand &cmd
 {
     AVSessionTrace trace("AVSessionControllerProxy::SendControlCommand");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_INVALID_PARAM, "command not valid");
     bool isActive {};
     CHECK_AND_RETURN_RET_LOG(IsSessionActive(isActive) == AVSESSION_SUCCESS &&
-        isActive, ERR_SESSION_DEACTIVE, "session is deactive");
-    CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_INVALID_PARAM, "command not valid");
+        isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");

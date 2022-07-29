@@ -29,6 +29,7 @@ import audio from './@ohos.multimedia.audio';
 declare namespace avSession {
   /**
    * Create an AVSession instance. An ability can only create one AVSession
+   * @param context The context of application
    * @param tag A user-defined name for this session
    * @param type The type of session {@link AVSessionType}
    * @param {AsyncCallback<AVSession>} [callback] - callback.
@@ -830,6 +831,7 @@ declare namespace avSession {
      */
     on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): void;
     off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): void;
+  }
 
   /**
    * The type of control command

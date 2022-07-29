@@ -258,6 +258,11 @@ HWTEST_F(AVSessionControllerTest, SendMediaButtonEvent001, TestSize.Level1)
     keyEvent->AddKeyItem(item);
     ASSERT_EQ(keyEvent->IsValid(), true);
 
+    bool isActive {};
+    controller_->IsSessionActive(isActive);
+    if (!isActive) {
+        avsession_->Activate();
+    }
     EXPECT_EQ(controller_->SendAVKeyEvent(*(keyEvent.get())), AVSESSION_SUCCESS);
 }
 
@@ -299,8 +304,8 @@ HWTEST_F(AVSessionControllerTest, SendMediaButtonEvent003, TestSize.Level1)
     keyEvent->AddKeyItem(item);
     ASSERT_EQ(keyEvent->IsValid(), true);
 
-    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
-    EXPECT_EQ(controller_->SendAVKeyEvent(*(keyEvent.get())), ERR_SESSION_NOT_EXIST);
+    EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->SendAVKeyEvent(*(keyEvent.get())), ERR_SESSION_DEACTIVE);
 }
 
 /**
@@ -524,6 +529,11 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand009, TestSize.Level1)
     AVControlCommand command;
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_SET_LOOP_MODE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
+    bool isActive {};
+    controller_->IsSessionActive(isActive);
+    if (!isActive) {
+        avsession_->Activate();
+    }
     EXPECT_EQ(controller_->SendControlCommand(command), ERR_COMMAND_NOT_SUPPORT);
 }
 
@@ -539,6 +549,11 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand010, TestSize.Level1)
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_LOOP_MODE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_SET_LOOP_MODE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
+    bool isActive {};
+    controller_->IsSessionActive(isActive);
+    if (!isActive) {
+        avsession_->Activate();
+    }
     EXPECT_EQ(controller_->SendControlCommand(command), AVSESSION_SUCCESS);
 }
 
@@ -554,8 +569,8 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand011, TestSize.Level1)
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.SetAssetId("123456"), AVSESSION_SUCCESS);
 
-    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
-    EXPECT_EQ(controller_->SendControlCommand(command), ERR_SESSION_NOT_EXIST);
+    EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->SendControlCommand(command), ERR_SESSION_DEACTIVE);
 }
 
 /**

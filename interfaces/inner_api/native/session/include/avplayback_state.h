@@ -23,31 +23,31 @@ namespace OHOS::AVSession {
 class AVPlaybackState : public Parcelable {
 public:
     enum {
-        PLAYBACK_STATE_INITIAL,
-        PLAYBACK_STATE_PREPARING,
-        PLAYBACK_STATE_PLAYING,
-        PLAYBACK_STATE_PAUSED,
-        PLAYBACK_STATE_FAST_FORWARD,
-        PLAYBACK_STATE_REWIND,
-        PLAYBACK_STATE_STOP,
-        PLAYBACK_STATE_MAX
+        PLAYBACK_STATE_INITIAL = 0,
+        PLAYBACK_STATE_PREPARING = 1,
+        PLAYBACK_STATE_PLAYING = 2,
+        PLAYBACK_STATE_PAUSED = 3,
+        PLAYBACK_STATE_FAST_FORWARD = 4,
+        PLAYBACK_STATE_REWIND = 5,
+        PLAYBACK_STATE_STOP = 6,
+        PLAYBACK_STATE_MAX = 7
     };
 
     enum {
-        PLAYBACK_KEY_STATE,
-        PLAYBACK_KEY_SPEED,
-        PLAYBACK_KEY_POSITION,
-        PLAYBACK_KEY_BUFFERED_TIME,
-        PLAYBACK_KEY_LOOP_MODE,
-        PLAYBACK_KEY_IS_FAVORITE,
-        PLAYBACK_KEY_MAX
+        PLAYBACK_KEY_STATE = 0,
+        PLAYBACK_KEY_SPEED = 1,
+        PLAYBACK_KEY_POSITION = 2,
+        PLAYBACK_KEY_BUFFERED_TIME = 3,
+        PLAYBACK_KEY_LOOP_MODE = 4,
+        PLAYBACK_KEY_IS_FAVORITE = 5,
+        PLAYBACK_KEY_MAX = 6
     };
 
     enum {
-        LOOP_MODE_SEQUENCE,
-        LOOP_MODE_SINGLE,
-        LOOP_MODE_LIST,
-        LOOP_MODE_SHUFFLE,
+        LOOP_MODE_SEQUENCE = 0,
+        LOOP_MODE_SINGLE = 1,
+        LOOP_MODE_LIST = 2,
+        LOOP_MODE_SHUFFLE = 3
     };
 
     struct Position {

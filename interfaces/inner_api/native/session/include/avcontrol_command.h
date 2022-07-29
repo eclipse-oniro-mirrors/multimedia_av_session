@@ -28,18 +28,18 @@ class AVControlCommand : public Parcelable {
 public:
     enum {
         SESSION_CMD_INVALID = -1,
-        SESSION_CMD_PLAY,
-        SESSION_CMD_PAUSE,
-        SESSION_CMD_STOP,
-        SESSION_CMD_PLAY_NEXT,
-        SESSION_CMD_PLAY_PREVIOUS,
-        SESSION_CMD_FAST_FORWARD,
-        SESSION_CMD_REWIND,
-        SESSION_CMD_SEEK,
-        SESSION_CMD_SET_SPEED,
-        SESSION_CMD_SET_LOOP_MODE,
-        SESSION_CMD_TOGGLE_FAVORITE,
-        SESSION_CMD_MAX,
+        SESSION_CMD_PLAY = 0,
+        SESSION_CMD_PAUSE = 1,
+        SESSION_CMD_STOP = 2,
+        SESSION_CMD_PLAY_NEXT = 3,
+        SESSION_CMD_PLAY_PREVIOUS = 4,
+        SESSION_CMD_FAST_FORWARD = 5,
+        SESSION_CMD_REWIND = 6,
+        SESSION_CMD_SEEK = 7,
+        SESSION_CMD_SET_SPEED = 8,
+        SESSION_CMD_SET_LOOP_MODE = 9,
+        SESSION_CMD_TOGGLE_FAVORITE = 10,
+        SESSION_CMD_MAX = 11
     };
 
     AVControlCommand();
