@@ -69,7 +69,6 @@ ohos_shared_library("avsession_service") {
     "-ffunction-sections",
     "-fno-asynchronous-unwind-tables",
     "-fno-unwind-tables",
-    "-fvisibility=hidden",
     "-Os",
   ]
 
