@@ -64,7 +64,12 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
     if (code > MAX_CODE_TEST) {
         return;
     }
-    auto avControllerItemObj = service->CreateControllerInner(avSessionItem->GetSessionId());
+    sptr<IRemoteObject> avControllerItemObj;
+    auto ret = service->CreateControllerInner(avSessionItem->GetSessionId(), avControllerItemObj);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGI("CreateControllerInner fail");
+        return;
+    }
     sptr<AVControllerItem> avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
     if (!avControllerItem) {
         SLOGI("avControllerItem is null");
