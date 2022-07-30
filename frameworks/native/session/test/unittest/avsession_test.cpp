@@ -469,7 +469,7 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
             default:
                 break;
         }
-        bool isActive {};
+        bool isActive = false;
         controller_->IsSessionActive(isActive);
         if (!isActive) {
             avsession_->Activate();
