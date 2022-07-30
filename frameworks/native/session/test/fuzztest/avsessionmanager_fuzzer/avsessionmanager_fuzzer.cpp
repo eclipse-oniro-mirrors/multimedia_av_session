@@ -47,8 +47,12 @@ bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_
 		SLOGI("avSession is null");
         return false;
     }
-    std::shared_ptr<AVSessionController> avSessionController =
-        AVSessionManager::GetInstance().CreateController(avSession->GetSessionId());
+    std::shared_ptr<AVSessionController> avSessionController;
+    int32_t ret = AVSessionManager::GetInstance().CreateController(avSession->GetSessionId(), avSessionController);
+    if (ret != AVSESSION_SUCCESS) {
+		SLOGI("avSessionController fail");
+        return false;
+    }
     if (!avSessionController) {
 		SLOGI("avSessionController is null");
         return false;
