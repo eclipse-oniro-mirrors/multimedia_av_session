@@ -40,7 +40,7 @@ ohos_fuzztest("AVSessionItemFuzzTest") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
-    "distributeddataobject:distributeddataobject_impl",
+    "data_object:distributeddataobject_impl",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
