@@ -50,11 +50,11 @@ bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_
     std::shared_ptr<AVSessionController> avSessionController;
     int32_t ret = AVSessionManager::GetInstance().CreateController(avSession->GetSessionId(), avSessionController);
     if (ret != AVSESSION_SUCCESS) {
-		SLOGI("avSessionController fail");
+        SLOGI("avSessionController fail");
         return false;
     }
     if (!avSessionController) {
-		SLOGI("avSessionController is null");
+        SLOGI("avSessionController is null");
         return false;
     }
 
