@@ -81,10 +81,10 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
        writer: "ST",
        composer: "ST",
        duration: 2222,
-       mediaImage: "https://www.example.com",    //请开发者根据实际情况使用
+       mediaImage: "https://www.example.com/example.jpg",    //请开发者根据实际情况使用
        subtitle: "8 Mile",
        description: "Rap",
-       lyric: "https://https://www.example.com",    //请开发者根据实际情况使用
+       lyric: "https://https://www.example.com/example.lrc",    //请开发者根据实际情况使用
        previousAssetId: "121277",
        nextAssetId: "121279",
     };
