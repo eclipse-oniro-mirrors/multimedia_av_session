@@ -221,11 +221,7 @@ void AVSessionDumper::ShowErrorInfo(std::string& result, const AVSessionService 
 }
 
 void AVSessionDumper::ProcessParameter(const std::string& arg, std::string& result,
-<<<<<<< HEAD
     const AVSessionService &sessionService) const
-=======
-                                       const AVSessionService &sessionService) const
->>>>>>> a3ae569e0323dcdf3382fc81d9e465beafc05fe2
 {
     if (arg == ARGS_HELP) {
         ShowHelp(result);
