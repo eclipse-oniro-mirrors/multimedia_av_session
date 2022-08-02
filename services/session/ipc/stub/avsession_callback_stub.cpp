@@ -46,56 +46,56 @@ bool AVSessionCallbackStub::CheckInterfaceToken(MessageParcel& data)
 
 int32_t AVSessionCallbackStub::HandleOnPlay(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnPlay");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlay");
     OnPlay();
     return ERR_NONE;
 }
 
 int32_t AVSessionCallbackStub::HandleOnPause(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnPause");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPause");
     OnPause();
     return ERR_NONE;
 }
 
 int32_t AVSessionCallbackStub::HandleOnStop(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnStop");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnStop");
     OnStop();
     return ERR_NONE;
 }
 
 int32_t AVSessionCallbackStub::HandleOnPlayNext(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnPlayNext");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlayNext");
     OnPlayNext();
     return ERR_NONE;
 }
 
 int32_t AVSessionCallbackStub::HandleOnPlayPrevious(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnPlayPrevious");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlayPrevious");
     OnPlayPrevious();
     return ERR_NONE;
 }
 
 int32_t AVSessionCallbackStub::HandleOnFastForward(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnFastForward");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnFastForward");
     OnFastForward();
     return ERR_NONE;
 }
 
 int32_t AVSessionCallbackStub::HandleOnRewind(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnRewind");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnRewind");
     OnRewind();
     return ERR_NONE;
 }
 
 int32_t AVSessionCallbackStub::HandleOnSeek(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnSeek");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnSeek");
     int32_t time = -1;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(time), ERR_NONE, "read time failed");
     OnSeek(time);
@@ -104,7 +104,7 @@ int32_t AVSessionCallbackStub::HandleOnSeek(MessageParcel& data, MessageParcel& 
 
 int32_t AVSessionCallbackStub::HandleOnSetSpeed(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnSetSpeed");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnSetSpeed");
     double speed = 0.0;
     CHECK_AND_RETURN_RET_LOG(data.ReadDouble(speed), ERR_NONE, "read speed failed");
     OnSetSpeed(speed);
@@ -113,7 +113,7 @@ int32_t AVSessionCallbackStub::HandleOnSetSpeed(MessageParcel& data, MessageParc
 
 int32_t AVSessionCallbackStub::HandleOnSetLoopMode(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnSetLoopMode");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnSetLoopMode");
     int32_t loopMode = -1;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(loopMode), ERR_NONE, "read loopMode failed");
     OnSetLoopMode(loopMode);
@@ -122,7 +122,7 @@ int32_t AVSessionCallbackStub::HandleOnSetLoopMode(MessageParcel& data, MessageP
 
 int32_t AVSessionCallbackStub::HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnToggleFavorite");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnToggleFavorite");
     std::string mediaId;
     CHECK_AND_RETURN_RET_LOG(data.ReadString(mediaId), ERR_NONE, "read mediaId failed");
     OnToggleFavorite(mediaId);
@@ -131,7 +131,7 @@ int32_t AVSessionCallbackStub::HandleOnToggleFavorite(MessageParcel& data, Messa
 
 int32_t AVSessionCallbackStub::HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply)
 {
-    AVSessionTrace trace("AVSessionCallbackStub::OnMediaKeyEvent");
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnMediaKeyEvent");
     auto keyEvent = MMI::KeyEvent::Create();
     CHECK_AND_RETURN_RET_LOG((*keyEvent).ReadFromParcel(data), ERR_NONE, "read keyEvent failed");
     OnMediaKeyEvent(*keyEvent);

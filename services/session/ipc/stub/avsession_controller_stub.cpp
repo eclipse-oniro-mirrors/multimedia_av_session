@@ -17,6 +17,7 @@
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel &data)
@@ -73,6 +74,7 @@ int32_t AVSessionControllerStub::HandleGetAVPlaybackState(MessageParcel &data, M
 
 int32_t AVSessionControllerStub::HandleSendControlCommand(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SendControlCommand");
     sptr<AVControlCommand> cmd = data.ReadParcelable<AVControlCommand>();
     if (cmd == nullptr) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SendCommand ret failed");
@@ -95,6 +97,7 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel &data, Messag
 
 int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SendAVKeyEvent");
     std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
     if (event == nullptr) {
         SLOGD("malloc keyEvent failed");
@@ -136,6 +139,7 @@ int32_t AVSessionControllerStub::HandleGetValidCommands(MessageParcel &data, Mes
 
 int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SetMetaFilter");
     std::string str = data.ReadString();
     if (str.length() != AVMetaData::META_KEY_MAX) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SetMetaFilter ret failed");

@@ -57,79 +57,78 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const T& param)
 
 void NapiAVSessionCallback::OnPlay()
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnPlay");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPlay");
     HandleEvent(EVENT_PLAY);
 }
 
 void NapiAVSessionCallback::OnPause()
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnPause");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPause");
     HandleEvent(EVENT_PAUSE);
 }
 
 void NapiAVSessionCallback::OnStop()
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnStop");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnStop");
     HandleEvent(EVENT_STOP);
 }
 
 void NapiAVSessionCallback::OnPlayNext()
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnPlayNext");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPlayNext");
     HandleEvent(EVENT_PLAY_NEXT);
 }
 
 void NapiAVSessionCallback::OnPlayPrevious()
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnPlayPrevious");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPlayPrevious");
     HandleEvent(EVENT_PLAY_PREVIOUS);
 }
 
 void NapiAVSessionCallback::OnFastForward()
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnFastForward");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnFastForward");
     HandleEvent(EVENT_FAST_FORWARD);
 }
 
 void NapiAVSessionCallback::OnRewind()
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnRewind");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnRewind");
     HandleEvent(EVENT_REWIND);
 }
 
 void NapiAVSessionCallback::OnSeek(int64_t time)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnSeek");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnSeek");
     HandleEvent(EVENT_SEEK, time);
 }
 
 void NapiAVSessionCallback::OnSetSpeed(double speed)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnSetSpeed");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnSetSpeed");
     HandleEvent(EVENT_SET_SPEED, speed);
 }
 
 void NapiAVSessionCallback::OnSetLoopMode(int32_t loopMode)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnSetLoopMode");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnSetLoopMode");
     HandleEvent(EVENT_SET_LOOP_MODE, loopMode);
 }
 
 void NapiAVSessionCallback::OnToggleFavorite(const std::string &assertId)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnToggleFavorite");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnToggleFavorite");
     HandleEvent(EVENT_TOGGLE_FAVORITE, assertId);
 }
 
 void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent &keyEvent)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::OnMediaKeyEvent");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnMediaKeyEvent");
     HandleEvent(EVENT_MEDIA_KEY_EVENT, std::make_shared<MMI::KeyEvent>(keyEvent));
 }
 
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::AddCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
@@ -153,7 +152,6 @@ napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi
 
 napi_status NapiAVSessionCallback::RemoveCallback(napi_env env, int32_t event, napi_value callback)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::RemoveCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callback == nullptr) {
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
@@ -173,7 +171,6 @@ napi_status NapiAVSessionCallback::RemoveCallback(napi_env env, int32_t event, n
 
 bool NapiAVSessionCallback::IsCallbacksEmpty(int32_t event)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionCallback::isCallbacksEmpty");
     return callbacks_[event].empty();
 }
 }

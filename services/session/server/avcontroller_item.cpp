@@ -64,7 +64,6 @@ int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
         SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
-    AVSessionTrace trace("AVControllerItem::SendAVKeyEvent");
     session_->HandleMediaKeyEvent(keyEvent);
     return AVSESSION_SUCCESS;
 }
@@ -105,7 +104,6 @@ int32_t AVControllerItem::SendControlCommand(const AVControlCommand &cmd)
         SLOGI("session not exist");
         return ERR_SESSION_NOT_EXIST;
     }
-    AVSessionTrace trace("AVControllerItem::SendControlCommand");
     std::vector<int32_t> cmds = session_->GetSupportCommand();
     if (std::find(cmds.begin(), cmds.end(), cmd.GetCommand()) == cmds.end()) {
         SLOGI("command not support");
@@ -151,7 +149,6 @@ std::string AVControllerItem::GetSessionId()
 void AVControllerItem::HandleSessionDestroy()
 {
     if (callback_ != nullptr) {
-        AVSessionTrace trace("AVControllerItem::OnSessionDestroy");
         callback_->OnSessionDestroy();
     }
     if (session_ != nullptr) {
@@ -168,7 +165,7 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
     AVPlaybackState stateOut;
     if (state.CopyToByMask(playbackMask_, stateOut)) {
         SLOGI("update playback state");
-        AVSessionTrace trace("AVControllerItem::OnPlaybackStateChange");
+        AVSESSION_TRACE_SYNC_START("AVControllerItem::OnPlaybackStateChange");
         callback_->OnPlaybackStateChange(stateOut);
     }
 }
@@ -181,7 +178,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
     AVMetaData metaOut;
     if (data.CopyToByMask(metaMask_, metaOut)) {
         SLOGI("update meta data");
-        AVSessionTrace trace("AVControllerItem::OnMetaDataChange");
+        AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         callback_->OnMetaDataChange(metaOut);
     }
 }
@@ -189,7 +186,6 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
 void AVControllerItem::HandleActiveStateChange(bool isActive)
 {
     if (callback_ != nullptr) {
-        AVSessionTrace trace("AVControllerItem::OnActiveStateChange");
         callback_->OnActiveStateChange(isActive);
     }
 }
@@ -197,7 +193,6 @@ void AVControllerItem::HandleActiveStateChange(bool isActive)
 void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t> &cmds)
 {
     if (callback_ != nullptr) {
-        AVSessionTrace trace("AVControllerItem::OnValidCommandChange");
         callback_->OnValidCommandChange(cmds);
     }
 }

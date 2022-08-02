@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//build/ohos/ace/ace.gni")
+import("//foundation/multimedia/av_session/config.gni")
 
 ohos_shared_library("avsession_napi") {
   include_dirs = [
@@ -63,9 +64,11 @@ ohos_shared_library("avsession_napi") {
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "utils_base:utils",
-    "hitrace_native:hitrace_meter",
   ]
-
+  if (multimedia_av_session_enable_trace_control) {
+    cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace_native:hitrace_meter" ]
+  }
   relative_install_dir = "module/multimedia"
 
   subsystem_name = "multimedia"

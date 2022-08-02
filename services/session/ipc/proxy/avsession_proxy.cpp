@@ -30,7 +30,6 @@ AVSessionProxy::AVSessionProxy(const sptr<IRemoteObject> &impl)
 
 std::string AVSessionProxy::GetSessionId()
 {
-    AVSessionTrace trace("AVSessionProxy::GetSessionId");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, "", "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), "", "write interface token failed");
@@ -48,7 +47,6 @@ std::string AVSessionProxy::GetSessionId()
 
 int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback> &callback)
 {
-    AVSessionTrace trace("AVSessionProxy::RegisterCallback");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(callback != nullptr, AVSESSION_ERROR, "callback is nullptr");
     callback_ = new(std::nothrow) AVSessionCallbackClient(callback);
@@ -62,7 +60,6 @@ int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback
 
 int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &callback)
 {
-    AVSessionTrace trace("AVSessionProxy::RegisterCallbackInner");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
                              "write interface token failed");
@@ -81,7 +78,6 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &ca
 
 int32_t AVSessionProxy::Destroy()
 {
-    AVSessionTrace trace("AVSessionProxy::Destroy");
     SLOGD("enter");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
@@ -106,7 +102,7 @@ int32_t AVSessionProxy::Destroy()
 
 int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
-    AVSessionTrace trace("AVSessionProxy::SetAVMetaData");
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(meta.IsValid(), AVSESSION_ERROR, "invalid meta data");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
@@ -127,7 +123,6 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 
 int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
 {
-    AVSessionTrace trace("AVSessionProxy::GetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -151,7 +146,6 @@ int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
 
 int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
 {
-    AVSessionTrace trace("AVSessionProxy::GetAVPlaybackState");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -175,7 +169,7 @@ int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
 
 int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
 {
-    AVSessionTrace trace("AVSessionProxy::SetAVPlaybackState");
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVPlaybackState");
     CHECK_AND_RETURN_RET_LOG(state.IsValid(), ERR_INVALID_PARAM, "state not valid");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
@@ -196,7 +190,6 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
 
 int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
-    AVSessionTrace trace("AVSessionProxy::SetLaunchAbility");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -216,7 +209,6 @@ int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAg
 
 sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 {
-    AVSessionTrace trace("AVSessionProxy::GetControllerInner");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -240,7 +232,6 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
-    AVSessionTrace trace("AVSessionProxy::GetController");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
     sptr <IRemoteObject> object = GetControllerInner();
     CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
@@ -250,7 +241,6 @@ std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 
 int32_t AVSessionProxy::Activate()
 {
-    AVSessionTrace trace("AVSessionProxy::Activate");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -268,7 +258,6 @@ int32_t AVSessionProxy::Activate()
 
 int32_t AVSessionProxy::Deactivate()
 {
-    AVSessionTrace trace("AVSessionProxy::Deactivate");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -286,7 +275,6 @@ int32_t AVSessionProxy::Deactivate()
 
 bool AVSessionProxy::IsActive()
 {
-    AVSessionTrace trace("AVSessionProxy::IsActive");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -304,7 +292,6 @@ bool AVSessionProxy::IsActive()
 
 int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 {
-    AVSessionTrace trace("AVSessionProxy::AddSupportCommand");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
@@ -326,7 +313,6 @@ int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 
 int32_t AVSessionProxy::DeleteSupportCommand(const int32_t cmd)
 {
-    AVSessionTrace trace("AVSessionProxy::DeleteSupportCommand");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");

@@ -13,4 +13,5 @@
 
 declare_args() {
   multimedia_av_session_enable_background_audio_control = true
+  multimedia_av_session_enable_trace_control = true
 }

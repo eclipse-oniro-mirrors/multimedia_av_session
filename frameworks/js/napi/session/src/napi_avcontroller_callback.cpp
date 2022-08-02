@@ -61,38 +61,34 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
 
 void NapiAVControllerCallback::OnSessionDestroy()
 {
-    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnSessionDestroy");
     HandleEvent(EVENT_SESSION_DESTROY);
 }
 
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
-    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnPlaybackStateChange");
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnPlaybackStateChange");
     HandleEvent(EVENT_PLAYBACK_STATE_CHANGE, state);
 }
 
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 {
-    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnMetaDataChange");
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnMetaDataChange");
     HandleEvent(EVENT_META_DATA_CHANGE, data);
 }
 
 void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
 {
-    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnActiveStateChange");
     HandleEvent(EVENT_ACTIVE_STATE_CHANGE, isActive);
 }
 
 void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
-    AVSessionTrace avSessionTrace("NapiAVControllerCallback::OnValidCommandChange");
     std::vector<std::string> stringCmds = NapiControlCommand::ConvertCommands(cmds);
     HandleEvent(EVENT_VALID_COMMAND_CHANGE, stringCmds);
 }
 
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
-    AVSessionTrace avSessionTrace("NapiAVControllerCallback::AddCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     napi_ref ref = nullptr;
 
@@ -117,7 +113,6 @@ napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, n
 
 napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event, napi_value callback)
 {
-    AVSessionTrace avSessionTrace("NapiAVControllerCallback::RemoveCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callback == nullptr) {
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {

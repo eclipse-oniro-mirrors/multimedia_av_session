@@ -227,7 +227,7 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor &descriptor
         listener->OnSessionCreate(descriptor);
     }
     for (const auto& [pid, listener] : sessionListeners_) {
-        AVSessionTrace trace("AVSessionService::OnSessionCreate");
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
         listener->OnSessionCreate(descriptor);
     }
 }
@@ -239,7 +239,6 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor &descripto
         listener->OnSessionRelease(descriptor);
     }
     for (const auto& [pid, listener] : sessionListeners_) {
-        AVSessionTrace trace("AVSessionService::OnSessionDestroy");
         listener->OnSessionRelease(descriptor);
     }
 }
@@ -251,7 +250,7 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor &descri
         listener->OnTopSessionChange(descriptor);
     }
     for (const auto& [pid, listener] : sessionListeners_) {
-        AVSessionTrace trace("AVSessionService::OnTopSessionChange");
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
         listener->OnTopSessionChange(descriptor);
     }
 }
@@ -292,7 +291,6 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
 sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
                                                          const AppExecFwk::ElementName& elementName)
 {
-    AVSessionTrace mAVSessionTrace("AVSessionService::CreateSessionInner");
     SLOGI("enter");
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
@@ -318,7 +316,6 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
 
 int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {
-    AVSessionTrace mAVSessionTrace("AVSessionService::GetAllSessionDescriptors");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
         return ERR_NO_PERMISSION;
@@ -335,7 +332,6 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
 int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& sessionId,
     AVSessionDescriptor& descriptor)
 {
-    AVSessionTrace mAVSessionTrace("AVSessionService::GetSessionDescriptorsBySessionId");
     std::lock_guard lockGuard(sessionAndControllerLock_);
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "session not exist");
@@ -368,7 +364,6 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
 
 int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
-    AVSessionTrace mAVSessionTrace("AVSessionService::CreateControllerInner");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
         return ERR_NO_PERMISSION;
@@ -429,7 +424,6 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    AVSessionTrace mAVSessionTrace("AVSessionService::SendSystemAVKeyEvent");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
         return ERR_NO_PERMISSION;
@@ -445,7 +439,6 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
-    AVSessionTrace mAVSessionTrace("AVSessionService::SendSystemControlCommand");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
         return ERR_NO_PERMISSION;
@@ -490,7 +483,6 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
 
 void AVSessionService::OnClientDied(pid_t pid)
 {
-    AVSessionTrace mAVSessionTrace("AVSessionService::OnClientDied");
     SLOGI("pid=%{public}d", pid);
     RemoveSessionListener(pid);
     RemoveClientDeathObserver(pid);
