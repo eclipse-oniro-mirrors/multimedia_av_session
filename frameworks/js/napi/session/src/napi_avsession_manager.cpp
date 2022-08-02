@@ -64,7 +64,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 
 napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionManager::CreateAVSession");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::CreateAVSession");
     struct ConcreteContext : public ContextBase {
         std::string tag_;
         int32_t type_{};
@@ -109,13 +109,11 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
 
 napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionManager::GetAllSessionDescriptors");
     struct ConcreteContext : public ContextBase {
         std::vector<AVSessionDescriptor> descriptors_;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
-    context->taskId = NAPI_GET_ALL_SESSION_DESCRIPTORS_TASK_ID;
 
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(context->descriptors_);
@@ -138,7 +136,7 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
 
 napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionManager::CreateController");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::CreateController");
     struct ConcreteContext : public ContextBase {
         std::string sessionId_ {};
         std::shared_ptr<AVSessionController> controller_;
@@ -174,7 +172,6 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
 
 napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionManager::CastAudio");
     SLOGI("not implement");
     napi_throw_error(env, nullptr, "not implement");
     return nullptr;
@@ -182,7 +179,6 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
 
 napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionManager::OnEvent");
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
     napi_value callback {};
@@ -199,7 +195,6 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     };
 
     context->GetCbInfo(env, info, input, true);
-    AVSessionTrace trace("NapiAVSessionManager::OnEvent_" + eventName);
     if (context->status != napi_ok) {
         napi_throw_error(env, nullptr, context->error.c_str());
         return NapiUtils::GetUndefinedValue(env);
@@ -239,7 +234,6 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
 
 napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionManager::OffEvent");
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
     napi_value callback = nullptr;
@@ -253,7 +247,6 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
     };
 
     context->GetCbInfo(env, info, input, true);
-    AVSessionTrace trace("NapiAVSessionManager::OffEvent_" + eventName);
     if (context->status != napi_ok) {
         napi_throw_error(env, nullptr, context->error.c_str());
         return NapiUtils::GetUndefinedValue(env);
@@ -275,7 +268,7 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
 
 napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionManager::SendSystemAVKeyEvent");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::SendSystemAVKeyEvent");
     struct ConcreteContext : public ContextBase {
         std::shared_ptr<MMI::KeyEvent> keyEvent_;
     };
@@ -305,7 +298,7 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
 
 napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionManager::SendSystemControlCommand");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::SendSystemControlCommand");
     struct ConcrentContext : public ContextBase {
         AVControlCommand command;
     };

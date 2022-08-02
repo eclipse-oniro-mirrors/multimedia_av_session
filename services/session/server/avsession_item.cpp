@@ -40,7 +40,6 @@ std::string AVSessionItem::GetSessionId()
 
 int32_t AVSessionItem::Destroy()
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::Destroy");
     if (callback_) {
         callback_.clear();
     }
@@ -70,7 +69,6 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::SetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
@@ -81,7 +79,6 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::SetAVPlaybackState");
     CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
@@ -93,7 +90,6 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 
 int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::GetAVPlaybackState");
     state = playbackState_;
     return AVSESSION_SUCCESS;
 }
@@ -106,7 +102,6 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
 
 sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::GetControllerInner");
     std::lock_guard lockGuard(lock_);
     auto iter = controllers_.find(GetPid());
     if (iter != controllers_.end()) {
@@ -128,7 +123,6 @@ int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback> &cal
 
 int32_t AVSessionItem::Activate()
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::Activate");
     descriptor_.isActive_ = true;
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
@@ -140,7 +134,6 @@ int32_t AVSessionItem::Activate()
 
 int32_t AVSessionItem::Deactivate()
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::Deactivate");
     descriptor_.isActive_ = false;
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
@@ -157,7 +150,6 @@ bool AVSessionItem::IsActive()
 
 int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::AddSupportCommand");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
@@ -212,7 +204,7 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
 
 void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::MediaKeyEvent");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnMediaKeyEvent");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
     callback_->OnMediaKeyEvent(keyEvent);
@@ -220,7 +212,6 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 
 void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::ExecuteControllerCommand");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
     int32_t code = cmd.GetCommand();
@@ -231,56 +222,56 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 
 void AVSessionItem::HandleOnPlay(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnPlay");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlay");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlay();
 }
 
 void AVSessionItem::HandleOnPause(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnPause");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPause");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPause();
 }
 
 void AVSessionItem::HandleOnStop(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnStop");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnStop");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnStop();
 }
 
 void AVSessionItem::HandleOnPlayNext(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnPlayNext");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayNext");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlayNext();
 }
 
 void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnPlayPrevious");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayPrevious");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlayPrevious();
 }
 
 void AVSessionItem::HandleOnFastForward(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnFastForward");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnFastForward");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnFastForward();
 }
 
 void AVSessionItem::HandleOnRewind(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnRewind");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnRewind");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnRewind();
 }
 
 void AVSessionItem::HandleOnSeek(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnSeek");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSeek");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int64_t time = 0;
     CHECK_AND_RETURN_LOG(cmd.GetSeekTime(time) == AVSESSION_SUCCESS, "GetSeekTime failed");
@@ -289,7 +280,7 @@ void AVSessionItem::HandleOnSeek(const AVControlCommand &cmd)
 
 void AVSessionItem::HandleOnSetSpeed(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnSetSpeed");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSetSpeed");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     double speed = 0.0;
     CHECK_AND_RETURN_LOG(cmd.GetSpeed(speed) == AVSESSION_SUCCESS, "GetSpeed failed");
@@ -298,7 +289,7 @@ void AVSessionItem::HandleOnSetSpeed(const AVControlCommand &cmd)
 
 void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnSetLoopMode");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSetLoopMode");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int32_t loopMode = AVSESSION_ERROR;
     CHECK_AND_RETURN_LOG(cmd.GetLoopMode(loopMode) == AVSESSION_SUCCESS, "GetLoopMode failed");
@@ -307,7 +298,7 @@ void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand &cmd)
 
 void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand &cmd)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::OnToggleFavorite");
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnToggleFavorite");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     std::string assetId;
     CHECK_AND_RETURN_LOG(cmd.GetAssetId(assetId) == AVSESSION_SUCCESS, "GetMediaId failed");
@@ -316,7 +307,6 @@ void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand &cmd)
 
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& contoller)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::AddController");
     std::lock_guard lockGuard(lock_);
     controllers_.insert({ pid, contoller });
     return AVSESSION_SUCCESS;
@@ -364,7 +354,6 @@ void AVSessionItem::SetTop(bool top)
 
 void AVSessionItem::HandleControllerRelease(pid_t pid)
 {
-    AVSessionTrace avSessionTrace("AVSessionItem::HandleControllerRelease");
     std::lock_guard lockGuard(lock_);
     controllers_.erase(pid);
 }

@@ -78,7 +78,6 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
 
 napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionController::ConstructorCallback");
     napi_value self;
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, nullptr, nullptr, &self, nullptr), nullptr);
 
@@ -104,7 +103,6 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
 napi_status NapiAVSessionController::NewInstance(napi_env env, std::shared_ptr<AVSessionController> &nativeController,
     napi_value &out)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionController::NewInstance");
     napi_value constructor{};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVControllerConstructorRef, &constructor), napi_generic_failure);
     napi_value instance{};
@@ -125,14 +123,12 @@ napi_status NapiAVSessionController::NewInstance(napi_env env, std::shared_ptr<A
 
 napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionController::GetAVPlaybackState");
     struct ConcreteContext : public ContextBase {
         AVPlaybackState state;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
-    context->taskId = NAPI_GET_AV_PLAYBACK_STATE_TASK_ID;
-
+    
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
         if (napiController->controller_ == nullptr) {
@@ -152,7 +148,7 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
     auto complete = [env, context](napi_value &output) {
         context->status = NapiPlaybackState::SetValue(env, context->state, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
-        
+
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetAVPlaybackState", executor, complete);
@@ -160,13 +156,11 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
 
 napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionController::GetAVMetadata");
     struct ConcreteContext : public ContextBase {
         AVMetaData data;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
-    context->taskId = NAPI_GET_AV_META_DATA_TASK_ID;
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
@@ -194,7 +188,7 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
 
 napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionController::SendAVKeyEvent");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionController::SendAVKeyEvent");
     struct ConcreteContext : public ContextBase {
         std::shared_ptr<MMI::KeyEvent> keyEvent_;
     };
@@ -229,13 +223,11 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
 
 napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionController::GetLaunchAbility");
     struct ConcreteContext : public ContextBase {
         AbilityRuntime::WantAgent::WantAgent ability;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
-    context->taskId = NAPI_GET_LAUNCH_ABILITY_TASK_ID;
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
@@ -263,13 +255,11 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
 
 napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionController::GetValidCommands");
     struct ConcreteContext : public ContextBase {
         std::vector<std::string> stringCmds;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
-    context->taskId = NAPI_GET_VALID_COMMANDS_TASK_ID;
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
@@ -299,13 +289,11 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
 
 napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionController::IsSessionActive");
     struct ConcreteContext : public ContextBase {
         bool isActive {};
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
-    context->taskId = NAPI_IS_ACTIVE_TASK_ID;
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
@@ -333,7 +321,7 @@ napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_
 
 napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionController::SendControlCommand");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionController::SendControlCommand");
     struct ConcrentContext : public ContextBase {
         AVControlCommand command;
     };
@@ -367,10 +355,8 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
 
 napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace trace("NapiAVSessionController::Destroy");
     auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info);
-    context->taskId = NAPI_AVSESSION_CONTROLLER_DESTROY_TASK_ID;
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
@@ -396,7 +382,6 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
 
 napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionController::GetRealPlaybackPositionSync");
     auto context = std::make_shared<ContextBase>();
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
@@ -420,7 +405,6 @@ napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, na
 
 napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionController::GetOutputDevice");
     SLOGI("not implement");
     napi_throw_error(env, nullptr, "not implement");
     return NapiUtils::GetUndefinedValue(env);
@@ -443,7 +427,6 @@ napi_status NapiAVSessionController::SetPlaybackStateFilter(napi_env env, NapiAV
 napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionController *napiController,
                                                    napi_value filter)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionController::SetMetaFilter");
     AVMetaData::MetaMaskType metaMask;
     auto status = NapiMetaData::ConvertFilter(env, filter, metaMask);
     CHECK_RETURN(status == napi_ok, "convert filter failed", status);
@@ -458,7 +441,6 @@ napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionCo
 napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
     const std::string& event, napi_value filter, napi_value callback)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionController::RegisterCallback");
     auto it = EventHandlers_.find(event);
     if (it == EventHandlers_.end()) {
         SLOGE("event name invalid");
@@ -495,7 +477,6 @@ static bool IsThreeParamForOnEvent(const std::string& event)
 
 napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionController::OnEvent");
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
     napi_value filter {};
@@ -525,7 +506,6 @@ napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info inf
         }
     };
     context->GetCbInfo(env, info, input, true);
-    AVSessionTrace trace("NapiAVSessionController::OnEvent_" + eventName);
     if (context->status != napi_ok) {
         napi_throw_error(env, nullptr, context->error.c_str());
         return NapiUtils::GetUndefinedValue(env);
@@ -539,7 +519,6 @@ napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info inf
 
 napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info info)
 {
-    AVSessionTrace avSessionTrace("NapiAVSessionController::OffEvent");
     auto context = std::make_shared<ContextBase>();
     std::string eventName;
     napi_value callback = nullptr;
@@ -553,7 +532,6 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     };
 
     context->GetCbInfo(env, info, input, true);
-    AVSessionTrace trace("NapiAVSessionController::OffEvent_" + eventName);
     if (context->status != napi_ok) {
         napi_throw_error(env, nullptr, context->error.c_str());
         return NapiUtils::GetUndefinedValue(env);

@@ -92,7 +92,7 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
             auto ctxt = reinterpret_cast<ContextBase *>(data);
             SLOGD("napi_async_execute_callback ctxt->status=%{public}d", ctxt->status);
             if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
-                AVSessionTrace::TraceBegin("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
+                AVSESSION_TRACE_ASYNC_START("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
             }
             if (ctxt->execute && ctxt->status == napi_ok) {
                 ctxt->execute();
@@ -109,7 +109,7 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
                 ctxt->complete(ctxt->output);
             }
             if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
-                AVSessionTrace::TraceEnd("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
+                AVSESSION_TRACE_ASYNC_END("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
             }
             GenerateOutput(ctxt);
         },

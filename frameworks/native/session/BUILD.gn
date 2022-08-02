@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/multimedia/av_session/config.gni")
 
 config("avsession_client_config") {
   include_dirs = [
@@ -55,7 +56,6 @@ ohos_shared_library("avsession_client") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
-    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
@@ -63,6 +63,11 @@ ohos_shared_library("avsession_client") {
     "samgr_standard:samgr_proxy",
     "utils_base:utils",
   ]
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace_native:hitrace_meter" ]
+  }
 
   subsystem_name = "multimedia"
   part_name = "multimedia_av_session"

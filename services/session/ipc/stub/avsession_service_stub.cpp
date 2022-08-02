@@ -18,6 +18,7 @@
 #include "avsession_errors.h"
 #include "session_listener_proxy.h"
 #include "client_death_proxy.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 bool AVSessionServiceStub::CheckInterfaceToken(MessageParcel &data)
@@ -45,6 +46,7 @@ int AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Me
 
 int AVSessionServiceStub::HandleCreateSessionInner(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CreateSessionInner");
     auto sessionTag = data.ReadString();
     auto sessionType = data.ReadInt32();
     sptr elementName = data.ReadParcelable<AppExecFwk::ElementName>();
@@ -92,6 +94,7 @@ int AVSessionServiceStub::HandleGetSessionDescriptorsById(MessageParcel &data, M
 
 int AVSessionServiceStub::HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CreateControllerInner");
     sptr<IRemoteObject> object;
     int32_t ret = CreateControllerInner(data.ReadString(), object);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -118,6 +121,7 @@ int AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel &data, Mes
 
 int AVSessionServiceStub::HandleSendSystemAVKeyEvent(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::SendSystemAVKeyEvent");
     auto keyEvent = MMI::KeyEvent::Create();
     if (keyEvent == nullptr) {
         SLOGE("create keyEvent failed");
@@ -137,6 +141,7 @@ int AVSessionServiceStub::HandleSendSystemAVKeyEvent(MessageParcel &data, Messag
 
 int AVSessionServiceStub::HandleSendSystemControlCommand(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::SendSystemControlCommand");
     sptr command = data.ReadParcelable<AVControlCommand>();
     if (command == nullptr) {
         SLOGE("read command failed");

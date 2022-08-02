@@ -17,35 +17,44 @@
 #define OHOS_AVSESSION_TRACE_H
 
 #include <string>
+#ifdef ENBABLE_AVSESSION_TRACE_CONTROL
 #include "hitrace_meter.h"
+#endif
 
+#ifdef ENBABLE_AVSESSION_TRACE_CONTROL
+#define AVSESSION_TRACE_SYNC_START(traceName)               \
+    do {                                                     \
+        AVSessionTrace trace(traceName);                    \
+    } while (0)
+
+#define AVSESSION_TRACE_ASYNC_START(traceName, taskId)      \
+    do {                                                     \
+        AVSessionTrace::TraceBegin(traceName, taskId);      \
+    } while (0)
+
+#define AVSESSION_TRACE_ASYNC_END(traceName, taskId)        \
+    do {                                                     \
+        AVSessionTrace::TraceEnd(traceName, taskId);        \
+    } while (0)
+#else
+#define AVSESSION_TRACE_SYNC_START(...)
+#define AVSESSION_TRACE_ASYNC_START(...)
+#define AVSESSION_TRACE_ASYNC_END(...)
+
+#endif
 namespace OHOS::AVSession {
 enum AVSessionTraceTaskId : int32_t {
     INVALID_TASK_ID = -1,
-    NAPI_SET_AV_META_DATA_TASK_ID,
-    NAPI_SET_AV_PLAYBACK_STATE_TASK_ID,
-    NAPI_SET_LAUNCH_ABILITY_TASK_ID,
-    NAPI_GET_CONTROLLER_TASK_ID,
-    NAPI_ACTIVATE_TASK_ID,
-    NAPI_DEACTIVATE_TASK_ID,
-    NAPI_AVSESSION_DESTROY_TASK_ID,
-    NAPI_AVSESSION_GET_OUTPUT_DEVICE_TASK_ID,
-    NAPI_GET_AV_PLAYBACK_STATE_TASK_ID,
-    NAPI_GET_AV_META_DATA_TASK_ID,
-    NAPI_SEND_AV_KEY_EVENT_TASK_ID,
-    NAPI_GET_LAUNCH_ABILITY_TASK_ID,
-    NAPI_IS_ACTIVE_TASK_ID,
-    NAPI_AVSESSION_CONTROLLER_DESTROY_TASK_ID,
-    NAPI_GET_VALID_COMMANDS_TASK_ID,
-    NAPI_SEND_CONTROL_COMMAND_TASK_ID,
-    NAPI_CREATE_AVSESSION_TASK_ID,
-    NAPI_GET_ALL_SESSION_DESCRIPTORS_TASK_ID,
-    NAPI_CREATE_CONTROLLER_TASK_ID,
-    NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID,
-    NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID,
-    NAPI_SET_AUDIO_STREAM_ID_TASK_ID
+    NAPI_SET_AV_META_DATA_TASK_ID = 0,
+    NAPI_SET_AV_PLAYBACK_STATE_TASK_ID = 1,
+    NAPI_SEND_AV_KEY_EVENT_TASK_ID = 2,
+    NAPI_SEND_CONTROL_COMMAND_TASK_ID = 3,
+    NAPI_CREATE_AVSESSION_TASK_ID = 4,
+    NAPI_CREATE_CONTROLLER_TASK_ID = 5,
+    NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID = 6,
+    NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID = 7
 };
-
+#ifdef ENBABLE_AVSESSION_TRACE_CONTROL
 class __attribute__((visibility("default"))) AVSessionTrace {
 public:
     explicit AVSessionTrace(const std::string& traceName)
@@ -91,5 +100,6 @@ public:
 private:
     bool isSync_ = false;
 };
+#endif
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_TRACE_H

@@ -41,7 +41,6 @@ ohos_fuzztest("AVControllerItemFuzzTest") {
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "data_object:distributeddataobject_impl",
-    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",

@@ -78,7 +78,7 @@ void AVSessionManagerImpl::OnServiceDie()
 std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string &tag, int32_t type,
                                                                const AppExecFwk::ElementName& elementName)
 {
-    AVSessionTrace trace("AVSessionManagerImpl::CreateSession");
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CreateSession");
     if (tag.empty() || elementName.GetBundleName().empty() || elementName.GetAbilityName().empty()) {
         SLOGE("param is invalid");
         return nullptr;
@@ -94,14 +94,12 @@ std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string
 
 int32_t AVSessionManagerImpl::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {
-    AVSessionTrace trace("AVSessionManagerImpl::GetAllSessionDescriptors");
     auto service = GetService();
     return service ? service->GetAllSessionDescriptors(descriptors) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::GetActivatedSessionDescriptors(std::vector<AVSessionDescriptor>& activatedSessions)
 {
-    AVSessionTrace trace("AVSessionManagerImpl::GetActivatedSessionDescriptors");
     std::vector<AVSessionDescriptor> descriptors;
     int32_t ret = GetAllSessionDescriptors(descriptors);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAllSessionDescriptors failed");
@@ -117,7 +115,6 @@ int32_t AVSessionManagerImpl::GetActivatedSessionDescriptors(std::vector<AVSessi
 int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(const std::string& sessionId,
                                                                AVSessionDescriptor& descriptor)
 {
-    AVSessionTrace trace("AVSessionManagerImpl::GetSessionDescriptorsBySessionId");
     if (sessionId.empty()) {
         SLOGE("sessionId is invalid");
         return ERR_INVALID_PARAM;
@@ -130,7 +127,7 @@ int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(const std::string
 int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {
-    AVSessionTrace trace("AVSessionManagerImpl::CreateController");
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CreateController");
     if (sessionId.empty()) {
         SLOGE("sessionId is invalid");
         return ERR_INVALID_PARAM;
@@ -142,7 +139,6 @@ int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
 
 int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener> &listener)
 {
-    AVSessionTrace trace("AVSessionManagerImpl::RegisterSessionListener");
     if (listener == nullptr) {
         SLOGE("listener is nullptr");
         return ERR_INVALID_PARAM;
@@ -183,7 +179,7 @@ int32_t AVSessionManagerImpl::UnregisterServiceDeathCallback()
 
 int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent &keyEvent)
 {
-    AVSessionTrace trace("AVSessionManagerImpl::SendSystemAVKeyEvent");
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemAVKeyEvent");
     if (!keyEvent.IsValid()) {
         SLOGE("keyEvent is invalid");
         return ERR_INVALID_PARAM;
@@ -195,7 +191,7 @@ int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent &keyEvent
 
 int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand &command)
 {
-    AVSessionTrace trace("AVSessionManagerImpl::SendSystemControlCommand");
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemControlCommand");
     if (!command.IsValid()) {
         SLOGE("command is invalid");
         return ERR_INVALID_PARAM;
@@ -207,7 +203,6 @@ int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand &c
 
 void AVSessionManagerImpl::RegisterClientDeathObserver()
 {
-    AVSessionTrace trace("AVSessionManagerImpl::RegisterClientDeathObserver");
     clientDeath_ = new(std::nothrow) ClientDeathStub();
     if (clientDeath_ == nullptr) {
         SLOGE("malloc failed");

@@ -43,7 +43,7 @@ int SessionListenerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mes
 
 int SessionListenerStub::HandleOnSessionCreate(MessageParcel &data, MessageParcel &reply)
 {
-    AVSessionTrace avSessionTrace("SessionListenerStub::OnSessionCreate");
+    AVSESSION_TRACE_SYNC_START("SessionListenerStub::OnSessionCreate");
     AVSessionDescriptor descriptor;
     descriptor.ReadFromParcel(data);
     OnSessionCreate(descriptor);
@@ -52,7 +52,6 @@ int SessionListenerStub::HandleOnSessionCreate(MessageParcel &data, MessageParce
 
 int SessionListenerStub::HandleOnSessionRelease(MessageParcel &data, MessageParcel &reply)
 {
-    AVSessionTrace avSessionTrace("SessionListenerStub::OnSessionDestroy");
     AVSessionDescriptor descriptor;
     descriptor.ReadFromParcel(data);
     OnSessionRelease(descriptor);
@@ -61,7 +60,7 @@ int SessionListenerStub::HandleOnSessionRelease(MessageParcel &data, MessageParc
 
 int SessionListenerStub::HandleOnTopSessionChange(MessageParcel &data, MessageParcel &reply)
 {
-    AVSessionTrace avSessionTrace("SessionListenerStub::OnTopSessionChange");
+    AVSESSION_TRACE_SYNC_START("SessionListenerStub::OnTopSessionChange");
     AVSessionDescriptor descriptor;
     descriptor.ReadFromParcel(data);
     OnTopSessionChange(descriptor);

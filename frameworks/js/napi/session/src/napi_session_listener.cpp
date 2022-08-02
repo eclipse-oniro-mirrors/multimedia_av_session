@@ -47,28 +47,26 @@ void NapiSessionListener::HandleEvent(int32_t event, const T &param)
 
 void NapiSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
-    AVSessionTrace avSessionTrace("NapiSessionListener::OnSessionCreate");
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnSessionCreate");
     SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
     HandleEvent(EVENT_SESSION_CREATED, descriptor);
 }
 
 void NapiSessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
-    AVSessionTrace avSessionTrace("NapiSessionListener::OnSessionDestroy");
     SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
     HandleEvent(EVENT_SESSION_DESTROYED, descriptor);
 }
 
 void NapiSessionListener::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
-    AVSessionTrace avSessionTrace("NapiSessionListener::OnTopSessionChange");
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnTopSessionChange");
     SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
     HandleEvent(EVENT_TOP_SESSION_CHANGED, descriptor);
 }
 
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
-    AVSessionTrace avSessionTrace("NapiSessionListener::AddCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
@@ -88,7 +86,6 @@ napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_v
 
 napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, napi_value callback)
 {
-    AVSessionTrace avSessionTrace("NapiSessionListener::RemoveCallback");
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callback == nullptr) {
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
