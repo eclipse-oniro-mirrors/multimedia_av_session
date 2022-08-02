@@ -22,7 +22,6 @@
 
 #include "iremote_stub.h"
 #include "system_ability.h"
-#include "avsession_dumper.h"
 #include "avsession_service_stub.h"
 #include "avsession_item.h"
 #include "avcontroller_item.h"
@@ -33,6 +32,7 @@
 #include "background_audio_controller.h"
 
 namespace OHOS::AVSession {
+class AVSessionDumper;
 class AVSessionService : public SystemAbility, public AVSessionServiceStub {
     DECLARE_SYSTEM_ABILITY(AVSessionService);
 
@@ -135,6 +135,7 @@ private:
     BackgroundAudioController backgroundAudioController_;
 
     std::unique_ptr<AVSessionDumper> dumpHelper_ {};
+    friend class AVSessionDumper;
 };
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {

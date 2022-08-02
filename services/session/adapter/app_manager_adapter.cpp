@@ -92,7 +92,7 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData &appProcessDa
         return;
     }
 
-    std::vector<int32_t> backgroundUIDs;
+    std::set<int32_t> backgroundUIDs;
     {
         std::lock_guard lockGuard(uidLock_);
         for (const auto& appData : appProcessData.appDatas) {
@@ -101,7 +101,7 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData &appProcessDa
 
             auto it = observedAppUIDs_.find(appData.uid);
             if (it != observedAppUIDs_.end()) {
-                backgroundUIDs.push_back(appData.uid);
+                backgroundUIDs.insert(appData.uid);
             }
         }
     }

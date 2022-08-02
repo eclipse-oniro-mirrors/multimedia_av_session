@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "audio_adapter.h"
+#include "audio_system_manager.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 
@@ -51,6 +52,12 @@ void AudioAdapter::AddStreamRendererStateListener(const StateListener &listener)
 
 int32_t AudioAdapter::PauseAudioStream(int32_t uid)
 {
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
+        uid, AudioStandard::StreamSetState::STREAM_PAUSE, AudioStandard::AudioStreamType::STREAM_MUSIC);
+    if (ret != 0) {
+        SLOGE("pause uid=%{public}d failed", uid);
+        return AVSESSION_ERROR;
+    }
     return AVSESSION_SUCCESS;
 }
 
