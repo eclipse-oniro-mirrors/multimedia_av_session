@@ -17,22 +17,30 @@
 #define OHOS_AVSESSION_DUMP_HELPER_H
 
 #include <string>
-#include "avcontroller_item.h"
+#include "avsession_service.h"
 
 namespace OHOS::AVSession {
 class AVSessionDumper {
+    using DumpActionType = void(*)(std::string &result, const AVSessionService &sessionService);
 public:
-    AVSessionDumper()= default;
+    AVSessionDumper() = default;
     ~AVSessionDumper() = default;
-    void Dump(const std::vector<std::string>& args, std::string& result, std::map<pid_t,
-        std::list<sptr<AVControllerItem>>> controllers) const;
+    void Dump(const std::vector<std::string>& args, std::string& result, const AVSessionService &sessionService) const;
+    void SetErrorInfo(const std::string &inErrMsg);
 
 private:
     void ShowHelp(std::string& result) const;
-    void ShowMetaData(std::string &result, std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers) const;
-    void ProcessParameter(const std::string& arg, std::string& result,
-        std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers) const;
     void ShowIllegalInfo(std::string& result) const;
+    void ProcessParameter(const std::string& arg, std::string& result, const AVSessionService &sessionService) const;
+    static void ShowMetaData(std::string &result, const AVSessionService &sessionService);
+    static void ShowSessionInfo(std::string &result, const AVSessionService &sessionService);
+    static void ShowControllerInfo(std::string& result, const AVSessionService &sessionService);
+    static void ShowErrorInfo(std::string &result, const AVSessionService &sessionService);
+
+    static std::map<std::string, AVSessionDumper::DumpActionType> funcMap_;
+    static std::map<int32_t, std::string> playBackStates_;
+    static std::map<int32_t, std::string> loopMode_;
+    static std::vector<std::string> errMessage_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_DUMP_HELPER_H
