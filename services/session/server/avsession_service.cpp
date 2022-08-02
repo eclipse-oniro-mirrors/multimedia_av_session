@@ -28,6 +28,7 @@
 #include "session_stack.h"
 #include "avsession_trace.h"
 #include "hash_calculator.h"
+#include "avsession_dumper.h"
 
 namespace OHOS::AVSession {
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
@@ -36,7 +37,6 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate)
 {
     SLOGD("construct");
-    dumpHelper_ = std::make_unique<AVSessionDumper>();
 }
 
 AVSessionService::~AVSessionService()
@@ -49,6 +49,7 @@ void AVSessionService::OnStart()
     if (!Publish(this)) {
         SLOGE("publish avsession service failed");
     }
+    dumpHelper_ = std::make_unique<AVSessionDumper>();
 
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
     backgroundAudioController_.Init();
@@ -302,6 +303,7 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
     auto result = CreateNewSession(tag, type, !PermissionChecker::GetInstance().CheckSystemPermission(), elementName);
     if (result == nullptr) {
         SLOGE("create new session failed");
+        dumpHelper_->SetErrorInfo("  AVSessionService::CreateSessionInner  create new session failed");
         return nullptr;
     }
     if (GetContainer().AddSession(pid, elementName.GetAbilityName(), result) != AVSESSION_SUCCESS) {
@@ -537,7 +539,7 @@ std::int32_t AVSessionService::Dump(std::int32_t fd, const std::vector<std::u16s
     }
 
     std::string result;
-    dumpHelper_->Dump(argsInStr, result, controllers_);
+    dumpHelper_->Dump(argsInStr, result, *this);
     std::int32_t ret = dprintf(fd, "%s", result.c_str());
     if (ret < 0) {
         SLOGE("dprintf to dump fd failed");

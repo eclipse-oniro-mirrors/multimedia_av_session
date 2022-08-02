@@ -132,6 +132,7 @@ private:
     sptr<IAVSessionCallback> callback_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;
     std::function<void(AVSessionItem&)> serviceCallback_;
+    friend class AVSessionDumper;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H
