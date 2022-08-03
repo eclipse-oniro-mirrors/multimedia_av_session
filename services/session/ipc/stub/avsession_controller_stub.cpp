@@ -139,7 +139,6 @@ int32_t AVSessionControllerStub::HandleGetValidCommands(MessageParcel &data, Mes
 
 int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel &data, MessageParcel &reply)
 {
-    AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SetMetaFilter");
     std::string str = data.ReadString();
     if (str.length() != AVMetaData::META_KEY_MAX) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SetMetaFilter ret failed");
