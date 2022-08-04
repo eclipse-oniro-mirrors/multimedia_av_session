@@ -18,27 +18,51 @@
 #include "accesstoken_kit.h"
 #include "avsession_log.h"
 #include "ipc_skeleton.h"
+#include "bundle_mgr_client.h"
 
 namespace OHOS::AVSession {
 using namespace Security::AccessToken;
+using AppExecFwk::BundleMgrClient;
 PermissionChecker& PermissionChecker::GetInstance()
 {
     static PermissionChecker permissionChecker;
     return permissionChecker;
 }
 
-bool PermissionChecker::CheckSystemPermission()
+bool PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessTokenID tokenId)
 {
-    AccessTokenID callerToken = OHOS::IPCSkeleton::GetCallingTokenID();
-    if (AccessTokenKit::GetTokenTypeFlag(callerToken) == TOKEN_NATIVE) {
+    if (AccessTokenKit::GetTokenTypeFlag(tokenId) == TOKEN_NATIVE) {
         return true;
     }
 
-    int32_t res = AccessTokenKit::VerifyAccessToken(callerToken, MANAGE_MEDIA_RESOURCES);
+    int32_t res = AccessTokenKit::VerifyAccessToken(tokenId, MANAGE_MEDIA_RESOURCES);
     if (res == PERMISSION_GRANTED) {
         return true;
     }
-    SLOGI("permission reject tokenid=%{public}u", callerToken);
+    SLOGI("permission reject tokenid=%{public}u", tokenId);
     return false;
+}
+
+bool PermissionChecker::CheckSystemPermission()
+{
+    AccessTokenID callerToken = OHOS::IPCSkeleton::GetCallingTokenID();
+    return CheckSystemPermission(callerToken);
+}
+
+bool PermissionChecker::CheckSystemPermissionByUid(int uid)
+{
+    BundleMgrClient client;
+    std::string bundleName;
+    if (!client.GetBundleNameForUid(uid, bundleName)) {
+        return true;
+    }
+
+    auto tokenId = AccessTokenKit::GetHapTokenID(uid / UID_TRANSFORM_DIVISOR, bundleName, 0);
+    if (tokenId == INVALID_TOKENID) {
+        SLOGE("get token id failed");
+        return false;
+    }
+
+    return CheckSystemPermission(tokenId);
 }
 } // namespace OHOS::AVSession

@@ -77,17 +77,25 @@ void AppManagerAdapter::SetAppBackgroundStateObserver(const std::function<void(i
 void AppManagerAdapter::AddObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
+    SLOGE("uid=%{public}d", uid);
     observedAppUIDs_.insert(uid);
 }
 
 void AppManagerAdapter::RemoveObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
+    SLOGE("uid=%{public}d", uid);
     observedAppUIDs_.erase(uid);
 }
 
 void AppManagerAdapter::HandleAppStateChanged(const AppProcessData &appProcessData)
 {
+    if (appProcessData.appState == ApplicationState::APP_STATE_TERMINATED) {
+        for (const auto& appData : appProcessData.appDatas) {
+            RemoveObservedApp(appData.uid);
+        }
+    }
+
     if (appProcessData.appState != ApplicationState::APP_STATE_BACKGROUND) {
         return;
     }
@@ -98,7 +106,6 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData &appProcessDa
         for (const auto& appData : appProcessData.appDatas) {
             SLOGI("bundleName=%{public}s uid=%{public}d state=%{public}d",
                   appData.appName.c_str(), appData.uid, appProcessData.appState);
-
             auto it = observedAppUIDs_.find(appData.uid);
             if (it != observedAppUIDs_.end()) {
                 backgroundUIDs.insert(appData.uid);
