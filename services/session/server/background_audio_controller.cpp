@@ -15,6 +15,7 @@
 
 #include "background_audio_controller.h"
 #include "avsession_log.h"
+#include "permission_checker.h"
 
 namespace OHOS::AVSession {
 using AudioStandard::RendererState;
@@ -42,16 +43,26 @@ void BackgroundAudioController::Init()
 void BackgroundAudioController::OnSessionCreate(const AVSessionDescriptor &descriptor)
 {
     std::lock_guard lockGuard(lock_);
-    if (descriptor.thirdPartyApp) {
-        sessionUIDs_.insert(descriptor.uid_);
-        AppManagerAdapter::GetInstance().RemoveObservedApp(descriptor.uid_);
-    }
+    SLOGE("uid=%{public}d", descriptor.uid_);
+    sessionUIDs_.insert(descriptor.uid_);
+    AppManagerAdapter::GetInstance().RemoveObservedApp(descriptor.uid_);
 }
 
 void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
-    std::lock_guard lockGuard(lock_);
-    sessionUIDs_.erase(descriptor.uid_);
+    {
+        std::lock_guard lockGuard(lock_);
+        sessionUIDs_.erase(descriptor.uid_);
+    }
+
+    if (descriptor.thirdPartyApp) {
+        if (!AppManagerAdapter::GetInstance().IsAppBackground(descriptor.uid_)) {
+            AppManagerAdapter::GetInstance().AddObservedApp(descriptor.uid_);
+            return;
+        }
+        SLOGI("pause uid=%{public}d", descriptor.uid_);
+        AudioAdapter::GetInstance().PauseAudioStream(descriptor.uid_);
+    }
 }
 
 void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos &infos)
@@ -68,6 +79,11 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
                 continue;
             }
         }
+        if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(info->clientUID)) {
+            SLOGI("uid=%{public}d is system app", info->clientUID);
+            continue;
+        }
+
         if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID)) {
             AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
             continue;

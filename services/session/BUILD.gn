@@ -77,7 +77,7 @@ ohos_shared_library("avsession_service") {
   }
 
   if (!use_libfuzzer) {
-    cflags += ["-flto"]
+    cflags += [ "-flto" ]
     ldflags = [
       "-flto",
       "-Wl,--gc-sections",
@@ -96,6 +96,7 @@ ohos_shared_library("avsession_service") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
