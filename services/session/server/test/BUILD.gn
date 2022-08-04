@@ -80,6 +80,24 @@ ohos_unittest("AppManagerAdapterTest") {
   ]
 }
 
+ohos_unittest("AudioAdapterTest") {
+  module_out_path = module_output_path
+
+  sources = [ "audio_adapter_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "//foundation/multimedia/av_session/services/session:avession_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "multimedia_audio_framework:audio_client",
+  ]
+}
+
 ###############################################################################
 group("unittest") {
   testonly = true
@@ -87,6 +105,7 @@ group("unittest") {
   deps = [
     ":AVSessionServiceTest",
     ":AppManagerAdapterTest",
+    ":AudioAdapterTest",
   ]
 }
 ###############################################################################
