@@ -17,6 +17,9 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
+namespace {
+    constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 1024 * 1024;
+}
 std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
     const std::shared_ptr<AVSessionPixelMap> &innerPixelMap)
 {
@@ -47,6 +50,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     const std::shared_ptr<Media::PixelMap> &pixelMap)
 {
     CHECK_AND_RETURN_RET_LOG(pixelMap != nullptr, nullptr, "invalid parameter");
+    CHECK_AND_RETURN_RET_LOG(pixelMap->GetByteCount() <= MAX_PIXEL_BUFFER_SIZE, nullptr, "too large pixelmap");
     Media::ImageInfo imageInfo;
     pixelMap->GetImageInfo(imageInfo);
     const auto *buffer = (uint8_t *)(&imageInfo);
