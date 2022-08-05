@@ -19,6 +19,7 @@
 #include "avsession_manager.h"
 #include "av_session.h"
 #include "avsession_errors.h"
+#include "avsession_pixel_map_adapter.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -64,7 +65,7 @@ void AVMetaDataTest::SetUp()
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(DURATION);
-    g_metaData.SetMediaImage(CreatePixelMap());
+    g_metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
     g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
     g_metaData.SetPublishDate(PUBLISHDATE);
     g_metaData.SetSubTitle("fac");
@@ -118,7 +119,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
     metaData.SetWriter("zhoujielun");
     metaData.SetComposer("zhoujielun");
     metaData.SetDuration(DURATION);
-    metaData.SetMediaImage(CreatePixelMap());
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
     metaData.SetMediaImageUri("https://baidu.yinyue.com");
     metaData.SetPublishDate(PUBLISHDATE);
     metaData.SetSubTitle("fac");

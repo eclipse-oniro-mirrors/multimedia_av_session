@@ -66,7 +66,7 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
         delete result;
         return nullptr;
     }
-    result->mediaImage_ = std::shared_ptr<Media::PixelMap>(data.ReadParcelable<Media::PixelMap>());
+    result->mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->metaMask_.test(META_KEY_MEDIA_IMAGE) && result->mediaImage_ == nullptr) {
         SLOGE("read PixelMap failed");
         delete result;
@@ -166,13 +166,13 @@ int64_t AVMetaData::GetDuration() const
     return duration_;
 }
 
-void AVMetaData::SetMediaImage(const std::shared_ptr<Media::PixelMap>& mediaImage)
+void AVMetaData::SetMediaImage(const std::shared_ptr<AVSessionPixelMap>& mediaImage)
 {
     mediaImage_ = mediaImage;
     metaMask_.set(META_KEY_MEDIA_IMAGE);
 }
 
-std::shared_ptr<Media::PixelMap> AVMetaData::GetMediaImage() const
+std::shared_ptr<AVSessionPixelMap> AVMetaData::GetMediaImage() const
 {
     return mediaImage_;
 }

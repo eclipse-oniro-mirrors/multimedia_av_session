@@ -15,6 +15,7 @@
 
 #include "napi_meta_data.h"
 #include "avsession_log.h"
+#include "avsession_pixel_map_adapter.h"
 #include "napi_utils.h"
 #include "pixel_map_napi.h"
 
@@ -338,7 +339,7 @@ napi_status NapiMetaData::GetMediaImage(napi_env env, napi_value in, AVMetaData 
             SLOGE("unwrap failed");
             return napi_invalid_arg;
         }
-        out.SetMediaImage(pixelMap);
+        out.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
     } else {
         SLOGE("mediaImage property value type invalid");
         return napi_invalid_arg;
@@ -355,7 +356,8 @@ napi_status NapiMetaData::SetMediaImage(napi_env env, const AVMetaData &in, napi
         return napi_ok;
     }
 
-    napi_value property = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+    napi_value property = Media::PixelMapNapi::CreatePixelMap(env,
+        AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
     auto status = napi_set_named_property(env, out, "mediaImage", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;

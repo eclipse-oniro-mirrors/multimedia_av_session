@@ -20,7 +20,7 @@
 #include <string>
 #include <map>
 #include "parcel.h"
-#include "pixel_map.h"
+#include "avsession_pixel_map.h"
 
 namespace OHOS::AVSession {
 class AVMetaData : public Parcelable {
@@ -78,8 +78,8 @@ public:
     void SetDuration(int64_t duration);
     int64_t GetDuration() const;
 
-    void SetMediaImage(const std::shared_ptr<Media::PixelMap>& mediaImage);
-    std::shared_ptr<Media::PixelMap> GetMediaImage() const;
+    void SetMediaImage(const std::shared_ptr<AVSessionPixelMap>& mediaImage);
+    std::shared_ptr<AVSessionPixelMap> GetMediaImage() const;
 
     void SetMediaImageUri(const std::string& mediaImageUri);
     std::string GetMediaImageUri() const;
@@ -122,7 +122,7 @@ private:
     std::string writer_ = "";
     std::string composer_ = "";
     int64_t duration_ = 0;
-    std::shared_ptr<Media::PixelMap> mediaImage_ = nullptr;
+    std::shared_ptr<AVSessionPixelMap> mediaImage_ = nullptr;
     std::string mediaImageUri_ = "";
     double publishDate_ = 0;
     std::string subTitle_ = "";
