@@ -25,6 +25,7 @@ ohos_shared_library("avsession_common") {
     "src/avmeta_data.cpp",
     "src/avplayback_state.cpp",
     "src/avsession_descriptor.cpp",
+    "src/avsession_pixel_map.cpp",
   ]
 
   public_configs = [ ":avsession_common_config" ]
@@ -34,7 +35,6 @@ ohos_shared_library("avsession_common") {
   external_deps = [
     "ability_base:want",
     "hiviewdfx_hilog_native:libhilog",
-    "multimedia_image_standard:image_native",
     "utils_base:utils",
   ]
 
