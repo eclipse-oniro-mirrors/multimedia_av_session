@@ -77,14 +77,12 @@ void AppManagerAdapter::SetAppBackgroundStateObserver(const std::function<void(i
 void AppManagerAdapter::AddObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
-    SLOGE("uid=%{public}d", uid);
     observedAppUIDs_.insert(uid);
 }
 
 void AppManagerAdapter::RemoveObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
-    SLOGE("uid=%{public}d", uid);
     observedAppUIDs_.erase(uid);
 }
 
