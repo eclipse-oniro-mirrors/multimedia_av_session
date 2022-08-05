@@ -49,6 +49,9 @@ private:
     std::function<void(int32_t)> backgroundObserver_;
     std::recursive_mutex uidLock_;
     std::set<int32_t> observedAppUIDs_;
+
+    static constexpr int RETRY_COUNT_MAX = 5;
+    static constexpr int RETRY_INTERVAL_TIME = 500;
 };
 
 class AVSessionAppStateCallback : public AppExecFwk::AppStateCallbackHost {
