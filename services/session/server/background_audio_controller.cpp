@@ -43,7 +43,6 @@ void BackgroundAudioController::Init()
 void BackgroundAudioController::OnSessionCreate(const AVSessionDescriptor &descriptor)
 {
     std::lock_guard lockGuard(lock_);
-    SLOGE("uid=%{public}d", descriptor.uid_);
     sessionUIDs_.insert(descriptor.uid_);
     AppManagerAdapter::GetInstance().RemoveObservedApp(descriptor.uid_);
 }
