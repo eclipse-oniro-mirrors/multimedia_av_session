@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-#include "app_manager_adapter.h"
+#include <thread>
+#include <chrono>
+
 #include "avsession_log.h"
 #include "app_mgr_constants.h"
+#include "app_manager_adapter.h"
 
 namespace OHOS::AVSession {
 using AppExecFwk::AppProcessData;
@@ -47,8 +50,15 @@ void AppManagerAdapter::Init()
         SLOGE("no memory");
         return;
     }
-    if (appManager_.RegisterAppStateCallback(appStateCallback_) != AppMgrResultCode::RESULT_OK) {
-        SLOGE("register app state callback failed");
+    int retryCount = 0;
+    while (retryCount < RETRY_COUNT_MAX) {
+        if (appManager_.RegisterAppStateCallback(appStateCallback_) != AppMgrResultCode::RESULT_OK) {
+            SLOGE("register app state callback failed");
+            retryCount++;
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL_TIME));
+            continue;
+        }
+        break;
     }
 }
 
