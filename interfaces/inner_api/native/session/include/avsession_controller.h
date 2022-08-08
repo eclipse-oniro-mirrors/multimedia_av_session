@@ -55,6 +55,8 @@ public:
 
     virtual int64_t GetRealPlaybackPosition() = 0;
 
+    virtual bool isDestroy() = 0;
+
     virtual ~AVSessionController() = default;
 };
 } // namespace OHOS::AVSession

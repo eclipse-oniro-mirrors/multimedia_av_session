@@ -415,6 +415,24 @@ HWTEST_F(AvsessionTest, GetController001, TestSize.Level1)
 }
 
 /**
+* @tc.name: GetController002
+* @tc.desc: Return shared_ptr of controller
+* @tc.type: FUNC
+* @tc.require: AR000H31JF
+*/
+HWTEST_F(AvsessionTest, GetController002, TestSize.Level1)
+{
+    SLOGE("GetController002 Begin");
+    auto controller = avsession_->GetController();
+    auto controller1 = avsession_->GetController();
+    EXPECT_NE(controller, nullptr);
+    EXPECT_NE(controller1, nullptr);
+    EXPECT_EQ(controller->Destroy(), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller1->Destroy(), ERR_CONTROLLER_NOT_EXIST);
+    SLOGE("GetController002 End");
+}
+
+/**
 * @tc.name: RegisterCallback001
 * @tc.desc: register avsession callback
 * @tc.type: FUNC

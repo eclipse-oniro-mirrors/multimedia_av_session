@@ -24,6 +24,8 @@ class AVSessionControllerProxy : public IRemoteProxy<IAVSessionController> {
 public:
     explicit AVSessionControllerProxy(const sptr<IRemoteObject> &impl);
 
+    ~AVSessionControllerProxy() override;
+
     int32_t GetAVPlaybackState(AVPlaybackState &state) override;
 
     int32_t GetAVMetaData(AVMetaData &data) override;
@@ -49,6 +51,8 @@ public:
     std::string GetSessionId() override;
 
     int64_t GetRealPlaybackPosition() override;
+
+    bool isDestroy() override;
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;

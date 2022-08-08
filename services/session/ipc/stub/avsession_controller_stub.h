@@ -34,6 +34,11 @@ public:
         return 0;
     }
 
+    bool isDestroy() override
+    {
+        return true;
+    }
+
 private:
     int32_t HandleRegisterCallbackInner(MessageParcel &data, MessageParcel &reply);
 

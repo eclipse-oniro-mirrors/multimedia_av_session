@@ -29,6 +29,8 @@ class AVSessionProxy : public IRemoteProxy<IAVSession> {
 public:
     explicit AVSessionProxy(const sptr<IRemoteObject> &impl);
 
+    ~AVSessionProxy() override;
+
     std::string GetSessionId() override;
 
     int32_t GetAVMetaData(AVMetaData& meta) override;
@@ -65,6 +67,7 @@ private:
     sptr<IAVSessionCallback> callback_;
     static inline BrokerDelegator<AVSessionProxy> delegator_;
     bool isDestroyed_ = {};
+    std::shared_ptr<AVSessionController> controller_;
 };
 }
 #endif // OHOS_AVSESSION_PROXY_H
