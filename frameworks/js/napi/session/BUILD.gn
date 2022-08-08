@@ -62,7 +62,7 @@ ohos_shared_library("avsession_napi") {
     "multimedia_image_standard:image_native",
     "napi:ace_napi",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
     "utils_base:utils",
   ]
   if (multimedia_av_session_enable_trace_control) {
