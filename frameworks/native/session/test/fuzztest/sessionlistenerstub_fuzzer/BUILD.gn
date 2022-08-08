@@ -54,7 +54,7 @@ ohos_fuzztest("SessionListenerStubFuzzTest") {
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "multimedia_audio_framework:audio_client",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 }
 

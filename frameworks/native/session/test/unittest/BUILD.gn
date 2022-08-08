@@ -42,7 +42,7 @@ common_external_deps = [
   "input:libmmi-client",
   "ipc:ipc_core",
   "multimedia_image_standard:image_native",
-  "samgr_standard:samgr_proxy",
+  "samgr:samgr_proxy",
 ]
 
 ohos_unittest("AVSessionManagerTest") {
