@@ -27,6 +27,12 @@ AVSessionControllerProxy::AVSessionControllerProxy(const sptr<IRemoteObject> &im
     SLOGD("construct");
 }
 
+AVSessionControllerProxy::~AVSessionControllerProxy()
+{
+    SLOGI("destroy");
+    Destroy();
+}
+
 int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState &state)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
@@ -312,5 +318,10 @@ int64_t AVSessionControllerProxy::GetRealPlaybackPosition()
           position.elapsedTime_, currentSysTime, position.updateTime_);
 
     return (position.elapsedTime_ + (currentSysTime - position.updateTime_));
+}
+
+bool AVSessionControllerProxy::isDestroy()
+{
+    return isDestroy_;
 }
 }

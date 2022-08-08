@@ -28,6 +28,12 @@ AVSessionProxy::AVSessionProxy(const sptr<IRemoteObject> &impl)
     SLOGD("construct");
 }
 
+AVSessionProxy::~AVSessionProxy()
+{
+    SLOGI("destroy");
+    Destroy();
+}
+
 std::string AVSessionProxy::GetSessionId()
 {
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, "", "session is destroyed");
@@ -96,6 +102,7 @@ int32_t AVSessionProxy::Destroy()
     }
     if (ret == AVSESSION_SUCCESS) {
         isDestroyed_ = true;
+        controller_ = nullptr;
     }
     return ret;
 }
@@ -233,10 +240,13 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(controller_ == nullptr || controller_->isDestroy(), controller_,
+        "controller already exist");
     sptr <IRemoteObject> object = GetControllerInner();
     CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
     auto controller = iface_cast<AVSessionControllerProxy>(object);
-    return std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
+    controller_ = std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
+    return controller_;
 }
 
 int32_t AVSessionProxy::Activate()
