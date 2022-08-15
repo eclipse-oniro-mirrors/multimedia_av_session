@@ -21,14 +21,18 @@
 #include "audio_adapter.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "file_ex.h"
 #include "iservice_registry.h"
 #include "key_event_adapter.h"
+#include "nlohmann/json.hpp"
 #include "permission_checker.h"
 #include "system_ability_definition.h"
 #include "session_stack.h"
 #include "avsession_trace.h"
 #include "hash_calculator.h"
 #include "avsession_dumper.h"
+
+using namespace nlohmann;
 
 namespace OHOS::AVSession {
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
@@ -311,6 +315,16 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
         return nullptr;
     }
 
+    {
+        std::lock_guard lockGuard1(abilityManagerLock_);
+        std::string bundleName = result->GetDescriptor().elementName_.GetBundleName();
+        std::string abilityName = result->GetDescriptor().elementName_.GetAbilityName();
+        auto it = abilityManager_.find(bundleName + abilityName);
+        if (it != abilityManager_.end()) {
+            it->second->StartAbilityByCallDone(result->GetDescriptor().sessionId_);
+        }
+    }
+
     NotifySessionCreate(result->GetDescriptor());
     SLOGI("success");
     return result;
@@ -364,22 +378,91 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
     return result;
 }
 
+const nlohmann::json &AVSessionService::GetSubNode(const nlohmann::json &node, const std::string &name)
+{
+    static const nlohmann::json jsonNull = nlohmann::json::value_t::null;
+    if (node.is_discarded() || node.is_null()) {
+        SLOGE("json node is invalid");
+        return jsonNull;
+    }
+
+    if (name.empty()) {
+        SLOGE("name is invalid");
+        return node;
+    }
+
+    auto it = node.find(name);
+    if (it == node.end()) {
+        SLOGE("%{public}s is not exist in json", name.c_str());
+        return jsonNull;
+    }
+    return *it;
+}
+
+int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
+{
+    std::string content;
+    if (!LoadStringFromFile(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, content)) {
+        SLOGE("LoadStringFromFile failed, filename=%{public}s", ABILITY_FILE_NAME);
+    }
+    std::string bundleName = DEFAULT_BUNDLE_NAME;
+    std::string abilityName = DEFAULT_ABILITY_NAME;
+
+    nlohmann::json value = json::parse(content, nullptr, false);
+    auto &node1 = GetSubNode(value, "bundleName");
+    auto &node2 = GetSubNode(value, "abilityName");
+    if (!node1.is_null() && !node2.is_null() && node1.is_string() && node2.is_string()) {
+        bundleName = node1;
+        abilityName = node2;
+    }
+
+    std::shared_ptr<AbilityManagerAdapter> ability = nullptr;
+    {
+        std::lock_guard lockGuard(abilityManagerLock_);
+        auto it = abilityManager_.find(bundleName + abilityName);
+        if (it != abilityManager_.end()) {
+            ability = it->second;
+        } else {
+            ability = std::make_shared<AbilityManagerAdapter>(bundleName, abilityName);
+            if (ability == nullptr) {
+                return ERR_NO_MEMORY;
+            }
+            abilityManager_[bundleName + abilityName] = ability;
+        }
+    }
+    int32_t ret = ability->StartAbilityByCall(sessionId);
+
+    std::lock_guard lockGuard(abilityManagerLock_);
+    abilityManager_.erase(bundleName + abilityName);
+    return ret;
+}
+
 int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
         return ERR_NO_PERMISSION;
     }
+    std::string sessionIdInner;
+    if (sessionId == "default") {
+        auto ret = StartDefaultAbilityByCall(sessionIdInner);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("StartDefaultAbilityByCall failed: %{public}d", ret);
+            return ret;
+        }
+    } else {
+        sessionIdInner = sessionId;
+    }
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    if (GetPresentController(pid, sessionId) != nullptr) {
+    if (GetPresentController(pid, sessionIdInner) != nullptr) {
         SLOGI("controller already exist");
         return ERR_CONTROLLER_IS_EXIST;
     }
 
-    auto session = GetContainer().GetSessionById(sessionId);
+    auto session = GetContainer().GetSessionById(sessionIdInner);
     if (session == nullptr) {
-        SLOGE("no session id %{public}s", sessionId.c_str());
+        SLOGE("no session id %{public}s", sessionIdInner.c_str());
         return ERR_SESSION_NOT_EXIST;
     }
 
@@ -502,6 +585,13 @@ void AVSessionService::HandleSessionRelease(AVSessionItem &session)
     GetContainer().RemoveSession(session.GetPid(), session.GetAbilityName());
     if (topSession_.GetRefPtr() == &session) {
         UpdateTopSession(nullptr);
+    }
+    nlohmann::json value;
+    value["bundleName"] = session.GetDescriptor().elementName_.GetBundleName();
+    value["abilityName"] = session.GetDescriptor().elementName_.GetAbilityName();
+    std::string content = value.dump();
+    if (!SaveStringToFile(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, content)) {
+        SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
     }
 }
 

@@ -32,18 +32,19 @@
       },
       "build": {
         "group_type": {
-	  "base_group": [
+          "base_group": [
           ],
-	  "fwk_group": [
-	  "//foundation/multimedia/av_session/frameworks/common:avsession_common",
-	  "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
-	  "//foundation/multimedia/av_session/frameworks/js/napi/session:avsession_napi",
-	  "//foundation/multimedia/av_session/utils:avsession_utils"
-	  ],
+          "fwk_group": [
+            "//foundation/multimedia/av_session/frameworks/common:avsession_common",
+            "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
+            "//foundation/multimedia/av_session/frameworks/js/napi/session:avsession_napi",
+            "//foundation/multimedia/av_session/services/session/adapter/ability_helper:ability_connect_helper",
+            "//foundation/multimedia/av_session/utils:avsession_utils"
+          ],
           "service_group": [
-	    "//foundation/multimedia/av_session/services/session:avession_server"
-	  ]
-	},
+            "//foundation/multimedia/av_session/services/session:avession_server"
+          ]
+        },
         "inner_kits": [
           {
             "header": {

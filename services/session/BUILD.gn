@@ -50,6 +50,7 @@ ohos_shared_library("avsession_service") {
     "adapter/audio_adapter.cpp",
     "adapter/key_event_adapter.cpp",
     "adapter/permission_checker.cpp",
+    "adapter/ability_manager_adapter.cpp",
   ]
 
   sources = ipc_sources + adapter_sources + service_sources
@@ -85,6 +86,14 @@ ohos_shared_library("avsession_service") {
   }
   cflags_cc = cflags
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
+
+  defines = []
+  if (target_cpu == "arm64") {
+    system_lib_path =  "\"/system/lib64/\""
+  } else {
+    system_lib_path = "\"/system/lib/\""
+  }
+  defines += [ "SYSTEM_LIB_PATH = ${system_lib_path}" ]
 
   deps = [
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",

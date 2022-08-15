@@ -52,7 +52,7 @@ public:
 
     int64_t GetRealPlaybackPosition() override;
 
-    bool isDestroy() override;
+    bool IsDestroy() override;
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;

@@ -313,6 +313,21 @@ HWTEST_F(AVSessionManagerTest, CreateController002, TestSize.Level1)
 }
 
 /**
+* @tc.name: CreateController003
+* @tc.desc: create session controller by default sessionId.
+* @tc.type: FUNC
+* @tc.require: AR000H55F0
+*/
+HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
+{
+    SLOGI("CreateController003 begin");
+    std::shared_ptr<AVSessionController> controller;
+    auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
+    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVALIABLE);
+    SLOGI("CreateController003 end");
+}
+
+/**
 * @tc.name: RegisterSessionListener001
 * @tc.desc: register nullptr listener
 * @tc.type: FUNC
