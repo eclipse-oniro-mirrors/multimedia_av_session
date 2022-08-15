@@ -76,7 +76,7 @@ public:
 
     void SetPid(pid_t pid);
 
-    void SetUid(uid_t uid);
+    void SetUid(pid_t uid);
 
     pid_t GetPid() const;
 
