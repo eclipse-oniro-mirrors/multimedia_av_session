@@ -30,6 +30,7 @@
 #include "isession_listener.h"
 #include "focus_session_strategy.h"
 #include "background_audio_controller.h"
+#include "ability_manager_adapter.h"
 
 namespace OHOS::AVSession {
 class AVSessionDumper;
@@ -118,6 +119,10 @@ private:
 
     void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 
+    int32_t StartDefaultAbilityByCall(std::string& sessionId);
+
+    const nlohmann::json &GetSubNode(const nlohmann::json &node, const std::string &name);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
@@ -131,11 +136,20 @@ private:
     std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
     std::list<SessionListener*> innerSessionListeners_;
 
+    std::recursive_mutex abilityManagerLock_;
+    std::map<std::string, std::shared_ptr<AbilityManagerAdapter>> abilityManager_;
+
     FocusSessionStrategy focusSessionStrategy_;
     BackgroundAudioController backgroundAudioController_;
 
     std::unique_ptr<AVSessionDumper> dumpHelper_ {};
     friend class AVSessionDumper;
+
+    static constexpr const char *ABILITY_FILE_NAME = "abilityinfo";
+    static constexpr const char *DEFAULT_BUNDLE_NAME = "ohos.samples.himusicdemo";
+    static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
+
+    const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
 };
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {

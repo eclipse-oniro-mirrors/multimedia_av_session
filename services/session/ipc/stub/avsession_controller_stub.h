@@ -34,7 +34,7 @@ public:
         return 0;
     }
 
-    bool isDestroy() override
+    bool IsDestroy() override
     {
         return true;
     }

@@ -320,7 +320,7 @@ int64_t AVSessionControllerProxy::GetRealPlaybackPosition()
     return (position.elapsedTime_ + (currentSysTime - position.updateTime_));
 }
 
-bool AVSessionControllerProxy::isDestroy()
+bool AVSessionControllerProxy::IsDestroy()
 {
     return isDestroy_;
 }

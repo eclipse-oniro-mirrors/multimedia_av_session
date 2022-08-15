@@ -240,7 +240,7 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
-    CHECK_AND_RETURN_RET_LOG(controller_ == nullptr || controller_->isDestroy(), controller_,
+    CHECK_AND_RETURN_RET_LOG(controller_ == nullptr || controller_->IsDestroy(), controller_,
         "controller already exist");
     sptr <IRemoteObject> object = GetControllerInner();
     CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
