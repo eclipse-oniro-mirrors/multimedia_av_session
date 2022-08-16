@@ -327,7 +327,7 @@ void AVSessionItem::SetPid(pid_t pid)
     descriptor_.pid_ = pid;
 }
 
-void AVSessionItem::SetUid(uid_t uid)
+void AVSessionItem::SetUid(pid_t uid)
 {
     descriptor_.uid_ = uid;
 }

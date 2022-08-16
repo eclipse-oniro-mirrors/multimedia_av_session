@@ -195,7 +195,7 @@ void AVSessionDumper::SetErrorInfo(const std::string& inErrMsg)
         return;
     }
     char tempTime [TIME_MAX];
-    int32_t ret = strftime(tempTime, sizeof(tempTime), "%Y-%m-%d %H:%M:%S", locTime);
+    auto ret = strftime(tempTime, sizeof(tempTime), "%Y-%m-%d %H:%M:%S", locTime);
     if (ret == 0) {
         SLOGE("strftime failed");
         return;
