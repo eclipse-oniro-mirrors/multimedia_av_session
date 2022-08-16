@@ -45,16 +45,22 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string &sessionId)
     status_ = Status::ABILITY_STATUS_RUNNING;
     if (handler_ == nullptr) {
         std::string path = std::string(SYSTEM_LIB_PATH) + std::string(SHARED_LIBRARY_FEATURE_ABILITY);
-        handler_ = dlopen(path.c_str(), RTLD_NOW);
+        char realPath[PATH_MAX] = { 0x00 };
+        if (realpath(path.c_str(), realPath) == nullptr) {
+            SLOGE("realpath failed %{public}s. reason: %{public}s", path.c_str(), strerror(errno));
+            status_ = Status::ABILITY_STATUS_INIT;
+            return AVSESSION_ERROR;
+        }
+        handler_ = dlopen(realPath, RTLD_NOW);
         if (handler_ == nullptr) {
-            SLOGE("dlopen failed %{public}s. %{public}s", SHARED_LIBRARY_FEATURE_ABILITY, dlerror());
+            SLOGE("dlopen failed %{public}s. reason: %{public}s", realPath, dlerror());
             status_ = Status::ABILITY_STATUS_INIT;
             return AVSESSION_ERROR;
         }
     }
     auto func = (FuncStartAbilityByCall)dlsym(handler_, FUNC_CALL_START_ABILITY_BY_CALL);
     if (func == nullptr) {
-        SLOGE("dlsym failed %{public}s. %{public}s", FUNC_CALL_START_ABILITY_BY_CALL, dlerror());
+        SLOGE("dlsym failed %{public}s. reason: %{public}s", FUNC_CALL_START_ABILITY_BY_CALL, dlerror());
         dlclose(handler_);
         handler_ = nullptr;
         status_ = Status::ABILITY_STATUS_INIT;
