@@ -1,0 +1,106 @@
+#  Copyright (c) 2022 Huawei Device Co., Ltd.
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+domain: AV_SESSION
+
+SESSION_SERVICE_START:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: start avsession service}
+  SERVICE_NAME: {type: STRING, desc: avsession service name}
+  SERVICE_ID: {type: INT32, desc: avsession service id}
+  DETAILED_MSG: {type: STRING, desc: detailed msg}
+
+FOCUS_CHANGE:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: focus change}
+  PID: {type: INT32, desc: pid}
+  OLD_BUNDLE_NAME: {type: STRING, desc: old bundle name}
+  OLD_MODULE_NAME: {type: STRING, desc: old module name}
+  OLD_ABILITY_NAME: {type: STRING, desc: old ability name}
+  OLD_SESSION_PID: {type: INT32, desc: old session pid}
+  OLD_SESSION_UID: {type: INT32, desc: old session uid}
+  OLD_SESSION_ID: {type: STRING, desc: old session id}
+  OLD_SESSION_TAG: {type: STRING, desc: old session tag}
+  OLD_SESSION_TYPE: {type: INT32, desc: old session type}
+  BUNDLE_NAME: {type: STRING, desc: change bundle name}
+  MODULE_NAME: {type: STRING, desc: change module name}
+  ABILITY_NAME: {type: STRING, desc: change ability name}
+  SESSION_PID: {type: INT32, desc: change session pid}
+  SESSION_UID: {type: INT32, desc: change session uid}
+  SESSION_ID: {type: STRING, desc: change session id}
+  SESSION_TAG: {type: STRING, desc: change session tag}
+  SESSION_TYPE: {type: INT32, desc: change session type}
+  FOCUS_SESSION_UID: {type: INT32, desc: focus session change info uid}
+  AUDIO_INFO_CONTENT_TYPE: {type: INT32, desc: audiorendererinfo contenttype}
+  AUDIO_INFO_RENDERER_STATE: {type: INT32, desc: audiorendererinfo rendererstate}
+  DETAILED_MSG: {type: STRING, desc: detailed msg}
+
+CONTROL_PERMISSION_DENIED:
+  __BASE: {type: SECURITY, level: CRITICAL, tag: security, desc: permission verification errors}
+  CALLER_UID: {type: INT32, desc: caller uid}
+  CALLER_PID: {type: INT32, desc: caller pid}
+  SESSION_ID: {type: STRING, desc: session id}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  KEY_CODE: {type: INT32, desc: key code}
+  KEY_ACTION: {type: INT32, desc: key action}
+  CMD: {type: INT32, desc: cmd}
+  ERROR_CODE: {type: INT32, desc: error code}
+  ERROR_MSG: {type: STRING, desc: error msg}
+
+CONTROL_COMMAND_FAILED:
+  __BASE: {type: FAULT, level: MINOR, tag: ability, desc: no response exception timeout invalid}
+  ERROR_TYPE: {type: STRING, desc: error type}
+  CMD: {type: INT32, desc: command}
+  TIME: {type: UINT64, desc: seek time}
+  SPEED: {type: DOUBLE, desc: speed}
+  MODE: {type: STRING, desc: loop mode}
+  ASSETID: {type: STRING, desc: assetId}
+  CALLING_PID: {type: INT32, desc: calling pid}
+  CLIENT_PID: {type: INT32, desc: cliend pid}
+  TAG: {type: STRING, desc: tag}
+  TYPE: {type: INT32, desc: type}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  ERROR_CODE: {type: INT32, desc: error code}
+  ERROR_INFO: {type: STRING, desc: error info}
+
+CONTROL_COMMAND_STATISTICS:
+  __BASE: {type: STATISTIC, level: MINOR, tag: statistic, desc: avsession control command statistics}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  CONTROLLER_PID: {type: INT32, desc: controller pid}
+  CMD: {type: INT32, desc: command}
+  POSITION: {type: BOOL, desc: sender is true, receiver is false}
+  PLAY_COUNT: {type: UINT32, desc: play count}
+  PAUSE_COUNT: {type: UINT32, desc: pause count}
+  STOP_COUNT: {type: UINT32, desc: stop count}
+  PLAY_NEXT_COUNT: {type: UINT32, desc: playnext count}
+  PLAY_PREVIOUS_COUNT: {type: UINT32, desc: playprevious count}
+  FAST_FORWARD_COUNT: {type: UINT32, desc: fastforward count}
+  REWIND_COUNT: {type: UINT32, desc: rewind count}
+  SEEK_COUNT: {type: UINT32, desc: seek count}
+  SET_SPEED_COUNT: {type: UINT32, desc: setspeed count}
+  SET_LOOP_MODE_COUNT: {type: UINT32, desc: setloopmode count}
+  TOGGLE_FAVORITE_COUNT: {type: UINT32, desc: togglefavorite count}
+  DETAILED_MSG: {type: STRING, desc: detailed msg}
+
+SESSION_LIFECYCLE_STATISTICS:
+  __BASE: {type: STATISTIC, level: MINOR, tag: statistic, desc: avsession control command statistics}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  APP_STATUS: {type: BOOL, desc: app in background is true}
+  SESSION_TYPE: {type: INT32, desc: sessiontype}
+  SESSION_LIFE_CYCLE: {type: BOOL, desc: create avsession is true, delete avsession is false}
+  CREATE_SESSION_COUNT: {type: UINT32, desc: create session count}
+  DELETE_SESSION_COUNT: {type: UINT32, desc: delete session count}
+
+CONTROL_COMMAND_FAILED_RATE:
+  __BASE: {type: STATISTIC, level: MINOR, tag: statistic, desc: avsession control command failed rate}
+  ALL_CTRL_COMMAND_COUNT: {type: UINT32, desc: all command count}
+  ALL_SUCCESS_CTRL_COMMAND: {type: UINT32, desc: success command count}
+  COMMAND_FAILED_RATE: {type: FLOAT, desc: command failed rate}

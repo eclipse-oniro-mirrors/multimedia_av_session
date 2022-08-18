@@ -26,6 +26,7 @@
 #include "napi_avsession_controller.h"
 #include "napi_control_command.h"
 #include "avsession_trace.h"
+#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAVSessionManager::OffEventHandlerType>>
@@ -316,9 +317,24 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->error = "native send control command failed";
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+            double speed;
+            int64_t time;
+            int32_t mode;
+            std::string assetId;
+            context->command.GetSpeed(speed);
+            context->command.GetSeekTime(time);
+            context->command.GetLoopMode(mode);
+            context->command.GetAssetId(assetId);
+            HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "SEND_CMD_FAILED",
+                "CMD", context->command.GetCommand(), "TIME", time, "SPEED", speed, "MODE", mode, "ASSETID", assetId,
+                "ERROR_CODE", ret, "ERROR_INFO", "native send control command failed");
+#endif
         }
         if (ret == ERR_NO_PERMISSION) {
             context->error = "native send control command no permission";
+            HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "ERROR_CODE", ret,
+                "ERROR_INFO", "native send control command no permission");
         }
     };
 

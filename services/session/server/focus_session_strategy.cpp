@@ -16,6 +16,7 @@
 #include "focus_session_strategy.h"
 #include "avsession_log.h"
 #include "audio_adapter.h"
+#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 FocusSessionStrategy::FocusSessionStrategy()
@@ -26,6 +27,8 @@ FocusSessionStrategy::FocusSessionStrategy()
 FocusSessionStrategy::~FocusSessionStrategy()
 {
     SLOGI("destroy");
+    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "PID", getpid(),
+        "DETAILED_MSG", "focussessionstrategy destory, audiostreammanager unregisteraudiorenderereventlistener");
     AudioStandard::AudioStreamManager::GetInstance()->UnregisterAudioRendererEventListener(getpid());
 }
 
@@ -65,6 +68,10 @@ bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChan
             return true;
         }
         if (it->second != AudioStandard::RendererState::RENDERER_RUNNING) {
+            HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", info.clientUID,
+                "AUDIO_INFO_CONTENT_TYPE", info.rendererInfo.contentType,
+                "AUDIO_INFO_RENDERER_STATE", info.rendererState,
+                "DETAILED_MSG", "focussessionstrategy selectfocussession, last focus session info");
             return true;
         }
     }
@@ -90,6 +97,9 @@ bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos &in
             continue;
         }
         SLOGI("uid=%{public}d is focus session", sessionInfo.uid);
+        HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", sessionInfo.uid, "AUDIO_INFO_CONTENT_TYPE",
+            info->rendererInfo.contentType, "AUDIO_INFO_RENDERER_STATE", info->rendererState,
+            "DETAILED_MSG", "focussessionstrategy selectfocussession, current focus session info");
         return true;
     }
     return false;

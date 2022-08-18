@@ -19,6 +19,7 @@
 #include "session_listener_proxy.h"
 #include "client_death_proxy.h"
 #include "avsession_trace.h"
+#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 bool AVSessionServiceStub::CheckInterfaceToken(MessageParcel &data)
@@ -146,6 +147,8 @@ int AVSessionServiceStub::HandleSendSystemControlCommand(MessageParcel &data, Me
     if (command == nullptr) {
         SLOGE("read command failed");
         reply.WriteInt32(ERR_UNMARSHALLING);
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "READ_PARCELABLE_FAILED",
+            "ERROR_INFO", "handle send system control command read command failed");
         return ERR_NONE;
     }
     if (!reply.WriteInt32(SendSystemControlCommand(*command))) {

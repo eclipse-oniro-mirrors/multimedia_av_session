@@ -22,6 +22,7 @@
 #include "avsession_errors.h"
 #include "session_listener_client.h"
 #include "avsession_trace.h"
+#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 AVSessionManagerImpl::AVSessionManagerImpl()
@@ -73,6 +74,8 @@ void AVSessionManagerImpl::OnServiceDie()
     if (callback) {
         callback();
     }
+    HISYSEVENT_RESET;
+    HISYSEVENT_UNREGISTER;
 }
 
 std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string &tag, int32_t type,
@@ -194,11 +197,18 @@ int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand &c
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemControlCommand");
     if (!command.IsValid()) {
         SLOGE("command is invalid");
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", command.GetCommand(),
+            "ERROR_CODE", ERR_INVALID_PARAM, "ERROR_INFO", "avsessionmanagerimpl command is invalid");
         return ERR_INVALID_PARAM;
     }
 
     auto service = GetService();
-    return service ? service->SendSystemControlCommand(command) : ERR_SERVICE_NOT_EXIST;
+    if (service == nullptr) {
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "GET_SERVICE_ERROR",
+            "ERROR_CODE", ERR_SERVICE_NOT_EXIST, "ERROR_INFO", "mgrimp sendsystemcontrolcommand get service error");
+        return ERR_SERVICE_NOT_EXIST;
+    }
+    return service->SendSystemControlCommand(command);
 }
 
 void AVSessionManagerImpl::RegisterClientDeathObserver()
@@ -206,10 +216,14 @@ void AVSessionManagerImpl::RegisterClientDeathObserver()
     clientDeath_ = new(std::nothrow) ClientDeathStub();
     if (clientDeath_ == nullptr) {
         SLOGE("malloc failed");
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "MALLOC_FAILED",
+            "ERROR_INFO", "avsession manager impl register client death observer malloc failed");
         return;
     }
     if (service_->RegisterClientDeathObserver(clientDeath_) != AVSESSION_SUCCESS) {
         SLOGE("register failed");
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "REGISTER_FAILED",
+            "ERROR_INFO", "avsession manager impl register client death observer register failed");
         return;
     }
     SLOGI("success");
