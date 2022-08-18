@@ -24,7 +24,10 @@ config("avsession_utils_config") {
 ohos_shared_library("avsession_utils") {
   install_enable = true
 
-  sources = [ "src/hash_calculator.cpp" ]
+  sources = [
+    "src/hash_calculator.cpp",
+    "src/avsession_sysevent.cpp",
+  ]
 
   include_dirs = [
     "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
@@ -42,6 +45,10 @@ ohos_shared_library("avsession_utils") {
   if (multimedia_av_session_enable_trace_control) {
     cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
     external_deps += [ "hitrace_native:hitrace_meter" ]
+  }
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent_native:libhisysevent" ]
   }
 
   subsystem_name = "multimedia"

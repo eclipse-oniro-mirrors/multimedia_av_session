@@ -15,6 +15,7 @@
 
 #include "session_stack.h"
 #include "avsession_errors.h"
+#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr<AVSessionItem>& item)
@@ -24,6 +25,7 @@ int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr
     }
     sessions_.insert(std::make_pair(std::make_pair(pid, abilityName), item));
     stack_.push_front(item);
+    HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_CREATE_SESSION);
     return AVSESSION_SUCCESS;
 }
 
@@ -35,6 +37,7 @@ std::vector<sptr<AVSessionItem>> SessionStack::RemoveSession(pid_t pid)
             result.push_back(it->second);
             stack_.remove(it->second);
             it = sessions_.erase(it);
+            HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_DELETE_SESSION);
         } else {
             it++;
         }
@@ -48,6 +51,7 @@ sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid, const std::string &ab
     if (it == sessions_.end()) {
         return nullptr;
     }
+    HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_DELETE_SESSION);
     auto result = it->second;
     sessions_.erase(it);
     stack_.remove(result);

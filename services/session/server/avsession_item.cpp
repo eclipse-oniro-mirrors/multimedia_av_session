@@ -20,6 +20,7 @@
 #include "avsession_errors.h"
 #include "avsession_descriptor.h"
 #include "avsession_trace.h"
+#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
@@ -212,12 +213,19 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 
 void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 {
+    HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_ALL_CTRL_COMMAND);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
     int32_t code = cmd.GetCommand();
     if (code >= 0 && code < SESSION_CMD_MAX) {
+        HISYSEVENT_ADD_OPERATION_COUNT(static_cast<Operation>(cmd.GetCommand()));
+        HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_SUCCESS_CTRL_COMMAND);
+        HISYSEVENT_ADD_CONTROLLER_COMMAND_INFO(descriptor_.elementName_.GetBundleName(), GetPid(),
+            cmd.GetCommand(), descriptor_.sessionType_);
         return (this->*cmdHandlers[code])(cmd);
     }
+    HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVAILD_COMMAND", "CMD", code,
+        "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");
 }
 
 void AVSessionItem::HandleOnPlay(const AVControlCommand &cmd)

@@ -31,6 +31,7 @@
 #include "avsession_trace.h"
 #include "hash_calculator.h"
 #include "avsession_dumper.h"
+#include "avsession_sysevent.h"
 
 using namespace nlohmann;
 
@@ -62,6 +63,9 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     AddSystemAbilityListener(AUDIO_POLICY_SERVICE_ID);
     AddSystemAbilityListener(APP_MGR_SERVICE_ID);
+    HISYSEVENT_REGITER;
+    HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
+        "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
 }
 
 void AVSessionService::OnDump()
@@ -114,6 +118,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem> &newTopSession
         }
         topSession_ = nullptr;
         SLOGI("set topSession to nullptr");
+        HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "DETAILED_MSG", "avsessionservice set topsession to nullptr");
         return;
     }
 
@@ -128,6 +133,12 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem> &newTopSession
         topSession_->SetTop(true);
         descriptor = topSession_->GetDescriptor();
     }
+    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "BUNDLE_NAME", descriptor.elementName_.GetBundleName(),
+        "MODULE_NAME", descriptor.elementName_.GetModuleName(),
+        "ABILITY_NAME", descriptor.elementName_.GetAbilityName(), "SESSION_PID", descriptor.pid_,
+        "SESSION_UID", descriptor.uid_, "SESSION_ID", descriptor.sessionId_,
+        "SESSION_TAG", descriptor.sessionTag_, "SESSION_TYPE", descriptor.sessionType_,
+        "DETAILED_MSG", "avsessionservice updatetopsession");
     NotifyTopSessionChanged(descriptor);
 }
 
@@ -140,6 +151,20 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     }
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetUid() == info.uid) {
+            HISYSEVENT_BEHAVIOR("FOCUS_CHANGE",
+                "OLD_BUNDLE_NAME", topSession_->GetDescriptor().elementName_.GetBundleName(),
+                "OLD_MODULE_NAME", topSession_->GetDescriptor().elementName_.GetModuleName(),
+                "OLD_ABILITY_NAME", topSession_->GetAbilityName(), "OLD_SESSION_PID", topSession_->GetPid(),
+                "OLD_SESSION_UID", topSession_->GetUid(), "OLD_SESSION_ID", topSession_->GetSessionId(),
+                "OLD_SESSION_TAG", topSession_->GetDescriptor().sessionTag_,
+                "OLD_SESSION_TYPE", topSession_->GetDescriptor().sessionType_,
+                "BUNDLE_NAME", session->GetDescriptor().elementName_.GetBundleName(),
+                "MODULE_NAME", session->GetDescriptor().elementName_.GetModuleName(),
+                "ABILITY_NAME", session->GetAbilityName(), "SESSION_PID", session->GetPid(),
+                "SESSION_UID", session->GetUid(), "SESSION_ID", session->GetSessionId(),
+                "SESSION_TAG", session->GetDescriptor().sessionTag_,
+                "SESSION_TYPE", session->GetDescriptor().sessionType_,
+                "DETAILED_MSG", "avsessionservice handlefocussession, updatetopsession");
             UpdateTopSession(session);
             return;
         }
@@ -150,11 +175,19 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
 {
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetUid() == info.uid) {
+            HISYSEVENT_BEHAVIOR("FOCUS_CHANGE",
+                "BUNDLE_NAME", session->GetDescriptor().elementName_.GetBundleName(),
+                "MODULE_NAME", session->GetDescriptor().elementName_.GetModuleName(),
+                "ABILITY_NAME", session->GetAbilityName(), "SESSION_PID", session->GetPid(),
+                "SESSION_UID", session->GetUid(), "SESSION_ID", session->GetSessionId(),
+                "DETAILED_MSG", "avsessionservice selectfocussession, true");
             SLOGI("true");
             return true;
         }
     }
     SLOGI("false");
+    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", info.uid,
+        "DETAILED_MSG", "avsessionservice selectfocussession, false");
     return false;
 }
 
@@ -258,6 +291,12 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor &descri
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
         listener->OnTopSessionChange(descriptor);
     }
+    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "BUNDLE_NAME", descriptor.elementName_.GetBundleName(),
+        "MODULE_NAME", descriptor.elementName_.GetModuleName(),
+        "ABILITY_NAME", descriptor.elementName_.GetAbilityName(), "SESSION_PID", descriptor.pid_,
+        "SESSION_UID", descriptor.uid_, "SESSION_ID", descriptor.sessionId_,
+        "SESSION_TAG", descriptor.sessionTag_, "SESSION_TYPE", descriptor.sessionType_,
+        "DETAILED_MSG", "avsessionservice notifytopsessionchanged");
 }
 
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, int32_t type, bool thirdPartyApp,
@@ -308,13 +347,16 @@ sptr<IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag,
     if (result == nullptr) {
         SLOGE("create new session failed");
         dumpHelper_->SetErrorInfo("  AVSessionService::CreateSessionInner  create new session failed");
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "CALLER_PID", pid, "TAG", tag, "TYPE", type, "BUNDLE_NAME",
+            elementName.GetBundleName(), "ERROR_MSG", "avsessionservice createsessioninner create new session failed");
         return nullptr;
     }
     if (GetContainer().AddSession(pid, elementName.GetAbilityName(), result) != AVSESSION_SUCCESS) {
         SLOGE("session num exceed max");
         return nullptr;
     }
-
+    HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
+        AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()), type, true);
     {
         std::lock_guard lockGuard1(abilityManagerLock_);
         std::string bundleName = result->GetDescriptor().elementName_.GetBundleName();
@@ -334,6 +376,8 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice getallsessiondescriptors checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
 
@@ -359,6 +403,9 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
     }
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", pid, "SESSION_ID", sessionId,
+            "ERROR_MSG", "avsessionservice getsessiondescriptors by sessionid checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
     descriptor = session->GetDescriptor();
@@ -441,6 +488,9 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", GetCallingPid(), "SESSION_ID", sessionId,
+            "ERROR_MSG", "avsessionservice createcontrollerinner checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
     std::string sessionIdInner;
@@ -501,6 +551,8 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
     SLOGI("enter");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice registersessionlistener checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
     AddSessionListener(GetCallingPid(), listener);
@@ -511,6 +563,9 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "KEY_CODE", keyEvent.GetKeyCode(), "KEY_ACTION", keyEvent.GetKeyAction(),
+            "ERROR_MSG", "avsessionservice sendsystemavkeyevent checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
     SLOGI("key=%{public}d", keyEvent.GetKeyCode());
@@ -526,6 +581,9 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", GetCallingPid(), "CMD", command.GetCommand(),
+            "ERROR_MSG", "avsessionservice sendsystemcontrolcommand checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
     SLOGI("cmd=%{public}d", command.GetCommand());
@@ -554,11 +612,15 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
     auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
         SLOGE("malloc failed");
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "RGS_CLIENT_DEATH_OBSERVER_FAILED",
+            "ERROR_INFO", "avsession service register client death observer malloc failed");
         return AVSESSION_ERROR;
     }
 
     if (!observer->AsObject()->AddDeathRecipient(recipient)) {
         SLOGE("add death recipient for %{public}d failed", pid);
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "RGS_CLIENT_DEATH_FAILED", "CALLING_PID", pid,
+            "ERROR_INFO", "avsession service register client death observer, add death recipient failed");
         return AVSESSION_ERROR;
     }
 
@@ -593,6 +655,9 @@ void AVSessionService::HandleSessionRelease(AVSessionItem &session)
     if (!SaveStringToFile(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, content)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
     }
+    HISYSEVENT_ADD_LIFE_CYCLE_INFO(session.GetDescriptor().elementName_.GetBundleName(),
+        AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()),
+        session.GetDescriptor().sessionType_, false);
 }
 
 void AVSessionService::HandleControllerRelease(AVControllerItem &controller)

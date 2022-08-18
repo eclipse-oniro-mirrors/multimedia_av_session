@@ -69,6 +69,10 @@ ohos_shared_library("avsession_napi") {
     cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
     external_deps += [ "hitrace_native:hitrace_meter" ]
   }
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent_native:libhisysevent" ]
+  }
   relative_install_dir = "module/multimedia"
 
   subsystem_name = "multimedia"
