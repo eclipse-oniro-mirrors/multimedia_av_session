@@ -29,7 +29,7 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
 
 **图1** AVSession交互图
 
-![zh-ch_image_avsession](avsession.png)
+![zh-ch_image_avsession](avsession.PNG)
 
 音频应用创建`AVSession`对象，并设置会话信息（包括媒体元数据、对应拉起的Ability、播放状态等）。
 
