@@ -29,7 +29,7 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
 
 **图1** AVSession交互图
 
-![zh-ch_image_avsession](avsession.png)
+![zh-ch_image_avsession](avsession.PNG)
 
 音频应用创建`AVSession`对象，并设置会话信息（包括媒体元数据、对应拉起的Ability、播放状态等）。
 
@@ -41,6 +41,7 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
 
 - 普通应用不支持开发播控中心端。当普通音视频应用运行在OpenHarmony上时，默认控制端为系统应用播控中心，开发者无需做额外的操作。***（到时候建链到播控中心，3.2会落）***
 - **播控中心**为系统应用，当开发者需要基于OpenHarmony开发自己的系统时，可以开发本系统的播控中心应用。
+- 为了解决音频在后台播放时用户无法获取到停止音频的入口，影响用户体验，AVSession服务增加了三方应用后台管控策略，只有三方应用接入了AVSession，才可以后台播放，否则当应用切后台时系统会强制暂停其音频播放。
 
 ## 开发指导
 

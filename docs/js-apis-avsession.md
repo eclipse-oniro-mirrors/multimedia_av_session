@@ -14,7 +14,7 @@ import avsession from '@ohos.multimedia.avsession';
 
 ## avsession.createAVSession
 
-createAVSession(tag: string, type: AVSessionType): Promise\<AVSession>
+createAVSession(context: Context, tag: string, type: AVSessionType): Promise\<AVSession>
 
 创建会话对象。使用Promise异步回调。
 
@@ -56,7 +56,7 @@ await avsession.createAVSession(context, tag, type).then((avsession) => {
 
 ## avsession.createAVSession
 
-createAVSession(tag: string, type: AVSessionType, callback: AsyncCallback\<AVSession>): void
+createAVSession(context: Context, tag: string, type: AVSessionType, callback: AsyncCallback\<AVSession>): void
 
 创建会话对象。使用callback异步回调。
 
