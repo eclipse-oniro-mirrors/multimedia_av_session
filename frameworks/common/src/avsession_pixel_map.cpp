@@ -26,20 +26,22 @@ bool AVSessionPixelMap::Marshalling(Parcel& parcel) const
 
 AVSessionPixelMap *AVSessionPixelMap::Unmarshalling(Parcel& data)
 {
+    std::vector<uint8_t> imageInfo;
+    if (!data.ReadUInt8Vector(&imageInfo)) {
+        SLOGE("Read image info failed");
+        return nullptr;
+    }
+
+    std::vector<uint8_t> buffer(DEFAULT_BUFFER_SIZE);
+    if (!data.ReadUInt8Vector(&buffer)) {
+        SLOGE("Read image data failed");
+        return nullptr;
+    }
+
     auto *result = new (std::nothrow) AVSessionPixelMap();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVSessionPixelMap failed");
-
-    if (!data.ReadUInt8Vector(&result->imageInfo_)) {
-        SLOGE("Read image info bytes failed");
-        delete result;
-        return nullptr;
-    }
-
-    if (!data.ReadUInt8Vector(&result->data_)) {
-        SLOGE("Read image data failed");
-        delete result;
-        return nullptr;
-    }
+    result->SetImageInfo(imageInfo);
+    result->SetPixelData(buffer);
     return result;
 }
 } // namespace OHOS::AVSession
