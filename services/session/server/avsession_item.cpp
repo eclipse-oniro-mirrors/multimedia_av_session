@@ -22,6 +22,10 @@
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#include <malloc.h>
+#endif
+
 namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
     : descriptor_(descriptor)
@@ -32,6 +36,11 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
 AVSessionItem::~AVSessionItem()
 {
     SLOGI("destroy id=%{public}s", descriptor_.sessionId_.c_str());
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#if defined(__BIONIC__)
+    mallopt(M_PURGE, 0);
+#endif
+#endif
 }
 
 std::string AVSessionItem::GetSessionId()

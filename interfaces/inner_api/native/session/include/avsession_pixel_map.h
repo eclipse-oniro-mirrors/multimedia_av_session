@@ -18,12 +18,23 @@
 #include <vector>
 #include "parcel.h"
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#include <malloc.h>
+#endif
+
 namespace OHOS::AVSession {
 constexpr size_t DEFAULT_BUFFER_SIZE = 160 * 1024;
 class AVSessionPixelMap : public Parcelable {
 public:
     AVSessionPixelMap() = default;
-    ~AVSessionPixelMap() = default;
+    ~AVSessionPixelMap()
+    {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#if defined(__BIONIC__)
+        mallopt(M_PURGE, 0);
+#endif
+#endif
+    }
 
     bool Marshalling(Parcel &data) const override;
     static AVSessionPixelMap *Unmarshalling(Parcel &data);
