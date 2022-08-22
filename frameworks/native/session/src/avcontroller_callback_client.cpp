@@ -20,20 +20,28 @@ namespace OHOS::AVSession {
 AVControllerCallbackClient::AVControllerCallbackClient(const std::shared_ptr<AVControllerCallback>& callback)
     : callback_(callback)
 {
+    if (handler_ == nullptr) {
+        auto runner = AppExecFwk::EventRunner::Create("AVControllerCallbackClient");
+        handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
     SLOGD("construct");
 }
 
 void AVControllerCallbackClient::OnSessionDestroy()
 {
     if (callback_) {
-        callback_->OnSessionDestroy();
+        if (!handler_->PostTask([this]() { callback_->OnSessionDestroy(); })) {
+            SLOGI("AVSessionCallbackClient handler postTask failed");
+        }
     }
 }
 
 void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState &state)
 {
     if (callback_) {
-        callback_->OnPlaybackStateChange(state);
+        if (!handler_->PostTask([this, state]() { callback_->OnPlaybackStateChange(state); })) {
+            SLOGI("AVSessionCallbackClient handler postTask failed");
+        }
     }
     if (playbackStateListener_) {
         playbackStateListener_(state);
@@ -43,21 +51,27 @@ void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState &st
 void AVControllerCallbackClient::OnMetaDataChange(const AVMetaData &data)
 {
     if (callback_) {
-        callback_->OnMetaDataChange(data);
+        if (!handler_->PostTask([this, data]() { callback_->OnMetaDataChange(data); })) {
+            SLOGI("AVSessionCallbackClient handler postTask failed");
+        }
     }
 }
 
 void AVControllerCallbackClient::OnActiveStateChange(bool isActive)
 {
     if (callback_) {
-        callback_->OnActiveStateChange(isActive);
+        if (!handler_->PostTask([this, isActive]() { callback_->OnActiveStateChange(isActive); })) {
+            SLOGI("AVSessionCallbackClient handler postTask failed");
+        }
     }
 }
 
 void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t> &cmds)
 {
     if (callback_) {
-        callback_->OnValidCommandChange(cmds);
+        if (!handler_->PostTask([this, cmds]() { callback_->OnValidCommandChange(cmds); })) {
+            SLOGI("AVSessionCallbackClient handler postTask failed");
+        }
     }
 }
 

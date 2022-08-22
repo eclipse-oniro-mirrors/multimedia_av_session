@@ -18,6 +18,7 @@
 
 #include "avcontroller_callback_stub.h"
 #include "avsession_info.h"
+#include "event_handler.h"
 
 namespace OHOS::AVSession {
 class AVControllerCallbackClient : public AVControllerCallbackStub {
@@ -38,6 +39,7 @@ public:
 
 private:
     std::shared_ptr<AVControllerCallback> callback_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;
 };
 }

@@ -63,6 +63,7 @@ ohos_shared_library("avsession_client") {
     "multimedia_image_standard:image_native",
     "samgr:samgr_proxy",
     "utils_base:utils",
+    "eventhandler:libeventhandler",
   ]
 
   if (multimedia_av_session_enable_trace_control) {
