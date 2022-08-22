@@ -19,6 +19,10 @@
 #include "avsession_log.h"
 #include "avsession_trace.h"
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#include <malloc.h>
+#endif
+
 namespace OHOS::AVSession {
 AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
     : pid_(pid), session_(session)
@@ -30,6 +34,11 @@ AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
 AVControllerItem::~AVControllerItem()
 {
     SLOGI("destroy sessionId=%{public}s", sessionId_.c_str());
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#if defined(__BIONIC__)
+    mallopt(M_PURGE, 0);
+#endif
+#endif
 }
 
 int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject> &callback)

@@ -22,6 +22,10 @@
 #include "parcel.h"
 #include "avsession_pixel_map.h"
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#include <malloc.h>
+#endif
+
 namespace OHOS::AVSession {
 class AVMetaData : public Parcelable {
 public:
@@ -49,7 +53,14 @@ public:
     using MetaMaskType = std::bitset<META_KEY_MAX>;
 
     AVMetaData() = default;
-    ~AVMetaData() override = default;
+    ~AVMetaData() override
+    {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#if defined(__BIONIC__)
+        mallopt(M_PURGE, 0);
+#endif
+#endif
+    }
 
     static AVMetaData *Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& data) const override;
