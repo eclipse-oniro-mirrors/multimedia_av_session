@@ -71,6 +71,7 @@ void NapiAsyncCallback::Call(napi_ref method, NapiArgsGetter getter)
     }
     if (method == nullptr) {
         SLOGE("method is nullptr");
+        return;
     }
 
     auto* work = new (std::nothrow) uv_work_t;

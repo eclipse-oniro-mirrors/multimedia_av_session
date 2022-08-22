@@ -34,6 +34,7 @@ NapiAVControllerCallback::~NapiAVControllerCallback()
 
 void NapiAVControllerCallback::HandleEvent(int32_t event)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
         SLOGE("not register callback event=%{public}d", event);
         return;
@@ -46,6 +47,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event)
 template<typename T>
 void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
         SLOGE("not register callback event=%{public}d", event);
         return;
