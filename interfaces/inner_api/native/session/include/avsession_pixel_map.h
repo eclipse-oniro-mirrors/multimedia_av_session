@@ -19,6 +19,7 @@
 #include "parcel.h"
 
 namespace OHOS::AVSession {
+constexpr size_t DEFAULT_BUFFER_SIZE = 160 * 1024;
 class AVSessionPixelMap : public Parcelable {
 public:
     AVSessionPixelMap() = default;
@@ -34,6 +35,7 @@ public:
 
     void SetPixelData(const std::vector<uint8_t> &data)
     {
+        data_.clear();
         data_ = data;
     }
 
@@ -44,11 +46,12 @@ public:
 
     void SetImageInfo(const std::vector<uint8_t> &imageInfo)
     {
+        imageInfo_.clear();
         imageInfo_ = imageInfo;
     }
 
 private:
-    std::vector<uint8_t> data_;
+    std::vector<uint8_t> data_ = std::vector<uint8_t>(DEFAULT_BUFFER_SIZE);
     std::vector<uint8_t> imageInfo_;
 };
 } // namespace OHOS::AVSession
