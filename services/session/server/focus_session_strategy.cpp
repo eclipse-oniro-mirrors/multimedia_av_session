@@ -27,8 +27,6 @@ FocusSessionStrategy::FocusSessionStrategy()
 FocusSessionStrategy::~FocusSessionStrategy()
 {
     SLOGI("destroy");
-    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "PID", getpid(),
-        "DETAILED_MSG", "focussessionstrategy destory, audiostreammanager unregisteraudiorenderereventlistener");
     AudioStandard::AudioStreamManager::GetInstance()->UnregisterAudioRendererEventListener(getpid());
 }
 

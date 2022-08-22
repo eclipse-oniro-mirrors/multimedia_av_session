@@ -75,12 +75,16 @@ void AVSessionSysEvent::Regiter()
             "CREATE_SESSION_COUNT", optCounts_[Operation::OPT_CREATE_SESSION],
             "DELETE_SESSION_COUNT", optCounts_[Operation::OPT_DELETE_SESSION]);
 
-        float failedRate = (optCounts_[Operation::OPT_ALL_CTRL_COMMAND] -
-            optCounts_[Operation::OPT_SUCCESS_CTRL_COMMAND]) / optCounts_[Operation::OPT_ALL_CTRL_COMMAND];
-        HiSysWriteStatistic("CONTROL_COMMAND_FAILED_RATE",
-            "ALL_CTRL_COMMAND_COUNT", optCounts_[Operation::OPT_ALL_CTRL_COMMAND],
-            "ALL_SUCCESS_CTRL_COMMAND", optCounts_[Operation::OPT_SUCCESS_CTRL_COMMAND],
-            "COMMAND_FAILED_RATE", failedRate);
+        uint32_t allCtrlCmdCount = optCounts_[Operation::OPT_ALL_CTRL_COMMAND];
+        uint32_t allSuccCmdCount = optCounts_[Operation::OPT_SUCCESS_CTRL_COMMAND];
+        if ((allCtrlCmdCount != 0) && (allSuccCmdCount <= allCtrlCmdCount)) {
+            float failedRate = (allCtrlCmdCount - allSuccCmdCount) / (allCtrlCmdCount * MULTIPLE);
+            HiSysWriteStatistic("CONTROL_COMMAND_FAILED_RATE", "ALL_CTRL_COMMAND_COUNT", allCtrlCmdCount,
+                "ALL_SUCCESS_CTRL_COMMAND", allSuccCmdCount, "COMMAND_FAILED_RATE", failedRate);
+        } else {
+            HiSysWriteStatistic("CONTROL_COMMAND_FAILED_RATE", "ALL_CTRL_COMMAND_COUNT", allCtrlCmdCount,
+                "ALL_SUCCESS_CTRL_COMMAND", allSuccCmdCount, "COMMAND_FAILED_RATE", 0);
+        }
         Reset();
     };
     timerId_ = timer_->Register(timeCallback, NOTIFY_TIME_INTERVAL, false);

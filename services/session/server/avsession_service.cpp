@@ -132,17 +132,25 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem> &newTopSession
         std::lock_guard lockGuard(sessionAndControllerLock_);
         if (topSession_ != nullptr) {
             topSession_->SetTop(false);
+            HISYSEVENT_BEHAVIOR("FOCUS_CHANGE",
+                "OLD_BUNDLE_NAME", topSession_->GetDescriptor().elementName_.GetBundleName(),
+                "OLD_MODULE_NAME", topSession_->GetDescriptor().elementName_.GetModuleName(),
+                "OLD_ABILITY_NAME", topSession_->GetAbilityName(), "OLD_SESSION_PID", topSession_->GetPid(),
+                "OLD_SESSION_UID", topSession_->GetUid(), "OLD_SESSION_ID", topSession_->GetSessionId(),
+                "OLD_SESSION_TAG", topSession_->GetDescriptor().sessionTag_,
+                "OLD_SESSION_TYPE", topSession_->GetDescriptor().sessionType_,
+                "BUNDLE_NAME", newTopSession->GetDescriptor().elementName_.GetBundleName(),
+                "MODULE_NAME", newTopSession->GetDescriptor().elementName_.GetModuleName(),
+                "ABILITY_NAME", newTopSession->GetAbilityName(), "SESSION_PID", newTopSession->GetPid(),
+                "SESSION_UID", newTopSession->GetUid(), "SESSION_ID", newTopSession->GetSessionId(),
+                "SESSION_TAG", newTopSession->GetDescriptor().sessionTag_,
+                "SESSION_TYPE", newTopSession->GetDescriptor().sessionType_,
+                "DETAILED_MSG", "avsessionservice handlefocussession, updatetopsession");
         }
         topSession_ = newTopSession;
         topSession_->SetTop(true);
         descriptor = topSession_->GetDescriptor();
     }
-    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "BUNDLE_NAME", descriptor.elementName_.GetBundleName(),
-        "MODULE_NAME", descriptor.elementName_.GetModuleName(),
-        "ABILITY_NAME", descriptor.elementName_.GetAbilityName(), "SESSION_PID", descriptor.pid_,
-        "SESSION_UID", descriptor.uid_, "SESSION_ID", descriptor.sessionId_,
-        "SESSION_TAG", descriptor.sessionTag_, "SESSION_TYPE", descriptor.sessionType_,
-        "DETAILED_MSG", "avsessionservice updatetopsession");
     NotifyTopSessionChanged(descriptor);
 }
 
@@ -155,20 +163,6 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     }
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetUid() == info.uid) {
-            HISYSEVENT_BEHAVIOR("FOCUS_CHANGE",
-                "OLD_BUNDLE_NAME", topSession_->GetDescriptor().elementName_.GetBundleName(),
-                "OLD_MODULE_NAME", topSession_->GetDescriptor().elementName_.GetModuleName(),
-                "OLD_ABILITY_NAME", topSession_->GetAbilityName(), "OLD_SESSION_PID", topSession_->GetPid(),
-                "OLD_SESSION_UID", topSession_->GetUid(), "OLD_SESSION_ID", topSession_->GetSessionId(),
-                "OLD_SESSION_TAG", topSession_->GetDescriptor().sessionTag_,
-                "OLD_SESSION_TYPE", topSession_->GetDescriptor().sessionType_,
-                "BUNDLE_NAME", session->GetDescriptor().elementName_.GetBundleName(),
-                "MODULE_NAME", session->GetDescriptor().elementName_.GetModuleName(),
-                "ABILITY_NAME", session->GetAbilityName(), "SESSION_PID", session->GetPid(),
-                "SESSION_UID", session->GetUid(), "SESSION_ID", session->GetSessionId(),
-                "SESSION_TAG", session->GetDescriptor().sessionTag_,
-                "SESSION_TYPE", session->GetDescriptor().sessionType_,
-                "DETAILED_MSG", "avsessionservice handlefocussession, updatetopsession");
             UpdateTopSession(session);
             return;
         }
@@ -179,19 +173,11 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
 {
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetUid() == info.uid) {
-            HISYSEVENT_BEHAVIOR("FOCUS_CHANGE",
-                "BUNDLE_NAME", session->GetDescriptor().elementName_.GetBundleName(),
-                "MODULE_NAME", session->GetDescriptor().elementName_.GetModuleName(),
-                "ABILITY_NAME", session->GetAbilityName(), "SESSION_PID", session->GetPid(),
-                "SESSION_UID", session->GetUid(), "SESSION_ID", session->GetSessionId(),
-                "DETAILED_MSG", "avsessionservice selectfocussession, true");
             SLOGI("true");
             return true;
         }
     }
     SLOGI("false");
-    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", info.uid,
-        "DETAILED_MSG", "avsessionservice selectfocussession, false");
     return false;
 }
 
@@ -295,12 +281,6 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor &descri
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
         listener->OnTopSessionChange(descriptor);
     }
-    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "BUNDLE_NAME", descriptor.elementName_.GetBundleName(),
-        "MODULE_NAME", descriptor.elementName_.GetModuleName(),
-        "ABILITY_NAME", descriptor.elementName_.GetAbilityName(), "SESSION_PID", descriptor.pid_,
-        "SESSION_UID", descriptor.uid_, "SESSION_ID", descriptor.sessionId_,
-        "SESSION_TAG", descriptor.sessionTag_, "SESSION_TYPE", descriptor.sessionType_,
-        "DETAILED_MSG", "avsessionservice notifytopsessionchanged");
 }
 
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, int32_t type, bool thirdPartyApp,
