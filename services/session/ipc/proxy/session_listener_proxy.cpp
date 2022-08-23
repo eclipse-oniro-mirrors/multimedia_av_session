@@ -15,7 +15,6 @@
 
 #include "session_listener_proxy.h"
 #include "avsession_log.h"
-#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 SessionListenerProxy::SessionListenerProxy(const sptr<IRemoteObject> &impl)
@@ -52,11 +51,5 @@ void SessionListenerProxy::OnTopSessionChange(const AVSessionDescriptor& descrip
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     CHECK_AND_RETURN_LOG(!Remote()->SendRequest(LISTENER_CMD_TOP_CHANGED, data, reply, option), "send request fail");
-    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "BUNDLE_NAME", descriptor.elementName_.GetBundleName(),
-        "MODULE_NAME", descriptor.elementName_.GetModuleName(),
-        "ABILITY_NAME", descriptor.elementName_.GetAbilityName(), "SESSION_PID", descriptor.pid_,
-        "SESSION_UID", descriptor.uid_, "SESSION_ID", descriptor.sessionId_,
-        "SESSION_TAG", descriptor.sessionTag_, "SESSION_TYPE", descriptor.sessionType_,
-        "DETAILED_MSG", "sessionlistenerproxy ontopsessionchange");
 }
 }

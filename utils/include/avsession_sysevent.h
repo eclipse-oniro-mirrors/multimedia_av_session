@@ -106,6 +106,7 @@ private:
     static constexpr uint32_t NOTIFY_TIME_INTERVAL = 12 * 60 * 60 * 1000; // retry after 12 hours
     std::list<AVSessionSysEvent::LifeCycleInfo> lifeCycleInfos_;
     std::list<AVSessionSysEvent::ControllerCommandInfo> controllerCommandInfos_;
+    static constexpr float MULTIPLE = 1.0f;
 };
 #endif
 

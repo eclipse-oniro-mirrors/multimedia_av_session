@@ -16,7 +16,6 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_trace.h"
-#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 bool SessionListenerStub::CheckInterfaceToken(MessageParcel &data)
@@ -64,12 +63,6 @@ int SessionListenerStub::HandleOnTopSessionChange(MessageParcel &data, MessagePa
     AVSESSION_TRACE_SYNC_START("SessionListenerStub::OnTopSessionChange");
     AVSessionDescriptor descriptor;
     descriptor.ReadFromParcel(data);
-    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "BUNDLE_NAME", descriptor.elementName_.GetBundleName(),
-        "MODULE_NAME", descriptor.elementName_.GetModuleName(),
-        "ABILITY_NAME", descriptor.elementName_.GetAbilityName(), "SESSION_PID", descriptor.pid_,
-        "SESSION_UID", descriptor.uid_, "SESSION_ID", descriptor.sessionId_,
-        "SESSION_TAG", descriptor.sessionTag_, "SESSION_TYPE", descriptor.sessionType_,
-        "DETAILED_MSG", "sessionlistenerstub handleontopsessionchange");
     OnTopSessionChange(descriptor);
     return ERR_NONE;
 }
