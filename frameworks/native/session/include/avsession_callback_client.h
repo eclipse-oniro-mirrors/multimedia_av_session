@@ -20,6 +20,7 @@
 #include "avsession_info.h"
 #include "key_event.h"
 #include "avsession_log.h"
+#include "event_handler.h"
 
 namespace OHOS::AVSession {
 class AVSessionCallbackClient : public AVSessionCallbackStub {
@@ -40,6 +41,7 @@ public:
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_CALLBACK_CLIENT_H
