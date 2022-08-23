@@ -33,6 +33,7 @@ NapiSessionListener::~NapiSessionListener()
 template<typename T>
 void NapiSessionListener::HandleEvent(int32_t event, const T &param)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
         SLOGE("not register callback event=%{public}d", event);
         return;
