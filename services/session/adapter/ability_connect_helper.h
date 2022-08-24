@@ -21,27 +21,42 @@
 #include "ability_connect_callback_interface.h"
 #include "ability_connect_callback_stub.h"
 #include "element_name.h"
+#include "iremote_stub.h"
 #include "want.h"
 
 namespace OHOS::AVSession {
-class AbilityConnectHelper : public AAFwk::AbilityConnectionStub {
+class AbilityConnectHelper {
 public:
-    AbilityConnectHelper() {};
-    virtual ~AbilityConnectHelper() {};
+    static AbilityConnectHelper& GetInstance();
+
+    int32_t StartAbilityByCall(const std::string bundleName, const std::string abilityName);
+
+private:
+   sptr<IRemoteObject> GetSystemAbility();
+
+   const std::u16string ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.aafwk.AbilityManager";
+};
+
+class AbilityConnectionStub : public IRemoteStub<AAFwk::IAbilityConnection> {
+public:
+    AbilityConnectionStub();
+    virtual ~AbilityConnectionStub();
+
+    virtual int OnRemoteRequest(
+        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+
+private:
+    DISALLOW_COPY_AND_MOVE(AbilityConnectionStub);
+};
+
+class AbilityConnectCallback : public AbilityConnectionStub {
+public:
+    AbilityConnectCallback() {};
+    virtual ~AbilityConnectCallback() {};
 
     virtual void OnAbilityConnectDone(
         const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode) override;
     virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
 };
 } // namespace OHOS::AVSession
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t StartAbilityByCall(const std::string bundleName, const std::string abilityName);
-
-#ifdef __cplusplus
-}
-#endif
 #endif /* ABILITY_CONNECT_HELPER_H */

@@ -42,14 +42,9 @@ private:
     void WaitForTimeout(uint32_t timeout);
 
 private:
-    static constexpr const char *SHARED_LIBRARY_FEATURE_ABILITY = "libability_connect_helper.z.so";
-    static constexpr const char *FUNC_CALL_START_ABILITY_BY_CALL = "StartAbilityByCall";
-    using FuncStartAbilityByCall = int32_t (*)(const std::string bundleName, const std::string abilityName);
-
     static constexpr int32_t ABILITY_START_TIMEOUT_MS = 5000;
     std::condition_variable syncCon_;
     std::mutex syncMutex_;
-    void *handler_ = nullptr;
     Status status_ = Status::ABILITY_STATUS_INIT;
     std::string bundleName_;
     std::string abilityName_;

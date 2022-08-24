@@ -15,10 +15,9 @@
 
 #include "ability_manager_adapter.h"
 
-#include <dlfcn.h>
-
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "ability_connect_helper.h"
 
 namespace OHOS::AVSession {
 AbilityManagerAdapter::AbilityManagerAdapter(const std::string bundleName, const std::string abilityName)
@@ -29,12 +28,7 @@ AbilityManagerAdapter::AbilityManagerAdapter(const std::string bundleName, const
 }
 
 AbilityManagerAdapter::~AbilityManagerAdapter()
-{
-    if (handler_ != nullptr) {
-        dlclose(handler_);
-        handler_ = nullptr;
-    }
-}
+{}
 
 int32_t AbilityManagerAdapter::StartAbilityByCall(std::string &sessionId)
 {
@@ -43,41 +37,14 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string &sessionId)
         return ERR_START_ABILITY_IS_RUNNING;
     }
     status_ = Status::ABILITY_STATUS_RUNNING;
-    if (handler_ == nullptr) {
-        std::string path = std::string(SYSTEM_LIB_PATH) + std::string(SHARED_LIBRARY_FEATURE_ABILITY);
-        char realPath[PATH_MAX] = { 0x00 };
-        if (realpath(path.c_str(), realPath) == nullptr) {
-            SLOGE("realpath failed %{public}s. reason: %{public}s", path.c_str(), strerror(errno));
-            status_ = Status::ABILITY_STATUS_INIT;
-            return AVSESSION_ERROR;
-        }
-        handler_ = dlopen(realPath, RTLD_NOW);
-        if (handler_ == nullptr) {
-            SLOGE("dlopen failed %{public}s. reason: %{public}s", realPath, dlerror());
-            status_ = Status::ABILITY_STATUS_INIT;
-            return AVSESSION_ERROR;
-        }
-    }
-    auto func = (FuncStartAbilityByCall)dlsym(handler_, FUNC_CALL_START_ABILITY_BY_CALL);
-    if (func == nullptr) {
-        SLOGE("dlsym failed %{public}s. reason: %{public}s", FUNC_CALL_START_ABILITY_BY_CALL, dlerror());
-        dlclose(handler_);
-        handler_ = nullptr;
+    int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName_, abilityName_);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("Start Ability failed: %{public}d", ret);
         status_ = Status::ABILITY_STATUS_INIT;
-        return AVSESSION_ERROR;
-    }
-    int32_t ret = func(bundleName_, abilityName_);
-    if (ret != 0) {
-        SLOGE("Start Ability failed");
-        dlclose(handler_);
-        handler_ = nullptr;
-        status_ = Status::ABILITY_STATUS_INIT;
-        return ERR_ABILITY_NOT_AVALIABLE;
+        return ret;
     }
 
     WaitForTimeout(ABILITY_START_TIMEOUT_MS);
-    dlclose(handler_);
-    handler_ = nullptr;
     ret = ERR_START_ABILITY_TIMEOUT;
     if (status_ == Status::ABILITY_STATUS_SUCCESS) {
         ret = AVSESSION_SUCCESS;

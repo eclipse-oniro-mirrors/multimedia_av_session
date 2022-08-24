@@ -51,6 +51,7 @@ ohos_shared_library("avsession_service") {
     "adapter/key_event_adapter.cpp",
     "adapter/permission_checker.cpp",
     "adapter/ability_manager_adapter.cpp",
+    "adapter/ability_connect_helper.cpp",
   ]
 
   sources = ipc_sources + adapter_sources + service_sources
