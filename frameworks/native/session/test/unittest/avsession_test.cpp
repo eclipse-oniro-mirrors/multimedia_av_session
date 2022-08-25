@@ -22,8 +22,14 @@
 #include "avsession_log.h"
 #include "avcontrol_command.h"
 
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 using namespace testing::ext;
 using namespace OHOS::AVSession;
+using namespace OHOS::Security::AccessToken;
+
 static int32_t g_onCall = AVSESSION_ERROR;
 static int32_t g_sessionId = AVSESSION_ERROR;
 static AVMetaData g_metaData;
@@ -31,6 +37,40 @@ static AVPlaybackState g_playbackState;
 static char g_testSessionTag[] = "test";
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
+static uint64_t g_selfTokenId = 0;
+
+static HapInfoParams g_info = {
+    .userID = 100,
+    .bundleName = "ohos.permission_test.demo",
+    .instIndex = 0,
+    .appIDDesc = "ohos.permission_test.demo"
+};
+
+static HapPolicyParams g_policy = {
+    .apl = APL_NORMAL,
+    .domain = "test.domain",
+    .permList = {
+        {
+            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
+            .bundleName = "ohos.permission_test.demo",
+            .grantMode = 1,
+            .availableLevel = APL_NORMAL,
+            .label = "label",
+            .labelId = 1,
+            .description = "test",
+            .descriptionId = 1
+        }
+    },
+    .permStateList = {
+        {
+            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
+            .isGeneral = true,
+            .resDeviceID = { "local" },
+            .grantStatus = { PermissionState::PERMISSION_GRANTED },
+            .grantFlags = { 1 }
+        }
+    }
+};
 
 class AvsessionTest : public testing::Test {
 public:
@@ -46,10 +86,18 @@ public:
 };
 
 void AvsessionTest::SetUpTestCase()
-{}
+{
+    g_selfTokenId = GetSelfTokenID();
+    AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(g_info, g_policy);
+    SetSelfTokenID(tokenIdEx.tokenIdExStruct.tokenID);
+}
 
 void AvsessionTest::TearDownTestCase()
-{}
+{
+    SetSelfTokenID(g_selfTokenId);
+    auto tokenId = AccessTokenKit::GetHapTokenID(g_info.userID, g_info.bundleName, g_info.instIndex);
+    AccessTokenKit::DeleteToken(tokenId);
+}
 
 void AvsessionTest::SetUp()
 {
