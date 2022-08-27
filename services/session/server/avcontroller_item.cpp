@@ -15,9 +15,11 @@
 
 #include "avcontroller_item.h"
 
+#include "ipc_skeleton.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
+#include "command_send_limit.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -118,6 +120,8 @@ int32_t AVControllerItem::SendControlCommand(const AVControlCommand &cmd)
         SLOGI("command not support");
         return ERR_COMMAND_NOT_SUPPORT;
     }
+    CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),
+        ERR_COMMAND_SEND_EXCEED_MAX, "command send number exceed max");
     session_->ExecuteControllerCommand(cmd);
     return AVSESSION_SUCCESS;
 }

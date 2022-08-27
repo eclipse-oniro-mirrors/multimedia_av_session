@@ -31,6 +31,7 @@
 #include "avsession_trace.h"
 #include "hash_calculator.h"
 #include "avsession_dumper.h"
+#include "command_send_limit.h"
 #include "avsession_sysevent.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
@@ -59,6 +60,7 @@ void AVSessionService::OnStart()
         SLOGE("publish avsession service failed");
     }
     dumpHelper_ = std::make_unique<AVSessionDumper>();
+    CommandSendLimit::GetInstance().StartTimer();
 
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
     backgroundAudioController_.Init();
@@ -78,6 +80,7 @@ void AVSessionService::OnDump()
 
 void AVSessionService::OnStop()
 {
+    CommandSendLimit::GetInstance().StopTimer();
 }
 
 void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
@@ -572,6 +575,8 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
     }
     SLOGI("cmd=%{public}d", command.GetCommand());
     if (topSession_) {
+        CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
+            ERR_COMMAND_SEND_EXCEED_MAX, "command excuted number exceed max");
         topSession_->ExecuteControllerCommand(command);
     }
     return AVSESSION_SUCCESS;
