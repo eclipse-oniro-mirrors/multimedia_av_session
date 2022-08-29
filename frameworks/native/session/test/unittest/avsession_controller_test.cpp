@@ -619,6 +619,36 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand011, TestSize.Level1)
 }
 
 /**
+* @tc.name: SendControlCommand012
+* @tc.desc: same pid can only send command 10 times per second successful
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand012, TestSize.Level1)
+{
+    sleep(1);
+    EXPECT_EQ(avsession_->Activate(), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
+    int failedCount = 0;
+    /**
+    * 21 = 10 * 2 + 1,
+    * The timer resets the number of command sending times per second.
+    * 21 can ensure at least one failure
+    */
+    for (int i = 0; i < 21; i++) {
+        AVControlCommand command;
+        EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
+        auto ret = controller_->SendControlCommand(command);
+        if (ret != AVSESSION_SUCCESS) {
+            failedCount++;
+            EXPECT_EQ(ret, ERR_COMMAND_SEND_EXCEED_MAX);
+        }
+    }
+    EXPECT_EQ(failedCount >= 1, true);
+    EXPECT_EQ(failedCount <= 11, true);
+}
+
+/**
 * @tc.name: RegisterCallback001
 * @tc.desc: register AVControllerCallback
 * @tc.type: FUNC

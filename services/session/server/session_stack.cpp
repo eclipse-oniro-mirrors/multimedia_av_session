@@ -20,7 +20,7 @@
 namespace OHOS::AVSession {
 int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr<AVSessionItem>& item)
 {
-    if (sessions_.size() > SessionContainer::SESSION_NUM_MAX) {
+    if (sessions_.size() >= SessionContainer::SESSION_NUM_MAX) {
         return ERR_SESSION_EXCEED_MAX;
     }
     sessions_.insert(std::make_pair(std::make_pair(pid, abilityName), item));

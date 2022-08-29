@@ -50,6 +50,7 @@ ohos_shared_library("avsession_service") {
     "adapter/audio_adapter.cpp",
     "adapter/key_event_adapter.cpp",
     "adapter/permission_checker.cpp",
+    "adapter/command_send_limit.cpp",
     "adapter/ability_manager_adapter.cpp",
     "adapter/ability_connect_helper.cpp",
   ]

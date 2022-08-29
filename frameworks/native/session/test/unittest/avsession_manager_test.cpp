@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <string>
 #include "avsession_manager.h"
 #include "avsession_info.h"
 #include "avsession_log.h"
@@ -178,7 +179,7 @@ HWTEST_F(AVSessionManagerTest, CreatSession002, TestSize.Level1)
 
 /**
 * @tc.name: CreatSession003
-* @tc.desc: One process can create only one session
+* @tc.desc: One process can create only one session with same abilityname
 * @tc.type: FUNC
 * @tc.require: AR000H31JC
 */
@@ -200,6 +201,37 @@ HWTEST_F(AVSessionManagerTest, CreatSession003, TestSize.Level1)
         session1->Destroy();
     }
     SLOGI("CreatSession003 end");
+}
+
+/**
+* @tc.name: CreatSession004
+* @tc.desc: AVSessionManager can create session less than or equal to 50
+* @tc.type: FUNC
+* @tc.require: AR000H31JC
+*/
+HWTEST_F(AVSessionManagerTest, CreatSession004, TestSize.Level1)
+{
+    SLOGI("CreatSession004 begin");
+    vector<std::shared_ptr<AVSession>> sessionList;
+    for (int i = 0; i < 50; i++) {
+        OHOS::AppExecFwk::ElementName elementName;
+        elementName.SetBundleName(g_testBundleName);
+        elementName.SetAbilityName(std::to_string(i));
+        auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
+            AVSession::SESSION_TYPE_AUDIO, elementName);
+        EXPECT_NE(session, nullptr);
+        sessionList.push_back(session);
+    }
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
+        AVSession::SESSION_TYPE_AUDIO, elementName);
+    EXPECT_EQ(session, nullptr);
+    for (auto it = sessionList.begin(); it != sessionList.end(); it++) {
+        (*it)->Destroy();
+    }
+    SLOGI("CreatSession004 end");
 }
 
 /**
@@ -530,4 +562,45 @@ HWTEST_F(AVSessionManagerTest, SendSystemControlCommand002, TestSize.Level1)
     auto result = AVSessionManager::GetInstance().SendSystemControlCommand(command);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGI("SendSystemControlCommand002 end");
+}
+
+/**
+* @tc.name: SendSystemControlCommand003
+* @tc.desc: same pid can only send command 10 times per second successful
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionManagerTest, SendSystemControlCommand003, TestSize.Level1)
+{
+    SLOGI("SendSystemControlCommand003 begin");
+    sleep(1);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
+        AVSession::SESSION_TYPE_AUDIO, elementName);
+    ASSERT_NE(session, nullptr);
+    EXPECT_EQ(session->Activate(), AVSESSION_SUCCESS);
+    EXPECT_EQ(session->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
+    int failedCount = 0;
+    /**
+    * 21 = 10 * 2 + 1,
+    * The timer resets the number of command sending times per second.
+    * 21 can ensure at least one failure
+    */
+    for (int j = 0; j < 21; j++) {
+        AVControlCommand command;
+        EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
+        auto ret = AVSessionManager::GetInstance().SendSystemControlCommand(command);
+        if (ret != AVSESSION_SUCCESS) {
+            EXPECT_EQ(ret, ERR_COMMAND_SEND_EXCEED_MAX);
+            failedCount++;
+        }
+    }
+    EXPECT_EQ(failedCount >= 1, true);
+    EXPECT_EQ(failedCount <= 11, true);
+    if (session != nullptr) {
+        session->Destroy();
+    }
+    SLOGI("SendSystemControlCommand003 end");
 }
