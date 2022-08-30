@@ -69,4 +69,19 @@ void AudioAdapter::OnRendererStateChange(const AudioRendererChangeInfos &infos)
         }
     }
 }
+
+bool AudioAdapter::GetRendererState(int32_t uid, AudioStandard::RendererState &rendererState)
+{
+    std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
+    AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    for (const auto& info : audioRendererChangeInfo) {
+        if (info->clientUID == uid) {
+            rendererState = info->rendererState;
+            SLOGI("find uid=%{public}d renderer state is %{public}d", uid, rendererState);
+            return true;
+        }
+    }
+    SLOGE("find uid=%{public}d renderer state fail", uid);
+    return false;
+}
 }

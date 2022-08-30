@@ -59,6 +59,13 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor &desc
             AppManagerAdapter::GetInstance().AddObservedApp(descriptor.uid_);
             return;
         }
+        int32_t uid = descriptor.uid_;
+        AudioStandard::RendererState rendererState = AudioStandard::RENDERER_PAUSED;
+        bool isSuccess = AudioAdapter::GetInstance().GetRendererState(uid, rendererState);
+        if (isSuccess && rendererState != AudioStandard::RENDERER_RUNNING) {
+            SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");
+            return;
+        }
         SLOGI("pause uid=%{public}d", descriptor.uid_);
         AudioAdapter::GetInstance().PauseAudioStream(descriptor.uid_);
     }
@@ -94,6 +101,12 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
 
 void BackgroundAudioController::HandleAppBackgroundState(int32_t uid) const
 {
+    AudioStandard::RendererState rendererState = AudioStandard::RENDERER_PAUSED;
+    bool isSuccess = AudioAdapter::GetInstance().GetRendererState(uid, rendererState);
+    if (isSuccess && rendererState != AudioStandard::RENDERER_RUNNING) {
+        SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");
+        return;
+    }
     SLOGI("pause uid=%{public}d", uid);
     AudioAdapter::GetInstance().PauseAudioStream(uid);
 }
