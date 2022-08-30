@@ -19,36 +19,27 @@ module_output_path = "multimedia_av_session/sessionfuzzer"
 ##############################fuzztest##########################################
 ohos_fuzztest("AvSessionServiceProxyFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file =
-    "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/avsessionserviceproxy_fuzzer"
+  fuzz_config_file = "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/avsessionserviceproxy_fuzzer"
 
-  include_dirs = [
-    "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/"
-  ]
+  include_dirs = [ "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/" ]
   cflags = [
     "-g",
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [
-    "avsessionserviceproxy_fuzzer.cpp",
-  ]
-  deps = [
-    "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
-    "//utils/native/base:utils"
-  ]
-   external_deps = [
+  sources = [ "avsessionserviceproxy_fuzzer.cpp" ]
+  deps = [ "//foundation/multimedia/av_session/frameworks/native/session:avsession_client" ]
+  external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "multimedia_image_standard:image_native",
     "multimedia_audio_framework:audio_client",
+    "multimedia_image_standard:image_native",
     "samgr:samgr_proxy",
   ]
 }
-
 ###############################################################################
-
