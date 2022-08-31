@@ -2,7 +2,7 @@
 
 ## 简介
 
-AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相关功能的接口，目的是提供系统内媒体的统一控制能力，三方音视频应用运行在openharmony系统上时，用户可以通过系统播控中心对本端的音视频应用的播放行为进行控制，展示播放信息。
+AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相关功能的接口，目的是提供系统内媒体的统一控制能力，三方音视频应用运行在openharmony系统上时，用户可以通过系统播控中心对本端或者投播的组网内的其他远端设备的音视频应用的播放行为进行控制，展示播放信息。
 
 通过AVSession播控框架，可以完成以下场景开发。
 
@@ -37,6 +37,8 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
 
 音频应用响应播控中心的命令并调整播放状态。
 
+支持分布式投播，当组网内的设备创建本地会话之后，播控中心或者音频应用可以根据设备列表选择想要投播的其他设备，将本地会话同步到远端，生成远端会话，并支持远端控制。需要控制远端会话时，通过远端控制器将控制命令发送到远端会话控制中心。
+
 ## 约束和限制
 
 - 普通应用不支持开发播控中心端。当普通音视频应用运行在OpenHarmony上时，默认控制端为系统应用播控中心，开发者无需做额外的操作。***（到时候建链到播控中心，3.2会落）***
@@ -51,8 +53,8 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
 
 1. 创建AVSession实例。
    ```js
-   import avsession from '@ohos.multimedia.avsession';
-   import WantAgent from '@ohos.wantAgent';
+   import avSession from '@ohos.multimedia.avsession';
+   import wantAgent from '@ohos.wantAgent';
    import featureAbility from '@ohos.ability.featureAbility';
 
    //全局变量定义
@@ -61,9 +63,11 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    let context = featureAbility.getContext();
    
    //创建音频类型会话
-   avsession.createAVSession(context, "AudioAppSample", 'audio').then((session) => {
+   avSession.createAVSession(context, "AudioAppSample", 'audio').then((session) => {
        currentSession = session;
        currentSession.activate();
+   }).catch((err) => {
+       console.info('createAVSession : ERROR : ' + err.message);
    });
    ```
 
@@ -96,19 +100,19 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    });
    
    //设置启动ability
-   var wantAgentInfo = {
+   let wantAgentInfo = {
        wants: [
            {
                bundleName: "com.neu.setResultOnAbilityResultTest1",
                abilityName: "com.example.test.MainAbility",
            }
        ],
-       operationType: WantAgent.OperationType.START_ABILITIES,
+       operationType: wantAgent.OperationType.START_ABILITIES,
        requestCode: 0,
-       wantAgentFlags:[WantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
+       wantAgentFlags:[wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
    }
 
-   WantAgent.getWantAgent(wantAgentInfo).then((agent) => {
+   wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
        currentSession.setLaunchAbility(agent).then(() => {
            console.info('setLaunchAbility successfully');
        }).catch((err) => {
@@ -118,11 +122,11 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    
    //设置播放状态
    let PlaybackState = {
-       state: avsession.PlaybackState.PLAYBACK_STATE_STOP,
+       state: avSession.PlaybackState.PLAYBACK_STATE_STOP,
        speed: 1.0,
        position:{elapsedTime: 0, updateTime: (new Date()).getTime()},
        bufferedTime: 1000,
-       loopMode: avsession.LoopMode.LOOP_MODE_SEQUENCE,
+       loopMode: avSession.LoopMode.LOOP_MODE_SEQUENCE,
        isFavorite: false,
    };
    currentSession.setAVPlaybackState(PlaybackState).then(() => {
@@ -135,77 +139,163 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    async function onPlay() {
        console.log("调用AudioPlayer.play方法");
        //设置播放状态
-       await currentSession.setAVPlaybackState({state: avsession.PlaybackState.PLAYBACK_STATE_PLAY});
+       currentSession.setAVPlaybackState({state: avSession.PlaybackState.PLAYBACK_STATE_PLAY}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    }
    
    //用户点击暂停按键
    async function onPause() {
        console.log("调用AudioPlayer.pause方法");
        //设置播放状态
-       await currentSession.setAVPlaybackState({state: avsession.PlaybackState.PLAYBACK_STATE_PAUSE});
+       await currentSession.setAVPlaybackState({state: avSession.PlaybackState.PLAYBACK_STATE_PAUSE}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    }
+
+   //获取当前session会话对象自身的控制器
+   currentSession.getController().then((selfController) => {
+       console.info('getController successfully');
+   }).catch((err) => {
+       console.info('getController : ERROR : '+ err.message);
+   });
+
+   //获取音频输出设备信息
+   currentSession.getOutputDevice().then((outputInfo) => {
+       console.info('getOutputDevice successfully, deviceName : ' + outputInfo.deviceName);
+   }).catch((err) => {
+       console.info('getOutputDevice : ERROR : '+ err.message);
+   });
    ```
 
 3. 响应播控中心控制行为。
 
    ```js
+   //开始播放回调
    currentSession.on('play', () => {
        console.log("调用AudioPlayer.play方法");
        //设置播放状态
-       currentSession.setAVPlaybackState({state: avsession.PlaybackState.PLAYBACK_STATE_PLAY});
+       currentSession.setAVPlaybackState({state: avSession.PlaybackState.PLAYBACK_STATE_PLAY}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    });
+
+   //播放暂停回调
    currentSession.on('pause', () => {
        console.log("调用AudioPlayer.pause方法");
        //设置播放状态
-       currentSession.setAVPlaybackState({state: avsession.PlaybackState.PLAYBACK_STATE_PAUSE});
+       currentSession.setAVPlaybackState({state: avSession.PlaybackState.PLAYBACK_STATE_PAUSE}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    });
+
+   //播放停止回调
    currentSession.on('stop', () => {
        console.log("调用AudioPlayer.stop方法");
        //设置播放状态
-       currentSession.setAVPlaybackState({state: avsession.PlaybackState.PLAYBACK_STATE_STOP});
+       currentSession.setAVPlaybackState({state: avSession.PlaybackState.PLAYBACK_STATE_STOP}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    });
+
+   //播放下一首回调
    currentSession.on('playNext', () => {
        //如果媒体文件未准备好，则下载并缓存媒体文件，设置准备状态
-       currentSession.setAVPlaybackState({state: avsession.PlaybackState.PLAYBACK_STATE_PREPARE});
+       currentSession.setAVPlaybackState({state: avSession.PlaybackState.PLAYBACK_STATE_PREPARE}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
        //成功获取媒体文件
-       currentSession.setAVMetadata({assetId: '58970105', title: '不如我们明天见'});
+       currentSession.setAVMetadata({assetId: '58970105', title: '不如我们明天见'}).then(() => {
+           console.info('setAVMetadata successfully');
+       }).catch((err) => {
+           console.info('setAVMetadata : ERROR : '+ err.message);
+       });
        console.log("调用AudioPlayer.play方法");
        //设置播放状态
        let time = (new Data()).getTime();
-       currentSession.setAVPlaybackState({state: avsession.PlaybackState.PLAYBACK_STATE_PLAY, position: {elapsedTime: 0, updateTime: time}, bufferedTime:2000});
+       currentSession.setAVPlaybackState({state: avSession.PlaybackState.PLAYBACK_STATE_PLAY, position: {elapsedTime: 0, updateTime: time}, bufferedTime:2000}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    });
+
+   //播放快进回调
    currentSession.on('fastForward', () => {
        console.log("调用AudioPlayer的倍速播放");
        //设置播放状态
-       currentSession.setAVPlaybackState({speed: 2.0});
+       currentSession.setAVPlaybackState({speed: 2.0}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    });
+
+   //跳播回调
    currentSession.on('seek', (time) => {
        console.log("调用AudioPlayer的seek方法");
        //设置播放状态
-       currentSession.setAVPlaybackState({position: {elapsedTime: time, updateTime: (new Data()).getTime()}});
+       currentSession.setAVPlaybackState({position: {elapsedTime: time, updateTime: (new Data()).getTime()}}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    });
+
+   //播放速度设置回调
    currentSession.on('setSpeed', (speed) => {
        console.log("调用AudioPlayer的倍速播放" + speed);
        //设置播放状态
-       currentSession.setAVPlaybackState({speed: speed});
+       currentSession.setAVPlaybackState({speed: speed}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    });
+
+   //播放循环模式设置回调
    currentSession.on('setLoopMode', (mode) => {
        console.log("应用自身切换循环模式" + mode);
        //设置播放状态
-       currentSession.setAVPlaybackState({loopMode: mode});
+       currentSession.setAVPlaybackState({loopMode: mode}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
    });
+
+   //设置歌曲收藏回调
    currentSession.on('toggleFavorite', (assetId) => {
        console.log("应用保存当前assetId为喜爱" + assetId);
        //根据上一次的状态进行切换
        let favorite = mediaFavorite == false ? true : false;
-       currentSession.setAVPlaybackState({isFavorite: favorite});
+       currentSession.setAVPlaybackState({isFavorite: favorite}).then(() => {
+           console.info('setAVPlaybackState successfully');
+       }).catch((err) => {
+           console.info('setAVPlaybackState : ERROR : '+ err.message);
+       });
        mediaFavorite = favorite;
    });
+
+   //媒体按键处理回调
    currentSession.on('handleKeyEvent', (event) => {
        console.log("用户按键" + event.keyCode);
    });
-   
-   currentSession.on('outputDeviceChanged', (device) => {
+
+   //播放设备变化回调
+   currentSession.on('outputDeviceChange', (device) => {
        console.log("输出设备变更,更新显示" + device.deviceName);
    });
    ```
@@ -227,7 +317,7 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    currentSession.off('setLoopMode');
    currentSession.off('toggleFavorite');
    currentSession.off('handleKeyEvent');
-   currentSession.off('outputDeviceChanged');
+   currentSession.off('outputDeviceChange');
    
    //去激活session并销毁对象
    currentSession.deactivate().then(() => {
@@ -240,26 +330,26 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
 1. 创建AVController实例。
 
    ```js
-   import avsession from '@ohos.multimedia.avsession';
+   import avSession from '@ohos.multimedia.avsession';
    import {Action KeyEvent} from '@ohos.multimodalInput.KeyEvent';
    import wantAgent from '@ohos.wantAgent';
+   import audio from '@ohos.multimedia.audio';
    
    // 全局变量定义
-   let g_controller = new Array<avsession.AVSessionController>();
-   let g_centerSupportCmd:Set<avsession.AVControlCommandType> = new Set(['play', 'pause', 'playNext', 'playPrevious', 'fastForward', 'rewind', 'seek','setSpeed', 'setLoopMode', 'toggleFavorite']);
-   let g_validCmd:Set<avsession.AVControlCommandType>;
+   let g_controller = new Array<avSession.AVSessionController>();
+   let g_centerSupportCmd:Set<avSession.AVControlCommandType> = new Set(['play', 'pause', 'playNext', 'playPrevious', 'fastForward', 'rewind', 'seek','setSpeed', 'setLoopMode', 'toggleFavorite']);
+   let g_validCmd:Set<avSession.AVControlCommandType>;
    
    // 获取系统内 avsession 描述符.(先打开三方应用，三方应用会自己创建avsession)
-   avsession.getAllSessionDescriptors().then((descriptors) => {
+   avSession.getAllSessionDescriptors().then((descriptors) => {
        descriptors.forEach((descriptor) => {
-           avsession.createController(descriptor.sessionId).then(   
-           (controller) => {
+           avSession.createController(descriptor.sessionId).then((controller) => {
                g_controller.push(controller);
-           }, err => {
+           }).catch((err) => {
                console.error('createController error');
-           }
-       })
-   }, err => {
+           });
+       });
+   }).catch((err) => {
        console.error('getAllSessionDescriptors error');
    });
    
@@ -270,11 +360,15 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
        controller.getAVMetadata().then((data) => {
            console.log("歌名" + data.title);
            console.log("歌手" + data.artist);
+       }).catch((err) => {
+           console.error('getAVMetadata error');
        });
        //获取播放状态更新按钮状态
        controller.getAVPlaybackState().then((state) => {
            console.log("播放状态" + state.state);
            console.log("当前播放速度" + state.speed);
+       }).catch((err) => {
+           console.error('getAVPlaybackState error');
        });
        //获取支持的命令
        controller.getValidCommands().then((cmds) => {
@@ -283,6 +377,8 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
                    g_validCmd.add(c);
                }
            }
+       }).catch((err) => {
+           console.error('getAVPlaybackState error');
        });
    }
    ```
@@ -292,12 +388,20 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    ```js
    //用户点击播放按键:发送控制命令--播放
    if (g_validCmd.has('play')) {
-       controller.sendControlCommand({command:'play'});
+       controller.sendControlCommand({command:'play'}).then(() => {
+           console.info('sendControlCommand successfully');
+       }).catch((err) => {
+           console.info('sendControlCommand : ERROR : '+ err.message);
+       });
    }
    
    //用户点击循环模式:发送控制命令--单曲循环
    if (g_validCmd.has('setLoopMode')) {
-       controller.sendControlCommand({command: 'setLoopMode', parameter: avsession.LoopMode.LOOP_MODE_SINGLE});
+       controller.sendControlCommand({command: 'setLoopMode', parameter: avSession.LoopMode.LOOP_MODE_SINGLE}).then(() => {
+           console.info('sendControlCommand successfully');
+       }).catch((err) => {
+           console.info('sendControlCommand : ERROR : '+ err.message);
+       });
    }
    
    //发送按键事件
@@ -315,11 +419,18 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    }).catch((err) => {
        console.info('getLaunchAbility : ERROR : '+ err.message);
    });
+
+   //获取音频输出设备信息
+   controller.getOutputDevice().then((outputInfo) => {
+       console.info('getOutputDevice successfully, deviceName : ' + outputInfo.deviceName);
+   }).catch((err) => {
+       console.info('getOutputDevice : ERROR : '+ err.message);
+   });
    
    //发送系统媒体按键事件
    let keyItem = {code: 0x49, pressedTime: 123456789, deviceId: 0};
    let event = {action: 2, key: keyItem, keys: [keyItem]};
-   avsession.sendSystemAVKeyEvent(event).then(() => {
+   avSession.sendSystemAVKeyEvent(event).then(() => {
        console.info('sendSystemAVKeyEvent Successfully');
    }).catch((err) => {
        console.info('sendSystemAVKeyEvent : ERROR : '+ err.message);
@@ -327,10 +438,26 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    
    //发送系统控制命令，系统会把控制命令发送到Top会话中
    let avcommand = {command: 'toggleFavorite', parameter: "false"};
-   avsession.sendSystemControlCommand(avcommand).then(() => {
+   avSession.sendSystemControlCommand(avcommand).then(() => {
        console.info('sendSystemControlCommand successfully');
    }).catch((err) => {
        console.info('sendSystemControlCommand : ERROR : '+ err.message);
+   });
+
+   //投播到其他设备
+   let audioManager = audio.getAudioManager();
+   let audioDevices;
+   await audioManager.getDevices(audio.DeviceFlag.OUTPUT_DEVICES_FLAG).then((data) => {
+       audioDevices = data;
+       console.info('Promise returned to indicate that the device list is obtained.');
+   }).catch((err) => {
+       console.info('getDevices : ERROR : ' + err.message);
+   });
+
+   avSession.castAudio('all', audioDevices).then(() => {
+       console.info('createController : SUCCESS');
+   }).catch((err) => {
+       console.info('createController : ERROR : ' + err.message);
    });
    ```
 
@@ -338,27 +465,21 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
 
    ```js
    //注册元数据更新监听
-   let filterKeys = new Set<keyof avsession.AVMetadata>();
-   filterKeys.add("assetId");
-   filterKeys.add("title");
-   filterKeys.add("description");
-   controller.on('metadataChanged', filterKeys, (metadata) => {
-       console.info('on metadataChanged assetId : ' + metadata.assetId);
+   let metaFilter = ['assetId', 'title', 'description'];
+   controller.on('metadataChange', metaFilter, (metadata) => {
+       console.info('on metadataChange assetId : ' + metadata.assetId);
    });
    
    //注册播放状态更新监听
-   let filterKeys = new Set<keyof avsession.AVPlaybackState>();
-   filterKeys.add("state");
-   filterKeys.add("speed");
-   filterKeys.add("loopMode");
-   controller.on('AVPlaybackState', filterKeys, (playbackState) => {
-       console.info('on AVPlaybackState state : ' + playbackState.state);
+   let playbackFilter = ['state', 'speed', 'loopMode'];
+   controller.on('playbackStateChange', playbackFilter, (playbackState) => {
+       console.info('on playbackStateChange state : ' + playbackState.state);
    });
    
    //注册会话支持的命令变更监听
-   controller.on('validCommandChanged', (cmds) => {
-       console.info('validCommandChanged : SUCCESS : size : ' + cmds.size);
-       console.info('validCommandChanged : SUCCESS : cmds : ' + cmds.values());
+   controller.on('validCommandChange', (cmds) => {
+       console.info('validCommandChange : SUCCESS : size : ' + cmds.size);
+       console.info('validCommandChange : SUCCESS : cmds : ' + cmds.values());
        g_validCmd.clear();
        for (let c of g_centerSupportCmd) {
            if (cmds.has(c)) {
@@ -368,18 +489,22 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    });
    
    //注册输出设备变更监听
-   controller.on('outputDeviceChanged', (device) => {
-       console.info('on outputDeviceChanged device isRemote : ' + device.isRemote);
+   controller.on('outputDeviceChange', (device) => {
+       console.info('on outputDeviceChange device isRemote : ' + device.isRemote);
    });
    
    //注册当前会话销毁监听
-   controller.on('sessionDestroyed', () => {
-       console.info('on sessionDestroyed : SUCCESS ');
-       controller.destroy();
+   controller.on('sessionDestroy', () => {
+       console.info('on sessionDestroy : SUCCESS ');
+       controller.destroy().then(() => {
+           console.info('destroy : SUCCESS ');
+       }).catch((err) => {
+           console.info('destroy : ERROR : '+ err.message);
+       });
    });
    
    //注册会话激活状态变更监听
-   controller.on('activeStateChanged', (isActive) => {
+   controller.on('activeStateChange', (isActive) => {
        if (isActive) {
            console.log("控制器卡片按键高亮");
        } else {
@@ -388,26 +513,28 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    });
    
    //监听系统会话创建
-   avsession.on('sessionCreated', (session) => {
+   avSession.on('sessionCreate', (session) => {
        //新增会话，需要创建控制器
-       avsession.createController(session.sessionId).then((controller) => {
+       avSession.createController(session.sessionId).then((controller) => {
            g_controller.push(controller);
+       }).catch((err) => {
+           console.info('createController : ERROR : ' + err.message);
        });
    });
    
    //监听系统会话销毁
-   avsession.on('sessionDestroyed', (session) => {
+   avSession.on('sessionDestroy', (session) => {
        let index = g_controller.findIndex((controller) => {
            return controller.sessionId == session.sessionId;
        });
        if (index != 0) {
            g_controller[index].destroy();
-            g_controller.splice(index, 1);
+           g_controller.splice(index, 1);
        }
    });
    
    //监听系统最高优先级会话变更
-   avsession.on('topSessionChanged', (session) => {
+   avSession.on('topSessionChange', (session) => {
        let index = g_controller.findIndex((controller) => {
            return controller.sessionId == session.sessionId;
        });
@@ -420,24 +547,28 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
    });
    
    //监听服务异常
-   avsession.on('sessionServiceDied', () => {
+   avSession.on('sessionServiceDie', () => {
        //服务端异常，应用清理资源
        console.log("服务端异常");
-   }
+   })
    ```
 
 4. 释放资源。
 
    ```js
    //取消注册回调
-   controller.off('metadataChanged');
-   controller.off('playbackStateChanged');
-   controller.off('sessionDestroyed');
-   controller.off('activeStateChanged');
-   controller.off('validCommandChanged');
-   controller.off('outputDeviceChanged');
+   controller.off('metadataChange');
+   controller.off('playbackStateChange');
+   controller.off('sessionDestroy');
+   controller.off('activeStateChange');
+   controller.off('validCommandChange');
+   controller.off('outputDeviceChange');
    
    //销毁controller对象
-   controller.destroy();
+   controller.destroy().then(() => {
+       console.info('destroy : SUCCESS ');
+   }).catch((err) => {
+       console.info('destroy : ERROR : '+ err.message);
+   });
    ```
 
