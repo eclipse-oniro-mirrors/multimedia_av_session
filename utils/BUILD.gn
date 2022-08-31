@@ -25,21 +25,19 @@ ohos_shared_library("avsession_utils") {
   install_enable = true
 
   sources = [
-    "src/hash_calculator.cpp",
     "src/avsession_sysevent.cpp",
+    "src/hash_calculator.cpp",
   ]
 
-  include_dirs = [
-    "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
-  ]
+  include_dirs = [ "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include" ]
 
   public_configs = [ ":avsession_utils_config" ]
 
   deps = [ "//third_party/openssl:libcrypto_shared" ]
 
   external_deps = [
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
-    "utils_base:utils",
   ]
 
   if (multimedia_av_session_enable_trace_control) {

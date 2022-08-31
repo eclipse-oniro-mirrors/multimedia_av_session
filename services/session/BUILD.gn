@@ -46,13 +46,13 @@ ohos_shared_library("avsession_service") {
   ]
 
   adapter_sources = [
+    "adapter/ability_connect_helper.cpp",
+    "adapter/ability_manager_adapter.cpp",
     "adapter/app_manager_adapter.cpp",
     "adapter/audio_adapter.cpp",
+    "adapter/command_send_limit.cpp",
     "adapter/key_event_adapter.cpp",
     "adapter/permission_checker.cpp",
-    "adapter/command_send_limit.cpp",
-    "adapter/ability_manager_adapter.cpp",
-    "adapter/ability_connect_helper.cpp",
   ]
 
   sources = ipc_sources + adapter_sources + service_sources
@@ -91,7 +91,7 @@ ohos_shared_library("avsession_service") {
 
   defines = []
   if (target_cpu == "arm64") {
-    system_lib_path =  "\"/system/lib64/\""
+    system_lib_path = "\"/system/lib64/\""
   } else {
     system_lib_path = "\"/system/lib/\""
   }
@@ -108,13 +108,13 @@ ohos_shared_library("avsession_service") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_audio_framework:audio_client",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
 
   if (multimedia_av_session_enable_trace_control) {

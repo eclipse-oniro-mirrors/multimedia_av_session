@@ -68,6 +68,7 @@ ohos_unittest("AppManagerAdapterTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
@@ -76,7 +77,6 @@ ohos_unittest("AppManagerAdapterTest") {
     "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
 }
 

@@ -49,13 +49,14 @@ ohos_shared_library("avsession_napi") {
     "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_manager",
     "ability_runtime:napi_base_context",
-    "ability_runtime:ability_context_native",
     "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "multimedia_image_standard:image",
@@ -63,7 +64,6 @@ ohos_shared_library("avsession_napi") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
   if (multimedia_av_session_enable_trace_control) {
     cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]

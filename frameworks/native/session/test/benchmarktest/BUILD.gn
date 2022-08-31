@@ -16,8 +16,8 @@ group("benchmarktest") {
   deps = []
   deps += [
     # deps file
-    "avsession_manager_test:SessionManagerTest",
-    "avsession_controller_test:ControllerTest",
     "avsession_benchmark_test:SessionTest",
+    "avsession_controller_test:ControllerTest",
+    "avsession_manager_test:SessionManagerTest",
   ]
 }

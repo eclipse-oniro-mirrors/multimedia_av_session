@@ -19,15 +19,13 @@ module_output_path = "multimedia_av_session/sessionfuzzer"
 ##############################fuzztest##########################################
 ohos_fuzztest("SessionListenerStubFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file =
-      "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/sessionlistenerstub_fuzzer"
+  fuzz_config_file = "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/sessionlistenerstub_fuzzer"
 
   include_dirs = [
     "//foundation/multimedia/av_session/services/session/ipc/base",
     "//foundation/multimedia/av_session/services/session/ipc/proxy",
     "//foundation/multimedia/av_session/services/session/ipc/stub",
     "//foundation/multimedia/av_session/services/session/adapter",
-    "//utils/native/base/include",
     "//foundation/multimedia/av_session/utils",
     "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/",
     "//foundation/multimedia/av_session/frameworks/native/session/include",
@@ -39,23 +37,18 @@ ohos_fuzztest("SessionListenerStubFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [
-    "session_listenerstub_fuzzer.cpp",
-  ]
-  deps = [
-    "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
-    "//utils/native/base:utils"
-  ]
-   external_deps = [
+  sources = [ "session_listenerstub_fuzzer.cpp" ]
+  deps = [ "//foundation/multimedia/av_session/frameworks/native/session:avsession_client" ]
+  external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "multimedia_image_standard:image_native",
     "multimedia_audio_framework:audio_client",
+    "multimedia_image_standard:image_native",
     "samgr:samgr_proxy",
   ]
 }
-
 ###############################################################################

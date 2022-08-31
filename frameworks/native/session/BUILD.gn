@@ -51,19 +51,19 @@ ohos_shared_library("avsession_client") {
 
   public_deps = [
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
-    "//foundation/multimedia/av_session/utils:avsession_utils"
+    "//foundation/multimedia/av_session/utils:avsession_utils",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "samgr:samgr_proxy",
-    "utils_base:utils",
-    "eventhandler:libeventhandler",
   ]
 
   if (multimedia_av_session_enable_trace_control) {

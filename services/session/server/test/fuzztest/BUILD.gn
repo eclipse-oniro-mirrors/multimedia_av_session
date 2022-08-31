@@ -17,12 +17,12 @@ group("fuzztest") {
   deps = []
   deps += [
     # deps file
-    "avsessionservice_fuzzer:AvSessionServiceFuzzTest",
     "avcontrollercallbackproxy_fuzzer:AVControllerCallbackProxyFuzzTest",
-    "sessionlistenerproxy_fuzzer:SessionListenerProxyFuzzTest",
+    "avcontrolleritem_fuzzer:AVControllerItemFuzzTest",
     "avsessioncallbackproxy_fuzzer:AVSessionCallbackProxyFuzzTest",
     "avsessionitem_fuzzer:AVSessionItemFuzzTest",
-    "avcontrolleritem_fuzzer:AVControllerItemFuzzTest",
+    "avsessionservice_fuzzer:AvSessionServiceFuzzTest",
+    "sessionlistenerproxy_fuzzer:SessionListenerProxyFuzzTest",
   ]
 }
 ###############################################################################

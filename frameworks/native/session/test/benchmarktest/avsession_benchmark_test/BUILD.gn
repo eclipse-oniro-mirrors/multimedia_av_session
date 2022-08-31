@@ -18,7 +18,12 @@ module_output_path = "multimedia_av_session/session"
 ohos_benchmarktest("SessionTest") {
   module_out_path = module_output_path
 
-  cflags = ["-g","-O0","-Wno-unused-variable","-fno-omit-frame-pointer"]
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
@@ -27,7 +32,7 @@ ohos_benchmarktest("SessionTest") {
   deps = [
     "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
     "//foundation/multimedia/av_session/services/session:avsession_service",
-    "//utils/native/base:utils"
+    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -36,8 +41,8 @@ ohos_benchmarktest("SessionTest") {
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "multimedia_image_standard:image_native",
     "multimedia_audio_framework:audio_client",
-    "samgr:samgr_proxy"
+    "multimedia_image_standard:image_native",
+    "samgr:samgr_proxy",
   ]
 }

@@ -18,7 +18,12 @@ module_output_path = "multimedia_av_session/session"
 ohos_benchmarktest("SessionManagerTest") {
   module_out_path = module_output_path
 
-  cflags = ["-g","-O0","-Wno-unused-variable","-fno-omit-frame-pointer"]
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
@@ -27,10 +32,10 @@ ohos_benchmarktest("SessionManagerTest") {
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
     "//foundation/multimedia/av_session/utils:avsession_utils",
+    "//third_party/benchmark:benchmark",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
-    "//third_party/benchmark:benchmark"
- ]
+  ]
 
   external_deps = [
     "ability_base:want",
@@ -40,6 +45,6 @@ ohos_benchmarktest("SessionManagerTest") {
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "samgr:samgr_proxy",
-    "utils_base:utils"
- ]
+    "utils_base:utils",
+  ]
 }
