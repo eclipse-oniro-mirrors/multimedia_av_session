@@ -9,10 +9,10 @@ AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相�
 ## 导入模块
 
 ```js
-import avsession from '@ohos.multimedia.avsession';
+import avSession from '@ohos.multimedia.avsession';
 ```
 
-## avsession.createAVSession
+## avSession.createAVSession
 
 createAVSession(context: Context, tag: string, type: AVSessionType): Promise\<AVSession>
 
@@ -46,15 +46,15 @@ let tag = "createNewSession";
 let type = "audio";
 let context = featureAbility.getContext();
 
-await avsession.createAVSession(context, tag, type).then((avsession) => {
-    session = avsession;
+await avSession.createAVSession(context, tag, type).then((avSession) => {
+    session = avSession;
     console.info('createAVSession : SUCCESS : sessionId = ' + session.sessionId);
 }).catch((err) => {
     console.info('createAVSession : ERROR : ' + err.message);
 });
 ```
 
-## avsession.createAVSession
+## avSession.createAVSession
 
 createAVSession(context: Context, tag: string, type: AVSessionType, callback: AsyncCallback\<AVSession>): void
 
@@ -82,17 +82,17 @@ let tag = "createNewSession";
 let type = "audio";
 let context = featureAbility.getContext();
 
-await avsession.createAVSession(context, tag, type, function (err, avsession) {
-    if (err.code == 0) {
-        session = avsession;
-        console.info('createAVSession : SUCCESS : sessionId = ' + session.sessionId);
-    } else {
+avSession.createAVSession(context, tag, type, function (err, avSession) {
+    if (err) {
         console.info('createAVSession : ERROR : ' + err.message);
+    } else {
+        session = avSession;
+        console.info('createAVSession : SUCCESS : sessionId = ' + session.sessionId);
     }
 });
 ```
 
-## avsession.getAllSessionDescriptors
+## avSession.getAllSessionDescriptors
 
 getAllSessionDescriptors(): Promise\<Array\<Readonly\<AVSessionDescriptor>>>
 
@@ -111,7 +111,7 @@ getAllSessionDescriptors(): Promise\<Array\<Readonly\<AVSessionDescriptor>>>
 **示例：**
 
 ```js
-avsession.getAllSessionDescriptors().then((descriptors) => {
+avSession.getAllSessionDescriptors().then((descriptors) => {
     console.info('getAllSessionDescriptors : SUCCESS : descriptors.length : ' + descriptors.length);
     if(descriptors.length > 0 ){
         console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].isActive : ' + descriptors[0].isActive);
@@ -119,11 +119,11 @@ avsession.getAllSessionDescriptors().then((descriptors) => {
         console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].sessionTag : ' + descriptors[0].sessionTag);
     }
 }).catch((err) => {
-    console.info('getAllSessionDescriptors : ERROR : '+err.message);
+    console.info('getAllSessionDescriptors : ERROR : '+ err.message);
 });
 ```
 
-## avsession.getAllSessionDescriptors
+## avSession.getAllSessionDescriptors
 
 getAllSessionDescriptors(callback: AsyncCallback\<Array\<Readonly\<AVSessionDescriptor>>>): void
 
@@ -142,21 +142,21 @@ getAllSessionDescriptors(callback: AsyncCallback\<Array\<Readonly\<AVSessionDesc
 **示例：**
 
 ```js
-avsession.getAllSessionDescriptors(function (err, descriptors) {
-    if (err.code == 0) {
+avSession.getAllSessionDescriptors(function (err, descriptors) {
+    if (err) {
+        console.info('getAllSessionDescriptors : ERROR : '+ err.message);
+    } else {
         console.info('getAllSessionDescriptors : SUCCESS : descriptors.length : ' + descriptors.length);
         if(descriptors.length > 0 ){
             console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].isActive : ' + descriptors[0].isActive);
             console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].type : ' + descriptors[0].type);
             console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].sessionTag : ' + descriptors[0].sessionTag);
         }
-    } else {
-        console.info('getAllSessionDescriptors : ERROR : '+err.message);
     }
 });
 ```
 
-## avsession.createController
+## avSession.createController
 
 createController(sessionId: string): Promise\<AVSessionController>
 
@@ -183,7 +183,7 @@ createController(sessionId: string): Promise\<AVSessionController>
 
 ```js
 let controller;
-await avsession.createController(session.sessionId).then((avcontroller) => {
+await avSession.createController(session.sessionId).then((avcontroller) => {
     controller = avcontroller;
     console.info('createController : SUCCESS : ' + controller.sessionId);
 }).catch((err) => {
@@ -191,7 +191,7 @@ await avsession.createController(session.sessionId).then((avcontroller) => {
 });
 ```
 
-## avsession.createController
+## avSession.createController
 
 createController(sessionId: string, callback: AsyncCallback\<AVSessionController>): void
 
@@ -212,17 +212,17 @@ createController(sessionId: string, callback: AsyncCallback\<AVSessionController
 
 ```js
 let controller;
-await avsession.createController(session.sessionId, function (err, avcontroller) {
-    if (err.code == 0) {
+avSession.createController(session.sessionId, function (err, avcontroller) {
+    if (err) {
+        console.info('createController : ERROR : '+ err.message);
+    } else {
         controller = avcontroller;
         console.info('createController : SUCCESS : ' + controller.sessionId);
-    } else {
-        console.info('createController : ERROR : '+err.message);
     }
 });
 ```
 
-## avsession.castAudio
+## avSession.castAudio
 
 castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDescriptor>): Promise\<void>
 
@@ -252,21 +252,23 @@ castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDe
 ```js
 import audio from '@ohos.multimedia.audio';
 
-var audioManager = audio.getAudioManager();
-var audioDevices;
+let audioManager = audio.getAudioManager();
+let audioDevices;
 await audioManager.getDevices(audio.DeviceFlag.OUTPUT_DEVICES_FLAG).then((data) => {
     audioDevices = data;
-    console.log('Promise returned to indicate that the device list is obtained.');
+    console.info('Promise returned to indicate that the device list is obtained.');
+}).catch((err) => {
+    console.info('getDevices : ERROR : ' + err.message);
 });
 
-avsession.castAudio('all', audioDevices).then(() => {
+avSession.castAudio('all', audioDevices).then(() => {
     console.info('createController : SUCCESS');
 }).catch((err) => {
     console.info('createController : ERROR : ' + err.message);
 });
 ```
 
-## avsession.castAudio
+## avSession.castAudio
 
 castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDescriptor>, callback: AsyncCallback\<void>): void
 
@@ -291,25 +293,27 @@ castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDe
 ```js
 import audio from '@ohos.multimedia.audio';
 
-var audioManager = audio.getAudioManager();
-var audioDevices;
+let audioManager = audio.getAudioManager();
+let audioDevices;
 await audioManager.getDevices(audio.DeviceFlag.OUTPUT_DEVICES_FLAG).then((data) => {
     audioDevices = data;
-    console.log('Promise returned to indicate that the device list is obtained.');
+    console.info('Promise returned to indicate that the device list is obtained.');
+}).catch((err) => {
+    console.info('getDevices : ERROR : ' + err.message);
 });
 
-avsession.castAudio('all', audioDevices, function (err) {
-    if (err.code == 0) {
-        console.info('castAudio : SUCCESS ');
+avSession.castAudio('all', audioDevices, function (err) {
+    if (err) {
+        console.info('castAudio : ERROR : '+ err.message);
     } else {
-        console.info('castAudio : ERROR : '+err.message);
+        console.info('castAudio : SUCCESS ');
     }
 });
 ```
 
-## avsession.on('sessionCreated' | 'sessionDestroyed')
+## avSession.on('sessionCreate' | 'sessionDestroy')
 
-on(type: 'sessionCreated' | 'sessionDestroyed', callback: (session: AVSessionDescriptor) => void): void
+on(type: 'sessionCreate' | 'sessionDestroy', callback: (session: AVSessionDescriptor) => void): void
 
 会话的创建和销毁的监听事件。
 
@@ -321,28 +325,28 @@ on(type: 'sessionCreated' | 'sessionDestroyed', callback: (session: AVSessionDes
 
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
-| type     | string                                                       | 是   | 事件回调类型，支持的事件为：<br/>- `'sessionCreated'`：会话创建事件，检测到会话创建时触发。<br/>- `'sessionDestroyed'`：会话销毁事件，检测到会话销毁时触发。 |
+| type     | string                                                       | 是   | 事件回调类型，支持的事件为：<br/>- `'sessionCreate'`：会话创建事件，检测到会话创建时触发。<br/>- `'sessionDestroy'`：会话销毁事件，检测到会话销毁时触发。 |
 | callback | (session: [AVSessionDescriptor](#avsessiondescriptor)) => void | 是   | 回调函数。参数为会话相关描述。                               |
 
 **示例：**
 
 ```js
-avsession.on('sessionCreated', (descriptor) => {
-    console.info('on sessionCreated : isActive : ' + descriptors.isActive);
-    console.info('on sessionCreated : type : ' + descriptors.type);
-    console.info('on sessionCreated : sessionTag : ' + descriptors.sessionTag);
+avSession.on('sessionCreate', (descriptor) => {
+    console.info('on sessionCreate : isActive : ' + descriptor.isActive);
+    console.info('on sessionCreate : type : ' + descriptor.type);
+    console.info('on sessionCreate : sessionTag : ' + descriptor.sessionTag);
 });
 
-avsession.on('sessionDestroyed', (descriptor) => {
-    console.info('on sessionDestroyed : isActive : ' + descriptors.isActive);
-    console.info('on sessionDestroyed : type : ' + descriptors.type);
-    console.info('on sessionDestroyed : sessionTag : ' + descriptors.sessionTag);
+avSession.on('sessionDestroy', (descriptor) => {
+    console.info('on sessionDestroy : isActive : ' + descriptor.isActive);
+    console.info('on sessionDestroy : type : ' + descriptor.type);
+    console.info('on sessionDestroy : sessionTag : ' + descriptor.sessionTag);
 });
 ```
 
-## avsession.on('topSessionChanged')
+## avSession.on('topSessionChange')
 
-on(type: 'topSessionChanged', callback: (session: AVSessionDescriptor) => void): void
+on(type: 'topSessionChange', callback: (session: AVSessionDescriptor) => void): void
 
 最新会话的变化的监听事件。
 
@@ -354,22 +358,22 @@ on(type: 'topSessionChanged', callback: (session: AVSessionDescriptor) => void):
 
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
-| type     | string                                                       | 是   | 事件回调类型，支持事件`'topSessionChanged'`：最新会话的变化事件，检测到最新的会话改变时触发。 |
+| type     | string                                                       | 是   | 事件回调类型，支持事件`'topSessionChange'`：最新会话的变化事件，检测到最新的会话改变时触发。 |
 | callback | (session: [AVSessionDescriptor](#avsessiondescriptor)) => void | 是   | 回调函数。参数为会话相关描述。                               |
 
 **示例：**
 
 ```js
-avsession.on('topSessionChanged', (descriptor) => {
-    console.info('on topSessionChanged : isActive : ' + descriptors.isActive);
-    console.info('on topSessionChanged : type : ' + descriptors.type);
-    console.info('on topSessionChanged : sessionTag : ' + descriptors.sessionTag);
+avSession.on('topSessionChange', (descriptor) => {
+    console.info('on topSessionChange : isActive : ' + descriptor.isActive);
+    console.info('on topSessionChange : type : ' + descriptor.type);
+    console.info('on topSessionChange : sessionTag : ' + descriptor.sessionTag);
 });
 ```
 
-## avsession.on('sessionServiceDied')
+## avSession.on('sessionServiceDie')
 
-on(type: 'sessionServiceDied', callback: () => void): void
+on(type: 'sessionServiceDie', callback: () => void): void
 
 监听会话的服务死亡事件。
 
@@ -379,20 +383,20 @@ on(type: 'sessionServiceDied', callback: () => void): void
 
 | 参数名   | 类型                 | 必填 | 说明                                                         |
 | -------- | -------------------- | ---- | ------------------------------------------------------------ |
-| type     | string               | 是   | 事件回调类型，支持事件`'sessionServiceDied'`：会话服务死亡事件，检测到会话的服务死亡时触发。 |
+| type     | string               | 是   | 事件回调类型，支持事件`'sessionServiceDie'`：会话服务死亡事件，检测到会话的服务死亡时触发。 |
 | callback | callback: () => void | 是   | 回调函数。                                                   |
 
 **示例：**
 
 ```js
-avsession.on('sessionServiceDied', () => {
-    console.info('on sessionServiceDied  : session is  Died ');
+avSession.on('sessionServiceDie', () => {
+    console.info('on sessionServiceDie  : session is  Died ');
 });
 ```
 
-## avsession.off('sessionServiceDied')
+## avSession.off('sessionServiceDie')
 
-off(type: 'sessionServiceDied'): void
+off(type: 'sessionServiceDie'): void
 
 会话服务死亡监听的关闭，关闭后，不再进行相关on方法的回调。
 
@@ -402,17 +406,17 @@ off(type: 'sessionServiceDied'): void
 
 | 参数名 | 类型   | 必填 | 说明                                                         |
 | ------ | ------ | ---- | ------------------------------------------------------------ |
-| type   | string | 是   | 事件回调类型，支持事件`'sessionServiceDied'`：会话服务死亡事件。 |
+| type   | string | 是   | 事件回调类型，支持事件`'sessionServiceDie'`：会话服务死亡事件。 |
 
 **示例：**
 
 ```js
-avsession.off('sessionServiceDied');
+avSession.off('sessionServiceDie');
 ```
 
-## avsession.off('sessionCreated' | 'sessionDestroyed' | 'topSessionChanged')
+## avSession.off('sessionCreate' | 'sessionDestroy' | 'topSessionChange')
 
-off(type: 'sessionCreated' | 'sessionDestroyed' | 'topSessionChanged'): void
+off(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange'): void
 
 会话对象相关监听的关闭，关闭后，不在进行相关on的回调。
 
@@ -424,17 +428,17 @@ off(type: 'sessionCreated' | 'sessionDestroyed' | 'topSessionChanged'): void
 
 | 参数名 | 类型   | 必填 | 说明                                                         |
 | ------ | ------ | ---- | ------------------------------------------------------------ |
-| type   | string | 是   | 事件回调类型，支持的事件为：<br/>- `'sessionCreated'`：会话创建事件。<br/>- `'sessionDestroyed'`：会话销毁事件。<br/>- `'topSessionChanged'`：最新会话的变化事件。 |
+| type   | string | 是   | 事件回调类型，支持的事件为：<br/>- `'sessionCreate'`：会话创建事件。<br/>- `'sessionDestroy'`：会话销毁事件。<br/>- `'topSessionChange'`：最新会话的变化事件。 |
 
 **示例：**
 
 ```js
-avsession.off('sessionCreated');
-avsession.off('sessionDestroyed');
-avsession.off('topSessionChanged');
+avSession.off('sessionCreate');
+avSession.off('sessionDestroy');
+avSession.off('topSessionChange');
 ```
 
-## avsession.sendSystemAVKeyEvent
+## avSession.sendSystemAVKeyEvent
 
 sendSystemAVKeyEvent(event: KeyEvent): Promise\<void>
 
@@ -463,7 +467,7 @@ sendSystemAVKeyEvent(event: KeyEvent): Promise\<void>
 let keyItem = {code:0x49, pressedTime:123456789, deviceId:0};
 let event = {action:2, key:keyItem, keys:[keyItem]};
 
-avsession.sendSystemAVKeyEvent(event).then(() => {
+avSession.sendSystemAVKeyEvent(event).then(() => {
     console.info('sendSystemAVKeyEvent Successfully');
 }).catch((err) => {
     console.info('sendSystemAVKeyEvent : ERROR : '+ err.message);
@@ -471,7 +475,7 @@ avsession.sendSystemAVKeyEvent(event).then(() => {
 
 ```
 
-## avsession.sendSystemAVKeyEvent
+## avSession.sendSystemAVKeyEvent
 
 sendSystemAVKeyEvent(event: KeyEvent, callback: AsyncCallback\<void>): void
 
@@ -494,16 +498,16 @@ sendSystemAVKeyEvent(event: KeyEvent, callback: AsyncCallback\<void>): void
 let keyItem = {code:0x49, pressedTime:123456789, deviceId:0};
 let event = {action:2, key:keyItem, keys:[keyItem]};
 
-avsession.sendSystemAVKeyEvent(event, function (err) {
-    if (err.code == 0) {
-        console.info('sendSystemAVKeyEvent : SUCCESS ');
-    } else {
+avSession.sendSystemAVKeyEvent(event, function (err) {
+    if (err) {
         console.info('sendSystemAVKeyEvent : ERROR : '+ err.message);
+    } else {
+        console.info('sendSystemAVKeyEvent : SUCCESS ');
     }
 });
 ```
 
-## avsession.sendSystemControlCommand
+## avSession.sendSystemControlCommand
 
 sendSystemControlCommand(command: AVControlCommand): Promise\<void>
 
@@ -537,16 +541,16 @@ let avcommand = {command:'play'};
 // let avcommand = {command:'rewind'};
 // let avcommand = {command:'seek', parameter:10};
 // let avcommand = {command:'setSpeed', parameter:2.6};
-// let avcommand = {command:'setLoopMode', parameter:avsession.LoopMode.LOOP_MODE_SINGLE};
+// let avcommand = {command:'setLoopMode', parameter:avSession.LoopMode.LOOP_MODE_SINGLE};
 // let avcommand = {command:'toggleFavorite', parameter:"false"};
-avsession.sendSystemControlCommand(avcommand).then(() => {
+avSession.sendSystemControlCommand(avcommand).then(() => {
     console.info('sendSystemControlCommand successfully');
 }).catch((err) => {
     console.info('sendSystemControlCommand : ERROR : '+ err.message);
 });
 ```
 
-## avsession.sendSystemControlCommand
+## avSession.sendSystemControlCommand
 
 sendSystemControlCommand(command: AVControlCommand, callback: AsyncCallback\<void>): void
 
@@ -575,20 +579,20 @@ let avcommand = {command:'play'};
 // let avcommand = {command:'rewind'};
 // let avcommand = {command:'seek', parameter:10};
 // let avcommand = {command:'setSpeed', parameter:2.6};
-// let avcommand = {command:'setLoopMode', parameter:avsession.LoopMode.LOOP_MODE_SINGLE};
+// let avcommand = {command:'setLoopMode', parameter:avSession.LoopMode.LOOP_MODE_SINGLE};
 // let avcommand = {command:'toggleFavorite', parameter:"false"};
-avsession.sendSystemControlCommand(avcommand, function (err) {
-    if (err.code == 0) {
-        console.info('sendSystemControlCommand  successfully');
-    } else {
+avSession.sendSystemControlCommand(avcommand, function (err) {
+    if (err) {
         console.info('sendSystemControlCommand  : ERROR : ' + err.message);
+    } else {
+        console.info('sendSystemControlCommand  successfully');
     }
 });
 ```
 
 ## AVSession
 
-调用[avsession.createAVSession](#avsessioncreateavsession)后，返回会话的实例，获得会话ID，可对会话进行发送命令，发送元数据，播放状态，按键事件的操作。
+调用[avSession.createAVSession](#avsessioncreateavsession)后，返回会话的实例，获得会话ID，可对会话进行发送命令，发送元数据，播放状态，按键事件的操作。
 
 ### 属性
 
@@ -647,7 +651,7 @@ let metadata  = {
 session.setAVMetadata(metadata).then(() => {
     console.info('setAVMetadata successfully');
 }).catch((err) => {
-    console.info('setAVMetadata : ERROR : '+err.message);
+    console.info('setAVMetadata : ERROR : '+ err.message);
 });
 ```
 
@@ -686,10 +690,10 @@ let metadata  = {
     nextAssetId: "121279",
 };
 session.setAVMetadata(metadata, function (err) {
-    if (err.code == 0) {
-        console.info('setAVMetadata successfully');
-    } else {
+    if (err) {
         console.info('setAVMetadata : ERROR : ' + err.message);
+    } else {
+        console.info('setAVMetadata successfully');
     }
 });
 ```
@@ -718,17 +722,17 @@ setAVPlaybackState(state: AVPlaybackState): Promise\<void>
 
 ```js
 let PlaybackState = {
-    state:avsession.PlaybackState.PLAYBACK_STATE_PLAY,
+    state:avSession.PlaybackState.PLAYBACK_STATE_PLAY,
     speed: 1.0,
     position:{elapsedTime:10, updateTime:(new Date()).getTime()},
     bufferedTime:1000,
-    loopMode:avsession.LoopMode.LOOP_MODE_SINGLE,
+    loopMode:avSession.LoopMode.LOOP_MODE_SINGLE,
     isFavorite:true,
 };
 session.setAVPlaybackState(PlaybackState).then(() => {
     console.info('setAVPlaybackState successfully');
 }).catch((err) => {
-    console.info('setAVPlaybackState : ERROR : '+err.message);
+    console.info('setAVPlaybackState : ERROR : '+ err.message);
 });
 ```
 
@@ -751,18 +755,18 @@ setAVPlaybackState(state: AVPlaybackState, callback: AsyncCallback\<void>): void
 
 ```js
 let PlaybackState = {
-    state:avsession.PlaybackState.PLAYBACK_STATE_PLAY,
+    state:avSession.PlaybackState.PLAYBACK_STATE_PLAY,
     speed: 1.0,
     position:{elapsedTime:10, updateTime:(new Date()).getTime()},
     bufferedTime:1000,
-    loopMode:avsession.LoopMode.LOOP_MODE_SINGLE,
+    loopMode:avSession.LoopMode.LOOP_MODE_SINGLE,
     isFavorite:true,
 };
 session.setAVPlaybackState(PlaybackState, function (err) {
-    if (err.code == 0) {
-        console.info('setAVPlaybackState successfully');
-    } else {
+    if (err) {
         console.info('setAVPlaybackState : ERROR : ' + err.message);
+    } else {
+        console.info('setAVPlaybackState successfully');
     }
 });
 ```
@@ -790,10 +794,10 @@ setLaunchAbility(ability: WantAgent): Promise\<void>
 **示例：**
 
 ```js
-import WantAgent from '@ohos.wantAgent';
+import wantAgent from '@ohos.wantAgent';
 
 //WantAgentInfo对象
-var wantAgentInfo = {
+let wantAgentInfo = {
     wants: [
         {
             deviceId: "deviceId",
@@ -815,16 +819,16 @@ var wantAgentInfo = {
                 }
         }
     ],
-    operationType: WantAgent.OperationType.START_ABILITIES,
+    operationType: wantAgent.OperationType.START_ABILITIES,
     requestCode: 0,
-    wantAgentFlags:[WantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
+    wantAgentFlags:[wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
 }
 
-WantAgent.getWantAgent(wantAgentInfo).then((agent) => {
-    session.setLaunchAbility(WantAgent).then(() => {
+wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
+    session.setLaunchAbility(agent).then(() => {
         console.info('setLaunchAbility successfully');
     }).catch((err) => {
-        console.info('setLaunchAbility : ERROR : '+err.message);
+        console.info('setLaunchAbility : ERROR : '+ err.message);
     });
 });
 ```
@@ -847,10 +851,10 @@ setLaunchAbility(ability: WantAgent, callback: AsyncCallback\<void>): void
 **示例：**
 
 ```js
-import WantAgent from '@ohos.wantAgent';
+import wantAgent from '@ohos.wantAgent';
 
 //WantAgentInfo对象
-var wantAgentInfo = {
+let wantAgentInfo = {
     wants: [
         {
             deviceId: "deviceId",
@@ -872,17 +876,17 @@ var wantAgentInfo = {
                 }
         }
     ],
-    operationType: WantAgent.OperationType.START_ABILITIES,
+    operationType: wantAgent.OperationType.START_ABILITIES,
     requestCode: 0,
-    wantAgentFlags:[WantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
+    wantAgentFlags:[wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
 }
 
-WantAgent.getWantAgent(wantAgentInfo).then((agent) => {
+wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
     session.setLaunchAbility(agent, function (err) {
-        if (err.code == 0) {
-            console.info('setLaunchAbility successfully');
+        if (err) {
+            console.info('setLaunchAbility : ERROR : ' + err.message);
         } else {
-            console.info('setLaunchAbility : ERROR : ' + err.message);   
+            console.info('setLaunchAbility successfully');
         }
     });
 });
@@ -916,7 +920,7 @@ setAudioStreamId(streamIds: Array\<number>): Promise\<void>
 session.setAudioStreamId(['1111','22222']).then(() => {
     console.info('setAudioStreamId successfully');
 }).catch((err) => {
-    console.info('setAudioStreamId : ERROR : '+err.message);
+    console.info('setAudioStreamId : ERROR : '+ err.message);
 });
 ```
 
@@ -941,10 +945,10 @@ setAudioStreamId(streamIds: Array\<number>, callback: AsyncCallback\<void>): voi
 
 ```js
 session.setAudioStreamId(['1111','22222'], function (err) {
-    if (err.code == 0) {
-        console.info('setAudioStreamId successfully');
+    if (err) {
+        console.info('setAudioStreamId : ERROR : '+ err.message);
     } else {
-        console.info('setAudioStreamId : ERROR : '+err.message);
+        console.info('setAudioStreamId successfully');
     }
 });
 ```
@@ -966,11 +970,12 @@ getController(): Promise\<AVSessionController>
 **示例：**
 
 ```js
+let controller;
 session.getController().then((avcontroller) => {
     controller = avcontroller;
     console.info('getController : SUCCESS : sessionid : ' + controller.sessionId);
 }).catch((err) => {
-    console.info('getController : ERROR : '+err.message);
+    console.info('getController : ERROR : '+ err.message);
 });
 ```
 
@@ -991,12 +996,13 @@ getController(callback: AsyncCallback\<AVSessionController>): void
 **示例：**
 
 ```js
+let controller;
 session.getController(function (err, avcontroller) {
-    if (err.code == 0) {
+    if (err) {
+        console.info('getController : ERROR : ' + err.message);
+    } else {
         controller = avcontroller;
         console.info('getController : SUCCESS : sessionid : ' + controller.sessionId);
-    } else {
-        console.info('getController : ERROR : ' + err.message);
     }
 });
 ```
@@ -1021,7 +1027,7 @@ getOutputDevice(): Promise\<OutputDeviceInfo>
 session.getOutputDevice().then((outputDeviceInfo) => {
     console.info('getOutputDevice : SUCCESS : isRemote : ' + outputDeviceInfo.isRemote);
 }).catch((err) => {
-    console.info('getOutputDevice : ERROR : '+err.message);
+    console.info('getOutputDevice : ERROR : '+ err.message);
 });
 ```
 
@@ -1043,10 +1049,10 @@ getOutputDevice(callback: AsyncCallback\<OutputDeviceInfo>): void
 
 ```js
 session.getOutputDevice(function (err, outputDeviceInfo) {
-    if (err.code == 0) {
-        console.info('getOutputDevice : SUCCESS : isRemote : ' + outputDeviceInfo.isRemote);
+    if (err) {
+        console.info('getOutputDevice : ERROR : '+ err.message);
     } else {
-        console.info('getOutputDevice : ERROR : '+err.message); 
+        console.info('getOutputDevice : SUCCESS : isRemote : ' + outputDeviceInfo.isRemote);
     }
 });
 ```
@@ -1071,7 +1077,7 @@ activate(): Promise\<void>
 session.activate().then(() => {
     console.info('activate : SUCCESS ');
 }).catch((err) => {
-    console.info('activate : ERROR : '+err.message);
+    console.info('activate : ERROR : '+ err.message);
 });
 ```
 
@@ -1093,10 +1099,10 @@ activate(callback: AsyncCallback\<void>): void
 
 ```js
 session.activate(function (err) {
-    if (err.code == 0) {
-        console.info('activate : SUCCESS ');
+    if (err) {
+        console.info('activate : ERROR : '+ err.message);
     } else {
-        console.info('activate : ERROR : '+err.message);
+        console.info('activate : SUCCESS ');
     }
 });
 ```
@@ -1123,7 +1129,7 @@ deactivate(): Promise\<void>
 session.deactivate().then(() => {
     console.info('deactivate : SUCCESS ');
 }).catch((err) => {
-    console.info('deactivate : ERROR : '+err.message);
+    console.info('deactivate : ERROR : '+ err.message);
 });
 ```
 
@@ -1147,10 +1153,10 @@ deactivate(callback: AsyncCallback\<void>): void
 
 ```js
 session.deactivate(function (err) {
-    if (err.code == 0) {
-        console.info('deactivate : SUCCESS ');
+    if (err) {
+        console.info('deactivate : ERROR : '+ err.message);
     } else {
-        console.info('deactivate : ERROR : '+err.message);
+        console.info('deactivate : SUCCESS ');
     }
 });
 ```
@@ -1175,7 +1181,7 @@ destroy(): Promise\<void>
 session.destroy().then(() => {
     console.info('destroy : SUCCESS ');
 }).catch((err) => {
-    console.info('destroy : ERROR : '+err.message);
+    console.info('destroy : ERROR : '+ err.message);
 });
 ```
 
@@ -1198,10 +1204,10 @@ destroy(callback: AsyncCallback\<void>): void
 
 ```js
 session.destroy(function (err) {
-    if (err.code == 0) {
-        console.info('destroy : SUCCESS ');
+    if (err) {
+        console.info('destroy : ERROR : '+ err.message);
     } else {
-        console.info('destroy : ERROR : '+err.message);
+        console.info('destroy : SUCCESS ');
     }
 });
 ```
@@ -1224,25 +1230,25 @@ on(type: 'play'|'pause'|'stop'|'playNext'|'playPrevious'|'fastForward'|'rewind',
 **示例：**
 
 ```js
-avsession.on('play', () => {
+session.on('play', () => {
     console.info('on play entry');
 });
-avsession.on('pause', () => {
+session.on('pause', () => {
     console.info('on pause entry');
 });
-avsession.on('stop', () => {
+session.on('stop', () => {
     console.info('on stop entry');
 });
-avsession.on('playNext', () => {
+session.on('playNext', () => {
     console.info('on playNext entry');
 });
-avsession.on('playPrevious', () => {
+session.on('playPrevious', () => {
     console.info('on playPrevious entry');
 });
-avsession.on('fastForward', () => {
+session.on('fastForward', () => {
     console.info('on fastForward entry');
 });
-avsession.on('rewind', () => {
+session.on('rewind', () => {
     console.info('on rewind entry');
 });
 ```
@@ -1362,9 +1368,9 @@ session.on('handleKeyEvent', (event) => {
 });
 ```
 
-### on('outputDeviceChanged')
+### on('outputDeviceChange')
 
-on(type: 'outputDeviceChanged', callback: (device: OutputDeviceInfo) => void): void
+on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): void
 
 设置分布式设备变化的监听事件。
 
@@ -1374,20 +1380,20 @@ on(type: 'outputDeviceChanged', callback: (device: OutputDeviceInfo) => void): v
 
 | 参数名   | 类型                                                    | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------- | ---- | ------------------------------------------------------------ |
-| type     | string                                                  | 是   | 事件回调类型，支持事件`'outputDeviceChanged'`：当分布式设备变化时，触发该事件。 |
+| type     | string                                                  | 是   | 事件回调类型，支持事件`'outputDeviceChange'`：当分布式设备变化时，触发该事件。 |
 | callback | (device: [OutputDeviceInfo](#outputdeviceinfo)) => void | 是   | 回调方法，参数device是设备相关信息。                         |
 
 **示例：**
 
 ```js
-session.on('outputDeviceChanged', (device) => {
-    console.info('on outputDeviceChanged device isRemote : ' + device.isRemote);
+session.on('outputDeviceChange', (device) => {
+    console.info('on outputDeviceChange device isRemote : ' + device.isRemote);
 });
 ```
 
 ### off
 
-off(type: 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward' | 'rewind' | 'seek' | 'setSpeed' | 'setLoopMode' | 'toggleFavorite' | 'handleKeyEvent' | 'outputDeviceChanged'): void
+off(type: 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward' | 'rewind' | 'seek' | 'setSpeed' | 'setLoopMode' | 'toggleFavorite' | 'handleKeyEvent' | 'outputDeviceChange'): void
 
 会话相关监听的关闭，关闭后，不再进行相关on回调。
 
@@ -1397,7 +1403,7 @@ off(type: 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward
 
 | 参数名 | 类型   | 必填 | 说明                                                         |
 | ------ | ------ | ---- | ------------------------------------------------------------ |
-| type   | string | 是   | 关闭对应的监听事件，支持的事件包括：` 'play'`，` 'pause'`，`'stop'`， `'playNext'`，` 'playPrevious'`， ` 'fastForward'`，` 'rewind'`，`'seek'`， `'setSpeed'`，` 'setLoopMode'`，` 'toggleFavorite'`， `'handleKeyEvent' `， `'outputDeviceChanged'`。 |
+| type   | string | 是   | 关闭对应的监听事件，支持的事件包括：` 'play'`，` 'pause'`，`'stop'`， `'playNext'`，` 'playPrevious'`， ` 'fastForward'`，` 'rewind'`，`'seek'`， `'setSpeed'`，` 'setLoopMode'`，` 'toggleFavorite'`， `'handleKeyEvent' `， `'outputDeviceChange'`。 |
 
 **示例：**
 
@@ -1414,12 +1420,12 @@ session.off('setSpeed');
 session.off('setLoopMode');
 session.off('toggleFavorite');
 session.off('handleKeyEvent');
-session.off('outputDeviceChanged');
+session.off('outputDeviceChange');
 ```
 
 ## AVSessionController
 
-调用[avsession.createController](#avsessioncreatecontroller)后，返回会话控制器实例，获得会话ID，然后可对会话进行发送命令，获取元数据，播放状态，按键事件等操作。
+调用[avSession.createController](#avsessioncreatecontroller)后，返回会话控制器实例，获得会话ID，然后可对会话进行发送命令，获取元数据，播放状态，按键事件等操作。
 
 ### 属性
 
@@ -1434,7 +1440,7 @@ session.off('outputDeviceChanged');
 **示例：**
 ```js
 let sessionId;
-await avsession.createController(session.sessionId).then((controller) => {
+await avSession.createController(session.sessionId).then((controller) => {
     sessionId = controller.sessionId;
 }).catch((err) => {
     console.info('createController : ERROR : ' + err.message);
@@ -1481,10 +1487,10 @@ getAVPlaybackState(callback: AsyncCallback\<AVPlaybackState>): void
 **示例：**
 ```js
 controller.getAVPlaybackState(function (err, playbackState) {
-    if (err.code == 0) {
-        console.info('getAVPlaybackState : SUCCESS : state : ' + playbackState.state);
-    } else {
+    if (err) {
         console.info('getAVPlaybackState : ERROR : ' + err.message);
+    } else {
+        console.info('getAVPlaybackState : SUCCESS : state : ' + playbackState.state);
     }
 });
 ```
@@ -1529,10 +1535,10 @@ getAVMetadata(callback: AsyncCallback\<AVMetadata>): void
 **示例：**
 ```js
 controller.getAVMetadata(function (err, metadata) {
-    if (err.code == 0) {
-        console.info('getAVMetadata : SUCCESS : assetId : ' + metadata.assetId);
-    } else {
+    if (err) {
         console.info('getAVMetadata : ERROR : ' + err.message);
+    } else {
+        console.info('getAVMetadata : SUCCESS : assetId : ' + metadata.assetId);
     }
 });
 ```
@@ -1578,10 +1584,10 @@ getOutputDevice(callback: AsyncCallback\<OutputDeviceInfo>): void
 
 ```js
 controller.getOutputDevice(function (err, deviceInfo) {
-    if (err.code == 0) {
-        console.info('getOutputDevice : SUCCESS : isRemote : ' + deviceInfo.isRemote);
-    } else {
+    if (err) {
         console.info('getOutputDevice : ERROR : ' + err.message);
+    } else {
+        console.info('getOutputDevice : SUCCESS : isRemote : ' + deviceInfo.isRemote);
     }
 });
 ```
@@ -1641,10 +1647,10 @@ let keyItem = {code:0x49, pressedTime:123456789, deviceId:0};
 let event = {action:2, key:keyItem, keys:[keyItem]};
 
 controller.sendAVKeyEvent(event, function (err) {
-    if (err.code == 0) {
-        console.info('sendAVKeyEvent Successfully');
+    if (err) {
+        console.info('sendAVKeyEvent : ERROR : '+ err.message);
     } else {
-        console.info('sendAVKeyEvent : ERROR : '+err.message);
+        console.info('sendAVKeyEvent Successfully');
     }
 });
 ```
@@ -1666,10 +1672,10 @@ getLaunchAbility(): Promise\<WantAgent>
 **示例：**
 
 ```js
-import WantAgent from '@ohos.wantAgent';
+import wantAgent from '@ohos.wantAgent';
 
-controller.getLaunchAbility().then((wantAgent) => {
-    console.info('getLaunchAbility : SUCCESS : wantAgent : ' + wantAgent);
+controller.getLaunchAbility().then((agent) => {
+    console.info('getLaunchAbility : SUCCESS : wantAgent : ' + agent);
 }).catch((err) => {
     console.info('getLaunchAbility : ERROR : '+ err.message);
 });
@@ -1692,13 +1698,13 @@ getLaunchAbility(callback: AsyncCallback\<WantAgent>): void
 **示例：**
 
 ```js
-import WantAgent from '@ohos.wantAgent';
+import wantAgent from '@ohos.wantAgent';
 
-controller.getLaunchAbility(function (err, wantAgent) {
-    if (err.code == 0) {
-        console.info('getLaunchAbility : SUCCESS : wantAgent : ' + wantAgent);
+controller.getLaunchAbility(function (err, agent) {
+    if (err) {
+        console.info('getLaunchAbility : ERROR : '+ err.message);
     } else {
-        console.info('getLaunchAbility : ERROR : '+err.message);
+        console.info('getLaunchAbility : SUCCESS : wantAgent : ' + agent);
     }
 });
 ```
@@ -1740,10 +1746,10 @@ isActive(): Promise\<boolean>
 **示例：**
 
 ```js
-controller.isActive().then((isactive) => {
-    console.info('isActive : SUCCESS : isactive : ' + isactive);
+controller.isActive().then((isActive) => {
+    console.info('isActive : SUCCESS : isactive : ' + isActive);
 }).catch((err) => {
-    console.info('isActive : ERROR : '+err.message);
+    console.info('isActive : ERROR : '+ err.message);
 });
 ```
 
@@ -1765,10 +1771,10 @@ isActive(callback: AsyncCallback\<boolean>): void
 
 ```js
 controller.isActive(function (err, isActive) {
-    if (err.code == 0) {
-        console.info('isActive : SUCCESS : isactive : ' + isActive);
-    } else {
+    if (err) {
         console.info('isActive : ERROR : '+ err.message);
+    } else {
+        console.info('isActive : SUCCESS : isactive : ' + isActive);
     }
 });
 ```
@@ -1815,17 +1821,17 @@ destroy(callback: AsyncCallback\<void>): void
 
 ```js
 controller.destroy(function (err) {
-    if (err.code == 0) {
-        console.info('destroy : SUCCESS ');
-    } else {
+    if (err) {
         console.info('destroy : ERROR : '+ err.message);
+    } else {
+        console.info('destroy : SUCCESS ');
     }
 });
 ```
 
 ### getValidCommands
 
-getValidCommands(): Promise\<Set\<AVControlCommandType>>
+getValidCommands(): Promise\<Array\<AVControlCommandType>>
 
 获取有效命令。使用Promise异步回调。
 
@@ -1835,14 +1841,13 @@ getValidCommands(): Promise\<Set\<AVControlCommandType>>
 
 | 类型                                                         | 说明                              |
 | ------------------------------------------------------------ | --------------------------------- |
-| Promise<Set<[AVControlCommandType](#avcontrolcommandtype)\>\> | Promise对象。返回有效命令的集合。 |
+| Promise<Array<[AVControlCommandType](#avcontrolcommandtype)\>\> | Promise对象。返回有效命令的集合。 |
 
 **示例：**
 
 ```js
 controller.getValidCommands.then((validCommands) => {
-    console.info('getValidCommands : SUCCESS : size : ' + validCommands.size);
-    console.info('getValidCommands : SUCCESS : validCommands : ' + validCommands.values());
+    console.info('getValidCommands : SUCCESS : size : ' + validCommands.length);
 }).catch((err) => {
     console.info('getValidCommands : ERROR : '+ err.message);
 });
@@ -1850,7 +1855,7 @@ controller.getValidCommands.then((validCommands) => {
 
 ### getValidCommands
 
-getValidCommands(callback: AsyncCallback\<Set\<AVControlCommandType>>): void
+getValidCommands(callback: AsyncCallback\<Array\<AVControlCommandType>>): void
 
 获取有效命令。使用callback异步回调。
 
@@ -1860,17 +1865,16 @@ getValidCommands(callback: AsyncCallback\<Set\<AVControlCommandType>>): void
 
 | 参数名   | 类型                                                         | 必填 | 说明                           |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------ |
-| callback | AsyncCallback\<Set\<[AVControlCommandType](#avcontrolcommandtype)\>\> | 是   | 回调函数，返回有效命令的集合。 |
+| callback | AsyncCallback\<Array\<[AVControlCommandType](#avcontrolcommandtype)\>\> | 是   | 回调函数，返回有效命令的集合。 |
 
 **示例：**
 
 ```js
 controller.getValidCommands(function (err, validCommands) {
-    if (err.code == 0) {
-        console.info('getValidCommands : SUCCESS : size : ' + validCommands.size);
-        console.info('getValidCommands : SUCCESS : validCommands : ' + validCommands.values());
-    } else {
+    if (err) {
         console.info('getValidCommands : ERROR : '+ err.message);
+    } else {
+        console.info('getValidCommands : SUCCESS : size : ' + validCommands.length);
     }
 });
 ```
@@ -1898,18 +1902,18 @@ sendControlCommand(command: AVControlCommand): Promise\<void>
 **示例：**
 
 ```js
-let avcommand = {command:'play'};
-// let avcommand = {command:'pause'};
-// let avcommand = {command:'stop'};
-// let avcommand = {command:'playNext'};
-// let avcommand = {command:'playPrevious'};
-// let avcommand = {command:'fastForward'};
-// let avcommand = {command:'rewind'};
-// let avcommand = {command:'seek', parameter:10};
-// let avcommand = {command:'setSpeed', parameter:2.6};
-// let avcommand = {command:'setLoopMode', parameter:avsession.LoopMode.LOOP_MODE_SINGLE};
-// let avcommand = {command:'toggleFavorite', parameter:"false"};
-controller.sendControlCommand(avcommand).then(() => {
+let avCommand = {command:'play'};
+// let avCommand = {command:'pause'};
+// let avCommand = {command:'stop'};
+// let avCommand = {command:'playNext'};
+// let avCommand = {command:'playPrevious'};
+// let avCommand = {command:'fastForward'};
+// let avCommand = {command:'rewind'};
+// let avCommand = {command:'seek', parameter:10};
+// let avCommand = {command:'setSpeed', parameter:2.6};
+// let avCommand = {command:'setLoopMode', parameter:avSession.LoopMode.LOOP_MODE_SINGLE};
+// let avCommand = {command:'toggleFavorite', parameter:"false"};
+controller.sendControlCommand(avCommand).then(() => {
     console.info('sendControlCommand successfully');
 }).catch((err) => {
     console.info('sendControlCommand : ERROR : '+ err.message);
@@ -1934,29 +1938,29 @@ sendControlCommand(command: AVControlCommand, callback: AsyncCallback\<void>): v
 **示例：**
 
 ```js
-let avcommand = {command:'play'};
-// let avcommand = {command:'pause'};
-// let avcommand = {command:'stop'};
-// let avcommand = {command:'playNext'};
-// let avcommand = {command:'playPrevious'};
-// let avcommand = {command:'fastForward'};
-// let avcommand = {command:'rewind'};
-// let avcommand = {command:'seek', parameter:10};
-// let avcommand = {command:'setSpeed', parameter:2.6};
-// let avcommand = {command:'setLoopMode', parameter:avsession.LoopMode.LOOP_MODE_SINGLE};
-// let avcommand = {command:'toggleFavorite', parameter:"false"};
-controller.sendControlCommand(avcommand, function (err) {
-    if (err.code == 0) {
-        console.info('sendControlCommand successfully');
-    } else {
+let avCommand = {command:'play'};
+// let avCommand = {command:'pause'};
+// let avCommand = {command:'stop'};
+// let avCommand = {command:'playNext'};
+// let avCommand = {command:'playPrevious'};
+// let avCommand = {command:'fastForward'};
+// let avCommand = {command:'rewind'};
+// let avCommand = {command:'seek', parameter:10};
+// let avCommand = {command:'setSpeed', parameter:2.6};
+// let avCommand = {command:'setLoopMode', parameter:avSession.LoopMode.LOOP_MODE_SINGLE};
+// let avCommand = {command:'toggleFavorite', parameter:"false"};
+controller.sendControlCommand(avCommand, function (err) {
+    if (err) {
         console.info('sendControlCommand : ERROR : '+ err.message);
+    } else {
+        console.info('sendControlCommand successfully');
     }
 });
 ```
 
-### on('metadataChanged')
+### on('metadataChange')
 
-on(type: 'metadataChanged', filter: Set\<keyof AVMetadata> | 'all', callback: (data: AVMetadata) => void)
+on(type: 'metadataChange', filter: Array\<keyof AVMetadata> | 'all', callback: (data: AVMetadata) => void)
 
 设置元数据变化的监听事件。
 
@@ -1966,29 +1970,26 @@ on(type: 'metadataChanged', filter: Set\<keyof AVMetadata> | 'all', callback: (d
 
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
-| type     | string                                                       | 是   | 事件回调类型，支持事件`'metadataChanged'`：当元数据变化时，触发该事件。 |
-| filter   | Set\<keyof&nbsp;[AVMetadata](#avmetadata)\>&nbsp;&#124;&nbsp;'all' | 是   | 'all' 表示关注元数据所有字段变化；Set<keyof&nbsp;[AVMetadata](#avmetadata)\> 表示关注set中的字段。 |
+| type     | string                                                       | 是   | 事件回调类型，支持事件`'metadataChange'`：当元数据变化时，触发该事件。 |
+| filter   | Array\<keyof&nbsp;[AVMetadata](#avmetadata)\>&nbsp;&#124;&nbsp;'all' | 是   | 'all' 表示关注元数据所有字段变化；Array<keyof&nbsp;[AVMetadata](#avmetadata)\> 表示关注Array中的字段。 |
 | callback | (data: [AVMetadata](#avmetadata)) => void                    | 是   | 回调函数，参数data是变化后的元数据。                         |
 
 **示例：**
 
 ```js
-controller.on('metadataChanged', 'all', (metadata) => {
-    console.info('on metadataChanged assetId : ' + metadata.assetId);
+controller.on('metadataChange', 'all', (metadata) => {
+    console.info('on metadataChange assetId : ' + metadata.assetId);
 });
 
-let filterKeys = new Set();
-filterKeys.add("assetId");
-filterKeys.add("title");
-filterKeys.add("description");
-controller.on('metadataChanged', filterKeys, (metadata) => {
-    console.info('on metadataChanged assetId : ' + metadata.assetId);
+let metaFilter = ['assetId', 'title', 'description'];
+controller.on('metadataChange', metaFilter, (metadata) => {
+    console.info('on metadataChange assetId : ' + metadata.assetId);
 });
 ```
 
-### on('playbackStateChanged')
+### on('playbackStateChange')
 
-on(type: 'playbackStateChanged', filter: Set\<keyof AVPlaybackState> | 'all', callback: (state: AVPlaybackState) => void)
+on(type: 'playbackStateChange', filter: Array\<keyof AVPlaybackState> | 'all', callback: (state: AVPlaybackState) => void)
 
 设置播放状态变化的监听事件。
 
@@ -1998,29 +1999,26 @@ on(type: 'playbackStateChanged', filter: Set\<keyof AVPlaybackState> | 'all', ca
 
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
-| type     | string                                                       | 是   | 事件回调类型，支持事件`'playbackStateChanged'`：当播放状态变化时，触发该事件。 |
-| filter   | Set\<keyof&nbsp;[AVPlaybackState](#avplaybackstate)\>&nbsp;&#124;&nbsp;'all' | 是   | 'all' 表示关注播放状态所有字段变化；Set<keyof&nbsp;[AVPlaybackState](#avplaybackstate)\> 表示关注set中的字段。 |
+| type     | string                                                       | 是   | 事件回调类型，支持事件`'playbackStateChange'`：当播放状态变化时，触发该事件。 |
+| filter   | Array\<keyof&nbsp;[AVPlaybackState](#avplaybackstate)\>&nbsp;&#124;&nbsp;'all' | 是   | 'all' 表示关注播放状态所有字段变化；Array<keyof&nbsp;[AVPlaybackState](#avplaybackstate)\> 表示关注set中的字段。 |
 | callback | (state: [AVPlaybackState](#avplaybackstate)) => void         | 是   | 回调函数，参数state是变化后的播放状态。                      |
 
 **示例：**
 
 ```js
-controller.on('AVPlaybackState', 'all', (playbackState) => {
-    console.info('on AVPlaybackState state : ' + playbackState.state);
+controller.on('playbackStateChange', 'all', (playbackState) => {
+    console.info('on playbackStateChange state : ' + playbackState.state);
 });
 
-let filterKeys = new Set();
-filterKeys.add("state");
-filterKeys.add("speed");
-filterKeys.add("loopMode");
-controller.on('AVPlaybackState', filterKeys, (playbackState) => {
-    console.info('on AVPlaybackState state : ' + playbackState.state);
+let playbackFilter = ['state', 'speed', 'loopMode'];
+controller.on('playbackStateChange', playbackFilter, (playbackState) => {
+    console.info('on playbackStateChange state : ' + playbackState.state);
 });
 ```
 
-### on('sessionDestroyed')
+### on('sessionDestroy')
 
-on(type: 'sessionDestroyed', callback: () => void)
+on(type: 'sessionDestroy', callback: () => void)
 
 会话的销毁的监听事件。
 
@@ -2030,20 +2028,20 @@ on(type: 'sessionDestroyed', callback: () => void)
 
 | 参数名   | 类型       | 必填 | 说明                                                         |
 | -------- | ---------- | ---- | ------------------------------------------------------------ |
-| type     | string     | 是   | 事件回调类型，支持事件`'sessionDestroyed'`：当检测到会话销毁时，触发该事件）。 |
+| type     | string     | 是   | 事件回调类型，支持事件`'sessionDestroy'`：当检测到会话销毁时，触发该事件）。 |
 | callback | () => void | 是   | 回调函数。                                                   |
 
 **示例：**
 
 ```js
-controller.on('sessionDestroyed', () => {
-    console.info('on sessionDestroyed : SUCCESS ');
+controller.on('sessionDestroy', () => {
+    console.info('on sessionDestroy : SUCCESS ');
 });
 ```
 
-### on('activeStateChanged')
+### on('activeStateChange')
 
-on(type: 'activeStateChanged', callback: (isActive: boolean) => void)
+on(type: 'activeStateChange', callback: (isActive: boolean) => void)
 
 会话的激活状态的监听事件。
 
@@ -2053,20 +2051,20 @@ on(type: 'activeStateChanged', callback: (isActive: boolean) => void)
 
 | 参数名   | 类型                        | 必填 | 说明                                                         |
 | -------- | --------------------------- | ---- | ------------------------------------------------------------ |
-| type     | string                      | 是   | 事件回调类型，支持事件`'activeStateChanged'`：当检测到会话的激活状态发生改变时，触发该事件。 |
+| type     | string                      | 是   | 事件回调类型，支持事件`'activeStateChange'`：当检测到会话的激活状态发生改变时，触发该事件。 |
 | callback | (isActive: boolean) => void | 是   | 回调函数。参数isActive表示会话是否被激活。                   |
 
 **示例：**
 
 ```js
-controller.on('activeStateChanged', (isActive) => {
-    console.info('on activeStateChanged : SUCCESS : isActive ' + isActive);
+controller.on('activeStateChange', (isActive) => {
+    console.info('on activeStateChange : SUCCESS : isActive ' + isActive);
 });
 ```
 
-### on('validCommandChanged')
+### on('validCommandChange')
 
-on(type: 'validCommandChanged', callback: (commands: Set\<AVControlCommandType>) => void)
+on(type: 'validCommandChanged', callback: (commands: Array\<AVControlCommandType>) => void)
 
 会话的有效命令监听事件。
 
@@ -2076,21 +2074,21 @@ on(type: 'validCommandChanged', callback: (commands: Set\<AVControlCommandType>)
 
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
-| type     | string                                                       | 是   | 事件回调类型，支持事件`'activeStateChanged'`：当检测到会话的合法命令发生改变时，触发该事件。 |
-| callback | (commands: Set<[AVControlCommandType](#avcontrolcommandtype)\>) => void | 是   | 回调函数。参数commands是有效命令的集合。                     |
+| type     | string                                                       | 是   | 事件回调类型，支持事件`'activeStateChange'`：当检测到会话的合法命令发生改变时，触发该事件。 |
+| callback | (commands: Array<[AVControlCommandType](#avcontrolcommandtype)\>) => void | 是   | 回调函数。参数commands是有效命令的集合。                     |
 
 **示例：**
 
 ```js
-controller.on('validCommandChanged', (validCommands) => {
-    console.info('validCommandChanged : SUCCESS : size : ' + validCommands.size);
-    console.info('validCommandChanged : SUCCESS : validCommands : ' + validCommands.values());
+controller.on('validCommandChange', (validCommands) => {
+    console.info('validCommandChange : SUCCESS : size : ' + validCommands.size);
+    console.info('validCommandChange : SUCCESS : validCommands : ' + validCommands.values());
 });
 ```
 
-### on('outputDeviceChanged')
+### on('outputDeviceChange')
 
-on(type: 'outputDeviceChanged', callback: (device: OutputDeviceInfo) => void): void
+on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): void
 
 设置分布式设备变化的监听事件。
 
@@ -2100,20 +2098,20 @@ on(type: 'outputDeviceChanged', callback: (device: OutputDeviceInfo) => void): v
 
 | 参数名   | 类型                                                    | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------- | ---- | ------------------------------------------------------------ |
-| type     | string                                                  | 是   | 事件回调类型，支持事件为`'outputDeviceChanged'`：当分布式设备变化时，触发该事件）。 |
+| type     | string                                                  | 是   | 事件回调类型，支持事件为`'outputDeviceChange'`：当分布式设备变化时，触发该事件）。 |
 | callback | (device: [OutputDeviceInfo](#outputdeviceinfo)) => void | 是   | 回调函数，参数device是设备相关信息。                         |
 
 **示例：**
 
 ```js
-controller.on('outputDeviceChanged', (device) => {
-    console.info('on outputDeviceChanged device isRemote : ' + device.isRemote);
+controller.on('outputDeviceChange', (device) => {
+    console.info('on outputDeviceChange device isRemote : ' + device.isRemote);
 });
 ```
 
 ### off
 
-off(type: 'metadataChanged'|'playbackStateChanged'|'sessionDestroyed'|'activeStateChanged'|'validCommandChanged'|'outputDeviceChanged'): void
+off(type: 'metadataChange'|'playbackStateChange'|'sessionDestroy'|'activeStateChange'|'validCommandChange'|'outputDeviceChange'): void
 
 控制器能够设置的监听事件的关闭操作。
 
@@ -2123,17 +2121,17 @@ off(type: 'metadataChanged'|'playbackStateChanged'|'sessionDestroyed'|'activeSta
 
 | 参数名 | 类型   | 必填 | 说明                                                         |
 | ------ | ------ | ---- | ------------------------------------------------------------ |
-| type   | string | 是   | 关闭对应的监听事件，支持的事件包括：`'metadataChanged'` ，`'playbackStateChanged'`，`'sessionDestroyed'` ，`'activeStateChanged'`，`'validCommandChanged'`，`'outputDeviceChanged'`。 |
+| type   | string | 是   | 关闭对应的监听事件，支持的事件包括：`'metadataChange'` ，`'playbackStateChange'`，`'sessionDestroy'` ，`'activeStateChange'`，`'validCommandChange'`，`'outputDeviceChange'`。 |
 
 **示例：**
 
 ```js
-controller.off('metadataChanged');
-controller.off('playbackStateChanged');
-controller.off('sessionDestroyed');
-controller.off('activeStateChanged');
-controller.off('validCommandChanged');
-controller.off('outputDeviceChanged');
+controller.off('metadataChange');
+controller.off('playbackStateChange');
+controller.off('sessionDestroy');
+controller.off('activeStateChange');
+controller.off('validCommandChange');
+controller.off('outputDeviceChange');
 ```
 
 ## SessionToken
