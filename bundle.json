@@ -67,7 +67,12 @@
           "//foundation/multimedia/av_session/services/session/server/test:unittest",
           "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest:fuzztest",
           "//foundation/multimedia/av_session/services/session/server/test/fuzztest:fuzztest",
-          "//foundation/multimedia/av_session/frameworks/native/session/test/benchmarktest:benchmarktest"
+          "//foundation/multimedia/av_session/frameworks/native/session/test/benchmarktest:benchmarktest",
+          "//foundation/multimedia/av_session/interfaces/inner_api/native/session/test/fuzztest/avcontrolcommand_fuzzer:fuzztest",
+          "//foundation/multimedia/av_session/interfaces/inner_api/native/session/test/fuzztest/avmetadata_fuzzer:fuzztest",
+          "//foundation/multimedia/av_session/interfaces/inner_api/native/session/test/fuzztest/avplaybackstate_fuzzer:fuzztest",
+          "//foundation/multimedia/av_session/interfaces/inner_api/native/session/test/fuzztest/avsessiondescriptor_fuzzer:fuzztest",
+          "//foundation/multimedia/av_session/interfaces/inner_api/native/session/test/fuzztest/avsessionpixelmap_fuzzer:fuzztest"
         ]
       }
     }
