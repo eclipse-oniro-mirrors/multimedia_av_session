@@ -22,20 +22,9 @@
 #endif
 
 #ifdef ENBABLE_AVSESSION_TRACE_CONTROL
-#define AVSESSION_TRACE_SYNC_START(traceName)               \
-    do {                                                     \
-        AVSessionTrace trace(traceName);                    \
-    } while (0)
-
-#define AVSESSION_TRACE_ASYNC_START(traceName, taskId)      \
-    do {                                                     \
-        AVSessionTrace::TraceBegin(traceName, taskId);      \
-    } while (0)
-
-#define AVSESSION_TRACE_ASYNC_END(traceName, taskId)        \
-    do {                                                     \
-        AVSessionTrace::TraceEnd(traceName, taskId);        \
-    } while (0)
+#define AVSESSION_TRACE_SYNC_START(traceName) AVSessionTrace trace(traceName)
+#define AVSESSION_TRACE_ASYNC_START(traceName, taskId) AVSessionTrace::TraceBegin(traceName, taskId)
+#define AVSESSION_TRACE_ASYNC_END(traceName, taskId) AVSessionTrace::TraceEnd(traceName, taskId)
 #else
 #define AVSESSION_TRACE_SYNC_START(...)
 #define AVSESSION_TRACE_ASYNC_START(...)
