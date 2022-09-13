@@ -24,6 +24,8 @@
 
 namespace OHOS::AVSession {
 class AVControllerItem;
+class RemoteSessionSink;
+class RemoteSessionSource;
 class AVSessionItem : public AVSessionStub {
 public:
     explicit AVSessionItem(const AVSessionDescriptor& descriptor);
@@ -66,6 +68,8 @@ public:
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
+    void HandleOutputDeviceChange(const OutputDeviceInfo& info);
+
     void ExecuteControllerCommand(const AVControlCommand& cmd);
 
     int32_t AddController(pid_t pid, sptr<AVControllerItem>& controller);
@@ -86,10 +90,25 @@ public:
 
     void SetTop(bool top);
 
+    std::shared_ptr<RemoteSessionSource> GetRemoteSource();
+
     void HandleControllerRelease(pid_t pid);
 
     void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);
 
+    void SetOutputDevice(const OutputDeviceInfo& info);
+
+    void GetOutputDevice(OutputDeviceInfo& info);
+
+    int32_t CastAudioToRemote(const std::string& sourceDevice, const std::string& sinkDevice,
+                              const std::string& sinkCapability);
+
+    int32_t SourceCancelCastAudio(const std::string& sinkDevice);
+
+    int32_t CastAudioFromRemote(const std::string& sourceSessionId, const std::string& sourceDevice,
+                                const std::string& sinkDevice, const std::string& sourceCapability);
+
+    int32_t SinkCancelCastAudio();
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
@@ -133,6 +152,9 @@ private:
     std::shared_ptr<AVSessionCallback> remoteCallback_;
     std::function<void(AVSessionItem&)> serviceCallback_;
     friend class AVSessionDumper;
+
+    std::shared_ptr<RemoteSessionSource> remoteSource_;
+    std::shared_ptr<RemoteSessionSink> remoteSink_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H

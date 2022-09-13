@@ -44,7 +44,9 @@
             "//foundation/multimedia/av_session/utils:avsession_utils"
           ],
           "service_group": [
-            "//foundation/multimedia/av_session/services/session:avession_server"
+            "//foundation/multimedia/av_session/services/session:avession_server",
+            "//foundation/multimedia/av_session/services/session/server/remote:remote_session_source",
+            "//foundation/multimedia/av_session/services/session/server/remote:remote_session_sink"
           ]
         },
         "inner_kits": [

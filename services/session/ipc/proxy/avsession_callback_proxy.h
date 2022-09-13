@@ -34,6 +34,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediaId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
+    void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
 private:
     static inline BrokerDelegator<AVSessionCallbackProxy> delegator_;
 };

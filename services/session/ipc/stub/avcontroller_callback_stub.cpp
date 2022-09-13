@@ -83,4 +83,14 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel &data
     OnValidCommandChange(cmds);
     return ERR_NONE;
 }
+
+int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel &data, MessageParcel &reply)
+{
+    OutputDeviceInfo outputDeviceInfo;
+    CHECK_AND_RETURN_RET_LOG(data.ReadBool(outputDeviceInfo.isRemote_), ERR_NONE, "read isRemote_ failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadStringVector(&outputDeviceInfo.deviceIds_), ERR_NONE, "read Ids failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadStringVector(&outputDeviceInfo.deviceNames_), ERR_NONE, "read Names failed");
+    OnOutputDeviceChange(outputDeviceInfo);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

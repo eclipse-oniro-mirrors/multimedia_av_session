@@ -147,4 +147,17 @@ void AVSessionCallbackProxy::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     CHECK_AND_RETURN_LOG(Remote()->SendRequest(SESSION_CALLBACK_ON_MEDIA_KEY_EVENT, data, reply, option) == 0,
         "send request failed");
 }
+
+void AVSessionCallbackProxy::OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteBool(outputDeviceInfo.isRemote_), "write isRemote_ failed");
+    CHECK_AND_RETURN_LOG(data.WriteStringVector(outputDeviceInfo.deviceIds_), "write deviceIds_ failed");
+    CHECK_AND_RETURN_LOG(data.WriteStringVector(outputDeviceInfo.deviceNames_), "write deviceNames_ failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(Remote()->SendRequest(SESSION_CALLBACK_ON_OUTPUT_DEVICE_CHANGE, data, reply, option) == 0,
+                         "send request failed");
+}
 } // namespace OHOS::AVSession

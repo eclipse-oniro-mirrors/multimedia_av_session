@@ -50,6 +50,7 @@ public:
     virtual void OnSetLoopMode(int32_t loopMode) = 0;
     virtual void OnToggleFavorite(const std::string& mediald) = 0;
     virtual void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
+    virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
     virtual ~AVSessionCallback() = default;
 };
 
@@ -65,7 +66,23 @@ public:
 
     virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
+    virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
+
     virtual ~AVControllerCallback() = default;
+};
+
+struct SessionToken {
+    std::string sessionId;
+    pid_t pid;
+    uid_t uid;
+};
+
+enum SessionDataCategory {
+    SESSION_DATA_CATEGORY_INVALID = -1,
+    SESSION_DATA_META = 0,
+    SESSION_DATA_PLAYBACK_STATE = 1,
+    SESSION_DATA_CONTROL_COMMAND = 2,
+    SESSION_DATA_CATEGORY_MAX = 3,
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

@@ -92,4 +92,20 @@ void AVControllerCallbackProxy::OnValidCommandChange(const std::vector<int32_t> 
     CHECK_AND_PRINT_LOG(remote->SendRequest(CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE, parcel, reply, option) == 0,
         "send request failed");
 }
+
+void AVControllerCallbackProxy::OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteBool(outputDeviceInfo.isRemote_), "write isRemote_ failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteStringVector(outputDeviceInfo.deviceIds_), "write deviceIds_ failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteStringVector(outputDeviceInfo.deviceNames_), "write deviceNames_ failed");
+
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_PRINT_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_PRINT_LOG(remote->SendRequest(CONTROLLER_CMD_ON_OUTPUT_DEVICE_CHANGE, parcel, reply, option) == 0,
+                        "send request failed");
+}
 }

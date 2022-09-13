@@ -173,9 +173,57 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
 
 napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info)
 {
-    SLOGI("not implement");
-    napi_throw_error(env, nullptr, "not implement");
-    return nullptr;
+    struct ConcreteContext : public ContextBase {
+        SessionToken sessionToken_ {};
+        bool isAll_ = false;
+        std::vector<AudioStandard::AudioDeviceDescriptor> audioDeviceDescriptors_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments");
+
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_string || type == napi_object),
+                               "invalid type invalid");
+        if (type == napi_string) {
+            std::string flag;
+            context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], flag);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (flag == "all"), "invalid argument");
+            context->isAll_ = true;
+        }
+        if (type == napi_object) {
+            context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionToken_);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (!context->sessionToken_.sessionId.empty()),
+                                   "invalid session token");
+        }
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->audioDeviceDescriptors_);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->audioDeviceDescriptors_.size() > 0),
+                               "invalid AudioDeviceDescriptor");
+    };
+    context->GetCbInfo(env, info, input);
+
+    auto executor = [context]() {
+        for (const auto& audioDeviceDescriptor : context->audioDeviceDescriptors_) {
+            SLOGI("networkId_: %{public}s", audioDeviceDescriptor.networkId_.c_str());
+        }
+        int32_t ret = AVSESSION_ERROR;
+        if (context->isAll_) {
+            ret = AVSessionManager::GetInstance().CastAudioForAll(context->audioDeviceDescriptors_);
+        } else {
+            ret = AVSessionManager::GetInstance().CastAudio(context->sessionToken_, context->audioDeviceDescriptors_);
+        }
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->error = "CastAudio failed";
+        }
+    };
+
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "CastAudio", executor, complete);
 }
 
 napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)

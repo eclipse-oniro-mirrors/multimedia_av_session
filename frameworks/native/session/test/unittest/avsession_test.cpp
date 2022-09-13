@@ -141,6 +141,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
+    void OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo) override {};
 
     ~AVSessionCallbackImpl() override;
 };

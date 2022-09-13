@@ -42,6 +42,9 @@ ohos_shared_library("avsession_service") {
     "server/avsession_service.cpp",
     "server/background_audio_controller.cpp",
     "server/focus_session_strategy.cpp",
+    "server/remote/json_utils.cpp",
+    "server/remote/remote_session_sink_proxy.cpp",
+    "server/remote/remote_session_source_proxy.cpp",
     "server/session_stack.cpp",
   ]
 
@@ -64,6 +67,9 @@ ohos_shared_library("avsession_service") {
     "//foundation/multimedia/av_session/services/session/ipc/proxy",
     "//foundation/multimedia/av_session/services/session/ipc/stub",
     "//foundation/multimedia/av_session/services/session/adapter",
+    "//foundation/multimedia/av_session/services/session/server",
+    "//foundation/multimedia/av_session/services/session/server/remote",
+    "//third_party/json/single_include",
   ]
 
   cflags = [
@@ -99,6 +105,7 @@ ohos_shared_library("avsession_service") {
 
   deps = [
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
+    "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
     "//foundation/multimedia/av_session/utils:avsession_utils",
   ]
 
@@ -109,6 +116,8 @@ ohos_shared_library("avsession_service") {
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "data_object:distributeddataobject_impl",
+    "device_manager:devicemanagersdk",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",

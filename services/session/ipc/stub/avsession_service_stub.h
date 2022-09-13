@@ -33,6 +33,9 @@ private:
     int HandleSendSystemAVKeyEvent(MessageParcel &data, MessageParcel &reply);
     int HandleSendSystemControlCommand(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterClientDeathObserver(MessageParcel &data, MessageParcel &reply);
+    int HandleCastAudio(MessageParcel &data, MessageParcel &reply);
+    int HandleCastAudioForAll(MessageParcel &data, MessageParcel &reply);
+    int HandleRemoteCastAudio(MessageParcel &data, MessageParcel &reply);
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HanlerFunc = int(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
@@ -44,7 +47,10 @@ private:
         [SERVICE_CMD_REGISTER_SESSION_LISTENER] = &AVSessionServiceStub::HandleRegisterSessionListener,
         [SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT] = &AVSessionServiceStub::HandleSendSystemAVKeyEvent,
         [SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND] = &AVSessionServiceStub::HandleSendSystemControlCommand,
-        [SERVICE_CMD_REGISTER_CLIENT_DEATH] = &AVSessionServiceStub::HandleRegisterClientDeathObserver
+        [SERVICE_CMD_REGISTER_CLIENT_DEATH] = &AVSessionServiceStub::HandleRegisterClientDeathObserver,
+        [SERVICE_CMD_CAST_AUDIO] = &AVSessionServiceStub::HandleCastAudio,
+        [SERVICE_CMD_CAST_AUDIO_FOR_ALL] = &AVSessionServiceStub::HandleCastAudioForAll,
+        [SERVICE_CMD_SEND_COMMAND_TO_REMOTE] = &AVSessionServiceStub::HandleRemoteCastAudio,
     };
 };
 } // namespace OHOS::AVSession

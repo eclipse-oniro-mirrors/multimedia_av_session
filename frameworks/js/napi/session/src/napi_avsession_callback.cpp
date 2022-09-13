@@ -129,6 +129,12 @@ void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent &keyEvent)
     HandleEvent(EVENT_MEDIA_KEY_EVENT, std::make_shared<MMI::KeyEvent>(keyEvent));
 }
 
+void NapiAVSessionCallback::OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
+    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, outputDeviceInfo);
+}
+
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

@@ -54,7 +54,7 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor &desc
         sessionUIDs_.erase(descriptor.uid_);
     }
 
-    if (descriptor.thirdPartyApp) {
+    if (descriptor.isThirdPartyApp_) {
         if (!AppManagerAdapter::GetInstance().IsAppBackground(descriptor.uid_)) {
             AppManagerAdapter::GetInstance().AddObservedApp(descriptor.uid_);
             return;

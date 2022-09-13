@@ -16,11 +16,20 @@
 #ifndef OHOS_REMOTE_SESSION_SOURCE_H
 #define OHOS_REMOTE_SESSION_SOURCE_H
 
+#include "avsession_info.h"
+#include "avsession_item.h"
+#include "avmeta_data.h"
+#include "avplayback_state.h"
+
 namespace OHOS::AVSession {
 class RemoteSessionSource {
 public:
-    RemoteSessionSource();
-    ~RemoteSessionSource();
+    virtual int32_t CastSessionToRemote(const sptr<AVSessionItem>& session, const std::string& sourceDevice,
+                                        const std::string& sinkDevice, const std::string& sinkCapability) = 0;
+    virtual int32_t CancelCastAudio(const std::string& sinkDevice) = 0;
+    virtual int32_t SetAVMetaData(const AVMetaData& metaData) = 0;
+    virtual int32_t SetAVPlaybackState(const AVPlaybackState& state) = 0;
+    virtual ~RemoteSessionSource() = default;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_REMOTE_SESSION_SOURCE_H

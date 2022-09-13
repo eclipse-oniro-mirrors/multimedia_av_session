@@ -137,4 +137,15 @@ int32_t AVSessionCallbackStub::HandleOnMediaKeyEvent(MessageParcel& data, Messag
     OnMediaKeyEvent(*keyEvent);
     return ERR_NONE;
 }
+
+int32_t AVSessionCallbackStub::HandOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnOutputDeviceChange");
+    OutputDeviceInfo outputDeviceInfo;
+    CHECK_AND_RETURN_RET_LOG(data.ReadBool(outputDeviceInfo.isRemote_), ERR_NONE, "read isRemote_ failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadStringVector(&outputDeviceInfo.deviceIds_), ERR_NONE, "read id failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadStringVector(&outputDeviceInfo.deviceNames_), ERR_NONE, "read name failed");
+    OnOutputDeviceChange(outputDeviceInfo);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

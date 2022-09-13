@@ -32,6 +32,7 @@ public:
         EVENT_META_DATA_CHANGE,
         EVENT_ACTIVE_STATE_CHANGE,
         EVENT_VALID_COMMAND_CHANGE,
+        EVENT_OUTPUT_DEVICE_CHANGE,
         EVENT_TYPE_MAX
     };
 
@@ -43,6 +44,7 @@ public:
     void OnMetaDataChange(const AVMetaData& data) override;
     void OnActiveStateChange(bool isActive) override;
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
+    void OnOutputDeviceChange(const OutputDeviceInfo& info) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

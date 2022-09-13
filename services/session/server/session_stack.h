@@ -28,6 +28,8 @@ public:
 
     sptr<AVSessionItem> RemoveSession(pid_t pid, const std::string& abilityName) override;
 
+    sptr<AVSessionItem> RemoveSession(const std::string& sessionId) override;
+
     sptr<AVSessionItem> GetSession(pid_t pid, const std::string& abilityName) override;
 
     sptr<AVSessionItem> GetSessionById(const std::string& sessionId) override;

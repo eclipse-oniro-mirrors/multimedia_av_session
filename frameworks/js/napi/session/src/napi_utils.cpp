@@ -157,6 +157,20 @@ napi_status NapiUtils::SetValue(napi_env env, const AppExecFwk::ElementName& in,
     return napi_ok;
 }
 
+napi_status NapiUtils::SetOutPutDeviceIdValue(napi_env env, const std::vector<std::string>& in, napi_value& out)
+{
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN(status == napi_ok, "create array failed!", status);
+    int index = 0;
+    for (auto& item : in) {
+        napi_value element = nullptr;
+        SetValue(env, static_cast<int32_t>(std::stoi(item)), element);
+        status = napi_set_element(env, out, index++, element);
+        CHECK_RETURN((status == napi_ok), "napi_set_element failed!", status);
+    }
+    return status;
+}
+
 /* napi_value <-> OutputDeviceInfo */
 napi_status NapiUtils::SetValue(napi_env env, const OutputDeviceInfo& in, napi_value& out)
 {
@@ -169,7 +183,7 @@ napi_status NapiUtils::SetValue(napi_env env, const OutputDeviceInfo& in, napi_v
     status = napi_set_named_property(env, out, "isRemote", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
-    status = SetValue(env, in.deviceIds_, property);
+    status = SetOutPutDeviceIdValue(env, in.deviceIds_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "deviceId", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
@@ -845,6 +859,162 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AppExecFwk::Element
         CHECK_RETURN(napi_ok == GetStageElementName(env, in, out), "get StagContext failed", napi_generic_failure);
     } else {
         CHECK_RETURN(napi_ok == GetFaElementName(env, out), "get FaContext failed", napi_generic_failure);
+    }
+    return napi_ok;
+}
+
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, SessionToken& out)
+{
+    napi_value value {};
+    auto status = napi_get_named_property(env, in, "sessionId", &value);
+    CHECK_RETURN(status == napi_ok, "get SessionToken sessionId failed", status);
+    status = GetValue(env, value, out.sessionId);
+    CHECK_RETURN(status == napi_ok, "get SessionToken sessionId value failed", status);
+
+    status = napi_get_named_property(env, in, "pid", &value);
+    CHECK_RETURN(status == napi_ok, "get SessionToken pid failed", status);
+    status = GetValue(env, value, out.pid);
+    CHECK_RETURN(status == napi_ok, "get SessionToken pid value failed", status);
+
+    status = napi_get_named_property(env, in, "uid", &value);
+    CHECK_RETURN(status == napi_ok, "get SessionToken uid failed", status);
+    status = GetValue(env, value, out.uid);
+    CHECK_RETURN(status == napi_ok, "get SessionToken uid value failed", status);
+    return napi_ok;
+}
+
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStandard::DeviceRole& out)
+{
+    int32_t deviceRole;
+    auto status = GetValue(env, in, deviceRole);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceRole failed", status);
+    out = static_cast<AudioStandard::DeviceRole>(deviceRole);
+    return napi_ok;
+}
+
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStandard::DeviceType& out)
+{
+    int32_t deviceType;
+    auto status = GetValue(env, in, deviceType);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceType failed", status);
+    out = static_cast<AudioStandard::DeviceType>(deviceType);
+    return napi_ok;
+}
+
+napi_status NapiUtils::GetSampleRate(napi_env env, napi_value in, AudioStandard::AudioSamplingRate& out)
+{
+    napi_value value {};
+    auto status = napi_get_named_property(env, in, "sampleRates", &value);
+    uint32_t length {};
+    napi_get_array_length(env, value, &length);
+    CHECK_RETURN(status == napi_ok, "get array length failed", status);
+    if (length > 0) {
+        napi_value element {};
+        status = napi_get_element(env, value, 0, &element);
+        CHECK_RETURN((status == napi_ok) && (element != nullptr), "get element failed", status);
+        int32_t samplingRate;
+        status = GetValue(env, element, samplingRate);
+        CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor audioStreamInfo_ samplingRate value failed", status);
+        out = static_cast<AudioStandard::AudioSamplingRate>(samplingRate);
+    }
+    return status;
+}
+
+napi_status NapiUtils::GetChannels(napi_env env, napi_value in, AudioStandard::AudioChannel& out)
+{
+    napi_value value {};
+    auto status = napi_get_named_property(env, in, "channelCounts", &value);
+    uint32_t length {};
+    napi_get_array_length(env, value, &length);
+    CHECK_RETURN(status == napi_ok, "get array length failed", status);
+    if (length > 0) {
+        napi_value element {};
+        status = napi_get_element(env, value, 0, &element);
+        CHECK_RETURN((status == napi_ok) && (element != nullptr), "get element failed", status);
+        int32_t channel;
+        status = GetValue(env, element, channel);
+        CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor audioStreamInfo_ channels value failed", status);
+        out = static_cast<AudioStandard::AudioChannel>(channel);
+    }
+    return status;
+}
+
+napi_status NapiUtils::GetChannelMasks(napi_env env, napi_value in, int32_t& out)
+{
+    napi_value value {};
+    auto status = napi_get_named_property(env, in, "channelMasks", &value);
+    uint32_t length {};
+    napi_get_array_length(env, value, &length);
+    CHECK_RETURN(status == napi_ok, "get array length failed", status);
+    if (length > 0) {
+        napi_value element {};
+        status = napi_get_element(env, value, 0, &element);
+        CHECK_RETURN((status == napi_ok) && (element != nullptr), "get element failed", status);
+        status = GetValue(env, element, out);
+        CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor channelMasks_ value failed", status);
+    }
+    return status;
+}
+
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStandard::AudioDeviceDescriptor& out)
+{
+    napi_value value {};
+    auto status = napi_get_named_property(env, in, "id", &value);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceId_ failed", status);
+    status = GetValue(env, value, out.deviceId_);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceId_ value failed", status);
+
+    status = napi_get_named_property(env, in, "name", &value);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceName_ failed", status);
+    status = GetValue(env, value, out.deviceName_);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceName_ value failed", status);
+
+    status = napi_get_named_property(env, in, "networkId", &value);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor networkId failed", status);
+    status = GetValue(env, value, out.networkId_);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor networkId value failed", status);
+    SLOGD("AudioDeviceDescriptor GetValue networkId %{public}s", out.networkId_.c_str());
+
+    status = napi_get_named_property(env, in, "deviceRole", &value);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceRole_ failed", status);
+    status = GetValue(env, value, out.deviceRole_);
+    CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceRole_ value failed", status);
+
+    if (napi_get_named_property(env, in, "address", &value) == napi_ok) {
+        GetValue(env, value, out.macAddress_);
+    }
+
+    if (napi_get_named_property(env, in, "deviceType", &value) == napi_ok) {
+        GetValue(env, value, out.deviceType_);
+    }
+
+    if (napi_get_named_property(env, in, "interruptGroupId", &value) == napi_ok) {
+        GetValue(env, value, out.interruptGroupId_);
+    }
+
+    if (napi_get_named_property(env, in, "volumeGroupId", &value) == napi_ok) {
+        GetValue(env, value, out.volumeGroupId_);
+    }
+
+    GetSampleRate(env, in, out.audioStreamInfo_.samplingRate);
+    GetChannels(env, in, out.audioStreamInfo_.channels);
+    GetChannelMasks(env, in, out.channelMasks_);
+    return napi_ok;
+}
+
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<AudioStandard::AudioDeviceDescriptor>& out)
+{
+    uint32_t length {};
+    auto status = napi_get_array_length(env, in, &length);
+    CHECK_RETURN(status == napi_ok, "get array length failed", status);
+    SLOGI("length %{public}d", length);
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value element {};
+        status = napi_get_element(env, in, i, &element);
+        CHECK_RETURN((status == napi_ok) && (element != nullptr), "get element failed", status);
+        AudioStandard::AudioDeviceDescriptor descriptor;
+        status = GetValue(env, element, descriptor);
+        out.push_back(descriptor);
     }
     return napi_ok;
 }

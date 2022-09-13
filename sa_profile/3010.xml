@@ -22,7 +22,7 @@
         <name>3010</name>
         <libpath>libavsession_service.z.so</libpath>
         <run-on-create>true</run-on-create>
-        <distributed>false</distributed>
+        <distributed>true</distributed>
         <dump-level>1</dump-level>
    </systemability>
 </info>

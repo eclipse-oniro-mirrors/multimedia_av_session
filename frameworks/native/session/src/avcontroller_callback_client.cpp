@@ -75,6 +75,15 @@ void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t>
     }
 }
 
+void AVControllerCallbackClient::OnOutputDeviceChange(const OutputDeviceInfo &info)
+{
+    if (callback_) {
+        if (!handler_->PostTask([this, info]() { callback_->OnOutputDeviceChange(info); })) {
+            SLOGI("AVSessionCallbackClient handler postTask failed");
+        }
+    }
+}
+
 void AVControllerCallbackClient::AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>
     &listener)
 {

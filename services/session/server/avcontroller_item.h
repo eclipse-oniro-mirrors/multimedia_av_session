@@ -21,6 +21,7 @@
 #include "avsession_item.h"
 #include "avcontroller_callback_proxy.h"
 #include "avsession_controller_stub.h"
+#include "audio_info.h"
 
 namespace OHOS::AVSession {
 class AVControllerItem : public AVSessionControllerStub {
@@ -60,6 +61,8 @@ public:
     void HandleActiveStateChange(bool isActive);
 
     void HandleValidCommandChange(const std::vector<int32_t> &cmds);
+
+    void HandleOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo);
 
     pid_t GetPid() const;
 

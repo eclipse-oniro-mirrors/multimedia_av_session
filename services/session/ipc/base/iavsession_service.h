@@ -16,6 +16,7 @@
 #ifndef OHOS_IAVSESSION_SERVICE_H
 #define OHOS_IAVSESSION_SERVICE_H
 
+#include "audio_system_manager.h"
 #include "iremote_broker.h"
 #include "iav_session.h"
 #include "iclient_death.h"
@@ -36,7 +37,17 @@ public:
         SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT,
         SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND,
         SERVICE_CMD_REGISTER_CLIENT_DEATH,
+        SERVICE_CMD_CAST_AUDIO,
+        SERVICE_CMD_CAST_AUDIO_FOR_ALL,
+        SERVICE_CMD_SEND_COMMAND_TO_REMOTE,
         SERVICE_CMD_MAX
+    };
+
+    enum RemoteServiceCommand {
+        COMMAND_INVALID = -1,
+        COMMAND_CAST_AUDIO = 0,
+        COMMAND_CANCEL_CAST_AUDIO = 1,
+        COMMAND_MAX = 2
     };
 
     virtual sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
@@ -56,6 +67,14 @@ public:
     virtual int32_t SendSystemControlCommand(const AVControlCommand& command) = 0;
 
     virtual int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) = 0;
+
+    virtual int32_t CastAudio(const SessionToken& token,
+                              const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
+
+    virtual int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
+
+    virtual int32_t ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
+                                            std::string& output) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_SERVICE_H

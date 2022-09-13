@@ -21,6 +21,7 @@
 #include "napi_playback_state.h"
 #include "want_agent.h"
 #include "avsession_trace.h"
+#include "napi_avsession_controller.h"
 
 namespace OHOS::AVSession {
 static __thread napi_ref AVSessionConstructorRef = nullptr;
@@ -326,8 +327,16 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
 
 napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_shared<ContextBase>();
-    context->GetCbInfo(env, info);
+    struct ConcreteContext : public ContextBase {
+        std::vector<int32_t> streamIds_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->streamIds_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get streamIds_ failed");
+    };
+    context->GetCbInfo(env, info, inputParser);
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
@@ -345,7 +354,10 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
 
 napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_shared<ContextBase>();
+    struct ConcreteContext : public ContextBase {
+        std::shared_ptr<AVSessionController> controller_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
@@ -355,16 +367,27 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
             context->error = "native session is nullptr";
             return;
         }
+        context->controller_ = napiSession->session_->GetController();
+        if (context->controller_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "native create controller failed";
+        }
     };
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
+    auto complete = [env, context](napi_value &output) {
+        CHECK_STATUS_RETURN_VOID(context, "get controller failed");
+        CHECK_ARGS_RETURN_VOID(context, context->controller_ != nullptr, "controller is nullptr");
+        context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to js object failed");
     };
     return NapiAsyncWork::Enqueue(env, context, "GetController", executor, complete);
 }
 
 napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_shared<ContextBase>();
+    struct ConcreteContext : public ContextBase {
+        OutputDeviceInfo outputDeviceInfo_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
@@ -374,9 +397,15 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
             context->error = "native session is nullptr";
             return;
         }
+        AVSessionDescriptor descriptor;
+        AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(napiSession->session_->GetSessionId(),
+                                                                         descriptor);
+        context->outputDeviceInfo_ = descriptor.outputDeviceInfo_;
     };
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
+
+    auto complete = [env, context](napi_value &output) {
+        context->status = NapiUtils::SetValue(env, context->outputDeviceInfo_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
     };
     return NapiAsyncWork::Enqueue(env, context, "GetOutputDevice", executor, complete);
 }
@@ -540,7 +569,7 @@ napi_status NapiAVSession::OnMediaKeyEvent(napi_env env, NapiAVSession* napiSess
 
 napi_status NapiAVSession::OnOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGED, callback);
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
 }
 
 napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
@@ -671,6 +700,6 @@ napi_status NapiAVSession::OffMediaKeyEvent(napi_env env, NapiAVSession* napiSes
 
 napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGED, callback);
+    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
 }
 }

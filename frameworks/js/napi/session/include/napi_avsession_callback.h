@@ -39,7 +39,7 @@ public:
         EVENT_SET_LOOP_MODE,
         EVENT_TOGGLE_FAVORITE,
         EVENT_MEDIA_KEY_EVENT,
-        EVENT_OUTPUT_DEVICE_CHANGED,
+        EVENT_OUTPUT_DEVICE_CHANGE,
         EVENT_TYPE_MAX
     };
 
@@ -58,6 +58,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& assertId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
+    void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

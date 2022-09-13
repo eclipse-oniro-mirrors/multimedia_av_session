@@ -48,6 +48,14 @@ public:
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
+    int32_t CastAudio(const SessionToken& token,
+                      const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
+
+    int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
+
+    int32_t ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
+                                    std::string& output) override;
+
 private:
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;
 };

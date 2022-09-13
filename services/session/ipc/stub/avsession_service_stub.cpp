@@ -21,6 +21,7 @@
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
 
+using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
 bool AVSessionServiceStub::CheckInterfaceToken(MessageParcel &data)
 {
@@ -167,6 +168,73 @@ int AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel &data,
     }
     auto clientDeathObserver = iface_cast<ClientDeathProxy>(remoteObject);
     reply.WriteInt32(RegisterClientDeathObserver(clientDeathObserver));
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleCastAudio(MessageParcel &data, MessageParcel &reply)
+{
+    SLOGI("start");
+    SessionToken token {};
+    token.sessionId = data.ReadString();
+    token.pid = data.ReadInt32();
+    token.uid = data.ReadUint32();
+    int32_t deviceNum = data.ReadInt32();
+    std::vector<AudioDeviceDescriptor> sinkAudioDescriptors;
+    for (int i = 0; i < deviceNum; i++) {
+        auto audioDeviceDescriptor = AudioDeviceDescriptor::Unmarshalling(data);
+        if (audioDeviceDescriptor == nullptr) {
+            SLOGE("read AudioDeviceDescriptor failed");
+            reply.WriteInt32(ERR_UNMARSHALLING);
+            return ERR_NONE;
+        }
+        SLOGI("networkId_: %{public}s, role %{public}d", (*audioDeviceDescriptor).networkId_.c_str(),
+              static_cast<int32_t>((*audioDeviceDescriptor).deviceRole_));
+        sinkAudioDescriptors.push_back(*audioDeviceDescriptor);
+    }
+    int32_t ret = CastAudio(token, sinkAudioDescriptors);
+    SLOGE("CastAudio ret %{public}d", ret);
+    reply.WriteInt32(ret);
+    SLOGI("success");
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleCastAudioForAll(MessageParcel &data, MessageParcel &reply)
+{
+    SLOGI("start");
+    int32_t deviceNum = data.ReadInt32();
+    std::vector<AudioDeviceDescriptor> sinkAudioDescriptors {};
+    for (int i = 0; i < deviceNum; i++) {
+        auto audioDeviceDescriptor = AudioDeviceDescriptor::Unmarshalling(data);
+        if (audioDeviceDescriptor == nullptr) {
+            SLOGE("read AudioDeviceDescriptor failed");
+            reply.WriteInt32(ERR_UNMARSHALLING);
+            return ERR_NONE;
+        }
+        SLOGI("networkId_: %{public}s, role %{public}d", (*audioDeviceDescriptor).networkId_.c_str(),
+              static_cast<int32_t>((*audioDeviceDescriptor).deviceRole_));
+        sinkAudioDescriptors.push_back(*audioDeviceDescriptor);
+    }
+    int32_t ret = CastAudioForAll(sinkAudioDescriptors);
+    SLOGI("CastAudioForAll ret %{public}d", ret);
+    reply.WriteInt32(ret);
+    return ERR_NONE;
+}
+
+int AVSessionServiceStub::HandleRemoteCastAudio(MessageParcel &data, MessageParcel &reply)
+{
+    SLOGI("start");
+    auto command = static_cast<RemoteServiceCommand>(data.ReadInt32());
+    std::string sessionInfo = data.ReadString();
+    std::string output;
+    int32_t ret = ProcessCastAudioCommand(command, sessionInfo, output);
+    SLOGE("RemoteCastAudio ret %{public}d", ret);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("RemoteCastAudio failed");
+        reply.WriteInt32(ret);
+        return ERR_NONE;
+    }
+    reply.WriteInt32(ret);
+    reply.WriteString(output);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

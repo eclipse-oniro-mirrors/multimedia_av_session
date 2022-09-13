@@ -41,6 +41,8 @@ class TestAVControllerCallback :public AVControllerCallback {
     void OnActiveStateChange(bool isActive) override;
 
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
+
+    void OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo) override {};
 };
 
 void TestAVControllerCallback::OnSessionDestroy()
