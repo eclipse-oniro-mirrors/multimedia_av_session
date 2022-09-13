@@ -55,6 +55,11 @@ public:
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
+    int32_t CastAudio(const SessionToken& token,
+                      const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
+
+    int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
+
 private:
     sptr<AVSessionServiceProxy> GetService();
 

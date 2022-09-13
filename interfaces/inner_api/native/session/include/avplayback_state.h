@@ -88,6 +88,15 @@ public:
     bool CopyToByMask(PlaybackStateMaskType& mask, AVPlaybackState& out) const;
     bool CopyFrom(const AVPlaybackState& in);
 
+    const static inline std::vector<int32_t> localCapability {
+        PLAYBACK_KEY_STATE,
+        PLAYBACK_KEY_SPEED,
+        PLAYBACK_KEY_POSITION,
+        PLAYBACK_KEY_BUFFERED_TIME,
+        PLAYBACK_KEY_LOOP_MODE,
+        PLAYBACK_KEY_IS_FAVORITE,
+    };
+
 private:
     PlaybackStateMaskType mask_;
 

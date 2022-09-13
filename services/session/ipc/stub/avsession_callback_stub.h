@@ -38,6 +38,7 @@ private:
     int32_t HandleOnSetLoopMode(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply);
+    int32_t HandOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
     using HanlerFunc = int32_t(AVSessionCallbackStub::*)(MessageParcel&, MessageParcel&);
     static inline HanlerFunc handlers[] = {
         [SESSION_CALLBACK_ON_PLAY] = &AVSessionCallbackStub::HandleOnPlay,
@@ -51,7 +52,8 @@ private:
         [SESSION_CALLBACK_ON_SET_SPEED] = &AVSessionCallbackStub::HandleOnSetSpeed,
         [SESSION_CALLBACK_ON_SET_LOOPMODE] = &AVSessionCallbackStub::HandleOnSetLoopMode,
         [SESSION_CALLBACK_ON_TOGGLE_FAVORITE] = &AVSessionCallbackStub::HandleOnToggleFavorite,
-        [SESSION_CALLBACK_ON_MEDIA_KEY_EVENT] = &AVSessionCallbackStub::HandleOnMediaKeyEvent
+        [SESSION_CALLBACK_ON_MEDIA_KEY_EVENT] = &AVSessionCallbackStub::HandleOnMediaKeyEvent,
+        [SESSION_CALLBACK_ON_OUTPUT_DEVICE_CHANGE] = &AVSessionCallbackStub::HandOnOutputDeviceChange
     };
 };
 } // namespace OHOS::AVSession

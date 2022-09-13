@@ -45,6 +45,22 @@ std::vector<sptr<AVSessionItem>> SessionStack::RemoveSession(pid_t pid)
     return result;
 }
 
+sptr<AVSessionItem> SessionStack::RemoveSession(const std::string& sessionId)
+{
+    sptr<AVSessionItem> result;
+    for (auto it = sessions_.begin(); it != sessions_.end();) {
+        if (it->second->GetSessionId() == sessionId) {
+            result = it->second;
+            stack_.remove(it->second);
+            it = sessions_.erase(it);
+            HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_DELETE_SESSION);
+        } else {
+            it++;
+        }
+    }
+    return result;
+}
+
 sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid, const std::string &abilityName)
 {
     auto it = sessions_.find(std::make_pair(pid, abilityName));

@@ -122,6 +122,25 @@ public:
 
     bool IsValid() const;
 
+    const static inline std::vector<int32_t> localCapability {
+        META_KEY_ASSET_ID,
+        META_KEY_TITLE,
+        META_KEY_ARTIST,
+        META_KEY_AUTHOR,
+        META_KEY_ALBUM,
+        META_KEY_WRITER,
+        META_KEY_COMPOSER,
+        META_KEY_DURATION,
+        META_KEY_MEDIA_IMAGE,
+        META_KEY_MEDIA_IMAGE_URI,
+        META_KEY_PUBLISH_DATE,
+        META_KEY_SUBTITLE,
+        META_KEY_DESCRIPTION,
+        META_KEY_LYRIC,
+        META_KEY_PREVIOUS_ASSET_ID,
+        META_KEY_NEXT_ASSET_ID,
+    };
+
 private:
     MetaMaskType metaMask_;
 

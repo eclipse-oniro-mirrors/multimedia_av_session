@@ -35,6 +35,8 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
 
+    void OnOutputDeviceChange(const OutputDeviceInfo &info) override;
+
     void AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)> &listener);
 
 private:

@@ -89,6 +89,11 @@ void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& 
     HandleEvent(EVENT_VALID_COMMAND_CHANGE, stringCmds);
 }
 
+void NapiAVControllerCallback::OnOutputDeviceChange(const OutputDeviceInfo& info)
+{
+    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, info);
+}
+
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

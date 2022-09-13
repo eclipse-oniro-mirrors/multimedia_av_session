@@ -29,6 +29,8 @@ public:
 
     virtual sptr<AVSessionItem> RemoveSession(pid_t pid, const std::string& abilityName) = 0;
 
+    virtual sptr<AVSessionItem> RemoveSession(const std::string& sessionId) = 0;
+
     virtual sptr<AVSessionItem> GetSession(pid_t pid, const std::string& abilityName) = 0;
 
     virtual sptr<AVSessionItem> GetSessionById(const std::string& sessionId) = 0;

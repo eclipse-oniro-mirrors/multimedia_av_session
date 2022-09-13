@@ -52,7 +52,7 @@ private:
 class AbilityConnectCallback : public AbilityConnectionStub {
 public:
     AbilityConnectCallback() {};
-    virtual ~AbilityConnectCallback() {};
+    ~AbilityConnectCallback() override;
 
     void OnAbilityConnectDone(
         const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode) override;

@@ -210,6 +210,13 @@ void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t> &cmds
     }
 }
 
+void AVControllerItem::HandleOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+{
+    if (callback_ != nullptr) {
+        callback_->OnOutputDeviceChange(outputDeviceInfo);
+    }
+}
+
 pid_t AVControllerItem::GetPid() const
 {
     return pid_;

@@ -16,11 +16,21 @@
 #ifndef OHOS_REMOTE_SESSION_SINK_H
 #define OHOS_REMOTE_SESSION_SINK_H
 
+#include <string>
+
+#include "avsession_info.h"
+#include "avsession_item.h"
+#include "avcontrol_command.h"
+
 namespace OHOS::AVSession {
 class RemoteSessionSink {
 public:
-    RemoteSessionSink();
-    ~RemoteSessionSink();
+    virtual int32_t CastSessionFromRemote(const sptr <AVSessionItem>& session, const std::string& sourceSessionId,
+                                          const std::string& sourceDevice, const std::string& sinkDevice,
+                                          const std::string& sourceCap) = 0;
+    virtual int32_t CancelCastSession() = 0;
+    virtual int32_t SetControlCommand(const AVControlCommand& command) = 0;
+    virtual ~RemoteSessionSink() = default;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_REMOTE_SESSION_SINK_H

@@ -133,6 +133,9 @@ int AbilityConnectionStub::OnRemoteRequest(
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
+AbilityConnectCallback::~AbilityConnectCallback()
+{}
+
 void AbilityConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &__attribute__((unused)) remoteObject, int resultCode)
 {

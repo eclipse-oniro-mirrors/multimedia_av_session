@@ -65,6 +65,20 @@ public:
     int32_t SetAssetId(const std::string &assetId);
     int32_t GetAssetId(std::string &assetId) const;
 
+    const static inline std::vector<int32_t> localCapability {
+        SESSION_CMD_PLAY,
+        SESSION_CMD_PAUSE,
+        SESSION_CMD_STOP,
+        SESSION_CMD_PLAY_NEXT,
+        SESSION_CMD_PLAY_PREVIOUS,
+        SESSION_CMD_FAST_FORWARD,
+        SESSION_CMD_REWIND,
+        SESSION_CMD_SEEK,
+        SESSION_CMD_SET_SPEED,
+        SESSION_CMD_SET_LOOP_MODE,
+        SESSION_CMD_TOGGLE_FAVORITE,
+    };
+
 private:
     int32_t cmd_ = SESSION_CMD_INVALID;
     std::variant<int32_t, double, int64_t, std::string> param_;

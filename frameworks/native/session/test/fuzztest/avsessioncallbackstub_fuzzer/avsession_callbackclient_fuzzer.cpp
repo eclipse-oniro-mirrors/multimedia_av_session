@@ -92,6 +92,11 @@ void TestAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     SLOGI("Enter into TestAVSessionCallback::OnMediaKeyEvent.");
 }
 
+void TestAVSessionCallback::OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+{
+    SLOGI("Enter into TestAVSessionCallback::OnOutputDeviceChange.");
+}
+
 int32_t AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {

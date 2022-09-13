@@ -211,6 +211,21 @@ int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand &c
     return service->SendSystemControlCommand(command);
 }
 
+int32_t AVSessionManagerImpl::CastAudio(const SessionToken& token,
+                                        const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors)
+{
+    auto service = GetService();
+    CHECK_AND_RETURN_RET_LOG(descriptors.size() > 0, ERR_INVALID_PARAM, "devices size is zero");
+    return service ? service->CastAudio(token, descriptors) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors)
+{
+    auto service = GetService();
+    CHECK_AND_RETURN_RET_LOG(descriptors.size() > 0, ERR_INVALID_PARAM, "devices size is zero");
+    return service ? service->CastAudioForAll(descriptors) : ERR_SERVICE_NOT_EXIST;
+}
+
 void AVSessionManagerImpl::RegisterClientDeathObserver()
 {
     clientDeath_ = new(std::nothrow) ClientDeathStub();

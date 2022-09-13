@@ -95,6 +95,8 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
+    void OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo) override {};
+
     ~AVControllerCallbackImpl() override;
 
     bool isActive_ = false;

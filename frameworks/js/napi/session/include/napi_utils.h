@@ -23,11 +23,8 @@
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
 #include "avsession_log.h"
-#include "avsession_descriptor.h"
-#include "avmeta_data.h"
-#include "avcontrol_command.h"
-#include "avplayback_state.h"
-#include "key_event.h"
+#include "audio_system_manager.h"
+#include "avsession_info.h"
 #include "want_agent.h"
 #include "napi_base_context.h"
 #include "ability.h"
@@ -188,6 +185,15 @@ public:
     static napi_status GetStageElementName(napi_env env, napi_value in, AppExecFwk::ElementName& out);
     static napi_status GetFaElementName(napi_env env, AppExecFwk::ElementName& out);
     static napi_status GetValue(napi_env env, napi_value in, AppExecFwk::ElementName& out);
+    static napi_status GetValue(napi_env env, napi_value in, SessionToken& out);
+    static napi_status GetValue(napi_env env, napi_value in, AudioStandard::DeviceRole& out);
+    static napi_status GetValue(napi_env env, napi_value in, AudioStandard::DeviceType& out);
+    static napi_status GetValue(napi_env env, napi_value in, AudioStandard::AudioDeviceDescriptor& out);
+    static napi_status GetValue(napi_env env, napi_value in, std::vector<AudioStandard::AudioDeviceDescriptor>& out);
+    static napi_status GetSampleRate(napi_env env, napi_value in, AudioStandard::AudioSamplingRate& out);
+    static napi_status GetChannels(napi_env env, napi_value in, AudioStandard::AudioChannel& out);
+    static napi_status GetChannelMasks(napi_env env, napi_value in, int32_t& out);
+    static napi_status SetOutPutDeviceIdValue(napi_env env, const std::vector<std::string>& in, napi_value& out);
 	
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
 

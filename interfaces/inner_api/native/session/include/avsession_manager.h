@@ -20,6 +20,7 @@
 #include <string>
 #include <memory>
 
+#include "audio_system_manager.h"
 #include "av_session.h"
 #include "avsession_controller.h"
 #include "avsession_info.h"
@@ -51,6 +52,11 @@ public:
     virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
 
     virtual int32_t SendSystemControlCommand(const AVControlCommand& command) = 0;
+
+    virtual int32_t CastAudio(const SessionToken& token,
+                              const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
+
+    virtual int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

@@ -145,4 +145,14 @@ void AVSessionCallbackClient::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
         SLOGI("AVSessionCallbackClient handler postTask failed");
     }
 }
+
+void AVSessionCallbackClient::OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+    CHECK_AND_RETURN_LOG(handler_, "handler is null");
+
+    if (!handler_->PostTask([this, outputDeviceInfo]() { callback_->OnOutputDeviceChange(outputDeviceInfo); })) {
+        SLOGI("AVSessionCallbackClient handler postTask failed");
+    }
+}
 }

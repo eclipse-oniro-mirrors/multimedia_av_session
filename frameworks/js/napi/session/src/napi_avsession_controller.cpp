@@ -405,9 +405,31 @@ napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, na
 
 napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_info info)
 {
-    SLOGI("not implement");
-    napi_throw_error(env, nullptr, "not implement");
-    return NapiUtils::GetUndefinedValue(env);
+    struct ConcreteContext : public ContextBase {
+        OutputDeviceInfo outputDeviceInfo_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->error = "no controller";
+            SLOGE("native controller is nullptr");
+            return;
+        }
+        AVSessionDescriptor descriptor;
+        AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(napiController->controller_->GetSessionId(),
+                                                                         descriptor);
+        context->outputDeviceInfo_ = descriptor.outputDeviceInfo_;
+    };
+
+    auto complete = [env, context](napi_value &output) {
+        context->status = NapiUtils::SetValue(env, context->outputDeviceInfo_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetOutputDevice", executor, complete);
 }
 
 napi_status NapiAVSessionController::SetPlaybackStateFilter(napi_env env, NapiAVSessionController *napiController,
@@ -591,13 +613,14 @@ napi_status NapiAVSessionController::OnValidCommandChange(napi_env env, NapiAVSe
                                                           napi_value param, napi_value callback)
 {
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_VALID_COMMAND_CHANGE,
-        callback);
+                                                  callback);
 }
 
 napi_status NapiAVSessionController::OnOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
                                                           napi_value param, napi_value callback)
 {
-    return napi_generic_failure;
+    return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_OUTPUT_DEVICE_CHANGE,
+                                                  callback);
 }
 
 napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessionController *napiController,
@@ -636,6 +659,7 @@ napi_status NapiAVSessionController::OffValidCommandChange(napi_env env, NapiAVS
 napi_status NapiAVSessionController::OffOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
                                                            napi_value callback)
 {
-    return napi_generic_failure;
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_OUTPUT_DEVICE_CHANGE,
+                                                     callback);
 }
 }

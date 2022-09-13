@@ -21,6 +21,10 @@
 #include "avsession_descriptor.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
+#include "remote_session_sink.h"
+#include "remote_session_source.h"
+#include "remote_session_sink_proxy.h"
+#include "remote_session_source_proxy.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -84,6 +88,11 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     for (const auto& [pid, controller] : controllers_) {
         controller->HandleMetaDataChange(meta);
     }
+
+    if (remoteSource_ != nullptr) {
+        SLOGI("set remote AVMetaData");
+        remoteSource_->SetAVMetaData(meta);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -94,6 +103,11 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);
         controller->HandlePlaybackStateChange(state);
+    }
+
+    if (remoteSource_ != nullptr) {
+        SLOGI("set remote AVPlaybackState");
+        remoteSource_->SetAVPlaybackState(state);
     }
     return AVSESSION_SUCCESS;
 }
@@ -223,8 +237,12 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 {
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_ALL_CTRL_COMMAND);
+    if (remoteSink_ != nullptr) {
+        SLOGI("set remote ControlCommand");
+        remoteSink_->SetControlCommand(cmd);
+    }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
+    CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactivate");
     int32_t code = cmd.GetCommand();
     if (code >= 0 && code < SESSION_CMD_MAX) {
         HISYSEVENT_ADD_OPERATION_COUNT(static_cast<Operation>(cmd.GetCommand()));
@@ -233,7 +251,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
             cmd.GetCommand(), descriptor_.sessionType_);
         return (this->*cmdHandlers[code])(cmd);
     }
-    HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVAILD_COMMAND", "CMD", code,
+    HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", code,
         "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");
 }
 
@@ -369,6 +387,11 @@ void AVSessionItem::SetTop(bool top)
     descriptor_.isTopSession_ = top;
 }
 
+std::shared_ptr<RemoteSessionSource> AVSessionItem::GetRemoteSource()
+{
+    return remoteSource_;
+}
+
 void AVSessionItem::HandleControllerRelease(pid_t pid)
 {
     std::lock_guard lockGuard(lock_);
@@ -379,4 +402,95 @@ void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSess
 {
     serviceCallback_ = callback;
 }
+
+void AVSessionItem::HandleOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnOutputDeviceChange");
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnOutputDeviceChange(outputDeviceInfo);
+}
+
+void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
+{
+    descriptor_.outputDeviceInfo_.isRemote_ = info.isRemote_;
+    descriptor_.outputDeviceInfo_.deviceIds_ = info.deviceIds_;
+    descriptor_.outputDeviceInfo_.deviceNames_ = info.deviceNames_;
+    HandleOutputDeviceChange(descriptor_.outputDeviceInfo_);
+    for (const auto &controller : controllers_) {
+        controller.second->HandleOutputDeviceChange(descriptor_.outputDeviceInfo_);
+    }
+    SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(info.deviceIds_.size()));
+}
+
+void AVSessionItem::GetOutputDevice(OutputDeviceInfo& info)
+{
+    info = GetDescriptor().outputDeviceInfo_;
+}
+
+int32_t AVSessionItem::CastAudioToRemote(const std::string& sourceDevice, const std::string& sinkDevice,
+                                         const std::string& sinkCapability)
+{
+    SLOGI("start");
+    remoteSource_ = std::make_shared<RemoteSessionSourceProxy>();
+    CHECK_AND_RETURN_RET_LOG(remoteSource_ != nullptr, AVSESSION_ERROR, "remoteSource_ is nullptr");
+    int32_t ret = remoteSource_->CastSessionToRemote(this, sourceDevice, sinkDevice, sinkCapability);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastSessionToRemote failed");
+    ret = remoteSource_->SetAVMetaData(GetMetaData());
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVMetaData failed");
+    ret = remoteSource_->SetAVPlaybackState(GetPlaybackState());
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVPlaybackState failed");
+    SLOGI("success");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SourceCancelCastAudio(const std::string& sinkDevice)
+{
+    SLOGI("start");
+    CHECK_AND_RETURN_RET_LOG(remoteSource_ != nullptr, AVSESSION_ERROR, "remoteSource_ is nullptr");
+    int32_t ret = remoteSource_->CancelCastAudio(sinkDevice);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudioToLocal failed");
+    SLOGI("success");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, const std::string& sourceDevice,
+                                           const std::string& sinkDevice, const std::string& sourceCapability)
+{
+    SLOGI("start");
+    remoteSink_ = std::make_shared<RemoteSessionSinkProxy>();
+    CHECK_AND_RETURN_RET_LOG(remoteSink_ != nullptr, AVSESSION_ERROR, "remoteSink_ is nullptr");
+    int32_t ret = remoteSink_->CastSessionFromRemote(this, sourceSessionId, sourceDevice, sinkDevice,
+                                                     sourceCapability);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastSessionFromRemote failed");
+
+    OutputDeviceInfo deviceInfo;
+    GetOutputDevice(deviceInfo);
+    deviceInfo.isRemote_ = true;
+    SetOutputDevice(deviceInfo);
+
+    CHECK_AND_RETURN_RET_LOG(Activate() == AVSESSION_SUCCESS, AVSESSION_ERROR, "Activate failed");
+
+    std::vector<std::vector<int32_t>> value(SESSION_DATA_CATEGORY_MAX);
+    ret = JsonUtils::GetVectorCapability(sourceCapability, value);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetVectorCapability error");
+    for (auto cmd : value[SESSION_DATA_CONTROL_COMMAND]) {
+        SLOGI("add support amd : %{public}d", cmd);
+        AddSupportCommand(cmd);
+    }
+    SLOGI("success");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SinkCancelCastAudio()
+{
+    CHECK_AND_RETURN_RET_LOG(remoteSink_ != nullptr, AVSESSION_ERROR, "remoteSink_ is nullptr");
+    int32_t ret = remoteSink_->CancelCastSession();
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CancelCastSession failed");
+    GetDescriptor().outputDeviceInfo_.deviceIds_.clear();
+    GetDescriptor().outputDeviceInfo_.deviceNames_.clear();
+    SLOGI("SinkCancelCastAudio");
+    return AVSESSION_SUCCESS;
+}
+
+
 } // namespace OHOS::AVSession
