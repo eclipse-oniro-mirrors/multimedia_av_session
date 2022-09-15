@@ -15,6 +15,9 @@
 
 #include "remote_session_sink_impl.h"
 
+#include "avsession_sysevent.h"
+#include "avsession_trace.h"
+
 namespace OHOS::AVSession {
 RemoteSessionSinkImpl::RemoteSessionSinkImpl()
 {
@@ -47,8 +50,15 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
     ret = syncer_->RegisterDisconnectNotifier([this](const std::string& deviceId) {
         SLOGE("device %{public}s disconnected, sessionId is %{public}s", deviceId.c_str(),
               session_->GetSessionId().c_str());
+        HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+            "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+            "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+            "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+            "ERROR_TYPE", "REMOTE_DISCONNECTED",
+            "ERROR_INFO", "remote disconnected");
         return AVSESSION_SUCCESS;
     });
+
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddDisconnectNotifier failed");
 
     ret = syncer_->RegisterDataNotifier([this](const SessionDataCategory category, const std::string& deviceId) {
@@ -56,6 +66,7 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
         CHECK_AND_RETURN_RET_LOG(session_ != nullptr && syncer_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");
         if (category == SESSION_DATA_META) {
             AVMetaData metaData;
+            AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::GetAVMetaData");
             CHECK_AND_RETURN_RET_LOG(syncer_->GetAVMetaData(metaData) == AVSESSION_SUCCESS, AVSESSION_ERROR,
                                      "GetAVMetaData failed");
             CHECK_AND_RETURN_RET_LOG(session_->SetAVMetaData(metaData) == AVSESSION_SUCCESS, AVSESSION_ERROR,
@@ -65,6 +76,7 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
 
         if (category == SESSION_DATA_PLAYBACK_STATE) {
             AVPlaybackState playbackState;
+            AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::GetAVPlaybackState");
             CHECK_AND_RETURN_RET_LOG(syncer_->GetAVPlaybackState(playbackState) == AVSESSION_SUCCESS, AVSESSION_ERROR,
                                      "GetAVPlaybackState failed");
             CHECK_AND_RETURN_RET_LOG(session_->SetAVPlaybackState(playbackState) == AVSESSION_SUCCESS, AVSESSION_ERROR,
@@ -90,7 +102,15 @@ int32_t RemoteSessionSinkImpl::CancelCastSession()
 int32_t RemoteSessionSinkImpl::SetControlCommand(const AVControlCommand &command)
 {
     CHECK_AND_RETURN_RET_LOG(syncer_ != nullptr, AVSESSION_ERROR, "syncer is nullptr");
-    syncer_->PutControlCommand(command);
+    auto ret = syncer_->PutControlCommand(command);
+        if (ret != AVSESSION_SUCCESS && session_ != nullptr) {
+            HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+                "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+                "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+                "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+                "ERROR_TYPE", "TIME_OUT",
+                "ERROR_INFO", "SetControlCommand time out");
+        }
     return AVSESSION_SUCCESS;
 }
 } // namespace OHOS::AVSession

@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include <dlfcn.h>
 #include "remote_session_sink_proxy.h"
+
+#include <dlfcn.h>
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 static std::string g_sinkLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_sink.z.so");
@@ -92,6 +94,7 @@ int32_t RemoteSessionSinkProxy::CancelCastSession()
 
 int32_t RemoteSessionSinkProxy::SetControlCommand(const AVControlCommand &command)
 {
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSinkProxy::SetControlCommand");
     CHECK_AND_RETURN_RET_LOG(sinkImpl_ != nullptr, AVSESSION_ERROR, "sinkImpl_ is nullptr");
     int32_t ret = sinkImpl_->SetControlCommand(command);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetControlCommand error");

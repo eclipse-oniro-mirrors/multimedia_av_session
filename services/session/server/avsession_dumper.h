@@ -36,11 +36,13 @@ private:
     static void ShowSessionInfo(std::string &result, const AVSessionService &sessionService);
     static void ShowControllerInfo(std::string& result, const AVSessionService &sessionService);
     static void ShowErrorInfo(std::string &result, const AVSessionService &sessionService);
+    static void ShowTrustedDevicesInfo(std::string& result, const AVSessionService& sessionService);
 
     static std::map<std::string, AVSessionDumper::DumpActionType> funcMap_;
     static std::map<int32_t, std::string> playBackStates_;
     static std::map<int32_t, std::string> loopMode_;
     static std::vector<std::string> errMessage_;
+    static std::map<int32_t, std::string> deviceTypeId_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_DUMP_HELPER_H

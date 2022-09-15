@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include "remote_session_syncer_impl.h"
+
 #include <iomanip>
 #include <sstream>
 #include "hash_calculator.h"
 #include "parcel.h"
-#include "remote_session_syncer_impl.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 RemoteSessionSyncerImpl::RemoteSessionSyncerImpl(const std::string& sourceSessionId, const std::string& sourceDevice,
@@ -89,6 +91,7 @@ int32_t RemoteSessionSyncerImpl::GetData(const std::string &key, std::vector<uin
 
 int32_t RemoteSessionSyncerImpl::PutAVMetaData(const AVMetaData& metaData)
 {
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVMetaData");
     Parcel data;
     CHECK_AND_RETURN_RET_LOG(metaData.Marshalling(data) == true, AVSESSION_ERROR, "metaData Marshalling error");
     uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
@@ -118,6 +121,7 @@ int32_t RemoteSessionSyncerImpl::GetAVMetaData(AVMetaData& metaData)
 
 int32_t RemoteSessionSyncerImpl::PutAVPlaybackState(const AVPlaybackState& state)
 {
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVPlaybackState");
     Parcel data;
     CHECK_AND_RETURN_RET_LOG(state.Marshalling(data) == true, AVSESSION_ERROR, "state Marshalling error");
     uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
@@ -149,6 +153,7 @@ int32_t RemoteSessionSyncerImpl::GetAVPlaybackState(AVPlaybackState& state)
 
 int32_t RemoteSessionSyncerImpl::PutControlCommand(const AVControlCommand& command)
 {
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutControlCommand");
     Parcel data;
     CHECK_AND_RETURN_RET_LOG(command.Marshalling(data) == true, AVSESSION_ERROR, "command Marshalling error");
     uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());

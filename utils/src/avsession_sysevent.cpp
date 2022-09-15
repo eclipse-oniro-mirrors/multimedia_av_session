@@ -35,9 +35,11 @@ void AVSessionSysEvent::AddOperationCount(Operation operation)
 
 void AVSessionSysEvent::Reset()
 {
+    std::lock_guard lockGuard(lock_);
     optCounts_.clear();
     lifeCycleInfos_.clear();
     controllerCommandInfos_.clear();
+    audioStatuses_.clear();
 }
 
 void AVSessionSysEvent::Regiter()
@@ -120,5 +122,21 @@ void AVSessionSysEvent::AddControllerCommandInfo(const std::string& bundleName, 
     controllerCommandInfo.controllerCmd_ = controllerCmd;
     controllerCommandInfos_.push_back(controllerCommandInfo);
 }
+
+int32_t AVSessionSysEvent::GetAudioStatus(int32_t uid)
+{
+    std::lock_guard lockGuard(lock_);
+    if (audioStatuses_.find(uid) != audioStatuses_.end()) {
+        return audioStatuses_[uid];
+    }
+    return 0;
+}
+
+void AVSessionSysEvent::SetAudioStatus(int32_t uid, int32_t rendererState)
+{
+    std::lock_guard lockGuard(lock_);
+    audioStatuses_[uid] = rendererState;
+}
+
 #endif
 } // namespace OHOS::AVSession
