@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/multimedia/av_session/config.gni")
 
 ###############################################################################
 common_include_dirs = [
@@ -38,7 +39,6 @@ common_external_deps = [
   "ability_runtime:wantagent_innerkits",
   "c_utils:utils",
   "data_object:distributeddataobject_impl",
-  "hitrace_native:hitrace_meter",
   "hiviewdfx_hilog_native:libhilog",
   "input:libmmi-client",
   "ipc:ipc_core",
@@ -47,11 +47,20 @@ common_external_deps = [
   "samgr:samgr_proxy",
 ]
 
+if (multimedia_av_session_enable_trace_control) {
+  common_cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+  common_external_deps += [ "hitrace_native:hitrace_meter" ]
+}
+if (multimedia_av_session_enable_sysevent_control) {
+  common_cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+  common_external_deps += [ "hisysevent_native:libhisysevent" ]
+}
 
 ohos_shared_library("remote_session_source") {
   install_enable = true
   include_dirs = common_include_dirs
   deps = common_deps
+  cflags = common_cflags
   external_deps = common_external_deps
 
   source_sources = [ "remote_session_source_impl.cpp" ]
@@ -72,6 +81,7 @@ ohos_shared_library("remote_session_sink") {
   install_enable = true
   include_dirs = common_include_dirs
   deps = common_deps
+  cflags = common_cflags
   external_deps = common_external_deps
 
   sink_sources = [ "remote_session_sink_impl.cpp" ]

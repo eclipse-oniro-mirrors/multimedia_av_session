@@ -1008,7 +1008,20 @@ int32_t AVSessionService::CastAudioInner(const std::vector<AudioStandard::AudioD
         JsonUtils::GetAllCapability(sinkSessionInfo, sinkCapability);
         ret = session->CastAudioToRemote(sourceDevice, sinkAudioDescriptor.networkId_, sinkCapability);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudioToRemote failed");
-
+        HISYSEVENT_BEHAVIOR("SESSION_CAST",
+            "BUNDLE_NAME", session->GetDescriptor().elementName_.GetBundleName(),
+            "MODULE_NAME", session->GetDescriptor().elementName_.GetModuleName(),
+            "ABILITY_NAME", session->GetDescriptor().elementName_.GetAbilityName(),
+            "SESSION_PID", session->GetDescriptor().pid_,
+            "SESSION_UID", session->GetDescriptor().uid_,
+            "SESSION_ID", session->GetDescriptor().sessionId_,
+            "SESSION_TAG", session->GetDescriptor().sessionTag_,
+            "SESSION_TYPE", session->GetDescriptor().sessionType_,
+            "CAST_TYPE", 0,
+            "DEST_DEVICE_TYPE", sinkAudioDescriptor.deviceType_,
+            "DEST_DEVICE_NAME", sinkAudioDescriptor.deviceName_.c_str(),
+            "DEST_DEVICE_ID", sinkAudioDescriptor.deviceId_,
+            "DETAILED_MSG", "avsession service cast audio");
         ret = SelectOutputDevice(session->GetUid(), sinkAudioDescriptor);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "selectOutputDevice failed");
     }

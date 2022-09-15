@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-#include "json_utils.h"
 #include "remote_session_source_impl.h"
+
+#include "json_utils.h"
+#include "avsession_trace.h"
+#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 RemoteSessionSourceImpl::RemoteSessionSourceImpl()
@@ -54,11 +57,20 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,
                                      "syncer is not exist");
             SLOGE("device %{public}s is disconnected", deviceId.c_str());
+            if (session_ != nullptr) {
+                HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+                    "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+                    "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+                    "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+                    "ERROR_TYPE", "REMOTE_DISCONNECTED",
+                    "ERROR_INFO", "remote disconnected");
+            }
             return AVSESSION_SUCCESS;
         });
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddDisconnectNotifier failed");
 
         ret = syncer->RegisterDataNotifier([this](const SessionDataCategory category, const std::string& deviceId) {
+			AVSESSION_TRACE_SYNC_START("RemoteSessionSourceImpl::DataNotifier");
             SLOGI("device %{public}s category %{public}d changed", deviceId.c_str(), category);
             CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,
@@ -102,7 +114,15 @@ int32_t RemoteSessionSourceImpl::SetAVMetaData(const AVMetaData& metaData)
         AVMetaData sinkMetaData;
         auto mask = GetSinkMetaMaskType(iter->first);
         metaData.CopyToByMask(mask, sinkMetaData);
-        iter->second->PutAVMetaData(sinkMetaData);
+        auto ret = iter->second->PutAVMetaData(sinkMetaData);
+        if (ret != AVSESSION_SUCCESS) {
+            HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+                "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+                "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+                "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+                "ERROR_TYPE", "TIME_OUT",
+                "ERROR_INFO", "SetAVMetaData time out");
+        }
     }
     SLOGI("success");
     return AVSESSION_SUCCESS;
@@ -117,7 +137,15 @@ int32_t RemoteSessionSourceImpl::SetAVPlaybackState(const AVPlaybackState& state
         AVPlaybackState sinkState;
         auto mask = GetSinkPlaybackStateMaskType(iter->first);
         state.CopyToByMask(mask, sinkState);
-        iter->second->PutAVPlaybackState(sinkState);
+        auto ret = iter->second->PutAVPlaybackState(sinkState);
+        if (ret != AVSESSION_SUCCESS) {
+            HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+                "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+                "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+                "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+                "ERROR_TYPE", "TIME_OUT",
+                "ERROR_INFO", "SetAVPlaybackState time out");
+        }
     }
     SLOGI("success");
     return AVSESSION_SUCCESS;

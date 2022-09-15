@@ -17,6 +17,7 @@
 #define OHOS_AVSESSION_SYSEVENT_H
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+#include <mutex>
 #include "hisysevent.h"
 #include "timer.h"
 #endif
@@ -97,12 +98,16 @@ public:
         const int32_t& sessionType, bool isCreateSession);
     void AddControllerCommandInfo(const std::string& bundleName, const pid_t& controllerPid,
         const int32_t& controllerCmd, const int32_t& sessionType);
+    void SetAudioStatus(int32_t uid, int32_t rendererState);
+    int32_t GetAudioStatus(int32_t uid);
 
 private:
+    std::map<int32_t, int32_t> audioStatuses_;
     AVSessionSysEvent();
     std::map<Operation, uint32_t> optCounts_;
     std::unique_ptr<Utils::Timer> timer_;
     uint32_t timerId_;
+    std::recursive_mutex lock_;
     static constexpr uint32_t NOTIFY_TIME_INTERVAL = 12 * 60 * 60 * 1000; // retry after 12 hours
     std::list<AVSessionSysEvent::LifeCycleInfo> lifeCycleInfos_;
     std::list<AVSessionSysEvent::ControllerCommandInfo> controllerCommandInfos_;
@@ -129,6 +134,11 @@ private:
     do {                                                                                                        \
         AVSessionSysEvent::GetInstance().AddLifeCycleInfo(bundleName, appStatus, sessionType, isCreateSession); \
     } while (0)
+#define HISYSEVENT_GET_AUDIO_STATUS(uid) AVSessionSysEvent::GetInstance().GetAudioStatus(uid)
+#define HISYSEVENT_SET_AUDIO_STATUS(uid, rendererState)                                                         \
+    do {                                                                                                        \
+        AVSessionSysEvent::GetInstance().SetAudioStatus(uid, rendererState);                                    \
+    } while (0)                                                                                                 \
 
 #else
 #define HISYSEVENT_FAULT(...)
@@ -141,7 +151,8 @@ private:
 #define HISYSEVENT_ADD_OPERATION_COUNT(...)
 #define HISYSEVENT_ADD_CONTROLLER_COMMAND_INFO(...)
 #define HISYSEVENT_ADD_LIFE_CYCLE_INFO(...)
-
+#define HISYSEVENT_GET_AUDIO_STATUS(...)
+#define HISYSEVENT_SET_AUDIO_STATUS(...)
 #endif
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SYSEVENT_H

@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#include "remote_session_source_proxy.h"
+
 #include <dlfcn.h>
 #include "remote_session_source_impl.h"
-#include "remote_session_source_proxy.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 static std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_source.z.so");
@@ -77,6 +79,7 @@ int32_t RemoteSessionSourceProxy::CastSessionToRemote(const sptr <AVSessionItem>
                                                       const std::string& sinkDevice,
                                                       const std::string& sinkCapability)
 {
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::CastSessionToRemote");
     CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
     int32_t ret = sourceImpl_->CastSessionToRemote(session, sourceDevice, sinkDevice, sinkCapability);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source CastSessionToRemote error");
@@ -93,6 +96,7 @@ int32_t  RemoteSessionSourceProxy::CancelCastAudio(const std::string& sinkDevice
 
 int32_t RemoteSessionSourceProxy::SetAVMetaData(const AVMetaData &metaData)
 {
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
     int32_t ret = sourceImpl_->SetAVMetaData(metaData);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetAVMetaData error");
@@ -101,6 +105,7 @@ int32_t RemoteSessionSourceProxy::SetAVMetaData(const AVMetaData &metaData)
 
 int32_t RemoteSessionSourceProxy::SetAVPlaybackState(const AVPlaybackState &state)
 {
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetAVPlaybackState");
     CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
     int32_t ret = sourceImpl_->SetAVPlaybackState(state);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetAVPlaybackState error");

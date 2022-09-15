@@ -83,10 +83,12 @@ bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos &in
         if (!IsFocusSession(*info)) {
             std::lock_guard lockGuard(stateLock_);
             lastStates_[info->clientUID] = info->rendererState;
+            HISYSEVENT_SET_AUDIO_STATUS(info->clientUID, info->rendererState);
             continue;
         }
         {
             std::lock_guard lockGuard(stateLock_);
+            HISYSEVENT_SET_AUDIO_STATUS(info->clientUID, info->rendererState);
             lastStates_[info->clientUID] = info->rendererState;
         }
         SLOGI("uid=%{public}d state=%{public}d", info->clientUID, info->rendererState);

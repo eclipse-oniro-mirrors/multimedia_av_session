@@ -104,3 +104,27 @@ CONTROL_COMMAND_FAILED_RATE:
   ALL_CTRL_COMMAND_COUNT: {type: UINT32, desc: all command count}
   ALL_SUCCESS_CTRL_COMMAND: {type: UINT32, desc: success command count}
   COMMAND_FAILED_RATE: {type: FLOAT, desc: command failed rate}
+
+SESSION_CAST:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: session cast}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  MODULE_NAME: {type: STRING, desc: module name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  SESSION_PID: {type: INT32, desc: session pid}
+  SESSION_UID: {type: INT32, desc: session uid}
+  SESSION_ID: {type: STRING, desc: session id}
+  SESSION_TAG: {type: STRING, desc: session tag}
+  SESSION_TYPE: {type: INT32, desc: session type}
+  CAST_TYPE: {type: INT32, desc: cast type}
+  DEST_DEVICE_TYPE: {type: STRING, desc: dest device type}
+  DEST_DEVICE_NAME: {type: STRING, desc: dest device name}
+  DEST_DEVICE_ID: {type: INT32, desc: dest device id}
+  DETAILED_MSG: {type: STRING, desc: detailed msg}
+
+REMOTE_CONTROL_FAILED:
+  __BASE: {type: FAULT, level: MINOR, tag: ability, desc: remote control failed}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  SESSION_TYPE: {type: INT32, desc: session type}
+  AUDIO_STATUS: {type: INT32, desc: audio status}
+  ERROR_TYPE: {type: STRING, desc: error type}
+  ERROR_INFO: {type: STRING, desc: error info}

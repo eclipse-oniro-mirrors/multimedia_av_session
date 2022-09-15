@@ -18,6 +18,7 @@
 #include "avsession_errors.h"
 #include "avsession_proxy.h"
 #include "avsession_controller_proxy.h"
+#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject> &impl)
@@ -250,6 +251,7 @@ int32_t AVSessionServiceProxy::CastAudioForAll(const std::vector<AudioStandard::
 int32_t AVSessionServiceProxy::ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
                                                        std::string& output)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceProxy::ProcessCastAudioCommand");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
                              "write interface token failed");

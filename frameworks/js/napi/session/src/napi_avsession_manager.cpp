@@ -173,6 +173,7 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
 
 napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info)
 {
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::CastAudio");
     struct ConcreteContext : public ContextBase {
         SessionToken sessionToken_ {};
         bool isAll_ = false;
@@ -202,6 +203,7 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
                                "invalid AudioDeviceDescriptor");
     };
     context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_CAST_AUDIO_TASK_ID;
 
     auto executor = [context]() {
         for (const auto& audioDeviceDescriptor : context->audioDeviceDescriptors_) {

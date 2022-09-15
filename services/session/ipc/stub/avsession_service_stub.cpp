@@ -173,6 +173,7 @@ int AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel &data,
 
 int AVSessionServiceStub::HandleCastAudio(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CastAudio");
     SLOGI("start");
     SessionToken token {};
     token.sessionId = data.ReadString();
@@ -200,6 +201,7 @@ int AVSessionServiceStub::HandleCastAudio(MessageParcel &data, MessageParcel &re
 
 int AVSessionServiceStub::HandleCastAudioForAll(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CastAudioForAll");
     SLOGI("start");
     int32_t deviceNum = data.ReadInt32();
     std::vector<AudioDeviceDescriptor> sinkAudioDescriptors {};
@@ -222,6 +224,7 @@ int AVSessionServiceStub::HandleCastAudioForAll(MessageParcel &data, MessageParc
 
 int AVSessionServiceStub::HandleRemoteCastAudio(MessageParcel &data, MessageParcel &reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::RemoteCastAudio");
     SLOGI("start");
     auto command = static_cast<RemoteServiceCommand>(data.ReadInt32());
     std::string sessionInfo = data.ReadString();

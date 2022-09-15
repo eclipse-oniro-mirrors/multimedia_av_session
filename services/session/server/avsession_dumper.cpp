@@ -26,12 +26,14 @@ const std::string ARGS_SHOW_METADATA = "-show_metadata";
 const std::string ARGS_SHOW_SESSION_INFO = "-show_session_info";
 const std::string ARGS_SHOW_CONTROLLER_INFO = "-show_controller_info";
 const std::string ARGS_SHOW_ERROR_INFO = "-show_error_info";
+const std::string ARGS_TRUSTED_DEVICES_INFO = "-show_trusted_devices_Info";
 
 std::map<std::string, AVSessionDumper::DumpActionType> AVSessionDumper::funcMap_ = {
     { ARGS_SHOW_METADATA, AVSessionDumper::ShowMetaData },
     { ARGS_SHOW_SESSION_INFO, AVSessionDumper::ShowSessionInfo },
     { ARGS_SHOW_CONTROLLER_INFO, AVSessionDumper::ShowControllerInfo },
     { ARGS_SHOW_ERROR_INFO, AVSessionDumper::ShowErrorInfo },
+    { ARGS_TRUSTED_DEVICES_INFO, AVSessionDumper::ShowTrustedDevicesInfo },
 };
 
 std::map<int32_t, std::string> AVSessionDumper::playBackStates_ = {
@@ -42,6 +44,18 @@ std::map<int32_t, std::string> AVSessionDumper::playBackStates_ = {
     { AVPlaybackState::PLAYBACK_STATE_FAST_FORWARD, "fast_forward" },
     { AVPlaybackState::PLAYBACK_STATE_REWIND, "rewind" },
     { AVPlaybackState::PLAYBACK_STATE_STOP, "stop" },
+};
+
+std::map<int32_t, std::string> AVSessionDumper::deviceTypeId_ = {
+    {DistributedHardware::DEVICE_TYPE_UNKNOWN, "unknown" },
+    {DistributedHardware::DEVICE_TYPE_WIFI_CAMERA, "camera" },
+    {DistributedHardware::DEVICE_TYPE_AUDIO, "audio" },
+    {DistributedHardware::DEVICE_TYPE_PC, "pc" },
+    {DistributedHardware::DEVICE_TYPE_PHONE, "phone" },
+    {DistributedHardware::DEVICE_TYPE_PAD, "pad" },
+    {DistributedHardware::DEVICE_TYPE_WATCH, "watch" },
+    {DistributedHardware::DEVICE_TYPE_CAR, "car" },
+    {DistributedHardware::DEVICE_TYPE_TV, "tv" },
 };
 
 std::map<int32_t, std::string> AVSessionDumper::loopMode_ = {
@@ -60,7 +74,8 @@ void AVSessionDumper::ShowHelp(std::string& result) const
         .append("-show_metadata               :show all avsession metadata in the system\n")
         .append("-show_session_info           :show information of all sessions\n")
         .append("-show_controller_info        :show information of all controllers \n")
-        .append("-show_error_info             :show error information about avsession\n");
+        .append("-show_error_info             :show error information about avsession\n")
+        .append("-show_trusted_devices_Info   :show trusted devices Info\n");
 }
 
 void AVSessionDumper::ShowMetaData(std::string& result, const AVSessionService &sessionService)
@@ -91,6 +106,34 @@ void AVSessionDumper::ShowMetaData(std::string& result, const AVSessionService &
             result.append("        previous assetid     : " + metaData.GetPreviousAssetId() + "\n");
             result.append("        next assetid         : " + metaData.GetNextAssetId() + "\n");
         }
+    }
+}
+
+void AVSessionDumper::ShowTrustedDevicesInfo(std::string& result, const AVSessionService& sessionService)
+{
+    std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList;
+    DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList("av_session", "", deviceList);
+
+    std::string buff;
+    result.append("Trusted Devices Info:\n\n")
+        .append("Count                          : " + std::to_string(deviceList.size()) + "\n");
+    for (const auto& device : deviceList) {
+        buff=device.deviceId;
+        result.append("         device id             : ");
+        result.append(buff + "  ");
+
+        buff=device.deviceName;
+        result.append("\n        device name            : ");
+        result.append(buff + "  ");
+
+        result.append("\n        device type id         : " + deviceTypeId_.find(device.deviceTypeId)->second);
+
+        buff=device.networkId;
+        result.append("\n        network  id            : ");
+        result.append(buff + "  ");
+
+        result.append("\n        range                  : " + std::to_string(device.range));
+        result.append("\n");
     }
 }
 
