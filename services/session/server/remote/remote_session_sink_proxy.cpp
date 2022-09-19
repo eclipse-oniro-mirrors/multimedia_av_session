@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "remote_session_sink_proxy.h"
-
 #include <dlfcn.h>
 #include "avsession_trace.h"
+#include "remote_session_sink_proxy.h"
 
 namespace OHOS::AVSession {
 static std::string g_sinkLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_sink.z.so");
@@ -66,6 +65,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement()
         return AVSESSION_ERROR;
     }
     destroyRemoteSessionSinkImpl(sinkImpl_);
+
     if (handle_ != nullptr) {
         dlclose(handle_);
     }

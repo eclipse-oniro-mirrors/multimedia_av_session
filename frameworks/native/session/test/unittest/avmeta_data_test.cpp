@@ -74,7 +74,7 @@ void AVMetaDataTest::SetUp()
 }
 
 void AVMetaDataTest::TearDown()
-{   
+{
 }
 
 std::shared_ptr<OHOS::Media::PixelMap> AVMetaDataTest::CreatePixelMap()
@@ -125,7 +125,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
     metaData.SetSubTitle("fac");
     metaData.SetDescription("for friends");
     metaData.SetLyric("https://baidu.yinyue.com");
-  
+
     EXPECT_EQ("123", metaData.GetAssetId());
     EXPECT_EQ("Black Humor", metaData.GetTitle());
     EXPECT_EQ("zhoujielun", metaData.GetArtist());
@@ -138,7 +138,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
     EXPECT_EQ(DURATION, metaData.GetDuration());
     EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
 
-    EXPECT_NE(nullptr,metaData.GetMediaImage());
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
 
     EXPECT_EQ("fac", metaData.GetSubTitle());
     EXPECT_EQ("for friends", metaData.GetDescription());
@@ -293,9 +293,9 @@ HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataFromMetaIn001, TestSize.Level1)
     auto ret = metaData.CopyFrom(g_metaDataCloneTest);
 
     EXPECT_EQ(ret, true);
-    EXPECT_EQ(metaData.GetAssetId(),g_metaDataCloneTest.GetAssetId());
-    EXPECT_EQ(metaData.GetWriter(),g_metaDataCloneTest.GetWriter());
-    EXPECT_EQ(metaData.GetDuration(),g_metaDataCloneTest.GetDuration());
+    EXPECT_EQ(metaData.GetAssetId(), g_metaDataCloneTest.GetAssetId());
+    EXPECT_EQ(metaData.GetWriter(), g_metaDataCloneTest.GetWriter());
+    EXPECT_EQ(metaData.GetDuration(), g_metaDataCloneTest.GetDuration());
     SLOGI("AVMetaDataCopyDataFromMetaIn001 End");
 }
 

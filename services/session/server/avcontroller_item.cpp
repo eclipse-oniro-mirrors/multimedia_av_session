@@ -196,6 +196,13 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
     }
 }
 
+void AVControllerItem::HandleOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+{
+    if (callback_ != nullptr) {
+        callback_->OnOutputDeviceChange(outputDeviceInfo);
+    }
+}
+
 void AVControllerItem::HandleActiveStateChange(bool isActive)
 {
     if (callback_ != nullptr) {
@@ -207,13 +214,6 @@ void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t> &cmds
 {
     if (callback_ != nullptr) {
         callback_->OnValidCommandChange(cmds);
-    }
-}
-
-void AVControllerItem::HandleOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
-{
-    if (callback_ != nullptr) {
-        callback_->OnOutputDeviceChange(outputDeviceInfo);
     }
 }
 

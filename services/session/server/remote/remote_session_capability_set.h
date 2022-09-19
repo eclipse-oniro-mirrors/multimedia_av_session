@@ -37,7 +37,7 @@ public:
                        int32_t key);
 
 private:
-    std::map <std::string, std::vector<std::vector<int32_t>>> capabilitys_ {};
+    std::map<std::string, std::vector<std::vector<int32_t>>> capabilitys_ {};
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_REMOTE_SESSION_CAPABILITY_SET_H

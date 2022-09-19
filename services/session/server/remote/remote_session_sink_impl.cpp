@@ -42,10 +42,10 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
     syncer_ = std::make_shared<RemoteSessionSyncerImpl>(sourceSessionId, sourceDevice, sinkDevice);
     CHECK_AND_RETURN_RET_LOG(syncer_ != nullptr, AVSESSION_ERROR, "syncer_ is nullptr");
     int32_t ret = syncer_->Init();
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "syncer_ init failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "syncer init failed");
     session_ = session;
     sourceDevice_ = sourceDevice;
-    SessionCapabilitySet::GetInstance().AddRemoteCapability(session->GetSessionId(), sourceDevice, sourceCap);
+    RemoteSessionCapabilitySet::GetInstance().AddRemoteCapability(session->GetSessionId(), sourceDevice, sourceCap);
 
     ret = syncer_->RegisterDisconnectNotifier([this](const std::string& deviceId) {
         SLOGE("device %{public}s disconnected, sessionId is %{public}s", deviceId.c_str(),
@@ -93,7 +93,7 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
 int32_t RemoteSessionSinkImpl::CancelCastSession()
 {
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSESSION_ERROR, "session is nullptr");
-    SessionCapabilitySet::GetInstance().RemoveRemoteCapability(session_->GetSessionId(), sourceDevice_);
+    RemoteSessionCapabilitySet::GetInstance().RemoveRemoteCapability(session_->GetSessionId(), sourceDevice_);
     syncer_->Destroy();
     syncer_ = nullptr;
     return AVSESSION_SUCCESS;
@@ -103,14 +103,14 @@ int32_t RemoteSessionSinkImpl::SetControlCommand(const AVControlCommand &command
 {
     CHECK_AND_RETURN_RET_LOG(syncer_ != nullptr, AVSESSION_ERROR, "syncer is nullptr");
     auto ret = syncer_->PutControlCommand(command);
-        if (ret != AVSESSION_SUCCESS && session_ != nullptr) {
-            HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
-                "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
-                "SESSION_TYPE", session_->GetDescriptor().sessionType_,
-                "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
-                "ERROR_TYPE", "TIME_OUT",
-                "ERROR_INFO", "SetControlCommand time out");
-        }
+    if (ret != AVSESSION_SUCCESS && session_ != nullptr) {
+        HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+            "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+            "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+            "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+            "ERROR_TYPE", "TIME_OUT",
+            "ERROR_INFO", "SetControlCommand time out");
+    }
     return AVSESSION_SUCCESS;
 }
 } // namespace OHOS::AVSession

@@ -45,9 +45,9 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
     int32_t ret = syncer->Init();
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "syncer init failed");
     syncers_[sinkDevice] = syncer;
-    SLOGE("sinkDevice is %{public}s", sinkDevice.c_str());
+    SLOGI("sinkDevice is %{public}s", sinkDevice.c_str());
 
-    SessionCapabilitySet::GetInstance().AddRemoteCapability(session->GetSessionId(), sinkDevice, sinkCapability);
+    RemoteSessionCapabilitySet::GetInstance().AddRemoteCapability(session->GetSessionId(), sinkDevice, sinkCapability);
 
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty(), AVSESSION_ERROR, "syncers size is empty");
 
@@ -90,7 +90,7 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
 int32_t  RemoteSessionSourceImpl::CancelCastAudio(const std::string& sinkDevice)
 {
     SLOGI("start");
-    SessionCapabilitySet::GetInstance().RemoveRemoteCapability(session_->GetSessionId(), sinkDevice);
+    RemoteSessionCapabilitySet::GetInstance().RemoveRemoteCapability(session_->GetSessionId(), sinkDevice);
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty(), AVSESSION_SUCCESS, "syncer is empty");
     auto iter = syncers_.begin();
     while (iter != syncers_.end()) {
@@ -108,7 +108,7 @@ int32_t  RemoteSessionSourceImpl::CancelCastAudio(const std::string& sinkDevice)
 int32_t RemoteSessionSourceImpl::SetAVMetaData(const AVMetaData& metaData)
 {
     SLOGI("start");
-    CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncer size is zero");
+    CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         SLOGI("iter %{public}s", iter->first.c_str());
         AVMetaData sinkMetaData;
@@ -131,7 +131,7 @@ int32_t RemoteSessionSourceImpl::SetAVMetaData(const AVMetaData& metaData)
 int32_t RemoteSessionSourceImpl::SetAVPlaybackState(const AVPlaybackState& state)
 {
     SLOGI("start");
-    CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncer size is zero");
+    CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         SLOGI("syncer %{public}s", iter->first.c_str());
         AVPlaybackState sinkState;
@@ -156,8 +156,9 @@ AVMetaData::MetaMaskType RemoteSessionSourceImpl::GetSinkMetaMaskType(const std:
     std::vector<int32_t> capability = AVMetaData::localCapability;
     AVMetaData::MetaMaskType mask;
     for (const auto& key : capability) {
-        bool hasCapability = SessionCapabilitySet::GetInstance().HasCapability(session_->GetSessionId(), sinkDevice,
-                                                                               SESSION_DATA_META, key);
+        bool hasCapability = RemoteSessionCapabilitySet::GetInstance().HasCapability(session_->GetSessionId(),
+                                                                                     sinkDevice,
+                                                                                     SESSION_DATA_META, key);
         if (hasCapability) {
             mask.set(key);
         }
@@ -171,8 +172,9 @@ AVPlaybackState::PlaybackStateMaskType RemoteSessionSourceImpl::GetSinkPlaybackS
     std::vector<int32_t> capability = AVPlaybackState::localCapability;
     AVPlaybackState::PlaybackStateMaskType mask;
     for (const auto& key : capability) {
-        bool hasCapability = SessionCapabilitySet::GetInstance().HasCapability(session_->GetSessionId(), sinkDevice,
-                                                                               SESSION_DATA_PLAYBACK_STATE, key);
+        bool hasCapability = RemoteSessionCapabilitySet::GetInstance().HasCapability(session_->GetSessionId(),
+                                                                                     sinkDevice,
+                                                                                     SESSION_DATA_PLAYBACK_STATE, key);
         if (hasCapability) {
             mask.set(key);
         }

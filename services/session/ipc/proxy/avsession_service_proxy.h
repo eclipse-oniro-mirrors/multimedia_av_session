@@ -20,6 +20,7 @@
 #include "iremote_proxy.h"
 #include "av_session.h"
 #include "avsession_controller.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 class AVSessionServiceProxy : public IRemoteProxy<IAVSessionService> {
@@ -54,7 +55,10 @@ public:
     int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
 
     int32_t ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
-                                    std::string& output) override;
+                                    std::string& output) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 
 private:
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;

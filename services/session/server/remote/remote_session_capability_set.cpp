@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+#include "remote_session_capability_set.h"
 #include "avcontrol_command.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
-#include "remote_session_capability_set.h"
 
 namespace OHOS::AVSession {
 RemoteSessionCapabilitySet& RemoteSessionCapabilitySet::GetInstance()

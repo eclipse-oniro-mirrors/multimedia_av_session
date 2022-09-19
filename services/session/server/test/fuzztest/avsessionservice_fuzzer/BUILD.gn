@@ -24,6 +24,7 @@ ohos_fuzztest("AvSessionServiceFuzzTest") {
   include_dirs = [
     "//foundation/multimedia/av_session/services/session/adapter",
     "//foundation/multimedia/av_session/services/session/server",
+    "//foundation/multimedia/av_session/services/session/server/remote",
     "//foundation/multimedia/av_session/services/session/server/test/fuzztest/",
   ]
   cflags = [

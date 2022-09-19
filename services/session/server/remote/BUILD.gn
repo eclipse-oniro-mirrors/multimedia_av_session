@@ -16,22 +16,19 @@ import("//foundation/multimedia/av_session/config.gni")
 
 ###############################################################################
 common_include_dirs = [
-  "//foundation/multimedia/av_session/frameworks/native/session/include",
   "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
   "//foundation/multimedia/av_session/services/session/server",
   "//foundation/multimedia/av_session/services/session/ipc/base",
   "//foundation/multimedia/av_session/services/session/ipc/proxy",
   "//foundation/multimedia/av_session/services/session/ipc/stub",
-  "//foundation/multimedia/av_session/services/session/adapter",
   "//foundation/multimedia/av_session/services/session/server/remote",
   "//third_party/json/single_include",
 ]
 
 common_deps = [
-  "//foundation/multimedia/av_session/frameworks/common:avsession_common",
   "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
-  "//foundation/multimedia/av_session/utils:avsession_utils",
   "//foundation/multimedia/av_session/services/session:avession_server",
+  "//foundation/multimedia/av_session/utils:avsession_utils",
 ]
 
 common_external_deps = [
@@ -47,8 +44,9 @@ common_external_deps = [
   "samgr:samgr_proxy",
 ]
 
+common_cflags = []
 if (multimedia_av_session_enable_trace_control) {
-  common_cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+  common_cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
   common_external_deps += [ "hitrace_native:hitrace_meter" ]
 }
 if (multimedia_av_session_enable_sysevent_control) {

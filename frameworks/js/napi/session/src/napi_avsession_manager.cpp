@@ -207,7 +207,8 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
 
     auto executor = [context]() {
         for (const auto& audioDeviceDescriptor : context->audioDeviceDescriptors_) {
-            SLOGI("networkId_: %{public}s", audioDeviceDescriptor.networkId_.c_str());
+            SLOGI("networkId_: %{public}s, role %{public}d", audioDeviceDescriptor.networkId_.c_str(),
+                  static_cast<int32_t>(audioDeviceDescriptor.deviceRole_));
         }
         int32_t ret = AVSESSION_ERROR;
         if (context->isAll_) {
@@ -221,9 +222,7 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
         }
     };
 
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
 
     return NapiAsyncWork::Enqueue(env, context, "CastAudio", executor, complete);
 }
