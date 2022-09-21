@@ -402,7 +402,7 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
     SLOGI("CreateController003 begin");
     std::shared_ptr<AVSessionController> controller;
     auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVALIABLE);
+    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
     SLOGI("CreateController003 end");
 }
 

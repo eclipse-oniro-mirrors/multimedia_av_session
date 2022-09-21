@@ -71,7 +71,7 @@ int32_t AbilityConnectHelper::StartAbilityByCall(const std::string bundleName, c
         SLOGE("Send request error");
         return ERR_IPC_SEND_REQUEST;
     }
-    return reply.ReadInt32() == ERR_OK ? AVSESSION_SUCCESS : ERR_ABILITY_NOT_AVALIABLE;
+    return reply.ReadInt32() == ERR_OK ? AVSESSION_SUCCESS : ERR_ABILITY_NOT_AVAILABLE;
 }
 
 sptr<IRemoteObject> AbilityConnectHelper::GetSystemAbility()
