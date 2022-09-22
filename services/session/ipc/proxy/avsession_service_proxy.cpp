@@ -15,10 +15,8 @@
 
 #include "avsession_service_proxy.h"
 #include "avsession_log.h"
-#include "avsession_errors.h"
 #include "avsession_proxy.h"
 #include "avsession_controller_proxy.h"
-#include "avsession_trace.h"
 
 namespace OHOS::AVSession {
 AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject> &impl)
@@ -216,7 +214,7 @@ int32_t AVSessionServiceProxy::CastAudio(const SessionToken& token,
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(static_cast<int32_t>(descriptors.size())), ERR_MARSHALLING,
                              "write descriptors size failed");
     for (auto descriptor : descriptors) {
-        SLOGI("networkId_: %{public}s, role %{public}d", descriptor.networkId_.c_str(),
+        SLOGE("networkId_: %{public}s, role %{public}d", descriptor.networkId_.c_str(),
               static_cast<int32_t>(descriptor.deviceRole_));
         CHECK_AND_RETURN_RET_LOG(descriptor.Marshalling(data), ERR_MARSHALLING, "write descriptor failed");
     }
@@ -236,7 +234,7 @@ int32_t AVSessionServiceProxy::CastAudioForAll(const std::vector<AudioStandard::
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(static_cast<int32_t>(descriptors.size())), ERR_MARSHALLING,
                              "write descriptors size failed");
     for (auto descriptor : descriptors) {
-        SLOGI("networkId_: %{public}s, role %{public}d", descriptor.networkId_.c_str(),
+        SLOGE("networkId_: %{public}s, role %{public}d", descriptor.networkId_.c_str(),
               static_cast<int32_t>(descriptor.deviceRole_));
         CHECK_AND_RETURN_RET_LOG(descriptor.Marshalling(data), ERR_MARSHALLING, "write descriptor failed");
     }
@@ -246,25 +244,5 @@ int32_t AVSessionServiceProxy::CastAudioForAll(const std::vector<AudioStandard::
                              ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
-}
-
-int32_t AVSessionServiceProxy::ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
-                                                       std::string& output)
-{
-    AVSESSION_TRACE_SYNC_START("AVSessionServiceProxy::ProcessCastAudioCommand");
-    MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
-                             "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(command), ERR_MARSHALLING, "write command failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteString(input), ERR_MARSHALLING, "write input failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_SEND_COMMAND_TO_REMOTE, data, reply, option) == 0,
-                             ERR_RPC_SEND_REQUEST, "send request failed");
-    int32_t ret = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_MARSHALLING, "read reply failed");
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "send request failed");
-    CHECK_AND_RETURN_RET_LOG(reply.ReadString(output), AVSESSION_ERROR, "read output failed");
-    return AVSESSION_SUCCESS;
 }
 } // namespace OHOS::AVSession

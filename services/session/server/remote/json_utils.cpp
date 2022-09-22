@@ -213,5 +213,5 @@ int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessio
     descriptor.sessionTag_ = sessionDescriptor["tag"];
     descriptor.isThirdPartyApp_ = sessionDescriptor["isThirdPartyApp"];
     return AVSESSION_SUCCESS;
-    }
+}
 } // namespace OHOS::AVSession

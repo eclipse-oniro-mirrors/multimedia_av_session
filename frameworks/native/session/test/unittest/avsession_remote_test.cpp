@@ -109,7 +109,7 @@ void AVSessionRemoteTest::SetUpTestCase()
     SLOGE("InitDeviceManager ret is %{public}d", ret);
     ret = OHOS::DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList("av_session", "", deviceList);
     SLOGE("GetTrustedDeviceList ret is %{public}d", ret);
-    SLOGI("GetTrustedDeviceList size is %{public}lu", deviceList.size());
+    SLOGI("GetTrustedDeviceList size is %{public}d", static_cast<int32_t>(deviceList.size()));
     ASSERT_NE(infoNum, 0);
     AudioDeviceDescriptor descriptor;
     for (int32_t i = 0; i < deviceList.size(); i++) {
@@ -239,9 +239,9 @@ AVSessionCastAudioCallbackImpl::~AVSessionCastAudioCallbackImpl()
 
 /**
 * @tc.name: CastAudio001
-* @tc.desc: 
+* @tc.desc: Cast current audio to the remote device
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K7
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, CastAudio001, TestSize.Level1)
 {
@@ -256,9 +256,9 @@ HWTEST_F(AVSessionRemoteTest, CastAudio001, TestSize.Level1)
 
 /**
 * @tc.name: CastAudio002
-* @tc.desc:
+* @tc.desc: Invalid params for sessionToken
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K7
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, CastAudio002, TestSize.Level1)
 {
@@ -270,9 +270,9 @@ HWTEST_F(AVSessionRemoteTest, CastAudio002, TestSize.Level1)
 
 /**
 * @tc.name: CastAudio003
-* @tc.desc:
+* @tc.desc: Invalid params for sessionToken
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K7
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, CastAudio003, TestSize.Level1)
 {
@@ -287,9 +287,9 @@ HWTEST_F(AVSessionRemoteTest, CastAudio003, TestSize.Level1)
 
 /**
 * @tc.name: CastAudio004
-* @tc.desc:
+* @tc.desc: Invalid params for descriptors
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K7
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, CastAudio004, TestSize.Level1)
 {
@@ -305,9 +305,9 @@ HWTEST_F(AVSessionRemoteTest, CastAudio004, TestSize.Level1)
 
 /**
 * @tc.name: CastAudioForAll001
-* @tc.desc: 
+* @tc.desc: Cast current all audios to the remote device
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K7
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, CastAudioForAll001, TestSize.Level1)
 {
@@ -318,9 +318,9 @@ HWTEST_F(AVSessionRemoteTest, CastAudioForAll001, TestSize.Level1)
 
 /**
 * @tc.name: CastAudioForAll002
-* @tc.desc:
+* @tc.desc: Invalid params for descriptors
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K7
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, CastAudioForAll002, TestSize.Level1)
 {
@@ -332,9 +332,9 @@ HWTEST_F(AVSessionRemoteTest, CastAudioForAll002, TestSize.Level1)
 
 /**
 * @tc.name: SetAVMetaData001
-* @tc.desc: 
+* @tc.desc: Set av meta data to remote devices
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K6
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, SetAVMetaData001, TestSize.Level1)
 {
@@ -365,9 +365,9 @@ HWTEST_F(AVSessionRemoteTest, SetAVMetaData001, TestSize.Level1)
 
 /**
 * @tc.name: SetAVPlaybackState001
-* @tc.desc: 
+* @tc.desc: Set av playback state to remote devices
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K6
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, SetAVPlaybackState001, TestSize.Level1)
 {
@@ -395,9 +395,9 @@ HWTEST_F(AVSessionRemoteTest, SetAVPlaybackState001, TestSize.Level1)
 
 /**
 * @tc.name: SendControlCommand001
-* @tc.desc: 
+* @tc.desc: Send control command by remote controller to local device
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K8
+* @tc.require: AR000H55F5
 */
 HWTEST_F(AVSessionRemoteTest, SendControlCommand001, TestSize.Level1)
 {
@@ -419,14 +419,20 @@ HWTEST_F(AVSessionRemoteTest, SendControlCommand001, TestSize.Level1)
     AVControlCommand cmd;
     EXPECT_EQ(cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
     EXPECT_EQ(controller->SendControlCommand(cmd), AVSESSION_SUCCESS);
+    if (controller != nullptr) {
+        ret = controller->Destroy();
+        EXPECT_EQ(ret, AVSESSION_SUCCESS);
+        controller = nullptr;
+        EXPECT_EQ(controller, nullptr);
+    }
     SLOGE("SendControlCommand001 End");
 }
 
 /**
 * @tc.name: GetController001
-* @tc.desc:
+* @tc.desc: Get controller by session
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K6
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, GetController001, TestSize.Level1)
 {
@@ -444,9 +450,9 @@ HWTEST_F(AVSessionRemoteTest, GetController001, TestSize.Level1)
 
 /**
 * @tc.name: GetController002
-* @tc.desc:
+* @tc.desc: The controller fetched twice through session is same
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K6
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, GetController002, TestSize.Level1)
 {
@@ -468,9 +474,9 @@ HWTEST_F(AVSessionRemoteTest, GetController002, TestSize.Level1)
 
 /**
 * @tc.name: GetOutputDevice001
-* @tc.desc:
+* @tc.desc: Get output device information by session
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K6
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, GetOutputDevice001, TestSize.Level1)
 {
@@ -478,10 +484,12 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice001, TestSize.Level1)
     AVSessionDescriptor descriptor;
     auto ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(avsession_->GetSessionId(), descriptor);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    SLOGE("avsession get deviceIds_ size %{public}lu", descriptor.outputDeviceInfo_.deviceIds_.size());
+    SLOGE("avsession get deviceIds_ size %{public}d",
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceIds_.size()));
     SLOGE("avsession get deviceId0 %{public}s", descriptor.outputDeviceInfo_.deviceIds_[0].c_str());
     ASSERT_NE(descriptor.outputDeviceInfo_.deviceIds_.size(), 0);
-    SLOGE("avsession get deviceNames_ size %{public}lu", descriptor.outputDeviceInfo_.deviceNames_.size());
+    SLOGE("avsession get deviceNames_ size %{public}d",
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceNames_.size()));
     SLOGE("avsession get deviceName0 %{public}s", descriptor.outputDeviceInfo_.deviceNames_[0].c_str());
     ASSERT_NE(descriptor.outputDeviceInfo_.deviceNames_.size(), 0);
     SLOGE("GetOutputDevice001 End");
@@ -489,59 +497,91 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice001, TestSize.Level1)
 
 /**
 * @tc.name: GetOutputDevice002
-* @tc.desc:
+* @tc.desc: Invalid params for sessionId
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K8
+* @tc.require: AR000H55F4
 */
 HWTEST_F(AVSessionRemoteTest, GetOutputDevice002, TestSize.Level1)
 {
     SLOGE("GetOutputDevice002 Begin");
+    AVSessionDescriptor descriptor;
+    EXPECT_EQ(AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId("123456789", descriptor),
+              AVSESSION_ERROR);
+    SLOGE("GetOutputDevice002 End");
+}
+
+/**
+* @tc.name: GetOutputDevice003
+* @tc.desc: Invalid params for sessionId
+* @tc.type: FUNC
+* @tc.require: AR000H55FQ
+*/
+HWTEST_F(AVSessionRemoteTest, GetOutputDevice003, TestSize.Level1)
+{
+    SLOGE("GetOutputDevice003 Begin");
+    AVSessionDescriptor descriptor;
+    EXPECT_EQ(AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId("", descriptor), ERR_INVALID_PARAM);
+    SLOGE("GetOutputDevice003 End");
+}
+
+/**
+* @tc.name: GetOutputDevice004
+* @tc.desc: Get output device information by controller
+* @tc.type: FUNC
+* @tc.require: AR000H55F4
+*/
+HWTEST_F(AVSessionRemoteTest, GetOutputDevice004, TestSize.Level1)
+{
+    SLOGE("GetOutputDevice004 Begin");
     std::shared_ptr<AVSessionController> controller = nullptr;
     auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     ASSERT_NE(controller, nullptr);
 
     AVSessionDescriptor descriptor;
-    auto ret1 = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(controller->GetSessionId(), descriptor);
-    EXPECT_EQ(ret1, AVSESSION_SUCCESS);
-    SLOGE("controller get deviceIds_ size %{public}lu", descriptor.outputDeviceInfo_.deviceIds_.size());
+    ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(controller->GetSessionId(), descriptor);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGE("controller get deviceIds_ size %{public}d",
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceIds_.size()));
     SLOGE("controller get deviceId0 %{public}s", descriptor.outputDeviceInfo_.deviceIds_[0].c_str());
     ASSERT_NE(descriptor.outputDeviceInfo_.deviceIds_.size(), 0);
-    SLOGE("controller get deviceNames_ size %{public}lu", descriptor.outputDeviceInfo_.deviceNames_.size());
+    SLOGE("controller get deviceNames_ size %{public}d",
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceNames_.size()));
     SLOGE("controller get deviceName0 %{public}s", descriptor.outputDeviceInfo_.deviceNames_[0].c_str());
     ASSERT_NE(descriptor.outputDeviceInfo_.deviceNames_.size(), 0);
     if (controller != nullptr) {
-        auto ret2 = controller->Destroy();
-        EXPECT_EQ(ret2, AVSESSION_SUCCESS);
-        controller = nullptr;
-        EXPECT_EQ(controller, nullptr);
+    ret = controller->Destroy();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    controller = nullptr;
+    EXPECT_EQ(controller, nullptr);
     }
-    SLOGE("GetOutputDevice002 End");
+    SLOGE("GetOutputDevice004 End");
 }
 
 /**
-* @tc.name: GetOutputDevice003
-* @tc.desc:
+* @tc.name: GetOutputDevice005
+* @tc.desc: Get same output device information by controller and session
 * @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K8
+* @tc.require: AR000H55F4
 */
-HWTEST_F(AVSessionRemoteTest, GetOutputDevice003, TestSize.Level1)
+HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
 {
-    SLOGE("GetOutputDevice003 Begin");
+    SLOGE("GetOutputDevice005 Begin");
     AVSessionDescriptor descriptor1;
-    auto ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(avsession_->GetSessionId(), descriptor1);
+    auto ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(avsession_->GetSessionId(),
+                                                                                descriptor1);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     ASSERT_NE(descriptor1.outputDeviceInfo_.deviceIds_.size(), 0);
     ASSERT_NE(descriptor1.outputDeviceInfo_.deviceNames_.size(), 0);
 
     std::shared_ptr<AVSessionController> controller = nullptr;
-    auto ret1 = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller);
-    EXPECT_EQ(ret1, AVSESSION_SUCCESS);
+    ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     ASSERT_NE(controller, nullptr);
 
     AVSessionDescriptor descriptor2;
-    auto ret2 = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(controller->GetSessionId(),descriptor2);
-    EXPECT_EQ(ret2, AVSESSION_SUCCESS);
+    ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(controller->GetSessionId(), descriptor2);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     ASSERT_NE(descriptor2.outputDeviceInfo_.deviceIds_.size(), 0);
     ASSERT_NE(descriptor2.outputDeviceInfo_.deviceNames_.size(), 0);
 
@@ -550,40 +590,11 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice003, TestSize.Level1)
     EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceNames_.size(), descriptor2.outputDeviceInfo_.deviceNames_.size());
     EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceNames_[0], descriptor2.outputDeviceInfo_.deviceNames_[0]);
     if (controller != nullptr) {
-        auto ret3 = controller->Destroy();
-        EXPECT_EQ(ret3, AVSESSION_SUCCESS);
-        controller = nullptr;
-        EXPECT_EQ(controller, nullptr);
+    ret = controller->Destroy();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    controller = nullptr;
+    EXPECT_EQ(controller, nullptr);
     }
-    SLOGE("GetOutputDevice003 End");
-}
-
-/**
-* @tc.name: GetOutputDevice004
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K6
-*/
-HWTEST_F(AVSessionRemoteTest, GetOutputDevice004, TestSize.Level1)
-{
-    SLOGE("GetOutputDevice004 Begin");
-    AVSessionDescriptor descriptor;
-    EXPECT_EQ(AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId("123456789", descriptor),
-              AVSESSION_ERROR);
-    SLOGE("GetOutputDevice004 End");
-}
-
-/**
-* @tc.name: GetOutputDevice005
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require: SR000H31K5, AR000H31K6
-*/
-HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
-{
-    SLOGE("GetOutputDevice005 Begin");
-    AVSessionDescriptor descriptor;
-    EXPECT_EQ(AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId("", descriptor), ERR_INVALID_PARAM);
     SLOGE("GetOutputDevice005 End");
 }
 

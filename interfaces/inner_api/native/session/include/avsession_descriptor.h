@@ -43,20 +43,20 @@ struct AVSessionDescriptor {
 };
 
 struct AVSessionBasicInfo {
-    std::string deviceName_ {};
-    std::string networkId_ {};
-    std::string vendorId_ {};
-    std::string deviceType_ {};
-    std::string systemVersion_ {};
+    std::string deviceName_;
+    std::string networkId_;
+    std::string vendorId_;
+    std::string deviceType_;
+    std::string systemVersion_;
     int32_t sessionVersion_ {};
-    std::vector<int32_t> reserve_ {};
-    std::vector<int32_t> feature_ {};
-    std::vector<int32_t> metaDataCap_ {};
-    std::vector<int32_t> playBackStateCap_ {};
-    std::vector<int32_t> controlCommandCap_ {};
-    std::vector<int32_t> extendCapability_ {};
+    std::vector<int32_t> reserve_;
+    std::vector<int32_t> feature_;
+    std::vector<int32_t> metaDataCap_;
+    std::vector<int32_t> playBackStateCap_;
+    std::vector<int32_t> controlCommandCap_;
+    std::vector<int32_t> extendCapability_;
     int32_t systemTime_ {};
-    std::vector<int32_t> extend_ {};
+    std::vector<int32_t> extend_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_DESCRIPTOR_H

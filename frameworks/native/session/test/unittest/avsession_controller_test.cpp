@@ -120,7 +120,7 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
 
-    void OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo) override {};
+    void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo &outputDeviceInfo) override {};
 
     ~AVControllerCallbackImpl() override;
 

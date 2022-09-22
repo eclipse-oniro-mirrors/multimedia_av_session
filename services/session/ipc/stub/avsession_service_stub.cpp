@@ -193,7 +193,7 @@ int AVSessionServiceStub::HandleCastAudio(MessageParcel &data, MessageParcel &re
         sinkAudioDescriptors.push_back(*audioDeviceDescriptor);
     }
     int32_t ret = CastAudio(token, sinkAudioDescriptors);
-    SLOGE("CastAudio ret %{public}d", ret);
+    SLOGI("CastAudio ret %{public}d", ret);
     reply.WriteInt32(ret);
     SLOGI("success");
     return ERR_NONE;

@@ -74,7 +74,7 @@ public:
 struct SessionToken {
     std::string sessionId;
     pid_t pid;
-    uid_t uid;
+    pid_t uid;
 };
 
 enum SessionDataCategory {

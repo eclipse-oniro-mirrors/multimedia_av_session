@@ -24,6 +24,7 @@ ohos_fuzztest("AVSessionItemFuzzTest") {
     "//foundation/multimedia/av_session/services/session/adapter",
     "//foundation/multimedia/av_session/services/session/server/test/fuzztest/",
     "//foundation/multimedia/av_session/services/session/server",
+    "//foundation/multimedia/av_session/services/session/server/remote",
   ]
   cflags = [
     "-g",

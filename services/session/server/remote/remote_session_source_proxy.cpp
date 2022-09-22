@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "remote_session_source_proxy.h"
-
 #include <dlfcn.h>
 #include "remote_session_source_impl.h"
 #include "avsession_trace.h"
+#include "remote_session_source_proxy.h"
 
 namespace OHOS::AVSession {
 static std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_source.z.so");

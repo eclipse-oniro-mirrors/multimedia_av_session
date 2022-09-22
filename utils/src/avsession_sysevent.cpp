@@ -123,7 +123,7 @@ void AVSessionSysEvent::AddControllerCommandInfo(const std::string& bundleName, 
     controllerCommandInfos_.push_back(controllerCommandInfo);
 }
 
-int32_t AVSessionSysEvent::GetAudioStatus(int32_t uid)
+int32_t AVSessionSysEvent::GetAudioStatus(pid_t uid)
 {
     std::lock_guard lockGuard(lock_);
     if (audioStatuses_.find(uid) != audioStatuses_.end()) {
@@ -132,7 +132,7 @@ int32_t AVSessionSysEvent::GetAudioStatus(int32_t uid)
     return 0;
 }
 
-void AVSessionSysEvent::SetAudioStatus(int32_t uid, int32_t rendererState)
+void AVSessionSysEvent::SetAudioStatus(pid_t uid, int32_t rendererState)
 {
     std::lock_guard lockGuard(lock_);
     audioStatuses_[uid] = rendererState;

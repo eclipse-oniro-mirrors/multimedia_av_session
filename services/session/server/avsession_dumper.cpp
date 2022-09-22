@@ -264,7 +264,7 @@ void AVSessionDumper::ShowErrorInfo(std::string& result, const AVSessionService 
 }
 
 void AVSessionDumper::ProcessParameter(const std::string& arg, std::string& result,
-    const AVSessionService &sessionService) const
+                                       const AVSessionService &sessionService) const
 {
     if (arg == ARGS_HELP) {
         ShowHelp(result);

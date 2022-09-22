@@ -29,7 +29,6 @@ namespace OHOS::AVSession {
 class RemoteSessionSourceImpl : public RemoteSessionSource {
 public:
     RemoteSessionSourceImpl();
-    static RemoteSessionSourceImpl& GetInstance();
     int32_t CastSessionToRemote(const sptr <AVSessionItem> &session, const std::string& sourceDevice,
                                 const std::string& sinkDevice, const std::string& sinkCapability) override;
 

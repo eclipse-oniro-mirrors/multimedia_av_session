@@ -98,11 +98,11 @@ public:
         const int32_t& sessionType, bool isCreateSession);
     void AddControllerCommandInfo(const std::string& bundleName, const pid_t& controllerPid,
         const int32_t& controllerCmd, const int32_t& sessionType);
-    void SetAudioStatus(int32_t uid, int32_t rendererState);
-    int32_t GetAudioStatus(int32_t uid);
+    void SetAudioStatus(pid_t uid, int32_t rendererState);
+    int32_t GetAudioStatus(pid_t uid);
 
 private:
-    std::map<int32_t, int32_t> audioStatuses_;
+    std::map<pid_t, int32_t> audioStatuses_;
     AVSessionSysEvent();
     std::map<Operation, uint32_t> optCounts_;
     std::unique_ptr<Utils::Timer> timer_;
@@ -138,7 +138,7 @@ private:
 #define HISYSEVENT_SET_AUDIO_STATUS(uid, rendererState)                                                         \
     do {                                                                                                        \
         AVSessionSysEvent::GetInstance().SetAudioStatus(uid, rendererState);                                    \
-    } while (0)                                                                                                 \
+    } while (0)
 
 #else
 #define HISYSEVENT_FAULT(...)

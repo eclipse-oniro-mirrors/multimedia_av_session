@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "remote_session_syncer_impl.h"
-
 #include <iomanip>
 #include <sstream>
+#include "avsession_trace.h"
 #include "hash_calculator.h"
 #include "parcel.h"
-#include "avsession_trace.h"
+#include "remote_session_syncer_impl.h"
 
 namespace OHOS::AVSession {
 RemoteSessionSyncerImpl::RemoteSessionSyncerImpl(const std::string& sourceSessionId, const std::string& sourceDevice,
@@ -74,6 +73,7 @@ int32_t RemoteSessionSyncerImpl::Init()
           sourceSessionId_.c_str(), sourceDevice_.c_str(), sinkDevice_.c_str(), objectName_.c_str());
     object_ = objectStore_->CreateObject(objectName_);
     CHECK_AND_RETURN_RET_LOG(object_ != nullptr, AVSESSION_ERROR, "object_ is nullptr");
+    SLOGE("init object success");
     return AVSESSION_SUCCESS;
 }
 
@@ -93,7 +93,7 @@ int32_t RemoteSessionSyncerImpl::PutAVMetaData(const AVMetaData& metaData)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVMetaData");
     Parcel data;
-    CHECK_AND_RETURN_RET_LOG(metaData.Marshalling(data) == true, AVSESSION_ERROR, "metaData Marshalling error");
+    CHECK_AND_RETURN_RET_LOG(metaData.Marshalling(data), AVSESSION_ERROR, "metaData Marshalling error");
     uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
     std::vector<uint8_t> dataVector(data.GetDataSize());
     std::copy(parcelData, parcelData + data.GetDataSize(), dataVector.begin());
@@ -123,7 +123,7 @@ int32_t RemoteSessionSyncerImpl::PutAVPlaybackState(const AVPlaybackState& state
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVPlaybackState");
     Parcel data;
-    CHECK_AND_RETURN_RET_LOG(state.Marshalling(data) == true, AVSESSION_ERROR, "state Marshalling error");
+    CHECK_AND_RETURN_RET_LOG(state.Marshalling(data), AVSESSION_ERROR, "state Marshalling error");
     uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
     std::vector<uint8_t> dataVector(data.GetDataSize());
     std::copy(parcelData, parcelData + data.GetDataSize(), dataVector.begin());
@@ -155,7 +155,7 @@ int32_t RemoteSessionSyncerImpl::PutControlCommand(const AVControlCommand& comma
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutControlCommand");
     Parcel data;
-    CHECK_AND_RETURN_RET_LOG(command.Marshalling(data) == true, AVSESSION_ERROR, "command Marshalling error");
+    CHECK_AND_RETURN_RET_LOG(command.Marshalling(data), AVSESSION_ERROR, "command Marshalling error");
     uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
     std::vector<uint8_t> dataVector(data.GetDataSize());
     std::copy(parcelData, parcelData + data.GetDataSize(), dataVector.begin());
@@ -202,9 +202,11 @@ int32_t RemoteSessionSyncerImpl::RegisterDisconnectNotifier(const ObjectDisconne
 
 void RemoteSessionSyncerImpl::Destroy()
 {
-    int32_t ret = objectStore_->DeleteObject(objectName_);
+    auto ret = objectStore_->UnWatch(object_);
+    CHECK_AND_RETURN_LOG(ret == ObjectStore::SUCCESS, "UnWatch error");
+    ret = objectStore_->DeleteObject(objectName_);
     CHECK_AND_RETURN_LOG(ret == ObjectStore::SUCCESS, "DeleteObject error");
-    SLOGE("Destroy");
+    SLOGI("Destroy");
 }
 
 RemoteSessionSyncerImpl::~RemoteSessionSyncerImpl()

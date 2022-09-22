@@ -21,6 +21,7 @@
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
 #include "avcontrol_command.h"
+#include "audio_info.h"
 
 namespace OHOS::AVSession {
 class AVControllerItem;
@@ -68,15 +69,14 @@ public:
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
+    void UpdateOutputDevice(OutputDeviceInfo &outputDeviceInfo,
+                            const std::unique_ptr<AudioStandard::AudioRendererChangeInfo> &outputDeviceChangeInfo);
+
     void HandleOutputDeviceChange(const OutputDeviceInfo& info);
 
     void ExecuteControllerCommand(const AVControlCommand& cmd);
 
     int32_t AddController(pid_t pid, sptr<AVControllerItem>& controller);
-
-    int32_t RegisterCallbackForRemote(std::shared_ptr<AVSessionCallback>& callback);
-
-    int32_t UnRegisterCallbackForRemote();
 
     void SetPid(pid_t pid);
 

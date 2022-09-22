@@ -23,8 +23,8 @@
 #include "avsession_sysevent.h"
 #include "remote_session_sink.h"
 #include "remote_session_source.h"
-#include "remote_session_sink_proxy.h"
 #include "remote_session_source_proxy.h"
+#include "remote_session_sink_proxy.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -347,16 +347,6 @@ int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& contolle
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionItem::RegisterCallbackForRemote(std::shared_ptr<AVSessionCallback>& callback)
-{
-    return AVSESSION_SUCCESS;
-}
-
-int32_t AVSessionItem::UnRegisterCallbackForRemote()
-{
-    return AVSESSION_SUCCESS;
-}
-
 void AVSessionItem::SetPid(pid_t pid)
 {
     descriptor_.pid_ = pid;
@@ -401,6 +391,46 @@ void AVSessionItem::HandleControllerRelease(pid_t pid)
 void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem &)> &callback)
 {
     serviceCallback_ = callback;
+}
+
+void AVSessionItem::UpdateOutputDevice(OutputDeviceInfo &outputDeviceInfo,
+                                       const std::unique_ptr<AudioStandard::AudioRendererChangeInfo> &outputDeviceChangeInfo)
+{
+    if (outputDeviceChangeInfo->rendererState == AudioStandard::RENDERER_RELEASED) {
+        std::string deviceId = std::to_string(outputDeviceChangeInfo->outputDeviceInfo.deviceId);
+        auto iter = std::find(descriptor_.outputDeviceInfo_.deviceIds_.begin(),
+                              descriptor_.outputDeviceInfo_.deviceIds_.end(),
+                              deviceId);
+        if (iter != descriptor_.outputDeviceInfo_.deviceIds_.end()) {
+            auto position = std::distance(descriptor_.outputDeviceInfo_.deviceIds_.begin(), iter);
+            SLOGI("delete output device id %{public}s, device name %{public}s",
+                  descriptor_.outputDeviceInfo_.deviceIds_.at(position).c_str(),
+                  descriptor_.outputDeviceInfo_.deviceNames_.at(position).c_str());
+            descriptor_.outputDeviceInfo_.deviceIds_.erase(iter);
+            descriptor_.outputDeviceInfo_.deviceNames_.erase(
+                descriptor_.outputDeviceInfo_.deviceNames_.begin() + position);
+        }
+    } else {
+        SLOGI("add output device id %{public}s, device name %{public}s",
+              std::to_string(outputDeviceChangeInfo->outputDeviceInfo.deviceId).c_str(),
+              outputDeviceChangeInfo->outputDeviceInfo.deviceName.c_str());
+        if (descriptor_.outputDeviceInfo_.deviceIds_[0] == "-1" &&
+            descriptor_.outputDeviceInfo_.deviceNames_[0] == "LocalDevice") {
+            descriptor_.outputDeviceInfo_.deviceIds_.clear();
+            descriptor_.outputDeviceInfo_.deviceNames_.clear();
+        }
+        auto iter = std::find(descriptor_.outputDeviceInfo_.deviceIds_.begin(),
+                              descriptor_.outputDeviceInfo_.deviceIds_.end(),
+                              std::to_string(outputDeviceChangeInfo->outputDeviceInfo.deviceId));
+        if (iter == descriptor_.outputDeviceInfo_.deviceIds_.end()) {
+            descriptor_.outputDeviceInfo_.deviceIds_.push_back(
+                std::to_string(outputDeviceChangeInfo->outputDeviceInfo.deviceId));
+            descriptor_.outputDeviceInfo_.deviceNames_.push_back(outputDeviceChangeInfo->outputDeviceInfo.deviceName);
+        } else {
+            SLOGI("deviceID and deviceName is exist");
+        }
+    }
+    outputDeviceInfo = descriptor_.outputDeviceInfo_;
 }
 
 void AVSessionItem::HandleOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
@@ -474,7 +504,7 @@ int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, c
     ret = JsonUtils::GetVectorCapability(sourceCapability, value);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetVectorCapability error");
     for (auto cmd : value[SESSION_DATA_CONTROL_COMMAND]) {
-        SLOGI("add support amd : %{public}d", cmd);
+        SLOGI("add support cmd : %{public}d", cmd);
         AddSupportCommand(cmd);
     }
     SLOGI("success");

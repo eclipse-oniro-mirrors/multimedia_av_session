@@ -32,10 +32,10 @@
 #include "focus_session_strategy.h"
 #include "background_audio_controller.h"
 #include "ability_manager_adapter.h"
-#include "avsession_service_proxy.h"
 #include "device_manager.h"
 #include "dm_device_info.h"
 #include "audio_adapter.h"
+#include "remote_session_command_process.h"
 
 namespace OHOS::AVSession {
 class AVSessionDumper;
@@ -136,7 +136,7 @@ private:
 
     sptr<AVControllerItem> CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session);
 
-    int32_t CancelCastAudioForClientDied(pid_t pid, const sptr<AVSessionItem>& session);
+    int32_t CancelCastAudioForClientExit(pid_t pid, const sptr<AVSessionItem>& session);
 
     void ClearSessionForClientDiedNoLock(pid_t pid);
 
@@ -158,7 +158,7 @@ private:
 
     void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 
-    sptr<AVSessionServiceProxy> GetService(const std::string& deviceId);
+    sptr<RemoteSessionCommandProcess> GetService(const std::string& deviceId);
 
     int32_t CastAudioProcess(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors,
                              const std::string& sourceSessionInfo,
@@ -239,7 +239,7 @@ private:
     friend class AVSessionDumper;
 
     static constexpr const char *ABILITY_FILE_NAME = "abilityinfo";
-    static constexpr const char *DEFAULT_BUNDLE_NAME = "ohos.samples.himusicdemo";
+    static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
 
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
