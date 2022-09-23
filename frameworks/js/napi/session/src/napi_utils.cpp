@@ -973,7 +973,6 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStandard::Audi
     CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor networkId failed", status);
     status = GetValue(env, value, out.networkId_);
     CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor networkId value failed", status);
-    SLOGD("AudioDeviceDescriptor GetValue networkId %{public}s", out.networkId_.c_str());
 
     status = napi_get_named_property(env, in, "deviceRole", &value);
     CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceRole_ failed", status);
@@ -1007,7 +1006,6 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<AudioSt
     uint32_t length {};
     auto status = napi_get_array_length(env, in, &length);
     CHECK_RETURN(status == napi_ok, "get array length failed", status);
-    SLOGI("length %{public}d", length);
     for (uint32_t i = 0; i < length; ++i) {
         napi_value element {};
         status = napi_get_element(env, in, i, &element);

@@ -188,7 +188,7 @@ int AVSessionServiceStub::HandleCastAudio(MessageParcel &data, MessageParcel &re
             reply.WriteInt32(ERR_UNMARSHALLING);
             return ERR_NONE;
         }
-        SLOGI("networkId_: %{public}s, role %{public}d", (*audioDeviceDescriptor).networkId_.c_str(),
+        SLOGI("networkId_: %{public}.6s, role %{public}d", (*audioDeviceDescriptor).networkId_.c_str(),
               static_cast<int32_t>((*audioDeviceDescriptor).deviceRole_));
         sinkAudioDescriptors.push_back(*audioDeviceDescriptor);
     }
@@ -212,7 +212,7 @@ int AVSessionServiceStub::HandleCastAudioForAll(MessageParcel &data, MessageParc
             reply.WriteInt32(ERR_UNMARSHALLING);
             return ERR_NONE;
         }
-        SLOGI("networkId_: %{public}s, role %{public}d", (*audioDeviceDescriptor).networkId_.c_str(),
+        SLOGI("networkId_: %{public}.6s, role %{public}d", (*audioDeviceDescriptor).networkId_.c_str(),
               static_cast<int32_t>((*audioDeviceDescriptor).deviceRole_));
         sinkAudioDescriptors.push_back(*audioDeviceDescriptor);
     }

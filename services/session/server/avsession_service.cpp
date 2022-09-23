@@ -815,7 +815,7 @@ int32_t AVSessionService::GetTrustedDeviceName(const std::string &networkId, std
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "get devicesInfo failed");
     SLOGI("deviceList size is %{public}d", static_cast<int32_t>(deviceList.size()));
     for (const auto &device : deviceList) {
-        SLOGI("device networkId is %{public}s", device.networkId);
+        SLOGI("device networkId is %{public}.6s", device.networkId);
         ret = strcmp(device.networkId, networkId.c_str());
         if (ret == 0) {
             deviceName = device.deviceName;
@@ -823,7 +823,7 @@ int32_t AVSessionService::GetTrustedDeviceName(const std::string &networkId, std
             return AVSESSION_SUCCESS;
         }
     }
-    SLOGI("can not find this device %{public}s", networkId.c_str());
+    SLOGI("can not find this device %{public}.6s", networkId.c_str());
     return AVSESSION_ERROR;
 }
 
@@ -881,7 +881,7 @@ bool AVSessionService::GetAudioDescriptorByDeviceId(const std::vector<sptr<Audio
     for (const auto& descriptor : descriptors) {
         if (std::to_string(descriptor->deviceId_) == deviceId) {
             audioDescriptor = *descriptor;
-            SLOGI("deviceId is %{public}d, networkId is %{public}s", audioDescriptor.deviceId_,
+            SLOGI("deviceId is %{public}d, networkId is %{public}.6s", audioDescriptor.deviceId_,
                   audioDescriptor.networkId_.c_str());
             return true;
         }
@@ -900,7 +900,7 @@ void AVSessionService::GetCastDeviceInfo(const sptr <AVSessionItem>& session,
         return;
     }
     castSinkDescriptors.push_back(descriptors[0]);
-    SLOGI("cast to deviceId %{public}d, networkId_ is %{public}s", descriptors[0].deviceId_,
+    SLOGI("cast to deviceId %{public}d, networkId_ is %{public}.6s", descriptors[0].deviceId_,
           descriptors[0].networkId_.c_str());
 
     OutputDeviceInfo deviceInfo;
@@ -926,7 +926,7 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
     auto audioDeviceDescriptor = new(std::nothrow) AudioDeviceDescriptor(descriptor);
     CHECK_AND_RETURN_RET_LOG(audioDeviceDescriptor != nullptr, AVSESSION_ERROR, "audioDeviceDescriptor is nullptr");
     audioDescriptor.push_back(audioDeviceDescriptor);
-    SLOGI("select the device %{public}s id %{public}d role is %{public}d, networkId is %{public}s",
+    SLOGI("select the device %{public}s id %{public}d role is %{public}d, networkId is %{public}.6s",
           descriptor.deviceName_.c_str(), descriptor.deviceId_, static_cast<int32_t>(descriptor.deviceRole_),
           descriptor.networkId_.c_str());
 
@@ -986,7 +986,7 @@ int32_t AVSessionService::CastAudioInner(const std::vector<AudioStandard::AudioD
     std::string sourceDevice;
     CHECK_AND_RETURN_RET_LOG(GetLocalNetworkId(sourceDevice) == AVSESSION_SUCCESS, AVSESSION_ERROR,
                              "GetLocalNetworkId failed");
-    SLOGI("networkId_: %{public}s, role %{public}d", sinkAudioDescriptors[0].networkId_.c_str(),
+    SLOGI("networkId_: %{public}.6s, role %{public}d", sinkAudioDescriptors[0].networkId_.c_str(),
           static_cast<int32_t>(sinkAudioDescriptors[0].deviceRole_));
     if (IsLocalDevice(sinkAudioDescriptors[0].networkId_)) {
         int32_t ret = SelectOutputDevice(session->GetUid(), sinkAudioDescriptors[0]);
@@ -1037,11 +1037,11 @@ int32_t AVSessionService::CancelCastAudioInner(const std::vector<AudioStandard::
     CHECK_AND_RETURN_RET_LOG(!sinkDevices.empty(), AVSESSION_ERROR, "sinkDevices is empty");
     for (const auto& sinkDevice : sinkDevices) {
         if (IsLocalDevice(sinkDevice.networkId_)) {
-            SLOGI("cancel Local device %{public}s", sinkDevice.networkId_.c_str());
+            SLOGI("cancel Local device %{public}.6s", sinkDevice.networkId_.c_str());
             continue;
         }
         std::string sinkSessionInfo;
-        SLOGI("cancel sinkDevices sinkDevice.networkId_ is %{public}s", sinkDevice.networkId_.c_str());
+        SLOGI("cancel sinkDevices sinkDevice.networkId_ is %{public}.6s", sinkDevice.networkId_.c_str());
         auto service = GetService(sinkDevice.networkId_);
         CHECK_AND_RETURN_RET_LOG(service != nullptr, AVSESSION_ERROR, "GetService %{public}s failed",
                                  sinkDevice.networkId_.c_str());
@@ -1198,7 +1198,7 @@ int32_t AVSessionService::GetAudioDescriptor(const sptr<AVSessionItem>& session,
     AudioDeviceDescriptor audioDescriptor;
     if (GetAudioDescriptorByDeviceId(audioDescriptors, deviceId, audioDescriptor)) {
         audioDeviceDescriptors.push_back(audioDescriptor);
-        SLOGI("get audio deviceId %{public}d, networkId_ is %{public}s", audioDescriptor.deviceId_,
+        SLOGI("get audio deviceId %{public}d, networkId_ is %{public}.6s", audioDescriptor.deviceId_,
               audioDescriptor.networkId_.c_str());
         return AVSESSION_SUCCESS;
     }

@@ -206,10 +206,6 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
     context->taskId = NAPI_CAST_AUDIO_TASK_ID;
 
     auto executor = [context]() {
-        for (const auto& audioDeviceDescriptor : context->audioDeviceDescriptors_) {
-            SLOGI("networkId_: %{public}s, role %{public}d", audioDeviceDescriptor.networkId_.c_str(),
-                  static_cast<int32_t>(audioDeviceDescriptor.deviceRole_));
-        }
         int32_t ret = AVSESSION_ERROR;
         if (context->isAll_) {
             ret = AVSessionManager::GetInstance().CastAudioForAll(context->audioDeviceDescriptors_);
