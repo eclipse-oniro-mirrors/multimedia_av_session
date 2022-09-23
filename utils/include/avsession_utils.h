@@ -1,0 +1,141 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef OHOS_AVSESSION_UTILS_H
+#define OHOS_AVSESSION_UTILS_H
+
+#include <cstdio>
+#include <dirent.h>
+#include <fstream>
+#include <string>
+#include <vector>
+#include "avsession_log.h"
+#include "directory_ex.h"
+#include "unistd.h"
+
+namespace OHOS::AVSession {
+namespace {
+    constexpr const char* CACHE_PATH_NAME = "/data/service/el1/public/av_session/cache/";
+    constexpr const char* FILE_SUFFIX = ".image.dat";
+    constexpr const int32_t MAX_FILE_SIZE = 200 * 1024;
+}
+class AVSessionUtils {
+public:
+    static void WriteImageToFile(const std::shared_ptr<AVSessionPixelMap>& innerPixelMap, const std::string& fileName)
+    {
+        if (innerPixelMap == nullptr) {
+            SLOGE("innerPixelMap is nullptr");
+            return;
+        }
+
+        char realPath[PATH_MAX] = { 0x00 };
+        if (realpath(CACHE_PATH_NAME, realPath) == nullptr) {
+            SLOGE("check path failed %{public}s", CACHE_PATH_NAME);
+            return;
+        }
+
+        size_t imgBufferSize = innerPixelMap->GetInnerImgBuffer().size();
+        SLOGI("imgBufferSize=%{public}zu", imgBufferSize);
+        if (imgBufferSize > MAX_FILE_SIZE) {
+            SLOGE("error, dataSize larger than %{public}d", MAX_FILE_SIZE);
+            return;
+        }
+
+        std::ofstream ofile(fileName.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);
+        if (!ofile.is_open()) {
+            SLOGE("open file error, fileName=%{public}s", fileName.c_str());
+            return;
+        }
+
+        ofile.write((char*)&imgBufferSize, sizeof(size_t));
+        ofile.write((char*)(&(innerPixelMap->GetInnerImgBuffer()[0])), imgBufferSize);
+        ofile.close();
+    }
+
+    static void ReadImageFromFile(std::shared_ptr<AVSessionPixelMap>& innerPixelMap, const std::string& fileName)
+    {
+        if (innerPixelMap == nullptr) {
+            SLOGE("innerPixelMap is nullptr");
+            return;
+        }
+
+        char realPath[PATH_MAX] = { 0x00 };
+        if (realpath(CACHE_PATH_NAME, realPath) == nullptr) {
+            SLOGE("check path failed %{public}s", CACHE_PATH_NAME);
+            return;
+        }
+
+        std::ifstream ifile(fileName.c_str(), std::ios::binary | std::ios::in);
+        if (!ifile.is_open()) {
+            SLOGE("open file error, fileName=%{public}s", fileName.c_str());
+            return;
+        }
+
+        size_t imgBufferSize;
+        ifile.read((char*)&imgBufferSize, sizeof(size_t));
+        SLOGI("imgBufferSize=%{public}zu", imgBufferSize);
+        if (imgBufferSize > MAX_FILE_SIZE) {
+            SLOGE("error, dataSize larger than %{public}d", MAX_FILE_SIZE);
+            ifile.close();
+            return;
+        }
+        std::vector<std::uint8_t> imgBuffer(imgBufferSize);
+        ifile.read((char*)&imgBuffer[0], imgBufferSize);
+        innerPixelMap->SetInnerImgBuffer(imgBuffer);
+        ifile.close();
+    }
+
+    static void DeleteFile(const std::string& filePath)
+    {
+        if (OHOS::RemoveFile(filePath)) {
+            SLOGI("remove .image.dat file success filePath=%{public}s", filePath.c_str());
+        } else {
+            SLOGE("remove .image.dat file fail filePath=%{public}s", filePath.c_str());
+        }
+    }
+
+    static void DeleteCacheFiles(const std::string& path)
+    {
+        std::string subPath;
+        DIR* dir = opendir(path.c_str());
+        if (dir == nullptr) {
+            return;
+        }
+
+        while (true) {
+            struct dirent* ptr = readdir(dir);
+            if (ptr == nullptr) {
+                break;
+            }
+
+            // current dir OR parent dir
+            if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {
+                continue;
+            }
+            subPath = OHOS::IncludeTrailingPathDelimiter(path) + std::string(ptr->d_name);
+            if (ptr->d_type == DT_DIR) {
+                DeleteCacheFiles(subPath);
+            } else {
+                if ((access(subPath.c_str(), F_OK) == 0) && (remove(subPath.c_str()) != 0)) {
+                        closedir(dir);
+                        return;
+                }
+            }
+        }
+        closedir(dir);
+    }
+};
+} // namespace OHOS::AVSession
+#endif // OHOS_AVSESSION_UTILS_H

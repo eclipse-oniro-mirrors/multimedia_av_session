@@ -38,6 +38,7 @@
 #include "command_send_limit.h"
 #include "avsession_sysevent.h"
 #include "json_utils.h"
+#include "avsession_utils.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -57,11 +58,15 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
 
 AVSessionService::~AVSessionService()
 {
+    std::string cachePath(CACHE_PATH_NAME);
+    AVSessionUtils::DeleteCacheFiles(cachePath);
     SLOGD("destroy");
 }
 
 void AVSessionService::OnStart()
 {
+    std::string cachePath(CACHE_PATH_NAME);
+    AVSessionUtils::DeleteCacheFiles(cachePath);
     if (!Publish(this)) {
         SLOGE("publish avsession service failed");
     }

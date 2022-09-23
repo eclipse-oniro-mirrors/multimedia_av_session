@@ -29,6 +29,7 @@ public:
     AVSessionPixelMap() = default;
     ~AVSessionPixelMap()
     {
+        Clear();
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #if defined(__BIONIC__)
         mallopt(M_PURGE, 0);
@@ -39,31 +40,28 @@ public:
     bool Marshalling(Parcel &data) const override;
     static AVSessionPixelMap *Unmarshalling(Parcel &data);
 
-    std::vector<uint8_t> GetPixelData() const
+    void Clear()
     {
-        return data_;
+        innerImgBuffer_.clear();
+        std::vector<uint8_t>().swap(innerImgBuffer_);
     }
 
-    void SetPixelData(const std::vector<uint8_t> &data)
+    std::vector<uint8_t> GetInnerImgBuffer() const
     {
-        data_.clear();
-        data_ = data;
+        return innerImgBuffer_;
     }
 
-    std::vector<uint8_t> GetImageInfo() const
+    void SetInnerImgBuffer(std::vector<uint8_t> &imgBuffer)
     {
-        return imageInfo_;
-    }
-
-    void SetImageInfo(const std::vector<uint8_t> &imageInfo)
-    {
-        imageInfo_.clear();
-        imageInfo_ = imageInfo;
+        if (imgBuffer.capacity() < DEFAULT_BUFFER_SIZE) {
+            imgBuffer.reserve(DEFAULT_BUFFER_SIZE);
+        }
+        innerImgBuffer_.clear();
+        innerImgBuffer_.swap(imgBuffer);
     }
 
 private:
-    std::vector<uint8_t> data_ = std::vector<uint8_t>(DEFAULT_BUFFER_SIZE);
-    std::vector<uint8_t> imageInfo_;
+    std::vector<uint8_t> innerImgBuffer_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_PIXEL_MAP_H
