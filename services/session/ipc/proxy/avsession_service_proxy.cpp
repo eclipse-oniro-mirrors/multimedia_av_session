@@ -214,7 +214,7 @@ int32_t AVSessionServiceProxy::CastAudio(const SessionToken& token,
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(static_cast<int32_t>(descriptors.size())), ERR_MARSHALLING,
                              "write descriptors size failed");
     for (auto descriptor : descriptors) {
-        SLOGE("networkId_: %{public}s, role %{public}d", descriptor.networkId_.c_str(),
+        SLOGI("networkId_: %{public}.6s, role %{public}d", descriptor.networkId_.c_str(),
               static_cast<int32_t>(descriptor.deviceRole_));
         CHECK_AND_RETURN_RET_LOG(descriptor.Marshalling(data), ERR_MARSHALLING, "write descriptor failed");
     }
@@ -234,7 +234,7 @@ int32_t AVSessionServiceProxy::CastAudioForAll(const std::vector<AudioStandard::
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(static_cast<int32_t>(descriptors.size())), ERR_MARSHALLING,
                              "write descriptors size failed");
     for (auto descriptor : descriptors) {
-        SLOGE("networkId_: %{public}s, role %{public}d", descriptor.networkId_.c_str(),
+        SLOGI("networkId_: %{public}.6s, role %{public}d", descriptor.networkId_.c_str(),
               static_cast<int32_t>(descriptor.deviceRole_));
         CHECK_AND_RETURN_RET_LOG(descriptor.Marshalling(data), ERR_MARSHALLING, "write descriptor failed");
     }
