@@ -51,13 +51,13 @@ public:
         return innerImgBuffer_;
     }
 
-    void SetInnerImgBuffer(std::vector<uint8_t> &imgBuffer)
+    void SetInnerImgBuffer(const std::vector<uint8_t> &imgBuffer)
     {
-        if (imgBuffer.capacity() < DEFAULT_BUFFER_SIZE) {
-            imgBuffer.reserve(DEFAULT_BUFFER_SIZE);
-        }
         innerImgBuffer_.clear();
-        innerImgBuffer_.swap(imgBuffer);
+        innerImgBuffer_ = imgBuffer;
+        if (innerImgBuffer_.capacity() < DEFAULT_BUFFER_SIZE) {
+            innerImgBuffer_.reserve(DEFAULT_BUFFER_SIZE);
+        }
     }
 
 private:

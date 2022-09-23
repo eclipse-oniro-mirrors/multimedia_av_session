@@ -17,13 +17,11 @@
 #define OHOS_AVSESSION_UTILS_H
 
 #include <cstdio>
-#include <dirent.h>
 #include <fstream>
 #include <string>
 #include <vector>
 #include "avsession_log.h"
 #include "directory_ex.h"
-#include "unistd.h"
 
 namespace OHOS::AVSession {
 namespace {
@@ -108,33 +106,13 @@ public:
 
     static void DeleteCacheFiles(const std::string& path)
     {
-        std::string subPath;
-        DIR* dir = opendir(path.c_str());
-        if (dir == nullptr) {
-            return;
-        }
-
-        while (true) {
-            struct dirent* ptr = readdir(dir);
-            if (ptr == nullptr) {
-                break;
-            }
-
-            // current dir OR parent dir
-            if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {
-                continue;
-            }
-            subPath = OHOS::IncludeTrailingPathDelimiter(path) + std::string(ptr->d_name);
-            if (ptr->d_type == DT_DIR) {
-                DeleteCacheFiles(subPath);
-            } else {
-                if ((access(subPath.c_str(), F_OK) == 0) && (remove(subPath.c_str()) != 0)) {
-                        closedir(dir);
-                        return;
-                }
+        std::vector<std::string> fileList;
+        OHOS::GetDirFiles(path, fileList);
+        for (const auto& file : fileList) {
+            if (file.find(FILE_SUFFIX) != std::string::npos) {
+                DeleteFile(file);
             }
         }
-        closedir(dir);
     }
 };
 } // namespace OHOS::AVSession
