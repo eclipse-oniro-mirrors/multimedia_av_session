@@ -19,29 +19,21 @@
 namespace OHOS::AVSession {
 bool AVSessionPixelMap::Marshalling(Parcel& parcel) const
 {
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteUInt8Vector(imageInfo_), false, "Write image info bytes failed");
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteUInt8Vector(data_), false, "Write image data failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteUInt8Vector(innerImgBuffer_), false, "Write innerImgBuffer data failed");
     return true;
 }
 
 AVSessionPixelMap *AVSessionPixelMap::Unmarshalling(Parcel& data)
 {
-    std::vector<uint8_t> imageInfo;
-    if (!data.ReadUInt8Vector(&imageInfo)) {
-        SLOGE("Read image info failed");
-        return nullptr;
-    }
-
-    std::vector<uint8_t> buffer(DEFAULT_BUFFER_SIZE);
-    if (!data.ReadUInt8Vector(&buffer)) {
-        SLOGE("Read image data failed");
+    std::vector<uint8_t> imgBuffer(DEFAULT_BUFFER_SIZE);
+    if (!data.ReadUInt8Vector(&imgBuffer)) {
+        SLOGE("Read imgBuffer data failed");
         return nullptr;
     }
 
     auto *result = new (std::nothrow) AVSessionPixelMap();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVSessionPixelMap failed");
-    result->SetImageInfo(imageInfo);
-    result->SetPixelData(buffer);
+    result->SetInnerImgBuffer(imgBuffer);
     return result;
 }
 } // namespace OHOS::AVSession

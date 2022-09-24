@@ -21,6 +21,7 @@
 #include "avsession_descriptor.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
+#include "avsession_utils.h"
 #include "remote_session_sink.h"
 #include "remote_session_source.h"
 #include "remote_session_source_proxy.h"
@@ -57,6 +58,9 @@ int32_t AVSessionItem::Destroy()
     if (callback_) {
         callback_.clear();
     }
+    std::string sessionId = descriptor_.sessionId_;
+    std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+    AVSessionUtils::DeleteFile(fileName);
 
     SLOGI("size=%{public}d", static_cast<int>(controllers_.size()));
     {
@@ -77,6 +81,10 @@ int32_t AVSessionItem::Destroy()
 
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
+    std::string sessionId = GetSessionId();
+    std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+    AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
     meta = metaData_;
     return AVSESSION_SUCCESS;
 }
@@ -84,6 +92,12 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+    std::string sessionId = GetSessionId();
+    std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+    AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
+    innerPixelMap->Clear();
+    metaData_.SetMediaImage(innerPixelMap);
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         controller->HandleMetaDataChange(meta);
@@ -213,6 +227,10 @@ AVPlaybackState AVSessionItem::GetPlaybackState()
 
 AVMetaData AVSessionItem::GetMetaData()
 {
+    std::string sessionId = GetSessionId();
+    std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+    AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
     return metaData_;
 }
 

@@ -23,6 +23,7 @@
 #include "session_listener_client.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
+#include "avsession_utils.h"
 
 namespace OHOS::AVSession {
 AVSessionManagerImpl::AVSessionManagerImpl()
@@ -76,6 +77,8 @@ void AVSessionManagerImpl::OnServiceDie()
     }
     HISYSEVENT_RESET;
     HISYSEVENT_UNREGISTER;
+    std::string cachePath(CACHE_PATH_NAME);
+    AVSessionUtils::DeleteCacheFiles(cachePath);
 }
 
 std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string &tag, int32_t type,
