@@ -115,6 +115,11 @@ int AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel &data, Mes
         return ERR_NONE;
     }
     auto listener = iface_cast<SessionListenerProxy>(remoteObject);
+    if (listener == nullptr) {
+        SLOGE("iface_cast remote object failed");
+        reply.WriteInt32(ERR_INVALID_PARAM);
+        return ERR_NONE;
+    }
     if (!reply.WriteInt32(RegisterSessionListener(listener))) {
         SLOGE("reply write int32 failed");
     }
@@ -133,6 +138,11 @@ int AVSessionServiceStub::HandleSendSystemAVKeyEvent(MessageParcel &data, Messag
     if (!keyEvent->ReadFromParcel(data)) {
         SLOGE("read keyEvent failed");
         reply.WriteInt32(ERR_UNMARSHALLING);
+        return ERR_NONE;
+    }
+    if (!keyEvent->IsValid()) {
+        SLOGE("KeyEvent is not valid");
+        reply.WriteInt32(ERR_INVALID_PARAM);
         return ERR_NONE;
     }
     if (!reply.WriteInt32(SendSystemAVKeyEvent(*keyEvent))) {
@@ -167,6 +177,11 @@ int AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel &data,
         return ERR_NONE;
     }
     auto clientDeathObserver = iface_cast<ClientDeathProxy>(remoteObject);
+    if (clientDeathObserver == nullptr) {
+        SLOGE("iface_cast remote object failed");
+        reply.WriteInt32(ERR_INVALID_PARAM);
+        return ERR_NONE;
+    }
     reply.WriteInt32(RegisterClientDeathObserver(clientDeathObserver));
     return ERR_NONE;
 }
@@ -180,6 +195,12 @@ int AVSessionServiceStub::HandleCastAudio(MessageParcel &data, MessageParcel &re
     token.pid = data.ReadInt32();
     token.uid = data.ReadUint32();
     int32_t deviceNum = data.ReadInt32();
+    if (deviceNum > RECEIVE_DEVICE_NUM_MAX) {
+        SLOGE("reveive deviceNum over range");
+        reply.WriteInt32(ERR_INVALID_PARAM);
+        return ERR_NONE;
+    }
+
     std::vector<AudioDeviceDescriptor> sinkAudioDescriptors;
     for (int i = 0; i < deviceNum; i++) {
         auto audioDeviceDescriptor = AudioDeviceDescriptor::Unmarshalling(data);
@@ -204,6 +225,12 @@ int AVSessionServiceStub::HandleCastAudioForAll(MessageParcel &data, MessageParc
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CastAudioForAll");
     SLOGI("start");
     int32_t deviceNum = data.ReadInt32();
+    if (deviceNum > RECEIVE_DEVICE_NUM_MAX) {
+        SLOGE("reveive deviceNum over range");
+        reply.WriteInt32(ERR_INVALID_PARAM);
+        return ERR_NONE;
+    }
+
     std::vector<AudioDeviceDescriptor> sinkAudioDescriptors {};
     for (int i = 0; i < deviceNum; i++) {
         auto audioDeviceDescriptor = AudioDeviceDescriptor::Unmarshalling(data);

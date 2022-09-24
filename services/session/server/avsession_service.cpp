@@ -1017,7 +1017,8 @@ int32_t AVSessionService::CastAudioInner(const std::vector<AudioStandard::AudioD
                                                        sinkSessionInfo);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ProcessCastAudioCommand failed");
         std::string sinkCapability;
-        JsonUtils::GetAllCapability(sinkSessionInfo, sinkCapability);
+        ret = JsonUtils::GetAllCapability(sinkSessionInfo, sinkCapability);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAllCapability failed");
         ret = session->CastAudioToRemote(sourceDevice, sinkAudioDescriptor.networkId_, sinkCapability);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudioToRemote failed");
         HISYSEVENT_BEHAVIOR("SESSION_CAST",
@@ -1159,7 +1160,8 @@ int32_t AVSessionService::RemoteCastAudioInner(const std::string& sourceSessionI
     ret = JsonUtils::GetSessionBasicInfo(sourceSessionInfo, sourceDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetBasicInfo failed");
     std::string sourceCapability;
-    JsonUtils::GetAllCapability(sourceSessionInfo, sourceCapability);
+    ret = JsonUtils::GetAllCapability(sourceSessionInfo, sourceCapability);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAllCapability failed");
     ret = session->CastAudioFromRemote(sourceDescriptor.sessionId_, sourceDeviceInfo.networkId_,
                                        sinkDeviceInfo.networkId_, sourceCapability);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudioFromRemote failed");
@@ -1197,8 +1199,9 @@ int32_t AVSessionService::CancelCastAudioForClientExit(pid_t pid, const sptr<AVS
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "session is nullptr");
     SLOGI("pid is %{public}d, sessionId is %{public}s", static_cast<int32_t>(pid), session->GetSessionId().c_str());
     std::string sourceSessionInfo;
-    SetBasicInfo(sourceSessionInfo);
-    int32_t ret = JsonUtils::SetSessionDescriptor(sourceSessionInfo, session->GetDescriptor());
+    int32_t ret = SetBasicInfo(sourceSessionInfo);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetBasicInfo failed");
+    ret = JsonUtils::SetSessionDescriptor(sourceSessionInfo, session->GetDescriptor());
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetDescriptorInfo failed");
 
     std::vector<AudioStandard::AudioDeviceDescriptor> cancelSinkDevices;

@@ -64,6 +64,7 @@ public:
     static constexpr char METADATA_KEY[] = "metaData";
     static constexpr char PLAYBACK_STATE_KEY[] = "playbackState";
     static constexpr char CONTROL_COMMAND_KEY[] = "controlCommand";
+    static constexpr int RECEIVE_DATA_SIZE_MAX = 500 * 1024;
     const std::map<std::string, SessionDataCategory> categoryMap {
             {METADATA_KEY, SESSION_DATA_META},
             {PLAYBACK_STATE_KEY, SESSION_DATA_PLAYBACK_STATE},
