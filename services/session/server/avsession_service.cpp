@@ -945,7 +945,14 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
 int32_t AVSessionService::CastAudio(const SessionToken &token,
                                     const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors)
 {
-    SLOGI("start");
+    SLOGI("sessionId is %{public}s", token.sessionId.c_str());
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+                            "ERROR_MSG", "avsessionservice CastAudio checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+
     std::string sourceSessionInfo;
     int32_t ret = SetBasicInfo(sourceSessionInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetBasicInfo failed");
@@ -1082,6 +1089,13 @@ int32_t AVSessionService::CastAudioForNewSession(const sptr <AVSessionItem>& ses
 int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors)
 {
     SLOGI("session size is %{public}d", static_cast<int32_t>(GetContainer().GetAllSessions().size()));
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+                            "ERROR_MSG", "avsessionservice CastAudioForAll checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+
     for (const auto& session : GetContainer().GetAllSessions()) {
         SessionToken token;
         token.sessionId = session->GetSessionId();
