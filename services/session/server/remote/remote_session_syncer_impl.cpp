@@ -106,8 +106,10 @@ int32_t RemoteSessionSyncerImpl::GetAVMetaData(AVMetaData& metaData)
 {
     std::vector<uint8_t> dataVector;
     CHECK_AND_RETURN_RET_LOG(GetData(METADATA_KEY, dataVector) == AVSESSION_SUCCESS, AVSESSION_ERROR, "get data error");
+    CHECK_AND_RETURN_RET_LOG(dataVector.size() <= RECEIVE_DATA_SIZE_MAX, AVSESSION_ERROR, "get data size over range");
     DefaultAllocator allocator;
     uint8_t *allocateData = reinterpret_cast<uint8_t*>(allocator.Alloc(dataVector.size()));
+    CHECK_AND_RETURN_RET_LOG(allocateData != nullptr, AVSESSION_ERROR, "alloc data fail");
     std::copy(dataVector.begin(), dataVector.end(), allocateData);
     Parcel parcelData;
     CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
@@ -138,8 +140,10 @@ int32_t RemoteSessionSyncerImpl::GetAVPlaybackState(AVPlaybackState& state)
     std::vector<uint8_t> dataVector;
     CHECK_AND_RETURN_RET_LOG(GetData(PLAYBACK_STATE_KEY, dataVector) == AVSESSION_SUCCESS, AVSESSION_ERROR,
                              "get data error");
+    CHECK_AND_RETURN_RET_LOG(dataVector.size() <= RECEIVE_DATA_SIZE_MAX, AVSESSION_ERROR, "get data size over range");
     DefaultAllocator allocator;
     uint8_t *allocateData = reinterpret_cast<uint8_t*>(allocator.Alloc(dataVector.size()));
+    CHECK_AND_RETURN_RET_LOG(allocateData != nullptr, AVSESSION_ERROR, "alloc data fail");
     std::copy(dataVector.begin(), dataVector.end(), allocateData);
     Parcel parcelData;
     CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
@@ -170,8 +174,10 @@ int32_t RemoteSessionSyncerImpl::GetControlCommand(AVControlCommand& command)
     std::vector<uint8_t> dataVector;
     CHECK_AND_RETURN_RET_LOG(GetData(CONTROL_COMMAND_KEY, dataVector) == AVSESSION_SUCCESS, AVSESSION_ERROR,
                              "get data error");
+    CHECK_AND_RETURN_RET_LOG(dataVector.size() <= RECEIVE_DATA_SIZE_MAX, AVSESSION_ERROR, "get data size over range");
     DefaultAllocator allocator;
     uint8_t *allocateData = reinterpret_cast<uint8_t*>(allocator.Alloc(dataVector.size()));
+    CHECK_AND_RETURN_RET_LOG(allocateData != nullptr, AVSESSION_ERROR, "alloc data fail");
     std::copy(dataVector.begin(), dataVector.end(), allocateData);
     Parcel parcelData;
     CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
