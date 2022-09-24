@@ -58,7 +58,6 @@ ohos_shared_library("avsession_client") {
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",

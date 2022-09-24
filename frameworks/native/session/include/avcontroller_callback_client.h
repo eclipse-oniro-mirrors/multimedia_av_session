@@ -18,12 +18,12 @@
 
 #include "avcontroller_callback_stub.h"
 #include "avsession_info.h"
-#include "event_handler.h"
 
 namespace OHOS::AVSession {
 class AVControllerCallbackClient : public AVControllerCallbackStub {
 public:
     explicit AVControllerCallbackClient(const std::shared_ptr<AVControllerCallback>& callback);
+    ~AVControllerCallbackClient();
 
     void OnSessionDestroy() override;
 
@@ -41,8 +41,8 @@ public:
 
 private:
     std::shared_ptr<AVControllerCallback> callback_;
-    std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;
+    static constexpr const char *EVENT_NAME = "AVControllerCallback";
 };
 }
 #endif // OHOS_AVCONTROLLER_CALLBACK_CLIENT_H
