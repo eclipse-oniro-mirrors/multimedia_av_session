@@ -93,11 +93,13 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
-    std::string sessionId = GetSessionId();
-    std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
-    AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
-    innerPixelMap->Clear();
-    metaData_.SetMediaImage(innerPixelMap);
+    if (innerPixelMap != nullptr) {
+        std::string sessionId = GetSessionId();
+        std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+        AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
+        innerPixelMap->Clear();
+        metaData_.SetMediaImage(innerPixelMap);
+    }
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
         controller->HandleMetaDataChange(meta);
