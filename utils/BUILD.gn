@@ -27,6 +27,7 @@ ohos_shared_library("avsession_utils") {
   sources = [
     "src/avsession_sysevent.cpp",
     "src/hash_calculator.cpp",
+    "src/avsession_event_handler.cpp"
   ]
 
   include_dirs = [ "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include" ]
@@ -38,6 +39,7 @@ ohos_shared_library("avsession_utils") {
   external_deps = [
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
+    "eventhandler:libeventhandler",
   ]
 
   if (multimedia_av_session_enable_trace_control) {
