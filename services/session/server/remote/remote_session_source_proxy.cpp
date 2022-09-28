@@ -32,7 +32,12 @@ RemoteSessionSourceProxy::~RemoteSessionSourceProxy()
 
 int32_t RemoteSessionSourceProxy::LoadSourceImplement()
 {
-    handle_ = dlopen(g_sourceLibraryPath.c_str(), RTLD_NOW);
+    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
+    if (realpath(g_sourceLibraryPath.c_str(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check path failed %{public}s", g_sourceLibraryPath.c_str());
+        return AVSESSION_ERROR;
+    }
+    handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
     if (handle_ == nullptr) {
         SLOGE("Failed to open extension library %{public}s, reason: %{public}sn", g_sourceLibraryPath.c_str(),
               dlerror());
