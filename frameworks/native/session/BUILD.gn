@@ -62,7 +62,7 @@ ohos_shared_library("avsession_client") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_audio_framework:audio_client",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
   ]
 
