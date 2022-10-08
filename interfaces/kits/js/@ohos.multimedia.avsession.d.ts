@@ -869,12 +869,6 @@ declare namespace avSession {
    */
   enum AVSessionErrorCode {
     /**
-     * Unknown error
-     * @since 9
-     */
-    ERR_CODE_UNKNOWN = 6600100,
-
-    /**
      * Server exception
      * @since 9
      */
@@ -903,6 +897,18 @@ declare namespace avSession {
      * @since 9
      */
     ERR_CODE_COMMAND_INVALID = 6600105,
+
+    /**
+     * Session inactive
+     * @since 9
+     */
+    ERR_CODE_SESSION_INACTIVE = 6600106,
+
+    /**
+     * Command or event overload
+     * @since 9
+     */
+    ERR_CODE_MESSAGE_OVERLOAD = 6600107,
   }
 }
 

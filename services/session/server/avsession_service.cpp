@@ -937,7 +937,7 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
 
     AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
     int32_t ret = audioSystemMgr->SelectOutputDevice(audioFilter, audioDescriptor);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SelectOutputDevice failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "SelectOutputDevice failed");
 
     return AVSESSION_SUCCESS;
 }
