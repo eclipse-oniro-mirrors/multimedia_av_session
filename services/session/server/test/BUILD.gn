@@ -45,7 +45,7 @@ ohos_unittest("AVSessionServiceTest") {
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
@@ -74,7 +74,7 @@ ohos_unittest("AppManagerAdapterTest") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_audio_framework:audio_client",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
