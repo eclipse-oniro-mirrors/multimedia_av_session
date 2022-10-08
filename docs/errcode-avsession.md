@@ -6,6 +6,7 @@
 Server exception
 ### 可能原因
 该错误码表示存在服务异常，可能原因如下。
+
 1.服务不存在
 2.IPC通信编解码异常
 3.内存分配空间不足
@@ -18,6 +19,7 @@ Server exception
 The session does not exist
 ### 可能原因
 该错误码表示当前会话不存在，可能原因如下。
+
 1.会话已销毁
 ### 处理步骤
 检查会话是否销毁。
@@ -27,6 +29,7 @@ The session does not exist
 The controller does not exist
 ### 可能原因
 该错误码表示当前会话的控制器不存在，可能原因如下。
+
 1.控制器未创建
 2.控制器已销毁
 ### 处理步骤
@@ -37,6 +40,7 @@ The controller does not exist
 Remote connection error
 ### 可能原因
 该错误码表示进行分布式播控时，远端设备连接失败，可能原因如下。
+
 1.设备分布式组网失败
 2.RPC通信失败
 ### 处理步骤
@@ -47,6 +51,7 @@ Remote connection error
 Command not supported
 ### 可能原因
 该错误码表示当前发送指令无效，可能原因如下。
+
 1.指令内容错误
 2.当前会话不支持该指令
 ### 处理步骤
@@ -57,6 +62,7 @@ Command not supported
 Session inactive
 ### 可能原因
 该错误码表示当前会话未激活，可能原因如下。
+
 1.会话创建后未进行激活操作
 ### 处理步骤
 激活会话。
@@ -69,6 +75,7 @@ session.activate()
 Command or event overload
 ### 可能原因
 该错误码表示1秒内指令或事件发送数量过载，可能原因如下。
+
 1.在1秒内当前进程接收命令及事件数量已超过最大接收容量
 ### 处理步骤
 检查是否存在恶意输入，一秒内输入大量指令或事件。
@@ -78,6 +85,7 @@ Command or event overload
 Permission denied
 ### 可能原因
 该错误码表示权限校验失败，可能原因如下。
+
 1.当前Hap没有权限
 ### 处理步骤
 检查Hap是否授权，升级相关接口权限：
@@ -93,6 +101,7 @@ Permission denied
 Parameter error
 ### 可能原因
 该错误码表示参数信息错误，可能原因如下。
+
 1.参数个数错误
 2.参数类型错误
 3.参数内容错误
@@ -104,6 +113,7 @@ Parameter error
  Capability not supported
 ### 可能原因
 该错误码表示当前设备不支持此API，可能原因如下。
+
 1.当前系统SysCap未支持该API
 ### 处理步骤
 检查接口调用拼写是否正确。
