@@ -16,6 +16,8 @@
 #include "napi_async_work.h"
 #include "napi_utils.h"
 #include "avsession_trace.h"
+#include "napi_avsession_manager.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 ContextBase::~ContextBase()
@@ -39,12 +41,14 @@ void ContextBase::GetCbInfo(napi_env envi, napi_callback_info info, NapiCbInfoPa
     size_t argc = ARGC_MAX;
     napi_value argv[ARGC_MAX] = {nullptr};
     status = napi_get_cb_info(env, info, &argc, argv, &self, nullptr);
-    CHECK_STATUS_RETURN_VOID(this, "napi_get_cb_info failed!");
-    CHECK_ARGS_RETURN_VOID(this, argc <= ARGC_MAX, "too many arguments!");
-    CHECK_ARGS_RETURN_VOID(this, self != nullptr, "no JavaScript this argument!");
+    CHECK_STATUS_RETURN_VOID(this, "napi_get_cb_info failed!", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    CHECK_ARGS_RETURN_VOID(this, argc <= ARGC_MAX, "too many arguments!",
+        NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    CHECK_ARGS_RETURN_VOID(this, self != nullptr, "no JavaScript this argument!",
+        NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     napi_create_reference(env, self, 1, &selfRef);
     status = napi_unwrap(env, self, &native);
-    CHECK_STATUS_RETURN_VOID(this, "self unwrap failed!");
+    CHECK_STATUS_RETURN_VOID(this, "self unwrap failed!", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
 
     if (!sync && (argc > 0)) {
         // get the last arguments :: <callback>
@@ -53,18 +57,19 @@ void ContextBase::GetCbInfo(napi_env envi, napi_callback_info info, NapiCbInfoPa
         napi_status tyst = napi_typeof(env, argv[index], &type);
         if ((tyst == napi_ok) && (type == napi_function)) {
             status = napi_create_reference(env, argv[index], 1, &callbackRef);
-            CHECK_STATUS_RETURN_VOID(this, "ref callback failed!");
+            CHECK_STATUS_RETURN_VOID(this, "ref callback failed!", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
             argc = index;
             SLOGD("async callback, no promise");
         } else {
-            SLOGD("no callback, async pormose");
+            SLOGD("no callback, async promise");
         }
     }
 
     if (parser) {
         parser(argc, argv);
     } else {
-        CHECK_ARGS_RETURN_VOID(this, argc == 0, "required no arguments!");
+        CHECK_ARGS_RETURN_VOID(this, argc == 0, "required no arguments!",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     }
 }
 
@@ -130,8 +135,11 @@ void NapiAsyncWork::GenerateOutput(ContextBase *ctxt)
         result[RESULT_DATA] = ctxt->output;
     } else {
         napi_value message = nullptr;
-        napi_create_string_utf8(ctxt->env, ctxt->error.c_str(), NAPI_AUTO_LENGTH, &message);
+        napi_value code = nullptr;
+        napi_create_string_utf8(ctxt->env, ctxt->errMessage.c_str(), NAPI_AUTO_LENGTH, &message);
         napi_create_error(ctxt->env, nullptr, message, &result[RESULT_ERROR]);
+        napi_create_int32(ctxt->env, ctxt->errCode, &code);
+        napi_set_named_property(ctxt->env, result[RESULT_ERROR], "code", code);
         napi_get_undefined(ctxt->env, &result[RESULT_DATA]);
     }
     if (ctxt->deferred != nullptr) {

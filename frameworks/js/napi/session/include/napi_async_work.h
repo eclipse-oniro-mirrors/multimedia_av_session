@@ -37,7 +37,8 @@ struct ContextBase {
     napi_env env = nullptr;
     napi_value output = nullptr;
     napi_status status = napi_invalid_arg;
-    std::string error;
+    std::string errMessage;
+    int32_t errCode;
     napi_value self = nullptr;
     void* native = nullptr;
     int32_t taskId = -1;

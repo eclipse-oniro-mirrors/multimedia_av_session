@@ -30,20 +30,22 @@
 #include "ability.h"
 
 /* check condition related to argc/argv, return and logging. */
-#define CHECK_ARGS_RETURN_VOID(context, condition, message)               \
+#define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
     do {                                                               \
         if (!(condition)) {                                            \
             (context)->status = napi_invalid_arg;                         \
-            (context)->error = std::string(message);                      \
+            (context)->errMessage = std::string(message);                      \
+            (context)->errCode = code;                      \
             SLOGE("test (" #condition ") failed: " message);           \
             return;                                                    \
         }                                                              \
     } while (0)
 
-#define CHECK_STATUS_RETURN_VOID(context, message)                        \
+#define CHECK_STATUS_RETURN_VOID(context, message, code)                        \
     do {                                                               \
         if ((context)->status != napi_ok) {                               \
-            (context)->error = std::string(message);                      \
+            (context)->errMessage = std::string(message);                      \
+            (context)->errCode = code;                      \
             SLOGE("test (context->status == napi_ok) failed: " message);  \
             return;                                                    \
         }                                                              \
@@ -194,8 +196,10 @@ public:
     static napi_status GetChannels(napi_env env, napi_value in, AudioStandard::AudioChannel& out);
     static napi_status GetChannelMasks(napi_env env, napi_value in, int32_t& out);
     static napi_status SetOutPutDeviceIdValue(napi_env env, const std::vector<std::string>& in, napi_value& out);
-	
+
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
+
+    static napi_status ThrowError(napi_env env, const char* napiMessage, int32_t napiCode);
 
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;

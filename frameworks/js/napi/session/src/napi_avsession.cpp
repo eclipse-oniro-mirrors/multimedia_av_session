@@ -22,6 +22,7 @@
 #include "want_agent.h"
 #include "avsession_trace.h"
 #include "napi_avsession_controller.h"
+#include "napi_avsession_manager.h"
 
 namespace OHOS::AVSession {
 static __thread napi_ref AVSessionConstructorRef = nullptr;
@@ -142,47 +143,58 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     napi_value callback {};
     auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
         /* require 2 arguments <event, callback> */
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
-        CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+        CHECK_STATUS_RETURN_VOID(context, "get event name failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
-                               "callback type invalid");
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         callback = argv[ARGV_SECOND];
     };
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
-        napi_throw_error(env, nullptr, context->error.c_str());
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
         return NapiUtils::GetUndefinedValue(env);
     }
     auto it = onEventHandlers_.find(eventName);
     if (it == onEventHandlers_.end()) {
         SLOGE("event name invalid");
-        napi_throw_error(env, nullptr, "event name invalid");
+        NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         return NapiUtils::GetUndefinedValue(env);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiSession->session_ == nullptr) {
-        SLOGE("native session is nullptr");
-        napi_throw_error(env, nullptr, "native session is nullptr");
+        SLOGE("OnEvent failed : session is nullptr");
+        NapiUtils::ThrowError(env, "OnEvent failed : session is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
         return NapiUtils::GetUndefinedValue(env);
     }
     if (napiSession->callback_ == nullptr) {
         napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
         if (napiSession->callback_ == nullptr) {
-            SLOGE("no memory");
-            napi_throw_error(env, nullptr, "no memory");
+            SLOGE("OnEvent failed : no memory");
+            NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
             return NapiUtils::GetUndefinedValue(env);
         }
         int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
         if (ret != AVSESSION_SUCCESS) {
-            napi_throw_error(env, nullptr, "native register callback failed");
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                NapiUtils::ThrowError(env, "OnEvent failed : native session not exist",
+                    NapiAVSessionManager::errcode_[ret]);
+            } else if (ret == ERR_INVALID_PARAM) {
+                NapiUtils::ThrowError(env, "OnEvent failed : native invalid parameters",
+                    NapiAVSessionManager::errcode_[ret]);
+            } else {
+                NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
+                    NapiAVSessionManager::errcode_[ret]);
+            }
             return NapiUtils::GetUndefinedValue(env);
         }
     }
     if (it->second(env, napiSession, callback) != napi_ok) {
-        napi_throw_error(env, nullptr, "add event callback failed");
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
     return NapiUtils::GetUndefinedValue(env);
 }
@@ -193,32 +205,34 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
     std::string eventName;
     napi_value callback = nullptr;
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
-        CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+        CHECK_STATUS_RETURN_VOID(context, "get event name failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         if (argc == ARGC_TWO) {
             callback = argv[ARGV_SECOND];
         }
     };
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
-        napi_throw_error(env, nullptr, context->error.c_str());
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
         return NapiUtils::GetUndefinedValue(env);
     }
     auto it = offEventHandlers_.find(eventName);
     if (it == offEventHandlers_.end()) {
         SLOGE("event name invalid");
-        napi_throw_error(env, nullptr, "event name invalid");
+        NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         return NapiUtils::GetUndefinedValue(env);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiSession->session_ == nullptr) {
-        SLOGE("native session is nullptr");
-        napi_throw_error(env, nullptr, "native session is nullptr");
+        SLOGE("OffEvent failed : session is nullptr");
+        NapiUtils::ThrowError(env, "OffEvent failed : session is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
         return NapiUtils::GetUndefinedValue(env);
     }
     if (napiSession != nullptr && it->second(env, napiSession, callback) != napi_ok) {
-        napi_throw_error(env, nullptr, "remove event callback failed");
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
     return NapiUtils::GetUndefinedValue(env);
 }
@@ -232,9 +246,11 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     auto context = std::make_shared<ConcreteContext>();
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiMetaData::GetValue(env, argv[ARGV_FIRST], context->metaData_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get metaData failed");
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get metaData failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
@@ -243,13 +259,21 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native session is nullptr";
+            context->errMessage = "SetAVMetaData failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
         int32_t ret = napiSession->session_->SetAVMetaData(context->metaData_);
         if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetAVMetaData failed : native session not exist";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "SetAVMetaData failed : native invalid parameters";
+            } else {
+                context->errMessage = "SetAVMetaData failed : native server exception";
+            }
             context->status = napi_generic_failure;
-            context->error = "SetAVMetaData failed";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
     auto complete = [env](napi_value& output) {
@@ -266,9 +290,11 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
     };
     auto context = std::make_shared<ConcreteContext>();
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiPlaybackState::GetValue(env, argv[ARGV_FIRST], context->playBackState_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get playBackState failed");
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get playBackState failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_AV_PLAYBACK_STATE_TASK_ID;
@@ -277,13 +303,21 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native session is nullptr";
+            context->errMessage = "SetAVPlaybackState failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
         int32_t ret = napiSession->session_->SetAVPlaybackState(context->playBackState_);
         if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetAVPlaybackState failed : native session not exist";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "SetAVPlaybackState failed : native invalid parameters";
+            } else {
+                context->errMessage = "SetAVPlaybackState failed : native server exception";
+            }
             context->status = napi_generic_failure;
-            context->error = "SetAVPlaybackState failed";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
     auto complete = [env](napi_value& output) {
@@ -300,9 +334,11 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
     auto context = std::make_shared<ConcreteContext>();
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->wantAgent_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get  wantAgent failed");
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get  wantAgent failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, inputParser);
 
@@ -310,13 +346,19 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native session is nullptr";
+            context->errMessage = "SetLaunchAbility failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
         int32_t ret = napiSession->session_->SetLaunchAbility(*context->wantAgent_);
         if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetLaunchAbility failed : native session not exist";
+            } else {
+                context->errMessage = "SetLaunchAbility failed : native server exception";
+            }
             context->status = napi_generic_failure;
-            context->error = "SetLaunchAbility failed";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
     auto complete = [env](napi_value& output) {
@@ -332,9 +374,11 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
     };
     auto context = std::make_shared<ConcreteContext>();
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->streamIds_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get streamIds_ failed");
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get streamIds_ failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, inputParser);
 
@@ -342,7 +386,8 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native session is nullptr";
+            context->errMessage = "SetAudioStreamId failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
     };
@@ -364,20 +409,24 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native session is nullptr";
+            context->errMessage = "GetController failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
         context->controller_ = napiSession->session_->GetController();
         if (context->controller_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native create controller failed";
+            context->errMessage = "GetController failed : native get controller failed";
+            context->errCode = NapiAVSessionManager::errcode_[AVSESSION_ERROR];
         }
     };
     auto complete = [env, context](napi_value &output) {
-        CHECK_STATUS_RETURN_VOID(context, "get controller failed");
-        CHECK_ARGS_RETURN_VOID(context, context->controller_ != nullptr, "controller is nullptr");
+        CHECK_STATUS_RETURN_VOID(context, "get controller failed",NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        CHECK_ARGS_RETURN_VOID(context, context->controller_ != nullptr, "controller is nullptr",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
         context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);
-        CHECK_STATUS_RETURN_VOID(context, "convert native object to js object failed");
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to js object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetController", executor, complete);
 }
@@ -394,7 +443,8 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native session is nullptr";
+            context->errMessage = "GetOutputDevice failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
         AVSessionDescriptor descriptor;
@@ -405,7 +455,8 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
 
     auto complete = [env, context](napi_value &output) {
         context->status = NapiUtils::SetValue(env, context->outputDeviceInfo_, output);
-        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetOutputDevice", executor, complete);
 }
@@ -419,13 +470,19 @@ napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native session is nullptr";
+            context->errMessage = "Activate session failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
         int32_t ret = napiSession->session_->Activate();
         if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "Activate session failed : native session not exist";
+            } else {
+                context->errMessage = "Activate session failed : native server exception";
+            }
             context->status = napi_generic_failure;
-            context->error = "activate session failed";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
     auto complete = [env](napi_value& output) {
@@ -443,13 +500,19 @@ napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native session is nullptr";
+            context->errMessage = "Deactivate session failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
         int32_t ret = napiSession->session_->Deactivate();
         if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "Deactivate session failed : native session not exist";
+            } else {
+                context->errMessage = "Deactivate session failed : native server exception";
+            }
             context->status = napi_generic_failure;
-            context->error = "deactivate session failed";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
     auto complete = [env](napi_value& output) {
@@ -467,17 +530,24 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native session is nullptr";
+            context->errMessage = "Destroy session failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
         int32_t ret = napiSession->session_->Destroy();
         if (ret == AVSESSION_SUCCESS) {
             napiSession->session_ = nullptr;
             napiSession->callback_ = nullptr;
+        } else if (ret == ERR_SESSION_NOT_EXIST) {
+            context->status = napi_generic_failure;
+            context->errMessage = "Destroy session failed : native session not exist";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         } else {
             context->status = napi_generic_failure;
-            context->error = "destroy session failed";
+            context->errMessage = "Destroy session failed : native server exception";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
+
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);

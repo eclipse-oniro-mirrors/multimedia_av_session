@@ -31,6 +31,7 @@ public:
 
     using OnEventHandlerType = std::function<napi_status(napi_env, napi_value)>;
     using OffEventHandlerType = std::function<napi_status(napi_env, napi_value)>;
+    static std::map<int32_t, int32_t> errcode_;
 
 private:
     static napi_value CreateAVSession(napi_env env, napi_callback_info info);
