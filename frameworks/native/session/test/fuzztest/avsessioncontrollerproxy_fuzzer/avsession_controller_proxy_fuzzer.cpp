@@ -25,20 +25,18 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST  = 15;
+const int32_t MAX_CODE_TEST  = 12;
 const int32_t MAX_CODE_LEN = 512;
+const int32_t MIN_SIZE_NUM = 4;
 
 bool AvsessionControllerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return false;
-    }
-	if (size > MAX_CODE_LEN) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return false;
     }
 
     uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
-	if (cmdCode > MAX_CODE_TEST) {
+	if (cmdCode >= MAX_CODE_TEST) {
 		return false;
 	}
 
@@ -74,7 +72,7 @@ bool OHOS::AVSession::AvsessionControllerProxySendRequest(uint8_t* data, size_t 
 }
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(uint8_t * data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::AVSession::AvsessionControllerProxySendRequest(data, size);

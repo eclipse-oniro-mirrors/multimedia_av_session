@@ -32,19 +32,17 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST  = 15;
+const int32_t MAX_CODE_TEST  = 14;
 const int32_t MAX_CODE_LEN  = 512;
+const int32_t MIN_SIZE_NUM = 4;
 
 void AvSessionItemFuzzer::AvSessionItemFuzzerTest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    if (size > MAX_CODE_LEN) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-    if (code > MAX_CODE_TEST) {
+    if (code >= MAX_CODE_TEST) {
         return;
     }
     std::string tag(reinterpret_cast<const char*>(data), size);
@@ -96,4 +94,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::AVSession::AvSessionItemOnRemoteRequest(const_cast<uint8_t*>(data), size);
     return 0;
 }
-

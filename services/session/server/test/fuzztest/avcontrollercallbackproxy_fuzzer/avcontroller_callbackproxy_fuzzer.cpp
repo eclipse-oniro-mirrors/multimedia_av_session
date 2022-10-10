@@ -28,34 +28,32 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST = 15;
+const int32_t MAX_CODE_TEST = 5;
 const int32_t MAX_CODE_LEN = 512;
+const int32_t MIN_SIZE_NUM = 4;
 
 bool AvControllerCallbackProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return false;
-    }
-    if (size > MAX_CODE_LEN) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || size < MIN_SIZE_NUM) {
         return false;
     }
 
     uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
-    if (cmdCode > MAX_CODE_TEST) {
+    if (cmdCode >= MAX_CODE_TEST) {
         return false;
     }
 
     sptr<IRemoteObject> remoteObject = nullptr;
     std::shared_ptr<AVControllerCallbackProxyFuzzerTest> avControllerCallbackProxy =
         std::make_shared<AVControllerCallbackProxyFuzzerTest>(remoteObject);
-      
+
     if (!avControllerCallbackProxy) {
         return false;
     }
     MessageParcel parcel;
     CHECK_AND_PRINT_LOG(parcel.WriteInterfaceToken(avControllerCallbackProxy->GetDescriptor()),
         "write interface token failed");
-    
+
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
     auto remote = avControllerCallbackProxy->GetRemote();
@@ -77,7 +75,6 @@ bool OHOS::AVSession::AVControllerCallbackProxySendRequest(uint8_t* data, size_t
 {
     auto avControllerCallbackProxy = std::make_unique<AvControllerCallbackProxyFuzzer>();
     if (avControllerCallbackProxy == nullptr) {
-        cout << "avControllerCallbackProxy is null" << endl;
         return false;
     }
     return avControllerCallbackProxy->FuzzSendRequest(data, size);

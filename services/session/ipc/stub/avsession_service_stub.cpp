@@ -40,7 +40,7 @@ int AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Me
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code >= 0 && code < SERVICE_CMD_MAX) {
+    if (code < SERVICE_CMD_MAX) {
         return (this->*handlers[code])(data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -141,7 +141,7 @@ int AVSessionServiceStub::HandleSendSystemAVKeyEvent(MessageParcel &data, Messag
         return ERR_NONE;
     }
     if (!keyEvent->IsValid()) {
-        SLOGE("KeyEvent is not valid");
+        SLOGE("keyEvent is not valid");
         reply.WriteInt32(ERR_INVALID_PARAM);
         return ERR_NONE;
     }
@@ -193,10 +193,10 @@ int AVSessionServiceStub::HandleCastAudio(MessageParcel &data, MessageParcel &re
     SessionToken token {};
     token.sessionId = data.ReadString();
     token.pid = data.ReadInt32();
-    token.uid = data.ReadUint32();
+    token.uid = data.ReadInt32();
     int32_t deviceNum = data.ReadInt32();
     if (deviceNum > RECEIVE_DEVICE_NUM_MAX) {
-        SLOGE("reveive deviceNum over range");
+        SLOGE("receive deviceNum over range");
         reply.WriteInt32(ERR_INVALID_PARAM);
         return ERR_NONE;
     }
@@ -226,7 +226,7 @@ int AVSessionServiceStub::HandleCastAudioForAll(MessageParcel &data, MessageParc
     SLOGI("start");
     int32_t deviceNum = data.ReadInt32();
     if (deviceNum > RECEIVE_DEVICE_NUM_MAX) {
-        SLOGE("reveive deviceNum over range");
+        SLOGE("receive deviceNum over range");
         reply.WriteInt32(ERR_INVALID_PARAM);
         return ERR_NONE;
     }

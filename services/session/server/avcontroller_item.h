@@ -26,7 +26,7 @@
 namespace OHOS::AVSession {
 class AVControllerItem : public AVSessionControllerStub {
 public:
-    AVControllerItem(pid_t pid, sptr<AVSessionItem> &session);
+    AVControllerItem(pid_t pid, const sptr<AVSessionItem> &session);
 
     ~AVControllerItem() override;
 

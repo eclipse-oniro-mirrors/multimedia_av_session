@@ -360,10 +360,10 @@ void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand &cmd)
     callback_->OnToggleFavorite(assetId);
 }
 
-int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& contoller)
+int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& controller)
 {
     std::lock_guard lockGuard(lock_);
-    controllers_.insert({ pid, contoller });
+    controllers_.insert({ pid, controller });
     return AVSESSION_SUCCESS;
 }
 
@@ -541,6 +541,4 @@ int32_t AVSessionItem::SinkCancelCastAudio()
     SLOGI("SinkCancelCastAudio");
     return AVSESSION_SUCCESS;
 }
-
-
 } // namespace OHOS::AVSession

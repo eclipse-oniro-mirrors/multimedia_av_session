@@ -39,8 +39,7 @@ int32_t RemoteSessionSourceProxy::LoadSourceImplement()
     }
     handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
     if (handle_ == nullptr) {
-        SLOGE("Failed to open extension library %{public}s, reason: %{public}sn", g_sourceLibraryPath.c_str(),
-              dlerror());
+        SLOGE("Failed to open library %{public}s, reason: %{public}sn", g_sourceLibraryPath.c_str(), dlerror());
         return AVSESSION_ERROR;
     }
     using SourceImpl = RemoteSessionSourceImpl* (*)();

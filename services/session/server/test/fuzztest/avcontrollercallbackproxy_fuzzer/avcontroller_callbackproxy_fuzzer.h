@@ -21,7 +21,9 @@
 namespace OHOS::AVSession {
 class AVControllerCallbackProxyFuzzerTest : public AVControllerCallbackProxy {
 public:
-    explicit AVControllerCallbackProxyFuzzerTest(const sptr<IRemoteObject>& impl) : AVControllerCallbackProxy(impl) {}
+    explicit AVControllerCallbackProxyFuzzerTest(const sptr<IRemoteObject>& impl)
+        : AVControllerCallbackProxy(impl)
+    {}
     sptr<IRemoteObject> GetRemote()
     {
         return Remote();

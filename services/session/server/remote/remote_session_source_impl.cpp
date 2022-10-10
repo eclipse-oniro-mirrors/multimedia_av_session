@@ -14,7 +14,6 @@
  */
 
 #include "remote_session_source_impl.h"
-
 #include "json_utils.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
@@ -52,8 +51,8 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty(), AVSESSION_ERROR, "syncers size is empty");
 
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
-        auto syncer = iter->second;
-        ret = syncer->RegisterDisconnectNotifier([this](const std::string& deviceId) {
+        auto sessionSyncer = iter->second;
+        ret = sessionSyncer->RegisterDisconnectNotifier([this] (const std::string& deviceId) {
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,
                                      "syncer is not exist");
             SLOGE("device %{public}s is disconnected", deviceId.c_str());
@@ -69,7 +68,8 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
         });
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddDisconnectNotifier failed");
 
-        ret = syncer->RegisterDataNotifier([this](const SessionDataCategory category, const std::string& deviceId) {
+        ret = sessionSyncer->RegisterDataNotifier([this] (const SessionDataCategory category,
+                                                          const std::string& deviceId) {
 			AVSESSION_TRACE_SYNC_START("RemoteSessionSourceImpl::DataNotifier");
             SLOGI("device %{public}s category %{public}d changed", deviceId.c_str(), category);
             CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");

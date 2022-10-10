@@ -28,8 +28,9 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST = 15;
+const int32_t MAX_CODE_TEST = 5;
 const int32_t MAX_CODE_LEN  = 512;
+const int32_t MIN_SIZE_NUM  = 4;
 
 class TestAVControllerCallback :public AVControllerCallback {
     void OnSessionDestroy() override;
@@ -70,16 +71,13 @@ void TestAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& 
     SLOGI("Enter into TestAVControllerCallback::OnValidCommandChange.");
 }
 
-void AvControllerCallbackClientFuzzer::FuzzOnRemoteRequest(uint8_t* data, size_t size)
+void AvControllerCallbackClientFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    if (size > MAX_CODE_LEN) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-	if (code > MAX_CODE_TEST) {
+	if (code >= MAX_CODE_TEST) {
 		return;
 	}
     std::shared_ptr<TestAVControllerCallback> testAVControllerCallback = std::make_shared<TestAVControllerCallback>();
@@ -102,10 +100,13 @@ void AvControllerCallbackClientFuzzer::FuzzOnRemoteRequest(uint8_t* data, size_t
     size -= sizeof(uint32_t);
     dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
     dataMessageParcel.RewindRead(0);
-    aVControllerCallbackClient->OnRemoteRequest(code, dataMessageParcel, reply, option);
+    int32_t ret = aVControllerCallbackClient->OnRemoteRequest(code, dataMessageParcel, reply, option);
+    if (ret == 0) {
+        SLOGI("OnRemoteRequest ERR_NONE");
+    }
 }
 
-void OHOS::AVSession::AvControllerCallbackOnRemoteRequest(uint8_t* data, size_t size)
+void OHOS::AVSession::AvControllerCallbackOnRemoteRequest(const uint8_t* data, size_t size)
 {
     auto avControllerCallbackClient = std::make_unique<AvControllerCallbackClientFuzzer>();
     if (avControllerCallbackClient == nullptr) {
@@ -119,6 +120,6 @@ void OHOS::AVSession::AvControllerCallbackOnRemoteRequest(uint8_t* data, size_t 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AvControllerCallbackOnRemoteRequest(const_cast<uint8_t*>(data), size);
+    OHOS::AVSession::AvControllerCallbackOnRemoteRequest(data, size);
     return 0;
 }

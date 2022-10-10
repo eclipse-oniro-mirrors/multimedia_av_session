@@ -407,6 +407,41 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
 }
 
 /**
+* @tc.name: CreateController004
+* @tc.desc: create session controller
+* @tc.type: FUNC
+* @tc.require: AR000H55F0
+*/
+HWTEST_F(AVSessionManagerTest, CreateController004, TestSize.Level1)
+{
+    SLOGI("CreateController004 begin");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
+    EXPECT_NE(session, nullptr);
+    ASSERT_EQ(session->GetSessionId().length(), SESSION_LEN);
+
+    std::shared_ptr<AVSessionController> controller;
+    auto ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_NE(controller, nullptr);
+
+    std::shared_ptr<AVSessionController> controller1;
+    ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller1);
+    EXPECT_EQ(ret, ERR_CONTROLLER_IS_EXIST);
+
+    if (session != nullptr) {
+        session->Destroy();
+    }
+    if (controller != nullptr) {
+        controller->Destroy();
+    }
+    SLOGI("CreateController004 end");
+}
+
+/**
 * @tc.name: RegisterSessionListener001
 * @tc.desc: register nullptr listener
 * @tc.type: FUNC

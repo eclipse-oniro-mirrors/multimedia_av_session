@@ -210,7 +210,7 @@ int32_t AVSessionServiceProxy::CastAudio(const SessionToken& token,
                              "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteString(token.sessionId), ERR_MARSHALLING, "write sessionId failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(token.pid), ERR_MARSHALLING, "write pid failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteUint32(token.uid), ERR_MARSHALLING, "write uid failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(token.uid), ERR_MARSHALLING, "write uid failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(static_cast<int32_t>(descriptors.size())), ERR_MARSHALLING,
                              "write descriptors size failed");
     for (auto descriptor : descriptors) {

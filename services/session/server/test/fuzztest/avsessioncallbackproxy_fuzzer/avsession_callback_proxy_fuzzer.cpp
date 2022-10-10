@@ -29,19 +29,17 @@ using namespace OHOS;
 using namespace OHOS::AVSession;
 
 const int32_t MAX_CODE_LEN = 512;
-const int32_t MAX_CODE_TEST = 15;
+const int32_t MAX_CODE_TEST = 13;
+const int32_t MIN_SIZE_NUM = 4;
 
 bool AvsessionCallbackProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return false;
-    }
-    if (size > MAX_CODE_LEN) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return false;
     }
 
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-    if (code > MAX_CODE_TEST) {
+    if (code >= MAX_CODE_TEST) {
         return false;
     }
 	
@@ -56,7 +54,7 @@ bool AvsessionCallbackProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     CHECK_AND_PRINT_LOG(request.WriteInterfaceToken(avSessionCallbackProxy->GetDescriptor()),
         "write interface token failed");
     MessageParcel reply;
-    MessageOption option = { MessageOption::TF_ASYNC };
+    MessageOption option = { MessageOption::TF_ASYNC};
     auto remote = avSessionCallbackProxy->GetRemote();
     if (!remote) {
         SLOGI("remote is null");
@@ -74,7 +72,6 @@ bool OHOS::AVSession::AvsessionCallbackProxySendRequestTest(uint8_t* data, size_
 {
     auto avSessionCallbackProxy = std::make_unique<AvsessionCallbackProxyFuzzer>();
     if (avSessionCallbackProxy == nullptr) {
-        cout << "avSessionCallbackProxy is null" << endl;
         return false;
     }
     return avSessionCallbackProxy->FuzzSendRequest(data, size);
@@ -87,4 +84,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::AVSession::AvsessionCallbackProxySendRequestTest(const_cast<uint8_t*>(data), size);
     return 0;
 }
-

@@ -20,7 +20,7 @@
 #include "ability_connect_helper.h"
 
 namespace OHOS::AVSession {
-AbilityManagerAdapter::AbilityManagerAdapter(const std::string bundleName, const std::string abilityName)
+AbilityManagerAdapter::AbilityManagerAdapter(const std::string &bundleName, const std::string &abilityName)
 {
     SLOGI("construct bundleName=%{public}s abilityName=%{public}s", bundleName.c_str(), abilityName.c_str());
     bundleName_ = bundleName;
@@ -54,7 +54,7 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string &sessionId)
     return ret;
 }
 
-void AbilityManagerAdapter::StartAbilityByCallDone(const std::string sessionId)
+void AbilityManagerAdapter::StartAbilityByCallDone(const std::string &sessionId)
 {
     if (status_ != Status::ABILITY_STATUS_RUNNING) {
         SLOGI("no need to notify");
