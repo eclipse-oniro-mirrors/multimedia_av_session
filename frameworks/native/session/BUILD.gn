@@ -26,7 +26,10 @@ config("avsession_client_config") {
 
 ohos_shared_library("avsession_client") {
   install_enable = true
-
+  sanitize = {
+    cfi = true
+    debug = false
+  }
   ipc_sources = [
     "//foundation/multimedia/av_session/services/session/ipc/proxy/avsession_controller_proxy.cpp",
     "//foundation/multimedia/av_session/services/session/ipc/proxy/avsession_proxy.cpp",
