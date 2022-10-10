@@ -19,7 +19,10 @@ config("avsession_common_config") {
 
 ohos_shared_library("avsession_common") {
   install_enable = true
-
+  sanitize = {
+    cfi = true
+    debug = false
+  }
   sources = [
     "src/avcontrol_command.cpp",
     "src/avmeta_data.cpp",

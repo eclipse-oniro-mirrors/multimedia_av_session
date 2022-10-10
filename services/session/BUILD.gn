@@ -24,7 +24,10 @@ group("avession_server") {
 
 ohos_shared_library("avsession_service") {
   install_enable = true
-
+  sanitize = {
+    cfi = true
+    debug = false
+  }
   ipc_sources = [
     "ipc/proxy/avcontroller_callback_proxy.cpp",
     "ipc/proxy/avsession_callback_proxy.cpp",

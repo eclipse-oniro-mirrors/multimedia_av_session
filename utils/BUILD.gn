@@ -23,11 +23,14 @@ config("avsession_utils_config") {
 
 ohos_shared_library("avsession_utils") {
   install_enable = true
-
+  sanitize = {
+    cfi = true
+    debug = false
+  }
   sources = [
+    "src/avsession_event_handler.cpp",
     "src/avsession_sysevent.cpp",
     "src/hash_calculator.cpp",
-    "src/avsession_event_handler.cpp"
   ]
 
   include_dirs = [ "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include" ]
@@ -38,8 +41,8 @@ ohos_shared_library("avsession_utils") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
     "eventhandler:libeventhandler",
+    "hiviewdfx_hilog_native:libhilog",
   ]
 
   if (multimedia_av_session_enable_trace_control) {

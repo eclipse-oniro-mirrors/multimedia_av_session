@@ -16,6 +16,10 @@ import("//build/ohos/ace/ace.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
 ohos_shared_library("avsession_napi") {
+  sanitize = {
+    cfi = true
+    debug = false
+  }
   include_dirs = [
     "include",
     "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
