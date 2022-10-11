@@ -250,7 +250,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio001, TestSize.Level1)
     sessionToken.sessionId = avsession_->GetSessionId();
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    AVSessionManager::GetInstance().CastAudio(sessionToken , g_descriptors);
+    AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors);
     SLOGE("CastAudio001 End");
 }
 
@@ -264,7 +264,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio002, TestSize.Level1)
 {
     SLOGE("CastAudio002 Begin");
     SessionToken sessionToken;
-    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken , g_descriptors), ERR_INVALID_PARAM);
+    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), ERR_INVALID_PARAM);
     SLOGE("CastAudio002 End");
 }
 
@@ -281,7 +281,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio003, TestSize.Level1)
     sessionToken.sessionId = "123456789";
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken , g_descriptors), ERR_INVALID_PARAM);
+    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), ERR_INVALID_PARAM);
     SLOGE("CastAudio003 End");
 }
 
@@ -299,7 +299,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio004, TestSize.Level1)
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
     std::vector<AudioDeviceDescriptor> descriptors;
-    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken , descriptors), ERR_INVALID_PARAM);
+    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken, descriptors), ERR_INVALID_PARAM);
     SLOGE("CastAudio004 End");
 }
 
@@ -343,7 +343,7 @@ HWTEST_F(AVSessionRemoteTest, SetAVMetaData001, TestSize.Level1)
     sessionToken.sessionId = avsession_->GetSessionId();
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    AVSessionManager::GetInstance().CastAudio(sessionToken , g_descriptors);
+    AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors);
     AVMetaData metaData;
     metaData.Reset();
     metaData.SetAssetId("123");
@@ -376,7 +376,7 @@ HWTEST_F(AVSessionRemoteTest, SetAVPlaybackState001, TestSize.Level1)
     sessionToken.sessionId = avsession_->GetSessionId();
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    AVSessionManager::GetInstance().CastAudio(sessionToken , g_descriptors);
+    AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors);
     AVMetaData metaData;
     metaData.Reset();
     metaData.SetAssetId("playback");
@@ -412,7 +412,7 @@ HWTEST_F(AVSessionRemoteTest, SendControlCommand001, TestSize.Level1)
     sessionToken.sessionId = avsession_->GetSessionId();
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    AVSessionManager::GetInstance().CastAudio(sessionToken , g_descriptors);
+    AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors);
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCastAudioCallbackImpl>();
     EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
@@ -441,7 +441,7 @@ HWTEST_F(AVSessionRemoteTest, GetController001, TestSize.Level1)
     sessionToken.sessionId = avsession_->GetSessionId();
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    AVSessionManager::GetInstance().CastAudio(sessionToken , g_descriptors);
+    AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors);
 
     auto controller = avsession_->GetController();
     ASSERT_NE(controller, nullptr);
@@ -461,7 +461,7 @@ HWTEST_F(AVSessionRemoteTest, GetController002, TestSize.Level1)
     sessionToken.sessionId = avsession_->GetSessionId();
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    AVSessionManager::GetInstance().CastAudio(sessionToken , g_descriptors);
+    AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors);
 
     auto controller = avsession_->GetController();
     auto controller1 = avsession_->GetController();
