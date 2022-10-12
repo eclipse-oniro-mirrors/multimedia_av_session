@@ -102,6 +102,8 @@ getAllSessionDescriptors(): Promise\<Array\<Readonly\<AVSessionDescriptor>>>
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
 
+**系统接口：** 该接口为系统接口。
+
 **返回值：**
 
 | 类型                                                         | 说明                                          |
@@ -132,6 +134,8 @@ getAllSessionDescriptors(callback: AsyncCallback\<Array\<Readonly\<AVSessionDesc
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
+
+**系统接口：** 该接口为系统接口。
 
 **参数：**
 
@@ -165,6 +169,8 @@ createController(sessionId: string): Promise\<AVSessionController>
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
+
+**系统接口：** 该接口为系统接口。
 
 **参数：**
 
@@ -201,6 +207,8 @@ createController(sessionId: string, callback: AsyncCallback\<AVSessionController
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
 
+**系统接口：** 该接口为系统接口。
+
 **参数：**
 
 | 参数名    | 类型                                                        | 必填 | 说明                                                         |
@@ -233,6 +241,8 @@ castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDe
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
+
+**系统接口：** 该接口为系统接口。
 
 **参数：**
 
@@ -280,6 +290,8 @@ castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDe
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
 
+**系统接口：** 该接口为系统接口。
+
 **参数：**
 
 | 参数名       | 类型                                                         | 必填 | 说明                                                         |
@@ -321,6 +333,8 @@ on(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback: (ses
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
 
+**系统接口：** 该接口为系统接口。
+
 **参数：**
 
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
@@ -350,13 +364,40 @@ avSession.on('topSessionChange', (descriptor) => {
 });
 ```
 
+## avSession.off('sessionCreate' | 'sessionDestroy' | 'topSessionChange')
+
+off(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback?: (session: AVSessionDescriptor) => void): void
+
+会话对象相关监听的关闭，关闭后，不再进行相关on的回调。
+
+**需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
+
+**系统能力：** SystemCapability.Multimedia.AVSession.Manager
+
+**系统接口：** 该接口为系统接口。
+
+**参数：**
+
+| 参数名   | 类型                                                         | 必填 | 说明                                                         |
+| -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
+| type     | string                                                       | 是   | 事件回调类型，支持的事件为：<br/>- `'sessionCreate'`：会话创建事件，检测到会话创建时触发。<br/>- `'sessionDestroy'`：会话销毁事件，检测到会话销毁时触发。 <br/>- `'topSessionChange'`：最新会话的变化事件，检测到最新的会话改变时触发。|
+| callback | (session: [AVSessionDescriptor](#avsessiondescriptor)) => void | 否   | 回调函数。参数为会话相关描述。                               |
+
+**示例：**
+
+```js
+avSession.off('sessionCreate');
+avSession.off('sessionDestroy');
+avSession.off('topSessionChange');
+```
+
 ## avSession.on('sessionServiceDie')
 
 on(type: 'sessionServiceDie', callback: () => void): void
 
 监听会话的服务死亡事件。
 
-**系统能力：** SystemCapability.Multimedia.AVSession.Manager
+**系统能力：** SystemCapability.Multimedia.AVSession.Core
 
 **参数：**
 
@@ -379,42 +420,19 @@ off(type: 'sessionServiceDie', callback?: () => void): void
 
 会话服务死亡监听的关闭，关闭后，不再进行相关on方法的回调。
 
-**系统能力：** SystemCapability.Multimedia.AVSession.Manager
+**系统能力：** SystemCapability.Multimedia.AVSession.Core
 
 **参数：**
 
-| 参数名 | 类型   | 必填 | 说明                                                         |
-| ------ | ------ | ---- | ------------------------------------------------------------ |
-| type   | string | 是   | 事件回调类型，支持事件`'sessionServiceDie'`：会话服务死亡事件。 |
+| 参数名    | 类型                    | 必填  |      说明                                               |
+| ------   | ---------------------- | ---- | ------------------------------------------------------- |
+| type     | string                 | 是    | 事件回调类型，支持事件`'sessionServiceDie'`：会话服务死亡事件。|
+| callback | callback: () => void   | 否    | 回调函数。                                               |
 
 **示例：**
 
 ```js
 avSession.off('sessionServiceDie');
-```
-
-## avSession.off('sessionCreate' | 'sessionDestroy' | 'topSessionChange')
-
-off(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback?: (session: AVSessionDescriptor) => void): void
-
-会话对象相关监听的关闭，关闭后，不在进行相关on的回调。
-
-**需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
-
-**系统能力：** SystemCapability.Multimedia.AVSession.Manager
-
-**参数：**
-
-| 参数名 | 类型   | 必填 | 说明                                                         |
-| ------ | ------ | ---- | ------------------------------------------------------------ |
-| type   | string | 是   | 事件回调类型，支持的事件为：<br/>- `'sessionCreate'`：会话创建事件。<br/>- `'sessionDestroy'`：会话销毁事件。<br/>- `'topSessionChange'`：最新会话的变化事件。 |
-
-**示例：**
-
-```js
-avSession.off('sessionCreate');
-avSession.off('sessionDestroy');
-avSession.off('topSessionChange');
 ```
 
 ## avSession.sendSystemAVKeyEvent
@@ -426,6 +444,8 @@ sendSystemAVKeyEvent(event: KeyEvent): Promise\<void>
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
+
+**系统接口：** 该接口为系统接口。
 
 **参数：**
 
@@ -464,6 +484,8 @@ sendSystemAVKeyEvent(event: KeyEvent, callback: AsyncCallback\<void>): void
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
 
+**系统接口：** 该接口为系统接口。
+
 **参数：**
 
 | 参数名   | 类型                                                         | 必填 | 说明                                  |
@@ -495,6 +517,8 @@ sendSystemControlCommand(command: AVControlCommand): Promise\<void>
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
+
+**系统接口：** 该接口为系统接口。
 
 **参数：**
 
@@ -538,6 +562,8 @@ sendSystemControlCommand(command: AVControlCommand, callback: AsyncCallback\<voi
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
+
+**系统接口：** 该接口为系统接口。
 
 **参数：**
 
@@ -1380,9 +1406,10 @@ off(type: 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward
 
 **参数：**
 
-| 参数名 | 类型   | 必填 | 说明                                                         |
-| ------ | ------ | ---- | ------------------------------------------------------------ |
-| type   | string | 是   | 关闭对应的监听事件，支持的事件包括：`'play'`，` 'pause'`，`'stop'`， `'playNext'`，` 'playPrevious'`， ` 'fastForward'`，` 'rewind'`。 |
+| 参数名    | 类型                  | 必填 | 说明                                                                                                                         |
+| -------- | -------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------- |
+| type     | string               | 是   | 关闭对应的监听事件，支持的事件包括：`'play'`，` 'pause'`，`'stop'`， `'playNext'`，` 'playPrevious'`， ` 'fastForward'`，` 'rewind'`。 |
+| callback | callback: () => void | 否   | 回调函数。                                                                                                                     |
 
 **示例：**
 
@@ -2296,7 +2323,7 @@ controller.off('activeStateChange');
 
 ### off('validCommandChange')
 
-off(type: 'validCommandChange', callback?: (commands: Array<AVControlCommandType>) => void)
+off(type: 'validCommandChange', callback?: (commands: Array\<AVControlCommandType>) => void)
 
 控制器取消监听会话有效命令变化的事件。
 
@@ -2344,6 +2371,8 @@ controller.off('outputDeviceChange');
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
 
+**系统接口：** 该接口为系统接口。
+
 | 名称      | 类型   | 必填 | 说明         |
 | :-------- | :----- | :--- | :----------- |
 | sessionId | string | 是   | 会话ID       |
@@ -2365,6 +2394,8 @@ controller.off('outputDeviceChange');
 会话的相关描述信息。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Manager
+
+**系统接口：** 该接口为系统接口。
 
 | 名称         | 类型                                                         | 可读 | 可写 | 说明                                                |
 | ------------ | ------------------------------------------------------------ | ---- | --------------------------------------------------- | --------------------------------------------------- |
@@ -2513,4 +2544,4 @@ controller.off('outputDeviceChange');
 | ERR_CODE_REMOTE_CONNECTION_ERR | 6600104 | 分布式设备连接失败 |
 | ERR_CODE_COMMAND_INVALID       | 6600105 | 命令非法           |
 | ERR_CODE_SESSION_INACTIVE      | 6600106 | 会话未激活        |
-| ERR_CODE_MESSAGE_OVERLOAD      | 6600107 | 命令或事件重载     |
+| ERR_CODE_MESSAGE_OVERLOAD      | 6600107 | 命令或事件过载     |
