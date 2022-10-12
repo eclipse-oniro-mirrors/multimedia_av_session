@@ -31,7 +31,12 @@ RemoteSessionSinkProxy::~RemoteSessionSinkProxy()
 
 int32_t RemoteSessionSinkProxy::LoadSinkImplement()
 {
-    handle_ = dlopen(g_sinkLibraryPath.c_str(), RTLD_NOW);
+    char sinkLibraryRealPath[PATH_MAX] = { 0x00 };
+    if (realpath(g_sinkLibraryPath.c_str(), sinkLibraryRealPath) == nullptr) {
+        SLOGE("check path failed %{public}s", g_sinkLibraryPath.c_str());
+        return AVSESSION_ERROR;
+    }
+    handle_ = dlopen(sinkLibraryRealPath, RTLD_NOW);
     if (handle_ == nullptr) {
         SLOGE("Failed to open extension library %{public}s, reason: %{public}sn", g_sinkLibraryPath.c_str(), dlerror());
         return AVSESSION_ERROR;

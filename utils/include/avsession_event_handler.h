@@ -13,20 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AVSESSION_PIXEL_MAP_ADAPTER_H
-#define OHOS_AVSESSION_PIXEL_MAP_ADAPTER_H
+#ifndef AV_SESSION_AVSESSION_EVENT_HANDLER_H
+#define AV_SESSION_AVSESSION_EVENT_HANDLER_H
 
-#include "avsession_pixel_map.h"
-#include "pixel_map.h"
+#include "event_handler.h"
 
 namespace OHOS::AVSession {
-class AVSessionPixelMapAdapter {
+class AVSessionEventHandler : public AppExecFwk::EventHandler {
 public:
-    static std::shared_ptr<Media::PixelMap> ConvertFromInner(const std::shared_ptr<AVSessionPixelMap> &innerPixelMap);
-    static std::shared_ptr<AVSessionPixelMap> ConvertToInner(const std::shared_ptr<Media::PixelMap> &pixelMap);
-    static int32_t originalPixelMapBytes_;
-    static int32_t originalWidth_;
-    static int32_t originalHeight_;
+    static AVSessionEventHandler& GetInstance();
+
+    AVSessionEventHandler();
+    ~AVSessionEventHandler();
+
+    bool AVSessionPostTask(const Callback &callback, const std::string &name = std::string());
+
+    void AVSessionRemoveTask(const std::string &name);
+
+private:
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
-} // namespace OHOS::AVSession
-#endif // OHOS_AVSESSION_PIXEL_MAP_ADAPTER_H
+}
+#endif // AV_SESSION_AVSESSION_EVENT_HANDLER_H

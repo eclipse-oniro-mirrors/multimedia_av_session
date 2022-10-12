@@ -23,8 +23,12 @@ config("avsession_utils_config") {
 
 ohos_shared_library("avsession_utils") {
   install_enable = true
-
+  sanitize = {
+    cfi = true
+    debug = false
+  }
   sources = [
+    "src/avsession_event_handler.cpp",
     "src/avsession_sysevent.cpp",
     "src/hash_calculator.cpp",
   ]
@@ -37,6 +41,7 @@ ohos_shared_library("avsession_utils") {
 
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
   ]
 

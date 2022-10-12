@@ -16,6 +16,10 @@ import("//build/ohos/ace/ace.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
 ohos_shared_library("avsession_napi") {
+  sanitize = {
+    cfi = true
+    debug = false
+  }
   include_dirs = [
     "include",
     "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
@@ -60,8 +64,8 @@ ohos_shared_library("avsession_napi") {
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "multimedia_audio_framework:audio_client",
-    "multimedia_image_standard:image",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image",
+    "multimedia_image_framework:image_native",
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

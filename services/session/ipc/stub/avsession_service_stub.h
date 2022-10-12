@@ -53,6 +53,8 @@ private:
         [SERVICE_CMD_CAST_AUDIO_FOR_ALL] = &AVSessionServiceStub::HandleCastAudioForAll,
         [SERVICE_CMD_SEND_COMMAND_TO_REMOTE] = &AVSessionServiceStub::HandleRemoteCastAudio,
     };
+
+    static constexpr int RECEIVE_DEVICE_NUM_MAX = 10;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_STUB_H

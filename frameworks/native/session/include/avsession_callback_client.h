@@ -20,12 +20,13 @@
 #include "avsession_info.h"
 #include "key_event.h"
 #include "avsession_log.h"
-#include "event_handler.h"
 
 namespace OHOS::AVSession {
 class AVSessionCallbackClient : public AVSessionCallbackStub {
 public:
     AVSessionCallbackClient(const std::shared_ptr<AVSessionCallback>& callback);
+    ~AVSessionCallbackClient();
+
     void OnPlay() override;
     void OnPause() override;
     void OnStop() override;
@@ -42,7 +43,7 @@ public:
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;
-    std::shared_ptr<AppExecFwk::EventHandler> handler_;
+    static constexpr const char *EVENT_NAME = "AVSessionCallback";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_CALLBACK_CLIENT_H

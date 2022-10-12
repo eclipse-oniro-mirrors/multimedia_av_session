@@ -23,6 +23,7 @@
 #include "session_listener_client.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
+#include "avsession_utils.h"
 
 namespace OHOS::AVSession {
 AVSessionManagerImpl::AVSessionManagerImpl()
@@ -76,6 +77,8 @@ void AVSessionManagerImpl::OnServiceDie()
     }
     HISYSEVENT_RESET;
     HISYSEVENT_UNREGISTER;
+    std::string cachePath(CACHE_PATH_NAME);
+    AVSessionUtils::DeleteCacheFiles(cachePath);
 }
 
 std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string &tag, int32_t type,
@@ -185,7 +188,7 @@ int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent &keyEvent
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemAVKeyEvent");
     if (!keyEvent.IsValid()) {
         SLOGE("keyEvent is invalid");
-        return ERR_INVALID_PARAM;
+        return ERR_COMMAND_NOT_SUPPORT;
     }
 
     auto service = GetService();
@@ -199,7 +202,7 @@ int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand &c
         SLOGE("command is invalid");
         HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", command.GetCommand(),
             "ERROR_CODE", ERR_INVALID_PARAM, "ERROR_INFO", "avsessionmanagerimpl command is invalid");
-        return ERR_INVALID_PARAM;
+        return ERR_COMMAND_NOT_SUPPORT;
     }
 
     auto service = GetService();

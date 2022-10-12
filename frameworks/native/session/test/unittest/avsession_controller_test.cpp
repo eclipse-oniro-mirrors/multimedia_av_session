@@ -328,7 +328,7 @@ HWTEST_F(AVSessionControllerTest, SendMediaButtonEvent002, TestSize.Level1)
     keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_CANCEL);
     ASSERT_EQ(keyEvent->IsValid(), false);
 
-    EXPECT_EQ(controller_->SendAVKeyEvent(*(keyEvent.get())), ERR_INVALID_PARAM);
+    EXPECT_EQ(controller_->SendAVKeyEvent(*(keyEvent.get())), ERR_COMMAND_NOT_SUPPORT);
 }
 
 /**
@@ -562,7 +562,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand007, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, SendControlCommand008, TestSize.Level1)
 {
     AVControlCommand command;
-    EXPECT_EQ(controller_->SendControlCommand(command), ERR_INVALID_PARAM);
+    EXPECT_EQ(controller_->SendControlCommand(command), ERR_COMMAND_NOT_SUPPORT);
 }
 
 /**

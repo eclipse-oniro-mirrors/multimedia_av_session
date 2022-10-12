@@ -39,6 +39,7 @@
 #include "command_send_limit.h"
 #include "avsession_sysevent.h"
 #include "json_utils.h"
+#include "avsession_utils.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -57,11 +58,15 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
 
 AVSessionService::~AVSessionService()
 {
+    std::string cachePath(CACHE_PATH_NAME);
+    AVSessionUtils::DeleteCacheFiles(cachePath);
     SLOGD("destroy");
 }
 
 void AVSessionService::OnStart()
 {
+    std::string cachePath(CACHE_PATH_NAME);
+    AVSessionUtils::DeleteCacheFiles(cachePath);
     if (!Publish(this)) {
         SLOGE("publish avsession service failed");
     }
@@ -932,7 +937,7 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
 
     AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
     int32_t ret = audioSystemMgr->SelectOutputDevice(audioFilter, audioDescriptor);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SelectOutputDevice failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "SelectOutputDevice failed");
 
     return AVSESSION_SUCCESS;
 }
@@ -940,7 +945,14 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
 int32_t AVSessionService::CastAudio(const SessionToken &token,
                                     const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors)
 {
-    SLOGI("start");
+    SLOGI("sessionId is %{public}s", token.sessionId.c_str());
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+                            "ERROR_MSG", "avsessionservice CastAudio checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+
     std::string sourceSessionInfo;
     int32_t ret = SetBasicInfo(sourceSessionInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetBasicInfo failed");
@@ -1005,7 +1017,8 @@ int32_t AVSessionService::CastAudioInner(const std::vector<AudioStandard::AudioD
                                                        sinkSessionInfo);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ProcessCastAudioCommand failed");
         std::string sinkCapability;
-        JsonUtils::GetAllCapability(sinkSessionInfo, sinkCapability);
+        ret = JsonUtils::GetAllCapability(sinkSessionInfo, sinkCapability);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAllCapability failed");
         ret = session->CastAudioToRemote(sourceDevice, sinkAudioDescriptor.networkId_, sinkCapability);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudioToRemote failed");
         HISYSEVENT_BEHAVIOR("SESSION_CAST",
@@ -1077,6 +1090,13 @@ int32_t AVSessionService::CastAudioForNewSession(const sptr <AVSessionItem>& ses
 int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors)
 {
     SLOGI("session size is %{public}d", static_cast<int32_t>(GetContainer().GetAllSessions().size()));
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+                            "ERROR_MSG", "avsessionservice CastAudioForAll checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+
     for (const auto& session : GetContainer().GetAllSessions()) {
         SessionToken token;
         token.sessionId = session->GetSessionId();
@@ -1140,7 +1160,8 @@ int32_t AVSessionService::RemoteCastAudioInner(const std::string& sourceSessionI
     ret = JsonUtils::GetSessionBasicInfo(sourceSessionInfo, sourceDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetBasicInfo failed");
     std::string sourceCapability;
-    JsonUtils::GetAllCapability(sourceSessionInfo, sourceCapability);
+    ret = JsonUtils::GetAllCapability(sourceSessionInfo, sourceCapability);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAllCapability failed");
     ret = session->CastAudioFromRemote(sourceDescriptor.sessionId_, sourceDeviceInfo.networkId_,
                                        sinkDeviceInfo.networkId_, sourceCapability);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudioFromRemote failed");
@@ -1178,8 +1199,9 @@ int32_t AVSessionService::CancelCastAudioForClientExit(pid_t pid, const sptr<AVS
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "session is nullptr");
     SLOGI("pid is %{public}d, sessionId is %{public}s", static_cast<int32_t>(pid), session->GetSessionId().c_str());
     std::string sourceSessionInfo;
-    SetBasicInfo(sourceSessionInfo);
-    int32_t ret = JsonUtils::SetSessionDescriptor(sourceSessionInfo, session->GetDescriptor());
+    int32_t ret = SetBasicInfo(sourceSessionInfo);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetBasicInfo failed");
+    ret = JsonUtils::SetSessionDescriptor(sourceSessionInfo, session->GetDescriptor());
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetDescriptorInfo failed");
 
     std::vector<AudioStandard::AudioDeviceDescriptor> cancelSinkDevices;

@@ -15,23 +15,22 @@
 
 #include "avcontroller_callback_client.h"
 #include "avsession_log.h"
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
 AVControllerCallbackClient::AVControllerCallbackClient(const std::shared_ptr<AVControllerCallback>& callback)
     : callback_(callback)
 {
-    if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("AVControllerCallbackClient");
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    }
     SLOGD("construct");
 }
 
 void AVControllerCallbackClient::OnSessionDestroy()
 {
     if (callback_) {
-        if (!handler_->PostTask([this]() { callback_->OnSessionDestroy(); })) {
-            SLOGI("AVSessionCallbackClient handler postTask failed");
+        auto callback = callback_;
+        if (!AVSessionEventHandler::GetInstance()
+            .AVSessionPostTask([callback]() { callback->OnSessionDestroy(); }, EVENT_NAME)) {
+            SLOGI("AVControllerCallbackClient handler postTask failed");
         }
     }
 }
@@ -39,8 +38,10 @@ void AVControllerCallbackClient::OnSessionDestroy()
 void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState &state)
 {
     if (callback_) {
-        if (!handler_->PostTask([this, state]() { callback_->OnPlaybackStateChange(state); })) {
-            SLOGI("AVSessionCallbackClient handler postTask failed");
+        auto callback = callback_;
+        if (!AVSessionEventHandler::GetInstance()
+            .AVSessionPostTask([callback, state]() { callback->OnPlaybackStateChange(state); }, EVENT_NAME)) {
+            SLOGI("AVControllerCallbackClient handler postTask failed");
         }
     }
     if (playbackStateListener_) {
@@ -51,8 +52,10 @@ void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState &st
 void AVControllerCallbackClient::OnMetaDataChange(const AVMetaData &data)
 {
     if (callback_) {
-        if (!handler_->PostTask([this, data]() { callback_->OnMetaDataChange(data); })) {
-            SLOGI("AVSessionCallbackClient handler postTask failed");
+        auto callback = callback_;
+        if (!AVSessionEventHandler::GetInstance()
+            .AVSessionPostTask([callback, data]() { callback->OnMetaDataChange(data); }, EVENT_NAME)) {
+            SLOGI("AVControllerCallbackClient handler postTask failed");
         }
     }
 }
@@ -60,8 +63,10 @@ void AVControllerCallbackClient::OnMetaDataChange(const AVMetaData &data)
 void AVControllerCallbackClient::OnActiveStateChange(bool isActive)
 {
     if (callback_) {
-        if (!handler_->PostTask([this, isActive]() { callback_->OnActiveStateChange(isActive); })) {
-            SLOGI("AVSessionCallbackClient handler postTask failed");
+        auto callback = callback_;
+        if (!AVSessionEventHandler::GetInstance()
+            .AVSessionPostTask([callback, isActive]() { callback->OnActiveStateChange(isActive); }, EVENT_NAME)) {
+            SLOGI("AVControllerCallbackClient handler postTask failed");
         }
     }
 }
@@ -69,8 +74,10 @@ void AVControllerCallbackClient::OnActiveStateChange(bool isActive)
 void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t> &cmds)
 {
     if (callback_) {
-        if (!handler_->PostTask([this, cmds]() { callback_->OnValidCommandChange(cmds); })) {
-            SLOGI("AVSessionCallbackClient handler postTask failed");
+        auto callback = callback_;
+        if (!AVSessionEventHandler::GetInstance()
+            .AVSessionPostTask([callback, cmds]() { callback->OnValidCommandChange(cmds); }, EVENT_NAME)) {
+            SLOGI("AVControllerCallbackClient handler postTask failed");
         }
     }
 }
@@ -78,8 +85,10 @@ void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t>
 void AVControllerCallbackClient::OnOutputDeviceChange(const OutputDeviceInfo &info)
 {
     if (callback_) {
-        if (!handler_->PostTask([this, info]() { callback_->OnOutputDeviceChange(info); })) {
-            SLOGI("AVSessionCallbackClient handler postTask failed");
+        auto callback = callback_;
+        if (!AVSessionEventHandler::GetInstance()
+            .AVSessionPostTask([callback, info]() { callback->OnOutputDeviceChange(info); }, EVENT_NAME)) {
+            SLOGI("AVControllerCallbackClient handler postTask failed");
         }
     }
 }
@@ -88,5 +97,11 @@ void AVControllerCallbackClient::AddListenerForPlaybackState(const std::function
     &listener)
 {
     playbackStateListener_ = listener;
+}
+
+AVControllerCallbackClient::~AVControllerCallbackClient()
+{
+    AVSessionEventHandler::GetInstance().AVSessionRemoveTask(EVENT_NAME);
+    SLOGI("destroy");
 }
 }

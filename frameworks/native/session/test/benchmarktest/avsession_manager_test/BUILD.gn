@@ -34,18 +34,17 @@ ohos_benchmarktest("SessionManagerTest") {
     "//foundation/multimedia/av_session/utils:avsession_utils",
     "//third_party/benchmark:benchmark",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_audio_framework:audio_client",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
 }

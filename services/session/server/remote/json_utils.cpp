@@ -76,6 +76,7 @@ int32_t JsonUtils::GetVectorCapability(const std::string& jsonCapability,
 {
     CHECK_AND_RETURN_RET_LOG(!jsonCapability.empty(), AVSESSION_ERROR, "jsonCapability is empty");
     json jsonObj = json::parse(jsonCapability);
+    CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
     int32_t ret = JsonToVector(jsonObj["metaData"], vectorCapability[SESSION_DATA_META]);
     CHECK_AND_CONTINUE_LOG(ret == AVSESSION_SUCCESS, "Get metaDataCapability error");
     ret = JsonToVector(jsonObj["playbackState"], vectorCapability[SESSION_DATA_PLAYBACK_STATE]);
@@ -90,6 +91,8 @@ int32_t JsonUtils::GetAllCapability(const std::string& sessionInfo, std::string&
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
     json jsonObject;
     json jsonSessionInfo = json::parse(sessionInfo);
+    CHECK_AND_RETURN_RET_LOG(!jsonSessionInfo.is_discarded() && !jsonSessionInfo.is_null(), AVSESSION_ERROR,
+        "json object is null");
     json compatibility = jsonSessionInfo["compatibility"];
     CHECK_AND_RETURN_RET_LOG(!compatibility.is_null(), AVSESSION_ERROR, "Getcompatibility error");
     json capabilitySet = compatibility["capabilitySet"];
@@ -123,6 +126,7 @@ int32_t JsonUtils::GetSessionBasicInfo(const std::string& sessionInfo, AVSession
 {
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
     json jsonObj = json::parse(sessionInfo);
+    CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
     json compatibility = jsonObj["compatibility"];
     CHECK_AND_RETURN_RET_LOG(!compatibility.empty(), AVSESSION_ERROR, "Getcompatibility error");
     basicInfo.networkId_ = compatibility["networkId"];
@@ -169,6 +173,8 @@ int32_t JsonUtils::GetSessionDescriptors(const std::string& sessionInfo, std::ve
 {
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
     json jsonObj = json::parse(sessionInfo);
+    CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
+    CHECK_AND_RETURN_RET_LOG(!jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
     json sessionDescriptors = jsonObj["data"]["sessionDescriptors"];
     CHECK_AND_RETURN_RET_LOG(!sessionDescriptors.is_null(), AVSESSION_ERROR, "sessionDescriptors is null");
     CHECK_AND_RETURN_RET_LOG(sessionDescriptors.is_array(), AVSESSION_ERROR, "json sessionDescriptors is not array");
@@ -202,6 +208,8 @@ int32_t JsonUtils::SetSessionDescriptor(std::string& sessionInfo, const AVSessio
 int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessionDescriptor& descriptor)
 {
     json jsonObj = json::parse(sessionInfo);
+    CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
+    CHECK_AND_RETURN_RET_LOG(!jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
     json sessionDescriptor = jsonObj["data"]["sessionDescriptor"];
     CHECK_AND_RETURN_RET_LOG(!sessionDescriptor.is_null(), AVSESSION_ERROR, "sessionDescriptor is null");
 
