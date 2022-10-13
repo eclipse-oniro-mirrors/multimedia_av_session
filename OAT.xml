@@ -61,7 +61,7 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="figures/.*" desc="Self-developed binary files, design framework diagrams or other resources used in code repository readme documents"/>
             </filefilter>
             <filefilter name="defaultFilter" desc="Json format files not to check">
-                <filteritem type="filename" name="*.json|*.PNG|avsession_service.cfg" desc="json desc files"/>
+                <filteritem type="filename" name="*.json|avsession.PNG|avsession_service.cfg" desc="json desc files"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
