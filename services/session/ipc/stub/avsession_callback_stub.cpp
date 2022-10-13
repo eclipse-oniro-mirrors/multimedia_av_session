@@ -27,7 +27,7 @@ int32_t AVSessionCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code >= 0 && code < SESSION_CALLBACK_MAX) {
+    if (code < SESSION_CALLBACK_MAX) {
         return (this->*handlers[code])(data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

@@ -29,7 +29,7 @@ class AbilityConnectHelper {
 public:
     static AbilityConnectHelper& GetInstance();
 
-    int32_t StartAbilityByCall(const std::string bundleName, const std::string abilityName);
+    int32_t StartAbilityByCall(const std::string &bundleName, const std::string &abilityName);
 
 private:
    sptr<IRemoteObject> GetSystemAbility();

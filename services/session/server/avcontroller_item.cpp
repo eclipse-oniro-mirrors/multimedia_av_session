@@ -26,7 +26,7 @@
 #endif
 
 namespace OHOS::AVSession {
-AVControllerItem::AVControllerItem(pid_t pid, sptr<AVSessionItem> &session)
+AVControllerItem::AVControllerItem(pid_t pid, const sptr<AVSessionItem> &session)
     : pid_(pid), session_(session)
 {
     sessionId_ = session_->GetSessionId();
@@ -140,9 +140,7 @@ int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackState
 
 int32_t AVControllerItem::Destroy()
 {
-    if (callback_ != nullptr) {
-        callback_ = nullptr;
-    }
+    callback_ = nullptr;
     if (session_ != nullptr) {
         session_->HandleControllerRelease(pid_);
         session_ = nullptr;
@@ -164,9 +162,7 @@ void AVControllerItem::HandleSessionDestroy()
     if (callback_ != nullptr) {
         callback_->OnSessionDestroy();
     }
-    if (session_ != nullptr) {
-        session_ = nullptr;
-    }
+    session_ = nullptr;
     sessionId_.clear();
 }
 

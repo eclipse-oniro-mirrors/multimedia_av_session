@@ -72,7 +72,7 @@ public:
     void UpdateOutputDevice(OutputDeviceInfo &outputDeviceInfo,
                             const std::unique_ptr<AudioStandard::AudioRendererChangeInfo> &outputDeviceChangeInfo);
 
-    void HandleOutputDeviceChange(const OutputDeviceInfo& info);
+    void HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo);
 
     void ExecuteControllerCommand(const AVControlCommand& cmd);
 

@@ -250,7 +250,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio001, TestSize.Level1)
     sessionToken.sessionId = avsession_->GetSessionId();
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors);
+    EXPECT_NE(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), AVSESSION_SUCCESS);
     SLOGE("CastAudio001 End");
 }
 
@@ -312,7 +312,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio004, TestSize.Level1)
 HWTEST_F(AVSessionRemoteTest, CastAudioForAll001, TestSize.Level1)
 {
     SLOGE("CastAudioForAll001 Begin");
-    AVSessionManager::GetInstance().CastAudioForAll(g_descriptors);
+    EXPECT_NE(AVSessionManager::GetInstance().CastAudioForAll(g_descriptors), AVSESSION_SUCCESS);
     SLOGE("CastAudioForAll001 End");
 }
 
@@ -590,10 +590,10 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
     EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceNames_.size(), descriptor2.outputDeviceInfo_.deviceNames_.size());
     EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceNames_[0], descriptor2.outputDeviceInfo_.deviceNames_[0]);
     if (controller != nullptr) {
-    ret = controller->Destroy();
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    controller = nullptr;
-    EXPECT_EQ(controller, nullptr);
+        ret = controller->Destroy();
+        EXPECT_EQ(ret, AVSESSION_SUCCESS);
+        controller = nullptr;
+        EXPECT_EQ(controller, nullptr);
     }
     SLOGE("GetOutputDevice005 End");
 }

@@ -19,7 +19,9 @@
 namespace OHOS::AVSession {
 class SessionListenerProxyFUzzerTest : public SessionListenerProxy {
 public:
-    explicit SessionListenerProxyFUzzerTest(const sptr<IRemoteObject>& impl) : SessionListenerProxy(impl) {}
+    explicit SessionListenerProxyFUzzerTest(const sptr<IRemoteObject>& impl)
+        : SessionListenerProxy(impl)
+    {}
     sptr<IRemoteObject> GetRemote()
     {
         return Remote();

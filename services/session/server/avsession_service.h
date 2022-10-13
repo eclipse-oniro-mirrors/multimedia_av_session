@@ -164,7 +164,7 @@ private:
                              const std::string& sourceSessionInfo,
                              sptr<AVSessionItem>& session);
 
-    int32_t CastAudioInner(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors,
+    int32_t CastAudioInner(const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors,
                            const std::string& sourceSessionInfo,
                            const sptr<AVSessionItem>& session);
 
@@ -198,7 +198,7 @@ private:
                                std::vector<AudioStandard::AudioDeviceDescriptor>& audioDeviceDescriptors);
 
     bool GetAudioDescriptorByDeviceId(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>>& descriptors,
-                                      const std::string deviceId,
+                                      const std::string& deviceId,
                                       AudioStandard::AudioDeviceDescriptor& audioDescriptor);
 
     void GetCastDeviceInfo(const sptr<AVSessionItem>& session,

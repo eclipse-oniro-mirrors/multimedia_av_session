@@ -23,34 +23,31 @@ using namespace OHOS;
 using namespace OHOS::AVSession;
 
 const int32_t MAX_CODE_LEN  = 512;
+const int32_t TIME = 1000;
+const int32_t MIN_SIZE_NUM = 4;
+static char g_testBundleName[] = "test.ohos.avsession";
+static char g_testAbilityName[] = "test.ability";
 
-bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size <= 0)) {
-        std::cout << "Invalid data" << std::endl;
+bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_t size) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return false;
     }
-	if (size > MAX_CODE_LEN){
-		return false;
-	}
 
     int32_t type = *reinterpret_cast<const int32_t *>(data);
-    std::string tag(reinterpret_cast<const char*>(data), size);
+    std::string tag(reinterpret_cast<const char *>(data), size);
     OHOS::AppExecFwk::ElementName elementName;
-    //std::string bundleName(reinterpret_cast<const char*>(data), size);
-    //std::string abilityName(reinterpret_cast<const char*>(data), size);
-    elementName.SetBundleName(TestBundleName);
-    elementName.SetAbilityName(TestAbilityName);
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
 
-    std::shared_ptr<AVSession> avSession = AVSessionManager::GetInstance().CreateSession(tag, type, elementName);
+    std::shared_ptr <AVSession> avSession = AVSessionManager::GetInstance().CreateSession(tag, type, elementName);
     if (!avSession) {
-		SLOGI("avSession is null");
+        SLOGI("avSession is null");
         return false;
     }
-    std::shared_ptr<AVSessionController> avSessionController;
+    std::shared_ptr <AVSessionController> avSessionController;
     int32_t ret = AVSessionManager::GetInstance().CreateController(avSession->GetSessionId(), avSessionController);
     if (ret != AVSESSION_SUCCESS) {
-        SLOGI("avSessionController fail");
+        SLOGI("CreateController fail");
         return false;
     }
     if (!avSessionController) {
@@ -58,6 +55,19 @@ bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_
         return false;
     }
 
+    if (avSession != nullptr) {
+        avSession->Destroy();
+    }
+    if (avSessionController != nullptr) {
+        avSessionController->Destroy();
+    }
+
+    bool result = SendSystemControlCommandFuzzTest(data);
+    return result == AVSESSION_SUCCESS;
+}
+
+bool AVSessionManagerFuzzer::SendSystemControlCommandFuzzTest(const uint8_t *data)
+{
     std::shared_ptr<TestSessionListener> listener = std::make_shared<TestSessionListener>();
 	if (!listener) {
 		SLOGI("listener is null");
@@ -72,24 +82,18 @@ bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_
 	int32_t keyCode = *reinterpret_cast<const int32_t*>(data);
 	keyEvent->SetKeyCode(keyCode);
     keyEvent->SetKeyAction(*reinterpret_cast<const int32_t*>(data));
-    keyEvent->SetActionTime(1000);
+    keyEvent->SetActionTime(TIME);
     auto keyItem = OHOS::MMI::KeyEvent::KeyItem();
     keyItem.SetKeyCode(*reinterpret_cast<const int32_t*>(data));
-    keyItem.SetDownTime(1000);
+    keyItem.SetDownTime(TIME);
     keyItem.SetPressed(true);
     keyEvent->AddKeyItem(keyItem);
     result = AVSessionManager::GetInstance().SendSystemAVKeyEvent(*keyEvent);
     AVControlCommand command;
     command.SetCommand(*reinterpret_cast<const int32_t*>(data));
     result = AVSessionManager::GetInstance().SendSystemControlCommand(command);
-    if (avSession != nullptr) {
-        avSession->Destroy();
-    }
-    if (avSessionController != nullptr) {
-        avSessionController->Destroy();
-    }
 
-    return result == AVSESSION_SUCCESS;
+    return result;
 }
 
 bool OHOS::AVSession::AVSessionManagerInterfaceTest(uint8_t* data, size_t size)

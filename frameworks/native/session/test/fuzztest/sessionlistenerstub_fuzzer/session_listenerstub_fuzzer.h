@@ -16,6 +16,8 @@
 #ifndef OHOS_SESSIONLISTENERSTUB_FUZZER_H
 #define OHOS_SESSIONLISTENERSTUB_FUZZER_H
 #include "avsession_info.h"
+#include "avsession_log.h"
+
 namespace OHOS::AVSession {
 class TestSessionListener : public SessionListener{
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override
@@ -40,7 +42,6 @@ public:
     SessionListenerStubFuzzer() = default;
     ~SessionListenerStubFuzzer() = default;
     int32_t OnRemoteRequest(uint8_t* data, size_t size);
-    
 };
 }
 #endif

@@ -31,12 +31,12 @@ enum class Status {
 
 class AbilityManagerAdapter {
 public:
-    AbilityManagerAdapter(const std::string bundleName, const std::string abilityName);
+    AbilityManagerAdapter(const std::string &bundleName, const std::string &abilityName);
     ~AbilityManagerAdapter();
 
     int32_t StartAbilityByCall(std::string &sessionId);
 
-    void StartAbilityByCallDone(const std::string sessionId);
+    void StartAbilityByCallDone(const std::string &sessionId);
 
 private:
     void WaitForTimeout(uint32_t timeout);
