@@ -174,7 +174,7 @@ int32_t JsonUtils::GetSessionDescriptors(const std::string& sessionInfo, std::ve
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
     json jsonObj = json::parse(sessionInfo);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
-    CHECK_AND_RETURN_RET_LOG(!jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
+    CHECK_AND_RETURN_RET_LOG(jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
     json sessionDescriptors = jsonObj["data"]["sessionDescriptors"];
     CHECK_AND_RETURN_RET_LOG(!sessionDescriptors.is_null(), AVSESSION_ERROR, "sessionDescriptors is null");
     CHECK_AND_RETURN_RET_LOG(sessionDescriptors.is_array(), AVSESSION_ERROR, "json sessionDescriptors is not array");
@@ -209,7 +209,7 @@ int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessio
 {
     json jsonObj = json::parse(sessionInfo);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
-    CHECK_AND_RETURN_RET_LOG(!jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
+    CHECK_AND_RETURN_RET_LOG(jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
     json sessionDescriptor = jsonObj["data"]["sessionDescriptor"];
     CHECK_AND_RETURN_RET_LOG(!sessionDescriptor.is_null(), AVSESSION_ERROR, "sessionDescriptor is null");
 

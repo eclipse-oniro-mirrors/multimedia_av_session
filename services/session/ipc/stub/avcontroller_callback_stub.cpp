@@ -36,7 +36,7 @@ int32_t AVControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code >= 0 && code < CONTROLLER_CMD_MAX) {
+    if (code < CONTROLLER_CMD_MAX) {
         return (this->*handlers[code])(data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

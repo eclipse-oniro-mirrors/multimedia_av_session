@@ -24,22 +24,24 @@ using namespace OHOS;
 using namespace OHOS::AVSession;
 
 const int32_t MAX_CODE_LEN  = 512;
+const int32_t MAX_CODE_NUM = 3;
+const int32_t MIN_SIZE_NUM = 4;
 
 int32_t SessionListenerStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
-	if (size > MAX_CODE_LEN) {
+    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+	if (code >= MAX_CODE_NUM) {
         return 0;
     }
-    	
-	uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-	size -= sizeof(uint32_t);
+
+    size -= sizeof(uint32_t);
     std::shared_ptr<TestSessionListener> testSessionListener = std::make_shared<TestSessionListener>();
     sptr<SessionListenerClient> sessionListenerStubClient = new SessionListenerClient(testSessionListener);
     MessageParcel dataMessageParcel;
-	if (!dataMessageParcel.WriteInterfaceToken(sessionListenerStubClient->GetDescriptor())) {
+    if (!dataMessageParcel.WriteInterfaceToken(sessionListenerStubClient->GetDescriptor())) {
         return AVSESSION_ERROR;
     }
     dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
@@ -54,8 +56,7 @@ int32_t OHOS::AVSession::SessionListenerStubRemoteRequestTest(uint8_t* data, siz
 {
     auto sessionListenerStub = std::make_unique<SessionListenerStubFuzzer>();
     if (sessionListenerStub == nullptr) {
-        cout << "sessionListenerStub is null" << endl;
-        return 0;
+        return false;
     }
     return sessionListenerStub->OnRemoteRequest(data, size);
 }

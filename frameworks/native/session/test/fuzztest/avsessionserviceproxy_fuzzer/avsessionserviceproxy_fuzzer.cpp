@@ -23,21 +23,23 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST = 15;
+const int32_t MAX_CODE_TEST = 8;
+const int32_t MIN_SIZE_NUM = 4;
 
 bool AVSessionServiceProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
         return false;
     }
 
     uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
-	if (cmdCode > MAX_CODE_TEST) {
+	if (cmdCode >= MAX_CODE_TEST) {
 		return false;
 	}
 
     sptr<IRemoteObject> remoteObject = nullptr;
-    std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy = std::make_shared<AVSessionServiceProxyFuzzerTest>(remoteObject);
+    std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy =
+        std::make_shared<AVSessionServiceProxyFuzzerTest>(remoteObject);
 
     MessageParcel request;
     CHECK_AND_RETURN_RET_LOG(request.WriteInterfaceToken(avServiceProxy->GetDescriptor()), ERR_MARSHALLING,
@@ -60,8 +62,7 @@ bool OHOS::AVSession::AVServiceProxySendRequestTest(uint8_t* data, size_t size)
 {
     auto avServiceProxy = std::make_unique<AVSessionServiceProxyFuzzer>();
     if (avServiceProxy == nullptr) {
-        cout << "avServiceProxyFuzzer is null" << endl;
-        return 0;
+        return false;
     }
     return avServiceProxy->FuzzSendRequest(data, size);
 }

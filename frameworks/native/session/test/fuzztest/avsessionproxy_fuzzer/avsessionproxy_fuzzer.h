@@ -21,7 +21,9 @@
 namespace OHOS::AVSession {
 class AVSessionProxyTestFuzzer : public AVSessionProxy {
 public:
-    explicit AVSessionProxyTestFuzzer(const sptr<IRemoteObject> &impl) : AVSessionProxy(impl) {}
+    explicit AVSessionProxyTestFuzzer(const sptr<IRemoteObject> &impl)
+        : AVSessionProxy(impl)
+    {}
     sptr<IRemoteObject> GetRemote()
     {
         return Remote();

@@ -26,7 +26,7 @@ class RemoteSessionCapabilitySet {
 public:
     static RemoteSessionCapabilitySet &GetInstance();
 
-    std::string GetLocalCapability();
+    static std::string GetLocalCapability();
 
     void AddRemoteCapability(const std::string &sessionId, const std::string &sinkDeviceId,
                              const std::string &sinkCapability);

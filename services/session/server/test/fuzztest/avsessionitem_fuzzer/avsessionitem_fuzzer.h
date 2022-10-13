@@ -15,10 +15,12 @@
 
 #ifndef OHOS_AVCONTROLLERCALLITEM_FUZZER_H
 #define OHOS_AVCONTROLLERCALLITEM_FUZZER_H
+
 #include <cstdint>
 #include <cstddef>
 #include "avsession_log.h"
 #include "avsession_manager.h"
+
 namespace OHOS::AVSession {
 void AvSessionItemOnRemoteRequest(uint8_t* data, size_t size);
 class AvSessionItemFuzzer {
@@ -29,4 +31,3 @@ public:
 };
 }
 #endif
-

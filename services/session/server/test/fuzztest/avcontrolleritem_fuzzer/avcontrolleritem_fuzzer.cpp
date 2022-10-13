@@ -22,7 +22,6 @@
 #include "ipc_skeleton.h"
 #include "avcontroller_callback_proxy.h"
 #include "avsession_controller_stub.h"
-#include "session_stack.cpp"
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
 #include "avsession_service.h"
@@ -31,14 +30,13 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST = 15;
+const int32_t MAX_CODE_TEST = 12;
 const int32_t MAX_CODE_LEN = 512;
+const int32_t MIN_SIZE_NUM = 4;
+
 void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    if (size > MAX_CODE_LEN) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
     
@@ -61,7 +59,7 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
         return;
     }
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-    if (code > MAX_CODE_TEST) {
+    if (code >= MAX_CODE_TEST) {
         return;
     }
     sptr<IRemoteObject> avControllerItemObj;
@@ -91,7 +89,6 @@ void OHOS::AVSession::AvControllerItemRemoteRequestTest(const uint8_t* data, siz
 {
     auto avControllerItemFuzzer = std::make_unique<AvControllerItemFuzzer>();
     if (avControllerItemFuzzer == nullptr) {
-        cout << "avControllerItemFuzzer is null" << endl;
         return;
     }
     avControllerItemFuzzer->FuzzOnRemoteRequest(data, size);
@@ -104,4 +101,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::AVSession::AvControllerItemRemoteRequestTest(data, size);
     return 0;
 }
-

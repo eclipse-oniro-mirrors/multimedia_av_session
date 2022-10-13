@@ -24,16 +24,18 @@ using namespace OHOS;
 using namespace OHOS::AVSession;
 
 const int32_t MAX_CODE_LEN  = 512;
+const int32_t MAX_CODE_NUM = 14;
+const int32_t MIN_SIZE_NUM = 4;
 
 bool AvsessionProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return false;
     }
-    if (size > MAX_CODE_LEN) {
+    uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
+    if (cmdCode >= MAX_CODE_NUM) {
 		return false;
 	}
-    uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
     sptr<IRemoteObject> remoteObject = nullptr;
     std::shared_ptr<AVSessionProxyTestFuzzer> avSessionProxy = std::make_shared<AVSessionProxyTestFuzzer>(remoteObject);
 
@@ -58,8 +60,7 @@ bool OHOS::AVSession::AvsessionProxySendRequestTest(uint8_t* data, size_t size)
 {
     auto avsessionProxy = std::make_unique<AvsessionProxyFuzzer>();
     if (avsessionProxy == nullptr) {
-        cout << "avsessionProxyFuzzer is null" << endl;
-        return 0;
+        return false;
     }
     return avsessionProxy->FuzzSendRequest(data, size);
 }

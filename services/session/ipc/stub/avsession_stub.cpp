@@ -35,7 +35,7 @@ int32_t AVSessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messa
         return AVSESSION_ERROR;
     }
     SLOGD("cmd code is %{public}d", code);
-    if (code >= 0 && code < SESSION_CMD_MAX) {
+    if (code < SESSION_CMD_MAX) {
         return (this->*handlers[code])(data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

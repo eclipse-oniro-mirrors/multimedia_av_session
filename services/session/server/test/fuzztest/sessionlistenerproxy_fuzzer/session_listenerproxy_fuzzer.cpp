@@ -24,16 +24,18 @@ using namespace OHOS;
 using namespace OHOS::AVSession;
 
 const int32_t MAX_CODE_LEN = 512;
+const int32_t MAX_CODE_NUM  = 3;
+const int32_t MIN_SIZE_NUM = 4;
 
 bool SessionListenerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return false;
-    }
-    if (size > MAX_CODE_LEN) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return false;
     }
     uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
+    if (cmdCode >= MAX_CODE_NUM) {
+        return false;
+    }
     sptr<IRemoteObject> remoteObject = nullptr;
     std::shared_ptr<SessionListenerProxyFUzzerTest> sessionListenerProxy =
         std::make_shared<SessionListenerProxyFUzzerTest>(remoteObject);
@@ -58,8 +60,7 @@ bool OHOS::AVSession::SessionListenerProxySendRequestTest(uint8_t* data, size_t 
 {
     auto sessionListenerProxy = std::make_unique<SessionListenerProxyFuzzer>();
     if (sessionListenerProxy == nullptr) {
-        cout << "sessionListenerProxy is null" << endl;
-        return 0;
+        return false;
     }
     return sessionListenerProxy->FuzzSendRequest(data, size);
 }

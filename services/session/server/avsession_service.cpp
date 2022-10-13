@@ -210,7 +210,7 @@ void AVSessionService::InitAudio()
     focusSessionStrategy_.RegisterFocusSessionSelector([this] (const auto& info) {
         return SelectFocusSession(info);
     });
-    AudioAdapter::GetInstance().AddStreamRendererStateListener([this](const AudioRendererChangeInfos &infos) {
+    AudioAdapter::GetInstance().AddStreamRendererStateListener([this] (const AudioRendererChangeInfos &infos) {
         OutputDeviceChangeListener(infos);
     });
 }
@@ -880,7 +880,7 @@ void AVSessionService::SetCastDeviceInfo(const std::vector<AudioStandard::AudioD
 }
 
 bool AVSessionService::GetAudioDescriptorByDeviceId(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>>&
-                                                    descriptors, const std::string deviceId,
+                                                    descriptors, const std::string& deviceId,
                                                     AudioStandard::AudioDeviceDescriptor& audioDescriptor)
 {
     for (const auto& descriptor : descriptors) {
@@ -1144,8 +1144,6 @@ int32_t AVSessionService::RemoteCastAudioInner(const std::string& sourceSessionI
     AVSessionBasicInfo sinkDeviceInfo;
     ret = JsonUtils::GetSessionBasicInfo(sinkSessionInfo, sinkDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetBasicInfo failed");
-
-    std::vector<AVSessionDescriptor> sinkDescriptors;
 
     sptr <AVSessionItem> session = CreateSessionInner(sourceDescriptor.sessionTag_, sourceDescriptor.sessionType_,
                                                       sourceDescriptor.isThirdPartyApp_,

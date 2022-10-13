@@ -35,7 +35,7 @@ int SessionListenerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mes
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code >= 0 && code < LISTENER_CMD_MAX) {
+    if (code < LISTENER_CMD_MAX) {
         return (this->*handlers[code])(data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

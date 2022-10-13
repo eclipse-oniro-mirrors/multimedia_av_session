@@ -30,7 +30,7 @@ AbilityConnectHelper& AbilityConnectHelper::GetInstance()
     return abilityConnectHelper;
 }
 
-int32_t AbilityConnectHelper::StartAbilityByCall(const std::string bundleName, const std::string abilityName)
+int32_t AbilityConnectHelper::StartAbilityByCall(const std::string &bundleName, const std::string &abilityName)
 {
     SLOGI("bundleName=%{public}s abilityName=%{public}s", bundleName.c_str(), abilityName.c_str());
     MessageParcel data;

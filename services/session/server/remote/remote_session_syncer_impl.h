@@ -81,9 +81,9 @@ private:
     DistributedObjectStore *objectStore_;
     ObjectDataNotifier objectDataNotifier_;
     ObjectDisconnectNotifier objectDisconnectNotifier_;
+    std::string sourceSessionId_;
     std::string sourceDevice_;
     std::string sinkDevice_;
-    std::string sourceSessionId_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_REMOTE_SESSION_SYNCER_IMPL_H

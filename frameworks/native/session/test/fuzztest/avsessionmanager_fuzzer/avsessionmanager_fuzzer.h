@@ -22,9 +22,6 @@
 namespace OHOS::AVSession {
 bool AVSessionManagerInterfaceTest(uint8_t* data, size_t size);
 
-static char TestBundleName[] = "test.ohos.avsession";
-static char TestAbilityName[] = "test.ability";
-
 class TestSessionListener : public SessionListener {
 public:
     void OnSessionCreate(const AVSessionDescriptor &descriptor) override
@@ -58,6 +55,7 @@ public:
     AVSessionManagerFuzzer() = default;
     ~AVSessionManagerFuzzer() = default;
     bool AVSessionManagerFuzzTest(const uint8_t* data, size_t size);
+    bool SendSystemControlCommandFuzzTest(const uint8_t* data);
 };
 }
 #endif
