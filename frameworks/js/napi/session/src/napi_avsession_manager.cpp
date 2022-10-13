@@ -440,7 +440,7 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
 #endif
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_COMMAND_NOT_SUPPORT) {
-
+                context->errMessage = "SendSystemControlCommand failed : native invalid command";
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SendSystemControlCommand failed : native send control command no permission";
                 HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "ERROR_CODE", ret,
