@@ -16,9 +16,7 @@ import avSession from '@ohos.multimedia.avsession';
 
 createAVSession(context: Context, tag: string, type: AVSessionType): Promise\<AVSession>
 
-创建会话对象。使用Promise异步回调。
-
-一个Ability只能存在一个会话，重复创建会失败。
+创建会话对象，一个Ability只能存在一个会话，重复创建会失败，结果通过Promise异步回调方式返回。在调用creatAVSession接口创建会话之前，需要通过[featureAbility.getContext()](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-featureAbility.md)先获取Context对象。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -26,6 +24,7 @@ createAVSession(context: Context, tag: string, type: AVSessionType): Promise\<AV
 
 | 参数名 | 类型                            | 必填 | 说明                           |
 | ------ | ------------------------------- | ---- | ------------------------------ |
+| context| [Context](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/ability/context-userguide.md) | 是| 应用上下文，提供获取应用程序环境信息的能力。 |
 | tag    | string                          | 是   | 会话的自定义名称。             |
 | type   | [AVSessionType](#avsessiontype) | 是   | 会话类型，当前支持音频和视频。 |
 
@@ -34,7 +33,16 @@ createAVSession(context: Context, tag: string, type: AVSessionType): Promise\<AV
 
 | 类型                              | 说明                                                         |
 | --------------------------------- | ------------------------------------------------------------ |
-| Promise<[AVSession](#avsession)\> | Promise对象。返回会话实例对象，可用于获取会话ID，并发送元数据、播放状态、按键事件等操作。 |
+| Promise<[AVSession](#avsession)\> | Promise对象。回调返回会话实例对象，可用于获取会话ID，以及设置元数据、播放状态，发送按键事件等操作。|
+
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -48,9 +56,9 @@ let context = featureAbility.getContext();
 
 await avSession.createAVSession(context, tag, type).then((avSession) => {
     session = avSession;
-    console.info('createAVSession : SUCCESS : sessionId = ' + session.sessionId);
+    console.info('CreateAVSession : SUCCESS : sessionId = ' + session.sessionId);
 }).catch((err) => {
-    console.info('createAVSession : ERROR : ' + err.message);
+    console.info(`CreateAVSession BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -58,9 +66,7 @@ await avSession.createAVSession(context, tag, type).then((avSession) => {
 
 createAVSession(context: Context, tag: string, type: AVSessionType, callback: AsyncCallback\<AVSession>): void
 
-创建会话对象。使用callback异步回调。
-
-一个Ability只能存在一个会话，重复创建会失败。
+创建会话对象，一个Ability只能存在一个会话，重复创建会失败，结果通过callback异步回调方式返回。在调用creatAVSession接口创建会话之前，需要通过[featureAbility.getContext()](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-featureAbility.md)先获取Context对象。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -68,9 +74,18 @@ createAVSession(context: Context, tag: string, type: AVSessionType, callback: As
 
 | 参数名   | 类型                                    | 必填 | 说明                                                         |
 | -------- | --------------------------------------- | ---- | ------------------------------------------------------------ |
+| context| [Context](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/ability/context-userguide.md) | 是| 应用上下文，提供获取应用程序环境信息的能力。     |
 | tag      | string                                  | 是   | 会话的自定义名称。                                           |
 | type     | [AVSessionType](#avsessiontype)         | 是   | 会话类型，当前支持音频和视频。                               |
-| callback | AsyncCallback<[AVSession](#avsession)\> | 是   | 回调函数。回调返回会话实例对象，可用于获取会话ID，并发送元数据、播放状态、按键事件等操作。 |
+| callback | AsyncCallback<[AVSession](#avsession)\> | 是   | 回调函数。回调返回会话实例对象，可用于获取会话ID，以及设置元数据、播放状态，发送按键事件等操作。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -84,10 +99,10 @@ let context = featureAbility.getContext();
 
 avSession.createAVSession(context, tag, type, function (err, avSession) {
     if (err) {
-        console.info('createAVSession : ERROR : ' + err.message);
+        console.info(`CreateAVSession BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
         session = avSession;
-        console.info('createAVSession : SUCCESS : sessionId = ' + session.sessionId);
+        console.info('CreateAVSession : SUCCESS : sessionId = ' + session.sessionId);
     }
 });
 ```
@@ -96,7 +111,7 @@ avSession.createAVSession(context, tag, type, function (err, avSession) {
 
 getAllSessionDescriptors(): Promise\<Array\<Readonly\<AVSessionDescriptor>>>
 
-获取所有会话的相关描述。使用Promise异步回调。
+获取所有会话的相关描述。结果通过Promise异步回调方式返回。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -108,7 +123,15 @@ getAllSessionDescriptors(): Promise\<Array\<Readonly\<AVSessionDescriptor>>>
 
 | 类型                                                         | 说明                                          |
 | ------------------------------------------------------------ | --------------------------------------------- |
-| Promise\<Array\<Readonly\<[AVSessionDescriptor](#avsessiondescriptor)\>\>\> | Promise对象。返回所有的会话的描述的只读对象。 |
+| Promise\<Array\<Readonly\<[AVSessionDescriptor](#avsessiondescriptor)\>\>\> | Promise对象。返回所有会话描述的只读对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -117,11 +140,11 @@ avSession.getAllSessionDescriptors().then((descriptors) => {
     console.info('getAllSessionDescriptors : SUCCESS : descriptors.length : ' + descriptors.length);
     if(descriptors.length > 0 ){
         console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].isActive : ' + descriptors[0].isActive);
-        console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].type : ' + descriptors[0].type);
-        console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].sessionTag : ' + descriptors[0].sessionTag);
+        console.info('GetAllSessionDescriptors : SUCCESS : descriptors[0].type : ' + descriptors[0].type);
+        console.info('GetAllSessionDescriptors : SUCCESS : descriptors[0].sessionTag : ' + descriptors[0].sessionTag);
     }
 }).catch((err) => {
-    console.info('getAllSessionDescriptors : ERROR : '+ err.message);
+    console.info(`GetAllSessionDescriptors BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -129,7 +152,7 @@ avSession.getAllSessionDescriptors().then((descriptors) => {
 
 getAllSessionDescriptors(callback: AsyncCallback\<Array\<Readonly\<AVSessionDescriptor>>>): void
 
-获取所有会话的相关描述。使用callback异步回调。
+获取所有会话的相关描述。结果通过callback异步回调方式返回。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -141,16 +164,24 @@ getAllSessionDescriptors(callback: AsyncCallback\<Array\<Readonly\<AVSessionDesc
 
 | 参数名   | 类型                                                         | 必填 | 说明                                       |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------ |
-| callback | AsyncCallback<Array<Readonly<[AVSessionDescriptor](#avsessiondescriptor)\>\>\> | 是   | 回调函数。返回所有的会话的描述的只读对象。 |
+| callback | AsyncCallback<Array<Readonly<[AVSessionDescriptor](#avsessiondescriptor)\>\>\> | 是   | 回调函数。返回所有会话描述的只读对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
 ```js
 avSession.getAllSessionDescriptors(function (err, descriptors) {
     if (err) {
-        console.info('getAllSessionDescriptors : ERROR : '+ err.message);
+        console.info(`GetAllSessionDescriptors BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('getAllSessionDescriptors : SUCCESS : descriptors.length : ' + descriptors.length);
+        console.info('GetAllSessionDescriptors : SUCCESS : descriptors.length : ' + descriptors.length);
         if(descriptors.length > 0 ){
             console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].isActive : ' + descriptors[0].isActive);
             console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].type : ' + descriptors[0].type);
@@ -164,7 +195,7 @@ avSession.getAllSessionDescriptors(function (err, descriptors) {
 
 createController(sessionId: string): Promise\<AVSessionController>
 
-根据会话ID创建会话控制器，可以创建多个会话控制器。使用Promise异步回调。
+根据会话ID创建会话控制器，可以创建多个会话控制器。结果通过Promise异步回调方式返回。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -178,12 +209,21 @@ createController(sessionId: string): Promise\<AVSessionController>
 | --------- | ------ | ---- | -------- |
 | sessionId | string | 是   | 会话ID。 |
 
-
 **返回值：**
 
 | 类型                                                  | 说明                                                         |
 | ----------------------------------------------------- | ------------------------------------------------------------ |
-| Promise<[AVSessionController](#avsessioncontroller)\> | Promise对象。返回会话控制器实例，可获得会话ID，并对会话进行发送命令，获取元数据、播放状态、按键事件等操作。 |
+| Promise<[AVSessionController](#avsessioncontroller)\> | Promise对象。返回会话控制器实例，可查看会话ID，<br>并完成对会话发送命令及事件，获取元数据、播放状态信息等操作。|
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在|
 
 **示例：**
 
@@ -191,9 +231,9 @@ createController(sessionId: string): Promise\<AVSessionController>
 let controller;
 await avSession.createController(session.sessionId).then((avcontroller) => {
     controller = avcontroller;
-    console.info('createController : SUCCESS : ' + controller.sessionId);
+    console.info('CreateController : SUCCESS : ' + controller.sessionId);
 }).catch((err) => {
-    console.info('createController : ERROR : ' + err.message);
+    console.info(`CreateController BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -201,7 +241,7 @@ await avSession.createController(session.sessionId).then((avcontroller) => {
 
 createController(sessionId: string, callback: AsyncCallback\<AVSessionController>): void
 
-根据会话ID创建会话控制器，可以创建多个会话控制器。使用callback异步回调。
+根据会话ID创建会话控制器，可以创建多个会话控制器。结果通过callback异步回调方式返回。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -214,7 +254,17 @@ createController(sessionId: string, callback: AsyncCallback\<AVSessionController
 | 参数名    | 类型                                                        | 必填 | 说明                                                         |
 | --------- | ----------------------------------------------------------- | ---- | ------------------------------------------------------------ |
 | sessionId | string                                                      | 是   | 会话ID。                                                     |
-| callback  | AsyncCallback<[AVSessionController](#avsessioncontroller)\> | 是   | 回调函数。返回会话控制器实例，可获得会话ID，并对会话进行发送命令，获取元数据、播放状态、按键事件等操作。 |
+| callback  | AsyncCallback<[AVSessionController](#avsessioncontroller)\> | 是   | 回调函数。返回会话控制器实例，可查看会话ID，<br>并完成对会话发送命令及事件，获取元数据、播放状态信息等操作。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在|
 
 **示例：**
 
@@ -222,10 +272,10 @@ createController(sessionId: string, callback: AsyncCallback\<AVSessionController
 let controller;
 avSession.createController(session.sessionId, function (err, avcontroller) {
     if (err) {
-        console.info('createController : ERROR : '+ err.message);
+        console.info(`CreateController BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
         controller = avcontroller;
-        console.info('createController : SUCCESS : ' + controller.sessionId);
+        console.info('CreateController : SUCCESS : ' + controller.sessionId);
     }
 });
 ```
@@ -234,9 +284,9 @@ avSession.createController(session.sessionId, function (err, avcontroller) {
 
 castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDescriptor>): Promise\<void>
 
-发送AudioDeviceDescriptor列表。使用Promise异步回调。
+投播会话到指定设备列表。结果通过Promise异步回调方式返回。
 
-需要导入`ohos.multimedia.audio`模块获取AudioDeviceDescriptor的相关描述。
+调用此接口之前，需要导入`ohos.multimedia.audio`模块获取AudioDeviceDescriptor的相关描述。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -249,13 +299,24 @@ castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDe
 | 参数名       | 类型                                                         | 必填 | 说明                                                         |
 | ------------ | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
 | session      | [SessionToken](#sessiontoken) &#124; 'all'                   | 是   | 会话令牌。SessionToken表示单个token；字符串`'all'`指所有token。 |
-| audioDevices | Array\<[audio.AudioDeviceDescriptor](js-apis-audio.md#audiodevicedescriptor)\> | 是   | 媒体的设备的描述列表。                          |
+| audioDevices | Array\<[audio.AudioDeviceDescriptor](js-apis-audio.md#audiodevicedescriptor)\> | 是   | 媒体设备列表。                          |
 
 **返回值：**
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当投播成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在|
+| 6600104  | 远端设备连接失败|
 
 **示例：**
 
@@ -268,13 +329,13 @@ await audioManager.getDevices(audio.DeviceFlag.OUTPUT_DEVICES_FLAG).then((data) 
     audioDevices = data;
     console.info('Promise returned to indicate that the device list is obtained.');
 }).catch((err) => {
-    console.info('getDevices : ERROR : ' + err.message);
+    console.info(`GetDevices BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 
 avSession.castAudio('all', audioDevices).then(() => {
-    console.info('createController : SUCCESS');
+    console.info('CreateController : SUCCESS');
 }).catch((err) => {
-    console.info('createController : ERROR : ' + err.message);
+    console.info(`CreateController BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -282,7 +343,7 @@ avSession.castAudio('all', audioDevices).then(() => {
 
 castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDescriptor>, callback: AsyncCallback\<void>): void
 
-发送AudioDeviceDescriptor列表。使用callback异步回调。
+投播会话到指定设备列表。结果通过callback异步回调方式返回。
 
 需要导入`ohos.multimedia.audio`模块获取AudioDeviceDescriptor的相关描述。
 
@@ -297,8 +358,19 @@ castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDe
 | 参数名       | 类型                                                         | 必填 | 说明                                                         |
 | ------------ | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
 | session      | [SessionToken](#sessiontoken) &#124; 'all'                   | 是   | 会话令牌。SessionToken表示单个token；字符串`'all'`指所有token。 |
-| audioDevices | Array\<[audio.AudioDeviceDescriptor](js-apis-audio.md#audiodevicedescriptor)\> | 是   | 媒体的设备的描述列表。                       |
-| callback     | AsyncCallback<void\>                                         | 是   | 回调函数。发送失败将获取err错误对象。                        |
+| audioDevices | Array\<[audio.AudioDeviceDescriptor](js-apis-audio.md#audiodevicedescriptor)\> | 是   | 媒体设备列表。                       |
+| callback     | AsyncCallback<void\>                                         | 是   | 回调函数。当投播成功，err为undefined，否则返回错误对象。                        |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在|
+| 6600104  | 远端设备连接失败|
 
 **示例：**
 
@@ -311,14 +383,14 @@ await audioManager.getDevices(audio.DeviceFlag.OUTPUT_DEVICES_FLAG).then((data) 
     audioDevices = data;
     console.info('Promise returned to indicate that the device list is obtained.');
 }).catch((err) => {
-    console.info('getDevices : ERROR : ' + err.message);
+    console.info(`GetDevices BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 
 avSession.castAudio('all', audioDevices, function (err) {
     if (err) {
-        console.info('castAudio : ERROR : '+ err.message);
+        console.info(`CastAudio BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('castAudio : SUCCESS ');
+        console.info('CastAudio : SUCCESS ');
     }
 });
 ```
@@ -339,8 +411,17 @@ on(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback: (ses
 
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
-| type     | string                                                       | 是   | 事件回调类型，支持的事件为：<br/>- `'sessionCreate'`：会话创建事件，检测到会话创建时触发。<br/>- `'sessionDestroy'`：会话销毁事件，检测到会话销毁时触发。 <br/>- `'topSessionChange'`：最新会话的变化事件，检测到最新的会话改变时触发。|
+| type     | string                                                       | 是   | 事件回调类型，支持的事件包括：<br/>- `'sessionCreate'`：会话创建事件，检测到会话创建时触发。<br/>- `'sessionDestroy'`：会话销毁事件，检测到会话销毁时触发。 <br/>- `'topSessionChange'`：最新会话的变化事件，检测到最新的会话改变时触发。|
 | callback | (session: [AVSessionDescriptor](#avsessiondescriptor)) => void | 是   | 回调函数。参数为会话相关描述。                               |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -368,7 +449,7 @@ avSession.on('topSessionChange', (descriptor) => {
 
 off(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback?: (session: AVSessionDescriptor) => void): void
 
-会话对象相关监听的关闭，关闭后，不再进行相关on的回调。
+取消会话相关事件监听，取消后，不再进行相关事件的监听。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -381,7 +462,15 @@ off(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback?: (s
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
 | type     | string                                                       | 是   | 事件回调类型，支持的事件为：<br/>- `'sessionCreate'`：会话创建事件，检测到会话创建时触发。<br/>- `'sessionDestroy'`：会话销毁事件，检测到会话销毁时触发。 <br/>- `'topSessionChange'`：最新会话的变化事件，检测到最新的会话改变时触发。|
-| callback | (session: [AVSessionDescriptor](#avsessiondescriptor)) => void | 否   | 回调函数。参数为会话相关描述。                               |
+| callback | (session: [AVSessionDescriptor](#avsessiondescriptor)) => void | 否   | 回调函数。当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为会话相关描述，为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                               |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -404,7 +493,16 @@ on(type: 'sessionServiceDie', callback: () => void): void
 | 参数名   | 类型                 | 必填 | 说明                                                         |
 | -------- | -------------------- | ---- | ------------------------------------------------------------ |
 | type     | string               | 是   | 事件回调类型，支持事件`'sessionServiceDie'`：会话服务死亡事件，检测到会话的服务死亡时触发。 |
-| callback | callback: () => void | 是   | 回调函数。                                                   |
+| callback | callback: () => void | 是   | 回调函数。当监听事件注册成功，err为undefined，否则返回错误对象。                                |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -418,7 +516,7 @@ avSession.on('sessionServiceDie', () => {
 
 off(type: 'sessionServiceDie', callback?: () => void): void
 
-会话服务死亡监听的关闭，关闭后，不再进行相关on方法的回调。
+取消会话服务死亡监听，取消后，不再进行服务死亡监听。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -427,7 +525,15 @@ off(type: 'sessionServiceDie', callback?: () => void): void
 | 参数名    | 类型                    | 必填  |      说明                                               |
 | ------   | ---------------------- | ---- | ------------------------------------------------------- |
 | type     | string                 | 是    | 事件回调类型，支持事件`'sessionServiceDie'`：会话服务死亡事件。|
-| callback | callback: () => void   | 否    | 回调函数。                                               |
+| callback | callback: () => void   | 否    | 回调函数。当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的服务死亡监听。            |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -439,7 +545,7 @@ avSession.off('sessionServiceDie');
 
 sendSystemAVKeyEvent(event: KeyEvent): Promise\<void>
 
-发送会话相关的按键事件。使用Promise异步回调。
+发送按键事件给置顶会话。结果通过Promise异步回调方式返回。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -451,13 +557,23 @@ sendSystemAVKeyEvent(event: KeyEvent): Promise\<void>
 
 | 参数名 | 类型                            | 必填 | 说明       |
 | ------ | ------------------------------- | ---- | ---------- |
-| event  | [KeyEvent](js-apis-keyevent.md) | 是   | 按键事件。 |
+| event  | [KeyEvent]((https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-keyevent.md)) | 是   | 按键事件。 |
 
 **返回值：**
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当事件发送成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600105  | 无效命令 |
 
 **示例：**
 
@@ -467,9 +583,9 @@ let keyItem = {code:0x49, pressedTime:123456789, deviceId:0};
 let event = {action:2, key:keyItem, keys:[keyItem]};
 
 avSession.sendSystemAVKeyEvent(event).then(() => {
-    console.info('sendSystemAVKeyEvent Successfully');
+    console.info('SendSystemAVKeyEvent Successfully');
 }).catch((err) => {
-    console.info('sendSystemAVKeyEvent : ERROR : '+ err.message);
+    console.info(`SendSystemAVKeyEvent BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 
 ```
@@ -478,7 +594,7 @@ avSession.sendSystemAVKeyEvent(event).then(() => {
 
 sendSystemAVKeyEvent(event: KeyEvent, callback: AsyncCallback\<void>): void
 
-发送会话相关的按键事件。使用callback异步回调。
+发送按键事件给置顶会话。结果通过callback异步回调方式返回。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -491,7 +607,17 @@ sendSystemAVKeyEvent(event: KeyEvent, callback: AsyncCallback\<void>): void
 | 参数名   | 类型                                                         | 必填 | 说明                                  |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------- |
 | event    | [KeyEvent](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-keyevent.md) | 是   | 按键事件。                            |
-| callback | AsyncCallback<void\>                                         | 是   | 回调函数。发送失败将获取err错误对象。 |
+| callback | AsyncCallback<void\>                                         | 是   | 回调函数。当事件发送成功，err为undefined，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600105  | 无效命令 |
 
 **示例：**
 
@@ -501,9 +627,9 @@ let event = {action:2, key:keyItem, keys:[keyItem]};
 
 avSession.sendSystemAVKeyEvent(event, function (err) {
     if (err) {
-        console.info('sendSystemAVKeyEvent : ERROR : '+ err.message);
+        console.info(`SendSystemAVKeyEvent BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('sendSystemAVKeyEvent : SUCCESS ');
+        console.info('SendSystemAVKeyEvent : SUCCESS ');
     }
 });
 ```
@@ -512,7 +638,7 @@ avSession.sendSystemAVKeyEvent(event, function (err) {
 
 sendSystemControlCommand(command: AVControlCommand): Promise\<void>
 
-发送会话相关的控制命令。使用Promise异步回调。
+发送控制命令给置顶会话。结果通过Promise异步回调方式返回。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -530,7 +656,18 @@ sendSystemControlCommand(command: AVControlCommand): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当命令发送成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600105  | 无效命令 |
+| 6600107  | 消息过载 |
 
 **示例：**
 
@@ -547,9 +684,9 @@ let avcommand = {command:'play'};
 // let avcommand = {command:'setLoopMode', parameter:avSession.LoopMode.LOOP_MODE_SINGLE};
 // let avcommand = {command:'toggleFavorite', parameter:"false"};
 avSession.sendSystemControlCommand(avcommand).then(() => {
-    console.info('sendSystemControlCommand successfully');
+    console.info('SendSystemControlCommand successfully');
 }).catch((err) => {
-    console.info('sendSystemControlCommand : ERROR : '+ err.message);
+    console.info(`SendSystemControlCommand BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -557,7 +694,7 @@ avSession.sendSystemControlCommand(avcommand).then(() => {
 
 sendSystemControlCommand(command: AVControlCommand, callback: AsyncCallback\<void>): void
 
-发送会话相关的控制命令。使用callback异步回调。
+发送控制命令给置顶会话。结果通过callback异步回调方式返回。
 
 **需要权限：** ohos.permission.MANAGE_MEDIA_RESOURCES，仅系统应用可用。
 
@@ -570,7 +707,18 @@ sendSystemControlCommand(command: AVControlCommand, callback: AsyncCallback\<voi
 | 参数名   | 类型                                  | 必填 | 说明                                  |
 | -------- | ------------------------------------- | ---- | ------------------------------------- |
 | command  | [AVControlCommand](#avcontrolcommand) | 是   | AVSession的相关命令和命令相关参数。   |
-| callback | AsyncCallback<void\>                  | 是   | 回调函数。发送失败将获取err错误对象。 |
+| callback | AsyncCallback<void\>                  | 是   | 回调函数。当命令发送成功，err为undefined，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 201  | 权限校验失败 |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600105  | 无效命令 |
+| 6600107  | 消息过载 |
 
 **示例：**
 
@@ -588,16 +736,16 @@ let avcommand = {command:'play'};
 // let avcommand = {command:'toggleFavorite', parameter:"false"};
 avSession.sendSystemControlCommand(avcommand, function (err) {
     if (err) {
-        console.info('sendSystemControlCommand  : ERROR : ' + err.message);
+        console.info(`SendSystemControlCommand BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('sendSystemControlCommand  successfully');
+        console.info('sendSystemControlCommand successfully');
     }
 });
 ```
 
 ## AVSession
 
-调用[avSession.createAVSession](#avsessioncreateavsession)后，返回会话的实例，获得会话ID，可对会话进行发送命令，发送元数据，播放状态，按键事件的操作。
+调用[avSession.createAVSession](#avsessioncreateavsession)后，返回会话的实例，可以获得会话ID，完成设置元数据，播放状态信息等操作。
 
 ### 属性
 
@@ -618,7 +766,7 @@ let sessionId = session.sessionId;
 
 setAVMetadata(data: AVMetadata): Promise\<void>
 
-设置会话元数据。使用Promise异步回调。
+设置会话元数据。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -632,7 +780,16 @@ setAVMetadata(data: AVMetadata): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当元数据设置成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -654,9 +811,9 @@ let metadata  = {
     nextAssetId: "121279",
 };
 session.setAVMetadata(metadata).then(() => {
-    console.info('setAVMetadata successfully');
+    console.info('SetAVMetadata successfully');
 }).catch((err) => {
-    console.info('setAVMetadata : ERROR : '+ err.message);
+    console.info(`SetAVMetadata BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -664,7 +821,7 @@ session.setAVMetadata(metadata).then(() => {
 
 setAVMetadata(data: AVMetadata, callback: AsyncCallback\<void>): void
 
-设置会话元数据。使用callback异步回调。
+设置会话元数据。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -673,7 +830,16 @@ setAVMetadata(data: AVMetadata, callback: AsyncCallback\<void>): void
 | 参数名   | 类型                      | 必填 | 说明                                  |
 | -------- | ------------------------- | ---- | ------------------------------------- |
 | data     | [AVMetadata](#avmetadata) | 是   | 会话元数据。                          |
-| callback | AsyncCallback<void\>      | 是   | 回调函数。设置失败将获取err错误对象。 |
+| callback | AsyncCallback<void\>      | 是   | 回调函数。当元数据设置成功，err为undefined，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -696,9 +862,9 @@ let metadata  = {
 };
 session.setAVMetadata(metadata, function (err) {
     if (err) {
-        console.info('setAVMetadata : ERROR : ' + err.message);
+        console.info(`SetAVMetadata BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('setAVMetadata successfully');
+        console.info('SetAVMetadata successfully');
     }
 });
 ```
@@ -707,7 +873,7 @@ session.setAVMetadata(metadata, function (err) {
 
 setAVPlaybackState(state: AVPlaybackState): Promise\<void>
 
-设置会话播放状态。使用Promise异步回调。
+设置会话播放状态。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -721,7 +887,16 @@ setAVPlaybackState(state: AVPlaybackState): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当播放状态设置成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -735,9 +910,9 @@ let PlaybackState = {
     isFavorite:true,
 };
 session.setAVPlaybackState(PlaybackState).then(() => {
-    console.info('setAVPlaybackState successfully');
+    console.info('SetAVPlaybackState successfully');
 }).catch((err) => {
-    console.info('setAVPlaybackState : ERROR : '+ err.message);
+    console.info(`SetAVPlaybackState BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -745,7 +920,7 @@ session.setAVPlaybackState(PlaybackState).then(() => {
 
 setAVPlaybackState(state: AVPlaybackState, callback: AsyncCallback\<void>): void
 
-设置会话播放状态。使用callback异步回调。
+设置会话播放状态。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -754,7 +929,16 @@ setAVPlaybackState(state: AVPlaybackState, callback: AsyncCallback\<void>): void
 | 参数名   | 类型                                | 必填 | 说明                                           |
 | -------- | ----------------------------------- | ---- | ---------------------------------------------- |
 | data     | [AVPlaybackState](#avplaybackstate) | 是   | 会话播放状态，包括状态、倍数、循环模式等信息。 |
-| callback | AsyncCallback<void\>                | 是   | 回调函数。设置失败将获取err错误对象。          |
+| callback | AsyncCallback<void\>                | 是   | 回调函数。当播放状态设置成功，err为undefined，否则返回错误对象。          |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -769,9 +953,9 @@ let PlaybackState = {
 };
 session.setAVPlaybackState(PlaybackState, function (err) {
     if (err) {
-        console.info('setAVPlaybackState : ERROR : ' + err.message);
+        console.info(`SetAVPlaybackState BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('setAVPlaybackState successfully');
+        console.info('SetAVPlaybackState successfully');
     }
 });
 ```
@@ -780,7 +964,7 @@ session.setAVPlaybackState(PlaybackState, function (err) {
 
 setLaunchAbility(ability: WantAgent): Promise\<void>
 
-设置一个WantAgent用于拉起会话的Ability。使用Promise异步回调。
+设置一个WantAgent用于拉起会话的Ability。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -794,7 +978,16 @@ setLaunchAbility(ability: WantAgent): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当Ability设置成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -831,9 +1024,9 @@ let wantAgentInfo = {
 
 wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
     session.setLaunchAbility(agent).then(() => {
-        console.info('setLaunchAbility successfully');
+        console.info('SetLaunchAbility successfully');
     }).catch((err) => {
-        console.info('setLaunchAbility : ERROR : '+ err.message);
+        console.info(`SetLaunchAbility BusinessError: code: ${err.code}, message: ${err.message}`);
     });
 });
 ```
@@ -842,7 +1035,7 @@ wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
 
 setLaunchAbility(ability: WantAgent, callback: AsyncCallback\<void>): void
 
-设置一个WantAgent用于拉起会话的Ability。使用callback异步回调。
+设置一个WantAgent用于拉起会话的Ability。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -851,7 +1044,16 @@ setLaunchAbility(ability: WantAgent, callback: AsyncCallback\<void>): void
 | 参数名   | 类型                              | 必填 | 说明                                                        |
 | -------- | --------------------------------- | ---- | ----------------------------------------------------------- |
 | ability  | [WantAgent](js-apis-wantAgent.md) | 是   | 应用的相关属性信息，如bundleName，abilityName，deviceId等。 |
-| callback | AsyncCallback<void\>              | 是   | 回调函数                                                    |
+| callback | AsyncCallback<void\>              | 是   | 回调函数。当Ability设置成功，err为undefined，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -889,9 +1091,9 @@ let wantAgentInfo = {
 wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
     session.setLaunchAbility(agent, function (err) {
         if (err) {
-            console.info('setLaunchAbility : ERROR : ' + err.message);
+            console.info(`SetLaunchAbility BusinessError: code: ${err.code}, message: ${err.message}`);
         } else {
-            console.info('setLaunchAbility successfully');
+            console.info('SetLaunchAbility successfully');
         }
     });
 });
@@ -901,7 +1103,7 @@ wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
 
 setAudioStreamId(streamIds: Array\<number>): Promise\<void>
 
-设置音频流ID。使用Promise异步回调。
+设置音频流ID。结果通过Promise异步回调方式返回。
 
 标识此会话控制的音频流，如果设置了多个流，这些流将在强制转换操作期间同时强制转换到远程端。
 
@@ -917,15 +1119,24 @@ setAudioStreamId(streamIds: Array\<number>): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当AudioStreamId设置成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.setAudioStreamId(['1111','22222']).then(() => {
-    console.info('setAudioStreamId successfully');
+    console.info('SetAudioStreamId successfully');
 }).catch((err) => {
-    console.info('setAudioStreamId : ERROR : '+ err.message);
+    console.info(`SetAudioStreamId BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -933,7 +1144,7 @@ session.setAudioStreamId(['1111','22222']).then(() => {
 
 setAudioStreamId(streamIds: Array\<number>, callback: AsyncCallback\<void>): void
 
-设置音频流id。使用callback异步回调。
+设置音频流id。结果通过callback异步回调方式返回。
 
 标识此会话控制的音频流，如果设置了多个流，这些流将在强制转换操作期间同时强制转换到远程端。
 
@@ -944,16 +1155,25 @@ setAudioStreamId(streamIds: Array\<number>, callback: AsyncCallback\<void>): voi
 | 参数名    | 类型                 | 必填 | 说明           |
 | --------- | -------------------- | ---- | -------------- |
 | streamIds | Array<number\>       | 是   | 媒体流ID列表。 |
-| callback  | AsyncCallback<void\> | 是   | 回调函数。     |
+| callback  | AsyncCallback<void\> | 是   | 回调函数。当AudioStreamId设置成功，err为undefined，否则返回错误对象。     |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.setAudioStreamId(['1111','22222'], function (err) {
     if (err) {
-        console.info('setAudioStreamId : ERROR : '+ err.message);
+        console.info(`SetAudioStreamId BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('setAudioStreamId successfully');
+        console.info('SetAudioStreamId successfully');
     }
 });
 ```
@@ -962,7 +1182,7 @@ session.setAudioStreamId(['1111','22222'], function (err) {
 
 getController(): Promise\<AVSessionController>
 
-通过会话获取控制器。使用Promise异步回调。
+获取本会话对应的控制器。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -972,15 +1192,23 @@ getController(): Promise\<AVSessionController>
 | ---------------------------------------------------- | ----------------------------- |
 | Promise<[AVSessionController](#avsessioncontroller)> | Promise对象。返回会话控制器。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+
 **示例：**
 
 ```js
 let controller;
 session.getController().then((avcontroller) => {
     controller = avcontroller;
-    console.info('getController : SUCCESS : sessionid : ' + controller.sessionId);
+    console.info('GetController : SUCCESS : sessionid : ' + controller.sessionId);
 }).catch((err) => {
-    console.info('getController : ERROR : '+ err.message);
+    console.info(`GetController BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -988,7 +1216,7 @@ session.getController().then((avcontroller) => {
 
 getController(callback: AsyncCallback\<AVSessionController>): void
 
-通过会话获取控制器。使用callback异步回调。
+获取本会话相应的控制器。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -996,7 +1224,15 @@ getController(callback: AsyncCallback\<AVSessionController>): void
 
 | 参数名   | 类型                                                        | 必填 | 说明                       |
 | -------- | ----------------------------------------------------------- | ---- | -------------------------- |
-| callback | AsyncCallback<[AVSessionController](#avsessioncontroller)\> | 是   | 回调函数，返回会话控制器。 |
+| callback | AsyncCallback<[AVSessionController](#avsessioncontroller)\> | 是   | 回调函数。返回会话控制器。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1004,10 +1240,10 @@ getController(callback: AsyncCallback\<AVSessionController>): void
 let controller;
 session.getController(function (err, avcontroller) {
     if (err) {
-        console.info('getController : ERROR : ' + err.message);
+        console.info(`GetController BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
         controller = avcontroller;
-        console.info('getController : SUCCESS : sessionid : ' + controller.sessionId);
+        console.info('GetController : SUCCESS : sessionid : ' + controller.sessionId);
     }
 });
 ```
@@ -1016,7 +1252,7 @@ session.getController(function (err, avcontroller) {
 
 getOutputDevice(): Promise\<OutputDeviceInfo>
 
-通过会话获取分布式设备信息。使用Promise异步回调。
+通过会话获取播放设备信息。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1024,15 +1260,23 @@ getOutputDevice(): Promise\<OutputDeviceInfo>
 
 | 类型                                           | 说明                              |
 | ---------------------------------------------- | --------------------------------- |
-| Promise<[OutputDeviceInfo](#outputdeviceinfo)> | Promise对象。返回分布式设备信息。 |
+| Promise<[OutputDeviceInfo](#outputdeviceinfo)> | Promise对象。返回播放设备信息。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.getOutputDevice().then((outputDeviceInfo) => {
-    console.info('getOutputDevice : SUCCESS : isRemote : ' + outputDeviceInfo.isRemote);
+    console.info('GetOutputDevice : SUCCESS : isRemote : ' + outputDeviceInfo.isRemote);
 }).catch((err) => {
-    console.info('getOutputDevice : ERROR : '+ err.message);
+    console.info(`GetOutputDevice BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1040,7 +1284,7 @@ session.getOutputDevice().then((outputDeviceInfo) => {
 
 getOutputDevice(callback: AsyncCallback\<OutputDeviceInfo>): void
 
-通过会话获取分布式设备相关信息。使用callback异步回调。
+通过会话获取播放设备相关信息。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1048,16 +1292,24 @@ getOutputDevice(callback: AsyncCallback\<OutputDeviceInfo>): void
 
 | 参数名   | 类型                                                  | 必填 | 说明                           |
 | -------- | ----------------------------------------------------- | ---- | ------------------------------ |
-| callback | AsyncCallback<[OutputDeviceInfo](#outputdeviceinfo)\> | 是   | 回调函数，返回分布式设备信息。 |
+| callback | AsyncCallback<[OutputDeviceInfo](#outputdeviceinfo)\> | 是   | 回调函数，返回播放设备信息。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.getOutputDevice(function (err, outputDeviceInfo) {
     if (err) {
-        console.info('getOutputDevice : ERROR : '+ err.message);
+        console.info(`GetOutputDevice BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('getOutputDevice : SUCCESS : isRemote : ' + outputDeviceInfo.isRemote);
+        console.info('GetOutputDevice : SUCCESS : isRemote : ' + outputDeviceInfo.isRemote);
     }
 });
 ```
@@ -1066,7 +1318,7 @@ session.getOutputDevice(function (err, outputDeviceInfo) {
 
 activate(): Promise\<void>
 
-激活会话，激活后可正常使用会话。使用Promise异步回调。
+激活会话，激活后可正常使用会话。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1074,15 +1326,23 @@ activate(): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当会话激活成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.activate().then(() => {
-    console.info('activate : SUCCESS ');
+    console.info('Activate : SUCCESS ');
 }).catch((err) => {
-    console.info('activate : ERROR : '+ err.message);
+    console.info(`Activate BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1090,7 +1350,7 @@ session.activate().then(() => {
 
 activate(callback: AsyncCallback\<void>): void
 
-激活会话，激活后可正常使用会话。使用callback异步回调。
+激活会话，激活后可正常使用会话。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1098,16 +1358,24 @@ activate(callback: AsyncCallback\<void>): void
 
 | 参数名   | 类型                 | 必填 | 说明       |
 | -------- | -------------------- | ---- | ---------- |
-| callback | AsyncCallback<void\> | 是   | 回调函数。 |
+| callback | AsyncCallback<void\> | 是   | 回调函数。当会话激活成功，err为undefined，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.activate(function (err) {
     if (err) {
-        console.info('activate : ERROR : '+ err.message);
+        console.info(`Activate BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('activate : SUCCESS ');
+        console.info('Activate : SUCCESS ');
     }
 });
 ```
@@ -1116,9 +1384,7 @@ session.activate(function (err) {
 
 deactivate(): Promise\<void>
 
-禁用当前会话。使用Promise异步回调。
-
-禁用当前会话的功能，可通过[activate](#activate)恢复。
+禁用当前会话的功能，可通过[activate](#activate)恢复。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1126,15 +1392,23 @@ deactivate(): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当禁用会话成功，无返回结果，否则返回错误对象。|
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.deactivate().then(() => {
-    console.info('deactivate : SUCCESS ');
+    console.info('Deactivate : SUCCESS ');
 }).catch((err) => {
-    console.info('deactivate : ERROR : '+ err.message);
+    console.info(`Deactivate BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1142,7 +1416,7 @@ session.deactivate().then(() => {
 
 deactivate(callback: AsyncCallback\<void>): void
 
-禁用当前会话。使用callback异步回调。
+禁用当前会话。结果通过callback异步回调方式返回。
 
 禁用当前会话的功能，可通过[activate](#activate)恢复。
 
@@ -1152,16 +1426,24 @@ deactivate(callback: AsyncCallback\<void>): void
 
 | 参数名   | 类型                 | 必填 | 说明       |
 | -------- | -------------------- | ---- | ---------- |
-| callback | AsyncCallback<void\> | 是   | 回调函数。 |
+| callback | AsyncCallback<void\> | 是   | 回调函数。当禁用会话成功，err为undefined，否则返回错误对象。|
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.deactivate(function (err) {
     if (err) {
-        console.info('deactivate : ERROR : '+ err.message);
+        console.info(`Deactivate BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('deactivate : SUCCESS ');
+        console.info('Deactivate : SUCCESS ');
     }
 });
 ```
@@ -1170,7 +1452,7 @@ session.deactivate(function (err) {
 
 destroy(): Promise\<void>
 
-销毁当前会话，使当前会话完全失效。使用Promise异步回调。
+销毁当前会话，使当前会话完全失效。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1178,15 +1460,23 @@ destroy(): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当会话销毁成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.destroy().then(() => {
-    console.info('destroy : SUCCESS ');
+    console.info('Destroy : SUCCESS ');
 }).catch((err) => {
-    console.info('destroy : ERROR : '+ err.message);
+    console.info(`Destroy BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1194,7 +1484,7 @@ session.destroy().then(() => {
 
 destroy(callback: AsyncCallback\<void>): void
 
-销毁当前会话，使当前会话完全失效。使用callback异步回调。
+销毁当前会话，使当前会话完全失效。结果通过callback异步回调方式返回。
 
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
@@ -1203,16 +1493,24 @@ destroy(callback: AsyncCallback\<void>): void
 
 | 参数名   | 类型                 | 必填 | 说明       |
 | -------- | -------------------- | ---- | ---------- |
-| callback | AsyncCallback<void\> | 是   | 回调函数。 |
+| callback | AsyncCallback<void\> | 是   | 回调函数。当会话销毁成功，err为undefined，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
 ```js
 session.destroy(function (err) {
     if (err) {
-        console.info('destroy : ERROR : '+ err.message);
+        console.info(`Destroy BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('destroy : SUCCESS ');
+        console.info('Destroy : SUCCESS ');
     }
 });
 ```
@@ -1229,8 +1527,17 @@ on(type: 'play'|'pause'|'stop'|'playNext'|'playPrevious'|'fastForward'|'rewind',
 
 | 参数名   | 类型                 | 必填 | 说明                                                         |
 | -------- | -------------------- | ---- | ------------------------------------------------------------ |
-| type     | string               | 是   | 事件回调类型，支持的事件包括：`'play'`，`'pause'`，`'stop'`，` 'playNext'`，` 'playPrevious'`， `'fastForward'`，` 'rewind'`。<br/>当对应的播放命令被发送到会话时，触发该事件。 |
-| callback | callback: () => void | 是   | 回调函数。                                                   |
+| type     | string               | 是   | 事件回调类型，支持的事件包括：`'play'`，`'pause'`，`'stop'`，` 'playNext'`，` 'playPrevious'`， `'fastForward'`，` 'rewind'`。<br/>当对应的播放命令被发送到会话时，触发该事件回调。 |
+| callback | callback: () => void | 是   | 回调函数。当监听事件注册成功，err为undefined，否则为错误对象。                                        |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1271,7 +1578,16 @@ on(type: 'seek', callback: (time: number) => void): void
 | 参数名   | 类型                   | 必填 | 说明                                                         |
 | -------- | ---------------------- | ---- | ------------------------------------------------------------ |
 | type     | string                 | 是   | 事件回调类型，支持事件`'seek'`：当跳转节点命令被发送到会话时，触发该事件。 |
-| callback | (time: number) => void | 是   | 回调函数，参数time是时间节点，单位为毫秒。                   |
+| callback | (time: number) => void | 是   | 回调函数。参数time是时间节点，单位为毫秒。                   |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1294,7 +1610,16 @@ on(type: 'setSpeed', callback: (speed: number) => void): void
 | 参数名   | 类型                    | 必填 | 说明                                                         |
 | -------- | ----------------------- | ---- | ------------------------------------------------------------ |
 | type     | string                  | 是   | 事件回调类型，支持事件`'setSpeed'`：当设置播放速率的命令被发送到会话时，触发该事件。 |
-| callback | (speed: number) => void | 是   | 回调方法，参数speed是播放倍速。                              |
+| callback | (speed: number) => void | 是   | 回调函数。参数speed是播放倍速。                              |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1317,7 +1642,16 @@ on(type: 'setLoopMode', callback: (mode: LoopMode) => void): void
 | 参数名   | 类型                                  | 必填 | 说明                                                         |
 | -------- | ------------------------------------- | ---- | ------------------------------------------------------------ |
 | type     | string                                | 是   | 事件回调类型，支持事件`'setLoopMode'`：当设置循环模式的命令被发送到会话时，触发该事件。 |
-| callback | (mode: [LoopMode](#loopmode)) => void | 是   | 回调方法，参数mode是循环模式。                               |
+| callback | (mode: [LoopMode](#loopmode)) => void | 是   | 回调函数。参数mode是循环模式。                               |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1340,7 +1674,16 @@ on(type: 'toggleFavorite', callback: (assetId: string) => void): void
 | 参数名   | 类型                      | 必填 | 说明                                                         |
 | -------- | ------------------------- | ---- | ------------------------------------------------------------ |
 | type     | string                    | 是   | 事件回调类型，支持事件`'toggleFavorite'`：当是否收藏的命令被发送到会话时，触发该事件。 |
-| callback | (assetId: string) => void | 是   | 回调方法，参数assetId是媒体ID。                              |
+| callback | (assetId: string) => void | 是   | 回调函数。参数assetId是媒体ID。                              |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1354,7 +1697,7 @@ session.on('toggleFavorite', (assetId) => {
 
 on(type: 'handleKeyEvent', callback: (event: KeyEvent) => void): void
 
-设置按键事件的监听事件
+设置按键事件的监听
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1363,7 +1706,16 @@ on(type: 'handleKeyEvent', callback: (event: KeyEvent) => void): void
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
 | type     | string                                                       | 是   | 事件回调类型，支持事件`'handleKeyEvent'`：当按键事件被发送到会话时，触发该事件。 |
-| callback | (event: [KeyEvent](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-keyevent.md)) => void | 是   | 回调方法，参数event是按键事件。                              |
+| callback | (event: [KeyEvent](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-keyevent.md)) => void | 是   | 回调函数。参数event是按键事件。                              |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1377,7 +1729,7 @@ session.on('handleKeyEvent', (event) => {
 
 on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): void
 
-设置分布式设备变化的监听事件。
+设置播放设备变化的监听事件。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1385,8 +1737,17 @@ on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): vo
 
 | 参数名   | 类型                                                    | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------- | ---- | ------------------------------------------------------------ |
-| type     | string                                                  | 是   | 事件回调类型，支持事件`'outputDeviceChange'`：当分布式设备变化时，触发该事件。 |
-| callback | (device: [OutputDeviceInfo](#outputdeviceinfo)) => void | 是   | 回调方法，参数device是设备相关信息。                         |
+| type     | string                                                  | 是   | 事件回调类型，支持事件`'outputDeviceChange'`：当播放设备变化时，触发该事件。 |
+| callback | (device: [OutputDeviceInfo](#outputdeviceinfo)) => void | 是   | 回调函数。参数device是设备相关信息。                         |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1400,7 +1761,7 @@ session.on('outputDeviceChange', (device) => {
 
 off(type: 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward' | 'rewind', callback?: () => void): void
 
-会话相关监听的关闭，关闭后，不再进行相关on回调。
+取消会话相关事件监听，关闭后，不再进行相关事件回调。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1409,7 +1770,16 @@ off(type: 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward
 | 参数名    | 类型                  | 必填 | 说明                                                                                                                         |
 | -------- | -------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------- |
 | type     | string               | 是   | 关闭对应的监听事件，支持的事件包括：`'play'`，` 'pause'`，`'stop'`， `'playNext'`，` 'playPrevious'`， ` 'fastForward'`，` 'rewind'`。 |
-| callback | callback: () => void | 否   | 回调函数。                                                                                                                     |
+| callback | callback: () => void | 否   | 回调函数。当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                            |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1436,7 +1806,16 @@ off(type: 'seek', callback?: (time: number) => void): void
 | 参数名   | 类型                   | 必填 | 说明                                          |
 | -------- | ---------------------- | ---- | ----------------------------------------- |
 | type     | string                 | 是   | 关闭对应的监听事件，支持关闭事件`'seek'`。       |
-| callback | (time: number) => void | 否   | 回调函数，参数time是时间节点，单位为毫秒。        |
+| callback | (time: number) => void | 否   | 回调函数，参数time是时间节点，单位为毫秒。<br>当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。        |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1457,7 +1836,16 @@ off(type: 'setSpeed', callback?: (speed: number) => void): void
 | 参数名   | 类型                    | 必填 | 说明                                           |
 | -------- | ----------------------- | ---- | -------------------------------------------|
 | type     | string                  | 是   | 关闭对应的监听事件，支持关闭事件`'setSpeed'`。    |
-| callback | (speed: number) => void | 否   | 回调方法，参数speed是播放倍速。                 |
+| callback | (speed: number) => void | 否   | 回调函数，参数speed是播放倍速。<br>当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1478,7 +1866,16 @@ off(type: 'setLoopMode', callback?: (mode: LoopMode) => void): void
 | 参数名   | 类型                                  | 必填 | 说明                                              |
 | -------- | ------------------------------------- | ---- | --------------------------------  ------------ |
 | type     | string                                | 是   | 关闭对应的监听事件，支持关闭事件`'setLoopMode'`。    |
-| callback | (mode: [LoopMode](#loopmode)) => void | 否   | 回调方法，参数mode是循环模式。                      |
+| callback | (mode: [LoopMode](#loopmode)) => void | 否   | 回调函数，参数mode是循环模式。<br>当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                      |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1499,7 +1896,16 @@ off(type: 'toggleFavorite', callback?: (assetId: string) => void): void
 | 参数名   | 类型                      | 必填 | 说明                                                         |
 | -------- | ------------------------- | ---- | -------------------------------------------------------- |
 | type     | string                    | 是   | 关闭对应的监听事件，支持关闭事件`'toggleFavorite'`。            |
-| callback | (assetId: string) => void | 否   | 回调方法，参数assetId是媒体ID。                               |
+| callback | (assetId: string) => void | 否   | 回调函数，参数assetId是媒体ID。<br>当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                               |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1511,7 +1917,7 @@ session.off('toggleFavorite');
 
 off(type: 'handleKeyEvent', callback?: (event: KeyEvent) => void): void
 
-取消监听按键事件
+取消监听按键事件。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1520,7 +1926,16 @@ off(type: 'handleKeyEvent', callback?: (event: KeyEvent) => void): void
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
 | type     | string                                                       | 是   | 关闭对应的监听事件，支持关闭事件`'handleKeyEvent'`。             |
-| callback | (event: [KeyEvent](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-keyevent.md)) => void | 否   | 回调方法，参数event是按键事件。                              |
+| callback | (event: [KeyEvent](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-keyevent.md)) => void | 否   | 回调函数，参数event是按键事件。<br>当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                              |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1532,7 +1947,7 @@ session.off('handleKeyEvent');
 
 off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): void
 
-取消监听分布式设备变化的事件。
+取消监听播放设备变化的事件。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1541,7 +1956,16 @@ off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): 
 | 参数名   | 类型                                                    | 必填 | 说明                                                      |
 | -------- | ------------------------------------------------------- | ---- | ------------------------------------------------------ |
 | type     | string                                                  | 是   | 关闭对应的监听事件，支持关闭事件`'outputDeviceChange'`。     |
-| callback | (device: [OutputDeviceInfo](#outputdeviceinfo)) => void | 否   | 回调方法，参数device是设备相关信息。                        |
+| callback | (device: [OutputDeviceInfo](#outputdeviceinfo)) => void | 否   | 回调函数，参数device是设备相关信息。<br>当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                        |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
 
 **示例：**
 
@@ -1553,7 +1977,7 @@ session.off('outputDeviceChange');
 
 ## AVSessionController
 
-调用[avSession.createController](#avsessioncreatecontroller)后，返回会话控制器实例，获得会话ID，然后可对会话进行发送命令，获取元数据，播放状态，按键事件等操作。
+调用[avSession.createController](#avsessioncreatecontroller)后，返回会话控制器实例。控制器可查看会话ID，并可完成对会话发送命令及事件，获取会话元数据，播放状态信息等操作。
 
 ### 属性
 
@@ -1571,7 +1995,7 @@ let sessionId;
 await avSession.createController(session.sessionId).then((controller) => {
     sessionId = controller.sessionId;
 }).catch((err) => {
-    console.info('createController : ERROR : ' + err.message);
+    console.info(`CreateController BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1579,7 +2003,7 @@ await avSession.createController(session.sessionId).then((controller) => {
 
 getAVPlaybackState(): Promise\<AVPlaybackState>
 
-获取当前播放状态相关属性。使用Promise异步回调。
+获取当前会话播放状态相关信息。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1587,14 +2011,23 @@ getAVPlaybackState(): Promise\<AVPlaybackState>
 
 | 类型                                          | 说明                        |
 | --------------------------------------------- | --------------------------- |
-| Promise<[AVPlaybackState](#avplaybackstate)\> | Promise对象。返回播放状态。 |
+| Promise<[AVPlaybackState](#avplaybackstate)\> | Promise对象。返回播放状态对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 ```js
 controller.getAVPlaybackState().then((playbackState) => {
-    console.info('getAVPlaybackState : SUCCESS : state : ' + playbackState.state);
+    console.info('GetAVPlaybackState : SUCCESS : state : ' + playbackState.state);
 }).catch((err) => {
-    console.info('getAVPlaybackState : ERROR : ' + err.message);
+    console.info(`GetAVPlaybackState BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1602,7 +2035,7 @@ controller.getAVPlaybackState().then((playbackState) => {
 
 getAVPlaybackState(callback: AsyncCallback\<AVPlaybackState>): void
 
-获取当前播放状态相关属性。使用callback异步回调。
+获取当前播放状态相关信息。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1610,15 +2043,24 @@ getAVPlaybackState(callback: AsyncCallback\<AVPlaybackState>): void
 
 | 参数名   | 类型                                                | 必填 | 说明                         |
 | -------- | --------------------------------------------------- | ---- | ---------------------------- |
-| callback | AsyncCallback<[AVPlaybackState](#avplaybackstate)\> | 是   | 回调函数，返回当前播放状态。 |
+| callback | AsyncCallback<[AVPlaybackState](#avplaybackstate)\> | 是   | 回调函数，返回当前播放状态对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 ```js
 controller.getAVPlaybackState(function (err, playbackState) {
     if (err) {
-        console.info('getAVPlaybackState : ERROR : ' + err.message);
+        console.info(`GetAVPlaybackState BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('getAVPlaybackState : SUCCESS : state : ' + playbackState.state);
+        console.info('GetAVPlaybackState : SUCCESS : state : ' + playbackState.state);
     }
 });
 ```
@@ -1627,7 +2069,7 @@ controller.getAVPlaybackState(function (err, playbackState) {
 
 getAVMetadata(): Promise\<AVMetadata>
 
-获取会话元数据。使用Promise异步回调。
+获取会话元数据。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1637,12 +2079,21 @@ getAVMetadata(): Promise\<AVMetadata>
 | ----------------------------------- | ----------------------------- |
 | Promise<[AVMetadata](#avmetadata)\> | Promise对象，返回会话元数据。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+
 **示例：**
 ```js
 controller.getAVMetadata().then((metadata) => {
-    console.info('getAVMetadata : SUCCESS : assetId : ' + metadata.assetId);
+    console.info('GetAVMetadata : SUCCESS : assetId : ' + metadata.assetId);
 }).catch((err) => {
-    console.info('getAVMetadata : ERROR : ' + err.message);
+    console.info(`GetAVMetadata BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1650,7 +2101,7 @@ controller.getAVMetadata().then((metadata) => {
 
 getAVMetadata(callback: AsyncCallback\<AVMetadata>): void
 
-获取会话元数据。使用callback异步回调。
+获取会话元数据。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1660,13 +2111,22 @@ getAVMetadata(callback: AsyncCallback\<AVMetadata>): void
 | -------- | ----------------------------------------- | ---- | -------------------------- |
 | callback | AsyncCallback<[AVMetadata](#avmetadata)\> | 是   | 回调函数，返回会话元数据。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+
 **示例：**
 ```js
 controller.getAVMetadata(function (err, metadata) {
     if (err) {
-        console.info('getAVMetadata : ERROR : ' + err.message);
+        console.info(`GetAVMetadata BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('getAVMetadata : SUCCESS : assetId : ' + metadata.assetId);
+        console.info('GetAVMetadata : SUCCESS : assetId : ' + metadata.assetId);
     }
 });
 ```
@@ -1675,7 +2135,7 @@ controller.getAVMetadata(function (err, metadata) {
 
 getOutputDevice(): Promise\<OutputDeviceInfo>
 
-获取分布式设备信息。使用Promise异步回调。
+获取播放设备信息。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1683,14 +2143,22 @@ getOutputDevice(): Promise\<OutputDeviceInfo>
 
 | 类型                                            | 说明                              |
 | ----------------------------------------------- | --------------------------------- |
-| Promise<[OutputDeviceInfo](#outputdeviceinfo)\> | Promise对象，返回分布式设备信息。 |
+| Promise<[OutputDeviceInfo](#outputdeviceinfo)\> | Promise对象，返回播放设备信息。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 ```js
 controller.getOutputDevice().then((deviceInfo) => {
-    console.info('getOutputDevice : SUCCESS : isRemote : ' + deviceInfo.isRemote);
+    console.info('GetOutputDevice : SUCCESS : isRemote : ' + deviceInfo.isRemote);
 }).catch((err) => {
-    console.info('getOutputDevice : ERROR : ' + err.message);
+    console.info(`GetOutputDevice BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1698,7 +2166,7 @@ controller.getOutputDevice().then((deviceInfo) => {
 
 getOutputDevice(callback: AsyncCallback\<OutputDeviceInfo>): void
 
-获取分布式设备信息。使用callback异步回调。
+获取播放设备信息。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1706,16 +2174,24 @@ getOutputDevice(callback: AsyncCallback\<OutputDeviceInfo>): void
 
 | 参数名   | 类型                                                  | 必填 | 说明                           |
 | -------- | ----------------------------------------------------- | ---- | ------------------------------ |
-| callback | AsyncCallback<[OutputDeviceInfo](#outputdeviceinfo)\> | 是   | 回调函数，返回分布式设备信息。 |
+| callback | AsyncCallback<[OutputDeviceInfo](#outputdeviceinfo)\> | 是   | 回调函数，返回播放设备信息。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 
 ```js
 controller.getOutputDevice(function (err, deviceInfo) {
     if (err) {
-        console.info('getOutputDevice : ERROR : ' + err.message);
+        console.info(`GetOutputDevice BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('getOutputDevice : SUCCESS : isRemote : ' + deviceInfo.isRemote);
+        console.info('GetOutputDevice : SUCCESS : isRemote : ' + deviceInfo.isRemote);
     }
 });
 ```
@@ -1724,7 +2200,7 @@ controller.getOutputDevice(function (err, deviceInfo) {
 
 sendAVKeyEvent(event: KeyEvent): Promise\<void>
 
-发送按键事件到会话。使用Promise异步回调。
+发送按键事件到控制器对应的会话。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1734,11 +2210,23 @@ sendAVKeyEvent(event: KeyEvent): Promise\<void>
 | ------ | ------------------------------------------------------------ | ---- | ---------- |
 | event  | [KeyEvent](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-keyevent.md) | 是   | 按键事件。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+| 6600105  | 无效命令 |
+| 6600106  | 会话未激活 |
+
 **返回值：**
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当事件发送成功，无返回结果，否则返回错误对象。 |
 
 **示例：**
 
@@ -1747,9 +2235,9 @@ let keyItem = {code:0x49, pressedTime:123456789, deviceId:0};
 let event = {action:2, key:keyItem, keys:[keyItem]};
 
 controller.sendAVKeyEvent(event).then(() => {
-    console.info('sendAVKeyEvent Successfully');
+    console.info('SendAVKeyEvent Successfully');
 }).catch((err) => {
-    console.info('sendAVKeyEvent : ERROR : '+ err.message);
+    console.info(`SendAVKeyEvent BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1757,7 +2245,7 @@ controller.sendAVKeyEvent(event).then(() => {
 
 sendAVKeyEvent(event: KeyEvent, callback: AsyncCallback\<void>): void
 
-发送按键事件到会话。使用callback异步回调。
+发送按键事件到会话。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1766,7 +2254,19 @@ sendAVKeyEvent(event: KeyEvent, callback: AsyncCallback\<void>): void
 | 参数名   | 类型                                                         | 必填 | 说明       |
 | -------- | ------------------------------------------------------------ | ---- | ---------- |
 | event    | [KeyEvent](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-keyevent.md) | 是   | 按键事件。 |
-| callback | AsyncCallback<void\>                                         | 是   | 回调方法。 |
+| callback | AsyncCallback<void\>                                         | 是   | 回调函数。当事件发送成功，err为undefined，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+| 6600105  | 无效命令 |
+| 6600106  | 会话未激活 |
 
 **示例：**
 
@@ -1776,9 +2276,9 @@ let event = {action:2, key:keyItem, keys:[keyItem]};
 
 controller.sendAVKeyEvent(event, function (err) {
     if (err) {
-        console.info('sendAVKeyEvent : ERROR : '+ err.message);
+        console.info(`SendAVKeyEvent BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('sendAVKeyEvent Successfully');
+        console.info('SendAVKeyEvent Successfully');
     }
 });
 ```
@@ -1787,7 +2287,7 @@ controller.sendAVKeyEvent(event, function (err) {
 
 getLaunchAbility(): Promise\<WantAgent>
 
-获取应用在会话中保存的WantAgent对象。使用Promise异步回调。
+获取应用在会话中保存的WantAgent对象。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1797,15 +2297,24 @@ getLaunchAbility(): Promise\<WantAgent>
 | ------------------------------------------- | ------------------------------------------------------------ |
 | Promise<[WantAgent](js-apis-wantAgent.md)\> | Promise对象，返回在[setLaunchAbility](#setlaunchability)保存的对象，包括应用的相关属性信息，如bundleName，abilityName，deviceId等。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+
 **示例：**
 
 ```js
 import wantAgent from '@ohos.wantAgent';
 
 controller.getLaunchAbility().then((agent) => {
-    console.info('getLaunchAbility : SUCCESS : wantAgent : ' + agent);
+    console.info('GetLaunchAbility : SUCCESS : wantAgent : ' + agent);
 }).catch((err) => {
-    console.info('getLaunchAbility : ERROR : '+ err.message);
+    console.info(`GetLaunchAbility BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1813,7 +2322,7 @@ controller.getLaunchAbility().then((agent) => {
 
 getLaunchAbility(callback: AsyncCallback\<WantAgent>): void
 
-获取应用在会话中保存的WantAgent对象。使用callback异步回调。
+获取应用在会话中保存的WantAgent对象。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1823,6 +2332,15 @@ getLaunchAbility(callback: AsyncCallback\<WantAgent>): void
 | -------- | ------------------------------------------------- | ---- | ------------------------------------------------------------ |
 | callback | AsyncCallback<[WantAgent](js-apis-wantAgent.md)\> | 是   | 回调函数。返回在[setLaunchAbility](#setlaunchability)保存的对象，包括应用的相关属性信息，如bundleName，abilityName，deviceId等。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+
 **示例：**
 
 ```js
@@ -1830,9 +2348,9 @@ import wantAgent from '@ohos.wantAgent';
 
 controller.getLaunchAbility(function (err, agent) {
     if (err) {
-        console.info('getLaunchAbility : ERROR : '+ err.message);
+        console.info(`GetLaunchAbility BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('getLaunchAbility : SUCCESS : wantAgent : ' + agent);
+        console.info('GetLaunchAbility : SUCCESS : wantAgent : ' + agent);
     }
 });
 ```
@@ -1851,6 +2369,14 @@ getRealPlaybackPositionSync(): number
 | ------ | ------------------ |
 | number | 时间节点，毫秒数。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
+
 **示例：**
 
 ```js
@@ -1861,7 +2387,7 @@ let time = controller.getRealPlaybackPositionSync();
 
 isActive(): Promise\<boolean>
 
-获取会话是否被激活。使用Promise异步回调。
+获取会话是否被激活。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1871,13 +2397,22 @@ isActive(): Promise\<boolean>
 | ----------------- | ------------------------------------------------------------ |
 | Promise<boolean\> | Promise对象，返回会话是否为激活状态，true表示被激活，false表示禁用。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+
 **示例：**
 
 ```js
 controller.isActive().then((isActive) => {
-    console.info('isActive : SUCCESS : isactive : ' + isActive);
+    console.info('IsActive : SUCCESS : isactive : ' + isActive);
 }).catch((err) => {
-    console.info('isActive : ERROR : '+ err.message);
+    console.info(`IsActive BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1885,7 +2420,7 @@ controller.isActive().then((isActive) => {
 
 isActive(callback: AsyncCallback\<boolean>): void
 
-获取会话是否被激活。使用callback异步回调。
+判断会话是否被激活。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1895,14 +2430,23 @@ isActive(callback: AsyncCallback\<boolean>): void
 | -------- | ----------------------- | ---- | ------------------------------------------------------------ |
 | callback | AsyncCallback<boolean\> | 是   | 回调函数，返回会话是否为激活状态，true表示被激活，false表示禁用。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+
 **示例：**
 
 ```js
 controller.isActive(function (err, isActive) {
     if (err) {
-        console.info('isActive : ERROR : '+ err.message);
+        console.info(`IsActive BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('isActive : SUCCESS : isactive : ' + isActive);
+        console.info('IsActive : SUCCESS : isactive : ' + isActive);
     }
 });
 ```
@@ -1911,7 +2455,7 @@ controller.isActive(function (err, isActive) {
 
 destroy(): Promise\<void>
 
-销毁当前控制器，销毁后当前控制器不可再用。使用Promise异步回调。
+销毁当前控制器，销毁后当前控制器不可再用。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1919,15 +2463,23 @@ destroy(): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当控制器销毁成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 
 ```js
 controller.destroy().then(() => {
-    console.info('destroy : SUCCESS ');
+    console.info('Destroy : SUCCESS ');
 }).catch((err) => {
-    console.info('destroy : ERROR : '+ err.message);
+    console.info(`Destroy BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1935,7 +2487,7 @@ controller.destroy().then(() => {
 
 destroy(callback: AsyncCallback\<void>): void
 
-销毁当前控制器，销毁后当前控制器不可再用。使用callback异步回调。
+销毁当前控制器，销毁后当前控制器不可再用。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1943,16 +2495,24 @@ destroy(callback: AsyncCallback\<void>): void
 
 | 参数名   | 类型                 | 必填 | 说明       |
 | -------- | -------------------- | ---- | ---------- |
-| callback | AsyncCallback<void\> | 是   | 回调函数。 |
+| callback | AsyncCallback<void\> | 是   | 回调函数。当控制器销毁成功，err为undefined，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 
 ```js
 controller.destroy(function (err) {
     if (err) {
-        console.info('destroy : ERROR : '+ err.message);
+        console.info(`Destroy BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('destroy : SUCCESS ');
+        console.info('Destroy : SUCCESS ');
     }
 });
 ```
@@ -1961,7 +2521,7 @@ controller.destroy(function (err) {
 
 getValidCommands(): Promise\<Array\<AVControlCommandType>>
 
-获取有效命令。使用Promise异步回调。
+获取会话支持的有效命令。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1971,13 +2531,22 @@ getValidCommands(): Promise\<Array\<AVControlCommandType>>
 | ------------------------------------------------------------ | --------------------------------- |
 | Promise<Array<[AVControlCommandType](#avcontrolcommandtype)\>\> | Promise对象。返回有效命令的集合。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+
 **示例：**
 
 ```js
 controller.getValidCommands.then((validCommands) => {
-    console.info('getValidCommands : SUCCESS : size : ' + validCommands.length);
+    console.info('GetValidCommands : SUCCESS : size : ' + validCommands.length);
 }).catch((err) => {
-    console.info('getValidCommands : ERROR : '+ err.message);
+    console.info(`GetValidCommands BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -1985,7 +2554,7 @@ controller.getValidCommands.then((validCommands) => {
 
 getValidCommands(callback: AsyncCallback\<Array\<AVControlCommandType>>): void
 
-获取有效命令。使用callback异步回调。
+获取会话支持的有效命令。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -1995,14 +2564,23 @@ getValidCommands(callback: AsyncCallback\<Array\<AVControlCommandType>>): void
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------ |
 | callback | AsyncCallback\<Array\<[AVControlCommandType](#avcontrolcommandtype)\>\> | 是   | 回调函数，返回有效命令的集合。 |
 
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+
 **示例：**
 
 ```js
 controller.getValidCommands(function (err, validCommands) {
     if (err) {
-        console.info('getValidCommands : ERROR : '+ err.message);
+        console.info(`GetValidCommands BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('getValidCommands : SUCCESS : size : ' + validCommands.length);
+        console.info('GetValidCommands : SUCCESS : size : ' + validCommands.length);
     }
 });
 ```
@@ -2011,7 +2589,7 @@ controller.getValidCommands(function (err, validCommands) {
 
 sendControlCommand(command: AVControlCommand): Promise\<void>
 
-通过会话控制器发送命令到会话。使用Promise异步回调。
+通过控制器发送命令到其对应的会话。结果通过Promise异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -2025,7 +2603,20 @@ sendControlCommand(command: AVControlCommand): Promise\<void>
 
 | 类型           | 说明                          |
 | -------------- | ----------------------------- |
-| Promise<void\> | Promise回调表示成功还是失败。 |
+| Promise<void\> | Promise对象。当命令发送成功，无返回结果，否则返回错误对象。 |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+| 6600105  | 无效命令 |
+| 6600106  | 会话未激活 |
+| 6600107  | 消息过载 |
 
 **示例：**
 
@@ -2042,9 +2633,9 @@ let avCommand = {command:'play'};
 // let avCommand = {command:'setLoopMode', parameter:avSession.LoopMode.LOOP_MODE_SINGLE};
 // let avCommand = {command:'toggleFavorite', parameter:"false"};
 controller.sendControlCommand(avCommand).then(() => {
-    console.info('sendControlCommand successfully');
+    console.info('SendControlCommand successfully');
 }).catch((err) => {
-    console.info('sendControlCommand : ERROR : '+ err.message);
+    console.info(`SendControlCommand BusinessError: code: ${err.code}, message: ${err.message}`);
 });
 ```
 
@@ -2052,7 +2643,7 @@ controller.sendControlCommand(avCommand).then(() => {
 
 sendControlCommand(command: AVControlCommand, callback: AsyncCallback\<void>): void
 
-异步通过会话控制器发送命令到会话。使用callback异步回调。
+通过会话控制器发送命令到其对应的会话。结果通过callback异步回调方式返回。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -2061,7 +2652,20 @@ sendControlCommand(command: AVControlCommand, callback: AsyncCallback\<void>): v
 | 参数名   | 类型                                  | 必填 | 说明                           |
 | -------- | ------------------------------------- | ---- | ------------------------------ |
 | command  | [AVControlCommand](#avcontrolcommand) | 是   | 会话的相关命令和命令相关参数。 |
-| callback | AsyncCallback<void\>                  | 是   | 回调函数。                     |
+| callback | AsyncCallback<void\>                  | 是   | 回调函数。当命令发送成功，err为undefined，否则返回错误对象。                     |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600102  | 会话不存在 |
+| 6600103  | 控制器不存在 |
+| 6600105  | 无效命令 |
+| 6600106  | 会话未激活 |
+| 6600107  | 消息过载 |
 
 **示例：**
 
@@ -2079,9 +2683,9 @@ let avCommand = {command:'play'};
 // let avCommand = {command:'toggleFavorite', parameter:"false"};
 controller.sendControlCommand(avCommand, function (err) {
     if (err) {
-        console.info('sendControlCommand : ERROR : '+ err.message);
+        console.info(`SendControlCommand BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('sendControlCommand successfully');
+        console.info('SendControlCommand successfully');
     }
 });
 ```
@@ -2099,8 +2703,17 @@ on(type: 'metadataChange', filter: Array\<keyof AVMetadata> | 'all', callback: (
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
 | type     | string                                                       | 是   | 事件回调类型，支持事件`'metadataChange'`：当元数据变化时，触发该事件。 |
-| filter   | Array\<keyof&nbsp;[AVMetadata](#avmetadata)\>&nbsp;&#124;&nbsp;'all' | 是   | 'all' 表示关注元数据所有字段变化；Array<keyof&nbsp;[AVMetadata](#avmetadata)\> 表示关注Array中的字段。 |
+| filter   | Array\<keyof&nbsp;[AVMetadata](#avmetadata)\>&nbsp;&#124;&nbsp;'all' | 是   | 'all' 表示关注元数据所有字段变化；Array<keyof&nbsp;[AVMetadata](#avmetadata)\> 表示关注Array中的字段变化。 |
 | callback | (data: [AVMetadata](#avmetadata)) => void                    | 是   | 回调函数，参数data是变化后的元数据。                         |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 
@@ -2128,8 +2741,17 @@ on(type: 'playbackStateChange', filter: Array\<keyof AVPlaybackState> | 'all', c
 | 参数名   | 类型                                                         | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
 | type     | string                                                       | 是   | 事件回调类型，支持事件`'playbackStateChange'`：当播放状态变化时，触发该事件。 |
-| filter   | Array\<keyof&nbsp;[AVPlaybackState](#avplaybackstate)\>&nbsp;&#124;&nbsp;'all' | 是   | 'all' 表示关注播放状态所有字段变化；Array<keyof&nbsp;[AVPlaybackState](#avplaybackstate)\> 表示关注set中的字段。 |
+| filter   | Array\<keyof&nbsp;[AVPlaybackState](#avplaybackstate)\>&nbsp;&#124;&nbsp;'all' | 是   | 'all' 表示关注播放状态所有字段变化；Array<keyof&nbsp;[AVPlaybackState](#avplaybackstate)\> 表示关注Array中的字段变化。 |
 | callback | (state: [AVPlaybackState](#avplaybackstate)) => void         | 是   | 回调函数，参数state是变化后的播放状态。                      |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 
@@ -2148,7 +2770,7 @@ controller.on('playbackStateChange', playbackFilter, (playbackState) => {
 
 on(type: 'sessionDestroy', callback: () => void)
 
-会话的销毁的监听事件。
+会话销毁的监听事件。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -2157,7 +2779,16 @@ on(type: 'sessionDestroy', callback: () => void)
 | 参数名   | 类型       | 必填 | 说明                                                         |
 | -------- | ---------- | ---- | ------------------------------------------------------------ |
 | type     | string     | 是   | 事件回调类型，支持事件`'sessionDestroy'`：当检测到会话销毁时，触发该事件）。 |
-| callback | () => void | 是   | 回调函数。                                                   |
+| callback | () => void | 是   | 回调函数。当监听事件注册成功，err为undefined，否则为错误对象。                  |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 
@@ -2180,7 +2811,16 @@ on(type: 'activeStateChange', callback: (isActive: boolean) => void)
 | 参数名   | 类型                        | 必填 | 说明                                                         |
 | -------- | --------------------------- | ---- | ------------------------------------------------------------ |
 | type     | string                      | 是   | 事件回调类型，支持事件`'activeStateChange'`：当检测到会话的激活状态发生改变时，触发该事件。 |
-| callback | (isActive: boolean) => void | 是   | 回调函数。参数isActive表示会话是否被激活。                   |
+| callback | (isActive: boolean) => void | 是   | 回调函数。参数isActive表示会话是否被激活。true表示被激活，false表示禁用。                   |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 
@@ -2194,7 +2834,7 @@ controller.on('activeStateChange', (isActive) => {
 
 on(type: 'validCommandChange', callback: (commands: Array\<AVControlCommandType>) => void)
 
-会话的有效命令监听事件。
+会话支持的有效命令变化监听事件。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -2204,6 +2844,15 @@ on(type: 'validCommandChange', callback: (commands: Array\<AVControlCommandType>
 | -------- | ------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
 | type     | string                                                       | 是   | 事件回调类型，支持事件`'activeStateChange'`：当检测到会话的合法命令发生改变时，触发该事件。 |
 | callback | (commands: Array<[AVControlCommandType](#avcontrolcommandtype)\>) => void | 是   | 回调函数。参数commands是有效命令的集合。                     |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 
@@ -2218,7 +2867,7 @@ controller.on('validCommandChange', (validCommands) => {
 
 on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): void
 
-设置分布式设备变化的监听事件。
+设置播放设备变化的监听事件。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
@@ -2226,8 +2875,17 @@ on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): vo
 
 | 参数名   | 类型                                                    | 必填 | 说明                                                         |
 | -------- | ------------------------------------------------------- | ---- | ------------------------------------------------------------ |
-| type     | string                                                  | 是   | 事件回调类型，支持事件为`'outputDeviceChange'`：当分布式设备变化时，触发该事件）。 |
+| type     | string                                                  | 是   | 事件回调类型，支持事件为`'outputDeviceChange'`：当播放设备变化时，触发该事件）。 |
 | callback | (device: [OutputDeviceInfo](#outputdeviceinfo)) => void | 是   | 回调函数，参数device是设备相关信息。                         |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
+| 6600103  | 控制器不存在 |
 
 **示例：**
 
@@ -2249,8 +2907,16 @@ off(type: 'metadataChange', callback?: (data: AVMetadata) => void)
 
 | 参数名   | 类型                                               | 必填 | 说明                                                    |
 | -------- | ------------------------------------------------ | ---- | ------------------------------------------------------ |
-| type     | string                                           | 是   | 关闭对应的监听事件，支持关闭事件`'metadataChange'`。         |
-| callback | (data: [AVMetadata](#avmetadata)) => void        | 否   | 回调函数，参数data是变化后的元数据。                         |
+| type     | string                                           | 是   | 取消对应的监听事件，支持事件`'metadataChange'`。         |
+| callback | (data: [AVMetadata](#avmetadata)) => void        | 否   | 回调函数，参数data是变化后的元数据。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                         |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -2270,8 +2936,16 @@ off(type: 'playbackStateChange', callback?: (state: AVPlaybackState) => void)
 
 | 参数名   | 类型                                                         | 必填 | 说明                                                     |
 | -------- | ------------------------------------------------------------ | ---- | ----------------------------------------------------- |
-| type     | string                                                       | 是   | 关闭对应的监听事件，支持关闭事件`'playbackStateChange'`。    |
-| callback | (state: [AVPlaybackState](#avplaybackstate)) => void         | 否   | 回调函数，参数state是变化后的播放状态。                      |
+| type     | string                                                       | 是   | 取消对应的监听事件，支持事件`'playbackStateChange'`。    |
+| callback | (state: [AVPlaybackState](#avplaybackstate)) => void         | 否   | 回调函数，参数state是变化后的播放状态。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                      |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -2291,8 +2965,16 @@ off(type: 'sessionDestroy', callback?: () => void)
 
 | 参数名   | 类型       | 必填 | 说明                                                      |
 | -------- | ---------- | ---- | ----------------------------------------------------- |
-| type     | string     | 是   | 关闭对应的监听事件，支持关闭事件`'sessionDestroy'`。         |
-| callback | () => void | 否   | 回调函数。                                               |
+| type     | string     | 是   | 取消对应的监听事件，支持事件`'sessionDestroy'`。         |
+| callback | () => void | 否   | 回调函数。当监听事件取消成功，err为undefined，否则返回错误对象。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                                               |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -2312,8 +2994,16 @@ off(type: 'activeStateChange', callback?: (isActive: boolean) => void)
 
 | 参数名   | 类型                        | 必填 | 说明                                                      |
 | -------- | --------------------------- | ---- | ----------------------------------------------------- |
-| type     | string                      | 是   | 关闭对应的监听事件，支持关闭事件`'activeStateChange'`。      |
-| callback | (isActive: boolean) => void | 否   | 回调函数。参数isActive表示会话是否被激活。                   |
+| type     | string                      | 是   | 取消对应的监听事件，支持事件`'activeStateChange'`。      |
+| callback | (isActive: boolean) => void | 否   | 回调函数。参数isActive表示会话是否被激活。true表示被激活，false表示禁用。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                   |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -2333,8 +3023,16 @@ off(type: 'validCommandChange', callback?: (commands: Array\<AVControlCommandTyp
 
 | 参数名   | 类型                                                         | 必填 | 说明                                                        |
 | -------- | ------------------------------------------------------------ | ---- | -------------------------------------------------------- |
-| type     | string                                                       | 是   | 关闭对应的监听事件，支持关闭事件`'activeStateChange'`。         |
-| callback | (commands: Array<[AVControlCommandType](#avcontrolcommandtype)\>) => void | 否   | 回调函数。参数commands是有效命令的集合。          |
+| type     | string                                                       | 是   | 取消对应的监听事件，支持事件`'activeStateChange'`。         |
+| callback | (commands: Array<[AVControlCommandType](#avcontrolcommandtype)\>) => void | 否   | 回调函数。参数commands是有效命令的集合。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。          |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -2354,8 +3052,16 @@ off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): 
 
 | 参数名   | 类型                                                    | 必填 | 说明                                                      |
 | -------- | ------------------------------------------------------- | ---- | ------------------------------------------------------ |
-| type     | string                                                  | 是   | 关闭对应的监听事件，支持关闭事件`'outputDeviceChange'`。      |
-| callback | (device: [OutputDeviceInfo](#outputdeviceinfo)) => void | 否   | 回调函数，参数device是设备相关信息。                         |
+| type     | string                                                  | 是   | 取消对应的监听事件，支持事件`'outputDeviceChange'`。      |
+| callback | (device: [OutputDeviceInfo](#outputdeviceinfo)) => void | 否   | 回调函数，参数device是设备相关信息。<br>该参数为可选参数，若不填写该参数，则认为取消所有相关会话的事件监听。                         |
+
+**错误码：**
+以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
+
+| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| -------- | ---------------------------------------- |
+| 401  | 参数检查失败 |
+| 6600101  | 服务异常 |
 
 **示例：**
 
@@ -2490,15 +3196,15 @@ controller.off('outputDeviceChange');
 
 ## OutputDeviceInfo
 
-分布式设备的相关信息。
+播放设备的相关信息。
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
 | 名称       | 类型           | 必填 | 说明                   |
 | ---------- | -------------- | ---- | ---------------------- |
 | isRemote   | boolean        | 是   | 设备是否连接。         |
-| audioDeviceId   | Array<number\> | 是   | 分布式设备的ID集合。   |
-| deviceName | Array<string\> | 是   | 分布式设备的名称集合。 |
+| audioDeviceId   | Array<number\> | 是   | 播放设备的ID集合。   |
+| deviceName | Array<string\> | 是   | 播放设备的名称集合。 |
 
 ## PlaybackState
 
@@ -2541,7 +3247,7 @@ controller.off('outputDeviceChange');
 | ERR_CODE_SERVICE_EXCEPTION     | 6600101 | 服务异常           |
 | ERR_CODE_SESSION_NOT_EXIST     | 6600102 | 会话不存在         |
 | ERR_CODE_CONTROLLER_NOT_EXIST  | 6600103 | 控制器不存在       |
-| ERR_CODE_REMOTE_CONNECTION_ERR | 6600104 | 分布式设备连接失败 |
-| ERR_CODE_COMMAND_INVALID       | 6600105 | 命令非法           |
+| ERR_CODE_REMOTE_CONNECTION_ERR | 6600104 | 远端设备连接失败 |
+| ERR_CODE_COMMAND_INVALID       | 6600105 | 无效命令           |
 | ERR_CODE_SESSION_INACTIVE      | 6600106 | 会话未激活        |
-| ERR_CODE_MESSAGE_OVERLOAD      | 6600107 | 命令或事件过载     |
+| ERR_CODE_MESSAGE_OVERLOAD      | 6600107 | 消息过载     |
