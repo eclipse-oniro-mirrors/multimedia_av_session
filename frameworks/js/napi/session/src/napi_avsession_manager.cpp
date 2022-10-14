@@ -41,6 +41,27 @@ std::shared_ptr<NapiSessionListener> NapiAVSessionManager::listener_;
 std::shared_ptr<NapiAsyncCallback> NapiAVSessionManager::asyncCallback_;
 std::list<napi_ref> NapiAVSessionManager::serviceDiedCallbacks_;
 
+std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
+    {AVSESSION_ERROR, 6600101},
+    {ERR_NO_MEMORY, 6600101},
+    {ERR_SERVICE_NOT_EXIST, 6600101},
+    {ERR_SESSION_LISTENER_EXIST, 6600101},
+    {ERR_MARSHALLING, 6600101},
+    {ERR_UNMARSHALLING, 6600101},
+    {ERR_IPC_SEND_REQUEST, 6600101},
+    {ERR_CONTROLLER_NOT_EXIST, 6600101},
+    {ERR_START_ABILITY_IS_RUNNING, 6600101},
+    {ERR_ABILITY_NOT_AVAILABLE, 6600101},
+    {ERR_START_ABILITY_TIMEOUT, 6600101},
+    {ERR_SESSION_NOT_EXIST, 6600102},
+    {ERR_CONTROLLER_NOT_EXIST, 6600103},
+    {ERR_RPC_SEND_REQUEST, 6600104},
+    {ERR_COMMAND_NOT_SUPPORT, 6600105},
+    {ERR_SESSION_DEACTIVE, 6600106},
+    {ERR_COMMAND_SEND_EXCEED_MAX, 6600107},
+    {ERR_NO_PERMISSION, 201},
+    {ERR_INVALID_PARAM, 401},
+};
 napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor descriptors[] = {
@@ -77,16 +98,21 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
 
     auto inputParser = [env, context](size_t argc, napi_value *argv) {
         // require 3 arguments <context> <tag> <type>
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THERE, "invalid arguments");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THERE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->elementName_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid context");
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid context",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->tag_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->tag_.empty(), "invalid tag");
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->tag_.empty(), "invalid tag",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         std::string typeString;
         context->status = NapiUtils::GetValue(env, argv[ARGV_THIRD], typeString);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !typeString.empty(), "invalid type");
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !typeString.empty(), "invalid type",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->type_ = NapiUtils::ConvertSessionType(typeString);
-        CHECK_ARGS_RETURN_VOID(context, context->type_ >= 0, "wrong session type");
+        CHECK_ARGS_RETURN_VOID(context, context->type_ >= 0, "wrong session type",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = napi_ok;
     };
     context->GetCbInfo(env, info, inputParser);
@@ -96,13 +122,15 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
                                                                           context->elementName_);
         if (context->session_ == nullptr) {
             context->status = napi_generic_failure;
-            context->error = "native create session failed";
+            context->errMessage = "CreateAVSession failed : native create session failed";
+            context->errCode = NapiAVSessionManager::errcode_[AVSESSION_ERROR];
         }
     };
 
     auto complete = [context](napi_value &output) {
         context->status = NapiAVSession::NewInstance(context->env, context->session_, output);
-        CHECK_STATUS_RETURN_VOID(context, "create new javascript object failed");
+        CHECK_STATUS_RETURN_VOID(context, "create new javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "CreateAVSession", executor, complete);
@@ -119,17 +147,20 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(context->descriptors_);
         if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetAllSessionDescriptors failed : native no permission";
+            } else {
+                context->errMessage = "GetAllSessionDescriptors failed : native server exception";
+            }
             context->status = napi_generic_failure;
-            context->error = "native GetAllSessionDescriptors failed";
-        }
-        if (ret == ERR_NO_PERMISSION) {
-            context->error = "native GetAllSessionDescriptors no permission";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
 
     auto complete = [env, context](napi_value &output) {
         context->status = NapiUtils::SetValue(env, context->descriptors_, output);
-        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetAllSessionDescriptors", executor, complete);
@@ -144,10 +175,11 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionId_);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (!context->sessionId_.empty()),
-                               "invalid sessionId");
+                               "invalid sessionId",NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_CREATE_CONTROLLER_TASK_ID;
@@ -155,17 +187,24 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().CreateController(context->sessionId_, context->controller_);
         if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetAllSessionDescriptors failed : native no permission";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "GetAllSessionDescriptors failed : native invalid parameters";
+            } else if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetAllSessionDescriptors failed : native session not exist";
+            } else {
+                context->errMessage = "GetAllSessionDescriptors failed : native server exception";
+            }
             context->status = napi_generic_failure;
-            context->error = "native create controller failed";
-        }
-        if (ret == ERR_NO_PERMISSION) {
-            context->error = "native create controller no permission";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
 
     auto complete = [env, context](napi_value &output) {
         context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);
-        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed");
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
 
     return NapiAsyncWork::Enqueue(env, context, "CreateController", executor, complete);
@@ -181,26 +220,28 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
 
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_string || type == napi_object),
-                               "invalid type invalid");
+                               "invalid type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         if (type == napi_string) {
             std::string flag;
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], flag);
-            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (flag == "all"), "invalid argument");
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (flag == "all"),
+                                   "invalid argument", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             context->isAll_ = true;
         }
         if (type == napi_object) {
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionToken_);
             CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (!context->sessionToken_.sessionId.empty()),
-                                   "invalid session token");
+                                   "invalid session token", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         }
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->audioDeviceDescriptors_);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->audioDeviceDescriptors_.size() > 0),
-                               "invalid AudioDeviceDescriptor");
+                               "invalid AudioDeviceDescriptor", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_CAST_AUDIO_TASK_ID;
@@ -213,8 +254,17 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
             ret = AVSessionManager::GetInstance().CastAudio(context->sessionToken_, context->audioDeviceDescriptors_);
         }
         if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "CastAudio failed : native no permission";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "CastAudio failed : native invalid parameters";
+            } else if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "CastAudio failed : native session not exist";
+            } else {
+                context->errMessage = "CastAudio failed : native server exception";
+            }
             context->status = napi_generic_failure;
-            context->error = "CastAudio failed";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
 
@@ -230,42 +280,48 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     napi_value callback {};
     auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
         /* require 2 arguments <event, callback> */
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
-        CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+        CHECK_STATUS_RETURN_VOID(context, "get event name failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
-                               "callback type invalid");
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         callback = argv[ARGV_SECOND];
     };
 
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
-        napi_throw_error(env, nullptr, context->error.c_str());
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
         return NapiUtils::GetUndefinedValue(env);
     }
 
     auto it = eventHandlers_.find(eventName);
     if (it == eventHandlers_.end()) {
         SLOGE("event name invalid");
-        napi_throw_error(env, nullptr, "event name invalid");
+        NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         return NapiUtils::GetUndefinedValue(env);
     }
     if (listener_ == nullptr) {
         listener_ = std::make_shared<NapiSessionListener>();
         if (listener_ == nullptr) {
-            SLOGE("no memory");
-            napi_throw_error(env, nullptr, "no memory");
+            SLOGE("OnEvent failed : no memory");
+            NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
             return NapiUtils::GetUndefinedValue(env);
         }
         int32_t ret = AVSessionManager::GetInstance().RegisterSessionListener(listener_);
         if (ret != AVSESSION_SUCCESS) {
             SLOGE("native register session listener failed");
-            if (ret == ERR_NO_PERMISSION) {
-                napi_throw_error(env, nullptr, "native register session listener no permission");
+            if (ret == ERR_INVALID_PARAM) {
+                NapiUtils::ThrowError(env, "OnEvent failed : native invalid parameters",
+                    NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            } else if (ret == ERR_NO_PERMISSION) {
+                NapiUtils::ThrowError(env, "OnEvent failed : native invalid parameters",
+                    NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
             } else {
-                napi_throw_error(env, nullptr, "native register session listener failed");
+                NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
+                    NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
             }
             return NapiUtils::GetUndefinedValue(env);
         }
@@ -273,6 +329,7 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
 
     if (it->second.first(env, callback) != napi_ok) {
         napi_throw_error(env, nullptr, "add event callback failed");
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
 
     return NapiUtils::GetUndefinedValue(env);
@@ -284,9 +341,11 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
     std::string eventName;
     napi_value callback = nullptr;
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
-        CHECK_STATUS_RETURN_VOID(context, "get event name failed");
+        CHECK_STATUS_RETURN_VOID(context, "get event name failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         if (argc == ARGC_TWO) {
             callback = argv[ARGV_SECOND];
         }
@@ -294,19 +353,19 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
 
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
-        napi_throw_error(env, nullptr, context->error.c_str());
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
         return NapiUtils::GetUndefinedValue(env);
     }
 
     auto it = eventHandlers_.find(eventName);
     if (it == eventHandlers_.end()) {
         SLOGE("event name invalid");
-        napi_throw_error(env, nullptr, "event name invalid");
+        NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
     if (it->second.second(env, callback) != napi_ok) {
-        napi_throw_error(env, nullptr, "remove event callback failed");
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
 
     return NapiUtils::GetUndefinedValue(env);
@@ -320,10 +379,11 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->keyEvent_);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->keyEvent_ != nullptr),
-                               "invalid keyEvent");
+                               "invalid keyEvent", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID;
@@ -331,11 +391,15 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().SendSystemAVKeyEvent(*context->keyEvent_);
         if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_COMMAND_NOT_SUPPORT) {
+                context->errMessage = "SendSystemAVKeyEvent failed : native invalid parameters";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SendSystemAVKeyEvent failed : native no permission";
+            } else {
+                context->errMessage = "SendSystemAVKeyEvent failed : native server exception";
+            }
             context->status = napi_generic_failure;
-            context->error = "native send keyEvent failed";
-        }
-        if (ret == ERR_NO_PERMISSION) {
-            context->error = "native send keyEvent no permission";
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
 
@@ -350,18 +414,17 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
     };
     auto context = std::make_shared<ConcrentContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments");
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiControlCommand::GetValue(env, argv[ARGV_FIRST], context->command);
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command");
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID;
 
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().SendSystemControlCommand(context->command);
-        if (ret != AVSESSION_SUCCESS) {
-            context->status = napi_generic_failure;
-            context->error = "native send control command failed";
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
             double speed;
             int64_t time;
@@ -375,11 +438,20 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
                 "CMD", context->command.GetCommand(), "TIME", time, "SPEED", speed, "MODE", mode, "ASSETID", assetId,
                 "ERROR_CODE", ret, "ERROR_INFO", "native send control command failed");
 #endif
-        }
-        if (ret == ERR_NO_PERMISSION) {
-            context->error = "native send control command no permission";
-            HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "ERROR_CODE", ret,
-                "ERROR_INFO", "native send control command no permission");
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_COMMAND_NOT_SUPPORT) {
+                context->errMessage = "SendSystemControlCommand failed : native invalid command";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SendSystemControlCommand failed : native send control command no permission";
+                HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "ERROR_CODE", ret,
+                                    "ERROR_INFO", "native send control command no permission");
+            } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
+                context->errMessage = "SendSystemControlCommand failed : native send command overload";
+            } else {
+                context->errMessage = "SendSystemControlCommand failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
 

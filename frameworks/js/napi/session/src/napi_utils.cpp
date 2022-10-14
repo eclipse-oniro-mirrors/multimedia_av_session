@@ -1016,4 +1016,17 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<AudioSt
     }
     return napi_ok;
 }
+
+napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t napiCode)
+{
+    napi_value message = nullptr;
+    napi_value code = nullptr;
+    napi_value result = nullptr;
+    napi_create_string_utf8(env, napiMessage, NAPI_AUTO_LENGTH, &message);
+    napi_create_error(env, nullptr, message, &result);
+    napi_create_int32(env, napiCode, &code);
+    napi_set_named_property(env, result, "code", code);
+    napi_throw(env, result);
+    return napi_ok;
+}
 }
