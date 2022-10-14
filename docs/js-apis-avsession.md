@@ -1772,7 +1772,7 @@ off(type: 'seek', callback?: (time: number) => void): void
 | 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
 | 6600101  | Server exception |
-| 6600102  | The session does not existThe session does not exist |
+| 6600102  | The session does not exist |
 
 **示例：**
 
