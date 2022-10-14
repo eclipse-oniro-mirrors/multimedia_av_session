@@ -39,10 +39,9 @@ createAVSession(context: Context, tag: string, type: AVSessionType): Promise\<AV
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -82,10 +81,9 @@ createAVSession(context: Context, tag: string, type: AVSessionType, callback: As
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -128,10 +126,9 @@ getAllSessionDescriptors(): Promise\<Array\<Readonly\<AVSessionDescriptor>>>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 6600101  | 服务异常 |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -169,10 +166,10 @@ getAllSessionDescriptors(callback: AsyncCallback\<Array\<Readonly\<AVSessionDesc
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
 | 201  | 权限校验失败 |
-| 6600101  | 服务异常 |
+| 6600101  |Server exception |
 
 **示例：**
 
@@ -218,12 +215,10 @@ createController(sessionId: string): Promise\<AVSessionController>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在|
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -259,12 +254,10 @@ createController(sessionId: string, callback: AsyncCallback\<AVSessionController
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在|
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -310,13 +303,11 @@ castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDe
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在|
-| 6600104  | 远端设备连接失败|
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600104  | Remote connection error |
 
 **示例：**
 
@@ -364,13 +355,11 @@ castAudio(session: SessionToken | 'all', audioDevices: Array<audio.AudioDeviceDe
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在|
-| 6600104  | 远端设备连接失败|
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600104  | Remote connection error |
 
 **示例：**
 
@@ -417,11 +406,9 @@ on(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback: (ses
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -467,10 +454,9 @@ off(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback?: (s
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -498,11 +484,9 @@ on(type: 'sessionServiceDie', callback: () => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -530,10 +514,9 @@ off(type: 'sessionServiceDie', callback?: () => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -568,12 +551,10 @@ sendSystemAVKeyEvent(event: KeyEvent): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600105  | 无效命令 |
+| 6600101  | Server exception |
+| 6600105  | Command not supported |
 
 **示例：**
 
@@ -612,12 +593,10 @@ sendSystemAVKeyEvent(event: KeyEvent, callback: AsyncCallback\<void>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600105  | 无效命令 |
+| 6600101  | Server exception |
+| 6600105  | Command not supported |
 
 **示例：**
 
@@ -661,13 +640,11 @@ sendSystemControlCommand(command: AVControlCommand): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600105  | 无效命令 |
-| 6600107  | 消息过载 |
+| 6600101  | Server exception |
+| 6600105  | Command not supported |
+| 6600107  | Command or event overload |
 
 **示例：**
 
@@ -712,13 +689,11 @@ sendSystemControlCommand(command: AVControlCommand, callback: AsyncCallback\<voi
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600105  | 无效命令 |
-| 6600107  | 消息过载 |
+| 6600101  | Server exception |
+| 6600105  | Command not supported |
+| 6600107  | Command or event overload |
 
 **示例：**
 
@@ -785,11 +760,10 @@ setAVMetadata(data: AVMetadata): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -835,11 +809,10 @@ setAVMetadata(data: AVMetadata, callback: AsyncCallback\<void>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -892,11 +865,10 @@ setAVPlaybackState(state: AVPlaybackState): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -934,11 +906,10 @@ setAVPlaybackState(state: AVPlaybackState, callback: AsyncCallback\<void>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -983,11 +954,10 @@ setLaunchAbility(ability: WantAgent): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1049,11 +1019,10 @@ setLaunchAbility(ability: WantAgent, callback: AsyncCallback\<void>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1124,11 +1093,10 @@ setAudioStreamId(streamIds: Array\<number>): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1160,11 +1128,10 @@ setAudioStreamId(streamIds: Array\<number>, callback: AsyncCallback\<void>): voi
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1195,10 +1162,10 @@ getController(): Promise\<AVSessionController>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1229,10 +1196,10 @@ getController(callback: AsyncCallback\<AVSessionController>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1265,10 +1232,10 @@ getOutputDevice(): Promise\<OutputDeviceInfo>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1297,10 +1264,10 @@ getOutputDevice(callback: AsyncCallback\<OutputDeviceInfo>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1331,10 +1298,10 @@ activate(): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1363,10 +1330,10 @@ activate(callback: AsyncCallback\<void>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1397,10 +1364,10 @@ deactivate(): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1431,10 +1398,10 @@ deactivate(callback: AsyncCallback\<void>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1465,10 +1432,10 @@ destroy(): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1498,10 +1465,10 @@ destroy(callback: AsyncCallback\<void>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1533,11 +1500,10 @@ on(type: 'play'|'pause'|'stop'|'playNext'|'playPrevious'|'fastForward'|'rewind',
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1583,14 +1549,13 @@ on(type: 'seek', callback: (time: number) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
-
+The session does not exist
 ```js
 session.on('seek', (time) => {
     console.info('on seek entry time : ' + time);
@@ -1615,11 +1580,10 @@ on(type: 'setSpeed', callback: (speed: number) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1647,11 +1611,10 @@ on(type: 'setLoopMode', callback: (mode: LoopMode) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1679,11 +1642,10 @@ on(type: 'toggleFavorite', callback: (assetId: string) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1711,11 +1673,10 @@ on(type: 'handleKeyEvent', callback: (event: KeyEvent) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1743,11 +1704,10 @@ on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): vo
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1775,11 +1735,10 @@ off(type: 'play' | 'pause' | 'stop' | 'playNext' | 'playPrevious' | 'fastForward
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1811,11 +1770,10 @@ off(type: 'seek', callback?: (time: number) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not existThe session does not exist |
 
 **示例：**
 
@@ -1841,11 +1799,10 @@ off(type: 'setSpeed', callback?: (speed: number) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1871,11 +1828,10 @@ off(type: 'setLoopMode', callback?: (mode: LoopMode) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1901,11 +1857,10 @@ off(type: 'toggleFavorite', callback?: (assetId: string) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1931,11 +1886,10 @@ off(type: 'handleKeyEvent', callback?: (event: KeyEvent) => void): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -1961,11 +1915,10 @@ off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): 
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
 
 **示例：**
 
@@ -2016,11 +1969,11 @@ getAVPlaybackState(): Promise\<AVPlaybackState>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 ```js
@@ -2048,11 +2001,11 @@ getAVPlaybackState(callback: AsyncCallback\<AVPlaybackState>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 ```js
@@ -2082,11 +2035,11 @@ getAVMetadata(): Promise\<AVMetadata>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 ```js
@@ -2114,11 +2067,11 @@ getAVMetadata(callback: AsyncCallback\<AVMetadata>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 ```js
@@ -2148,10 +2101,10 @@ getOutputDevice(): Promise\<OutputDeviceInfo>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 ```js
@@ -2179,10 +2132,10 @@ getOutputDevice(callback: AsyncCallback\<OutputDeviceInfo>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2213,14 +2166,13 @@ sendAVKeyEvent(event: KeyEvent): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
-| 6600105  | 无效命令 |
-| 6600106  | 会话未激活 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
+| 6600105  | Command not supported |
+| 6600106  | Session inactive |
 
 **返回值：**
 
@@ -2259,14 +2211,13 @@ sendAVKeyEvent(event: KeyEvent, callback: AsyncCallback\<void>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
-| 6600105  | 无效命令 |
-| 6600106  | 会话未激活 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
+| 6600105  | Command not supported |
+| 6600106  | Session inactive |
 
 **示例：**
 
@@ -2300,11 +2251,11 @@ getLaunchAbility(): Promise\<WantAgent>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2335,11 +2286,11 @@ getLaunchAbility(callback: AsyncCallback\<WantAgent>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2372,10 +2323,10 @@ getRealPlaybackPositionSync(): number
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2400,11 +2351,11 @@ isActive(): Promise\<boolean>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2433,11 +2384,11 @@ isActive(callback: AsyncCallback\<boolean>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2468,10 +2419,10 @@ destroy(): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2500,10 +2451,10 @@ destroy(callback: AsyncCallback\<void>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2534,11 +2485,11 @@ getValidCommands(): Promise\<Array\<AVControlCommandType>>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2567,11 +2518,11 @@ getValidCommands(callback: AsyncCallback\<Array\<AVControlCommandType>>): void
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2608,15 +2559,14 @@ sendControlCommand(command: AVControlCommand): Promise\<void>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
+| 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
-| 6600105  | 无效命令 |
-| 6600106  | 会话未激活 |
-| 6600107  | 消息过载 |
+| 6600101  | Server exception |
+| 6600102  | The session does not exist |
+| 6600103  | The controller does not exist |
+| 6600105  | Command not supported |
+| 6600106  | Session inactive |
+| 6600107  | Command or event overload |
 
 **示例：**
 
@@ -2657,15 +2607,14 @@ sendControlCommand(command: AVControlCommand, callback: AsyncCallback\<void>): v
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600102  | 会话不存在 |
-| 6600103  | 控制器不存在 |
-| 6600105  | 无效命令 |
-| 6600106  | 会话未激活 |
-| 6600107  | 消息过载 |
+| 错误码ID | 错误信息 |
+| -------- | ------------------------------- |
+| 6600101  | Server exception                |
+| 6600102  | The session does not exist      |
+| 6600103  | The controller does not exist   |
+| 6600105  | Command not supported           |
+| 6600106  | Session inactive                |
+| 6600107  | Command or event overload       |
 
 **示例：**
 
@@ -2709,11 +2658,10 @@ on(type: 'metadataChange', filter: Array\<keyof AVMetadata> | 'all', callback: (
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 错误码ID | 错误信息 |
+| -------- | ------------------------------ |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2747,11 +2695,10 @@ on(type: 'playbackStateChange', filter: Array\<keyof AVPlaybackState> | 'all', c
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 错误码ID | 错误信息 |
+| -------- | ------------------------------ |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2784,11 +2731,10 @@ on(type: 'sessionDestroy', callback: () => void)
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 错误码ID | 错误信息 |
+| -------- | ------------------------------ |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2816,11 +2762,10 @@ on(type: 'activeStateChange', callback: (isActive: boolean) => void)
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 错误码ID | 错误信息 |
+| -------- | ----------------------------- |
+| 6600101  | Server exception |
+| 6600103  |The controller does not exist |
 
 **示例：**
 
@@ -2848,11 +2793,10 @@ on(type: 'validCommandChange', callback: (commands: Array\<AVControlCommandType>
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 错误码ID | 错误信息 |
+| -------- | ------------------------------ |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2881,11 +2825,10 @@ on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): vo
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
-| 6600103  | 控制器不存在 |
+| 错误码ID | 错误信息 |
+| -------- | ----------------------- |
+| 6600101  | Server exception |
+| 6600103  | The controller does not exist |
 
 **示例：**
 
@@ -2913,10 +2856,9 @@ off(type: 'metadataChange', callback?: (data: AVMetadata) => void)
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 错误码ID | 错误信息 |
+| -------- | ---------------- |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -2942,10 +2884,9 @@ off(type: 'playbackStateChange', callback?: (state: AVPlaybackState) => void)
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 错误码ID | 错误信息 |
+| -------- | ---------------- |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -2971,10 +2912,9 @@ off(type: 'sessionDestroy', callback?: () => void)
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 错误码ID | 错误信息 |
+| -------- | ---------------- |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -3000,10 +2940,9 @@ off(type: 'activeStateChange', callback?: (isActive: boolean) => void)
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 错误码ID | 错误信息 |
+| -------- | ---------------- |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -3029,10 +2968,9 @@ off(type: 'validCommandChange', callback?: (commands: Array\<AVControlCommandTyp
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 错误码ID | 错误信息           |
+| -------- | ---------------- |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -3058,10 +2996,9 @@ off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): 
 **错误码：**
 以下错误码的详细介绍请参见[ohos.multimedia.avsession(多媒体会话)错误码](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/errcode-avsession.md)。
 
-| 错误码ID | 错误信息（此处仅提供错误抛出的关键信息） |
-| -------- | ---------------------------------------- |
-| 401  | 参数检查失败 |
-| 6600101  | 服务异常 |
+| 错误码ID  | 错误信息          |
+| -------- | ---------------- |
+| 6600101  | Server exception |
 
 **示例：**
 
@@ -3175,7 +3112,7 @@ controller.off('outputDeviceChange');
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
 | 名称         | 类型                                  | 必填 | 说明     |
-| ------------ | ------------------------------------- | ---- | -------- |
+| ------------ | ------------------------------------- | ---- | ------- |
 | state        | [PlaybackState](#playbackstate)       | 否   | 播放状态 |
 | speed        | number                                | 否   | 播放倍速 |
 | position     | [PlaybackPosition](#playbackposition) | 否   | 播放位置 |
@@ -3203,8 +3140,8 @@ controller.off('outputDeviceChange');
 | 名称       | 类型           | 必填 | 说明                   |
 | ---------- | -------------- | ---- | ---------------------- |
 | isRemote   | boolean        | 是   | 设备是否连接。         |
-| audioDeviceId   | Array<number\> | 是   | 播放设备的ID集合。   |
-| deviceName | Array<string\> | 是   | 播放设备的名称集合。 |
+| audioDeviceId   | Array<number\> | 是   | 播放设备的ID集合。  |
+| deviceName | Array<string\> | 是   | 播放设备的名称集合。    |
 
 ## PlaybackState
 
@@ -3213,8 +3150,8 @@ controller.off('outputDeviceChange');
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
 | 名称                        | 值   | 说明         |
-| --------------------------- | ---- | ------------ |
-| PLAYBACK_STATE_INITIAL      | 0    | 初始状态 |
+| --------------------------- | ---- | ----------- |
+| PLAYBACK_STATE_INITIAL      | 0    | 初始状态     |
 | PLAYBACK_STATE_PREPARE      | 1    | 正在缓冲     |
 | PLAYBACK_STATE_PLAY         | 2    | 正在播放     |
 | PLAYBACK_STATE_PAUSE        | 3    | 暂停         |
@@ -3242,12 +3179,12 @@ controller.off('outputDeviceChange');
 
 **系统能力：** SystemCapability.Multimedia.AVSession.Core
 
-| 名称                           | 值      | 说明               |
-| ------------------------------ | ------- | ------------------ |
-| ERR_CODE_SERVICE_EXCEPTION     | 6600101 | 服务异常           |
-| ERR_CODE_SESSION_NOT_EXIST     | 6600102 | 会话不存在         |
-| ERR_CODE_CONTROLLER_NOT_EXIST  | 6600103 | 控制器不存在       |
-| ERR_CODE_REMOTE_CONNECTION_ERR | 6600104 | 远端设备连接失败 |
-| ERR_CODE_COMMAND_INVALID       | 6600105 | 无效命令           |
-| ERR_CODE_SESSION_INACTIVE      | 6600106 | 会话未激活        |
-| ERR_CODE_MESSAGE_OVERLOAD      | 6600107 | 消息过载     |
+| 名称                           | 值      | 说明                             |
+| ------------------------------ | ------- | ------------------------------- |
+| ERR_CODE_SERVICE_EXCEPTION     | 6600101 | Server exception                |
+| ERR_CODE_SESSION_NOT_EXIST     | 6600102 | The session does not exist      |
+| ERR_CODE_CONTROLLER_NOT_EXIST  | 6600103 | The controller does not exist   |
+| ERR_CODE_REMOTE_CONNECTION_ERR | 6600104 | Remote connection error         |
+| ERR_CODE_COMMAND_INVALID       | 6600105 | Command not supported           |
+| ERR_CODE_SESSION_INACTIVE      | 6600106 | Session inactive                |
+| ERR_CODE_MESSAGE_OVERLOAD      | 6600107 | Command or event overload       |
