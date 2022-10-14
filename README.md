@@ -46,7 +46,7 @@ Data and command interaction between applications and AVSessionService(Session S
 The structure of the repository directory is as follows:
 
 ```
-/foundation/multimedia/avsession # Service code of the AVSession component
+/foundation/multimedia/av_session # Service code of the AVSession component
 ├── frameworks                             # Framework code
 │   ├── common                             # Common framework code
 │   ├── js                                 # JS framework implementation
@@ -68,4 +68,4 @@ The structure of the repository directory is as follows:
 
 ## Repositories Involved
 
-[**multimedia_avsession_standard**](https://gitee.com/openharmony-sig/multimedia_avsession_standard)
+[**multimedia_av_session**](https://gitee.com/openharmony/multimedia_av_session)
