@@ -66,16 +66,6 @@ The structure of the repository directory is as follows:
 └── bundle.json                            # Compilation file
 ```
 
-## Constraints 
-
-For more information, see [Constraints and Restrictions](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/avsession.md)
-
-## Description 
-
-For more information about the interface, see [the API documentation]((https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/avsession.md)
-
-For instructions on use, refer to [the development instructions](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/avsession.md#%E5%BC%80%E5%8F%91%E6%8C%87%E5%AF%BC)
-
 ## Repositories Involved
 
 [**multimedia_avsession_standard**](https://gitee.com/openharmony-sig/multimedia_avsession_standard)
