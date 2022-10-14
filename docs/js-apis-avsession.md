@@ -168,7 +168,6 @@ getAllSessionDescriptors(callback: AsyncCallback\<Array\<Readonly\<AVSessionDesc
 
 | 错误码ID | 错误信息 |
 | -------- | ---------------------------------------- |
-| 201  | 权限校验失败 |
 | 6600101  |Server exception |
 
 **示例：**
