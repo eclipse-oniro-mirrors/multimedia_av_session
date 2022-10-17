@@ -1,6 +1,10 @@
 # 媒体会话管理
 
-AVSession（Audio & Video Session，媒体会话管理）提供媒体播控相关功能的接口，使应用可以高效地在不同媒体之间完成切换。
+媒体会话管理提供媒体播控相关功能的接口，使应用可以高效地在不同媒体之间完成切换。
+
+该模块提供以下媒体会话相关的常用功能：
+- [AVSession](#section652893) : 会话，可用于获得会话ID，完成设置元数据、播放状态信息等操作。
+- [AVSessionController](#section974602): 会话控制器，可用于查看会话ID，完成对会话发送命令及事件，获取会话元数据、播放状态信息等操作。
 
 > **说明：**
 >
@@ -55,7 +59,7 @@ let context = featureAbility.getContext();
 
 await avSession.createAVSession(context, tag, type).then((avSession) => {
     session = avSession;
-    console.info('CreateAVSession : SUCCESS : sessionId = ' + session.sessionId);
+    console.info(`CreateAVSession : SUCCESS : sessionId = ${session.sessionId}`);
 }).catch((err) => {
     console.info(`CreateAVSession BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -100,7 +104,7 @@ avSession.createAVSession(context, tag, type, function (err, avSession) {
         console.info(`CreateAVSession BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
         session = avSession;
-        console.info('CreateAVSession : SUCCESS : sessionId = ' + session.sessionId);
+        console.info(`CreateAVSession : SUCCESS : sessionId = ${session.sessionId}`);
     }
 });
 ```
@@ -134,11 +138,11 @@ getAllSessionDescriptors(): Promise\<Array\<Readonly\<AVSessionDescriptor>>>
 
 ```js
 avSession.getAllSessionDescriptors().then((descriptors) => {
-    console.info('getAllSessionDescriptors : SUCCESS : descriptors.length : ' + descriptors.length);
+    console.info(`getAllSessionDescriptors : SUCCESS : descriptors.length : ${descriptors.length}`);
     if(descriptors.length > 0 ){
-        console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].isActive : ' + descriptors[0].isActive);
-        console.info('GetAllSessionDescriptors : SUCCESS : descriptors[0].type : ' + descriptors[0].type);
-        console.info('GetAllSessionDescriptors : SUCCESS : descriptors[0].sessionTag : ' + descriptors[0].sessionTag);
+        console.info(`getAllSessionDescriptors : SUCCESS : descriptors[0].isActive : ${descriptors[0].isActive}`);
+        console.info(`GetAllSessionDescriptors : SUCCESS : descriptors[0].type : ${descriptors[0].type}`);
+        console.info(`GetAllSessionDescriptors : SUCCESS : descriptors[0].sessionTag : ${descriptors[0].sessionTag}`);
     }
 }).catch((err) => {
     console.info(`GetAllSessionDescriptors BusinessError: code: ${err.code}, message: ${err.message}`);
@@ -177,11 +181,11 @@ avSession.getAllSessionDescriptors(function (err, descriptors) {
     if (err) {
         console.info(`GetAllSessionDescriptors BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('GetAllSessionDescriptors : SUCCESS : descriptors.length : ' + descriptors.length);
+        console.info(`GetAllSessionDescriptors : SUCCESS : descriptors.length : ${descriptors.length}`);
         if(descriptors.length > 0 ){
-            console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].isActive : ' + descriptors[0].isActive);
-            console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].type : ' + descriptors[0].type);
-            console.info('getAllSessionDescriptors : SUCCESS : descriptors[0].sessionTag : ' + descriptors[0].sessionTag);
+            console.info(`getAllSessionDescriptors : SUCCESS : descriptors[0].isActive : ${descriptors[0].isActive}`);
+            console.info(`getAllSessionDescriptors : SUCCESS : descriptors[0].type : ${descriptors[0].type}`);
+            console.info(`getAllSessionDescriptors : SUCCESS : descriptors[0].sessionTag : ${descriptors[0].sessionTag}`);
         }
     }
 });
@@ -225,7 +229,7 @@ createController(sessionId: string): Promise\<AVSessionController>
 let controller;
 await avSession.createController(session.sessionId).then((avcontroller) => {
     controller = avcontroller;
-    console.info('CreateController : SUCCESS : ' + controller.sessionId);
+    console.info(`CreateController : SUCCESS : ${controller.sessionId}`);
 }).catch((err) => {
     console.info(`CreateController BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -267,7 +271,7 @@ avSession.createController(session.sessionId, function (err, avcontroller) {
         console.info(`CreateController BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
         controller = avcontroller;
-        console.info('CreateController : SUCCESS : ' + controller.sessionId);
+        console.info(`CreateController : SUCCESS : ${controller.sessionId}`);
     }
 });
 ```
@@ -413,21 +417,21 @@ on(type: 'sessionCreate' | 'sessionDestroy' | 'topSessionChange', callback: (ses
 
 ```js
 avSession.on('sessionCreate', (descriptor) => {
-    console.info('on sessionCreate : isActive : ' + descriptor.isActive);
-    console.info('on sessionCreate : type : ' + descriptor.type);
-    console.info('on sessionCreate : sessionTag : ' + descriptor.sessionTag);
+    console.info(`on sessionCreate : isActive : ${descriptor.isActive}`);
+    console.info(`on sessionCreate : type : ${descriptor.type}`);
+    console.info(`on sessionCreate : sessionTag : ${descriptor.sessionTag}`);
 });
 
 avSession.on('sessionDestroy', (descriptor) => {
-    console.info('on sessionDestroy : isActive : ' + descriptor.isActive);
-    console.info('on sessionDestroy : type : ' + descriptor.type);
-    console.info('on sessionDestroy : sessionTag : ' + descriptor.sessionTag);
+    console.info(`on sessionDestroy : isActive : ${descriptor.isActive}`);
+    console.info(`on sessionDestroy : type : ${descriptor.type}`);
+    console.info(`on sessionDestroy : sessionTag : ${descriptor.sessionTag}`);
 });
 
 avSession.on('topSessionChange', (descriptor) => {
-    console.info('on topSessionChange : isActive : ' + descriptor.isActive);
-    console.info('on topSessionChange : type : ' + descriptor.type);
-    console.info('on topSessionChange : sessionTag : ' + descriptor.sessionTag);
+    console.info(`on topSessionChange : isActive : ${descriptor.isActive}`);
+    console.info(`on topSessionChange : type : ${descriptor.type}`);
+    console.info(`on topSessionChange : sessionTag : ${descriptor.sessionTag}`);
 });
 ```
 
@@ -717,7 +721,7 @@ avSession.sendSystemControlCommand(avcommand, function (err) {
 });
 ```
 
-## AVSession
+## AVSession<a name="section652893"></a>
 
 调用[avSession.createAVSession](#avsessioncreateavsession)后，返回会话的实例，可以获得会话ID，完成设置元数据，播放状态信息等操作。
 
@@ -1172,7 +1176,7 @@ getController(): Promise\<AVSessionController>
 let controller;
 session.getController().then((avcontroller) => {
     controller = avcontroller;
-    console.info('GetController : SUCCESS : sessionid : ' + controller.sessionId);
+    console.info(`GetController : SUCCESS : sessionid : ${controller.sessionId}`);
 }).catch((err) => {
     console.info(`GetController BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -1209,7 +1213,7 @@ session.getController(function (err, avcontroller) {
         console.info(`GetController BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
         controller = avcontroller;
-        console.info('GetController : SUCCESS : sessionid : ' + controller.sessionId);
+        console.info(`GetController : SUCCESS : sessionid : ${controller.sessionId}`);
     }
 });
 ```
@@ -1240,7 +1244,7 @@ getOutputDevice(): Promise\<OutputDeviceInfo>
 
 ```js
 session.getOutputDevice().then((outputDeviceInfo) => {
-    console.info('GetOutputDevice : SUCCESS : isRemote : ' + outputDeviceInfo.isRemote);
+    console.info(`GetOutputDevice : SUCCESS : isRemote : ${outputDeviceInfo.isRemote}`);
 }).catch((err) => {
     console.info(`GetOutputDevice BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -1275,7 +1279,7 @@ session.getOutputDevice(function (err, outputDeviceInfo) {
     if (err) {
         console.info(`GetOutputDevice BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('GetOutputDevice : SUCCESS : isRemote : ' + outputDeviceInfo.isRemote);
+        console.info(`GetOutputDevice : SUCCESS : isRemote : ${outputDeviceInfo.isRemote}`);
     }
 });
 ```
@@ -1557,7 +1561,7 @@ on(type: 'seek', callback: (time: number) => void): void
 The session does not exist
 ```js
 session.on('seek', (time) => {
-    console.info('on seek entry time : ' + time);
+    console.info(`on seek entry time : ${time}`);
 });
 ```
 
@@ -1588,7 +1592,7 @@ on(type: 'setSpeed', callback: (speed: number) => void): void
 
 ```js
 session.on('setSpeed', (speed) => {
-    console.info('on setSpeed speed : ' + speed);
+    console.info(`on setSpeed speed : ${speed}`);
 });
 ```
 
@@ -1619,7 +1623,7 @@ on(type: 'setLoopMode', callback: (mode: LoopMode) => void): void
 
 ```js
 session.on('setLoopMode', (mode) => {
-    console.info('on setLoopMode mode : ' + mode);
+    console.info(`on setLoopMode mode : ${mode}`);
 });
 ```
 
@@ -1650,7 +1654,7 @@ on(type: 'toggleFavorite', callback: (assetId: string) => void): void
 
 ```js
 session.on('toggleFavorite', (assetId) => {
-    console.info('on toggleFavorite mode : ' + assetId);
+    console.info(`on toggleFavorite mode : ${assetId}`);
 });
 ```
 
@@ -1681,7 +1685,7 @@ on(type: 'handleKeyEvent', callback: (event: KeyEvent) => void): void
 
 ```js
 session.on('handleKeyEvent', (event) => {
-    console.info('on handleKeyEvent event : ' + event);
+    console.info(`on handleKeyEvent event : ${event}`);
 });
 ```
 
@@ -1712,7 +1716,7 @@ on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): vo
 
 ```js
 session.on('outputDeviceChange', (device) => {
-    console.info('on outputDeviceChange device isRemote : ' + device.isRemote);
+    console.info(`on outputDeviceChange device isRemote : ${device.isRemote}`);
 });
 ```
 
@@ -1927,7 +1931,7 @@ session.off('outputDeviceChange');
 
 
 
-## AVSessionController
+## AVSessionController<a name="section974602"></a>
 
 调用[avSession.createController](#avsessioncreatecontroller)后，返回会话控制器实例。控制器可查看会话ID，并可完成对会话发送命令及事件，获取会话元数据，播放状态信息等操作。
 
@@ -1977,7 +1981,7 @@ getAVPlaybackState(): Promise\<AVPlaybackState>
 **示例：**
 ```js
 controller.getAVPlaybackState().then((playbackState) => {
-    console.info('GetAVPlaybackState : SUCCESS : state : ' + playbackState.state);
+    console.info(`GetAVPlaybackState : SUCCESS : state : ${playbackState.state}`);
 }).catch((err) => {
     console.info(`GetAVPlaybackState BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -2012,7 +2016,7 @@ controller.getAVPlaybackState(function (err, playbackState) {
     if (err) {
         console.info(`GetAVPlaybackState BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('GetAVPlaybackState : SUCCESS : state : ' + playbackState.state);
+        console.info(`GetAVPlaybackState : SUCCESS : state : ${playbackState.state}`);
     }
 });
 ```
@@ -2043,7 +2047,7 @@ getAVMetadata(): Promise\<AVMetadata>
 **示例：**
 ```js
 controller.getAVMetadata().then((metadata) => {
-    console.info('GetAVMetadata : SUCCESS : assetId : ' + metadata.assetId);
+    console.info(`GetAVMetadata : SUCCESS : assetId : ${metadata.assetId}`);
 }).catch((err) => {
     console.info(`GetAVMetadata BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -2078,7 +2082,7 @@ controller.getAVMetadata(function (err, metadata) {
     if (err) {
         console.info(`GetAVMetadata BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('GetAVMetadata : SUCCESS : assetId : ' + metadata.assetId);
+        console.info(`GetAVMetadata : SUCCESS : assetId : ${metadata.assetId}`);
     }
 });
 ```
@@ -2108,7 +2112,7 @@ getOutputDevice(): Promise\<OutputDeviceInfo>
 **示例：**
 ```js
 controller.getOutputDevice().then((deviceInfo) => {
-    console.info('GetOutputDevice : SUCCESS : isRemote : ' + deviceInfo.isRemote);
+    console.info(`GetOutputDevice : SUCCESS : isRemote : ${deviceInfo.isRemote}`);
 }).catch((err) => {
     console.info(`GetOutputDevice BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -2143,7 +2147,7 @@ controller.getOutputDevice(function (err, deviceInfo) {
     if (err) {
         console.info(`GetOutputDevice BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('GetOutputDevice : SUCCESS : isRemote : ' + deviceInfo.isRemote);
+        console.info(`GetOutputDevice : SUCCESS : isRemote : ${deviceInfo.isRemote}`);
     }
 });
 ```
@@ -2262,7 +2266,7 @@ getLaunchAbility(): Promise\<WantAgent>
 import wantAgent from '@ohos.wantAgent';
 
 controller.getLaunchAbility().then((agent) => {
-    console.info('GetLaunchAbility : SUCCESS : wantAgent : ' + agent);
+    console.info(`GetLaunchAbility : SUCCESS : wantAgent : ${agent}`);
 }).catch((err) => {
     console.info(`GetLaunchAbility BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -2300,7 +2304,7 @@ controller.getLaunchAbility(function (err, agent) {
     if (err) {
         console.info(`GetLaunchAbility BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('GetLaunchAbility : SUCCESS : wantAgent : ' + agent);
+        console.info(`GetLaunchAbility : SUCCESS : wantAgent : ${agent}`);
     }
 });
 ```
@@ -2360,7 +2364,7 @@ isActive(): Promise\<boolean>
 
 ```js
 controller.isActive().then((isActive) => {
-    console.info('IsActive : SUCCESS : isactive : ' + isActive);
+    console.info(`IsActive : SUCCESS : isactive : ${isActive}`);
 }).catch((err) => {
     console.info(`IsActive BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -2396,7 +2400,7 @@ controller.isActive(function (err, isActive) {
     if (err) {
         console.info(`IsActive BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('IsActive : SUCCESS : isactive : ' + isActive);
+        console.info(`IsActive : SUCCESS : isactive : ${isActive}`);
     }
 });
 ```
@@ -2494,7 +2498,7 @@ getValidCommands(): Promise\<Array\<AVControlCommandType>>
 
 ```js
 controller.getValidCommands.then((validCommands) => {
-    console.info('GetValidCommands : SUCCESS : size : ' + validCommands.length);
+    console.info(`GetValidCommands : SUCCESS : size : ${validCommands.length}`);
 }).catch((err) => {
     console.info(`GetValidCommands BusinessError: code: ${err.code}, message: ${err.message}`);
 });
@@ -2530,7 +2534,7 @@ controller.getValidCommands(function (err, validCommands) {
     if (err) {
         console.info(`GetValidCommands BusinessError: code: ${err.code}, message: ${err.message}`);
     } else {
-        console.info('GetValidCommands : SUCCESS : size : ' + validCommands.length);
+        console.info(`GetValidCommands : SUCCESS : size : ${validCommands.length}`);
     }
 });
 ```
@@ -2666,12 +2670,12 @@ on(type: 'metadataChange', filter: Array\<keyof AVMetadata> | 'all', callback: (
 
 ```js
 controller.on('metadataChange', 'all', (metadata) => {
-    console.info('on metadataChange assetId : ' + metadata.assetId);
+    console.info(`on metadataChange assetId : ${metadata.assetId}`);
 });
 
 let metaFilter = ['assetId', 'title', 'description'];
 controller.on('metadataChange', metaFilter, (metadata) => {
-    console.info('on metadataChange assetId : ' + metadata.assetId);
+    console.info(`on metadataChange assetId : ${metadata.assetId}`);
 });
 ```
 
@@ -2703,12 +2707,12 @@ on(type: 'playbackStateChange', filter: Array\<keyof AVPlaybackState> | 'all', c
 
 ```js
 controller.on('playbackStateChange', 'all', (playbackState) => {
-    console.info('on playbackStateChange state : ' + playbackState.state);
+    console.info(`on playbackStateChange state : ${playbackState.state}`);
 });
 
 let playbackFilter = ['state', 'speed', 'loopMode'];
 controller.on('playbackStateChange', playbackFilter, (playbackState) => {
-    console.info('on playbackStateChange state : ' + playbackState.state);
+    console.info(`on playbackStateChange state : ${playbackState.state}`);
 });
 ```
 
@@ -2770,7 +2774,7 @@ on(type: 'activeStateChange', callback: (isActive: boolean) => void)
 
 ```js
 controller.on('activeStateChange', (isActive) => {
-    console.info('on activeStateChange : SUCCESS : isActive ' + isActive);
+    console.info(`on activeStateChange : SUCCESS : isActive ${isActive}`);
 });
 ```
 
@@ -2801,8 +2805,8 @@ on(type: 'validCommandChange', callback: (commands: Array\<AVControlCommandType>
 
 ```js
 controller.on('validCommandChange', (validCommands) => {
-    console.info('validCommandChange : SUCCESS : size : ' + validCommands.size);
-    console.info('validCommandChange : SUCCESS : validCommands : ' + validCommands.values());
+    console.info(`validCommandChange : SUCCESS : size : ${validCommands.size}`);
+    console.info(`validCommandChange : SUCCESS : validCommands : ${validCommands.values()}`);
 });
 ```
 
@@ -2833,7 +2837,7 @@ on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): vo
 
 ```js
 controller.on('outputDeviceChange', (device) => {
-    console.info('on outputDeviceChange device isRemote : ' + device.isRemote);
+    console.info(`on outputDeviceChange device isRemote : ${device.isRemote}`);
 });
 ```
 
