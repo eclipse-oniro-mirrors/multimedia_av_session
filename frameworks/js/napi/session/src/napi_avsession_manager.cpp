@@ -49,7 +49,7 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_MARSHALLING, 6600101},
     {ERR_UNMARSHALLING, 6600101},
     {ERR_IPC_SEND_REQUEST, 6600101},
-    {ERR_CONTROLLER_NOT_EXIST, 6600101},
+    {ERR_CONTROLLER_IS_EXIST, 6600101},
     {ERR_START_ABILITY_IS_RUNNING, 6600101},
     {ERR_ABILITY_NOT_AVAILABLE, 6600101},
     {ERR_START_ABILITY_TIMEOUT, 6600101},
@@ -129,7 +129,7 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
 
     auto complete = [context](napi_value &output) {
         context->status = NapiAVSession::NewInstance(context->env, context->session_, output);
-        CHECK_STATUS_RETURN_VOID(context, "create new javascript object failed",
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
 
@@ -188,13 +188,13 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
         int32_t ret = AVSessionManager::GetInstance().CreateController(context->sessionId_, context->controller_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "GetAllSessionDescriptors failed : native no permission";
+                context->errMessage = "CreateController failed : native no permission";
             } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "GetAllSessionDescriptors failed : native invalid parameters";
+                context->errMessage = "CreateController failed : native invalid parameters";
             } else if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "GetAllSessionDescriptors failed : native session not exist";
+                context->errMessage = "CreateController failed : native session not exist";
             } else {
-                context->errMessage = "GetAllSessionDescriptors failed : native server exception";
+                context->errMessage = "CreateController failed : native server exception";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -328,7 +328,6 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     }
 
     if (it->second.first(env, callback) != napi_ok) {
-        napi_throw_error(env, nullptr, "add event callback failed");
         NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
 
@@ -360,7 +359,7 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
     auto it = eventHandlers_.find(eventName);
     if (it == eventHandlers_.end()) {
         SLOGE("event name invalid");
-        NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
@@ -392,7 +391,7 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
         int32_t ret = AVSessionManager::GetInstance().SendSystemAVKeyEvent(*context->keyEvent_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_COMMAND_NOT_SUPPORT) {
-                context->errMessage = "SendSystemAVKeyEvent failed : native invalid parameters";
+                context->errMessage = "SendSystemAVKeyEvent failed : native invalid keyEvent";
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SendSystemAVKeyEvent failed : native no permission";
             } else {
@@ -444,7 +443,7 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SendSystemControlCommand failed : native send control command no permission";
                 HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "ERROR_CODE", ret,
-                                    "ERROR_INFO", "native send control command no permission");
+                                    "ERROR_INFO", "SendSystemControlCommand failed : native no permission");
             } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
                 context->errMessage = "SendSystemControlCommand failed : native send command overload";
             } else {
