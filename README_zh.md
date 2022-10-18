@@ -46,7 +46,7 @@ AVSession部件为系统提供了统一的媒体控制能力，当三方应用�
 仓目录结构如下：
 
 ```
-/foundation/multimedia/avsession  # 会话部件业务代码
+/foundation/multimedia/av_session  # 会话部件业务代码
 ├── frameworks                             # 框架代码
 │   ├── common                             # 框架公共代码
 │   ├── js                                 # js框架实现
@@ -68,14 +68,14 @@ AVSession部件为系统提供了统一的媒体控制能力，当三方应用�
 
 ## 约束<a name="section1533973044317"></a>
 
-详细约束请参考[约束和限制](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/avsession.md)
+详细约束请参考[约束和限制](https://gitee.com/openharmony/multimedia_av_session/blob/master/docs/avsession.md)
 
 ## 说明
 
-详细接口说明请参考[API文档](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/js-apis-avsession.md)
+详细接口说明请参考[API文档](https://gitee.com/openharmony/multimedia_av_session/blob/master/docs/js-apis-avsession.md)
 
-使用说明请参考[开发指导](https://gitee.com/openharmony-sig/multimedia_avsession_standard/blob/master/docs/avsession.md#%E5%BC%80%E5%8F%91%E6%8C%87%E5%AF%BC)
+使用说明请参考[开发指导](https://gitee.com/openharmony/multimedia_av_session/blob/master/docs/avsession.md#%E5%BC%80%E5%8F%91%E6%8C%87%E5%AF%BC)
 
 ## 相关仓<a name="section1533973044317"></a>
 
-[**multimedia_avsession_standard**](https://gitee.com/openharmony-sig/multimedia_avsession_standard)
+[**multimedia_av_session**](https://gitee.com/openharmony/multimedia_av_session)
