@@ -30,6 +30,7 @@ public:
     }
 };
 bool AvsessionProxySendRequestTest(uint8_t* data, size_t size);
+void AvsessionProxyTest(uint8_t* data, size_t size);
 
 class AvsessionProxyFuzzer {
 public:

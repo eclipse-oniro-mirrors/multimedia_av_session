@@ -42,7 +42,7 @@ bool AvsessionCallbackProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     if (code >= MAX_CODE_TEST) {
         return false;
     }
-	
+
     sptr<IRemoteObject> remoteObject = nullptr;
     std::shared_ptr<AvsessionCallbackProxyFuzzerTest> avSessionCallbackProxy =
         std::make_shared<AvsessionCallbackProxyFuzzerTest>(remoteObject);

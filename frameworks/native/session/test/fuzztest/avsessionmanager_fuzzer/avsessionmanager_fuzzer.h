@@ -21,6 +21,7 @@
 
 namespace OHOS::AVSession {
 bool AVSessionManagerInterfaceTest(uint8_t* data, size_t size);
+void AVSessionManagerTest(uint8_t* data, size_t size);
 
 class TestSessionListener : public SessionListener {
 public:

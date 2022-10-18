@@ -33,7 +33,7 @@ int32_t SessionListenerStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
         return 0;
     }
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-	if (code >= MAX_CODE_NUM) {
+    if (code >= MAX_CODE_NUM) {
         return 0;
     }
 

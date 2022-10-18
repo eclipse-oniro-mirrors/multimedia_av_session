@@ -15,7 +15,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <iostream>
 #include <memory>
 #include "avsession_callback_stub.h"
 #include "iavsession_callback.h"
@@ -102,22 +101,22 @@ int32_t AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(uint8_t* data, size_t
     if ((data == nullptr) || (size <= 0)) {
         return 0;
     }
-	if (size > MAX_CODE_LEN) {
+    if (size > MAX_CODE_LEN) {
         return 0;
     }
 
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-	if (code > MAX_CODE_TEST) {
-		return 0;
-	}
+    if (code > MAX_CODE_TEST) {
+        return 0;
+    }
 
     size -= sizeof(uint32_t);
 
-    std::shared_ptr<AVSessionCallback> avSessionCallbackStub(new TestAVSessionCallback);
+    std::shared_ptr<AVSessionCallback> avSessionCallbackStub = std::make_shared<TestAVSessionCallback>();
     sptr<AVSessionCallbackClient> avSessionCallbackStubClient = new AVSessionCallbackClient(avSessionCallbackStub);
-	if (!avSessionCallbackStubClient) {
-	    SLOGI("avSessionCallbackStubClient is null");
-	    return false;
+    if (!avSessionCallbackStubClient) {
+        SLOGI("avSessionCallbackStubClient is null");
+        return false;
     }
     MessageParcel reply;
     MessageOption option;
@@ -132,14 +131,52 @@ int32_t AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(uint8_t* data, size_t
     return ret;
 }
 
+int32_t AvSessionCallbackClientFuzzer::FuzzTest(uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0) || (size > MAX_CODE_LEN)) {
+        return 0;
+    }
+    std::shared_ptr<AVSessionCallback> avSessionCallbackStub = std::make_shared<TestAVSessionCallback>();
+    sptr<AVSessionCallbackClient> avSessionCallbackStubClient = new AVSessionCallbackClient(avSessionCallbackStub);
+    if (!avSessionCallbackStubClient) {
+        SLOGI("avSessionCallbackStubClient is null");
+        return 0;
+    }
+
+    avSessionCallbackStubClient->OnPlay();
+    avSessionCallbackStubClient->OnPause();
+    avSessionCallbackStubClient->OnStop();
+    avSessionCallbackStubClient->OnPlayNext();
+    avSessionCallbackStubClient->OnPlayPrevious();
+    avSessionCallbackStubClient->OnFastForward();
+    avSessionCallbackStubClient->OnRewind();
+    avSessionCallbackStubClient->OnSeek(*(reinterpret_cast<const int64_t*>(data)));
+    avSessionCallbackStubClient->OnSetSpeed(*(reinterpret_cast<const double*>(data)));
+    avSessionCallbackStubClient->OnSetLoopMode(*(reinterpret_cast<const int32_t*>(data)));
+
+    std::string mediald(reinterpret_cast<const char*>(data), size);
+    avSessionCallbackStubClient->OnToggleFavorite(mediald);
+    return 0;
+}
+
 int32_t OHOS::AVSession::AvSessionCallbackClientRemoteRequestTest(uint8_t* data, size_t size)
 {
     auto avSessionCallbackStub = std::make_unique<AvSessionCallbackClientFuzzer>();
     if (avSessionCallbackStub == nullptr) {
-        cout << "avSessionCallbackStub is null" << endl;
+        SLOGI("avSessionCallbackStub is null");
         return 0;
     }
     return avSessionCallbackStub->FuzzOnRemoteRequest(data, size);
+}
+
+int32_t OHOS::AVSession::AvSessionCallbackClientTests(uint8_t* data, size_t size)
+{
+    auto avSessionCallbackStub = std::make_unique<AvSessionCallbackClientFuzzer>();
+    if (avSessionCallbackStub == nullptr) {
+        SLOGI("avSessionCallbackStub is null");
+        return 0;
+    }
+    return avSessionCallbackStub->FuzzTest(data, size);
 }
 
 /* Fuzzer entry point */
@@ -147,5 +184,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::AVSession::AvSessionCallbackClientRemoteRequestTest(const_cast<uint8_t*>(data), size);
+    OHOS::AVSession::AvSessionCallbackClientTests(const_cast<uint8_t*>(data), size);
     return 0;
 }

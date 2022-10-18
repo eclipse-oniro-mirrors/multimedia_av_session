@@ -34,8 +34,8 @@ bool AvsessionProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     }
     uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
     if (cmdCode >= MAX_CODE_NUM) {
-		return false;
-	}
+        return false;
+    }
     sptr<IRemoteObject> remoteObject = nullptr;
     std::shared_ptr<AVSessionProxyTestFuzzer> avSessionProxy = std::make_shared<AVSessionProxyTestFuzzer>(remoteObject);
 
@@ -47,8 +47,8 @@ bool AvsessionProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     MessageOption option;
     auto remote = avSessionProxy->GetRemote();
     size -= sizeof(uint32_t);
-	request.WriteBuffer(data + sizeof(uint32_t), size);
-	request.RewindRead(0);
+    request.WriteBuffer(data + sizeof(uint32_t), size);
+    request.RewindRead(0);
     int32_t result = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
     CHECK_AND_RETURN_RET_LOG((result = remote->SendRequest(cmdCode, request, reply, option)) == 0, ERR_IPC_SEND_REQUEST,
@@ -65,10 +65,43 @@ bool OHOS::AVSession::AvsessionProxySendRequestTest(uint8_t* data, size_t size)
     return avsessionProxy->FuzzSendRequest(data, size);
 }
 
+void OHOS::AVSession::AvsessionProxyTest(uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+
+    AVMetaData metaData;
+    std::string strData(reinterpret_cast<const char*>(data), size);
+    metaData.SetAssetId(strData);
+
+    AVPlaybackState avState;
+    int32_t state = *(reinterpret_cast<const int32_t*>(data));
+    avState.SetState(state);
+
+    int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
+
+    sptr<IRemoteObject> impl = nullptr;
+    AVSessionProxy avSessionProxy(impl);
+    avSessionProxy.GetAVMetaData(metaData);
+    avSessionProxy.SetAVMetaData(metaData);
+    avSessionProxy.GetAVPlaybackState(avState);
+    avSessionProxy.SetAVPlaybackState(avState);
+    avSessionProxy.AddSupportCommand(cmd);
+    avSessionProxy.DeleteSupportCommand(cmd);
+    avSessionProxy.GetSessionId();
+    avSessionProxy.GetController();
+    avSessionProxy.Activate();
+    avSessionProxy.Deactivate();
+    avSessionProxy.IsActive();
+    avSessionProxy.Destroy();
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::AVSession::AvsessionProxySendRequestTest(data, size);
+    OHOS::AVSession::AvsessionProxyTest(data, size);
     return 0;
 }

@@ -20,12 +20,14 @@
 #include "avsession_info.h"
 namespace OHOS::AVSession {
 int32_t AvSessionCallbackClientRemoteRequestTest(uint8_t* data, size_t size);
+int32_t AvSessionCallbackClientTests(uint8_t* data, size_t size);
 
 class AvSessionCallbackClientFuzzer {
 public:
     AvSessionCallbackClientFuzzer() = default;
     ~AvSessionCallbackClientFuzzer() = default;
     int32_t FuzzOnRemoteRequest(uint8_t* data, size_t size);
+    int32_t FuzzTest(uint8_t* data, size_t size);
 };
 
 class TestAVSessionCallback : public AVSessionCallback {

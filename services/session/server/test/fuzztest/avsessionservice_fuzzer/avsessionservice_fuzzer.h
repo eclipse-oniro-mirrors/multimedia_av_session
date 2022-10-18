@@ -19,12 +19,22 @@
 #include <cstddef>
 namespace OHOS::AVSession {
 int32_t AVSessionServiceRemoteRequestTest(uint8_t* data, size_t size);
+int32_t AVSessionServiceGetAllSessionDescriptorsTest(uint8_t* data, size_t size);
+int32_t AVSessionServiceCreSessionAndControllerTest(uint8_t* data, size_t size);
+int32_t AVSessionServiceRegisterTest(uint8_t* data, size_t size);
+void AVSessionOnAddSystemAbilityTest(uint8_t* data, size_t size);
+int32_t AVSessionSendCommandTest(uint8_t* data, size_t size);
 
 class AVSessionServiceFuzzer {
 public:
     AVSessionServiceFuzzer() = default;
     ~AVSessionServiceFuzzer() = default;
     int32_t OnRemoteRequest(uint8_t* data, size_t size);
+    int32_t GetAllSessionDescriptorsTest(uint8_t* data, size_t size);
+    int32_t CreateSessionAndControllerTest(uint8_t* data, size_t size);
+    int32_t RegisterTest(uint8_t* data, size_t size);
+    void OnAddSystemAbilityTest(uint8_t* data, size_t size);
+    int32_t SendCommandTest(uint8_t* data, size_t size);
 };
 }
 #endif
