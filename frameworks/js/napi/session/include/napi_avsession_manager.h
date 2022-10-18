@@ -56,6 +56,8 @@ private:
 
     static void HandleServiceDied();
 
+    static napi_status RegisterNativeSessionListener(napi_env env);
+
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> eventHandlers_;
 
     static std::shared_ptr<NapiSessionListener> listener_;

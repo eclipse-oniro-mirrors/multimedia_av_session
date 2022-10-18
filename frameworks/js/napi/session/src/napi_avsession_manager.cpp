@@ -272,6 +272,33 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
 
     return NapiAsyncWork::Enqueue(env, context, "CastAudio", executor, complete);
 }
+napi_status NapiAVSessionManager::RegisterNativeSessionListener(napi_env env)
+{
+    if (listener_ == nullptr) {
+        listener_ = std::make_shared<NapiSessionListener>();
+        if (listener_ == nullptr) {
+            SLOGE("OnEvent failed : no memory");
+            NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+            return napi_generic_failure;
+        }
+        int32_t ret = AVSessionManager::GetInstance().RegisterSessionListener(listener_);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("native register session listener failed");
+            if (ret == ERR_INVALID_PARAM) {
+                NapiUtils::ThrowError(env, "OnEvent failed : native invalid parameters",
+                    NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            } else if (ret == ERR_NO_PERMISSION) {
+                NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
+                    NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+            } else {
+                NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
+                    NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+            }
+            return napi_generic_failure;
+        }
+    }
+    return napi_ok;
+}
 
 napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
 {
@@ -303,28 +330,9 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
         NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         return NapiUtils::GetUndefinedValue(env);
     }
-    if (listener_ == nullptr) {
-        listener_ = std::make_shared<NapiSessionListener>();
-        if (listener_ == nullptr) {
-            SLOGE("OnEvent failed : no memory");
-            NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
-            return NapiUtils::GetUndefinedValue(env);
-        }
-        int32_t ret = AVSessionManager::GetInstance().RegisterSessionListener(listener_);
-        if (ret != AVSESSION_SUCCESS) {
-            SLOGE("native register session listener failed");
-            if (ret == ERR_INVALID_PARAM) {
-                NapiUtils::ThrowError(env, "OnEvent failed : native invalid parameters",
-                    NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-            } else if (ret == ERR_NO_PERMISSION) {
-                NapiUtils::ThrowError(env, "OnEvent failed : native invalid parameters",
-                    NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-            } else {
-                NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
-                    NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
-            }
-            return NapiUtils::GetUndefinedValue(env);
-        }
+
+    if (RegisterNativeSessionListener(env) == napi_generic_failure) {
+        return NapiUtils::GetUndefinedValue(env);
     }
 
     if (it->second.first(env, callback) != napi_ok) {
