@@ -580,7 +580,7 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::s
                     NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
                 return napi_generic_failure;
             } else {
-                NapiUtils::ThrowError(env, "OnEvent failed : native controller not exist",
+                NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
                     NapiAVSessionManager::errcode_[ret]);
                 return napi_generic_failure;
             }
