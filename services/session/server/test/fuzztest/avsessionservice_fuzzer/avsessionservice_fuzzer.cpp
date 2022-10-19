@@ -23,6 +23,8 @@ using namespace OHOS;
 using namespace OHOS::AVSession;
 
 const int32_t MAX_CODE_LEN  = 512;
+constexpr const char* TEST_BUNDLE_NAME = "test.ohos.avsession";
+constexpr const char* TEST_ABILITY_NAME = "test.ability";
 
 int32_t AVSessionServiceFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
 {
@@ -85,11 +87,9 @@ int32_t AVSessionServiceFuzzer::CreateSessionAndControllerTest(uint8_t* data, si
 
     int32_t type = *reinterpret_cast<const int32_t*>(data);
     std::string tag(reinterpret_cast<const char*>(data), size);
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    std::string abilityName(reinterpret_cast<const char*>(data), size);
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(bundleName);
-    elementName.SetAbilityName(abilityName);
+    elementName.SetBundleName(TEST_BUNDLE_NAME);
+    elementName.SetAbilityName(TEST_ABILITY_NAME);
 
     sptr<AVSessionService> mAVSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
     auto session = mAVSessionService->CreateSessionInner(tag, type, elementName);
