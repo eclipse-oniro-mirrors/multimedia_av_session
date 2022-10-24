@@ -16,10 +16,11 @@
 #include <iostream>
 #include <cstddef>
 #include <cstdint>
-#include "avsession_controller_proxy_fuzzer.h"
 #include "avsession_callback_proxy.h"
+#include "avsession_controller_proxy.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_controller_proxy_fuzzer.h"
 
 using namespace std;
 using namespace OHOS;
@@ -36,9 +37,9 @@ bool AvsessionControllerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     }
 
     uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
-	if (cmdCode >= MAX_CODE_TEST) {
-		return false;
-	}
+    if (cmdCode >= MAX_CODE_TEST) {
+        return false;
+    }
 
     sptr<IRemoteObject> remoteObject = nullptr;
     std::shared_ptr<AvsessionControllerProxyFuzzerTest> avSessionProxy =
@@ -71,10 +72,44 @@ bool OHOS::AVSession::AvsessionControllerProxySendRequest(uint8_t* data, size_t 
     return avsessionProxy->FuzzSendRequest(data, size);
 }
 
+void OHOS::AVSession::AvsessionControllerProxyTest(uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+
+    AVPlaybackState state;
+    int32_t _state = *(reinterpret_cast<const int32_t*>(data));
+    state.SetState(_state);
+
+    AVMetaData metaData;
+    std::string _data(reinterpret_cast<const char*>(data), size);
+    metaData.SetAssetId(_data);
+
+    std::vector<int32_t> cmds;
+    int32_t _cmds = *(reinterpret_cast<const int32_t*>(data));
+    cmds.push_back(_cmds);
+
+    bool isActive = *(reinterpret_cast<const bool*>(data));
+
+    AVControlCommand controlCommand;
+    int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
+    controlCommand.SetCommand(cmd);
+
+    sptr<IRemoteObject> impl = nullptr;
+    AVSessionControllerProxy avSessionControllerProxy(impl);
+    avSessionControllerProxy.GetAVPlaybackState(state);
+    avSessionControllerProxy.GetAVMetaData(metaData);
+    avSessionControllerProxy.GetValidCommands(cmds);
+    avSessionControllerProxy.IsSessionActive(isActive);
+    avSessionControllerProxy.SendControlCommand(controlCommand);
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::AVSession::AvsessionControllerProxySendRequest(data, size);
+    OHOS::AVSession::AvsessionControllerProxyTest(data, size);
     return 0;
 }

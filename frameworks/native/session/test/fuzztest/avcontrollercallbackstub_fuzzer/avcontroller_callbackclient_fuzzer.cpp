@@ -77,18 +77,18 @@ void AvControllerCallbackClientFuzzer::FuzzOnRemoteRequest(const uint8_t* data, 
         return;
     }
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-	if (code >= MAX_CODE_TEST) {
-		return;
-	}
+    if (code >= MAX_CODE_TEST) {
+        return;
+    }
     std::shared_ptr<TestAVControllerCallback> testAVControllerCallback = std::make_shared<TestAVControllerCallback>();
-	if (!testAVControllerCallback) {
-		SLOGI("testAVControllerCallback is null");
+    if (!testAVControllerCallback) {
+        SLOGI("testAVControllerCallback is null");
         return;
     }
     sptr<AVControllerCallbackClient> aVControllerCallbackClient =
         new AVControllerCallbackClient(testAVControllerCallback);
-	if (!aVControllerCallbackClient) {
-		SLOGI("avControllerCallbackClient is null");
+    if (!aVControllerCallbackClient) {
+        SLOGI("avControllerCallbackClient is null");
         return;
     }
     MessageParcel dataMessageParcel;
@@ -106,6 +106,36 @@ void AvControllerCallbackClientFuzzer::FuzzOnRemoteRequest(const uint8_t* data, 
     }
 }
 
+void AvControllerCallbackClientFuzzer::FuzzTests(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
+    std::shared_ptr<TestAVControllerCallback> testAVControllerCallback = std::make_shared<TestAVControllerCallback>();
+    if (!testAVControllerCallback) {
+        SLOGI("testAVControllerCallback is null");
+        return;
+    }
+    AVControllerCallbackClient aVControllerCallbackClient(testAVControllerCallback);
+    aVControllerCallbackClient.OnSessionDestroy();
+    int32_t state = *(reinterpret_cast<const int32_t*>(data));
+    if ((state >= AVPlaybackState::PLAYBACK_STATE_INITIAL) && (state <= AVPlaybackState::PLAYBACK_STATE_MAX)) {
+        AVPlaybackState playbackState;
+        playbackState.SetState(state);
+        aVControllerCallbackClient.OnPlaybackStateChange(playbackState);
+    }
+
+    AVMetaData metaData;
+    std::string assetId(reinterpret_cast<const char*>(data), size);
+    metaData.SetAssetId(assetId);
+    aVControllerCallbackClient.OnMetaDataChange(metaData);
+    aVControllerCallbackClient.OnActiveStateChange(*(reinterpret_cast<const bool*>(data)));
+
+    std::vector<int32_t> cmds;
+    cmds.push_back(*(reinterpret_cast<const int32_t*>(data)));
+    aVControllerCallbackClient.OnValidCommandChange(cmds);
+}
+
 void OHOS::AVSession::AvControllerCallbackOnRemoteRequest(const uint8_t* data, size_t size)
 {
     auto avControllerCallbackClient = std::make_unique<AvControllerCallbackClientFuzzer>();
@@ -116,10 +146,21 @@ void OHOS::AVSession::AvControllerCallbackOnRemoteRequest(const uint8_t* data, s
     avControllerCallbackClient->FuzzOnRemoteRequest(data, size);
 }
 
+void OHOS::AVSession::AvControllerCallbackClientTests(const uint8_t* data, size_t size)
+{
+    auto avControllerCallbackClient = std::make_unique<AvControllerCallbackClientFuzzer>();
+    if (avControllerCallbackClient == nullptr) {
+        SLOGI("avControllerCallbackClient is null");
+        return;
+    }
+    avControllerCallbackClient->FuzzTests(data, size);
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::AVSession::AvControllerCallbackOnRemoteRequest(data, size);
+    OHOS::AVSession::AvControllerCallbackClientTests(data, size);
     return 0;
 }

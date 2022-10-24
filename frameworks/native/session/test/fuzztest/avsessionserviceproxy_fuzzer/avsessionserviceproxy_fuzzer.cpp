@@ -33,9 +33,9 @@ bool AVSessionServiceProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     }
 
     uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
-	if (cmdCode >= MAX_CODE_TEST) {
-		return false;
-	}
+    if (cmdCode >= MAX_CODE_TEST) {
+        return false;
+    }
 
     sptr<IRemoteObject> remoteObject = nullptr;
     std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy =
@@ -49,8 +49,8 @@ bool AVSessionServiceProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     MessageOption option;
     auto remote = avServiceProxy->GetRemote();
     size -= sizeof(uint32_t);
-	request.WriteBuffer(data + sizeof(uint32_t), size);
-	request.RewindRead(0);
+    request.WriteBuffer(data + sizeof(uint32_t), size);
+    request.RewindRead(0);
     int32_t result = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
     CHECK_AND_RETURN_RET_LOG((result = remote->SendRequest(cmdCode, request, reply, option)) == 0, ERR_IPC_SEND_REQUEST,
