@@ -18,7 +18,6 @@ group("fuzztest") {
   deps += [
     # deps file
     "avcontrollercallbackstub_fuzzer:AVControllerCallbackStubFuzzTest",
-    "avsessioncallbackstub_fuzzer:AVSessionCallbackStubFuzzTest",
     "avsessioncontrollerproxy_fuzzer:AvSessionControllerProxyFuzzTest",
     "avsessionmanager_fuzzer:AVSessionManagerFuzzTest",
     "avsessionproxy_fuzzer:AvSessionProxyFuzzTest",
