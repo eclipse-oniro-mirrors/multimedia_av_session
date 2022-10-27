@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include "avsession_trace.h"
 #include "napi_async_callback.h"
-#include <memory>
 
 namespace OHOS::AVSession {
 NapiAsyncCallback::NapiAsyncCallback(napi_env env) : env_(env)
@@ -80,7 +80,7 @@ void NapiAsyncCallback::Call(napi_ref method, NapiArgsGetter getter)
         return;
     }
 
-    work->data = new DataContext{ env_, method, std::move(getter) };
+    work->data = new DataContext{env_, method, std::move(getter)};
     int res = uv_queue_work(loop_, work, [](uv_work_t* work) {}, AfterWorkCallback);
     if (res != 0) {
         SLOGE("uv queue work failed");

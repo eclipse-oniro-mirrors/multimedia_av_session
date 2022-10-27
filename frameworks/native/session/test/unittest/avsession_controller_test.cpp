@@ -891,7 +891,7 @@ HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition002, TestSize.Level1)
     metaData.SetDuration(TestMicroSecond * TestMicroSecond + TestMicroSecond);
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     AVPlaybackState state;
-    state.SetPosition({ TestMicroSecond * TestMicroSecond, TestMicroSecond });
+    state.SetPosition({TestMicroSecond * TestMicroSecond, TestMicroSecond});
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
     AVPlaybackState resultState;
     EXPECT_EQ(controller_->GetAVPlaybackState(resultState), AVSESSION_SUCCESS);
@@ -919,7 +919,7 @@ HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition003, TestSize.Level1)
     metaData.SetDuration(TestMicroSecond * TestMicroSecond + TestMicroSecond);
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     AVPlaybackState state;
-    state.SetPosition({ TestMicroSecond * TestMicroSecond, TestMicroSecond });
+    state.SetPosition({TestMicroSecond * TestMicroSecond, TestMicroSecond});
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
     sleep(1);
     EXPECT_EQ(controller_->GetRealPlaybackPosition() > 0, true);

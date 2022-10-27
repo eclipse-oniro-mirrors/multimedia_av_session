@@ -174,7 +174,7 @@ napi_status NapiPlaybackState::GetPosition(napi_env env, napi_value in, AVPlayba
     int64_t elapsedTime {};
     status = NapiUtils::GetNamedProperty(env, result, "elapsedTime", elapsedTime);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
-    out.SetPosition({ elapsedTime, updateTime });
+    out.SetPosition({elapsedTime, updateTime});
     return status;
 }
 

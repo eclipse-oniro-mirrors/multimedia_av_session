@@ -15,9 +15,9 @@
 
 #include <iostream>
 #include <memory>
-#include "avsessionserviceproxy_fuzzer.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsessionserviceproxy_fuzzer.h"
 
 using namespace std;
 using namespace OHOS;

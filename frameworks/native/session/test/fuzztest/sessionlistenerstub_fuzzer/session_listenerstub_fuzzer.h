@@ -19,7 +19,7 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-class TestSessionListener : public SessionListener{
+class TestSessionListener : public SessionListener {
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override
     {
         SLOGI("Enter into TestSessionListener::OnSessionCreate.");

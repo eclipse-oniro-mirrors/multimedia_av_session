@@ -177,7 +177,7 @@ BENCHMARK_F(AVSessionManagerTest, GetDescriptorsBySessionId)(benchmark::State& s
     session->Activate();
     auto sessionId = session->GetSessionId();
     while (state.KeepRunning()) {
-        AVSessionDescriptor descriptor{};
+        AVSessionDescriptor descriptor {};
         auto errCode = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
         if (errCode != AVSESSION_SUCCESS) {
             SLOGE("%{public}s error, failed to GetSessionDescriptorsBySessionId, error code is %{public}d.", __func__,

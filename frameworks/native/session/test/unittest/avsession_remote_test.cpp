@@ -34,6 +34,8 @@ using namespace OHOS::AVSession;
 using namespace OHOS::AudioStandard;
 using namespace OHOS::Security::AccessToken;
 
+const int32_t DECICE_ID = 2;
+
 static HapInfoParams g_info = {
     .userID = 100,
     .bundleName = "ohos.permission_test.demo",
@@ -114,7 +116,7 @@ void AVSessionRemoteTest::SetUpTestCase()
     AudioDeviceDescriptor descriptor;
     for (int32_t i = 0; i < deviceList.size(); i++) {
         descriptor.networkId_ = deviceList[i].networkId;
-        descriptor.deviceId_ = 2;
+        descriptor.deviceId_ = DECICE_ID;
         g_descriptors.push_back(descriptor);
         SLOGI("g_sinkDevices is %{public}s", deviceList[i].networkId);
     }
@@ -132,8 +134,8 @@ void AVSessionRemoteTest::SetUp()
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
     elementName.SetAbilityName(g_testAbilityName);
-    avsession_ = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
-                                                            elementName);
+    avsession_ =
+        AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
     ASSERT_NE(avsession_, nullptr);
 }
 
@@ -385,7 +387,7 @@ HWTEST_F(AVSessionRemoteTest, SetAVPlaybackState001, TestSize.Level1)
     AVPlaybackState playbackState;
     playbackState.SetState(1);
     playbackState.SetSpeed(1);
-    playbackState.SetPosition({ 80000, 0 });
+    playbackState.SetPosition({80000, 0});
     playbackState.SetBufferedTime(700000);
     playbackState.SetLoopMode(1);
     playbackState.SetFavorite(true);

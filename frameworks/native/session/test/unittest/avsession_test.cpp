@@ -328,7 +328,7 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState001, TestSize.Level1)
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     g_playbackState.SetState(1);
     g_playbackState.SetSpeed(1.5);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
@@ -347,7 +347,7 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState002, TestSize.Level1)
     SLOGE("SetAVPlaybackState002 Begin");
     g_playbackState.SetState(1);
     g_playbackState.SetSpeed(1);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(700000);
     g_playbackState.SetLoopMode(1);
     g_playbackState.SetFavorite(true);
@@ -371,7 +371,7 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState003, TestSize.Level1)
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     g_playbackState.SetState(1);
     g_playbackState.SetSpeed(1);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(17000);
     g_playbackState.SetLoopMode(1);
     g_playbackState.SetFavorite(true);
@@ -395,7 +395,7 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState004, TestSize.Level1)
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     g_playbackState.SetState(1);
     g_playbackState.SetSpeed(1);
-    g_playbackState.SetPosition({ 10000, 0 });
+    g_playbackState.SetPosition({10000, 0});
     g_playbackState.SetBufferedTime(17000);
     g_playbackState.SetLoopMode(1);
     g_playbackState.SetFavorite(true);
@@ -419,7 +419,7 @@ HWTEST_F(AvsessionTest, GetAVPlaybackState001, TestSize.Level1)
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     g_playbackState.SetState(1);
     g_playbackState.SetSpeed(1);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(87000);
     g_playbackState.SetLoopMode(1);
     g_playbackState.SetFavorite(true);
