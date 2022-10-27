@@ -28,7 +28,8 @@ const int32_t MIN_SIZE_NUM = 4;
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
 
-bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_t size) {
+bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_t size)
+{
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return false;
     }

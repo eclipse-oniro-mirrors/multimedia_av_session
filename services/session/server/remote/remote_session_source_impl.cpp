@@ -70,7 +70,7 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
 
         ret = sessionSyncer->RegisterDataNotifier([this] (const SessionDataCategory category,
                                                           const std::string& deviceId) {
-			AVSESSION_TRACE_SYNC_START("RemoteSessionSourceImpl::DataNotifier");
+            AVSESSION_TRACE_SYNC_START("RemoteSessionSourceImpl::DataNotifier");
             SLOGI("device %{public}s category %{public}d changed", deviceId.c_str(), category);
             CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,

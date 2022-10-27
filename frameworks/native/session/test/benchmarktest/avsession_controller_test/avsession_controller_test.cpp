@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
+#include <benchmark/benchmark.h>
+#include <string>
+#include <unistd.h>
+#include <vector>
 #include "avmeta_data.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"
 #include "key_event.h"
 #include "want_agent.h"
-#include <benchmark/benchmark.h>
-#include <string>
-#include <unistd.h>
-#include <vector>
 
 using namespace std;
 using namespace OHOS::AVSession;
