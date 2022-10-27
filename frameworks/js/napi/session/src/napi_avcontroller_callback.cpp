@@ -15,11 +15,11 @@
 
 #include "avsession_log.h"
 #include "avsession_trace.h"
-#include "napi_avcontroller_callback.h"
 #include "napi_control_command.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
 #include "napi_utils.h"
+#include "napi_avcontroller_callback.h"
 
 namespace OHOS::AVSession {
 NapiAVControllerCallback::NapiAVControllerCallback()

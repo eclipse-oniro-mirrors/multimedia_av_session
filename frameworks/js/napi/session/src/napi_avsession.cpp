@@ -83,7 +83,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice)
     };
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
-    napi_value constructor{};
+    napi_value constructor {};
     auto status = napi_define_class(env, "AVSession", NAPI_AUTO_LENGTH, ConstructorCallback, nullptr,
                                     property_count, descriptors, &constructor);
     if (status != napi_ok) {
@@ -118,11 +118,11 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
 
 napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession> &nativeSession, napi_value &out)
 {
-    napi_value constructor{};
+    napi_value constructor {};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVSessionConstructorRef, &constructor), napi_generic_failure);
-    napi_value instance{};
+    napi_value instance {};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
-    NapiAVSession *napiAvSession{};
+    NapiAVSession *napiAvSession {};
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void **>(&napiAvSession)), napi_generic_failure);
     napiAvSession->session_ = std::move(nativeSession);
     napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
@@ -421,7 +421,7 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
         }
     };
     auto complete = [env, context](napi_value &output) {
-        CHECK_STATUS_RETURN_VOID(context, "get controller failed",NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        CHECK_STATUS_RETURN_VOID(context, "get controller failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
         CHECK_ARGS_RETURN_VOID(context, context->controller_ != nullptr, "controller is nullptr",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
         context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);
@@ -547,7 +547,6 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
             context->errMessage = "Destroy session failed : native server exception";
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
-
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);

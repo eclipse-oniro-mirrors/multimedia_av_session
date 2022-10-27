@@ -89,7 +89,7 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::CreateAVSession");
     struct ConcreteContext : public ContextBase {
         std::string tag_;
-        int32_t type_{};
+        int32_t type_ {};
         AppExecFwk::ElementName elementName_;
         std::shared_ptr<AVSession> session_;
     };
@@ -179,7 +179,7 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionId_);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (!context->sessionId_.empty()),
-                               "invalid sessionId",NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+                               "invalid sessionId", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_CREATE_CONTROLLER_TASK_ID;

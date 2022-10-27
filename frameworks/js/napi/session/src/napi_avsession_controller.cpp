@@ -16,7 +16,6 @@
 #include "key_event.h"
 #include "napi_async_work.h"
 #include "napi_avcontroller_callback.h"
-#include "napi_avsession_controller.h"
 #include "napi_control_command.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
@@ -25,6 +24,7 @@
 #include "avsession_errors.h"
 #include "avsession_trace.h"
 #include "napi_avsession_manager.h"
+#include "napi_avsession_controller.h"
 
 namespace OHOS::AVSession {
 static __thread napi_ref AVControllerConstructorRef = nullptr;
@@ -66,7 +66,7 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
-    napi_value constructor{};
+    napi_value constructor {};
     auto status = napi_define_class(env, "AVSessionController", NAPI_AUTO_LENGTH, ConstructorCallback, nullptr,
         property_count, descriptors, &constructor);
     if (status != napi_ok) {
@@ -104,11 +104,11 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
 napi_status NapiAVSessionController::NewInstance(napi_env env, std::shared_ptr<AVSessionController> &nativeController,
     napi_value &out)
 {
-    napi_value constructor{};
+    napi_value constructor {};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVControllerConstructorRef, &constructor), napi_generic_failure);
-    napi_value instance{};
+    napi_value instance {};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
-    NapiAVSessionController *napiController{};
+    NapiAVSessionController *napiController {};
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void **>(&napiController)), napi_generic_failure);
     napiController->controller_ = std::move(nativeController);
     napiController->sessionId_ = napiController->controller_->GetSessionId();
@@ -158,7 +158,6 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
         context->status = NapiPlaybackState::SetValue(env, context->state, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
-
     };
     return NapiAsyncWork::Enqueue(env, context, "GetAVPlaybackState", executor, complete);
 }
