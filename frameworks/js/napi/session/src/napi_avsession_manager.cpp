@@ -89,7 +89,7 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::CreateAVSession");
     struct ConcreteContext : public ContextBase {
         std::string tag_;
-        int32_t type_ {};
+        int32_t type_{};
         AppExecFwk::ElementName elementName_;
         std::shared_ptr<AVSession> session_;
     };
