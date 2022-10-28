@@ -1,0 +1,175 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import("//build/test.gni")
+
+module_output_path = "multimedia_av_session/session"
+
+###############################################################################
+config("module_private_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "../../ipc/base/",
+    "../../ipc/proxy/",
+    "../../ipc/stub/",
+    "../../server/",
+    "../../server/remote/",
+    "../../../../interfaces/inner_api/native/session/include/",
+    "../../../../frameworks/native/session/include",
+    "../../adapter/",
+    "../../../../utils/include/",
+  ]
+}
+
+ohos_unittest("AVSessionServiceTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_service_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "//foundation/multimedia/av_session/frameworks/common:avsession_common",
+    "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
+    "//foundation/multimedia/av_session/utils:avsession_utils",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "multimedia_audio_framework:audio_client",
+    "multimedia_image_framework:image_native",
+    "samgr:samgr_proxy",
+  ]
+}
+
+ohos_unittest("AppManagerAdapterTest") {
+  module_out_path = module_output_path
+
+  sources = [ "appmanager_adapter_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "//foundation/multimedia/av_session/services/session:avsession_service",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "multimedia_audio_framework:audio_client",
+    "multimedia_image_framework:image_native",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+}
+
+ohos_unittest("AudioAdapterTest") {
+  module_out_path = module_output_path
+
+  sources = [ "audio_adapter_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "//foundation/multimedia/av_session/services/session:avession_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "multimedia_audio_framework:audio_client",
+  ]
+}
+
+ohos_unittest("RemoteUtilsTest") {
+  module_out_path = module_output_path
+
+  sources = [ "remote_utils_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "//foundation/multimedia/av_session/services/session:avession_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "multimedia_audio_framework:audio_client",
+    "safwk:system_ability_fwk",
+  ]
+}
+
+ohos_unittest("SessionStackTest") {
+  module_out_path = module_output_path
+
+  sources = [ "session_stack_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "//foundation/multimedia/av_session/services/session:avession_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "multimedia_audio_framework:audio_client",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+}
+
+###############################################################################
+group("unittest") {
+  testonly = true
+
+  deps = [
+    ":AVSessionServiceTest",
+    ":AppManagerAdapterTest",
+    ":AudioAdapterTest",
+    ":RemoteUtilsTest",
+    ":SessionStackTest",
+  ]
+}
+###############################################################################
