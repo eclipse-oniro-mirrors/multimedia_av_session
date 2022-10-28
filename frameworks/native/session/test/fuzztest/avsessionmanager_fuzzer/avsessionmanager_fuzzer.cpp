@@ -14,8 +14,8 @@
  */
 #include <string>
 #include <memory>
-#include <iostream>
 #include "avsession_errors.h"
+#include "avsession_manager_impl.h"
 #include "avsessionmanager_fuzzer.h"
 
 using namespace std;
@@ -69,18 +69,18 @@ bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_
 bool AVSessionManagerFuzzer::SendSystemControlCommandFuzzTest(const uint8_t *data)
 {
     std::shared_ptr<TestSessionListener> listener = std::make_shared<TestSessionListener>();
-	if (!listener) {
-		SLOGI("listener is null");
+    if (!listener) {
+        SLOGI("listener is null");
         return false;
     }
     auto result = AVSessionManager::GetInstance().RegisterSessionListener(listener);
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
-	if (!keyEvent) {
-		SLOGI("keyEvent is null");
+    if (!keyEvent) {
+        SLOGI("keyEvent is null");
         return false;
     }
-	int32_t keyCode = *reinterpret_cast<const int32_t*>(data);
-	keyEvent->SetKeyCode(keyCode);
+    int32_t keyCode = *reinterpret_cast<const int32_t*>(data);
+    keyEvent->SetKeyCode(keyCode);
     keyEvent->SetKeyAction(*reinterpret_cast<const int32_t*>(data));
     keyEvent->SetActionTime(TIME);
     auto keyItem = OHOS::MMI::KeyEvent::KeyItem();
@@ -100,10 +100,41 @@ bool OHOS::AVSession::AVSessionManagerInterfaceTest(uint8_t* data, size_t size)
 {
     auto avSessionManager = std::make_unique<AVSessionManagerFuzzer>();
     if (avSessionManager == nullptr) {
-        cout << "avSessionManagerFuzzer is null" << endl;
+        SLOGI("avSessionManagerFuzzer is null");
         return false;
     }
     return avSessionManager->AVSessionManagerFuzzTest(data, size);
+}
+
+void OHOS::AVSession::AVSessionManagerTest(uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        SLOGI("Invalid data");
+        return;
+    }
+
+    std::vector<AVSessionDescriptor> descriptors;
+    std::string avSessionId(reinterpret_cast<const char*>(data), size);
+    AVSessionDescriptor avSessionDescriptor;
+    avSessionDescriptor.sessionId_ = avSessionId;
+    descriptors.push_back(avSessionDescriptor);
+
+    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    std::shared_ptr<AVSessionController> controller;
+
+    std::string bySessionId(reinterpret_cast<const char*>(data), size);
+    AVSessionDescriptor descriptor;
+
+    AVControlCommand command;
+    int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
+    command.SetCommand(cmd);
+
+    AVSessionManagerImpl avSessionManagerImpl;
+    avSessionManagerImpl.GetAllSessionDescriptors(descriptors);
+    avSessionManagerImpl.CreateController(sessionId, controller);
+    avSessionManagerImpl.GetActivatedSessionDescriptors(descriptors);
+    avSessionManagerImpl.GetSessionDescriptorsBySessionId(bySessionId, descriptor);
+    avSessionManagerImpl.SendSystemControlCommand(command);
 }
 
 /* Fuzzer entry point */
@@ -111,5 +142,6 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::AVSession::AVSessionManagerInterfaceTest(data, size);
+    OHOS::AVSession::AVSessionManagerTest(data, size);
     return 0;
 }

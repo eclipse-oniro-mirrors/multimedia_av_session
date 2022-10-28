@@ -19,6 +19,8 @@
 #include <cstddef>
 namespace OHOS::AVSession {
 void AvControllerItemRemoteRequestTest(const uint8_t* data, size_t size);
+void AvControllerItemDataTest(const uint8_t* data, size_t size);
+void AvControllerItemTest(const uint8_t* data, size_t size);
 
 class AvControllerItemFuzzer {
 public:

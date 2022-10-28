@@ -19,12 +19,14 @@
 #include <cstddef>
 namespace OHOS::AVSession {
 void AvControllerCallbackOnRemoteRequest(const uint8_t* data, size_t size);
+void AvControllerCallbackClientTests(const uint8_t* data, size_t size);
 
 class AvControllerCallbackClientFuzzer {
 public:
     AvControllerCallbackClientFuzzer() = default;
     ~AvControllerCallbackClientFuzzer() = default;
     void FuzzOnRemoteRequest(const uint8_t* data, size_t size);
+    void FuzzTests(const uint8_t* data, size_t size);
 };
 }
 #endif

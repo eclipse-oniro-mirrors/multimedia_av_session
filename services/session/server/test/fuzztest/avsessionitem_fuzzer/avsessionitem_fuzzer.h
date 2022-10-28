@@ -23,6 +23,7 @@
 
 namespace OHOS::AVSession {
 void AvSessionItemOnRemoteRequest(uint8_t* data, size_t size);
+void AvSessionItemTest(uint8_t* data, size_t size);
 class AvSessionItemFuzzer {
 public:
     AvSessionItemFuzzer() = default;
