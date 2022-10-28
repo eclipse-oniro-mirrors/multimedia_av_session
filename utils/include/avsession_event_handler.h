@@ -26,7 +26,7 @@ public:
     AVSessionEventHandler();
     ~AVSessionEventHandler();
 
-    bool AVSessionPostTask(const Callback &callback, const std::string &name = std::string());
+    bool AVSessionPostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
 
     void AVSessionRemoveTask(const std::string &name);
 
