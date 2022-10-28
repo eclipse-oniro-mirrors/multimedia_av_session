@@ -633,7 +633,7 @@ void AVSessionService::HandleEventHandlerCallBack()
         topSession_->ExecuteControllerCommand(cmd);
     }
     pressCount_ = 0;
-    isFirstPress = false;
+    isFirstPress = true;
 }
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
@@ -648,11 +648,12 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
     SLOGI("key=%{public}d", keyEvent.GetKeyCode());
     if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK) {
         pressCount_++;
-        if (!isFirstPress) {
-            isFirstPress = AVSessionEventHandler::GetInstance().AVSessionPostTask([this](){
+        if (isFirstPress) {
+            auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
                 HandleEventHandlerCallBack();
             }, "SendSystemAVKeyEvent", CLICK_TIMEOUT);
-            CHECK_AND_RETURN_RET_LOG(isFirstPress, AVSESSION_ERROR, "init eventHandler failed");
+            CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
+            isFirstPress = false;
         }
         return AVSESSION_SUCCESS;
     }
