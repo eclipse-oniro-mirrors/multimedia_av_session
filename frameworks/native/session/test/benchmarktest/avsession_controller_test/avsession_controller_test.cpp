@@ -52,7 +52,6 @@ public:
         elementName.SetAbilityName(g_testAbilityName);
         avsession_ =
             AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
-
         if (avsession_ == nullptr) {
             SLOGE("%{public}s error, failed to CreateSession, avsession_ nullptr.", __func__);
         }
