@@ -40,6 +40,8 @@
 #include "avsession_sysevent.h"
 #include "json_utils.h"
 #include "avsession_utils.h"
+#include "avcontrol_command.h"
+#include "avsession_event_handler.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -125,6 +127,7 @@ void AVSessionService::InitKeyEvent()
         MMI::KeyEvent::KEYCODE_MEDIA_PREVIOUS,
         MMI::KeyEvent::KEYCODE_MEDIA_REWIND,
         MMI::KeyEvent::KEYCODE_MEDIA_FAST_FORWARD,
+        MMI::KeyEvent::KEYCODE_HEADSETHOOK,
     };
 
     KeyEventAdapter::GetInstance().SubscribeKeyEvent(
@@ -610,6 +613,29 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionService::HandleEventHandlerCallBack()
+{
+    SLOGI("handle eventHandler callback");
+    AVControlCommand cmd;
+    if (pressCount_ >= 3 && topSession_) {
+        cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+        topSession_->ExecuteControllerCommand(cmd);
+    } else if (pressCount_ == 2 && topSession_) {
+        cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
+        topSession_->ExecuteControllerCommand(cmd);
+    } else if (pressCount_ == 1 && topSession_) {
+        auto playbackState = topSession_->GetPlaybackState();
+        if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAYING) {
+            cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
+        } else {
+            cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+        }
+        topSession_->ExecuteControllerCommand(cmd);
+    }
+    pressCount_ = 0;
+    isInitEventHandler = false;
+}
+
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
@@ -620,6 +646,15 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
         return ERR_NO_PERMISSION;
     }
     SLOGI("key=%{public}d", keyEvent.GetKeyCode());
+    if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK) {
+        pressCount_++;
+        if (!isInitEventHandler) {
+            isInitEventHandler = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]()
+                {HandleEventHandlerCallBack();}, "SendSystemAVKeyEvent", 500);
+            CHECK_AND_RETURN_RET_LOG(isInitEventHandler, AVSESSION_ERROR, "init eventHandler failed");
+        }
+        return AVSESSION_SUCCESS;
+    }
     if (topSession_) {
         topSession_->HandleMediaKeyEvent(keyEvent);
     } else {

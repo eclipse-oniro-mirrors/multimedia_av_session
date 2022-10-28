@@ -33,7 +33,7 @@ AVSessionEventHandler::~AVSessionEventHandler()
     SLOGI("destroy");
 }
 
-bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const std::string &name)
+bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const std::string &name, int64_t delayTime)
 {
     SLOGI("AVSessionEventHandler ProxyPostTask");
 
@@ -41,7 +41,7 @@ bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const st
         auto runner = AppExecFwk::EventRunner::Create("AVSessionEventHandler");
         handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
-    return handler_->PostTask(callback, name);
+    return handler_->PostTask(callback, name, delayTime);
 }
 
 void AVSessionEventHandler::AVSessionRemoveTask(const std::string &name)

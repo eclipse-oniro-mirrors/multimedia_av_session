@@ -35,6 +35,10 @@ bool PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessToken
         return true;
     }
 
+    if (AccessTokenKit::GetTokenTypeFlag(tokenId) == TOKEN_SHELL) {
+        return true;
+    }
+
     int32_t res = AccessTokenKit::VerifyAccessToken(tokenId, MANAGE_MEDIA_RESOURCES);
     if (res == PERMISSION_GRANTED) {
         return true;
