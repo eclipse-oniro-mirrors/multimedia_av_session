@@ -230,7 +230,7 @@ HWTEST_F(AVSessionControllerTest, GetAVPlaybackState001, TestSize.Level1)
     state.SetState(1);
     state.SetSpeed(1);
     state.SetBufferedTime(1);
-    state.SetPosition({ 1, 0 });
+    state.SetPosition({1, 0});
     state.SetLoopMode(1);
     state.SetFavorite(true);
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
