@@ -247,7 +247,12 @@ private:
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
 
     int32_t pressCount_ {};
-    bool isInitEventHandler;
+    bool isFirstPress;
+
+    static constexpr const int32_t ONE_CLICK = 1;
+    static constexpr const int32_t DOUBLE_CLICK = 2;
+    static constexpr int32_t THREE_CLICK = 3;
+    static constexpr int32_t CLICK_TIMEOUT = 500;
 };
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {

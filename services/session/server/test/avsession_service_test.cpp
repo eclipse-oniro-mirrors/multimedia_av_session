@@ -154,7 +154,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
     g_playbackState.SetSpeed(1.5);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
@@ -162,12 +162,6 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
 
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
     EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
-
-//    std::shared_ptr<OHOS::MMI::KeyOption> keyOption = std::make_shared<OHOS::MMI::KeyOption>();
-//    keyOption->SetFinalKey(OHOS::MMI::KeyEvent::KEYCODE_HEADSETHOOK);
-//    keyOption->SetFinalKeyDown(true);
-//    keyOption->SetFinalKeyDownDuration(0);
-//    OHOS::MMI::InputManager::GetInstance()->SubscribeKeyEvent(keyOption, [](const auto& keyEvent){AVSessionManager::GetInstance().SendSystemAVKeyEvent(*keyEvent);});
 
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -178,7 +172,6 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
     item.SetDownTime(0);
     item.SetPressed(true);
     keyEvent->AddPressedKeyItems(item);
-
     OHOS::MMI::InputManager::GetInstance()->SimulateInputEvent(keyEvent);
     sleep(1);
     EXPECT_EQ(g_pauseOnCall, AVSESSION_SUCCESS);
@@ -214,7 +207,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSED);
     g_playbackState.SetSpeed(1.5);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
@@ -232,7 +225,6 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
     item.SetDownTime(0);
     item.SetPressed(true);
     keyEvent->AddPressedKeyItems(item);
-
     OHOS::MMI::InputManager::GetInstance()->SimulateInputEvent(keyEvent);
     sleep(1);
     EXPECT_EQ(g_playOnCall, AVSESSION_SUCCESS);
@@ -267,7 +259,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent003, TestSize.Level1)
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
     g_playbackState.SetSpeed(1.5);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
@@ -320,7 +312,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent004, TestSize.Level1)
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
     g_playbackState.SetSpeed(1.5);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
@@ -374,7 +366,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent005, TestSize.Level1)
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
     g_playbackState.SetSpeed(1.5);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
@@ -429,7 +421,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent006, TestSize.Level1)
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
     g_playbackState.SetSpeed(1.5);
-    g_playbackState.SetPosition({ 80000, 0 });
+    g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);

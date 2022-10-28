@@ -617,13 +617,13 @@ void AVSessionService::HandleEventHandlerCallBack()
 {
     SLOGI("handle eventHandler callback");
     AVControlCommand cmd;
-    if (pressCount_ >= 3 && topSession_) {
+    if (pressCount_ >= THREE_CLICK && topSession_) {
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
         topSession_->ExecuteControllerCommand(cmd);
-    } else if (pressCount_ == 2 && topSession_) {
+    } else if (pressCount_ == DOUBLE_CLICK && topSession_) {
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
         topSession_->ExecuteControllerCommand(cmd);
-    } else if (pressCount_ == 1 && topSession_) {
+    } else if (pressCount_ == ONE_CLICK && topSession_) {
         auto playbackState = topSession_->GetPlaybackState();
         if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAYING) {
             cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
@@ -633,7 +633,7 @@ void AVSessionService::HandleEventHandlerCallBack()
         topSession_->ExecuteControllerCommand(cmd);
     }
     pressCount_ = 0;
-    isInitEventHandler = false;
+    isFirstPress = false;
 }
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
@@ -648,10 +648,11 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
     SLOGI("key=%{public}d", keyEvent.GetKeyCode());
     if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK) {
         pressCount_++;
-        if (!isInitEventHandler) {
-            isInitEventHandler = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]()
-                {HandleEventHandlerCallBack();}, "SendSystemAVKeyEvent", 500);
-            CHECK_AND_RETURN_RET_LOG(isInitEventHandler, AVSESSION_ERROR, "init eventHandler failed");
+        if (!isFirstPress) {
+            isFirstPress = AVSessionEventHandler::GetInstance().AVSessionPostTask([this](){
+                HandleEventHandlerCallBack();
+            }, "SendSystemAVKeyEvent", CLICK_TIMEOUT);
+            CHECK_AND_RETURN_RET_LOG(isFirstPress, AVSESSION_ERROR, "init eventHandler failed");
         }
         return AVSESSION_SUCCESS;
     }
