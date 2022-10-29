@@ -210,6 +210,8 @@ private:
 
     int32_t StartDefaultAbilityByCall(std::string& sessionId);
 
+    void HandleEventHandlerCallBack();
+
     const nlohmann::json &GetSubNode(const nlohmann::json &node, const std::string &name);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
@@ -243,6 +245,14 @@ private:
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
 
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
+
+    int32_t pressCount_ {};
+    bool isFirstPress = true;
+
+    const int32_t ONE_CLICK = 1;
+    const int32_t DOUBLE_CLICK = 2;
+    const int32_t THREE_CLICK = 3;
+    const int32_t CLICK_TIMEOUT = 500;
 };
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
