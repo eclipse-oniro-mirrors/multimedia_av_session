@@ -322,3 +322,73 @@ HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataByMask001, TestSize.Level1)
     EXPECT_EQ(metaOut.GetDuration(), g_metaDataCloneTest.GetDuration());
     SLOGI("AVMetaDataCopyDataByMask001 End");
 }
+
+/**
+ * @tc.name: SetPreviousAssetId001
+ * @tc.desc: set previous asset id.
+ * @tc.type: FUNC
+ * @tc.require: I5YMXD
+ */
+HWTEST_F(AVMetaDataTest, SetPreviousAssetId001, TestSize.Level1)
+{
+    SLOGI("SetPreviousAssetId001 Begin");
+    AVMetaData metaOut;
+    metaOut.SetPreviousAssetId("123");
+
+    EXPECT_EQ("123", metaOut.GetPreviousAssetId());
+    SLOGI("SetPreviousAssetId001 End");
+}
+
+/**
+ * @tc.name: SetNextAssetId001
+ * @tc.desc: set next asset id.
+ * @tc.type: FUNC
+ * @tc.require: I5YMXD
+ */
+HWTEST_F(AVMetaDataTest, SetNextAssetId001, TestSize.Level1)
+{
+    SLOGI("SetNextAssetId001 Begin");
+    AVMetaData metaOut;
+    metaOut.SetNextAssetId("123");
+
+    EXPECT_EQ("123", metaOut.GetNextAssetId());
+    SLOGI("SetNextAssetId001 End");
+}
+
+/**
+* @tc.name: IsValid001
+* @tc.desc: Return is avmetadata IsValid success
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVMetaDataTest, IsValid001, TestSize.Level1)
+{
+    SLOGI("IsValid001 Begin");
+    AVMetaData metaOut;
+    metaOut.SetAssetId("a");
+    metaOut.SetWriter("b");
+    metaOut.SetDuration(0);
+    metaOut.SetPublishDate(0);
+
+    EXPECT_EQ(metaOut.IsValid(), true);
+    SLOGI("IsValid001 End");
+}
+
+/**
+* @tc.name: IsValid002
+* @tc.desc: Return is avmetadata IsValid failed
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVMetaDataTest, IsValid002, TestSize.Level1)
+{
+    SLOGI("IsValid002 Begin");
+    AVMetaData metaOut;
+    metaOut.SetAssetId("a");
+    metaOut.SetWriter("b");
+    metaOut.SetDuration(-2);
+    metaOut.SetPublishDate(0);
+
+    EXPECT_EQ(metaOut.IsValid(), false);
+    SLOGI("IsValid002 End");
+}

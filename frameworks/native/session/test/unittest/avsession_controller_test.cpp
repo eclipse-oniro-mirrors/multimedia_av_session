@@ -926,6 +926,17 @@ HWTEST_F(AVSessionControllerTest, GetRealPlaybackPosition003, TestSize.Level1)
 }
 
 /**
+* @tc.name: IsDestroy001
+* @tc.desc: Return is controller isdestroy success
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVSessionControllerTest, IsDestroy001, TestSize.Level1)
+{
+    EXPECT_EQ(controller_->IsDestroy(), false);
+}
+
+/**
 * @tc.name: Destroy001
 * @tc.desc: Return is controller destroy success
 * @tc.type: FUNC
