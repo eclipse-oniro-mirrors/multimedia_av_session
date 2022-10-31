@@ -67,7 +67,7 @@ bool OHOS::AVSession::AvsessionProxySendRequestTest(uint8_t* data, size_t size)
 
 void OHOS::AVSession::AvsessionProxyTest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
 

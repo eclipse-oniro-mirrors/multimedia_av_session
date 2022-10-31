@@ -109,7 +109,7 @@ bool OHOS::AVSession::AVSessionManagerInterfaceTest(uint8_t* data, size_t size)
 
 void OHOS::AVSession::AVSessionManagerTest(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         SLOGI("Invalid data");
         return;
     }
