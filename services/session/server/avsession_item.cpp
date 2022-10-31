@@ -151,7 +151,7 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     sptr<AVSessionItem> session(this);
     sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(GetPid(), session);
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "malloc controller failed");
-    controllers_.insert({ GetPid(), result });
+    controllers_.insert({GetPid(), result});
     return result;
 }
 
@@ -363,7 +363,7 @@ void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand &cmd)
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& controller)
 {
     std::lock_guard lockGuard(lock_);
-    controllers_.insert({ pid, controller });
+    controllers_.insert({pid, controller});
     return AVSESSION_SUCCESS;
 }
 
@@ -413,8 +413,9 @@ void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSess
     serviceCallback_ = callback;
 }
 
-void AVSessionItem::UpdateOutputDevice(OutputDeviceInfo &outputDeviceInfo,
-                                       const std::unique_ptr<AudioStandard::AudioRendererChangeInfo> &outputDeviceChangeInfo)
+void AVSessionItem::UpdateOutputDevice(
+    OutputDeviceInfo& outputDeviceInfo,
+    const std::unique_ptr<AudioStandard::AudioRendererChangeInfo>& outputDeviceChangeInfo)
 {
     if (outputDeviceChangeInfo->rendererState == AudioStandard::RENDERER_RELEASED) {
         std::string deviceId = std::to_string(outputDeviceChangeInfo->outputDeviceInfo.deviceId);

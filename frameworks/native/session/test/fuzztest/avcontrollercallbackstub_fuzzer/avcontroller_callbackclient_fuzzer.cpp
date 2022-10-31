@@ -32,7 +32,7 @@ const int32_t MAX_CODE_TEST = 5;
 const int32_t MAX_CODE_LEN  = 512;
 const int32_t MIN_SIZE_NUM  = 4;
 
-class TestAVControllerCallback :public AVControllerCallback {
+class TestAVControllerCallback : public AVControllerCallback {
     void OnSessionDestroy() override;
 
     void OnPlaybackStateChange(const AVPlaybackState& state) override;

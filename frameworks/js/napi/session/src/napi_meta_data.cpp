@@ -236,7 +236,7 @@ napi_status NapiMetaData::GetAuthor(napi_env env, napi_value in, AVMetaData &out
 
 napi_status NapiMetaData::SetAuthor(napi_env env, const AVMetaData &in, napi_value &out)
 {
-    napi_value property{};
+    napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetAuthor(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "author", property);
@@ -371,7 +371,7 @@ napi_status NapiMetaData::SetMediaImageUri(napi_env env, const AVMetaData &in, n
         return napi_ok;
     }
 
-    napi_value property{};
+    napi_value property {};
     auto status = NapiUtils::SetValue(env, uri, property);
     CHECK_RETURN(status == napi_ok, "create property failed", status);
     status = napi_set_named_property(env, out, "mediaImage", property);
@@ -393,7 +393,7 @@ napi_status NapiMetaData::GetPublishDate(napi_env env, napi_value in, AVMetaData
 
 napi_status NapiMetaData::SetPublishDate(napi_env env, const AVMetaData &in, napi_value &out)
 {
-    napi_value property{};
+    napi_value property {};
     auto status = NapiUtils::SetDateValue(env, in.GetPublishDate(), property);
     CHECK_RETURN(status == napi_ok, "create date object failed", status);
     status = napi_set_named_property(env, out, "publishDate", property);
