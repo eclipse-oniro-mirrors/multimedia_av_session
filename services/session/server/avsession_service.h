@@ -194,7 +194,7 @@ private:
     void SetCastDeviceInfo(const std::vector<AudioStandard::AudioDeviceDescriptor>& castAudioDescriptors,
                            sptr<AVSessionItem>& session);
 
-    int32_t GetAudioDescriptor(const sptr<AVSessionItem>& session, std::string deviceId,
+    int32_t GetAudioDescriptor(const sptr<AVSessionItem>& session, const std::string deviceId,
                                std::vector<AudioStandard::AudioDeviceDescriptor>& audioDeviceDescriptors);
 
     bool GetAudioDescriptorByDeviceId(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>>& descriptors,

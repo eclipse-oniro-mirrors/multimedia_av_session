@@ -1248,7 +1248,7 @@ int32_t AVSessionService::CancelCastAudioForClientExit(pid_t pid, const sptr<AVS
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::GetAudioDescriptor(const sptr<AVSessionItem>& session, std::string deviceId,
+int32_t AVSessionService::GetAudioDescriptor(const sptr<AVSessionItem>& session, const std::string deviceId,
                                              std::vector<AudioStandard::AudioDeviceDescriptor>& audioDeviceDescriptors)
 {
     auto audioDescriptors = AudioSystemManager::GetInstance()->GetDevices(ALL_L_D_DEVICES_FLAG);
