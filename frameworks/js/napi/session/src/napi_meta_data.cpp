@@ -82,8 +82,8 @@ napi_status NapiMetaData::ConvertFilter(napi_env env, napi_value filter, AVMetaD
     auto status = napi_typeof(env, filter, &type);
     CHECK_RETURN(status == napi_ok, "napi_typeof failed", status);
 
-    std::string stringFilter;
     if (type == napi_string) {
+        std::string stringFilter;
         status = NapiUtils::GetValue(env, filter, stringFilter);
         CHECK_RETURN(status == napi_ok, "get string filter failed", status);
         if (stringFilter != "all") {
