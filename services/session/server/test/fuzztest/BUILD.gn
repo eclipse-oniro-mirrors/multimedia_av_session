@@ -22,6 +22,8 @@ group("fuzztest") {
     "avsessioncallbackproxy_fuzzer:AVSessionCallbackProxyFuzzTest",
     "avsessionitem_fuzzer:AVSessionItemFuzzTest",
     "sessionlistenerproxy_fuzzer:SessionListenerProxyFuzzTest",
+    "audioadapterinterface_fuzzer:AudioAdapterInterfaceFuzzTest",
+    "abilitymanageradapter_fuzzer:AbilityManagerAdapterFuzzTest",
   ]
 }
 ###############################################################################
