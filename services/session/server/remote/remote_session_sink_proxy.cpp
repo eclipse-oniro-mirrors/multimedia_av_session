@@ -29,7 +29,7 @@ RemoteSessionSinkProxy::~RemoteSessionSinkProxy()
     UnLoadSinkImplement();
 }
 
-int32_t RemoteSessionSinkProxy::LoadSinkImplement()
+int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("cfi")))
 {
     char sinkLibraryRealPath[PATH_MAX] = { 0x00 };
     if (realpath(g_sinkLibraryPath.c_str(), sinkLibraryRealPath) == nullptr) {
@@ -57,7 +57,7 @@ int32_t RemoteSessionSinkProxy::LoadSinkImplement()
     return AVSESSION_SUCCESS;
 }
 
-int32_t RemoteSessionSinkProxy::UnLoadSinkImplement()
+int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize("cfi")))
 {
     using SinkImpl = void(*)(RemoteSessionSinkImpl*);
     auto destroyRemoteSessionSinkImpl = (SinkImpl)(dlsym(handle_, "DestroyRemoteSessionSinkImpl"));

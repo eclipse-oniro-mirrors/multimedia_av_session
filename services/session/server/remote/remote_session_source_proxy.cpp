@@ -30,7 +30,7 @@ RemoteSessionSourceProxy::~RemoteSessionSourceProxy()
     UnLoadSourceImplement();
 }
 
-int32_t RemoteSessionSourceProxy::LoadSourceImplement()
+int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_sanitize("cfi")))
 {
     char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
     if (realpath(g_sourceLibraryPath.c_str(), sourceLibraryRealPath) == nullptr) {
@@ -58,7 +58,7 @@ int32_t RemoteSessionSourceProxy::LoadSourceImplement()
     return AVSESSION_SUCCESS;
 }
 
-int32_t RemoteSessionSourceProxy::UnLoadSourceImplement()
+int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sanitize("cfi")))
 {
     using SourceImpl = void(*)(RemoteSessionSourceImpl*);
     auto destroyRemoteSessionSourceImpl = (SourceImpl)(dlsym(handle_, "DestroyRemoteSessionSourceImpl"));
