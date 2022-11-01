@@ -24,6 +24,8 @@ group("fuzztest") {
     "sessionlistenerproxy_fuzzer:SessionListenerProxyFuzzTest",
     "audioadapterinterface_fuzzer:AudioAdapterInterfaceFuzzTest",
     "abilitymanageradapter_fuzzer:AbilityManagerAdapterFuzzTest",
+    "abilityconnecthelper_fuzzer:AbilityConnectHelperFuzzTest",
+    "bkgraudiocontroller_fuzzer:BkGrAudioControllerFuzzTest",
   ]
 }
 ###############################################################################
