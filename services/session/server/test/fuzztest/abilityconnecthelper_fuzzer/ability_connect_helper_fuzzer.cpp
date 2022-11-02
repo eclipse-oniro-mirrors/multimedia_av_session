@@ -21,8 +21,8 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
-#include "avsession_service.h"
 #include "ability_connect_helper_fuzzer.h"
+#include "avsession_service.h"
 
 using namespace std;
 using namespace OHOS;
