@@ -59,6 +59,44 @@ HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level1)
 }
 
 /**
+* @tc.name: IsValid001
+* @tc.desc: Return is avplaybackstate IsValid success
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVPlaybackStateTest, IsValid001, TestSize.Level1)
+{
+    AVPlaybackState avPlaybackState;
+    avPlaybackState.SetState(1);
+    avPlaybackState.SetSpeed(3.0);
+    avPlaybackState.SetLoopMode(1);
+    avPlaybackState.SetBufferedTime(40);
+    avPlaybackState.SetPosition({10, 10});
+    avPlaybackState.SetFavorite(true);
+
+    EXPECT_EQ(avPlaybackState.IsValid(), true);
+}
+
+/**
+* @tc.name: IsValid002
+* @tc.desc: Return is avplaybackstate IsValid failed
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVPlaybackStateTest, IsValid002, TestSize.Level1)
+{
+    AVPlaybackState avPlaybackState;
+    avPlaybackState.SetState(-1);
+    avPlaybackState.SetSpeed(3.0);
+    avPlaybackState.SetLoopMode(1);
+    avPlaybackState.SetBufferedTime(40);
+    avPlaybackState.SetPosition({10, 10});
+    avPlaybackState.SetFavorite(true);
+
+    EXPECT_EQ(avPlaybackState.IsValid(), false);
+}
+
+/**
 * @tc.name: GetState001
 * @tc.desc: Getting state after using parcel to set
 * @tc.type: FUNC
@@ -98,4 +136,89 @@ HWTEST_F(AVPlaybackStateTest, GetState002, TestSize.Level1)
     AVPlaybackState *result = AVPlaybackState::Unmarshalling(*parcel);
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetSpeed(), 3.0);
+}
+
+/**
+* @tc.name: GetMask001
+* @tc.desc: Return is avplaybackstate GetMask success
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVPlaybackStateTest, GetMask001, TestSize.Level1)
+{
+    AVPlaybackState avPlaybackState;
+    avPlaybackState.SetState(0);
+    avPlaybackState.SetSpeed(3.0);
+    avPlaybackState.SetLoopMode(1);
+    avPlaybackState.SetBufferedTime(40);
+    avPlaybackState.SetPosition({10, 10});
+    avPlaybackState.SetFavorite(true);
+
+    EXPECT_EQ(avPlaybackState.GetMask(), 0b111111);
+}
+
+/**
+* @tc.name: CopyToByMask001
+* @tc.desc: Return is avplaybackstate CopyToByMask success
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVPlaybackStateTest, CopyToByMask001, TestSize.Level1)
+{
+    AVPlaybackState stateOut;
+    stateOut.SetSpeed(3.0);
+    AVPlaybackState::PlaybackStateMaskType mask = stateOut.GetMask();
+
+    AVPlaybackState stateTest;
+    stateTest.SetSpeed(3.0);
+    auto ret = stateTest.CopyToByMask(mask, stateOut);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+* @tc.name: CopyToByMask002
+* @tc.desc: Return is avplaybackstate CopyToByMask failed
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVPlaybackStateTest, CopyToByMask002, TestSize.Level1)
+{
+    AVPlaybackState stateOut;
+    AVPlaybackState::PlaybackStateMaskType mask = stateOut.GetMask();
+
+    AVPlaybackState stateTest;
+    auto ret = stateTest.CopyToByMask(mask, stateOut);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+* @tc.name: CopyFrom001
+* @tc.desc: Return is avplaybackstate CopyFrom success
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVPlaybackStateTest, CopyFrom001, TestSize.Level1)
+{
+    AVPlaybackState stateOut;
+    stateOut.SetSpeed(3.0);
+
+    AVPlaybackState stateTest;
+    auto ret = stateTest.CopyFrom(stateOut);
+    EXPECT_EQ(stateTest.GetSpeed(), 3.0);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+* @tc.name: CopyFrom002
+* @tc.desc: Return is avplaybackstate CopyFrom failed
+* @tc.type: FUNC
+* @tc.require: I5YMXD
+*/
+HWTEST_F(AVPlaybackStateTest, CopyFrom002, TestSize.Level1)
+{
+    AVPlaybackState stateOut;
+
+    AVPlaybackState stateTest;
+    auto ret = stateTest.CopyFrom(stateOut);
+    EXPECT_EQ(ret, false);
 }
