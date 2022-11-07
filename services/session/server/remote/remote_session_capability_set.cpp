@@ -59,7 +59,7 @@ bool RemoteSessionCapabilitySet::HasCapability(const std::string& sessionId, con
 {
     CHECK_AND_RETURN_RET_LOG(capabilitys_.size() > 0, false, "Don't have Capability");
     std::string strKey = sessionId + "-" + sinkDevice;
-    auto iter = capabilitys_.find(strkey);
+    auto iter = capabilitys_.find(strKey);
     CHECK_AND_RETURN_RET_LOG(iter != capabilitys_.end(), false, "Don't have the key");
     std::vector<std::vector<int32_t>> capability = iter->second;
     CHECK_AND_RETURN_RET_LOG(capability[category].size() > 0, false, "Don't have Capability");
