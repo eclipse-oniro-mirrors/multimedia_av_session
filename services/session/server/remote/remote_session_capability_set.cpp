@@ -57,12 +57,12 @@ void RemoteSessionCapabilitySet::RemoveRemoteCapability(const std::string& sessi
 bool RemoteSessionCapabilitySet::HasCapability(const std::string& sessionId, const std::string& sinkDevice,
                                                SessionDataCategory category, int32_t key)
 {
-    CHECK_AND_RETURN_RET_LOG(capabilitys_.size() > 0, false, " Don't have Capability");
-    std::string strkey = sessionId + "-" + sinkDevice;
+    CHECK_AND_RETURN_RET_LOG(capabilitys_.size() > 0, false, "Don't have Capability");
+    std::string strKey = sessionId + "-" + sinkDevice;
     auto iter = capabilitys_.find(strkey);
-    CHECK_AND_RETURN_RET_LOG(iter != capabilitys_.end(), false, " Don't have the key");
+    CHECK_AND_RETURN_RET_LOG(iter != capabilitys_.end(), false, "Don't have the key");
     std::vector<std::vector<int32_t>> capability = iter->second;
-    CHECK_AND_RETURN_RET_LOG(capability[category].size() > 0, false, " Don't have Capability");
+    CHECK_AND_RETURN_RET_LOG(capability[category].size() > 0, false, "Don't have Capability");
     for (const auto &item : capability[category]) {
         if (item == key) {
             return true;

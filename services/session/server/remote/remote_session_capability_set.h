@@ -24,16 +24,16 @@
 namespace OHOS::AVSession {
 class RemoteSessionCapabilitySet {
 public:
-    static RemoteSessionCapabilitySet &GetInstance();
+    static RemoteSessionCapabilitySet& GetInstance();
 
     static std::string GetLocalCapability();
 
-    void AddRemoteCapability(const std::string &sessionId, const std::string &sinkDeviceId,
-                             const std::string &sinkCapability);
+    void AddRemoteCapability(const std::string& sessionId, const std::string& sinkDeviceId,
+                             const std::string& sinkCapability);
 
-    void RemoveRemoteCapability(const std::string &sessionId, const std::string &sinkDevice);
+    void RemoveRemoteCapability(const std::string& sessionId, const std::string& sinkDevice);
 
-    bool HasCapability(const std::string &sessionId, const std::string &sinkDevice, SessionDataCategory category,
+    bool HasCapability(const std::string& sessionId, const std::string& sinkDevice, SessionDataCategory category,
                        int32_t key);
 
 private:
