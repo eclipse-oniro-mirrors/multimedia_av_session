@@ -18,7 +18,7 @@
 #include "remote_session_sink_proxy.h"
 
 namespace OHOS::AVSession {
-static constexpr std::string g_sinkLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_sink.z.so");
+static std::string g_sinkLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_sink.z.so");
 
 RemoteSessionSinkProxy::RemoteSessionSinkProxy()
 {
