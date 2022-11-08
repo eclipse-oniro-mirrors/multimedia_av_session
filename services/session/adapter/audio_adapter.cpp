@@ -42,7 +42,7 @@ AudioAdapter::~AudioAdapter()
 void AudioAdapter::Init()
 {
     SLOGI("register audio renderer event listener");
-    AudioStandard::AudioStreamManager::GetInstance()->RegisterAudioRendererEventListener(getpid(), shared_from_this());
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->RegisterAudioRendererEventListener(getpid(), shared_from_this());
     if (ret != 0) {
         SLOGE("register audio renderer event listener failed");
     }
