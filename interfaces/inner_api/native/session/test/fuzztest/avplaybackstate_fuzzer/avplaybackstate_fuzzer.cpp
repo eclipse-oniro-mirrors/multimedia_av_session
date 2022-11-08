@@ -14,7 +14,6 @@
  */
 
 #include "avplaybackstate_fuzzer.h"
-
 #include "avplayback_state.h"
 #include "parcel.h"
 

@@ -76,9 +76,9 @@ private:
     static napi_status OffOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
                                              napi_value callback);
 
-    static napi_status SetPlaybackStateFilter(napi_env env, NapiAVSessionController *napiController,
+    static napi_status SetPlaybackStateFilter(napi_env env, NapiAVSessionController* napiController,
                                               napi_value filter);
-    static napi_status SetMetaFilter(napi_env env, NapiAVSessionController *napiController, napi_value filter);
+    static napi_status SetMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
                                         const std::string& eventName, napi_value filter, napi_value callback);
 

@@ -19,6 +19,7 @@
 #include <memory>
 #include <string>
 #include <map>
+
 #include "parcel.h"
 #include "avsession_pixel_map.h"
 
@@ -62,7 +63,7 @@ public:
 #endif
     }
 
-    static AVMetaData *Unmarshalling(Parcel& data);
+    static AVMetaData* Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& data) const override;
 
     void SetAssetId(const std::string& assetId);

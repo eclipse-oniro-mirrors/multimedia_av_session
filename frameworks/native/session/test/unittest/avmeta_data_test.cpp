@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "avmeta_data.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"

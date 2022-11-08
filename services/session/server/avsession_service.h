@@ -71,7 +71,7 @@ public:
 
     void OnStop() override;
 
-    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                            const AppExecFwk::ElementName& elementName) override;
@@ -96,7 +96,7 @@ public:
 
     void HandleControllerRelease(AVControllerItem& controller);
 
-    std::int32_t Dump(std::int32_t fd, const std::vector<std::u16string> &args) override;
+    std::int32_t Dump(std::int32_t fd, const std::vector<std::u16string>& args) override;
 
     int32_t CastAudio(const SessionToken& token,
                       const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors) override;
@@ -194,7 +194,7 @@ private:
     void SetCastDeviceInfo(const std::vector<AudioStandard::AudioDeviceDescriptor>& castAudioDescriptors,
                            sptr<AVSessionItem>& session);
 
-    int32_t GetAudioDescriptor(const sptr<AVSessionItem>& session, const std::string deviceId,
+    int32_t GetAudioDescriptor(const std::string deviceId,
                                std::vector<AudioStandard::AudioDeviceDescriptor>& audioDeviceDescriptors);
 
     bool GetAudioDescriptorByDeviceId(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>>& descriptors,
@@ -212,7 +212,7 @@ private:
 
     void HandleEventHandlerCallBack();
 
-    const nlohmann::json &GetSubNode(const nlohmann::json &node, const std::string &name);
+    const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
@@ -259,7 +259,7 @@ class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
     explicit ClientDeathRecipient(const std::function<void()>& callback);
 
-    void OnRemoteDied(const wptr<IRemoteObject> &object) override;
+    void OnRemoteDied(const wptr<IRemoteObject>& object) override;
 
 private:
     std::function<void()> callback_;

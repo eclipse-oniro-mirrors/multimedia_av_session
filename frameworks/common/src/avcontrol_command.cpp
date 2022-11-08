@@ -20,15 +20,15 @@
 
 namespace OHOS::AVSession {
 AVControlCommand::AVControlCommand()
+    : cmd_(SESSION_CMD_INVALID)
 {
-    cmd_ = SESSION_CMD_INVALID;
 }
 
 AVControlCommand::~AVControlCommand()
 {
 }
 
-AVControlCommand *AVControlCommand::Unmarshalling(Parcel &data)
+AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
 {
     auto result = new (std::nothrow) AVControlCommand();
     if (result != nullptr) {
@@ -54,7 +54,7 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel &data)
     return result;
 }
 
-bool AVControlCommand::Marshalling(Parcel &parcel) const
+bool AVControlCommand::Marshalling(Parcel& parcel) const
 {
     if (!parcel.WriteInt32(cmd_)) {
         return false;
@@ -110,7 +110,7 @@ int32_t AVControlCommand::SetSpeed(double speed)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControlCommand::GetSpeed(double &speed) const
+int32_t AVControlCommand::GetSpeed(double& speed) const
 {
     if (!std::holds_alternative<double>(param_)) {
         return AVSESSION_ERROR;
@@ -128,7 +128,7 @@ int32_t AVControlCommand::SetSeekTime(int64_t time)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControlCommand::GetSeekTime(int64_t &time) const
+int32_t AVControlCommand::GetSeekTime(int64_t& time) const
 {
     if (!std::holds_alternative<int64_t>(param_)) {
         return AVSESSION_ERROR;
@@ -146,7 +146,7 @@ int32_t AVControlCommand::SetLoopMode(int32_t mode)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControlCommand::GetLoopMode(int32_t &mode) const
+int32_t AVControlCommand::GetLoopMode(int32_t& mode) const
 {
     if (!std::holds_alternative<int32_t>(param_)) {
         return AVSESSION_ERROR;
@@ -155,7 +155,7 @@ int32_t AVControlCommand::GetLoopMode(int32_t &mode) const
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControlCommand::SetAssetId(const std::string &assetId)
+int32_t AVControlCommand::SetAssetId(const std::string& assetId)
 {
     if (assetId.empty()) {
         return ERR_INVALID_PARAM;
@@ -164,7 +164,7 @@ int32_t AVControlCommand::SetAssetId(const std::string &assetId)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControlCommand::GetAssetId(std::string &assetId) const
+int32_t AVControlCommand::GetAssetId(std::string& assetId) const
 {
     if (!std::holds_alternative<std::string>(param_)) {
         return AVSESSION_ERROR;

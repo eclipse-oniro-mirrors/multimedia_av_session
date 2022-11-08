@@ -38,7 +38,7 @@ bool AVSessionCallbackStub::CheckInterfaceToken(MessageParcel& data)
     auto localDescriptor = IAVSessionCallback::GetDescriptor();
     auto remoteDescriptor = data.ReadInterfaceToken();
     if (remoteDescriptor != localDescriptor) {
-        SLOGE("interface token is not equal");
+        SLOGI("interface token is not equal");
         return false;
     }
     return true;

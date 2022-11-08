@@ -37,8 +37,8 @@ public:
 #endif
     }
 
-    bool Marshalling(Parcel &data) const override;
-    static AVSessionPixelMap *Unmarshalling(Parcel &data);
+    bool Marshalling(Parcel& data) const override;
+    static AVSessionPixelMap* Unmarshalling(Parcel& data);
 
     void Clear()
     {
@@ -51,7 +51,7 @@ public:
         return innerImgBuffer_;
     }
 
-    void SetInnerImgBuffer(const std::vector<uint8_t> &imgBuffer)
+    void SetInnerImgBuffer(const std::vector<uint8_t>& imgBuffer)
     {
         innerImgBuffer_.clear();
         innerImgBuffer_ = imgBuffer;

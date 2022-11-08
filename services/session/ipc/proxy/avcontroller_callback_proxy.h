@@ -26,15 +26,15 @@ public:
 
     void OnSessionDestroy() override;
 
-    void OnPlaybackStateChange(const AVPlaybackState &state) override;
+    void OnPlaybackStateChange(const AVPlaybackState& state) override;
 
-    void OnMetaDataChange(const AVMetaData &data) override;
+    void OnMetaDataChange(const AVMetaData& data) override;
 
     void OnActiveStateChange(bool isActive) override;
 
-    void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
+    void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo) override;
+    void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
 
 private:
     static inline BrokerDelegator<AVControllerCallbackProxy> delegator_;

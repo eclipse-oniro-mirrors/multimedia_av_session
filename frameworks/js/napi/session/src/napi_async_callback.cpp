@@ -14,8 +14,10 @@
  */
 
 #include <memory>
+
 #include "avsession_trace.h"
 #include "napi_async_callback.h"
+#include "napi_utils.h"
 
 namespace OHOS::AVSession {
 NapiAsyncCallback::NapiAsyncCallback(napi_env env) : env_(env)
@@ -27,7 +29,7 @@ NapiAsyncCallback::NapiAsyncCallback(napi_env env) : env_(env)
 
 NapiAsyncCallback::~NapiAsyncCallback()
 {
-    SLOGE("no memory leak for queue-callback");
+    SLOGD("no memory leak for queue-callback");
     env_ = nullptr;
 }
 
@@ -36,7 +38,7 @@ napi_env NapiAsyncCallback::GetEnv() const
     return env_;
 }
 
-void NapiAsyncCallback::AfterWorkCallback(uv_work_t *work, int aStatus)
+void NapiAsyncCallback::AfterWorkCallback(uv_work_t* work, int aStatus)
 {
     AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::AfterWorkCallback");
     std::shared_ptr<DataContext> context(static_cast<DataContext*>(work->data), [work](DataContext* ptr) {
@@ -65,25 +67,14 @@ void NapiAsyncCallback::AfterWorkCallback(uv_work_t *work, int aStatus)
 
 void NapiAsyncCallback::Call(napi_ref method, NapiArgsGetter getter)
 {
-    if (loop_ == nullptr) {
-        SLOGE("loop_ is nullptr");
-        return;
-    }
-    if (method == nullptr) {
-        SLOGE("method is nullptr");
-        return;
-    }
+    CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
+    CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
 
     auto* work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        SLOGE("no memory for uv_work_t");
-        return;
-    }
+    CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
     work->data = new DataContext{env_, method, std::move(getter)};
     int res = uv_queue_work(loop_, work, [](uv_work_t* work) {}, AfterWorkCallback);
-    if (res != 0) {
-        SLOGE("uv queue work failed");
-    }
+    CHECK_RETURN_VOID(res == 0, "uv queue work failed");
 }
 }

@@ -114,13 +114,13 @@ napi_status NapiMetaData::ConvertFilter(napi_env env, napi_value filter, AVMetaD
     return napi_ok;
 }
 
-napi_status NapiMetaData::GetValue(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetValue(napi_env env, napi_value in, AVMetaData& out)
 {
     std::vector<std::string> propertyNames;
     auto status = NapiUtils::GetPropertyNames(env, in, propertyNames);
     CHECK_RETURN(status == napi_ok, "get property name failed", status);
 
-    for (const auto &name : propertyNames) {
+    for (const auto& name : propertyNames) {
         auto it = getterMap_.find(name);
         if (it == getterMap_.end()) {
             SLOGE("property %{public}s is not of metadata", name.c_str());
@@ -136,7 +136,7 @@ napi_status NapiMetaData::GetValue(napi_env env, napi_value in, AVMetaData &out)
     return napi_ok;
 }
 
-napi_status NapiMetaData::SetValue(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetValue(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_status status = napi_create_object(env, &out);
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
@@ -161,14 +161,14 @@ napi_status NapiMetaData::SetValue(napi_env env, const AVMetaData &in, napi_valu
     return napi_ok;
 }
 
-napi_status NapiMetaData::SetUndefinedMeta(napi_env env, napi_value &meta)
+napi_status NapiMetaData::SetUndefinedMeta(napi_env env, napi_value& meta)
 {
     auto status = napi_set_named_property(env, meta, "assetId", NapiUtils::GetUndefinedValue(env));
     CHECK_RETURN(status == napi_ok, "set assetId to undefined failed", status);
     return napi_ok;
 }
 
-napi_status NapiMetaData::GetAssetId(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetAssetId(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "assetId", property);
@@ -177,7 +177,7 @@ napi_status NapiMetaData::GetAssetId(napi_env env, napi_value in, AVMetaData &ou
     return status;
 }
 
-napi_status NapiMetaData::SetAssetId(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetAssetId(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetAssetId(), property);
@@ -187,7 +187,7 @@ napi_status NapiMetaData::SetAssetId(napi_env env, const AVMetaData &in, napi_va
     return status;
 }
 
-napi_status NapiMetaData::GetTitle(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetTitle(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "title", property);
@@ -196,7 +196,7 @@ napi_status NapiMetaData::GetTitle(napi_env env, napi_value in, AVMetaData &out)
     return status;
 }
 
-napi_status NapiMetaData::SetTitle(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetTitle(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetTitle(), property);
@@ -206,7 +206,7 @@ napi_status NapiMetaData::SetTitle(napi_env env, const AVMetaData &in, napi_valu
     return status;
 }
 
-napi_status NapiMetaData::GetArtist(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetArtist(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "artist", property);
@@ -215,7 +215,7 @@ napi_status NapiMetaData::GetArtist(napi_env env, napi_value in, AVMetaData &out
     return status;
 }
 
-napi_status NapiMetaData::SetArtist(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetArtist(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetArtist(), property);
@@ -225,7 +225,7 @@ napi_status NapiMetaData::SetArtist(napi_env env, const AVMetaData &in, napi_val
     return status;
 }
 
-napi_status NapiMetaData::GetAuthor(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetAuthor(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "author", property);
@@ -234,7 +234,7 @@ napi_status NapiMetaData::GetAuthor(napi_env env, napi_value in, AVMetaData &out
     return status;
 }
 
-napi_status NapiMetaData::SetAuthor(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetAuthor(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetAuthor(), property);
@@ -244,7 +244,7 @@ napi_status NapiMetaData::SetAuthor(napi_env env, const AVMetaData &in, napi_val
     return status;
 }
 
-napi_status NapiMetaData::GetAlbum(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetAlbum(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "album", property);
@@ -253,7 +253,7 @@ napi_status NapiMetaData::GetAlbum(napi_env env, napi_value in, AVMetaData &out)
     return status;
 }
 
-napi_status NapiMetaData::SetAlbum(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetAlbum(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetAlbum(), property);
@@ -263,7 +263,7 @@ napi_status NapiMetaData::SetAlbum(napi_env env, const AVMetaData &in, napi_valu
     return status;
 }
 
-napi_status NapiMetaData::GetWriter(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetWriter(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "writer", property);
@@ -272,7 +272,7 @@ napi_status NapiMetaData::GetWriter(napi_env env, napi_value in, AVMetaData &out
     return status;
 }
 
-napi_status NapiMetaData::SetWriter(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetWriter(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetWriter(), property);
@@ -282,7 +282,7 @@ napi_status NapiMetaData::SetWriter(napi_env env, const AVMetaData &in, napi_val
     return status;
 }
 
-napi_status NapiMetaData::GetComposer(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetComposer(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "composer", property);
@@ -291,7 +291,7 @@ napi_status NapiMetaData::GetComposer(napi_env env, napi_value in, AVMetaData &o
     return status;
 }
 
-napi_status NapiMetaData::SetComposer(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetComposer(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetComposer(), property);
@@ -301,7 +301,7 @@ napi_status NapiMetaData::SetComposer(napi_env env, const AVMetaData &in, napi_v
     return status;
 }
 
-napi_status NapiMetaData::GetDuration(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetDuration(napi_env env, napi_value in, AVMetaData& out)
 {
     int64_t property;
     auto status = NapiUtils::GetNamedProperty(env, in, "duration", property);
@@ -310,7 +310,7 @@ napi_status NapiMetaData::GetDuration(napi_env env, napi_value in, AVMetaData &o
     return status;
 }
 
-napi_status NapiMetaData::SetDuration(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetDuration(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetDuration(), property);
@@ -320,7 +320,7 @@ napi_status NapiMetaData::SetDuration(napi_env env, const AVMetaData &in, napi_v
     return status;
 }
 
-napi_status NapiMetaData::GetMediaImage(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetMediaImage(napi_env env, napi_value in, AVMetaData& out)
 {
     napi_value property {};
     auto status = napi_get_named_property(env, in, "mediaImage", &property);
@@ -348,7 +348,7 @@ napi_status NapiMetaData::GetMediaImage(napi_env env, napi_value in, AVMetaData 
     return status;
 }
 
-napi_status NapiMetaData::SetMediaImage(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetMediaImage(napi_env env, const AVMetaData& in, napi_value& out)
 {
     auto pixelMap = in.GetMediaImage();
     if (pixelMap == nullptr) {
@@ -363,7 +363,7 @@ napi_status NapiMetaData::SetMediaImage(napi_env env, const AVMetaData &in, napi
     return status;
 }
 
-napi_status NapiMetaData::SetMediaImageUri(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetMediaImageUri(napi_env env, const AVMetaData& in, napi_value& out)
 {
     auto uri = in.GetMediaImageUri();
     if (uri.empty()) {
@@ -379,7 +379,7 @@ napi_status NapiMetaData::SetMediaImageUri(napi_env env, const AVMetaData &in, n
     return status;
 }
 
-napi_status NapiMetaData::GetPublishDate(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetPublishDate(napi_env env, napi_value in, AVMetaData& out)
 {
     napi_value property;
     auto status = napi_get_named_property(env, in, "publishDate", &property);
@@ -391,7 +391,7 @@ napi_status NapiMetaData::GetPublishDate(napi_env env, napi_value in, AVMetaData
     return status;
 }
 
-napi_status NapiMetaData::SetPublishDate(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetPublishDate(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetDateValue(env, in.GetPublishDate(), property);
@@ -401,7 +401,7 @@ napi_status NapiMetaData::SetPublishDate(napi_env env, const AVMetaData &in, nap
     return status;
 }
 
-napi_status NapiMetaData::GetSubtitle(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetSubtitle(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "subtitle", property);
@@ -410,7 +410,7 @@ napi_status NapiMetaData::GetSubtitle(napi_env env, napi_value in, AVMetaData &o
     return status;
 }
 
-napi_status NapiMetaData::SetSubtitle(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetSubtitle(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetSubTitle(), property);
@@ -420,7 +420,7 @@ napi_status NapiMetaData::SetSubtitle(napi_env env, const AVMetaData &in, napi_v
     return status;
 }
 
-napi_status NapiMetaData::GetDescription(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetDescription(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "description", property);
@@ -429,7 +429,7 @@ napi_status NapiMetaData::GetDescription(napi_env env, napi_value in, AVMetaData
     return status;
 }
 
-napi_status NapiMetaData::SetDescription(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetDescription(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetDescription(), property);
@@ -439,7 +439,7 @@ napi_status NapiMetaData::SetDescription(napi_env env, const AVMetaData &in, nap
     return status;
 }
 
-napi_status NapiMetaData::GetLyric(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetLyric(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "lyric", property);
@@ -448,7 +448,7 @@ napi_status NapiMetaData::GetLyric(napi_env env, napi_value in, AVMetaData &out)
     return status;
 }
 
-napi_status NapiMetaData::SetLyric(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetLyric(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetLyric(), property);
@@ -458,7 +458,7 @@ napi_status NapiMetaData::SetLyric(napi_env env, const AVMetaData &in, napi_valu
     return status;
 }
 
-napi_status NapiMetaData::GetPreviousAssetId(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetPreviousAssetId(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "previousAssetId", property);
@@ -467,7 +467,7 @@ napi_status NapiMetaData::GetPreviousAssetId(napi_env env, napi_value in, AVMeta
     return status;
 }
 
-napi_status NapiMetaData::SetPreviousAssetId(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetPreviousAssetId(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetPreviousAssetId(), property);
@@ -477,7 +477,7 @@ napi_status NapiMetaData::SetPreviousAssetId(napi_env env, const AVMetaData &in,
     return status;
 }
 
-napi_status NapiMetaData::GetNextAssetId(napi_env env, napi_value in, AVMetaData &out)
+napi_status NapiMetaData::GetNextAssetId(napi_env env, napi_value in, AVMetaData& out)
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "nextAssetId", property);
@@ -486,7 +486,7 @@ napi_status NapiMetaData::GetNextAssetId(napi_env env, napi_value in, AVMetaData
     return status;
 }
 
-napi_status NapiMetaData::SetNextAssetId(napi_env env, const AVMetaData &in, napi_value &out)
+napi_status NapiMetaData::SetNextAssetId(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetNextAssetId(), property);

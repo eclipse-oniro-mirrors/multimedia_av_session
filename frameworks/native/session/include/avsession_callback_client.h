@@ -43,7 +43,7 @@ public:
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;
-    static constexpr const char *EVENT_NAME = "AVSessionCallback";
+    static constexpr const char* EVENT_NAME = "AVSessionCallback";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_CALLBACK_CLIENT_H

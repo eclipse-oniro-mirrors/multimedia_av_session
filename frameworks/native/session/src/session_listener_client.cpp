@@ -17,20 +17,20 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-SessionListenerClient::SessionListenerClient(const std::shared_ptr<SessionListener> &listener)
+SessionListenerClient::SessionListenerClient(const std::shared_ptr<SessionListener>& listener)
     : listener_(listener)
 {
     SLOGD("construct");
 }
 
-void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor &descriptor)
+void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     if (listener_) {
         listener_->OnSessionCreate(descriptor);
     }
 }
 
-void SessionListenerClient::OnSessionRelease(const AVSessionDescriptor &descriptor)
+void SessionListenerClient::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
     if (listener_) {
         listener_->OnSessionRelease(descriptor);

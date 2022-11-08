@@ -14,7 +14,6 @@
  */
 
 #include "avcontrolcommand_fuzzer.h"
-
 #include "avcontrol_command.h"
 #include "parcel.h"
 

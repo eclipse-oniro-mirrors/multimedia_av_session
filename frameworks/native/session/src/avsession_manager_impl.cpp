@@ -14,7 +14,6 @@
  */
 
 #include "avsession_manager_impl.h"
-
 #include "iservice_registry.h"
 #include "ipc_skeleton.h"
 #include "system_ability_definition.h"
@@ -51,10 +50,14 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
     service_ = iface_cast<AVSessionServiceProxy>(object);
     if (service_ != nullptr) {
         auto recipient = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDie(); });
-        if (recipient != nullptr) {
-            sptr<IAVSessionService> serviceBase = service_;
-            serviceBase->AsObject()->AddDeathRecipient(recipient);
+        if (recipient == nullptr) {
+            SLOGE("register ServiceDeathRecipient failed");
+            return nullptr;
         }
+
+        sptr<IAVSessionService> serviceBase = service_;
+        serviceBase->AsObject()->AddDeathRecipient(recipient);
+
         SLOGD("get service success");
         RegisterClientDeathObserver();
     }
@@ -81,7 +84,7 @@ void AVSessionManagerImpl::OnServiceDie()
     AVSessionUtils::DeleteCacheFiles(cachePath);
 }
 
-std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string &tag, int32_t type,
+std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type,
                                                                const AppExecFwk::ElementName& elementName)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CreateSession");
@@ -143,7 +146,7 @@ int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     return service ? service->CreateController(sessionId, controller) : ERR_SERVICE_NOT_EXIST;
 }
 
-int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener> &listener)
+int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener>& listener)
 {
     if (listener == nullptr) {
         SLOGE("listener is nullptr");
@@ -165,13 +168,14 @@ int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<Sess
     }
     auto ret = service->RegisterSessionListener(listener_);
     if (ret != AVSESSION_SUCCESS) {
+        std::lock_guard<std::mutex> lockGuard(lock_);
         listener_.clear();
         return ret;
     }
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionManagerImpl::RegisterServiceDeathCallback(const DeathCallback &callback)
+int32_t AVSessionManagerImpl::RegisterServiceDeathCallback(const DeathCallback& callback)
 {
     deathCallback_ = callback;
     return AVSESSION_SUCCESS;
@@ -183,7 +187,7 @@ int32_t AVSessionManagerImpl::UnregisterServiceDeathCallback()
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent &keyEvent)
+int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemAVKeyEvent");
     if (!keyEvent.IsValid()) {
@@ -195,7 +199,7 @@ int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent &keyEvent
     return service ? service->SendSystemAVKeyEvent(keyEvent) : ERR_SERVICE_NOT_EXIST;
 }
 
-int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand &command)
+int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand& command)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemControlCommand");
     if (!command.IsValid()) {
@@ -218,16 +222,16 @@ int32_t AVSessionManagerImpl::CastAudio(const SessionToken& token,
                                         const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CastAudio");
-    auto service = GetService();
     CHECK_AND_RETURN_RET_LOG(descriptors.size() > 0, ERR_INVALID_PARAM, "devices size is zero");
+    auto service = GetService();
     return service ? service->CastAudio(token, descriptors) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CastAudioForAll");
-    auto service = GetService();
     CHECK_AND_RETURN_RET_LOG(descriptors.size() > 0, ERR_INVALID_PARAM, "devices size is zero");
+    auto service = GetService();
     return service ? service->CastAudioForAll(descriptors) : ERR_SERVICE_NOT_EXIST;
 }
 
@@ -240,6 +244,7 @@ void AVSessionManagerImpl::RegisterClientDeathObserver()
             "ERROR_INFO", "avsession manager impl register client death observer malloc failed");
         return;
     }
+    
     if (service_->RegisterClientDeathObserver(clientDeath_) != AVSESSION_SUCCESS) {
         SLOGE("register failed");
         HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "REGISTER_FAILED",
@@ -255,7 +260,7 @@ ServiceDeathRecipient::ServiceDeathRecipient(const std::function<void()>& callba
     SLOGD("construct");
 }
 
-void ServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &object)
+void ServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
 {
     if (callback_) {
         callback_();

@@ -45,8 +45,8 @@ public:
     AVControlCommand();
     ~AVControlCommand() override;
 
-    static AVControlCommand *Unmarshalling(Parcel &data);
-    bool Marshalling(Parcel &parcel) const override;
+    static AVControlCommand* Unmarshalling(Parcel& data);
+    bool Marshalling(Parcel& parcel) const override;
 
     bool IsValid() const;
 
@@ -54,16 +54,16 @@ public:
     int32_t GetCommand() const;
 
     int32_t SetSpeed(double speed);
-    int32_t GetSpeed(double &speed) const;
+    int32_t GetSpeed(double& speed) const;
 
     int32_t SetSeekTime(int64_t time);
-    int32_t GetSeekTime(int64_t &time) const;
+    int32_t GetSeekTime(int64_t& time) const;
 
     int32_t SetLoopMode(int32_t mode);
-    int32_t GetLoopMode(int32_t &mode) const;
+    int32_t GetLoopMode(int32_t& mode) const;
 
-    int32_t SetAssetId(const std::string &assetId);
-    int32_t GetAssetId(std::string &assetId) const;
+    int32_t SetAssetId(const std::string& assetId);
+    int32_t GetAssetId(std::string& assetId) const;
 
     const static inline std::vector<int32_t> localCapability {
         SESSION_CMD_PLAY,

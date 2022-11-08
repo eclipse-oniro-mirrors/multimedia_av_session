@@ -35,12 +35,12 @@ namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
     : descriptor_(descriptor)
 {
-    SLOGI("constructor id=%{public}s", descriptor_.sessionId_.c_str());
+    SLOGD("constructor id=%{public}s", descriptor_.sessionId_.c_str());
 }
 
 AVSessionItem::~AVSessionItem()
 {
-    SLOGI("destroy id=%{public}s", descriptor_.sessionId_.c_str());
+    SLOGD("destroy id=%{public}s", descriptor_.sessionId_.c_str());
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #if defined(__BIONIC__)
     mallopt(M_PURGE, 0);
@@ -107,7 +107,8 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 
     if (remoteSource_ != nullptr) {
         SLOGI("set remote AVMetaData");
-        remoteSource_->SetAVMetaData(meta);
+        auto ret = remoteSource_->SetAVMetaData(meta);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVMetaData failed");
     }
     return AVSESSION_SUCCESS;
 }
@@ -155,7 +156,7 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     return result;
 }
 
-int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback> &callback)
+int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback>& callback)
 {
     callback_ = callback;
     return AVSESSION_SUCCESS;
@@ -257,74 +258,79 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 {
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_ALL_CTRL_COMMAND);
+    int32_t code = cmd.GetCommand();
+    if (code < 0 || code >= SESSION_CMD_MAX) {
+        SLOGE("controlCommand invalid");
+        return;
+    }
+
     if (remoteSink_ != nullptr) {
         SLOGI("set remote ControlCommand");
-        remoteSink_->SetControlCommand(cmd);
+        CHECK_AND_RETURN_LOG(remoteSink_->SetControlCommand(cmd) == AVSESSION_SUCCESS, "SetControlCommand failed");
     }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactivate");
-    int32_t code = cmd.GetCommand();
-    if (code >= 0 && code < SESSION_CMD_MAX) {
-        HISYSEVENT_ADD_OPERATION_COUNT(static_cast<Operation>(cmd.GetCommand()));
-        HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_SUCCESS_CTRL_COMMAND);
-        HISYSEVENT_ADD_CONTROLLER_COMMAND_INFO(descriptor_.elementName_.GetBundleName(), GetPid(),
-            cmd.GetCommand(), descriptor_.sessionType_);
-        return (this->*cmdHandlers[code])(cmd);
-    }
+
+    HISYSEVENT_ADD_OPERATION_COUNT(static_cast<Operation>(cmd.GetCommand()));
+    HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_SUCCESS_CTRL_COMMAND);
+    HISYSEVENT_ADD_CONTROLLER_COMMAND_INFO(descriptor_.elementName_.GetBundleName(), GetPid(),
+        cmd.GetCommand(), descriptor_.sessionType_);
+    return (this->*cmdHandlers[code])(cmd);
+
     HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", code,
         "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");
 }
 
-void AVSessionItem::HandleOnPlay(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnPlay(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlay");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlay();
 }
 
-void AVSessionItem::HandleOnPause(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnPause(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPause");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPause();
 }
 
-void AVSessionItem::HandleOnStop(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnStop(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnStop");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnStop();
 }
 
-void AVSessionItem::HandleOnPlayNext(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnPlayNext(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayNext");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlayNext();
 }
 
-void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayPrevious");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlayPrevious();
 }
 
-void AVSessionItem::HandleOnFastForward(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnFastForward(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnFastForward");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnFastForward();
 }
 
-void AVSessionItem::HandleOnRewind(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnRewind(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnRewind");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnRewind();
 }
 
-void AVSessionItem::HandleOnSeek(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnSeek(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSeek");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
@@ -333,7 +339,7 @@ void AVSessionItem::HandleOnSeek(const AVControlCommand &cmd)
     callback_->OnSeek(time);
 }
 
-void AVSessionItem::HandleOnSetSpeed(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnSetSpeed(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSetSpeed");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
@@ -342,7 +348,7 @@ void AVSessionItem::HandleOnSetSpeed(const AVControlCommand &cmd)
     callback_->OnSetSpeed(speed);
 }
 
-void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSetLoopMode");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
@@ -351,7 +357,7 @@ void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand &cmd)
     callback_->OnSetLoopMode(loopMode);
 }
 
-void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand &cmd)
+void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnToggleFavorite");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
@@ -408,53 +414,12 @@ void AVSessionItem::HandleControllerRelease(pid_t pid)
     controllers_.erase(pid);
 }
 
-void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem &)> &callback)
+void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem& )>& callback)
 {
     serviceCallback_ = callback;
 }
 
-void AVSessionItem::UpdateOutputDevice(
-    OutputDeviceInfo& outputDeviceInfo,
-    const std::unique_ptr<AudioStandard::AudioRendererChangeInfo>& outputDeviceChangeInfo)
-{
-    if (outputDeviceChangeInfo->rendererState == AudioStandard::RENDERER_RELEASED) {
-        std::string deviceId = std::to_string(outputDeviceChangeInfo->outputDeviceInfo.deviceId);
-        auto iter = std::find(descriptor_.outputDeviceInfo_.deviceIds_.begin(),
-                              descriptor_.outputDeviceInfo_.deviceIds_.end(),
-                              deviceId);
-        if (iter != descriptor_.outputDeviceInfo_.deviceIds_.end()) {
-            auto position = std::distance(descriptor_.outputDeviceInfo_.deviceIds_.begin(), iter);
-            SLOGI("delete output device id %{public}s, device name %{public}s",
-                  descriptor_.outputDeviceInfo_.deviceIds_.at(position).c_str(),
-                  descriptor_.outputDeviceInfo_.deviceNames_.at(position).c_str());
-            descriptor_.outputDeviceInfo_.deviceIds_.erase(iter);
-            descriptor_.outputDeviceInfo_.deviceNames_.erase(
-                descriptor_.outputDeviceInfo_.deviceNames_.begin() + position);
-        }
-    } else {
-        SLOGI("add output device id %{public}s, device name %{public}s",
-              std::to_string(outputDeviceChangeInfo->outputDeviceInfo.deviceId).c_str(),
-              outputDeviceChangeInfo->outputDeviceInfo.deviceName.c_str());
-        if (descriptor_.outputDeviceInfo_.deviceIds_[0] == "-1" &&
-            descriptor_.outputDeviceInfo_.deviceNames_[0] == "LocalDevice") {
-            descriptor_.outputDeviceInfo_.deviceIds_.clear();
-            descriptor_.outputDeviceInfo_.deviceNames_.clear();
-        }
-        auto iter = std::find(descriptor_.outputDeviceInfo_.deviceIds_.begin(),
-                              descriptor_.outputDeviceInfo_.deviceIds_.end(),
-                              std::to_string(outputDeviceChangeInfo->outputDeviceInfo.deviceId));
-        if (iter == descriptor_.outputDeviceInfo_.deviceIds_.end()) {
-            descriptor_.outputDeviceInfo_.deviceIds_.push_back(
-                std::to_string(outputDeviceChangeInfo->outputDeviceInfo.deviceId));
-            descriptor_.outputDeviceInfo_.deviceNames_.push_back(outputDeviceChangeInfo->outputDeviceInfo.deviceName);
-        } else {
-            SLOGI("deviceID and deviceName is exist");
-        }
-    }
-    outputDeviceInfo = descriptor_.outputDeviceInfo_;
-}
-
-void AVSessionItem::HandleOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+void AVSessionItem::HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnOutputDeviceChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
@@ -467,7 +432,7 @@ void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
     descriptor_.outputDeviceInfo_.deviceIds_ = info.deviceIds_;
     descriptor_.outputDeviceInfo_.deviceNames_ = info.deviceNames_;
     HandleOutputDeviceChange(descriptor_.outputDeviceInfo_);
-    for (const auto &controller : controllers_) {
+    for (const auto& controller : controllers_) {
         controller.second->HandleOutputDeviceChange(descriptor_.outputDeviceInfo_);
     }
     SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(info.deviceIds_.size()));
@@ -526,7 +491,8 @@ int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, c
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetVectorCapability error");
     for (auto cmd : value[SESSION_DATA_CONTROL_COMMAND]) {
         SLOGI("add support cmd : %{public}d", cmd);
-        AddSupportCommand(cmd);
+        ret = AddSupportCommand(cmd);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddSupportCommand failed");
     }
     SLOGI("success");
     return AVSESSION_SUCCESS;

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "avcontrolleritem_fuzzer.h"
-
 #include <cstddef>
 #include <cstdint>
 
@@ -25,6 +23,7 @@
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
 #include "avsession_service.h"
+#include "avcontrolleritem_fuzzer.h"
 
 using namespace std;
 using namespace OHOS;

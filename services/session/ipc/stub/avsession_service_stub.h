@@ -22,23 +22,23 @@
 namespace OHOS::AVSession {
 class AVSessionServiceStub : public IRemoteStub<IAVSessionService> {
 public:
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
-    int HandleCreateSessionInner(MessageParcel &data, MessageParcel &reply);
-    int HandleGetAllSessionDescriptors(MessageParcel &data, MessageParcel &reply);
-    int HandleGetSessionDescriptorsById(MessageParcel &data, MessageParcel &reply);
-    int HandleCreateControllerInner(MessageParcel &data, MessageParcel &reply);
-    int HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply);
-    int HandleSendSystemAVKeyEvent(MessageParcel &data, MessageParcel &reply);
-    int HandleSendSystemControlCommand(MessageParcel &data, MessageParcel &reply);
-    int HandleRegisterClientDeathObserver(MessageParcel &data, MessageParcel &reply);
-    int HandleCastAudio(MessageParcel &data, MessageParcel &reply);
-    int HandleCastAudioForAll(MessageParcel &data, MessageParcel &reply);
-    int HandleRemoteCastAudio(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleCreateSessionInner(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetAllSessionDescriptors(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleSendSystemAVKeyEvent(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleSendSystemControlCommand(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleRegisterClientDeathObserver(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleCastAudio(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleCastAudioForAll(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleRemoteCastAudio(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HanlerFunc = int(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
+    using HanlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
     static inline HanlerFunc handlers[] = {
         [SERVICE_CMD_CREATE_SESSION] = &AVSessionServiceStub::HandleCreateSessionInner,
         [SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS] = &AVSessionServiceStub::HandleGetAllSessionDescriptors,
@@ -53,7 +53,7 @@ private:
         [SERVICE_CMD_SEND_COMMAND_TO_REMOTE] = &AVSessionServiceStub::HandleRemoteCastAudio,
     };
 
-    static constexpr int RECEIVE_DEVICE_NUM_MAX = 10;
+    static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_STUB_H

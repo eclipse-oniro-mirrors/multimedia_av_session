@@ -29,7 +29,7 @@ int32_t AVSessionPixelMapAdapter::originalWidth_ = 0;
 int32_t AVSessionPixelMapAdapter::originalHeight_ = 0;
 
 std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
-    const std::shared_ptr<AVSessionPixelMap> &innerPixelMap)
+    const std::shared_ptr<AVSessionPixelMap>& innerPixelMap)
 {
     CHECK_AND_RETURN_RET_LOG(innerPixelMap != nullptr, nullptr, "invalid parameter");
     CHECK_AND_RETURN_RET_LOG(innerPixelMap->GetInnerImgBuffer().size() > IMAGE_BYTE_SIZE, nullptr,
@@ -47,16 +47,15 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
 
     Media::ImageInfo imageInfo;
     std::copy(innerImgBuffer.data() + IMAGE_BYTE_SIZE,
-        innerImgBuffer.data() + IMAGE_BYTE_SIZE + imgBufferSize, (uint8_t*)(&imageInfo));
+        innerImgBuffer.data() + IMAGE_BYTE_SIZE + imgBufferSize, reinterpret_cast<uint8_t*>(&imageInfo));
 
     const std::shared_ptr<Media::PixelMap>& pixelMap = std::make_shared<Media::PixelMap>();
     pixelMap->SetImageInfo(imageInfo);
 
     uint32_t dataSize = 0;
     for (uint8_t i = 0; i < DATA_BYTE_SIZE; i++) {
-        uint8_t tmpValue = innerImgBuffer[IMAGE_BYTE_SIZE + imgBufferSize + i];
-        uint32_t size = tmpValue << (OFFSET_BYTE * (DATA_BYTE_SIZE - i - 1));
-        dataSize += size;
+        uint32_t tmpValue = innerImgBuffer[IMAGE_BYTE_SIZE + imgBufferSize + i];
+        dataSize += (tmpValue << (OFFSET_BYTE * (DATA_BYTE_SIZE - i - 1)));
     }
     void* dataAddr = static_cast<void*>(innerImgBuffer.data() + IMAGE_BYTE_SIZE + imgBufferSize + DATA_BYTE_SIZE);
     pixelMap->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
@@ -70,28 +69,28 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
     options.editable = true;
     auto result = Media::PixelMap::Create(*pixelMap, options);
     if (originalPixelMapBytes_ > MAX_PIXEL_BUFFER_SIZE) {
-        float scaleRatio = (float)originalPixelMapBytes_ / (float)MAX_PIXEL_BUFFER_SIZE;
+        float scaleRatio = static_cast<float>(originalPixelMapBytes_) / static_cast<float>(MAX_PIXEL_BUFFER_SIZE);
         pixelMap->scale(scaleRatio, scaleRatio);
     }
     return std::move(result);
 }
 
 std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
-    const std::shared_ptr<Media::PixelMap> &pixelMap)
+    const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     CHECK_AND_RETURN_RET_LOG(pixelMap != nullptr, nullptr, "invalid parameter");
     originalPixelMapBytes_ = pixelMap->GetByteCount();
     originalWidth_ = pixelMap->GetWidth();
     originalHeight_ = pixelMap->GetHeight();
     if (originalPixelMapBytes_ > MAX_PIXEL_BUFFER_SIZE) {
-        float scaleRatio = (float)MAX_PIXEL_BUFFER_SIZE / (float)originalPixelMapBytes_;
+        float scaleRatio = static_cast<float>(MAX_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_);
         pixelMap->scale(scaleRatio, scaleRatio);
     }
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> imgBuffer;
     Media::ImageInfo imageInfo;
     pixelMap->GetImageInfo(imageInfo);
-    const auto *buffer = (uint8_t *)(&imageInfo);
+    const auto* buffer = reinterpret_cast<uint8_t*>(&imageInfo);
     uint16_t imageInfoSize = static_cast<uint16_t>(sizeof(Media::ImageInfo));
     int32_t pixelDataSize = pixelMap->GetByteCount();
     size_t bufferSize = IMAGE_BYTE_SIZE + imageInfoSize + DATA_BYTE_SIZE + pixelDataSize;

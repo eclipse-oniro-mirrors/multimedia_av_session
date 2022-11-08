@@ -30,13 +30,13 @@ static constexpr size_t STR_TAIL_LENGTH = 1;
 
 int32_t NapiUtils::ConvertSessionType(const std::string& typeString)
 {
-    int32_t type = AVSession::SESSION_TYPE_INVALID;
     if (typeString == "audio") {
-        type = AVSession::SESSION_TYPE_AUDIO;
+        return AVSession::SESSION_TYPE_AUDIO;
     } else if (typeString == "video") {
-        type = AVSession::SESSION_TYPE_VIDEO;
+        return AVSession::SESSION_TYPE_VIDEO;
+    } else {
+        return AVSession::SESSION_TYPE_INVALID;
     }
-    return type;
 }
 
 std::string NapiUtils::ConvertSessionType(int32_t type)
@@ -340,6 +340,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::shared_ptr<MMI
 
 napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEvent>& in, napi_value& out)
 {
+    CHECK_RETURN(in != nullptr, "input is nullptr", napi_invalid_arg);
     auto status = napi_create_object(env, &out);
     CHECK_RETURN(status == napi_ok, "create object failed", status);
 
@@ -361,7 +362,7 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEven
 
     uint32_t idx = 0;
     std::vector<MMI::KeyEvent::KeyItem> keyItems = in->GetKeyItems();
-    for (const auto &keyItem : keyItems) {
+    for (const auto& keyItem : keyItems) {
         napi_value item {};
         status = SetValue(env, keyItem, item);
         CHECK_RETURN(status == napi_ok, "create keyItem failed", status);
@@ -379,7 +380,7 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEven
 /* napi_value <-> AbilityRuntime::WantAgent::WantAgent */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, AbilityRuntime::WantAgent::WantAgent*& out)
 {
-    auto status = napi_unwrap(env, in, reinterpret_cast<void **>(&out));
+    auto status = napi_unwrap(env, in, reinterpret_cast<void**>(&out));
     CHECK_RETURN(status == napi_ok, "unwrap failed", napi_invalid_arg);
     return status;
 }
@@ -388,8 +389,8 @@ napi_status NapiUtils::SetValue(napi_env env, const AbilityRuntime::WantAgent::W
 {
     auto status = napi_create_object(env, &out);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    auto finalizecb = [](napi_env env, void *data, void *hint) {};
-    status = napi_wrap(env, out, (void *)&in, finalizecb, nullptr, nullptr);
+    auto finalizecb = [](napi_env env, void* data, void* hint) {};
+    status = napi_wrap(env, out, (void*)&in, finalizecb, nullptr, nullptr);
     CHECK_RETURN(status == napi_ok, "wrap object failed", napi_generic_failure);
     return status;
 }
@@ -844,9 +845,11 @@ napi_status NapiUtils::GetStageElementName(napi_env env, napi_value in, AppExecF
 
 napi_status NapiUtils::GetFaElementName(napi_env env, AppExecFwk::ElementName& out)
 {
-    auto *ability = AbilityRuntime::GetCurrentAbility(env);
+    auto* ability = AbilityRuntime::GetCurrentAbility(env);
     CHECK_RETURN(ability != nullptr, "get feature ability failed", napi_generic_failure);
-    out = ability->GetWant()->GetElement();
+    auto want = ability->GetWant();
+    CHECK_RETURN(want != nullptr, "get want failed", napi_generic_failure);
+    out = want->GetElement();
     return napi_ok;
 }
 

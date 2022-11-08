@@ -17,6 +17,7 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
+
 #include "avmeta_data.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
@@ -54,11 +55,13 @@ public:
             AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
         if (avsession_ == nullptr) {
             SLOGE("%{public}s error, failed to CreateSession, avsession_ nullptr.", __func__);
+            return;
         }
 
         AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller_);
         if (controller_ == nullptr) {
             SLOGE("%{public}s error, failed to CreateController, controller_ nullptr.", __func__);
+            return;
         }
     }
 
@@ -94,7 +97,7 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo) override {};
+    void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override {};
 
     ~AVControllerCallbackImpl() override;
 

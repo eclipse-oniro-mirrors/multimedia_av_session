@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "avsession_manager.h"
 #include "avsession_info.h"
 #include "avsession_log.h"
@@ -80,8 +81,8 @@ public:
     void TearDown() override;
 
     uint64_t selfTokenId_ = 0;
-    void AddPermission(const HapInfoParams &info, const HapPolicyParams &policy);
-    void DeletePermission(const HapInfoParams &info);
+    void AddPermission(const HapInfoParams& info, const HapPolicyParams& policy);
+    void DeletePermission(const HapInfoParams& info);
 };
 
 void AVSessionPermissionTest::SetUpTestCase()
@@ -96,7 +97,7 @@ void AVSessionPermissionTest::SetUp()
 void AVSessionPermissionTest::TearDown()
 {}
 
-void AVSessionPermissionTest::AddPermission(const HapInfoParams &info, const HapPolicyParams &policy)
+void AVSessionPermissionTest::AddPermission(const HapInfoParams& info, const HapPolicyParams& policy)
 {
     selfTokenId_ = GetSelfTokenID();
     AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(info, policy);
@@ -105,7 +106,7 @@ void AVSessionPermissionTest::AddPermission(const HapInfoParams &info, const Hap
     SLOGI("GetSelfTokenID:%{public}" PRId64, GetSelfTokenID());
 }
 
-void AVSessionPermissionTest::DeletePermission(const HapInfoParams &info)
+void AVSessionPermissionTest::DeletePermission(const HapInfoParams& info)
 {
     SetSelfTokenID(selfTokenId_);
     auto tokenId = AccessTokenKit::GetHapTokenID(info.userID, info.bundleName, info.instIndex);
@@ -114,17 +115,17 @@ void AVSessionPermissionTest::DeletePermission(const HapInfoParams &info)
 
 class TestSessionListener : public SessionListener {
 public:
-    void OnSessionCreate(const AVSessionDescriptor &descriptor) override
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override
     {
         SLOGI("sessionId=%{public}s created", descriptor.sessionId_.c_str());
     }
 
-    void OnSessionRelease(const AVSessionDescriptor &descriptor) override
+    void OnSessionRelease(const AVSessionDescriptor& descriptor) override
     {
         SLOGI("sessionId=%{public}s released", descriptor.sessionId_.c_str());
     }
 
-    void OnTopSessionChange(const AVSessionDescriptor &descriptor) override
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override
     {
         SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }

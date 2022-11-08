@@ -14,36 +14,35 @@
  */
 
 #include "avsession_controller_stub.h"
-
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
 
 namespace OHOS::AVSession {
-bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel &data)
+bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel& data)
 {
     auto localDescriptor = IAVSessionController::GetDescriptor();
     auto remoteDescriptor = data.ReadInterfaceToken();
     if (remoteDescriptor != localDescriptor) {
-        SLOGE("interface token is not equal");
+        SLOGI("interface token is not equal");
         return false;
     }
     return true;
 }
 
-int32_t AVSessionControllerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+int32_t AVSessionControllerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption &option)
 {
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code >= 0 && code < CONTROLLER_CMD_MAX) {
+    if (code < CONTROLLER_CMD_MAX) {
         return (this->*handlers[code])(data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t AVSessionControllerStub::HandleRegisterCallbackInner(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply)
 {
     auto remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
@@ -55,13 +54,13 @@ int32_t AVSessionControllerStub::HandleRegisterCallbackInner(MessageParcel &data
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleDestroy(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleDestroy(MessageParcel& data, MessageParcel& reply)
 {
     CHECK_AND_PRINT_LOG(reply.WriteInt32(Destroy()), "write release() ret failed");
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleGetAVPlaybackState(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply)
 {
     AVPlaybackState state;
     int32_t ret = GetAVPlaybackState(state);
@@ -72,7 +71,7 @@ int32_t AVSessionControllerStub::HandleGetAVPlaybackState(MessageParcel &data, M
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleSendControlCommand(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleSendControlCommand(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SendControlCommand");
     sptr<AVControlCommand> cmd = data.ReadParcelable<AVControlCommand>();
@@ -84,7 +83,7 @@ int32_t AVSessionControllerStub::HandleSendControlCommand(MessageParcel &data, M
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
     AVMetaData metaData;
     int32_t ret = GetAVMetaData(metaData);
@@ -95,12 +94,12 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel &data, Messag
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SendAVKeyEvent");
     std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
     if (event == nullptr) {
-        SLOGD("malloc keyEvent failed");
+        SLOGI("malloc keyEvent failed");
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_NO_MEMORY), "write SendAVKeyEvent ret failed");
         return ERR_NONE;
     }
@@ -115,7 +114,7 @@ int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel &data, Messa
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleGetLaunchAbility(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleGetLaunchAbility(MessageParcel& data, MessageParcel& reply)
 {
     AbilityRuntime::WantAgent::WantAgent ability;
     int32_t ret = GetLaunchAbility(ability);
@@ -126,7 +125,7 @@ int32_t AVSessionControllerStub::HandleGetLaunchAbility(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleGetValidCommands(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleGetValidCommands(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<int32_t> cmds;
     int32_t ret = GetValidCommands(cmds);
@@ -137,7 +136,7 @@ int32_t AVSessionControllerStub::HandleGetValidCommands(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel& data, MessageParcel& reply)
 {
     std::string str = data.ReadString();
     if (str.length() != AVMetaData::META_KEY_MAX) {
@@ -145,7 +144,7 @@ int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel &data, Messag
         return ERR_NONE;
     }
     if (str.find_first_not_of("01") != std::string::npos) {
-        SLOGE("mask string not 0 or 1");
+        SLOGI("mask string not 0 or 1");
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write int32 failed");
         return ERR_NONE;
     }
@@ -154,7 +153,7 @@ int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel &data, Messag
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleSetPlaybackFilter(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleSetPlaybackFilter(MessageParcel& data, MessageParcel& reply)
 {
     std::string str = data.ReadString();
     if (str.length() != AVPlaybackState::PLAYBACK_KEY_MAX) {
@@ -162,7 +161,7 @@ int32_t AVSessionControllerStub::HandleSetPlaybackFilter(MessageParcel &data, Me
         return ERR_NONE;
     }
     if (str.find_first_not_of("01") != std::string::npos) {
-        SLOGE("mask string not all 0 or 1");
+        SLOGI("mask string not all 0 or 1");
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write int32 failed");
         return ERR_NONE;
     }
@@ -171,7 +170,7 @@ int32_t AVSessionControllerStub::HandleSetPlaybackFilter(MessageParcel &data, Me
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleIsSessionActive(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleIsSessionActive(MessageParcel& data, MessageParcel& reply)
 {
     bool isActive = false;
     int32_t ret = IsSessionActive(isActive);
@@ -182,7 +181,7 @@ int32_t AVSessionControllerStub::HandleIsSessionActive(MessageParcel &data, Mess
     return ERR_NONE;
 }
 
-int32_t AVSessionControllerStub::HandleGetSessionId(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionControllerStub::HandleGetSessionId(MessageParcel& data, MessageParcel& reply)
 {
     CHECK_AND_PRINT_LOG(reply.WriteString(GetSessionId()), "write int32_t failed");
     return ERR_NONE;

@@ -16,6 +16,7 @@
 #include <iostream>
 #include <cstddef>
 #include <cstdint>
+
 #include "avsession_callback_proxy.h"
 #include "avsession_controller_proxy.h"
 #include "avsession_errors.h"
@@ -26,9 +27,9 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST  = 12;
-const int32_t MAX_CODE_LEN = 512;
-const int32_t MIN_SIZE_NUM = 4;
+constexpr int32_t MAX_CODE_TEST  = 12;
+constexpr int32_t MAX_CODE_LEN = 512;
+constexpr int32_t MIN_SIZE_NUM = 4;
 
 bool AvsessionControllerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {
@@ -52,11 +53,11 @@ bool AvsessionControllerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     auto remote = avSessionProxy->GetRemote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     size -= sizeof(uint32_t);
     request.WriteBuffer(data + sizeof(uint32_t), size);
     request.RewindRead(0);
     int32_t result = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG((result = remote->SendRequest(cmdCode, request, reply, option)) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     return result == AVSESSION_SUCCESS;
@@ -65,10 +66,7 @@ bool AvsessionControllerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 bool OHOS::AVSession::AvsessionControllerProxySendRequest(uint8_t* data, size_t size)
 {
     auto avsessionProxy = std::make_unique<AvsessionControllerProxyFuzzer>();
-    if (avsessionProxy == nullptr) {
-        cout << "avsessionProxy is null" << endl;
-        return false;
-    }
+    CHECK_AND_RETURN_RET_LOG(avsessionProxy != nullptr, false, "avsessionProxy is null");
     return avsessionProxy->FuzzSendRequest(data, size);
 }
 

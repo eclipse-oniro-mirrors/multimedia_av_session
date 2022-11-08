@@ -21,7 +21,7 @@ AVPlaybackState::AVPlaybackState()
 {
 }
 
-bool AVPlaybackState::Marshalling(Parcel &parcel) const
+bool AVPlaybackState::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(mask_.to_string()) &&
         parcel.WriteInt32(state_) &&
@@ -33,7 +33,7 @@ bool AVPlaybackState::Marshalling(Parcel &parcel) const
         parcel.WriteBool(isFavorite_);
 }
 
-AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel &parcel)
+AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
 {
     std::string mask;
     CHECK_AND_RETURN_RET_LOG(parcel.ReadString(mask) && mask.length() == PLAYBACK_KEY_MAX, nullptr, "mask not valid");
@@ -80,7 +80,7 @@ void AVPlaybackState::SetSpeed(double speed)
     speed_ = speed;
 }
 
-void AVPlaybackState::SetPosition(const Position &position)
+void AVPlaybackState::SetPosition(const Position& position)
 {
     mask_.set(PLAYBACK_KEY_POSITION);
     position_ = position;
@@ -168,32 +168,32 @@ bool AVPlaybackState::CopyFrom(const AVPlaybackState& in)
     return result;
 }
 
-void AVPlaybackState::CloneState(const AVPlaybackState &from, AVPlaybackState &to)
+void AVPlaybackState::CloneState(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.state_ = from.state_;
 }
 
-void AVPlaybackState::CloneSpeed(const AVPlaybackState &from, AVPlaybackState &to)
+void AVPlaybackState::CloneSpeed(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.speed_ = from.speed_;
 }
 
-void AVPlaybackState::ClonePosition(const AVPlaybackState &from, AVPlaybackState &to)
+void AVPlaybackState::ClonePosition(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.position_ = from.position_;
 }
 
-void AVPlaybackState::CloneBufferedTime(const AVPlaybackState &from, AVPlaybackState &to)
+void AVPlaybackState::CloneBufferedTime(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.bufferedTime_ = from.bufferedTime_;
 }
 
-void AVPlaybackState::CloneLoopMode(const AVPlaybackState &from, AVPlaybackState &to)
+void AVPlaybackState::CloneLoopMode(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.loopMode_ = from.loopMode_;
 }
 
-void AVPlaybackState::CloneIsFavorite(const AVPlaybackState &from, AVPlaybackState &to)
+void AVPlaybackState::CloneIsFavorite(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.isFavorite_ = from.isFavorite_;
 }

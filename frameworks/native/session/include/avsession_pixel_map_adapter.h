@@ -22,8 +22,8 @@
 namespace OHOS::AVSession {
 class AVSessionPixelMapAdapter {
 public:
-    static std::shared_ptr<Media::PixelMap> ConvertFromInner(const std::shared_ptr<AVSessionPixelMap> &innerPixelMap);
-    static std::shared_ptr<AVSessionPixelMap> ConvertToInner(const std::shared_ptr<Media::PixelMap> &pixelMap);
+    static std::shared_ptr<Media::PixelMap> ConvertFromInner(const std::shared_ptr<AVSessionPixelMap>& innerPixelMap);
+    static std::shared_ptr<AVSessionPixelMap> ConvertToInner(const std::shared_ptr<Media::PixelMap>& pixelMap);
     static int32_t originalPixelMapBytes_;
     static int32_t originalWidth_;
     static int32_t originalHeight_;

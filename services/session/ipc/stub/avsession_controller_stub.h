@@ -22,9 +22,9 @@
 namespace OHOS::AVSession {
 class AVSessionControllerStub : public IRemoteStub<IAVSessionController> {
 public:
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
-    int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback) override
+    int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback) override
     {
         return 0;
     }
@@ -40,33 +40,33 @@ public:
     }
 
 private:
-    int32_t HandleRegisterCallbackInner(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleDestroy(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleDestroy(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetAVPlaybackState(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleSendControlCommand(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSendControlCommand(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetAVMetaData(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleSendAVKeyEvent(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSendAVKeyEvent(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetLaunchAbility(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetLaunchAbility(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetValidCommands(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetValidCommands(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleSetMetaFilter(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetMetaFilter(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleSetPlaybackFilter(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetPlaybackFilter(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleIsSessionActive(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsSessionActive(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetSessionId(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HanlerFunc = int32_t (AVSessionControllerStub::*)(MessageParcel &data, MessageParcel &reply);
+    using HanlerFunc = int32_t (AVSessionControllerStub::*)(MessageParcel& data, MessageParcel& reply);
     static inline HanlerFunc handlers[] = {
         [CONTROLLER_CMD_REGISTER_CALLBACK] = &AVSessionControllerStub::HandleRegisterCallbackInner,
         [CONTROLLER_CMD_DESTROY] = &AVSessionControllerStub::HandleDestroy,

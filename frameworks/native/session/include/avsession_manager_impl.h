@@ -78,7 +78,7 @@ class ServiceDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
     explicit ServiceDeathRecipient(const std::function<void()>& callback);
 
-    void OnRemoteDied(const wptr<IRemoteObject> &object) override;
+    void OnRemoteDied(const wptr<IRemoteObject>& object) override;
 
 private:
     std::function<void()> callback_;

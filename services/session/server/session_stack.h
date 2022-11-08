@@ -17,6 +17,7 @@
 #define OHOS_SESSION_STACK_H
 
 #include <string>
+
 #include "session_container.h"
 
 namespace OHOS::AVSession {

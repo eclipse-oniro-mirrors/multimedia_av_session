@@ -82,18 +82,18 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
     napi_value self;
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, nullptr, nullptr, &self, nullptr), nullptr);
 
-    auto finalize = [](napi_env env, void *data, void *hint) {
-        auto *napiController = reinterpret_cast<NapiAVSessionController *>(data);
+    auto finalize = [](napi_env env, void* data, void* hint) {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(data);
         napi_delete_reference(env, napiController->wrapperRef_);
         delete napiController;
     };
 
-    auto *napiController = new(std::nothrow) NapiAVSessionController();
+    auto* napiController = new(std::nothrow) NapiAVSessionController();
     if (napiController == nullptr) {
         SLOGE("no memory");
         return nullptr;
     }
-    if (napi_wrap(env, self, static_cast<void *>(napiController), finalize, nullptr,
+    if (napi_wrap(env, self, static_cast<void*>(napiController), finalize, nullptr,
                   &(napiController->wrapperRef_)) != napi_ok) {
         SLOGE("wrap failed");
         return nullptr;
@@ -101,15 +101,15 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
     return self;
 }
 
-napi_status NapiAVSessionController::NewInstance(napi_env env, std::shared_ptr<AVSessionController> &nativeController,
-    napi_value &out)
+napi_status NapiAVSessionController::NewInstance(napi_env env, std::shared_ptr<AVSessionController>& nativeController,
+    napi_value& out)
 {
     napi_value constructor{};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVControllerConstructorRef, &constructor), napi_generic_failure);
     napi_value instance{};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
-    NapiAVSessionController *napiController{};
-    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void **>(&napiController)), napi_generic_failure);
+    NapiAVSessionController* napiController{};
+    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiController)), napi_generic_failure);
     napiController->controller_ = std::move(nativeController);
     napiController->sessionId_ = napiController->controller_->GetSessionId();
 
@@ -154,7 +154,7 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
         }
     };
 
-    auto complete = [env, context](napi_value &output) {
+    auto complete = [env, context](napi_value& output) {
         context->status = NapiPlaybackState::SetValue(env, context->state, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -194,7 +194,7 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
         }
     };
 
-    auto complete = [env, context](napi_value &output) {
+    auto complete = [env, context](napi_value& output) {
         context->status = NapiMetaData::SetValue(env, context->data, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -283,7 +283,7 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
         }
     };
 
-    auto complete = [env, context](napi_value &output) {
+    auto complete = [env, context](napi_value& output) {
         context->status = NapiUtils::SetValue(env, context->ability, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -326,7 +326,7 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
         context->stringCmds = NapiControlCommand::ConvertCommands(cmds);
     };
 
-    auto complete = [env, context](napi_value &output) {
+    auto complete = [env, context](napi_value& output) {
         context->status = NapiUtils::SetValue(env, context->stringCmds, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -367,7 +367,7 @@ napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_
         }
     };
 
-    auto complete = [env, context](napi_value &output) {
+    auto complete = [env, context](napi_value& output) {
         context->status = NapiUtils::SetValue(env, context->isActive, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -429,6 +429,12 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
 napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
@@ -462,6 +468,12 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
 napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
@@ -507,7 +519,7 @@ napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_
         context->outputDeviceInfo_ = descriptor.outputDeviceInfo_;
     };
 
-    auto complete = [env, context](napi_value &output) {
+    auto complete = [env, context](napi_value& output) {
         context->status = NapiUtils::SetValue(env, context->outputDeviceInfo_, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -529,7 +541,7 @@ napi_status NapiAVSessionController::SetPlaybackStateFilter(napi_env env, NapiAV
     return status;
 }
 
-napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionController *napiController,
+napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionController* napiController,
                                                    napi_value filter)
 {
     AVMetaData::MetaMaskType metaMask;
@@ -601,6 +613,12 @@ static bool IsThreeParamForOnEvent(const std::string& event)
 napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     std::string eventName;
     napi_value filter {};
     napi_value callback {};
@@ -646,6 +664,12 @@ napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info inf
 napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    
     std::string eventName;
     napi_value callback = nullptr;
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
@@ -684,7 +708,7 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     return NapiUtils::GetUndefinedValue(env);
 }
 
-napi_status NapiAVSessionController::OnSessionDestroy(napi_env env, NapiAVSessionController *napiController,
+napi_status NapiAVSessionController::OnSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                                       napi_value param, napi_value callback)
 {
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_SESSION_DESTROY, callback);
@@ -729,7 +753,7 @@ napi_status NapiAVSessionController::OnOutputDeviceChange(napi_env env, NapiAVSe
                                                   callback);
 }
 
-napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessionController *napiController,
+napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                                        napi_value callback)
 {
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_SESSION_DESTROY, callback);

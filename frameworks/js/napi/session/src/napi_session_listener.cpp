@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "napi_session_listener.h"
 #include <memory>
+
 #include "avsession_log.h"
 #include "avsession_info.h"
 #include "avsession_trace.h"
+#include "napi_session_listener.h"
 
 namespace OHOS::AVSession {
 NapiSessionListener::NapiSessionListener()
@@ -31,15 +32,15 @@ NapiSessionListener::~NapiSessionListener()
 }
 
 template<typename T>
-void NapiSessionListener::HandleEvent(int32_t event, const T &param)
+void NapiSessionListener::HandleEvent(int32_t event, const T& param)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
-    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [param](napi_env env, int &argc, napi_value *argv) {
+    for (auto& ref : callbacks_[event]) {
+        asyncCallback_->Call(ref, [param](napi_env env, int& argc, napi_value* argv) {
             argc = 1;
             NapiUtils::SetValue(env, param, *argv);
         });
@@ -89,8 +90,8 @@ napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, nap
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callback == nullptr) {
-        for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
-            napi_status ret = napi_delete_reference(env, *callbackRef);
+        for (auto& callbackRef : callbacks_[event]) {
+            napi_status ret = napi_delete_reference(env, callbackRef);
             CHECK_AND_RETURN_RET_LOG(napi_ok == ret, ret, "delete callback reference failed");
         }
         callbacks_[event].clear();
