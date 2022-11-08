@@ -19,7 +19,8 @@
 #include "remote_session_source_proxy.h"
 
 namespace OHOS::AVSession {
-static constexpr std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_source.z.so");
+static const std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) +
+                                               std::string("libremote_session_source.z.so");
 
 RemoteSessionSourceProxy::RemoteSessionSourceProxy()
 {
