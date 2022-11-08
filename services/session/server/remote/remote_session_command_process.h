@@ -81,6 +81,7 @@ public:
 
     int32_t ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
                                     std::string& output) override;
+
 private:
     static inline BrokerDelegator<RemoteSessionCommandProcess> delegator_;
 };
