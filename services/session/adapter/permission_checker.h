@@ -29,7 +29,7 @@ public:
     bool CheckSystemPermissionByUid(int uid);
 
 private:
-    static constexpr const char *MANAGE_MEDIA_RESOURCES = "ohos.permission.MANAGE_MEDIA_RESOURCES";
+    static constexpr const char* MANAGE_MEDIA_RESOURCES = "ohos.permission.MANAGE_MEDIA_RESOURCES";
     static constexpr int UID_TRANSFORM_DIVISOR = 200000;
 };
 } // namespace OHOS::AVSession

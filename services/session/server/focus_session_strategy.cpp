@@ -37,17 +37,17 @@ void FocusSessionStrategy::Init()
     });
 }
 
-void FocusSessionStrategy::RegisterFocusSessionChangeCallback(const FocusSessionChangeCallback &callback)
+void FocusSessionStrategy::RegisterFocusSessionChangeCallback(const FocusSessionChangeCallback& callback)
 {
     callback_ = callback;
 }
 
-void FocusSessionStrategy::RegisterFocusSessionSelector(const FocusSessionSelector &selector)
+void FocusSessionStrategy::RegisterFocusSessionSelector(const FocusSessionSelector& selector)
 {
     selector_ = selector;
 }
 
-void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos &infos)
+void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos& infos)
 {
     FocusSessionChangeInfo focusSessionChangeInfo;
     if (SelectFocusSession(infos, focusSessionChangeInfo)) {
@@ -76,7 +76,7 @@ bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChan
     return false;
 }
 
-bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos &infos,
+bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos& infos,
                                               FocusSessionChangeInfo& sessionInfo)
 {
     for (const auto& info : infos) {

@@ -43,7 +43,7 @@ public:
     virtual ~AbilityConnectionStub();
 
     int OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+        uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
     DISALLOW_COPY_AND_MOVE(AbilityConnectionStub);
@@ -55,8 +55,8 @@ public:
     ~AbilityConnectCallback() override;
 
     void OnAbilityConnectDone(
-        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode) override;
-    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
+        const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode) override;
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 };
 } // namespace OHOS::AVSession
 #endif /* ABILITY_CONNECT_HELPER_H */

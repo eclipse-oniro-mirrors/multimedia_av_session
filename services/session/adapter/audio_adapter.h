@@ -41,7 +41,7 @@ public:
 
     void OnRendererStateChange(const AudioRendererChangeInfos& infos) override;
 
-    bool GetRendererState(int32_t uid, AudioStandard::RendererState &rendererState);
+    bool GetRendererState(int32_t uid, AudioStandard::RendererState& rendererState);
 
 private:
     static std::shared_ptr<AudioAdapter> instance_;
