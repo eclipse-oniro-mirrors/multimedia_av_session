@@ -43,6 +43,9 @@ void AudioAdapter::Init()
 {
     SLOGI("register audio renderer event listener");
     AudioStandard::AudioStreamManager::GetInstance()->RegisterAudioRendererEventListener(getpid(), shared_from_this());
+    if (ret != 0) {
+        SLOGE("register audio renderer event listener failed");
+    }
 }
 
 void AudioAdapter::AddStreamRendererStateListener(const StateListener &listener)
@@ -73,7 +76,11 @@ void AudioAdapter::OnRendererStateChange(const AudioRendererChangeInfos &infos)
 bool AudioAdapter::GetRendererState(int32_t uid, AudioStandard::RendererState &rendererState)
 {
     std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
-    AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    if (ret != 0) {
+        SLOGE("get renderer state failed");
+        return false;
+    }
     for (const auto& info : audioRendererChangeInfo) {
         if (info->clientUID == uid) {
             rendererState = info->rendererState;

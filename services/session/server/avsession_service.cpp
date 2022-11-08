@@ -247,6 +247,7 @@ void AVSessionService::InitDM()
 {
     SLOGI("enter");
     auto callback = std::make_shared<AVSessionInitDMCallback>();
+    CHECK_AND_RETURN_LOG(callback != nullptr, "no memory");
     int32_t ret = OHOS::DistributedHardware::DeviceManager::GetInstance().InitDeviceManager("av_session", callback);
     CHECK_AND_RETURN_LOG(ret == 0, "InitDeviceManager error ret is %{public}d", ret);
 }
@@ -633,7 +634,7 @@ void AVSessionService::HandleEventHandlerCallBack()
         topSession_->ExecuteControllerCommand(cmd);
     }
     pressCount_ = 0;
-    isFirstPress = true;
+    isFirstPress_ = true;
 }
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
@@ -648,12 +649,12 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
     SLOGI("key=%{public}d", keyEvent.GetKeyCode());
     if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK) {
         pressCount_++;
-        if (isFirstPress) {
+        if (isFirstPress_) {
             auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
                 HandleEventHandlerCallBack();
             }, "SendSystemAVKeyEvent", CLICK_TIMEOUT);
             CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
-            isFirstPress = false;
+            isFirstPress_ = false;
         }
         return AVSESSION_SUCCESS;
     }
@@ -960,6 +961,7 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
 {
     SLOGI("uid is %{public}d", uid);
     sptr <AudioStandard::AudioRendererFilter> audioFilter = new(std::nothrow) AudioRendererFilter();
+    CHECK_AND_RETURN_RET_LOG(audioFilter != nullptr, AVSESSION_ERROR, "no memory");
     audioFilter->uid = uid;
     audioFilter->rendererInfo.contentType = ContentType::CONTENT_TYPE_MUSIC;
     audioFilter->rendererInfo.streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
@@ -973,6 +975,7 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
           descriptor.networkId_.c_str());
 
     AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
+    CHECK_AND_RETURN_RET_LOG(audioSystemMgr != nullptr, AVSESSION_ERROR, "audioSystemMgr is nullptr");
     int32_t ret = audioSystemMgr->SelectOutputDevice(audioFilter, audioDescriptor);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "SelectOutputDevice failed");
 

@@ -41,7 +41,7 @@ private:
 
     int32_t UnLoadSourceImplement();
 
-    void *handle_;
+    void *handle_ = nullptr;
     RemoteSessionSourceImpl *sourceImpl_;
 };
 } // namespace OHOS::AVSession

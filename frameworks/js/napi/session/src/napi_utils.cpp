@@ -350,6 +350,7 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEven
     CHECK_RETURN(status == napi_ok, "set action property failed", status);
 
     napi_value key {};
+    CHECK_RETURN(in->GetKeyItem() != nullptr, "get key item failed", napi_generic_failure);
     status = SetValue(env, *in->GetKeyItem(), key);
     CHECK_RETURN(status == napi_ok, "create key property failed", status);
     status = napi_set_named_property(env, out, "key", key);
