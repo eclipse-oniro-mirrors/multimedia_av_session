@@ -167,7 +167,7 @@ AVMetaData::MetaMaskType RemoteSessionSourceImpl::GetSinkMetaMaskType(const std:
 }
 
 AVPlaybackState::PlaybackStateMaskType RemoteSessionSourceImpl::GetSinkPlaybackStateMaskType(
-    const std::string &sinkDevice)
+    const std::string& sinkDevice)
 {
     std::vector<int32_t> capability = AVPlaybackState::localCapability;
     AVPlaybackState::PlaybackStateMaskType mask;

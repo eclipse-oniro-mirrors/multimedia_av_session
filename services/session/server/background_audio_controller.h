@@ -28,9 +28,9 @@ public:
     BackgroundAudioController();
     ~BackgroundAudioController() override;
 
-    void OnSessionCreate(const AVSessionDescriptor &descriptor) override;
-    void OnSessionRelease(const AVSessionDescriptor &descriptor) override;
-    void OnTopSessionChange(const AVSessionDescriptor &descriptor) override {}
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
+    void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override {}
 
     void Init();
 

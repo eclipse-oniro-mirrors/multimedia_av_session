@@ -40,10 +40,10 @@ public:
     void RegisterFocusSessionSelector(const FocusSessionSelector& selector);
 
 private:
-    void HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos &infos);
+    void HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos& infos);
 
     bool IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info);
-    bool SelectFocusSession(const AudioRendererChangeInfos &infos, FocusSessionChangeInfo& sessionInfo);
+    bool SelectFocusSession(const AudioRendererChangeInfos& infos, FocusSessionChangeInfo& sessionInfo);
 
     FocusSessionChangeCallback callback_;
     FocusSessionSelector selector_;

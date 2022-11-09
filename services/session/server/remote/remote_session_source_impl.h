@@ -29,14 +29,14 @@ namespace OHOS::AVSession {
 class RemoteSessionSourceImpl : public RemoteSessionSource {
 public:
     RemoteSessionSourceImpl();
-    int32_t CastSessionToRemote(const sptr <AVSessionItem> &session, const std::string& sourceDevice,
+    int32_t CastSessionToRemote(const sptr <AVSessionItem>& session, const std::string& sourceDevice,
                                 const std::string& sinkDevice, const std::string& sinkCapability) override;
 
     int32_t CancelCastAudio(const std::string& sinkDevice) override;
 
-    int32_t SetAVMetaData(const AVMetaData &metaData) override;
+    int32_t SetAVMetaData(const AVMetaData& metaData) override;
 
-    int32_t SetAVPlaybackState(const AVPlaybackState &state) override;
+    int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
 
     ~RemoteSessionSourceImpl() override = default;
 
@@ -44,8 +44,8 @@ private:
     AVMetaData::MetaMaskType GetSinkMetaMaskType(const std::string& sinkDevice);
     AVPlaybackState::PlaybackStateMaskType GetSinkPlaybackStateMaskType(const std::string& sinkDevice);
 
-    std::map <std::string, std::shared_ptr<RemoteSessionSyncer>> syncers_;
-    sptr <AVSessionItem> session_;
+    std::map<std::string, std::shared_ptr<RemoteSessionSyncer>> syncers_;
+    sptr<AVSessionItem> session_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_REMOTE_SESSION_SOURCE_IMPL_H
