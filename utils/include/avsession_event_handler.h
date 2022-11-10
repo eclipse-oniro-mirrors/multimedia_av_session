@@ -24,7 +24,7 @@ public:
     static AVSessionEventHandler& GetInstance();
 
     AVSessionEventHandler();
-    ~AVSessionEventHandler();
+    ~AVSessionEventHandler() override;
 
     bool AVSessionPostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
 

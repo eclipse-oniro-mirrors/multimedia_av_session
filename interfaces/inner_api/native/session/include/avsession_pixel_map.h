@@ -27,7 +27,7 @@ constexpr size_t DEFAULT_BUFFER_SIZE = 160 * 1024;
 class AVSessionPixelMap : public Parcelable {
 public:
     AVSessionPixelMap() = default;
-    ~AVSessionPixelMap()
+    ~AVSessionPixelMap() override
     {
         Clear();
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
@@ -37,7 +37,7 @@ public:
 #endif
     }
 
-    bool Marshalling(Parcel &data) const override;
+    bool Marshalling(Parcel& parcel) const override;
     static AVSessionPixelMap *Unmarshalling(Parcel &data);
 
     void Clear()

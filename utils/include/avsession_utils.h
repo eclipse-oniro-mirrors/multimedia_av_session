@@ -24,13 +24,10 @@
 #include "directory_ex.h"
 
 namespace OHOS::AVSession {
-namespace {
-    constexpr const char* CACHE_PATH_NAME = "/data/service/el1/public/av_session/cache/";
-    constexpr const char* FILE_SUFFIX = ".image.dat";
-    constexpr const int32_t MAX_FILE_SIZE = 200 * 1024;
-}
 class AVSessionUtils {
 public:
+    static constexpr const int32_t MAX_FILE_SIZE = 200 * 1024;
+
     static void WriteImageToFile(const std::shared_ptr<AVSessionPixelMap>& innerPixelMap, const std::string& fileName)
     {
         if (innerPixelMap == nullptr) {
@@ -39,8 +36,8 @@ public:
         }
 
         char realPath[PATH_MAX] = { 0x00 };
-        if (realpath(CACHE_PATH_NAME, realPath) == nullptr) {
-            SLOGE("check path failed %{public}s", CACHE_PATH_NAME);
+        if (realpath(AVSessionUtils::GetCachePathName(), realPath) == nullptr) {
+            SLOGE("check path failed %{public}s", AVSessionUtils::GetCachePathName());
             return;
         }
 
@@ -70,8 +67,8 @@ public:
         }
 
         char realPath[PATH_MAX] = { 0x00 };
-        if (realpath(CACHE_PATH_NAME, realPath) == nullptr) {
-            SLOGE("check path failed %{public}s", CACHE_PATH_NAME);
+        if (realpath(AVSessionUtils::GetCachePathName(), realPath) == nullptr) {
+            SLOGE("check path failed %{public}s", AVSessionUtils::GetCachePathName());
             return;
         }
 
@@ -109,11 +106,22 @@ public:
         std::vector<std::string> fileList;
         OHOS::GetDirFiles(path, fileList);
         for (const auto& file : fileList) {
-            if (file.find(FILE_SUFFIX) != std::string::npos) {
+            if (file.find(AVSessionUtils::GetFileSuffix()) != std::string::npos) {
                 DeleteFile(file);
             }
         }
     }
+    static const char* GetCachePathName() {
+        return CACHE_PATH_NAME;
+    }
+
+    static const char* GetFileSuffix() {
+        return FILE_SUFFIX;
+    }
+
+private:
+    static constexpr const char* CACHE_PATH_NAME = "/data/service/el1/public/av_session/cache/";
+    static constexpr const char* FILE_SUFFIX = ".image.dat";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_UTILS_H
