@@ -233,8 +233,13 @@ private:
     FocusSessionStrategy focusSessionStrategy_;
     BackgroundAudioController backgroundAudioController_;
 
+    std::recursive_mutex castAudioSessionMapLock_;
     std::map<std::string, std::string> castAudioSessionMap_;
-    bool isAllSessionCast_ = false;
+
+    std::recursive_mutex isAllSessionCastLock_;
+    bool isAllSessionCast_ {};
+
+    std::recursive_mutex outputDeviceIdLock_;
     std::string outputDeviceId_;
 
     std::unique_ptr<AVSessionDumper> dumpHelper_ {};

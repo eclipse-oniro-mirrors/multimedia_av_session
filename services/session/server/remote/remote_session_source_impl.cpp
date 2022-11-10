@@ -113,7 +113,9 @@ int32_t RemoteSessionSourceImpl::SetAVMetaData(const AVMetaData& metaData)
         SLOGI("iter %{public}s", iter->first.c_str());
         AVMetaData sinkMetaData;
         auto mask = GetSinkMetaMaskType(iter->first);
-        metaData.CopyToByMask(mask, sinkMetaData);
+        if (!metaData.CopyToByMask(mask, sinkMetaData)) {
+            continue;
+        }
         auto ret = iter->second->PutAVMetaData(sinkMetaData);
         if (ret != AVSESSION_SUCCESS) {
             HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
@@ -136,7 +138,9 @@ int32_t RemoteSessionSourceImpl::SetAVPlaybackState(const AVPlaybackState& state
         SLOGI("syncer %{public}s", iter->first.c_str());
         AVPlaybackState sinkState;
         auto mask = GetSinkPlaybackStateMaskType(iter->first);
-        state.CopyToByMask(mask, sinkState);
+        if (!state.CopyToByMask(mask, sinkState)) {
+            continue;
+        }
         auto ret = iter->second->PutAVPlaybackState(sinkState);
         if (ret != AVSESSION_SUCCESS) {
             HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",

@@ -375,10 +375,15 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string &tag, i
     return result;
 }
 
-sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
-                                                          const AppExecFwk::ElementName &elementName)
+sptr<AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
+                                                         const AppExecFwk::ElementName &elementName)
 {
     SLOGI("enter");
+    CHECK_AND_RETURN_RET_LOG(!tag.empty(), nullptr, "tag is empty");
+    CHECK_AND_RETURN_RET_LOG(type == AVSession::SESSION_TYPE_AUDIO || type == AVSession::SESSION_TYPE_VIDEO,
+        nullptr, "type is invalid");
+    CHECK_AND_RETURN_RET_LOG(!elementName.GetBundleName().empty() && !elementName.GetAbilityName().empty(),
+        nullptr, "element is invalid");
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (AbilityHasSession(pid, elementName.GetAbilityName())) {
@@ -400,15 +405,6 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
     }
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()), type, true);
-    {
-        std::lock_guard lockGuard1(abilityManagerLock_);
-        std::string bundleName = result->GetDescriptor().elementName_.GetBundleName();
-        std::string abilityName = result->GetDescriptor().elementName_.GetAbilityName();
-        auto it = abilityManager_.find(bundleName + abilityName);
-        if (it != abilityManager_.end()) {
-            it->second->StartAbilityByCallDone(result->GetDescriptor().sessionId_);
-        }
-    }
 
     NotifySessionCreate(result->GetDescriptor());
     SLOGI("success");
@@ -421,8 +417,22 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string &tag
     auto session = CreateSessionInner(tag, type, !PermissionChecker::GetInstance().CheckSystemPermission(),
                                       elementName);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, session, "session is nullptr");
-    SLOGI("isAllSessionCast_ is %{public}d", isAllSessionCast_);
-    CHECK_AND_RETURN_RET_LOG(isAllSessionCast_, session, "no need to cast");
+
+    {
+        std::lock_guard lockGuard1(abilityManagerLock_);
+        std::string bundleName = session->GetDescriptor().elementName_.GetBundleName();
+        std::string abilityName = session->GetDescriptor().elementName_.GetAbilityName();
+        auto it = abilityManager_.find(bundleName + abilityName);
+        if (it != abilityManager_.end()) {
+            it->second->StartAbilityByCallDone(session->GetDescriptor().sessionId_);
+        }
+    }
+
+    {
+        std::lock_guard lockGuard(isAllSessionCastLock_);
+        SLOGI("isAllSessionCast_ is %{public}d", isAllSessionCast_);
+        CHECK_AND_RETURN_RET_LOG(isAllSessionCast_, session, "no need to cast");
+    }
     CHECK_AND_RETURN_RET_LOG(CastAudioForNewSession(session) == AVSESSION_SUCCESS, session, "cast new session error");
     return session;
 }
@@ -739,25 +749,28 @@ void AVSessionService::HandleSessionRelease(AVSessionItem &session)
 {
     SLOGI("sessionId=%{public}s", session.GetSessionId().c_str());
     NotifySessionRelease(session.GetDescriptor());
-    auto sessionPtr = GetContainer().GetSessionById(session.GetSessionId());
-    if (session.GetRemoteSource() != nullptr && sessionPtr != nullptr) {
-        int32_t ret = CancelCastAudioForClientExit(session.GetPid(), sessionPtr);
-        SLOGI("CancelCastAudioForClientExit ret is %{public}d", ret);
-    } else {
-        SLOGI("GetContainer has no this session");
-    }
     std::lock_guard lockGuard(sessionAndControllerLock_);
     GetContainer().RemoveSession(session.GetPid(), session.GetAbilityName());
     if (topSession_.GetRefPtr() == &session) {
         UpdateTopSession(nullptr);
     }
-    nlohmann::json value;
-    value["bundleName"] = session.GetDescriptor().elementName_.GetBundleName();
-    value["abilityName"] = session.GetDescriptor().elementName_.GetAbilityName();
-    std::string content = value.dump();
-    if (!SaveStringToFile(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, content)) {
-        SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
+
+    if (session.GetRemoteSource() != nullptr) {
+        auto sessionPtr = GetContainer().GetSessionById(session.GetSessionId());
+        if (sessionPtr != nullptr) {
+            int32_t ret = CancelCastAudioForClientExit(session.GetPid(), sessionPtr);
+            SLOGI("CancelCastAudioForClientExit ret is %{public}d", ret);
+        }
+    } else {
+        nlohmann::json value;
+        value["bundleName"] = session.GetDescriptor().elementName_.GetBundleName();
+        value["abilityName"] = session.GetDescriptor().elementName_.GetAbilityName();
+        std::string content = value.dump();
+        if (!SaveStringToFile(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, content)) {
+            SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
+        }
     }
+
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(session.GetDescriptor().elementName_.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()),
         session.GetDescriptor().sessionType_, false);
@@ -961,21 +974,21 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
 {
     SLOGI("uid is %{public}d", uid);
     sptr <AudioStandard::AudioRendererFilter> audioFilter = new(std::nothrow) AudioRendererFilter();
-    CHECK_AND_RETURN_RET_LOG(audioFilter != nullptr, AVSESSION_ERROR, "no memory");
+    CHECK_AND_RETURN_RET_LOG(audioFilter != nullptr, ERR_NO_MEMORY, "new AudioRendererFilter failed");
     audioFilter->uid = uid;
     audioFilter->rendererInfo.contentType = ContentType::CONTENT_TYPE_MUSIC;
     audioFilter->rendererInfo.streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
 
-    std::vector<sptr < AudioDeviceDescriptor>> audioDescriptor;
+    std::vector<sptr<AudioDeviceDescriptor>> audioDescriptor;
     auto audioDeviceDescriptor = new(std::nothrow) AudioDeviceDescriptor(descriptor);
-    CHECK_AND_RETURN_RET_LOG(audioDeviceDescriptor != nullptr, AVSESSION_ERROR, "audioDeviceDescriptor is nullptr");
+    CHECK_AND_RETURN_RET_LOG(audioDeviceDescriptor != nullptr, ERR_NO_MEMORY, "audioDeviceDescriptor is nullptr");
     audioDescriptor.push_back(audioDeviceDescriptor);
     SLOGI("select the device %{public}s id %{public}d role is %{public}d, networkId is %{public}.6s",
           descriptor.deviceName_.c_str(), descriptor.deviceId_, static_cast<int32_t>(descriptor.deviceRole_),
           descriptor.networkId_.c_str());
 
     AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
-    CHECK_AND_RETURN_RET_LOG(audioSystemMgr != nullptr, AVSESSION_ERROR, "audioSystemMgr is nullptr");
+    CHECK_AND_RETURN_RET_LOG(audioSystemMgr != nullptr, AVSESSION_ERROR, "get AudioSystemManager instance failed");
     int32_t ret = audioSystemMgr->SelectOutputDevice(audioFilter, audioDescriptor);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "SelectOutputDevice failed");
 
@@ -996,7 +1009,7 @@ int32_t AVSessionService::CastAudio(const SessionToken &token,
     std::string sourceSessionInfo;
     int32_t ret = SetBasicInfo(sourceSessionInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetBasicInfo failed");
-    sptr <AVSessionItem> session = GetContainer().GetSessionById(token.sessionId);
+    sptr<AVSessionItem> session = GetContainer().GetSessionById(token.sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
                              token.sessionId.c_str());
     ret = JsonUtils::SetSessionDescriptor(sourceSessionInfo, session->GetDescriptor());
@@ -1022,7 +1035,11 @@ int32_t AVSessionService::CastAudioProcess(const std::vector<AudioStandard::Audi
 
     if (castSinkDescriptors.size() > 0) {
         int32_t ret = CastAudioInner(castSinkDescriptors, sourceSessionInfo, session);
-        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudioInner failed");
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("CastAudioInner failed, try cancel it. ret is %{public}d",
+                CancelCastAudioInner(castSinkDescriptors, sourceSessionInfo, session));
+            return ret;
+        }
     }
 
     SetCastDeviceInfo(descriptors, session);
@@ -1043,7 +1060,6 @@ int32_t AVSessionService::CastAudioInner(const std::vector<AudioStandard::AudioD
     if (IsLocalDevice(sinkAudioDescriptors[0].networkId_)) {
         int32_t ret = SelectOutputDevice(session->GetUid(), sinkAudioDescriptors[0]);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "selectOutputDevice failed");
-        isAllSessionCast_ = false;
         return AVSESSION_SUCCESS;
     }
 
@@ -1107,7 +1123,7 @@ int32_t AVSessionService::CancelCastAudioInner(const std::vector<AudioStandard::
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::CastAudioForNewSession(const sptr <AVSessionItem>& session)
+int32_t AVSessionService::CastAudioForNewSession(const sptr<AVSessionItem>& session)
 {
     SLOGI("new sessionId is %{public}s", session->GetSessionId().c_str());
     SessionToken token;
@@ -1115,9 +1131,13 @@ int32_t AVSessionService::CastAudioForNewSession(const sptr <AVSessionItem>& ses
     token.pid = session->GetPid();
     token.uid = session->GetUid();
 
+    int32_t ret = AVSESSION_SUCCESS;
     std::vector<AudioStandard::AudioDeviceDescriptor> castSinkDevices;
-    int32_t ret = GetAudioDescriptor(session, outputDeviceId_, castSinkDevices);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAudioDescriptor failed");
+    {
+        std::lock_guard lockGuard(outputDeviceIdLock_);
+        ret = GetAudioDescriptor(session, outputDeviceId_, castSinkDevices);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAudioDescriptor failed");
+    }
 
     ret = CastAudio(token, castSinkDevices);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudio error, session Id is %{public}s",
@@ -1129,7 +1149,7 @@ int32_t AVSessionService::CastAudioForNewSession(const sptr <AVSessionItem>& ses
 
 int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors)
 {
-    SLOGI("session size is %{public}d", static_cast<int32_t>(GetContainer().GetAllSessions().size()));
+    CHECK_AND_RETURN_RET_LOG(sinkAudioDescriptors.size() > 0, ERR_INVALID_PARAM, "sinkAudioDescriptors is empty");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
@@ -1137,6 +1157,13 @@ int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::Audio
         return ERR_NO_PERMISSION;
     }
 
+    {
+        std::lock_guard lockGuard(isAllSessionCastLock_);
+        isAllSessionCast_ = false;
+        if (!IsLocalDevice(sinkAudioDescriptors[0].networkId_)) {
+            isAllSessionCast_ = true;
+        }
+    }
     for (const auto& session : GetContainer().GetAllSessions()) {
         SessionToken token;
         token.sessionId = session->GetSessionId();
@@ -1146,11 +1173,12 @@ int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::Audio
         int32_t ret = CastAudio(token, sinkAudioDescriptors);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudio session %{public}s failed",
                                  token.sessionId.c_str());
-        outputDeviceId_ = session->GetDescriptor().outputDeviceInfo_.deviceIds_[0];
+        {
+            std::lock_guard lockGuard(outputDeviceIdLock_);
+            outputDeviceId_ = session->GetDescriptor().outputDeviceInfo_.deviceIds_[0];
+        }
     }
-    if (!IsLocalDevice(sinkAudioDescriptors[0].networkId_)) {
-        isAllSessionCast_ = true;
-    }
+
     SLOGI("isAllSessionCast_ %{public}d, outputDeviceId_ is %{public}s", isAllSessionCast_, outputDeviceId_.c_str());
     return AVSESSION_SUCCESS;
 }
@@ -1192,7 +1220,10 @@ int32_t AVSessionService::RemoteCastAudioInner(const std::string& sourceSessionI
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "CreateSession failed");
     SLOGI("sink deviceId %{public}s", session->GetSessionId().c_str());
 
-    castAudioSessionMap_[sourceDescriptor.sessionId_] = session->GetSessionId();
+    {
+        std::lock_guard lockGuard(castAudioSessionMapLock_);
+        castAudioSessionMap_[sourceDescriptor.sessionId_] = session->GetSessionId();
+    }
 
     AVSessionBasicInfo sourceDeviceInfo;
     ret = JsonUtils::GetSessionBasicInfo(sourceSessionInfo, sourceDeviceInfo);
@@ -1218,6 +1249,8 @@ int32_t AVSessionService::RemoteCancelCastAudioInner(const std::string& sessionI
     AVSessionDescriptor sourceDescriptor;
     ret = JsonUtils::GetSessionDescriptor(sessionInfo, sourceDescriptor);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetSessionDescriptor failed");
+
+    std::lock_guard lockGuard(castAudioSessionMapLock_);
     auto iter = castAudioSessionMap_.find(sourceDescriptor.sessionId_);
     CHECK_AND_RETURN_RET_LOG(iter != castAudioSessionMap_.end(), AVSESSION_ERROR, "no source session %{public}s",
                              sourceDescriptor.sessionId_.c_str());
