@@ -37,7 +37,7 @@ public:
 #endif
     }
 
-    bool Marshalling(Parcel &data) const override;
+    bool Marshalling(Parcel& parcel) const override;
     static AVSessionPixelMap *Unmarshalling(Parcel &data);
 
     void Clear()
