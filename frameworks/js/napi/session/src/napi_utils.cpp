@@ -749,7 +749,7 @@ bool NapiUtils::Equals(napi_env env, napi_value value, napi_ref copy)
     CHECK_RETURN((napi_get_reference_value(env, copy, &copyValue) == napi_ok),
                  "get ref value failed", napi_generic_failure);
     bool isEquals = false;
-    CHECK_RETURN(napi_strict_equals(env, value, copyValue, &isEquals) == napi_ok,,
+    CHECK_RETURN(napi_strict_equals(env, value, copyValue, &isEquals) == napi_ok,
                  "get equals result failed", napi_generic_failure);
     return isEquals;
 }
