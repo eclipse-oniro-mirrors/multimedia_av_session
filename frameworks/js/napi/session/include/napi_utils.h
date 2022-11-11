@@ -117,7 +117,7 @@ public:
 
     /* napi_value <-> AbilityRuntime::WantAgent::WantAgent */
     static napi_status GetValue(napi_env env, napi_value in, AbilityRuntime::WantAgent::WantAgent*& out);
-    static napi_status SetValue(napi_env env, const AbilityRuntime::WantAgent::WantAgent& in, napi_value& out);
+    static napi_status SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent& in, napi_value& out);
 
     /* napi_value <-> AVMetaData */
     static napi_status GetValue(napi_env env, napi_value in, AVMetaData& out);
@@ -180,7 +180,7 @@ public:
     static napi_status GetPropertyNames(napi_env env, napi_value in, std::vector<std::string>& out);
 
     static napi_status GetDateValue(napi_env env, napi_value value, double& result);
-    static napi_status SetDateValue(napi_env env, double in, napi_value& out);
+    static napi_status SetDateValue(napi_env env, double time, napi_value& result);
     static napi_status GetRefByCallback(napi_env env, std::list<napi_ref> callbackList, napi_value callback,
         napi_ref& callbackRef);
 

@@ -82,10 +82,10 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("off", OffEvent),
         DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice)
     };
-    auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
+    auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor{};
     auto status = napi_define_class(env, "AVSession", NAPI_AUTO_LENGTH, ConstructorCallback, nullptr,
-                                    property_count, descriptors, &constructor);
+                                    propertyCount, descriptors, &constructor);
     if (status != napi_ok) {
         SLOGE("define class failed");
         return NapiUtils::GetUndefinedValue(env);

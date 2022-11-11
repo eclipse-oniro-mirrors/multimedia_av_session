@@ -22,7 +22,7 @@
 namespace OHOS::AVSession {
 class AVControllerCallbackClient : public AVControllerCallbackStub {
 public:
-    explicit AVControllerCallbackClient(const std::shared_ptr<AVControllerCallback>& callback);
+    explicit AVSessionCallbackClient(const std::shared_ptr<AVSessionCallback>& callback);
     ~AVControllerCallbackClient();
 
     void OnSessionDestroy() override;

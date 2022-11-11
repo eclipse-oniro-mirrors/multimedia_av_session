@@ -77,7 +77,7 @@ void AVSessionManagerImpl::OnServiceDie()
     }
     HISYSEVENT_RESET;
     HISYSEVENT_UNREGISTER;
-    std::string cachePath(CACHE_PATH_NAME);
+    std::string cachePath(AVSessionUtils::GetCachePathName());
     AVSessionUtils::DeleteCacheFiles(cachePath);
 }
 
