@@ -111,11 +111,13 @@ public:
             }
         }
     }
-    static const char* GetCachePathName() {
+    static const char* GetCachePathName()
+    {
         return CACHE_PATH_NAME;
     }
 
-    static const char* GetFileSuffix() {
+    static const char* GetFileSuffix()
+    {
         return FILE_SUFFIX;
     }
 
