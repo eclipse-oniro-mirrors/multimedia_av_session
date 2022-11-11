@@ -99,7 +99,7 @@ int32_t RemoteSessionSinkImpl::CancelCastSession()
     return AVSESSION_SUCCESS;
 }
 
-int32_t RemoteSessionSinkImpl::SetControlCommand(const AVControlCommand &command)
+int32_t RemoteSessionSinkImpl::SetControlCommand(const AVControlCommand& command)
 {
     CHECK_AND_RETURN_RET_LOG(syncer_ != nullptr, AVSESSION_ERROR, "syncer is nullptr");
     auto ret = syncer_->PutControlCommand(command);

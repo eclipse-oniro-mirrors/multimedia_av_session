@@ -233,8 +233,13 @@ private:
     FocusSessionStrategy focusSessionStrategy_;
     BackgroundAudioController backgroundAudioController_;
 
+    std::recursive_mutex castAudioSessionMapLock_;
     std::map<std::string, std::string> castAudioSessionMap_;
-    bool isAllSessionCast_;
+
+    std::recursive_mutex isAllSessionCastLock_;
+    bool isAllSessionCast_ {};
+
+    std::recursive_mutex outputDeviceIdLock_;
     std::string outputDeviceId_;
 
     std::unique_ptr<AVSessionDumper> dumpHelper_ {};
@@ -247,7 +252,7 @@ private:
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
 
     int32_t pressCount_ {};
-    bool isFirstPress = true;
+    bool isFirstPress_ = true;
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;

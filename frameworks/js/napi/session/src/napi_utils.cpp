@@ -340,7 +340,8 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::shared_ptr<MMI
 
 napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEvent>& in, napi_value& out)
 {
-    CHECK_RETURN(in != nullptr, "input is nullptr", napi_invalid_arg);
+    CHECK_RETURN(in != nullptr, "key event is nullptr", napi_generic_failure);
+
     auto status = napi_create_object(env, &out);
     CHECK_RETURN(status == napi_ok, "create object failed", status);
 
@@ -351,6 +352,7 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEven
     CHECK_RETURN(status == napi_ok, "set action property failed", status);
 
     napi_value key {};
+    CHECK_RETURN(in->GetKeyItem() != nullptr, "get key item failed", napi_generic_failure);
     status = SetValue(env, *in->GetKeyItem(), key);
     CHECK_RETURN(status == napi_ok, "create key property failed", status);
     status = napi_set_named_property(env, out, "key", key);

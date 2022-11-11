@@ -18,7 +18,7 @@
 #include "avsession_trace.h"
 
 namespace OHOS::AVSession {
-RemoteSessionCommandProcess::RemoteSessionCommandProcess(const sptr<IRemoteObject> &impl)
+RemoteSessionCommandProcess::RemoteSessionCommandProcess(const sptr<IRemoteObject>& impl)
     : IRemoteProxy<IAVSessionService>(impl)
 {
     SLOGD("constructor");

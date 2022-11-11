@@ -53,7 +53,7 @@ int32_t JsonUtils::JsonToVector(json object, std::vector<int32_t>& out)
 int32_t JsonUtils::GetJsonCapability(const std::vector<std::vector<int32_t>>& capability, std::string& jsonCapability)
 {
     json jsonObject;
-    for (uint32_t i = 0;i < capability.size(); i++) {
+    for (uint32_t i = 0; i < capability.size(); i++) {
         if (i == SESSION_DATA_META) {
             jsonObject["metaData"] = capability[i];
             continue;
@@ -89,7 +89,6 @@ int32_t JsonUtils::GetVectorCapability(const std::string& jsonCapability,
 int32_t JsonUtils::GetAllCapability(const std::string& sessionInfo, std::string& jsonCapability)
 {
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
-    json jsonObject;
     json jsonSessionInfo = json::parse(sessionInfo);
     CHECK_AND_RETURN_RET_LOG(!jsonSessionInfo.is_discarded() && !jsonSessionInfo.is_null(), AVSESSION_ERROR,
         "json object is null");

@@ -16,8 +16,8 @@
 #include <memory>
 
 #include "avsession_trace.h"
-#include "napi_async_callback.h"
 #include "napi_utils.h"
+#include "napi_async_callback.h"
 
 namespace OHOS::AVSession {
 NapiAsyncCallback::NapiAsyncCallback(napi_env env) : env_(env)

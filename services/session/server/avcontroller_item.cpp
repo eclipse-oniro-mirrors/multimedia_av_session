@@ -168,7 +168,6 @@ void AVControllerItem::HandleOutputDeviceChange(const OutputDeviceInfo& outputDe
 {
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnOutputDeviceChange(outputDeviceInfo);
-
 }
 
 void AVControllerItem::HandleActiveStateChange(bool isActive)

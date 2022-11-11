@@ -30,7 +30,7 @@ AbilityConnectHelper& AbilityConnectHelper::GetInstance()
     return abilityConnectHelper;
 }
 
-int32_t AbilityConnectHelper::StartAbilityByCall(const std::string &bundleName, const std::string &abilityName)
+int32_t AbilityConnectHelper::StartAbilityByCall(const std::string& bundleName, const std::string& abilityName)
 {
     SLOGI("bundleName=%{public}s abilityName=%{public}s", bundleName.c_str(), abilityName.c_str());
     MessageParcel data;
@@ -97,7 +97,7 @@ AbilityConnectionStub::~AbilityConnectionStub()
 {}
 
 int AbilityConnectionStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+    uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     auto descriptor = AbilityConnectionStub::GetDescriptor();
     auto remoteDescriptor = data.ReadInterfaceToken();
@@ -136,14 +136,14 @@ int AbilityConnectionStub::OnRemoteRequest(
 AbilityConnectCallback::~AbilityConnectCallback()
 {}
 
-void AbilityConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
-    const sptr<IRemoteObject> &__attribute__((unused)) remoteObject, int resultCode)
+void AbilityConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
+    const sptr<IRemoteObject>& __attribute__((unused)) remoteObject, int resultCode)
 {
     SLOGI("OnAbilityConnectDone callback, retcode:%{public}d, bundlename:%{public}s, abilityname:%{public}s",
         resultCode, element.GetBundleName().c_str(), element.GetAbilityName().c_str());
 }
 
-void AbilityConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
+void AbilityConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
 {
     SLOGI("OnAbilityDisConnectDone callback, retcode:%{public}d, bundlename:%{public}s, abilityname:%{public}s",
         resultCode, element.GetBundleName().c_str(), element.GetAbilityName().c_str());

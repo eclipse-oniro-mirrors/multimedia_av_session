@@ -79,7 +79,7 @@ bool AppManagerAdapter::IsAppBackground(int32_t uid)
     return false;
 }
 
-void AppManagerAdapter::SetAppBackgroundStateObserver(const std::function<void(int32_t)> &observer)
+void AppManagerAdapter::SetAppBackgroundStateObserver(const std::function<void(int32_t)>& observer)
 {
     backgroundObserver_ = observer;
 }
@@ -96,7 +96,7 @@ void AppManagerAdapter::RemoveObservedApp(int32_t uid)
     observedAppUIDs_.erase(uid);
 }
 
-void AppManagerAdapter::HandleAppStateChanged(const AppProcessData &appProcessData)
+void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessData)
 {
     if (appProcessData.appState == ApplicationState::APP_STATE_TERMINATED) {
         for (const auto& appData : appProcessData.appDatas) {
@@ -128,7 +128,7 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData &appProcessDa
     }
 }
 
-void AVSessionAppStateCallback::OnAppStateChanged(const AppExecFwk::AppProcessData &appProcessData)
+void AVSessionAppStateCallback::OnAppStateChanged(const AppExecFwk::AppProcessData& appProcessData)
 {
     AppManagerAdapter::GetInstance().HandleAppStateChanged(appProcessData);
 }

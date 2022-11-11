@@ -414,7 +414,7 @@ void AVSessionItem::HandleControllerRelease(pid_t pid)
     controllers_.erase(pid);
 }
 
-void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem& )>& callback)
+void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback)
 {
     serviceCallback_ = callback;
 }
