@@ -19,6 +19,7 @@
 
 namespace OHOS::AVSession {
 static std::string g_sinkLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_sink.z.so");
+
 RemoteSessionSinkProxy::RemoteSessionSinkProxy()
 {
     LoadSinkImplement();
@@ -97,7 +98,7 @@ int32_t RemoteSessionSinkProxy::CancelCastSession()
     return AVSESSION_SUCCESS;
 }
 
-int32_t RemoteSessionSinkProxy::SetControlCommand(const AVControlCommand &command)
+int32_t RemoteSessionSinkProxy::SetControlCommand(const AVControlCommand& command)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSinkProxy::SetControlCommand");
     CHECK_AND_RETURN_RET_LOG(sinkImpl_ != nullptr, AVSESSION_ERROR, "sinkImpl_ is nullptr");
