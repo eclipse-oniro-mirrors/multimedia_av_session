@@ -384,12 +384,12 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AbilityRuntime::Wan
     return status;
 }
 
-napi_status NapiUtils::SetValue(napi_env env, const AbilityRuntime::WantAgent::WantAgent& in, napi_value& out)
+napi_status NapiUtils::SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent& in, napi_value& out)
 {
     auto status = napi_create_object(env, &out);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     auto finalizecb = [](napi_env env, void *data, void *hint) {};
-    status = napi_wrap(env, out, (void *)&in, finalizecb, nullptr, nullptr);
+    status = napi_wrap(env, out, static_cast<void*>(&in), finalizecb, nullptr, nullptr);
     CHECK_RETURN(status == napi_ok, "wrap object failed", napi_generic_failure);
     return status;
 }
@@ -466,7 +466,8 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<uint8_t
     size_t offset = 0;
     void* data = nullptr;
     napi_status status = napi_get_typedarray_info(env, in, &type, &length, &data, &buffer, &offset);
-    SLOGD("array type=%{public}d length=%{public}d offset=%{public}d", (int)type, (int)length, (int)offset);
+    SLOGD("array type=%{public}d length=%{public}d offset=%{public}d", static_cast<int>(type), static_cast<int>(length),
+          static_cast<int>(offset));
     CHECK_RETURN(status == napi_ok, "napi_get_typedarray_info failed!", napi_invalid_arg);
     CHECK_RETURN(type == napi_uint8_array, "is not Uint8Array!", napi_invalid_arg);
     CHECK_RETURN((length > 0) && (data != nullptr), "invalid data!", napi_invalid_arg);
@@ -552,7 +553,8 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<int32_t
     uint8_t* data = nullptr;
     napi_status status = napi_get_typedarray_info(env, in, &type, &length,
                                                   reinterpret_cast<void**>(&data), &buffer, &offset);
-    SLOGD("array type=%{public}d length=%{public}d offset=%{public}d", (int)type, (int)length, (int)offset);
+    SLOGD("array type=%{public}d length=%{public}d offset=%{public}d", static_cast<int>(type), static_cast<int>(length),
+          static_cast<int>(offset));
     CHECK_RETURN(status == napi_ok, "napi_get_typedarray_info failed!", napi_invalid_arg);
     CHECK_RETURN(type <= napi_int32_array, "is not int32 supported typed array!", napi_invalid_arg);
     CHECK_RETURN((length > 0) && (data != nullptr), "invalid data!", napi_invalid_arg);
@@ -591,7 +593,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<uint32_
     uint8_t* data = nullptr;
     napi_status status = napi_get_typedarray_info(env, in, &type, &length,
                                                   reinterpret_cast<void**>(&data), &buffer, &offset);
-    SLOGD("napi_get_typedarray_info type=%{public}d", (int)type);
+    SLOGD("napi_get_typedarray_info type=%{public}d", static_cast<int>(type));
     CHECK_RETURN(status == napi_ok, "napi_get_typedarray_info failed!", napi_invalid_arg);
     CHECK_RETURN((type <= napi_uint16_array) || (type == napi_uint32_array), "invalid type!", napi_invalid_arg);
     CHECK_RETURN((length > 0) && (data != nullptr), "invalid data!", napi_invalid_arg);
@@ -630,7 +632,8 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<int64_t
     uint8_t* data = nullptr;
     napi_status status = napi_get_typedarray_info(env, in, &type, &length,
                                                   reinterpret_cast<void**>(&data), &buffer, &offset);
-    SLOGD("array type=%{public}d length=%{public}d offset=%{public}d", (int)type, (int)length, (int)offset);
+    SLOGD("array type=%{public}d length=%{public}d offset=%{public}d", static_cast<int>(type), static_cast<int>(length),
+          static_cast<int>(offset));
     CHECK_RETURN(status == napi_ok, "napi_get_typedarray_info failed!", napi_invalid_arg);
     CHECK_RETURN((type <= napi_uint32_array) || (type == napi_bigint64_array), "invalid type!", napi_invalid_arg);
     CHECK_RETURN((length > 0) && (data != nullptr), "invalid data!", napi_invalid_arg);
@@ -672,7 +675,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<double>
         size_t offset = 0;
         uint8_t* data = nullptr;
         status = napi_get_typedarray_info(env, in, &type, &length, reinterpret_cast<void**>(&data), &buffer, &offset);
-        SLOGD("napi_get_typedarray_info status=%{public}d type=%{public}d", status, (int)type);
+        SLOGD("napi_get_typedarray_info status=%{public}d type=%{public}d", status, static_cast<int>(type));
         CHECK_RETURN(status == napi_ok, "napi_get_typedarray_info failed!", napi_invalid_arg);
         CHECK_RETURN((length > 0) && (data != nullptr), "invalid data!", napi_invalid_arg);
         TypedArray2Vector<double>(data, length, type, out);
@@ -743,10 +746,10 @@ bool NapiUtils::Equals(napi_env env, napi_value value, napi_ref copy)
 
     napi_value copyValue = nullptr;
     napi_get_reference_value(env, copy, &copyValue);
-    CHECK_RETURN((napi_ok == napi_get_reference_value(env, copy, &copyValue)),
+    CHECK_RETURN((napi_get_reference_value(env, copy, &copyValue) == napi_ok),
                  "get ref value failed", napi_generic_failure);
     bool isEquals = false;
-    CHECK_RETURN(napi_ok == napi_strict_equals(env, value, copyValue, &isEquals),
+    CHECK_RETURN(napi_strict_equals(env, value, copyValue, &isEquals) == napi_ok,
                  "get equals result failed", napi_generic_failure);
     return isEquals;
 }
@@ -853,12 +856,12 @@ napi_status NapiUtils::GetFaElementName(napi_env env, AppExecFwk::ElementName& o
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, AppExecFwk::ElementName& out)
 {
     bool isStageMode = false;
-    CHECK_RETURN(napi_ok == AbilityRuntime::IsStageContext(env, in, isStageMode), "get context type failed",
+    CHECK_RETURN(AbilityRuntime::IsStageContext(env, in, isStageMode) == napi_ok, "get context type failed",
                  napi_generic_failure);
     if (isStageMode) {
-        CHECK_RETURN(napi_ok == GetStageElementName(env, in, out), "get StagContext failed", napi_generic_failure);
+        CHECK_RETURN(GetStageElementName(env, in, out) == napi_ok, "get StagContext failed", napi_generic_failure);
     } else {
-        CHECK_RETURN(napi_ok == GetFaElementName(env, out), "get FaContext failed", napi_generic_failure);
+        CHECK_RETURN(GetFaElementName(env, out) == napi_ok, "get FaContext failed", napi_generic_failure);
     }
     return napi_ok;
 }

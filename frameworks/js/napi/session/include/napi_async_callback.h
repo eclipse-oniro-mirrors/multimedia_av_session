@@ -28,7 +28,7 @@ class NapiAsyncCallback final {
 public:
     using NapiArgsGetter = std::function<void(napi_env env, int& argc, napi_value* argv)>;
 
-    NapiAsyncCallback(napi_env env);
+    explicit NapiAsyncCallback(napi_env env);
     ~NapiAsyncCallback();
 
     napi_env GetEnv() const;
@@ -36,7 +36,7 @@ public:
     void Call(napi_ref method, NapiArgsGetter getter = NapiArgsGetter());
 
 private:
-    static void AfterWorkCallback(uv_work_t* work, int status);
+    static void AfterWorkCallback(uv_work_t* work, int aStatus);
 
     struct DataContext {
         napi_env env;

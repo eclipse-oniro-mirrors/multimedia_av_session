@@ -60,14 +60,14 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
 
 AVSessionService::~AVSessionService()
 {
-    std::string cachePath(CACHE_PATH_NAME);
+    std::string cachePath(AVSessionUtils::GetCachePathName());
     AVSessionUtils::DeleteCacheFiles(cachePath);
     SLOGD("destroy");
 }
 
 void AVSessionService::OnStart()
 {
-    std::string cachePath(CACHE_PATH_NAME);
+    std::string cachePath(AVSessionUtils::GetCachePathName());
     AVSessionUtils::DeleteCacheFiles(cachePath);
     if (!Publish(this)) {
         SLOGE("publish avsession service failed");

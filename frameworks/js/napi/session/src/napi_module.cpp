@@ -36,8 +36,8 @@ static napi_module module = {
     .nm_filename = nullptr,
     .nm_register_func = Export,
     .nm_modname = "multimedia.avsession",
-    .nm_priv = ((void*)0),
-    .reserved = { 0 }
+    .nm_priv = ((void*)nullptr),
+    .reserved = {nullptr}
 };
 
 extern "C" __attribute__((constructor)) void RegisterModule(void)

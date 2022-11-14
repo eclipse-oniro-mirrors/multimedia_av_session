@@ -83,10 +83,10 @@ public:
     }
 
     AVSessionTrace(const AVSessionTrace&) = delete;
-    AVSessionTrace& operator= (const AVSessionTrace&) = delete;
+    AVSessionTrace& operator = (const AVSessionTrace&) = delete;
 
     AVSessionTrace(AVSessionTrace&&) = delete;
-    AVSessionTrace& operator= (AVSessionTrace&&) = delete;
+    AVSessionTrace& operator = (AVSessionTrace&&) = delete;
 private:
     bool isSync_ = false;
 };
