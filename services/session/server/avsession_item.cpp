@@ -59,7 +59,7 @@ int32_t AVSessionItem::Destroy()
         callback_.clear();
     }
     std::string sessionId = descriptor_.sessionId_;
-    std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+    std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileName);
 
     SLOGI("size=%{public}d", static_cast<int>(controllers_.size()));
@@ -82,7 +82,7 @@ int32_t AVSessionItem::Destroy()
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
     std::string sessionId = GetSessionId();
-    std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+    std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
     meta = metaData_;
@@ -95,7 +95,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     if (innerPixelMap != nullptr) {
         std::string sessionId = GetSessionId();
-        std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+        std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
         innerPixelMap->Clear();
         metaData_.SetMediaImage(innerPixelMap);
@@ -231,7 +231,7 @@ AVPlaybackState AVSessionItem::GetPlaybackState()
 AVMetaData AVSessionItem::GetMetaData()
 {
     std::string sessionId = GetSessionId();
-    std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+    std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
     return metaData_;

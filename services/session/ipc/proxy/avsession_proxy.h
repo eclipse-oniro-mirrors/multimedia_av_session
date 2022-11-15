@@ -57,7 +57,7 @@ public:
 
     int32_t AddSupportCommand(const int32_t cmd) override;
 
-    int32_t DeleteSupportCommand(int32_t cmd) override;
+    int32_t DeleteSupportCommand(const int32_t cmd) override;
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;

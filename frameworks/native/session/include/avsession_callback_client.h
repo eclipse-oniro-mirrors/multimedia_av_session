@@ -24,7 +24,7 @@
 namespace OHOS::AVSession {
 class AVSessionCallbackClient : public AVSessionCallbackStub {
 public:
-    AVSessionCallbackClient(const std::shared_ptr<AVSessionCallback>& callback);
+    explicit AVSessionCallbackClient(const std::shared_ptr<AVSessionCallback>& callback);
     ~AVSessionCallbackClient();
 
     void OnPlay() override;

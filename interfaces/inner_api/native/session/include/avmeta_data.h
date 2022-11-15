@@ -64,7 +64,7 @@ public:
     }
 
     static AVMetaData* Unmarshalling(Parcel& data);
-    bool Marshalling(Parcel& data) const override;
+    bool Marshalling(Parcel& parcel) const override;
 
     void SetAssetId(const std::string& assetId);
     std::string GetAssetId() const;

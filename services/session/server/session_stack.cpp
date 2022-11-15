@@ -36,7 +36,7 @@ std::vector<sptr<AVSessionItem>> SessionStack::RemoveSession(pid_t pid)
     for (auto it = sessions_.begin(); it != sessions_.end();) {
         if (it->first.first == pid) {
             std::string sessionId = it->second->GetSessionId();
-            std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+            std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
             AVSessionUtils::DeleteFile(fileName);
             result.push_back(it->second);
             stack_.remove(it->second);
@@ -54,7 +54,7 @@ sptr<AVSessionItem> SessionStack::RemoveSession(const std::string& sessionId)
     sptr<AVSessionItem> result;
     for (auto it = sessions_.begin(); it != sessions_.end();) {
         if (it->second->GetSessionId() == sessionId) {
-            std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+            std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
             AVSessionUtils::DeleteFile(fileName);
             result = it->second;
             stack_.remove(it->second);
@@ -76,7 +76,7 @@ sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid, const std::string& ab
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_DELETE_SESSION);
     auto result = it->second;
     std::string sessionId = result->GetSessionId();
-    std::string fileName = CACHE_PATH_NAME + sessionId + FILE_SUFFIX;
+    std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileName);
     sessions_.erase(it);
     stack_.remove(result);

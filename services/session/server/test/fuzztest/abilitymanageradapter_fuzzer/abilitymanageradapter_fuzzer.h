@@ -13,25 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef AV_SESSION_AVSESSION_EVENT_HANDLER_H
-#define AV_SESSION_AVSESSION_EVENT_HANDLER_H
+#ifndef OHOS_AVCONTROLLERCALLITEM_FUZZER_H
+#define OHOS_AVCONTROLLERCALLITEM_FUZZER_H
 
-#include "event_handler.h"
+#include <functional>
+#include <memory>
+#include <mutex>
+#include "ability_manager_adapter.h"
+#include "ability_connect_helper.h"
 
 namespace OHOS::AVSession {
-class AVSessionEventHandler : public AppExecFwk::EventHandler {
-public:
-    static AVSessionEventHandler& GetInstance();
-
-    AVSessionEventHandler();
-    ~AVSessionEventHandler() override;
-
-    bool AVSessionPostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
-
-    void AVSessionRemoveTask(const std::string &name);
-
-private:
-    std::shared_ptr<AppExecFwk::EventHandler> handler_;
-};
+    void AbilityManagerAdapterTest(uint8_t *data, size_t size);
 }
-#endif // AV_SESSION_AVSESSION_EVENT_HANDLER_H
+#endif
