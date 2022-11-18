@@ -545,7 +545,9 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
     int32_t ret = ability->StartAbilityByCall(sessionId);
 
     std::lock_guard lockGuard(abilityManagerLock_);
-    abilityManager_.erase(bundleName + abilityName);
+    if (ret != ERR_START_ABILITY_IS_RUNNING) {
+        abilityManager_.erase(bundleName + abilityName);
+    }
     return ret;
 }
 
