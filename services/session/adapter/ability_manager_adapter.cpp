@@ -60,8 +60,8 @@ void AbilityManagerAdapter::StartAbilityByCallDone(const std::string &sessionId)
         SLOGI("no need to notify");
         return;
     }
-    syncCon_.notify_one();
     sessionId_ = sessionId;
+    syncCon_.notify_one();
 }
 
 void AbilityManagerAdapter::WaitForTimeout(uint32_t timeout)
