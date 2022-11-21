@@ -103,11 +103,10 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid) const
 {
     AudioStandard::RendererState rendererState = AudioStandard::RENDERER_PAUSED;
     bool isSuccess = AudioAdapter::GetInstance().GetRendererState(uid, rendererState);
-    if (isSuccess && rendererState != AudioStandard::RENDERER_RUNNING) {
-        SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");
-        return;
+    if (isSuccess) {
+        SLOGI("pause uid=%{public}d", uid);
+        AudioAdapter::GetInstance().PauseAudioStream(uid);
     }
-    SLOGI("pause uid=%{public}d", uid);
-    AudioAdapter::GetInstance().PauseAudioStream(uid);
+    SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");
 }
 }
