@@ -25,8 +25,8 @@ KeyEventAdapter& KeyEventAdapter::GetInstance()
     return keyEventAdapter;
 }
 
-void KeyEventAdapter::SubscribeKeyEvent(const std::vector<int32_t> &keyCodes,
-                                        const std::function<void(std::shared_ptr<MMI::KeyEvent>)> &callback)
+void KeyEventAdapter::SubscribeKeyEvent(const std::vector<int32_t>& keyCodes,
+                                        const std::function<void(std::shared_ptr<MMI::KeyEvent>)>& callback)
 {
     SLOGI("enter");
     auto* inputManager = MMI::InputManager::GetInstance();
@@ -34,6 +34,7 @@ void KeyEventAdapter::SubscribeKeyEvent(const std::vector<int32_t> &keyCodes,
 
     for (auto keyCode : keyCodes) {
         auto keyOption = std::make_shared<MMI::KeyOption>();
+        CHECK_AND_RETURN_LOG(keyOption != nullptr, "no memory");
         keyOption->SetFinalKey(keyCode);
         keyOption->SetFinalKeyDown(true);
         keyOption->SetFinalKeyDownDuration(0);

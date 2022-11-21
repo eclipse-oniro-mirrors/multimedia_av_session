@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+
 #include "avsession_log.h"
 #include "input_manager.h"
 #include "key_event.h"
@@ -94,7 +95,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override {};
     void OnToggleFavorite(const std::string& mediaId) override {};
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override {};
-    void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo &outputDeviceInfo) override {};
+    void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
 
     ~AVSessionCallbackImpl() override;
 };

@@ -14,7 +14,6 @@
  */
 
 #include "avmetadata_fuzzer.h"
-
 #include "avmeta_data.h"
 #include "avsession_pixel_map.h"
 #include "parcel.h"

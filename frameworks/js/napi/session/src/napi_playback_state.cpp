@@ -55,10 +55,8 @@ napi_status NapiPlaybackState::ConvertFilter(napi_env env, napi_value filter,
         std::string stringFilter;
         status = NapiUtils::GetValue(env, filter, stringFilter);
         CHECK_RETURN(status == napi_ok, "get string filter failed", status);
-        if (stringFilter != "all") {
-            SLOGE("string filter only support all") ;
-            return napi_invalid_arg;
-        }
+        CHECK_RETURN(stringFilter == "all", "string filter only support all", napi_invalid_arg);
+
         mask.set();
         return napi_ok;
     }
@@ -83,13 +81,13 @@ napi_status NapiPlaybackState::ConvertFilter(napi_env env, napi_value filter,
     return napi_ok;
 }
 
-napi_status NapiPlaybackState::GetValue(napi_env env, napi_value in, AVPlaybackState &out)
+napi_status NapiPlaybackState::GetValue(napi_env env, napi_value in, AVPlaybackState& out)
 {
     std::vector<std::string> propertyNames;
     auto status = NapiUtils::GetPropertyNames(env, in, propertyNames);
     CHECK_RETURN(status == napi_ok, "get property name failed", status);
 
-    for (const auto &name : propertyNames) {
+    for (const auto& name : propertyNames) {
         auto it = getterMap_.find(name);
         if (it == getterMap_.end()) {
             SLOGE("property %{public}s is not of metadata", name.c_str());
@@ -105,7 +103,7 @@ napi_status NapiPlaybackState::GetValue(napi_env env, napi_value in, AVPlaybackS
     return napi_ok;
 }
 
-napi_status NapiPlaybackState::SetValue(napi_env env, const AVPlaybackState &in, napi_value &out)
+napi_status NapiPlaybackState::SetValue(napi_env env, const AVPlaybackState& in, napi_value& out)
 {
     napi_status status = napi_create_object(env, &out);
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
@@ -125,7 +123,7 @@ napi_status NapiPlaybackState::SetValue(napi_env env, const AVPlaybackState &in,
     return napi_ok;
 }
 
-napi_status NapiPlaybackState::GetState(napi_env env, napi_value in, AVPlaybackState &out)
+napi_status NapiPlaybackState::GetState(napi_env env, napi_value in, AVPlaybackState& out)
 {
     int32_t property;
     auto status = NapiUtils::GetNamedProperty(env, in, "state", property);
@@ -134,7 +132,7 @@ napi_status NapiPlaybackState::GetState(napi_env env, napi_value in, AVPlaybackS
     return status;
 }
 
-napi_status NapiPlaybackState::SetState(napi_env env, const AVPlaybackState &in, napi_value &out)
+napi_status NapiPlaybackState::SetState(napi_env env, const AVPlaybackState& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetState(), property);
@@ -144,7 +142,7 @@ napi_status NapiPlaybackState::SetState(napi_env env, const AVPlaybackState &in,
     return status;
 }
 
-napi_status NapiPlaybackState::GetSpeed(napi_env env, napi_value in, AVPlaybackState &out)
+napi_status NapiPlaybackState::GetSpeed(napi_env env, napi_value in, AVPlaybackState& out)
 {
     double property;
     auto status = NapiUtils::GetNamedProperty(env, in, "speed", property);
@@ -153,7 +151,7 @@ napi_status NapiPlaybackState::GetSpeed(napi_env env, napi_value in, AVPlaybackS
     return status;
 }
 
-napi_status NapiPlaybackState::SetSpeed(napi_env env, const AVPlaybackState &in, napi_value &out)
+napi_status NapiPlaybackState::SetSpeed(napi_env env, const AVPlaybackState& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetSpeed(), property);
@@ -163,7 +161,7 @@ napi_status NapiPlaybackState::SetSpeed(napi_env env, const AVPlaybackState &in,
     return status;
 }
 
-napi_status NapiPlaybackState::GetPosition(napi_env env, napi_value in, AVPlaybackState &out)
+napi_status NapiPlaybackState::GetPosition(napi_env env, napi_value in, AVPlaybackState& out)
 {
     napi_value result {};
     auto status = napi_get_named_property(env, in, "position", &result);
@@ -178,7 +176,7 @@ napi_status NapiPlaybackState::GetPosition(napi_env env, napi_value in, AVPlayba
     return status;
 }
 
-napi_status NapiPlaybackState::SetPosition(napi_env env, const AVPlaybackState &in, napi_value &out)
+napi_status NapiPlaybackState::SetPosition(napi_env env, const AVPlaybackState& in, napi_value& out)
 {
     napi_value positionProperty {};
     napi_status status = napi_create_object(env, &positionProperty);
@@ -203,7 +201,7 @@ napi_status NapiPlaybackState::SetPosition(napi_env env, const AVPlaybackState &
     return status;
 }
 
-napi_status NapiPlaybackState::GetBufferedTime(napi_env env, napi_value in, AVPlaybackState &out)
+napi_status NapiPlaybackState::GetBufferedTime(napi_env env, napi_value in, AVPlaybackState& out)
 {
     int64_t property;
     auto status = NapiUtils::GetNamedProperty(env, in, "bufferedTime", property);
@@ -212,7 +210,7 @@ napi_status NapiPlaybackState::GetBufferedTime(napi_env env, napi_value in, AVPl
     return status;
 }
 
-napi_status NapiPlaybackState::SetBufferedTime(napi_env env, const AVPlaybackState &in, napi_value &out)
+napi_status NapiPlaybackState::SetBufferedTime(napi_env env, const AVPlaybackState& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetBufferedTime(), property);
@@ -222,7 +220,7 @@ napi_status NapiPlaybackState::SetBufferedTime(napi_env env, const AVPlaybackSta
     return status;
 }
 
-napi_status NapiPlaybackState::GetLoopMode(napi_env env, napi_value in, AVPlaybackState &out)
+napi_status NapiPlaybackState::GetLoopMode(napi_env env, napi_value in, AVPlaybackState& out)
 {
     int32_t property;
     auto status = NapiUtils::GetNamedProperty(env, in, "loopMode", property);
@@ -231,7 +229,7 @@ napi_status NapiPlaybackState::GetLoopMode(napi_env env, napi_value in, AVPlayba
     return status;
 }
 
-napi_status NapiPlaybackState::SetLoopMode(napi_env env, const AVPlaybackState &in, napi_value &out)
+napi_status NapiPlaybackState::SetLoopMode(napi_env env, const AVPlaybackState& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetLoopMode(), property);
@@ -241,7 +239,7 @@ napi_status NapiPlaybackState::SetLoopMode(napi_env env, const AVPlaybackState &
     return status;
 }
 
-napi_status NapiPlaybackState::GetIsFavorite(napi_env env, napi_value in, AVPlaybackState &out)
+napi_status NapiPlaybackState::GetIsFavorite(napi_env env, napi_value in, AVPlaybackState& out)
 {
     bool property;
     auto status = NapiUtils::GetNamedProperty(env, in, "isFavorite", property);
@@ -250,7 +248,7 @@ napi_status NapiPlaybackState::GetIsFavorite(napi_env env, napi_value in, AVPlay
     return status;
 }
 
-napi_status NapiPlaybackState::SetIsFavorite(napi_env env, const AVPlaybackState &in, napi_value &out)
+napi_status NapiPlaybackState::SetIsFavorite(napi_env env, const AVPlaybackState& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetFavorite(), property);

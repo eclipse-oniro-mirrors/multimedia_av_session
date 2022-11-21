@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <memory>
+
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsessionserviceproxy_fuzzer.h"
@@ -23,8 +24,8 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST = 8;
-const int32_t MIN_SIZE_NUM = 4;
+constexpr int32_t MAX_CODE_TEST = 8;
+constexpr int32_t MIN_SIZE_NUM = 4;
 
 bool AVSessionServiceProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {
@@ -48,11 +49,11 @@ bool AVSessionServiceProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     auto remote = avServiceProxy->GetRemote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
     size -= sizeof(uint32_t);
     request.WriteBuffer(data + sizeof(uint32_t), size);
     request.RewindRead(0);
     int32_t result = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
     CHECK_AND_RETURN_RET_LOG((result = remote->SendRequest(cmdCode, request, reply, option)) == 0, ERR_IPC_SEND_REQUEST,
         "send request failed");
     return result == AVSESSION_SUCCESS;

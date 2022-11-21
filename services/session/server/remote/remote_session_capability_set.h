@@ -24,7 +24,7 @@
 namespace OHOS::AVSession {
 class RemoteSessionCapabilitySet {
 public:
-    static RemoteSessionCapabilitySet &GetInstance();
+    static RemoteSessionCapabilitySet& GetInstance();
 
     static std::string GetLocalCapability();
 

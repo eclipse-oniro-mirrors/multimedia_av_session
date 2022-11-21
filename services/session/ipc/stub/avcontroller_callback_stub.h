@@ -26,21 +26,21 @@ public:
 
 private:
 
-    int32_t HandleOnSessionDestroy(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnSessionDestroy(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleOnPlaybackStateChange(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnPlaybackStateChange(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleOnMetadataChange(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnMetadataChange(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleOnActiveStateChange(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnActiveStateChange(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleOnValidCommandChange(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnValidCommandChange(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleOnOutputDeviceChange(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HanlerFunc = int32_t (AVControllerCallbackStub::*)(MessageParcel &data, MessageParcel &reply);
+    using HanlerFunc = int32_t (AVControllerCallbackStub::*)(MessageParcel& data, MessageParcel& reply);
     static inline HanlerFunc handlers[] = {
         [CONTROLLER_CMD_ON_SESSION_DESTROY] = &AVControllerCallbackStub::HandleOnSessionDestroy,
         [CONTROLLER_CMD_ON_PLAYBACK_STATE_CHANGE] = &AVControllerCallbackStub::HandleOnPlaybackStateChange,

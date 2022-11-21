@@ -14,14 +14,13 @@
  */
 
 #include "avsession_controller_proxy.h"
-
 #include "avcontroller_callback_client.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
 
 namespace OHOS::AVSession {
-AVSessionControllerProxy::AVSessionControllerProxy(const sptr<IRemoteObject> &impl)
+AVSessionControllerProxy::AVSessionControllerProxy(const sptr<IRemoteObject>& impl)
     : IRemoteProxy<IAVSessionController>(impl)
 {
     SLOGD("construct");
@@ -33,7 +32,7 @@ AVSessionControllerProxy::~AVSessionControllerProxy()
     Destroy();
 }
 
-int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState &state)
+int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
@@ -58,7 +57,7 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState &state)
     return ret;
 }
 
-int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData &data)
+int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
@@ -107,7 +106,7 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability)
+int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
@@ -132,7 +131,7 @@ int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::Wa
     return ret;
 }
 
-int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t> &cmds)
+int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t>& cmds)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
@@ -154,7 +153,7 @@ int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t> &cmds)
     return ret;
 }
 
-int32_t AVSessionControllerProxy::IsSessionActive(bool &isActive)
+int32_t AVSessionControllerProxy::IsSessionActive(bool& isActive)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
@@ -176,7 +175,7 @@ int32_t AVSessionControllerProxy::IsSessionActive(bool &isActive)
     return ret;
 }
 
-int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand &cmd)
+int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendControlCommand");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
@@ -200,7 +199,7 @@ int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand &cmd
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
+int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType& filter)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
@@ -219,7 +218,7 @@ int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType &
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVSessionControllerProxy::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter)
+int32_t AVSessionControllerProxy::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
@@ -238,7 +237,7 @@ int32_t AVSessionControllerProxy::SetPlaybackFilter(const AVPlaybackState::Playb
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback)
+int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
 
@@ -246,12 +245,12 @@ int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVContr
     callback_ = new(std::nothrow) AVControllerCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVControllerCallbackClient failed");
 
-    callback_->AddListenerForPlaybackState([this](const AVPlaybackState &state) { currentState_ = state; });
+    callback_->AddListenerForPlaybackState([this](const AVPlaybackState& state) { currentState_ = state; });
 
     return RegisterCallbackInner(callback_);
 }
 
-int32_t AVSessionControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject> &callback)
+int32_t AVSessionControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,

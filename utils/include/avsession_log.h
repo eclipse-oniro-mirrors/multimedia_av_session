@@ -17,6 +17,7 @@
 #define OHOS_AVSESSION_LOG_H
 
 #include <cinttypes>
+
 #include "hilog/log.h"
 
 #undef LOG_DOMAIN

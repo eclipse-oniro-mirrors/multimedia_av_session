@@ -19,7 +19,8 @@
 #include "remote_session_source_proxy.h"
 
 namespace OHOS::AVSession {
-static std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_source.z.so");
+static const std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) +
+                                               std::string("libremote_session_source.z.so");
 
 RemoteSessionSourceProxy::RemoteSessionSourceProxy()
 {
@@ -97,7 +98,7 @@ int32_t  RemoteSessionSourceProxy::CancelCastAudio(const std::string& sinkDevice
     return AVSESSION_SUCCESS;
 }
 
-int32_t RemoteSessionSourceProxy::SetAVMetaData(const AVMetaData &metaData)
+int32_t RemoteSessionSourceProxy::SetAVMetaData(const AVMetaData& metaData)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
@@ -106,7 +107,7 @@ int32_t RemoteSessionSourceProxy::SetAVMetaData(const AVMetaData &metaData)
     return AVSESSION_SUCCESS;
 }
 
-int32_t RemoteSessionSourceProxy::SetAVPlaybackState(const AVPlaybackState &state)
+int32_t RemoteSessionSourceProxy::SetAVPlaybackState(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetAVPlaybackState");
     CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");

@@ -28,7 +28,7 @@ struct OutputDeviceInfo {
 
 struct AVSessionDescriptor {
     bool WriteToParcel(Parcel& out) const;
-    bool ReadFromParcel(Parcel &in);
+    bool ReadFromParcel(Parcel& in);
 
     std::string sessionId_;
     int32_t sessionType_ {};

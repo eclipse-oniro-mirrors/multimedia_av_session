@@ -29,25 +29,25 @@
 namespace OHOS::AVSession {
 class AVSessionController {
 public:
-    virtual int32_t GetAVPlaybackState(AVPlaybackState &state) = 0;
+    virtual int32_t GetAVPlaybackState(AVPlaybackState& state) = 0;
 
-    virtual int32_t GetAVMetaData(AVMetaData &data) = 0;
+    virtual int32_t GetAVMetaData(AVMetaData& data) = 0;
 
     virtual int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
 
-    virtual int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) = 0;
+    virtual int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability) = 0;
 
-    virtual int32_t GetValidCommands(std::vector<int32_t> &cmds) = 0;
+    virtual int32_t GetValidCommands(std::vector<int32_t>& cmds) = 0;
 
-    virtual int32_t IsSessionActive(bool &isActive) = 0;
+    virtual int32_t IsSessionActive(bool& isActive) = 0;
 
-    virtual int32_t SendControlCommand(const AVControlCommand &cmd) = 0;
+    virtual int32_t SendControlCommand(const AVControlCommand& cmd) = 0;
 
-    virtual int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback) = 0;
+    virtual int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback) = 0;
 
-    virtual int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) = 0;
+    virtual int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) = 0;
 
-    virtual int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter) = 0;
+    virtual int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) = 0;
 
     virtual int32_t Destroy() = 0;
 

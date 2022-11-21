@@ -17,6 +17,7 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
+
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"
@@ -116,6 +117,11 @@ BENCHMARK_F(AVSessionManagerTest, GetAllSessionDescriptors)(benchmark::State& st
     elementName.SetAbilityName(g_testAbilityName);
     auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
                                                                  elementName);
+    if (session == nullptr) {
+        SLOGE("%{public}s error, failed to CreateSession, session is nullptr.", __func__);
+        state.SkipWithError("GetSessionDescriptorsBySessionId failed, return error.");
+    }
+
     while (state.KeepRunning()) {
         std::vector<AVSessionDescriptor> descriptors;
         auto errCode = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
@@ -124,9 +130,9 @@ BENCHMARK_F(AVSessionManagerTest, GetAllSessionDescriptors)(benchmark::State& st
             state.SkipWithError("GetAllSessionDescriptors failed, return error.");
         }
     }
-    if (session != nullptr) {
-        session->Destroy();
-    }
+
+    session->Destroy();
+
     SLOGI("BenchMark GetAllSessionDescriptors test end");
 }
 
@@ -144,6 +150,10 @@ BENCHMARK_F(AVSessionManagerTest, GetActivatedSessionDescriptors)(benchmark::Sta
     elementName.SetAbilityName(g_testAbilityName);
     auto session =
         AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    if (session == nullptr) {
+        SLOGE("%{public}s error, failed to CreateSession, session is nullptr.", __func__);
+        state.SkipWithError("GetSessionDescriptorsBySessionId failed, return error.");
+    }
     session->Activate();
     while (state.KeepRunning()) {
         std::vector<AVSessionDescriptor> descriptors;
@@ -154,9 +164,9 @@ BENCHMARK_F(AVSessionManagerTest, GetActivatedSessionDescriptors)(benchmark::Sta
             state.SkipWithError("GetActivatedSessionDescriptors failed, return error.");
         }
     }
-    if (session != nullptr) {
-        session->Destroy();
-    }
+
+    session->Destroy();
+
     SLOGI("BenchMark GetActivatedSessionDescriptors test end");
 }
 
@@ -174,6 +184,10 @@ BENCHMARK_F(AVSessionManagerTest, GetDescriptorsBySessionId)(benchmark::State& s
     elementName.SetAbilityName(g_testAbilityName);
     auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
                                                                  elementName);
+    if (session == nullptr) {
+        SLOGE("%{public}s error, failed to CreateSession, session is nullptr.", __func__);
+        state.SkipWithError("GetSessionDescriptorsBySessionId failed, return error.");
+    }
     session->Activate();
     auto sessionId = session->GetSessionId();
     while (state.KeepRunning()) {
@@ -185,9 +199,7 @@ BENCHMARK_F(AVSessionManagerTest, GetDescriptorsBySessionId)(benchmark::State& s
             state.SkipWithError("GetSessionDescriptorsBySessionId failed, return error.");
         }
     }
-    if (session != nullptr) {
-        session->Destroy();
-    }
+    session->Destroy();
     SLOGI("BenchMark GetDescriptorsBySessionId test end");
 }
 
@@ -205,6 +217,11 @@ BENCHMARK_F(AVSessionManagerTest, CreateController)(benchmark::State& state)
     elementName.SetAbilityName(g_testAbilityName);
     auto session =
         AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
+    if (session == nullptr) {
+        SLOGE("%{public}s error, failed to CreateSession, session is nullptr.", __func__);
+        state.SkipWithError("GetSessionDescriptorsBySessionId failed, return error.");
+    }
+
     while (state.KeepRunning()) {
         std::shared_ptr<AVSessionController> controller;
         auto errCode = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller);
@@ -216,9 +233,9 @@ BENCHMARK_F(AVSessionManagerTest, CreateController)(benchmark::State& state)
             controller->Destroy();
         }
     }
-    if (session != nullptr) {
-        session->Destroy();
-    }
+
+    session->Destroy();
+
     SLOGI("BenchMark CreateController test end");
 }
 

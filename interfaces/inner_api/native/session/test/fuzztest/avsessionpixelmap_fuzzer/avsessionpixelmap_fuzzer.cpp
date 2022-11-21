@@ -14,7 +14,6 @@
  */
 
 #include "avsessionpixelmap_fuzzer.h"
-
 #include "avsession_pixel_map.h"
 #include "parcel.h"
 

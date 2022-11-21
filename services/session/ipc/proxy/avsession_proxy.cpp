@@ -22,7 +22,7 @@
 #include "avsession_trace.h"
 
 namespace OHOS::AVSession {
-AVSessionProxy::AVSessionProxy(const sptr<IRemoteObject> &impl)
+AVSessionProxy::AVSessionProxy(const sptr<IRemoteObject>& impl)
     : IRemoteProxy<IAVSession>(impl)
 {
     SLOGD("construct");
@@ -42,8 +42,8 @@ std::string AVSessionProxy::GetSessionId()
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, "", "remote is nullptr");
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SESSION_CMD_GET_SESSION_ID, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, "", "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_SESSION_ID, data, reply, option) == 0,
         "", "send request failed");
 
     std::string sessionId;
@@ -51,7 +51,7 @@ std::string AVSessionProxy::GetSessionId()
     return sessionId;
 }
 
-int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback> &callback)
+int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback)
 {
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(callback != nullptr, ERR_INVALID_PARAM, "callback is nullptr");
@@ -64,7 +64,7 @@ int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &callback)
+int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback>& callback)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -74,7 +74,7 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &ca
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_REGISTER_CALLBACK, data, reply, option) == 0,
                              ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -84,7 +84,7 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback> &ca
 
 int32_t AVSessionProxy::Destroy()
 {
-    SLOGD("enter");
+    SLOGI("enter");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -92,7 +92,7 @@ int32_t AVSessionProxy::Destroy()
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_DESTROY, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -120,7 +120,7 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -137,7 +137,7 @@ int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_META_DATA, data, reply, option) == 0,
                              ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -160,7 +160,7 @@ int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_PLAYBACK_STATE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -187,7 +187,7 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_PLAYBACK_STATE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -206,7 +206,7 @@ int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAg
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_LAUNCH_ABILITY, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -258,7 +258,7 @@ int32_t AVSessionProxy::Activate()
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ACTIVATE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -275,7 +275,7 @@ int32_t AVSessionProxy::Deactivate()
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_DEACTIVATE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -292,7 +292,7 @@ bool AVSessionProxy::IsActive()
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ISACTIVE, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -313,7 +313,7 @@ int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ADD_SUPPORT_COMMAND, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -334,7 +334,7 @@ int32_t AVSessionProxy::DeleteSupportCommand(const int32_t cmd)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "remote is nullptr");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_DELETE_SUPPORT_COMMAND, data, reply, option) == 0,
                              ERR_IPC_SEND_REQUEST, "send request failed");
 

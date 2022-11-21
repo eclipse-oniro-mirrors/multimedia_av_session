@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "avsession_manager.h"
 #include "avsession_errors.h"
 #include "want_agent.h"
@@ -141,7 +142,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
-    void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo &outputDeviceInfo) override {};
+    void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
 
     ~AVSessionCallbackImpl() override;
 };

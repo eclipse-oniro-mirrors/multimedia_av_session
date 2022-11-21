@@ -17,39 +17,48 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-SessionListenerProxy::SessionListenerProxy(const sptr<IRemoteObject> &impl)
+SessionListenerProxy::SessionListenerProxy(const sptr<IRemoteObject>& impl)
     : IRemoteProxy<ISessionListener>(impl)
 {
     SLOGD("construct");
 }
 
-void SessionListenerProxy::OnSessionCreate(const AVSessionDescriptor &descriptor)
+void SessionListenerProxy::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    descriptor.WriteToParcel(data);
+    CHECK_AND_RETURN_LOG(descriptor.WriteToParcel(data), "write descriptor failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    CHECK_AND_RETURN_LOG(!Remote()->SendRequest(LISTENER_CMD_ON_CREATE, data, reply, option), "send request fail");
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_ON_CREATE, data, reply, option) == 0, "send request fail");
 }
 
-void SessionListenerProxy::OnSessionRelease(const AVSessionDescriptor &descriptor)
+void SessionListenerProxy::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    descriptor.WriteToParcel(data);
+    CHECK_AND_RETURN_LOG(descriptor.WriteToParcel(data), "write descriptor failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    CHECK_AND_RETURN_LOG(!Remote()->SendRequest(LISTENER_CMD_ON_RELEASE, data, reply, option), "send request fail");
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_ON_RELEASE, data, reply, option) == 0, "send request fail");
 }
 
 void SessionListenerProxy::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    descriptor.WriteToParcel(data);
+    CHECK_AND_RETURN_LOG(descriptor.WriteToParcel(data), "write descriptor failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    CHECK_AND_RETURN_LOG(!Remote()->SendRequest(LISTENER_CMD_TOP_CHANGED, data, reply, option), "send request fail");
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_TOP_CHANGED, data, reply, option) == 0, "send request fail");
 }
 }

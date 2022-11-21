@@ -17,7 +17,7 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-bool AVSessionDescriptor::WriteToParcel(Parcel &out) const
+bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
 {
     CHECK_AND_RETURN_RET_LOG(out.WriteString(sessionId_), false, "write sessionId failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(sessionType_), false, "write sessionType failed");
@@ -33,7 +33,7 @@ bool AVSessionDescriptor::WriteToParcel(Parcel &out) const
     return true;
 }
 
-bool AVSessionDescriptor::ReadFromParcel(Parcel &in)
+bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
 {
     CHECK_AND_RETURN_RET_LOG(in.ReadString(sessionId_), false, "Read sessionId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(sessionType_), false, "Read sessionType failed");

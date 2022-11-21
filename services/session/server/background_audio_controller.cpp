@@ -40,14 +40,14 @@ void BackgroundAudioController::Init()
     });
 }
 
-void BackgroundAudioController::OnSessionCreate(const AVSessionDescriptor &descriptor)
+void BackgroundAudioController::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(lock_);
     sessionUIDs_.insert(descriptor.uid_);
     AppManagerAdapter::GetInstance().RemoveObservedApp(descriptor.uid_);
 }
 
-void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor &descriptor)
+void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
     {
         std::lock_guard lockGuard(lock_);
@@ -71,7 +71,7 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor &desc
     }
 }
 
-void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos &infos)
+void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos)
 {
     for (const auto& info : infos) {
         if (info->rendererState != AudioStandard::RENDERER_RUNNING) {

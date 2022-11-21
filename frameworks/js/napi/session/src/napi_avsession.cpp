@@ -98,17 +98,17 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
 {
     napi_value self;
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, nullptr, nullptr, &self, nullptr), nullptr);
-    auto finalize = [](napi_env env, void *data, void *hint) {
-        auto *napiSession = reinterpret_cast<NapiAVSession *>(data);
+    auto finalize = [](napi_env env, void* data, void* hint) {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(data);
         napi_delete_reference(env, napiSession->wrapperRef_);
         delete napiSession;
     };
-    auto *napiSession = new(std::nothrow) NapiAVSession();
+    auto* napiSession = new(std::nothrow) NapiAVSession();
     if (napiSession == nullptr) {
         SLOGE("no memory");
         return nullptr;
     }
-    if (napi_wrap(env, self, static_cast<void *>(napiSession), finalize, nullptr,
+    if (napi_wrap(env, self, static_cast<void*>(napiSession), finalize, nullptr,
                   &(napiSession->wrapperRef_)) != napi_ok) {
         SLOGE("wrap failed");
         return nullptr;
@@ -116,14 +116,14 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
     return self;
 }
 
-napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession> &nativeSession, napi_value &out)
+napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out)
 {
     napi_value constructor{};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVSessionConstructorRef, &constructor), napi_generic_failure);
     napi_value instance{};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
-    NapiAVSession *napiAvSession{};
-    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void **>(&napiAvSession)), napi_generic_failure);
+    NapiAVSession* napiAvSession{};
+    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiAvSession)), napi_generic_failure);
     napiAvSession->session_ = std::move(nativeSession);
     napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
     SLOGI("sessionId=%{public}s", napiAvSession->sessionId_.c_str());
@@ -139,6 +139,11 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession> 
 napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
     std::string eventName;
     napi_value callback {};
     auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
@@ -202,6 +207,11 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
 napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OffEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
     std::string eventName;
     napi_value callback = nullptr;
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
@@ -244,6 +254,11 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
         AVMetaData metaData_;
     };
     auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetAVMetaData failed : no memory");
+        NapiUtils::ThrowError(env, "SetAVMetaData failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
@@ -289,6 +304,13 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
         AVPlaybackState playBackState_;
     };
     auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetAVPlaybackState failed : no memory");
+        NapiUtils::ThrowError(env, "SetAVPlaybackState failed : no memory",
+                              NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -332,6 +354,12 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
         AbilityRuntime::WantAgent::WantAgent* wantAgent_;
     };
     auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetLaunchAbility failed : no memory");
+        NapiUtils::ThrowError(env, "SetLaunchAbility failed : no memory",
+                              NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
@@ -373,6 +401,13 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
         std::vector<int32_t> streamIds_;
     };
     auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetAudioStreamId failed : no memory");
+        NapiUtils::ThrowError(env, "SetAudioStreamId failed : no memory",
+                              NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -403,6 +438,12 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
         std::shared_ptr<AVSessionController> controller_;
     };
     auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("GetController failed : no memory");
+        NapiUtils::ThrowError(env, "GetController failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
@@ -420,7 +461,7 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[AVSESSION_ERROR];
         }
     };
-    auto complete = [env, context](napi_value &output) {
+    auto complete = [env, context](napi_value& output) {
         CHECK_STATUS_RETURN_VOID(context, "get controller failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
         CHECK_ARGS_RETURN_VOID(context, context->controller_ != nullptr, "controller is nullptr",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -437,6 +478,12 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
         OutputDeviceInfo outputDeviceInfo_;
     };
     auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("GetOutputDevice failed : no memory");
+        NapiUtils::ThrowError(env, "GetOutputDevice failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
@@ -453,7 +500,7 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
         context->outputDeviceInfo_ = descriptor.outputDeviceInfo_;
     };
 
-    auto complete = [env, context](napi_value &output) {
+    auto complete = [env, context](napi_value& output) {
         context->status = NapiUtils::SetValue(env, context->outputDeviceInfo_, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -464,6 +511,12 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
 napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("Activate failed : no memory");
+        NapiUtils::ThrowError(env, "Activate failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
@@ -494,6 +547,12 @@ napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
 napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("Deactivate failed : no memory");
+        NapiUtils::ThrowError(env, "Deactivate failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
@@ -524,6 +583,12 @@ napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
 napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("Destroy failed : no memory");
+        NapiUtils::ThrowError(env, "Destroy failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {

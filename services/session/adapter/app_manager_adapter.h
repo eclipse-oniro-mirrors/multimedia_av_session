@@ -56,7 +56,7 @@ private:
 
 class AVSessionAppStateCallback : public AppExecFwk::AppStateCallbackHost {
 public:
-    void OnAppStateChanged(const AppExecFwk::AppProcessData &) override;
+    void OnAppStateChanged(const AppExecFwk::AppProcessData&) override;
 };
 }
 #endif // AV_SESSION_APP_MANAGER_ADAPTER_H

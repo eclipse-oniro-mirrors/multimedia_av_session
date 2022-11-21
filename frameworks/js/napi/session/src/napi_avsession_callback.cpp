@@ -50,7 +50,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const T& param)
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [param](napi_env env, int &argc, napi_value *argv) {
+        asyncCallback_->Call(*ref, [param](napi_env env, int& argc, napi_value* argv) {
             argc = NapiUtils::ARGC_ONE;
             NapiUtils::SetValue(env, param, *argv);
         });
@@ -117,19 +117,19 @@ void NapiAVSessionCallback::OnSetLoopMode(int32_t loopMode)
     HandleEvent(EVENT_SET_LOOP_MODE, loopMode);
 }
 
-void NapiAVSessionCallback::OnToggleFavorite(const std::string &assertId)
+void NapiAVSessionCallback::OnToggleFavorite(const std::string& assertId)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnToggleFavorite");
     HandleEvent(EVENT_TOGGLE_FAVORITE, assertId);
 }
 
-void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent &keyEvent)
+void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnMediaKeyEvent");
     HandleEvent(EVENT_MEDIA_KEY_EVENT, std::make_shared<MMI::KeyEvent>(keyEvent));
 }
 
-void NapiAVSessionCallback::OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+void NapiAVSessionCallback::OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
     HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, outputDeviceInfo);

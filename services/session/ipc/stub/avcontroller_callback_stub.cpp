@@ -13,24 +13,23 @@
  * limitations under the License.
  */
 #include "avcontroller_callback_stub.h"
-
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
 
 namespace OHOS::AVSession {
-bool AVControllerCallbackStub::CheckInterfaceToken(MessageParcel &data)
+bool AVControllerCallbackStub::CheckInterfaceToken(MessageParcel& data)
 {
     auto localDescriptor = IAVControllerCallback::GetDescriptor();
     auto remoteDescriptor = data.ReadInterfaceToken();
     if (remoteDescriptor != localDescriptor) {
-        SLOGE("interface token is not equal");
+        SLOGI("interface token is not equal");
         return false;
     }
     return true;
 }
 
-int32_t AVControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+int32_t AVControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption &option)
 {
     if (!CheckInterfaceToken(data)) {
@@ -42,13 +41,13 @@ int32_t AVControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t AVControllerCallbackStub::HandleOnSessionDestroy(MessageParcel &data, MessageParcel &reply)
+int32_t AVControllerCallbackStub::HandleOnSessionDestroy(MessageParcel& data, MessageParcel& reply)
 {
     OnSessionDestroy();
     return ERR_NONE;
 }
 
-int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel &data, MessageParcel &reply)
+int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel& data, MessageParcel& reply)
 {
     sptr<AVPlaybackState> state = data.ReadParcelable<AVPlaybackState>();
 
@@ -58,7 +57,7 @@ int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel &dat
     return ERR_NONE;
 }
 
-int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel &data, MessageParcel &reply)
+int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, MessageParcel& reply)
 {
     sptr<AVMetaData> metaData = data.ReadParcelable<AVMetaData>();
 
@@ -68,7 +67,7 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel &data, Me
     return ERR_NONE;
 }
 
-int32_t AVControllerCallbackStub::HandleOnActiveStateChange(MessageParcel &data, MessageParcel &reply)
+int32_t AVControllerCallbackStub::HandleOnActiveStateChange(MessageParcel& data, MessageParcel& reply)
 {
     bool isActive = false;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(isActive), ERR_NONE, "read isActive failed");
@@ -76,7 +75,7 @@ int32_t AVControllerCallbackStub::HandleOnActiveStateChange(MessageParcel &data,
     return ERR_NONE;
 }
 
-int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel &data, MessageParcel &reply)
+int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<int32_t> cmds;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32Vector(&cmds), ERR_NONE, "read int32 vector failed");
@@ -84,7 +83,7 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel &data
     return ERR_NONE;
 }
 
-int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel &data, MessageParcel &reply)
+int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply)
 {
     OutputDeviceInfo outputDeviceInfo;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(outputDeviceInfo.isRemote_), ERR_NONE, "read isRemote_ failed");

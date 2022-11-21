@@ -73,7 +73,7 @@ void ContextBase::GetCbInfo(napi_env envi, napi_callback_info info, NapiCbInfoPa
     }
 }
 
-napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctxt, const std::string &name,
+napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctxt, const std::string& name,
                                   NapiAsyncExecute execute, NapiAsyncComplete complete)
 {
     SLOGI("name=%{public}s", name.c_str());
@@ -92,9 +92,9 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
     napi_create_string_utf8(ctxt->env, name.c_str(), NAPI_AUTO_LENGTH, &resource);
     napi_create_async_work(
         ctxt->env, nullptr, resource,
-        [](napi_env env, void *data) {
+        [](napi_env env, void* data) {
             CHECK_RETURN_VOID(data != nullptr, "napi_async_execute_callback nullptr");
-            auto ctxt = reinterpret_cast<ContextBase *>(data);
+            auto ctxt = reinterpret_cast<ContextBase*>(data);
             SLOGD("napi_async_execute_callback ctxt->status=%{public}d", ctxt->status);
             if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
                 AVSESSION_TRACE_ASYNC_START("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
@@ -103,9 +103,9 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
                 ctxt->execute();
             }
         },
-        [](napi_env env, napi_status status, void *data) {
+        [](napi_env env, napi_status status, void* data) {
             CHECK_RETURN_VOID(data != nullptr, "napi_async_complete_callback nullptr");
-            auto ctxt = reinterpret_cast<ContextBase *>(data);
+            auto ctxt = reinterpret_cast<ContextBase*>(data);
             SLOGD("napi_async_complete_callback status=%{public}d, ctxt->status=%{public}d", status, ctxt->status);
             if ((status != napi_ok) && (ctxt->status == napi_ok)) {
                 ctxt->status = status;
@@ -118,13 +118,13 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
             }
             GenerateOutput(ctxt);
         },
-        reinterpret_cast<void *>(ctxt.get()), &ctxt->work);
+        reinterpret_cast<void*>(ctxt.get()), &ctxt->work);
     napi_queue_async_work(ctxt->env, ctxt->work);
     ctxt->hold = ctxt; // save crossing-thread ctxt.
     return promise;
 }
 
-void NapiAsyncWork::GenerateOutput(ContextBase *ctxt)
+void NapiAsyncWork::GenerateOutput(ContextBase* ctxt)
 {
     napi_value result[RESULT_ALL] = {nullptr};
     if (ctxt->status == napi_ok) {

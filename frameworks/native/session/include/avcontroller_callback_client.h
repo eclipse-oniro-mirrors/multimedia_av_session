@@ -27,22 +27,22 @@ public:
 
     void OnSessionDestroy() override;
 
-    void OnPlaybackStateChange(const AVPlaybackState &state) override;
+    void OnPlaybackStateChange(const AVPlaybackState& state) override;
 
-    void OnMetaDataChange(const AVMetaData &data) override;
+    void OnMetaDataChange(const AVMetaData& data) override;
 
     void OnActiveStateChange(bool isActive) override;
 
-    void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
+    void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const OutputDeviceInfo &info) override;
+    void OnOutputDeviceChange(const OutputDeviceInfo& info) override;
 
-    void AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)> &listener);
+    void AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 
 private:
     std::shared_ptr<AVControllerCallback> callback_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;
-    static constexpr const char *EVENT_NAME = "AVControllerCallback";
+    static constexpr const char* EVENT_NAME = "AVControllerCallback";
 };
 }
 #endif // OHOS_AVCONTROLLER_CALLBACK_CLIENT_H

@@ -17,6 +17,7 @@
 #define OHOS_AVSESSION_INFO_H
 
 #include <string>
+
 #include "avmeta_data.h"
 #include "avplayback_state.h"
 #include "avsession_descriptor.h"
@@ -58,13 +59,13 @@ class AVControllerCallback {
 public:
     virtual void OnSessionDestroy() = 0;
 
-    virtual void OnPlaybackStateChange(const AVPlaybackState &state) = 0;
+    virtual void OnPlaybackStateChange(const AVPlaybackState& state) = 0;
 
-    virtual void OnMetaDataChange(const AVMetaData &data) = 0;
+    virtual void OnMetaDataChange(const AVMetaData& data) = 0;
 
     virtual void OnActiveStateChange(bool isActive) = 0;
 
-    virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
+    virtual void OnValidCommandChange(const std::vector<int32_t>& cmds) = 0;
 
     virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
 
