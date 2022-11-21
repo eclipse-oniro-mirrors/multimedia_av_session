@@ -112,6 +112,7 @@ public:
             }
         }
     }
+
     static const char* GetCachePathName()
     {
         return CACHE_PATH_NAME;
