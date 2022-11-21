@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "avplayback_state.h"
 
 using namespace testing::ext;
@@ -47,6 +48,7 @@ void AVPlaybackStateTest::TearDown()
 HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level1)
 {
     auto *avp = new (std::nothrow) AVPlaybackState();
+    EXPECT_NE(avp, nullptr);
     avp->SetState(0);
     avp->SetSpeed(3.0);
     avp->SetLoopMode(1);
@@ -54,6 +56,7 @@ HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level1)
     avp->SetPosition({10, 10});
     avp->SetFavorite(true);
     auto *parcel = new (std::nothrow) OHOS::Parcel();
+    EXPECT_NE(parcel, nullptr);
     bool boo = avp->Marshalling(*parcel);
     EXPECT_EQ(boo, true);
 }
@@ -105,6 +108,7 @@ HWTEST_F(AVPlaybackStateTest, IsValid002, TestSize.Level1)
 HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
 {
     auto *parcel = new (std::nothrow) OHOS::Parcel();
+    EXPECT_NE(parcel, nullptr);
     AVPlaybackState::PlaybackStateMaskType mask;
     mask.set();
     parcel->WriteString(mask.to_string());
@@ -129,8 +133,10 @@ HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
 HWTEST_F(AVPlaybackStateTest, GetState002, TestSize.Level1)
 {
     auto *avp = new (std::nothrow) AVPlaybackState();
+    EXPECT_NE(avp, nullptr);
     avp->SetSpeed(3.0);
     auto *parcel = new (std::nothrow) OHOS::Parcel();
+    EXPECT_NE(parcel, nullptr);
     bool boo = avp->Marshalling(*parcel);
     ASSERT_EQ(boo, true);
     AVPlaybackState *result = AVPlaybackState::Unmarshalling(*parcel);

@@ -20,7 +20,7 @@ namespace OHOS::AVSession {
 AVSessionCallbackClient::AVSessionCallbackClient(const std::shared_ptr<AVSessionCallback>& callback)
     : callback_(callback)
 {
-    SLOGI("construct");
+    SLOGD("construct");
 }
 
 void AVSessionCallbackClient::OnPlay()
@@ -28,10 +28,9 @@ void AVSessionCallbackClient::OnPlay()
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnPlay(); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback]() { callback->OnPlay(); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnPause()
@@ -39,10 +38,9 @@ void AVSessionCallbackClient::OnPause()
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnPause(); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback]() { callback->OnPause(); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnStop()
@@ -50,10 +48,9 @@ void AVSessionCallbackClient::OnStop()
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnStop(); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback]() { callback->OnStop(); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnPlayNext()
@@ -61,10 +58,9 @@ void AVSessionCallbackClient::OnPlayNext()
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnPlayNext(); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback]() { callback->OnPlayNext(); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnPlayPrevious()
@@ -72,10 +68,9 @@ void AVSessionCallbackClient::OnPlayPrevious()
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnPlayPrevious(); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback]() { callback->OnPlayPrevious(); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnFastForward()
@@ -83,10 +78,9 @@ void AVSessionCallbackClient::OnFastForward()
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnFastForward(); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback]() { callback->OnFastForward(); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnRewind()
@@ -94,10 +88,9 @@ void AVSessionCallbackClient::OnRewind()
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnRewind(); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback]() { callback->OnRewind(); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnSeek(int64_t time)
@@ -105,10 +98,9 @@ void AVSessionCallbackClient::OnSeek(int64_t time)
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, time]() { callback->OnSeek(time); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, time]() { callback->OnSeek(time); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnSetSpeed(double speed)
@@ -116,10 +108,9 @@ void AVSessionCallbackClient::OnSetSpeed(double speed)
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, speed]() { callback->OnSetSpeed(speed); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, speed]() { callback->OnSetSpeed(speed); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnSetLoopMode(int32_t loopMode)
@@ -127,10 +118,9 @@ void AVSessionCallbackClient::OnSetLoopMode(int32_t loopMode)
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, loopMode]() { callback->OnSetLoopMode(loopMode); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, loopMode]() { callback->OnSetLoopMode(loopMode); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnToggleFavorite(const std::string& mediald)
@@ -138,10 +128,9 @@ void AVSessionCallbackClient::OnToggleFavorite(const std::string& mediald)
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, mediald]() { callback->OnToggleFavorite(mediald); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, mediald]() { callback->OnToggleFavorite(mediald); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
@@ -149,10 +138,9 @@ void AVSessionCallbackClient::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, keyEvent]() { callback->OnMediaKeyEvent(keyEvent); }, EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, keyEvent]() { callback->OnMediaKeyEvent(keyEvent); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
@@ -160,16 +148,15 @@ void AVSessionCallbackClient::OnOutputDeviceChange(const OutputDeviceInfo& outpu
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    if (!AVSessionEventHandler::GetInstance()
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
         .AVSessionPostTask([callback, outputDeviceInfo]() { callback->OnOutputDeviceChange(outputDeviceInfo); },
-                           EVENT_NAME)) {
-        SLOGI("AVSessionCallbackClient handler postTask failed");
-    }
+                           EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
 }
 
 AVSessionCallbackClient::~AVSessionCallbackClient()
 {
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask(EVENT_NAME);
-    SLOGI("destroy");
+    SLOGD("destroy");
 }
 }

@@ -15,6 +15,7 @@
 
 #include <benchmark/benchmark.h>
 #include <unistd.h>
+
 #include "avcontrol_command.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
@@ -51,6 +52,7 @@ public:
             AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
         if (avsession_ == nullptr) {
             SLOGE("%{public}s error, failed to CreateSession, avsession_ nullptr.", __func__);
+            return;
         }
         g_sessionId++;
         AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller_);
@@ -95,7 +97,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
-    void OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo) override {};
+    void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override {};
 
     ~AVSessionCallbackImpl() override;
 };
@@ -224,7 +226,7 @@ BENCHMARK_F(AVSessionTest, GetAVMetaDataTestCase)(benchmark::State& state)
     }
 }
 
-BENCHMARK_F(AVSessionTest, SetAVPlaybackStateTestCase)(benchmark::State &state)
+BENCHMARK_F(AVSessionTest, SetAVPlaybackStateTestCase)(benchmark::State& state)
 {
     const int32_t iPosition = 80000;
     const int32_t iBufferedTime = 700000;
@@ -244,7 +246,7 @@ BENCHMARK_F(AVSessionTest, SetAVPlaybackStateTestCase)(benchmark::State &state)
     }
 }
 
-BENCHMARK_F(AVSessionTest, GetAVPlaybackStateTestCase)(benchmark::State &state)
+BENCHMARK_F(AVSessionTest, GetAVPlaybackStateTestCase)(benchmark::State& state)
 {
     while (state.KeepRunning()) {
         AVPlaybackState backState;
@@ -256,7 +258,7 @@ BENCHMARK_F(AVSessionTest, GetAVPlaybackStateTestCase)(benchmark::State &state)
     }
 }
 
-BENCHMARK_F(AVSessionTest, SetLaunchAbilityTestCase)(benchmark::State &state)
+BENCHMARK_F(AVSessionTest, SetLaunchAbilityTestCase)(benchmark::State& state)
 {
     while (state.KeepRunning()) {
         OHOS::AbilityRuntime::WantAgent::WantAgent ability;
@@ -269,7 +271,7 @@ BENCHMARK_F(AVSessionTest, SetLaunchAbilityTestCase)(benchmark::State &state)
     }
 }
 
-BENCHMARK_F(AVSessionTest, GetControllerTestCase)(benchmark::State &state)
+BENCHMARK_F(AVSessionTest, GetControllerTestCase)(benchmark::State& state)
 {
     while (state.KeepRunning()) {
         auto controller = avsession_->GetController();
@@ -280,7 +282,7 @@ BENCHMARK_F(AVSessionTest, GetControllerTestCase)(benchmark::State &state)
     }
 }
 
-BENCHMARK_F(AVSessionTest, RegisterCallbackTestCase)(benchmark::State &state)
+BENCHMARK_F(AVSessionTest, RegisterCallbackTestCase)(benchmark::State& state)
 {
     while (state.KeepRunning()) {
         std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
@@ -293,7 +295,7 @@ BENCHMARK_F(AVSessionTest, RegisterCallbackTestCase)(benchmark::State &state)
     }
 }
 
-BENCHMARK_F(AVSessionTest, ActivateTestCase)(benchmark::State &state)
+BENCHMARK_F(AVSessionTest, ActivateTestCase)(benchmark::State& state)
 {
     while (state.KeepRunning()) {
         OHOS::ErrCode errCode = avsession_->Activate();
@@ -305,7 +307,7 @@ BENCHMARK_F(AVSessionTest, ActivateTestCase)(benchmark::State &state)
     }
 }
 
-BENCHMARK_F(AVSessionTest, DeactivateTestCase)(benchmark::State &state)
+BENCHMARK_F(AVSessionTest, DeactivateTestCase)(benchmark::State& state)
 {
     while (state.KeepRunning()) {
         OHOS::ErrCode errCode = avsession_->Deactivate();

@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "napi_avsession_enum.h"
-
 #include <string>
+
 #include "napi/native_common.h"
 #include "avcontrol_command.h"
 #include "avplayback_state.h"
+#include "napi_avsession_enum.h"
 
 namespace OHOS::AVSession {
 static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::string& name, int32_t value)

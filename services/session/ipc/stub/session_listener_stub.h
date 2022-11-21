@@ -22,18 +22,18 @@
 namespace OHOS::AVSession {
 class SessionListenerStub : public IRemoteStub<ISessionListener> {
 public:
-    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
-    int HandleOnSessionCreate(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnSessionCreate(MessageParcel& data, MessageParcel& reply);
 
-    int HandleOnSessionRelease(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnSessionRelease(MessageParcel& data, MessageParcel& reply);
 
-    int HandleOnTopSessionChange(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnTopSessionChange(MessageParcel& data, MessageParcel& reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HanlerFunc = int(SessionListenerStub::*)(MessageParcel&, MessageParcel&);
+    using HanlerFunc = int32_t(SessionListenerStub::*)(MessageParcel&, MessageParcel&);
     static inline HanlerFunc handlers[] = {
         [LISTENER_CMD_ON_CREATE] = &SessionListenerStub::HandleOnSessionCreate,
         [LISTENER_CMD_ON_RELEASE] = &SessionListenerStub::HandleOnSessionRelease,

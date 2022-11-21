@@ -378,7 +378,7 @@ void AVMetaData::CloneMediaImageUri(const AVMetaData& from, AVMetaData& to)
     to.mediaImageUri_ = from.mediaImageUri_;
 }
 
-void AVMetaData::ClonePublishData(const AVMetaData &from, AVMetaData &to)
+void AVMetaData::ClonePublishData(const AVMetaData& from, AVMetaData& to)
 {
     to.publishDate_ = from.publishDate_;
 }
@@ -398,12 +398,12 @@ void AVMetaData::CloneLyric(const AVMetaData& from, AVMetaData& to)
     to.lyric_ = from.lyric_;
 }
 
-void AVMetaData::ClonePreviousAssetId(const AVMetaData &from, AVMetaData &to)
+void AVMetaData::ClonePreviousAssetId(const AVMetaData& from, AVMetaData& to)
 {
     to.previousAssetId_ = from.previousAssetId_;
 }
 
-void AVMetaData::CloneNextAssetId(const AVMetaData &from, AVMetaData &to)
+void AVMetaData::CloneNextAssetId(const AVMetaData& from, AVMetaData& to)
 {
     to.nextAssetId_ = from.nextAssetId_;
 }

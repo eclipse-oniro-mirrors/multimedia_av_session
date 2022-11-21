@@ -17,6 +17,7 @@
 #define OHOS_SESSION_LISTENER_CLIENT_H
 
 #include <memory>
+
 #include "session_listener_stub.h"
 #include "avsession_info.h"
 

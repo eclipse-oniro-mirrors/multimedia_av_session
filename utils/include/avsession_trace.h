@@ -17,6 +17,7 @@
 #define OHOS_AVSESSION_TRACE_H
 
 #include <string>
+
 #ifdef ENBABLE_AVSESSION_TRACE_CONTROL
 #include "hitrace_meter.h"
 #endif

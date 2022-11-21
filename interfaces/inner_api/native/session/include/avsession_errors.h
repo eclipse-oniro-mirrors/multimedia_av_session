@@ -17,6 +17,7 @@
 #define OHOS_AVSESSION_ERRORS_H
 
 #include <cinttypes>
+
 #include "errors.h"
 
 namespace OHOS::AVSession {

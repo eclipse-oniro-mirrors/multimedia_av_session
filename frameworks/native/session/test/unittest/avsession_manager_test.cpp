@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <string>
+
 #include "avsession_manager.h"
 #include "avsession_info.h"
 #include "avsession_log.h"
@@ -98,19 +99,19 @@ void AVSessionManagerTest::TearDown()
 
 class TestSessionListener : public SessionListener {
 public:
-    void OnSessionCreate(const AVSessionDescriptor &descriptor) override
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override
     {
         SLOGI("sessionId=%{public}s created", descriptor.sessionId_.c_str());
         descriptor_ = descriptor;
     }
 
-    void OnSessionRelease(const AVSessionDescriptor &descriptor) override
+    void OnSessionRelease(const AVSessionDescriptor& descriptor) override
     {
         SLOGI("sessionId=%{public}s released", descriptor.sessionId_.c_str());
         descriptor_ = descriptor;
     }
 
-    void OnTopSessionChange(const AVSessionDescriptor &descriptor) override
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override
     {
         SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }
@@ -171,9 +172,8 @@ HWTEST_F(AVSessionManagerTest, CreatSession002, TestSize.Level1)
     auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
                                                                  elementName);
     EXPECT_NE(session, nullptr);
-    if (session != nullptr) {
-        session->Destroy();
-    }
+    session->Destroy();
+
     SLOGI("CreatSession002 end");
 }
 
@@ -197,9 +197,8 @@ HWTEST_F(AVSessionManagerTest, CreatSession003, TestSize.Level1)
                                                                   elementName);
     EXPECT_EQ(session2, nullptr);
 
-    if (session1 != nullptr) {
-        session1->Destroy();
-    }
+    session1->Destroy();
+
     SLOGI("CreatSession003 end");
 }
 
@@ -264,9 +263,8 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
     EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), g_testAbilityName);
     EXPECT_EQ(descriptors[0].isActive_, false);
 
-    if (session != nullptr) {
-        session->Destroy();
-    }
+    session->Destroy();
+
     SLOGI("GetAllSessionDescriptors001 end");
 }
 
@@ -301,9 +299,8 @@ HWTEST_F(AVSessionManagerTest, GetActivatedSessionDescriptors001, TestSize.Level
     EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), g_testAbilityName);
     EXPECT_EQ(descriptors[0].isActive_, true);
 
-    if (session != nullptr) {
-        session->Destroy();
-    }
+    session->Destroy();
+
     SLOGI("GetActivatedSessionDescriptors001 end");
 }
 
@@ -339,9 +336,9 @@ HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsBySessionId001, TestSize.Lev
     EXPECT_EQ(descriptor.isActive_, true);
     ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId + '1', descriptor);
     EXPECT_EQ(ret, AVSESSION_ERROR);
-    if (session != nullptr) {
-        session->Destroy();
-    }
+
+    session->Destroy();
+
     SLOGI("GetSessionDescriptorsBySessionId001 end");
 }
 
@@ -382,12 +379,9 @@ HWTEST_F(AVSessionManagerTest, CreateController002, TestSize.Level1)
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_NE(controller, nullptr);
 
-    if (session != nullptr) {
-        session->Destroy();
-    }
-    if (controller != nullptr) {
-        controller->Destroy();
-    }
+    session->Destroy();
+    controller->Destroy();
+
     SLOGI("CreateController002 end");
 }
 
@@ -432,12 +426,9 @@ HWTEST_F(AVSessionManagerTest, CreateController004, TestSize.Level1)
     ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller1);
     EXPECT_EQ(ret, ERR_CONTROLLER_IS_EXIST);
 
-    if (session != nullptr) {
-        session->Destroy();
-    }
-    if (controller != nullptr) {
-        controller->Destroy();
-    }
+    session->Destroy();
+    controller->Destroy();
+
     SLOGI("CreateController004 end");
 }
 
@@ -479,9 +470,8 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(session->GetSessionId(), listener->GetSessionId());
 
-    if (session != nullptr) {
-        session->Destroy();
-    }
+    session->Destroy();
+
     SLOGI("RegisterSessionListener001 end");
 }
 
@@ -634,8 +624,8 @@ HWTEST_F(AVSessionManagerTest, SendSystemControlCommand003, TestSize.Level1)
     }
     EXPECT_EQ(failedCount >= 1, true);
     EXPECT_EQ(failedCount <= 11, true);
-    if (session != nullptr) {
-        session->Destroy();
-    }
+
+    session->Destroy();
+
     SLOGI("SendSystemControlCommand003 end");
 }

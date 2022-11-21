@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "avsession_manager.h"
 #include "avsession_info.h"
 #include "avsession_errors.h"
@@ -108,9 +109,9 @@ void AVSessionRemoteTest::SetUpTestCase()
     std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList;
     auto callback = std::make_shared<InitCallback>();
     int ret = OHOS::DistributedHardware::DeviceManager::GetInstance().InitDeviceManager("av_session", callback);
-    SLOGE("InitDeviceManager ret is %{public}d", ret);
+    SLOGI("InitDeviceManager ret is %{public}d", ret);
     ret = OHOS::DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList("av_session", "", deviceList);
-    SLOGE("GetTrustedDeviceList ret is %{public}d", ret);
+    SLOGI("GetTrustedDeviceList ret is %{public}d", ret);
     SLOGI("GetTrustedDeviceList size is %{public}d", static_cast<int32_t>(deviceList.size()));
     ASSERT_NE(infoNum, 0);
     AudioDeviceDescriptor descriptor;
@@ -595,7 +596,6 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
         ret = controller->Destroy();
         EXPECT_EQ(ret, AVSESSION_SUCCESS);
         controller = nullptr;
-        EXPECT_EQ(controller, nullptr);
     }
     SLOGE("GetOutputDevice005 End");
 }

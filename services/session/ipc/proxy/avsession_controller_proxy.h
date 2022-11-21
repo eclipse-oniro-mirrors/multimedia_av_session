@@ -22,29 +22,29 @@
 namespace OHOS::AVSession {
 class AVSessionControllerProxy : public IRemoteProxy<IAVSessionController> {
 public:
-    explicit AVSessionControllerProxy(const sptr<IRemoteObject> &impl);
+    explicit AVSessionControllerProxy(const sptr<IRemoteObject>& impl);
 
     ~AVSessionControllerProxy() override;
 
-    int32_t GetAVPlaybackState(AVPlaybackState &state) override;
+    int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
-    int32_t GetAVMetaData(AVMetaData &data) override;
+    int32_t GetAVMetaData(AVMetaData& data) override;
 
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
-    int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
+    int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability) override;
 
-    int32_t GetValidCommands(std::vector<int32_t> &cmds) override;
+    int32_t GetValidCommands(std::vector<int32_t>& cmds) override;
 
-    int32_t IsSessionActive(bool &isActive) override;
+    int32_t IsSessionActive(bool& isActive) override;
 
-    int32_t SendControlCommand(const AVControlCommand &cmd) override;
+    int32_t SendControlCommand(const AVControlCommand& cmd) override;
 
-    int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback> &callback) override;
+    int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback) override;
 
-    int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) override;
+    int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
 
-    int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter) override;
+    int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
 
     int32_t Destroy() override;
 

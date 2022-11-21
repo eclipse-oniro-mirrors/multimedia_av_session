@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avcontroller_callback_stub.h"
@@ -28,9 +29,9 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST = 5;
-const int32_t MAX_CODE_LEN  = 512;
-const int32_t MIN_SIZE_NUM  = 4;
+constexpr int32_t MAX_CODE_TEST = 5;
+constexpr int32_t MAX_CODE_LEN  = 512;
+constexpr int32_t MIN_SIZE_NUM  = 4;
 
 class TestAVControllerCallback : public AVControllerCallback {
     void OnSessionDestroy() override;
@@ -43,7 +44,7 @@ class TestAVControllerCallback : public AVControllerCallback {
 
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo) override {};
+    void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override {};
 };
 
 void TestAVControllerCallback::OnSessionDestroy()

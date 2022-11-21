@@ -112,15 +112,15 @@ class AVControllerCallbackImpl : public AVControllerCallback {
 public:
     void OnSessionDestroy() override;
 
-    void OnPlaybackStateChange(const AVPlaybackState &state) override;
+    void OnPlaybackStateChange(const AVPlaybackState& state) override;
 
-    void OnMetaDataChange(const AVMetaData &data) override;
+    void OnMetaDataChange(const AVMetaData& data) override;
 
     void OnActiveStateChange(bool isActive) override;
 
-    void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
+    void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo &outputDeviceInfo) override {};
+    void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
 
     ~AVControllerCallbackImpl() override;
 
@@ -140,12 +140,12 @@ void AVControllerCallbackImpl::OnSessionDestroy()
     isDestory_ = true;
 }
 
-void AVControllerCallbackImpl::OnPlaybackStateChange(const AVPlaybackState &state)
+void AVControllerCallbackImpl::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     state_ = state;
 }
 
-void AVControllerCallbackImpl::OnMetaDataChange(const AVMetaData &data)
+void AVControllerCallbackImpl::OnMetaDataChange(const AVMetaData& data)
 {
     data_ = data;
 }
@@ -155,7 +155,7 @@ void AVControllerCallbackImpl::OnActiveStateChange(bool isActive)
     isActive_ = isActive;
 }
 
-void AVControllerCallbackImpl::OnValidCommandChange(const std::vector<int32_t> &cmds)
+void AVControllerCallbackImpl::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
     cmds_ = cmds;
 }

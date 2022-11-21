@@ -14,6 +14,7 @@
  */
 
 #include <iostream>
+
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "session_listener_client.h"
@@ -23,9 +24,9 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_LEN  = 512;
-const int32_t MAX_CODE_NUM = 3;
-const int32_t MIN_SIZE_NUM = 4;
+constexpr int32_t MAX_CODE_LEN  = 512;
+constexpr int32_t MAX_CODE_NUM = 3;
+constexpr int32_t MIN_SIZE_NUM = 4;
 
 int32_t SessionListenerStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
 {

@@ -27,7 +27,7 @@
 namespace OHOS::AVSession {
 class AVSessionProxy : public IRemoteProxy<IAVSession> {
 public:
-    explicit AVSessionProxy(const sptr<IRemoteObject> &impl);
+    explicit AVSessionProxy(const sptr<IRemoteObject>& impl);
 
     ~AVSessionProxy() override;
 

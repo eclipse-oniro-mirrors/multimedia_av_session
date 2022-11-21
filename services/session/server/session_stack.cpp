@@ -67,7 +67,7 @@ sptr<AVSessionItem> SessionStack::RemoveSession(const std::string& sessionId)
     return result;
 }
 
-sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid, const std::string &abilityName)
+sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid, const std::string& abilityName)
 {
     auto it = sessions_.find(std::make_pair(pid, abilityName));
     if (it == sessions_.end()) {

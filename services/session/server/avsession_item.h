@@ -18,6 +18,7 @@
 
 #include <string>
 #include <map>
+
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
 #include "avcontrol_command.h"
@@ -68,9 +69,6 @@ public:
     AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
-
-    void UpdateOutputDevice(OutputDeviceInfo &outputDeviceInfo,
-                            const std::unique_ptr<AudioStandard::AudioRendererChangeInfo> &outputDeviceChangeInfo);
 
     void HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo);
 

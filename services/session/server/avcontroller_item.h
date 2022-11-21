@@ -26,27 +26,27 @@
 namespace OHOS::AVSession {
 class AVControllerItem : public AVSessionControllerStub {
 public:
-    AVControllerItem(pid_t pid, const sptr<AVSessionItem> &session);
+    AVControllerItem(pid_t pid, const sptr<AVSessionItem>& session);
 
     ~AVControllerItem() override;
 
-    int32_t GetAVPlaybackState(AVPlaybackState &state) override;
+    int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
-    int32_t GetAVMetaData(AVMetaData &data) override;
+    int32_t GetAVMetaData(AVMetaData& data) override;
 
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
-    int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability) override;
+    int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability) override;
 
-    int32_t GetValidCommands(std::vector<int32_t> &cmds) override;
+    int32_t GetValidCommands(std::vector<int32_t>& cmds) override;
 
-    int32_t IsSessionActive(bool &isActive) override;
+    int32_t IsSessionActive(bool& isActive) override;
 
-    int32_t SendControlCommand(const AVControlCommand &cmd) override;
+    int32_t SendControlCommand(const AVControlCommand& cmd) override;
 
-    int32_t SetMetaFilter(const AVMetaData::MetaMaskType &filter) override;
+    int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
 
-    int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter) override;
+    int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
 
     int32_t Destroy() override;
 
@@ -54,15 +54,15 @@ public:
 
     void HandleSessionDestroy();
 
-    void HandlePlaybackStateChange(const AVPlaybackState &state);
+    void HandlePlaybackStateChange(const AVPlaybackState& state);
 
-    void HandleMetaDataChange(const AVMetaData &data);
+    void HandleMetaDataChange(const AVMetaData& data);
 
     void HandleActiveStateChange(bool isActive);
 
-    void HandleValidCommandChange(const std::vector<int32_t> &cmds);
+    void HandleValidCommandChange(const std::vector<int32_t>& cmds);
 
-    void HandleOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo);
+    void HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo);
 
     pid_t GetPid() const;
 

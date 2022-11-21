@@ -34,7 +34,7 @@ std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlComm
     { "toggleFavorite", { GetAssetId, SetAssetId, AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE } },
 };
 
-int32_t NapiControlCommand::ConvertCommand(const std::string &cmd)
+int32_t NapiControlCommand::ConvertCommand(const std::string& cmd)
 {
     for (const auto& [key, value] : commandMap_) {
         if (key == cmd) {
@@ -66,7 +66,7 @@ std::vector<std::string> NapiControlCommand::ConvertCommands(const std::vector<i
     return result;
 }
 
-napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlCommand &out)
+napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlCommand& out)
 {
     std::string cmd;
     auto status = NapiUtils::GetNamedProperty(env, in, "command", cmd);
@@ -89,7 +89,7 @@ napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlC
     return getter(env, in, out);
 }
 
-napi_status NapiControlCommand::SetValue(napi_env env, AVControlCommand &in, napi_value &out)
+napi_status NapiControlCommand::SetValue(napi_env env, AVControlCommand& in, napi_value& out)
 {
     napi_status status = napi_create_object(env, &out);
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
@@ -111,19 +111,25 @@ napi_status NapiControlCommand::SetValue(napi_env env, AVControlCommand &in, nap
     return setter(env, in, out);
 }
 
-napi_status NapiControlCommand::GetNoneParam(napi_env env, napi_value in, AVControlCommand &out)
+napi_status NapiControlCommand::GetNoneParam(napi_env env, napi_value in, AVControlCommand& out)
 {
     SLOGD("no param need to get");
+    (void)(env);
+    (void)(in);
+    (void)(out);
     return napi_ok;
 }
 
-napi_status NapiControlCommand::SetNoneParam(napi_env env, AVControlCommand &in, napi_value &out)
+napi_status NapiControlCommand::SetNoneParam(napi_env env, AVControlCommand& in, napi_value& out)
 {
     SLOGD("no param need to set");
+    (void)(env);
+    (void)(in);
+    (void)(out);
     return napi_ok;
 }
 
-napi_status NapiControlCommand::GetSpeed(napi_env env, napi_value in, AVControlCommand &out)
+napi_status NapiControlCommand::GetSpeed(napi_env env, napi_value in, AVControlCommand& out)
 {
     double speed {};
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", speed);
@@ -136,7 +142,7 @@ napi_status NapiControlCommand::GetSpeed(napi_env env, napi_value in, AVControlC
     return status;
 }
 
-napi_status NapiControlCommand::SetSpeed(napi_env env, AVControlCommand &in, napi_value &out)
+napi_status NapiControlCommand::SetSpeed(napi_env env, AVControlCommand& in, napi_value& out)
 {
     double speed {};
     CHECK_AND_RETURN_RET_LOG(in.GetSpeed(speed) == AVSESSION_SUCCESS, napi_invalid_arg, "get parameter failed");
@@ -153,7 +159,7 @@ napi_status NapiControlCommand::SetSpeed(napi_env env, AVControlCommand &in, nap
     return status;
 }
 
-napi_status NapiControlCommand::GetSeekTime(napi_env env, napi_value in, AVControlCommand &out)
+napi_status NapiControlCommand::GetSeekTime(napi_env env, napi_value in, AVControlCommand& out)
 {
     int64_t time {};
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", time);
@@ -166,7 +172,7 @@ napi_status NapiControlCommand::GetSeekTime(napi_env env, napi_value in, AVContr
     return status;
 }
 
-napi_status NapiControlCommand::SetSeekTime(napi_env env, AVControlCommand &in, napi_value &out)
+napi_status NapiControlCommand::SetSeekTime(napi_env env, AVControlCommand& in, napi_value& out)
 {
     int64_t time {};
     CHECK_AND_RETURN_RET_LOG(in.GetSeekTime(time) == AVSESSION_SUCCESS, napi_invalid_arg, "get parameter failed");
@@ -183,7 +189,7 @@ napi_status NapiControlCommand::SetSeekTime(napi_env env, AVControlCommand &in, 
     return status;
 }
 
-napi_status NapiControlCommand::GetLoopMode(napi_env env, napi_value in, AVControlCommand &out)
+napi_status NapiControlCommand::GetLoopMode(napi_env env, napi_value in, AVControlCommand& out)
 {
     int32_t loopMode {};
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", loopMode);
@@ -196,7 +202,7 @@ napi_status NapiControlCommand::GetLoopMode(napi_env env, napi_value in, AVContr
     return status;
 }
 
-napi_status NapiControlCommand::SetLoopMode(napi_env env, AVControlCommand &in, napi_value &out)
+napi_status NapiControlCommand::SetLoopMode(napi_env env, AVControlCommand& in, napi_value& out)
 {
     int32_t loopMode {};
     CHECK_AND_RETURN_RET_LOG(in.GetLoopMode(loopMode) == AVSESSION_SUCCESS, napi_invalid_arg, "get parameter failed");
@@ -212,7 +218,7 @@ napi_status NapiControlCommand::SetLoopMode(napi_env env, AVControlCommand &in, 
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "set parameter property failed");
     return status;
 }
-napi_status NapiControlCommand::GetAssetId(napi_env env, napi_value in, AVControlCommand &out)
+napi_status NapiControlCommand::GetAssetId(napi_env env, napi_value in, AVControlCommand& out)
 {
     std::string assetId;
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", assetId);
@@ -225,7 +231,7 @@ napi_status NapiControlCommand::GetAssetId(napi_env env, napi_value in, AVContro
     return status;
 }
 
-napi_status NapiControlCommand::SetAssetId(napi_env env, AVControlCommand &in, napi_value &out)
+napi_status NapiControlCommand::SetAssetId(napi_env env, AVControlCommand& in, napi_value& out)
 {
     std::string assetId;
     CHECK_AND_RETURN_RET_LOG(in.GetAssetId(assetId) == AVSESSION_SUCCESS, napi_invalid_arg, "get parameter failed");

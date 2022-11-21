@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <ctime>
+
 #include "avsession_errors.h"
 #include "avsession_dumper.h"
 
@@ -78,7 +79,7 @@ void AVSessionDumper::ShowHelp(std::string& result) const
         .append("-show_trusted_devices_Info   :show trusted devices Info\n");
 }
 
-void AVSessionDumper::ShowMetaData(std::string& result, const AVSessionService &sessionService)
+void AVSessionDumper::ShowMetaData(std::string& result, const AVSessionService& sessionService)
 {
     int32_t controllerIndex = 0;
     int32_t itemIndex = 0;
@@ -137,7 +138,7 @@ void AVSessionDumper::ShowTrustedDevicesInfo(std::string& result, const AVSessio
     }
 }
 
-void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionService &sessionService)
+void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionService& sessionService)
 {
     std::vector<sptr<AVSessionItem>> sessions = sessionService.GetContainer().GetAllSessions();
     result.append("Session Information:\n\n")
@@ -190,7 +191,7 @@ void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionServic
     }
 }
 
-void AVSessionDumper::ShowControllerInfo(std::string& result, const AVSessionService &sessionService)
+void AVSessionDumper::ShowControllerInfo(std::string& result, const AVSessionService& sessionService)
 {
     AVPlaybackState playbackState;
     std::string temp;
@@ -249,7 +250,7 @@ void AVSessionDumper::SetErrorInfo(const std::string& inErrMsg)
     errMessage_.push_back(msgInfo);
 }
 
-void AVSessionDumper::ShowErrorInfo(std::string& result, const AVSessionService &sessionService)
+void AVSessionDumper::ShowErrorInfo(std::string& result, const AVSessionService& sessionService)
 {
     if (errMessage_.empty()) {
         result.append("No Error Information!\n");
@@ -264,7 +265,7 @@ void AVSessionDumper::ShowErrorInfo(std::string& result, const AVSessionService 
 }
 
 void AVSessionDumper::ProcessParameter(const std::string& arg, std::string& result,
-                                       const AVSessionService &sessionService) const
+                                       const AVSessionService& sessionService) const
 {
     if (arg == ARGS_HELP) {
         ShowHelp(result);
@@ -284,7 +285,7 @@ void AVSessionDumper::ShowIllegalInfo(std::string& result) const
 }
 
 void AVSessionDumper::Dump(const std::vector<std::string>& args, std::string& result,
-    const AVSessionService &sessionService) const
+    const AVSessionService& sessionService) const
 {
     result.clear();
     auto argsSize = args.size();

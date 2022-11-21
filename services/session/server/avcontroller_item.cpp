@@ -14,7 +14,6 @@
  */
 
 #include "avcontroller_item.h"
-
 #include "ipc_skeleton.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
@@ -26,16 +25,15 @@
 #endif
 
 namespace OHOS::AVSession {
-AVControllerItem::AVControllerItem(pid_t pid, const sptr<AVSessionItem> &session)
+AVControllerItem::AVControllerItem(pid_t pid, const sptr<AVSessionItem>& session)
     : pid_(pid), session_(session)
 {
     sessionId_ = session_->GetSessionId();
-    SLOGI("construct sessionId=%{public}s", sessionId_.c_str());
+    SLOGD("construct sessionId=%{public}s", sessionId_.c_str());
 }
 
 AVControllerItem::~AVControllerItem()
 {
-    SLOGI("destroy sessionId=%{public}s", sessionId_.c_str());
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #if defined(__BIONIC__)
     mallopt(M_PURGE, 0);
@@ -43,96 +41,74 @@ AVControllerItem::~AVControllerItem()
 #endif
 }
 
-int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject> &callback)
+int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
     callback_ = iface_cast<AVControllerCallbackProxy>(callback);
+    CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState &state)
+int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 {
-    if (session_ == nullptr) {
-        SLOGI("session not exist");
-        return ERR_SESSION_NOT_EXIST;
-    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     state = session_->GetPlaybackState();
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::GetAVMetaData(AVMetaData &data)
+int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
 {
-    if (session_ == nullptr) {
-        SLOGI("session not exist");
-        return ERR_SESSION_NOT_EXIST;
-    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     data = session_->GetMetaData();
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    if (session_ == nullptr) {
-        SLOGI("session not exist");
-        return ERR_SESSION_NOT_EXIST;
-    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     session_->HandleMediaKeyEvent(keyEvent);
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent &ability)
+int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability)
 {
-    if (session_ == nullptr) {
-        SLOGI("session not exist");
-        return ERR_SESSION_NOT_EXIST;
-    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     ability = session_->GetLaunchAbility();
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::GetValidCommands(std::vector<int32_t> &cmds)
+int32_t AVControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 {
-    if (session_ == nullptr) {
-        SLOGI("session not exist");
-        return ERR_SESSION_NOT_EXIST;
-    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     cmds = session_->GetSupportCommand();
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::IsSessionActive(bool &isActive)
+int32_t AVControllerItem::IsSessionActive(bool& isActive)
 {
-    if (session_ == nullptr) {
-        SLOGI("session not exist");
-        return ERR_SESSION_NOT_EXIST;
-    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     isActive = session_->IsActive();
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::SendControlCommand(const AVControlCommand &cmd)
+int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
 {
-    if (session_ == nullptr) {
-        SLOGI("session not exist");
-        return ERR_SESSION_NOT_EXIST;
-    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     std::vector<int32_t> cmds = session_->GetSupportCommand();
-    if (std::find(cmds.begin(), cmds.end(), cmd.GetCommand()) == cmds.end()) {
-        SLOGI("command not support");
-        return ERR_COMMAND_NOT_SUPPORT;
-    }
+    CHECK_AND_RETURN_RET_LOG(std::find(cmds.begin(), cmds.end(), cmd.GetCommand()) != cmds.end(),
+                             ERR_COMMAND_NOT_SUPPORT, "command not support");
     CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),
         ERR_COMMAND_SEND_EXCEED_MAX, "command send number exceed max");
     session_->ExecuteControllerCommand(cmd);
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType &filter)
+int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType& filter)
 {
     metaMask_ = filter;
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType &filter)
+int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
     playbackMask_ = filter;
     return AVSESSION_SUCCESS;
@@ -166,11 +142,9 @@ void AVControllerItem::HandleSessionDestroy()
     sessionId_.clear();
 }
 
-void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
+void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
 {
-    if (callback_ == nullptr) {
-        return;
-    }
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVPlaybackState stateOut;
     if (state.CopyToByMask(playbackMask_, stateOut)) {
         SLOGI("update playback state");
@@ -179,11 +153,9 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState &state)
     }
 }
 
-void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
+void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
 {
-    if (callback_ == nullptr) {
-        return;
-    }
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVMetaData metaOut;
     if (data.CopyToByMask(metaMask_, metaOut)) {
         SLOGI("update meta data");
@@ -192,25 +164,22 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData &data)
     }
 }
 
-void AVControllerItem::HandleOutputDeviceChange(const OutputDeviceInfo &outputDeviceInfo)
+void AVControllerItem::HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
 {
-    if (callback_ != nullptr) {
-        callback_->OnOutputDeviceChange(outputDeviceInfo);
-    }
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnOutputDeviceChange(outputDeviceInfo);
 }
 
 void AVControllerItem::HandleActiveStateChange(bool isActive)
 {
-    if (callback_ != nullptr) {
-        callback_->OnActiveStateChange(isActive);
-    }
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnActiveStateChange(isActive);
 }
 
-void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t> &cmds)
+void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds)
 {
-    if (callback_ != nullptr) {
-        callback_->OnValidCommandChange(cmds);
-    }
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnValidCommandChange(cmds);
 }
 
 pid_t AVControllerItem::GetPid() const
@@ -223,7 +192,7 @@ bool AVControllerItem::HasSession(const std::string& sessionId)
     return sessionId_ == sessionId;
 }
 
-void AVControllerItem::SetServiceCallbackForRelease(const std::function<void(AVControllerItem &)> &callback)
+void AVControllerItem::SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback)
 {
     serviceCallback_ = callback;
 }

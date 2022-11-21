@@ -14,7 +14,6 @@
  */
 
 #include "avsessiondescriptor_fuzzer.h"
-
 #include "avsession_descriptor.h"
 #include "parcel.h"
 
