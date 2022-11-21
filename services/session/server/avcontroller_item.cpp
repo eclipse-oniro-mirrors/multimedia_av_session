@@ -19,6 +19,7 @@
 #include "avsession_log.h"
 #include "avsession_trace.h"
 #include "command_send_limit.h"
+#include "avsession_utils.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -158,6 +159,12 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVMetaData metaOut;
     if (data.CopyToByMask(metaMask_, metaOut)) {
+        if ((metaMask_.test(AVMetaData::META_KEY_MEDIA_IMAGE)) && (metaOut.GetMediaImage() != nullptr)) {
+            std::string fileName = AVSessionUtils::GetCachePathName() + sessionId_ + AVSessionUtils::GetFileSuffix();
+            std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaOut.GetMediaImage();
+            AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
+            metaOut.SetMediaImage(innerPixelMap);
+        }
         SLOGI("update meta data");
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         callback_->OnMetaDataChange(metaOut);
