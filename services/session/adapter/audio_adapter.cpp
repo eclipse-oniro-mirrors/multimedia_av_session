@@ -83,8 +83,7 @@ bool AudioAdapter::GetRendererState(int32_t uid, AudioStandard::RendererState& r
         return false;
     }
     for (const auto& info : audioRendererChangeInfo) {
-        if (info->clientUID == uid) {
-            rendererState = info->rendererState;
+        if (info->clientUID == uid and info->rendererState == AudioStandard::RENDERER_RUNNING) {
             SLOGI("find uid=%{public}d renderer state is %{public}d", uid, rendererState);
             return true;
         }
