@@ -21,12 +21,14 @@ config("module_private_config") {
   include_dirs = [
     "../../include/",
     "../../../../../../interfaces/inner_api/native/session/include/",
+    "../../../../../services/session/server/",
   ]
 }
 
 common_deps = [
   "//foundation/multimedia/av_session/frameworks/common:avsession_common",
   "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
+  "//foundation/multimedia/av_session/services/session:avsession_service",
   "//foundation/multimedia/av_session/utils:avsession_utils",
   "//third_party/googletest:gtest_main",
 ]
