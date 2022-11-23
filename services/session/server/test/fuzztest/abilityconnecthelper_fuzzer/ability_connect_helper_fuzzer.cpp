@@ -44,6 +44,9 @@ void OHOS::AVSession::AbilityConnectHelperFuzzTest(uint8_t *data, size_t size)
 
 void OHOS::AVSession::AbilityConnectionStubFuzzTest(uint8_t *data, size_t size)
 {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     MessageParcel Parcel;
     MessageParcel reply;
     MessageOption option;
