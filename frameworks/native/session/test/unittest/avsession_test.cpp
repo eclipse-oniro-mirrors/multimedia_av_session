@@ -246,10 +246,10 @@ HWTEST_F(AvsessionTest, SetAVMetaData001, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("https://baidu.yinyue.com");
+    g_metaData.SetLyric("xxxxx");
     EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_ERROR);
     SLOGE("SetAVMetaData001 End");
 }
@@ -272,10 +272,10 @@ HWTEST_F(AvsessionTest, SetAVMetaData002, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("https://baidu.yinyue.com");
+    g_metaData.SetLyric("xxxxx");
     EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
     SLOGE("SetAVMetaData002 End");
 }
