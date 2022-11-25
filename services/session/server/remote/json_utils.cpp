@@ -194,7 +194,6 @@ int32_t JsonUtils::GetSessionDescriptors(const std::string& sessionInfo, std::ve
 int32_t JsonUtils::SetSessionDescriptor(std::string& sessionInfo, const AVSessionDescriptor& descriptor)
 {
     json jsonObj = sessionInfo.empty() ? json::parse(R"({})") : json::parse(sessionInfo);
-    json jsonObj = json::parse(sessionInfo);
     jsonObj["data"]["sessionDescriptor"]["sessionId"] = descriptor.sessionId_;
     jsonObj["data"]["sessionDescriptor"]["type"] = ConvertSessionType(descriptor.sessionType_);
     jsonObj["data"]["sessionDescriptor"]["bundleName"] = descriptor.elementName_.GetBundleName();
