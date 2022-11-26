@@ -147,10 +147,10 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("https://baidu.yinyue.com");
+    g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
@@ -200,10 +200,10 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("https://baidu.yinyue.com");
+    g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSED);
@@ -252,10 +252,10 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent003, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("https://baidu.yinyue.com");
+    g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
@@ -305,10 +305,10 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent004, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("https://baidu.yinyue.com");
+    g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
@@ -359,10 +359,10 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent005, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("https://baidu.yinyue.com");
+    g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
@@ -414,10 +414,10 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent006, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("https://baidu.yinyue.com");
+    g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);

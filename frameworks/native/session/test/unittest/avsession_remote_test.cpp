@@ -357,10 +357,10 @@ HWTEST_F(AVSessionRemoteTest, SetAVMetaData001, TestSize.Level1)
     metaData.SetWriter("zhoujielun");
     metaData.SetComposer("zhoujielun");
     metaData.SetDuration(40000);
-    metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    metaData.SetMediaImageUri("xxxxx");
     metaData.SetSubTitle("fac");
     metaData.SetDescription("for friends");
-    metaData.SetLyric("https://baidu.yinyue.com");
+    metaData.SetLyric("xxxxx");
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     SLOGE("SetAVMetaData001 End");
 }
@@ -599,4 +599,3 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
     }
     SLOGE("GetOutputDevice005 End");
 }
-

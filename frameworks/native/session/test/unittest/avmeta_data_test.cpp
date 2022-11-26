@@ -67,11 +67,11 @@ void AVMetaDataTest::SetUp()
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(DURATION);
     g_metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
-    g_metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetPublishDate(PUBLISHDATE);
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("https://baidu.yinyue.com");
+    g_metaData.SetLyric("xxxxx");
 }
 
 void AVMetaDataTest::TearDown()
@@ -121,11 +121,11 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
     metaData.SetComposer("zhoujielun");
     metaData.SetDuration(DURATION);
     metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
-    metaData.SetMediaImageUri("https://baidu.yinyue.com");
+    metaData.SetMediaImageUri("xxxxx");
     metaData.SetPublishDate(PUBLISHDATE);
     metaData.SetSubTitle("fac");
     metaData.SetDescription("for friends");
-    metaData.SetLyric("https://baidu.yinyue.com");
+    metaData.SetLyric("xxxxx");
 
     EXPECT_EQ("123", metaData.GetAssetId());
     EXPECT_EQ("Black Humor", metaData.GetTitle());
@@ -134,7 +134,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
     EXPECT_EQ("Jay", metaData.GetAlbum());
     EXPECT_EQ("zhoujielun", metaData.GetWriter());
     EXPECT_EQ("zhoujielun", metaData.GetComposer());
-    EXPECT_EQ("https://baidu.yinyue.com", metaData.GetMediaImageUri());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
 
     EXPECT_EQ(DURATION, metaData.GetDuration());
     EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
@@ -143,7 +143,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
 
     EXPECT_EQ("fac", metaData.GetSubTitle());
     EXPECT_EQ("for friends", metaData.GetDescription());
-    EXPECT_EQ("https://baidu.yinyue.com", metaData.GetLyric());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
 
     SLOGI("SetAVMetaData001 End");
 }
