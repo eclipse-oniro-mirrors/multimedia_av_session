@@ -193,7 +193,7 @@ int32_t JsonUtils::GetSessionDescriptors(const std::string& sessionInfo, std::ve
 
 int32_t JsonUtils::SetSessionDescriptor(std::string& sessionInfo, const AVSessionDescriptor& descriptor)
 {
-    json jsonObj = json::parse(sessionInfo);
+    json jsonObj = sessionInfo.empty() ? json::parse(R"({})") : json::parse(sessionInfo);
     jsonObj["data"]["sessionDescriptor"]["sessionId"] = descriptor.sessionId_;
     jsonObj["data"]["sessionDescriptor"]["type"] = ConvertSessionType(descriptor.sessionType_);
     jsonObj["data"]["sessionDescriptor"]["bundleName"] = descriptor.elementName_.GetBundleName();
@@ -206,6 +206,7 @@ int32_t JsonUtils::SetSessionDescriptor(std::string& sessionInfo, const AVSessio
 
 int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessionDescriptor& descriptor)
 {
+    CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
     json jsonObj = json::parse(sessionInfo);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
     CHECK_AND_RETURN_RET_LOG(jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
