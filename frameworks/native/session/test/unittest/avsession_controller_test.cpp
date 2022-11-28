@@ -15,12 +15,15 @@
 
 #include <gtest/gtest.h>
 
+#include "avsession_controller_stub.h"
 #include "avsession_errors.h"
 #include "avsession_manager.h"
-
+#include "avsession_item.h"
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
+#include "iavsession_controller.h"
+#include "iremote_stub.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -168,6 +171,82 @@ bool IsAVPlaybackStateEqual(AVPlaybackState& state1,  AVPlaybackState& state2)
         state1.GetBufferedTime() == state2.GetBufferedTime() &&
         state1.GetLoopMode() == state2.GetLoopMode() &&
         state1.GetFavorite() == state2.GetFavorite();
+}
+
+class AVSessionControllerStubTest : public AVSessionControllerStub {
+public:
+    int32_t GetAVPlaybackState(AVPlaybackState& state) override;
+    int32_t GetAVMetaData(AVMetaData& data) override;
+    int32_t SendAVKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
+    int32_t GetLaunchAbility(OHOS::AbilityRuntime::WantAgent::WantAgent& ability) override;
+    int32_t GetValidCommands(std::vector<int32_t>& cmds) override;
+    int32_t IsSessionActive(bool& isActive) override;
+    int32_t SendControlCommand(const AVControlCommand& cmd) override;
+    int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
+    int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
+    int32_t Destroy() override;
+    std::string GetSessionId() override;
+    int32_t RegisterCallbackInner(const OHOS::sptr<IRemoteObject>& callback) override;
+};
+
+int32_t AVSessionControllerStubTest::GetAVPlaybackState(AVPlaybackState& state)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetAVMetaData(AVMetaData& data)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::SendAVKeyEvent(const OHOS::MMI::KeyEvent& keyEvent)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetLaunchAbility(OHOS::AbilityRuntime::WantAgent::WantAgent& ability)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetValidCommands(std::vector<int32_t>& cmds)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::IsSessionActive(bool& isActive)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::SendControlCommand(const AVControlCommand& cmd)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::SetMetaFilter(const AVMetaData::MetaMaskType& filter)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::Destroy()
+{
+    return 0;
+}
+
+std::string AVSessionControllerStubTest::GetSessionId()
+{
+    return NULL;
+}
+
+int32_t AVSessionControllerStubTest::RegisterCallbackInner(const OHOS::sptr<IRemoteObject>& callback)
+{
+    return 0;
 }
 
 /**
@@ -946,4 +1025,99 @@ HWTEST_F(AVSessionControllerTest, Destroy001, TestSize.Level1)
 {
     EXPECT_EQ(controller_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->Destroy(), ERR_CONTROLLER_NOT_EXIST);
+}
+
+/**
+* @tc.name: HandleSetMetaFilter001
+* @tc.desc: Return is write SetMetaFilter ret failed
+* @tc.type: FUNC
+* @tc.require: I62PJU
+*/
+HWTEST_F(AVSessionControllerTest, HandleSetMetaFilter001, TestSize.Level1)
+{
+    AVSessionControllerStubTest avSessionControllerStubTest;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
+    data.WriteString("test");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    auto ret = avSessionControllerStubTest.OnRemoteRequest(
+        OHOS::AVSession::AVSessionControllerStub::CONTROLLER_CMD_SET_META_FILTER, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+}
+
+/**
+* @tc.name: HandleSetMetaFilter002
+* @tc.desc: Return is write int32 failed
+* @tc.type: FUNC
+* @tc.require: I62PJU
+*/
+HWTEST_F(AVSessionControllerTest, HandleSetMetaFilter002, TestSize.Level1)
+{
+    AVSessionControllerStubTest avSessionControllerStubTest;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
+    data.WriteString("2222222222222222");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    auto ret = avSessionControllerStubTest.OnRemoteRequest(
+        OHOS::AVSession::AVSessionControllerStub::CONTROLLER_CMD_SET_META_FILTER, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+}
+
+/**
+* @tc.name: HandleSetPlaybackFilter001
+* @tc.desc: Return is write SetPlaybackFilter ret failed
+* @tc.type: FUNC
+* @tc.require: I62PJU
+*/
+HWTEST_F(AVSessionControllerTest, HandleSetPlaybackFilter001, TestSize.Level1)
+{
+    AVSessionControllerStubTest avSessionControllerStubTest;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
+    data.WriteString("test");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    auto ret = avSessionControllerStubTest.OnRemoteRequest(
+        OHOS::AVSession::AVSessionControllerStub::CONTROLLER_CMD_SET_PLAYBACK_FILTER, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+}
+
+/**
+* @tc.name: HandleSetPlaybackFilter002
+* @tc.desc: Return is write int32 failed
+* @tc.type: FUNC
+* @tc.require: I62PJU
+*/
+HWTEST_F(AVSessionControllerTest, HandleSetPlaybackFilter002, TestSize.Level1)
+{
+    AVSessionControllerStubTest avSessionControllerStubTest;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
+    data.WriteString("222222");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    auto ret = avSessionControllerStubTest.OnRemoteRequest(
+        OHOS::AVSession::AVSessionControllerStub::CONTROLLER_CMD_SET_PLAYBACK_FILTER, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+}
+
+/**
+* @tc.name: OnRemoteRequest001
+* @tc.desc: Invalid code
+* @tc.type: FUNC
+* @tc.require: I62PJU
+*/
+HWTEST_F(AVSessionControllerTest, OnRemoteRequest001, TestSize.Level1)
+{
+    AVSessionControllerStubTest avSessionControllerStubTest;
+    uint32_t code = -1;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
+    data.WriteString("test");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    auto ret = avSessionControllerStubTest.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::IPC_STUB_UNKNOW_TRANS_ERR);
 }
