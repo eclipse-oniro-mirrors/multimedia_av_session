@@ -191,9 +191,6 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
             } else if (ret == ERR_INVALID_PARAM) {
                 NapiUtils::ThrowError(env, "OnEvent failed : native invalid parameters",
                     NapiAVSessionManager::errcode_[ret]);
-            } else if (ret == ERR_NO_PERMISSION) {
-                NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
-                    NapiAVSessionManager::errcode_[ret]);
             } else {
                 NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
                     NapiAVSessionManager::errcode_[ret]);
@@ -287,8 +284,6 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
                 context->errMessage = "SetAVMetaData failed : native session not exist";
             } else if (ret == ERR_INVALID_PARAM) {
                 context->errMessage = "SetAVMetaData failed : native invalid parameters";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "SetAVMetaData failed : native no permission";
             } else {
                 context->errMessage = "SetAVMetaData failed : native server exception";
             }
@@ -340,8 +335,6 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
                 context->errMessage = "SetAVPlaybackState failed : native session not exist";
             } else if (ret == ERR_INVALID_PARAM) {
                 context->errMessage = "SetAVPlaybackState failed : native invalid parameters";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "SetAVPlaybackState failed : native no permission";
             } else {
                 context->errMessage = "SetAVPlaybackState failed : native server exception";
             }
@@ -389,8 +382,6 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "SetLaunchAbility failed : native session not exist";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "SetLaunchAbility failed : native no permission";
             } else {
                 context->errMessage = "SetLaunchAbility failed : native server exception";
             }
@@ -540,8 +531,6 @@ napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "Activate session failed : native session not exist";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "Activate failed : native no permission";
             } else {
                 context->errMessage = "Activate session failed : native server exception";
             }
@@ -578,8 +567,6 @@ napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "Deactivate session failed : native session not exist";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "Deactivate failed : native no permission";
             } else {
                 context->errMessage = "Deactivate session failed : native server exception";
             }
@@ -619,10 +606,6 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
         } else if (ret == ERR_SESSION_NOT_EXIST) {
             context->status = napi_generic_failure;
             context->errMessage = "Destroy session failed : native session not exist";
-            context->errCode = NapiAVSessionManager::errcode_[ret];
-        } else if (ret == ERR_NO_PERMISSION) {
-            context->status = napi_generic_failure;
-            context->errMessage = "Destroy failed : native no permission";
             context->errCode = NapiAVSessionManager::errcode_[ret];
         } else {
             context->status = napi_generic_failure;

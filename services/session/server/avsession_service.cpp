@@ -414,12 +414,6 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
 sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
                                                           const AppExecFwk::ElementName& elementName)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-                            "ERROR_MSG", "avsessionservice createsession checksystempermission failed");
-        return nullptr;
-    }
     auto session = CreateSessionInner(tag, type, !PermissionChecker::GetInstance().CheckSystemPermission(),
                                       elementName);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, session, "session is nullptr");
@@ -719,12 +713,6 @@ void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
     SLOGI("enter");
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice registerclientdeath checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     auto pid = GetCallingPid();
     auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
