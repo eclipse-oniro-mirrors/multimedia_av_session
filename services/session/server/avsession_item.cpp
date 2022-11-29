@@ -26,7 +26,6 @@
 #include "remote_session_source.h"
 #include "remote_session_source_proxy.h"
 #include "remote_session_sink_proxy.h"
-#include "permission_checker.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -56,13 +55,6 @@ std::string AVSessionItem::GetSessionId()
 
 int32_t AVSessionItem::Destroy()
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession destroy checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     if (callback_) {
         callback_.clear();
     }
@@ -89,13 +81,6 @@ int32_t AVSessionItem::Destroy()
 
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession getavmetadata checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::string sessionId = GetSessionId();
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
@@ -106,13 +91,6 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession setavmetadata checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     if (innerPixelMap != nullptr) {
@@ -137,13 +115,6 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession setavplaybackstate checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
@@ -160,39 +131,18 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 
 int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession getavplaybackstate checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     state = playbackState_;
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession setlaunchability checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     launchAbility_ = ability;
     return AVSESSION_SUCCESS;
 }
 
 sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession getcontroller checksystempermission failed");
-        return nullptr;
-    }
     std::lock_guard lockGuard(lock_);
     auto iter = controllers_.find(GetPid());
     if (iter != controllers_.end()) {
@@ -208,26 +158,12 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 
 int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback>& callback)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession registercallbackinner checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     callback_ = callback;
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::Activate()
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession avtivate checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     descriptor_.isActive_ = true;
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
@@ -239,13 +175,6 @@ int32_t AVSessionItem::Activate()
 
 int32_t AVSessionItem::Deactivate()
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession deactivate checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     descriptor_.isActive_ = false;
     std::lock_guard lockGuard(lock_);
     for (const auto& [pid, controller] : controllers_) {
