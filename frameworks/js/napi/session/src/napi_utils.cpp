@@ -266,25 +266,25 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, MMI::KeyEvent::KeyI
     return status;
 }
 
-napi_status NapiUtils::SetValue(napi_env env, const MMI::KeyEvent::KeyItem& in, napi_value& out)
+napi_status NapiUtils::SetValue(napi_env env, const std::optional<MMI::KeyEvent::KeyItem> in, napi_value& out)
 {
     auto status = napi_create_object(env, &out);
     CHECK_RETURN(status == napi_ok, "create object failed", status);
 
     napi_value code {};
-    status = SetValue(env, in.GetKeyCode(), code);
+    status = SetValue(env, in->GetKeyCode(), code);
     CHECK_RETURN(status == napi_ok, "create property failed", status);
     status = napi_set_named_property(env, out, "code", code);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
 
     napi_value pressedTime {};
-    status = SetValue(env, in.GetDownTime(), pressedTime);
+    status = SetValue(env, in->GetDownTime(), pressedTime);
     CHECK_RETURN(status == napi_ok, "create property failed", status);
     status = napi_set_named_property(env, out, "pressedTime", pressedTime);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
 
     napi_value deviceId {};
-    status = SetValue(env, in.GetDeviceId(), deviceId);
+    status = SetValue(env, in->GetDeviceId(), deviceId);
     CHECK_RETURN(status == napi_ok, "create property failed", status);
     status = napi_set_named_property(env, out, "deviceId", deviceId);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
@@ -352,8 +352,8 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEven
     CHECK_RETURN(status == napi_ok, "set action property failed", status);
 
     napi_value key {};
-    CHECK_RETURN(in->GetKeyItem() != nullptr, "get key item failed", napi_generic_failure);
-    status = SetValue(env, *in->GetKeyItem(), key);
+    CHECK_RETURN(in->GetKeyItem(), "get key item failed", napi_generic_failure);
+    status = SetValue(env, in->GetKeyItem(), key);
     CHECK_RETURN(status == napi_ok, "create key property failed", status);
     status = napi_set_named_property(env, out, "key", key);
     CHECK_RETURN(status == napi_ok, "set key property failed", status);

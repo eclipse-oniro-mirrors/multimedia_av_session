@@ -109,7 +109,7 @@ public:
 
     /* napi_value <-> MMI::KeyEvent::KeyItem */
     static napi_status GetValue(napi_env env, napi_value in, MMI::KeyEvent::KeyItem& out);
-    static napi_status SetValue(napi_env env, const MMI::KeyEvent::KeyItem& in, napi_value& out);
+    static napi_status SetValue(napi_env env, const std::optional<MMI::KeyEvent::KeyItem> in, napi_value& out);
 
     /* napi_value <-> MMI::KeyEvent */
     static napi_status GetValue(napi_env env, napi_value in, std::shared_ptr<MMI::KeyEvent>& out);
