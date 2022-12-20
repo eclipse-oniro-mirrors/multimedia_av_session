@@ -414,6 +414,12 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
 sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
                                                           const AppExecFwk::ElementName& elementName)
 {
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("CreateSessionInner: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+                            "ERROR_MSG", "avsessionservice createsession checksystempermission failed");
+        return nullptr;
+    }
     auto session = CreateSessionInner(tag, type, !PermissionChecker::GetInstance().CheckSystemPermission(),
                                       elementName);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, session, "session is nullptr");
@@ -440,7 +446,7 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
 int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
+        SLOGE("GetAllSessionDescriptors: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
             "ERROR_MSG", "avsessionservice getallsessiondescriptors checksystempermission failed");
         return ERR_NO_PERMISSION;
@@ -467,7 +473,7 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
         return AVSESSION_SUCCESS;
     }
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
+        SLOGE("GetSessionDescriptorsBySessionId: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
             "CALLER_PID", pid, "SESSION_ID", sessionId,
             "ERROR_MSG", "avsessionservice getsessiondescriptors by sessionid checksystempermission failed");
@@ -554,7 +560,7 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
 int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
+        SLOGE("CreateControllerInner: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
             "CALLER_PID", GetCallingPid(), "SESSION_ID", sessionId,
             "ERROR_MSG", "avsessionservice createcontrollerinner checksystempermission failed");
@@ -617,7 +623,7 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 {
     SLOGI("enter");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
+        SLOGE("RegisterSessionListener: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
             "ERROR_MSG", "avsessionservice registersessionlistener checksystempermission failed");
         return ERR_NO_PERMISSION;
@@ -654,7 +660,7 @@ void AVSessionService::HandleEventHandlerCallBack()
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
+        SLOGE("SendSystemAVKeyEvent: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
             "KEY_CODE", keyEvent.GetKeyCode(), "KEY_ACTION", keyEvent.GetKeyAction(),
             "ERROR_MSG", "avsessionservice sendsystemavkeyevent checksystempermission failed");
@@ -683,7 +689,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
+        SLOGE("SendSystemControlCommand: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
             "CALLER_PID", GetCallingPid(), "CMD", command.GetCommand(),
             "ERROR_MSG", "avsessionservice sendsystemcontrolcommand checksystempermission failed");
@@ -713,6 +719,12 @@ void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
     SLOGI("enter");
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("RegisterClientDeathObserver: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice registerclientdeath checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
     auto pid = GetCallingPid();
     auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
@@ -1004,7 +1016,7 @@ int32_t AVSessionService::CastAudio(const SessionToken& token,
 {
     SLOGI("sessionId is %{public}s", token.sessionId.c_str());
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
+        SLOGE("CastAudio: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
                             "ERROR_MSG", "avsessionservice CastAudio checksystempermission failed");
         return ERR_NO_PERMISSION;
@@ -1155,7 +1167,7 @@ int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::Audio
 {
     CHECK_AND_RETURN_RET_LOG(sinkAudioDescriptors.size() > 0, ERR_INVALID_PARAM, "sinkAudioDescriptors is empty");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("CheckSystemPermission failed");
+        SLOGE("CastAudioForAll: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
                             "ERROR_MSG", "avsessionservice CastAudioForAll checksystempermission failed");
         return ERR_NO_PERMISSION;

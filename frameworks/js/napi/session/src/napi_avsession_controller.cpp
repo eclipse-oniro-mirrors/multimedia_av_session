@@ -145,6 +145,8 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
                 context->errMessage = "GetAVPlaybackState failed : native session not exist";
             } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
                 context->errMessage = "GetAVPlaybackState failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetAVPlaybackState failed : native no permission";
             } else {
                 context->errMessage = "GetAVPlaybackState failed : native server exception";
             }
@@ -185,6 +187,8 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
                 context->errMessage = "GetAVMetaData failed : native session not exist";
             } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
                 context->errMessage = "GetAVMetaData failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetAVMetaData failed : native no permission";
             } else {
                 context->errMessage = "GetAVMetaData failed : native server exception";
             }
@@ -239,6 +243,8 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
                 context->errMessage = "SendAVKeyEvent failed : native session is not active";
             } else if (ret == ERR_COMMAND_NOT_SUPPORT) {
                 context->errMessage = "SendAVKeyEvent failed : native invalid KeyEvent";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SendAVKeyEvent failed : native no permission";
             } else {
                 context->errMessage = "SendAVKeyEvent failed : native server exception";
             }
@@ -274,6 +280,8 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
                 context->errMessage = "GetLaunchAbility failed : native session not exist";
             } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
                 context->errMessage = "GetLaunchAbility failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetLaunchAbility failed : native no permission";
             } else {
                 context->errMessage = "GetLaunchAbility failed : native server exception";
             }
@@ -316,6 +324,8 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
                 context->errMessage = "GetValidCommands failed : native session not exist";
             } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
                 context->errMessage = "GetValidCommands failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetValidCommands failed : native no permission";
             } else {
                 context->errMessage = "GetValidCommands failed : native server exception";
             }
@@ -358,6 +368,8 @@ napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_
                 context->errMessage = "IsSessionActive failed : native session not exist";
             } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
                 context->errMessage = "IsSessionActive failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "IsSessionActive failed : native no permission";
             } else {
                 context->errMessage = "IsSessionActive failed : native server exception";
             }
@@ -414,6 +426,8 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
                 context->errMessage = "SendControlCommand failed : native command not support";
             } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
                 context->errMessage = "SendControlCommand failed : native command send nums overload";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SendControlCommand failed : native no permission";
             } else {
                 context->errMessage = "SendControlCommand failed : native server exception";
             }
@@ -450,6 +464,8 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_CONTROLLER_NOT_EXIST) {
                 context->errMessage = "Destroy controller failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "Destroy controller failed : native no permission";
             } else {
                 context->errMessage = "Destroy controller failed : native server exception";
             }
@@ -575,8 +591,7 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::s
         napiController->callback_= std::make_shared<NapiAVControllerCallback>();
         if (napiController->callback_ == nullptr) {
             SLOGE("OnEvent failed : no memory");
-            NapiUtils::ThrowError(env, "OnEvent failed : no memory",
-                NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+            NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
             return napi_generic_failure;
         }
         auto ret = napiController->controller_->RegisterCallback(napiController->callback_);
@@ -589,6 +604,10 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::s
             } else if (ret == ERR_NO_MEMORY) {
                 NapiUtils::ThrowError(env, "OnEvent failed : native no memory",
                     NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+                return napi_generic_failure;
+            } else if (ret == ERR_NO_PERMISSION) {
+                NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
+                    NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
                 return napi_generic_failure;
             } else {
                 NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
@@ -669,7 +688,7 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
         NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
-    
+
     std::string eventName;
     napi_value callback = nullptr;
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
