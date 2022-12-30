@@ -27,8 +27,11 @@
 #include "napi_control_command.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
+#include "ipc_skeleton.h"
+#include "tokenid_kit.h"
 
 namespace OHOS::AVSession {
+using namespace Security::AccessToken;
 std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAVSessionManager::OffEventHandlerType>>
     NapiAVSessionManager::eventHandlers_ = {
     { "sessionCreate", { OnSessionCreate, OffSessionCreate } },
@@ -59,7 +62,7 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_COMMAND_NOT_SUPPORT, 6600105},
     {ERR_SESSION_DEACTIVE, 6600106},
     {ERR_COMMAND_SEND_EXCEED_MAX, 6600107},
-    {ERR_NO_PERMISSION, 201},
+    {ERR_NO_PERMISSION, 202},
     {ERR_INVALID_PARAM, 401},
 };
 napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
@@ -97,6 +100,10 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
     context->taskId = NAPI_CREATE_AVSESSION_TASK_ID;
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+        bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+        CHECK_ARGS_RETURN_VOID(context, isSystemApp, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         // require 3 arguments <context> <tag> <type>
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THERE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);

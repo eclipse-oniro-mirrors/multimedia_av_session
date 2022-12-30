@@ -19,6 +19,7 @@
 #include "avsession_log.h"
 #include "ipc_skeleton.h"
 #include "bundle_mgr_client.h"
+#include "tokenid_kit.h"
 
 namespace OHOS::AVSession {
 using namespace Security::AccessToken;
@@ -39,12 +40,15 @@ bool PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessToken
         return true;
     }
 
-    int32_t res = AccessTokenKit::VerifyAccessToken(tokenId, MANAGE_MEDIA_RESOURCES);
-    if (res == PERMISSION_GRANTED) {
-        return true;
+    uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+    if (!isSystemApp) {
+        SLOGI("Not system app, permission reject tokenid=%{public}u", tokenId);
+        return false;
     }
-    SLOGI("permission reject tokenid=%{public}u", tokenId);
-    return false;
+
+    SLOGI("Check system permission finished");
+    return true;
 }
 
 bool PermissionChecker::CheckSystemPermission()
