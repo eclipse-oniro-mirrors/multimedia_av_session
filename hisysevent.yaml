@@ -14,14 +14,14 @@
 domain: AV_SESSION
 
 SESSION_SERVICE_START:
-  __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: start avsession service}
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: start avsession service}
   SERVICE_NAME: {type: STRING, desc: avsession service name}
   SERVICE_ID: {type: INT32, desc: avsession service id}
   DETAILED_MSG: {type: STRING, desc: detailed msg}
 
 FOCUS_CHANGE:
-  __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: focus change}
-  PID: {type: INT32, desc: pid}
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: focus change}
+  PID: {type: INT32, desc: the pid of focus change}
   OLD_BUNDLE_NAME: {type: STRING, desc: old bundle name}
   OLD_MODULE_NAME: {type: STRING, desc: old module name}
   OLD_ABILITY_NAME: {type: STRING, desc: old ability name}
@@ -44,39 +44,39 @@ FOCUS_CHANGE:
   DETAILED_MSG: {type: STRING, desc: detailed msg}
 
 CONTROL_PERMISSION_DENIED:
-  __BASE: {type: SECURITY, level: CRITICAL, tag: security, desc: permission verification errors}
+  __BASE: {type: SECURITY, level: CRITICAL, desc: permission verification errors}
   CALLER_UID: {type: INT32, desc: caller uid}
   CALLER_PID: {type: INT32, desc: caller pid}
   SESSION_ID: {type: STRING, desc: session id}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   KEY_CODE: {type: INT32, desc: key code}
   KEY_ACTION: {type: INT32, desc: key action}
-  CMD: {type: INT32, desc: cmd}
+  CMD: {type: INT32, desc: command}
   ERROR_CODE: {type: INT32, desc: error code}
   ERROR_MSG: {type: STRING, desc: error msg}
 
 CONTROL_COMMAND_FAILED:
-  __BASE: {type: FAULT, level: MINOR, tag: ability, desc: no response exception timeout invalid}
+  __BASE: {type: FAULT, level: MINOR, desc: no response exception timeout invalid}
   ERROR_TYPE: {type: STRING, desc: error type}
   CMD: {type: INT32, desc: command}
   TIME: {type: UINT64, desc: seek time}
-  SPEED: {type: DOUBLE, desc: speed}
+  SPEED: {type: DOUBLE, desc: control command failed speed}
   MODE: {type: STRING, desc: loop mode}
-  ASSETID: {type: STRING, desc: assetId}
+  ASSETID: {type: STRING, desc: control command failed assetId}
   CALLING_PID: {type: INT32, desc: calling pid}
   CLIENT_PID: {type: INT32, desc: cliend pid}
-  TAG: {type: STRING, desc: tag}
-  TYPE: {type: INT32, desc: type}
+  TAG: {type: STRING, desc: control command failed tag}
+  TYPE: {type: INT32, desc: control command failed type}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   ERROR_CODE: {type: INT32, desc: error code}
   ERROR_INFO: {type: STRING, desc: error info}
 
 CONTROL_COMMAND_STATISTICS:
-  __BASE: {type: STATISTIC, level: MINOR, tag: statistic, desc: avsession control command statistics}
+  __BASE: {type: STATISTIC, level: MINOR, desc: avsession control command statistics}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   CONTROLLER_PID: {type: INT32, desc: controller pid}
   CMD: {type: INT32, desc: command}
-  POSITION: {type: BOOL, desc: sender is true, receiver is false}
+  POSITION: {type: BOOL, desc: sender is true and receiver is false}
   PLAY_COUNT: {type: UINT32, desc: play count}
   PAUSE_COUNT: {type: UINT32, desc: pause count}
   STOP_COUNT: {type: UINT32, desc: stop count}
@@ -91,22 +91,22 @@ CONTROL_COMMAND_STATISTICS:
   DETAILED_MSG: {type: STRING, desc: detailed msg}
 
 SESSION_LIFECYCLE_STATISTICS:
-  __BASE: {type: STATISTIC, level: MINOR, tag: statistic, desc: avsession control command statistics}
+  __BASE: {type: STATISTIC, level: MINOR, desc: avsession control command statistics}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   APP_STATUS: {type: BOOL, desc: app in background is true}
   SESSION_TYPE: {type: INT32, desc: sessiontype}
-  SESSION_LIFE_CYCLE: {type: BOOL, desc: create avsession is true, delete avsession is false}
+  SESSION_LIFE_CYCLE: {type: BOOL, desc: create avsession is true and delete avsession is false}
   CREATE_SESSION_COUNT: {type: UINT32, desc: create session count}
   DELETE_SESSION_COUNT: {type: UINT32, desc: delete session count}
 
 CONTROL_COMMAND_FAILED_RATE:
-  __BASE: {type: STATISTIC, level: MINOR, tag: statistic, desc: avsession control command failed rate}
+  __BASE: {type: STATISTIC, level: MINOR, desc: avsession control command failed rate}
   ALL_CTRL_COMMAND_COUNT: {type: UINT32, desc: all command count}
   ALL_SUCCESS_CTRL_COMMAND: {type: UINT32, desc: success command count}
   COMMAND_FAILED_RATE: {type: FLOAT, desc: command failed rate}
 
 SESSION_CAST:
-  __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: session cast}
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: session cast}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
@@ -122,7 +122,7 @@ SESSION_CAST:
   DETAILED_MSG: {type: STRING, desc: detailed msg}
 
 REMOTE_CONTROL_FAILED:
-  __BASE: {type: FAULT, level: MINOR, tag: ability, desc: remote control failed}
+  __BASE: {type: FAULT, level: MINOR, desc: remote control failed}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   SESSION_TYPE: {type: INT32, desc: session type}
   AUDIO_STATUS: {type: INT32, desc: audio status}
