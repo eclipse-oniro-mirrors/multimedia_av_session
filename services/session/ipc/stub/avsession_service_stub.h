@@ -38,8 +38,8 @@ private:
     int32_t HandleRemoteCastAudio(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HanlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
-    static inline HanlerFunc handlers[] = {
+    using HandlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
+    static inline HandlerFunc handlers[] = {
         [SERVICE_CMD_CREATE_SESSION] = &AVSessionServiceStub::HandleCreateSessionInner,
         [SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS] = &AVSessionServiceStub::HandleGetAllSessionDescriptors,
         [SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID] = &AVSessionServiceStub::HandleGetSessionDescriptorsById,
