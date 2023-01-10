@@ -33,8 +33,8 @@ private:
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HanlerFunc = int32_t(SessionListenerStub::*)(MessageParcel&, MessageParcel&);
-    static inline HanlerFunc handlers[] = {
+    using HandlerFunc = int32_t(SessionListenerStub::*)(MessageParcel&, MessageParcel&);
+    static inline HandlerFunc handlers[] = {
         [LISTENER_CMD_ON_CREATE] = &SessionListenerStub::HandleOnSessionCreate,
         [LISTENER_CMD_ON_RELEASE] = &SessionListenerStub::HandleOnSessionRelease,
         [LISTENER_CMD_TOP_CHANGED] = &SessionListenerStub::HandleOnTopSessionChange,

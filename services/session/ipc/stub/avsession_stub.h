@@ -67,8 +67,8 @@ private:
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HanlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
-    static inline HanlerFunc handlers[] = {
+    using HandlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
+    static inline HandlerFunc handlers[] = {
         [SESSION_CMD_GET_SESSION_ID] = &AVSessionStub::HandleGetSessionId,
         [SESSION_CMD_GET_META_DATA] = &AVSessionStub::HandleGetAVMetaData,
         [SESSION_CMD_SET_META_DATA] = &AVSessionStub::HandleSetAVMetaData,

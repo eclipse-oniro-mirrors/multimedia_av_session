@@ -66,8 +66,8 @@ private:
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HanlerFunc = int32_t (AVSessionControllerStub::*)(MessageParcel& data, MessageParcel& reply);
-    static inline HanlerFunc handlers[] = {
+    using HandlerFunc = int32_t (AVSessionControllerStub::*)(MessageParcel& data, MessageParcel& reply);
+    static inline HandlerFunc handlers[] = {
         [CONTROLLER_CMD_REGISTER_CALLBACK] = &AVSessionControllerStub::HandleRegisterCallbackInner,
         [CONTROLLER_CMD_DESTROY] = &AVSessionControllerStub::HandleDestroy,
         [CONTROLLER_CMD_GET_AV_PLAYBACK_STATE] = &AVSessionControllerStub::HandleGetAVPlaybackState,

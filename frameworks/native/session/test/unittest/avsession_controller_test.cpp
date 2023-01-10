@@ -34,7 +34,8 @@ static HapInfoParams g_info = {
     .userID = 100,
     .bundleName = "ohos.permission_test.demo",
     .instIndex = 0,
-    .appIDDesc = "ohos.permission_test.demo"
+    .appIDDesc = "ohos.permission_test.demo",
+    .isSystemApp = true
 };
 
 static HapPolicyParams g_policy = {
@@ -80,8 +81,9 @@ public:
 void AVSessionControllerTest::SetUpTestCase()
 {
     g_selfTokenId = GetSelfTokenID();
-    AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(g_info, g_policy);
-    SetSelfTokenID(tokenIdEx.tokenIdExStruct.tokenID);
+    AccessTokenKit::AllocHapToken(g_info, g_policy);
+    AccessTokenIDEx tokenID = AccessTokenKit::GetHapTokenIDEx(g_info.userID, g_info.bundleName, g_info.instIndex);
+    SetSelfTokenID(tokenID.tokenIDEx);
 }
 
 void AVSessionControllerTest::TearDownTestCase()

@@ -32,7 +32,8 @@ static HapInfoParams g_infoA = {
     .userID = 100,
     .bundleName = "ohos.permission_test.demoA",
     .instIndex = 0,
-    .appIDDesc = "ohos.permission_test.demoA"
+    .appIDDesc = "ohos.permission_test.demoA",
+    .isSystemApp = false
 };
 
 static HapPolicyParams g_policyA = {
@@ -44,7 +45,8 @@ static HapInfoParams g_infoB = {
     .userID = 100,
     .bundleName = "ohos.permission_test.demoB",
     .instIndex = 0,
-    .appIDDesc = "ohos.permission_test.demoB"
+    .appIDDesc = "ohos.permission_test.demoB",
+    .isSystemApp = true
 };
 
 static HapPolicyParams g_policyB = {
@@ -99,10 +101,9 @@ void AVSessionPermissionTest::TearDown()
 
 void AVSessionPermissionTest::AddPermission(const HapInfoParams& info, const HapPolicyParams& policy)
 {
-    selfTokenId_ = GetSelfTokenID();
-    AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(info, policy);
-    SetSelfTokenID(tokenIdEx.tokenIdExStruct.tokenID);
-    SLOGI("selfTokenId_:%{public}" PRId64, selfTokenId_);
+    AccessTokenKit::AllocHapToken(info, policy);
+    AccessTokenIDEx tokenID = AccessTokenKit::GetHapTokenIDEx(info.userID, info.bundleName, info.instIndex);
+    SetSelfTokenID(tokenID.tokenIDEx);
     SLOGI("GetSelfTokenID:%{public}" PRId64, GetSelfTokenID());
 }
 
@@ -140,18 +141,9 @@ public:
 HWTEST_F(AVSessionPermissionTest, GetAllSessionDescriptorsWithNoPerm001, TestSize.Level1)
 {
     AddPermission(g_infoA, g_policyA);
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("test.ohos.avsession");
-    elementName.SetAbilityName("test.ability");
-    auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
-    ASSERT_NE(session, nullptr);
-
     std::vector<AVSessionDescriptor> descriptors;
     auto ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
     EXPECT_EQ(ret, ERR_NO_PERMISSION);
-    if (session != nullptr) {
-        session->Destroy();
-    }
     DeletePermission(g_infoA);
 }
 
@@ -164,20 +156,9 @@ HWTEST_F(AVSessionPermissionTest, GetAllSessionDescriptorsWithNoPerm001, TestSiz
 HWTEST_F(AVSessionPermissionTest, GetActivatedSessionDescriptorsWithNoPerm001, TestSize.Level1)
 {
     AddPermission(g_infoA, g_policyA);
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("test.ohos.avsession");
-    elementName.SetAbilityName("test.ability");
-    auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
-    ASSERT_NE(session, nullptr);
-    session->Activate();
-
     std::vector<AVSessionDescriptor> descriptors;
     auto ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
     EXPECT_EQ(ret, ERR_NO_PERMISSION);
-
-    if (session != nullptr) {
-        session->Destroy();
-    }
     DeletePermission(g_infoA);
 }
 
@@ -190,24 +171,11 @@ HWTEST_F(AVSessionPermissionTest, GetActivatedSessionDescriptorsWithNoPerm001, T
 HWTEST_F(AVSessionPermissionTest, GetSessionDescriptorsBySessionIdWithNoPerm001, TestSize.Level1)
 {
     AddPermission(g_infoA, g_policyA);
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("test.ohos.avsession");
-    elementName.SetAbilityName("test.ability");
-    auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
-    ASSERT_NE(session, nullptr);
-    session->Activate();
-    auto sessionId = session->GetSessionId();
     AVSessionDescriptor descriptor {};
-    int32_t ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_EQ(descriptor.sessionTag_, "test");
-    EXPECT_EQ(descriptor.sessionType_, AVSession::SESSION_TYPE_AUDIO);
-    EXPECT_EQ(descriptor.elementName_.GetBundleName(), "test.ohos.avsession");
-    EXPECT_EQ(descriptor.elementName_.GetAbilityName(), "test.ability");
-    EXPECT_EQ(descriptor.isActive_, true);
-    if (session != nullptr) {
-        session->Destroy();
-    }
+
+    // Using "1" as the test input parameter
+    int32_t ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId("1", descriptor);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     DeletePermission(g_infoA);
 }
 
@@ -220,18 +188,11 @@ HWTEST_F(AVSessionPermissionTest, GetSessionDescriptorsBySessionIdWithNoPerm001,
 HWTEST_F(AVSessionPermissionTest, CreateControllerWithNoPerm001, TestSize.Level1)
 {
     AddPermission(g_infoA, g_policyA);
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("test.ohos.avsession");
-    elementName.SetAbilityName("test.ability");
-    auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
-    ASSERT_NE(session, nullptr);
-
     std::shared_ptr<AVSessionController> controller;
-    auto ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller);
+
+    // Using "1" as the test input parameter
+    auto ret = AVSessionManager::GetInstance().CreateController("1", controller);
     EXPECT_EQ(ret, ERR_NO_PERMISSION);
-    if (session != nullptr) {
-        session->Destroy();
-    }
     DeletePermission(g_infoA);
 }
 

@@ -39,8 +39,8 @@ private:
     int32_t HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply);
     int32_t HandOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
-    using HanlerFunc = int32_t(AVSessionCallbackStub::*)(MessageParcel&, MessageParcel&);
-    static inline HanlerFunc handlers[] = {
+    using HandlerFunc = int32_t(AVSessionCallbackStub::*)(MessageParcel&, MessageParcel&);
+    static inline HandlerFunc handlers[] = {
         [SESSION_CALLBACK_ON_PLAY] = &AVSessionCallbackStub::HandleOnPlay,
         [SESSION_CALLBACK_ON_PAUSE] = &AVSessionCallbackStub::HandleOnPause,
         [SESSION_CALLBACK_ON_STOP] = &AVSessionCallbackStub::HandleOnStop,
