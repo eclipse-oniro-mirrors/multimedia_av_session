@@ -31,6 +31,8 @@ public:
 
     int32_t SetAVMetaData(const AVMetaData& metaData) override;
 
+    int32_t SetSessionEventRemote(const std::string& event, const AAFwk::WantParams& args) override;
+
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
 
     RemoteSessionSourceProxy();

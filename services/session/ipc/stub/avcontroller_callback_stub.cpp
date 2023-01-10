@@ -92,4 +92,15 @@ int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data
     OnOutputDeviceChange(outputDeviceInfo);
     return ERR_NONE;
 }
+
+int32_t AVControllerCallbackStub::HandleOnSessionEventChange(MessageParcel& data, MessageParcel& reply)
+{
+    auto event = data.ReadString();
+    sptr want = data.ReadParcelable<AAFwk::WantParams>();
+
+    CHECK_AND_RETURN_RET_LOG(want != nullptr, ERR_NONE, "read want args failed");
+    AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnSessionEventChange");
+    OnSessionEventChange(event, *want);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

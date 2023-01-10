@@ -130,7 +130,7 @@ int32_t AVSessionStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& r
 
 int32_t AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& reply)
 {
-    sptr<IRemoteObject>  controller = GetControllerInner();
+    sptr<IRemoteObject> controller = GetControllerInner();
     if (controller == nullptr) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "write int32 failed");
         return ERR_NONE;
@@ -162,7 +162,7 @@ int32_t AVSessionStub::HandleAddSupportCommand(MessageParcel& data, MessageParce
 {
     int32_t ret = AddSupportCommand(data.ReadInt32());
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "AddSupportCommand failed");
     return ERR_NONE;
 }
 
@@ -170,7 +170,19 @@ int32_t AVSessionStub::HandleDeleteSupportCommand(MessageParcel& data, MessagePa
 {
     int32_t ret = DeleteSupportCommand(data.ReadInt32());
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "DeleteSupportCommand failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleSetSessionEvent(MessageParcel& data, MessageParcel& reply)
+{
+    auto event = data.ReadString();
+    sptr want = data.ReadParcelable<AAFwk::WantParams>();
+    if (want == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
+    }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetSessionEvent(event, *want)), ERR_NONE, "WriteInt32 result failed");
     return ERR_NONE;
 }
 }

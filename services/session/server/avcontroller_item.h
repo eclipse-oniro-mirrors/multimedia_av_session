@@ -64,6 +64,8 @@ public:
 
     void HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo);
 
+    void HandleSetSessionEvent(const std::string& event, const AAFwk::WantParams& args);
+
     pid_t GetPid() const;
 
     bool HasSession(const std::string& sessionId);

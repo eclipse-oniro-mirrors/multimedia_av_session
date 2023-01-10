@@ -36,6 +36,8 @@ public:
 
     void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
 
+    void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
+
 private:
     static inline BrokerDelegator<AVControllerCallbackProxy> delegator_;
 };

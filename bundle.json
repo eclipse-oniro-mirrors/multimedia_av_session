@@ -70,6 +70,8 @@
         ],
         "test": [
           "//foundation/multimedia/av_session/frameworks/native/session/test/unittest:unittest",
+          "//foundation/multimedia/av_session/frameworks/native/session/test/unittest/napi/avsession_jsunittest:jsunittest",
+          "//foundation/multimedia/av_session/frameworks/native/session/test/unittest/napi/avsession_controller_jsunittest:jsunittest",
           "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest:fuzztest",
           "//foundation/multimedia/av_session/frameworks/native/session/test/benchmarktest:benchmarktest",
           "//foundation/multimedia/av_session/interfaces/inner_api/native/session/test/fuzztest/avcontrolcommand_fuzzer:fuzztest",

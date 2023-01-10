@@ -59,6 +59,8 @@ public:
 
     int32_t DeleteSupportCommand(const int32_t cmd) override;
 
+    int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;

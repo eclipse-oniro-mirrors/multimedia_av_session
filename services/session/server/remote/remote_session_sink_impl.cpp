@@ -64,29 +64,42 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
     ret = syncer_->RegisterDataNotifier([this](const SessionDataCategory category, const std::string& deviceId) {
         SLOGE("device %{public}s category %{public}d changed", deviceId.c_str(), category);
         CHECK_AND_RETURN_RET_LOG(session_ != nullptr && syncer_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");
-        if (category == SESSION_DATA_META) {
-            AVMetaData metaData;
-            AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::GetAVMetaData");
-            CHECK_AND_RETURN_RET_LOG(syncer_->GetAVMetaData(metaData) == AVSESSION_SUCCESS, AVSESSION_ERROR,
-                                     "GetAVMetaData failed");
-            CHECK_AND_RETURN_RET_LOG(session_->SetAVMetaData(metaData) == AVSESSION_SUCCESS, AVSESSION_ERROR,
-                                     "SetAVMetaData failed");
-            return AVSESSION_SUCCESS;
-        }
 
-        if (category == SESSION_DATA_PLAYBACK_STATE) {
-            AVPlaybackState playbackState;
-            AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::GetAVPlaybackState");
-            CHECK_AND_RETURN_RET_LOG(syncer_->GetAVPlaybackState(playbackState) == AVSESSION_SUCCESS, AVSESSION_ERROR,
-                                     "GetAVPlaybackState failed");
-            CHECK_AND_RETURN_RET_LOG(session_->SetAVPlaybackState(playbackState) == AVSESSION_SUCCESS, AVSESSION_ERROR,
-                                     "SetAVPlaybackState failed");
-            return AVSESSION_SUCCESS;
-        }
-        SLOGE("category is illegal");
-        return AVSESSION_ERROR;
+        return HandleSessionDataCategory(category);
     });
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddDataNotifier failed");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSinkImpl::HandleSessionDataCategory(const SessionDataCategory category)
+{
+    if (category == SESSION_DATA_META) {
+        AVMetaData metaData;
+        AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::GetAVMetaData");
+        CHECK_AND_RETURN_RET_LOG(syncer_->GetAVMetaData(metaData) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "GetAVMetaData failed");
+        CHECK_AND_RETURN_RET_LOG(session_->SetAVMetaData(metaData) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "SetAVMetaData failed");
+    } else if (category == SESSION_DATA_PLAYBACK_STATE) {
+        AVPlaybackState playbackState;
+        AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::GetAVPlaybackState");
+        CHECK_AND_RETURN_RET_LOG(syncer_->GetAVPlaybackState(playbackState) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "GetAVPlaybackState failed");
+        CHECK_AND_RETURN_RET_LOG(session_->SetAVPlaybackState(playbackState) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "SetAVPlaybackState failed");
+    } else if (category == SESSION_DATA_SET_EVENT) {
+        std::string event;
+        AAFwk::WantParams args;
+        AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::SetSessionEvent");
+        CHECK_AND_RETURN_RET_LOG(syncer_->GetSessionEvent(event, args) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "GetSessionEvent failed");
+        CHECK_AND_RETURN_RET_LOG(session_->SetSessionEvent(event, args) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "SetAVPlaybackState failed");
+    } else {
+        SLOGE("category is illegal");
+        return AVSESSION_ERROR;
+    }
+    
     return AVSESSION_SUCCESS;
 }
 

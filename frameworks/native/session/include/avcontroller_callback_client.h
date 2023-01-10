@@ -39,6 +39,8 @@ public:
 
     void AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 
+    void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
+
 private:
     std::shared_ptr<AVControllerCallback> callback_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;

@@ -23,6 +23,7 @@
 #include "native_engine/native_engine.h"
 #include "extension_context.h"
 #include "ability_context.h"
+#include "napi_common_want.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 4096;
@@ -394,6 +395,22 @@ napi_status NapiUtils::SetValue(napi_env env, AbilityRuntime::WantAgent::WantAge
     auto finalizecb = [](napi_env env, void* data, void* hint) {};
     status = napi_wrap(env, out, static_cast<void*>(&in), finalizecb, nullptr, nullptr);
     CHECK_RETURN(status == napi_ok, "wrap object failed", napi_generic_failure);
+    return status;
+}
+
+/* napi_value <-> AAFwk::WantParams */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AAFwk::WantParams& out)
+{
+    auto status = AppExecFwk::UnwrapWantParams(env, in, out);
+    CHECK_RETURN(status == true, "unwrap object failed", napi_generic_failure);
+    return napi_ok;
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AAFwk::WantParams& in, napi_value& out)
+{
+    auto status = napi_create_object(env, &out);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    out = AppExecFwk::WrapWantParams(env, in);
     return status;
 }
 
@@ -821,6 +838,7 @@ napi_status NapiUtils::GetRefByCallback(napi_env env, std::list<napi_ref> callba
 {
     for (auto ref = callbackList.begin(); ref != callbackList.end(); ++ref) {
         if (Equals(env, callback, *ref)) {
+            SLOGD("Callback has been matched");
             callbackRef = *ref;
             break;
         }

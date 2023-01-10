@@ -36,6 +36,7 @@ std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     { "activeStateChange", { OnActiveStateChange, OffActiveStateChange } },
     { "validCommandChange", { OnValidCommandChange, OffValidCommandChange } },
     { "outputDeviceChange", { OnOutputDeviceChange, OffOutputDeviceChange } },
+    { "sessionEventChange", { OnSessionEventChange, OffSessionEventChange } },
 };
 
 NapiAVSessionController::NapiAVSessionController()
@@ -661,7 +662,7 @@ napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info inf
             context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
             CHECK_ARGS_RETURN_VOID(
                 context, (context->status == napi_ok) && (type == napi_object || type == napi_string),
-                "filter type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+                "Second param type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             filter = argv[ARGV_SECOND];
             context->status = napi_typeof(env, argv[ARGV_THIRD], &type);
             CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
@@ -674,7 +675,6 @@ napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info inf
         NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
         return NapiUtils::GetUndefinedValue(env);
     }
-
     RegisterCallback(env, context, eventName, filter, callback);
 
     return NapiUtils::GetUndefinedValue(env);
@@ -772,6 +772,13 @@ napi_status NapiAVSessionController::OnOutputDeviceChange(napi_env env, NapiAVSe
                                                   callback);
 }
 
+napi_status NapiAVSessionController::OnSessionEventChange(napi_env env, NapiAVSessionController* napiController,
+                                                          napi_value param, napi_value callback)
+{
+    return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_SESSION_EVENT_CHANGE,
+                                                  callback);
+}
+
 napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                                        napi_value callback)
 {
@@ -809,6 +816,13 @@ napi_status NapiAVSessionController::OffOutputDeviceChange(napi_env env, NapiAVS
                                                            napi_value callback)
 {
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_OUTPUT_DEVICE_CHANGE,
+                                                     callback);
+}
+
+napi_status NapiAVSessionController::OffSessionEventChange(napi_env env, NapiAVSessionController* napiController,
+                                                           napi_value callback)
+{
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_SESSION_EVENT_CHANGE,
                                                      callback);
 }
 }

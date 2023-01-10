@@ -24,6 +24,7 @@
 #include "avsession_manager.h"
 #include "key_event.h"
 #include "want_agent.h"
+#include "want_params.h"
 
 using namespace std;
 using namespace OHOS::AVSession;
@@ -98,6 +99,8 @@ public:
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
     void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override {};
+
+    void OnSessionEventChange(const std::string& event, const OHOS::AAFwk::WantParams& args) override {};
 
     ~AVControllerCallbackImpl() override;
 

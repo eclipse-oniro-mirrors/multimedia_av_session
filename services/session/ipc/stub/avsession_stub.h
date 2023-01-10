@@ -19,6 +19,7 @@
 #include "iav_session.h"
 #include "iremote_stub.h"
 #include "want_agent.h"
+#include "want_params.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 
@@ -65,6 +66,8 @@ private:
 
     int32_t HandleDeleteSupportCommand(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleSetSessionEvent(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HanlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
@@ -83,6 +86,7 @@ private:
         [SESSION_CMD_DESTROY] = &AVSessionStub::HandleDestroy,
         [SESSION_CMD_ADD_SUPPORT_COMMAND] = &AVSessionStub::HandleAddSupportCommand,
         [SESSION_CMD_DELETE_SUPPORT_COMMAND] = &AVSessionStub::HandleDeleteSupportCommand,
+        [SESSION_CMD_SET_SESSION_EVENT] = &AVSessionStub::HandleSetSessionEvent,
     };
 };
 }

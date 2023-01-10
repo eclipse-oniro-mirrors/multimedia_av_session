@@ -24,6 +24,7 @@
 #include "token_setproc.h"
 #include "iavsession_controller.h"
 #include "iremote_stub.h"
+#include "want_params.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -124,6 +125,8 @@ public:
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
     void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
+
+    void OnSessionEventChange(const std::string& event, const OHOS::AAFwk::WantParams& args) override {};
 
     ~AVControllerCallbackImpl() override;
 

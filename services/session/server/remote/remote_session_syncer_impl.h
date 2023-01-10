@@ -49,6 +49,10 @@ public:
 
     int32_t GetControlCommand(AVControlCommand& command) override;
 
+    int32_t PutSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
+
+    int32_t GetSessionEvent(std::string& event, AAFwk::WantParams& args) override;
+
     int32_t RegisterDataNotifier(const ObjectDataNotifier& notifier) override;
 
     int32_t RegisterDisconnectNotifier(const ObjectDisconnectNotifier& notifier) override;
@@ -64,11 +68,13 @@ public:
     static constexpr char METADATA_KEY[] = "metaData";
     static constexpr char PLAYBACK_STATE_KEY[] = "playbackState";
     static constexpr char CONTROL_COMMAND_KEY[] = "controlCommand";
+    static constexpr char SESSION_EVENT_KEY[] = "sessionEvent";
     static constexpr int RECEIVE_DATA_SIZE_MAX = 500 * 1024;
     const std::map<std::string, SessionDataCategory> categoryMap {
             {METADATA_KEY, SESSION_DATA_META},
             {PLAYBACK_STATE_KEY, SESSION_DATA_PLAYBACK_STATE},
             {CONTROL_COMMAND_KEY, SESSION_DATA_CONTROL_COMMAND},
+            {SESSION_EVENT_KEY, SESSION_DATA_SET_EVENT},
     };
 
 private:

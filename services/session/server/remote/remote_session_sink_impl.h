@@ -44,6 +44,7 @@ private:
     std::shared_ptr<RemoteSessionSyncer> syncer_;
     sptr <AVSessionItem> session_;
     std::string sourceDevice_;
+    int32_t HandleSessionDataCategory(const SessionDataCategory category);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_REMOTE_SESSION_SINK_IMPL_H

@@ -44,6 +44,7 @@ ohos_shared_library("avsession_napi") {
   ]
 
   deps = [
+    "$ability_runtime_dir/frameworks/js/napi/inner/napi_common:napi_common",
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
     "//foundation/multimedia/av_session/utils:avsession_utils",

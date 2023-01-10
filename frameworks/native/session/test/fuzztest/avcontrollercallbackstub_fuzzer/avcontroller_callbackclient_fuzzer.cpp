@@ -23,6 +23,7 @@
 #include "iavcontroller_callback.h"
 #include "iremote_stub.h"
 #include "avcontroller_callback_client.h"
+#include "want_params.h"
 #include "avcontroller_callbackclient_fuzzer.h"
 
 using namespace std;
@@ -45,6 +46,8 @@ class TestAVControllerCallback : public AVControllerCallback {
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
     void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override {};
+
+    void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
 };
 
 void TestAVControllerCallback::OnSessionDestroy()
@@ -70,6 +73,11 @@ void TestAVControllerCallback::OnActiveStateChange(bool isActive)
 void TestAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
     SLOGI("Enter into TestAVControllerCallback::OnValidCommandChange.");
+}
+
+void TestAVControllerCallback::OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args)
+{
+    SLOGI("Enter into TestAVControllerCallback::OnSessionEventChange.");
 }
 
 void AvControllerCallbackClientFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)
@@ -135,6 +143,12 @@ void AvControllerCallbackClientFuzzer::FuzzTests(const uint8_t* data, size_t siz
     std::vector<int32_t> cmds;
     cmds.push_back(*(reinterpret_cast<const int32_t*>(data)));
     aVControllerCallbackClient.OnValidCommandChange(cmds);
+
+    AAFwk::WantParams wantParams;
+    std::string eventName(reinterpret_cast<const char*>(data), size);
+    std::string eventKey(reinterpret_cast<const char*>(data), size);
+    std::string eventValue(reinterpret_cast<const char*>(data), size);
+    aVControllerCallbackClient.OnSessionEventChange(eventName, wantParams);
 }
 
 void OHOS::AVSession::AvControllerCallbackOnRemoteRequest(const uint8_t* data, size_t size)

@@ -43,7 +43,8 @@ enum AVSessionTraceTaskId : int32_t {
     NAPI_CREATE_CONTROLLER_TASK_ID = 5,
     NAPI_SEND_SYSTEM_AV_KEY_EVENT_TASK_ID = 6,
     NAPI_SEND_SYSTEM_CONTROL_COMMAND_TASK_ID = 7,
-    NAPI_CAST_AUDIO_TASK_ID = 8
+    NAPI_CAST_AUDIO_TASK_ID = 8,
+    NAPI_SET_SESSION_EVENT_TASK_ID = 9
 };
 #ifdef ENBABLE_AVSESSION_TRACE_CONTROL
 class __attribute__((visibility("default"))) AVSessionTrace {
