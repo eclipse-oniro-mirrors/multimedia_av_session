@@ -54,14 +54,7 @@ public:
     using MetaMaskType = std::bitset<META_KEY_MAX>;
 
     AVMetaData() = default;
-    ~AVMetaData() override
-    {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
-#if defined(__BIONIC__)
-        mallopt(M_PURGE, 0);
-#endif
-#endif
-    }
+    ~AVMetaData() = default;
 
     static AVMetaData* Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& parcel) const override;
