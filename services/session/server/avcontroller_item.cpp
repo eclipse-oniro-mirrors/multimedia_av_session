@@ -37,11 +37,7 @@ AVControllerItem::AVControllerItem(pid_t pid, const sptr<AVSessionItem>& session
 
 AVControllerItem::~AVControllerItem()
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
-#if defined(__BIONIC__)
-    mallopt(M_PURGE, 0);
-#endif
-#endif
+    SLOGI("destroy sessionId=%{public}s", sessionId_.c_str());
 }
 
 int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)

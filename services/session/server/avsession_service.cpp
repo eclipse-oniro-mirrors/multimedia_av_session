@@ -754,11 +754,6 @@ void AVSessionService::OnClientDied(pid_t pid)
     std::lock_guard lockGuard(sessionAndControllerLock_);
     ClearSessionForClientDiedNoLock(pid);
     ClearControllerForClientDiedNoLock(pid);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
-#if defined(__BIONIC__)
-    mallopt(M_PURGE, 0);
-#endif
-#endif
 }
 
 void AVSessionService::HandleSessionRelease(AVSessionItem& session)
