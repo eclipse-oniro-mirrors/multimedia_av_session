@@ -15,6 +15,8 @@
 
 #include "background_audio_controller.h"
 #include "avsession_log.h"
+#include "avsession_service.h"
+#include "avsession_item.h"
 #include "permission_checker.h"
 
 namespace OHOS::AVSession {
@@ -30,8 +32,9 @@ BackgroundAudioController::~BackgroundAudioController()
     SLOGI("destroy");
 }
 
-void BackgroundAudioController::Init()
+void BackgroundAudioController::Init(AVSessionService *ptr)
 {
+    ptr_ = ptr;
     AudioAdapter::GetInstance().AddStreamRendererStateListener([this](const auto& infos) {
         HandleAudioStreamRendererStateChange(infos);
     });
@@ -67,11 +70,12 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
             return;
         }
         SLOGI("pause uid=%{public}d", descriptor.uid_);
+        ptr_->NotifyAudioSessionCheck_(descriptor);
         AudioAdapter::GetInstance().PauseAudioStream(descriptor.uid_);
     }
 }
 
-void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos)
+void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos &infos)
 {
     for (const auto& info : infos) {
         if (info->rendererState != AudioStandard::RENDERER_RUNNING) {
@@ -95,6 +99,11 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
             continue;
         }
         SLOGI("pause uid=%{public}d", info->clientUID);
+        for (const auto& session : ptr_->GetContainer_().GetAllSessions()) {
+            if (session->GetUid() == info->clientUID) {
+                ptr_->NotifyAudioSessionCheck_(session->GetDescriptor());
+            }
+        }
         AudioAdapter::GetInstance().PauseAudioStream(info->clientUID);
     }
 }
@@ -105,6 +114,11 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid) const
     bool isSuccess = AudioAdapter::GetInstance().GetRendererState(uid, rendererState);
     if (isSuccess) {
         SLOGI("pause uid=%{public}d", uid);
+        for (const auto& session : ptr_->GetContainer_().GetAllSessions()) {
+            if (session->GetUid() == uid) {
+                ptr_->NotifyAudioSessionCheck_(session->GetDescriptor());
+            }
+        }
         AudioAdapter::GetInstance().PauseAudioStream(uid);
     }
     SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");

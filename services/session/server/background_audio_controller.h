@@ -23,6 +23,7 @@
 #include "app_manager_adapter.h"
 
 namespace OHOS::AVSession {
+class AVSessionService;
 class BackgroundAudioController : public SessionListener {
 public:
     BackgroundAudioController();
@@ -31,15 +32,16 @@ public:
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
     void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override {}
+    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override {}
 
-    void Init();
+    void Init(AVSessionService *ptr);
 
     void HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos);
     void HandleAppBackgroundState(int32_t uid) const;
-
 private:
     std::recursive_mutex lock_;
     std::set<int32_t> sessionUIDs_;
+    AVSessionService *ptr_;
 };
 }
 #endif // AV_SESSION_BACKGROUND_AUDIO_CONTROLLER_H

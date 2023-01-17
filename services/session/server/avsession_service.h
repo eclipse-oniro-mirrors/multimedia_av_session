@@ -103,6 +103,16 @@ public:
 
     int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors) override;
 
+    void NotifyAudioSessionCheck_(const AVSessionDescriptor& descriptor)
+    {
+        return NotifyAudioSessionCheck(descriptor);
+    }
+
+    SessionContainer& GetContainer_()
+    {
+        return GetContainer();
+    }
+
 private:
     static SessionContainer& GetContainer();
 
@@ -115,6 +125,7 @@ private:
     void NotifySessionCreate(const AVSessionDescriptor& descriptor);
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
+    void NotifyAudioSessionCheck(const AVSessionDescriptor& descriptor);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
     void RemoveClientDeathObserver(pid_t pid);

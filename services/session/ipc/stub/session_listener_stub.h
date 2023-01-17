@@ -31,6 +31,7 @@ private:
 
     int32_t HandleOnTopSessionChange(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnAudioSessionChecked(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HanlerFunc = int32_t(SessionListenerStub::*)(MessageParcel&, MessageParcel&);
@@ -38,6 +39,7 @@ private:
         [LISTENER_CMD_ON_CREATE] = &SessionListenerStub::HandleOnSessionCreate,
         [LISTENER_CMD_ON_RELEASE] = &SessionListenerStub::HandleOnSessionRelease,
         [LISTENER_CMD_TOP_CHANGED] = &SessionListenerStub::HandleOnTopSessionChange,
+        [LISTENER_CMD_AUDIO_CHECKED] = &SessionListenerStub::HandleOnAudioSessionChecked,
     };
 };
 }

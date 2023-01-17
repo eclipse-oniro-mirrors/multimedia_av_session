@@ -67,6 +67,13 @@ void NapiSessionListener::OnTopSessionChange(const AVSessionDescriptor& descript
     HandleEvent(EVENT_TOP_SESSION_CHANGED, descriptor);
 }
 
+void NapiSessionListener::OnAudioSessionChecked(const AVSessionDescriptor& descriptor)
+{
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnAudioSessionCheck");
+    SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
+    HandleEvent(EVENT_AUDIO_SESSION_CHECKED, descriptor);
+}
+
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

@@ -34,6 +34,11 @@ class TestSessionListener : public SessionListener {
     {
         SLOGI("Enter into TestSessionListener::OnTopSessionChange.");
     }
+
+    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("Enter into TestSessionListener::OnAudioSessionChecked.");
+    }
 };
 int32_t SessionListenerStubRemoteRequestTest(uint8_t* data, size_t size);
 

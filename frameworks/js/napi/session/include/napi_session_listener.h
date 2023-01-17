@@ -32,6 +32,7 @@ public:
         EVENT_SESSION_CREATED,
         EVENT_SESSION_DESTROYED,
         EVENT_TOP_SESSION_CHANGED,
+        EVENT_AUDIO_SESSION_CHECKED,
         EVENT_TYPE_MAX
     };
 
@@ -41,6 +42,7 @@ public:
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
     void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
+    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
