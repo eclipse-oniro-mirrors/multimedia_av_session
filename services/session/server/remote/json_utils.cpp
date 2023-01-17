@@ -75,7 +75,7 @@ int32_t JsonUtils::GetVectorCapability(const std::string& jsonCapability,
                                        std::vector<std::vector<int32_t>>& vectorCapability)
 {
     CHECK_AND_RETURN_RET_LOG(!jsonCapability.empty(), AVSESSION_ERROR, "jsonCapability is empty");
-    json jsonObj = json::parse(jsonCapability);
+    json jsonObj = json::parse(jsonCapability, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
     int32_t ret = JsonToVector(jsonObj["metaData"], vectorCapability[SESSION_DATA_META]);
     CHECK_AND_CONTINUE_LOG(ret == AVSESSION_SUCCESS, "Get metaDataCapability error");
@@ -89,7 +89,7 @@ int32_t JsonUtils::GetVectorCapability(const std::string& jsonCapability,
 int32_t JsonUtils::GetAllCapability(const std::string& sessionInfo, std::string& jsonCapability)
 {
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
-    json jsonSessionInfo = json::parse(sessionInfo);
+    json jsonSessionInfo = json::parse(sessionInfo, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonSessionInfo.is_discarded() && !jsonSessionInfo.is_null(), AVSESSION_ERROR,
         "json object is null");
     json compatibility = jsonSessionInfo["compatibility"];
@@ -102,7 +102,14 @@ int32_t JsonUtils::GetAllCapability(const std::string& sessionInfo, std::string&
 
 int32_t JsonUtils::SetSessionBasicInfo(std::string& sessionInfo, const AVSessionBasicInfo& basicInfo)
 {
-    json jsonObj = sessionInfo.empty() ? json::parse(R"({})") : json::parse(sessionInfo);
+    json jsonObj;
+    if (sessionInfo.empty()) {
+        jsonObj = json::parse(R"({})", nullptr, false);
+        CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
+    } else {
+        jsonObj = json::parse(sessionInfo, nullptr, false);
+        CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
+    }
     jsonObj["compatibility"]["networkId"] = basicInfo.networkId_;
     jsonObj["compatibility"]["vendorId"] = basicInfo.vendorId_;
     jsonObj["compatibility"]["deviceType"] = basicInfo.deviceType_;
@@ -124,7 +131,7 @@ int32_t JsonUtils::SetSessionBasicInfo(std::string& sessionInfo, const AVSession
 int32_t JsonUtils::GetSessionBasicInfo(const std::string& sessionInfo, AVSessionBasicInfo& basicInfo)
 {
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
-    json jsonObj = json::parse(sessionInfo);
+    json jsonObj = json::parse(sessionInfo, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
     json compatibility = jsonObj["compatibility"];
     CHECK_AND_RETURN_RET_LOG(!compatibility.empty(), AVSESSION_ERROR, "Getcompatibility error");
@@ -155,7 +162,14 @@ int32_t JsonUtils::GetSessionBasicInfo(const std::string& sessionInfo, AVSession
 
 int32_t JsonUtils::SetSessionDescriptors(std::string& sessionInfo, const std::vector<AVSessionDescriptor>& descriptors)
 {
-    json jsonObj = sessionInfo.empty() ? json::parse(R"({})") : json::parse(sessionInfo);
+    json jsonObj;
+    if (sessionInfo.empty()) {
+        jsonObj = json::parse(R"({})", nullptr, false);
+        CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
+    } else {
+        jsonObj = json::parse(sessionInfo, nullptr, false);
+        CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
+    }
     for (uint32_t i = 0; i < descriptors.size(); i++) {
         jsonObj["data"]["sessionDescriptors"][i]["sessionId"] = descriptors[i].sessionId_;
         jsonObj["data"]["sessionDescriptors"][i]["type"] = ConvertSessionType(descriptors[i].sessionType_);
@@ -171,7 +185,7 @@ int32_t JsonUtils::SetSessionDescriptors(std::string& sessionInfo, const std::ve
 int32_t JsonUtils::GetSessionDescriptors(const std::string& sessionInfo, std::vector<AVSessionDescriptor>& descriptors)
 {
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
-    json jsonObj = json::parse(sessionInfo);
+    json jsonObj = json::parse(sessionInfo, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
     CHECK_AND_RETURN_RET_LOG(jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
     json sessionDescriptors = jsonObj["data"]["sessionDescriptors"];
@@ -193,7 +207,14 @@ int32_t JsonUtils::GetSessionDescriptors(const std::string& sessionInfo, std::ve
 
 int32_t JsonUtils::SetSessionDescriptor(std::string& sessionInfo, const AVSessionDescriptor& descriptor)
 {
-    json jsonObj = sessionInfo.empty() ? json::parse(R"({})") : json::parse(sessionInfo);
+    json jsonObj;
+    if (sessionInfo.empty()) {
+        jsonObj = json::parse(R"({})", nullptr, false);
+        CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
+    } else {
+        jsonObj = json::parse(sessionInfo, nullptr, false);
+        CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
+    }
     jsonObj["data"]["sessionDescriptor"]["sessionId"] = descriptor.sessionId_;
     jsonObj["data"]["sessionDescriptor"]["type"] = ConvertSessionType(descriptor.sessionType_);
     jsonObj["data"]["sessionDescriptor"]["bundleName"] = descriptor.elementName_.GetBundleName();
@@ -207,7 +228,7 @@ int32_t JsonUtils::SetSessionDescriptor(std::string& sessionInfo, const AVSessio
 int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessionDescriptor& descriptor)
 {
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
-    json jsonObj = json::parse(sessionInfo);
+    json jsonObj = json::parse(sessionInfo, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
     CHECK_AND_RETURN_RET_LOG(jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
     json sessionDescriptor = jsonObj["data"]["sessionDescriptor"];
