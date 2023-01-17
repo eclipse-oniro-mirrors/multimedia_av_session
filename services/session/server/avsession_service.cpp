@@ -527,6 +527,7 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
     std::string abilityName = DEFAULT_ABILITY_NAME;
 
     nlohmann::json value = json::parse(content, nullptr, false);
+    CHECK_AND_RETURN_RET_LOG(!value.is_discarded() && !value.is_null(), AVSESSION_ERROR, "json object is null");
     auto& node1 = GetSubNode(value, "bundleName");
     auto& node2 = GetSubNode(value, "abilityName");
     if (!node1.is_null() && !node2.is_null() && node1.is_string() && node2.is_string()) {
