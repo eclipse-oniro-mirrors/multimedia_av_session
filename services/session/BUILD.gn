@@ -107,6 +107,7 @@ ohos_shared_library("avsession_service") {
     "./../../frameworks/common:avsession_common",
     "./../../utils:avsession_utils",
     "./../session:avsession_item",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
@@ -216,6 +217,7 @@ ohos_shared_library("avsession_item") {
   deps = [
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/utils:avsession_utils",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
