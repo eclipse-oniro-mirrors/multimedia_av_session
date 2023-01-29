@@ -345,6 +345,44 @@ HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsBySessionId001, TestSize.Lev
 }
 
 /**
+* @tc.name: GetHistoricalSessionDescriptors001
+* @tc.desc: Get session descriptors by sessionId
+* @tc.type: FUNC
+* @tc.require: AR000H31JC
+*/
+HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Level1)
+{
+    SLOGI("GetHistoricalSessionDescriptors001 begin");
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptors.size(), 0);
+
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
+    EXPECT_NE(session, nullptr);
+    session->Activate();
+    auto sessionId = session->GetSessionId();
+    AVSessionDescriptor descriptor {};
+    ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptor.elementName_.GetBundleName(), g_testBundleName);
+    EXPECT_EQ(descriptor.elementName_.GetAbilityName(), g_testAbilityName);
+    EXPECT_EQ(descriptor.sessionId_, sessionId);
+    session->Destroy();
+    ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptor.elementName_.GetBundleName(), g_testBundleName);
+    EXPECT_EQ(descriptor.elementName_.GetAbilityName(), g_testAbilityName);
+    EXPECT_EQ(descriptor.sessionId_, sessionId);
+
+    SLOGI("GetHistoricalSessionDescriptors001 end");
+}
+
+/**
 * @tc.name: CreateController001
 * @tc.desc: create session controller by wrong sessionId.
 * @tc.type: FUNC

@@ -40,6 +40,8 @@ public:
 
     virtual int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) = 0;
 
+    virtual int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) = 0;
+
     virtual int32_t CreateController(const std::string& sessionId,
         std::shared_ptr<AVSessionController>& controller) = 0;
 

@@ -133,6 +133,13 @@ int32_t AVSessionManagerImpl::GetSessionDescriptorsBySessionId(const std::string
     return service ? service->GetSessionDescriptorsBySessionId(sessionId, descriptor) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::GetHistoricalSessionDescriptors(int32_t maxSize,
+    std::vector<AVSessionDescriptor>& descriptors)
+{
+    auto service = GetService();
+    return service ? service->GetHistoricalSessionDescriptors(maxSize, descriptors) : ERR_SERVICE_NOT_EXIST;
+}
+
 int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {

@@ -86,6 +86,8 @@ public:
 
     std::string GetAbilityName() const;
 
+    std::string GetBundleName() const;
+
     void SetTop(bool top);
 
     std::shared_ptr<RemoteSessionSource> GetRemoteSource();

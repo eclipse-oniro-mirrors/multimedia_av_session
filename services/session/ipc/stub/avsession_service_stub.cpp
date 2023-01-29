@@ -94,6 +94,21 @@ int32_t AVSessionServiceStub::HandleGetSessionDescriptorsById(MessageParcel& dat
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = GetHistoricalSessionDescriptors(data.ReadInt32(), descriptors);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(descriptors.size()), ERR_NONE, "write size failed");
+    for (const auto& descriptor : descriptors) {
+        if (!descriptor.WriteToParcel(reply)) {
+            SLOGI("write descriptor failed");
+            break;
+        }
+    }
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CreateControllerInner");
