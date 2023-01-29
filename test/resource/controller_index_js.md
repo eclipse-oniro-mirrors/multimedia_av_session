@@ -197,7 +197,7 @@ export default {
             }
         })
 
-        // 注册系统最高优先级会话变更监听
+        // Register the system's highest priority session change listening
         AVSessionManager.on('topSessionChange', (descriptor) => {
             this.log('topSessionChange success');
             if (descriptor == undefined) {
