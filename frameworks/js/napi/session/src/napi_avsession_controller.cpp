@@ -25,6 +25,8 @@
 #include "avsession_errors.h"
 #include "avsession_trace.h"
 #include "napi_avsession_manager.h"
+#include "ipc_skeleton.h"
+#include "tokenid_kit.h"
 
 namespace OHOS::AVSession {
 static __thread napi_ref AVControllerConstructorRef = nullptr;
@@ -600,20 +602,18 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::s
             if (ret == ERR_CONTROLLER_NOT_EXIST) {
                 NapiUtils::ThrowError(env, "OnEvent failed : native controller not exist",
                     NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
-                return napi_generic_failure;
             } else if (ret == ERR_NO_MEMORY) {
                 NapiUtils::ThrowError(env, "OnEvent failed : native no memory",
                     NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
-                return napi_generic_failure;
             } else if (ret == ERR_NO_PERMISSION) {
                 NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
                     NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-                return napi_generic_failure;
             } else {
                 NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
                     NapiAVSessionManager::errcode_[ret]);
-                return napi_generic_failure;
             }
+            napiController->callback_ = nullptr;
+            return napi_generic_failure;
         }
     }
     if (it->second.first(env, napiController, filter, callback) != napi_ok) {
@@ -692,6 +692,11 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     std::string eventName;
     napi_value callback = nullptr;
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
+        uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+        bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+        CHECK_ARGS_RETURN_VOID(context, isSystemApp, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
