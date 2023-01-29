@@ -30,11 +30,6 @@ public:
     ~AVSessionPixelMap() override
     {
         Clear();
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
-#if defined(__BIONIC__)
-        mallopt(M_PURGE, 0);
-#endif
-#endif
     }
 
     bool Marshalling(Parcel& parcel) const override;

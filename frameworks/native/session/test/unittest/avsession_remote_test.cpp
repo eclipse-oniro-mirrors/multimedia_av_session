@@ -88,7 +88,7 @@ public:
 
 class AVSessionRemoteTest : public testing::Test {
 public:
-    static constexpr char DBINDER_PKG_NAME[] = "av_session";
+    static constexpr char TEST_PKG_NAME[] = "av_session";
     static constexpr int NODE_NUM = 4;
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -105,7 +105,7 @@ void AVSessionRemoteTest::SetUpTestCase()
 
     NodeBasicInfo *nodeInfo[NODE_NUM];
     int32_t infoNum = NODE_NUM;
-    GetAllNodeDeviceInfo(DBINDER_PKG_NAME, nodeInfo, &infoNum);
+    GetAllNodeDeviceInfo(TEST_PKG_NAME, nodeInfo, &infoNum);
     std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList;
     auto callback = std::make_shared<InitCallback>();
     int ret = OHOS::DistributedHardware::DeviceManager::GetInstance().InitDeviceManager("av_session", callback);
