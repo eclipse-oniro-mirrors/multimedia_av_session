@@ -56,6 +56,21 @@ declare namespace avSession {
   function getAllSessionDescriptors(): Promise<Array<Readonly<AVSessionDescriptor>>>;
 
   /**
+   * Get history avsession records. These sessions have been destroyed.
+   * @permission ohos.permission.MANAGE_MEDIA_RESOURCES
+   * @param maxSize Specifies the maximum size of the returned value array.
+   * If provided '0' or not provided, the maximum value is determined by the system.
+   * @returns The array of {@link AVSessionDescriptor}
+   * @throws {BusinessError} 401 - parameter check failed
+   * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
+   * @syscap SystemCapability.Multimedia.AVSession.Manager
+   * @systemapi Hide this for inner system use
+   * @since 9
+   */
+    function getHistoricalSessionDescriptors(maxSize: number, callback: AsyncCallback<Array<Readonly<AVSessionDescriptor>>>): void;
+    function getHistoricalSessionDescriptors(maxSize?: number): Promise<Array<Readonly<AVSessionDescriptor>>>;
+
+  /**
    * Create an avsession controller
    * @permission ohos.permission.MANAGE_MEDIA_RESOURCES
    * @param sessionId Specifies the sessionId to create the controller.

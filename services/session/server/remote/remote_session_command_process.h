@@ -43,6 +43,11 @@ public:
         return AVSESSION_SUCCESS;
     }
 
+    int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override
     {
         return AVSESSION_SUCCESS;

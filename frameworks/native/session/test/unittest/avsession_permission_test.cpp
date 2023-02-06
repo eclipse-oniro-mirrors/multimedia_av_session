@@ -180,6 +180,23 @@ HWTEST_F(AVSessionPermissionTest, GetSessionDescriptorsBySessionIdWithNoPerm001,
 }
 
 /**
+* @tc.name: GetHistoricalSessionDescriptorsWithNoPerm001
+* @tc.desc: Get session descriptors by sessionId with no permission
+* @tc.type: FUNC
+* @tc.require: AR000H31JR
+*/
+HWTEST_F(AVSessionPermissionTest, GetHistoricalSessionDescriptorsWithNoPerm001, TestSize.Level1)
+{
+    AddPermission(g_infoA, g_policyA);
+    std::vector<AVSessionDescriptor> descriptors;
+
+    // Using "1" as the test input parameter
+    int32_t ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
+    EXPECT_EQ(ret, ERR_NO_PERMISSION);
+    DeletePermission(g_infoA);
+}
+
+/**
 * @tc.name: CreateControllerWithNoPerm001
 * @tc.desc: create session controller with no permission
 * @tc.type: FUNC
@@ -301,6 +318,34 @@ HWTEST_F(AVSessionPermissionTest, GetActivatedSessionDescriptorsWithPerm001, Tes
     if (session != nullptr) {
         session->Destroy();
     }
+    DeletePermission(g_infoB);
+}
+
+/**
+* @tc.name: GetHistoricalSessionDescriptorsWithNoPerm001
+* @tc.desc: Get session descriptors by sessionId with no permission
+* @tc.type: FUNC
+* @tc.require: AR000H31JR
+*/
+HWTEST_F(AVSessionPermissionTest, GetHistoricalSessionDescriptorsWithPerm001, TestSize.Level1)
+{
+    AddPermission(g_infoB, g_policyB);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.avsession");
+    elementName.SetAbilityName("test.ability");
+    auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
+    ASSERT_NE(session, nullptr);
+
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret_1 = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
+    EXPECT_EQ(ret_1, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptors.size(), 1);
+    if (session != nullptr) {
+        session->Destroy();
+    }
+    auto ret_2 = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
+    EXPECT_EQ(ret_2, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptors.size(), 1);
     DeletePermission(g_infoB);
 }
 

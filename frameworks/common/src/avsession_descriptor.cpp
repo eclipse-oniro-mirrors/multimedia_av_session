@@ -17,6 +17,22 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
+bool AVHistoryDescriptor::WriteToParcel(Parcel& out) const
+{
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(sessionId_), false, "write sessionId failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(bundleName_), false, "write bundleName failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(abilityName_), false, "write abilityName failed");
+    return true;
+}
+
+bool AVHistoryDescriptor::ReadFromParcel(Parcel& in)
+{
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(sessionId_), false, "Read sessionId failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(bundleName_), false, "Read bundleName failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(abilityName_), false, "Read abilityName failed");
+    return true;
+}
+
 bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
 {
     CHECK_AND_RETURN_RET_LOG(out.WriteString(sessionId_), false, "write sessionId failed");

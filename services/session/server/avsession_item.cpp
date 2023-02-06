@@ -487,6 +487,11 @@ std::string AVSessionItem::GetAbilityName() const
     return descriptor_.elementName_.GetAbilityName();
 }
 
+std::string AVSessionItem::GetBundleName() const
+{
+    return descriptor_.elementName_.GetBundleName();
+}
+
 void AVSessionItem::SetTop(bool top)
 {
     descriptor_.isTopSession_ = top;

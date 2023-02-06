@@ -28,6 +28,7 @@ private:
     int32_t HandleCreateSessionInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetAllSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemAVKeyEvent(MessageParcel& data, MessageParcel& reply);
@@ -43,6 +44,7 @@ private:
         [SERVICE_CMD_CREATE_SESSION] = &AVSessionServiceStub::HandleCreateSessionInner,
         [SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS] = &AVSessionServiceStub::HandleGetAllSessionDescriptors,
         [SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID] = &AVSessionServiceStub::HandleGetSessionDescriptorsById,
+        [SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS] = &AVSessionServiceStub::HandleGetHistoricalSessionDescriptors,
         [SERVICE_CMD_CREATE_CONTROLLER] = &AVSessionServiceStub::HandleCreateControllerInner,
         [SERVICE_CMD_REGISTER_SESSION_LISTENER] = &AVSessionServiceStub::HandleRegisterSessionListener,
         [SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT] = &AVSessionServiceStub::HandleSendSystemAVKeyEvent,

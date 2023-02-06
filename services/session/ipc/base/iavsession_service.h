@@ -32,6 +32,7 @@ public:
         SERVICE_CMD_CREATE_SESSION,
         SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS,
         SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID,
+        SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS,
         SERVICE_CMD_CREATE_CONTROLLER,
         SERVICE_CMD_REGISTER_SESSION_LISTENER,
         SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT,
@@ -57,6 +58,8 @@ public:
 
     virtual int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId,
         AVSessionDescriptor& descriptor) = 0;
+
+    virtual int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) = 0;
 
     virtual int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
 

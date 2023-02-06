@@ -26,6 +26,15 @@ struct OutputDeviceInfo {
     std::vector<std::string> deviceNames_;
 };
 
+struct AVHistoryDescriptor {
+    bool WriteToParcel(Parcel& out) const;
+    bool ReadFromParcel(Parcel& in);
+
+    std::string sessionId_;
+    std::string bundleName_;
+    std::string abilityName_;
+};
+
 struct AVSessionDescriptor {
     bool WriteToParcel(Parcel& out) const;
     bool ReadFromParcel(Parcel& in);

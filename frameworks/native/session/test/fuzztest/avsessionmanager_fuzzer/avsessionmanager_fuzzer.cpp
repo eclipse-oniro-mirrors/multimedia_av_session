@@ -126,13 +126,14 @@ void OHOS::AVSession::AVSessionManagerTest(uint8_t* data, size_t size)
 
     std::string bySessionId(reinterpret_cast<const char*>(data), size);
     AVSessionDescriptor descriptor;
-
+    int32_t maxSize = 0;
     AVControlCommand command;
     int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
     command.SetCommand(cmd);
 
     AVSessionManagerImpl avSessionManagerImpl;
     avSessionManagerImpl.GetAllSessionDescriptors(descriptors);
+    avSessionManagerImpl.GetHistoricalSessionDescriptors(maxSize, descriptors);
     avSessionManagerImpl.CreateController(sessionId, controller);
     avSessionManagerImpl.GetActivatedSessionDescriptors(descriptors);
     avSessionManagerImpl.GetSessionDescriptorsBySessionId(bySessionId, descriptor);

@@ -80,6 +80,8 @@ public:
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
+    int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
+
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -152,6 +154,8 @@ private:
 
     void InitDM();
 
+    void InitBMS();
+
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 
     void UpdateTopSession(const sptr<AVSessionItem>& newTopSession);
@@ -210,9 +214,23 @@ private:
 
     int32_t StartDefaultAbilityByCall(std::string& sessionId);
 
+    int32_t StartAbilityByCall(const std::string& sessionIdNeeded, std::string& sessionId);
+
     void HandleEventHandlerCallBack();
 
+    bool IsHistoricalSession(const std::string& sessionId);
+
+    void DeleteHistoricalRecord(const std::string& bundleName);
+
     const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
+
+    void refreshAbilityFileOnCreateSession(const std::string& sessionId, const AppExecFwk::ElementName& elementName);
+
+    void refreshSortFileOnCreateSession(const std::string& sessionId, const AppExecFwk::ElementName& elementName);
+
+    bool LoadStringFromFileEx(const std::string& filePath, std::string& content);
+
+    bool SaveStringToFileEx(const std::string& filePath, const std::string& content);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
@@ -245,19 +263,24 @@ private:
     std::unique_ptr<AVSessionDumper> dumpHelper_ {};
     friend class AVSessionDumper;
 
+    static constexpr const char *SORT_FILE_NAME = "sortinfo";
     static constexpr const char *ABILITY_FILE_NAME = "abilityinfo";
+    static constexpr const char *DEFAULT_SESSION_ID = "DEFAULT";
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
 
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
 
     int32_t pressCount_ {};
+    int32_t maxHistoryNums {};
     bool isFirstPress_ = true;
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;
     const int32_t THREE_CLICK = 3;
     const int32_t CLICK_TIMEOUT = 500;
+    const int32_t defMaxHistoryNum = 10;
+    const int32_t maxFileLength = 32 * 1024 * 1024;
 };
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {

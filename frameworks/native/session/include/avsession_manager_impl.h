@@ -45,6 +45,8 @@ public:
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
+    int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
+
     int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) override;
 
     int32_t RegisterServiceDeathCallback(const DeathCallback& callback) override;
