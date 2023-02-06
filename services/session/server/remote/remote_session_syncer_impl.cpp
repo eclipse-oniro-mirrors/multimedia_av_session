@@ -187,6 +187,46 @@ int32_t RemoteSessionSyncerImpl::GetControlCommand(AVControlCommand& command)
     return AVSESSION_SUCCESS;
 }
 
+int32_t RemoteSessionSyncerImpl::PutSessionEvent(const std::string& event, const AAFwk::WantParams& args)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutSessionEvent");
+    Parcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(event), ERR_MARSHALLING, "write event string failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&args), ERR_MARSHALLING, "Write WantParams failed");
+
+    uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
+    std::vector<uint8_t> dataVector(data.GetDataSize());
+    std::copy(parcelData, parcelData + data.GetDataSize(), dataVector.begin());
+
+    CHECK_AND_RETURN_RET_LOG(PutData(SESSION_EVENT_KEY, dataVector) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "put data error");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSyncerImpl::GetSessionEvent(std::string& event, AAFwk::WantParams& args)
+{
+    std::vector<uint8_t> dataVector;
+    CHECK_AND_RETURN_RET_LOG(GetData(SESSION_EVENT_KEY, dataVector) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "get data error");
+    CHECK_AND_RETURN_RET_LOG(dataVector.size() <= RECEIVE_DATA_SIZE_MAX, AVSESSION_ERROR, "get data size over range");
+    DefaultAllocator allocator;
+    uint8_t *allocateData = reinterpret_cast<uint8_t*>(allocator.Alloc(dataVector.size()));
+    CHECK_AND_RETURN_RET_LOG(allocateData != nullptr, AVSESSION_ERROR, "alloc data fail");
+    std::copy(dataVector.begin(), dataVector.end(), allocateData);
+
+    Parcel parcelData;
+    CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
+                             AVSESSION_ERROR, "parse parcel error");
+                             
+    std::string eventData = parcelData.ReadString();
+    event = std::string(eventData);
+    AAFwk::WantParams *argsData = parcelData.ReadParcelable<AAFwk::WantParams>();
+    args = AAFwk::WantParams(*argsData);
+
+    delete argsData;
+    return AVSESSION_SUCCESS;
+}
+
 int32_t RemoteSessionSyncerImpl::RegisterDataNotifier(const ObjectDataNotifier& notifier)
 {
     CHECK_AND_RETURN_RET_LOG(objectStore_ != nullptr && object_ != nullptr, AVSESSION_ERROR,

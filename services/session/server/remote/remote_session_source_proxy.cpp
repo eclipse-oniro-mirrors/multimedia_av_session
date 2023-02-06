@@ -115,4 +115,13 @@ int32_t RemoteSessionSourceProxy::SetAVPlaybackState(const AVPlaybackState& stat
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetAVPlaybackState error");
     return AVSESSION_SUCCESS;
 }
+
+int32_t RemoteSessionSourceProxy::SetSessionEventRemote(const std::string& event, const AAFwk::WantParams& args)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetSessionEventRemote");
+    CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
+    int32_t ret = sourceImpl_->SetSessionEventRemote(event, args);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetAVMetaData error");
+    return AVSESSION_SUCCESS;
+}
 } // namespace OHOS::AVSession

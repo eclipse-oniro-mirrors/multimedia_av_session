@@ -38,6 +38,8 @@ public:
 
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
 
+    int32_t SetSessionEventRemote(const std::string& event, const AAFwk::WantParams& args) override;
+
     ~RemoteSessionSourceImpl() override = default;
 
 private:

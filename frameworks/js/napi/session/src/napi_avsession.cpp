@@ -19,6 +19,7 @@
 #include "napi_utils.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
+#include "want_params.h"
 #include "want_agent.h"
 #include "avsession_trace.h"
 #include "napi_avsession_controller.h"
@@ -80,7 +81,8 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("destroy", Destroy),
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
-        DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice)
+        DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice),
+        DECLARE_NAPI_FUNCTION("setSessionEvent", SetSessionEvent)
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor{};
@@ -634,6 +636,72 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
         output = NapiUtils::GetUndefinedValue(env);
     };
     return NapiAsyncWork::Enqueue(env, context, "Destroy", executor, complete);
+}
+
+napi_value NapiAVSession::SetSessionEvent(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSession::SetSessionEvent");
+    struct ConcreteContext : public ContextBase {
+        std::string event_;
+        AAFwk::WantParams args_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetSessionEvent failed : no memory");
+        NapiUtils::ThrowError(env, "SetSessionEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->event_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get event failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->args_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get args failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SetSessionEvent failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->SetSessionEvent(context->event_, context->args_);
+        if (ret != AVSESSION_SUCCESS) {
+            ErrCodeToMessage(ret, context->errMessage);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetSessionEvent", executor, complete);
+}
+
+void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)
+{
+    switch (errCode) {
+        case ERR_SESSION_NOT_EXIST:
+            message = "SetSessionEvent failed : native session not exist";
+            break;
+        case ERR_INVALID_PARAM:
+            message = "SetAVMetaData failed : native invalid parameters";
+            break;
+        case ERR_NO_PERMISSION:
+            message = "SetSessionEvent failed : native no permission";
+            break;
+        default:
+            message = "SetSessionEvent failed : native server exception";
+            break;
+    }
 }
 
 napi_status NapiAVSession::OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)

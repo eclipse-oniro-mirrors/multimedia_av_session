@@ -21,6 +21,7 @@
 
 #include "avsession_info.h"
 #include "want_agent.h"
+#include "want_params.h"
 #include "avsession_controller.h"
 
 namespace OHOS::AVSession {
@@ -59,6 +60,8 @@ public:
     virtual int32_t AddSupportCommand(const int32_t cmd) = 0;
 
     virtual int32_t DeleteSupportCommand(const int32_t cmd) = 0;
+
+    virtual int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) = 0;
 
     virtual ~AVSession() = default;
 };

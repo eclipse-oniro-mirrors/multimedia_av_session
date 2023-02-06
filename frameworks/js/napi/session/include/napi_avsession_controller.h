@@ -65,6 +65,8 @@ private:
                                             napi_value param, napi_value callback);
     static napi_status OnOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
                                             napi_value param, napi_value callback);
+    static napi_status OnSessionEventChange(napi_env env, NapiAVSessionController* napiController,
+                                            napi_value param, napi_value callback);
 
     static napi_status OffSessionDestroy(napi_env env, NapiAVSessionController* napiController, napi_value callback);
     static napi_status OffPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
@@ -74,6 +76,8 @@ private:
     static napi_status OffValidCommandChange(napi_env env, NapiAVSessionController* napiController,
                                              napi_value callback);
     static napi_status OffOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
+                                             napi_value callback);
+    static napi_status OffSessionEventChange(napi_env env, NapiAVSessionController* napiController,
                                              napi_value callback);
 
     static napi_status SetPlaybackStateFilter(napi_env env, NapiAVSessionController* napiController,

@@ -38,6 +38,8 @@ private:
 
     int32_t HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnSessionEventChange(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t (AVControllerCallbackStub::*)(MessageParcel& data, MessageParcel& reply);
@@ -48,6 +50,7 @@ private:
         [CONTROLLER_CMD_ON_ACTIVE_STATE_CHANGE] = &AVControllerCallbackStub::HandleOnActiveStateChange,
         [CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE] = &AVControllerCallbackStub::HandleOnValidCommandChange,
         [CONTROLLER_CMD_ON_OUTPUT_DEVICE_CHANGE] = &AVControllerCallbackStub::HandleOnOutputDeviceChange,
+        [CONTROLLER_CMD_ON_SET_SESSION_EVENT] = &AVControllerCallbackStub::HandleOnSessionEventChange,
     };
 };
 }

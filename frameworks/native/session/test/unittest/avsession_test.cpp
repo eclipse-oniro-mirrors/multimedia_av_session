@@ -407,6 +407,21 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState004, TestSize.Level1)
 }
 
 /**
+* @tc.name: SetSessionEventTest001
+* @tc.desc: Set session event
+* @tc.type: FUNC
+* @tc.require: I6C6IN
+*/
+HWTEST_F(AvsessionTest, SetSessionEventTest001, TestSize.Level1)
+{
+    SLOGE("SetSessionEventTest001 Begin");
+    std::string event = "eventName";
+    OHOS::AAFwk::WantParams args;
+    EXPECT_EQ(avsession_->SetSessionEvent(event, args), AVSESSION_SUCCESS);
+    SLOGE("SetSessionEventTest001 End");
+}
+
+/**
 * @tc.name: GetAVPlaybackState001
 * @tc.desc: Return the result of get av playback state
 * @tc.type: FUNC

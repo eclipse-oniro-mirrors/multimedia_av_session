@@ -284,6 +284,29 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("SetSessionEvent: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
+                            "ERROR_MSG", "avsession SetSessionEvent checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+
+    std::lock_guard lockGuard(lock_);
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleSetSessionEvent(event, args);
+    }
+
+    if (remoteSource_ != nullptr) {
+        SLOGI("Set remote session event");
+        auto ret = remoteSource_->SetSessionEventRemote(event, args);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetSessionEvent failed");
+    }
+    return AVSESSION_SUCCESS;
+}
+
 AVSessionDescriptor AVSessionItem::GetDescriptor()
 {
     return descriptor_;

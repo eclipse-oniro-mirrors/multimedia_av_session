@@ -55,6 +55,7 @@ private:
     static napi_value Activate(napi_env env, napi_callback_info info);
     static napi_value Deactivate(napi_env env, napi_callback_info info);
     static napi_value Destroy(napi_env env, napi_callback_info info);
+    static napi_value SetSessionEvent(napi_env env, napi_callback_info info);
 
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -83,6 +84,8 @@ private:
     static napi_status OffToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
+
+    static void ErrCodeToMessage(int32_t errCode, std::string& message);
 
     napi_ref wrapperRef_ {};
     std::string sessionId_ ;

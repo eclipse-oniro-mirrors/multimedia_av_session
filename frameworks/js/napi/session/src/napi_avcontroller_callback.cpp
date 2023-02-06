@@ -61,6 +61,25 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
     }
 }
 
+template<typename T>
+void NapiAVControllerCallback::HandleEvent(int32_t event, const std::string& firstParam, const T& secondParam)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callbacks_[event].empty()) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        asyncCallback_->Call(*ref, [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
+            argc = NapiUtils::ARGC_TWO;
+            auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
+            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            status = NapiUtils::SetValue(env, secondParam, argv[1]);
+            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+        });
+    }
+}
+
 void NapiAVControllerCallback::OnSessionDestroy()
 {
     HandleEvent(EVENT_SESSION_DESTROY);
@@ -94,6 +113,12 @@ void NapiAVControllerCallback::OnOutputDeviceChange(const OutputDeviceInfo& info
     HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, info);
 }
 
+void NapiAVControllerCallback::OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnSessionEventChange");
+    HandleEvent(EVENT_SESSION_EVENT_CHANGE, event, args);
+}
+
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
@@ -122,6 +147,7 @@ napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callback == nullptr) {
+        SLOGD("Remove callback, the callback is nullptr");
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
             napi_status ret = napi_delete_reference(env, *callbackRef);
             CHECK_AND_RETURN_RET_LOG(ret == napi_ok, ret, "delete callback reference failed");

@@ -107,4 +107,18 @@ void AVControllerCallbackProxy::OnOutputDeviceChange(const OutputDeviceInfo& out
     CHECK_AND_PRINT_LOG(remote->SendRequest(CONTROLLER_CMD_ON_OUTPUT_DEVICE_CHANGE, parcel, reply, option) == 0,
                         "send request failed");
 }
+
+void AVControllerCallbackProxy::OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args)
+{
+    MessageParcel parcel;
+    CHECK_AND_PRINT_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_PRINT_LOG(parcel.WriteString(event), "write event string failed");
+    CHECK_AND_PRINT_LOG(parcel.WriteParcelable(&args), "Write Want failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_PRINT_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_PRINT_LOG(remote->SendRequest(CONTROLLER_CMD_ON_SET_SESSION_EVENT, parcel, reply, option) == 0,
+        "send request failed");
+}
 }

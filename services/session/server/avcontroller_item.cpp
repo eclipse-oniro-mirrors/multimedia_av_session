@@ -22,6 +22,7 @@
 #include "avsession_utils.h"
 #include "permission_checker.h"
 #include "avsession_sysevent.h"
+#include "want_params.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -239,6 +240,13 @@ void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds
 {
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnValidCommandChange(cmds);
+}
+
+void AVControllerItem::HandleSetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVSESSION_TRACE_SYNC_START("AVControllerItem::OnSessionEventChange");
+    callback_->OnSessionEventChange(event, args);
 }
 
 pid_t AVControllerItem::GetPid() const

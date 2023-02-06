@@ -29,6 +29,7 @@ public:
     virtual int32_t CancelCastAudio(const std::string& sinkDevice) = 0;
     virtual int32_t SetAVMetaData(const AVMetaData& metaData) = 0;
     virtual int32_t SetAVPlaybackState(const AVPlaybackState& state) = 0;
+    virtual int32_t SetSessionEventRemote(const std::string& event, const AAFwk::WantParams& args) = 0;
     virtual ~RemoteSessionSource() = default;
 };
 } // namespace OHOS::AVSession

@@ -341,4 +341,24 @@ int32_t AVSessionProxy::DeleteSupportCommand(const int32_t cmd)
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
+
+int32_t AVSessionProxy::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
+{
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(event), ERR_MARSHALLING, "write event string failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&args),
+        ERR_MARSHALLING, "Write Want failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_SESSION_EVENT, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
 }

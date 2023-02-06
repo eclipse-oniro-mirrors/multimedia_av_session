@@ -23,6 +23,7 @@
 #include "avsession_log.h"
 #include "avsession_manager.h"
 #include "want_agent.h"
+#include "want_params.h"
 
 using namespace OHOS::AVSession;
 
@@ -341,6 +342,20 @@ BENCHMARK_F(AVSessionTest, DeleteSupportCommand)(benchmark::State& state)
             SLOGE("%{public}s error, failed to DeleteSupportCommand, error code is %{public}d.", __func__,
                 errCode);
             state.SkipWithError("DeleteSupportCommand failed, return error.");
+        }
+    }
+}
+
+BENCHMARK_F(AVSessionTest, SetSessionEvent)(benchmark::State& state)
+{
+    const std::string event = "dynamic_lyrics";
+    const OHOS::AAFwk::WantParams args;
+    while (state.KeepRunning()) {
+        OHOS::ErrCode errCode = avsession_->SetSessionEvent(event, args);
+        if (errCode != OHOS::ERR_OK) {
+            SLOGE("%{public}s error, failed to SetSessionEvent, error code is %{public}d.", __func__,
+                errCode);
+            state.SkipWithError("SetSessionEvent failed, return error.");
         }
     }
 }
