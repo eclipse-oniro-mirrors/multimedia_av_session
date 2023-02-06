@@ -556,6 +556,11 @@ napi_status NapiAVSessionManager::OnTopSessionChange(napi_env env, napi_value ca
     return listener_->AddCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED, callback);
 }
 
+napi_status NapiAVSessionManager::OnAudioSessionChecked(napi_env env, napi_value callback)
+{
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_AUDIO_SESSION_CHECKED, callback);
+}
+
 napi_status NapiAVSessionManager::OnServiceDie(napi_env env, napi_value callback)
 {
     napi_ref ref = nullptr;
@@ -604,6 +609,11 @@ napi_status NapiAVSessionManager::OffSessionDestroy(napi_env env, napi_value cal
 napi_status NapiAVSessionManager::OffTopSessionChange(napi_env env, napi_value callback)
 {
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED, callback);
+}
+
+napi_status NapiAVSessionManager::OffAudioSessionChecked(napi_env env, napi_value callback)
+{
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_AUDIO_SESSION_CHECKED, callback);
 }
 
 napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)

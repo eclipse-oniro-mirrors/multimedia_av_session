@@ -43,4 +43,11 @@ void SessionListenerClient::OnTopSessionChange(const AVSessionDescriptor& descri
         listener_->OnTopSessionChange(descriptor);
     }
 }
+
+void SessionListenerClient::OnAudioSessionChecked(const AVSessionDescriptor& descriptor)
+{
+    if (listener_) {
+        listener_->OnAudioSessionChecked(descriptor);
+    }
+}
 }

@@ -86,7 +86,7 @@ void AVSessionService::OnStart()
     }
 
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
-    backgroundAudioController_.Init();
+    backgroundAudioController_.Init(this);
     AddInnerSessionListener(&backgroundAudioController_);
 #endif
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
@@ -399,6 +399,18 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
         listener->OnTopSessionChange(descriptor);
+    }
+}
+
+void AVSessionService::NotifyAudioSessionCheck(const AVSessionDescriptor& descriptor)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    for (const auto& listener : innerSessionListeners_) {
+        listener->OnAudioSessionChecked(descriptor);
+    }
+    for (const auto& [pid, listener] : sessionListeners_) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnAudioSessionCheck");
+        listener->OnAudioSessionChecked(descriptor);
     }
 }
 

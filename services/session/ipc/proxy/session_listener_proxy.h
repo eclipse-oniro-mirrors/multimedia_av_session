@@ -30,6 +30,8 @@ public:
 
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
 
+    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override;
+
 private:
     static inline BrokerDelegator<SessionListenerProxy> delegator_;
 };

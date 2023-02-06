@@ -66,4 +66,13 @@ int32_t SessionListenerStub::HandleOnTopSessionChange(MessageParcel& data, Messa
     OnTopSessionChange(descriptor);
     return ERR_NONE;
 }
+
+int32_t SessionListenerStub::HandleOnAudioSessionChecked(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("SessionListenerStub::OnAudioSessionChecked");
+    AVSessionDescriptor descriptor;
+    CHECK_AND_RETURN_RET_LOG(descriptor.ReadFromParcel(data), ERR_NONE, "read descriptor failed");
+    OnAudioSessionChecked(descriptor);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

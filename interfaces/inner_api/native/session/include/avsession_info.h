@@ -35,6 +35,8 @@ public:
 
     virtual void OnTopSessionChange(const AVSessionDescriptor& descriptor) = 0;
 
+    virtual void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) = 0;
+
     virtual ~SessionListener() = default;
 };
 
