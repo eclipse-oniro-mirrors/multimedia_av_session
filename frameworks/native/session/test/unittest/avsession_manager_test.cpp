@@ -376,11 +376,11 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_NE(descriptors.size(), 0);
     int32_t size = descriptors.size();
-    EXPECT_EQ(descriptors[size -1].sessionTag_, g_testSessionTag);
-    EXPECT_EQ(descriptors[size -1].sessionType_, AVSession::SESSION_TYPE_AUDIO);
-    EXPECT_EQ(descriptors[size -1].elementName_.GetBundleName(), g_testBundleName);
-    EXPECT_EQ(descriptors[size -1].elementName_.GetAbilityName(), g_testAbilityName);
-    EXPECT_EQ(descriptors[size -1].isActive_, true);
+    EXPECT_EQ(descriptors[0].sessionTag_, g_testSessionTag);
+    EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
+    EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), g_testBundleName);
+    EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), g_testAbilityName);
+    EXPECT_EQ(descriptors[0].isActive_, true);
     session->Destroy();
     ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
