@@ -372,19 +372,20 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     EXPECT_NE(session, nullptr);
     session->Activate();
     auto sessionId = session->GetSessionId();
-    AVSessionDescriptor descriptor {};
-    ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
+    std::vector<AVSessionDescriptor> descriptors;
+    ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(sessionId, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_EQ(descriptor.elementName_.GetBundleName(), g_testBundleName);
-    EXPECT_EQ(descriptor.elementName_.GetAbilityName(), g_testAbilityName);
-    EXPECT_EQ(descriptor.sessionId_, sessionId);
+    EXPECT_NE(descriptors.size(), 0);
+    int32_t size = descriptors.size();
+    EXPECT_EQ((descriptors[size -1].sessionTag_, g_testSessionTag);
+    EXPECT_EQ(descriptors[size -1].sessionType_, AVSession::SESSION_TYPE_AUDIO);
+    EXPECT_EQ(descriptors[size -1].elementName_.GetBundleName(), g_testBundleName);
+    EXPECT_EQ(descriptors[size -1].elementName_.GetAbilityName(), g_testAbilityName);
+    EXPECT_EQ(descriptors[size -1].isActive_, true);
     session->Destroy();
-    ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
+    ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(sessionId, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_EQ(descriptor.elementName_.GetBundleName(), g_testBundleName);
-    EXPECT_EQ(descriptor.elementName_.GetAbilityName(), g_testAbilityName);
-    EXPECT_EQ(descriptor.sessionId_, sessionId);
-
+    EXPECT_EQ(descriptors.size(), size);
     SLOGI("GetHistoricalSessionDescriptors001 end");
 }
 

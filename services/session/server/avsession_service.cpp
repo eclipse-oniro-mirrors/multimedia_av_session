@@ -228,7 +228,7 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
             }
         }
         if (values.size() >= maxHistoryNums) {
-            values.erase(values.end());
+            values.erase(values.end() - 1);
         }
         nlohmann::json value;
         value["sessionId"] = session->GetSessionId();
@@ -570,7 +570,7 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
             }
         }
         if (values.size() >= maxHistoryNums) {
-            values.erase(values.end());
+            values.erase(values.end() - 1);
         }
         nlohmann::json value;
         value["sessionId"] = sessionId;
