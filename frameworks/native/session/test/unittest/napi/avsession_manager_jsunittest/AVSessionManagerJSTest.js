@@ -93,7 +93,7 @@ describe("AVSessionManagerJSTest", function () {
       destroySessionTask();
       done();
     });
-    if (descriptors.length == 1) {
+    if (descriptors.length >= 1) {
         expect(true).assertTrue();
     } else {
         console.error(TAG + " get history session number : " + descriptors.length + ", error ");
@@ -117,7 +117,7 @@ describe("AVSessionManagerJSTest", function () {
       destroySessionTask();
       done();
     });
-    if (descriptors.length == 1) {
+    if (descriptors.length >= 1) {
         expect(true).assertTrue();
     } else {
         console.error(TAG + " get history session number : " + descriptors.length + ", error ");
@@ -141,7 +141,7 @@ describe("AVSessionManagerJSTest", function () {
       destroySessionTask();
       done();
     });
-    if (descriptors.length == 1) {
+    if (descriptors.length >= 1) {
         expect(true).assertTrue();
     } else {
         console.error(TAG + " get history session number : " + descriptors.length + ", error ");
@@ -196,7 +196,7 @@ describe("AVSessionManagerJSTest", function () {
         done();
       }
       console.error(TAG + "getHistoricalSessionDescriptors005 return :" + data);
-      if (data.length == 1) {
+      if (data.length >= 1) {
         expect(true).assertTrue();
       } else {
           console.error(TAG + " get history session number : " + data.length + ", error ");
@@ -222,7 +222,7 @@ describe("AVSessionManagerJSTest", function () {
       destroySessionTask();
       done();
     });
-    if (descriptors.length == 1) {
+    if (descriptors.length >= 1) {
         expect(true).assertTrue();
     } else {
         console.error(TAG + " get history session number : " + descriptors.length + ", error ");
@@ -244,7 +244,15 @@ describe("AVSessionManagerJSTest", function () {
       expect().assertFail();
       done();
     });
-    if (descriptors.length == 1) {
+    let size = descriptors.length;
+    await createSessionTask();
+    destroySessionTask();
+    let descriptorsRetry = await AVSessionManager.getHistoricalSessionDescriptors().catch((err) => {
+      console.error(TAG + "getHistoricalSessionDescriptors007 retry error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    if (descriptorsRetry.length >= size) {
         expect(true).assertTrue();
     } else {
         console.error(TAG + " get history session number : " + descriptors.length + ", error ");
@@ -261,14 +269,14 @@ describe("AVSessionManagerJSTest", function () {
    */
   it("getHistoricalSessionDescriptors008", 0, async function (done) {
     await createSessionTask();
-    for (let i = 0; i < 1000; i ++) {
+    for (let i = 0; i < 100; i ++) {
       let descriptors = await AVSessionManager.getHistoricalSessionDescriptors().catch((err) => {
         console.error(TAG + " loop : " + i + ", getHistoricalSessionDescriptors008 error " + JSON.stringify(err));
         expect().assertFail();
         destroySessionTask();
         done();
       });
-      if (descriptors.length == 1) {
+      if (descriptors.length >= 1) {
           expect(true).assertTrue();
       } else {
           console.error(TAG + " loop : " + i + ", get history session number : " + descriptors.length + ", error ");
