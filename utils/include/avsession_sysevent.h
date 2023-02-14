@@ -65,28 +65,28 @@ public:
     template<typename... Types>
     static int HiSysWriteFault(const std::string& eventName, Types... keyValues)
     {
-        return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AV_SESSION, eventName,
+        return HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AV_SESSION, eventName,
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, keyValues...);
     }
 
     template<typename... Types>
     static int HiSysWriteStatistic(const std::string& eventName, Types... keyValues)
     {
-        return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AV_SESSION, eventName,
+        return HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AV_SESSION, eventName,
             OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, keyValues...);
     }
 
     template<typename... Types>
     static int HiSysWriteSecurity(const std::string& eventName, Types... keyValues)
     {
-        return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AV_SESSION, eventName,
+        return HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AV_SESSION, eventName,
             OHOS::HiviewDFX::HiSysEvent::EventType::SECURITY, keyValues...);
     }
 
     template<typename... Types>
     static int HiSysWriteBehavior(const std::string& eventName, Types... keyValues)
     {
-        return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AV_SESSION, eventName,
+        return HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AV_SESSION, eventName,
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR, keyValues...);
     }
 
