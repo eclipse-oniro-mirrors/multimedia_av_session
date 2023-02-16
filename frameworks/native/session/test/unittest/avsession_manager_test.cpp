@@ -129,6 +129,11 @@ public:
         return descriptor_.sessionId_;
     }
 
+    pid_t GetSessionUid() const
+    {
+        return descriptor_.uid_;
+    }
+
 private:
     AVSessionDescriptor descriptor_;
 };
@@ -516,6 +521,12 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(session->GetSessionId(), listener->GetSessionId());
 
+    AVSessionDescriptor descriptor;
+    descriptor.isThirdPartyApp_ = true;
+    descriptor.uid_ = 100;
+    listener->OnAudioSessionChecked(descriptor);
+    sleep(1);
+    EXPECT_EQ(descriptor.uid_, listener->GetSessionUid());
     session->Destroy();
 
     SLOGI("RegisterSessionListener001 end");

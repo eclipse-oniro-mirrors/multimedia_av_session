@@ -22,6 +22,7 @@ config("module_private_config") {
     "../../include/",
     "../../../../../../interfaces/inner_api/native/session/include/",
     "../../../../../services/session/server/",
+    "../../../../../services/session/adapter",
   ]
 }
 
