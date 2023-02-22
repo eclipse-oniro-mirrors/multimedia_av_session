@@ -684,8 +684,8 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
         descriptor.elementName_.SetAbilityName(DEFAULT_ABILITY_NAME);
         tempDescriptors.push_back(descriptor);
     }
-    if (maxSize == 0 || maxSize > maxHistoryNums) {
-        maxSize = maxHistoryNums;
+    if (maxSize < 0 || maxSize > maxHistoryNums) {
+        maxSize = unSetHistoryNum;
     }
     for (auto iterator = tempDescriptors.begin(); iterator != tempDescriptors.end(); ++iterator) {
         if (descriptors.size() >= maxSize) {
@@ -1059,7 +1059,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
     values = json::parse(oldContent, nullptr, false);
     CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
     for (auto value : values) {
-        if (bundleName == values["bundleName"]) {
+        if (bundleName == value["bundleName"]) {
             values.erase(std::remove(values.begin(), values.end(), value));
             break;
         }
@@ -1076,7 +1076,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
     values = json::parse(oldContent, nullptr, false);
     CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
     for (auto value : values) {
-        if (bundleName == values["bundleName"]) {
+        if (bundleName == value["bundleName"]) {
             values.erase(std::remove(values.begin(), values.end(), value));
             break;
         }
