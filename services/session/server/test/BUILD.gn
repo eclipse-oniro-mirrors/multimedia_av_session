@@ -56,7 +56,7 @@ ohos_unittest("AVSessionServiceTest") {
     "dsoftbus:softbus_client",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_audio_framework:audio_client",
     "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
@@ -71,7 +71,8 @@ ohos_unittest("AppManagerAdapterTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "//foundation/multimedia/av_session/services/session:avsession_service",
+    "./../../../session:avsession_item",
+    "./../../../session:avsession_service",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -84,7 +85,7 @@ ohos_unittest("AppManagerAdapterTest") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_audio_framework:audio_client",
     "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
@@ -100,7 +101,8 @@ ohos_unittest("AbilityConnectHelperTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "//foundation/multimedia/av_session/services/session:avsession_service",
+    "./../../../session:avsession_item",
+    "./../../../session:avsession_service",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -113,7 +115,7 @@ ohos_unittest("AbilityConnectHelperTest") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_audio_framework:audio_client",
     "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
@@ -129,7 +131,8 @@ ohos_unittest("BkGrAudioControllerTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "//foundation/multimedia/av_session/services/session:avsession_service",
+    "./../../../session:avsession_item",
+    "./../../../session:avsession_service",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -142,7 +145,7 @@ ohos_unittest("BkGrAudioControllerTest") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_audio_framework:audio_client",
     "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
@@ -211,7 +214,7 @@ ohos_unittest("SessionStackTest") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_audio_framework:audio_client",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

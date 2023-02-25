@@ -42,7 +42,7 @@ ohos_benchmarktest("SessionManagerTest") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_audio_framework:audio_client",
     "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",

@@ -30,8 +30,9 @@ ohos_benchmarktest("SessionTest") {
   sources = [ "avsession_benchmark_test.cpp" ]
 
   deps = [
-    "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
-    "//foundation/multimedia/av_session/services/session:avsession_service",
+    "./../../../../../../services/session:avsession_item",
+    "./../../../../../../services/session:avsession_service",
+    "./../../../../session:avsession_client",
   ]
 
   external_deps = [
@@ -40,7 +41,7 @@ ohos_benchmarktest("SessionTest") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_audio_framework:audio_client",
     "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
