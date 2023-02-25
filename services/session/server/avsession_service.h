@@ -289,6 +289,7 @@ private:
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;
     const int32_t THREE_CLICK = 3;
+    const int32_t unSetHistoryNum = 3;
     const int32_t CLICK_TIMEOUT = 500;
     const int32_t defMaxHistoryNum = 10;
     const int32_t maxFileLength = 32 * 1024 * 1024;
