@@ -31,8 +31,9 @@ ohos_fuzztest("AVSessionCallbackProxyFuzzTest") {
   ]
   sources = [ "avsession_callback_proxy_fuzzer.cpp" ]
   deps = [
-    "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
-    "//foundation/multimedia/av_session/services/session:avsession_service",
+    "./../../../../../../frameworks/native/session:avsession_client",
+    "./../../../../../session:avsession_item",
+    "./../../../../../session:avsession_service",
   ]
   external_deps = [
     "ability_base:want",
@@ -40,7 +41,7 @@ ohos_fuzztest("AVSessionCallbackProxyFuzzTest") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_audio_framework:audio_client",
     "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
