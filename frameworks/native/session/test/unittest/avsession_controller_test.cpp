@@ -130,6 +130,10 @@ public:
 
     void OnSessionEventChange(const std::string& event, const OHOS::AAFwk::WantParams& args) override {};
 
+    void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override {};
+
+    void OnQueueTitleChange(const std::string& title) override {};
+
     ~AVControllerCallbackImpl() override;
 
     bool isActive_ = false;
@@ -137,6 +141,8 @@ public:
     AVPlaybackState state_;
     bool isDestory_ = false;
     std::vector<int32_t> cmds_;
+    std::vector<AVQueueItem> items_;
+    std::string title_;
 };
 
 AVControllerCallbackImpl::~AVControllerCallbackImpl()
@@ -189,6 +195,9 @@ public:
     int32_t SendControlCommand(const AVControlCommand& cmd) override;
     int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
     int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
+    int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
+    int32_t GetAVQueueTitle(std::string& title) override;
+    int32_t SkipToQueueItem(int32_t& itemId) override;
     int32_t Destroy() override;
     std::string GetSessionId() override;
     int32_t RegisterCallbackInner(const OHOS::sptr<IRemoteObject>& callback) override;
@@ -235,6 +244,21 @@ int32_t AVSessionControllerStubTest::SetMetaFilter(const AVMetaData::MetaMaskTyp
 }
 
 int32_t AVSessionControllerStubTest::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetAVQueueItems(std::vector<AVQueueItem>& items)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetAVQueueTitle(std::string& title)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::SkipToQueueItem(int32_t& itemId)
 {
     return 0;
 }

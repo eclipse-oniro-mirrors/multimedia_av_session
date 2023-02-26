@@ -30,7 +30,8 @@ bool AVPlaybackState::Marshalling(Parcel& parcel) const
         parcel.WriteInt64(position_.updateTime_) &&
         parcel.WriteInt64(bufferedTime_) &&
         parcel.WriteInt32(loopMode_) &&
-        parcel.WriteBool(isFavorite_);
+        parcel.WriteBool(isFavorite_) &&
+        parcel.WriteInt32(activeItemId_);
 }
 
 AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
@@ -48,7 +49,8 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
         !parcel.ReadInt64(result->position_.updateTime_) ||
         !parcel.ReadInt64(result->bufferedTime_) ||
         !parcel.ReadInt32(result->loopMode_) ||
-        !parcel.ReadBool(result->isFavorite_)) {
+        !parcel.ReadBool(result->isFavorite_) ||
+        !parcel.ReadInt32(result->activeItemId_)) {
         SLOGE("Read AVPlaybackState failed");
         delete result;
         return nullptr;
@@ -104,6 +106,12 @@ void AVPlaybackState::SetFavorite(bool isFavorite)
     isFavorite_ = isFavorite;
 }
 
+void AVPlaybackState::SetActiveItemId(int32_t activeItemId)
+{
+    mask_.set(PLAYBACK_KEY_ACTIVE_ITEM_ID);
+    activeItemId_ = activeItemId;
+}
+
 int32_t AVPlaybackState::GetState() const
 {
     return state_;
@@ -132,6 +140,11 @@ int32_t AVPlaybackState::GetLoopMode() const
 bool AVPlaybackState::GetFavorite() const
 {
     return isFavorite_;
+}
+
+int32_t AVPlaybackState::GetActiveItemId() const
+{
+    return activeItemId_;
 }
 
 AVPlaybackState::PlaybackStateMaskType AVPlaybackState::GetMask() const
@@ -196,5 +209,10 @@ void AVPlaybackState::CloneLoopMode(const AVPlaybackState& from, AVPlaybackState
 void AVPlaybackState::CloneIsFavorite(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.isFavorite_ = from.isFavorite_;
+}
+
+void AVPlaybackState::CloneActiveItemId(const AVPlaybackState& from, AVPlaybackState& to)
+{
+    to.activeItemId_ = from.activeItemId_;
 }
 } // OHOS::AVSession

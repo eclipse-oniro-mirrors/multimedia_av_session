@@ -199,4 +199,18 @@ void AVSessionCallbackProxy::OnOutputDeviceChange(const OutputDeviceInfo& output
     CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_OUTPUT_DEVICE_CHANGE, data, reply, option) == 0,
                          "send request failed");
 }
+
+void AVSessionCallbackProxy::OnSkipToQueueItem(int32_t itemId)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(itemId), "write itemId failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_SKIP_TO_QUEUE_ITEM, data, reply, option) == 0,
+        "send request failed");
+}
 } // namespace OHOS::AVSession

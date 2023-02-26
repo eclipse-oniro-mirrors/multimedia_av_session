@@ -19,6 +19,8 @@
 #include "avsession_info.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 #include "avcontrol_command.h"
 #include "remote_session_syncer.h"
 #include "distributed_object.h"
@@ -53,6 +55,14 @@ public:
 
     int32_t GetSessionEvent(std::string& event, AAFwk::WantParams& args) override;
 
+    int32_t PutAVQueueItems(const std::vector<AVQueueItem>& items) override;
+
+    int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
+    
+    int32_t PutAVQueueTitle(const std::string& items) override;
+
+    int32_t GetAVQueueTitle(std::string& items) override;
+
     int32_t RegisterDataNotifier(const ObjectDataNotifier& notifier) override;
 
     int32_t RegisterDisconnectNotifier(const ObjectDisconnectNotifier& notifier) override;
@@ -69,12 +79,16 @@ public:
     static constexpr char PLAYBACK_STATE_KEY[] = "playbackState";
     static constexpr char CONTROL_COMMAND_KEY[] = "controlCommand";
     static constexpr char SESSION_EVENT_KEY[] = "sessionEvent";
+    static constexpr char QUEUE_ITEMS_KEY[] = "queueItems";
+    static constexpr char QUEUE_TITLE_KEY[] = "queueTitle";
     static constexpr int RECEIVE_DATA_SIZE_MAX = 500 * 1024;
     const std::map<std::string, SessionDataCategory> categoryMap {
             {METADATA_KEY, SESSION_DATA_META},
             {PLAYBACK_STATE_KEY, SESSION_DATA_PLAYBACK_STATE},
             {CONTROL_COMMAND_KEY, SESSION_DATA_CONTROL_COMMAND},
             {SESSION_EVENT_KEY, SESSION_DATA_SET_EVENT},
+            {QUEUE_ITEMS_KEY, SESSION_DATA_QUEUE_ITEMS},
+            {QUEUE_TITLE_KEY, SESSION_DATA_QUEUE_TITLE},
     };
 
 private:

@@ -34,6 +34,8 @@ public:
         EVENT_VALID_COMMAND_CHANGE,
         EVENT_OUTPUT_DEVICE_CHANGE,
         EVENT_SESSION_EVENT_CHANGE,
+        EVENT_QUEUE_ITEMS_CHANGE,
+        EVENT_QUEUE_TITLE_CHANGE,
         EVENT_TYPE_MAX
     };
 
@@ -47,6 +49,8 @@ public:
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
     void OnOutputDeviceChange(const OutputDeviceInfo& info) override;
     void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
+    void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override;
+    void OnQueueTitleChange(const std::string& title) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

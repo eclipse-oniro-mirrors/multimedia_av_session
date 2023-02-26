@@ -49,6 +49,12 @@ public:
 
     virtual int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) = 0;
 
+    virtual int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) = 0;
+
+    virtual int32_t GetAVQueueTitle(std::string& title) = 0;
+
+    virtual int32_t SkipToQueueItem(int32_t& itemId) = 0;
+
     virtual int32_t Destroy() = 0;
 
     virtual std::string GetSessionId() = 0;

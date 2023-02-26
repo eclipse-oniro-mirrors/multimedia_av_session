@@ -130,6 +130,79 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("GetAVMetaData: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
+                            "ERROR_MSG", "avsession getavqueueitems checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    items = queueItems_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SetAVQueueItems(const std::vector<AVQueueItem>& items)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("SetAVQueueItems: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
+                            "ERROR_MSG", "avsession setavqueueitems checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    queueItems_ = items;
+    std::lock_guard lockGuard(lock_);
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleQueueItemsChange(items);
+    }
+
+    if (remoteSource_ != nullptr) {
+        SLOGI("set remote AVQueueItems");
+        auto ret = remoteSource_->SetAVQueueItems(items);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVQueueItems failed");
+    }
+    return AVSESSION_SUCCESS;
+}
+
+
+int32_t AVSessionItem::GetAVQueueTitle(std::string& title)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("GetAVQueueTitle: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
+                            "ERROR_MSG", "avsession getavqueuetitle checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    title = queueTitle_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SetAVQueueTitle(const std::string& title)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("SetAVQueueTitle: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
+                            "ERROR_MSG", "avsession setavqueuetitle checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    queueTitle_ = title;
+    std::lock_guard lockGuard(lock_);
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleQueueTitleChange(title);
+    }
+
+    if (remoteSource_ != nullptr) {
+        SLOGI("set remote AVQueueTitle");
+        auto ret = remoteSource_->SetAVQueueTitle(title);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVQueueTitle failed");
+    }
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
@@ -326,6 +399,16 @@ AVMetaData AVSessionItem::GetMetaData()
     return metaData_;
 }
 
+std::vector<AVQueueItem> AVSessionItem::GetQueueItems()
+{
+    return queueItems_;
+}
+
+std::string AVSessionItem::GetQueueTitle()
+{
+    return queueTitle_;
+}
+
 std::vector<int32_t> AVSessionItem::GetSupportCommand()
 {
     return supportedCmd_;
@@ -368,6 +451,14 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 
     HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", code,
         "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");
+}
+
+
+void AVSessionItem::HandleSkipToQueueItem(const int32_t& itemId)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSkipToQueueItem");
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnSkipToQueueItem(itemId);
 }
 
 void AVSessionItem::HandleOnPlay(const AVControlCommand& cmd)

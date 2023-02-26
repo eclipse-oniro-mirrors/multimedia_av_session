@@ -20,6 +20,8 @@
 
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 #include "avsession_descriptor.h"
 #include "key_event.h"
 #include "want_params.h"
@@ -55,6 +57,7 @@ public:
     virtual void OnToggleFavorite(const std::string& mediald) = 0;
     virtual void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
     virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual void OnSkipToQueueItem(int32_t itemId) = 0;
     virtual ~AVSessionCallback() = default;
 };
 
@@ -74,6 +77,10 @@ public:
 
     virtual void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) = 0;
 
+    virtual void OnQueueItemsChange(const std::vector<AVQueueItem>& items) = 0;
+
+    virtual void OnQueueTitleChange(const std::string& title) = 0;
+
     virtual ~AVControllerCallback() = default;
 };
 
@@ -89,7 +96,9 @@ enum SessionDataCategory {
     SESSION_DATA_PLAYBACK_STATE = 1,
     SESSION_DATA_CONTROL_COMMAND = 2,
     SESSION_DATA_SET_EVENT = 3,
-    SESSION_DATA_CATEGORY_MAX = 4,
+    SESSION_DATA_QUEUE_ITEMS = 4,
+    SESSION_DATA_QUEUE_TITLE = 5,
+    SESSION_DATA_CATEGORY_MAX = 6,
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

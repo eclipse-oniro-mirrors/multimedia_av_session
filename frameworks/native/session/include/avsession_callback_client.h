@@ -40,6 +40,7 @@ public:
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
+    void OnSkipToQueueItem(int32_t itemId) override;
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;

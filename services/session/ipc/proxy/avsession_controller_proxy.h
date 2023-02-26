@@ -46,6 +46,12 @@ public:
 
     int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
 
+    int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
+
+    int32_t GetAVQueueTitle(std::string& title) override;
+
+    int32_t SkipToQueueItem(int32_t& itemId) override;
+
     int32_t Destroy() override;
 
     std::string GetSessionId() override;

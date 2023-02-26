@@ -128,6 +128,58 @@ int32_t AVSessionStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& r
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleGetAVQueueItems(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<AVQueueItem> avQueueItems;
+    int32_t ret = GetAVQueueItems(avQueueItems);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVQueueItems failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(avQueueItems.size()), ERR_NONE, "write items num int32 failed");
+    for (auto &parcelable : avQueueItems) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteParcelable(&parcelable), ERR_NONE, "Write items failed");
+    }
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleSetAVQueueItems(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::SetAVQueueItems");
+    std::vector<AVQueueItem> items_;
+    int32_t itemNum = data.ReadInt32();
+    CHECK_AND_RETURN_RET_LOG(itemNum >= 0, ERR_UNMARSHALLING, "read int32 itemNum failed");
+    for (int32_t i = 0; i < itemNum; i++) {
+        AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
+        CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
+        items_.emplace_back(*item);
+        delete item;
+    }
+    int32_t ret = SetAVQueueItems(items_);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVQueueItems failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleGetAVQueueTitle(MessageParcel& data, MessageParcel& reply)
+{
+    std::string title;
+    int32_t ret = GetAVQueueTitle(title);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVQueueTitle failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteString(title), ERR_NONE, "write title string failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleSetAVQueueTitle(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::SetAVQueueTitle");
+    std::string title;
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(title), ERR_NONE, "read title string failed");
+    int32_t ret = SetAVQueueTitle(title);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVQueueTitle failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> controller = GetControllerInner();

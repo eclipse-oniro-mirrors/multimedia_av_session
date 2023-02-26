@@ -127,6 +127,18 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetValue(napi_env env, const AVMetaData& in, napi_value& out);
 
+    /* napi_value <-> AVMediaDescription */
+    static napi_status GetValue(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetValue(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    /* napi_value <-> AVQueueItem */
+    static napi_status GetValue(napi_env env, napi_value in, AVQueueItem& out);
+    static napi_status SetValue(napi_env env, const AVQueueItem& in, napi_value& out);
+
+    /* napi_value <-> std::vector<AVQueueItem> */
+    static napi_status GetValue(napi_env env, napi_value in, std::vector<AVQueueItem>& out);
+    static napi_status SetValue(napi_env env, const std::vector<AVQueueItem>& in, napi_value& out);
+
     /* napi_value <-> AVPlaybackState */
     static napi_status GetValue(napi_env env, napi_value in, AVPlaybackState& out);
     static napi_status SetValue(napi_env env, const AVPlaybackState& in, napi_value& out);

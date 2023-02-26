@@ -50,6 +50,12 @@ private:
 
     int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetAVQueueItems(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetAVQueueTitle(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleSkipToQueueItem(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleSendAVKeyEvent(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetLaunchAbility(MessageParcel& data, MessageParcel& reply);
@@ -80,6 +86,9 @@ private:
         [CONTROLLER_CMD_SET_PLAYBACK_FILTER] = &AVSessionControllerStub::HandleSetPlaybackFilter,
         [CONTROLLER_CMD_IS_SESSION_ACTIVE] = &AVSessionControllerStub::HandleIsSessionActive,
         [CONTROLLER_CMD_GET_SESSION_ID] = &AVSessionControllerStub::HandleGetSessionId,
+        [CONTROLLER_CMD_GET_AV_QUEUE_ITEMS] = &AVSessionControllerStub::HandleGetAVQueueItems,
+        [CONTROLLER_CMD_GET_AV_QUEUE_TITLE] = &AVSessionControllerStub::HandleGetAVQueueTitle,
+        [CONTROLLER_CMD_SKIP_TO_QUEUE_ITEM] = &AVSessionControllerStub::HandleSkipToQueueItem,
     };
 };
 } // namespace OHOS::AVSession

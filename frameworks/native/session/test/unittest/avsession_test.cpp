@@ -20,6 +20,8 @@
 #include "want_agent.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 #include "avsession_log.h"
 #include "avcontrol_command.h"
 
@@ -145,6 +147,7 @@ public:
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
+    void OnSkipToQueueItem(int32_t itemId) override {};
 
     ~AVSessionCallbackImpl() override;
 };
@@ -212,6 +215,7 @@ void AVSessionCallbackImpl::OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent)
     SLOGE("OnMediaKeyEvent");
     g_onCall = AVSESSION_SUCCESS;
 }
+
 AVSessionCallbackImpl::~AVSessionCallbackImpl()
 {
 }

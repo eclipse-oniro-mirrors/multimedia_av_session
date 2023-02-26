@@ -98,6 +98,26 @@ void AVControllerCallbackClient::OnSessionEventChange(const std::string& event, 
         "AVControllerCallbackClient handler postTask failed");
 }
 
+void AVControllerCallbackClient::OnQueueItemsChange(const std::vector<AVQueueItem>& items)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, items]() { callback->OnQueueItemsChange(items); }, EVENT_NAME),
+        "AVControllerCallbackClient handler postTask failed");
+}
+
+void AVControllerCallbackClient::OnQueueTitleChange(const std::string& title)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, title]() { callback->OnQueueTitleChange(title); }, EVENT_NAME),
+        "AVControllerCallbackClient handler postTask failed");
+}
+
 void AVControllerCallbackClient::AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>&
     listener)
 {
