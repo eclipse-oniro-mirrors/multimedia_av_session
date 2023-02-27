@@ -14,6 +14,8 @@
 import("//build/ohos.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
+openssl_dir = "//third_party/openssl"
+
 group("avession_server") {
   deps = [
     ":avsession_item",
@@ -66,6 +68,7 @@ ohos_shared_library("avsession_service") {
     "//foundation/multimedia/av_session/services/session/server",
     "//foundation/multimedia/av_session/services/session/server/remote",
     "//third_party/json/single_include",
+    "$openssl_dir/include/",
   ]
 
   cflags = [
@@ -100,6 +103,7 @@ ohos_shared_library("avsession_service") {
   defines += [ "SYSTEM_LIB_PATH = ${system_lib_path}" ]
 
   deps = [
+    "$openssl_dir:libcrypto_shared",
     "./../../frameworks/common:avsession_common",
     "./../../utils:avsession_utils",
     "./../session:avsession_item",
@@ -118,7 +122,7 @@ ohos_shared_library("avsession_service") {
     "device_manager:devicemanagersdk",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_audio_framework:audio_client",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

@@ -14,11 +14,9 @@
 import("//build/ohos.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
+openssl_dir = "//third_party/openssl"
 config("avsession_utils_config") {
-  include_dirs = [
-    "include",
-    "//third_party/openssl/include/",
-  ]
+  include_dirs = [ "include" ]
 }
 
 ohos_shared_library("avsession_utils") {
@@ -33,7 +31,10 @@ ohos_shared_library("avsession_utils") {
     "src/hash_calculator.cpp",
   ]
 
-  include_dirs = [ "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include" ]
+  include_dirs = [
+    "./../interfaces/inner_api/native/session/include",
+    "$openssl_dir/include/",
+  ]
 
   public_configs = [ ":avsession_utils_config" ]
 

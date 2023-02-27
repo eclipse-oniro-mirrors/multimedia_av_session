@@ -23,7 +23,10 @@
 #include "want_agent.h"
 #include "want_params.h"
 #include "avsession_controller.h"
-
+/**
+ * @brief Session, which can be used to set metadata, play status information and other operations.
+ * @since 9
+ */
 namespace OHOS::AVSession {
 class AVSession {
 public:
@@ -33,36 +36,137 @@ public:
         SESSION_TYPE_VIDEO = 1
     };
 
+    /**
+     * @brief Get current session id.
+     *
+     * @return Returns current session id.
+     * @since 9
+    */
     virtual std::string GetSessionId() = 0;
 
+    /**
+     * Get the metadata of the current session.
+     * @param AVMetadata Session metadata {@link AVMetadata}.
+     * @since 9
+    */
     virtual int32_t GetAVMetaData(AVMetaData& meta) = 0;
 
+    /**
+     * Set session metadata.
+     * @param AVMetadata Session metadata {@link AVMetadata}.
+     * @since 9
+    */
     virtual int32_t SetAVMetaData(const AVMetaData& meta) = 0;
 
+    /**
+     * @brief Get current playing status infos.
+     *
+     * @param state Current playing status infos {@link AVPlaybackState}.
+     * @return Returns check whether the system permissions are supported.
+     * @since 9
+    */
     virtual int32_t GetAVPlaybackState(AVPlaybackState& state) = 0;
 
+    /**
+     * @brief Set session playback status information.
+     *
+     * @param state Current playing status infos {@link AVPlaybackState}.
+     * @return Return whether the setting is successful.
+     * @since 9
+    */
     virtual int32_t SetAVPlaybackState(const AVPlaybackState& state) = 0;
 
+    /**
+     * @brief Set a WantAgent's ability to pull up the session.
+     *
+     * @param ability Relevant attribute information of the application{@link WantAgent}.
+     * @return Return whether the setting is successful.
+     * @since 9
+    */
     virtual int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) = 0;
 
+    /**
+     * @brief Get the controller corresponding to this session.
+     *
+     * @return Return to session controller{@link AVSessionController}.
+     * @since 9
+    */
     virtual std::shared_ptr<AVSessionController> GetController() = 0;
 
+    /**
+     * @brief Listen for AVSession Callback event.
+     *
+     * @param callback Listen for AVSession Callback event{@link AVSessionCallback}.
+     * @return Returns whether the return is successful.
+     * @since 9
+    */
     virtual int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) = 0;
 
+    /**
+     * @brief Activate session.
+     *
+     * @return Return whether the setting is successful
+     * @since 9
+    */
     virtual int32_t Activate() = 0;
 
+    /**
+     * @brief Disable the function of the current session.
+     *
+     * @return Return whether the setting is successful
+     * @since 9
+    */
     virtual int32_t Deactivate() = 0;
 
+    /**
+     * @brief Get whether the session is activated.
+     *
+     * @return Return whether the setting is successful
+     * @since 9
+    */
     virtual bool IsActive() = 0;
 
+    /**
+     * @brief Destroy session.
+     *
+     * @return Return whether the setting is successful
+     * @since 9
+    */
     virtual int32_t Destroy() = 0;
 
+    /**
+     * @brief Add Support Command.
+     *
+     * @param cmd Commands to be added.
+     * @return Return whether the addition was successful.
+     * @since 9
+    */
     virtual int32_t AddSupportCommand(const int32_t cmd) = 0;
 
+    /**
+     * @brief Delete Support Command.
+     *
+     * @param cmd Commands to be deleted.
+     * @return Return whether the deletion was successful.
+     * @since 9
+    */
     virtual int32_t DeleteSupportCommand(const int32_t cmd) = 0;
 
+    /**
+     * @brief Set session events.
+     *
+     * @param event Name of the session event set
+     * @param args Session event key-value pairs passed
+     * @return Return whether the setting is successful
+     * @since 9
+    */
     virtual int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) = 0;
 
+    /**
+     * @brief Deconstruct AVSession object.
+     *
+     * @since 9
+    */
     virtual ~AVSession() = default;
 };
 } // namespace OHOS::AVSession
