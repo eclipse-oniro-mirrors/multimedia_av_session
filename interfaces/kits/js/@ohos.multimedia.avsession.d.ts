@@ -257,6 +257,30 @@ declare namespace avSession {
     setAudioStreamId(streamIds: Array<number>): Promise<void>;
 
     /**
+     * Set the playlist. Identifies the content of the playlist presented by this session.
+     * @param items An array of the AVQueueItem
+     * @throws {BusinessError} 401 - parameter check failed
+     * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
+     * @throws {BusinessError} {@link #ERR_CODE_SESSION_NOT_EXIST} - session does not exist
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    setAVQueueItems(streamIds: Array<AVQueueItem>, callback: AsyncCallback<void>): void;
+    setAVQueueItems(streamIds: Array<AVQueueItem>): Promise<void>;
+  
+    /**
+     * Set the name of the playlist presented by this session.
+     * @param title The name of the playlist
+     * @throws {BusinessError} 401 - parameter check failed
+     * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
+     * @throws {BusinessError} {@link #ERR_CODE_SESSION_NOT_EXIST} - session does not exist
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    setAVQueueTitle(title: string, callback: AsyncCallback<void>): void;
+    setAVQueueTitle(title: string): Promise<void>;
+
+    /**
      * Get the current session's own controller
      * @returns The instance of {@link AVSessionController}
      * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
@@ -375,6 +399,20 @@ declare namespace avSession {
      */
     on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): void;
     off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): void;
+
+    /**
+     * Register or unregister the item to play from the playlist change callback
+     * @param type Registration Type
+     * @param callback Used to handle the item to play changed.
+     * The callback provide the new device info {@link OutputDeviceInfo}
+     * @throws {BusinessError} 401 - parameter check failed
+     * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
+     * @throws {BusinessError} {@link #ERR_CODE_SESSION_NOT_EXIST} - session does not exist
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    on(type: 'skipToQueueItem', callback: (itemId: number) => void): void;
+    off(type: 'skipToQueueItem', callback?: (itemId: number) => void): void;
 
     /**
      * Activate the session, indicating that the session can accept control commands
@@ -507,6 +545,86 @@ declare namespace avSession {
      * @since 9
      */
     nextAssetId?: string;
+  }
+
+  /**
+   * The description of the media for an item in the playlist of the session
+   * @interface AVMediaDescription
+   * @syscap SystemCapability.Multimedia.AVSession.Core
+   * @since 10
+   */
+  interface AVMediaDescription {
+    /**
+     * Unique ID used to represent this media.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    mediaId: string;
+    /**
+     * The title of this media, for display in media center.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    title?: string;
+    /**
+     * The artist of this media
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    artist?: string;
+    /**
+     * The subtitle of the media, used for display
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    subtitle?: string;
+    /**
+     * The image of the media as a {@link PixelMap},
+     * used to display in media center.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    icon?: image.PixelMap | string;
+    /**
+     * The image of the media as an uri formatted String,
+     * used to display in media center.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    iconUri?: string;
+    /**
+     * Any additional attributes that can be represented as key-value pairs
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    extras?: {[key: string]: string};
+    /**
+     * The uri of the media, used to locate the media in some special cases
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    mediaUri?: string;
+  }
+
+  /**
+   * The item in the playlist of the session
+   * @interface AVQueueItem
+   * @syscap SystemCapability.Multimedia.AVSession.Core
+   * @since 10
+   */
+  interface AVQueueItem {
+    /**
+     * Sequence number of the item in the playlist.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    itemId: number;
+    /**
+     * The media description of the item in the playlist.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 9
+     */
+    description?: AVMediaDescription;
   }
 
   /**
@@ -765,6 +883,39 @@ declare namespace avSession {
     getAVMetadata(): Promise<AVMetadata>;
 
     /**
+     * Get the name of the playlist of the current session
+     * @returns string
+     * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
+     * @throws {BusinessError} {@link #ERR_CODE_SESSION_NOT_EXIST} - session does not exist
+     * @throws {BusinessError} {@link #ERR_CODE_CONTROLLER_NOT_EXIST} - controller does not exist
+     * @since 10
+     */
+    getAVQueueTitle(callback: AsyncCallback<string>): void;
+    getAVQueueTitle(): Promise<string>;
+
+    /**
+     * Get the playlist of the current session
+     * @returns An array of AVQueueItem {@link AVQueueItem}
+     * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
+     * @throws {BusinessError} {@link #ERR_CODE_SESSION_NOT_EXIST} - session does not exist
+     * @throws {BusinessError} {@link #ERR_CODE_CONTROLLER_NOT_EXIST} - controller does not exist
+     * @since 10
+     */
+    getAVQueueItems(callback: AsyncCallback<Array<AVQueueItem>>): void;
+    getAVQueueItems(): Promise<Array<AVQueueItem>>;
+
+    /**
+     * Set the item in the playlist to be played
+     * @param itemId The serial number of the item to be played
+     * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
+     * @throws {BusinessError} {@link #ERR_CODE_SESSION_NOT_EXIST} - session does not exist
+     * @throws {BusinessError} {@link #ERR_CODE_CONTROLLER_NOT_EXIST} - controller does not exist
+     * @since 10
+     */
+    skipToQueueItem(itemId: number, callback: AsyncCallback<void>): void;
+    skipToQueueItem(itemId: number): Promise<void>;
+
+    /**
      * Get output device information
      * @returns The instance of {@link OutputDeviceInfo}
      * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
@@ -936,6 +1087,34 @@ declare namespace avSession {
      */
     on(type: 'outputDeviceChange', callback: (device: OutputDeviceInfo) => void): void;
     off(type: 'outputDeviceChange', callback?: (device: OutputDeviceInfo) => void): void;
+
+    /**
+     * Register or unregister session playlist change callback
+     * @param type Registration Type
+     * @param callback Used to handle playlist changed.
+     * The callback provide the new array of AVQueueItem {@link AVQueueItem}
+     * @throws {BusinessError} 401 - parameter check failed
+     * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
+     * @throws {BusinessError} {@link #ERR_CODE_CONTROLLER_NOT_EXIST} - controller does not exist
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    on(type: 'queueItemChange', callback: (items: Array<AVQueueItem>) => void): void;
+    off(type: 'queueItemChange', callback?: (items: Array<AVQueueItem>) => void): void;
+
+    /**
+     * Register or unregister the name of session playlist change callback
+     * @param type Registration Type
+     * @param callback Used to handle name of playlist changed.
+     * The callback provide the new name.
+     * @throws {BusinessError} 401 - parameter check failed
+     * @throws {BusinessError} {@link #ERR_CODE_SERVICE_EXCEPTION} - server exception
+     * @throws {BusinessError} {@link #ERR_CODE_CONTROLLER_NOT_EXIST} - controller does not exist
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    on(type: 'queueTitleChange', callback: (title: string) => void): void;
+    off(type: 'queueTitleChange', callback?: (title: string) => void): void;
   }
 
   /**

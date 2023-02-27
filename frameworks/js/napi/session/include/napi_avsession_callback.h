@@ -40,6 +40,7 @@ public:
         EVENT_TOGGLE_FAVORITE,
         EVENT_MEDIA_KEY_EVENT,
         EVENT_OUTPUT_DEVICE_CHANGE,
+        EVENT_SKIP_TO_QUEUE_ITEM,
         EVENT_TYPE_MAX
     };
 
@@ -59,6 +60,7 @@ public:
     void OnToggleFavorite(const std::string& assertId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
+    void OnSkipToQueueItem(int32_t itemId) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

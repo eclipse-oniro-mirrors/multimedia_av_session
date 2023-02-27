@@ -121,7 +121,25 @@ int32_t RemoteSessionSourceProxy::SetSessionEventRemote(const std::string& event
     AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetSessionEventRemote");
     CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
     int32_t ret = sourceImpl_->SetSessionEventRemote(event, args);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetAVMetaData error");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetSessionEventRemote error");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSourceProxy::SetAVQueueItems(const std::vector<AVQueueItem>& items)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetAVQueueItems");
+    CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
+    int32_t ret = sourceImpl_->SetAVQueueItems(items);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetAVQueueItems error");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSourceProxy::SetAVQueueTitle(const std::string& items)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetAVQueueTitle");
+    CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
+    int32_t ret = sourceImpl_->SetAVQueueTitle(items);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetAVQueueTitle error");
     return AVSESSION_SUCCESS;
 }
 } // namespace OHOS::AVSession

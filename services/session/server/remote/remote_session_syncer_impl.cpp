@@ -227,6 +227,88 @@ int32_t RemoteSessionSyncerImpl::GetSessionEvent(std::string& event, AAFwk::Want
     return AVSESSION_SUCCESS;
 }
 
+int32_t RemoteSessionSyncerImpl::PutAVQueueItems(const std::vector<AVQueueItem>& items)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVQueueItems");
+    Parcel data;
+    
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(items.size()), AVSESSION_ERROR, "write items num int32 failed");
+    for (auto &parcelable : items) {
+        CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&parcelable), AVSESSION_ERROR, "Write items failed");
+    }
+
+    uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
+    std::vector<uint8_t> dataVector(data.GetDataSize());
+    std::copy(parcelData, parcelData + data.GetDataSize(), dataVector.begin());
+
+    CHECK_AND_RETURN_RET_LOG(PutData(QUEUE_ITEMS_KEY, dataVector) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "put data error");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSyncerImpl::GetAVQueueItems(std::vector<AVQueueItem>& items)
+{
+    std::vector<uint8_t> dataVector;
+    CHECK_AND_RETURN_RET_LOG(GetData(QUEUE_ITEMS_KEY, dataVector) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "get data error");
+    CHECK_AND_RETURN_RET_LOG(dataVector.size() <= RECEIVE_DATA_SIZE_MAX, AVSESSION_ERROR, "get data size over range");
+    DefaultAllocator allocator;
+    uint8_t *allocateData = reinterpret_cast<uint8_t*>(allocator.Alloc(dataVector.size()));
+    CHECK_AND_RETURN_RET_LOG(allocateData != nullptr, AVSESSION_ERROR, "alloc data fail");
+    std::copy(dataVector.begin(), dataVector.end(), allocateData);
+
+    Parcel parcelData;
+    CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
+                             AVSESSION_ERROR, "parse parcel error");
+
+    std::vector<AVQueueItem> items_;
+    int32_t itemNum = parcelData.ReadInt32();
+    CHECK_AND_RETURN_RET_LOG(itemNum >= 0, AVSESSION_ERROR, "parse int32 itemNum failed");
+    for (int32_t i = 0; i < itemNum; i++) {
+        AVQueueItem *item = parcelData.ReadParcelable<AVQueueItem>();
+        CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
+        items_.emplace_back(*item);
+        delete item;
+    }
+    items = items_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSyncerImpl::PutAVQueueTitle(const std::string& title)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVQueueTitle");
+    Parcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(title), ERR_MARSHALLING, "write title string failed");
+
+    uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
+    std::vector<uint8_t> dataVector(data.GetDataSize());
+    std::copy(parcelData, parcelData + data.GetDataSize(), dataVector.begin());
+
+    CHECK_AND_RETURN_RET_LOG(PutData(QUEUE_TITLE_KEY, dataVector) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "put data error");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSyncerImpl::GetAVQueueTitle(std::string& title)
+{
+    std::vector<uint8_t> dataVector;
+    CHECK_AND_RETURN_RET_LOG(GetData(QUEUE_TITLE_KEY, dataVector) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "get data error");
+    CHECK_AND_RETURN_RET_LOG(dataVector.size() <= RECEIVE_DATA_SIZE_MAX, AVSESSION_ERROR, "get data size over range");
+    DefaultAllocator allocator;
+    uint8_t *allocateData = reinterpret_cast<uint8_t*>(allocator.Alloc(dataVector.size()));
+    CHECK_AND_RETURN_RET_LOG(allocateData != nullptr, AVSESSION_ERROR, "alloc data fail");
+    std::copy(dataVector.begin(), dataVector.end(), allocateData);
+
+    Parcel parcelData;
+    CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
+                             AVSESSION_ERROR, "parse parcel error");
+
+    std::string titleDate = parcelData.ReadString();
+    title = std::string(titleDate);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t RemoteSessionSyncerImpl::RegisterDataNotifier(const ObjectDataNotifier& notifier)
 {
     CHECK_AND_RETURN_RET_LOG(objectStore_ != nullptr && object_ != nullptr, AVSESSION_ERROR,

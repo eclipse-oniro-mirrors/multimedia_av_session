@@ -19,6 +19,8 @@
 #include "napi_control_command.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
+#include "napi_media_description.h"
+#include "napi_queue_item.h"
 #include "napi_utils.h"
 
 namespace OHOS::AVSession {
@@ -117,6 +119,18 @@ void NapiAVControllerCallback::OnSessionEventChange(const std::string& event, co
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnSessionEventChange");
     HandleEvent(EVENT_SESSION_EVENT_CHANGE, event, args);
+}
+
+void NapiAVControllerCallback::OnQueueItemsChange(const std::vector<AVQueueItem>& items)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnQueueItemsChange");
+    HandleEvent(EVENT_QUEUE_ITEMS_CHANGE, items);
+}
+
+void NapiAVControllerCallback::OnQueueTitleChange(const std::string& title)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnQueueTitleChange");
+    HandleEvent(EVENT_QUEUE_TITLE_CHANGE, title);
 }
 
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)

@@ -171,7 +171,51 @@ int32_t RemoteSessionSourceImpl::SetSessionEventRemote(const std::string& event,
                 "SESSION_TYPE", session_->GetDescriptor().sessionType_,
                 "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
                 "ERROR_TYPE", "TIME_OUT",
-                "ERROR_INFO", "SetAVMetaData time out");
+                "ERROR_INFO", "SetSessionEventRemote time out");
+        }
+    }
+    SLOGI("success");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSourceImpl::SetAVQueueItems(const std::vector<AVQueueItem>& items)
+{
+    SLOGI("start");
+    CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
+    for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
+        SLOGI("iter %{public}s", iter->first.c_str());
+        std::vector<AVQueueItem> sinkItems = items;
+
+        auto ret = iter->second->PutAVQueueItems(sinkItems);
+        if (ret != AVSESSION_SUCCESS) {
+            HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+                "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+                "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+                "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+                "ERROR_TYPE", "TIME_OUT",
+                "ERROR_INFO", "SetAVQueueItems time out");
+        }
+    }
+    SLOGI("success");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSourceImpl::SetAVQueueTitle(const std::string& title)
+{
+    SLOGI("start");
+    CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
+    for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
+        SLOGI("iter %{public}s", iter->first.c_str());
+        std::string sinkTitle = title;
+
+        auto ret = iter->second->PutAVQueueTitle(sinkTitle);
+        if (ret != AVSESSION_SUCCESS) {
+            HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+                "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+                "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+                "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+                "ERROR_TYPE", "TIME_OUT",
+                "ERROR_INFO", "SetAVQueueTitle time out");
         }
     }
     SLOGI("success");

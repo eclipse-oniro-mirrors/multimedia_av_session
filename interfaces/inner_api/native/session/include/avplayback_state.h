@@ -40,7 +40,8 @@ public:
         PLAYBACK_KEY_BUFFERED_TIME = 3,
         PLAYBACK_KEY_LOOP_MODE = 4,
         PLAYBACK_KEY_IS_FAVORITE = 5,
-        PLAYBACK_KEY_MAX = 6
+        PLAYBACK_KEY_ACTIVE_ITEM_ID = 6,
+        PLAYBACK_KEY_MAX = 7
     };
 
     enum {
@@ -83,6 +84,9 @@ public:
     void SetFavorite(bool isFavorite);
     bool GetFavorite() const;
 
+    void SetActiveItemId(int32_t activeItemId);
+    int32_t GetActiveItemId() const;
+
     PlaybackStateMaskType GetMask() const;
 
     bool CopyToByMask(PlaybackStateMaskType& mask, AVPlaybackState& out) const;
@@ -95,6 +99,7 @@ public:
         PLAYBACK_KEY_BUFFERED_TIME,
         PLAYBACK_KEY_LOOP_MODE,
         PLAYBACK_KEY_IS_FAVORITE,
+        PLAYBACK_KEY_ACTIVE_ITEM_ID,
     };
 
 private:
@@ -106,6 +111,7 @@ private:
     int64_t bufferedTime_ {};
     int32_t loopMode_ = LOOP_MODE_SEQUENCE;
     bool isFavorite_ {};
+    int32_t activeItemId_ {};
 
     static void CloneState(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneSpeed(const AVPlaybackState& from, AVPlaybackState& to);
@@ -113,6 +119,7 @@ private:
     static void CloneBufferedTime(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneLoopMode(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneIsFavorite(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneActiveItemId(const AVPlaybackState& from, AVPlaybackState& to);
 
     using CloneActionType = void(*)(const AVPlaybackState& from, AVPlaybackState& to);
     static inline CloneActionType cloneActions[PLAYBACK_KEY_MAX] = {
@@ -122,6 +129,7 @@ private:
         [PLAYBACK_KEY_BUFFERED_TIME] = &AVPlaybackState::CloneBufferedTime,
         [PLAYBACK_KEY_LOOP_MODE] = &AVPlaybackState::CloneLoopMode,
         [PLAYBACK_KEY_IS_FAVORITE] = &AVPlaybackState::CloneIsFavorite,
+        [PLAYBACK_KEY_ACTIVE_ITEM_ID] = &AVPlaybackState::CloneActiveItemId,
     };
 };
 } // namespace OHOS::AVSession

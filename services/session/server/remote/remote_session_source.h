@@ -20,6 +20,8 @@
 #include "avsession_item.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 
 namespace OHOS::AVSession {
 class RemoteSessionSource {
@@ -30,6 +32,8 @@ public:
     virtual int32_t SetAVMetaData(const AVMetaData& metaData) = 0;
     virtual int32_t SetAVPlaybackState(const AVPlaybackState& state) = 0;
     virtual int32_t SetSessionEventRemote(const std::string& event, const AAFwk::WantParams& args) = 0;
+    virtual int32_t SetAVQueueItems(const std::vector<AVQueueItem>& itemId) = 0;
+    virtual int32_t SetAVQueueTitle(const std::string& title) = 0;
     virtual ~RemoteSessionSource() = default;
 };
 } // namespace OHOS::AVSession

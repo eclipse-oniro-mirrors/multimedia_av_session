@@ -33,6 +33,12 @@ public:
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
     int32_t GetAVMetaData(AVMetaData& data) override;
+    
+    int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
+
+    int32_t GetAVQueueTitle(std::string& title) override;
+
+    int32_t SkipToQueueItem(int32_t& itemId) override;
 
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
@@ -65,6 +71,10 @@ public:
     void HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo);
 
     void HandleSetSessionEvent(const std::string& event, const AAFwk::WantParams& args);
+
+    void HandleQueueItemsChange(const std::vector<AVQueueItem>& items);
+    
+    void HandleQueueTitleChange(const std::string& title);
 
     pid_t GetPid() const;
 

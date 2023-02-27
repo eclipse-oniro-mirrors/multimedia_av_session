@@ -17,6 +17,8 @@
 #include "avcontrol_command.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 
 namespace OHOS::AVSession {
 RemoteSessionCapabilitySet& RemoteSessionCapabilitySet::GetInstance()

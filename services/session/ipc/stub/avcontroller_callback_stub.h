@@ -39,6 +39,10 @@ private:
     int32_t HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnSessionEventChange(MessageParcel& data, MessageParcel& reply);
+    
+    int32_t HandleOnQueueItemsChange(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleOnQueueTitleChange(MessageParcel& data, MessageParcel& reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
@@ -51,6 +55,8 @@ private:
         [CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE] = &AVControllerCallbackStub::HandleOnValidCommandChange,
         [CONTROLLER_CMD_ON_OUTPUT_DEVICE_CHANGE] = &AVControllerCallbackStub::HandleOnOutputDeviceChange,
         [CONTROLLER_CMD_ON_SET_SESSION_EVENT] = &AVControllerCallbackStub::HandleOnSessionEventChange,
+        [CONTROLLER_CMD_ON_QUEUE_ITEMS_CHANGE] = &AVControllerCallbackStub::HandleOnQueueItemsChange,
+        [CONTROLLER_CMD_ON_QUEUE_TITLE_CHANGE] = &AVControllerCallbackStub::HandleOnQueueTitleChange,
     };
 };
 }

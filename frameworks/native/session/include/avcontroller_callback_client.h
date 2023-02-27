@@ -41,6 +41,10 @@ public:
 
     void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
 
+    void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override;
+
+    void OnQueueTitleChange(const std::string& title) override;
+
 private:
     std::shared_ptr<AVControllerCallback> callback_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;

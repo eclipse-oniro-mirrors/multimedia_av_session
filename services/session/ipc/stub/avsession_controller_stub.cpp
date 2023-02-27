@@ -94,6 +94,40 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
+int32_t AVSessionControllerStub::HandleGetAVQueueItems(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<AVQueueItem> items;
+    int32_t ret = GetAVQueueItems(items);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(items.size()), ERR_NONE, "write items num int32 failed");
+        for (auto &parcelable : items) {
+            CHECK_AND_RETURN_RET_LOG(reply.WriteParcelable(&parcelable), ERR_NONE, "Write items failed");
+        }
+    }
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleGetAVQueueTitle(MessageParcel& data, MessageParcel& reply)
+{
+    std::string title;
+    int32_t ret = GetAVQueueTitle(title);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteString(title), "write title failed");
+    }
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleSkipToQueueItem(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t itemId;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(itemId), ERR_NONE, "read itemId int32 failed");
+    int32_t ret = SkipToQueueItem(itemId);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SendAVKeyEvent");

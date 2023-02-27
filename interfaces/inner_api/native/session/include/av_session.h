@@ -43,6 +43,14 @@ public:
 
     virtual int32_t SetAVPlaybackState(const AVPlaybackState& state) = 0;
 
+    virtual int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) = 0;
+
+    virtual int32_t SetAVQueueItems(const std::vector<AVQueueItem>& items) = 0;
+    
+    virtual int32_t GetAVQueueTitle(std::string& title) = 0;
+
+    virtual int32_t SetAVQueueTitle(const std::string& title) = 0;
+
     virtual int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) = 0;
 
     virtual std::shared_ptr<AVSessionController> GetController() = 0;
