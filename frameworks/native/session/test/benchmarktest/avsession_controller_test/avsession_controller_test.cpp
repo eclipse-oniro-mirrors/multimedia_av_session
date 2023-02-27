@@ -25,6 +25,8 @@
 #include "key_event.h"
 #include "want_agent.h"
 #include "want_params.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 
 using namespace std;
 using namespace OHOS::AVSession;
@@ -102,6 +104,10 @@ public:
 
     void OnSessionEventChange(const std::string& event, const OHOS::AAFwk::WantParams& args) override {};
 
+    void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override {};
+
+    void OnQueueTitleChange(const std::string& title) override {};
+
     ~AVControllerCallbackImpl() override;
 
     bool isActive_ = false;
@@ -109,6 +115,8 @@ public:
     AVPlaybackState state_;
     bool isDestory_ = false;
     std::vector<int32_t> cmds_;
+    std::vector<AVQueueItem> items_;
+    std::string title_;
 };
 
 AVControllerCallbackImpl::~AVControllerCallbackImpl()

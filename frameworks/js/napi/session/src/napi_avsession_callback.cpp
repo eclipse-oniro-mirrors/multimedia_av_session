@@ -135,6 +135,12 @@ void NapiAVSessionCallback::OnOutputDeviceChange(const OutputDeviceInfo& outputD
     HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, outputDeviceInfo);
 }
 
+void NapiAVSessionCallback::OnSkipToQueueItem(int32_t itemId)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnSkipToQueueItem");
+    HandleEvent(EVENT_SKIP_TO_QUEUE_ITEM, itemId);
+}
+
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     SLOGI("Add callback %{public}d", event);

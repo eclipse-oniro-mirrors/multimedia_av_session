@@ -154,6 +154,16 @@ void AVSessionCallbackClient::OnOutputDeviceChange(const OutputDeviceInfo& outpu
         "AVSessionCallbackClient handler postTask failed");
 }
 
+void AVSessionCallbackClient::OnSkipToQueueItem(int32_t itemId)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, itemId]() { callback->OnSkipToQueueItem(itemId); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
+}
+
 AVSessionCallbackClient::~AVSessionCallbackClient()
 {
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask(EVENT_NAME);

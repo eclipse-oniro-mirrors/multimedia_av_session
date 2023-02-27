@@ -94,12 +94,25 @@ int32_t RemoteSessionSinkImpl::HandleSessionDataCategory(const SessionDataCatego
         CHECK_AND_RETURN_RET_LOG(syncer_->GetSessionEvent(event, args) == AVSESSION_SUCCESS, AVSESSION_ERROR,
             "GetSessionEvent failed");
         CHECK_AND_RETURN_RET_LOG(session_->SetSessionEvent(event, args) == AVSESSION_SUCCESS, AVSESSION_ERROR,
-            "SetAVPlaybackState failed");
+            "SetSessionEvent failed");
+    } else if (category == SESSION_DATA_QUEUE_ITEMS) {
+        std::vector<AVQueueItem> items;
+        AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::Get & Set QueueItems");
+        CHECK_AND_RETURN_RET_LOG(syncer_->GetAVQueueItems(items) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "GetAVQueueItems failed");
+        CHECK_AND_RETURN_RET_LOG(session_->SetAVQueueItems(items) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "SetAVQueueItems failed");
+    } else if (category == SESSION_DATA_QUEUE_TITLE) {
+        std::string title;
+        AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::Get & Set QueueTitle");
+        CHECK_AND_RETURN_RET_LOG(syncer_->GetAVQueueTitle(title) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "GetAVQueueTitle failed");
+        CHECK_AND_RETURN_RET_LOG(session_->GetAVQueueTitle(title) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "GetAVQueueTitle failed");
     } else {
         SLOGE("category is illegal");
         return AVSESSION_ERROR;
     }
-    
     return AVSESSION_SUCCESS;
 }
 

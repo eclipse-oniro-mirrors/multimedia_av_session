@@ -24,6 +24,7 @@ std::map<std::string, NapiPlaybackState::GetterType> NapiPlaybackState::getterMa
     { "bufferedTime", GetBufferedTime },
     { "loopMode", GetLoopMode },
     { "isFavorite", GetIsFavorite },
+    { "activeItemId", GetActiveItemId },
 };
 
 std::map<int32_t, NapiPlaybackState::SetterType> NapiPlaybackState::setterMap_ = {
@@ -33,6 +34,7 @@ std::map<int32_t, NapiPlaybackState::SetterType> NapiPlaybackState::setterMap_ =
     { AVPlaybackState::PLAYBACK_KEY_BUFFERED_TIME, SetBufferedTime },
     { AVPlaybackState::PLAYBACK_KEY_LOOP_MODE, SetLoopMode },
     { AVPlaybackState::PLAYBACK_KEY_IS_FAVORITE, SetIsFavorite },
+    { AVPlaybackState::PLAYBACK_KEY_ACTIVE_ITEM_ID, SetActiveItemId },
 };
 
 std::map<std::string, int32_t> NapiPlaybackState::filterMap_ = {
@@ -42,6 +44,7 @@ std::map<std::string, int32_t> NapiPlaybackState::filterMap_ = {
     { "bufferedTime", AVPlaybackState::PLAYBACK_KEY_BUFFERED_TIME },
     { "loopMode", AVPlaybackState::PLAYBACK_KEY_LOOP_MODE },
     { "isFavorite", AVPlaybackState::PLAYBACK_KEY_IS_FAVORITE },
+    { "activeItemId", AVPlaybackState::PLAYBACK_KEY_ACTIVE_ITEM_ID },
 };
 
 napi_status NapiPlaybackState::ConvertFilter(napi_env env, napi_value filter,
@@ -254,6 +257,25 @@ napi_status NapiPlaybackState::SetIsFavorite(napi_env env, const AVPlaybackState
     auto status = NapiUtils::SetValue(env, in.GetFavorite(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "isFavorite", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiPlaybackState::GetActiveItemId(napi_env env, napi_value in, AVPlaybackState& out)
+{
+    bool property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "activeItemId", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetActiveItemId(property);
+    return status;
+}
+
+napi_status NapiPlaybackState::SetActiveItemId(napi_env env, const AVPlaybackState& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetActiveItemId(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "activeItemId", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }

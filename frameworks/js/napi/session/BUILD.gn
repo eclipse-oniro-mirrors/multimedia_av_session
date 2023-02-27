@@ -36,9 +36,11 @@ ohos_shared_library("avsession_napi") {
     "src/napi_avsession_enum.cpp",
     "src/napi_avsession_manager.cpp",
     "src/napi_control_command.cpp",
+    "src/napi_media_description.cpp",
     "src/napi_meta_data.cpp",
     "src/napi_module.cpp",
     "src/napi_playback_state.cpp",
+    "src/napi_queue_item.cpp",
     "src/napi_session_listener.cpp",
     "src/napi_utils.cpp",
   ]

@@ -56,6 +56,8 @@ private:
     static napi_value Deactivate(napi_env env, napi_callback_info info);
     static napi_value Destroy(napi_env env, napi_callback_info info);
     static napi_value SetSessionEvent(napi_env env, napi_callback_info info);
+    static napi_value SetAVQueueItems(napi_env env, napi_callback_info info);
+    static napi_value SetAVQueueTitle(napi_env env, napi_callback_info info);
 
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -70,6 +72,7 @@ private:
     static napi_status OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -84,6 +87,7 @@ private:
     static napi_status OffToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
 

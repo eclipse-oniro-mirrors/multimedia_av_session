@@ -48,6 +48,10 @@ class TestAVControllerCallback : public AVControllerCallback {
     void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override {};
 
     void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
+
+    void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override;
+
+    void OnQueueTitleChange(const std::string& title) override;
 };
 
 void TestAVControllerCallback::OnSessionDestroy()
@@ -78,6 +82,16 @@ void TestAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& 
 void TestAVControllerCallback::OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args)
 {
     SLOGI("Enter into TestAVControllerCallback::OnSessionEventChange.");
+}
+
+void TestAVControllerCallback::OnQueueItemsChange(const std::vector<AVQueueItem>& items)
+{
+    SLOGI("Enter into TestAVControllerCallback::OnQueueItemsChange.");
+}
+
+void TestAVControllerCallback::OnQueueTitleChange(const std::string& title)
+{
+    SLOGI("Enter into TestAVControllerCallback::OnQueueTitleChange.");
 }
 
 void AvControllerCallbackClientFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)

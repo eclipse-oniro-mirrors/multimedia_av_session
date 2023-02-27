@@ -19,6 +19,8 @@
 #include "napi_utils.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
+#include "napi_media_description.h"
+#include "napi_queue_item.h"
 #include "want_params.h"
 #include "want_agent.h"
 #include "avsession_trace.h"
@@ -41,6 +43,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "toggleFavorite", OnToggleFavorite },
     { "handleKeyEvent", OnMediaKeyEvent },
     { "outputDeviceChange", OnOutputDeviceChange },
+    { "skipToQueueItem", OnSkipToQueueItem },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
     { "play", OffPlay },
@@ -55,7 +58,8 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "setLoopMode", OffSetLoopMode },
     { "toggleFavorite", OffToggleFavorite },
     { "handleKeyEvent", OffMediaKeyEvent },
-    { "outputDeviceChange", OffOutputDeviceChange }
+    { "outputDeviceChange", OffOutputDeviceChange },
+    { "skipToQueueItem", OffSkipToQueueItem },
 };
 
 NapiAVSession::NapiAVSession()
@@ -82,7 +86,9 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
         DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice),
-        DECLARE_NAPI_FUNCTION("setSessionEvent", SetSessionEvent)
+        DECLARE_NAPI_FUNCTION("setSessionEvent", SetSessionEvent),
+        DECLARE_NAPI_FUNCTION("setAVQueueItems", SetAVQueueItems),
+        DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor{};
@@ -355,6 +361,112 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
         output = NapiUtils::GetUndefinedValue(env);
     };
     return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", executor, complete);
+}
+
+napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVQueueItems");
+    struct ConcreteContext : public ContextBase {
+        std::vector<AVQueueItem> items_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetAVQueueItems failed : no memory");
+        NapiUtils::ThrowError(env, "SetAVQueueItems failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->items_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get queueItems failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SET_AV_QUEUE_ITEMS_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SetAVQueueItems failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->SetAVQueueItems(context->items_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetAVQueueItems failed : native session not exist";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "SetAVQueueItems failed : native invalid parameters";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SetAVQueueItems failed : native no permission";
+            } else {
+                context->errMessage = "SetAVQueueItems failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetAVQueueItems", executor, complete);
+}
+
+napi_value NapiAVSession::SetAVQueueTitle(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVQueueTitle");
+    struct ConcreteContext : public ContextBase {
+        std::string title;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetAVQueueTitle failed : no memory");
+        NapiUtils::ThrowError(env, "SetAVQueueTitle failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->title);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get queueItems failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SET_AV_QUEUE_TITLE_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SetAVQueueTitle failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->SetAVQueueTitle(context->title);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetAVQueueTitle failed : native session not exist";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "SetAVQueueTitle failed : native invalid parameters";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SetAVQueueTitle failed : native no permission";
+            } else {
+                context->errMessage = "SetAVQueueTitle failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetAVQueueTitle", executor, complete);
 }
 
 napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info)
@@ -817,6 +929,11 @@ napi_status NapiAVSession::OnOutputDeviceChange(napi_env env, NapiAVSession* nap
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
 }
 
+napi_status NapiAVSession::OnSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, callback);
+}
+
 napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY, callback);
@@ -972,5 +1089,12 @@ napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* na
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ == nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
+}
+
+napi_status NapiAVSession::OffSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ == nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, callback);
 }
 }

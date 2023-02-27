@@ -21,6 +21,8 @@
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
 #include "napi_utils.h"
+#include "napi_media_description.h"
+#include "napi_queue_item.h"
 #include "want_agent.h"
 #include "avsession_errors.h"
 #include "avsession_trace.h"
@@ -39,6 +41,8 @@ std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     { "validCommandChange", { OnValidCommandChange, OffValidCommandChange } },
     { "outputDeviceChange", { OnOutputDeviceChange, OffOutputDeviceChange } },
     { "sessionEventChange", { OnSessionEventChange, OffSessionEventChange } },
+    { "queueItemsChange", { OnQueueItemsChange, OffQueueItemsChange } },
+    { "queueTitleChange", { OnQueueTitleChange, OffQueueTitleChange } },
 };
 
 NapiAVSessionController::NapiAVSessionController()
@@ -66,6 +70,9 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("destroy", Destroy),
         DECLARE_NAPI_FUNCTION("getValidCommands", GetValidCommands),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
+        DECLARE_NAPI_FUNCTION("getAVQueueItems", GetAVQueueItems),
+        DECLARE_NAPI_FUNCTION("getAVQueueTitle", GetAVQueueTitle),
+        DECLARE_NAPI_FUNCTION("skipToQueueItem", SkipToQueueItem)
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
@@ -208,6 +215,143 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetAVMetaData", executor, complete);
+}
+
+napi_value NapiAVSessionController::GetAVQueueItems(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<AVQueueItem> items_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("GetAVQueueItems failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetAVQueueItems failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->GetAVQueueItems(context->items_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetAVQueueItems failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetAVQueueItems failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetAVQueueItems failed : native no permission";
+            } else {
+                context->errMessage = "GetAVQueueItems failed : native server exception";
+            }
+            SLOGE("controller GetAVQueueItems failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->items_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "GetAVQueueItems", executor, complete);
+}
+
+napi_value NapiAVSessionController::GetAVQueueTitle(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::string title_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("GetAVQueueTitle failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetAVQueueTitle failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->GetAVQueueTitle(context->title_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetAVQueueTitle failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetAVQueueTitle failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetAVQueueTitle failed : native no permission";
+            } else {
+                context->errMessage = "GetAVQueueTitle failed : native server exception";
+            }
+            SLOGE("controller GetAVQueueTitle failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->title_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "GetAVQueueTitle", executor, complete);
+}
+
+napi_value NapiAVSessionController::SkipToQueueItem(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionController::SkipToQueueItem");
+    struct ConcreteContext : public ContextBase {
+        int32_t itemId_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        NapiUtils::ThrowError(env, "avsession SkipToQueueItem failed:no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->itemId_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get itemId failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("SkipToQueueItem failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "SkipToQueueItem failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->SkipToQueueItem(context->itemId_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SkipToQueueItem failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "SkipToQueueItem failed : native controller not exist";
+            } else if (ret == ERR_SESSION_DEACTIVE) {
+                context->errMessage = "SkipToQueueItem failed : native session is not active";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SkipToQueueItem failed : native no permission";
+            } else {
+                context->errMessage = "SkipToQueueItem failed : native server exception";
+            }
+            SLOGE("controller SkipToQueueItem failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SkipToQueueItem", executor);
 }
 
 napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_info info)
@@ -784,6 +928,20 @@ napi_status NapiAVSessionController::OnSessionEventChange(napi_env env, NapiAVSe
                                                   callback);
 }
 
+napi_status NapiAVSessionController::OnQueueItemsChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value param, napi_value callback)
+{
+    return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_QUEUE_ITEMS_CHANGE,
+        callback);
+}
+
+napi_status NapiAVSessionController::OnQueueTitleChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value param, napi_value callback)
+{
+    return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_QUEUE_TITLE_CHANGE,
+        callback);
+}
+
 napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                                        napi_value callback)
 {
@@ -829,5 +987,19 @@ napi_status NapiAVSessionController::OffSessionEventChange(napi_env env, NapiAVS
 {
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_SESSION_EVENT_CHANGE,
                                                      callback);
+}
+
+napi_status NapiAVSessionController::OffQueueItemsChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value callback)
+{
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_QUEUE_ITEMS_CHANGE,
+        callback);
+}
+
+napi_status NapiAVSessionController::OffQueueTitleChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value callback)
+{
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_QUEUE_TITLE_CHANGE,
+        callback);
 }
 }

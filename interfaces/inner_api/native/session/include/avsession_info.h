@@ -20,6 +20,8 @@
 
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 #include "avsession_descriptor.h"
 #include "key_event.h"
 #include "want_params.h"
@@ -167,6 +169,14 @@ public:
     virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
+     * @brief Listen to the change of item in the playlist to be played.
+     *
+     * @param itemId The serial number of the item to be played.
+     * @since 10
+     */
+    virtual void OnSkipToQueueItem(int32_t itemId) = 0;
+    
+    /**
      * @brief Deconstruct AVSessionCallback.
      * @since 9
     */
@@ -231,6 +241,22 @@ public:
     virtual void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) = 0;
 
     /**
+     * @brief Session playlist change callback.
+     *
+     * @param items The changed queue items.
+     * @since 10
+     */
+    virtual void OnQueueItemsChange(const std::vector<AVQueueItem>& items) = 0;
+
+    /**
+     * @brief Session title change callback.
+     *
+     * @param title The changed title.
+     * @since 10
+     */
+    virtual void OnQueueTitleChange(const std::string& title) = 0;
+
+    /**
      * @brief Deconstruct AVControllerCallback.
      * @since 9
     */
@@ -249,7 +275,9 @@ enum SessionDataCategory {
     SESSION_DATA_PLAYBACK_STATE = 1,
     SESSION_DATA_CONTROL_COMMAND = 2,
     SESSION_DATA_SET_EVENT = 3,
-    SESSION_DATA_CATEGORY_MAX = 4,
+    SESSION_DATA_QUEUE_ITEMS = 4,
+    SESSION_DATA_QUEUE_TITLE = 5,
+    SESSION_DATA_CATEGORY_MAX = 6,
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

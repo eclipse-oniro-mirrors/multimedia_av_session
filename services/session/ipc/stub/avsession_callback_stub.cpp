@@ -148,4 +148,13 @@ int32_t AVSessionCallbackStub::HandOnOutputDeviceChange(MessageParcel& data, Mes
     OnOutputDeviceChange(outputDeviceInfo);
     return ERR_NONE;
 }
+
+int32_t AVSessionCallbackStub::HandleOnSkipToQueueItem(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnSkipToQueueItem");
+    int32_t itemId = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(itemId), ERR_NONE, "read itemId failed");
+    OnSkipToQueueItem(itemId);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

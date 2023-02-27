@@ -40,6 +40,14 @@ public:
 
     int32_t SetAVMetaData(const AVMetaData& meta) override;
 
+    int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
+
+    int32_t SetAVQueueItems(const std::vector<AVQueueItem>& items) override;
+    
+    int32_t GetAVQueueTitle(std::string& title) override;
+
+    int32_t SetAVQueueTitle(const std::string& title) override;
+
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
@@ -64,6 +72,10 @@ public:
 
     AVMetaData GetMetaData();
 
+    std::vector<AVQueueItem> GetQueueItems();
+
+    std::string GetQueueTitle();
+
     std::vector<int32_t> GetSupportCommand();
 
     AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
@@ -71,6 +83,8 @@ public:
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
     void HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo);
+
+    void HandleSkipToQueueItem(const int32_t& itemId);
 
     void ExecuteControllerCommand(const AVControlCommand& cmd);
 
@@ -148,6 +162,8 @@ private:
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
+    std::vector<AVQueueItem> queueItems_;
+    std::string queueTitle_;
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
     std::vector<int32_t> supportedCmd_;
     sptr<IAVSessionCallback> callback_;

@@ -68,6 +68,14 @@ private:
 
     int32_t HandleSetSessionEvent(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetAVQueueItems(MessageParcel& data, MessageParcel& reply);
+    
+    int32_t HandleSetAVQueueItems(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetAVQueueTitle(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleSetAVQueueTitle(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
@@ -87,6 +95,10 @@ private:
         [SESSION_CMD_ADD_SUPPORT_COMMAND] = &AVSessionStub::HandleAddSupportCommand,
         [SESSION_CMD_DELETE_SUPPORT_COMMAND] = &AVSessionStub::HandleDeleteSupportCommand,
         [SESSION_CMD_SET_SESSION_EVENT] = &AVSessionStub::HandleSetSessionEvent,
+        [SESSION_CMD_GET_QUEUE_ITEMS] = &AVSessionStub::HandleGetAVQueueItems,
+        [SESSION_CMD_SET_QUEUE_ITEMS] = &AVSessionStub::HandleSetAVQueueItems,
+        [SESSION_CMD_GET_QUEUE_TITLE] = &AVSessionStub::HandleGetAVQueueTitle,
+        [SESSION_CMD_SET_QUEUE_TITLE] = &AVSessionStub::HandleSetAVQueueTitle,
     };
 };
 }

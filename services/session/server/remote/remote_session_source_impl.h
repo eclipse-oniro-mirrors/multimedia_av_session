@@ -40,6 +40,10 @@ public:
 
     int32_t SetSessionEventRemote(const std::string& event, const AAFwk::WantParams& args) override;
 
+    int32_t SetAVQueueItems(const std::vector<AVQueueItem>& items) override;
+    
+    int32_t SetAVQueueTitle(const std::string& title) override;
+
     ~RemoteSessionSourceImpl() override = default;
 
 private:

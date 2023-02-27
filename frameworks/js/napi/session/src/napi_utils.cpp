@@ -19,6 +19,8 @@
 #include "av_session.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
+#include "napi_media_description.h"
+#include "napi_queue_item.h"
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
 #include "extension_context.h"
@@ -423,6 +425,60 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVMetaData& out)
 napi_status NapiUtils::SetValue(napi_env env, const AVMetaData& in, napi_value& out)
 {
     return NapiMetaData::SetValue(env, in, out);
+}
+
+/* napi_value <-> AVMediaDescription */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    return NapiMediaDescription::GetValue(env, in, out);
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    return NapiMediaDescription::SetValue(env, in, out);
+}
+
+/* napi_value <-> AVQueueItem */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVQueueItem& out)
+{
+    return NapiQueueItem::GetValue(env, in, out);
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AVQueueItem& in, napi_value& out)
+{
+    return NapiQueueItem::SetValue(env, in, out);
+}
+
+/* napi_value <-> std::vector<AVQueueItem> */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<AVQueueItem>& out)
+{
+    uint32_t length {};
+    auto status = napi_get_array_length(env, in, &length);
+    CHECK_RETURN(status == napi_ok, "get AVQueueItem array length failed", status);
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value element {};
+        status = napi_get_element(env, in, i, &element);
+        CHECK_RETURN((status == napi_ok) && (element != nullptr), "get element failed", status);
+        AVQueueItem descriptor;
+        status = GetValue(env, element, descriptor);
+        out.push_back(descriptor);
+    }
+    return status;
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<AVQueueItem>& in, napi_value& out)
+{
+    SLOGD("napi_value <- std::vector<std::string>");
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN(status == napi_ok, "create AVQueueItem array failed!", status);
+    int index = 0;
+    for (auto& item : in) {
+        napi_value element = nullptr;
+        SetValue(env, item, element);
+        status = napi_set_element(env, out, index++, element);
+        CHECK_RETURN((status == napi_ok), "napi_set_element failed!", status);
+    }
+    return status;
 }
 
 /* napi_value <-> AVPlaybackState */

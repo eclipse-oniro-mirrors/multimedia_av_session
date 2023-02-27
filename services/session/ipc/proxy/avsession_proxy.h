@@ -23,6 +23,8 @@
 #include "avsession_errors.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 
 namespace OHOS::AVSession {
 class AVSessionProxy : public IRemoteProxy<IAVSession> {
@@ -40,6 +42,14 @@ public:
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
+
+    int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
+
+    int32_t SetAVQueueItems(const std::vector<AVQueueItem>& items) override;
+
+    int32_t GetAVQueueTitle(std::string& title) override;
+
+    int32_t SetAVQueueTitle(const std::string& title) override;
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 

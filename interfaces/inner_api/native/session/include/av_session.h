@@ -77,6 +77,42 @@ public:
     virtual int32_t SetAVPlaybackState(const AVPlaybackState& state) = 0;
 
     /**
+     * @brief Get the playlist. Which is the content of the playlist presented by this session.
+     *
+     * @param items An array of the AVQueueItem.
+     * @return Return whether the obtain is successful.
+     * @since 10
+    */
+    virtual int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) = 0;
+
+    /**
+     * @brief Set the playlist. Identifies the content of the playlist presented by this session.
+     *
+     * @param items An array of the AVQueueItem.
+     * @return Return whether the setting is successful.
+     * @since 10
+    */
+    virtual int32_t SetAVQueueItems(const std::vector<AVQueueItem>& items) = 0;
+  
+    /**
+     * @brief Get the name of the playlist presented by this session.
+
+     * @param title The name of the playlist.
+     * @return Return whether the get is successful.
+     * @since 10
+     */
+    virtual int32_t GetAVQueueTitle(std::string& title) = 0;
+  
+    /**
+     * @brief Set the name of the playlist presented by this session.
+
+     * @param title The name of the playlist.
+     * @return Return whether the set is successful.
+     * @since 10
+     */
+    virtual int32_t SetAVQueueTitle(const std::string& title) = 0;
+
+    /**
      * @brief Set a WantAgent's ability to pull up the session.
      *
      * @param ability Relevant attribute information of the application{@link WantAgent}.

@@ -19,6 +19,8 @@
 #include "avsession_info.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 #include "avcontrol_command.h"
 
 namespace OHOS::AVSession {
@@ -44,6 +46,14 @@ public:
     virtual int32_t PutSessionEvent(const std::string& event, const AAFwk::WantParams& args) = 0;
 
     virtual int32_t GetSessionEvent(std::string& event, AAFwk::WantParams& args) = 0;
+
+    virtual int32_t PutAVQueueItems(const std::vector<AVQueueItem>& items) = 0;
+
+    virtual int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) = 0;
+    
+    virtual int32_t PutAVQueueTitle(const std::string& items) = 0;
+
+    virtual int32_t GetAVQueueTitle(std::string& items) = 0;
 
     virtual int32_t RegisterDataNotifier(const ObjectDataNotifier& notifier) = 0;
 

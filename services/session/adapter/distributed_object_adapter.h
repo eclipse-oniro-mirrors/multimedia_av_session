@@ -18,6 +18,8 @@
 
 #include "distributed_objectstore.h"
 #include "avmeta_data.h"
+#include "avmedia_description.h"
+#include "avqueue_item.h"
 
 namespace OHOS::AVSession {
 class DistributedObjectAdapter {

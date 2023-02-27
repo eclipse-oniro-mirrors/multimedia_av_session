@@ -80,6 +80,45 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("GetAVQueueItems: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
+                            "ERROR_MSG", "controller getavqueueitems checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    items = session_->GetQueueItems();
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControllerItem::GetAVQueueTitle(std::string& title)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("GetAVQueueTitle: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
+                            "ERROR_MSG", "controller getavqueuetitle checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    title = session_->GetQueueTitle();
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControllerItem::SkipToQueueItem(int32_t& itemId)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("SkipToQueueItem: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
+                            "ERROR_MSG", "controller skiptoqueueitem checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    session_->HandleSkipToQueueItem(itemId);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
@@ -247,6 +286,20 @@ void AVControllerItem::HandleSetSessionEvent(const std::string& event, const AAF
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnSessionEventChange");
     callback_->OnSessionEventChange(event, args);
+}
+
+void AVControllerItem::HandleQueueItemsChange(const std::vector<AVQueueItem>& items)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVSESSION_TRACE_SYNC_START("AVControllerItem::OnQueueItemsChange");
+    callback_->OnQueueItemsChange(items);
+}
+
+void AVControllerItem::HandleQueueTitleChange(const std::string& title)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVSESSION_TRACE_SYNC_START("AVControllerItem::OnQueueTitleChange");
+    callback_->OnQueueTitleChange(title);
 }
 
 pid_t AVControllerItem::GetPid() const

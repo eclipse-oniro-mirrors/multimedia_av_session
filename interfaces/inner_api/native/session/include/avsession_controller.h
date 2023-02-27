@@ -124,6 +124,33 @@ public:
     virtual int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) = 0;
 
     /**
+     * @brief Get the playlist. Which is the content of the playlist presented by this session.
+     *
+     * @param items An array of the AVQueueItem.
+     * @return Return whether the obtain is successful.
+     * @since 10
+    */
+    virtual int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) = 0;
+
+    /**
+     * @brief Get the name of the playlist presented by this session.
+     *
+     * @param title The name of the playlist.
+     * @return Return whether the get is successful.
+     * @since 10
+     */
+    virtual int32_t GetAVQueueTitle(std::string& title) = 0;
+
+    /**
+     * @brief Set the item in the playlist to be played.
+     *
+     * @param itemId The serial number of the item to be played.
+     * @return Return whether the operation is successful.
+     * @since 10
+     */
+    virtual int32_t SkipToQueueItem(int32_t& itemId) = 0;
+
+    /**
      * @brief Destroy session.
      *
      * @return Returns whether destroy successful.
