@@ -16,7 +16,7 @@ import("//foundation/multimedia/av_session/config.gni")
 
 openssl_dir = "//third_party/openssl"
 
-group("avession_server") {
+group("avsession_server") {
   deps = [
     ":avsession_item",
     ":avsession_service",

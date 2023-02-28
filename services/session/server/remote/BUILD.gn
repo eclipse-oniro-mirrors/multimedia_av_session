@@ -32,7 +32,7 @@ common_deps = [
   "$openssl_dir:libcrypto_shared",
   "./../../../../frameworks/native/session:avsession_client",
   "./../../../../utils:avsession_utils",
-  "./../../../session:avsession_item",
+  "./../../../session:avsession_server",
 ]
 
 common_external_deps = [
