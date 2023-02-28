@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
-group("avession_server") {
+group("avsession_server") {
   deps = [
     ":avsession_item",
     ":avsession_service",

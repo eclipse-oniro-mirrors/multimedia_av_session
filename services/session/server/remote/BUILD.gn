@@ -28,7 +28,7 @@ common_include_dirs = [
 common_deps = [
   "./../../../../frameworks/native/session:avsession_client",
   "./../../../../utils:avsession_utils",
-  "./../../../session:avsession_item",
+  "./../../../session:avsession_server",
 ]
 
 common_external_deps = [
