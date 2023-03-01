@@ -30,6 +30,7 @@ public:
                                           const std::string& sourceCap) = 0;
     virtual int32_t CancelCastSession() = 0;
     virtual int32_t SetControlCommand(const AVControlCommand& command) = 0;
+    virtual int32_t SetCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) = 0;
     virtual ~RemoteSessionSink() = default;
 };
 } // namespace OHOS::AVSession

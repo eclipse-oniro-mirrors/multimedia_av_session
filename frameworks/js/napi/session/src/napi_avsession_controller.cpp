@@ -70,6 +70,7 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("destroy", Destroy),
         DECLARE_NAPI_FUNCTION("getValidCommands", GetValidCommands),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
+        DECLARE_NAPI_FUNCTION("sendCommonCommand", SendCommonCommand),
         DECLARE_NAPI_FUNCTION("getAVQueueItems", GetAVQueueItems),
         DECLARE_NAPI_FUNCTION("getAVQueueTitle", GetAVQueueTitle),
         DECLARE_NAPI_FUNCTION("skipToQueueItem", SkipToQueueItem)
@@ -585,6 +586,80 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
     };
 
     return NapiAsyncWork::Enqueue(env, context, "SendControlCommand", executor);
+}
+
+napi_value NapiAVSessionController::SendCommonCommand(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionController::SendCommonCommand");
+    struct ConcreteContext : public ContextBase {
+        std::string commonCommand_;
+        AAFwk::WantParams commandArgs_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SendCommonCommand failed : no memory");
+        NapiUtils::ThrowError(env, "SendCommonCommand failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "Invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->commonCommand_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get common command failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->commandArgs_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get command args failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SEND_COMMON_COMMAND_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("SendCommonCommand failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "SendCommonCommand failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->
+            SendCommonCommand(context->commonCommand_, context->commandArgs_);
+        if (ret != AVSESSION_SUCCESS) {
+            ErrCodeToMessage(ret, context->errMessage);
+            SLOGE("Controller SendCommonCommand failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SendCommonCommand", executor, complete);
+}
+
+void NapiAVSessionController::ErrCodeToMessage(int32_t errCode, std::string& message)
+{
+    switch (errCode) {
+        case ERR_SESSION_NOT_EXIST:
+            message = "SetSessionEvent failed : native session not exist";
+            break;
+        case ERR_CONTROLLER_NOT_EXIST:
+            message = "SendCommonCommand failed : native controller not exist";
+            break;
+        case ERR_SESSION_DEACTIVE:
+            message = "SendCommonCommand failed : native session is not active";
+            break;
+        case ERR_NO_PERMISSION:
+            message = "SetSessionEvent failed : native no permission";
+            break;
+        default:
+            message = "SetSessionEvent failed : native server exception";
+            break;
+    }
 }
 
 napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info info)

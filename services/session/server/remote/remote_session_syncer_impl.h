@@ -55,6 +55,10 @@ public:
 
     int32_t GetSessionEvent(std::string& event, AAFwk::WantParams& args) override;
 
+    int32_t PutCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
+
+    int32_t GetCommonCommand(std::string& commonCommand, AAFwk::WantParams& commandArgs) override;
+
     int32_t PutAVQueueItems(const std::vector<AVQueueItem>& items) override;
 
     int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
@@ -78,6 +82,7 @@ public:
     static constexpr char METADATA_KEY[] = "metaData";
     static constexpr char PLAYBACK_STATE_KEY[] = "playbackState";
     static constexpr char CONTROL_COMMAND_KEY[] = "controlCommand";
+    static constexpr char COMMON_COMMAND_KEY[] = "commonCommand";
     static constexpr char SESSION_EVENT_KEY[] = "sessionEvent";
     static constexpr char QUEUE_ITEMS_KEY[] = "queueItems";
     static constexpr char QUEUE_TITLE_KEY[] = "queueTitle";
@@ -86,6 +91,7 @@ public:
             {METADATA_KEY, SESSION_DATA_META},
             {PLAYBACK_STATE_KEY, SESSION_DATA_PLAYBACK_STATE},
             {CONTROL_COMMAND_KEY, SESSION_DATA_CONTROL_COMMAND},
+            {COMMON_COMMAND_KEY, SESSION_DATA_COMMON_COMMAND},
             {SESSION_EVENT_KEY, SESSION_DATA_SET_EVENT},
             {QUEUE_ITEMS_KEY, SESSION_DATA_QUEUE_ITEMS},
             {QUEUE_TITLE_KEY, SESSION_DATA_QUEUE_TITLE},

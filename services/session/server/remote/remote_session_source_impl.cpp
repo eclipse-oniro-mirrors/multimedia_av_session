@@ -74,16 +74,36 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
             SLOGI("device %{public}s category %{public}d changed", deviceId.c_str(), category);
             CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,
-                                     "syncer is not exist");
-            CHECK_AND_RETURN_RET_LOG(category == SESSION_DATA_CONTROL_COMMAND, AVSESSION_ERROR, "category is error");
-            AVControlCommand command;
-            CHECK_AND_RETURN_RET_LOG(syncers_[deviceId]->GetControlCommand(command) == AVSESSION_SUCCESS,
-                                     AVSESSION_ERROR, "GetControlCommand failed");
-            session_->ExecuteControllerCommand(command);
-            return AVSESSION_SUCCESS;
+                "syncer is not exist");
+            return HandleSourceSessionDataCategory(category, deviceId);
         });
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddDataNotifier failed");
     }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSourceImpl::HandleSourceSessionDataCategory(const SessionDataCategory category,
+    const std::string& deviceId)
+{
+    if (category == SESSION_DATA_CONTROL_COMMAND) {
+        AVMetaData metaData;
+        AVSESSION_TRACE_SYNC_START("RemoteSessionSourceImpl::SendControlCommand");
+        AVControlCommand command;
+        CHECK_AND_RETURN_RET_LOG(syncers_[deviceId]->GetControlCommand(command) == AVSESSION_SUCCESS,
+            AVSESSION_ERROR, "GetControlCommand failed");
+        session_->ExecuteControllerCommand(command);
+    } else if (category == SESSION_DATA_COMMON_COMMAND) {
+        std::string commonCommand;
+        AAFwk::WantParams commandArgs;
+        AVSESSION_TRACE_SYNC_START("RemoteSessionSourceImpl::SendCommonCommand");
+        CHECK_AND_RETURN_RET_LOG(syncers_[deviceId]->GetCommonCommand(commonCommand, commandArgs) == AVSESSION_SUCCESS,
+            AVSESSION_ERROR, "GetCommonCommand failed");
+        session_->ExecueCommonCommand(commonCommand, commandArgs);
+    } else {
+        SLOGE("Category is illegal");
+        return AVSESSION_ERROR;
+    }
+
     return AVSESSION_SUCCESS;
 }
 

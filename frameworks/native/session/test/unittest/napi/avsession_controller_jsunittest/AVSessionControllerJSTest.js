@@ -29,7 +29,11 @@ describe("AVSessionControllerJsTest", function () {
   const UPDATE_LYRICS_EVENT = "dynamic_lyrics";
   const UPDATE_LYRICS_WANT_PARAMS = {
     lyrics: "This is my lyrics"
-  }
+  };
+  const COMMON_COMMAND_STRING = "common_command";
+  const COMMON_COMMAND_PARAMS = {
+    command: "This is my command"
+  };
 
   beforeAll(async function () {
     session = await avSession.createAVSession(featureAbility.getContext(), "AVSessionDemo", 'audio').catch((err) => {
@@ -294,5 +298,76 @@ describe("AVSessionControllerJsTest", function () {
       expect(err.code == 401).assertTrue();
     }
     done();
+  })
+
+  /*
+   * @tc.name:sendCommonCommandTest001
+   * @tc.desc:Send common command - callback
+   * @tc.type: FUNC
+   * @tc.require: I6ETY6
+   */
+  it("sendCommonCommandTest001", 0, async function (done) {
+    controller.sendComonCommand(COMMON_COMMAND_STRING, COMMON_COMMAND_PARAMS, (err) => {
+      if (err) {
+        console.error(TAG + "sendCommonCommandTest001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      console.info(TAG + "sendCommonCommandTest001 finished");
+      expect(true).assertTrue();
+      done();
+    });
+  })
+
+  /*
+   * @tc.name:sendCommonCommandTest002
+   * @tc.desc:Send common command - promise
+   * @tc.type: FUNC
+   * @tc.require: I6ETY6
+   */
+  it("sendCommonCommandTest002", 0, async function (done) {
+    await controller.sendComonCommand(COMMON_COMMAND_STRING, COMMON_COMMAND_PARAMS).catch((err) => {
+      console.error(TAG + "sendCommonCommandTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    console.info(TAG + "sendCommonCommandTest002 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:sendCommonCommandTest003
+   * @tc.desc:Set common command - one param
+   * @tc.type: FUNC
+   * @tc.require: I6ETY6
+   */
+  it("sendCommonCommandTest003", 0, async function (done) {
+    let errCode = 0;
+    await controller.sendCommonCommand(COMMON_COMMAND_STRING).catch((err) => {
+      console.info(TAG + "sendCommonCommandTest003 caught error" + err.code);
+      errCode = err.code;
+    });
+    sleep(200).then(() => {
+      expect(errCode == 401).assertTrue();
+      done();
+    })
+  })
+
+  /*
+   * @tc.name:sendCommonCommandTest004
+   * @tc.desc:Send common command - invalid params
+   * @tc.type: FUNC
+   * @tc.require: I6ETY6
+   */
+  it("sendCommonCommandTest004", 0, async function (done) {
+    let errCode = 0;
+    await controller.sendCommonCommand(COMMON_COMMAND_STRING, COMMON_COMMAND_PARAMS).catch((err) => {
+    console.info(TAG + "sendCommonCommandTest004 caught error" + err.code);
+      errCode = err.code;
+    });
+    sleep(200).then(() => {
+      expect(errCode == 401).assertTrue();
+      done();
+    })
   })
 })

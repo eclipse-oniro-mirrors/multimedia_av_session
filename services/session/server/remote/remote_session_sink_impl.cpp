@@ -139,4 +139,20 @@ int32_t RemoteSessionSinkImpl::SetControlCommand(const AVControlCommand& command
     }
     return AVSESSION_SUCCESS;
 }
+
+int32_t RemoteSessionSinkImpl::SetCommonCommand(const std::string& commonCommand,
+    const AAFwk::WantParams& commandArgs)
+{
+    CHECK_AND_RETURN_RET_LOG(syncer_ != nullptr, AVSESSION_ERROR, "syncer is nullptr");
+    auto ret = syncer_->PutCommonCommand(commonCommand, commandArgs);
+    if (ret != AVSESSION_SUCCESS && session_ != nullptr) {
+        HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+            "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+            "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+            "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+            "ERROR_TYPE", "TIME_OUT",
+            "ERROR_INFO", "SetCommonCommand time out");
+    }
+    return AVSESSION_SUCCESS;
+}
 } // namespace OHOS::AVSession

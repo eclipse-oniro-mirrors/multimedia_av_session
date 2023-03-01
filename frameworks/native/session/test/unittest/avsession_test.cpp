@@ -147,6 +147,7 @@ public:
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
+    void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override {};
 
     ~AVSessionCallbackImpl() override;
@@ -213,6 +214,13 @@ void AVSessionCallbackImpl::OnToggleFavorite(const std::string& mediald)
 void AVSessionCallbackImpl::OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent)
 {
     SLOGE("OnMediaKeyEvent");
+    g_onCall = AVSESSION_SUCCESS;
+}
+
+void AVSessionCallbackImpl::OnCommonCommand(const std::string& commonCommand,
+    const OHOS::AAFwk::WantParams& commandArgs)
+{
+    SLOGI("OnCommonCommand");
     g_onCall = AVSESSION_SUCCESS;
 }
 
@@ -423,6 +431,25 @@ HWTEST_F(AvsessionTest, SetSessionEventTest001, TestSize.Level1)
     OHOS::AAFwk::WantParams args;
     EXPECT_EQ(avsession_->SetSessionEvent(event, args), AVSESSION_SUCCESS);
     SLOGE("SetSessionEventTest001 End");
+}
+
+/**
+* @tc.name: SetSessionEventTest002
+* @tc.desc: Set session event - large number of calls
+* @tc.type: FUNC
+* @tc.require: I6C6IN
+*/
+HWTEST_F(AvsessionTest, SetSessionEventTest002, TestSize.Level2)
+{
+    SLOGE("SetSessionEventTest002 Begin");
+    std::string event = "eventName";
+    OHOS::AAFwk::WantParams args;
+
+    // Test the interface through 500 calls
+    for (int i = 0; i < 500; i++) {
+        EXPECT_EQ(avsession_->SetSessionEvent(event, args), AVSESSION_SUCCESS);
+    }
+    SLOGE("SetSessionEventTest002 End");
 }
 
 /**

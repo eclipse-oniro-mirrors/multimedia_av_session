@@ -97,6 +97,16 @@ public:
     virtual int32_t SendControlCommand(const AVControlCommand& cmd) = 0;
 
     /**
+     * Send common commands to its corresponding session through the controller.
+     *
+     * @param commonCommand The name of the command to be sent.
+     * @param commandArgs Command packets to be sent
+     * @return int32_t Return whether sending succeeded.
+     * @since 10
+    */
+    virtual int32_t SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) = 0;
+
+    /**
      * @brief Listen for AVController Callback event.
      *
      * @param callback Listen for AVController Callback event{@link AVControllerCallback}.

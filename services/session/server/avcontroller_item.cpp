@@ -189,6 +189,19 @@ int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("SendControlCommand: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
+                            "ERROR_MSG", "Controller SendCommonCommand checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
+    session_->ExecueCommonCommand(commonCommand, commandArgs);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType& filter)
 {
     metaMask_ = filter;

@@ -40,6 +40,7 @@ public:
         EVENT_TOGGLE_FAVORITE,
         EVENT_MEDIA_KEY_EVENT,
         EVENT_OUTPUT_DEVICE_CHANGE,
+        EVENT_SEND_COMMON_COMMAND,
         EVENT_SKIP_TO_QUEUE_ITEM,
         EVENT_TYPE_MAX
     };
@@ -60,6 +61,7 @@ public:
     void OnToggleFavorite(const std::string& assertId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
+    void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
@@ -72,6 +74,9 @@ private:
 
     template<typename T>
     void HandleEvent(int32_t event, const T& param);
+
+    template<typename T>
+    void HandleEvent(int32_t event, const std::string& firstParam, const T& secondParam);
 
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;

@@ -43,6 +43,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "toggleFavorite", OnToggleFavorite },
     { "handleKeyEvent", OnMediaKeyEvent },
     { "outputDeviceChange", OnOutputDeviceChange },
+    { "commonCommand", OnCommonCommand },
     { "skipToQueueItem", OnSkipToQueueItem },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
@@ -59,6 +60,7 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "toggleFavorite", OffToggleFavorite },
     { "handleKeyEvent", OffMediaKeyEvent },
     { "outputDeviceChange", OffOutputDeviceChange },
+    { "commonCommand", OffCommonCommand },
     { "skipToQueueItem", OffSkipToQueueItem },
 };
 
@@ -929,6 +931,11 @@ napi_status NapiAVSession::OnOutputDeviceChange(napi_env env, NapiAVSession* nap
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
 }
 
+napi_status NapiAVSession::OnCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_SEND_COMMON_COMMAND, callback);
+}
+
 napi_status NapiAVSession::OnSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, callback);
@@ -1089,6 +1096,11 @@ napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* na
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
+}
+
+napi_status NapiAVSession::OffCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SEND_COMMON_COMMAND, callback);
 }
 
 napi_status NapiAVSession::OffSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback)

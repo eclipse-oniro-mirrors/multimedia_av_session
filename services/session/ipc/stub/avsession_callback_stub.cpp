@@ -138,7 +138,7 @@ int32_t AVSessionCallbackStub::HandleOnMediaKeyEvent(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
-int32_t AVSessionCallbackStub::HandOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply)
+int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnOutputDeviceChange");
     OutputDeviceInfo outputDeviceInfo;
@@ -146,6 +146,16 @@ int32_t AVSessionCallbackStub::HandOnOutputDeviceChange(MessageParcel& data, Mes
     CHECK_AND_RETURN_RET_LOG(data.ReadStringVector(&outputDeviceInfo.deviceIds_), ERR_NONE, "read id failed");
     CHECK_AND_RETURN_RET_LOG(data.ReadStringVector(&outputDeviceInfo.deviceNames_), ERR_NONE, "read name failed");
     OnOutputDeviceChange(outputDeviceInfo);
+    return ERR_NONE;
+}
+
+int32_t AVSessionCallbackStub::HandleOnCommonCommand(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnCommonCommand");
+    auto commonCommand = data.ReadString();
+    sptr commonArgs = data.ReadParcelable<AAFwk::WantParams>();
+    CHECK_AND_RETURN_RET_LOG(commonArgs != nullptr, ERR_NONE, "Read common args failed");
+    OnCommonCommand(commonCommand, *commonArgs);
     return ERR_NONE;
 }
 

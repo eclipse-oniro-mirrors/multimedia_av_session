@@ -72,6 +72,7 @@ private:
     static napi_status OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -87,6 +88,7 @@ private:
     static napi_status OffToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);

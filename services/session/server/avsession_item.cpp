@@ -453,6 +453,18 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
         "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");
 }
 
+void AVSessionItem::ExecueCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::ExecueCommonCommand");
+    if (remoteSink_ != nullptr) {
+        SLOGI("Send remote CommonCommand");
+        CHECK_AND_RETURN_LOG(remoteSink_->SetCommonCommand(commonCommand, commandArgs) == AVSESSION_SUCCESS,
+            "SetCommonCommand failed");
+    }
+
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnCommonCommand(commonCommand, commandArgs);
+}
 
 void AVSessionItem::HandleSkipToQueueItem(const int32_t& itemId)
 {

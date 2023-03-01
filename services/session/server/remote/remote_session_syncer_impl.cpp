@@ -187,6 +187,46 @@ int32_t RemoteSessionSyncerImpl::GetControlCommand(AVControlCommand& command)
     return AVSESSION_SUCCESS;
 }
 
+int32_t RemoteSessionSyncerImpl::PutCommonCommand(const std::string& commonCommand,
+    const AAFwk::WantParams& commandArgs)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutCommonCommand");
+    Parcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(commonCommand), ERR_MARSHALLING, "Write commonCommand string failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&commandArgs), ERR_MARSHALLING, "Write commandArgs failed");
+
+    uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
+    std::vector<uint8_t> dataVector(data.GetDataSize());
+    std::copy(parcelData, parcelData + data.GetDataSize(), dataVector.begin());
+
+    CHECK_AND_RETURN_RET_LOG(PutData(COMMON_COMMAND_KEY, dataVector) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+        "Put data error");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSyncerImpl::GetCommonCommand(std::string& commonCommand, AAFwk::WantParams& commandArgs)
+{
+    std::vector<uint8_t> dataVector;
+    CHECK_AND_RETURN_RET_LOG(GetData(COMMON_COMMAND_KEY, dataVector) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+        "Get data error");
+    CHECK_AND_RETURN_RET_LOG(dataVector.size() <= RECEIVE_DATA_SIZE_MAX, AVSESSION_ERROR, "Get data size over range");
+    DefaultAllocator allocator;
+    uint8_t *allocateData = reinterpret_cast<uint8_t*>(allocator.Alloc(dataVector.size()));
+    CHECK_AND_RETURN_RET_LOG(allocateData != nullptr, AVSESSION_ERROR, "Alloc data fail");
+    std::copy(dataVector.begin(), dataVector.end(), allocateData);
+
+    Parcel parcelData;
+    CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
+                             AVSESSION_ERROR, "Parse parcel error");
+
+    std::string commandString = parcelData.ReadString();
+    commonCommand = std::string(commandString);
+    AAFwk::WantParams *argsData = parcelData.ReadParcelable<AAFwk::WantParams>();
+    commandArgs = AAFwk::WantParams(*argsData);
+    delete argsData;
+    return AVSESSION_SUCCESS;
+}
+
 int32_t RemoteSessionSyncerImpl::PutSessionEvent(const std::string& event, const AAFwk::WantParams& args)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutSessionEvent");

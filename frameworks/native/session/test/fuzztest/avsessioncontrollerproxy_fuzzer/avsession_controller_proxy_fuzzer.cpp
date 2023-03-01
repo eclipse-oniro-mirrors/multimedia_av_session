@@ -94,6 +94,9 @@ void OHOS::AVSession::AvsessionControllerProxyTest(uint8_t* data, size_t size)
     int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
     controlCommand.SetCommand(cmd);
 
+    std::string eventName(reinterpret_cast<const char*>(data), size);
+    AAFwk::WantParams wantParams;
+
     sptr<IRemoteObject> impl = nullptr;
     AVSessionControllerProxy avSessionControllerProxy(impl);
     avSessionControllerProxy.GetAVPlaybackState(state);
@@ -101,6 +104,7 @@ void OHOS::AVSession::AvsessionControllerProxyTest(uint8_t* data, size_t size)
     avSessionControllerProxy.GetValidCommands(cmds);
     avSessionControllerProxy.IsSessionActive(isActive);
     avSessionControllerProxy.SendControlCommand(controlCommand);
+    avSessionControllerProxy.SendCommonCommand(eventName, wantParams);
 }
 
 /* Fuzzer entry point */

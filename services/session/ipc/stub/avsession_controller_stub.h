@@ -48,6 +48,8 @@ private:
 
     int32_t HandleSendControlCommand(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleSendCommonCommand(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetAVQueueItems(MessageParcel& data, MessageParcel& reply);
@@ -78,6 +80,7 @@ private:
         [CONTROLLER_CMD_DESTROY] = &AVSessionControllerStub::HandleDestroy,
         [CONTROLLER_CMD_GET_AV_PLAYBACK_STATE] = &AVSessionControllerStub::HandleGetAVPlaybackState,
         [CONTROLLER_CMD_SEND_CONTROL_COMMAND] = &AVSessionControllerStub::HandleSendControlCommand,
+        [CONTROLLER_CMD_SEND_COMMON_COMMAND] = &AVSessionControllerStub::HandleSendCommonCommand,
         [CONTROLLER_CMD_GET_AV_META_DATA] = &AVSessionControllerStub::HandleGetAVMetaData,
         [CONTROLLER_CMD_SEND_AV_KEYEVENT] = &AVSessionControllerStub::HandleSendAVKeyEvent,
         [CONTROLLER_CMD_GET_LAUNCH_ABILITY] = &AVSessionControllerStub::HandleGetLaunchAbility,
