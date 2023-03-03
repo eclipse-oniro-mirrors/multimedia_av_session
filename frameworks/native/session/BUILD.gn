@@ -78,8 +78,6 @@ ohos_shared_library("avsession_client") {
     external_deps += [ "hisysevent_native:libhisysevent" ]
   }
 
-  version_script = "avsession_client.versionscript"
-
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "multimedia"
   part_name = "multimedia_av_session"
