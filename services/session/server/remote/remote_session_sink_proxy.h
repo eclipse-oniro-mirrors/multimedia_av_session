@@ -33,6 +33,8 @@ public:
 
     int32_t SetControlCommand(const AVControlCommand& command) override;
 
+    int32_t SetCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
+
     RemoteSessionSinkProxy();
     ~RemoteSessionSinkProxy() override;
 

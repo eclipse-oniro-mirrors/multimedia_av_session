@@ -43,6 +43,10 @@ public:
 
     virtual int32_t GetControlCommand(AVControlCommand& command) = 0;
 
+    virtual int32_t PutCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) = 0;
+
+    virtual int32_t GetCommonCommand(std::string& commonCommand, AAFwk::WantParams& commandArgs) = 0;
+
     virtual int32_t PutSessionEvent(const std::string& event, const AAFwk::WantParams& args) = 0;
 
     virtual int32_t GetSessionEvent(std::string& event, AAFwk::WantParams& args) = 0;

@@ -368,6 +368,19 @@ BENCHMARK_F(AVSessionControllerTest, SetMetaFilter)(benchmark::State& state)
         }
     }
 }
+
+BENCHMARK_F(AVSessionControllerTest, SendCommonCommand)(benchmark::State& state)
+{
+    const std::string commonCommand = "common_command";
+    const OHOS::AAFwk::WantParams commandArgs;
+    while (state.KeepRunning()) {
+        OHOS::ErrCode errCode = controller_->SendCommonCommand(commonCommand, commandArgs);
+        if (errCode != OHOS::ERR_OK) {
+            SLOGE("%{public}s error, failed to SendCommonCommand, error code is %{public}d.", __func__, errCode);
+            state.SkipWithError("SendCommonCommand failed, return error.");
+        }
+    }
+}
 } // namespace
 
 // Run the benchmark

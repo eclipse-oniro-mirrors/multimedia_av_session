@@ -49,6 +49,7 @@ public:
 private:
     AVMetaData::MetaMaskType GetSinkMetaMaskType(const std::string& sinkDevice);
     AVPlaybackState::PlaybackStateMaskType GetSinkPlaybackStateMaskType(const std::string& sinkDevice);
+    int32_t HandleSourceSessionDataCategory(const SessionDataCategory category, const std::string& deviceId);
 
     std::map<std::string, std::shared_ptr<RemoteSessionSyncer>> syncers_;
     sptr<AVSessionItem> session_;

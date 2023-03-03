@@ -150,8 +150,17 @@ void AVSessionCallbackClient::OnOutputDeviceChange(const OutputDeviceInfo& outpu
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
         .AVSessionPostTask([callback, outputDeviceInfo]() { callback->OnOutputDeviceChange(outputDeviceInfo); },
-                           EVENT_NAME),
-        "AVSessionCallbackClient handler postTask failed");
+        EVENT_NAME), "AVSessionCallbackClient handler postTask failed");
+}
+
+void AVSessionCallbackClient::OnCommonCommand(const std::string& commonCommand,
+    const AAFwk::WantParams& commandArgs)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance().AVSessionPostTask([callback,
+        commonCommand, commandArgs]() {callback->OnCommonCommand(commonCommand, commandArgs);},
+        EVENT_NAME), "AVSessionCallbackClient handler postTask failed");
 }
 
 void AVSessionCallbackClient::OnSkipToQueueItem(int32_t itemId)

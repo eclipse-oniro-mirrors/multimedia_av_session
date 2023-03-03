@@ -38,7 +38,8 @@ private:
     int32_t HandleOnSetLoopMode(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply);
-    int32_t HandOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnCommonCommand(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnSkipToQueueItem(MessageParcel& data, MessageParcel& reply);
     using HandlerFunc = int32_t(AVSessionCallbackStub::*)(MessageParcel&, MessageParcel&);
     static inline HandlerFunc handlers[] = {
@@ -54,7 +55,8 @@ private:
         [SESSION_CALLBACK_ON_SET_LOOPMODE] = &AVSessionCallbackStub::HandleOnSetLoopMode,
         [SESSION_CALLBACK_ON_TOGGLE_FAVORITE] = &AVSessionCallbackStub::HandleOnToggleFavorite,
         [SESSION_CALLBACK_ON_MEDIA_KEY_EVENT] = &AVSessionCallbackStub::HandleOnMediaKeyEvent,
-        [SESSION_CALLBACK_ON_OUTPUT_DEVICE_CHANGE] = &AVSessionCallbackStub::HandOnOutputDeviceChange,
+        [SESSION_CALLBACK_ON_OUTPUT_DEVICE_CHANGE] = &AVSessionCallbackStub::HandleOnOutputDeviceChange,
+        [SESSION_CALLBACK_ON_SEND_COMMON_COMMAND] = &AVSessionCallbackStub::HandleOnCommonCommand,
         [SESSION_CALLBACK_ON_SKIP_TO_QUEUE_ITEM] = &AVSessionCallbackStub::HandleOnSkipToQueueItem
     };
 };

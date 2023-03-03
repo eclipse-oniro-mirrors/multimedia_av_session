@@ -193,6 +193,7 @@ public:
     int32_t GetValidCommands(std::vector<int32_t>& cmds) override;
     int32_t IsSessionActive(bool& isActive) override;
     int32_t SendControlCommand(const AVControlCommand& cmd) override;
+    int32_t SendCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
     int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
     int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
     int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
@@ -234,6 +235,12 @@ int32_t AVSessionControllerStubTest::IsSessionActive(bool& isActive)
 }
 
 int32_t AVSessionControllerStubTest::SendControlCommand(const AVControlCommand& cmd)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::SendCommonCommand(const std::string& commonCommand,
+    const OHOS::AAFwk::WantParams& commandArgs)
 {
     return 0;
 }
@@ -756,6 +763,57 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand012, TestSize.Level1)
     }
     EXPECT_EQ(failedCount >= 1, true);
     EXPECT_EQ(failedCount <= 11, true);
+}
+
+/**
+* @tc.name: SendCommonCommand001
+* @tc.desc: Send common command - session is activate
+* @tc.type: FUNC
+* @tc.require: I6ETY6
+*/
+HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
+{
+    SLOGI("SendCommonCommand001 Begin");
+    std::string commonCommand = "common_command";
+    OHOS::AAFwk::WantParams commandArgs;
+    EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+    SLOGI("SendCommonCommand001 End");
+}
+
+/**
+* @tc.name: SendCommonCommand002
+* @tc.desc: Send common command - session is deactivate
+* @tc.type: FUNC
+* @tc.require: I6ETY6
+*/
+HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
+{
+    SLOGI("SendCommonCommand002 Begin");
+    std::string commonCommand = "common_command";
+    OHOS::AAFwk::WantParams commandArgs;
+    EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_SESSION_DEACTIVE);
+    SLOGI("SendCommonCommand002 End");
+}
+
+/**
+* @tc.name: SendCommonCommand003
+* @tc.desc: Send common command - large number of calls
+* @tc.type: FUNC
+* @tc.require: I6ETY6
+*/
+HWTEST_F(AVSessionControllerTest, SendCommonCommand003, TestSize.Level2)
+{
+    SLOGI("SendCommonCommand003 Begin");
+    std::string commonCommand = "common_command";
+    OHOS::AAFwk::WantParams commandArgs;
+
+    // Test the interface through 500 calls
+    for (int i = 0; i < 500; i++) {
+        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+    }
+    SLOGI("SendCommonCommand003 End");
 }
 
 /**

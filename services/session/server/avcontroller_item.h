@@ -50,6 +50,8 @@ public:
 
     int32_t SendControlCommand(const AVControlCommand& cmd) override;
 
+    int32_t SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
+
     int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
 
     int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;

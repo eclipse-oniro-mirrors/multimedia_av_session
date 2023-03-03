@@ -106,4 +106,14 @@ int32_t RemoteSessionSinkProxy::SetControlCommand(const AVControlCommand& comman
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetControlCommand error");
     return AVSESSION_SUCCESS;
 }
+
+int32_t RemoteSessionSinkProxy::SetCommonCommand(const std::string& commonCommand,
+    const AAFwk::WantParams& commandArgs)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSinkProxy::SetCommonCommand");
+    CHECK_AND_RETURN_RET_LOG(sinkImpl_ != nullptr, AVSESSION_ERROR, "sinkImpl_ is nullptr");
+    int32_t ret = sinkImpl_->SetCommonCommand(commonCommand, commandArgs);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "Source SetCommonCommand error");
+    return AVSESSION_SUCCESS;
+}
 } // namespace OHOS::AVSession

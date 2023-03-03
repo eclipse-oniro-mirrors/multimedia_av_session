@@ -83,6 +83,20 @@ int32_t AVSessionControllerStub::HandleSendControlCommand(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int32_t AVSessionControllerStub::HandleSendCommonCommand(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SendCommonCommand");
+    auto commonCommand = data.ReadString();
+    sptr commandArgs = data.ReadParcelable<AAFwk::WantParams>();
+    if (commandArgs == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
+    }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SendCommonCommand(commonCommand, *commandArgs)),
+        ERR_NONE, "WriteInt32 result failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
     AVMetaData metaData;

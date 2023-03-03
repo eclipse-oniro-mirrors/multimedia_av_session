@@ -169,6 +169,15 @@ public:
     virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
+     * @brief Listen for command events.
+     *
+     * @param commonCommand The name of the command to be sent.
+    * @param commandArgs Command packets to be sent
+     * @since 10
+     */
+    virtual void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) = 0;
+
+    /**
      * @brief Listen to the change of item in the playlist to be played.
      *
      * @param itemId The serial number of the item to be played.
@@ -277,7 +286,8 @@ enum SessionDataCategory {
     SESSION_DATA_SET_EVENT = 3,
     SESSION_DATA_QUEUE_ITEMS = 4,
     SESSION_DATA_QUEUE_TITLE = 5,
-    SESSION_DATA_CATEGORY_MAX = 6,
+    SESSION_DATA_COMMON_COMMAND = 6,
+    SESSION_DATA_CATEGORY_MAX = 7,
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

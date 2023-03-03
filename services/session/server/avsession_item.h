@@ -88,6 +88,8 @@ public:
 
     void ExecuteControllerCommand(const AVControlCommand& cmd);
 
+    void ExecueCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
+
     int32_t AddController(pid_t pid, sptr<AVControllerItem>& controller);
 
     void SetPid(pid_t pid);

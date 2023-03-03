@@ -49,6 +49,7 @@ private:
     static napi_value GetValidCommands(napi_env env, napi_callback_info info);
     static napi_value IsSessionActive(napi_env env, napi_callback_info info);
     static napi_value SendControlCommand(napi_env env, napi_callback_info info);
+    static napi_value SendCommonCommand(napi_env env, napi_callback_info info);
     static napi_value Destroy(napi_env env, napi_callback_info info);
     static napi_value GetRealPlaybackPositionSync(napi_env env, napi_callback_info info);
     static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
@@ -96,6 +97,8 @@ private:
     static napi_status SetMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
                                         const std::string& eventName, napi_value filter, napi_value callback);
+
+    static void ErrCodeToMessage(int32_t errCode, std::string& message);
 
     napi_ref wrapperRef_ {};
     std::string sessionId_;

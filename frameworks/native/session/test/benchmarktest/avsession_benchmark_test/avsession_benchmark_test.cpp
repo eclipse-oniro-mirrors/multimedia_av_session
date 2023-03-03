@@ -101,6 +101,7 @@ public:
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override {};
+    void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override {};
 
     ~AVSessionCallbackImpl() override;
@@ -176,6 +177,13 @@ void AVSessionCallbackImpl::OnToggleFavorite(const std::string& mediald)
 void AVSessionCallbackImpl::OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent)
 {
     SLOGI("OnMediaKeyEvent");
+    g_onCall = AVSESSION_SUCCESS;
+}
+
+void AVSessionCallbackImpl::OnCommonCommand(const std::string& commonCommand,
+    const OHOS::AAFwk::WantParams& commandArgs)
+{
+    SLOGI("OnCommonCommand");
     g_onCall = AVSESSION_SUCCESS;
 }
 
