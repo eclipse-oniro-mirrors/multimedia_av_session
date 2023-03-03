@@ -25,6 +25,10 @@ describe("AVSessionControllerJsTest", function () {
   let controller = null;
   let receivedCallback = false;
   let receivedCallback2 = false;
+  let receivedString = null;
+  let receivedString2 = null;
+  let receivedParam = null;
+  let receivedParam2 = null;
   const INVALID_STRING = "invalid string";
   const UPDATE_LYRICS_EVENT = "dynamic_lyrics";
   const UPDATE_LYRICS_WANT_PARAMS = {
@@ -40,6 +44,7 @@ describe("AVSessionControllerJsTest", function () {
       console.error(TAG + "Create AVSession error " + JSON.stringify(err));
       expect().assertFail();
     });
+    session.activate();
     controller = await avSession.createController(session.sessionId).catch((err) => {
       console.error(TAG + "Create controller error " + JSON.stringify(err));
       expect().assertFail();
@@ -73,6 +78,8 @@ describe("AVSessionControllerJsTest", function () {
       expect().assertFail();
     }
     receivedCallback = true;
+    receivedString = sessionEvent;
+    receivedParam = args;
   }
 
   function dynamicLyricsCallback2(sessionEvent, args) {
@@ -83,44 +90,49 @@ describe("AVSessionControllerJsTest", function () {
       expect().assertFail();
     }
     receivedCallback2 = true;
+    receivedString2 = sessionEvent;
+    receivedParam2 = args;
   }
 
   /*
-   * @tc.name:onSessionEventChangeTest001
+   * @tc.name:onSessionEventTest001
    * @tc.desc:One on function - lyrics session event
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("onSessionEventChangeTest001", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
-      console.error(TAG + "setSessionEventTest002 error " + JSON.stringify(err));
+  it("onSessionEventTest001", 0, async function (done) {
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+      console.error(TAG + "dispatchSessionEventTest002 error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
     sleep(200).then(() => {
       if (receivedCallback) {
         console.log(TAG + "Received session event change event");
-        expect(true).assertTrue();
+        expect(receivedString == UPDATE_LYRICS_EVENT).assertTrue();
+        expect(receivedParam.lyrics == UPDATE_LYRICS_WANT_PARAMS.lyrics).assertTrue();
       } else {
         console.error(TAG + "Session event change event not received");
         expect().assertFail();
       }
       receivedCallback = false;
+      receivedString = null;
+      receivedParam = null;
       done();
     })
   })
 
   /*
-   * @tc.name:onSessionEventChangeTest002
+   * @tc.name:onSessionEventTest002
    * @tc.desc:Two on functions - lyrics session event
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("onSessionEventChangeTest002", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    controller.on('sessionEventChange', dynamicLyricsCallback2);
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+  it("onSessionEventTest002", 0, async function (done) {
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    controller.on('sessionEvent', dynamicLyricsCallback2);
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "Set session event error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -128,6 +140,10 @@ describe("AVSessionControllerJsTest", function () {
     await sleep(200);
     if (receivedCallback && receivedCallback2) {
       console.log(TAG + "Received session event change event");
+      expect(receivedString == UPDATE_LYRICS_EVENT).assertTrue();
+      expect(receivedParam.lyrics == UPDATE_LYRICS_WANT_PARAMS.lyrics).assertTrue();
+      expect(receivedString2 == UPDATE_LYRICS_EVENT).assertTrue();
+      expect(receivedParam2.lyrics == UPDATE_LYRICS_WANT_PARAMS.lyrics).assertTrue();
       expect(true).assertTrue();
     } else {
       console.error(TAG + "Session event change event not received");
@@ -135,18 +151,22 @@ describe("AVSessionControllerJsTest", function () {
     }
     receivedCallback = false;
     receivedCallback2 = false;
+    receivedString2 = null;
+    receivedParam2 = null;
+    receivedString2 = null;
+    receivedParam2 = null;
     done();
   })
 
   /*
-   * @tc.name:onSessionEventChangeTest003
+   * @tc.name:onSessionEventTest003
    * @tc.desc:One on functions - one param
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("onSessionEventChangeTest003", 0, async function (done) {
+  it("onSessionEventTest003", 0, async function (done) {
     try {
-      controller.on('sessionEventChange');
+      controller.on('sessionEvent');
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
@@ -154,14 +174,14 @@ describe("AVSessionControllerJsTest", function () {
   })
 
   /*
-   * @tc.name:onSessionEventChangeTest004
+   * @tc.name:onSessionEventTest004
    * @tc.desc:One on functions - three params
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("onSessionEventChangeTest004", 0, async function (done) {
+  it("onSessionEventTest004", 0, async function (done) {
     try {
-      controller.on('sessionEventChange', dynamicLyricsCallback1, dynamicLyricsCallback2);
+      controller.on('sessionEvent', dynamicLyricsCallback1, dynamicLyricsCallback2);
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
@@ -169,14 +189,14 @@ describe("AVSessionControllerJsTest", function () {
   })
 
   /*
-   * @tc.name:onSessionEventChangeTest005
+   * @tc.name:onSessionEventTest005
    * @tc.desc:One on functions - invalid type
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("onSessionEventChangeTest005", 0, async function (done) {
+  it("onSessionEventTest005", 0, async function (done) {
     try {
-      controller.on('sessionEventChange', INVALID_STRING);
+      controller.on('sessionEvent', INVALID_STRING);
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
@@ -184,16 +204,16 @@ describe("AVSessionControllerJsTest", function () {
   })
 
   /*
-   * @tc.name:offSessionEventChangeTest001
+   * @tc.name:offSessionEventTest001
    * @tc.desc:Two on functions and one off function - lyrics session event
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("offSessionEventChangeTest001", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    controller.on('sessionEventChange', dynamicLyricsCallback2);
-    controller.off('sessionEventChange', dynamicLyricsCallback2);
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+  it("offSessionEventTest001", 0, async function (done) {
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    controller.on('sessionEvent', dynamicLyricsCallback2);
+    controller.off('sessionEvent', dynamicLyricsCallback2);
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "Set session event error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -201,28 +221,32 @@ describe("AVSessionControllerJsTest", function () {
     await sleep(200);
     if (receivedCallback && !receivedCallback2) {
       console.log(TAG + "Received session event change event");
+      expect(receivedString == UPDATE_LYRICS_EVENT).assertTrue();
+      expect(receivedParam.lyrics == UPDATE_LYRICS_WANT_PARAMS.lyrics).assertTrue();
       expect(true).assertTrue();
     } else {
       console.error(TAG + "Session event change event not received");
       expect().assertFail();
     }
     receivedCallback = false;
+    receivedString = null;
+    receivedParam = null;
     done();
   })
 
   /*
-   * @tc.name:offSessionEventChangeTest002
+   * @tc.name:offSessionEventTest002
    * @tc.desc:Two on functions and two off function - lyrics session event
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("offSessionEventChangeTest002", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    controller.on('sessionEventChange', dynamicLyricsCallback2);
-    controller.off('sessionEventChange', dynamicLyricsCallback1);
-    controller.off('sessionEventChange', dynamicLyricsCallback2);
+  it("offSessionEventTest002", 0, async function (done) {
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    controller.on('sessionEvent', dynamicLyricsCallback2);
+    controller.off('sessionEvent', dynamicLyricsCallback1);
+    controller.off('sessionEvent', dynamicLyricsCallback2);
 
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "Set session event error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -240,17 +264,17 @@ describe("AVSessionControllerJsTest", function () {
   })
 
   /*
-   * @tc.name:offSessionEventChangeTest003
+   * @tc.name:offSessionEventTest003
    * @tc.desc:Two on functions and off all function - lyrics session event
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("offSessionEventChangeTest003", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    controller.on('sessionEventChange', dynamicLyricsCallback2);
-    controller.off('sessionEventChange');
+  it("offSessionEventTest003", 0, async function (done) {
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    controller.on('sessionEvent', dynamicLyricsCallback2);
+    controller.off('sessionEvent');
 
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "Set session event error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -268,16 +292,16 @@ describe("AVSessionControllerJsTest", function () {
   })
 
   /*
-   * @tc.name:offSessionEventChangeTest004
+   * @tc.name:offSessionEventTest004
    * @tc.desc:Two on functions and off function - three params
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("offSessionEventChangeTest004", 0, async function (done) {
+  it("offSessionEventTest004", 0, async function (done) {
     try {
-      controller.on('sessionEventChange', dynamicLyricsCallback1);
-      controller.on('sessionEventChange', dynamicLyricsCallback2);
-      controller.off('sessionEventChange', dynamicLyricsCallback1, dynamicLyricsCallback2);
+      controller.on('sessionEvent', dynamicLyricsCallback1);
+      controller.on('sessionEvent', dynamicLyricsCallback2);
+      controller.off('sessionEvent', dynamicLyricsCallback1, dynamicLyricsCallback2);
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
@@ -285,15 +309,15 @@ describe("AVSessionControllerJsTest", function () {
   })
 
   /*
-   * @tc.name:offSessionEventChangeTest005
+   * @tc.name:offSessionEventTest005
    * @tc.desc:One on functions and off all function - invalid type
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("offSessionEventChangeTest005", 0, async function (done) {
+  it("offSessionEventTest005", 0, async function (done) {
     try {
-      controller.on('sessionEventChange', dynamicLyricsCallback1);
-      controller.off('sessionEventChange', INVALID_STRING);
+      controller.on('sessionEvent', dynamicLyricsCallback1);
+      controller.off('sessionEvent', INVALID_STRING);
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
@@ -307,7 +331,7 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.require: I6ETY6
    */
   it("sendCommonCommandTest001", 0, async function (done) {
-    controller.sendComonCommand(COMMON_COMMAND_STRING, COMMON_COMMAND_PARAMS, (err) => {
+    controller.sendCommonCommand(COMMON_COMMAND_STRING, COMMON_COMMAND_PARAMS, (err) => {
       if (err) {
         console.error(TAG + "sendCommonCommandTest001 error " + JSON.stringify(err));
         expect().assertFail();
@@ -326,7 +350,7 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.require: I6ETY6
    */
   it("sendCommonCommandTest002", 0, async function (done) {
-    await controller.sendComonCommand(COMMON_COMMAND_STRING, COMMON_COMMAND_PARAMS).catch((err) => {
+    await controller.sendCommonCommand(COMMON_COMMAND_STRING, COMMON_COMMAND_PARAMS).catch((err) => {
       console.error(TAG + "sendCommonCommandTest002 error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -361,13 +385,30 @@ describe("AVSessionControllerJsTest", function () {
    */
   it("sendCommonCommandTest004", 0, async function (done) {
     let errCode = 0;
-    await controller.sendCommonCommand(COMMON_COMMAND_STRING, COMMON_COMMAND_PARAMS).catch((err) => {
-    console.info(TAG + "sendCommonCommandTest004 caught error" + err.code);
+    await controller.sendCommonCommand(COMMON_COMMAND_PARAMS, COMMON_COMMAND_PARAMS).catch((err) => {
+      console.info(TAG + "sendCommonCommandTest004 caught error" + err.code);
       errCode = err.code;
     });
     sleep(200).then(() => {
       expect(errCode == 401).assertTrue();
       done();
     })
+  })
+
+  /*
+   * @tc.name:sendCommonCommandTest005
+   * @tc.desc:Send common command - deactive
+   * @tc.type: FUNC
+   * @tc.require: I6ETY6
+   */
+  it("sendCommonCommandTest005", 0, async function (done) {
+    try {
+      session.deactivate(async () => {
+        await controller.sendCommonCommand(COMMON_COMMAND_STRING, COMMON_COMMAND_PARAMS);
+      });
+    } catch (err) {
+      expect(err.code == 6600106).assertTrue();
+    }
+    done();
   })
 })

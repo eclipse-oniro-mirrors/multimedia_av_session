@@ -25,6 +25,10 @@ describe("AVSessionJsTest", function () {
   let controller = null;
   let receivedCallback = false;
   let receivedCallback2 = false;
+  let receivedString = null;
+  let receivedString2 = null;
+  let receivedParam = null;
+  let receivedParam2 = null;
   const INVALID_STRING = "invalid string";
   const UPDATE_LYRICS_EVENT = "dynamic_lyrics";
   const UPDATE_LYRICS_WANT_PARAMS = {
@@ -40,6 +44,7 @@ describe("AVSessionJsTest", function () {
       console.error(TAG + "Create AVSession error " + JSON.stringify(err));
       expect().assertFail();
     });
+    session.activate();
     controller = await avSession.createController(session.sessionId).catch((err) => {
       console.error(TAG + "Create controller error " + JSON.stringify(err));
       expect().assertFail();
@@ -72,6 +77,8 @@ describe("AVSessionJsTest", function () {
       expect().assertFail();
     }
     receivedCallback = true;
+    receivedString = command;
+    receivedParam = args;
   }
 
   function commonCommandCallback2(command, args) {
@@ -82,53 +89,55 @@ describe("AVSessionJsTest", function () {
       expect().assertFail();
     }
     receivedCallback2 = true;
+    receivedString2 = command;
+    receivedParam2 = args;
   }
 
   /*
-   * @tc.name:setSessionEventTest001
+   * @tc.name:dispatchSessionEventTest001
    * @tc.desc:Set session event - callback
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("setSessionEventTest001", 0, async function (done) {
-    session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS, (err) => {
+  it("dispatchSessionEventTest001", 0, async function (done) {
+    session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS, (err) => {
       if (err) {
-        console.error(TAG + "setSessionEventTest001 error " + JSON.stringify(err));
+        console.error(TAG + "dispatchSessionEventTest001 error " + JSON.stringify(err));
         expect().assertFail();
         done();
       }
-      console.info(TAG + "setSessionEventTest001 finished");
+      console.info(TAG + "dispatchSessionEventTest001 finished");
       expect(true).assertTrue();
       done();
     });
   })
 
   /*
-   * @tc.name:setSessionEventTest002
+   * @tc.name:dispatchSessionEventTest002
    * @tc.desc:Set session event - promise
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("setSessionEventTest002", 0, async function (done) {
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
-      console.error(TAG + "setSessionEventTest002 error " + JSON.stringify(err));
+  it("dispatchSessionEventTest002", 0, async function (done) {
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+      console.error(TAG + "dispatchSessionEventTest002 error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
-    console.info(TAG + "setSessionEventTest002 finished");
+    console.info(TAG + "dispatchSessionEventTest002 finished");
     done();
   })
 
   /*
-   * @tc.name:setSessionEventTest003
+   * @tc.name:dispatchSessionEventTest003
    * @tc.desc:Set session event - one param
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("setSessionEventTest003", 0, async function (done) {
+  it("dispatchSessionEventTest003", 0, async function (done) {
     let errCode = 0;
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT).catch((err) => {
-      console.info(TAG + "setSessionEventTest003 caught error" + err.code);
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT).catch((err) => {
+      console.info(TAG + "dispatchSessionEventTest003 caught error" + err.code);
       errCode = err.code;
     });
     sleep(200).then(()=>{
@@ -138,15 +147,15 @@ describe("AVSessionJsTest", function () {
   })
 
   /*
-   * @tc.name:setSessionEventTest004
+   * @tc.name:dispatchSessionEventTest004
    * @tc.desc:Set session event - invalid params
    * @tc.type: FUNC
    * @tc.require: I6C6IN
    */
-  it("setSessionEventTest004", 0, async function (done) {
+  it("dispatchSessionEventTest004", 0, async function (done) {
     let errCode = 0;
-    await session.setSessionEvent(UPDATE_LYRICS_WANT_PARAMS, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
-    console.info(TAG + "setSessionEventTest003 caught error" + err.code);
+    await session.dispatchSessionEvent(UPDATE_LYRICS_WANT_PARAMS, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    console.info(TAG + "dispatchSessionEventTest003 caught error" + err.code);
       errCode = err.code;
     });
     sleep(200).then(()=>{
@@ -171,12 +180,15 @@ describe("AVSessionJsTest", function () {
     sleep(200).then(() => {
       if (receivedCallback) {
         console.log(TAG + "Received common command");
-        expect(true).assertTrue();
+        expect(receivedString == COMMON_COMMAND_STRING).assertTrue();
+        expect(receivedParam.command == COMMON_COMMAND_PARAMS.command).assertTrue();
       } else {
         console.error(TAG + "Common command not received");
         expect().assertFail();
       }
       receivedCallback = false;
+      receivedString = null;
+      receivedParam = null;
       done();
     })
   })
@@ -198,13 +210,21 @@ describe("AVSessionJsTest", function () {
     await sleep(200);
     if (receivedCallback && receivedCallback2) {
       console.log(TAG + "Received common command");
+      expect(receivedString == COMMON_COMMAND_STRING).assertTrue();
+      expect(receivedParam.command == COMMON_COMMAND_PARAMS.command).assertTrue();
+      expect(receivedString2 == COMMON_COMMAND_STRING).assertTrue();
+      expect(receivedParam2.command == COMMON_COMMAND_PARAMS.command).assertTrue();
       expect(true).assertTrue();
     } else {
       console.error(TAG + "Common command not received");
       expect().assertFail();
     }
     receivedCallback = false;
+    receivedString = null;
+    receivedParam = null;
     receivedCallback2 = false;
+    receivedString2 = null;
+    receivedParam2 = null;
     done();
   })
 
@@ -271,12 +291,16 @@ describe("AVSessionJsTest", function () {
     await sleep(200);
     if (receivedCallback && !receivedCallback2) {
       console.log(TAG + "offCommonCommandTest001 finished");
+      expect(receivedString == COMMON_COMMAND_STRING).assertTrue();
+      expect(receivedParam.command == COMMON_COMMAND_PARAMS.command).assertTrue();
       expect(true).assertTrue();
     } else {
       console.error(TAG + "offCommonCommandTest001 failed");
       expect().assertFail();
     }
     receivedCallback = false;
+    receivedString = null;
+    receivedParam = null;
     done();
   })
 
