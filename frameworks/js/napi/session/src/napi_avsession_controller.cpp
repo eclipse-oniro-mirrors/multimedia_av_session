@@ -40,7 +40,7 @@ std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     { "activeStateChange", { OnActiveStateChange, OffActiveStateChange } },
     { "validCommandChange", { OnValidCommandChange, OffValidCommandChange } },
     { "outputDeviceChange", { OnOutputDeviceChange, OffOutputDeviceChange } },
-    { "sessionEventChange", { OnSessionEventChange, OffSessionEventChange } },
+    { "sessionEvent", { OnSessionEventChange, OffSessionEventChange } },
     { "queueItemsChange", { OnQueueItemsChange, OffQueueItemsChange } },
     { "queueTitleChange", { OnQueueTitleChange, OffQueueTitleChange } },
 };
