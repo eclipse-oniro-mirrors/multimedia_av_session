@@ -88,7 +88,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
         DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice),
-        DECLARE_NAPI_FUNCTION("setSessionEvent", SetSessionEvent),
+        DECLARE_NAPI_FUNCTION("dispatchSessionEvent", SetSessionEvent),
         DECLARE_NAPI_FUNCTION("setAVQueueItems", SetAVQueueItems),
         DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
     };

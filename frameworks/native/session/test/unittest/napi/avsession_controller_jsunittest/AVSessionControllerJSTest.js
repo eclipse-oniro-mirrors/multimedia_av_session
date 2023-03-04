@@ -92,8 +92,8 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.require: I6C6IN
    */
   it("onSessionEventChangeTest001", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "setSessionEventTest002 error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -118,9 +118,9 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.require: I6C6IN
    */
   it("onSessionEventChangeTest002", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    controller.on('sessionEventChange', dynamicLyricsCallback2);
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    controller.on('sessionEvent', dynamicLyricsCallback2);
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "Set session event error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -146,7 +146,7 @@ describe("AVSessionControllerJsTest", function () {
    */
   it("onSessionEventChangeTest003", 0, async function (done) {
     try {
-      controller.on('sessionEventChange');
+      controller.on('sessionEvent');
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
@@ -161,7 +161,7 @@ describe("AVSessionControllerJsTest", function () {
    */
   it("onSessionEventChangeTest004", 0, async function (done) {
     try {
-      controller.on('sessionEventChange', dynamicLyricsCallback1, dynamicLyricsCallback2);
+      controller.on('sessionEvent', dynamicLyricsCallback1, dynamicLyricsCallback2);
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
@@ -176,7 +176,7 @@ describe("AVSessionControllerJsTest", function () {
    */
   it("onSessionEventChangeTest005", 0, async function (done) {
     try {
-      controller.on('sessionEventChange', INVALID_STRING);
+      controller.on('sessionEvent', INVALID_STRING);
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
@@ -190,10 +190,10 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.require: I6C6IN
    */
   it("offSessionEventChangeTest001", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    controller.on('sessionEventChange', dynamicLyricsCallback2);
-    controller.off('sessionEventChange', dynamicLyricsCallback2);
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    controller.on('sessionEvent', dynamicLyricsCallback2);
+    controller.off('sessionEvent', dynamicLyricsCallback2);
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "Set session event error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -217,12 +217,12 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.require: I6C6IN
    */
   it("offSessionEventChangeTest002", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    controller.on('sessionEventChange', dynamicLyricsCallback2);
-    controller.off('sessionEventChange', dynamicLyricsCallback1);
-    controller.off('sessionEventChange', dynamicLyricsCallback2);
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    controller.on('sessionEvent', dynamicLyricsCallback2);
+    controller.off('sessionEvent', dynamicLyricsCallback1);
+    controller.off('sessionEvent', dynamicLyricsCallback2);
 
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "Set session event error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -246,11 +246,11 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.require: I6C6IN
    */
   it("offSessionEventChangeTest003", 0, async function (done) {
-    controller.on('sessionEventChange', dynamicLyricsCallback1);
-    controller.on('sessionEventChange', dynamicLyricsCallback2);
-    controller.off('sessionEventChange');
+    controller.on('sessionEvent', dynamicLyricsCallback1);
+    controller.on('sessionEvent', dynamicLyricsCallback2);
+    controller.off('sessionEvent');
 
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "Set session event error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -275,9 +275,9 @@ describe("AVSessionControllerJsTest", function () {
    */
   it("offSessionEventChangeTest004", 0, async function (done) {
     try {
-      controller.on('sessionEventChange', dynamicLyricsCallback1);
-      controller.on('sessionEventChange', dynamicLyricsCallback2);
-      controller.off('sessionEventChange', dynamicLyricsCallback1, dynamicLyricsCallback2);
+      controller.on('sessionEvent', dynamicLyricsCallback1);
+      controller.on('sessionEvent', dynamicLyricsCallback2);
+      controller.off('sessionEvent', dynamicLyricsCallback1, dynamicLyricsCallback2);
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
@@ -292,8 +292,8 @@ describe("AVSessionControllerJsTest", function () {
    */
   it("offSessionEventChangeTest005", 0, async function (done) {
     try {
-      controller.on('sessionEventChange', dynamicLyricsCallback1);
-      controller.off('sessionEventChange', INVALID_STRING);
+      controller.on('sessionEvent', dynamicLyricsCallback1);
+      controller.off('sessionEvent', INVALID_STRING);
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }

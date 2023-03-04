@@ -91,7 +91,7 @@ describe("AVSessionJsTest", function () {
    * @tc.require: I6C6IN
    */
   it("setSessionEventTest001", 0, async function (done) {
-    session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS, (err) => {
+    session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS, (err) => {
       if (err) {
         console.error(TAG + "setSessionEventTest001 error " + JSON.stringify(err));
         expect().assertFail();
@@ -110,7 +110,7 @@ describe("AVSessionJsTest", function () {
    * @tc.require: I6C6IN
    */
   it("setSessionEventTest002", 0, async function (done) {
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
       console.error(TAG + "setSessionEventTest002 error " + JSON.stringify(err));
       expect().assertFail();
       done();
@@ -127,7 +127,7 @@ describe("AVSessionJsTest", function () {
    */
   it("setSessionEventTest003", 0, async function (done) {
     let errCode = 0;
-    await session.setSessionEvent(UPDATE_LYRICS_EVENT).catch((err) => {
+    await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT).catch((err) => {
       console.info(TAG + "setSessionEventTest003 caught error" + err.code);
       errCode = err.code;
     });
@@ -145,7 +145,7 @@ describe("AVSessionJsTest", function () {
    */
   it("setSessionEventTest004", 0, async function (done) {
     let errCode = 0;
-    await session.setSessionEvent(UPDATE_LYRICS_WANT_PARAMS, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
+    await session.dispatchSessionEvent(UPDATE_LYRICS_WANT_PARAMS, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
     console.info(TAG + "setSessionEventTest003 caught error" + err.code);
       errCode = err.code;
     });
