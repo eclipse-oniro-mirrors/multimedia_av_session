@@ -62,7 +62,7 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddDisconnectNotifier failed");
 
     ret = syncer_->RegisterDataNotifier([this](const SessionDataCategory category, const std::string& deviceId) {
-        SLOGE("device %{public}s category %{public}d changed", deviceId.c_str(), category);
+        SLOGI("device %{public}s category %{public}d changed", deviceId.c_str(), category);
         CHECK_AND_RETURN_RET_LOG(session_ != nullptr && syncer_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");
 
         return HandleSessionDataCategory(category);

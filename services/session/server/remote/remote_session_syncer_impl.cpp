@@ -25,7 +25,7 @@ RemoteSessionSyncerImpl::RemoteSessionSyncerImpl(const std::string& sourceSessio
                                                  const std::string& sinkDevice)
     : sourceSessionId_(sourceSessionId), sourceDevice_(sourceDevice), sinkDevice_(sinkDevice)
 {
-    SLOGE("construct");
+    SLOGI("construct");
 }
 
 void RemoteSessionSyncerImpl::OnChanged(const std::string &sessionId, const std::vector<std::string>& keys)
@@ -49,7 +49,7 @@ void RemoteSessionSyncerImpl::OnChanged(const std::string &name, const std::stri
 
 int32_t RemoteSessionSyncerImpl::Init()
 {
-    SLOGE("start");
+    SLOGI("start");
     objectStore_ = DistributedObjectStore::GetInstance("av_session");
     CHECK_AND_RETURN_RET_LOG(objectStore_ != nullptr, AVSESSION_ERROR, "objectStore_ is nullptr");
 
@@ -71,7 +71,7 @@ int32_t RemoteSessionSyncerImpl::Init()
           sourceSessionId_.c_str(), sourceDevice_.c_str(), sinkDevice_.c_str(), objectName_.c_str());
     object_ = objectStore_->CreateObject(objectName_);
     CHECK_AND_RETURN_RET_LOG(object_ != nullptr, AVSESSION_ERROR, "object_ is nullptr");
-    SLOGE("init object success");
+    SLOGI("init object success");
     return AVSESSION_SUCCESS;
 }
 
