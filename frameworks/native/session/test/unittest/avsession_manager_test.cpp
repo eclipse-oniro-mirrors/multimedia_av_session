@@ -377,7 +377,7 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     EXPECT_NE(session, nullptr);
     session->Activate();
     auto sessionId = session->GetSessionId();
-    ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
+    ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(10, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_NE(descriptors.size(), 0);
     int32_t size = descriptors.size();
@@ -387,7 +387,7 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), g_testAbilityName);
     EXPECT_EQ(descriptors[0].isActive_, true);
     session->Destroy();
-    ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
+    ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(10, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptors.size(), size);
     SLOGI("GetHistoricalSessionDescriptors001 end");

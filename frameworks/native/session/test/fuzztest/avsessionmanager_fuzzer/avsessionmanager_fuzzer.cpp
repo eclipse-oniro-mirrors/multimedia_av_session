@@ -126,7 +126,7 @@ void OHOS::AVSession::AVSessionManagerTest(uint8_t* data, size_t size)
 
     std::string bySessionId(reinterpret_cast<const char*>(data), size);
     AVSessionDescriptor descriptor;
-    int32_t maxSize = 0;
+    int32_t maxSize = 10;
     AVControlCommand command;
     int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
     command.SetCommand(cmd);

@@ -344,11 +344,11 @@ HWTEST_F(AVSessionPermissionTest, GetHistoricalSessionDescriptorsWithPerm001, Te
     std::vector<AVSessionDescriptor> descriptors;
     auto ret_1 = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
     EXPECT_EQ(ret_1, AVSESSION_SUCCESS);
-    EXPECT_NE(descriptors.size(), 0);
+    EXPECT_EQ(descriptors.size(), 0);
     if (session != nullptr) {
         session->Destroy();
     }
-    auto ret_2 = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
+    auto ret_2 = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(10, descriptors);
     EXPECT_EQ(ret_2, AVSESSION_SUCCESS);
     EXPECT_NE(descriptors.size(), 0);
     DeletePermission(g_infoB);
