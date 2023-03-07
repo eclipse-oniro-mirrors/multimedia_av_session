@@ -111,7 +111,7 @@ describe("AVSessionManagerJSTest", function () {
    */
   it("getHistoricalSessionDescriptors002", 0, async function (done) {
     await createSessionTask();
-    let descriptors = await AVSessionManager.getHistoricalSessionDescriptors(100).catch((err) => {
+    let descriptors = await AVSessionManager.getHistoricalSessionDescriptors(10).catch((err) => {
       console.error(TAG + "getHistoricalSessionDescriptors002 error " + JSON.stringify(err));
       expect().assertFail();
       destroySessionTask();
@@ -120,7 +120,7 @@ describe("AVSessionManagerJSTest", function () {
     if (descriptors.length >= 1) {
         expect(true).assertTrue();
     } else {
-        console.error(TAG + " get history session number : " + descriptors.length + ", error ");
+        console.error(TAG + " 002 get history session number : " + descriptors.length + ", error ");
         expect().assertFail();
     }
     destroySessionTask();
@@ -141,10 +141,10 @@ describe("AVSessionManagerJSTest", function () {
       destroySessionTask();
       done();
     });
-    if (descriptors.length >= 1) {
+    if (descriptors.length == 0) {
         expect(true).assertTrue();
     } else {
-        console.error(TAG + " get history session number : " + descriptors.length + ", error ");
+        console.error(TAG + " 003 get history session number : " + descriptors.length + ", error ");
         expect().assertFail();
     }
     destroySessionTask();
@@ -188,7 +188,7 @@ describe("AVSessionManagerJSTest", function () {
    */
   it("getHistoricalSessionDescriptors005", 0, async function (done) {
     await createSessionTask();
-    await AVSessionManager.getHistoricalSessionDescriptors(0, (err, data) => {
+    await AVSessionManager.getHistoricalSessionDescriptors((err, data) => {
       if (err) {
         console.error(TAG + "getHistoricalSessionDescriptors005 error " + JSON.stringify(err));
         expect().assertFail();

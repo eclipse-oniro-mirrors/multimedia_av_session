@@ -232,7 +232,7 @@ BENCHMARK_F(AVSessionManagerTest, GetHistoricalSessionDescriptors)(benchmark::St
     auto sessionId = session->GetSessionId();
     while (state.KeepRunning()) {
         std::vector<AVSessionDescriptor> descriptors;
-        auto errCode = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
+        auto errCode = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(10, descriptors);
         if (errCode != AVSESSION_SUCCESS) {
             SLOGE("%{public}s error, failed to GetHistoricalSessionDescriptors, error code is %{public}d.", __func__,
                 errCode);
