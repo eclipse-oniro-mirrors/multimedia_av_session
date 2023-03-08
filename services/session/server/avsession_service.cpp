@@ -550,7 +550,7 @@ void AVSessionService::refreshAbilityFileOnCreateSession(const std::string& sess
 void AVSessionService::refreshSortFileOnCreateSession(const std::string& sessionId,
                                                       const AppExecFwk::ElementName& elementName)
 {
-    SLOGE("refresh sort when session created, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
+    SLOGI("refresh sort when session created, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
     std::string oldSortContent;
     if (LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
