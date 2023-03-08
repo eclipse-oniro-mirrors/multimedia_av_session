@@ -774,6 +774,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand012, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
 {
     SLOGI("SendCommonCommand001 Begin");
+    avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
     EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
@@ -789,6 +790,7 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
 {
     SLOGI("SendCommonCommand002 Begin");
+    avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
     EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
@@ -806,6 +808,7 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
 HWTEST_F(AVSessionControllerTest, SendCommonCommand003, TestSize.Level2)
 {
     SLOGI("SendCommonCommand003 Begin");
+    avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
 
