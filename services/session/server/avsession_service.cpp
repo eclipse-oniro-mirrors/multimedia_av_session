@@ -402,15 +402,15 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
     }
 }
 
-void AVSessionService::NotifyAudioSessionCheck(const AVSessionDescriptor& descriptor)
+void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& listener : innerSessionListeners_) {
-        listener->OnAudioSessionChecked(descriptor);
+        listener->OnAudioSessionChecked(uid);
     }
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnAudioSessionCheck");
-        listener->OnAudioSessionChecked(descriptor);
+        listener->OnAudioSessionChecked(uid);
     }
 }
 

@@ -42,7 +42,7 @@ public:
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
     void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
-    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override;
+    void OnAudioSessionChecked(const int32_t uid) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

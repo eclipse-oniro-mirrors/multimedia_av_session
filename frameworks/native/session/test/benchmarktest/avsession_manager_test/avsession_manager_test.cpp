@@ -53,10 +53,9 @@ public:
         SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }
 
-    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override
+    void OnAudioSessionChecked(const int32_t uid) override
     {
-        SLOGI("sessionId=%{public}s checked", descriptor.sessionId_.c_str());
-        descriptor_ = descriptor;
+        SLOGI("uid=%{public}d checked", uid);
     }
 
     std::string GetSessionId() const
