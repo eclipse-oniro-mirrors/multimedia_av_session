@@ -55,6 +55,7 @@ HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level1)
     avp->SetBufferedTime(40);
     avp->SetPosition({10, 10});
     avp->SetFavorite(true);
+    avp->SetActiveItemId(7);
     auto *parcel = new (std::nothrow) OHOS::Parcel();
     EXPECT_NE(parcel, nullptr);
     bool boo = avp->Marshalling(*parcel);
@@ -76,6 +77,7 @@ HWTEST_F(AVPlaybackStateTest, IsValid001, TestSize.Level1)
     avPlaybackState.SetBufferedTime(40);
     avPlaybackState.SetPosition({10, 10});
     avPlaybackState.SetFavorite(true);
+    avPlaybackState.SetActiveItemId(7);
 
     EXPECT_EQ(avPlaybackState.IsValid(), true);
 }
@@ -95,6 +97,7 @@ HWTEST_F(AVPlaybackStateTest, IsValid002, TestSize.Level1)
     avPlaybackState.SetBufferedTime(40);
     avPlaybackState.SetPosition({10, 10});
     avPlaybackState.SetFavorite(true);
+    avPlaybackState.SetActiveItemId(7);
 
     EXPECT_EQ(avPlaybackState.IsValid(), false);
 }
@@ -119,6 +122,7 @@ HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
     parcel->WriteInt64(3);
     parcel->WriteInt32(3);
     parcel->WriteBool(true);
+    parcel->WriteInt32(7);
     AVPlaybackState *result = AVPlaybackState::Unmarshalling(*parcel);
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetFavorite(), true);
@@ -159,8 +163,9 @@ HWTEST_F(AVPlaybackStateTest, GetMask001, TestSize.Level1)
     avPlaybackState.SetBufferedTime(40);
     avPlaybackState.SetPosition({10, 10});
     avPlaybackState.SetFavorite(true);
+    avPlaybackState.SetActiveItemId(7);
 
-    EXPECT_EQ(avPlaybackState.GetMask(), 0b111111);
+    EXPECT_EQ(avPlaybackState.GetMask(), 0b1111111);
 }
 
 /**
