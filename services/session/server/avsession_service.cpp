@@ -618,6 +618,19 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
             descriptors.push_back(session->GetDescriptor());
         }
     }
+
+    for (const auto& session: GetContainer().GetAllSessions()) {
+        bool duplicateSession = false;
+        for (const auto& desc: descriptors) {
+            if (desc.sessionId_ == session->GetSessionId()) {
+                duplicateSession = true;
+                break;
+            }
+        }
+        if (!duplicateSession) {
+            descriptors.push_back(session->GetDescriptor());
+        }
+    }
     SLOGI("size=%{public}d", static_cast<int32_t>(descriptors.size()));
     return AVSESSION_SUCCESS;
 }
