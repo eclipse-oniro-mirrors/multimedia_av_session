@@ -240,6 +240,7 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
             values.insert(values.begin(), value);
         }
         std::string newSortContent = values.dump();
+        SLOGD("SelectFocusSession::Dump json object finished");
         if (!SaveStringToFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, newSortContent)) {
             SLOGE("SelectFocusSession save sort fail !");
         }
@@ -539,6 +540,7 @@ void AVSessionService::refreshAbilityFileOnCreateSession(const std::string& sess
             }
         }
         std::string newContent = values.dump();
+        SLOGD("refreshAbilityFileOnCreateSession::Dump json object finished");
         if (!SaveStringToFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, newContent)) {
             SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
         }
@@ -582,6 +584,7 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
             values.insert(values.begin(), value);
         }
         std::string newSortContent = values.dump();
+        SLOGD("refreshSortFileOnCreateSession::Dump json object finished");
         if (!SaveStringToFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, newSortContent)) {
             SLOGE("SaveStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
         }
@@ -1078,6 +1081,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
         }
     }
     newContent = values.dump();
+    SLOGD("DeleteHistoricalRecord::Dump json object finished");
     if (!SaveStringToFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
         return;
@@ -1095,6 +1099,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
         }
     }
     newContent = values.dump();
+    SLOGD("DeleteHistoricalRecord::Dump json object finished");
     if (!SaveStringToFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
         return;
@@ -1147,6 +1152,7 @@ void AVSessionService::HandleSessionRelease(AVSessionItem& session)
     value["abilityName"] = session.GetAbilityName();
     values.push_back(value);
     std::string newContent = values.dump();
+    SLOGD("HandleSessionRelease::Dump json object finished");
     if (!SaveStringToFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
     }
@@ -1752,6 +1758,7 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
         fileWrite.open(filePath.c_str(), ios::out | ios::trunc);
         nlohmann::json emptyValue;
         std::string emptyContent = emptyValue.dump();
+        SLOGD("LoadStringFromFileEx::Dump json object finished");
         fileWrite.write(emptyContent.c_str(), emptyContent.length());
         if (fileWrite.fail()) {
             SLOGE("file empty init json fail ! ");
