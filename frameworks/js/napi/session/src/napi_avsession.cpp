@@ -373,22 +373,23 @@ napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
-        SLOGE("SetAVQueueItems failed : no memory");
         NapiUtils::ThrowError(env, "SetAVQueueItems failed : no memory",
             NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
-
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->items_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get queueItems failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        for (auto &item : context->items_) {
+            CHECK_ARGS_RETURN_VOID(context, item.IsValid(), "invalid queue item content",
+                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        }
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_AV_QUEUE_ITEMS_TASK_ID;
-
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {

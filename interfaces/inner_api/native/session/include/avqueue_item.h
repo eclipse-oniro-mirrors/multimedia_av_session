@@ -49,6 +49,8 @@ public:
     void SetDescription(const std::shared_ptr<AVMediaDescription>& description);
     std::shared_ptr<AVMediaDescription> GetDescription() const;
 
+    bool IsValid() const;
+
     void Reset();
 
 private:

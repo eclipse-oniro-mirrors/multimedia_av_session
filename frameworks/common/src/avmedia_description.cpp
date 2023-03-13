@@ -142,6 +142,11 @@ std::string AVMediaDescription::GetMediaUri() const
     return mediaUri_;
 }
 
+bool AVMediaDescription::IsValid() const
+{
+    return !(mediaId_.empty());
+}
+
 void AVMediaDescription::Reset()
 {
     mediaId_ = "";

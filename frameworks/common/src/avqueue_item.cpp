@@ -61,6 +61,11 @@ std::shared_ptr<AVMediaDescription> AVQueueItem::GetDescription() const
     return description_;
 }
 
+bool AVQueueItem::IsValid() const
+{
+    return (*description_).IsValid();
+}
+
 void AVQueueItem::Reset()
 {
     itemId_ = 0;
