@@ -75,6 +75,8 @@ public:
     void SetMediaUri(const std::string& mediaUri);
     std::string GetMediaUri() const;
 
+    bool IsValid() const;
+
     void Reset();
 
 private:
