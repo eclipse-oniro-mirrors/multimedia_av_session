@@ -45,6 +45,7 @@ void ParamsConfigOperator::InitConfig()
         return;
     }
     nlohmann::json configs = nlohmann::json::parse(content, nullptr, false);
+    SLOGD("InitConfig::parse json object finished");
     for (auto config : configs.items()) {
         if (config.value().is_number()) {
             configIntParams.insert(std::pair<std::string, int32_t>(config.key(), config.value()));
