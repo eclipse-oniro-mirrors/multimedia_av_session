@@ -283,7 +283,7 @@ private:
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
 
     int32_t pressCount_ {};
-    int32_t maxHistoryNums {};
+    int32_t maxHistoryNums = 10;
     bool isFirstPress_ = true;
 
     const int32_t ONE_CLICK = 1;

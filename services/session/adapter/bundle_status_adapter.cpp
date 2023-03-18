@@ -67,6 +67,14 @@ bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleNam
         SLOGE("no memory");
         return false;
     }
+    if (bundleMgrProxy == nullptr) {
+        SLOGE("SubscribeBundleStatusEvent with proxy null!");
+        Init();
+        if (bundleMgrProxy == nullptr) {
+            SLOGE("SubscribeBundleStatusEvent with proxy null after init!");
+            return false;
+        }
+    }
     bundleStatusCallbackImpl->SetBundleName(bundleName);
     if (bundleMgrProxy->RegisterBundleStatusCallback(bundleStatusCallbackImpl)) {
         bundleStatusListeners_.insert(std::pair<std::string, std::function<void(const std::string)>>(bundleName,
