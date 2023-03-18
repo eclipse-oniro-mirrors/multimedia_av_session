@@ -15,6 +15,8 @@
 
 #include <sstream>
 #include <iomanip>
+#include <iostream>
+#include <regex>
 
 #include "accesstoken_kit.h"
 #include "app_manager_adapter.h"
@@ -464,6 +466,15 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
         nullptr, "type is invalid");
     CHECK_AND_RETURN_RET_LOG(!elementName.GetBundleName().empty() && !elementName.GetAbilityName().empty(),
         nullptr, "element is invalid");
+    std::regex nameRegex("[A-Za-z\\w\\.]*");
+    if (!std::regex_match(elementName.GetBundleName(), nameRegex)) {
+        SLOGE("CreateSessionInner err regex, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
+        return nullptr;
+    }
+    if (!std::regex_match(elementName.GetAbilityName(), nameRegex)) {
+        SLOGE("CreateSessionInner err regex, abilityName=%{public}s", (elementName.GetAbilityName()).c_str());
+        return nullptr;
+    }
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (AbilityHasSession(pid, elementName.GetAbilityName())) {
