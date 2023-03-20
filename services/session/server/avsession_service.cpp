@@ -212,6 +212,7 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         if (session->GetUid() != info.uid) {
             continue;
         }
+        std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
         SLOGI("true");
         std::string oldSortContent;
         if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
@@ -304,6 +305,7 @@ void AVSessionService::InitDM()
 
 void AVSessionService::InitBMS()
 {
+    std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
     SLOGI("enter");
     BundleStatusAdapter::GetInstance().Init();
     std::string oldSortContent;
@@ -516,7 +518,6 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
     CHECK_AND_RETURN_RET_LOG(session != nullptr, session, "session is nullptr");
 
     refreshSortFileOnCreateSession(session->GetSessionId(), elementName);
-    refreshAbilityFileOnCreateSession(session->GetSessionId(), elementName);
 
     {
         std::lock_guard lockGuard1(abilityManagerLock_);
@@ -537,32 +538,10 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
     return session;
 }
 
-void AVSessionService::refreshAbilityFileOnCreateSession(const std::string& sessionId,
-                                                         const AppExecFwk::ElementName& elementName)
-{
-    std::string oldContent;
-    if (LoadStringFromFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, oldContent)) {
-        nlohmann::json values = json::parse(oldContent, nullptr, false);
-        CHECK_AND_RETURN_LOG(!values.is_discarded(), "ability json object is null");
-        for (auto value : values) {
-            if (elementName.GetBundleName() == value["bundleName"] &&
-                elementName.GetAbilityName() == value["abilityName"]) {
-                values.erase(std::remove(values.begin(), values.end(), value));
-            }
-        }
-        std::string newContent = values.dump();
-        SLOGD("refreshAbilityFileOnCreateSession::Dump json object finished");
-        if (!SaveStringToFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, newContent)) {
-            SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
-        }
-    } else {
-        SLOGE("LoadStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
-    }
-}
-
 void AVSessionService::refreshSortFileOnCreateSession(const std::string& sessionId,
                                                       const AppExecFwk::ElementName& elementName)
 {
+    std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
     SLOGI("refresh sort when session created, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
     std::string oldSortContent;
     if (LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
@@ -614,6 +593,7 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
     }
 
     std::lock_guard lockGuard(sessionAndControllerLock_);
+    std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
 
     std::string oldSortContent;
     if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
@@ -682,7 +662,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
         return ERR_NO_PERMISSION;
     }
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    std::string content;
+    std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
     std::string oldSortContent;
     std::vector<AVSessionDescriptor> tempDescriptors;
     if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
@@ -760,38 +740,49 @@ const nlohmann::json& AVSessionService::GetSubNode(const nlohmann::json& node, c
 
 bool AVSessionService::IsHistoricalSession(const std::string& sessionId)
 {
-    std::string content;
-    if (LoadStringFromFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, content)) {
-        nlohmann::json values = json::parse(content, nullptr, false);
-        CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), false, "json object is null");
-        for (auto& value : values) {
-            if (sessionId == value["sessionId"]) {
-                return true;
-            }
+    std::string sortContent;
+
+    {
+        std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
+        if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, sortContent)) {
+            SLOGE("IsHistoricalSession read sort failed, filename=%{public}s", SORT_FILE_NAME);
+            return false;
         }
-    } else {
-        SLOGE("LoadStringFromFile failed, filename=%{public}s", ABILITY_FILE_NAME);
+        if (sortContent.find(sessionId) == string::npos) {
+            SLOGE("IsHistoricalSession find session no sort, sessionId=%{public}s", sessionId.c_str());
+            return false;
+        }
     }
-    return false;
+
+    auto session = GetContainer().GetSessionById(sessionId);
+    if (session != nullptr) {
+        SLOGE("IsHistoricalSession find session alive, sessionId=%{public}s", sessionId.c_str());
+        return false;
+    }
+    SLOGE("IsHistoricalSession find session historical, sessionId=%{public}s", sessionId.c_str());
+    return true;
 }
 
 int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
 {
     std::string bundleName = DEFAULT_BUNDLE_NAME;
     std::string abilityName = DEFAULT_ABILITY_NAME;
-    std::string content;
-    std::string oldSortContent;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, content)) {
-        SLOGE("LoadStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
+    std::string sortContent;
+
+    {
+        std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
+        if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, sortContent)) {
+            SLOGE("GetAllSessionDescriptors read sort fail! ");
+            return AVSESSION_ERROR;
+        }
     }
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
-        SLOGE("GetAllSessionDescriptors read sort fail! ");
-    }
-    if (!content.empty() && !oldSortContent.empty()) {
-        nlohmann::json sortValues = json::parse(oldSortContent, nullptr, false);
+
+    if (!sortContent.empty()) {
+        nlohmann::json sortValues = json::parse(sortContent, nullptr, false);
         CHECK_AND_RETURN_RET_LOG(!sortValues.is_discarded(), AVSESSION_ERROR, "json object is null");
         for (auto& value : sortValues) {
-            if ((content.find(value["sessionId"] != string::npos))) {
+            auto session = GetContainer().GetSessionById(value["sessionId"]);
+            if (session != nullptr) {
                 bundleName = value["bundleName"];
                 abilityName = value["abilityName"];
                 break;
@@ -824,10 +815,15 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
 int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded, std::string& sessionId)
 {
     std::string content;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, content)) {
-        SLOGE("LoadStringFromFile failed, filename=%{public}s", ABILITY_FILE_NAME);
-        return AVSESSION_ERROR;
+    
+    {
+        std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
+        if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, content)) {
+            SLOGE("LoadStringFromFile failed, filename=%{public}s", SORT_FILE_NAME);
+            return AVSESSION_ERROR;
+        }
     }
+
     nlohmann::json values = json::parse(content, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), AVSESSION_ERROR, "json object is null");
     std::string bundleName;
@@ -1075,12 +1071,13 @@ void AVSessionService::OnClientDied(pid_t pid)
 
 void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
 {
+    std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
     SLOGI("delete historical record, bundleName=%{public}s", bundleName.c_str());
     std::string oldContent;
     std::string newContent;
     nlohmann::json values;
     if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldContent)) {
-        SLOGE("LoadStringFromFile failed, filename=%{public}s", ABILITY_FILE_NAME);
+        SLOGE("LoadStringFromFile failed, filename=%{public}s", SORT_FILE_NAME);
         return;
     }
     values = json::parse(oldContent, nullptr, false);
@@ -1094,25 +1091,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
     newContent = values.dump();
     SLOGD("DeleteHistoricalRecord::Dump json object finished");
     if (!SaveStringToFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, newContent)) {
-        SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
-        return;
-    }
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, oldContent)) {
-        SLOGE("LoadStringFromFile failed, filename=%{public}s", ABILITY_FILE_NAME);
-        return;
-    }
-    values = json::parse(oldContent, nullptr, false);
-    CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
-    for (auto value : values) {
-        if (bundleName == value["bundleName"]) {
-            values.erase(std::remove(values.begin(), values.end(), value));
-            break;
-        }
-    }
-    newContent = values.dump();
-    SLOGD("DeleteHistoricalRecord::Dump json object finished");
-    if (!SaveStringToFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, newContent)) {
-        SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
+        SLOGE("SaveStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
         return;
     }
 }
@@ -1138,35 +1117,6 @@ void AVSessionService::HandleSessionRelease(AVSessionItem& session)
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(session.GetDescriptor().elementName_.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()),
         session.GetDescriptor().sessionType_, false);
-    std::string oldContent;
-    std::string oldSortContent;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
-        SLOGE("LoadStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
-        return;
-    }
-    if (oldSortContent.find(session.GetSessionId()) == string::npos) {
-        SLOGE("have no sort record, sessionId=%{public}s", session.GetSessionId().c_str());
-        return;
-    }
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, oldContent)) {
-        SLOGE("LoadStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
-        return;
-    }
-    nlohmann::json values = json::parse(oldContent, nullptr, false);
-    CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
-    if (values.size() >= maxHistoryNums) {
-        values.erase(values.begin());
-    }
-    nlohmann::json value;
-    value["sessionId"] = session.GetSessionId();
-    value["bundleName"] = session.GetBundleName();
-    value["abilityName"] = session.GetAbilityName();
-    values.push_back(value);
-    std::string newContent = values.dump();
-    SLOGD("HandleSessionRelease::Dump json object finished");
-    if (!SaveStringToFileEx(AVSESSION_FILE_DIR + ABILITY_FILE_NAME, newContent)) {
-        SLOGE("SaveStringToFile failed, filename=%{public}s", ABILITY_FILE_NAME);
-    }
 }
 
 void AVSessionService::HandleControllerRelease(AVControllerItem& controller)

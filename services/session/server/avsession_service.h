@@ -235,8 +235,6 @@ private:
 
     const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
 
-    void refreshAbilityFileOnCreateSession(const std::string& sessionId, const AppExecFwk::ElementName& elementName);
-
     void refreshSortFileOnCreateSession(const std::string& sessionId, const AppExecFwk::ElementName& elementName);
 
     bool LoadStringFromFileEx(const std::string& filePath, std::string& content);
@@ -273,6 +271,8 @@ private:
 
     std::unique_ptr<AVSessionDumper> dumpHelper_ {};
     friend class AVSessionDumper;
+
+    std::recursive_mutex sortFileReadWriteLock_;
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
     static constexpr const char *ABILITY_FILE_NAME = "abilityinfo";
