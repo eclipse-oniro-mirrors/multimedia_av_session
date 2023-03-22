@@ -1672,7 +1672,6 @@ void AVSessionService::ClearControllerForClientDiedNoLock(pid_t pid)
 {
     auto it = controllers_.find(pid);
     CHECK_AND_RETURN_LOG(it != controllers_.end(), "no find controller");
-    controllers_.erase(it);
     auto controllers = std::move(it->second);
     SLOGI("remove controllers size=%{public}d", static_cast<int>(controllers.size()));
     if (!controllers.empty()) {
@@ -1680,6 +1679,9 @@ void AVSessionService::ClearControllerForClientDiedNoLock(pid_t pid)
             controller->Destroy();
         }
     }
+    it = controllers_.find(pid);
+    CHECK_AND_RETURN_LOG(it != controllers_.end(), "no find controller");
+    controllers_.erase(pid);
 }
 
 ClientDeathRecipient::ClientDeathRecipient(const std::function<void()>& callback)
