@@ -215,10 +215,10 @@ BENCHMARK_F(AVSessionTest, SetAVMetaDataTestCase)(benchmark::State& state)
         metaData.SetWriter("zhoujielun");
         metaData.SetComposer("zhoujielun");
         metaData.SetDuration(iDuration);
-        metaData.SetMediaImageUri("https://baidu.yinyue.com");
+        metaData.SetMediaImageUri("xxxxx");
         metaData.SetSubTitle("fac");
         metaData.SetDescription("for friends");
-        metaData.SetLyric("https://baidu.yinyue.com");
+        metaData.SetLyric("xxxxx");
         OHOS::ErrCode errCode = avsession_->SetAVMetaData(metaData);
         if (errCode != OHOS::ERR_OK) {
             state.SkipWithError("SetAVMetaDataTestCase failed, return error.");
