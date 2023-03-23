@@ -782,7 +782,7 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
         CHECK_AND_RETURN_RET_LOG(!sortValues.is_discarded(), AVSESSION_ERROR, "json object is null");
         for (auto& value : sortValues) {
             auto session = GetContainer().GetSessionById(value["sessionId"]);
-            if (session != nullptr) {
+            if (session == nullptr) {
                 bundleName = value["bundleName"];
                 abilityName = value["abilityName"];
                 break;
