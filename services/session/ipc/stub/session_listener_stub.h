@@ -36,10 +36,10 @@ private:
 
     using HandlerFunc = int32_t(SessionListenerStub::*)(MessageParcel&, MessageParcel&);
     static inline HandlerFunc handlers[] = {
-        [LISTENER_CMD_ON_CREATE] = &SessionListenerStub::HandleOnSessionCreate,
-        [LISTENER_CMD_ON_RELEASE] = &SessionListenerStub::HandleOnSessionRelease,
-        [LISTENER_CMD_TOP_CHANGED] = &SessionListenerStub::HandleOnTopSessionChange,
-        [LISTENER_CMD_AUDIO_CHECKED] = &SessionListenerStub::HandleOnAudioSessionChecked,
+        &SessionListenerStub::HandleOnSessionCreate,
+        &SessionListenerStub::HandleOnSessionRelease,
+        &SessionListenerStub::HandleOnTopSessionChange,
+        &SessionListenerStub::HandleOnAudioSessionChecked,
     };
 };
 }

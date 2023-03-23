@@ -230,7 +230,7 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
                 break;
             }
         }
-        if (values.size() >= maxHistoryNums) {
+        if (values.size() >= (size_t)maxHistoryNums) {
             values.erase(values.end() - 1);
         }
         nlohmann::json value;
@@ -561,7 +561,7 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
                 values.erase(std::remove(values.begin(), values.end(), value));
             }
         }
-        if (values.size() >= maxHistoryNums) {
+        if (values.size() >= (size_t)maxHistoryNums) {
             values.erase(values.end() - 1);
         }
         nlohmann::json value;
@@ -695,7 +695,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
         maxSize = unSetHistoryNum;
     }
     for (auto iterator = tempDescriptors.begin(); iterator != tempDescriptors.end(); ++iterator) {
-        if (descriptors.size() >= maxSize) {
+        if (descriptors.size() >= (size_t)maxSize) {
             break;
         }
         descriptors.push_back(*iterator);

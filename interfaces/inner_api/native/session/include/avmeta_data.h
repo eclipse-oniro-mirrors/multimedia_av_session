@@ -174,22 +174,22 @@ private:
 
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
-        [META_KEY_ASSET_ID] = &AVMetaData::CloneAssetId,
-        [META_KEY_TITLE] = &AVMetaData::CloneTitle,
-        [META_KEY_ARTIST] = &AVMetaData::CloneArtist,
-        [META_KEY_AUTHOR] = &AVMetaData::CloneAuthor,
-        [META_KEY_ALBUM] = &AVMetaData::CloneAlbum,
-        [META_KEY_WRITER] = &AVMetaData::CloneWriter,
-        [META_KEY_COMPOSER] = &AVMetaData::CloneComposer,
-        [META_KEY_DURATION] = &AVMetaData::CloneDuration,
-        [META_KEY_MEDIA_IMAGE] = &AVMetaData::CloneMediaImage,
-        [META_KEY_MEDIA_IMAGE_URI] = &AVMetaData::CloneMediaImageUri,
-        [META_KEY_PUBLISH_DATE] = &AVMetaData::ClonePublishData,
-        [META_KEY_SUBTITLE] = &AVMetaData::CloneSubTitle,
-        [META_KEY_DESCRIPTION] = &AVMetaData::CloneDescription,
-        [META_KEY_LYRIC] = &AVMetaData::CloneLyric,
-        [META_KEY_PREVIOUS_ASSET_ID] = &AVMetaData::ClonePreviousAssetId,
-        [META_KEY_NEXT_ASSET_ID] = &AVMetaData::CloneNextAssetId,
+        &AVMetaData::CloneAssetId,
+        &AVMetaData::CloneTitle,
+        &AVMetaData::CloneArtist,
+        &AVMetaData::CloneAuthor,
+        &AVMetaData::CloneAlbum,
+        &AVMetaData::CloneWriter,
+        &AVMetaData::CloneComposer,
+        &AVMetaData::CloneDuration,
+        &AVMetaData::CloneMediaImage,
+        &AVMetaData::CloneMediaImageUri,
+        &AVMetaData::ClonePublishData,
+        &AVMetaData::CloneSubTitle,
+        &AVMetaData::CloneDescription,
+        &AVMetaData::CloneLyric,
+        &AVMetaData::ClonePreviousAssetId,
+        &AVMetaData::CloneNextAssetId,
     };
 };
 } // namespace OHOS::AVSession
