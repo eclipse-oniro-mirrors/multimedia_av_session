@@ -188,7 +188,7 @@ napi_value NapiAVSessionManager::GetHistoricalSessionDescriptors(napi_env env, n
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid arguments",
                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             CHECK_ARGS_RETURN_VOID(context,
-                (context->maxSize_ >= HISTORICAL_MIN_NUM && context->maxSize_ <= HISTORICAL_MAX_NUM),
+                (context->maxSize_ >= (int32_t)HISTORICAL_MIN_NUM && context->maxSize_ <= (int32_t)HISTORICAL_MAX_NUM),
                 "invalid arguments", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         } else {
             context->maxSize_ = HISTORICAL_UNSET_NUM;

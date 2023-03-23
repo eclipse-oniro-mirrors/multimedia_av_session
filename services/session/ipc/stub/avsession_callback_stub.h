@@ -43,21 +43,21 @@ private:
     int32_t HandleOnSkipToQueueItem(MessageParcel& data, MessageParcel& reply);
     using HandlerFunc = int32_t(AVSessionCallbackStub::*)(MessageParcel&, MessageParcel&);
     static inline HandlerFunc handlers[] = {
-        [SESSION_CALLBACK_ON_PLAY] = &AVSessionCallbackStub::HandleOnPlay,
-        [SESSION_CALLBACK_ON_PAUSE] = &AVSessionCallbackStub::HandleOnPause,
-        [SESSION_CALLBACK_ON_STOP] = &AVSessionCallbackStub::HandleOnStop,
-        [SESSION_CALLBACK_ON_PLAY_NEXT] = &AVSessionCallbackStub::HandleOnPlayNext,
-        [SESSION_CALLBACK_ON_PLAY_PREVIOUS] = &AVSessionCallbackStub::HandleOnPlayPrevious,
-        [SESSION_CALLBACK_ON_FAST_FORWARD] = &AVSessionCallbackStub::HandleOnFastForward,
-        [SESSION_CALLBACK_ON_REWIND] = &AVSessionCallbackStub::HandleOnRewind,
-        [SESSION_CALLBACK_ON_SEEK] = &AVSessionCallbackStub::HandleOnSeek,
-        [SESSION_CALLBACK_ON_SET_SPEED] = &AVSessionCallbackStub::HandleOnSetSpeed,
-        [SESSION_CALLBACK_ON_SET_LOOPMODE] = &AVSessionCallbackStub::HandleOnSetLoopMode,
-        [SESSION_CALLBACK_ON_TOGGLE_FAVORITE] = &AVSessionCallbackStub::HandleOnToggleFavorite,
-        [SESSION_CALLBACK_ON_MEDIA_KEY_EVENT] = &AVSessionCallbackStub::HandleOnMediaKeyEvent,
-        [SESSION_CALLBACK_ON_OUTPUT_DEVICE_CHANGE] = &AVSessionCallbackStub::HandleOnOutputDeviceChange,
-        [SESSION_CALLBACK_ON_SEND_COMMON_COMMAND] = &AVSessionCallbackStub::HandleOnCommonCommand,
-        [SESSION_CALLBACK_ON_SKIP_TO_QUEUE_ITEM] = &AVSessionCallbackStub::HandleOnSkipToQueueItem
+        &AVSessionCallbackStub::HandleOnPlay,
+        &AVSessionCallbackStub::HandleOnPause,
+        &AVSessionCallbackStub::HandleOnStop,
+        &AVSessionCallbackStub::HandleOnPlayNext,
+        &AVSessionCallbackStub::HandleOnPlayPrevious,
+        &AVSessionCallbackStub::HandleOnFastForward,
+        &AVSessionCallbackStub::HandleOnRewind,
+        &AVSessionCallbackStub::HandleOnSeek,
+        &AVSessionCallbackStub::HandleOnSetSpeed,
+        &AVSessionCallbackStub::HandleOnSetLoopMode,
+        &AVSessionCallbackStub::HandleOnToggleFavorite,
+        &AVSessionCallbackStub::HandleOnMediaKeyEvent,
+        &AVSessionCallbackStub::HandleOnOutputDeviceChange,
+        &AVSessionCallbackStub::HandleOnCommonCommand,
+        &AVSessionCallbackStub::HandleOnSkipToQueueItem,
     };
 };
 } // namespace OHOS::AVSession

@@ -123,13 +123,13 @@ private:
 
     using CloneActionType = void(*)(const AVPlaybackState& from, AVPlaybackState& to);
     static inline CloneActionType cloneActions[PLAYBACK_KEY_MAX] = {
-        [PLAYBACK_KEY_STATE] = &AVPlaybackState::CloneState,
-        [PLAYBACK_KEY_SPEED] = &AVPlaybackState::CloneSpeed,
-        [PLAYBACK_KEY_POSITION] = &AVPlaybackState::ClonePosition,
-        [PLAYBACK_KEY_BUFFERED_TIME] = &AVPlaybackState::CloneBufferedTime,
-        [PLAYBACK_KEY_LOOP_MODE] = &AVPlaybackState::CloneLoopMode,
-        [PLAYBACK_KEY_IS_FAVORITE] = &AVPlaybackState::CloneIsFavorite,
-        [PLAYBACK_KEY_ACTIVE_ITEM_ID] = &AVPlaybackState::CloneActiveItemId,
+        &AVPlaybackState::CloneState,
+        &AVPlaybackState::CloneSpeed,
+        &AVPlaybackState::ClonePosition,
+        &AVPlaybackState::CloneBufferedTime,
+        &AVPlaybackState::CloneLoopMode,
+        &AVPlaybackState::CloneIsFavorite,
+        &AVPlaybackState::CloneActiveItemId,
     };
 };
 } // namespace OHOS::AVSession

@@ -76,22 +76,22 @@ private:
 
     using HandlerFunc = int32_t (AVSessionControllerStub::*)(MessageParcel& data, MessageParcel& reply);
     static inline HandlerFunc handlers[] = {
-        [CONTROLLER_CMD_REGISTER_CALLBACK] = &AVSessionControllerStub::HandleRegisterCallbackInner,
-        [CONTROLLER_CMD_DESTROY] = &AVSessionControllerStub::HandleDestroy,
-        [CONTROLLER_CMD_GET_AV_PLAYBACK_STATE] = &AVSessionControllerStub::HandleGetAVPlaybackState,
-        [CONTROLLER_CMD_SEND_CONTROL_COMMAND] = &AVSessionControllerStub::HandleSendControlCommand,
-        [CONTROLLER_CMD_SEND_COMMON_COMMAND] = &AVSessionControllerStub::HandleSendCommonCommand,
-        [CONTROLLER_CMD_GET_AV_META_DATA] = &AVSessionControllerStub::HandleGetAVMetaData,
-        [CONTROLLER_CMD_SEND_AV_KEYEVENT] = &AVSessionControllerStub::HandleSendAVKeyEvent,
-        [CONTROLLER_CMD_GET_LAUNCH_ABILITY] = &AVSessionControllerStub::HandleGetLaunchAbility,
-        [CONTROLLER_CMD_GET_VALID_COMMANDS] = &AVSessionControllerStub::HandleGetValidCommands,
-        [CONTROLLER_CMD_SET_META_FILTER] = &AVSessionControllerStub::HandleSetMetaFilter,
-        [CONTROLLER_CMD_SET_PLAYBACK_FILTER] = &AVSessionControllerStub::HandleSetPlaybackFilter,
-        [CONTROLLER_CMD_IS_SESSION_ACTIVE] = &AVSessionControllerStub::HandleIsSessionActive,
-        [CONTROLLER_CMD_GET_SESSION_ID] = &AVSessionControllerStub::HandleGetSessionId,
-        [CONTROLLER_CMD_GET_AV_QUEUE_ITEMS] = &AVSessionControllerStub::HandleGetAVQueueItems,
-        [CONTROLLER_CMD_GET_AV_QUEUE_TITLE] = &AVSessionControllerStub::HandleGetAVQueueTitle,
-        [CONTROLLER_CMD_SKIP_TO_QUEUE_ITEM] = &AVSessionControllerStub::HandleSkipToQueueItem,
+        &AVSessionControllerStub::HandleRegisterCallbackInner,
+        &AVSessionControllerStub::HandleDestroy,
+        &AVSessionControllerStub::HandleGetAVPlaybackState,
+        &AVSessionControllerStub::HandleGetAVMetaData,
+        &AVSessionControllerStub::HandleSendAVKeyEvent,
+        &AVSessionControllerStub::HandleGetLaunchAbility,
+        &AVSessionControllerStub::HandleGetValidCommands,
+        &AVSessionControllerStub::HandleSendControlCommand,
+        &AVSessionControllerStub::HandleSendCommonCommand,
+        &AVSessionControllerStub::HandleSetMetaFilter,
+        &AVSessionControllerStub::HandleSetPlaybackFilter,
+        &AVSessionControllerStub::HandleIsSessionActive,
+        &AVSessionControllerStub::HandleGetSessionId,
+        &AVSessionControllerStub::HandleGetAVQueueItems,
+        &AVSessionControllerStub::HandleGetAVQueueTitle,
+        &AVSessionControllerStub::HandleSkipToQueueItem,
     };
 };
 } // namespace OHOS::AVSession

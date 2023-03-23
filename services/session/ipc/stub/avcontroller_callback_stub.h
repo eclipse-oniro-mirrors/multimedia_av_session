@@ -48,15 +48,15 @@ private:
 
     using HandlerFunc = int32_t (AVControllerCallbackStub::*)(MessageParcel& data, MessageParcel& reply);
     static inline HandlerFunc handlers[] = {
-        [CONTROLLER_CMD_ON_SESSION_DESTROY] = &AVControllerCallbackStub::HandleOnSessionDestroy,
-        [CONTROLLER_CMD_ON_PLAYBACK_STATE_CHANGE] = &AVControllerCallbackStub::HandleOnPlaybackStateChange,
-        [CONTROLLER_CMD_ON_METADATA_CHANGE] = &AVControllerCallbackStub::HandleOnMetadataChange,
-        [CONTROLLER_CMD_ON_ACTIVE_STATE_CHANGE] = &AVControllerCallbackStub::HandleOnActiveStateChange,
-        [CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE] = &AVControllerCallbackStub::HandleOnValidCommandChange,
-        [CONTROLLER_CMD_ON_OUTPUT_DEVICE_CHANGE] = &AVControllerCallbackStub::HandleOnOutputDeviceChange,
-        [CONTROLLER_CMD_ON_SET_SESSION_EVENT] = &AVControllerCallbackStub::HandleOnSessionEventChange,
-        [CONTROLLER_CMD_ON_QUEUE_ITEMS_CHANGE] = &AVControllerCallbackStub::HandleOnQueueItemsChange,
-        [CONTROLLER_CMD_ON_QUEUE_TITLE_CHANGE] = &AVControllerCallbackStub::HandleOnQueueTitleChange,
+        &AVControllerCallbackStub::HandleOnSessionDestroy,
+        &AVControllerCallbackStub::HandleOnPlaybackStateChange,
+        &AVControllerCallbackStub::HandleOnMetadataChange,
+        &AVControllerCallbackStub::HandleOnActiveStateChange,
+        &AVControllerCallbackStub::HandleOnValidCommandChange,
+        &AVControllerCallbackStub::HandleOnOutputDeviceChange,
+        &AVControllerCallbackStub::HandleOnSessionEventChange,
+        &AVControllerCallbackStub::HandleOnQueueItemsChange,
+        &AVControllerCallbackStub::HandleOnQueueTitleChange,
     };
 };
 }

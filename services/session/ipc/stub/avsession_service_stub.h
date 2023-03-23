@@ -41,18 +41,18 @@ private:
 
     using HandlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
     static inline HandlerFunc handlers[] = {
-        [SERVICE_CMD_CREATE_SESSION] = &AVSessionServiceStub::HandleCreateSessionInner,
-        [SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS] = &AVSessionServiceStub::HandleGetAllSessionDescriptors,
-        [SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID] = &AVSessionServiceStub::HandleGetSessionDescriptorsById,
-        [SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS] = &AVSessionServiceStub::HandleGetHistoricalSessionDescriptors,
-        [SERVICE_CMD_CREATE_CONTROLLER] = &AVSessionServiceStub::HandleCreateControllerInner,
-        [SERVICE_CMD_REGISTER_SESSION_LISTENER] = &AVSessionServiceStub::HandleRegisterSessionListener,
-        [SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT] = &AVSessionServiceStub::HandleSendSystemAVKeyEvent,
-        [SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND] = &AVSessionServiceStub::HandleSendSystemControlCommand,
-        [SERVICE_CMD_REGISTER_CLIENT_DEATH] = &AVSessionServiceStub::HandleRegisterClientDeathObserver,
-        [SERVICE_CMD_CAST_AUDIO] = &AVSessionServiceStub::HandleCastAudio,
-        [SERVICE_CMD_CAST_AUDIO_FOR_ALL] = &AVSessionServiceStub::HandleCastAudioForAll,
-        [SERVICE_CMD_SEND_COMMAND_TO_REMOTE] = &AVSessionServiceStub::HandleRemoteCastAudio,
+        &AVSessionServiceStub::HandleCreateSessionInner,
+        &AVSessionServiceStub::HandleGetAllSessionDescriptors,
+        &AVSessionServiceStub::HandleGetSessionDescriptorsById,
+        &AVSessionServiceStub::HandleGetHistoricalSessionDescriptors,
+        &AVSessionServiceStub::HandleCreateControllerInner,
+        &AVSessionServiceStub::HandleRegisterSessionListener,
+        &AVSessionServiceStub::HandleSendSystemAVKeyEvent,
+        &AVSessionServiceStub::HandleSendSystemControlCommand,
+        &AVSessionServiceStub::HandleRegisterClientDeathObserver,
+        &AVSessionServiceStub::HandleCastAudio,
+        &AVSessionServiceStub::HandleCastAudioForAll,
+        &AVSessionServiceStub::HandleRemoteCastAudio,
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;
