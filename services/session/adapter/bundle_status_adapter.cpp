@@ -104,6 +104,8 @@ void BundleStatusAdapter::NotifyBundleRemoved(const std::string bundleName)
         return;
     }
     bundleStatusListener->second(bundleName);
+    SLOGI("erase bundle status callback, bundleName=%{public}s", bundleName.c_str());
+    bundleStatusListeners_.erase(bundleName);
 }
 
 BundleStatusCallbackImpl::BundleStatusCallbackImpl(const std::function<void(const std::string)>& callback)
