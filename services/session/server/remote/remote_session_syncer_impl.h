@@ -63,9 +63,9 @@ public:
 
     int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
     
-    int32_t PutAVQueueTitle(const std::string& items) override;
+    int32_t PutAVQueueTitle(const std::string& title) override;
 
-    int32_t GetAVQueueTitle(std::string& items) override;
+    int32_t GetAVQueueTitle(std::string& title) override;
 
     int32_t RegisterDataNotifier(const ObjectDataNotifier& notifier) override;
 

@@ -23,7 +23,8 @@
 namespace OHOS::AVSession {
 RemoteSessionSyncerImpl::RemoteSessionSyncerImpl(const std::string& sourceSessionId, const std::string& sourceDevice,
                                                  const std::string& sinkDevice)
-    : sourceSessionId_(sourceSessionId), sourceDevice_(sourceDevice), sinkDevice_(sinkDevice)
+    : object_(nullptr), objectStore_(nullptr), sourceSessionId_(sourceSessionId), sourceDevice_(sourceDevice),
+    sinkDevice_(sinkDevice)
 {
     SLOGI("construct");
 }

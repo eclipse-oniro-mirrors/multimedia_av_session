@@ -22,7 +22,7 @@
 namespace OHOS::AVSession {
 using AudioStandard::RendererState;
 
-BackgroundAudioController::BackgroundAudioController()
+BackgroundAudioController::BackgroundAudioController() : ptr_(nullptr)
 {
     SLOGI("construct");
 }

@@ -134,11 +134,11 @@ int32_t RemoteSessionSourceProxy::SetAVQueueItems(const std::vector<AVQueueItem>
     return AVSESSION_SUCCESS;
 }
 
-int32_t RemoteSessionSourceProxy::SetAVQueueTitle(const std::string& items)
+int32_t RemoteSessionSourceProxy::SetAVQueueTitle(const std::string& title)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetAVQueueTitle");
     CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
-    int32_t ret = sourceImpl_->SetAVQueueTitle(items);
+    int32_t ret = sourceImpl_->SetAVQueueTitle(title);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetAVQueueTitle error");
     return AVSESSION_SUCCESS;
 }
