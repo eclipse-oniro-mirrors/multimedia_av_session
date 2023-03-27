@@ -204,14 +204,14 @@ void AVSessionCallbackProxy::OnCommonCommand(const std::string& commonCommand,
     const AAFwk::WantParams& commandArgs)
 {
     MessageParcel parcel;
-    CHECK_AND_PRINT_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "Write interface token failed");
-    CHECK_AND_PRINT_LOG(parcel.WriteString(commonCommand), "Write event string failed");
-    CHECK_AND_PRINT_LOG(parcel.WriteParcelable(&commandArgs), "Write Want failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "Write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteString(commonCommand), "Write event string failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&commandArgs), "Write Want failed");
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
-    CHECK_AND_PRINT_LOG(remote != nullptr, "Get remote service failed");
-    CHECK_AND_PRINT_LOG(remote->SendRequest(SESSION_CALLBACK_ON_SEND_COMMON_COMMAND, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_LOG(remote != nullptr, "Get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_SEND_COMMON_COMMAND, parcel, reply, option) == 0,
         "Send request failed");
 }
 

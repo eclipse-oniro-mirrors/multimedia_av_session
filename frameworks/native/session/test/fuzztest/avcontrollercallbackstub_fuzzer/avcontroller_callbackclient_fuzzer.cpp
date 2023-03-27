@@ -160,8 +160,6 @@ void AvControllerCallbackClientFuzzer::FuzzTests(const uint8_t* data, size_t siz
 
     AAFwk::WantParams wantParams;
     std::string eventName(reinterpret_cast<const char*>(data), size);
-    std::string eventKey(reinterpret_cast<const char*>(data), size);
-    std::string eventValue(reinterpret_cast<const char*>(data), size);
     aVControllerCallbackClient.OnSessionEventChange(eventName, wantParams);
 }
 

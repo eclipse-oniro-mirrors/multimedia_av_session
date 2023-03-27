@@ -740,9 +740,8 @@ const nlohmann::json& AVSessionService::GetSubNode(const nlohmann::json& node, c
 
 bool AVSessionService::IsHistoricalSession(const std::string& sessionId)
 {
-    std::string sortContent;
-
     {
+        std::string sortContent;
         std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
         if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, sortContent)) {
             SLOGE("IsHistoricalSession read sort failed, filename=%{public}s", SORT_FILE_NAME);
