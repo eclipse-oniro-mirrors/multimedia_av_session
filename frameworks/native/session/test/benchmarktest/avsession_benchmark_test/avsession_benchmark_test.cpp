@@ -66,7 +66,7 @@ public:
 
     void TearDown(const ::benchmark::State& state) override
     {
-        int32_t ret = AVSESSION_ERROR;
+        [[maybe_unused]] int32_t ret = AVSESSION_ERROR;
         if (avsession_) {
             ret = avsession_->Destroy();
             avsession_ = nullptr;
