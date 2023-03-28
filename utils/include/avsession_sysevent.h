@@ -108,7 +108,7 @@ private:
     std::unique_ptr<Utils::Timer> timer_;
     uint32_t timerId_;
     std::recursive_mutex lock_;
-    static constexpr uint32_t NOTIFY_TIME_INTERVAL = 12 * 60 * 60 * 1000; // retry after 12 hours
+    static constexpr uint32_t NOTIFY_TIME_INTERVAL = 1 * 60 * 60 * 1000; // retry after 1 hours
     std::list<AVSessionSysEvent::LifeCycleInfo> lifeCycleInfos_;
     std::list<AVSessionSysEvent::ControllerCommandInfo> controllerCommandInfos_;
     static constexpr float MULTIPLE = 1.0f;
