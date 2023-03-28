@@ -137,6 +137,7 @@ void NapiAVSessionCallback::OnOutputDeviceChange(const OutputDeviceInfo& outputD
 
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
+    SLOGI("Add callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
@@ -160,6 +161,7 @@ napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi
 
 napi_status NapiAVSessionCallback::RemoveCallback(napi_env env, int32_t event, napi_value callback)
 {
+    SLOGI("Remove callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callback == nullptr) {
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
