@@ -144,7 +144,7 @@ void AVSessionRemoteTest::SetUp()
 
 void AVSessionRemoteTest::TearDown()
 {
-    int32_t ret = AVSESSION_ERROR;
+    [[maybe_unused]] int32_t ret = AVSESSION_ERROR;
     if (avsession_ != nullptr) {
         ret = avsession_->Destroy();
         avsession_ = nullptr;
