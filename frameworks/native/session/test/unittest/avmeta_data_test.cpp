@@ -23,9 +23,10 @@
 #include "avsession_pixel_map_adapter.h"
 
 using namespace testing::ext;
-using namespace OHOS::AVSession;
 using namespace OHOS::Media;
 
+namespace OHOS {
+namespace AVSession {
 namespace {
     constexpr int64_t DURATION = 40000;
     constexpr int64_t DURATION_PLAYBACK_SCENE_LIVE = -1;
@@ -393,3 +394,5 @@ HWTEST_F(AVMetaDataTest, IsValid002, TestSize.Level1)
     EXPECT_EQ(metaOut.IsValid(), false);
     SLOGI("IsValid002 End");
 }
+} // namespace AVSession
+} // namespace OHOS

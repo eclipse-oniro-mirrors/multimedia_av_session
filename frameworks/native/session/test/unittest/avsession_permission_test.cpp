@@ -25,9 +25,10 @@
 #include "token_setproc.h"
 
 using namespace testing::ext;
-using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 
+namespace OHOS {
+namespace AVSession {
 static HapInfoParams g_infoA = {
     .userID = 100,
     .bundleName = "ohos.permission_test.demoA",
@@ -434,3 +435,5 @@ HWTEST_F(AVSessionPermissionTest, SendSystemControlCommandWithPerm001, TestSize.
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     DeletePermission(g_infoB);
 }
+} // namespace AVSession
+} // namespace OHOS

@@ -30,9 +30,10 @@
 #include "token_setproc.h"
 
 using namespace testing::ext;
-using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 
+namespace OHOS {
+namespace AVSession {
 static int32_t g_onCall = AVSESSION_ERROR;
 static int32_t g_sessionId = AVSESSION_ERROR;
 static AVMetaData g_metaData;
@@ -531,6 +532,40 @@ HWTEST_F(AvsessionTest, GetController002, TestSize.Level1)
 }
 
 /**
+* @tc.name: SetAVQueueItems
+* @tc.desc: Set queue items of current application
+* @tc.type: FUNC
+* @tc.require: I6RJST
+*/
+HWTEST_F(AvsessionTest, SetAVQueueItems, TestSize.Level1)
+{
+    SLOGE("SetAVQueueItems Begin");
+    std::vector<AVQueueItem> items;
+    AVQueueItem queueItem;
+    queueItem.SetItemId(1);
+    AVMediaDescription description;
+    description.SetMediaId("id");
+    queueItem.SetDescription(std::make_shared<AVMediaDescription>(description));
+    items.push_back(queueItem);
+    EXPECT_EQ(avsession_->SetAVQueueItems(items), AVSESSION_SUCCESS);
+    SLOGE("SetAVQueueItems End");
+}
+
+/**
+* @tc.name: SetAVQueueTitle
+* @tc.desc: Set queue title of current application
+* @tc.type: FUNC
+* @tc.require: I6RJST
+*/
+HWTEST_F(AvsessionTest, SetAVQueueTitle, TestSize.Level1)
+{
+    SLOGE("SetAVQueueTitle Begin");
+    std::string title = "AVQueueTitle";
+    EXPECT_EQ(avsession_->SetAVQueueTitle(title), AVSESSION_SUCCESS);
+    SLOGE("SetAVQueueTitle End");
+}
+
+/**
 * @tc.name: RegisterCallback001
 * @tc.desc: register avsession callback
 * @tc.type: FUNC
@@ -787,3 +822,5 @@ HWTEST_F(AvsessionTest, Destroy002, TestSize.Level1)
     avsession_ = nullptr;
     SLOGE("Destroy002 End");
 }
+} // namespace AVSession
+} // namespace OHOS

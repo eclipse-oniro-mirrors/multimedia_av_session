@@ -26,9 +26,10 @@
 #include "token_setproc.h"
 
 using namespace testing::ext;
-using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 
+namespace OHOS {
+namespace AVSession {
 static char g_testSessionTag[] = "test";
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
@@ -484,6 +485,36 @@ HWTEST_F(AVSessionManagerTest, CreateController004, TestSize.Level1)
 }
 
 /**
+* @tc.name: CreateController005
+* @tc.desc: create session controller
+* @tc.type: FUNC
+* @tc.require: I6RJST
+*/
+HWTEST_F(AVSessionManagerTest, CreateController005, TestSize.Level1)
+{
+    SLOGI("CreateController005 begin");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+        elementName);
+    EXPECT_NE(session, nullptr);
+    ASSERT_EQ(session->GetSessionId().length(), SESSION_LEN);
+
+    std::shared_ptr<AVSessionController> controller;
+    auto ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_NE(controller, nullptr);
+    std::shared_ptr<AVSessionController> secondController;
+    ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), secondController);
+    EXPECT_EQ(ret, ERR_CONTROLLER_IS_EXIST);
+
+    session->Destroy();
+    controller->Destroy();
+    SLOGI("CreateController005 end");
+}
+
+/**
 * @tc.name: RegisterSessionListener001
 * @tc.desc: register nullptr listener
 * @tc.type: FUNC
@@ -686,3 +717,5 @@ HWTEST_F(AVSessionManagerTest, SendSystemControlCommand003, TestSize.Level1)
 
     SLOGI("SendSystemControlCommand003 end");
 }
+} // namespace AVSession
+} // namespace OHOS
