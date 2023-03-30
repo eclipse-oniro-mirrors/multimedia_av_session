@@ -87,8 +87,8 @@ void AVControllerCallbackProxy::OnValidCommandChange(const std::vector<int32_t>&
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
-    CHECK_AND_PRINT_LOG(remote != nullptr, "get remote service failed");
-    CHECK_AND_PRINT_LOG(remote->SendRequest(CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE, parcel, reply, option) == 0,
         "send request failed");
 }
 
@@ -125,7 +125,7 @@ void AVControllerCallbackProxy::OnSessionEventChange(const std::string& event, c
 void AVControllerCallbackProxy::OnQueueItemsChange(const std::vector<AVQueueItem>& items)
 {
     MessageParcel parcel;
-    CHECK_AND_PRINT_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
 
     CHECK_AND_RETURN_LOG(parcel.WriteInt32(items.size()), "write items num int32 failed");
     for (auto &parcelable : items) {
