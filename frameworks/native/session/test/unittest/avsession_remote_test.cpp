@@ -31,10 +31,11 @@
 
 
 using namespace testing::ext;
-using namespace OHOS::AVSession;
 using namespace OHOS::AudioStandard;
 using namespace OHOS::Security::AccessToken;
 
+namespace OHOS {
+namespace AVSession {
 const int32_t DECICE_ID = 2;
 
 static HapInfoParams g_info = {
@@ -615,3 +616,5 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
     }
     SLOGE("GetOutputDevice005 End");
 }
+} // namespace AVSession
+} // namespace OHOS

@@ -27,9 +27,10 @@
 #include "want_params.h"
 
 using namespace testing::ext;
-using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 
+namespace OHOS {
+namespace AVSession {
 static uint64_t g_selfTokenId = 0;
 static HapInfoParams g_info = {
     .userID = 100,
@@ -1211,3 +1212,45 @@ HWTEST_F(AVSessionControllerTest, OnRemoteRequest001, TestSize.Level1)
     auto ret = avSessionControllerStubTest.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::IPC_STUB_UNKNOW_TRANS_ERR);
 }
+
+/**
+* @tc.name: GetAVQueueItems001
+* @tc.desc: Get queue items of current application
+* @tc.type: FUNC
+* @tc.require: I6RJST
+*/
+HWTEST_F(AVSessionControllerTest, GetAVQueueItems001, TestSize.Level1)
+{
+    SLOGE("GetAVQueueItems001 Begin");
+    int32_t itemId = 1;
+    std::string mediaId = "id";
+    std::vector<AVQueueItem> items;
+    std::vector<AVQueueItem> receivedItems;
+    AVQueueItem queueItem;
+    queueItem.SetItemId(itemId);
+    AVMediaDescription description;
+    description.SetMediaId(mediaId);
+    queueItem.SetDescription(std::make_shared<AVMediaDescription>(description));
+    items.push_back(queueItem);
+    EXPECT_EQ(avsession_->SetAVQueueItems(items), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->GetAVQueueItems(receivedItems), AVSESSION_SUCCESS);
+    EXPECT_EQ(receivedItems[0].GetItemId(), itemId);
+    EXPECT_EQ(receivedItems[0].GetDescription()->GetMediaId(), mediaId);
+    SLOGE("GetAVQueueItems001 End");
+}
+
+/**
+* @tc.name: GetAVQueueTitle001
+* @tc.desc: Set queue title of current application
+* @tc.type: FUNC
+* @tc.require: I6RJST
+*/
+HWTEST_F(AVSessionControllerTest, GetAVQueueTitle001, TestSize.Level1)
+{
+    SLOGE("GetAVQueueTitle001 Begin");
+    std::string title = "AVQueueTitle";
+    EXPECT_EQ(avsession_->SetAVQueueTitle(title), AVSESSION_SUCCESS);
+    SLOGE("GetAVQueueTitle001 End");
+}
+} // namespace AVSession
+} // namespace OHOS

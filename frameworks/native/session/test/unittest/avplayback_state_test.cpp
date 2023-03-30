@@ -18,7 +18,9 @@
 #include "avplayback_state.h"
 
 using namespace testing::ext;
-using namespace OHOS::AVSession;
+
+namespace OHOS {
+namespace AVSession {
 class AVPlaybackStateTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -233,3 +235,5 @@ HWTEST_F(AVPlaybackStateTest, CopyFrom002, TestSize.Level1)
     auto ret = stateTest.CopyFrom(stateOut);
     EXPECT_EQ(ret, false);
 }
+} // namespace AVSession
+} // namespace OHOS
