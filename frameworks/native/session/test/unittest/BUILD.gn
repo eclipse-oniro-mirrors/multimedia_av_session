@@ -149,11 +149,34 @@ ohos_unittest("AVMediaDescriptionTest") {
   external_deps = common_external_deps
 }
 
+ohos_unittest("AVDumperTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_dumper_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "../../include/",
+    "../../../../../../interfaces/inner_api/native/session/include/",
+    "../../../../../services/session/adapter",
+    "../../../../../services/session/server/",
+    "../../../../../services/session/server/remote",
+  ]
+
+  external_deps = common_external_deps
+}
+
 ###############################################################################
 group("unittest") {
   testonly = true
 
   deps = [
+    ":AVDumperTest",
     ":AVMediaDescriptionTest",
     ":AVMetaDataTest",
     ":AVPlaybackStateTest",
