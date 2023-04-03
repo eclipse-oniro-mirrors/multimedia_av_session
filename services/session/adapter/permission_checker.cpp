@@ -61,9 +61,11 @@ bool PermissionChecker::CheckSystemPermissionByUid(int uid)
 {
     BundleMgrClient client;
     std::string bundleName;
-    if (!client.GetBundleNameForUid(uid, bundleName)) {
+    std::string identity = OHOS::IPCSkeleton::ResetCallingIdentity();
+    if (client.GetNameForUid(uid, bundleName) != OHOS::ERR_OK) {
         return true;
     }
+    OHOS::IPCSkeleton::SetCallingIdentity(identity);
 
     AccessTokenIDEx accessTokenIdEx = AccessTokenKit::GetHapTokenIDEx(uid / UID_TRANSFORM_DIVISOR, bundleName, 0);
     auto tokenId = accessTokenIdEx.tokenIdExStruct.tokenID;
