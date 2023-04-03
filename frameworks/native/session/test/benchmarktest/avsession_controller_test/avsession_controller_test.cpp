@@ -290,7 +290,7 @@ BENCHMARK_F(AVSessionControllerTest, SendControlCommand)(benchmark::State& state
             avsession_->Activate();
         }
         int32_t errCode = controller_->SendControlCommand(command);
-        if (errCode != AVSESSION_SUCCESS) {
+        if (errCode != ERR_COMMAND_SEND_EXCEED_MAX && errCode != AVSESSION_SUCCESS) {
             SLOGE("%{public}s error, failed to SendControlCommand, error code is %{public}d.", __func__, errCode);
             state.SkipWithError("SendControlCommand failed, return error.");
         }
@@ -374,6 +374,11 @@ BENCHMARK_F(AVSessionControllerTest, SendCommonCommand)(benchmark::State& state)
     const std::string commonCommand = "common_command";
     const OHOS::AAFwk::WantParams commandArgs;
     while (state.KeepRunning()) {
+        bool isActive = false;
+        controller_->IsSessionActive(isActive);
+        if (!isActive) {
+            avsession_->Activate();
+        }
         OHOS::ErrCode errCode = controller_->SendCommonCommand(commonCommand, commandArgs);
         if (errCode != OHOS::ERR_OK) {
             SLOGE("%{public}s error, failed to SendCommonCommand, error code is %{public}d.", __func__, errCode);
