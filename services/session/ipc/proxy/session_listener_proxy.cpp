@@ -62,11 +62,11 @@ void SessionListenerProxy::OnTopSessionChange(const AVSessionDescriptor& descrip
     CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_TOP_CHANGED, data, reply, option) == 0, "send request fail");
 }
 
-void SessionListenerProxy::OnAudioSessionChecked(const AVSessionDescriptor& descriptor)
+void SessionListenerProxy::OnAudioSessionChecked(const int32_t uid)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(descriptor.WriteToParcel(data), "write descriptor failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(uid), "write uid failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");

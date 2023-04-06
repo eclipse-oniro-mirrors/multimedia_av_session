@@ -32,7 +32,7 @@ public:
 
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
 
-    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override;
+    void OnAudioSessionChecked(const int32_t uid) override;
     
 private:
     std::shared_ptr<SessionListener> listener_;

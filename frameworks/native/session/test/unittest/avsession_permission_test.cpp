@@ -132,9 +132,9 @@ public:
         SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }
 
-    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override
+    void OnAudioSessionChecked(const int32_t uid) override
     {
-        SLOGI("sessionId=%{public}s checked", descriptor.sessionId_.c_str());
+        SLOGI("uid=%{public}d checked", uid);
     }
 };
 

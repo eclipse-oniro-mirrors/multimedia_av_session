@@ -119,10 +119,9 @@ public:
         SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }
 
-    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override
+    void OnAudioSessionChecked(const int32_t uid) override
     {
-        SLOGI("sessionId=%{public}s checked", descriptor.sessionId_.c_str());
-        descriptor_ = descriptor;
+        SLOGI("uid=%{public}d checked", uid);
     }
 
     std::string GetSessionId() const
@@ -555,7 +554,7 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
     AVSessionDescriptor descriptor;
     descriptor.isThirdPartyApp_ = true;
     descriptor.uid_ = 100;
-    listener->OnAudioSessionChecked(descriptor);
+    listener->OnAudioSessionChecked(descriptor.uid_);
     sleep(1);
     EXPECT_EQ(descriptor.uid_, listener->GetSessionUid());
     session->Destroy();

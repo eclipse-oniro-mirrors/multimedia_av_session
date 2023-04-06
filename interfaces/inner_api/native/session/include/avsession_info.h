@@ -62,10 +62,10 @@ public:
     /**
      * @brief Listen for AudioSession verification.
      *
-     * @param descriptor Session related description callback.
+     * @param uid Session related uid.
      * @since 9
     */
-    virtual void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) {};
+    virtual void OnAudioSessionChecked(const int32_t uid) {};
 
     /**
      * @brief Deconstruct SessionListener.

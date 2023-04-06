@@ -70,12 +70,12 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
             return;
         }
         SLOGI("pause uid=%{public}d", descriptor.uid_);
-        ptr_->NotifyAudioSessionCheck_(descriptor);
+        ptr_->NotifyAudioSessionCheck_(descriptor.uid_);
         AudioAdapter::GetInstance().PauseAudioStream(descriptor.uid_);
     }
 }
 
-void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos &infos)
+void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos)
 {
     for (const auto& info : infos) {
         if (info->rendererState != AudioStandard::RENDERER_RUNNING) {
@@ -99,11 +99,7 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
             continue;
         }
         SLOGI("pause uid=%{public}d", info->clientUID);
-        for (const auto& session : ptr_->GetContainer_().GetAllSessions()) {
-            if (session->GetUid() == info->clientUID) {
-                ptr_->NotifyAudioSessionCheck_(session->GetDescriptor());
-            }
-        }
+        ptr_->NotifyAudioSessionCheck_(info->clientUID);
         AudioAdapter::GetInstance().PauseAudioStream(info->clientUID);
     }
 }
@@ -114,11 +110,7 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid) const
     bool isSuccess = AudioAdapter::GetInstance().GetRendererState(uid, rendererState);
     if (isSuccess) {
         SLOGI("pause uid=%{public}d", uid);
-        for (const auto& session : ptr_->GetContainer_().GetAllSessions()) {
-            if (session->GetUid() == uid) {
-                ptr_->NotifyAudioSessionCheck_(session->GetDescriptor());
-            }
-        }
+        ptr_->NotifyAudioSessionCheck_(uid);
         AudioAdapter::GetInstance().PauseAudioStream(uid);
     }
     SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");

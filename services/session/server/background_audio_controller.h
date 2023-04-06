@@ -32,7 +32,7 @@ public:
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
     void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override {}
-    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override {}
+    void OnAudioSessionChecked(const int32_t uid) override {}
 
     void Init(AVSessionService *ptr);
 

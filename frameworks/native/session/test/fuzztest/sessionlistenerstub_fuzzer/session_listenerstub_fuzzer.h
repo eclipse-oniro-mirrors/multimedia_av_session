@@ -35,7 +35,7 @@ class TestSessionListener : public SessionListener {
         SLOGI("Enter into TestSessionListener::OnTopSessionChange.");
     }
 
-    void OnAudioSessionChecked(const AVSessionDescriptor& descriptor) override
+    void OnAudioSessionChecked(const int32_t uid) override
     {
         SLOGI("Enter into TestSessionListener::OnAudioSessionChecked.");
     }

@@ -72,7 +72,7 @@ int32_t SessionListenerStub::HandleOnAudioSessionChecked(MessageParcel& data, Me
     AVSESSION_TRACE_SYNC_START("SessionListenerStub::OnAudioSessionChecked");
     AVSessionDescriptor descriptor;
     CHECK_AND_RETURN_RET_LOG(descriptor.ReadFromParcel(data), ERR_NONE, "read descriptor failed");
-    OnAudioSessionChecked(descriptor);
+    OnAudioSessionChecked(descriptor.uid_);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession
