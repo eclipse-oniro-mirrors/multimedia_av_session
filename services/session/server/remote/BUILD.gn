@@ -38,12 +38,12 @@ common_deps = [
 common_external_deps = [
   "ability_base:want",
   "ability_runtime:wantagent_innerkits",
+  "audio_framework:audio_client",
   "c_utils:utils",
   "data_object:distributeddataobject_impl",
   "hiviewdfx_hilog_native:libhilog",
   "input:libmmi-client",
   "ipc:ipc_single",
-  "multimedia_audio_framework:audio_client",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
