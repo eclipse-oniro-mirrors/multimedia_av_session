@@ -105,7 +105,7 @@ public:
 
     int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors) override;
 
-    void NotifyAudioSessionCheck_(const int32_t uid)
+    void NotifyAudioSessionCheckTrigger(const int32_t uid)
     {
         return NotifyAudioSessionCheck(uid);
     }
