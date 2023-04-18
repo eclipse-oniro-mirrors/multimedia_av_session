@@ -67,6 +67,10 @@ public:
 
     int32_t GetAVQueueTitle(std::string& title) override;
 
+    int32_t PutExtras(const AAFwk::WantParams& extras) override;
+
+    int32_t GetExtras(AAFwk::WantParams& extras) override;
+
     int32_t RegisterDataNotifier(const ObjectDataNotifier& notifier) override;
 
     int32_t RegisterDisconnectNotifier(const ObjectDisconnectNotifier& notifier) override;
@@ -86,6 +90,7 @@ public:
     static constexpr char SESSION_EVENT_KEY[] = "sessionEvent";
     static constexpr char QUEUE_ITEMS_KEY[] = "queueItems";
     static constexpr char QUEUE_TITLE_KEY[] = "queueTitle";
+    static constexpr char EXTRAS_KEY[] = "extras";
     static constexpr int RECEIVE_DATA_SIZE_MAX = 500 * 1024;
     const std::map<std::string, SessionDataCategory> categoryMap {
             {METADATA_KEY, SESSION_DATA_META},
@@ -95,6 +100,7 @@ public:
             {SESSION_EVENT_KEY, SESSION_DATA_SET_EVENT},
             {QUEUE_ITEMS_KEY, SESSION_DATA_QUEUE_ITEMS},
             {QUEUE_TITLE_KEY, SESSION_DATA_QUEUE_TITLE},
+            {EXTRAS_KEY, SESSION_DATA_EXTRAS},
     };
 
 private:

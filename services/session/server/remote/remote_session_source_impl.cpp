@@ -242,6 +242,28 @@ int32_t RemoteSessionSourceImpl::SetAVQueueTitle(const std::string& title)
     return AVSESSION_SUCCESS;
 }
 
+int32_t RemoteSessionSourceImpl::SetExtrasRemote(const AAFwk::WantParams& extras)
+{
+    SLOGI("start");
+    CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
+    for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
+        SLOGI("iter %{public}s", iter->first.c_str());
+        AAFwk::WantParams sinkExtras = extras;
+
+        auto ret = iter->second->PutExtras(sinkExtras);
+        if (ret != AVSESSION_SUCCESS) {
+            HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+                "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
+                "SESSION_TYPE", session_->GetDescriptor().sessionType_,
+                "AUDIO_STATUS", HISYSEVENT_GET_AUDIO_STATUS(session_->GetUid()),
+                "ERROR_TYPE", "TIME_OUT",
+                "ERROR_INFO", "SetExtrasRemote time out");
+        }
+    }
+    SLOGI("success");
+    return AVSESSION_SUCCESS;
+}
+
 AVMetaData::MetaMaskType RemoteSessionSourceImpl::GetSinkMetaMaskType(const std::string& sinkDevice)
 {
     std::vector<int32_t> capability = AVMetaData::localCapability;

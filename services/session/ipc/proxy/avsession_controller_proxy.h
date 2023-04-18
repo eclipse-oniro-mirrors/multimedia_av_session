@@ -54,6 +54,8 @@ public:
 
     int32_t SkipToQueueItem(int32_t& itemId) override;
 
+    int32_t GetExtras(AAFwk::WantParams& extras) override;
+
     int32_t Destroy() override;
 
     std::string GetSessionId() override;

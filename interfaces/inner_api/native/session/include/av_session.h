@@ -122,6 +122,24 @@ public:
     virtual int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) = 0;
 
     /**
+     * @brief Get custom media packet.
+     *
+     * @param extras Custom media packet key-value pairs passed
+     * @return Return whether the getting is successful
+     * @since 10
+    */
+    virtual int32_t GetExtras(AAFwk::WantParams& extras) = 0;
+
+    /**
+     * @brief Set custom media packet.
+     *
+     * @param extras Custom media packet key-value pairs passed
+     * @return Return whether the setting is successful
+     * @since 10
+    */
+    virtual int32_t SetExtras(const AAFwk::WantParams& extras) = 0;
+
+    /**
      * @brief Get the controller corresponding to this session.
      *
      * @return Return to session controller{@link AVSessionController}.

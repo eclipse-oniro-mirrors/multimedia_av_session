@@ -26,6 +26,7 @@
 #include "avcontrol_command.h"
 
 #include "accesstoken_kit.h"
+#include "bool_wrapper.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
@@ -563,6 +564,47 @@ HWTEST_F(AvsessionTest, SetAVQueueTitle, TestSize.Level1)
     std::string title = "AVQueueTitle";
     EXPECT_EQ(avsession_->SetAVQueueTitle(title), AVSESSION_SUCCESS);
     SLOGE("SetAVQueueTitle End");
+}
+
+/**
+* @tc.name: SetExtrasTest001
+* @tc.desc: Set custom media packets
+* @tc.type: FUNC
+* @tc.require: I6TD43
+*/
+HWTEST_F(AvsessionTest, SetExtrasTest001, TestSize.Level1)
+{
+    SLOGI("SetExtrasTest001 Begin");
+    std::shared_ptr<OHOS::AAFwk::WantParams> wantParamsIn = nullptr;
+    wantParamsIn = std::make_shared<OHOS::AAFwk::WantParams>();
+    std::string keyStr = "1234567";
+    bool valueBool = true;
+    wantParamsIn->SetParam(keyStr, OHOS::AAFwk::Boolean::Box(valueBool));
+
+    EXPECT_EQ(avsession_->SetExtras(*wantParamsIn), AVSESSION_SUCCESS);
+    SLOGI("SetExtrasTest001 End");
+}
+
+/**
+* @tc.name: SetExtrasTest002
+* @tc.desc: Set custom media packets - large number of calls
+* @tc.type: FUNC
+* @tc.require: I6TD43
+*/
+HWTEST_F(AvsessionTest, SetExtrasTest002, TestSize.Level2)
+{
+    SLOGI("SetExtrasTest002 Begin");
+    std::shared_ptr<OHOS::AAFwk::WantParams> wantParamsIn = nullptr;
+    wantParamsIn = std::make_shared<OHOS::AAFwk::WantParams>();
+    std::string keyStr = "1234567";
+    bool valueBool = true;
+    wantParamsIn->SetParam(keyStr, OHOS::AAFwk::Boolean::Box(valueBool));
+
+    // Test the interface through 500 calls
+    for (int i = 0; i < 500; i++) {
+        EXPECT_EQ(avsession_->SetExtras(*wantParamsIn), AVSESSION_SUCCESS);
+    }
+    SLOGI("SetExtrasTest002 End");
 }
 
 /**

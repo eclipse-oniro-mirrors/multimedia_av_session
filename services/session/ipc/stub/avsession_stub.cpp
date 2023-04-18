@@ -180,6 +180,27 @@ int32_t AVSessionStub::HandleSetAVQueueTitle(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleGetExtras(MessageParcel& data, MessageParcel& reply)
+{
+    AAFwk::WantParams extras;
+    int32_t ret = GetExtras(extras);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetExtras failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteParcelable(&extras), ERR_NONE, "write extras failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleSetExtras(MessageParcel& data, MessageParcel& reply)
+{
+    sptr extrasWant = data.ReadParcelable<AAFwk::WantParams>();
+    if (extrasWant == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
+    }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetExtras(*extrasWant)), ERR_NONE, "WriteInt32 result failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> controller = GetControllerInner();

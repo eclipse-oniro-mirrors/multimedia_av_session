@@ -118,6 +118,16 @@ void AVControllerCallbackClient::OnQueueTitleChange(const std::string& title)
         "AVControllerCallbackClient handler postTask failed");
 }
 
+void AVControllerCallbackClient::OnExtrasChange(const AAFwk::WantParams& extras)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, extras]() { callback->OnExtrasChange(extras); }, EVENT_NAME),
+        "AVControllerCallbackClient handler postTask failed");
+}
+
 void AVControllerCallbackClient::AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>&
     listener)
 {

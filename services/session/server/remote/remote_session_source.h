@@ -34,6 +34,7 @@ public:
     virtual int32_t SetSessionEventRemote(const std::string& event, const AAFwk::WantParams& args) = 0;
     virtual int32_t SetAVQueueItems(const std::vector<AVQueueItem>& itemId) = 0;
     virtual int32_t SetAVQueueTitle(const std::string& title) = 0;
+    virtual int32_t SetExtrasRemote(const AAFwk::WantParams& extras) = 0;
     virtual ~RemoteSessionSource() = default;
 };
 } // namespace OHOS::AVSession

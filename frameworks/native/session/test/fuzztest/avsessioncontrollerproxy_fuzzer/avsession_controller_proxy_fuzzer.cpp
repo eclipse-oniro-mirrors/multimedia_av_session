@@ -105,6 +105,7 @@ void OHOS::AVSession::AvsessionControllerProxyTest(uint8_t* data, size_t size)
     avSessionControllerProxy.IsSessionActive(isActive);
     avSessionControllerProxy.SendControlCommand(controlCommand);
     avSessionControllerProxy.SendCommonCommand(eventName, wantParams);
+    avSessionControllerProxy.GetExtras(wantParams);
 }
 
 /* Fuzzer entry point */

@@ -70,7 +70,7 @@
           }
         ],
         "test": [
-          "//foundation/multimedia/av_session/frameworks/native/session/test/unittest:unittest",
+          "//foundation/multimedia/av_session/frameworks/native/session/test/unittest:av_session_unittest",
           "//foundation/multimedia/av_session/frameworks/native/session/test/unittest/napi/avsession_jsunittest:jsunittest",
           "//foundation/multimedia/av_session/frameworks/native/session/test/unittest/napi/avsession_controller_jsunittest:jsunittest",
           "//foundation/multimedia/av_session/frameworks/native/session/test/unittest/napi/avsession_manager_jsunittest:jsunittest",
@@ -81,7 +81,7 @@
           "//foundation/multimedia/av_session/interfaces/inner_api/native/session/test/fuzztest/avplaybackstate_fuzzer:fuzztest",
           "//foundation/multimedia/av_session/interfaces/inner_api/native/session/test/fuzztest/avsessiondescriptor_fuzzer:fuzztest",
           "//foundation/multimedia/av_session/interfaces/inner_api/native/session/test/fuzztest/avsessionpixelmap_fuzzer:fuzztest",
-          "//foundation/multimedia/av_session/services/session/server/test:unittest",
+          "//foundation/multimedia/av_session/services/session/server/test:av_session_server_unittest",
           "//foundation/multimedia/av_session/services/session/server/test/fuzztest:fuzztest"
         ]
       }

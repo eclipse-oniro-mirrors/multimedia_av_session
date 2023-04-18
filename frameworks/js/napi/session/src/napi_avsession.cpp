@@ -80,6 +80,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setAVMetadata", SetAVMetaData),
         DECLARE_NAPI_FUNCTION("setAVPlaybackState", SetAVPlaybackState),
         DECLARE_NAPI_FUNCTION("setLaunchAbility", SetLaunchAbility),
+        DECLARE_NAPI_FUNCTION("setExtras", SetExtras),
         DECLARE_NAPI_FUNCTION("setAudioStreamId", SetAudioStreamId),
         DECLARE_NAPI_FUNCTION("getController", GetController),
         DECLARE_NAPI_FUNCTION("activate", Activate),
@@ -521,6 +522,56 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
     return NapiAsyncWork::Enqueue(env, context, "SetLaunchAbility", executor, complete);
 }
 
+napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSession::SetExtras");
+    struct ConcreteContext : public ContextBase {
+        AAFwk::WantParams extras_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetExtras failed : no memory");
+        NapiUtils::ThrowError(env, "SetExtras failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->extras_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get extras failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SET_EXTRAS_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SetExtras failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->SetExtras(context->extras_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetExtras failed : native session not exist";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "SetExtras failed : native invalid parameters";
+            } else {
+                context->errMessage = "SetExtras failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetExtras", executor, complete);
+}
+
 napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
@@ -808,7 +859,7 @@ void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)
             message = "SetSessionEvent failed : native session not exist";
             break;
         case ERR_INVALID_PARAM:
-            message = "SetAVMetaData failed : native invalid parameters";
+            message = "SetSessionEvent failed : native invalid parameters";
             break;
         case ERR_NO_PERMISSION:
             message = "SetSessionEvent failed : native no permission";

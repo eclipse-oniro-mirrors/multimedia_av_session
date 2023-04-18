@@ -350,6 +350,42 @@ int32_t RemoteSessionSyncerImpl::GetAVQueueTitle(std::string& title)
     return AVSESSION_SUCCESS;
 }
 
+int32_t RemoteSessionSyncerImpl::PutExtras(const AAFwk::WantParams& extras)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutExtras");
+    Parcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&extras), ERR_MARSHALLING, "Write extras failed");
+
+    uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
+    std::vector<uint8_t> dataVector(data.GetDataSize());
+    std::copy(parcelData, parcelData + data.GetDataSize(), dataVector.begin());
+
+    CHECK_AND_RETURN_RET_LOG(PutData(EXTRAS_KEY, dataVector) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "put data error");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t RemoteSessionSyncerImpl::GetExtras(AAFwk::WantParams& extras)
+{
+    std::vector<uint8_t> dataVector;
+    CHECK_AND_RETURN_RET_LOG(GetData(EXTRAS_KEY, dataVector) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "get data error");
+    CHECK_AND_RETURN_RET_LOG(dataVector.size() <= RECEIVE_DATA_SIZE_MAX, AVSESSION_ERROR, "get data size over range");
+    DefaultAllocator allocator;
+    uint8_t *allocateData = reinterpret_cast<uint8_t*>(allocator.Alloc(dataVector.size()));
+    CHECK_AND_RETURN_RET_LOG(allocateData != nullptr, AVSESSION_ERROR, "alloc data fail");
+    std::copy(dataVector.begin(), dataVector.end(), allocateData);
+
+    Parcel parcelData;
+    CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
+        AVSESSION_ERROR, "parse parcel error");
+    AAFwk::WantParams *extrasData = parcelData.ReadParcelable<AAFwk::WantParams>();
+    extras = AAFwk::WantParams(*extrasData);
+
+    delete extrasData;
+    return AVSESSION_SUCCESS;
+}
+
 int32_t RemoteSessionSyncerImpl::RegisterDataNotifier(const ObjectDataNotifier& notifier)
 {
     CHECK_AND_RETURN_RET_LOG(objectStore_ != nullptr && object_ != nullptr, AVSESSION_ERROR,

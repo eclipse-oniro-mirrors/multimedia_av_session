@@ -59,6 +59,10 @@ public:
 
     virtual int32_t GetAVQueueTitle(std::string& items) = 0;
 
+    virtual int32_t PutExtras(const AAFwk::WantParams& extras) = 0;
+
+    virtual int32_t GetExtras(AAFwk::WantParams& extras) = 0;
+
     virtual int32_t RegisterDataNotifier(const ObjectDataNotifier& notifier) = 0;
 
     virtual int32_t RegisterDisconnectNotifier(const ObjectDisconnectNotifier& notifier) = 0;

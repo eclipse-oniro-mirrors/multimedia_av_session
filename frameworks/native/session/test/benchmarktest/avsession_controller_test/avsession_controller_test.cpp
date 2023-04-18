@@ -108,6 +108,8 @@ public:
 
     void OnQueueTitleChange(const std::string& title) override {};
 
+    void OnExtrasChange(const OHOS::AAFwk::WantParams& args) override {};
+
     ~AVControllerCallbackImpl() override;
 
     bool isActive_ = false;
@@ -332,7 +334,10 @@ BENCHMARK_F(AVSessionControllerTest, GetRealPlaybackPosition)(benchmark::State& 
     avsession_->SetAVMetaData(metaData);
 
     AVPlaybackState backState;
-    backState.SetPosition({TestMicroSecond * TestMicroSecond, TestMicroSecond});
+    AVPlaybackState::Position position;
+    position.elapsedTime_ = TestMicroSecond * TestMicroSecond;
+    position.updateTime_ = TestMicroSecond;
+    backState.SetPosition(position);
     avsession_->SetAVPlaybackState(backState);
     AVPlaybackState resultState;
     controller_->GetAVPlaybackState(resultState);
@@ -383,6 +388,18 @@ BENCHMARK_F(AVSessionControllerTest, SendCommonCommand)(benchmark::State& state)
         if (errCode != OHOS::ERR_OK) {
             SLOGE("%{public}s error, failed to SendCommonCommand, error code is %{public}d.", __func__, errCode);
             state.SkipWithError("SendCommonCommand failed, return error.");
+        }
+    }
+}
+
+BENCHMARK_F(AVSessionControllerTest, GetExtras)(benchmark::State& state)
+{
+    OHOS::AAFwk::WantParams extras;
+    while (state.KeepRunning()) {
+        OHOS::ErrCode errCode = controller_->GetExtras(extras);
+        if (errCode != OHOS::ERR_OK) {
+            SLOGE("%{public}s error, failed to GetExtras, error code is %{public}d.", __func__, errCode);
+            state.SkipWithError("GetExtras failed, return error.");
         }
     }
 }

@@ -266,6 +266,14 @@ public:
     virtual void OnQueueTitleChange(const std::string& title) = 0;
 
     /**
+     * @brief Session custom media packet change callback.
+     *
+     * @param extras The changed custom media packet.
+     * @since 10
+     */
+    virtual void OnExtrasChange(const AAFwk::WantParams& extras) = 0;
+
+    /**
      * @brief Deconstruct AVControllerCallback.
      * @since 9
     */
@@ -287,7 +295,8 @@ enum SessionDataCategory {
     SESSION_DATA_QUEUE_ITEMS = 4,
     SESSION_DATA_QUEUE_TITLE = 5,
     SESSION_DATA_COMMON_COMMAND = 6,
-    SESSION_DATA_CATEGORY_MAX = 7,
+    SESSION_DATA_EXTRAS = 7,
+    SESSION_DATA_CATEGORY_MAX = 8,
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

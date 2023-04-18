@@ -42,6 +42,8 @@ public:
 
     void OnQueueTitleChange(const std::string& title) override;
 
+    void OnExtrasChange(const AAFwk::WantParams& extras) override;
+
 private:
     static inline BrokerDelegator<AVControllerCallbackProxy> delegator_;
 };

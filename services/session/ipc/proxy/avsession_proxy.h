@@ -53,6 +53,10 @@ public:
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
+    int32_t GetExtras(AAFwk::WantParams& extras) override;
+
+    int32_t SetExtras(const AAFwk::WantParams& extras) override;
+
     std::shared_ptr<AVSessionController> GetController() override;
 
     int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) override;

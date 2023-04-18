@@ -161,6 +161,15 @@ public:
     virtual int32_t SkipToQueueItem(int32_t& itemId) = 0;
 
     /**
+     * @brief Get custom media packet.
+     *
+     * @param extras Custom media packet key-value pairs
+     * @return Return whether the operation is successful
+     * @since 10
+    */
+    virtual int32_t GetExtras(AAFwk::WantParams& extras) = 0;
+
+    /**
      * @brief Destroy session.
      *
      * @return Returns whether destroy successful.
