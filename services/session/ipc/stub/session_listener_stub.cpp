@@ -70,10 +70,9 @@ int32_t SessionListenerStub::HandleOnTopSessionChange(MessageParcel& data, Messa
 int32_t SessionListenerStub::HandleOnAudioSessionChecked(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("SessionListenerStub::OnAudioSessionChecked");
-    int32_t uid;
-    int32_t ret = data.ReadInt32(uid);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "HandleOnAudioSessionChecked failed");
+    int32_t uid = data.ReadInt32();
     OnAudioSessionChecked(uid);
+    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession
