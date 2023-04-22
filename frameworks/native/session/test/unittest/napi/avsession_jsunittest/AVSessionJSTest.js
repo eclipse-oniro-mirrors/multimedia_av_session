@@ -38,6 +38,9 @@ describe("AVSessionJsTest", function () {
   const COMMON_COMMAND_PARAMS = {
     command: "This is my command"
   };
+  const CUSTOM_EXTRAS = {
+    extras: "This is custom media packet"
+  };
 
   beforeAll(async function () {
     session = await avSession.createAVSession(featureAbility.getContext(), "AVSessionDemo", 'audio').catch((err) => {
@@ -160,6 +163,79 @@ describe("AVSessionJsTest", function () {
     });
     sleep(200).then(()=>{
       expect(errCode == 401).assertTrue();
+      done();
+    })
+  })
+
+  /*
+   * @tc.name:SetExtras001
+   * @tc.desc:Set extras - callback
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("SetExtras001", 0, async function (done) {
+    session.setExtras(CUSTOM_EXTRAS, (err) => {
+      if (err) {
+        console.error(TAG + "SetExtras001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      console.info(TAG + "SetExtras001 finished");
+      expect(true).assertTrue();
+      done();
+    });
+  })
+
+  /*
+   * @tc.name:SetExtras002
+   * @tc.desc:Set extras - promise
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("SetExtras002", 0, async function (done) {
+    await session.setExtras(CUSTOM_EXTRAS).catch((err) => {
+      console.error(TAG + "SetExtras002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    console.info(TAG + "SetExtras002 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:SetExtras003
+   * @tc.desc:Set extras - zero param
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("SetExtras003", 0, async function (done) {
+    let errCode = 0;
+    await session.setExtras().catch((err) => {
+      console.info(TAG + "SetExtras003 caught error" + err.code);
+      errCode = err.code;
+    });
+    sleep(200).then(()=>{
+      expect(errCode == 401).assertTrue();
+      console.info(TAG + "SetExtras003 finished");
+      done();
+    })
+  })
+
+  /*
+   * @tc.name:SetExtras004
+   * @tc.desc:Set extras - invalid params
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("SetExtras004", 0, async function (done) {
+    let errCode = 0;
+    await session.setExtras(INVALID_STRING).catch((err) => {
+    console.info(TAG + "SetExtras004 caught error" + err.code);
+      errCode = err.code;
+    });
+    sleep(200).then(()=>{
+      expect(errCode == 401).assertTrue();
+      console.info(TAG + "SetExtras004 finished");
       done();
     })
   })

@@ -81,6 +81,7 @@ void OHOS::AVSession::AvsessionProxyTest(uint8_t* data, size_t size)
     avState.SetState(state);
 
     int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
+    AAFwk::WantParams wantParams;
 
     sptr<IRemoteObject> impl = nullptr;
     AVSessionProxy avSessionProxy(impl);
@@ -88,6 +89,7 @@ void OHOS::AVSession::AvsessionProxyTest(uint8_t* data, size_t size)
     avSessionProxy.SetAVMetaData(metaData);
     avSessionProxy.GetAVPlaybackState(avState);
     avSessionProxy.SetAVPlaybackState(avState);
+    avSessionProxy.SetExtras(wantParams);
     avSessionProxy.AddSupportCommand(cmd);
     avSessionProxy.DeleteSupportCommand(cmd);
     avSessionProxy.GetSessionId();

@@ -223,7 +223,7 @@ ohos_unittest("SessionStackTest") {
 }
 
 ###############################################################################
-group("unittest") {
+group("av_session_server_unittest") {
   testonly = true
 
   deps = [

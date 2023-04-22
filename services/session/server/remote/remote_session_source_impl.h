@@ -44,6 +44,8 @@ public:
     
     int32_t SetAVQueueTitle(const std::string& title) override;
 
+    int32_t SetExtrasRemote(const AAFwk::WantParams& extras) override;
+
     ~RemoteSessionSourceImpl() override = default;
 
 private:

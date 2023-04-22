@@ -29,6 +29,8 @@ describe("AVSessionControllerJsTest", function () {
   let receivedString2 = null;
   let receivedParam = null;
   let receivedParam2 = null;
+  let receivedExtras = null;
+  let receivedExtras2 = null;
   const INVALID_STRING = "invalid string";
   const UPDATE_LYRICS_EVENT = "dynamic_lyrics";
   const UPDATE_LYRICS_WANT_PARAMS = {
@@ -37,6 +39,9 @@ describe("AVSessionControllerJsTest", function () {
   const COMMON_COMMAND_STRING = "common_command";
   const COMMON_COMMAND_PARAMS = {
     command: "This is my command"
+  };
+  const CUSTOM_EXTRAS = {
+    extrasKey: "This is custom media packet"
   };
 
   beforeAll(async function () {
@@ -92,6 +97,26 @@ describe("AVSessionControllerJsTest", function () {
     receivedCallback2 = true;
     receivedString2 = sessionEvent;
     receivedParam2 = args;
+  }
+
+  function extrasChangeCallback1(extras) {
+    console.log(TAG + "Callback1 received args: " + JSON.stringify(extras));
+    if (extras.extrasKey != CUSTOM_EXTRAS.extrasKey) {
+      console.error(TAG + "Callback1 extras unmatch");
+      expect().assertFail();
+    }
+    receivedCallback = true;
+    receivedExtras = extras;
+  }
+
+  function extrasChangeCallback2(extras) {
+    console.log(TAG + "Callback2 received args: " + JSON.stringify(extras));
+    if (extras.extrasKey != CUSTOM_EXTRAS.extrasKey) {
+      console.error(TAG + "Callback2 extras unmatch");
+      expect().assertFail();
+    }
+    receivedCallback2 = true;
+    receivedExtras2 = extras;
   }
 
   /*
@@ -409,6 +434,284 @@ describe("AVSessionControllerJsTest", function () {
     } catch (err) {
       expect(err.code == 6600106).assertTrue();
     }
+    done();
+  })
+
+  /*
+   * @tc.name:GetExtras001
+   * @tc.desc:Get extras - callback
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("GetExtras001", 0, async function (done) {
+    console.info(TAG + "GetExtras001 start");
+    await session.setExtras(CUSTOM_EXTRAS).catch((err) => {
+      console.error(TAG + "GetExtras001 error " + JSON.stringify(err));
+      expect().assertFail();
+    });
+
+    controller.getExtras((err, extras) => {
+      if (err) {
+        console.error(TAG + "GetExtras001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      expect(extras.extrasKey == CUSTOM_EXTRAS.extrasKey).assertTrue();
+      console.info(TAG + "GetExtras001 finished");
+      done();
+    });
+  })
+
+  /*
+   * @tc.name:GetExtras002
+   * @tc.desc:Get extras - promise
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("GetExtras002", 0, async function (done) {
+    console.info(TAG + "GetExtras002 start");
+    await session.setExtras(CUSTOM_EXTRAS).catch((err) => {
+      console.error(TAG + "GetExtras002 error " + JSON.stringify(err));
+      expect().assertFail();
+    });
+
+    let extras = await controller.getExtras().catch((err) => {
+      console.error(TAG + "GetExtras002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    })
+    expect(extras.extrasKey == CUSTOM_EXTRAS.extrasKey).assertTrue();
+    console.info(TAG + "GetExtras002 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:OnExtrasChange001
+   * @tc.desc:One on function - extras change
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OnExtrasChange001", 0, async function (done) {
+    console.info(TAG + "OnExtrasChange001 start");
+    controller.on('extrasChange', extrasChangeCallback1);
+    await session.setExtras(CUSTOM_EXTRAS).catch((err) => {
+      console.error(TAG + "OnExtrasChange001 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    sleep(200).then(() => {
+      if (receivedCallback) {
+        console.log(TAG + "Received extras change event");
+        expect(receivedExtras.extrasKey == CUSTOM_EXTRAS.extrasKey).assertTrue();
+      } else {
+        console.error(TAG + "OnExtrasChange001 extras change event not received");
+        expect().assertFail();
+      }
+      receivedCallback = false;
+      receivedExtras = null;
+      console.info(TAG + "OnExtrasChange001 finished");
+      done();
+    })
+  })
+
+  /*
+   * @tc.name:OnExtrasChange002
+   * @tc.desc:Two on function - extras change
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OnExtrasChange002", 0, async function (done) {
+    console.info(TAG + "OnExtrasChange002 start");
+    controller.on('extrasChange', extrasChangeCallback1);
+    controller.on('extrasChange', extrasChangeCallback2);
+    await session.setExtras(CUSTOM_EXTRAS).catch((err) => {
+      console.error(TAG + "OnExtrasChange002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    sleep(200).then(() => {
+      if (receivedCallback && receivedCallback2) {
+        console.log(TAG + "Received extras change event");
+        expect(receivedExtras.extrasKey == CUSTOM_EXTRAS.extrasKey).assertTrue();
+        expect(receivedExtras2.extrasKey == CUSTOM_EXTRAS.extrasKey).assertTrue();
+      } else {
+        console.error(TAG + "OnExtrasChange002 extras change event not received");
+        expect().assertFail();
+      }
+      receivedCallback = false;
+      receivedCallback2 = false;
+      receivedExtras = null;
+      receivedExtras2 = null;
+      console.info(TAG + "OnExtrasChange002 finished");
+      done();
+    })
+  })
+
+  /*
+   * @tc.name:OnExtrasChange003
+   * @tc.desc:One on functions - one param
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OnExtrasChange003", 0, async function (done) {
+    try {
+      controller.on('extrasChange');
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    console.info(TAG + "OnExtrasChange003 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:OnExtrasChange004
+   * @tc.desc:One on functions - three params
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OnExtrasChange004", 0, async function (done) {
+    try {
+      controller.on('extrasChange', extrasChangeCallback1, extrasChangeCallback2);
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    console.info(TAG + "OnExtrasChange004 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:OnExtrasChange005
+   * @tc.desc:One on functions - invalid type
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OnExtrasChange005", 0, async function (done) {
+    try {
+      controller.on('extrasChange', INVALID_STRING);
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    console.info(TAG + "OnExtrasChange005 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:OffExtrasChange001
+   * @tc.desc:Two on functions and one off function - extras change
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OffExtrasChange001", 0, async function (done) {
+    controller.on('extrasChange', extrasChangeCallback1);
+    controller.on('extrasChange', extrasChangeCallback2);
+    controller.off('extrasChange', extrasChangeCallback2);
+    await session.setExtras(CUSTOM_EXTRAS).catch((err) => {
+      console.error(TAG + "OnExtrasChange002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (receivedCallback && !receivedCallback2) {
+      console.log(TAG + "Received extras change event");
+      expect(receivedExtras.extrasKey == CUSTOM_EXTRAS.extrasKey).assertTrue();
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Extras change event not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    receivedExtras = null;
+    console.info(TAG + "OffExtrasChange001 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:OffExtrasChange002
+   * @tc.desc:Two on functions and two off function - extras change
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OffExtrasChange002", 0, async function (done) {
+    controller.on('extrasChange', extrasChangeCallback1);
+    controller.on('extrasChange', extrasChangeCallback2);
+    controller.off('extrasChange', extrasChangeCallback1);
+    controller.off('extrasChange', extrasChangeCallback2);
+    await session.setExtras(CUSTOM_EXTRAS).catch((err) => {
+      console.error(TAG + "OnExtrasChange002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (!receivedCallback && !receivedCallback2) {
+      console.log(TAG + "Success, not received extras change event");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Test failed, extras change event received");
+      expect().assertFail();
+    }
+    console.info(TAG + "OffExtrasChange002 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:OnExtrasChange003
+   * @tc.desc:Two on functions and off all function - extras change
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OnExtrasChange003", 0, async function (done) {
+    controller.on('extrasChange', extrasChangeCallback1);
+    controller.on('extrasChange', extrasChangeCallback2);
+    controller.off('extrasChange');
+    await session.setExtras(CUSTOM_EXTRAS).catch((err) => {
+      console.error(TAG + "OnExtrasChange003 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (!receivedCallback && !receivedCallback2) {
+      console.log(TAG + "Success, not received extras change event");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Test failed, extras change event received");
+      expect().assertFail();
+    }
+    console.info(TAG + "OnExtrasChange003 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:OnExtrasChange004
+   * @tc.desc:Two on functions and off function - three params
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OnExtrasChange004", 0, async function (done) {
+    try {
+      controller.on('extrasChange', extrasChangeCallback1);
+      controller.on('extrasChange', extrasChangeCallback2);
+      controller.off('extrasChange', extrasChangeCallback1, extrasChangeCallback2);
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    console.info(TAG + "OnExtrasChange004 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:OnExtrasChange005
+   * @tc.desc:One on functions and off all function - invalid type
+   * @tc.type: FUNC
+   * @tc.require: I6TD43
+   */
+  it("OnExtrasChange005", 0, async function (done) {
+    try {
+      controller.on('extrasChange', extrasChangeCallback1);
+      controller.off('extrasChange', INVALID_STRING);
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    console.info(TAG + "OnExtrasChange005 finished");
     done();
   })
 })

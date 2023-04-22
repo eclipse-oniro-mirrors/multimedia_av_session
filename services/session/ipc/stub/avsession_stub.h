@@ -50,6 +50,10 @@ private:
 
     int32_t HandleSetLaunchAbility(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetExtras(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleSetExtras(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetController(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
@@ -89,6 +93,8 @@ private:
         &AVSessionStub::HandleSetAVQueueItems,
         &AVSessionStub::HandleGetAVQueueTitle,
         &AVSessionStub::HandleSetAVQueueTitle,
+        &AVSessionStub::HandleGetExtras,
+        &AVSessionStub::HandleSetExtras,
         &AVSessionStub::HandleSetLaunchAbility,
         &AVSessionStub::HandleGetController,
         &AVSessionStub::HandleRegisterCallbackInner,

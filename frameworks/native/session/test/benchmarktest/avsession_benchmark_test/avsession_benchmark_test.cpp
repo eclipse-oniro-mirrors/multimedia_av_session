@@ -370,6 +370,19 @@ BENCHMARK_F(AVSessionTest, SetSessionEvent)(benchmark::State& state)
         }
     }
 }
+
+BENCHMARK_F(AVSessionTest, SetExtras)(benchmark::State& state)
+{
+    const OHOS::AAFwk::WantParams extras;
+    while (state.KeepRunning()) {
+        OHOS::ErrCode errCode = avsession_->SetExtras(extras);
+        if (errCode != OHOS::ERR_OK) {
+            SLOGE("%{public}s error, failed to SetExtras, error code is %{public}d.", __func__,
+                errCode);
+            state.SkipWithError("SetExtras failed, return error.");
+        }
+    }
+}
 } // namespace
 
 // Run the benchmark

@@ -119,6 +119,19 @@ int32_t AVControllerItem::SkipToQueueItem(int32_t& itemId)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::GetExtras(AAFwk::WantParams& extras)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("GetExtras: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
+            "ERROR_MSG", "controller getextras checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    extras = session_->GetExtras();
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
@@ -313,6 +326,13 @@ void AVControllerItem::HandleQueueTitleChange(const std::string& title)
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnQueueTitleChange");
     callback_->OnQueueTitleChange(title);
+}
+
+void AVControllerItem::HandleExtrasChange(const AAFwk::WantParams& extras)
+{
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVSESSION_TRACE_SYNC_START("AVControllerItem::OnSetExtras");
+    callback_->OnExtrasChange(extras);
 }
 
 pid_t AVControllerItem::GetPid() const

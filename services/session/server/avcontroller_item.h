@@ -40,6 +40,8 @@ public:
 
     int32_t SkipToQueueItem(int32_t& itemId) override;
 
+    int32_t GetExtras(AAFwk::WantParams& extras) override;
+
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability) override;
@@ -77,6 +79,8 @@ public:
     void HandleQueueItemsChange(const std::vector<AVQueueItem>& items);
     
     void HandleQueueTitleChange(const std::string& title);
+
+    void HandleExtrasChange(const AAFwk::WantParams& extras);
 
     pid_t GetPid() const;
 

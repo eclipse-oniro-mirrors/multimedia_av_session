@@ -52,6 +52,10 @@ public:
 
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
+    int32_t GetExtras(AAFwk::WantParams& extras) override;
+
+    int32_t SetExtras(const AAFwk::WantParams& extras) override;
+
     int32_t Activate() override;
 
     int32_t Deactivate() override;
@@ -75,6 +79,8 @@ public:
     std::vector<AVQueueItem> GetQueueItems();
 
     std::string GetQueueTitle();
+
+    AAFwk::WantParams GetExtras();
 
     std::vector<int32_t> GetSupportCommand();
 
@@ -167,6 +173,7 @@ private:
     std::vector<AVQueueItem> queueItems_;
     std::string queueTitle_;
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
+    AAFwk::WantParams extras_;
     std::vector<int32_t> supportedCmd_;
     sptr<IAVSessionCallback> callback_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;

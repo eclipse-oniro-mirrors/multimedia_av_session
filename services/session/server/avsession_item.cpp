@@ -145,7 +145,6 @@ int32_t AVSessionItem::SetAVQueueItems(const std::vector<AVQueueItem>& items)
     return AVSESSION_SUCCESS;
 }
 
-
 int32_t AVSessionItem::GetAVQueueTitle(std::string& title)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
@@ -207,6 +206,35 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
     launchAbility_ = ability;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::GetExtras(AAFwk::WantParams& extras)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("GetExtras: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
+            "ERROR_MSG", "avsession getextras checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    extras = extras_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
+{
+    extras_ = extras;
+    std::lock_guard lockGuard(lock_);
+    for (const auto& [pid, controller] : controllers_) {
+        controller->HandleExtrasChange(extras);
+    }
+
+    if (remoteSource_ != nullptr) {
+        SLOGI("Set remote session extras");
+        auto ret = remoteSource_->SetExtrasRemote(extras);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetRemoteExtras failed");
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -339,6 +367,11 @@ std::vector<int32_t> AVSessionItem::GetSupportCommand()
 AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
 {
     return launchAbility_;
+}
+
+AAFwk::WantParams AVSessionItem::GetExtras()
+{
+    return extras_;
 }
 
 void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)

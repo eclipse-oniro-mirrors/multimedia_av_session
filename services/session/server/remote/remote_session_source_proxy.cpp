@@ -142,4 +142,13 @@ int32_t RemoteSessionSourceProxy::SetAVQueueTitle(const std::string& title)
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetAVQueueTitle error");
     return AVSESSION_SUCCESS;
 }
+
+int32_t RemoteSessionSourceProxy::SetExtrasRemote(const AAFwk::WantParams& extras)
+{
+    AVSESSION_TRACE_SYNC_START("RemoteSessionSourceProxy::SetExtrasRemote");
+    CHECK_AND_RETURN_RET_LOG(sourceImpl_ != nullptr, AVSESSION_ERROR, "sourceImpl_ is nullptr");
+    int32_t ret = sourceImpl_->SetExtrasRemote(extras);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "source SetExtrasRemote error");
+    return AVSESSION_SUCCESS;
+}
 } // namespace OHOS::AVSession

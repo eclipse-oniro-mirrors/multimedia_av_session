@@ -104,7 +104,6 @@ int32_t AVControllerCallbackStub::HandleOnSessionEventChange(MessageParcel& data
     return ERR_NONE;
 }
 
-
 int32_t AVControllerCallbackStub::HandleOnQueueItemsChange(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<AVQueueItem> items_;
@@ -121,12 +120,20 @@ int32_t AVControllerCallbackStub::HandleOnQueueItemsChange(MessageParcel& data, 
     return ERR_NONE;
 }
 
-
 int32_t AVControllerCallbackStub::HandleOnQueueTitleChange(MessageParcel& data, MessageParcel& reply)
 {
     auto title = data.ReadString();
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnQueueTitleChange");
     OnQueueTitleChange(title);
+    return ERR_NONE;
+}
+
+int32_t AVControllerCallbackStub::HandleOnExtrasChange(MessageParcel& data, MessageParcel& reply)
+{
+    sptr extras = data.ReadParcelable<AAFwk::WantParams>();
+    CHECK_AND_RETURN_RET_LOG(extras != nullptr, ERR_NONE, "read extras failed");
+    AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnExtrasChange");
+    OnExtrasChange(*extras);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

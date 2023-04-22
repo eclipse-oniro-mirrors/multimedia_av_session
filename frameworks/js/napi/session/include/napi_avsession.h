@@ -58,6 +58,7 @@ private:
     static napi_value SetSessionEvent(napi_env env, napi_callback_info info);
     static napi_value SetAVQueueItems(napi_env env, napi_callback_info info);
     static napi_value SetAVQueueTitle(napi_env env, napi_callback_info info);
+    static napi_value SetExtras(napi_env env, napi_callback_info info);
 
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback);

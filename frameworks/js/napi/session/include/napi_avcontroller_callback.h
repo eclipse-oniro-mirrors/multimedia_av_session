@@ -36,7 +36,8 @@ public:
         EVENT_SESSION_EVENT_CHANGE,
         EVENT_QUEUE_ITEMS_CHANGE,
         EVENT_QUEUE_TITLE_CHANGE,
-        EVENT_TYPE_MAX
+        EVENT_EXTRAS_CHANGE,
+        EVENT_TYPE_MAX,
     };
 
     NapiAVControllerCallback();
@@ -51,6 +52,7 @@ public:
     void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
     void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override;
     void OnQueueTitleChange(const std::string& title) override;
+    void OnExtrasChange(const AAFwk::WantParams& extras) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

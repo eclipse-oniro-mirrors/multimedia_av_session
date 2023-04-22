@@ -553,7 +553,7 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
 
     AVSessionDescriptor descriptor;
     descriptor.isThirdPartyApp_ = true;
-    descriptor.uid_ = 100;
+    descriptor.uid_ = 0;
     listener->OnAudioSessionChecked(descriptor.uid_);
     sleep(1);
     EXPECT_EQ(descriptor.uid_, listener->GetSessionUid());

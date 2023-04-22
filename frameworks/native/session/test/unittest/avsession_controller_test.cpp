@@ -20,6 +20,7 @@
 #include "avsession_manager.h"
 #include "avsession_item.h"
 #include "accesstoken_kit.h"
+#include "bool_wrapper.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 #include "iavsession_controller.h"
@@ -135,6 +136,8 @@ public:
 
     void OnQueueTitleChange(const std::string& title) override {};
 
+    void OnExtrasChange(const OHOS::AAFwk::WantParams& extras) override {};
+
     ~AVControllerCallbackImpl() override;
 
     bool isActive_ = false;
@@ -200,6 +203,7 @@ public:
     int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
     int32_t GetAVQueueTitle(std::string& title) override;
     int32_t SkipToQueueItem(int32_t& itemId) override;
+    int32_t GetExtras(OHOS::AAFwk::WantParams& extras) override;
     int32_t Destroy() override;
     std::string GetSessionId() override;
     int32_t RegisterCallbackInner(const OHOS::sptr<IRemoteObject>& callback) override;
@@ -267,6 +271,11 @@ int32_t AVSessionControllerStubTest::GetAVQueueTitle(std::string& title)
 }
 
 int32_t AVSessionControllerStubTest::SkipToQueueItem(int32_t& itemId)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetExtras(OHOS::AAFwk::WantParams& extras)
 {
     return 0;
 }
@@ -1251,6 +1260,68 @@ HWTEST_F(AVSessionControllerTest, GetAVQueueTitle001, TestSize.Level1)
     std::string title = "AVQueueTitle";
     EXPECT_EQ(avsession_->SetAVQueueTitle(title), AVSESSION_SUCCESS);
     SLOGE("GetAVQueueTitle001 End");
+}
+
+/**
+* @tc.name: GetExtras001
+* @tc.desc: Return cumtom media packets - extras
+* @tc.type: FUNC
+* @tc.require: I6TD43
+*/
+HWTEST_F(AVSessionControllerTest, GetExtras001, TestSize.Level1)
+{
+    SLOGI("GetExtras001 Begin");
+    std::shared_ptr<OHOS::AAFwk::WantParams> wantParamsIn = nullptr;
+    wantParamsIn = std::make_shared<OHOS::AAFwk::WantParams>();
+    std::string keyStr = "1234567";
+    bool valueBool = true;
+    wantParamsIn->SetParam(keyStr, OHOS::AAFwk::Boolean::Box(valueBool));
+    EXPECT_EQ(avsession_->SetExtras(*wantParamsIn), AVSESSION_SUCCESS);
+
+    OHOS::AAFwk::WantParams resultExtras;
+    EXPECT_EQ(controller_->GetExtras(resultExtras), AVSESSION_SUCCESS);
+    EXPECT_EQ(resultExtras.HasParam("1234567"), 1);
+    SLOGI("GetExtras001 End");
+}
+
+/**
+* @tc.name: GetExtras002
+* @tc.desc: Return custom media packets - large number of calls
+* @tc.type: FUNC
+* @tc.require: I6TD43
+*/
+HWTEST_F(AVSessionControllerTest, GetExtras002, TestSize.Level1)
+{
+    SLOGI("GetExtras002 Begin");
+    std::shared_ptr<OHOS::AAFwk::WantParams> wantParamsIn = nullptr;
+    wantParamsIn = std::make_shared<OHOS::AAFwk::WantParams>();
+    std::string keyStr = "1234567";
+    bool valueBool = true;
+    wantParamsIn->SetParam(keyStr, OHOS::AAFwk::Boolean::Box(valueBool));
+    EXPECT_EQ(avsession_->SetExtras(*wantParamsIn), AVSESSION_SUCCESS);
+
+    OHOS::AAFwk::WantParams resultExtras;
+    // Test the interface through 500 calls
+    for (int i = 0; i < 500; i++) {
+        EXPECT_EQ(controller_->GetExtras(resultExtras), AVSESSION_SUCCESS);
+        EXPECT_EQ(resultExtras.HasParam("1234567"), 1);
+    }
+    SLOGI("GetExtras002 End");
+}
+
+/**
+* @tc.name: GetExtras003
+* @tc.desc: Return custom media packets - session not exist
+* @tc.type: FUNC
+* @tc.require: I6TD43
+*/
+HWTEST_F(AVSessionControllerTest, GetExtras003, TestSize.Level1)
+{
+    SLOGI("GetExtras003 Begin");
+    OHOS::AAFwk::WantParams resultExtras;
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->GetExtras(resultExtras), ERR_SESSION_NOT_EXIST);
+    SLOGI("GetExtras003 End");
 }
 } // namespace AVSession
 } // namespace OHOS

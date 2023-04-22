@@ -58,6 +58,8 @@ private:
 
     int32_t HandleSkipToQueueItem(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetExtras(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleSendAVKeyEvent(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetLaunchAbility(MessageParcel& data, MessageParcel& reply);
@@ -92,6 +94,7 @@ private:
         &AVSessionControllerStub::HandleGetAVQueueItems,
         &AVSessionControllerStub::HandleGetAVQueueTitle,
         &AVSessionControllerStub::HandleSkipToQueueItem,
+        &AVSessionControllerStub::HandleGetExtras,
     };
 };
 } // namespace OHOS::AVSession

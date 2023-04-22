@@ -43,6 +43,7 @@ std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     { "sessionEvent", { OnSessionEventChange, OffSessionEventChange } },
     { "queueItemsChange", { OnQueueItemsChange, OffQueueItemsChange } },
     { "queueTitleChange", { OnQueueTitleChange, OffQueueTitleChange } },
+    { "extrasChange", { OnExtrasChange, OffExtrasChange } },
 };
 
 NapiAVSessionController::NapiAVSessionController()
@@ -73,7 +74,8 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("sendCommonCommand", SendCommonCommand),
         DECLARE_NAPI_FUNCTION("getAVQueueItems", GetAVQueueItems),
         DECLARE_NAPI_FUNCTION("getAVQueueTitle", GetAVQueueTitle),
-        DECLARE_NAPI_FUNCTION("skipToQueueItem", SkipToQueueItem)
+        DECLARE_NAPI_FUNCTION("skipToQueueItem", SkipToQueueItem),
+        DECLARE_NAPI_FUNCTION("getExtras", GetExtras),
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
@@ -353,6 +355,49 @@ napi_value NapiAVSessionController::SkipToQueueItem(napi_env env, napi_callback_
         }
     };
     return NapiAsyncWork::Enqueue(env, context, "SkipToQueueItem", executor);
+}
+
+napi_value NapiAVSessionController::GetExtras(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        AAFwk::WantParams extras_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("GetExtras failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetExtras failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->GetExtras(context->extras_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetExtras failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetExtras failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetExtras failed : native no permission";
+            } else {
+                context->errMessage = "GetExtras failed : native server exception";
+            }
+            SLOGE("Controller getExtras failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->extras_, output);
+        CHECK_STATUS_RETURN_VOID(context, "Convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "GetExtras", executor, complete);
 }
 
 napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_info info)
@@ -1017,6 +1062,13 @@ napi_status NapiAVSessionController::OnQueueTitleChange(napi_env env, NapiAVSess
         callback);
 }
 
+napi_status NapiAVSessionController::OnExtrasChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value param, napi_value callback)
+{
+    return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_EXTRAS_CHANGE,
+        callback);
+}
+
 napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                                        napi_value callback)
 {
@@ -1075,6 +1127,13 @@ napi_status NapiAVSessionController::OffQueueTitleChange(napi_env env, NapiAVSes
     napi_value callback)
 {
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_QUEUE_TITLE_CHANGE,
+        callback);
+}
+
+napi_status NapiAVSessionController::OffExtrasChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value callback)
+{
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_EXTRAS_CHANGE,
         callback);
 }
 }

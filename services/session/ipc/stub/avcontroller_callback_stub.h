@@ -44,6 +44,8 @@ private:
 
     int32_t HandleOnQueueTitleChange(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnExtrasChange(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t (AVControllerCallbackStub::*)(MessageParcel& data, MessageParcel& reply);
@@ -57,6 +59,7 @@ private:
         &AVControllerCallbackStub::HandleOnSessionEventChange,
         &AVControllerCallbackStub::HandleOnQueueItemsChange,
         &AVControllerCallbackStub::HandleOnQueueTitleChange,
+        &AVControllerCallbackStub::HandleOnExtrasChange,
     };
 };
 }

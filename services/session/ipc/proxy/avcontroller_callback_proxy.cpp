@@ -152,4 +152,17 @@ void AVControllerCallbackProxy::OnQueueTitleChange(const std::string& title)
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_QUEUE_TITLE_CHANGE, parcel, reply, option) == 0,
         "send request failed");
 }
+
+void AVControllerCallbackProxy::OnExtrasChange(const AAFwk::WantParams& extras)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&extras), "Write extras failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_SET_EXTRAS_EVENT, parcel, reply, option) == 0,
+        "send request failed");
 }
+} // namespace OHOS::AVSession

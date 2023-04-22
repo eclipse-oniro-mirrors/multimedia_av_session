@@ -133,6 +133,12 @@ void NapiAVControllerCallback::OnQueueTitleChange(const std::string& title)
     HandleEvent(EVENT_QUEUE_TITLE_CHANGE, title);
 }
 
+void NapiAVControllerCallback::OnExtrasChange(const AAFwk::WantParams& extras)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnExtrasChange");
+    HandleEvent(EVENT_EXTRAS_CHANGE, extras);
+}
+
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

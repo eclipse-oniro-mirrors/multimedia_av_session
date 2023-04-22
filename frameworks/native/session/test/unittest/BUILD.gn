@@ -75,6 +75,8 @@ ohos_unittest("AVSessionControllerTest") {
   deps = common_deps
 
   external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
 }
 
 ohos_unittest("AVPlaybackStateTest") {
@@ -99,6 +101,8 @@ ohos_unittest("AVSessionTest") {
   deps = common_deps
 
   external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
 }
 
 ohos_unittest("AVMetaDataTest") {
@@ -172,7 +176,7 @@ ohos_unittest("AVDumperTest") {
 }
 
 ###############################################################################
-group("unittest") {
+group("av_session_unittest") {
   testonly = true
 
   deps = [
