@@ -359,6 +359,7 @@ napi_value NapiAVSessionController::SkipToQueueItem(napi_env env, napi_callback_
 
 napi_value NapiAVSessionController::GetExtras(napi_env env, napi_callback_info info)
 {
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionController::GetExtras");
     struct ConcreteContext : public ContextBase {
         AAFwk::WantParams extras_;
     };

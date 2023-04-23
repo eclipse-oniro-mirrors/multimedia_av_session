@@ -182,6 +182,7 @@ int32_t AVSessionStub::HandleSetAVQueueTitle(MessageParcel& data, MessageParcel&
 
 int32_t AVSessionStub::HandleGetExtras(MessageParcel& data, MessageParcel& reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::HandleGetExtras");
     AAFwk::WantParams extras;
     int32_t ret = GetExtras(extras);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -192,6 +193,7 @@ int32_t AVSessionStub::HandleGetExtras(MessageParcel& data, MessageParcel& reply
 
 int32_t AVSessionStub::HandleSetExtras(MessageParcel& data, MessageParcel& reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::HandleSetExtras");
     sptr extrasWant = data.ReadParcelable<AAFwk::WantParams>();
     if (extrasWant == nullptr) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");

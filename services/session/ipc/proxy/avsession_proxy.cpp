@@ -311,6 +311,7 @@ int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAg
 
 int32_t AVSessionProxy::GetExtras(AAFwk::WantParams& extras)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::GetExtras");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -334,6 +335,7 @@ int32_t AVSessionProxy::GetExtras(AAFwk::WantParams& extras)
 
 int32_t AVSessionProxy::SetExtras(const AAFwk::WantParams& extras)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetExtras");
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
