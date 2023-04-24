@@ -144,6 +144,7 @@ int32_t AVSessionControllerStub::HandleSkipToQueueItem(MessageParcel& data, Mess
 
 int32_t AVSessionControllerStub::HandleGetExtras(MessageParcel& data, MessageParcel& reply)
 {
+    AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::HandleGetExtras");
     AAFwk::WantParams extras;
     int32_t ret = GetExtras(extras);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
