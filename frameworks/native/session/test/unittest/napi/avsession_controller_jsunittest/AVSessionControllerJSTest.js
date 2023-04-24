@@ -654,17 +654,17 @@ describe("AVSessionControllerJsTest", function () {
   })
 
   /*
-   * @tc.name:OnExtrasChange003
+   * @tc.name:OffExtrasChange003
    * @tc.desc:Two on functions and off all function - extras change
    * @tc.type: FUNC
    * @tc.require: I6TD43
    */
-  it("OnExtrasChange003", 0, async function (done) {
+  it("OffExtrasChange003", 0, async function (done) {
     controller.on('extrasChange', extrasChangeCallback1);
     controller.on('extrasChange', extrasChangeCallback2);
     controller.off('extrasChange');
     await session.setExtras(CUSTOM_EXTRAS).catch((err) => {
-      console.error(TAG + "OnExtrasChange003 error " + JSON.stringify(err));
+      console.error(TAG + "OffExtrasChange003 error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
@@ -676,17 +676,17 @@ describe("AVSessionControllerJsTest", function () {
       console.error(TAG + "Test failed, extras change event received");
       expect().assertFail();
     }
-    console.info(TAG + "OnExtrasChange003 finished");
+    console.info(TAG + "OffExtrasChange003 finished");
     done();
   })
 
   /*
-   * @tc.name:OnExtrasChange004
+   * @tc.name:OffExtrasChange004
    * @tc.desc:Two on functions and off function - three params
    * @tc.type: FUNC
    * @tc.require: I6TD43
    */
-  it("OnExtrasChange004", 0, async function (done) {
+  it("OffExtrasChange004", 0, async function (done) {
     try {
       controller.on('extrasChange', extrasChangeCallback1);
       controller.on('extrasChange', extrasChangeCallback2);
@@ -694,24 +694,24 @@ describe("AVSessionControllerJsTest", function () {
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
-    console.info(TAG + "OnExtrasChange004 finished");
+    console.info(TAG + "OffExtrasChange004 finished");
     done();
   })
 
   /*
-   * @tc.name:OnExtrasChange005
+   * @tc.name:OffExtrasChange005
    * @tc.desc:One on functions and off all function - invalid type
    * @tc.type: FUNC
    * @tc.require: I6TD43
    */
-  it("OnExtrasChange005", 0, async function (done) {
+  it("OffExtrasChange005", 0, async function (done) {
     try {
       controller.on('extrasChange', extrasChangeCallback1);
       controller.off('extrasChange', INVALID_STRING);
     } catch (err) {
       expect(err.code == 401).assertTrue();
     }
-    console.info(TAG + "OnExtrasChange005 finished");
+    console.info(TAG + "OffExtrasChange005 finished");
     done();
   })
 })
