@@ -1263,14 +1263,14 @@ HWTEST_F(AVSessionControllerTest, GetAVQueueTitle001, TestSize.Level1)
 }
 
 /**
-* @tc.name: GetExtras001
+* @tc.name: GetExtrasTest001
 * @tc.desc: Return cumtom media packets - extras
 * @tc.type: FUNC
 * @tc.require: I6TD43
 */
-HWTEST_F(AVSessionControllerTest, GetExtras001, TestSize.Level1)
+HWTEST_F(AVSessionControllerTest, GetExtrasTest001, TestSize.Level1)
 {
-    SLOGI("GetExtras001 Begin");
+    SLOGI("GetExtrasTest001 Begin");
     std::shared_ptr<OHOS::AAFwk::WantParams> wantParamsIn = nullptr;
     wantParamsIn = std::make_shared<OHOS::AAFwk::WantParams>();
     std::string keyStr = "1234567";
@@ -1281,18 +1281,18 @@ HWTEST_F(AVSessionControllerTest, GetExtras001, TestSize.Level1)
     OHOS::AAFwk::WantParams resultExtras;
     EXPECT_EQ(controller_->GetExtras(resultExtras), AVSESSION_SUCCESS);
     EXPECT_EQ(resultExtras.HasParam("1234567"), 1);
-    SLOGI("GetExtras001 End");
+    SLOGI("GetExtrasTest001 End");
 }
 
 /**
-* @tc.name: GetExtras002
+* @tc.name: GetExtrasTest002
 * @tc.desc: Return custom media packets - large number of calls
 * @tc.type: FUNC
 * @tc.require: I6TD43
 */
-HWTEST_F(AVSessionControllerTest, GetExtras002, TestSize.Level1)
+HWTEST_F(AVSessionControllerTest, GetExtrasTest002, TestSize.Level1)
 {
-    SLOGI("GetExtras002 Begin");
+    SLOGI("GetExtrasTest002 Begin");
     std::shared_ptr<OHOS::AAFwk::WantParams> wantParamsIn = nullptr;
     wantParamsIn = std::make_shared<OHOS::AAFwk::WantParams>();
     std::string keyStr = "1234567";
@@ -1306,22 +1306,22 @@ HWTEST_F(AVSessionControllerTest, GetExtras002, TestSize.Level1)
         EXPECT_EQ(controller_->GetExtras(resultExtras), AVSESSION_SUCCESS);
         EXPECT_EQ(resultExtras.HasParam("1234567"), 1);
     }
-    SLOGI("GetExtras002 End");
+    SLOGI("GetExtrasTest002 End");
 }
 
 /**
-* @tc.name: GetExtras003
+* @tc.name: GetExtrasTest003
 * @tc.desc: Return custom media packets - session not exist
 * @tc.type: FUNC
 * @tc.require: I6TD43
 */
-HWTEST_F(AVSessionControllerTest, GetExtras003, TestSize.Level1)
+HWTEST_F(AVSessionControllerTest, GetExtrasTest003, TestSize.Level1)
 {
-    SLOGI("GetExtras003 Begin");
+    SLOGI("GetExtrasTest003 Begin");
     OHOS::AAFwk::WantParams resultExtras;
     EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->GetExtras(resultExtras), ERR_SESSION_NOT_EXIST);
-    SLOGI("GetExtras003 End");
+    SLOGI("GetExtrasTest003 End");
 }
 } // namespace AVSession
 } // namespace OHOS

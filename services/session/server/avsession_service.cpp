@@ -409,11 +409,14 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
 
 void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 {
+    SLOGI("Start searching for the corresponding callback");
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& listener : innerSessionListeners_) {
+        SLOGI("Found inner session listener");
         listener->OnAudioSessionChecked(uid);
     }
     for (const auto& [pid, listener] : sessionListeners_) {
+        SLOGI("Found session listener with pid");
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnAudioSessionCheck");
         listener->OnAudioSessionChecked(uid);
     }
