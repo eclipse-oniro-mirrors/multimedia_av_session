@@ -107,8 +107,14 @@ int32_t RemoteSessionSinkImpl::HandleSessionDataCategory(const SessionDataCatego
         AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::Get & Set QueueTitle");
         CHECK_AND_RETURN_RET_LOG(syncer_->GetAVQueueTitle(title) == AVSESSION_SUCCESS, AVSESSION_ERROR,
             "GetAVQueueTitle failed");
-        CHECK_AND_RETURN_RET_LOG(session_->GetAVQueueTitle(title) == AVSESSION_SUCCESS, AVSESSION_ERROR,
-            "GetAVQueueTitle failed");
+        CHECK_AND_RETURN_RET_LOG(session_->SetAVQueueTitle(title) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "SetAVQueueTitle failed");
+    } else if (category == SESSION_DATA_EXTRAS) {
+        AAFwk::WantParams extras;
+        AVSESSION_TRACE_SYNC_START("RemoteSessionSinkImpl::Get & Set Extras");
+        CHECK_AND_RETURN_RET_LOG(syncer_->GetExtras(extras) == AVSESSION_SUCCESS, AVSESSION_ERROR, "GetExtras failed");
+        CHECK_AND_RETURN_RET_LOG(session_->SetExtras(extras) == AVSESSION_SUCCESS, AVSESSION_ERROR,
+            "SetExtras failed");
     } else {
         SLOGE("category is illegal");
         return AVSESSION_ERROR;
