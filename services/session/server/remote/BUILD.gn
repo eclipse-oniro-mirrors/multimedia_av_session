@@ -15,7 +15,6 @@ import("//build/ohos.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
 ###############################################################################
-openssl_dir = "//third_party/openssl"
 
 common_include_dirs = [
   "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
@@ -25,14 +24,13 @@ common_include_dirs = [
   "//foundation/multimedia/av_session/services/session/ipc/stub",
   "//foundation/multimedia/av_session/services/session/server/remote",
   "//third_party/json/single_include",
-  "$openssl_dir/include/",
 ]
 
 common_deps = [
-  "$openssl_dir:libcrypto_shared",
   "./../../../../frameworks/native/session:avsession_client",
   "./../../../../utils:avsession_utils",
   "./../../../session:avsession_server",
+  "//third_party/openssl:libcrypto_shared",
 ]
 
 common_external_deps = [
