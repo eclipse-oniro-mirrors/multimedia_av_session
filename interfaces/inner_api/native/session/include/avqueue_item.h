@@ -24,10 +24,6 @@
 #include "parcel.h"
 #include "avmedia_description.h"
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
-#include <malloc.h>
-#endif
-
 namespace OHOS::AVSession {
 class AVQueueItem : public Parcelable {
 public:

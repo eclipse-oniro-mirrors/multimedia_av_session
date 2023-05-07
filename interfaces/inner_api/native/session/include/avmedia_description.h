@@ -25,10 +25,6 @@
 #include "avsession_pixel_map.h"
 #include "want_params.h"
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
-#include <malloc.h>
-#endif
-
 namespace OHOS::AVSession {
 class AVMediaDescription : public Parcelable {
 public:
