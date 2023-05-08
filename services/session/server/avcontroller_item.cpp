@@ -43,6 +43,7 @@ AVControllerItem::~AVControllerItem()
 
 int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("RegisterCallbackInner: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
@@ -229,6 +230,7 @@ int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackState
 
 int32_t AVControllerItem::Destroy()
 {
+    std::lock_guard lockGuard(callbackMutex_);
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("Destroy: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
@@ -254,6 +256,7 @@ std::string AVControllerItem::GetSessionId()
 
 void AVControllerItem::HandleSessionDestroy()
 {
+    std::lock_guard lockGuard(callbackMutex_);
     if (callback_ != nullptr) {
         callback_->OnSessionDestroy();
     }
@@ -263,6 +266,7 @@ void AVControllerItem::HandleSessionDestroy()
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVPlaybackState stateOut;
     if (state.CopyToByMask(playbackMask_, stateOut)) {
@@ -274,6 +278,7 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
 
 void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVMetaData metaOut;
     if (data.CopyToByMask(metaMask_, metaOut)) {
@@ -291,24 +296,28 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
 
 void AVControllerItem::HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnOutputDeviceChange(outputDeviceInfo);
 }
 
 void AVControllerItem::HandleActiveStateChange(bool isActive)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnActiveStateChange(isActive);
 }
 
 void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnValidCommandChange(cmds);
 }
 
 void AVControllerItem::HandleSetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnSessionEventChange");
     callback_->OnSessionEventChange(event, args);
@@ -316,6 +325,7 @@ void AVControllerItem::HandleSetSessionEvent(const std::string& event, const AAF
 
 void AVControllerItem::HandleQueueItemsChange(const std::vector<AVQueueItem>& items)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnQueueItemsChange");
     callback_->OnQueueItemsChange(items);
@@ -323,6 +333,7 @@ void AVControllerItem::HandleQueueItemsChange(const std::vector<AVQueueItem>& it
 
 void AVControllerItem::HandleQueueTitleChange(const std::string& title)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnQueueTitleChange");
     callback_->OnQueueTitleChange(title);
@@ -330,6 +341,7 @@ void AVControllerItem::HandleQueueTitleChange(const std::string& title)
 
 void AVControllerItem::HandleExtrasChange(const AAFwk::WantParams& extras)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnSetExtras");
     callback_->OnExtrasChange(extras);
