@@ -96,13 +96,10 @@ int32_t JsonUtils::GetVectorCapability(const std::string& jsonCapability,
     CHECK_AND_RETURN_RET_LOG(!jsonCapability.empty(), AVSESSION_ERROR, "jsonCapability is empty");
     json jsonObj = json::parse(jsonCapability, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
-    CHECK_AND_RETURN_RET_LOG(IsInt32(jsonObj, "metaData"), AVSESSION_ERROR, "Get key of metaData failed");
     int32_t ret = JsonToVector(jsonObj["metaData"], vectorCapability[SESSION_DATA_META]);
     CHECK_AND_CONTINUE_LOG(ret == AVSESSION_SUCCESS, "Get metaDataCapability error");
-    CHECK_AND_RETURN_RET_LOG(IsInt32(jsonObj, "playbackState"), AVSESSION_ERROR, "Get key of playbackState failed");
     ret = JsonToVector(jsonObj["playbackState"], vectorCapability[SESSION_DATA_PLAYBACK_STATE]);
     CHECK_AND_CONTINUE_LOG(ret == AVSESSION_SUCCESS, "Get playbackStateCapability error");
-    CHECK_AND_RETURN_RET_LOG(IsInt32(jsonObj, "controlCommand"), AVSESSION_ERROR, "Get key of controlCommand failed");
     ret = JsonToVector(jsonObj["controlCommand"], vectorCapability[SESSION_DATA_CONTROL_COMMAND]);
     CHECK_AND_CONTINUE_LOG(ret == AVSESSION_SUCCESS, "Get controlCommandCapability error");
     return AVSESSION_SUCCESS;
