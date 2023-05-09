@@ -47,6 +47,8 @@ private:
     static int32_t JsonToVector(json object, std::vector<int32_t>& out);
     static int32_t ConvertSessionType(const std::string& typeString);
     static std::string ConvertSessionType(int32_t type);
+    static bool IsString(const json& jsonObj, const std::string& key);
+    static bool IsInt32(const json& jsonObj, const std::string& key);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_JSON_UTILS_H

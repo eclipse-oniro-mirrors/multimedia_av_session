@@ -71,6 +71,25 @@ int32_t JsonUtils::GetJsonCapability(const std::vector<std::vector<int32_t>>& ca
     return AVSESSION_SUCCESS;
 }
 
+bool JsonUtils::IsInt32(const json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_number_integer()
+        && INT32_MIN <= jsonObj[key] && jsonObj[key] <= INT32_MAX;
+    if (!res) {
+        SLOGE("The key %{public}s of jsonObj is invalid", key.c_str());
+    }
+    return res;
+}
+
+bool JsonUtils::IsString(const json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_string();
+    if (!res) {
+        SLOGE("The key %{public}s of jsonObj is invalid", key.c_str());
+    }
+    return res;
+}
+
 int32_t JsonUtils::GetVectorCapability(const std::string& jsonCapability,
                                        std::vector<std::vector<int32_t>>& vectorCapability)
 {
@@ -92,8 +111,12 @@ int32_t JsonUtils::GetAllCapability(const std::string& sessionInfo, std::string&
     json jsonSessionInfo = json::parse(sessionInfo, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonSessionInfo.is_discarded() && !jsonSessionInfo.is_null(), AVSESSION_ERROR,
         "json object is null");
+    CHECK_AND_RETURN_RET_LOG(jsonSessionInfo.contains("compatibility"), AVSESSION_ERROR,
+        "The key of jsonObj is invalid");
     json compatibility = jsonSessionInfo["compatibility"];
     CHECK_AND_RETURN_RET_LOG(!compatibility.is_null(), AVSESSION_ERROR, "Getcompatibility error");
+    CHECK_AND_RETURN_RET_LOG(compatibility.contains("capabilitySet"), AVSESSION_ERROR,
+        "The key of compatibility is invalid");
     json capabilitySet = compatibility["capabilitySet"];
     CHECK_AND_RETURN_RET_LOG(!capabilitySet.is_null(), AVSESSION_ERROR, "GetCapabilitySet error");
     jsonCapability = capabilitySet.dump();
@@ -133,8 +156,16 @@ int32_t JsonUtils::GetSessionBasicInfo(const std::string& sessionInfo, AVSession
     CHECK_AND_RETURN_RET_LOG(!sessionInfo.empty(), AVSESSION_ERROR, "sessionInfo is empty");
     json jsonObj = json::parse(sessionInfo, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
+    CHECK_AND_RETURN_RET_LOG(jsonObj.contains("compatibility") && jsonObj.contains("data"), AVSESSION_ERROR,
+        "The key of jsonObj is invalid");
     json compatibility = jsonObj["compatibility"];
     CHECK_AND_RETURN_RET_LOG(!compatibility.empty(), AVSESSION_ERROR, "Getcompatibility error");
+    CHECK_AND_RETURN_RET_LOG(IsString(compatibility, "networkId") && IsString(compatibility, "vendorId")
+        && IsString(compatibility, "deviceType") && IsString(compatibility, "systemVersion")
+        && IsInt32(compatibility, "avsessionVersion") && IsInt32(jsonObj["data"], "systemTime")
+        && compatibility.contains("reserve") && compatibility.contains("features")
+        && compatibility.contains("extendCapability") && IsInt32(jsonObj["data"], "extend"), AVSESSION_ERROR,
+        "The key of jsonObj is invalid");
     basicInfo.networkId_ = compatibility["networkId"];
     basicInfo.vendorId_ = compatibility["vendorId"];
     basicInfo.deviceType_ = compatibility["deviceType"];
@@ -144,8 +175,12 @@ int32_t JsonUtils::GetSessionBasicInfo(const std::string& sessionInfo, AVSession
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get reserve error");
     ret = JsonToVector(compatibility["features"], basicInfo.feature_);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get feature error");
+    CHECK_AND_RETURN_RET_LOG(compatibility.contains("capabilitySet"), AVSESSION_ERROR,
+        "The key of jsonObj is invalid");
     json capabilitySet = compatibility["capabilitySet"];
     CHECK_AND_RETURN_RET_LOG(!capabilitySet.empty(), AVSESSION_ERROR, "GetCapabilitySet error");
+    CHECK_AND_RETURN_RET_LOG(capabilitySet.contains("metaData") && capabilitySet.contains("playbackState")
+        && capabilitySet.contains("controlCommand"), AVSESSION_ERROR, "The key of jsonObj is invalid");
     ret = JsonToVector(capabilitySet["metaData"], basicInfo.metaDataCap_);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get metaData error");
     ret = JsonToVector(capabilitySet["playbackState"], basicInfo.playBackStateCap_);
@@ -188,6 +223,8 @@ int32_t JsonUtils::GetSessionDescriptors(const std::string& sessionInfo, std::ve
     json jsonObj = json::parse(sessionInfo, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
     CHECK_AND_RETURN_RET_LOG(jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
+    CHECK_AND_RETURN_RET_LOG(jsonObj["data"].contains("sessionDescriptors"), AVSESSION_ERROR,
+        "The key of jsonObj is invalid");
     json sessionDescriptors = jsonObj["data"]["sessionDescriptors"];
     CHECK_AND_RETURN_RET_LOG(!sessionDescriptors.is_null(), AVSESSION_ERROR, "sessionDescriptors is null");
     CHECK_AND_RETURN_RET_LOG(sessionDescriptors.is_array(), AVSESSION_ERROR, "json sessionDescriptors is not array");
@@ -231,6 +268,8 @@ int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessio
     json jsonObj = json::parse(sessionInfo, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!jsonObj.is_discarded() && !jsonObj.is_null(), AVSESSION_ERROR, "json object is null");
     CHECK_AND_RETURN_RET_LOG(jsonObj.contains("data"), AVSESSION_ERROR, "json object data is null");
+    CHECK_AND_RETURN_RET_LOG(jsonObj["data"].contains("sessionDescriptor"), AVSESSION_ERROR,
+        "The key of jsonObj is invalid");
     json sessionDescriptor = jsonObj["data"]["sessionDescriptor"];
     CHECK_AND_RETURN_RET_LOG(!sessionDescriptor.is_null(), AVSESSION_ERROR, "sessionDescriptor is null");
 
