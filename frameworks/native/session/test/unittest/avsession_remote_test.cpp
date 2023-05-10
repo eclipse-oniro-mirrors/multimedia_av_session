@@ -90,8 +90,8 @@ public:
 
 class AVSessionRemoteTest : public testing::Test {
 public:
-    static constexpr char testPkgName[] = "av_session";
-    static constexpr int nodeNumber = 4;
+    static constexpr char TEST_PACKAGE_NAME[] = "av_session";
+    static constexpr int NODE_NUMBER = 4;
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
@@ -106,9 +106,9 @@ void AVSessionRemoteTest::SetUpTestCase()
     AccessTokenIDEx tokenID = AccessTokenKit::GetHapTokenIDEx(g_info.userID, g_info.bundleName, g_info.instIndex);
     SetSelfTokenID(tokenID.tokenIDEx);
 
-    NodeBasicInfo *nodeInfo[nodeNumber];
-    int32_t infoNum = nodeNumber;
-    GetAllNodeDeviceInfo(testPkgName, nodeInfo, &infoNum);
+    NodeBasicInfo *nodeInfo[NODE_NUMBER];
+    int32_t infoNum = NODE_NUMBER;
+    GetAllNodeDeviceInfo(TEST_PACKAGE_NAME, nodeInfo, &infoNum);
     std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList;
     auto callback = std::make_shared<InitCallback>();
     int ret = OHOS::DistributedHardware::DeviceManager::GetInstance().InitDeviceManager("av_session", callback);

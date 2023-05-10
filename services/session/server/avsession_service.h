@@ -110,11 +110,6 @@ public:
         return NotifyAudioSessionCheck(uid);
     }
 
-    SessionContainer& GetContainer_()
-    {
-        return GetContainer();
-    }
-
 private:
     static SessionContainer& GetContainer();
 
