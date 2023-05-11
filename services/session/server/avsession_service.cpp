@@ -152,6 +152,7 @@ void AVSessionService::InitKeyEvent()
 
 void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession)
 {
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (newTopSession == nullptr) {
         std::lock_guard lockGuard(sessionAndControllerLock_);
         if (topSession_ != nullptr) {
@@ -943,6 +944,7 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 
 void AVSessionService::HandleEventHandlerCallBack()
 {
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     SLOGI("handle eventHandler callback");
     AVControlCommand cmd;
     if (pressCount_ >= THREE_CLICK && topSession_) {
@@ -968,6 +970,7 @@ void AVSessionService::HandleEventHandlerCallBack()
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("SendSystemAVKeyEvent: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
@@ -997,6 +1000,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("SendSystemControlCommand: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),

@@ -580,6 +580,7 @@ void AVSessionItem::HandleOutputDeviceChange(const OutputDeviceInfo& outputDevic
 
 void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
 {
+    std::lock_guard lockGuard(lock_);
     descriptor_.outputDeviceInfo_.isRemote_ = info.isRemote_;
     descriptor_.outputDeviceInfo_.deviceIds_ = info.deviceIds_;
     descriptor_.outputDeviceInfo_.deviceNames_ = info.deviceNames_;

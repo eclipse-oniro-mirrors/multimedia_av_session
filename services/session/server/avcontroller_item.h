@@ -16,6 +16,7 @@
 #ifndef OHOS_AVCONTROLLER_ITEM_H
 #define OHOS_AVCONTROLLER_ITEM_H
 
+#include <mutex>
 #include <string>
 
 #include "avsession_item.h"
@@ -99,6 +100,7 @@ private:
     AVMetaData::MetaMaskType metaMask_;
     AVPlaybackState::PlaybackStateMaskType playbackMask_;
     std::function<void(AVControllerItem&)> serviceCallback_;
+    std::recursive_mutex callbackMutex_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_ITEM_H
