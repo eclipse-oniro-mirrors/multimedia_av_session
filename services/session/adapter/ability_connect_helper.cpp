@@ -62,6 +62,10 @@ int32_t AbilityConnectHelper::StartAbilityByCall(const std::string& bundleName, 
         SLOGE("Failed to write flag");
         return ERR_MARSHALLING;
     }
+    if (!data.WriteInt32(-1)) { // -1 is default connect id of ability manager
+        SLOGE("Failed to write connect id");
+        return ERR_MARSHALLING;
+    }
 
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
