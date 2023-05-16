@@ -152,7 +152,6 @@ void AVSessionService::InitKeyEvent()
 
 void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession)
 {
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (newTopSession == nullptr) {
         std::lock_guard lockGuard(sessionAndControllerLock_);
         if (topSession_ != nullptr) {
@@ -944,9 +943,9 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 
 void AVSessionService::HandleEventHandlerCallBack()
 {
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     SLOGI("handle eventHandler callback");
     AVControlCommand cmd;
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (pressCount_ >= THREE_CLICK && topSession_) {
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
         topSession_->ExecuteControllerCommand(cmd);
@@ -970,7 +969,6 @@ void AVSessionService::HandleEventHandlerCallBack()
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("SendSystemAVKeyEvent: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
@@ -990,6 +988,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
         }
         return AVSESSION_SUCCESS;
     }
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_) {
         topSession_->HandleMediaKeyEvent(keyEvent);
     } else {
@@ -1000,7 +999,6 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("SendSystemControlCommand: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
@@ -1009,6 +1007,7 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
         return ERR_NO_PERMISSION;
     }
     SLOGI("cmd=%{public}d", command.GetCommand());
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_) {
         CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
             ERR_COMMAND_SEND_EXCEED_MAX, "command excuted number exceed max");
