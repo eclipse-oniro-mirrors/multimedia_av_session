@@ -44,5 +44,6 @@ ohos_shared_library("avsession_common") {
   ]
 
   subsystem_name = "multimedia"
+  innerapi_tags = [ "platformsdk" ]
   part_name = "multimedia_av_session"
 }
