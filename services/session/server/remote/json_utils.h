@@ -49,6 +49,7 @@ private:
     static std::string ConvertSessionType(int32_t type);
     static bool IsString(const json& jsonObj, const std::string& key);
     static bool IsInt32(const json& jsonObj, const std::string& key);
+    static bool IsBool(const json& jsonObj, const std::string& key);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_JSON_UTILS_H
