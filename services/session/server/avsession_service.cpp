@@ -953,14 +953,24 @@ void AVSessionService::HandleEventHandlerCallBack()
     } else if (pressCount_ == DOUBLE_CLICK && topSession_) {
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
         topSession_->ExecuteControllerCommand(cmd);
-    } else if (pressCount_ == ONE_CLICK && topSession_) {
-        auto playbackState = topSession_->GetPlaybackState();
-        if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAYING) {
-            cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
-        } else {
-            cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    } else if (pressCount_ == ONE_CLICK) {
+        SLOGI("HandleEventHandlerCallBack on ONE_CLICK ");
+        if (!topSession_) {
+            SLOGI("HandleEventHandlerCallBack ONE_CLICK without topSession_");
+            sptr<IRemoteObject> object;
+            int32_t ret = CreateControllerInner("default", object);
+            SLOGI("HandleEventHandlerCallBack ONE_CLICK !topSession_ ret : %{public}d", static_cast<int32_t>(ret));
         }
-        topSession_->ExecuteControllerCommand(cmd);
+        if (topSession_) {
+            SLOGI("HandleEventHandlerCallBack ONE_CLICK with topSession_ ");
+            auto playbackState = topSession_->GetPlaybackState();
+            if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAYING) {
+                cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
+            } else {
+                cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+            }
+            topSession_->ExecuteControllerCommand(cmd);
+        }
     } else {
         SLOGI("press invalid");
     }
