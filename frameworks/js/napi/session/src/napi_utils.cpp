@@ -830,6 +830,16 @@ bool NapiUtils::Equals(napi_env env, napi_value value, napi_ref copy)
     return isEquals;
 }
 
+bool NapiUtils::TypeCheck(napi_env env, napi_value value, napi_valuetype expectType)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_status status = napi_typeof(env, value, &valueType);
+    if (status != napi_ok || valueType != expectType) {
+        return false;
+    }
+    return true;
+}
+
 napi_value NapiUtils::GetUndefinedValue(napi_env env)
 {
     napi_value result {};

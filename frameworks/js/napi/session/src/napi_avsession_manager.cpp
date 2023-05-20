@@ -179,7 +179,8 @@ napi_value NapiAVSessionManager::GetHistoricalSessionDescriptors(napi_env env, n
     auto context = std::make_shared<ConcreteContext>();
 
     auto input = [env, context](size_t argc, napi_value* argv) {
-        if (argc == ARGC_ONE) {
+        if (argc == ARGC_ONE && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
+            && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)) {
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->maxSize_);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid arguments",
                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
