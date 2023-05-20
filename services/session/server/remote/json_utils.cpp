@@ -173,7 +173,7 @@ int32_t JsonUtils::GetSessionBasicInfo(const std::string& sessionInfo, AVSession
         && IsString(compatibility, "deviceType") && IsString(compatibility, "systemVersion")
         && IsInt32(compatibility, "avsessionVersion") && IsInt32(jsonObj["data"], "systemTime")
         && compatibility.contains("reserve") && compatibility.contains("features")
-        && compatibility.contains("extendCapability") && IsInt32(jsonObj["data"], "extend"), AVSESSION_ERROR,
+        && compatibility.contains("extendCapability"), AVSESSION_ERROR,
         "The key of jsonObj is invalid");
     basicInfo.networkId_ = compatibility["networkId"];
     basicInfo.vendorId_ = compatibility["vendorId"];
