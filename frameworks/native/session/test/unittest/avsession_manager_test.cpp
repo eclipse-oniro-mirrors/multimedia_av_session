@@ -138,6 +138,24 @@ private:
     AVSessionDescriptor descriptor_;
 };
 
+class TestListenerForRootFunc : public SessionListener {
+public:
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s created", descriptor.sessionId_.c_str());
+    }
+
+    void OnSessionRelease(const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s released", descriptor.sessionId_.c_str());
+    }
+
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
+    }
+};
+
 /**
 * @tc.name: CreatSession001
 * @tc.desc: invalid params
@@ -560,6 +578,23 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
     session->Destroy();
 
     SLOGI("RegisterSessionListener001 end");
+}
+
+/**
+* @tc.name: RegisterSessionListener003
+* @tc.desc: register listener for OnAudioSessionChecked
+* @tc.type: FUNC
+* @tc.require: I7799X
+*/
+HWTEST_F(AVSessionManagerTest, RegisterSessionListener003, TestSize.Level1)
+{
+    SLOGI("RegisterSessionListener003 begin");
+    std::shared_ptr<TestListenerForRootFunc> listener = std::make_shared<TestListenerForRootFunc>();
+    auto result = AVSessionManager::GetInstance().RegisterSessionListener(listener);
+    int32_t uid = 0;
+    listener->OnAudioSessionChecked(uid);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGI("RegisterSessionListener003 end");
 }
 
 /**
