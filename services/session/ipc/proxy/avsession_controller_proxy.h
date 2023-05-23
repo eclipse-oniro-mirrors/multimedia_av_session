@@ -16,6 +16,8 @@
 #ifndef OHOS_AVSESSION_CONTROLLER_PROXY_H
 #define OHOS_AVSESSION_CONTROLLER_PROXY_H
 
+#include <mutex>
+
 #include "iavsession_controller.h"
 #include "iremote_proxy.h"
 
@@ -71,6 +73,8 @@ private:
     static inline BrokerDelegator<AVSessionControllerProxy> delegator_;
     AVPlaybackState currentState_;
     bool isDestroy_ = false;
+
+    std::recursive_mutex controllerProxyLock_;
 };
 }
 
