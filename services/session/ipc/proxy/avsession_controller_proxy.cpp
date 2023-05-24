@@ -288,6 +288,7 @@ int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand& cmd
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_CONTROL_COMMAND, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -402,6 +403,7 @@ int32_t AVSessionControllerProxy::Destroy()
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_DESTROY, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     isDestroy_ = true;
