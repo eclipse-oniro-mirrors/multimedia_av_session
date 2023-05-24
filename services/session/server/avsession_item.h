@@ -165,22 +165,27 @@ private:
         &AVSessionItem::HandleOnToggleFavorite,
     };
 
-    std::recursive_mutex lock_;
+    std::recursive_mutex controllersLock_;
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
+    std::recursive_mutex queueItemsLock_;
     std::vector<AVQueueItem> queueItems_;
     std::string queueTitle_;
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
     AAFwk::WantParams extras_;
     std::vector<int32_t> supportedCmd_;
+    std::recursive_mutex callbackLock_;
     sptr<IAVSessionCallback> callback_;
+    std::recursive_mutex remoteCallbackLock_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;
     std::function<void(AVSessionItem&)> serviceCallback_;
     friend class AVSessionDumper;
 
+    std::recursive_mutex remoteSourceLock_;
     std::shared_ptr<RemoteSessionSource> remoteSource_;
+    std::recursive_mutex remoteSinkLock_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
 };
 } // namespace OHOS::AVSession
