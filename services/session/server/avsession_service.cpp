@@ -351,10 +351,10 @@ std::string AVSessionService::AllocSessionId()
     return stream.str();
 }
 
-bool AVSessionService::AbilityHasSession(pid_t pid, const std::string& abilityName)
+bool AVSessionService::AbilityHasSession(pid_t pid)
 {
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    return GetContainer().GetSession(pid, abilityName) != nullptr;
+    return GetContainer().PidHasSession(pid);
 }
 
 sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const std::string& sessionId)
@@ -482,7 +482,7 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
     }
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    if (AbilityHasSession(pid, elementName.GetAbilityName())) {
+    if (AbilityHasSession(pid)) {
         SLOGI("process %{public}d %{public}s already has one session", pid, elementName.GetAbilityName().c_str());
         return nullptr;
     }

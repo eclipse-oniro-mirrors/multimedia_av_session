@@ -92,6 +92,18 @@ sptr<AVSessionItem> SessionStack::GetSession(pid_t pid, const std::string& abili
     return it->second;
 }
 
+bool SessionStack::PidHasSession(pid_t pid)
+{
+    std::map<std::pair<pid_t, std::string>, sptr<AVSessionItem>>::iterator iter = sessions_.begin();
+    while (iter != sessions_.end()) {
+        if (iter->first.first == pid) {
+            return true;
+        }
+        iter++;
+    }
+    return false;
+}
+
 sptr<AVSessionItem> SessionStack::GetSessionById(const std::string& sessionId)
 {
     for (const auto& session : stack_) {

@@ -220,21 +220,17 @@ HWTEST_F(AVSessionManagerTest, CreatSession004, TestSize.Level1)
 {
     SLOGI("CreatSession004 begin");
     vector<std::shared_ptr<AVSession>> sessionList;
-    for (int i = 0; i < 50; i++) {
-        OHOS::AppExecFwk::ElementName elementName;
-        elementName.SetBundleName(g_testBundleName);
-        elementName.SetAbilityName(std::to_string(i));
-        auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
-            AVSession::SESSION_TYPE_AUDIO, elementName);
-        EXPECT_NE(session, nullptr);
-        sessionList.push_back(session);
-    }
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
-    elementName.SetAbilityName(g_testAbilityName);
-    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
+    elementName.SetAbilityName("1");
+    auto firstSession = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
         AVSession::SESSION_TYPE_AUDIO, elementName);
-    EXPECT_EQ(session, nullptr);
+    EXPECT_NE(firstSession, nullptr);
+    sessionList.push_back(firstSession);
+    elementName.SetAbilityName("2");
+    auto secondSession = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
+        AVSession::SESSION_TYPE_AUDIO, elementName);
+    EXPECT_EQ(secondSession, nullptr);
     for (auto it = sessionList.begin(); it != sessionList.end(); it++) {
         (*it)->Destroy();
     }
