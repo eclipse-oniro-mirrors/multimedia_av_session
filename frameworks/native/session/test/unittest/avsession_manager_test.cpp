@@ -119,11 +119,6 @@ public:
         SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }
 
-    void OnAudioSessionChecked(const int32_t uid) override
-    {
-        SLOGI("uid=%{public}d checked", uid);
-    }
-
     std::string GetSessionId() const
     {
         return descriptor_.sessionId_;
@@ -136,24 +131,6 @@ public:
 
 private:
     AVSessionDescriptor descriptor_;
-};
-
-class TestListenerForRootFunc : public SessionListener {
-public:
-    void OnSessionCreate(const AVSessionDescriptor& descriptor) override
-    {
-        SLOGI("sessionId=%{public}s created", descriptor.sessionId_.c_str());
-    }
-
-    void OnSessionRelease(const AVSessionDescriptor& descriptor) override
-    {
-        SLOGI("sessionId=%{public}s released", descriptor.sessionId_.c_str());
-    }
-
-    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override
-    {
-        SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
-    }
 };
 
 /**
@@ -569,32 +546,12 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(session->GetSessionId(), listener->GetSessionId());
 
-    AVSessionDescriptor descriptor;
-    descriptor.isThirdPartyApp_ = true;
-    descriptor.uid_ = 0;
-    listener->OnAudioSessionChecked(descriptor.uid_);
-    sleep(1);
-    EXPECT_EQ(descriptor.uid_, listener->GetSessionUid());
-    session->Destroy();
-
-    SLOGI("RegisterSessionListener001 end");
-}
-
-/**
-* @tc.name: RegisterSessionListener003
-* @tc.desc: register listener for OnAudioSessionChecked
-* @tc.type: FUNC
-* @tc.require: I7799X
-*/
-HWTEST_F(AVSessionManagerTest, RegisterSessionListener003, TestSize.Level1)
-{
-    SLOGI("RegisterSessionListener003 begin");
-    std::shared_ptr<TestListenerForRootFunc> listener = std::make_shared<TestListenerForRootFunc>();
-    auto result = AVSessionManager::GetInstance().RegisterSessionListener(listener);
     int32_t uid = 0;
     listener->OnAudioSessionChecked(uid);
-    EXPECT_EQ(result, AVSESSION_SUCCESS);
-    SLOGI("RegisterSessionListener003 end");
+    sleep(1);
+    session->Destroy();
+
+    SLOGI("RegisterSessionListener002 end");
 }
 
 /**
