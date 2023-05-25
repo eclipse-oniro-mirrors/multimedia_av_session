@@ -95,12 +95,16 @@ protected:
 private:
     pid_t pid_;
     std::string sessionId_;
+    std::recursive_mutex sessionMutex_;
     sptr<AVSessionItem> session_;
-    sptr<IAVControllerCallback> callback_;
-    AVMetaData::MetaMaskType metaMask_;
-    AVPlaybackState::PlaybackStateMaskType playbackMask_;
-    std::function<void(AVControllerItem&)> serviceCallback_;
     std::recursive_mutex callbackMutex_;
+    sptr<IAVControllerCallback> callback_;
+    std::recursive_mutex metaMaskMutex_;
+    AVMetaData::MetaMaskType metaMask_;
+    std::recursive_mutex playbackMaskMutex_;
+    AVPlaybackState::PlaybackStateMaskType playbackMask_;
+    std::recursive_mutex serviceCallbackMutex_;
+    std::function<void(AVControllerItem&)> serviceCallback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_ITEM_H

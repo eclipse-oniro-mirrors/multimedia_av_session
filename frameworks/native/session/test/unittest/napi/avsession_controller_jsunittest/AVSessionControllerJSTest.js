@@ -43,6 +43,22 @@ describe("AVSessionControllerJsTest", function () {
   const CUSTOM_EXTRAS = {
     extrasKey: "This is custom media packet"
   };
+  const QUEUE_ITEM_ID = 666;
+  const QUEUE_ITEM_LENGTH = 1;
+  const QUEUE_ITEM_KEY_WORD = "QUEUE_ITEM_RELATE";
+  const EXTRAS = { "items_author": "name" };
+  const QUEUE_ITEM_DESCRIPTION = {
+    mediaId: QUEUE_ITEM_KEY_WORD,
+    title: QUEUE_ITEM_KEY_WORD,
+    extras: EXTRAS
+  };
+  const QUEUE_ITEM = {
+    itemId: QUEUE_ITEM_ID,
+    description: QUEUE_ITEM_DESCRIPTION
+  }
+  const ITEMS_ARRAY = [QUEUE_ITEM];
+  const QUEUE_TITLE = "title";
+  const SKIP_ITEM_ID = 200;
 
   beforeAll(async function () {
     session = await avSession.createAVSession(featureAbility.getContext(), "AVSessionDemo", 'audio').catch((err) => {
@@ -117,6 +133,86 @@ describe("AVSessionControllerJsTest", function () {
     }
     receivedCallback2 = true;
     receivedExtras2 = extras;
+  }
+
+  function queueTitleCallback1(title) {
+    console.log(TAG + "queueTitleCallback1 received Title " + JSON.stringify(title));
+    if (title != QUEUE_TITLE) {
+      console.error(TAG + "queueTitleCallback1 received Title unmatch");
+      expect().assertFail();
+    }
+    receivedCallback = true;
+  }
+
+  function queueTitleCallback2(title) {
+    console.log(TAG + "queueTitleCallback2 received Title " + JSON.stringify(title));
+    if (title != QUEUE_TITLE) {
+      console.error(TAG + "queueTitleCallback2 received Title unmatch");
+      expect().assertFail();
+    }
+    receivedCallback2 = true;
+  }
+
+  function queueItemsCallback1(items) {
+    console.log(TAG + "queueItemsCallback1 received items length: " + items.length);
+    console.log(TAG + "queueItemsCallback1 received items id: " + items[0].itemId);
+    console.log(TAG + "queueItemsCallback1 received items title: " + items[0].description.title);
+    if (items.length != QUEUE_ITEM_LENGTH) {
+      console.error(TAG + "queueItemsCallback1 received items length unmatch");
+      expect().assertFail();
+      return;
+    }
+    if (items[0].itemId != QUEUE_ITEM_ID) {
+      console.error(TAG + "queueItemsCallback1 received items id unmatch");
+      expect().assertFail();
+      return;
+    }
+    if (items[0].description.title != QUEUE_ITEM_KEY_WORD) {
+      console.error(TAG + "queueItemsCallback1 received items key word unmatch");
+      expect().assertFail();
+      return;
+    }
+    receivedCallback = true;
+  }
+
+  function queueItemsCallback2(items) {
+    console.log(TAG + "queueItemsCallback2 received items length: " + items.length);
+    console.log(TAG + "queueItemsCallback2 received items id: " + items[0].itemId);
+    console.log(TAG + "queueItemsCallback2 received items title: " + items[0].description.title);
+    if (items.length != QUEUE_ITEM_LENGTH) {
+      console.error(TAG + "queueItemsCallback2 received items length unmatch");
+      expect().assertFail();
+      return;
+    }
+    if (items[0].itemId != QUEUE_ITEM_ID) {
+      console.error(TAG + "queueItemsCallback2 received items id unmatch");
+      expect().assertFail();
+      return;
+    }
+    if (items[0].description.title != QUEUE_ITEM_KEY_WORD) {
+      console.error(TAG + "queueItemsCallback2 received items key word unmatch");
+      expect().assertFail();
+      return;
+    }
+    receivedCallback2 = true;
+  }
+
+  function skipToQueueItemCallback1(itemId) {
+    console.log(TAG + "skipToQueueItemCallback1 received itemid " + itemId);
+    if (itemId != SKIP_ITEM_ID) {
+      console.error(TAG + "skipToQueueItemCallback1 received uid unmatch");
+      expect().assertFail();
+    }
+    receivedCallback = true;
+  }
+
+  function skipToQueueItemCallback2(itemId) {
+    console.log(TAG + "skipToQueueItemCallback2 received itemid " + itemId);
+    if (itemId != SKIP_ITEM_ID) {
+      console.error(TAG + "skipToQueueItemCallback2 received uid unmatch");
+      expect().assertFail();
+    }
+    receivedCallback2 = true;
   }
 
   /*
@@ -714,4 +810,672 @@ describe("AVSessionControllerJsTest", function () {
     console.info(TAG + "OffExtrasChange005 finished");
     done();
   })
+
+  /*
+   * @tc.name:onQueueItemsChangeTest001
+   * @tc.desc:One on function - queue items change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("onQueueItemsChangeTest001", 0, async function (done) {
+    controller.on('queueItemsChange', queueItemsCallback1);
+    await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
+      console.error(TAG + "onQueueItemsChangeTest001 setAVQueueItems error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    sleep(200).then(() => {
+      if (receivedCallback) {
+        console.log(TAG + "Received queue items change");
+        expect(true).assertTrue();
+      } else {
+        console.error(TAG + "Session queue items change  not received");
+        expect().assertFail();
+      }
+      receivedCallback = false;
+      done();
+    });
+  })
+
+  /*
+   * @tc.name:onQueueItemsChangeTest002
+   * @tc.desc:One on function - queue items change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("onQueueItemChangeTest002", 0, async function (done) {
+    controller.on('queueItemsChange', queueItemsCallback1);
+    controller.on('queueItemsChange', queueItemsCallback2);
+    await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
+      console.error(TAG + "setAVQueueItemsTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (receivedCallback && receivedCallback2) {
+      console.log(TAG + "Received queue items change");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Session queue items change  not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    receivedCallback2 = false;
+    done();
+  })
+
+  /*
+   * @tc.name:onQueueItemsChangeTest003
+   * @tc.desc:One on functions - one param
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("onQueueItemsChangeTest003", 0, async function (done) {
+    try {
+      controller.on('queueItemsChange');
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    done();
+  })
+
+  /*
+   * @tc.name:onQueueItemsChangeTest004
+   * @tc.desc:One on functions - three params
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("onQueueItemsChangeTest004", 0, async function (done) {
+    try {
+      controller.on('queueItemsChange', queueItemsCallback1, queueItemsCallback2);
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    done();
+  })
+
+  /*
+   * @tc.name:onQueueTitleChangeTest001
+   * @tc.desc:One on function - queue title change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("onQueueTitleChangeTest001", 0, async function (done) {
+    controller.on('queueTitleChange', queueTitleCallback1);
+    await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
+      console.error(TAG + "onQueueTitleChangeTest001 setAVQueueTitle error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    sleep(200).then(() => {
+      if (receivedCallback) {
+        console.log(TAG + "Received queue Title change");
+        expect(true).assertTrue();
+      } else {
+        console.error(TAG + "Session queue Title change  not received");
+        expect().assertFail();
+      }
+      receivedCallback = false;
+      done();
+    });
+  })
+
+  /*
+   * @tc.name:onQueueTitleChangeTest002
+   * @tc.desc:One on function - queue title change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("onQueueTitleChangeTest002", 0, async function (done) {
+    controller.on('queueTitleChange', queueTitleCallback1);
+    controller.on('queueTitleChange', queueTitleCallback2);
+    await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
+      console.error(TAG + "setAVQueueTitleTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (receivedCallback && receivedCallback2) {
+      console.log(TAG + "Received queue Title change");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Session queue Title change  not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    receivedCallback2 = false;
+    done();
+  })
+
+  /*
+   * @tc.name:onQueueTitleChangeTest003
+   * @tc.desc:One on functions - one param
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("onQueueTitleChangeTest003", 0, async function (done) {
+    try {
+      controller.on('queueTitleChange');
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    done();
+  })
+
+  /*
+   * @tc.name:onQueueTitleChangeTest004
+   * @tc.desc:One on functions - three params
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("onQueueTitleChangeTest004", 0, async function (done) {
+    try {
+      controller.on('queueTitleChange', queueTitleCallback1, queueTitleCallback2);
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    done();
+  })
+
+  /*
+   * @tc.name:offQueueItemsChangeTest001
+   * @tc.desc:Two on functions and one off function - queue items change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("offQueueItemsChangeTest001", 0, async function (done) {
+    controller.on('queueItemsChange', queueItemsCallback1);
+    controller.on('queueItemsChange', queueItemsCallback2);
+    controller.off('queueItemsChange', queueItemsCallback2);
+    await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
+      console.error(TAG + "offQueueItemsChangeTest001 setAVQueueItems error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (receivedCallback && !receivedCallback2) {
+      console.log(TAG + "Received queue items change");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Session queue items change  not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    done();
+  })
+
+  /*
+   * @tc.name:offQueueItemsChangeTest002
+   * @tc.desc:Two on functions and two off function - queue items change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("offQueueItemsChangeTest002", 0, async function (done) {
+    controller.on('queueItemsChange', queueItemsCallback1);
+    controller.on('queueItemsChange', queueItemsCallback2);
+    controller.off('queueItemsChange', queueItemsCallback1);
+    controller.off('queueItemsChange', queueItemsCallback2);
+    await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
+      console.error(TAG + "offQueueItemsChangeTest001 setAVQueueItems error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (!receivedCallback && !receivedCallback2) {
+      console.log(TAG + "Received queue items change");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Session queue items change  not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    done();
+  })
+
+  /*
+   * @tc.name:offQueueItemsChangeTest003
+   * @tc.desc:Two on functions and off all function - queue items change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("offQueueItemsChangeTest003", 0, async function (done) {
+    controller.on('queueItemsChange', queueItemsCallback1);
+    controller.on('queueItemsChange', queueItemsCallback2);
+    controller.off('queueItemsChange');
+    await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
+      console.error(TAG + "offQueueItemsChangeTest001 setAVQueueItems error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (!receivedCallback && !receivedCallback2) {
+      console.log(TAG + "Received queue items change");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Session queue items change  not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    done();
+  })
+
+  /*
+   * @tc.name:offQueueItemsChangeTest004
+   * @tc.desc:Two on functions and off function - three params
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("offQueueItemsChangeTest004", 0, async function (done) {
+    try {
+      controller.on('queueItemsChange', queueItemsCallback1);
+      controller.on('queueItemsChange', queueItemsCallback2);
+      controller.off('queueItemsChange', queueItemsCallback1, queueItemsCallback2);
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    done();
+  })
+
+  /*
+   * @tc.name:offQueueTitleChangeTest001
+   * @tc.desc:Two on functions and one off function - queue title change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("offQueueTitleChangeTest001", 0, async function (done) {
+    controller.on('queueTitleChange', queueTitleCallback1);
+    controller.on('queueTitleChange', queueTitleCallback2);
+    controller.off('queueTitleChange', queueTitleCallback2);
+    await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
+      console.error(TAG + "offQueueTitleChangeTest001 setAVQueueTitle error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (receivedCallback && !receivedCallback2) {
+      console.log(TAG + "Received queue Title change");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Session queue Title change  not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    done();
+  })
+
+  /*
+   * @tc.name:offQueueTitleChangeTest002
+   * @tc.desc:Two on functions and two off function - queue title change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("offQueueTitleChangeTest002", 0, async function (done) {
+    controller.on('queueTitleChange', queueTitleCallback1);
+    controller.on('queueTitleChange', queueTitleCallback2);
+    controller.off('queueTitleChange', queueTitleCallback1);
+    controller.off('queueTitleChange', queueTitleCallback2);
+
+    await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
+      console.error(TAG + "offQueueTitleChangeTest001 setAVQueueTitle error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (!receivedCallback && !receivedCallback2) {
+      console.log(TAG + "Received queue Title change");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Session queue Title change  not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    done();
+  })
+
+  /*
+   * @tc.name:offQueueTitleChangeTest003
+   * @tc.desc:Two on functions and off all function - queue title change
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("offQueueTitleChangeTest003", 0, async function (done) {
+    controller.on('queueTitleChange', queueTitleCallback1);
+    controller.on('queueTitleChange', queueTitleCallback2);
+    controller.off('queueTitleChange');
+
+    await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
+      console.error(TAG + "offQueueTitleChangeTest001 setAVQueueTitle error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (!receivedCallback && !receivedCallback2) {
+      console.log(TAG + "Received queue Title change");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "Session queue Title change  not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    done();
+  })
+
+  /*
+   * @tc.name:offQueueTitleChangeTest004
+   * @tc.desc:Two on functions and off function - three params
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("offQueueTitleChangeTest004", 0, async function (done) {
+    try {
+      controller.on('queueTitleChange', queueTitleCallback1);
+      controller.on('queueTitleChange', queueTitleCallback2);
+      controller.off('queueTitleChange', queueTitleCallback1, queueTitleCallback2);
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    done();
+  })
+
+  /*
+   * @tc.name:setAVQueueItemsTest001
+   * @tc.desc:setAVQueueItems - callback
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+
+  it("setAVQueueItemsTest001", 0, async function (done) {
+    session.setAVQueueItems(ITEMS_ARRAY, (err) => {
+      if (err) {
+        console.error(TAG + "setAVQueueItemsTest001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      console.info(TAG + "setAVQueueItemsTest001 finished");
+      expect(true).assertTrue();
+      done();
+    });
+  })
+
+  /*
+   * @tc.name:setAVQueueItemsTest002
+   * @tc.desc:setAVQueueItems - promise
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("setAVQueueItemsTest002", 0, async function (done) {
+    await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
+      console.error(TAG + "setAVQueueItemsTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    console.info(TAG + "setAVQueueItemsTest002 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:setAVQueueTitleTest001
+   * @tc.desc:setAVQueueTitle - callback
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("setAVQueueTitleTest001", 0, async function (done) {
+    session.setAVQueueTitle(QUEUE_TITLE, (err) => {
+      if (err) {
+        console.error(TAG + "setAVQueueTitleTest001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      console.info(TAG + "setAVQueueTitleTest001 finished");
+      expect(true).assertTrue();
+      done();
+    });
+  })
+
+  /*
+   * @tc.name:setAVQueueTitleTest002
+   * @tc.desc:setAVQueueTitle - promise
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("setAVQueueTitleTest002", 0, async function (done) {
+    await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
+      console.error(TAG + "setAVQueueTitleTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    console.info(TAG + "setAVQueueTitleTest002 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:SkipToQueueItemTest001
+   * @tc.desc:SkipToQueueItem - callback
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("SkipToQueueItemTest001", 0, async function (done) {
+    controller.skipToQueueItem(QUEUE_ITEM_ID, (err) => {
+      if (err) {
+        console.error(TAG + "SkipToQueueItemTest001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      console.info(TAG + "SkipToQueueItemTest001 finished");
+      expect(true).assertTrue();
+      done();
+    });
+  })
+
+  /*
+   * @tc.name:SkipToQueueItemTest002
+   * @tc.desc:SkipToQueueItem - promise
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("SkipToQueueItemTest002", 0, async function (done) {
+    await controller.skipToQueueItem(QUEUE_ITEM_ID).catch((err) => {
+      console.error(TAG + "SkipToQueueItemTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    console.info(TAG + "SkipToQueueItemTest002 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:OnSkipToQueueItemTest001
+   * @tc.desc:One on function - skip to queue items
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("OnSkipToQueueItemTest001", 0, async function (done) {
+    session.on('skipToQueueItem', skipToQueueItemCallback1);
+    await controller.skipToQueueItem(SKIP_ITEM_ID).catch((err) => {
+      console.error(TAG + "skipToQueueItemTest001 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    sleep(200).then(() => {
+      if (receivedCallback) {
+        console.log(TAG + "Received skipToQueueItem ");
+        expect(true).assertTrue();
+      } else {
+        console.error(TAG + "skipToQueueItem not received");
+        expect().assertFail();
+      }
+      receivedCallback = false;
+      done();
+    })
+  })
+
+  /*
+   * @tc.name:OnSkipToQueueItemTest002
+   * @tc.desc:One on function - skip to queue items
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("OnSkipToQueueItemTest002", 0, async function (done) {
+    session.on('skipToQueueItem', skipToQueueItemCallback1);
+    session.on('skipToQueueItem', skipToQueueItemCallback2);
+    await controller.skipToQueueItem(SKIP_ITEM_ID).catch((err) => {
+      console.error(TAG + "skipToQueueItemTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    await sleep(200);
+    if (receivedCallback && receivedCallback2) {
+      console.log(TAG + "Received skipToQueueItem ");
+      expect(true).assertTrue();
+    } else {
+      console.error(TAG + "skipToQueueItem not received");
+      expect().assertFail();
+    }
+    receivedCallback = false;
+    receivedCallback2 = false;
+    done();
+  })
+
+  /*
+   * @tc.name:OnSkipToQueueItemTest003
+   * @tc.desc:One on functions - one param
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("OnSkipToQueueItemTest003", 0, async function (done) {
+    try {
+      session.on('skipToQueueItem');
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    done();
+  })
+
+  /*
+   * @tc.name:OnSkipToQueueItemTest004
+   * @tc.desc:One on functions - three params
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("OnSkipToQueueItemTest004", 0, async function (done) {
+    try {
+      session.on('skipToQueueItem', skipToQueueItemCallback1, skipToQueueItemCallback2);
+    } catch (err) {
+      expect(err.code == 401).assertTrue();
+    }
+    done();
+  })
+
+  /*
+   * @tc.name:GetAVQueueItemsTest001
+   * @tc.desc:GetAVQueueItems - callback
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("GetAVQueueItemsTest001", 0, async function (done) {
+    session.setAVQueueItems(ITEMS_ARRAY, (err) => {
+      if (err) {
+        console.error(TAG + "setAVQueueItemsTest001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      console.info(TAG + "setAVQueueItemsTest001 finished");
+      expect(true).assertTrue();
+      done();
+    });
+    await sleep(200);
+    controller.getAVQueueItems((err) => {
+      if (err) {
+        console.error(TAG + "getAVQueueItemsTest001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      console.info(TAG + "getAVQueueItemsTest001 finished");
+      expect(true).assertTrue();
+      done();
+    });
+    await sleep(200);
+  })
+
+  /*
+   * @tc.name:GetAVQueueItemsTest002
+   * @tc.desc:GetAVQueueItems - promise
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("GetAVQueueItemsTest002", 0, async function (done) {
+    await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
+      console.error(TAG + "setAVQueueItemsTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    console.info(TAG + "setAVQueueItemsTest002 finished");
+    done();
+    await sleep(200);
+    await controller.getAVQueueItems().catch((err) => {
+      console.error(TAG + "getAVQueueItemsTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    console.info(TAG + "getAVQueueItemsTest002 finished");
+    done();
+    await sleep(200);
+  })
+
+  /*
+   * @tc.name:GetAVQueueTitleTest001
+   * @tc.desc:GetAVQueueTitle - callback
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("GetAVQueueTitleTest001", 0, async function (done) {
+    session.setAVQueueTitle(QUEUE_TITLE, (err) => {
+      if (err) {
+        console.error(TAG + "setAVQueueTitleTest001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      console.info(TAG + "setAVQueueTitleTest001 finished");
+      expect(true).assertTrue();
+      done();
+    });
+    await sleep(200);
+    controller.getAVQueueTitle((err) => {
+      if (err) {
+        console.error(TAG + "getAVQueueTitleTest001 error " + JSON.stringify(err));
+        expect().assertFail();
+        done();
+      }
+      console.info(TAG + "getAVQueueTitleTest001 finished");
+      expect(true).assertTrue();
+      done();
+    });
+    await sleep(200);
+  })
+
+  /*
+   * @tc.name:GetAVQueueTitleTest002
+   * @tc.desc:GetAVQueueTitle - promise
+   * @tc.type: FUNC
+   * @tc.require: I6KTU4
+   */
+  it("GetAVQueueTitleTest002", 0, async function (done) {
+    await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
+      console.error(TAG + "setAVQueueTitleTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    console.info(TAG + "setAVQueueTitleTest002 finished");
+    done();
+    await sleep(200);
+    await controller.getAVQueueTitle().catch((err) => {
+      console.error(TAG + "getAVQueueTitleTest002 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    });
+    console.info(TAG + "getAVQueueTitleTest002 finished");
+    done();
+    await sleep(200);
+  })
+
 })

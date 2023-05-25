@@ -115,7 +115,7 @@ private:
 
     std::string AllocSessionId();
 
-    bool AbilityHasSession(pid_t pid, const std::string& abilityName);
+    bool AbilityHasSession(pid_t pid);
 
     sptr<AVControllerItem> GetPresentController(pid_t pid, const std::string& sessionId);
 

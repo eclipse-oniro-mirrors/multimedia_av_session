@@ -152,7 +152,6 @@ void AVSessionService::InitKeyEvent()
 
 void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession)
 {
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (newTopSession == nullptr) {
         std::lock_guard lockGuard(sessionAndControllerLock_);
         if (topSession_ != nullptr) {
@@ -352,10 +351,10 @@ std::string AVSessionService::AllocSessionId()
     return stream.str();
 }
 
-bool AVSessionService::AbilityHasSession(pid_t pid, const std::string& abilityName)
+bool AVSessionService::AbilityHasSession(pid_t pid)
 {
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    return GetContainer().GetSession(pid, abilityName) != nullptr;
+    return GetContainer().PidHasSession(pid);
 }
 
 sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const std::string& sessionId)
@@ -483,7 +482,7 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
     }
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    if (AbilityHasSession(pid, elementName.GetAbilityName())) {
+    if (AbilityHasSession(pid)) {
         SLOGI("process %{public}d %{public}s already has one session", pid, elementName.GetAbilityName().c_str());
         return nullptr;
     }
@@ -944,23 +943,33 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 
 void AVSessionService::HandleEventHandlerCallBack()
 {
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     SLOGI("handle eventHandler callback");
     AVControlCommand cmd;
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (pressCount_ >= THREE_CLICK && topSession_) {
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
         topSession_->ExecuteControllerCommand(cmd);
     } else if (pressCount_ == DOUBLE_CLICK && topSession_) {
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
         topSession_->ExecuteControllerCommand(cmd);
-    } else if (pressCount_ == ONE_CLICK && topSession_) {
-        auto playbackState = topSession_->GetPlaybackState();
-        if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAYING) {
-            cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
-        } else {
-            cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    } else if (pressCount_ == ONE_CLICK) {
+        SLOGI("HandleEventHandlerCallBack on ONE_CLICK ");
+        if (!topSession_) {
+            SLOGI("HandleEventHandlerCallBack ONE_CLICK without topSession_");
+            sptr<IRemoteObject> object;
+            int32_t ret = CreateControllerInner("default", object);
+            SLOGI("HandleEventHandlerCallBack ONE_CLICK !topSession_ ret : %{public}d", static_cast<int32_t>(ret));
         }
-        topSession_->ExecuteControllerCommand(cmd);
+        if (topSession_) {
+            SLOGI("HandleEventHandlerCallBack ONE_CLICK with topSession_ ");
+            auto playbackState = topSession_->GetPlaybackState();
+            if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAYING) {
+                cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
+            } else {
+                cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+            }
+            topSession_->ExecuteControllerCommand(cmd);
+        }
     } else {
         SLOGI("press invalid");
     }
@@ -970,7 +979,6 @@ void AVSessionService::HandleEventHandlerCallBack()
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("SendSystemAVKeyEvent: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
@@ -990,6 +998,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
         }
         return AVSESSION_SUCCESS;
     }
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_) {
         topSession_->HandleMediaKeyEvent(keyEvent);
     } else {
@@ -1000,7 +1009,6 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("SendSystemControlCommand: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
@@ -1009,6 +1017,7 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
         return ERR_NO_PERMISSION;
     }
     SLOGI("cmd=%{public}d", command.GetCommand());
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_) {
         CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
             ERR_COMMAND_SEND_EXCEED_MAX, "command excuted number exceed max");
