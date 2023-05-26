@@ -46,6 +46,9 @@ void NapiAsyncCallback::AfterWorkCallback(uv_work_t* work, int aStatus)
         delete work;
     });
 
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(context->env, &scope);
+
     int argc = 0;
     napi_value argv[ARGC_MAX] = { nullptr };
     if (context->getter) {
@@ -63,6 +66,7 @@ void NapiAsyncCallback::AfterWorkCallback(uv_work_t* work, int aStatus)
     if (status != napi_ok) {
         SLOGE("call function failed status=%{public}d.", status);
     }
+    napi_close_handle_scope(context->env, scope);
 }
 
 void NapiAsyncCallback::Call(napi_ref method, NapiArgsGetter getter)

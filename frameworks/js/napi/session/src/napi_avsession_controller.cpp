@@ -106,8 +106,7 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
         SLOGE("no memory");
         return nullptr;
     }
-    if (napi_wrap(env, self, static_cast<void*>(napiController), finalize, nullptr,
-                  &(napiController->wrapperRef_)) != napi_ok) {
+    if (napi_wrap(env, self, static_cast<void*>(napiController), finalize, nullptr, nullptr) != napi_ok) {
         SLOGE("wrap failed");
         return nullptr;
     }
