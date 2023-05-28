@@ -161,6 +161,15 @@ public:
      * @since 9
     */
     virtual int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
+
+    /**
+     * Discovery nearby devices that can be cast.
+     *
+     * @param castDeviceCapability Device capability to filter device list
+     * @return Returns whether the device was successfully found
+     * @since 10
+    */
+    virtual int32_t StartCastDiscovery(int32_t castDeviceCapability) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

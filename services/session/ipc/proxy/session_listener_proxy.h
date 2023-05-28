@@ -32,6 +32,8 @@ public:
 
     void OnAudioSessionChecked(const int32_t uid) override;
 
+    void OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo) override;
+
 private:
     static inline BrokerDelegator<SessionListenerProxy> delegator_;
 };

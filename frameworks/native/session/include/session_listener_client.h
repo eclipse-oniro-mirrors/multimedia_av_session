@@ -33,6 +33,8 @@ public:
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
 
     void OnAudioSessionChecked(const int32_t uid) override;
+
+    void OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo) override;
     
 private:
     std::shared_ptr<SessionListener> listener_;

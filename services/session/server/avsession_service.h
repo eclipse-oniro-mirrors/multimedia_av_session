@@ -110,6 +110,8 @@ public:
         return NotifyAudioSessionCheck(uid);
     }
 
+    void NotifyDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo);
+
 private:
     static SessionContainer& GetContainer();
 

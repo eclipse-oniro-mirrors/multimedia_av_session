@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "av_router.h"
 #include "avsession_service_stub.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
@@ -284,6 +285,17 @@ int32_t AVSessionServiceStub::HandleRemoteCastAudio(MessageParcel& data, Message
     }
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(reply.WriteString(output), ERR_NONE, "write int32 failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleCastDeviceCapability(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleCastDeviceCapability");
+    SLOGI("HandleCastDeviceCapability start");
+    auto castDeviceCapability = data.ReadInt32();
+    int32_t ret = AVRouter::GetInstance().StartCastDiscovery(castDeviceCapability);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleCastDeviceCapability failed");
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

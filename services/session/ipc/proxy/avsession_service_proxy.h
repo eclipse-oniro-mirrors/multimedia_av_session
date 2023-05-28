@@ -62,6 +62,8 @@ public:
         return AVSESSION_SUCCESS;
     }
 
+    int32_t StartCastDiscovery(int32_t castDeviceCapability);
+
 private:
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;
 };

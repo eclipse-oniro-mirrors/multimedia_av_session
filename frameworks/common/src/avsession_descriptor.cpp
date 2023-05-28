@@ -70,4 +70,49 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
     elementName_ = *elementName;
     return true;
 }
+
+bool CastDeviceInfo::WriteToParcel(Parcel& out) const
+{
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceCategory_), false, "write deviceCategory failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceId_), false, "write deviceId failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceName_), false, "write deviceName failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceType_), false, "write deviceType failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(ipAddress_), false, "write ipAddress failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(providerId_), false, "write providerId failed");
+
+    return true;
 }
+
+bool CastDeviceInfo::ReadFromParcel(Parcel& in)
+{
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceCategory_), false, "Read deviceCategory failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceId_), false, "Read deviceId failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceName_), false, "Read deviceName failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceType_), false, "Read deviceType failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(ipAddress_), false, "Read ipAddress failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(providerId_), false, "Read providerId failed");
+
+    return true;
+}
+
+bool CastOutputDeviceInfo::WriteToParcel(Parcel& out) const
+{
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castDevices_.size()), false, "write castDevices size failed");
+    for (CastDeviceInfo castDevice : castDevices_) {
+        castDevice.WriteToParcel(out);
+    }
+    return true;
+}
+
+bool CastOutputDeviceInfo::ReadFromParcel(Parcel& in)
+{
+    int32_t castDevicesSize;
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(castDevicesSize), false, "Read castDevices size failed");
+    for (int i = 0; i < castDevicesSize; i++) {
+        CastDeviceInfo castDevice;
+        castDevice.ReadFromParcel(in);
+        castDevices_.emplace_back(castDevice);
+    }
+    return true;
+}
+} // namespace OHOS::AVSession

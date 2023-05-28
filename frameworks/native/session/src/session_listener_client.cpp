@@ -50,4 +50,11 @@ void SessionListenerClient::OnAudioSessionChecked(const int32_t uid)
         listener_->OnAudioSessionChecked(uid);
     }
 }
+
+void SessionListenerClient:: OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo)
+{
+    if (listener_) {
+        listener_->OnDeviceFound(castOutputDeviceInfo);
+    }
 }
+} // OHOS::AVSession

@@ -68,6 +68,14 @@ public:
     virtual void OnAudioSessionChecked(const int32_t uid) {};
 
     /**
+     * @brief Listen for the event of device discovery.
+     *
+     * @param { CastOutputDeviceInfo } castOutputDeviceInfo - Discovered device info.
+     * @since 10
+    */
+    virtual void OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo) {};
+
+    /**
      * @brief Deconstruct SessionListener.
      * @since 9
     */

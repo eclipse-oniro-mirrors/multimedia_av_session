@@ -170,6 +170,14 @@ public:
     /* std::vector<AVSessionDescriptor> <-> napi_value */
     static napi_status SetValue(napi_env env, const std::vector<AVSessionDescriptor>& in, napi_value& out);
 
+    /* CastOutputDeviceInfo <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, CastOutputDeviceInfo& out);
+    static napi_status SetValue(napi_env env, const CastOutputDeviceInfo& in, napi_value& out);
+
+    /* CastDeviceInfo <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, CastDeviceInfo& out);
+    static napi_status SetValue(napi_env env, const CastDeviceInfo& in, napi_value& out);
+
     /* napi_get_named_property wrapper */
     template <typename T>
     static inline napi_status GetNamedProperty(napi_env env, napi_value in, const std::string& prop, T& value)

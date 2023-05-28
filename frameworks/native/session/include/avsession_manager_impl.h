@@ -62,6 +62,8 @@ public:
 
     int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
 
+    int32_t StartCastDiscovery(int32_t castDeviceCapability) override;
+
 private:
     sptr<AVSessionServiceProxy> GetService();
 

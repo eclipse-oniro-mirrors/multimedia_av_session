@@ -21,6 +21,7 @@
 #include "accesstoken_kit.h"
 #include "app_manager_adapter.h"
 #include "audio_adapter.h"
+#include "av_router.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_info.h"
@@ -91,6 +92,8 @@ void AVSessionService::OnStart()
     backgroundAudioController_.Init(this);
     AddInnerSessionListener(&backgroundAudioController_);
 #endif
+    AVRouter::GetInstance().Init(this);
+
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     AddSystemAbilityListener(AUDIO_POLICY_SERVICE_ID);
     AddSystemAbilityListener(APP_MGR_SERVICE_ID);
@@ -419,6 +422,18 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
         SLOGI("Found session listener with pid");
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnAudioSessionCheck");
         listener->OnAudioSessionChecked(uid);
+    }
+}
+
+void AVSessionService::NotifyDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    for (const auto& listener : innerSessionListeners_) {
+        listener->OnDeviceFound(castOutputDeviceInfo);
+    }
+    for (const auto& [pid, listener] : sessionListeners_) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceFound");
+        listener->OnDeviceFound(castOutputDeviceInfo);
     }
 }
 

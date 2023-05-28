@@ -32,6 +32,9 @@ private:
     int32_t HandleOnTopSessionChange(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnAudioSessionChecked(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleOnDeviceFound(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t(SessionListenerStub::*)(MessageParcel&, MessageParcel&);
@@ -40,6 +43,7 @@ private:
         &SessionListenerStub::HandleOnSessionRelease,
         &SessionListenerStub::HandleOnTopSessionChange,
         &SessionListenerStub::HandleOnAudioSessionChecked,
+        &SessionListenerStub::HandleOnDeviceFound,
     };
 };
 }

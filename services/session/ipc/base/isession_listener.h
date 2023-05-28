@@ -29,6 +29,7 @@ public:
         LISTENER_CMD_ON_RELEASE,
         LISTENER_CMD_TOP_CHANGED,
         LISTENER_CMD_AUDIO_CHECKED,
+        LISTENER_CMD_DEVICE_FOUND,
         LISTENER_CMD_MAX
     };
 
@@ -39,6 +40,8 @@ public:
     virtual void OnTopSessionChange(const AVSessionDescriptor& descriptor) = 0;
 
     virtual void OnAudioSessionChecked(const int32_t uid) = 0;
+
+    virtual void OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo) = 0;
 };
 }
 #endif // OHOS_ISESSION_LISTENER_H

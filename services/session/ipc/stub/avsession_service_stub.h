@@ -37,6 +37,7 @@ private:
     int32_t HandleCastAudio(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCastAudioForAll(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRemoteCastAudio(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleCastDeviceCapability(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
@@ -53,6 +54,7 @@ private:
         &AVSessionServiceStub::HandleCastAudio,
         &AVSessionServiceStub::HandleCastAudioForAll,
         &AVSessionServiceStub::HandleRemoteCastAudio,
+        &AVSessionServiceStub::HandleCastDeviceCapability,
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;

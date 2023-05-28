@@ -298,4 +298,22 @@ int32_t AVSessionServiceProxy::CastAudioForAll(const std::vector<AudioStandard::
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
+
+int32_t AVSessionServiceProxy::StartCastDiscovery(const int32_t castDeviceCapability)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(castDeviceCapability),
+        ERR_MARSHALLING, "write castDeviceCapability failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_SEND_CAST_DEVICE_CAPABILITY, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
+}
 } // namespace OHOS::AVSession

@@ -50,6 +50,7 @@ enum AVSessionTraceTaskId : int32_t {
     NAPI_SET_AV_QUEUE_TITLE_TASK_ID = 12,
     NAPI_SET_AV_QUEUE_ITEMS_TASK_ID = 13,
     NAPI_SET_EXTRAS_TASK_ID = 14,
+    NAPI_START_CAST_DISCOVERY= 15,
 };
 #ifdef ENBABLE_AVSESSION_TRACE_CONTROL
 class __attribute__((visibility("default"))) AVSessionTrace {

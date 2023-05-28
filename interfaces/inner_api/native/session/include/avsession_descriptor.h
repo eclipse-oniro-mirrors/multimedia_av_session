@@ -26,6 +26,25 @@ struct OutputDeviceInfo {
     std::vector<std::string> deviceNames_;
 };
 
+struct CastDeviceInfo {
+    bool WriteToParcel(Parcel& out) const;
+    bool ReadFromParcel(Parcel& in);
+
+    int32_t deviceCategory_;
+    std::string deviceId_;
+    std::string deviceName_;
+    int32_t deviceType_;
+    std::string ipAddress_;
+    int32_t providerId_;
+};
+
+struct CastOutputDeviceInfo {
+    bool WriteToParcel(Parcel& out) const;
+    bool ReadFromParcel(Parcel& in);
+
+    std::vector<CastDeviceInfo> castDevices_;
+};
+
 struct AVHistoryDescriptor {
     bool WriteToParcel(Parcel& out) const;
     bool ReadFromParcel(Parcel& in);

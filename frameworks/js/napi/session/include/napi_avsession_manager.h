@@ -41,6 +41,7 @@ private:
     static napi_value CastAudio(napi_env env, napi_callback_info info);
     static napi_value SendSystemAVKeyEvent(napi_env env, napi_callback_info info);
     static napi_value SendSystemControlCommand(napi_env env, napi_callback_info info);
+    static napi_value StartCastDiscovery(napi_env env, napi_callback_info info);
 
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
@@ -49,12 +50,14 @@ private:
     static napi_status OnSessionDestroy(napi_env env, napi_value callback);
     static napi_status OnTopSessionChange(napi_env env, napi_value callback);
     static napi_status OnAudioSessionChecked(napi_env env, napi_value callback);
+    static napi_status OnDeviceFound(napi_env env, napi_value callback);
     static napi_status OnServiceDie(napi_env env, napi_value callback);
 
     static napi_status OffSessionCreate(napi_env env, napi_value callback);
     static napi_status OffSessionDestroy(napi_env env, napi_value callback);
     static napi_status OffTopSessionChange(napi_env env, napi_value callback);
     static napi_status OffAudioSessionChecked(napi_env env, napi_value callback);
+    static napi_status OffDeviceFound(napi_env env, napi_value callback);
     static napi_status OffServiceDie(napi_env env, napi_value callback);
 
     static void HandleServiceDied();

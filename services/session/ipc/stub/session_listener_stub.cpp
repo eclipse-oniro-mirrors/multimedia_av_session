@@ -75,4 +75,13 @@ int32_t SessionListenerStub::HandleOnAudioSessionChecked(MessageParcel& data, Me
     reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
+
+int32_t SessionListenerStub::HandleOnDeviceFound(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("SessionListenerStub::HandleOnDeviceFound");
+    CastOutputDeviceInfo castOutputDeviceInfo;
+    CHECK_AND_RETURN_RET_LOG(castOutputDeviceInfo.ReadFromParcel(data), ERR_NONE, "read castOutputDeviceInfo failed");
+    OnDeviceFound(castOutputDeviceInfo);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

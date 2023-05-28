@@ -242,6 +242,13 @@ int32_t AVSessionManagerImpl::CastAudioForAll(const std::vector<AudioStandard::A
     return service ? service->CastAudioForAll(descriptors) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::StartCastDiscovery(const int32_t castDeviceCapability)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartCastDiscovery");
+    auto service = GetService();
+    return service ? service->StartCastDiscovery(castDeviceCapability) : ERR_SERVICE_NOT_EXIST;
+}
+
 void AVSessionManagerImpl::RegisterClientDeathObserver()
 {
     clientDeath_ = new(std::nothrow) ClientDeathStub();
