@@ -15,5 +15,5 @@ import("//build/ohos/sa_profile/sa_profile.gni")
 
 ohos_sa_profile("avsession_sa_profile") {
   sources = [ "av_session.json" ]
-  part_name = "multimedia_av_session"
+  part_name = "av_session"
 }

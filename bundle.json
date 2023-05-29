@@ -1,5 +1,5 @@
 {
-    "name": "@ohos/multimedia_av_session",
+    "name": "@ohos/av_session",
     "description": "Audio and Video Session Management",
     "version": "4.0",
     "license": "Apache License 2.0",
@@ -10,7 +10,7 @@
     "dirs": {},
     "scripts": {},
     "component": {
-      "name": "multimedia_av_session",
+      "name": "av_session",
       "subsystem": "multimedia",
       "syscap": [
           "SystemCapability.Multimedia.AVSession",

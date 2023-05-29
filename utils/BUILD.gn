@@ -56,6 +56,6 @@ ohos_shared_library("avsession_utils") {
   }
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_av_session"
+  part_name = "av_session"
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }

@@ -77,7 +77,7 @@ ohos_shared_library("remote_session_source") {
   sources = source_sources + syncers
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_av_session"
+  part_name = "av_session"
 }
 
 ohos_shared_library("remote_session_sink") {
@@ -101,5 +101,5 @@ ohos_shared_library("remote_session_sink") {
   sources = sink_sources + syncers
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_av_session"
+  part_name = "av_session"
 }

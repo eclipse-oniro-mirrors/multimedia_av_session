@@ -139,7 +139,7 @@ ohos_shared_library("avsession_service") {
   }
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_av_session"
+  part_name = "av_session"
 }
 
 ohos_shared_library("avsession_item") {
@@ -249,5 +249,5 @@ ohos_shared_library("avsession_item") {
   }
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_av_session"
+  part_name = "av_session"
 }
