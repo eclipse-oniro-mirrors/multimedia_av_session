@@ -143,13 +143,14 @@ void AVSessionCallbackClient::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
         "AVSessionCallbackClient handler postTask failed");
 }
 
-void AVSessionCallbackClient::OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
+void AVSessionCallbackClient::OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, outputDeviceInfo]() { callback->OnOutputDeviceChange(outputDeviceInfo); },
+        .AVSessionPostTask([callback, deviceState, outputDeviceInfo]() {
+            callback->OnOutputDeviceChange(deviceState, outputDeviceInfo); },
         EVENT_NAME), "AVSessionCallbackClient handler postTask failed");
 }
 

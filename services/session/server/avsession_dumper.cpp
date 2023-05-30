@@ -168,20 +168,20 @@ void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionServic
             .append("bundle name                  : " + descriptor.elementName_.GetBundleName() + "\n")
             .append("ability name                 : " + descriptor.elementName_.GetAbilityName() + "\n");
 
-        std::string isRemote = descriptor.outputDeviceInfo_.isRemote_ ? "true" : "false";
-        std::vector<std::string> deviceIds = descriptor.outputDeviceInfo_.deviceIds_;
-        result.append("outputdevice\n")
-            .append("        outputdevice is remote       : " + isRemote + "\n")
-            .append("        the count of devices         : " + std::to_string(deviceIds.size()) +
-            "\n        device id                    : ");
-        for (const auto& deviceId : deviceIds) {
-            result.append(deviceId + "  ");
-        }
-        result.append("\n        device name                  : ");
-        std::vector<std::string> deviceNames = descriptor.outputDeviceInfo_.deviceNames_;
-        for (const auto& deviceName : deviceNames) {
-            result.append(deviceName + "  ");
-        }
+        // std::string isRemote = descriptor.outputDeviceInfo_.isRemote_ ? "true" : "false";
+        // std::vector<std::string> deviceIds = descriptor.outputDeviceInfo_.deviceIds_;
+        // result.append("outputdevice\n")
+        //     .append("        outputdevice is remote       : " + isRemote + "\n")
+        //     .append("        the count of devices         : " + std::to_string(deviceIds.size()) +
+        //     "\n        device id                    : ");
+        // for (const auto& deviceId : deviceIds) {
+        //     result.append(deviceId + "  ");
+        // }
+        // result.append("\n        device name                  : ");
+        // std::vector<std::string> deviceNames = descriptor.outputDeviceInfo_.deviceNames_;
+        // for (const auto& deviceName : deviceNames) {
+        //     result.append(deviceName + "  ");
+        // }
         result.append("\n\nRelated Controllers:\n")
             .append("the count of controllers     : " + std::to_string(session->controllers_.size()) + "\n")
             .append("pid of controllers           : ");

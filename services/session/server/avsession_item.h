@@ -88,7 +88,7 @@ public:
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
-    void HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo);
+    void HandleOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo);
 
     void HandleSkipToQueueItem(const int32_t& itemId);
 

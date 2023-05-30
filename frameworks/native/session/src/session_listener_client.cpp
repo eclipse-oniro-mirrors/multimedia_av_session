@@ -51,7 +51,7 @@ void SessionListenerClient::OnAudioSessionChecked(const int32_t uid)
     }
 }
 
-void SessionListenerClient:: OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo)
+void SessionListenerClient:: OnDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     if (listener_) {
         listener_->OnDeviceFound(castOutputDeviceInfo);

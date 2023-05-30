@@ -30,7 +30,7 @@ public:
 
     int32_t StartCastDiscovery(int32_t castDeviceCapability) override;
 
-    int32_t OnDeviceFound(CastOutputDeviceInfo& castOutputDeviceInfo) override;
+    int32_t OnDeviceFound(OutputDeviceInfo& castOutputDeviceInfo) override;
 
 protected:
 

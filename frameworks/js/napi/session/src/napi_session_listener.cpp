@@ -74,7 +74,7 @@ void NapiSessionListener::OnAudioSessionChecked(const int32_t uid)
     HandleEvent(EVENT_AUDIO_SESSION_CHECKED, uid);
 }
 
-void NapiSessionListener::OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo)
+void NapiSessionListener::OnDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceFound");
     SLOGI("Start handle device found event");

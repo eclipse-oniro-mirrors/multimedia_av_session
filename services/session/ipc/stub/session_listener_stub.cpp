@@ -79,7 +79,7 @@ int32_t SessionListenerStub::HandleOnAudioSessionChecked(MessageParcel& data, Me
 int32_t SessionListenerStub::HandleOnDeviceFound(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("SessionListenerStub::HandleOnDeviceFound");
-    CastOutputDeviceInfo castOutputDeviceInfo;
+    OutputDeviceInfo castOutputDeviceInfo;
     CHECK_AND_RETURN_RET_LOG(castOutputDeviceInfo.ReadFromParcel(data), ERR_NONE, "read castOutputDeviceInfo failed");
     OnDeviceFound(castOutputDeviceInfo);
     return ERR_NONE;

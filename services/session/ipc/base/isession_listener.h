@@ -41,7 +41,7 @@ public:
 
     virtual void OnAudioSessionChecked(const int32_t uid) = 0;
 
-    virtual void OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo) = 0;
+    virtual void OnDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo) = 0;
 };
 }
 #endif // OHOS_ISESSION_LISTENER_H

@@ -20,13 +20,8 @@
 #include "element_name.h"
 
 namespace OHOS::AVSession {
-struct OutputDeviceInfo {
-    bool isRemote_ {};
-    std::vector<std::string> deviceIds_;
-    std::vector<std::string> deviceNames_;
-};
 
-struct CastDeviceInfo {
+struct DeviceInfo {
     bool WriteToParcel(Parcel& out) const;
     bool ReadFromParcel(Parcel& in);
 
@@ -38,11 +33,11 @@ struct CastDeviceInfo {
     int32_t providerId_;
 };
 
-struct CastOutputDeviceInfo {
+struct OutputDeviceInfo {
     bool WriteToParcel(Parcel& out) const;
     bool ReadFromParcel(Parcel& in);
 
-    std::vector<CastDeviceInfo> castDevices_;
+    std::vector<DeviceInfo> deviceInfos_;
 };
 
 struct AVHistoryDescriptor {

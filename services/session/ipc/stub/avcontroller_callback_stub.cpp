@@ -85,11 +85,23 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel& data
 
 int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply)
 {
+    int32_t deviceState;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceState), false, "write deviceInfoSize failed");
     OutputDeviceInfo outputDeviceInfo;
-    CHECK_AND_RETURN_RET_LOG(data.ReadBool(outputDeviceInfo.isRemote_), ERR_NONE, "read isRemote_ failed");
-    CHECK_AND_RETURN_RET_LOG(data.ReadStringVector(&outputDeviceInfo.deviceIds_), ERR_NONE, "read Ids failed");
-    CHECK_AND_RETURN_RET_LOG(data.ReadStringVector(&outputDeviceInfo.deviceNames_), ERR_NONE, "read Names failed");
-    OnOutputDeviceChange(outputDeviceInfo);
+    int32_t deviceInfoSize;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+    for (int i = 0; i < deviceInfoSize; i++) {
+        DeviceInfo deviceInfo;
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceCategory_), false, "Read deviceCategory failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    }
+
+    OnOutputDeviceChange(deviceState, outputDeviceInfo);
     return ERR_NONE;
 }
 

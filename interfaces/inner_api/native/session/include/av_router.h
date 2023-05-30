@@ -55,11 +55,11 @@ public:
     /**
      * Notify Router that the device has been discovered.
      *
-     * @param { CastOutputDeviceInfo } castOutputDeviceInfo - Discovered device infos.
+     * @param { OutputDeviceInfo } castOutputDeviceInfo - Discovered device infos.
      * @return { number } Whether the notify operation was successful
      * @since 10
     */
-    virtual int32_t OnDeviceFound(CastOutputDeviceInfo& castOutputDeviceInfo) = 0;
+    virtual int32_t OnDeviceFound(OutputDeviceInfo& castOutputDeviceInfo) = 0;
 
 };
 } // namespace OHOS::AVSession

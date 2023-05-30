@@ -76,7 +76,7 @@ void SessionListenerProxy::OnAudioSessionChecked(const int32_t uid)
         "send request fail");
 }
 
-void SessionListenerProxy::OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo)
+void SessionListenerProxy::OnDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");

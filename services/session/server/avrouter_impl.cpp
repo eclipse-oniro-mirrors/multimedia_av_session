@@ -45,7 +45,7 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVRouterImpl::OnDeviceFound(CastOutputDeviceInfo& castOutputDeviceInfo)
+int32_t AVRouterImpl::OnDeviceFound(OutputDeviceInfo& castOutputDeviceInfo)
 {
     std::lock_guard lockGuard(servicePtrLock_);
     if (servicePtr_ == nullptr) {

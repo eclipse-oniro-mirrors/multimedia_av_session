@@ -60,7 +60,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& assertId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
-    void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
+    void OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
 
@@ -77,6 +77,9 @@ private:
 
     template<typename T>
     void HandleEvent(int32_t event, const std::string& firstParam, const T& secondParam);
+
+    template<typename T>
+    void HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam);
 
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;

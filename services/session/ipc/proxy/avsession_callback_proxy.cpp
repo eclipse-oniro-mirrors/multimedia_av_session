@@ -184,13 +184,22 @@ void AVSessionCallbackProxy::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
         "send request failed");
 }
 
-void AVSessionCallbackProxy::OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
+void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(data.WriteBool(outputDeviceInfo.isRemote_), "write isRemote_ failed");
-    CHECK_AND_RETURN_LOG(data.WriteStringVector(outputDeviceInfo.deviceIds_), "write deviceIds_ failed");
-    CHECK_AND_RETURN_LOG(data.WriteStringVector(outputDeviceInfo.deviceNames_), "write deviceNames_ failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(deviceState), "write deviceState failed");
+
+    int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
+    CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfoSize), "write deviceInfoSize failed");
+    for (DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
+        CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.deviceCategory_), "write deviceCategory failed");
+        CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.deviceId_), "write deviceId failed");
+        CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.deviceName_), "write deviceName failed");
+        CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.deviceType_), "write deviceType failed");
+        CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.ipAddress_), "write ipAddress failed");
+        CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.providerId_), "write providerId failed");
+    }
 
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");

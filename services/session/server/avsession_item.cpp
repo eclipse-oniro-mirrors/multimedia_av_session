@@ -615,25 +615,24 @@ void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSess
     serviceCallback_ = callback;
 }
 
-void AVSessionItem::HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
+void AVSessionItem::HandleOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnOutputDeviceChange");
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnOutputDeviceChange(outputDeviceInfo);
+    callback_->OnOutputDeviceChange(deviceState, outputDeviceInfo);
 }
 
 void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
 {
-    descriptor_.outputDeviceInfo_.isRemote_ = info.isRemote_;
-    descriptor_.outputDeviceInfo_.deviceIds_ = info.deviceIds_;
-    descriptor_.outputDeviceInfo_.deviceNames_ = info.deviceNames_;
-    HandleOutputDeviceChange(descriptor_.outputDeviceInfo_);
+    descriptor_.outputDeviceInfo_.deviceInfos_ = info.deviceInfos_;
+    int32_t deviceStateConnected = 1;
+    HandleOutputDeviceChange(deviceStateConnected, descriptor_.outputDeviceInfo_);
     std::lock_guard controllersLockGuard(controllersLock_);
     for (const auto& controller : controllers_) {
-        controller.second->HandleOutputDeviceChange(descriptor_.outputDeviceInfo_);
+        controller.second->HandleOutputDeviceChange(deviceStateConnected, descriptor_.outputDeviceInfo_);
     }
-    SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(info.deviceIds_.size()));
+    SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(info.deviceInfos_.size()));
 }
 
 void AVSessionItem::GetOutputDevice(OutputDeviceInfo& info)
@@ -681,10 +680,13 @@ int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, c
         sourceCapability);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastSessionFromRemote failed");
 
-    OutputDeviceInfo deviceInfo;
-    GetOutputDevice(deviceInfo);
-    deviceInfo.isRemote_ = true;
-    SetOutputDevice(deviceInfo);
+    OutputDeviceInfo outputDeviceInfo;
+    GetOutputDevice(outputDeviceInfo);
+    int32_t deviceCateGoryStreaming = 2;
+    for (int i = 0; i < outputDeviceInfo.deviceInfos_.size(); i++) {
+        outputDeviceInfo.deviceInfos_[i].deviceCategory_ = deviceCateGoryStreaming;
+    }
+    SetOutputDevice(outputDeviceInfo);
 
     CHECK_AND_RETURN_RET_LOG(Activate() == AVSESSION_SUCCESS, AVSESSION_ERROR, "Activate failed");
 
@@ -706,8 +708,9 @@ int32_t AVSessionItem::SinkCancelCastAudio()
     CHECK_AND_RETURN_RET_LOG(remoteSink_ != nullptr, AVSESSION_ERROR, "remoteSink_ is nullptr");
     int32_t ret = remoteSink_->CancelCastSession();
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CancelCastSession failed");
-    GetDescriptor().outputDeviceInfo_.deviceIds_.clear();
-    GetDescriptor().outputDeviceInfo_.deviceNames_.clear();
+    GetDescriptor().outputDeviceInfo_.deviceInfos_.clear();
+    DeviceInfo deviceInfo;
+    GetDescriptor().outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     SLOGI("SinkCancelCastAudio");
     return AVSESSION_SUCCESS;
 }

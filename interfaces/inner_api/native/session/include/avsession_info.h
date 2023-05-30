@@ -70,10 +70,10 @@ public:
     /**
      * @brief Listen for the event of device discovery.
      *
-     * @param { CastOutputDeviceInfo } castOutputDeviceInfo - Discovered device info.
+     * @param { OutputDeviceInfo } castOutputDeviceInfo - Discovered device info.
      * @since 10
     */
-    virtual void OnDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo) {};
+    virtual void OnDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo) {};
 
     /**
      * @brief Deconstruct SessionListener.
@@ -171,10 +171,11 @@ public:
     /**
      * @brief Monitor and play device change events.
      *
+     * @param deviceState Event callback of device state.
      * @param outputDeviceInfo Event callback of device information.
      * @since 9
     */
-    virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual void OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
      * @brief Listen for command events.
@@ -243,10 +244,11 @@ public:
     /**
      * @brief Monitor and play device change events.
      *
+     * @param deviceState Event callback of device state.
      * @param outputDeviceInfo Device related information callback.
      * @since 9
     */
-    virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual void OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
      * @brief Listen for changes in custom events of the session.

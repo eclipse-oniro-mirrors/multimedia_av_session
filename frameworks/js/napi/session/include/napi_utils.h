@@ -101,9 +101,6 @@ public:
     /* napi_value <-> AppExecFwk::ElementName */
     static napi_status SetValue(napi_env env, const AppExecFwk::ElementName& in, napi_value& out);
 
-    /* napi_value <-> OutputDeviceInfo */
-    static napi_status SetValue(napi_env env, const OutputDeviceInfo& in, napi_value& out);
-
     /* napi_value <-> AVSessionDescriptor */
     static napi_status SetValue(napi_env env, const AVSessionDescriptor& in, napi_value& out);
 
@@ -170,13 +167,13 @@ public:
     /* std::vector<AVSessionDescriptor> <-> napi_value */
     static napi_status SetValue(napi_env env, const std::vector<AVSessionDescriptor>& in, napi_value& out);
 
-    /* CastOutputDeviceInfo <-> napi_value */
-    static napi_status GetValue(napi_env env, napi_value in, CastOutputDeviceInfo& out);
-    static napi_status SetValue(napi_env env, const CastOutputDeviceInfo& in, napi_value& out);
+    /* OutputDeviceInfo <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, OutputDeviceInfo& out);
+    static napi_status SetValue(napi_env env, const OutputDeviceInfo& in, napi_value& out);
 
-    /* CastDeviceInfo <-> napi_value */
-    static napi_status GetValue(napi_env env, napi_value in, CastDeviceInfo& out);
-    static napi_status SetValue(napi_env env, const CastDeviceInfo& in, napi_value& out);
+    /* DeviceInfo <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, DeviceInfo& out);
+    static napi_status SetValue(napi_env env, const DeviceInfo& in, napi_value& out);
 
     /* napi_get_named_property wrapper */
     template <typename T>

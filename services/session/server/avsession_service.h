@@ -110,7 +110,7 @@ public:
         return NotifyAudioSessionCheck(uid);
     }
 
-    void NotifyDeviceFound(const CastOutputDeviceInfo& castOutputDeviceInfo);
+    void NotifyDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo);
 
 private:
     static SessionContainer& GetContainer();
@@ -203,7 +203,7 @@ private:
 
     int32_t SetBasicInfo(std::string& sessionInfo);
 
-    void SetCastDeviceInfo(const std::vector<AudioStandard::AudioDeviceDescriptor>& castAudioDescriptors,
+    void SetDeviceInfo(const std::vector<AudioStandard::AudioDeviceDescriptor>& castAudioDescriptors,
                            sptr<AVSessionItem>& session);
 
     int32_t GetAudioDescriptor(const std::string deviceId,
@@ -213,7 +213,7 @@ private:
                                       const std::string& deviceId,
                                       AudioStandard::AudioDeviceDescriptor& audioDescriptor);
 
-    void GetCastDeviceInfo(const sptr<AVSessionItem>& session,
+    void GetDeviceInfo(const sptr<AVSessionItem>& session,
                            const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors,
                            std::vector<AudioStandard::AudioDeviceDescriptor>& castSinkDescriptors,
                            std::vector<AudioStandard::AudioDeviceDescriptor>& cancelSinkDescriptors);

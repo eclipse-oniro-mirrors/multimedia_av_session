@@ -219,10 +219,11 @@ void OHOS::AVSession::AvControllerItemTest(const uint8_t* data, size_t size)
     std::vector<int32_t> controlCmds;
     controlCmds.push_back(*(reinterpret_cast<const int32_t*>(data)));
     avControllerItem->HandleValidCommandChange(controlCmds);
+    int32_t deviceState;
     OutputDeviceInfo deviceInfo;
     deviceInfo.isRemote_ = *(reinterpret_cast<const bool*>(data));
     deviceInfo.deviceIds_.push_back(deviceId);
-    avControllerItem->HandleOutputDeviceChange(deviceInfo);
+    avControllerItem->HandleOutputDeviceChange(deviceState, deviceInfo);
     avControllerItem->HandleSessionDestroy();
     avControllerItem->Destroy();
 }
