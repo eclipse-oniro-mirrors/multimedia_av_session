@@ -34,7 +34,7 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST  = 14;
+const int32_t MAX_CODE_TEST  = 21;
 const int32_t MAX_CODE_LEN  = 512;
 const int32_t MIN_SIZE_NUM = 4;
 
