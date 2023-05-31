@@ -130,6 +130,9 @@ void OHOS::AVSession::AVSessionManagerTest(uint8_t* data, size_t size)
     AVControlCommand command;
     int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
     command.SetCommand(cmd);
+    SessionToken sessionToken;
+    sessionToken.sessionId = sessionId;
+    std::vector<AudioStandard::AudioDeviceDescriptor> deviceDescriptor;
 
     AVSessionManagerImpl avSessionManagerImpl;
     avSessionManagerImpl.GetAllSessionDescriptors(descriptors);
@@ -138,6 +141,7 @@ void OHOS::AVSession::AVSessionManagerTest(uint8_t* data, size_t size)
     avSessionManagerImpl.GetActivatedSessionDescriptors(descriptors);
     avSessionManagerImpl.GetSessionDescriptorsBySessionId(bySessionId, descriptor);
     avSessionManagerImpl.SendSystemControlCommand(command);
+    avSessionManagerImpl.CastAudio(sessionToken, deviceDescriptor);
 }
 
 /* Fuzzer entry point */
