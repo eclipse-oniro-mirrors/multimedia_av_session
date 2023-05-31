@@ -86,5 +86,5 @@ ohos_shared_library("avsession_napi") {
   relative_install_dir = "module/multimedia"
 
   subsystem_name = "multimedia"
-  part_name = "multimedia_av_session"
+  part_name = "av_session"
 }

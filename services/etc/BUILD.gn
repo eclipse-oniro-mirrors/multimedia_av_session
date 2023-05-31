@@ -16,6 +16,6 @@ import("//build/ohos.gni")
 ohos_prebuilt_etc("avsession_service.rc") {
   source = "avsession_service.cfg"
   relative_install_dir = "init"
-  part_name = "multimedia_av_session"
+  part_name = "av_session"
   subsystem_name = "multimedia"
 }
