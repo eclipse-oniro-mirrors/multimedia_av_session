@@ -41,7 +41,10 @@ public:
         SERVICE_CMD_CAST_AUDIO,
         SERVICE_CMD_CAST_AUDIO_FOR_ALL,
         SERVICE_CMD_SEND_COMMAND_TO_REMOTE,
-        SERVICE_CMD_SEND_CAST_DEVICE_CAPABILITY,
+        SERVICE_CMD_START_CAST_DISCOVERY,
+        SERVICE_CMD_STOP_CAST_DISCOVERY,
+        SERVICE_CMD_START_CAST,
+        SERVICE_CMD_RELEASE_CAST,
         SERVICE_CMD_MAX
     };
 
@@ -79,6 +82,10 @@ public:
 
     virtual int32_t ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
                                             std::string& output) = 0;
+
+    virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) = 0;
+
+    virtual int32_t ReleaseCast() = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_SERVICE_H

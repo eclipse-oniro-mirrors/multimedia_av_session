@@ -87,6 +87,15 @@ public:
     int32_t ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
                                     std::string& output) override;
 
+    int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
+    int32_t ReleaseCast() override
+    {
+        return AVSESSION_SUCCESS;
+    }
 private:
     static inline BrokerDelegator<RemoteSessionCommandProcess> delegator_;
 };

@@ -17,29 +17,37 @@
 #define OHOS_AVROUTER_IMPL_H
 
 #include "av_router.h"
-#include "avsession_descriptor.h"
-#include "avsession_service.h"
-#include "audio_info.h"
+
 
 namespace OHOS::AVSession {
 class AVRouterImpl : public AVRouter {
 public:
     AVRouterImpl();
 
-    void Init(AVSessionService *servicePtr) override;
+    void Init(IAVSessionServiceListener *servicePtr) override;
 
     int32_t StartCastDiscovery(int32_t castDeviceCapability) override;
 
+    int32_t StopCastDiscovery() override;
+
     int32_t OnDeviceFound(OutputDeviceInfo& castOutputDeviceInfo) override;
+
+    int32_t OnCastServerDied(int32_t providerId) override;
+
+    int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo) override;
+
+    int32_t ReleaseCast() override;
+
+    int32_t RegisterCallback(const std::shared_ptr<AVRouterCallback> callback, int64_t castHandle) override;
 
 protected:
 
 private:
     std::recursive_mutex servicePtrLock_;
-    AVSessionService *servicePtr_;
-    std::recursive_mutex providerMapLock_;
-    // std::map<int32_t, sptr<IAVProvider>> providerMap_; 
-
+    IAVSessionServiceListener *servicePtr_;
+    std::recursive_mutex providerManagerLock_;
+    // std::map<int32_t, sptr<AVCastProviderManager>> providerManagerMap_; 
+    // int32_t providerNumber = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

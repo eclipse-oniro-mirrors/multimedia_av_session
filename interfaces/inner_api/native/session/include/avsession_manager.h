@@ -170,6 +170,35 @@ public:
      * @since 10
     */
     virtual int32_t StartCastDiscovery(int32_t castDeviceCapability) = 0;
+
+    /**
+     * Stop cast process.
+     *
+     * @return Returns
+     * @since 10
+    */
+    virtual int32_t StopCastDiscovery() = 0;
+
+    /**
+     * Start cast process.
+     *
+     * @param sessionToken Session token
+     * @param outputDeviceInfo outputdeviceInfo
+     * @return Returns whether the device was successfully found
+     * @since 10
+    */
+    virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) = 0;
+    
+    /**
+     * Start cast process.
+     *
+     * @param sessionToken Session token
+     * @param outputDeviceInfo outputdeviceInfo
+     * @return Returns whether the device was successfully found
+     * @since 10
+    */
+    virtual int32_t ReleaseCast() = 0;
+
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

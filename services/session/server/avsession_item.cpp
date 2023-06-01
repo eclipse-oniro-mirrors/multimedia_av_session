@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "av_router.h"
 #include "avsession_item.h"
 #include "avsession_service.h"
 #include "avcontroller_item.h"
@@ -352,6 +353,42 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetSessionEvent failed");
     }
     return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
+{
+    std::lock_guard castHandleLockGuard(castHandleLock_);
+    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo);
+    CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
+
+    castHandle_ = castHandle;
+
+    // std::shared_ptr<AVRouterCallback> callback = dynamic_cast<std::shared_ptr<AVRouterCallback>>(shared_from_this());
+    AVRouter::GetInstance().RegisterCallback(shared_from_this(), castHandle_);
+
+
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::ReleaseCast()
+{
+    int64_t ret = AVRouter::GetInstance().ReleaseCast();
+    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
+
+    // std::shared_ptr<AVRouterCallback> callback = dynamic_cast<std::shared_ptr<AVRouterCallback>>(shared_from_this());
+    // AVRouter::GetInstance().RegisterCallback(shared_from_this(), castHandle_);
+
+
+    return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo)
+{
+    HandleOutputDeviceChange(castState, outputDeviceInfo);
+    std::lock_guard controllersLockGuard(controllersLock_);
+    for (const auto& controller : controllers_) {
+        controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
+    }
 }
 
 AVSessionDescriptor AVSessionItem::GetDescriptor()

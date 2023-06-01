@@ -288,14 +288,74 @@ int32_t AVSessionServiceStub::HandleRemoteCastAudio(MessageParcel& data, Message
     return ERR_NONE;
 }
 
-int32_t AVSessionServiceStub::HandleCastDeviceCapability(MessageParcel& data, MessageParcel& reply)
+int32_t AVSessionServiceStub::HandleStartCastDiscovery(MessageParcel& data, MessageParcel& reply)
 {
-    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleCastDeviceCapability");
-    SLOGI("HandleCastDeviceCapability start");
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCastDiscovery");
+    SLOGI("HandleStartCastDiscovery start");
     auto castDeviceCapability = data.ReadInt32();
     int32_t ret = AVRouter::GetInstance().StartCastDiscovery(castDeviceCapability);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleCastDeviceCapability failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStartCastDiscovery failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStopCastDiscovery(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStopCastDiscovery");
+    SLOGI("HandleStopCastDiscovery start");
+    int32_t ret = AVRouter::GetInstance().StopCastDiscovery();
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStopCastDiscovery failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCast");
+    SLOGI("HandleStartCast start");
+    SessionToken sessionToken {};
+    sessionToken.sessionId = data.ReadString();
+    sessionToken.pid = data.ReadInt32();
+    sessionToken.uid = data.ReadInt32();
+
+    OutputDeviceInfo outputDeviceInfo;
+    int32_t deviceInfoSize;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+
+    if (deviceInfoSize > RECEIVE_DEVICE_NUM_MAX) {
+        SLOGI("receive deviceNum over range");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    for (int i = 0; i < deviceInfoSize; i++) {
+        DeviceInfo deviceInfo;
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceCategory_), false, "Read deviceCategory failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    }
+
+    int32_t ret = StartCast(sessionToken, outputDeviceInfo);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
+    SLOGI("StartCast ret %{public}d", ret);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    SLOGI("HandleStartCast success");
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleReleaseCast(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleReleaseCast");
+    SLOGI("HandleReleaseCast start");
+ 
+    int32_t ret = ReleaseCast();
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ReleaseCast failed");
+    SLOGI("ReleaseCast ret %{public}d", ret);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    SLOGI("HandleReleaseCast success");
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

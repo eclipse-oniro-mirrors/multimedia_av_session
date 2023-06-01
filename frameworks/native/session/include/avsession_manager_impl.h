@@ -64,6 +64,12 @@ public:
 
     int32_t StartCastDiscovery(int32_t castDeviceCapability) override;
 
+    int32_t StopCastDiscovery() override;
+
+    int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
+
+    int32_t ReleaseCast() override;
+
 private:
     sptr<AVSessionServiceProxy> GetService();
 

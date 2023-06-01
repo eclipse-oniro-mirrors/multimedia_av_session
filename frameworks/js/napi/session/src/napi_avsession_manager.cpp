@@ -78,6 +78,9 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("off", OffEvent),
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemAVKeyEvent", SendSystemAVKeyEvent),
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemControlCommand", SendSystemControlCommand),
+        DECLARE_NAPI_STATIC_FUNCTION("startCastDiscovery", StartCastDiscovery),
+        DECLARE_NAPI_STATIC_FUNCTION("startCast", StartCast),
+        DECLARE_NAPI_STATIC_FUNCTION("releaseCast", ReleaseCast),
     };
 
     napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
@@ -576,6 +579,127 @@ napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_
         }
     };
     return NapiAsyncWork::Enqueue(env, context, "StartCastDiscovery", executor);
+}
+
+napi_value NapiAVSessionManager::StopCastDiscovery(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StopCastDiscovery");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("Activate failed : no memory");
+        NapiUtils::ThrowError(env, "Activate failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_STOP_CAST_DISCOVERY;
+
+    auto executor = [context]() {
+        int32_t ret = AVSESSION_ERROR;
+        ret = AVSessionManager::GetInstance().StopCastDiscovery();
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "StopCastDiscovery failed : native no permission";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "StopCastDiscovery failed : native invalid parameters";
+            } else if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "StopCastDiscovery failed : native session not exist";
+            } else {
+                context->errMessage = "StopCastDiscovery failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "StopCastDiscovery", executor, complete);
+}
+
+napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StartCast");
+    struct ConcreteContext : public ContextBase {
+        SessionToken sessionToken_ {};
+        OutputDeviceInfo outputdeviceInfo_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_object),
+            "invalid type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionToken_);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (!context->sessionToken_.sessionId.empty()),
+            "invalid session token", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->outputdeviceInfo_);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (context->outputdeviceInfo_.deviceInfos_.size() > 0),
+            "invalid outputdeviceInfo", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_START_CAST;
+
+    auto executor = [context]() {
+        int32_t ret = AVSESSION_ERROR;
+        ret = AVSessionManager::GetInstance().StartCast(context->sessionToken_, context->outputdeviceInfo_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "StartCast failed : native no permission";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "StartCast failed : native invalid parameters";
+            } else if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "StartCast failed : native session not exist";
+            } else {
+                context->errMessage = "StartCast failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+
+    return NapiAsyncWork::Enqueue(env, context, "StartCast", executor, complete);
+}
+
+napi_value NapiAVSessionManager::ReleaseCast(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::ReleaseCast");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("Activate failed : no memory");
+        NapiUtils::ThrowError(env, "Activate failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_RELEASE_CAST;
+
+    auto executor = [context]() {
+        int32_t ret = AVSESSION_ERROR;
+        ret = AVSessionManager::GetInstance().ReleaseCast();
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "ReleaseCast failed : native no permission";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "ReleaseCast failed : native invalid parameters";
+            } else if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "ReleaseCast failed : native session not exist";
+            } else {
+                context->errMessage = "ReleaseCast failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "ReleaseCast", executor, complete);
 }
 
 napi_status NapiAVSessionManager::OnSessionCreate(napi_env env, napi_value callback)

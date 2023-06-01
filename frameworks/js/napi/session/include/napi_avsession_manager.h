@@ -42,6 +42,9 @@ private:
     static napi_value SendSystemAVKeyEvent(napi_env env, napi_callback_info info);
     static napi_value SendSystemControlCommand(napi_env env, napi_callback_info info);
     static napi_value StartCastDiscovery(napi_env env, napi_callback_info info);
+    static napi_value StopCastDiscovery(napi_env env, napi_callback_info info);
+    static napi_value StartCast(napi_env env, napi_callback_info info);
+    static napi_value ReleaseCast(napi_env env, napi_callback_info info);
 
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);

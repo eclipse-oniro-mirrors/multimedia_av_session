@@ -36,6 +36,7 @@
 #include "dm_device_info.h"
 #include "audio_adapter.h"
 #include "remote_session_command_process.h"
+#include "i_avsession_service_listener.h"
 
 namespace OHOS::AVSession {
 class AVSessionDumper;
@@ -55,7 +56,7 @@ public:
     }
 };
 
-class AVSessionService : public SystemAbility, public AVSessionServiceStub {
+class AVSessionService : public SystemAbility, public AVSessionServiceStub, public IAVSessionServiceListener {
     DECLARE_SYSTEM_ABILITY(AVSessionService);
 
 public:
@@ -110,7 +111,11 @@ public:
         return NotifyAudioSessionCheck(uid);
     }
 
-    void NotifyDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo);
+    void NotifyDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo) override;
+
+    int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
+
+    int32_t ReleaseCast() override;
 
 private:
     static SessionContainer& GetContainer();

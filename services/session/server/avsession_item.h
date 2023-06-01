@@ -28,7 +28,8 @@ namespace OHOS::AVSession {
 class AVControllerItem;
 class RemoteSessionSink;
 class RemoteSessionSource;
-class AVSessionItem : public AVSessionStub {
+class AVSessionItem : public AVSessionStub, public AVRouterCallback,
+    public std::enable_shared_from_this<AVSessionItem> {
 public:
     explicit AVSessionItem(const AVSessionDescriptor& descriptor);
 
@@ -133,6 +134,13 @@ public:
     int32_t SinkCancelCastAudio();
 
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
+
+    int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
+
+    int32_t ReleaseCast();
+
+    void OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo) override;
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
@@ -187,6 +195,9 @@ private:
     std::shared_ptr<RemoteSessionSource> remoteSource_;
     std::recursive_mutex remoteSinkLock_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
+
+    std::recursive_mutex castHandleLock_;
+    int64_t castHandle_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H

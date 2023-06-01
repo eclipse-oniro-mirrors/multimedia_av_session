@@ -39,8 +39,6 @@ ohos_shared_library("avsession_service") {
 
   service_sources = [
     "server/avsession_dumper.cpp",
-    "server/avrouter.cpp",
-    "server/avrouter_impl.cpp",
     "server/avsession_service.cpp",
     "server/background_audio_controller.cpp",
     "server/focus_session_strategy.cpp",
@@ -106,6 +104,7 @@ ohos_shared_library("avsession_service") {
 
   deps = [
     "$openssl_dir:libcrypto_shared",
+    "./../session:avsession_router",
     "./../../frameworks/common:avsession_common",
     "./../../utils:avsession_utils",
     "./../session:avsession_item",
@@ -142,6 +141,99 @@ ohos_shared_library("avsession_service") {
 
   subsystem_name = "multimedia"
   part_name = "av_session"
+}
+
+ohos_shared_library("avsession_router") {
+  install_enable = true
+  sanitize = {
+    cfi = true
+    debug = false
+  }
+  ipc_sources = [
+  ]
+
+  service_sources = [
+    "server/avrouter.cpp",
+    "server/avrouter_impl.cpp",
+  ]
+
+  adapter_sources = [
+  ]
+
+  sources = ipc_sources + adapter_sources + service_sources
+
+  include_dirs = [
+    "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
+    "//foundation/multimedia/av_session/services/session/adapter",
+    "./server",
+  ]
+
+  cflags = [
+    "-fPIC",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
+    "-Os",
+  ]
+
+  if (multimedia_av_session_enable_background_audio_control) {
+    cflags += [ "-DENABLE_BACKGROUND_AUDIO_CONTROL" ]
+  }
+
+  if (!use_libfuzzer) {
+    cflags += [ "-flto" ]
+    ldflags = [
+      "-flto",
+      "-Wl,--gc-sections",
+    ]
+  }
+  cflags_cc = cflags
+  cflags_cc += [ "-fvisibility-inlines-hidden" ]
+
+  defines = []
+  if (target_cpu == "arm64") {
+    system_lib_path = "\"/system/lib64/\""
+  } else {
+    system_lib_path = "\"/system/lib/\""
+  }
+  defines += [ "SYSTEM_LIB_PATH = ${system_lib_path}" ]
+
+  deps = [
+    "//foundation/multimedia/av_session/frameworks/common:avsession_common",
+    "//foundation/multimedia/av_session/utils:avsession_utils",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "audio_framework:audio_client",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "data_object:distributeddataobject_impl",
+    "device_manager:devicemanagersdk",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace_native:hitrace_meter" ]
+  }
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent_native:libhisysevent" ]
+  }
+
+  subsystem_name = "multimedia"
+  part_name = "multimedia_av_session"
 }
 
 ohos_shared_library("avsession_item") {
@@ -217,6 +309,7 @@ ohos_shared_library("avsession_item") {
   defines += [ "SYSTEM_LIB_PATH = ${system_lib_path}" ]
 
   deps = [
+    "./../session:avsession_router",
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/utils:avsession_utils",
     "//third_party/openssl:libcrypto_shared",

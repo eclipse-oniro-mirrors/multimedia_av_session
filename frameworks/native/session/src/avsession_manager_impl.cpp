@@ -249,6 +249,27 @@ int32_t AVSessionManagerImpl::StartCastDiscovery(const int32_t castDeviceCapabil
     return service ? service->StartCastDiscovery(castDeviceCapability) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::StopCastDiscovery()
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StopCastDiscovery");
+    auto service = GetService();
+    return service ? service->StopCastDiscovery() : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartCast");
+    auto service = GetService();
+    return service ? service->StartCast(sessionToken, outputDeviceInfo) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::ReleaseCast()
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::ReleaseCast");
+    auto service = GetService();
+    return service ? service->ReleaseCast() : ERR_SERVICE_NOT_EXIST;
+}
+
 void AVSessionManagerImpl::RegisterClientDeathObserver()
 {
     clientDeath_ = new(std::nothrow) ClientDeathStub();

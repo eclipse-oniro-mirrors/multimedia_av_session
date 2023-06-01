@@ -64,6 +64,12 @@ public:
 
     int32_t StartCastDiscovery(int32_t castDeviceCapability);
 
+    int32_t StopCastDiscovery();
+
+    int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
+
+    int32_t ReleaseCast() override;
+
 private:
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;
 };

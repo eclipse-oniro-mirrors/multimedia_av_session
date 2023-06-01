@@ -437,6 +437,42 @@ void AVSessionService::NotifyDeviceFound(const OutputDeviceInfo& castOutputDevic
     }
 }
 
+int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
+{
+    SLOGI("SessionId is %{public}s", sessionToken.sessionId.c_str());
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("StartCast: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice StartCast checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+
+    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
+        sessionToken.sessionId.c_str());
+
+    int32_t ret = session->StartCast(outputDeviceInfo);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::ReleaseCast()
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("ReleaseCast: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice ReleaseCast checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+
+    std::vector<sptr<AVSessionItem>> sessions = GetContainer().GetAllSessions();
+
+    for (auto session : sessions) {
+        CHECK_AND_RETURN_RET_LOG(session->ReleaseCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "ReleaseCast failed");
+    }
+    return AVSESSION_SUCCESS;
+}
+
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
 {

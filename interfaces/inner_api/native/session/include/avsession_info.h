@@ -290,6 +290,24 @@ public:
     virtual ~AVControllerCallback() = default;
 };
 
+class AVRouterCallback {
+public:
+    /**
+     * @brief Listen to the change of cast state change.
+     *
+     * @param castHandle The combination of providerId and castId.
+     * @since 9
+    */
+    virtual void OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo) = 0;
+
+    /**
+     * @brief Deconstruct AVRouterCallback.
+     * @since 10
+    */
+    virtual ~AVRouterCallback() = default;
+};
+
+
 struct SessionToken {
     std::string sessionId;
     pid_t pid;
