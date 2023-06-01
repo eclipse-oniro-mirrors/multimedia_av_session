@@ -119,11 +119,6 @@ public:
         SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }
 
-    void OnAudioSessionChecked(const int32_t uid) override
-    {
-        SLOGI("uid=%{public}d checked", uid);
-    }
-
     std::string GetSessionId() const
     {
         return descriptor_.sessionId_;
@@ -225,21 +220,17 @@ HWTEST_F(AVSessionManagerTest, CreatSession004, TestSize.Level1)
 {
     SLOGI("CreatSession004 begin");
     vector<std::shared_ptr<AVSession>> sessionList;
-    for (int i = 0; i < 50; i++) {
-        OHOS::AppExecFwk::ElementName elementName;
-        elementName.SetBundleName(g_testBundleName);
-        elementName.SetAbilityName(std::to_string(i));
-        auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
-            AVSession::SESSION_TYPE_AUDIO, elementName);
-        EXPECT_NE(session, nullptr);
-        sessionList.push_back(session);
-    }
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
-    elementName.SetAbilityName(g_testAbilityName);
-    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
+    elementName.SetAbilityName("1");
+    auto firstSession = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
         AVSession::SESSION_TYPE_AUDIO, elementName);
-    EXPECT_EQ(session, nullptr);
+    EXPECT_NE(firstSession, nullptr);
+    sessionList.push_back(firstSession);
+    elementName.SetAbilityName("2");
+    auto secondSession = AVSessionManager::GetInstance().CreateSession(g_testSessionTag,
+        AVSession::SESSION_TYPE_AUDIO, elementName);
+    EXPECT_EQ(secondSession, nullptr);
     for (auto it = sessionList.begin(); it != sessionList.end(); it++) {
         (*it)->Destroy();
     }
@@ -551,15 +542,12 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(session->GetSessionId(), listener->GetSessionId());
 
-    AVSessionDescriptor descriptor;
-    descriptor.isThirdPartyApp_ = true;
-    descriptor.uid_ = 0;
-    listener->OnAudioSessionChecked(descriptor.uid_);
+    int32_t uid = 0;
+    listener->OnAudioSessionChecked(uid);
     sleep(1);
-    EXPECT_EQ(descriptor.uid_, listener->GetSessionUid());
     session->Destroy();
 
-    SLOGI("RegisterSessionListener001 end");
+    SLOGI("RegisterSessionListener002 end");
 }
 
 /**

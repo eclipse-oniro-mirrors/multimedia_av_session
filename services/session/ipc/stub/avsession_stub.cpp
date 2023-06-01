@@ -144,9 +144,11 @@ int32_t AVSessionStub::HandleGetAVQueueItems(MessageParcel& data, MessageParcel&
 int32_t AVSessionStub::HandleSetAVQueueItems(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionStub::SetAVQueueItems");
+    int32_t maxQueueItemLength = 1000; // The maximum allowed playlist size is 1000
     std::vector<AVQueueItem> items_;
     int32_t itemNum = data.ReadInt32();
-    CHECK_AND_RETURN_RET_LOG(itemNum >= 0, ERR_UNMARSHALLING, "read int32 itemNum failed");
+    CHECK_AND_RETURN_RET_LOG((itemNum >= 0) && (itemNum < maxQueueItemLength),
+        ERR_UNMARSHALLING, "read int32 itemNum failed");
     for (int32_t i = 0; i < itemNum; i++) {
         AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
         CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");

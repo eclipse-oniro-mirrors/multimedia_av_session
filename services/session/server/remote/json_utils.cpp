@@ -90,6 +90,15 @@ bool JsonUtils::IsString(const json& jsonObj, const std::string& key)
     return res;
 }
 
+bool JsonUtils::IsBool(const json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_boolean();
+    if (!res) {
+        SLOGE("The key %{public}s of jsonObj is invalid", key.c_str());
+    }
+    return res;
+}
+
 int32_t JsonUtils::GetVectorCapability(const std::string& jsonCapability,
                                        std::vector<std::vector<int32_t>>& vectorCapability)
 {
@@ -164,7 +173,7 @@ int32_t JsonUtils::GetSessionBasicInfo(const std::string& sessionInfo, AVSession
         && IsString(compatibility, "deviceType") && IsString(compatibility, "systemVersion")
         && IsInt32(compatibility, "avsessionVersion") && IsInt32(jsonObj["data"], "systemTime")
         && compatibility.contains("reserve") && compatibility.contains("features")
-        && compatibility.contains("extendCapability") && IsInt32(jsonObj["data"], "extend"), AVSESSION_ERROR,
+        && compatibility.contains("extendCapability"), AVSESSION_ERROR,
         "The key of jsonObj is invalid");
     basicInfo.networkId_ = compatibility["networkId"];
     basicInfo.vendorId_ = compatibility["vendorId"];
@@ -229,6 +238,10 @@ int32_t JsonUtils::GetSessionDescriptors(const std::string& sessionInfo, std::ve
     CHECK_AND_RETURN_RET_LOG(!sessionDescriptors.is_null(), AVSESSION_ERROR, "sessionDescriptors is null");
     CHECK_AND_RETURN_RET_LOG(sessionDescriptors.is_array(), AVSESSION_ERROR, "json sessionDescriptors is not array");
     for (json::iterator it = sessionDescriptors.begin(); it != sessionDescriptors.end(); ++it) {
+        CHECK_AND_RETURN_RET_LOG(IsString(it.value(), "sessionId") && IsString(it.value(), "type")
+            && IsString(it.value(), "bundleName") && IsString(it.value(), "abilityName")
+            && IsString(it.value(), "tag") && IsBool(it.value(), "isThirdPartyApp"), AVSESSION_ERROR,
+            "The key of jsonObj is invalid");
         AVSessionDescriptor descriptor;
         descriptor.sessionId_ = it.value()["sessionId"];
         std::string type = it.value()["type"];
@@ -272,6 +285,10 @@ int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessio
         "The key of jsonObj is invalid");
     json sessionDescriptor = jsonObj["data"]["sessionDescriptor"];
     CHECK_AND_RETURN_RET_LOG(!sessionDescriptor.is_null(), AVSESSION_ERROR, "sessionDescriptor is null");
+    CHECK_AND_RETURN_RET_LOG(IsString(sessionDescriptor, "sessionId") && IsString(sessionDescriptor, "type")
+        && IsString(sessionDescriptor, "bundleName") && IsString(sessionDescriptor, "abilityName")
+        && IsString(sessionDescriptor, "tag") && IsBool(sessionDescriptor, "isThirdPartyApp"), AVSESSION_ERROR,
+        "The key of jsonObj is invalid");
 
     descriptor.sessionId_ = sessionDescriptor["sessionId"];
     std::string type = sessionDescriptor["type"];

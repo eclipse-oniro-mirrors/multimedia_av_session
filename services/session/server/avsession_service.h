@@ -115,7 +115,7 @@ private:
 
     std::string AllocSessionId();
 
-    bool AbilityHasSession(pid_t pid, const std::string& abilityName);
+    bool AbilityHasSession(pid_t pid);
 
     sptr<AVControllerItem> GetPresentController(pid_t pid, const std::string& sessionId);
 
@@ -271,7 +271,7 @@ private:
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
     static constexpr const char *ABILITY_FILE_NAME = "abilityinfo";
-    static constexpr const char *DEFAULT_SESSION_ID = "DEFAULT";
+    static constexpr const char *DEFAULT_SESSION_ID = "default";
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
 

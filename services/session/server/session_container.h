@@ -34,6 +34,8 @@ public:
 
     virtual sptr<AVSessionItem> GetSession(pid_t pid, const std::string& abilityName) = 0;
 
+    virtual bool PidHasSession(pid_t pid) = 0;
+
     virtual sptr<AVSessionItem> GetSessionById(const std::string& sessionId) = 0;
 
     virtual std::vector<sptr<AVSessionItem>> GetAllSessions() = 0;

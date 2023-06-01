@@ -33,6 +33,8 @@ public:
 
     sptr<AVSessionItem> GetSession(pid_t pid, const std::string& abilityName) override;
 
+    bool PidHasSession(pid_t pid) override;
+
     sptr<AVSessionItem> GetSessionById(const std::string& sessionId) override;
 
     std::vector<sptr<AVSessionItem>> GetAllSessions() override;

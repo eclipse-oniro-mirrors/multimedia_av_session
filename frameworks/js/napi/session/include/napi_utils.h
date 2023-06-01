@@ -190,6 +190,7 @@ public:
     static napi_status Unwrap(napi_env env, napi_value in, void** out, napi_value constructor);
 
     static bool Equals(napi_env env, napi_value value, napi_ref copy);
+    static bool TypeCheck(napi_env env, napi_value value, napi_valuetype expectType);
 
     static napi_value GetUndefinedValue(napi_env env);
 
