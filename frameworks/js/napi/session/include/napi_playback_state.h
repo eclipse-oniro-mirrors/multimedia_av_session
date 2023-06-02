@@ -55,6 +55,9 @@ private:
     static napi_status GetActiveItemId(napi_env env, napi_value in, AVPlaybackState& out);
     static napi_status SetActiveItemId(napi_env env, const AVPlaybackState& in, napi_value& out);
 
+    static napi_status GetExtras(napi_env env, napi_value in, AVPlaybackState& out);
+    static napi_status SetExtras(napi_env env, const AVPlaybackState& in, napi_value& out);
+
     static std::map<std::string, GetterType> getterMap_;
     static std::map<int32_t, SetterType> setterMap_;
     static std::map<std::string, int32_t> filterMap_;

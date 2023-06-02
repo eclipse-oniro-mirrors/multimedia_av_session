@@ -18,6 +18,7 @@
 
 #include <bitset>
 #include <parcel.h>
+#include "want_agent.h"
 
 namespace OHOS::AVSession {
 class AVPlaybackState : public Parcelable {
@@ -41,7 +42,8 @@ public:
         PLAYBACK_KEY_LOOP_MODE = 4,
         PLAYBACK_KEY_IS_FAVORITE = 5,
         PLAYBACK_KEY_ACTIVE_ITEM_ID = 6,
-        PLAYBACK_KEY_MAX = 7
+        PLAYBACK_KEY_EXTRAS = 7,
+        PLAYBACK_KEY_MAX = 8,
     };
 
     enum {
@@ -87,6 +89,9 @@ public:
     void SetActiveItemId(int32_t activeItemId);
     int32_t GetActiveItemId() const;
 
+    void SetExtras(const std::shared_ptr<AAFwk::WantParams>& extras);
+    std::shared_ptr<AAFwk::WantParams> GetExtras() const;
+
     PlaybackStateMaskType GetMask() const;
 
     bool CopyToByMask(PlaybackStateMaskType& mask, AVPlaybackState& out) const;
@@ -112,6 +117,7 @@ private:
     int32_t loopMode_ = LOOP_MODE_SEQUENCE;
     bool isFavorite_ {};
     int32_t activeItemId_ {};
+    std::shared_ptr<AAFwk::WantParams> extras_ = nullptr;
 
     static void CloneState(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneSpeed(const AVPlaybackState& from, AVPlaybackState& to);
@@ -120,6 +126,7 @@ private:
     static void CloneLoopMode(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneIsFavorite(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneActiveItemId(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneExtras(const AVPlaybackState& from, AVPlaybackState& to);
 
     using CloneActionType = void(*)(const AVPlaybackState& from, AVPlaybackState& to);
     static inline CloneActionType cloneActions[PLAYBACK_KEY_MAX] = {
@@ -130,6 +137,7 @@ private:
         &AVPlaybackState::CloneLoopMode,
         &AVPlaybackState::CloneIsFavorite,
         &AVPlaybackState::CloneActiveItemId,
+        &AVPlaybackState::CloneExtras,
     };
 };
 } // namespace OHOS::AVSession
