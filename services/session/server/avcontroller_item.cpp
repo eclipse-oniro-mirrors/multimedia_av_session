@@ -43,12 +43,6 @@ AVControllerItem::~AVControllerItem()
 
 int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("RegisterCallbackInner: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller registercallbackinner checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(callbackMutex_);
     callback_ = iface_cast<AVControllerCallbackProxy>(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
@@ -57,12 +51,6 @@ int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callb
 
 int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetAVPlaybackState: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller getavplaybackstate checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     state = session_->GetPlaybackState();
@@ -71,12 +59,6 @@ int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 
 int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetAVMetaData: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller getavmetadata checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     data = session_->GetMetaData();
@@ -85,12 +67,6 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
 
 int32_t AVControllerItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetAVQueueItems: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller getavqueueitems checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     items = session_->GetQueueItems();
@@ -99,12 +75,6 @@ int32_t AVControllerItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
 
 int32_t AVControllerItem::GetAVQueueTitle(std::string& title)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetAVQueueTitle: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller getavqueuetitle checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     title = session_->GetQueueTitle();
@@ -113,12 +83,6 @@ int32_t AVControllerItem::GetAVQueueTitle(std::string& title)
 
 int32_t AVControllerItem::SkipToQueueItem(int32_t& itemId)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("SkipToQueueItem: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller skiptoqueueitem checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     session_->HandleSkipToQueueItem(itemId);
@@ -127,12 +91,6 @@ int32_t AVControllerItem::SkipToQueueItem(int32_t& itemId)
 
 int32_t AVControllerItem::GetExtras(AAFwk::WantParams& extras)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetExtras: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-            "ERROR_MSG", "controller getextras checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     extras = session_->GetExtras();
@@ -141,12 +99,6 @@ int32_t AVControllerItem::GetExtras(AAFwk::WantParams& extras)
 
 int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("SendAVKeyEvent: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller sendavkeyevent checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     session_->HandleMediaKeyEvent(keyEvent);
@@ -155,12 +107,6 @@ int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 
 int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetLaunchAbility: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller getlaunchability checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     ability = session_->GetLaunchAbility();
@@ -169,12 +115,6 @@ int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent&
 
 int32_t AVControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetValidCommands: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller getvalidcommands checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     cmds = session_->GetSupportCommand();
@@ -183,12 +123,6 @@ int32_t AVControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 
 int32_t AVControllerItem::IsSessionActive(bool& isActive)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("IsSessionActive: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller issessionactive checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     isActive = session_->IsActive();
@@ -197,12 +131,6 @@ int32_t AVControllerItem::IsSessionActive(bool& isActive)
 
 int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("SendControlCommand: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller sendcontrolcommand checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     std::vector<int32_t> cmds = session_->GetSupportCommand();
@@ -216,12 +144,6 @@ int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
 
 int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("SendControlCommand: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "Controller SendCommonCommand checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
     session_->ExecueCommonCommand(commonCommand, commandArgs);
@@ -244,12 +166,6 @@ int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackState
 
 int32_t AVControllerItem::Destroy()
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("Destroy: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "SESSION_ID", sessionId_,
-                            "ERROR_MSG", "controller destroy checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     {
         std::lock_guard callbackLockGuard(callbackMutex_);
         callback_ = nullptr;
