@@ -39,6 +39,7 @@ ohos_shared_library("avsession_common") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
   ]
