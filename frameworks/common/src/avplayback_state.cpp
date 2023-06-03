@@ -31,7 +31,8 @@ bool AVPlaybackState::Marshalling(Parcel& parcel) const
         parcel.WriteInt64(bufferedTime_) &&
         parcel.WriteInt32(loopMode_) &&
         parcel.WriteBool(isFavorite_) &&
-        parcel.WriteInt32(activeItemId_);
+        parcel.WriteInt32(activeItemId_) &&
+        parcel.WriteParcelable(extras_.get());
 }
 
 AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
@@ -54,6 +55,10 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
         SLOGE("Read AVPlaybackState failed");
         delete result;
         return nullptr;
+    }
+    result->extras_ = std::shared_ptr<AAFwk::WantParams>(parcel.ReadParcelable<AAFwk::WantParams>());
+    if (result->extras_ == nullptr) {
+        SLOGE("Read AVPlaybackState failed, the extras is null");
     }
     return result;
 }
@@ -112,6 +117,12 @@ void AVPlaybackState::SetActiveItemId(int32_t activeItemId)
     activeItemId_ = activeItemId;
 }
 
+void AVPlaybackState::SetExtras(const std::shared_ptr<AAFwk::WantParams>& extras)
+{
+    mask_.set(PLAYBACK_KEY_EXTRAS);
+    extras_ = extras;
+}
+
 int32_t AVPlaybackState::GetState() const
 {
     return state_;
@@ -145,6 +156,11 @@ bool AVPlaybackState::GetFavorite() const
 int32_t AVPlaybackState::GetActiveItemId() const
 {
     return activeItemId_;
+}
+
+std::shared_ptr<AAFwk::WantParams> AVPlaybackState::GetExtras() const
+{
+    return extras_;
 }
 
 AVPlaybackState::PlaybackStateMaskType AVPlaybackState::GetMask() const
@@ -214,5 +230,10 @@ void AVPlaybackState::CloneIsFavorite(const AVPlaybackState& from, AVPlaybackSta
 void AVPlaybackState::CloneActiveItemId(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.activeItemId_ = from.activeItemId_;
+}
+
+void AVPlaybackState::CloneExtras(const AVPlaybackState& from, AVPlaybackState& to)
+{
+    to.extras_ = from.extras_;
 }
 } // OHOS::AVSession
