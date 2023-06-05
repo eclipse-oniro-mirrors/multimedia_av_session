@@ -20,6 +20,7 @@
 
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avcast_player_state.h"
 #include "avmedia_description.h"
 #include "avqueue_item.h"
 #include "avsession_descriptor.h"
@@ -80,6 +81,27 @@ public:
      * @since 9
     */
     virtual ~SessionListener() = default;
+};
+
+class IAVCastControllerProxyListener {
+public:
+
+    virtual void OnPlayerStatusChanged(const AVPlaybackState playbackState) = 0;
+
+    // virtual void OnPositionChanged(const int32_t position, int32_t bufferPosition, int32_t duration) = 0;
+
+    // virtual void OnMediaItemChanged(const PlayInfo playInfo) = 0;
+
+    virtual void OnVolumeChanged(const int32_t volume) = 0;
+
+    virtual void OnPlaySpeedChanged(const float playSpeed) = 0;
+
+    virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
+    /**
+     * @brief Deconstruct SessionListener.
+     * @since 9
+    */
+    virtual ~IAVCastControllerProxyListener() = default;
 };
 
 class AVSessionCallback {
@@ -290,7 +312,28 @@ public:
     virtual ~AVControllerCallback() = default;
 };
 
-class AVRouterCallback {
+class AVCastControllerCallback {
+public:
+    virtual void OnStateChange(const AVCastPlayerState& state) = 0;
+
+    virtual void OnVolumeChange(const int32_t volume) = 0;
+
+    virtual void OnSeekDone(const int32_t seek) = 0;
+
+    virtual void OnSpeedDone(const int32_t speed) = 0;
+    
+    virtual void OnTimeUpdate(const int32_t time) = 0;
+
+    virtual void OnError(const int32_t errorCode, const std::string& errorMsg) = 0;
+
+    /**
+     * @brief Deconstruct AVControllerCallback.
+     * @since 9
+    */
+    virtual ~AVCastControllerCallback() = default;
+};
+
+class IAVCastSessionStateListener {
 public:
     /**
      * @brief Listen to the change of cast state change.
@@ -301,10 +344,10 @@ public:
     virtual void OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo) = 0;
 
     /**
-     * @brief Deconstruct AVRouterCallback.
+     * @brief Deconstruct IAVCastSessionStateListener.
      * @since 10
     */
-    virtual ~AVRouterCallback() = default;
+    virtual ~IAVCastSessionStateListener() = default;
 };
 
 

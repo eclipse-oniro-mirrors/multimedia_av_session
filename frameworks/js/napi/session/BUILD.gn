@@ -29,6 +29,11 @@ ohos_shared_library("avsession_napi") {
   sources = [
     "src/napi_async_callback.cpp",
     "src/napi_async_work.cpp",
+    "src/napi_cast_control_command.cpp",
+    "src/napi_avcast_controller.cpp",
+    "src/napi_avcast_controller_callback.cpp",
+    "src/napi_play_info.cpp",
+    "src/napi_play_info_holder.cpp",    
     "src/napi_avcontroller_callback.cpp",
     "src/napi_avsession.cpp",
     "src/napi_avsession_callback.cpp",
@@ -49,6 +54,7 @@ ohos_shared_library("avsession_napi") {
     "$ability_runtime_dir/frameworks/js/napi/inner/napi_common:napi_common",
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
+    "//foundation/multimedia/av_session/frameworks/native/session:avsession_cast_client",
     "//foundation/multimedia/av_session/utils:avsession_utils",
   ]
 

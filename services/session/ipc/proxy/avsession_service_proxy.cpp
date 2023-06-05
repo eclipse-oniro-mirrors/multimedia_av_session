@@ -17,6 +17,7 @@
 #include "avsession_log.h"
 #include "avsession_proxy.h"
 #include "avsession_controller_proxy.h"
+#include "avcast_controller_proxy.h"
 
 namespace OHOS::AVSession {
 AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject>& impl)
@@ -172,6 +173,42 @@ int32_t AVSessionServiceProxy::CreateControllerInner(const std::string& sessionI
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_CREATE_CONTROLLER, data, reply, option) == 0,
+                             ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        object = reply.ReadRemoteObject();
+    }
+    return ret;
+}
+
+int32_t AVSessionServiceProxy::CreateCastController(const std::string& sessionId,
+    std::shared_ptr<AVCastController>& castController)
+{
+    sptr<IRemoteObject> object;
+    auto ret = CreateCastControllerInner(sessionId, object);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateControllerInner failed");
+
+    auto castControllerObject = iface_cast<AVCastControllerProxy>(object);
+    CHECK_AND_RETURN_RET_LOG(castControllerObject, AVSESSION_ERROR, "castControllerObject is nullptr");
+
+    castController = std::shared_ptr<AVCastController>(castControllerObject.GetRefPtr(),
+        [holder = castControllerObject](const auto*) {});
+    return ret;
+}
+
+int32_t AVSessionServiceProxy::CreateCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_UNMARSHALLING,
+                             "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(sessionId), ERR_UNMARSHALLING, "write sessionId failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_CREATE_CAST_CONTROLLER, data, reply, option) == 0,
                              ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
@@ -363,11 +400,12 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
-int32_t AVSessionServiceProxy::ReleaseCast()
+int32_t AVSessionServiceProxy::ReleaseCast(const std::string& sessionId)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(sessionId), ERR_MARSHALLING, "write sessionId failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");

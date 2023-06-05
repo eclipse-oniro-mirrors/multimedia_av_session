@@ -22,6 +22,7 @@
 #include "want_params.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avcast_controller.h"
 
 namespace OHOS::AVSession {
 class AVSessionStub : public IRemoteStub<IAVSession> {
@@ -34,6 +35,11 @@ public:
     }
 
     std::shared_ptr<AVSessionController> GetController() override
+    {
+        return nullptr;
+    }
+    
+    std::shared_ptr<AVCastController> GetAVCastController() override
     {
         return nullptr;
     }
@@ -55,6 +61,8 @@ private:
     int32_t HandleSetExtras(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetController(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetAVCastController(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
@@ -97,6 +105,7 @@ private:
         &AVSessionStub::HandleSetExtras,
         &AVSessionStub::HandleSetLaunchAbility,
         &AVSessionStub::HandleGetController,
+        &AVSessionStub::HandleGetAVCastController,
         &AVSessionStub::HandleRegisterCallbackInner,
         &AVSessionStub::HandleActivate,
         &AVSessionStub::HandleDeactivate,

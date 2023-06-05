@@ -44,11 +44,13 @@
           "fwk_group": [
             "//foundation/multimedia/av_session/frameworks/common:avsession_common",
             "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
+            "//foundation/multimedia/av_session/frameworks/native/session:avsession_cast_client",
             "//foundation/multimedia/av_session/frameworks/js/napi/session:avsession_napi",
             "//foundation/multimedia/av_session/utils:avsession_utils"
           ],
           "service_group": [
             "//foundation/multimedia/av_session/services/session:avsession_item",
+            "//foundation/multimedia/av_session/services/session:avsession_cast_item",
             "//foundation/multimedia/av_session/services/session:avsession_router",
             "//foundation/multimedia/av_session/services/session:avsession_server",
             "//foundation/multimedia/av_session/services/session/server/remote:remote_session_source",

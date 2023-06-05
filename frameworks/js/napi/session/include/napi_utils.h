@@ -28,6 +28,7 @@
 #include "want_agent.h"
 #include "napi_base_context.h"
 #include "ability.h"
+#include "play_info_holder.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -140,6 +141,10 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, AVPlaybackState& out);
     static napi_status SetValue(napi_env env, const AVPlaybackState& in, napi_value& out);
 
+    /* napi_value <-> AVCastPlayerState */
+    static napi_status GetValue(napi_env env, napi_value in, AVCastPlayerState& out);
+    static napi_status SetValue(napi_env env, const AVCastPlayerState& in, napi_value& out);
+
     /* napi_value <-> std::vector<std::string> */
     static napi_status GetValue(napi_env env, napi_value in, std::vector<std::string>& out);
     static napi_status SetValue(napi_env env, const std::vector<std::string>& in, napi_value& out);
@@ -174,6 +179,14 @@ public:
     /* DeviceInfo <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, DeviceInfo& out);
     static napi_status SetValue(napi_env env, const DeviceInfo& in, napi_value& out);
+
+    /* PlayInfoHolder <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, PlayInfoHolder& out);
+    static napi_status SetValue(napi_env env, const PlayInfoHolder& in, napi_value& out);
+
+    /* PlayInfo <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, std::vector<std::shared_ptr<PlayInfo>>& out);
+    static napi_status SetValue(napi_env env, const std::vector<std::shared_ptr<PlayInfo>>& in, napi_value& out);
 
     /* napi_get_named_property wrapper */
     template <typename T>

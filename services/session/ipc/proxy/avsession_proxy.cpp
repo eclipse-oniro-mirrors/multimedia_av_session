@@ -16,6 +16,7 @@
 #include "avsession_proxy.h"
 #include "avsession_callback_client.h"
 #include "avsession_controller_proxy.h"
+#include "avcast_controller_proxy.h"
 #include "iavsession_callback.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
@@ -386,6 +387,41 @@ std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
     auto controller = iface_cast<AVSessionControllerProxy>(object);
     controller_ = std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
     return controller_;
+}
+
+sptr<IRemoteObject> AVSessionProxy::GetAVCastControllerInner()
+{
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+                             nullptr, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, nullptr, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_AVCAST_CONTROLLER, data, reply, option) == 0,
+        nullptr, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), nullptr, "read int32 failed");
+    sptr <IRemoteObject> castController = nullptr;
+    if (ret == AVSESSION_SUCCESS) {
+        castController = reply.ReadRemoteObject();
+        CHECK_AND_RETURN_RET_LOG(castController != nullptr, nullptr, "read IRemoteObject failed");
+    }
+    return castController;
+}
+
+std::shared_ptr<AVCastController> AVSessionProxy::GetAVCastController()
+{
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(castController_ == nullptr, castController_,
+        "controller already exist");
+    sptr <IRemoteObject> object = GetAVCastControllerInner();
+    CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
+    auto castController = iface_cast<AVCastControllerProxy>(object);
+    castController_ = std::shared_ptr<AVCastController>(castController.GetRefPtr(), [holder = castController](const auto*) {});
+    return castController_;
 }
 
 int32_t AVSessionProxy::Activate()

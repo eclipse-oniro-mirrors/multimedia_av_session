@@ -14,6 +14,7 @@
  */
 
 #include "napi_avsession.h"
+#include "avcast_controller.h"
 #include "avsession_controller.h"
 #include "napi_async_work.h"
 #include "napi_utils.h"
@@ -24,6 +25,7 @@
 #include "want_params.h"
 #include "want_agent.h"
 #include "avsession_trace.h"
+#include "napi_avcast_controller.h"
 #include "napi_avsession_controller.h"
 #include "napi_avsession_manager.h"
 
@@ -92,6 +94,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("dispatchSessionEvent", SetSessionEvent),
         DECLARE_NAPI_FUNCTION("setAVQueueItems", SetAVQueueItems),
         DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
+        DECLARE_NAPI_FUNCTION("getAVCastController", GetAVCastController),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor{};
@@ -646,6 +649,46 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetController", executor, complete);
+}
+
+napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::shared_ptr<AVCastController> castController_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("GetAVCastController failed : no memory");
+        NapiUtils::ThrowError(env, "GetAVCastController failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "GetAVCastController failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        context->castController_ = napiSession->session_->GetAVCastController();
+        if (context->castController_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "GetAVCastController failed : native get controller failed";
+            context->errCode = NapiAVSessionManager::errcode_[AVSESSION_ERROR];
+        }
+    };
+    auto complete = [env, context](napi_value& output) {
+        CHECK_STATUS_RETURN_VOID(context, "get controller failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        CHECK_ARGS_RETURN_VOID(context, context->castController_ != nullptr, "controller is nullptr",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        context->status = NapiAVCastController::NewInstance(env, context->castController_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to js object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetAVCastController", executor, complete);
 }
 
 napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)

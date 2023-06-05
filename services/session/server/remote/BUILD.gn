@@ -28,6 +28,7 @@ common_include_dirs = [
 
 common_deps = [
   "./../../../../frameworks/native/session:avsession_client",
+  "//foundation/multimedia/av_session/services/session:avsession_cast_item",
   "./../../../../utils:avsession_utils",
   "./../../../session:avsession_server",
   "//third_party/openssl:libcrypto_shared",

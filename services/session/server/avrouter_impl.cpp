@@ -80,6 +80,16 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerId)
     return AVSESSION_SUCCESS;
 }
 
+std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const int32_t castHandler)
+{
+    // int32_t providerId = castHandle >> 32;
+    // int32_t castId = (castHandle << 32) >> 32;
+    // CHECK_AND_RETURN_RET_LOG(providerMap_.find(providerId) != providerMap_.end(),
+    //     AVSESSION_ERROR, "Can not find corresponding provider");
+    // return providerMap_[providerId].GetRemoteController(castId);
+    return nullptr;
+}
+
 int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
     int64_t castHandle = -1;
@@ -91,19 +101,30 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     return castHandle;
 }
 
-int32_t AVRouterImpl::ReleaseCast()
+int32_t AVRouterImpl::ReleaseCast(const int64_t castHandle)
 {
-    // int64_t castHandle = -1;
-    // CHECK_AND_RETURN_RET_LOG(providerMap_.find(outputDeviceInfo[0].providerId_) != providerMap_.end(),
-    //     castHandle, "Can not find corresponding provider");
-    // int32_t castId = providerMap_[outputDeviceInfo[0].providerId_].startCast(outputDeviceInfo[0]);
+    // int32_t providerId = castHandle >> 32;
 
-    // castHandle = (outputDeviceInfo[0].providerId_ << 32) | castId;
+    // int64_t castHandle = -1;
+    // CHECK_AND_RETURN_RET_LOG(providerMap_.find(providerId) != providerMap_.end(),
+    //     castHandle, "Can not find corresponding provider");
+    // int32_t castId = providerMap_[providerId].ReleaseCast();
+
     return AVSESSION_SUCCESS;
 }
 
 
-int32_t AVRouterImpl::RegisterCallback(const std::shared_ptr<AVRouterCallback> callback, int64_t castHandle)
+int32_t AVRouterImpl::RegisterCallback(const std::shared_ptr<IAVCastSessionStateListener> callback, int64_t castHandle)
+{
+    // int32_t providerId = castHandle >> 32;
+    // int32_t castId = (castHandle << 32) >> 32;
+    // CHECK_AND_RETURN_RET_LOG(providerMap_.find(providerId) != providerMap_.end(),
+    //     AVSESSION_ERROR, "Can not find corresponding provider");
+    // providerMap_[providerId].RegisterCalback(callback, castId);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVRouterImpl::RegisterCastControllerProxyListener(const int64_t castHandle, const std::shared_ptr<IAVCastControllerProxyListener>& castControllerProxyListener)
 {
     // int32_t providerId = castHandle >> 32;
     // int32_t castId = (castHandle << 32) >> 32;

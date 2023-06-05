@@ -22,6 +22,7 @@
 
 #include "audio_system_manager.h"
 #include "av_session.h"
+#include "avcast_controller.h"
 #include "avsession_controller.h"
 #include "avsession_info.h"
 #include "key_event.h"
@@ -96,6 +97,9 @@ public:
     */
     virtual int32_t CreateController(const std::string& sessionId,
         std::shared_ptr<AVSessionController>& controller) = 0;
+
+    virtual int32_t CreateCastController(const std::string& sessionId,
+        std::shared_ptr<AVCastController>& castController) = 0;
 
     /**
      * @brief Listen for sessionListener callback event.
@@ -197,7 +201,7 @@ public:
      * @return Returns whether the device was successfully found
      * @since 10
     */
-    virtual int32_t ReleaseCast() = 0;
+    virtual int32_t ReleaseCast(const std::string& sessionId) = 0;
 
 };
 } // namespace OHOS::AVSession

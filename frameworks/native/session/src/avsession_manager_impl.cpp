@@ -153,6 +153,18 @@ int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     return service ? service->CreateController(sessionId, controller) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::CreateCastController(const std::string& sessionId, std::shared_ptr<AVCastController>& castController)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CreateCastController");
+    if (sessionId.empty()) {
+        SLOGE("sessionId is invalid");
+        return ERR_INVALID_PARAM;
+    }
+
+    auto service = GetService();
+    return service ? service->CreateCastController(sessionId, castController) : ERR_SERVICE_NOT_EXIST;
+}
+
 int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener>& listener)
 {
     if (listener == nullptr) {
@@ -263,11 +275,11 @@ int32_t AVSessionManagerImpl::StartCast(const SessionToken& sessionToken, const 
     return service ? service->StartCast(sessionToken, outputDeviceInfo) : ERR_SERVICE_NOT_EXIST;
 }
 
-int32_t AVSessionManagerImpl::ReleaseCast()
+int32_t AVSessionManagerImpl::ReleaseCast(const std::string& sessionId)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::ReleaseCast");
     auto service = GetService();
-    return service ? service->ReleaseCast() : ERR_SERVICE_NOT_EXIST;
+    return service ? service->ReleaseCast(sessionId) : ERR_SERVICE_NOT_EXIST;
 }
 
 void AVSessionManagerImpl::RegisterClientDeathObserver()

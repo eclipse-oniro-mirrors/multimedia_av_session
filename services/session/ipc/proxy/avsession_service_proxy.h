@@ -19,6 +19,7 @@
 #include "iavsession_service.h"
 #include "iremote_proxy.h"
 #include "av_session.h"
+#include "avcast_controller.h"
 #include "avsession_controller.h"
 #include "avsession_errors.h"
 
@@ -42,6 +43,10 @@ public:
     int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller);
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
+
+    int32_t CreateCastController(const std::string& sessionId, std::shared_ptr<AVCastController>& controller);
+
+    int32_t CreateCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
@@ -68,7 +73,7 @@ public:
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
-    int32_t ReleaseCast() override;
+    int32_t ReleaseCast(const std::string& sessionId) override;
 
 private:
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;

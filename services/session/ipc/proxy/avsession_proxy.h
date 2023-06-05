@@ -59,6 +59,8 @@ public:
 
     std::shared_ptr<AVSessionController> GetController() override;
 
+    std::shared_ptr<AVCastController> GetAVCastController() override;
+
     int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) override;
 
     int32_t Activate() override;
@@ -78,12 +80,14 @@ public:
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
+    sptr<IRemoteObject> GetAVCastControllerInner() override;
 
 private:
     sptr<IAVSessionCallback> callback_;
     static inline BrokerDelegator<AVSessionProxy> delegator_;
     bool isDestroyed_ = {};
     std::shared_ptr<AVSessionController> controller_;
+    std::shared_ptr<AVCastController> castController_;
 };
 }
 #endif // OHOS_AVSESSION_PROXY_H

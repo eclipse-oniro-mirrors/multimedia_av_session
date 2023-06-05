@@ -38,6 +38,7 @@ private:
     static napi_value GetAllSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value CreateController(napi_env env, napi_callback_info info);
+    static napi_value CreateCastController(napi_env env, napi_callback_info info);
     static napi_value CastAudio(napi_env env, napi_callback_info info);
     static napi_value SendSystemAVKeyEvent(napi_env env, napi_callback_info info);
     static napi_value SendSystemControlCommand(napi_env env, napi_callback_info info);

@@ -217,6 +217,18 @@ int32_t AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& r
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleGetAVCastController(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<IRemoteObject> castController = GetAVCastControllerInner();
+    if (castController == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_SUCCESS), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteRemoteObject(castController), ERR_NONE, "write object failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionStub::HandleActivate(MessageParcel& data, MessageParcel& reply)
 {
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Activate()), ERR_NONE, "WriteInt32 failed");

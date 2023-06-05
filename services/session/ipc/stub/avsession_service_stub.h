@@ -30,6 +30,7 @@ private:
     int32_t HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleCreateCastControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemAVKeyEvent(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemControlCommand(MessageParcel& data, MessageParcel& reply);
@@ -50,6 +51,7 @@ private:
         &AVSessionServiceStub::HandleGetSessionDescriptorsById,
         &AVSessionServiceStub::HandleGetHistoricalSessionDescriptors,
         &AVSessionServiceStub::HandleCreateControllerInner,
+        &AVSessionServiceStub::HandleCreateCastControllerInner,
         &AVSessionServiceStub::HandleRegisterSessionListener,
         &AVSessionServiceStub::HandleSendSystemAVKeyEvent,
         &AVSessionServiceStub::HandleSendSystemControlCommand,

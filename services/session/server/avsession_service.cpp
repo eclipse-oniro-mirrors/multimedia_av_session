@@ -456,7 +456,7 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::ReleaseCast()
+int32_t AVSessionService::ReleaseCast(const std::string& sessionId)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("ReleaseCast: CheckSystemPermission failed");
@@ -465,11 +465,9 @@ int32_t AVSessionService::ReleaseCast()
         return ERR_NO_PERMISSION;
     }
 
-    std::vector<sptr<AVSessionItem>> sessions = GetContainer().GetAllSessions();
+    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+    CHECK_AND_RETURN_RET_LOG(session->ReleaseCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "ReleaseCast failed");
 
-    for (auto session : sessions) {
-        CHECK_AND_RETURN_RET_LOG(session->ReleaseCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "ReleaseCast failed");
-    }
     return AVSESSION_SUCCESS;
 }
 
@@ -961,6 +959,15 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     controllers_[pid].push_back(result);
     object = result;
     SLOGI("success");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::CreateCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
+{
+    auto session = GetContainer().GetSessionById(sessionId);
+    auto result = session->GetAVCastControllerInner();
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, AVSESSION_ERROR, "CreateCastControllerInner failed");
+    object = result;
     return AVSESSION_SUCCESS;
 }
 

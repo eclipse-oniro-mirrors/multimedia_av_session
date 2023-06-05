@@ -23,6 +23,8 @@
 #include "want_agent.h"
 #include "want_params.h"
 #include "avsession_controller.h"
+#include "avcast_controller.h"
+
 /**
  * @brief Session, which can be used to set metadata, play status information and other operations.
  * @since 9
@@ -146,6 +148,14 @@ public:
      * @since 9
     */
     virtual std::shared_ptr<AVSessionController> GetController() = 0;
+
+    /**
+     * @brief Get the controller corresponding to this session.
+     *
+     * @return Return to session controller{@link AVSessionController}.
+     * @since 9
+    */
+    virtual std::shared_ptr<AVCastController> GetAVCastController() = 0;
 
     /**
      * @brief Listen for AVSession Callback event.

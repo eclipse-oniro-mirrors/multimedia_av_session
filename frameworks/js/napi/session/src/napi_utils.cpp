@@ -26,6 +26,8 @@
 #include "extension_context.h"
 #include "ability_context.h"
 #include "napi_common_want.h"
+#include "napi_play_info.h"
+#include "napi_play_info_holder.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 4096;
@@ -465,6 +467,35 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVPlaybackState& ou
 napi_status NapiUtils::SetValue(napi_env env, const AVPlaybackState& in, napi_value& out)
 {
     return NapiPlaybackState::SetValue(env, in, out);
+}
+
+/* napi_value <-> AVCastPlayerState */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVCastPlayerState& out)
+{
+    napi_valuetype type = napi_undefined;
+    napi_status status = napi_typeof(env, in, &type);
+    CHECK_RETURN((status == napi_ok) && (type == napi_string), "invalid type", napi_invalid_arg);
+
+    size_t maxLen = STR_MAX_LENGTH;
+    status = napi_get_value_string_utf8(env, in, nullptr, 0, &maxLen);
+    if (maxLen <= 0 || maxLen >= STR_MAX_LENGTH) {
+        return napi_invalid_arg;
+    }
+
+    char buf[STR_MAX_LENGTH + STR_TAIL_LENGTH] {};
+    size_t len = 0;
+    status = napi_get_value_string_utf8(env, in, buf, maxLen + STR_TAIL_LENGTH, &len);
+    if (status == napi_ok) {
+        AVCastPlayerState castPlayerState;
+        castPlayerState.castPlayerState_ = std::string(buf);
+        out = castPlayerState;
+    }
+    return status;
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AVCastPlayerState& in, napi_value& out)
+{
+    return napi_create_string_utf8(env, in.castPlayerState_.c_str(), in.castPlayerState_.size(), &out);
 }
 
 /* napi_value <-> std::vector<std::string> */
@@ -1191,6 +1222,56 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, OutputDeviceInfo& o
         out.deviceInfos_.push_back(DeviceInfo);
     }
     return napi_ok;
+}
+
+/* napi_value <-> std::vector<std::shared_ptr<PlayInfo>> */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<std::shared_ptr<PlayInfo>>& out)
+{
+    SLOGD("napi_value -> std::vector<std::shared_ptr<PlayInfo>>");
+    out.clear();
+    bool isArray = false;
+    napi_is_array(env, in, &isArray);
+    CHECK_RETURN(isArray, "not an array", napi_invalid_arg);
+
+    uint32_t length = 0;
+    napi_status status = napi_get_array_length(env, in, &length);
+    CHECK_RETURN((status == napi_ok) && (length > 0), "get_array failed!", napi_invalid_arg);
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value item = nullptr;
+        status = napi_get_element(env, in, i, &item);
+        CHECK_RETURN((item != nullptr) && (status == napi_ok), "no element", napi_invalid_arg);
+        std::shared_ptr<PlayInfo> playInfo;
+        status = NapiPlayInfo::GetValue(env, item, playInfo);
+        CHECK_RETURN(status == napi_ok, "not a string", napi_invalid_arg);
+        out.push_back(playInfo);
+    }
+    return status;
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<std::shared_ptr<PlayInfo>>& in, napi_value& out)
+{
+    SLOGD("napi_value <- std::vector<PlayInfo>");
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN(status == napi_ok, "create array failed!", status);
+    int index = 0;
+    for (auto& item : in) {
+        napi_value element = nullptr;
+        NapiPlayInfo::SetValue(env, item, element);
+        status = napi_set_element(env, out, index++, element);
+        CHECK_RETURN((status == napi_ok), "napi_set_element failed!", status);
+    }
+    return status;
+}
+
+/* napi_value <-> PlayInfoHolder */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, PlayInfoHolder& out)
+{
+    return NapiPlayInfoHolder::GetValue(env, in, out);
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const PlayInfoHolder& in, napi_value& out)
+{
+    return NapiPlayInfoHolder::SetValue(env, in, out);
 }
 
 napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t napiCode)

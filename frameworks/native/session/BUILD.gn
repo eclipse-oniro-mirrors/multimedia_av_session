@@ -53,6 +53,58 @@ ohos_shared_library("avsession_client") {
   public_configs = [ ":avsession_client_config" ]
 
   public_deps = [
+    "./../session:avsession_cast_client",
+    "//foundation/multimedia/av_session/frameworks/common:avsession_common",
+    "//foundation/multimedia/av_session/utils:avsession_utils",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "audio_framework:audio_client",
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "multimedia_image_framework:image_native",
+    "samgr:samgr_proxy",
+  ]
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace_native:hitrace_meter" ]
+  }
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent_native:libhisysevent" ]
+  }
+
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "multimedia"
+  part_name = "multimedia_av_session"
+}
+
+
+ohos_shared_library("avsession_cast_client") {
+  install_enable = true
+  sanitize = {
+    cfi = true
+    debug = false
+  }
+  ipc_sources = [
+    "//foundation/multimedia/av_session/services/session/ipc/proxy/avcast_controller_proxy.cpp",
+    "//foundation/multimedia/av_session/services/session/ipc/stub/avcast_controller_callback_stub.cpp",
+  ]
+
+  client_sources = [
+    "src/avcast_controller_callback_client.cpp",
+  ]
+
+  sources = ipc_sources + client_sources
+
+  public_configs = [ ":avsession_client_config" ]
+
+  public_deps = [
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/utils:avsession_utils",
   ]

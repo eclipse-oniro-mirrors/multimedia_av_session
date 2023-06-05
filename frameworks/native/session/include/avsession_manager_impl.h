@@ -41,6 +41,9 @@ public:
 
     int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller) override;
 
+    int32_t CreateCastController(const std::string& sessionId,
+        std::shared_ptr<AVCastController>& castController) override;
+
     int32_t GetActivatedSessionDescriptors(std::vector<AVSessionDescriptor>& activatedSessions) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
@@ -68,7 +71,7 @@ public:
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
-    int32_t ReleaseCast() override;
+    int32_t ReleaseCast(const std::string& sessionId) override;
 
 private:
     sptr<AVSessionServiceProxy> GetService();

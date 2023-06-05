@@ -34,11 +34,15 @@ public:
 
     int32_t OnCastServerDied(int32_t providerId) override;
 
+    std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int32_t castHandler) override;
+
     int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo) override;
 
-    int32_t ReleaseCast() override;
+    int32_t ReleaseCast(const int64_t castHandle) override;
 
-    int32_t RegisterCallback(const std::shared_ptr<AVRouterCallback> callback, int64_t castHandle) override;
+    int32_t RegisterCallback(const std::shared_ptr<IAVCastSessionStateListener> callback, int64_t castHandle) override;
+
+    int32_t RegisterCastControllerProxyListener(const int64_t castHandle, const std::shared_ptr<IAVCastControllerProxyListener>& castControllerProxyListener) override;
 
 protected:
 

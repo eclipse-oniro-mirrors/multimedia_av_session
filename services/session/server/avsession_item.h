@@ -23,12 +23,14 @@
 #include "avsession_callback_proxy.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
+#include "i_avcast_controller_proxy.h"
+#include "avcast_controller_item.h"
 
 namespace OHOS::AVSession {
 class AVControllerItem;
 class RemoteSessionSink;
 class RemoteSessionSource;
-class AVSessionItem : public AVSessionStub, public AVRouterCallback,
+class AVSessionItem : public AVSessionStub, public IAVCastSessionStateListener,
     public std::enable_shared_from_this<AVSessionItem> {
 public:
     explicit AVSessionItem(const AVSessionDescriptor& descriptor);
@@ -140,6 +142,8 @@ public:
     int32_t ReleaseCast();
 
     void OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo) override;
+    
+    sptr<IRemoteObject> GetAVCastControllerInner() override;
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
@@ -198,6 +202,11 @@ private:
 
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_;
+
+    std::recursive_mutex castControllerProxyLock_;
+    std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
+    std::vector<sptr<AVCastControllerItem>> castControllers_;
+
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H

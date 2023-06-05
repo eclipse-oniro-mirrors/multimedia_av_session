@@ -39,6 +39,7 @@ public:
         SESSION_CMD_SET_EXTRAS,
         SESSION_CMD_SET_LAUNCH_ABILITY,
         SESSION_CMD_GET_CONTROLLER,
+        SESSION_CMD_GET_AVCAST_CONTROLLER,
         SESSION_CMD_REGISTER_CALLBACK,
         SESSION_CMD_ACTIVATE,
         SESSION_CMD_DEACTIVATE,
@@ -53,6 +54,7 @@ public:
 protected:
     virtual int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) = 0;
     virtual sptr<IRemoteObject> GetControllerInner() = 0;
+    virtual sptr<IRemoteObject> GetAVCastControllerInner() = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_H

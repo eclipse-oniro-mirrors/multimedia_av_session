@@ -51,6 +51,7 @@ private:
     static napi_value SetLaunchAbility(napi_env env, napi_callback_info info);
     static napi_value SetAudioStreamId(napi_env env, napi_callback_info info);
     static napi_value GetController(napi_env env, napi_callback_info info);
+    static napi_value GetAVCastController(napi_env env, napi_callback_info info);
     static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
     static napi_value Activate(napi_env env, napi_callback_info info);
     static napi_value Deactivate(napi_env env, napi_callback_info info);

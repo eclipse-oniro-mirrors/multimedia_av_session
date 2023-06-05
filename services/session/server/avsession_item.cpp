@@ -29,6 +29,9 @@
 #include "remote_session_sink_proxy.h"
 #include "permission_checker.h"
 
+#include "avcast_controller_proxy.h"
+#include "avcast_controller_item.h"
+
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
 #endif
@@ -275,6 +278,26 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     return result;
 }
 
+sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
+{
+    if (castControllerProxy_ == nullptr) {
+        castControllerProxy_ = AVRouter::GetInstance().GetRemoteController(castHandle_);
+    }
+
+    CHECK_AND_RETURN_RET_LOG(castControllers_.size() > 50, nullptr, "allocated controllers exceed the maximum number");
+
+    sptr<AVCastControllerItem> castController = new (std::nothrow) AVCastControllerItem();
+    CHECK_AND_RETURN_RET_LOG(castController != nullptr, nullptr, "malloc AVCastController failed");
+    castController->Init(castControllerProxy_);
+    castControllers_.emplace_back(castController);
+
+    castController->RegisterCastControllerProxyListener(castHandle_);
+    
+    sptr<IRemoteObject> remoteObject =castController->AsObject();
+
+    return remoteObject;
+}
+
 int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback>& callback)
 {
     std::lock_guard callbackLockGuard(callbackLock_);
@@ -363,7 +386,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 
     castHandle_ = castHandle;
 
-    // std::shared_ptr<AVRouterCallback> callback = dynamic_cast<std::shared_ptr<AVRouterCallback>>(shared_from_this());
+    // std::shared_ptr<IAVCastSessionStateListener> callback = dynamic_cast<std::shared_ptr<IAVCastSessionStateListener>>(shared_from_this());
     AVRouter::GetInstance().RegisterCallback(shared_from_this(), castHandle_);
 
 
@@ -372,10 +395,10 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 
 int32_t AVSessionItem::ReleaseCast()
 {
-    int64_t ret = AVRouter::GetInstance().ReleaseCast();
+    int64_t ret = AVRouter::GetInstance().ReleaseCast(castHandle_);
     CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
-    // std::shared_ptr<AVRouterCallback> callback = dynamic_cast<std::shared_ptr<AVRouterCallback>>(shared_from_this());
+    // std::shared_ptr<IAVCastSessionStateListener> callback = dynamic_cast<std::shared_ptr<IAVCastSessionStateListener>>(shared_from_this());
     // AVRouter::GetInstance().RegisterCallback(shared_from_this(), castHandle_);
 
 
@@ -720,7 +743,7 @@ int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, c
     OutputDeviceInfo outputDeviceInfo;
     GetOutputDevice(outputDeviceInfo);
     int32_t deviceCateGoryStreaming = 2;
-    for (int i = 0; i < outputDeviceInfo.deviceInfos_.size(); i++) {
+    for (int32_t i = 0; i < outputDeviceInfo.deviceInfos_.size(); i++) {
         outputDeviceInfo.deviceInfos_[i].deviceCategory_ = deviceCateGoryStreaming;
     }
     SetOutputDevice(outputDeviceInfo);
