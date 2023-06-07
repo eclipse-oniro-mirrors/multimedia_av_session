@@ -956,11 +956,6 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     std::string eventName;
     napi_value callback = nullptr;
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
-        uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
-        bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
-        CHECK_ARGS_RETURN_VOID(context, isSystemApp, "Check system permission error",
-            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
