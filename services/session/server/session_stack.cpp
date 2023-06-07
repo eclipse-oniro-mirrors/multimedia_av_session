@@ -99,7 +99,7 @@ bool SessionStack::PidHasSession(pid_t pid)
         if (iter->first.first == pid) {
             return true;
         }
-        iter++;
+        ++iter;
     }
     return false;
 }
