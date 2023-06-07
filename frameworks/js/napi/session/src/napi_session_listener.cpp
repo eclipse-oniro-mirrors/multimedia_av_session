@@ -74,11 +74,11 @@ void NapiSessionListener::OnAudioSessionChecked(const int32_t uid)
     HandleEvent(EVENT_AUDIO_SESSION_CHECKED, uid);
 }
 
-void NapiSessionListener::OnDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo)
+void NapiSessionListener::OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
-    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceFound");
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceAvailable");
     SLOGI("Start handle device found event");
-    HandleEvent(EVENT_DEVICE_FOUND, castOutputDeviceInfo);
+    HandleEvent(EVENT_DEVICE_AVAILABLE, castOutputDeviceInfo);
 }
 
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)

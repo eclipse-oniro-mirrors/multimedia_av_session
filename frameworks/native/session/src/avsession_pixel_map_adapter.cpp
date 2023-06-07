@@ -110,4 +110,4 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     innerPixelMap->SetInnerImgBuffer(imgBuffer);
     return innerPixelMap;
 }
-} // OHOS::AVSession
+} // namespace OHOS::AVSession

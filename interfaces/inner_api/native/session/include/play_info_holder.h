@@ -40,7 +40,7 @@ public:
     bool Marshalling(Parcel& parcel) const override;
 
     void SetCurrentIndex(int32_t currentIndex);
-    int32_t GetCurrentIndex() const;
+    int32_t GetCurrentTime() const;
 
     void SetPlayInfos(const std::vector<std::shared_ptr<PlayInfo>>& playInfos);
 

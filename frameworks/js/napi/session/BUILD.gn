@@ -32,6 +32,7 @@ ohos_shared_library("avsession_napi") {
     "src/napi_cast_control_command.cpp",
     "src/napi_avcast_controller.cpp",
     "src/napi_avcast_controller_callback.cpp",
+    "src/napi_device_info.cpp",
     "src/napi_play_info.cpp",
     "src/napi_play_info_holder.cpp",    
     "src/napi_avcontroller_callback.cpp",

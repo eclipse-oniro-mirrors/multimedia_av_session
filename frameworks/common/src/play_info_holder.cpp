@@ -48,7 +48,7 @@ void PlayInfoHolder::SetCurrentIndex(int32_t currentIndex)
     currentIndex_ = currentIndex;
 }
 
-int32_t PlayInfoHolder::GetCurrentIndex() const
+int32_t PlayInfoHolder::GetCurrentTime() const
 {
     return currentIndex_;
 }

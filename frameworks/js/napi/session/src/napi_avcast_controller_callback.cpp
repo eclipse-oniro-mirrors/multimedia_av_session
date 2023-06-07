@@ -82,7 +82,6 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const std::string&
     }
 }
 
-
 template<typename T>
 void NapiAVCastControllerCallback::HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam)
 {
@@ -102,39 +101,45 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const int32_t firs
     }
 }
 
-void NapiAVCastControllerCallback::OnStateChange(const AVCastPlayerState& state)
+void NapiAVCastControllerCallback::OnStateChanged(const AVCastPlayerState& state)
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnStateChange");
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnStateChanged");
+    SLOGI("Start handle OnStateChanged event");
     HandleEvent(EVENT_CAST_STATE_CHANGE, state);
 }
 
-void NapiAVCastControllerCallback::OnVolumeChange(const int32_t volume)
+void NapiAVCastControllerCallback::OnVolumeChanged(const int32_t volume)
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnVolumeChange");
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnVolumeChanged");
+    SLOGI("Start handle OnVolumeChanged event");
     HandleEvent(EVENT_CAST_VOLUME_CHANGE, volume);
 }
 
 void NapiAVCastControllerCallback::OnSeekDone(const int32_t seek)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnSeekDone");
+    SLOGI("Start handle OnSeekDone event");
     HandleEvent(EVENT_CAST_SEEK_DONE, seek);
 }
 
-void NapiAVCastControllerCallback::OnSpeedDone(const int32_t speed)
+void NapiAVCastControllerCallback::OnPlaySpeedChanged(const int32_t speed)
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnSpeedDone");
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlaySpeedChanged");
+    SLOGI("Start handle OnPlaySpeedChanged event");
     HandleEvent(EVENT_CAST_SPEED_DONE, speed);
 }
 
 void NapiAVCastControllerCallback::OnTimeUpdate(const int32_t time)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnTimeUpdate");
+    SLOGI("Start handle OnTimeUpdate event");
     HandleEvent(EVENT_CAST_TIME_UPDATE, time);
 }
 
-void NapiAVCastControllerCallback::OnError(const int32_t errorCode, const std::string& errorMsg)
+void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnError");
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayerError");
+    SLOGI("Start handle OnPlayerError event");
     HandleEvent(EVENT_CAST_ERROR, errorCode, errorMsg);
 }
 
@@ -144,7 +149,7 @@ napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t even
     napi_ref ref = nullptr;
 
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
-                             napi_generic_failure, "get callback reference failed");
+        napi_generic_failure, "get callback reference failed");
     CHECK_AND_RETURN_RET_LOG(ref == nullptr, napi_ok, "callback has been registered");
     napi_status status = napi_create_reference(env, callback, NapiUtils::ARGC_ONE, &ref);
     if (status != napi_ok) {
@@ -176,7 +181,7 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
     }
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
-                             napi_generic_failure, "get callback reference failed");
+        napi_generic_failure, "get callback reference failed");
     CHECK_AND_RETURN_RET_LOG(ref != nullptr, napi_ok, "callback has been remove");
     callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);

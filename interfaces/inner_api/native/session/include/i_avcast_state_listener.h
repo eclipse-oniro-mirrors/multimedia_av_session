@@ -17,7 +17,7 @@
 #define OHOS_I_AVCAST_STATE_LISTENER_H
 
 #include <string>
-#include "avsession_descriptor.h"
+#include "device_info.h"
 
 /**
  * @brief Router is a part related to cast media
@@ -33,7 +33,7 @@ public:
      * @return { number } Whether the notify operation was successful
      * @since 10
     */
-    virtual void OnDeviceFound(std::vector<DeviceInfo> deviceInfos) = 0;
+    virtual void OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos) = 0;
 
     virtual void OnCastServerDied() = 0;
 };

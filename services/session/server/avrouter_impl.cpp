@@ -29,6 +29,7 @@ AVRouterImpl::AVRouterImpl()
 
 void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
 {
+    SLOGI("Start init AVRouter");
     servicePtr_ = servicePtr;
     // TODO: 这里new出来一个provider
     // HwCastProvider hwProvider = new HwCastProvider();
@@ -42,6 +43,8 @@ void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
 
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability)
 {
+    SLOGI("AVRouterImpl StartCastDiscovery");
+
     // std::lock_guard lockGuard(providerManagerLock_);
 
     // for (const auto& [providerId, providerManager] : providerManagerMap_) {
@@ -52,6 +55,8 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability)
 
 int32_t AVRouterImpl::StopCastDiscovery()
 {
+    SLOGI("AVRouterImpl StopCastDiscovery");
+
     // std::lock_guard lockGuard(providerManagerLock_);
 
     // for (const auto& [providerId, providerManager] : providerManagerMap_) {
@@ -60,18 +65,22 @@ int32_t AVRouterImpl::StopCastDiscovery()
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVRouterImpl::OnDeviceFound(OutputDeviceInfo& castOutputDeviceInfo)
+int32_t AVRouterImpl::OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo)
 {
+    SLOGI("AVRouterImpl received OnDeviceAvailable event");
+
     std::lock_guard lockGuard(servicePtrLock_);
     if (servicePtr_ == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
     }
-    servicePtr_->NotifyDeviceFound(castOutputDeviceInfo);
+    servicePtr_->NotifyDeviceAvailable(castOutputDeviceInfo);
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVRouterImpl::OnCastServerDied(int32_t providerId)
 {
+    SLOGI("AVRouterImpl received OnCastServerDied event");
+
     // if (providerManagerMap_.find(providerId) != providerManagerMap_.end()){
     //     providerManagerMap_.erase(providerId);
     // } else {
@@ -82,6 +91,8 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerId)
 
 std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const int32_t castHandler)
 {
+    SLOGI("AVRouterImpl start get remote controller process");
+
     // int32_t providerId = castHandle >> 32;
     // int32_t castId = (castHandle << 32) >> 32;
     // CHECK_AND_RETURN_RET_LOG(providerMap_.find(providerId) != providerMap_.end(),
@@ -92,6 +103,8 @@ std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const 
 
 int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
+    SLOGI("AVRouterImpl start cast process");
+
     int64_t castHandle = -1;
     // CHECK_AND_RETURN_RET_LOG(providerMap_.find(outputDeviceInfo[0].providerId_) != providerMap_.end(),
     //     castHandle, "Can not find corresponding provider");
@@ -101,21 +114,24 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     return castHandle;
 }
 
-int32_t AVRouterImpl::ReleaseCast(const int64_t castHandle)
+int32_t AVRouterImpl::StopCast(const int64_t castHandle)
 {
+    SLOGI("AVRouterImpl stop cast process");
+
     // int32_t providerId = castHandle >> 32;
 
     // int64_t castHandle = -1;
     // CHECK_AND_RETURN_RET_LOG(providerMap_.find(providerId) != providerMap_.end(),
     //     castHandle, "Can not find corresponding provider");
-    // int32_t castId = providerMap_[providerId].ReleaseCast();
+    // int32_t castId = providerMap_[providerId].StopCast();
 
     return AVSESSION_SUCCESS;
 }
 
 
-int32_t AVRouterImpl::RegisterCallback(const std::shared_ptr<IAVCastSessionStateListener> callback, int64_t castHandle)
+int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr<IAVCastSessionStateListener> callback)
 {
+    SLOGI("AVRouterImpl register IAVCastSessionStateListener callback to provider");
     // int32_t providerId = castHandle >> 32;
     // int32_t castId = (castHandle << 32) >> 32;
     // CHECK_AND_RETURN_RET_LOG(providerMap_.find(providerId) != providerMap_.end(),
@@ -126,6 +142,7 @@ int32_t AVRouterImpl::RegisterCallback(const std::shared_ptr<IAVCastSessionState
 
 int32_t AVRouterImpl::RegisterCastControllerProxyListener(const int64_t castHandle, const std::shared_ptr<IAVCastControllerProxyListener>& castControllerProxyListener)
 {
+    SLOGI("AVRouterImpl register IAVCastControllerProxyListener callback to provider");
     // int32_t providerId = castHandle >> 32;
     // int32_t castId = (castHandle << 32) >> 32;
     // CHECK_AND_RETURN_RET_LOG(providerMap_.find(providerId) != providerMap_.end(),
@@ -133,4 +150,4 @@ int32_t AVRouterImpl::RegisterCastControllerProxyListener(const int64_t castHand
     // providerMap_[providerId].RegisterCalback(callback, castId);
     return AVSESSION_SUCCESS;
 }
-} // OHOS::AVSession
+} // namespace OHOS::AVSession

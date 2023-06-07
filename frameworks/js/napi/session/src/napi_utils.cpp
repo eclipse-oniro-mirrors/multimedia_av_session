@@ -1224,7 +1224,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, OutputDeviceInfo& o
     return napi_ok;
 }
 
-/* napi_value <-> std::vector<std::shared_ptr<PlayInfo>> */
+/* napi_value -> std::vector<std::shared_ptr<PlayInfo>> */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<std::shared_ptr<PlayInfo>>& out)
 {
     SLOGD("napi_value -> std::vector<std::shared_ptr<PlayInfo>>");
@@ -1248,6 +1248,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<std::sh
     return status;
 }
 
+/* napi_value <- std::vector<std::shared_ptr<PlayInfo>> */
 napi_status NapiUtils::SetValue(napi_env env, const std::vector<std::shared_ptr<PlayInfo>>& in, napi_value& out)
 {
     SLOGD("napi_value <- std::vector<PlayInfo>");
@@ -1263,16 +1264,55 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<std::shared_ptr<
     return status;
 }
 
-/* napi_value <-> PlayInfoHolder */
+/* napi_value -> PlayInfoHolder */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, PlayInfoHolder& out)
 {
     return NapiPlayInfoHolder::GetValue(env, in, out);
 }
 
+/* napi_value <-> PlayInfoHolder */
 napi_status NapiUtils::SetValue(napi_env env, const PlayInfoHolder& in, napi_value& out)
 {
     return NapiPlayInfoHolder::SetValue(env, in, out);
 }
+
+/* napi_value -> MediaInfo */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, MediaInfo& out)
+{
+    napi_value value {};
+    auto status = napi_get_named_property(env, in, "mediaId", &value);
+    CHECK_RETURN(status == napi_ok, "get mediaId failed", status);
+    status = GetValue(env, value, out.mediaId_);
+    CHECK_RETURN(status == napi_ok, "get mediaId value failed", status);
+
+    status = napi_get_named_property(env, in, "mediaUrl", &value);
+    CHECK_RETURN(status == napi_ok, "get mediaUrl failed", status);
+    status = GetValue(env, value, out.mediaUrl_);
+    CHECK_RETURN(status == napi_ok, "get mediaUrl value failed", status);
+
+    return napi_ok;
+}
+
+/* napi_value <- MediaInfo */
+napi_status NapiUtils::SetValue(napi_env env, const MediaInfo& in, napi_value& out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
+
+    napi_value property = nullptr;
+    status = SetValue(env, in.mediaId_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "mediaId", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.mediaUrl_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "mediaUrl", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    return napi_ok;
+}
+
 
 napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t napiCode)
 {

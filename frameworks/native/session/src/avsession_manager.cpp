@@ -21,4 +21,4 @@ AVSessionManager& AVSessionManager::GetInstance()
     static AVSessionManagerImpl avSessionManager;
     return avSessionManager;
 }
-} // OHOS::AVSession
+} // namespace OHOS::AVSession

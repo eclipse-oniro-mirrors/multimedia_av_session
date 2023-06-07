@@ -44,6 +44,8 @@ public:
     */
     virtual int32_t Start(const PlayInfoHolder& playInfoHolder) = 0;
 
+    virtual int32_t Update(const MediaInfo& mediaInfo) = 0;
+
     /**
      * Send commands to its corresponding session through the controller.
      *
@@ -63,9 +65,17 @@ public:
     */
     virtual int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) = 0;
 
+    virtual int32_t GetDuration() = 0;
+
     virtual std::string GetSurfaceId() = 0;
 
-    virtual int32_t GetCurrentIndex() = 0;
+    virtual int32_t GetVolume() = 0;
+
+    virtual int32_t GetRepeatMode() = 0;
+
+    virtual double GetPlaySpeed() = 0;
+
+    virtual int32_t GetCurrentTime() = 0;
 
     virtual int32_t Destroy() = 0;
 

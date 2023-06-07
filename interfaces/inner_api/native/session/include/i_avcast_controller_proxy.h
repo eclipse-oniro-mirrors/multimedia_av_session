@@ -19,6 +19,7 @@
 #include <string>
 #include "avplayback_state.h"
 #include "play_info_holder.h"
+#include "media_info.h"
 #include "avcast_control_command.h"
 #include "avsession_info.h"
 
@@ -33,11 +34,13 @@ public:
 
     virtual void release() = 0;
 
-    virtual void RegisterControllerListener(const IAVCastSessionStateListener iAVCastSessionStateListener) = 0;
+    virtual void RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener> iAVCastControllerProxyListener) = 0;
 
-    virtual void UnregisterControllerListener(const IAVCastSessionStateListener iAVCastSessionStateListener) = 0;
+    virtual void UnregisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener> iAVCastControllerProxyListener) = 0;
 
     virtual void Start(const PlayInfoHolder& playInfoHolder) = 0;
+
+    virtual void Update(const MediaInfo& mediaInfo) = 0;
 
     virtual void SendControlCommand(const AVCastControlCommand& cmd) = 0;
 

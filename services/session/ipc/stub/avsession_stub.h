@@ -88,6 +88,8 @@ private:
 
     int32_t HandleSetAVQueueTitle(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleReleaseCast(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
@@ -114,6 +116,7 @@ private:
         &AVSessionStub::HandleAddSupportCommand,
         &AVSessionStub::HandleDeleteSupportCommand,
         &AVSessionStub::HandleSetSessionEvent,
+        &AVSessionStub::HandleReleaseCast,
     };
 };
 }

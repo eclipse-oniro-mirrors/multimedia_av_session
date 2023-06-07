@@ -39,12 +39,12 @@ public:
     NapiAVCastControllerCallback();
     ~NapiAVCastControllerCallback() override;
 
-    void OnStateChange(const AVCastPlayerState& state) override;
-    void OnVolumeChange(const int32_t volume) override;
+    void OnStateChanged(const AVCastPlayerState& state) override;
+    void OnVolumeChanged(const int32_t volume) override;
     void OnSeekDone(const int32_t seek) override;
-    void OnSpeedDone(const int32_t speed) override;
+    void OnPlaySpeedChanged(const int32_t speed) override;
     void OnTimeUpdate(const int32_t time) override;
-    void OnError(const int32_t errorCode, const std::string& errorMsg) override;
+    void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

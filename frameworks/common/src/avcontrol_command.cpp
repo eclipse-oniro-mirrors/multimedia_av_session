@@ -172,4 +172,4 @@ int32_t AVControlCommand::GetAssetId(std::string& assetId) const
     assetId = std::get<std::string>(param_);
     return AVSESSION_SUCCESS;
 }
-} // OHOS::AVSession
+} // namespace OHOS::AVSession

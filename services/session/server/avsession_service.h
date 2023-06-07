@@ -85,7 +85,7 @@ public:
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
-    int32_t CreateCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
+    int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
@@ -113,11 +113,11 @@ public:
         return NotifyAudioSessionCheck(uid);
     }
 
-    void NotifyDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo) override;
+    void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
-    int32_t ReleaseCast(const std::string& sessionId) override;
+    int32_t StopCast(const std::string& sessionId) override;
 
 private:
     static SessionContainer& GetContainer();

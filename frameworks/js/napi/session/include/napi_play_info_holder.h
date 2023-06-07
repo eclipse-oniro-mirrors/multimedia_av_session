@@ -30,7 +30,7 @@ public:
     using SetterType = std::function<napi_status(napi_env env, const PlayInfoHolder& in, napi_value& out)>;
 
 private:
-    static napi_status GetCurrentIndex(napi_env env, napi_value in, PlayInfoHolder& out);
+    static napi_status GetCurrentTime(napi_env env, napi_value in, PlayInfoHolder& out);
     static napi_status SetCurrentIndex(napi_env env, const PlayInfoHolder& in, napi_value& out);
 
     static napi_status GetPlayInfos(napi_env env, napi_value in, PlayInfoHolder& out);

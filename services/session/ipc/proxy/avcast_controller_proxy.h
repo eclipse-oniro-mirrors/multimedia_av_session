@@ -32,13 +32,23 @@ public:
 
     int32_t Start(const PlayInfoHolder& PlayInfoHolder) override;
 
+    int32_t Update(const MediaInfo& mediaInfo) override;
+
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
     int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) override;
 
+    int32_t GetDuration() override;
+
     std::string GetSurfaceId() override;
 
-    int32_t GetCurrentIndex() override;
+    int32_t GetVolume() override;
+
+    int32_t GetRepeatMode() override;
+
+    double GetPlaySpeed() override;
+
+    int32_t GetCurrentTime() override;
 
     int32_t Destroy() override;
     

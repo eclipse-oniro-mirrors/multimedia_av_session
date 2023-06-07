@@ -39,7 +39,7 @@ std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAV
     { "sessionDestroy", { OnSessionDestroy, OffSessionDestroy } },
     { "topSessionChange", { OnTopSessionChange, OffTopSessionChange } },
     { "sessionServiceDie", { OnServiceDie, OffServiceDie } },
-    { "deviceFound", { OnDeviceFound, OffDeviceFound } },
+    { "deviceAvailable", { OnDeviceAvailable, OffDeviceAvailable } },
 };
 
 std::shared_ptr<NapiSessionListener> NapiAVSessionManager::listener_;
@@ -64,6 +64,10 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_COMMAND_NOT_SUPPORT, 6600105},
     {ERR_SESSION_DEACTIVE, 6600106},
     {ERR_COMMAND_SEND_EXCEED_MAX, 6600107},
+    {ERR_CONNECT_TIMEOUT, 6600108},
+    {ERR_REMOTE_UNSUPORT_FORMAT, 6600109},
+    {ERR_CAST_SERVICE_DIED, 6600110},
+    {ERR_REMOTE_CONNECTION_NOT_EXIST, 6600111},
     {ERR_NO_PERMISSION, 202},
     {ERR_INVALID_PARAM, 401},
 };
@@ -74,7 +78,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("getAllSessionDescriptors", GetAllSessionDescriptors),
         DECLARE_NAPI_STATIC_FUNCTION("getHistoricalSessionDescriptors", GetHistoricalSessionDescriptors),
         DECLARE_NAPI_STATIC_FUNCTION("createController", CreateController),
-        DECLARE_NAPI_STATIC_FUNCTION("createCastController", CreateCastController),
+        DECLARE_NAPI_STATIC_FUNCTION("getAVCastController", GetAVCastController),
         DECLARE_NAPI_STATIC_FUNCTION("castAudio", CastAudio),
         DECLARE_NAPI_STATIC_FUNCTION("on", OnEvent),
         DECLARE_NAPI_STATIC_FUNCTION("off", OffEvent),
@@ -82,7 +86,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemControlCommand", SendSystemControlCommand),
         DECLARE_NAPI_STATIC_FUNCTION("startCastDiscovery", StartCastDiscovery),
         DECLARE_NAPI_STATIC_FUNCTION("startCast", StartCast),
-        DECLARE_NAPI_STATIC_FUNCTION("releaseCast", ReleaseCast),
+        DECLARE_NAPI_STATIC_FUNCTION("stopCast", StopCast),
     };
 
     napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
@@ -267,9 +271,9 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
     return NapiAsyncWork::Enqueue(env, context, "CreateController", executor, complete);
 }
 
-napi_value NapiAVSessionManager::CreateCastController(napi_env env, napi_callback_info info)
+napi_value NapiAVSessionManager::GetAVCastController(napi_env env, napi_callback_info info)
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::CreateCastController");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::GetAVCastController");
     struct ConcreteContext : public ContextBase {
         std::string sessionId_ {};
         std::shared_ptr<AVCastController> castController_;
@@ -286,16 +290,16 @@ napi_value NapiAVSessionManager::CreateCastController(napi_env env, napi_callbac
     context->taskId = NAPI_CREATE_CAST_CONTROLLER_TASK_ID;
 
     auto executor = [context]() {
-        int32_t ret = AVSessionManager::GetInstance().CreateCastController(context->sessionId_, context->castController_);
+        int32_t ret = AVSessionManager::GetInstance().GetAVCastController(context->sessionId_, context->castController_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "CreateCastController failed : native no permission";
+                context->errMessage = "GetAVCastController failed : native no permission";
             } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "CreateCastController failed : native invalid parameters";
+                context->errMessage = "GetAVCastController failed : native invalid parameters";
             } else if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "CreateCastController failed : native session not exist";
+                context->errMessage = "GetAVCastController failed : native session not exist";
             } else {
-                context->errMessage = "CreateCastController failed : native server exception";
+                context->errMessage = "GetAVCastController failed : native server exception";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -308,7 +312,7 @@ napi_value NapiAVSessionManager::CreateCastController(napi_env env, napi_callbac
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
 
-    return NapiAsyncWork::Enqueue(env, context, "CreateCastController", executor, complete);
+    return NapiAsyncWork::Enqueue(env, context, "GetAVCastController", executor, complete);
 }
 
 napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info)
@@ -599,6 +603,9 @@ napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
+        if (argc == ARGC_ZERO) {
+            context->castDeviceCapability_ = 0; // 0 is default cast device capability
+        }
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->castDeviceCapability_);
@@ -606,7 +613,7 @@ napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_
             "Invalid castDeviceCapability", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
-    context->taskId = NAPI_START_CAST_DISCOVERY;
+    context->taskId = NAPI_START_CAST_DISCOVERY_TASK_ID;
 
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().StartCastDiscovery(context->castDeviceCapability_);
@@ -638,7 +645,7 @@ napi_value NapiAVSessionManager::StopCastDiscovery(napi_env env, napi_callback_i
     }
 
     context->GetCbInfo(env, info);
-    context->taskId = NAPI_STOP_CAST_DISCOVERY;
+    context->taskId = NAPI_STOP_CAST_DISCOVERY_TASK_ID;
 
     auto executor = [context]() {
         int32_t ret = AVSESSION_ERROR;
@@ -687,7 +694,7 @@ napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info
             "invalid outputdeviceInfo", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
-    context->taskId = NAPI_START_CAST;
+    context->taskId = NAPI_START_CAST_TASK_ID;
 
     auto executor = [context]() {
         int32_t ret = AVSESSION_ERROR;
@@ -712,9 +719,9 @@ napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info
     return NapiAsyncWork::Enqueue(env, context, "StartCast", executor, complete);
 }
 
-napi_value NapiAVSessionManager::ReleaseCast(napi_env env, napi_callback_info info)
+napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::ReleaseCast");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StopCast");
     struct ConcreteContext : public ContextBase {
         std::string sessionId_;
     };
@@ -730,11 +737,11 @@ napi_value NapiAVSessionManager::ReleaseCast(napi_env env, napi_callback_info in
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionId_);
     };
     context->GetCbInfo(env, info, input);
-    context->taskId = NAPI_RELEASE_CAST;
+    context->taskId = NAPI_RELEASE_CAST_TASK_ID;
 
     auto executor = [context]() {
         int32_t ret = AVSESSION_ERROR;
-        ret = AVSessionManager::GetInstance().ReleaseCast(context->sessionId_);
+        ret = AVSessionManager::GetInstance().StopCast(context->sessionId_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "StartCast failed : native no permission";
@@ -752,7 +759,7 @@ napi_value NapiAVSessionManager::ReleaseCast(napi_env env, napi_callback_info in
 
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
 
-    return NapiAsyncWork::Enqueue(env, context, "ReleaseCast", executor, complete);
+    return NapiAsyncWork::Enqueue(env, context, "StopCast", executor, complete);
 }
 
 napi_status NapiAVSessionManager::OnSessionCreate(napi_env env, napi_value callback)
@@ -775,9 +782,9 @@ napi_status NapiAVSessionManager::OnAudioSessionChecked(napi_env env, napi_value
     return listener_->AddCallback(env, NapiSessionListener::EVENT_AUDIO_SESSION_CHECKED, callback);
 }
 
-napi_status NapiAVSessionManager::OnDeviceFound(napi_env env, napi_value callback)
+napi_status NapiAVSessionManager::OnDeviceAvailable(napi_env env, napi_value callback)
 {
-    return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_FOUND, callback);
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_AVAILABLE, callback);
 }
 
 napi_status NapiAVSessionManager::OnServiceDie(napi_env env, napi_value callback)
@@ -835,9 +842,9 @@ napi_status NapiAVSessionManager::OffAudioSessionChecked(napi_env env, napi_valu
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_AUDIO_SESSION_CHECKED, callback);
 }
 
-napi_status NapiAVSessionManager::OffDeviceFound(napi_env env, napi_value callback)
+napi_status NapiAVSessionManager::OffDeviceAvailable(napi_env env, napi_value callback)
 {
-    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_FOUND, callback);
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_AVAILABLE, callback);
 }
 
 napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)

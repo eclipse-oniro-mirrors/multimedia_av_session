@@ -63,7 +63,7 @@ public:
      * @return { number } Whether the notify operation was successful
      * @since 10
     */
-    virtual int32_t OnDeviceFound(OutputDeviceInfo& castOutputDeviceInfo) = 0;
+    virtual int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) = 0;
 
     virtual int32_t OnCastServerDied(int32_t providerId) = 0;
 
@@ -85,7 +85,7 @@ public:
      * @return { number } Whether the start cast operation was successful
      * @since 10
     */
-    virtual int32_t ReleaseCast(const int64_t castHandle) = 0;
+    virtual int32_t StopCast(const int64_t castHandle) = 0;
 
     /**
      * @brief Listen for AVRouter Callback event.
@@ -94,7 +94,7 @@ public:
      * @return Returns whether the return is successful.
      * @since 10
     */
-    virtual int32_t RegisterCallback(const std::shared_ptr<IAVCastSessionStateListener> callback, int64_t castHandle) = 0;
+    virtual int32_t RegisterCallback(int64_t castHandleconst, std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
 
     /**
      * @brief Listen for AVRouter Callback event.

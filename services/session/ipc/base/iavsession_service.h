@@ -34,7 +34,7 @@ public:
         SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID,
         SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS,
         SERVICE_CMD_CREATE_CONTROLLER,
-        SERVICE_CMD_CREATE_CAST_CONTROLLER,
+        SERVICE_CMD_GET_AV_CAST_CONTROLLER,
         SERVICE_CMD_REGISTER_SESSION_LISTENER,
         SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT,
         SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND,
@@ -68,7 +68,7 @@ public:
 
     virtual int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
 
-    virtual int32_t CreateCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
+    virtual int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
 
     virtual int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
 
@@ -88,7 +88,7 @@ public:
 
     virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
-    virtual int32_t ReleaseCast(const std::string& sessionId) = 0;
+    virtual int32_t StopCast(const std::string& sessionId) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_SERVICE_H

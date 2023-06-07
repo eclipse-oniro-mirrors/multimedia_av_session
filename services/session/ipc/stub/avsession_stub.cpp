@@ -274,4 +274,10 @@ int32_t AVSessionStub::HandleSetSessionEvent(MessageParcel& data, MessageParcel&
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetSessionEvent(event, *want)), ERR_NONE, "WriteInt32 result failed");
     return ERR_NONE;
 }
+
+int32_t AVSessionStub::HandleReleaseCast(MessageParcel& data, MessageParcel& reply)
+{
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ReleaseCast()), ERR_NONE, "WriteInt32 failed");
+    return ERR_NONE;
 }
+} // namespace OHOS::AVSession

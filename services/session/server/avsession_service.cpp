@@ -425,15 +425,15 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
     }
 }
 
-void AVSessionService::NotifyDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo)
+void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& listener : innerSessionListeners_) {
-        listener->OnDeviceFound(castOutputDeviceInfo);
+        listener->OnDeviceAvailable(castOutputDeviceInfo);
     }
     for (const auto& [pid, listener] : sessionListeners_) {
-        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceFound");
-        listener->OnDeviceFound(castOutputDeviceInfo);
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
+        listener->OnDeviceAvailable(castOutputDeviceInfo);
     }
 }
 
@@ -456,17 +456,17 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::ReleaseCast(const std::string& sessionId)
+int32_t AVSessionService::StopCast(const std::string& sessionId)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("ReleaseCast: CheckSystemPermission failed");
+        SLOGE("StopCast: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice ReleaseCast checksystempermission failed");
+            "ERROR_MSG", "avsessionservice StopCast checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
 
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
-    CHECK_AND_RETURN_RET_LOG(session->ReleaseCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "ReleaseCast failed");
+    CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
 
     return AVSESSION_SUCCESS;
 }
@@ -962,11 +962,12 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::CreateCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
+int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
+    SLOGI("Start get cast controller");
     auto session = GetContainer().GetSessionById(sessionId);
     auto result = session->GetAVCastControllerInner();
-    CHECK_AND_RETURN_RET_LOG(result != nullptr, AVSESSION_ERROR, "CreateCastControllerInner failed");
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, AVSESSION_ERROR, "GetAVCastControllerInner failed");
     object = result;
     return AVSESSION_SUCCESS;
 }
@@ -991,7 +992,7 @@ void AVSessionService::AddInnerSessionListener(SessionListener* listener)
 
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    SLOGI("enter");
+    SLOGI("Enter RegisterSessionListener process");
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("RegisterSessionListener: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),

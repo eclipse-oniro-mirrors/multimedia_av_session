@@ -182,11 +182,11 @@ int32_t AVSessionServiceProxy::CreateControllerInner(const std::string& sessionI
     return ret;
 }
 
-int32_t AVSessionServiceProxy::CreateCastController(const std::string& sessionId,
+int32_t AVSessionServiceProxy::GetAVCastController(const std::string& sessionId,
     std::shared_ptr<AVCastController>& castController)
 {
     sptr<IRemoteObject> object;
-    auto ret = CreateCastControllerInner(sessionId, object);
+    auto ret = GetAVCastControllerInner(sessionId, object);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateControllerInner failed");
 
     auto castControllerObject = iface_cast<AVCastControllerProxy>(object);
@@ -197,19 +197,19 @@ int32_t AVSessionServiceProxy::CreateCastController(const std::string& sessionId
     return ret;
 }
 
-int32_t AVSessionServiceProxy::CreateCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
+int32_t AVSessionServiceProxy::GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_UNMARSHALLING,
-                             "write interface token failed");
+        "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteString(sessionId), ERR_UNMARSHALLING, "write sessionId failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_CREATE_CAST_CONTROLLER, data, reply, option) == 0,
-                             ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_GET_AV_CAST_CONTROLLER, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
@@ -381,7 +381,7 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
 
     int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfoSize), ERR_MARSHALLING, "write deviceInfoSize failed");
-    for (DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
+    for (const DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.deviceCategory_), ERR_MARSHALLING, "write deviceCategory failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceId_), ERR_MARSHALLING, "write deviceId failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceName_), ERR_MARSHALLING, "write deviceName failed");
@@ -400,7 +400,7 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
-int32_t AVSessionServiceProxy::ReleaseCast(const std::string& sessionId)
+int32_t AVSessionServiceProxy::StopCast(const std::string& sessionId)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,

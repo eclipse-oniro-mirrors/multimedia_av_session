@@ -42,29 +42,30 @@ private:
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
-    static napi_value Start(napi_env env, napi_callback_info info);
     static napi_value SendControlCommand(napi_env env, napi_callback_info info);
+    static napi_value Start(napi_env env, napi_callback_info info);
+    static napi_value Update(napi_env env, napi_callback_info info);
 
-    static napi_status OnStateChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnStateChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnVolumeChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnVolumeChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
     static napi_status OnSeekDone(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnSpeedDone(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnPlaySpeedChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
     static napi_status OnTimeUpdate(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnError(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnPlayerError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
 
     static napi_status OffStateChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffVolumeChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value callback);
     static napi_status OffSeekDone(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffSpeedDone(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
+    static napi_status OffPlaySpeedChanged(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffTimeUpdate(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffError(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
+    static napi_status OffPlayerError(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,

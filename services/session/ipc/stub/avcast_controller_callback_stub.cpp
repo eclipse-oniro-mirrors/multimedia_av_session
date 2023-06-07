@@ -45,8 +45,8 @@ int32_t AVCastControllerCallbackStub::HandleOnStateChange(MessageParcel& data, M
 {
     AVCastPlayerState castPlayerState;
     CHECK_AND_RETURN_RET_LOG(data.ReadString(castPlayerState.castPlayerState_), false, "Read castPlayerState failed");
-    AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::OnStateChange");
-    OnStateChange(castPlayerState);
+    AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::OnStateChanged");
+    OnStateChanged(castPlayerState);
     return ERR_NONE;
 }
 
@@ -54,7 +54,7 @@ int32_t AVCastControllerCallbackStub::HandleOnVolumeChange(MessageParcel& data, 
 {
     int32_t volume;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(volume), ERR_NONE, "read volume failed");
-    OnVolumeChange(volume);
+    OnVolumeChanged(volume);
     return ERR_NONE;
 }
 
@@ -66,11 +66,11 @@ int32_t AVCastControllerCallbackStub::HandleOnSeekDone(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
-int32_t AVCastControllerCallbackStub::HandleOnSpeedDone(MessageParcel& data, MessageParcel& reply)
+int32_t AVCastControllerCallbackStub::HandleOnPlaySpeedChanged(MessageParcel& data, MessageParcel& reply)
 {
     int32_t speed;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(speed), ERR_NONE, "read speed failed");
-    OnSpeedDone(speed);
+    OnPlaySpeedChanged(speed);
     return ERR_NONE;
 }
 
@@ -88,7 +88,7 @@ int32_t AVCastControllerCallbackStub::HandleOnError(MessageParcel& data, Message
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(errorCode), ERR_NONE, "read time failed");
     std::string errorMsg;
     CHECK_AND_RETURN_RET_LOG(data.ReadString(errorMsg), ERR_NONE, "read time failed");
-    OnError(errorCode, errorMsg);
+    OnPlayerError(errorCode, errorMsg);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

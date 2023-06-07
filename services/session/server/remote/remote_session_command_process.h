@@ -53,7 +53,7 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    int32_t CreateCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override
+    int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override
     {
         return AVSESSION_SUCCESS;
     }
@@ -97,7 +97,7 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    int32_t ReleaseCast(const std::string& sessionId) override
+    int32_t StopCast(const std::string& sessionId) override
     {
         return AVSESSION_SUCCESS;
     }

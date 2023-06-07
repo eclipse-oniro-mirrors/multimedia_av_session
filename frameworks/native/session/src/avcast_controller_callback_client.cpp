@@ -24,23 +24,23 @@ AVCastControllerCallbackClient::AVCastControllerCallbackClient(const std::shared
     SLOGD("construct");
 }
 
-void AVCastControllerCallbackClient::OnStateChange(const AVCastPlayerState& state)
+void AVCastControllerCallbackClient::OnStateChanged(const AVCastPlayerState& state)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, state]() { callback->OnStateChange(state); }, EVENT_NAME),
+        .AVSessionPostTask([callback, state]() { callback->OnStateChanged(state); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
-void AVCastControllerCallbackClient::OnVolumeChange(const int32_t volume)
+void AVCastControllerCallbackClient::OnVolumeChanged(const int32_t volume)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, volume]() { callback->OnVolumeChange(volume); }, EVENT_NAME),
+        .AVSessionPostTask([callback, volume]() { callback->OnVolumeChanged(volume); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
@@ -54,13 +54,13 @@ void AVCastControllerCallbackClient::OnSeekDone(const int32_t seek)
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
-void AVCastControllerCallbackClient::OnSpeedDone(const int32_t speed)
+void AVCastControllerCallbackClient::OnPlaySpeedChanged(const int32_t speed)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, speed]() { callback->OnSpeedDone(speed); }, EVENT_NAME),
+        .AVSessionPostTask([callback, speed]() { callback->OnPlaySpeedChanged(speed); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
@@ -74,13 +74,13 @@ void AVCastControllerCallbackClient::OnTimeUpdate(const int32_t time)
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
-void AVCastControllerCallbackClient::OnError(const int32_t errorCode, const std::string& errorMsg)
+void AVCastControllerCallbackClient::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, errorCode, errorMsg]() { callback->OnError(errorCode, errorMsg); }, EVENT_NAME),
+        .AVSessionPostTask([callback, errorCode, errorMsg]() { callback->OnPlayerError(errorCode, errorMsg); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
 }
 

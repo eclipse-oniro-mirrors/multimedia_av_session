@@ -28,19 +28,21 @@ AVCastProviderManager::AVCastProviderManager()
 //     provider_ = provider;
 // }
 
-void AVCastProviderManager::OnDeviceFound(std::vector<DeviceInfo> deviceInfos)
+void AVCastProviderManager::OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos)
 {
+    SLOGI("On device available");
     for (int i = 0; i < deviceInfos.size(); i++) {
         deviceInfos[i].providerId_ = provider_.id;
     }
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_ = deviceInfos;
-    AVRouter::GetInstance().OnDeviceFound(outputDeviceInfo);
+    AVRouter::GetInstance().OnDeviceAvailable(outputDeviceInfo);
 }
 
 void AVCastProviderManager::OnCastServerDied()
 {
+    SLOGI("On cast server died");
     // AVRouter::GetInstance().OnCastServerDied(provider_.id);
 }
 
-} // OHOS::AVSession
+} // namespace OHOS::AVSession

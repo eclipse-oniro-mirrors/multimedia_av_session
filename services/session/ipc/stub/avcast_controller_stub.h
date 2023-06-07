@@ -31,11 +31,21 @@ public:
 
 
 private:
-    int32_t HandleStart(MessageParcel& data, MessageParcel& reply);
-
     int32_t HandleSendControlCommand(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleStart(MessageParcel& data, MessageParcel& reply);
+    
+    int32_t HandleUpdate(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetDuration(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetSurfaceId(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetVolume(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetRepeatMode(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetPlaySpeed(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetCurrentTime(MessageParcel& data, MessageParcel& reply);
 
@@ -43,14 +53,18 @@ private:
 
     int32_t HandleDestroy(MessageParcel& data, MessageParcel& reply);
 
-
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t (AVCastControllerStub::*)(MessageParcel& data, MessageParcel& reply);
     static inline HandlerFunc handlers[] = {
         &AVCastControllerStub::HandleSendControlCommand,
         &AVCastControllerStub::HandleStart,
+        &AVCastControllerStub::HandleUpdate,
+        &AVCastControllerStub::HandleGetDuration,
         &AVCastControllerStub::HandleGetSurfaceId,
+        &AVCastControllerStub::HandleGetVolume,
+        &AVCastControllerStub::HandleGetRepeatMode,
+        &AVCastControllerStub::HandleGetPlaySpeed,
         &AVCastControllerStub::HandleGetCurrentTime,
         &AVCastControllerStub::HandleRegisterCallbackInner,
         &AVCastControllerStub::HandleDestroy,

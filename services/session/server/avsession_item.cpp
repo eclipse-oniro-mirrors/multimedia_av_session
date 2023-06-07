@@ -281,9 +281,10 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
 {
     if (castControllerProxy_ == nullptr) {
+        SLOGI("CastControllerProxy is null, start get new proxy");
         castControllerProxy_ = AVRouter::GetInstance().GetRemoteController(castHandle_);
     }
-
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, nullptr, "Get castController proxy failed");
     CHECK_AND_RETURN_RET_LOG(castControllers_.size() > 50, nullptr, "allocated controllers exceed the maximum number");
 
     sptr<AVCastControllerItem> castController = new (std::nothrow) AVCastControllerItem();
@@ -291,9 +292,9 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     castController->Init(castControllerProxy_);
     castControllers_.emplace_back(castController);
 
-    castController->RegisterCastControllerProxyListener(castHandle_);
+    castController->RegisterControllerListener(castControllerProxy_);
     
-    sptr<IRemoteObject> remoteObject =castController->AsObject();
+    sptr<IRemoteObject> remoteObject = castController->AsObject();
 
     return remoteObject;
 }
@@ -378,24 +379,32 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionItem::ReleaseCast()
+{
+    SLOGI("Release cast process");
+    return StopCast();
+}
+
 int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
+    SLOGI("Start cast process");
     std::lock_guard castHandleLockGuard(castHandleLock_);
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
     castHandle_ = castHandle;
 
-    // std::shared_ptr<IAVCastSessionStateListener> callback = dynamic_cast<std::shared_ptr<IAVCastSessionStateListener>>(shared_from_this());
-    AVRouter::GetInstance().RegisterCallback(shared_from_this(), castHandle_);
+    // Register castHandle and avsession item to provider, as IAVCastSessionStateListener
+    AVRouter::GetInstance().RegisterCallback(castHandle_, shared_from_this());
 
 
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionItem::ReleaseCast()
+int32_t AVSessionItem::StopCast()
 {
-    int64_t ret = AVRouter::GetInstance().ReleaseCast(castHandle_);
+    SLOGI("Stop cast process");
+    int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
     CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
     // std::shared_ptr<IAVCastSessionStateListener> callback = dynamic_cast<std::shared_ptr<IAVCastSessionStateListener>>(shared_from_this());
@@ -407,6 +416,7 @@ int32_t AVSessionItem::ReleaseCast()
 
 void AVSessionItem::OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo)
 {
+    SLOGI("OnCastStateChange");
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     std::lock_guard controllersLockGuard(controllersLock_);
     for (const auto& controller : controllers_) {

@@ -13,27 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_I_AVSESSION_SERVICE_LISTENER_H
-#define OHOS_I_AVSESSION_SERVICE_LISTENER_H
+#include "media_info.h"
+#include "avsession_log.h"
 
-#include <string>
-#include "avsession_descriptor.h"
-
-/**
- * @brief Router is a part related to cast media
- * @since 10
- */
 namespace OHOS::AVSession {
-class IAVSessionServiceListener {
-public:
-    /**
-     * Notify Router that the device has been discovered.
-     *
-     * @param { OutputDeviceInfo } castOutputDeviceInfo - Discovered device infos.
-     * @return { number } Whether the notify operation was successful
-     * @since 10
-    */
-    virtual void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) = 0;
-};
+bool MediaInfo::WriteToParcel(Parcel& out) const
+{
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(mediaId_), false, "write mediaId failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(mediaUrl_), false, "write mediaUrl failed");
+    return true;
+}
+
+bool MediaInfo::ReadFromParcel(Parcel& in)
+{
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(mediaId_), false, "Read mediaId failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(mediaUrl_), false, "Read mediaUrl failed");
+    return true;
+}
 } // namespace OHOS::AVSession
-#endif // OHOS_I_AVSESSION_SERVICE_LISTENER_H

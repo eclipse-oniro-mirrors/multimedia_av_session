@@ -38,14 +38,14 @@ private:
     static napi_value GetAllSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value CreateController(napi_env env, napi_callback_info info);
-    static napi_value CreateCastController(napi_env env, napi_callback_info info);
+    static napi_value GetAVCastController(napi_env env, napi_callback_info info);
     static napi_value CastAudio(napi_env env, napi_callback_info info);
     static napi_value SendSystemAVKeyEvent(napi_env env, napi_callback_info info);
     static napi_value SendSystemControlCommand(napi_env env, napi_callback_info info);
     static napi_value StartCastDiscovery(napi_env env, napi_callback_info info);
     static napi_value StopCastDiscovery(napi_env env, napi_callback_info info);
     static napi_value StartCast(napi_env env, napi_callback_info info);
-    static napi_value ReleaseCast(napi_env env, napi_callback_info info);
+    static napi_value StopCast(napi_env env, napi_callback_info info);
 
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
@@ -54,14 +54,14 @@ private:
     static napi_status OnSessionDestroy(napi_env env, napi_value callback);
     static napi_status OnTopSessionChange(napi_env env, napi_value callback);
     static napi_status OnAudioSessionChecked(napi_env env, napi_value callback);
-    static napi_status OnDeviceFound(napi_env env, napi_value callback);
+    static napi_status OnDeviceAvailable(napi_env env, napi_value callback);
     static napi_status OnServiceDie(napi_env env, napi_value callback);
 
     static napi_status OffSessionCreate(napi_env env, napi_value callback);
     static napi_status OffSessionDestroy(napi_env env, napi_value callback);
     static napi_status OffTopSessionChange(napi_env env, napi_value callback);
     static napi_status OffAudioSessionChecked(napi_env env, napi_value callback);
-    static napi_status OffDeviceFound(napi_env env, napi_value callback);
+    static napi_status OffDeviceAvailable(napi_env env, napi_value callback);
     static napi_status OffServiceDie(napi_env env, napi_value callback);
 
     static void HandleServiceDied();
@@ -74,6 +74,7 @@ private:
     static std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     static std::list<napi_ref> serviceDiedCallbacks_;
 
+    static constexpr size_t ARGC_ZERO = 0;
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
     static constexpr size_t ARGC_THERE = 3;

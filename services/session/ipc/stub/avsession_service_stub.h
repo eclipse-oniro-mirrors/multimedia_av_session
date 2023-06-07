@@ -30,7 +30,7 @@ private:
     int32_t HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply);
-    int32_t HandleCreateCastControllerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetAVCastControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemAVKeyEvent(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemControlCommand(MessageParcel& data, MessageParcel& reply);
@@ -41,7 +41,7 @@ private:
     int32_t HandleStartCastDiscovery(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStopCastDiscovery(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStartCast(MessageParcel& data, MessageParcel& reply);
-    int32_t HandleReleaseCast(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStopCast(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
@@ -51,7 +51,7 @@ private:
         &AVSessionServiceStub::HandleGetSessionDescriptorsById,
         &AVSessionServiceStub::HandleGetHistoricalSessionDescriptors,
         &AVSessionServiceStub::HandleCreateControllerInner,
-        &AVSessionServiceStub::HandleCreateCastControllerInner,
+        &AVSessionServiceStub::HandleGetAVCastControllerInner,
         &AVSessionServiceStub::HandleRegisterSessionListener,
         &AVSessionServiceStub::HandleSendSystemAVKeyEvent,
         &AVSessionServiceStub::HandleSendSystemControlCommand,
@@ -62,7 +62,7 @@ private:
         &AVSessionServiceStub::HandleStartCastDiscovery,
         &AVSessionServiceStub::HandleStopCastDiscovery,
         &AVSessionServiceStub::HandleStartCast,
-        &AVSessionServiceStub::HandleReleaseCast,
+        &AVSessionServiceStub::HandleStopCast,
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;

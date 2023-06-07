@@ -98,7 +98,7 @@ public:
     virtual int32_t CreateController(const std::string& sessionId,
         std::shared_ptr<AVSessionController>& controller) = 0;
 
-    virtual int32_t CreateCastController(const std::string& sessionId,
+    virtual int32_t GetAVCastController(const std::string& sessionId,
         std::shared_ptr<AVCastController>& castController) = 0;
 
     /**
@@ -201,7 +201,7 @@ public:
      * @return Returns whether the device was successfully found
      * @since 10
     */
-    virtual int32_t ReleaseCast(const std::string& sessionId) = 0;
+    virtual int32_t StopCast(const std::string& sessionId) = 0;
 
 };
 } // namespace OHOS::AVSession

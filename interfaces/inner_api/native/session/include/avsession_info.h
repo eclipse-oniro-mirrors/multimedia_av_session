@@ -74,7 +74,7 @@ public:
      * @param { OutputDeviceInfo } castOutputDeviceInfo - Discovered device info.
      * @since 10
     */
-    virtual void OnDeviceFound(const OutputDeviceInfo& castOutputDeviceInfo) {};
+    virtual void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) {};
 
     /**
      * @brief Deconstruct SessionListener.
@@ -86,7 +86,7 @@ public:
 class IAVCastControllerProxyListener {
 public:
 
-    virtual void OnPlayerStatusChanged(const AVPlaybackState playbackState) = 0;
+    virtual void OnPlayerStatusChanged(const AVCastPlayerState& playerState) = 0;
 
     // virtual void OnPositionChanged(const int32_t position, int32_t bufferPosition, int32_t duration) = 0;
 
@@ -314,17 +314,17 @@ public:
 
 class AVCastControllerCallback {
 public:
-    virtual void OnStateChange(const AVCastPlayerState& state) = 0;
+    virtual void OnStateChanged(const AVCastPlayerState& state) = 0;
 
-    virtual void OnVolumeChange(const int32_t volume) = 0;
+    virtual void OnVolumeChanged(const int32_t volume) = 0;
 
     virtual void OnSeekDone(const int32_t seek) = 0;
 
-    virtual void OnSpeedDone(const int32_t speed) = 0;
+    virtual void OnPlaySpeedChanged(const int32_t speed) = 0;
     
     virtual void OnTimeUpdate(const int32_t time) = 0;
 
-    virtual void OnError(const int32_t errorCode, const std::string& errorMsg) = 0;
+    virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
 
     /**
      * @brief Deconstruct AVControllerCallback.

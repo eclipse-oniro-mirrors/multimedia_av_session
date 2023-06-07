@@ -29,6 +29,8 @@
 #include "napi_base_context.h"
 #include "ability.h"
 #include "play_info_holder.h"
+#include "media_info.h"
+#include "device_info.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -187,6 +189,10 @@ public:
     /* PlayInfo <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, std::vector<std::shared_ptr<PlayInfo>>& out);
     static napi_status SetValue(napi_env env, const std::vector<std::shared_ptr<PlayInfo>>& in, napi_value& out);
+
+    /* napi_value <-> MediaInfo */
+    static napi_status GetValue(napi_env env, napi_value in, MediaInfo& out);
+    static napi_status SetValue(napi_env env, const MediaInfo& in, napi_value& out);
 
     /* napi_get_named_property wrapper */
     template <typename T>

@@ -137,9 +137,11 @@ public:
 
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
 
+    int32_t ReleaseCast() override;
+
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
 
-    int32_t ReleaseCast();
+    int32_t StopCast();
 
     void OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo) override;
     

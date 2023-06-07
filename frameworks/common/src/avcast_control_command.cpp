@@ -144,4 +144,4 @@ int32_t AVCastControlCommand::GetVolume(int32_t& volume) const
     volume = std::get<int32_t>(param_);
     return AVSESSION_SUCCESS;
 }
-} // OHOS::AVSession
+} // namespace OHOS::AVSession

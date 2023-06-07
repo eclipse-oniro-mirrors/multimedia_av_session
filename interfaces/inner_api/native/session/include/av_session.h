@@ -226,6 +226,8 @@ public:
     */
     virtual int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) = 0;
 
+    virtual int32_t ReleaseCast() = 0;
+
     /**
      * @brief Deconstruct AVSession object.
      *

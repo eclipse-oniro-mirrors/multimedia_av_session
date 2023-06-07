@@ -30,7 +30,7 @@ public:
 
     int32_t StopCastDiscovery() override;
 
-    int32_t OnDeviceFound(OutputDeviceInfo& castOutputDeviceInfo) override;
+    int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) override;
 
     int32_t OnCastServerDied(int32_t providerId) override;
 
@@ -38,9 +38,9 @@ public:
 
     int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo) override;
 
-    int32_t ReleaseCast(const int64_t castHandle) override;
+    int32_t StopCast(const int64_t castHandle) override;
 
-    int32_t RegisterCallback(const std::shared_ptr<IAVCastSessionStateListener> callback, int64_t castHandle) override;
+    int32_t RegisterCallback(int64_t castHandleconst, std::shared_ptr<IAVCastSessionStateListener> callback) override;
 
     int32_t RegisterCastControllerProxyListener(const int64_t castHandle, const std::shared_ptr<IAVCastControllerProxyListener>& castControllerProxyListener) override;
 

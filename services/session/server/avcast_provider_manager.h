@@ -26,7 +26,7 @@ public:
 
     // void Init(int32_t providerId, std::shared_ptr<AVCastProvider> provider);
 
-    void OnDeviceFound(std::vector<DeviceInfo> deviceInfos) override;
+    void OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos) override;
 
     void OnCastServerDied() override;
 

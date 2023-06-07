@@ -21,4 +21,4 @@ AVRouter& AVRouter::GetInstance()
     static AVRouterImpl avRouter;
     return avRouter;
 }
-} // OHOS::AVSession
+} // namespace OHOS::AVSession

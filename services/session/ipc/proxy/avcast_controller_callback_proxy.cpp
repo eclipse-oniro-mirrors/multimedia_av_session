@@ -24,7 +24,7 @@ AVCastControllerCallbackProxy::AVCastControllerCallbackProxy(const sptr<IRemoteO
 }
 
 
-void AVCastControllerCallbackProxy::OnStateChange(const AVCastPlayerState& state)
+void AVCastControllerCallbackProxy::OnStateChanged(const AVCastPlayerState& state)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -38,7 +38,7 @@ void AVCastControllerCallbackProxy::OnStateChange(const AVCastPlayerState& state
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnVolumeChange(const int32_t volume)
+void AVCastControllerCallbackProxy::OnVolumeChanged(const int32_t volume)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -66,7 +66,7 @@ void AVCastControllerCallbackProxy::OnSeekDone(const int32_t seek)
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnSpeedDone(const int32_t speed)
+void AVCastControllerCallbackProxy::OnPlaySpeedChanged(const int32_t speed)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -94,7 +94,7 @@ void AVCastControllerCallbackProxy::OnTimeUpdate(const int32_t time)
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnError(const int32_t errorCode, const std::string& errorMsg)
+void AVCastControllerCallbackProxy::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");

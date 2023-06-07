@@ -305,4 +305,4 @@ void AVControllerItem::SetServiceCallbackForRelease(const std::function<void(AVC
     std::lock_guard lockGuard(serviceCallbackMutex_);
     serviceCallback_ = callback;
 }
-} // OHOS::AVSession
+} // namespace OHOS::AVSession

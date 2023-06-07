@@ -21,7 +21,7 @@
 
 namespace OHOS::AVSession {
 std::map<std::string, NapiPlayInfoHolder::GetterType> NapiPlayInfoHolder::getterMap_ = {
-    { "currentIndex", GetCurrentIndex },
+    { "currentIndex", GetCurrentTime },
     { "playInfos", GetPlayInfos },
 };
 
@@ -66,7 +66,7 @@ napi_status NapiPlayInfoHolder::SetValue(napi_env env, const PlayInfoHolder& in,
     return napi_ok;
 }
 
-napi_status NapiPlayInfoHolder::GetCurrentIndex(napi_env env, napi_value in, PlayInfoHolder& out)
+napi_status NapiPlayInfoHolder::GetCurrentTime(napi_env env, napi_value in, PlayInfoHolder& out)
 {
     int32_t property;
     auto status = NapiUtils::GetNamedProperty(env, in, "currentIndex", property);
@@ -78,7 +78,7 @@ napi_status NapiPlayInfoHolder::GetCurrentIndex(napi_env env, napi_value in, Pla
 napi_status NapiPlayInfoHolder::SetCurrentIndex(napi_env env, const PlayInfoHolder& in, napi_value& out)
 {
     napi_value property {};
-    auto status = NapiUtils::SetValue(env, in.GetCurrentIndex(), property);
+    auto status = NapiUtils::SetValue(env, in.GetCurrentTime(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "currentIndex", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);

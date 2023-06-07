@@ -95,6 +95,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setAVQueueItems", SetAVQueueItems),
         DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
         DECLARE_NAPI_FUNCTION("getAVCastController", GetAVCastController),
+        DECLARE_NAPI_FUNCTION("releaseCast", ReleaseCast),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor{};
@@ -892,6 +893,44 @@ napi_value NapiAVSession::SetSessionEvent(napi_env env, napi_callback_info info)
         output = NapiUtils::GetUndefinedValue(env);
     };
     return NapiAsyncWork::Enqueue(env, context, "SetSessionEvent", executor, complete);
+}
+
+napi_value NapiAVSession::ReleaseCast(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("ReleaseCast failed : no memory");
+        NapiUtils::ThrowError(env, "ReleaseCast failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "ReleaseCast failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->ReleaseCast();
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "ReleaseCast failed : native session not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "ReleaseCast failed : native no permission";
+            } else {
+                context->errMessage = "ReleaseCast failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "ReleaseCast", executor, complete);
 }
 
 void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)

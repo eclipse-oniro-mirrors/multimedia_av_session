@@ -32,7 +32,7 @@ private:
 
     int32_t HandleOnSeekDone(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleOnSpeedDone(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnPlaySpeedChanged(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnTimeUpdate(MessageParcel& data, MessageParcel& reply);
 
@@ -45,7 +45,7 @@ private:
         &AVCastControllerCallbackStub::HandleOnStateChange,
         &AVCastControllerCallbackStub::HandleOnVolumeChange,
         &AVCastControllerCallbackStub::HandleOnSeekDone,
-        &AVCastControllerCallbackStub::HandleOnSpeedDone,
+        &AVCastControllerCallbackStub::HandleOnPlaySpeedChanged,
         &AVCastControllerCallbackStub::HandleOnTimeUpdate,
         &AVCastControllerCallbackStub::HandleOnError,
     };

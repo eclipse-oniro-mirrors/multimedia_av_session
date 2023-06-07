@@ -33,7 +33,7 @@ private:
 
     int32_t HandleOnAudioSessionChecked(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleOnDeviceFound(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnDeviceAvailable(MessageParcel& data, MessageParcel& reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
@@ -43,7 +43,7 @@ private:
         &SessionListenerStub::HandleOnSessionRelease,
         &SessionListenerStub::HandleOnTopSessionChange,
         &SessionListenerStub::HandleOnAudioSessionChecked,
-        &SessionListenerStub::HandleOnDeviceFound,
+        &SessionListenerStub::HandleOnDeviceAvailable,
     };
 };
 }

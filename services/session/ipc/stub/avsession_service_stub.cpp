@@ -122,11 +122,11 @@ int32_t AVSessionServiceStub::HandleCreateControllerInner(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int32_t AVSessionServiceStub::HandleCreateCastControllerInner(MessageParcel& data, MessageParcel& reply)
+int32_t AVSessionServiceStub::HandleGetAVCastControllerInner(MessageParcel& data, MessageParcel& reply)
 {
-    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleCreateCastControllerInner");
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleGetAVCastControllerInner");
     sptr<IRemoteObject> object;
-    int32_t ret = CreateCastControllerInner(data.ReadString(), object);
+    int32_t ret = GetAVCastControllerInner(data.ReadString(), object);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");
@@ -358,17 +358,17 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
-int32_t AVSessionServiceStub::HandleReleaseCast(MessageParcel& data, MessageParcel& reply)
+int32_t AVSessionServiceStub::HandleStopCast(MessageParcel& data, MessageParcel& reply)
 {
-    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleReleaseCast");
-    SLOGI("HandleReleaseCast start");
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStopCast");
+    SLOGI("HandleStopCast start");
     std::string sessionId = data.ReadString();
 
-    int32_t ret = ReleaseCast(sessionId);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ReleaseCast failed");
-    SLOGI("ReleaseCast ret %{public}d", ret);
+    int32_t ret = StopCast(sessionId);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StopCast failed");
+    SLOGI("StopCast ret %{public}d", ret);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    SLOGI("HandleReleaseCast success");
+    SLOGI("HandleStopCast success");
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession
