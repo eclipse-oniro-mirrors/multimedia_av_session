@@ -47,6 +47,14 @@ public:
     virtual std::string GetSessionId() = 0;
 
     /**
+     * @brief Get current session id.
+     *
+     * @return Returns current session id.
+     * @since 9
+    */
+    virtual std::string GetSessionType() = 0;
+
+    /**
      * Get the metadata of the current session.
      * @param AVMetadata Session metadata {@link AVMetadata}.
      * @since 9

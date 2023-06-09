@@ -85,14 +85,14 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel& data
 
 int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t deviceState;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceState), false, "write deviceInfoSize failed");
+    int32_t connectionState;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(connectionState), false, "write deviceInfoSize failed");
     OutputDeviceInfo outputDeviceInfo;
     int32_t deviceInfoSize;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (int i = 0; i < deviceInfoSize; i++) {
         DeviceInfo deviceInfo;
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceCategory_), false, "Read deviceCategory failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
@@ -101,7 +101,7 @@ int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
 
-    OnOutputDeviceChange(deviceState, outputDeviceInfo);
+    OnOutputDeviceChange(connectionState, outputDeviceInfo);
     return ERR_NONE;
 }
 

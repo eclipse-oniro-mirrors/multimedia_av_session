@@ -51,7 +51,7 @@ int32_t AVCastControllerProxy::Start(const PlayInfoHolder& playInfoHolder)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVCastControllerProxy::Update(const MediaInfo& mediaInfo)
+int32_t AVCastControllerProxy::UpdateMediaInfo(const MediaInfo& mediaInfo)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
@@ -142,7 +142,7 @@ int32_t AVCastControllerProxy::GetVolume()
     return reply.ReadInt32(result) ? result : AVSESSION_ERROR;
 }
 
-int32_t AVCastControllerProxy::GetRepeatMode()
+int32_t AVCastControllerProxy::GetLoopMode()
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), AVSESSION_ERROR, "write interface token failed");

@@ -27,6 +27,7 @@ struct MediaInfo {
 
     std::string mediaId_;
     std::string mediaUrl_;
+    int32_t startPosition_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_MEDIA_INFO_H

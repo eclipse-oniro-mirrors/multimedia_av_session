@@ -201,7 +201,7 @@ public:
      * @return Returns whether the device was successfully found
      * @since 10
     */
-    virtual int32_t StopCast(const std::string& sessionId) = 0;
+    virtual int32_t StopCast(const SessionToken& sessionToken) = 0;
 
 };
 } // namespace OHOS::AVSession

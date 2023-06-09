@@ -92,17 +92,17 @@ void AVControllerCallbackProxy::OnValidCommandChange(const std::vector<int32_t>&
         "send request failed");
 }
 
-void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t deviceState,
+void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
     const OutputDeviceInfo& outputDeviceInfo)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceState), "write deviceState failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(connectionState), "write connectionState failed");
 
     int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
     CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfoSize), "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
-        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.deviceCategory_), "write deviceCategory failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.castCategory_), "write castCategory failed");
         CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.deviceId_), "write deviceId failed");
         CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.deviceName_), "write deviceName failed");
         CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.deviceType_), "write deviceType failed");

@@ -29,11 +29,11 @@ public:
 
     void OnPlayerStatusChanged(const AVCastPlayerState& playerState) override;
 
-    void OnVolumeChanged(const int32_t volume) override;
+    void OnVolumeChange(const int32_t volume) override;
 
-    void OnPlaySpeedChanged(const float playSpeed) override;
+    void OnPlaySpeedChange(const float playSpeed) override;
 
-    void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
+    void OnError(const int32_t errorCode, const std::string& errorMsg) override;
 
     int32_t GetDuration() override;
 
@@ -41,7 +41,7 @@ public:
 
     int32_t GetVolume() override;
 
-    int32_t GetRepeatMode() override;
+    int32_t GetLoopMode() override;
 
     double GetPlaySpeed() override;
 
@@ -51,7 +51,7 @@ public:
 
     int32_t Start(const PlayInfoHolder& playInfoHolder) override;
 
-    int32_t Update(const MediaInfo& mediaInfo) override;
+    int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) override;
 
     void RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
@@ -65,7 +65,7 @@ private:
     int32_t duration_;
     std::string surfaceId_;
     int32_t volume_;
-    int32_t repeatMode_;
+    int32_t loopMode_;
     double playSpeed_;
     int32_t currentTime_;
     sptr<IAVCastControllerCallback> callback_;

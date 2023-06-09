@@ -19,7 +19,7 @@
 namespace OHOS::AVSession {
 // bool DeviceInfoClass::Marshalling(Parcel& parcel) const
 // {
-//     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceCategory_), false, "write deviceCategory failed");
+//     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castCategory_), false, "write castCategory failed");
 //     CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceId_), false, "write deviceId failed");
 //     CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceName_), false, "write deviceName failed");
 //     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceType_), false, "write deviceType failed");
@@ -34,7 +34,7 @@ namespace OHOS::AVSession {
 //     auto *result = new (std::nothrow) DeviceInfoClass();
 
 //     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new DeviceInfoClass failed");
-//     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceCategory_), false, "Read deviceCategory failed");
+//     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(castCategory_), false, "Read castCategory failed");
 //     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceId_), false, "Read deviceId failed");
 //     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceName_), false, "Read deviceName failed");
 //     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceType_), false, "Read deviceType failed");
@@ -44,14 +44,14 @@ namespace OHOS::AVSession {
 //     return result;
 // }
 
-// void DeviceInfoClass::SetDeviceCategory(const int32_t deviceCategory)
+// void DeviceInfoClass::SetCastCategory(const int32_t castCategory)
 // {
-//     deviceCategory_ = deviceCategory;
+//     castCategory_ = castCategory;
 // }
 
-// int32_t DeviceInfoClass::GetDeviceCategory() const
+// int32_t DeviceInfoClass::GetCastCategory() const
 // {
-//     return deviceCategory_;
+//     return castCategory_;
 // }
 
 // void DeviceInfoClass::SetDeviceId(const std::string& deviceId)
@@ -111,7 +111,7 @@ namespace OHOS::AVSession {
 
 // void DeviceInfoClass::Reset()
 // {
-//     deviceCategory_ = 0;
+//     castCategory_ = 0;
 //     deviceId_ = "";
 //     deviceName_ = "";
 //     deviceType_ = 0;

@@ -28,10 +28,12 @@ class NapiAVCastControllerCallback : public AVCastControllerCallback {
 public:
     enum {
         EVENT_CAST_STATE_CHANGE,
+        EVENT_CAST_MEDIA_ITEM_CHANGE,
         EVENT_CAST_VOLUME_CHANGE,
-        EVENT_CAST_SEEK_DONE,
-        EVENT_CAST_SPEED_DONE,
-        EVENT_CAST_TIME_UPDATE,
+        EVENT_CAST_LOOP_MODE_CHANGE,
+        EVENT_CAST_PLAY_SPEED_CHANGE,
+        EVENT_CAST_POSITON_CHANGE,
+        EVENT_CAST_VIDEO_SIZE_CHANGE,
         EVENT_CAST_ERROR,
         EVENT_CAST_TYPE_MAX,
     };
@@ -39,12 +41,14 @@ public:
     NapiAVCastControllerCallback();
     ~NapiAVCastControllerCallback() override;
 
-    void OnStateChanged(const AVCastPlayerState& state) override;
-    void OnVolumeChanged(const int32_t volume) override;
-    void OnSeekDone(const int32_t seek) override;
-    void OnPlaySpeedChanged(const int32_t speed) override;
-    void OnTimeUpdate(const int32_t time) override;
-    void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
+    void OnStateChange(const AVCastPlayerState& state) override;
+    void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
+    void OnVolumeChange(const int32_t volume) override;
+    void OnLoopModeChange(const int32_t loopMode) override;
+    void OnPlaySpeedChange(const int32_t playSpeed) override;
+    void OnPositionChange(const int32_t position) override;
+    void OnVideoSizeChange(const int32_t width, const int32_t height) override;
+    void OnError(const int32_t errorCode, const std::string& errorMsg) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

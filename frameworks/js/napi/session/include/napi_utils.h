@@ -186,10 +186,6 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, PlayInfoHolder& out);
     static napi_status SetValue(napi_env env, const PlayInfoHolder& in, napi_value& out);
 
-    /* PlayInfo <-> napi_value */
-    static napi_status GetValue(napi_env env, napi_value in, std::vector<std::shared_ptr<PlayInfo>>& out);
-    static napi_status SetValue(napi_env env, const std::vector<std::shared_ptr<PlayInfo>>& in, napi_value& out);
-
     /* napi_value <-> MediaInfo */
     static napi_status GetValue(napi_env env, napi_value in, MediaInfo& out);
     static napi_status SetValue(napi_env env, const MediaInfo& in, napi_value& out);

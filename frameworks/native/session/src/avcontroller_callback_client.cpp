@@ -78,13 +78,13 @@ void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t>
         "AVControllerCallbackClient handler postTask failed");
 }
 
-void AVControllerCallbackClient::OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& info)
+void AVControllerCallbackClient::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, deviceState, info]() { callback->OnOutputDeviceChange(deviceState, info); },
+        .AVSessionPostTask([callback, connectionState, info]() { callback->OnOutputDeviceChange(connectionState, info); },
             EVENT_NAME),
         "AVControllerCallbackClient handler postTask failed");
 }

@@ -25,7 +25,7 @@ struct DeviceInfo {
     bool WriteToParcel(Parcel& out) const;
     bool ReadFromParcel(Parcel& in);
 
-    int32_t deviceCategory_;
+    int32_t castCategory_;
     std::string deviceId_;
     std::string deviceName_;
     int32_t deviceType_;

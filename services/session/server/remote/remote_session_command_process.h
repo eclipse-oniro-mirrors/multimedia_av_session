@@ -97,7 +97,7 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    int32_t StopCast(const std::string& sessionId) override
+    int32_t StopCast(const SessionToken& sessionToken) override
     {
         return AVSESSION_SUCCESS;
     }

@@ -679,7 +679,7 @@ napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
 
         napi_valuetype type = napi_undefined;
@@ -723,7 +723,7 @@ napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StopCast");
     struct ConcreteContext : public ContextBase {
-        std::string sessionId_;
+        SessionToken sessionToken_ {};
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
@@ -732,25 +732,27 @@ napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
 
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_string),
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_object),
             "invalid type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionId_);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionToken_);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (!context->sessionToken_.sessionId.empty()),
+            "invalid session token", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
-    context->taskId = NAPI_RELEASE_CAST_TASK_ID;
+    context->taskId = NAPI_STOP_CAST_TASK_ID;
 
     auto executor = [context]() {
         int32_t ret = AVSESSION_ERROR;
-        ret = AVSessionManager::GetInstance().StopCast(context->sessionId_);
+        ret = AVSessionManager::GetInstance().StopCast(context->sessionToken_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "StartCast failed : native no permission";
+                context->errMessage = "StopCast failed : native no permission";
             } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "StartCast failed : native invalid parameters";
+                context->errMessage = "StopCast failed : native invalid parameters";
             } else if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "StartCast failed : native session not exist";
+                context->errMessage = "StopCast failed : native session not exist";
             } else {
-                context->errMessage = "StartCast failed : native server exception";
+                context->errMessage = "StopCast failed : native server exception";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];

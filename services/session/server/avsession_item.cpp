@@ -53,6 +53,14 @@ std::string AVSessionItem::GetSessionId()
     return descriptor_.sessionId_;
 }
 
+std::string AVSessionItem::GetSessionType()
+{
+    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
+        return "video";
+    }
+    return "audio";
+}
+
 int32_t AVSessionItem::Destroy()
 {
     {
@@ -685,22 +693,22 @@ void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSess
     serviceCallback_ = callback;
 }
 
-void AVSessionItem::HandleOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo)
+void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnOutputDeviceChange");
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnOutputDeviceChange(deviceState, outputDeviceInfo);
+    callback_->OnOutputDeviceChange(connectionState, outputDeviceInfo);
 }
 
 void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
 {
     descriptor_.outputDeviceInfo_.deviceInfos_ = info.deviceInfos_;
-    int32_t deviceStateConnected = 1;
-    HandleOutputDeviceChange(deviceStateConnected, descriptor_.outputDeviceInfo_);
+    int32_t connectionStateConnected = 1;
+    HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
     std::lock_guard controllersLockGuard(controllersLock_);
     for (const auto& controller : controllers_) {
-        controller.second->HandleOutputDeviceChange(deviceStateConnected, descriptor_.outputDeviceInfo_);
+        controller.second->HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
     }
     SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(info.deviceInfos_.size()));
 }
@@ -752,9 +760,9 @@ int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, c
 
     OutputDeviceInfo outputDeviceInfo;
     GetOutputDevice(outputDeviceInfo);
-    int32_t deviceCateGoryStreaming = 2;
+    int32_t castCategoryStreaming = 2;
     for (int32_t i = 0; i < outputDeviceInfo.deviceInfos_.size(); i++) {
-        outputDeviceInfo.deviceInfos_[i].deviceCategory_ = deviceCateGoryStreaming;
+        outputDeviceInfo.deviceInfos_[i].castCategory_ = castCategoryStreaming;
     }
     SetOutputDevice(outputDeviceInfo);
 

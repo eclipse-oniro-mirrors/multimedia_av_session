@@ -130,9 +130,9 @@ void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& 
     HandleEvent(EVENT_VALID_COMMAND_CHANGE, stringCmds);
 }
 
-void NapiAVControllerCallback::OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& info)
+void NapiAVControllerCallback::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info)
 {
-    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, deviceState, info);
+    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, connectionState, info);
 }
 
 void NapiAVControllerCallback::OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args)

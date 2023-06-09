@@ -43,8 +43,8 @@ class DeviceInfoClass : public Parcelable {
 //     static DeviceInfoClass* Unmarshalling(Parcel& data);
 //     bool Marshalling(Parcel& parcel) const override;
 
-//     void SetDeviceCategory(const int32_t deviceCategory);
-//     int32_t GetDeviceCategory() const;
+//     void SetCastCategory(const int32_t castCategory);
+//     int32_t GetCastCategory() const;
 
 //     void SetDeviceId(const std::string& deviceId);
 //     std::string GetDeviceId() const;
@@ -66,7 +66,7 @@ class DeviceInfoClass : public Parcelable {
 //     void Reset();
 
 // private:
-//     int32_t deviceCategory_ = 0;
+//     int32_t castCategory_ = 0;
 //     std::string deviceId_ = "";
 //     std::string deviceName_ = "";
 //     int32_t deviceType_ = 0;

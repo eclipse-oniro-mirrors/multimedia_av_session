@@ -35,7 +35,6 @@ ohos_shared_library("avsession_common") {
     "src/avqueue_item.cpp",
     "src/avsession_descriptor.cpp",
     "src/avsession_pixel_map.cpp",
-    "src/play_info.cpp",
     "src/play_info_holder.cpp",
   ]
 

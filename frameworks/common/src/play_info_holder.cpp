@@ -19,11 +19,10 @@
 namespace OHOS::AVSession {
 bool PlayInfoHolder::Marshalling(Parcel& parcel) const
 {
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(currentIndex_), false, "write currentIndex failed");
     int32_t playInfosSize = playInfos_.size();
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(playInfosSize), false, "write playInfoSize failed");
     for (auto playInfo : playInfos_) {
-        CHECK_AND_RETURN_RET_LOG(playInfo->Marshalling(parcel), false, "write playInfoSize failed");
+        CHECK_AND_RETURN_RET_LOG(playInfo.Marshalling(parcel), false, "write playInfoSize failed");
     }
     return true;
 }
@@ -32,33 +31,22 @@ PlayInfoHolder *PlayInfoHolder::Unmarshalling(Parcel& data)
 {
     auto *result = new (std::nothrow) PlayInfoHolder();
 
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(result->currentIndex_), nullptr, "Read currentIndex failed");
     int32_t playInfosSize;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(playInfosSize), nullptr, "write playInfoSize failed");
     for (int i = 0; i < playInfosSize; i++) {
-        PlayInfo* playInfo = PlayInfo::Unmarshalling(data);
-        result->playInfos_.emplace_back(playInfo);
+        AVQueueItem* queueItem = AVQueueItem::Unmarshalling(data);
+        result->playInfos_.emplace_back(*queueItem);
     }
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new PlayInfoHolder failed");
     return result;
 }
 
-void PlayInfoHolder::SetCurrentIndex(int32_t currentIndex)
-{
-    currentIndex_ = currentIndex;
-}
-
-int32_t PlayInfoHolder::GetCurrentTime() const
-{
-    return currentIndex_;
-}
-
-void PlayInfoHolder::SetPlayInfos(const std::vector<std::shared_ptr<PlayInfo>>& playInfos)
+void PlayInfoHolder::SetPlayInfos(const std::vector<AVQueueItem>& playInfos)
 {
     playInfos_ = playInfos;
 }
 
-const std::vector<std::shared_ptr<PlayInfo>>& PlayInfoHolder::GetPlayInfos() const
+const std::vector<AVQueueItem>& PlayInfoHolder::GetPlayInfos() const
 {
     return playInfos_;
 }
@@ -70,7 +58,6 @@ bool PlayInfoHolder::IsValid() const
 
 void PlayInfoHolder::Reset()
 {
-    currentIndex_ = 0;
     playInfos_.clear();
 }
 } // namespace OHOS::AVSession

@@ -71,7 +71,7 @@ public:
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
-    int32_t StopCast(const std::string& sessionId) override;
+    int32_t StopCast(const SessionToken& sessionToken) override;
 
 private:
     sptr<AVSessionServiceProxy> GetService();

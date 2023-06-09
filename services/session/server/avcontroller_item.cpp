@@ -237,11 +237,11 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
     }
 }
 
-void AVControllerItem::HandleOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo)
+void AVControllerItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
 {
     std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnOutputDeviceChange(deviceState, outputDeviceInfo);
+    callback_->OnOutputDeviceChange(connectionState, outputDeviceInfo);
 }
 
 void AVControllerItem::HandleActiveStateChange(bool isActive)

@@ -25,17 +25,22 @@ public:
     explicit AVCastControllerCallbackClient(const std::shared_ptr<AVCastControllerCallback>& callback);
     ~AVCastControllerCallbackClient();
 
-    void OnStateChanged(const AVCastPlayerState& state) override;
 
-    void OnVolumeChanged(const int32_t volume) override;
+    void OnStateChange(const AVCastPlayerState& state) override;
 
-    void OnSeekDone(const int32_t seek) override;
+    void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
 
-    void OnPlaySpeedChanged(const int32_t speed) override;
+    void OnVolumeChange(const int32_t volume) override;
+
+    void OnLoopModeChange(const int32_t loopMode) override;
+
+    void OnPlaySpeedChange(const int32_t playSpeed) override;
+
+    void OnPositionChange(const int32_t position) override;
+
+    void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     
-    void OnTimeUpdate(const int32_t time) override;
-
-    void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
+    void OnError(const int32_t errorCode, const std::string& errorMsg) override;
 
 private:
     std::shared_ptr<AVCastControllerCallback> callback_;

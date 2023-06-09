@@ -52,6 +52,23 @@ std::string AVSessionProxy::GetSessionId()
     return sessionId;
 }
 
+std::string AVSessionProxy::GetSessionType()
+{
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, "", "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), "", "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, "", "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_SESSION_TYPE, data, reply, option) == 0,
+        "", "send request failed");
+
+    std::string sessionType;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadString(sessionType), "", "read sessionType failed");
+    return sessionType;
+}
+
 int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback)
 {
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");

@@ -99,6 +99,7 @@ private:
 
     napi_ref wrapperRef_ {};
     std::string sessionId_ ;
+    std::string sessionType_ ;
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
 

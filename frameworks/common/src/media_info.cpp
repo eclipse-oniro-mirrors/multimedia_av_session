@@ -21,6 +21,7 @@ bool MediaInfo::WriteToParcel(Parcel& out) const
 {
     CHECK_AND_RETURN_RET_LOG(out.WriteString(mediaId_), false, "write mediaId failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(mediaUrl_), false, "write mediaUrl failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(startPosition_), false, "write mediaInfo failed");
     return true;
 }
 
@@ -28,6 +29,7 @@ bool MediaInfo::ReadFromParcel(Parcel& in)
 {
     CHECK_AND_RETURN_RET_LOG(in.ReadString(mediaId_), false, "Read mediaId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(mediaUrl_), false, "Read mediaUrl failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(startPosition_), false, "Read mediaInfo failed");
     return true;
 }
 } // namespace OHOS::AVSession

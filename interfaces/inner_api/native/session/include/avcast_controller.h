@@ -44,7 +44,7 @@ public:
     */
     virtual int32_t Start(const PlayInfoHolder& playInfoHolder) = 0;
 
-    virtual int32_t Update(const MediaInfo& mediaInfo) = 0;
+    virtual int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) = 0;
 
     /**
      * Send commands to its corresponding session through the controller.
@@ -71,7 +71,7 @@ public:
 
     virtual int32_t GetVolume() = 0;
 
-    virtual int32_t GetRepeatMode() = 0;
+    virtual int32_t GetLoopMode() = 0;
 
     virtual double GetPlaySpeed() = 0;
 

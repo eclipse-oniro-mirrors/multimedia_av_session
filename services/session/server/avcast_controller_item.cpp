@@ -34,7 +34,7 @@ void AVCastControllerItem::OnPlayerStatusChanged(const AVCastPlayerState& player
 {
     SLOGI("OnPlayerStatusChanged");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnStateChanged(playerState);
+    callback_->OnStateChange(playerState);
 }
 
 // void AVCastControllerItem::OnPositionChanged(const int32_t position, int32_t bufferPosition, int32_t duration)
@@ -47,25 +47,25 @@ void AVCastControllerItem::OnPlayerStatusChanged(const AVCastPlayerState& player
 
 // }
 
-void AVCastControllerItem::OnVolumeChanged(const int32_t volume)
+void AVCastControllerItem::OnVolumeChange(const int32_t volume)
 {
-    SLOGI("OnVolumeChanged");
+    SLOGI("OnVolumeChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnVolumeChanged(volume);
+    callback_->OnVolumeChange(volume);
 }
 
-void AVCastControllerItem::OnPlaySpeedChanged(const float playSpeed)
+void AVCastControllerItem::OnPlaySpeedChange(const float playSpeed)
 {
-    SLOGI("OnPlaySpeedChanged");
+    SLOGI("OnPlaySpeedChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlaySpeedChanged(playSpeed);
+    callback_->OnPlaySpeedChange(playSpeed);
 }
 
-void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
+void AVCastControllerItem::OnError(const int32_t errorCode, const std::string& errorMsg)
 {
-    SLOGI("OnPlayerError");
+    SLOGI("OnError");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlayerError(errorCode, errorMsg);
+    callback_->OnError(errorCode, errorMsg);
 }
 
 // void AVCastControllerItem::OnLoopModeChanged(const int32_t loopMode)
@@ -88,9 +88,9 @@ int32_t AVCastControllerItem::GetVolume()
     return volume_;
 }
 
-int32_t AVCastControllerItem::GetRepeatMode()
+int32_t AVCastControllerItem::GetLoopMode()
 {
-    return repeatMode_;
+    return loopMode_;
 }
 
 double AVCastControllerItem::GetPlaySpeed()
@@ -117,10 +117,10 @@ int32_t AVCastControllerItem::Start(const PlayInfoHolder& playInfoHolder)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVCastControllerItem::Update(const MediaInfo& mediaInfo)
+int32_t AVCastControllerItem::UpdateMediaInfo(const MediaInfo& mediaInfo)
 {
     SLOGI("Call Update of cast controller proxy");
-    castControllerProxy_->Update(mediaInfo);
+    castControllerProxy_->UpdateMediaInfo(mediaInfo);
     return AVSESSION_SUCCESS;
 }
 

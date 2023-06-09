@@ -39,6 +39,8 @@ public:
 
     std::string GetSessionId() override;
 
+    std::string GetSessionType() override;
+
     int32_t GetAVMetaData(AVMetaData& meta) override;
 
     int32_t SetAVMetaData(const AVMetaData& meta) override;
@@ -91,7 +93,7 @@ public:
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
-    void HandleOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo);
+    void HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo);
 
     void HandleSkipToQueueItem(const int32_t& itemId);
 

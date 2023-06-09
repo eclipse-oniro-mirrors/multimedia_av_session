@@ -35,6 +35,8 @@ public:
 
     std::string GetSessionId() override;
 
+    std::string GetSessionType() override;
+
     int32_t GetAVMetaData(AVMetaData& meta) override;
 
     int32_t SetAVMetaData(const AVMetaData& meta) override;

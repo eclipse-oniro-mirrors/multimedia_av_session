@@ -140,6 +140,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiAvSession)), napi_generic_failure);
     napiAvSession->session_ = std::move(nativeSession);
     napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
+    napiAvSession->sessionType_ = napiAvSession->session_->GetSessionType();    
     SLOGI("sessionId=%{public}s", napiAvSession->sessionId_.c_str());
 
     napi_value property {};

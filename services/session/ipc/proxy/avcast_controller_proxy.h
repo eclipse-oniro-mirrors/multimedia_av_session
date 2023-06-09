@@ -32,7 +32,7 @@ public:
 
     int32_t Start(const PlayInfoHolder& PlayInfoHolder) override;
 
-    int32_t Update(const MediaInfo& mediaInfo) override;
+    int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) override;
 
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
@@ -44,7 +44,7 @@ public:
 
     int32_t GetVolume() override;
 
-    int32_t GetRepeatMode() override;
+    int32_t GetLoopMode() override;
 
     double GetPlaySpeed() override;
 

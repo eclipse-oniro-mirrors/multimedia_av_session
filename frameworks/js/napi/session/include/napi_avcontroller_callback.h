@@ -48,7 +48,7 @@ public:
     void OnMetaDataChange(const AVMetaData& data) override;
     void OnActiveStateChange(bool isActive) override;
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
-    void OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& info) override;
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info) override;
     void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
     void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override;
     void OnQueueTitleChange(const std::string& title) override;

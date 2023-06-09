@@ -167,10 +167,10 @@ void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     HandleEvent(EVENT_MEDIA_KEY_EVENT, std::make_shared<MMI::KeyEvent>(keyEvent));
 }
 
-void NapiAVSessionCallback::OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo)
+void NapiAVSessionCallback::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
-    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, deviceState, outputDeviceInfo);
+    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, connectionState, outputDeviceInfo);
 }
 
 void NapiAVSessionCallback::OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)

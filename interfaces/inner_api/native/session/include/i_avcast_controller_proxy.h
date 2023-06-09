@@ -40,7 +40,7 @@ public:
 
     virtual void Start(const PlayInfoHolder& playInfoHolder) = 0;
 
-    virtual void Update(const MediaInfo& mediaInfo) = 0;
+    virtual void UpdateMediaInfo(const MediaInfo& mediaInfo) = 0;
 
     virtual void SendControlCommand(const AVCastControlCommand& cmd) = 0;
 

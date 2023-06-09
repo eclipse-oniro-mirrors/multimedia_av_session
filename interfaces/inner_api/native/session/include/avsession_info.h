@@ -92,11 +92,11 @@ public:
 
     // virtual void OnMediaItemChanged(const PlayInfo playInfo) = 0;
 
-    virtual void OnVolumeChanged(const int32_t volume) = 0;
+    virtual void OnVolumeChange(const int32_t volume) = 0;
 
-    virtual void OnPlaySpeedChanged(const float playSpeed) = 0;
+    virtual void OnPlaySpeedChange(const float playSpeed) = 0;
 
-    virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
+    virtual void OnError(const int32_t errorCode, const std::string& errorMsg) = 0;
     /**
      * @brief Deconstruct SessionListener.
      * @since 9
@@ -193,11 +193,11 @@ public:
     /**
      * @brief Monitor and play device change events.
      *
-     * @param deviceState Event callback of device state.
+     * @param connectionState Event callback of device state.
      * @param outputDeviceInfo Event callback of device information.
      * @since 9
     */
-    virtual void OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
      * @brief Listen for command events.
@@ -266,11 +266,11 @@ public:
     /**
      * @brief Monitor and play device change events.
      *
-     * @param deviceState Event callback of device state.
+     * @param connectionState Event callback of device state.
      * @param outputDeviceInfo Device related information callback.
      * @since 9
     */
-    virtual void OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
      * @brief Listen for changes in custom events of the session.
@@ -314,17 +314,21 @@ public:
 
 class AVCastControllerCallback {
 public:
-    virtual void OnStateChanged(const AVCastPlayerState& state) = 0;
+    virtual void OnStateChange(const AVCastPlayerState& state) = 0;
 
-    virtual void OnVolumeChanged(const int32_t volume) = 0;
+    virtual void OnMediaItemChange(const AVQueueItem& avQueueItem) = 0;
 
-    virtual void OnSeekDone(const int32_t seek) = 0;
+    virtual void OnVolumeChange(const int32_t volume) = 0;
 
-    virtual void OnPlaySpeedChanged(const int32_t speed) = 0;
-    
-    virtual void OnTimeUpdate(const int32_t time) = 0;
+    virtual void OnLoopModeChange(const int32_t loopMode) = 0;
 
-    virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
+    virtual void OnPlaySpeedChange(const int32_t playSpeed) = 0;
+
+    virtual void OnPositionChange(const int32_t position) = 0;
+
+    virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
+
+    virtual void OnError(const int32_t errorCode, const std::string& errorMsg) = 0;
 
     /**
      * @brief Deconstruct AVControllerCallback.

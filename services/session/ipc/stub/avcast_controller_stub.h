@@ -43,7 +43,7 @@ private:
 
     int32_t HandleGetVolume(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetRepeatMode(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetLoopMode(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetPlaySpeed(MessageParcel& data, MessageParcel& reply);
 
@@ -63,7 +63,7 @@ private:
         &AVCastControllerStub::HandleGetDuration,
         &AVCastControllerStub::HandleGetSurfaceId,
         &AVCastControllerStub::HandleGetVolume,
-        &AVCastControllerStub::HandleGetRepeatMode,
+        &AVCastControllerStub::HandleGetLoopMode,
         &AVCastControllerStub::HandleGetPlaySpeed,
         &AVCastControllerStub::HandleGetCurrentTime,
         &AVCastControllerStub::HandleRegisterCallbackInner,

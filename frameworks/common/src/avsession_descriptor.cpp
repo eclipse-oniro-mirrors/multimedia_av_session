@@ -46,7 +46,7 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
     int32_t deviceInfoSize = outputDeviceInfo_.deviceInfos_.size();
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : outputDeviceInfo_.deviceInfos_) {
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceCategory_), false, "write deviceCategory failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceId_), false, "write deviceId failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
@@ -71,7 +71,7 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (int i = 0; i < deviceInfoSize; i++) {
         DeviceInfo deviceInfo;
-        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceCategory_), false, "Read deviceCategory failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
@@ -91,7 +91,7 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
 
 bool DeviceInfo::WriteToParcel(Parcel& out) const
 {
-    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceCategory_), false, "write deviceCategory failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castCategory_), false, "write castCategory failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceId_), false, "write deviceId failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceName_), false, "write deviceName failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceType_), false, "write deviceType failed");
@@ -103,7 +103,7 @@ bool DeviceInfo::WriteToParcel(Parcel& out) const
 
 bool DeviceInfo::ReadFromParcel(Parcel& in)
 {
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceCategory_), false, "Read deviceCategory failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(castCategory_), false, "Read castCategory failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceId_), false, "Read deviceId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceName_), false, "Read deviceName failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceType_), false, "Read deviceType failed");
@@ -118,7 +118,7 @@ bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
     int32_t deviceInfoSize = deviceInfos_.size();
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : deviceInfos_) {
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceCategory_), false, "write deviceCategory failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceId_), false, "write deviceId failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
@@ -134,7 +134,7 @@ bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (int i = 0; i < deviceInfoSize; i++) {
         DeviceInfo deviceInfo;
-        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceCategory_), false, "Read deviceCategory failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");

@@ -37,7 +37,10 @@ public:
         MEDAI_DESCRIPTION_KEY_ICON_URI = 5,
         MEDAI_DESCRIPTION_KEY_EXTRAS = 6,
         MEDAI_DESCRIPTION_KEY_MEDIA_URI = 7,
-        MEDAI_DESCRIPTION_KEY_MAX = 8
+        MEDAI_DESCRIPTION_KEY_DURATION = 8,
+        MEDAI_DESCRIPTION_KEY_START_POSITION = 9,
+        MEDAI_DESCRIPTION_KEY_APP_NAME = 10,
+        MEDAI_DESCRIPTION_KEY_MAX = 11,
     };
 
     AVMediaDescription() = default;
@@ -71,6 +74,15 @@ public:
     void SetMediaUri(const std::string& mediaUri);
     std::string GetMediaUri() const;
 
+    void SetDuration(const int32_t duration);
+    int32_t GetDuration() const;
+
+    void SetStartPosition(const int32_t startPosition);
+    int32_t GetStartPosition() const;
+
+    void SetAppName(const std::string& appName);
+    std::string GetAppName() const;
+    
     bool IsValid() const;
 
     void Reset();
@@ -84,6 +96,9 @@ private:
     std::string iconUri_ = "";
     std::shared_ptr<AAFwk::WantParams> extras_ = nullptr;
     std::string mediaUri_ = "";
+    int32_t duration_ = 0;
+    int32_t startPosition_ = 0;
+    std::string appName_ = "";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVMEDIA_DESCRIPTION_H

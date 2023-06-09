@@ -21,17 +21,22 @@
 
 namespace OHOS::AVSession {
 std::map<std::string, NapiPlayInfoHolder::GetterType> NapiPlayInfoHolder::getterMap_ = {
-    { "currentIndex", GetCurrentTime },
     { "playInfos", GetPlayInfos },
 };
 
 std::map<int32_t, NapiPlayInfoHolder::SetterType> NapiPlayInfoHolder::setterMap_ = {
-    { PlayInfoHolder::PLAY_INFO_HOLDER_KEY_CURRENT_INDEX, SetCurrentIndex },
     { PlayInfoHolder::PLAY_INFO_HOLDER_KEY_PLAY_INFOS, SetPlayInfos },
 };
 
 napi_status NapiPlayInfoHolder::GetValue(napi_env env, napi_value in, PlayInfoHolder& out)
 {
+    bool hasProperty = false;
+    napi_has_named_property(env, in, "playInfos", &hasProperty);
+    if (!hasProperty) {
+        SLOGE("playInfos is not exit in PlayInfoHolder");
+        return napi_invalid_arg;
+    }
+
     std::vector<std::string> propertyNames;
     auto status = NapiUtils::GetPropertyNames(env, in, propertyNames);
     CHECK_RETURN(status == napi_ok, "get property name failed", status);
@@ -66,28 +71,9 @@ napi_status NapiPlayInfoHolder::SetValue(napi_env env, const PlayInfoHolder& in,
     return napi_ok;
 }
 
-napi_status NapiPlayInfoHolder::GetCurrentTime(napi_env env, napi_value in, PlayInfoHolder& out)
-{
-    int32_t property;
-    auto status = NapiUtils::GetNamedProperty(env, in, "currentIndex", property);
-    CHECK_RETURN(status == napi_ok, "get property failed", status);
-    out.SetCurrentIndex(property);
-    return status;
-}
-
-napi_status NapiPlayInfoHolder::SetCurrentIndex(napi_env env, const PlayInfoHolder& in, napi_value& out)
-{
-    napi_value property {};
-    auto status = NapiUtils::SetValue(env, in.GetCurrentTime(), property);
-    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
-    status = napi_set_named_property(env, out, "currentIndex", property);
-    CHECK_RETURN(status == napi_ok, "set property failed", status);
-    return status;
-}
-
 napi_status NapiPlayInfoHolder::GetPlayInfos(napi_env env, napi_value in, PlayInfoHolder& out)
 {
-    std::vector<std::shared_ptr<PlayInfo>> property {};
+    std::vector<AVQueueItem> property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "playInfos", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetPlayInfos(property);

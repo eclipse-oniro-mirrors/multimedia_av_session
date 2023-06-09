@@ -47,6 +47,12 @@ int32_t AVSessionStub::HandleGetSessionId(MessageParcel& data, MessageParcel& re
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleGetSessionType(MessageParcel& data, MessageParcel& reply)
+{
+    CHECK_AND_PRINT_LOG(reply.WriteString(GetSessionType()), "write int32_t failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionStub::HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply)
 {
     auto remoteObject = data.ReadRemoteObject();

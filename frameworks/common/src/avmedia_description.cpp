@@ -25,6 +25,9 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteString(description_) &&
         parcel.WriteString(iconUri_) &&
         parcel.WriteString(mediaUri_) &&
+        parcel.WriteInt32(duration_) &&
+        parcel.WriteInt32(startPosition_) &&
+        parcel.WriteString(appName_) &&
         parcel.WriteParcelable(icon_.get()) &&
         parcel.WriteParcelable(extras_.get());
 }
@@ -50,6 +53,15 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
     }
     if (!data.ReadString(result->mediaUri_)) {
         SLOGD("AVMediaDescription Unmarshalling mediaUri null ");
+    }
+    if (!data.ReadInt32(result->duration_)) {
+        SLOGD("AVMediaDescription Unmarshalling duration null ");
+    }
+    if (!data.ReadInt32(result->startPosition_)) {
+        SLOGD("AVMediaDescription Unmarshalling startPosition null ");
+    }
+    if (!data.ReadString(result->appName_)) {
+        SLOGD("AVMediaDescription Unmarshalling appName null ");
     }
     result->icon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->icon_ == nullptr) {
@@ -142,6 +154,36 @@ std::string AVMediaDescription::GetMediaUri() const
     return mediaUri_;
 }
 
+void AVMediaDescription::SetDuration(const int32_t duration)
+{
+    duration_ = duration;
+}
+
+int32_t AVMediaDescription::GetDuration() const
+{
+    return duration_;
+}
+
+void AVMediaDescription::SetStartPosition(const int32_t startPosition)
+{
+    startPosition_ = startPosition;
+}
+
+int32_t AVMediaDescription::GetStartPosition() const
+{
+    return startPosition_;
+}
+
+void AVMediaDescription::SetAppName(const std::string& appName)
+{
+    appName_ = appName;
+}
+
+std::string AVMediaDescription::GetAppName() const
+{
+    return appName_;
+}
+
 bool AVMediaDescription::IsValid() const
 {
     return !(mediaId_.empty());
@@ -157,5 +199,8 @@ void AVMediaDescription::Reset()
     iconUri_ = "";
     extras_ = nullptr;
     mediaUri_ = "";
+    duration_ = 0;
+    startPosition_ = 0;
+    appName_ = "";
 }
 } // namespace OHOS::AVSession

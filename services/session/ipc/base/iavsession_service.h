@@ -45,7 +45,7 @@ public:
         SERVICE_CMD_START_CAST_DISCOVERY,
         SERVICE_CMD_STOP_CAST_DISCOVERY,
         SERVICE_CMD_START_CAST,
-        SERVICE_CMD_RELEASE_CAST,
+        SERVICE_CMD_STOP_CAST,
         SERVICE_CMD_MAX
     };
 
@@ -88,7 +88,7 @@ public:
 
     virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
-    virtual int32_t StopCast(const std::string& sessionId) = 0;
+    virtual int32_t StopCast(const SessionToken& sessionToken) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_SERVICE_H

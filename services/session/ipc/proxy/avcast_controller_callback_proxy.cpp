@@ -23,8 +23,7 @@ AVCastControllerCallbackProxy::AVCastControllerCallbackProxy(const sptr<IRemoteO
     SLOGD("construct");
 }
 
-
-void AVCastControllerCallbackProxy::OnStateChanged(const AVCastPlayerState& state)
+void AVCastControllerCallbackProxy::OnStateChange(const AVCastPlayerState& state)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -38,7 +37,21 @@ void AVCastControllerCallbackProxy::OnStateChanged(const AVCastPlayerState& stat
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnVolumeChanged(const int32_t volume)
+void AVCastControllerCallbackProxy::OnMediaItemChange(const AVQueueItem& avQueueItem)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&avQueueItem), "Write avQueueItem failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_MEDIA_ITEM_CHANGE, parcel, reply, option) == 0,
+        "send request failed");
+}
+
+void AVCastControllerCallbackProxy::OnVolumeChange(const int32_t volume)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -52,21 +65,21 @@ void AVCastControllerCallbackProxy::OnVolumeChanged(const int32_t volume)
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnSeekDone(const int32_t seek)
+void AVCastControllerCallbackProxy::OnLoopModeChange(const int32_t loopMode)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(seek), "write seek failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(loopMode), "write loopMode failed");
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
-    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_SEEK_DONE, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_LOOP_MODE_CHANGE, parcel, reply, option) == 0,
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnPlaySpeedChanged(const int32_t speed)
+void AVCastControllerCallbackProxy::OnPlaySpeedChange(const int32_t speed)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -76,25 +89,40 @@ void AVCastControllerCallbackProxy::OnPlaySpeedChanged(const int32_t speed)
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
-    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_SPEED_DONE, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_PLAY_SPEED_CHANGE, parcel, reply, option) == 0,
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnTimeUpdate(const int32_t time)
+void AVCastControllerCallbackProxy::OnPositionChange(const int32_t seek)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(time), "write time failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(seek), "write seek failed");
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
-    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_TIME_UPDATE, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_POSITION_CHANGE, parcel, reply, option) == 0,
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
+void AVCastControllerCallbackProxy::OnVideoSizeChange(const int32_t width, const int32_t height)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(width), "write width failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(height), "write height failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_VIDEO_SIZE_CHANGE, parcel, reply, option) == 0,
+        "send request failed");
+}
+
+void AVCastControllerCallbackProxy::OnError(const int32_t errorCode, const std::string& errorMsg)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");

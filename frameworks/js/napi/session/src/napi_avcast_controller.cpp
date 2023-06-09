@@ -35,12 +35,14 @@ namespace OHOS::AVSession {
 static __thread napi_ref AVCastControllerConstructorRef = nullptr;
 std::map<std::string, std::pair<NapiAVCastController::OnEventHandlerType,
     NapiAVCastController::OffEventHandlerType>> NapiAVCastController::EventHandlers_ = {
-    { "stateChanged", { OnStateChanged, OffStateChange } },
-    { "volumeChanged", { OnVolumeChanged, OffVolumeChange } },
-    { "seekDone", { OnSeekDone, OffSeekDone } },
-    { "playSpeedChanged", { OnPlaySpeedChanged, OffPlaySpeedChanged } },
-    { "timeUpdate", { OnTimeUpdate, OffTimeUpdate } },
-    { "playerError", { OnPlayerError, OffPlayerError } },
+    { "stateChange", { OnStateChange, OffStateChange } },
+    { "mediaItemChange", { OnMediaItemChange, OffMediaItemChange } },
+    { "volumeChange", { OnVolumeChange, OffVolumeChange } },
+    { "loopModeChange", { OnLoopModeChange, OffLoopModeChange } },
+    { "playSpeedChange", { OnPlaySpeedChange, OffPlaySpeedChange } },
+    { "positionChange", { OnPositionChange, OffPositionChange } }, // seek done -> positionChange
+    { "videoSizeChange", { OnVideoSizeChange, OffVideoSizeChange } }, // timeUpdate -> videoSizeChange
+    { "error", { OnError, OffError } },
 };
 
 NapiAVCastController::NapiAVCastController()
@@ -59,6 +61,7 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
         DECLARE_NAPI_FUNCTION("start", Start),
+        DECLARE_NAPI_FUNCTION("updateMediaInfo", UpdateMediaInfo),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
     };
 
@@ -108,21 +111,139 @@ napi_status NapiAVCastController::NewInstance(napi_env env, std::shared_ptr<AVCa
     NapiAVCastController* napiCastController{};
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiCastController)), napi_generic_failure);
     napiCastController->castController_ = std::move(nativeController);
+
+    napiCastController->duration_ = napiCastController->castController_->GetDuration();
     napiCastController->surfaceId_ = napiCastController->castController_->GetSurfaceId();
+    napiCastController->volume_ = napiCastController->castController_->GetVolume();
+    napiCastController->loopMode_ = napiCastController->castController_->GetLoopMode();
+    napiCastController->playSpeed_ = napiCastController->castController_->GetPlaySpeed();
     napiCastController->currentTime_ = napiCastController->castController_->GetCurrentTime();
 
     napi_value property {};
-    auto status = NapiUtils::SetValue(env, napiCastController->surfaceId_, property);
+    auto status = NapiUtils::SetValue(env, napiCastController->duration_, property);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "duration", property), napi_generic_failure);
+
+    status = NapiUtils::SetValue(env, napiCastController->surfaceId_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "surfaceId", property), napi_generic_failure);
 
+    status = NapiUtils::SetValue(env, napiCastController->volume_, property);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "volume", property), napi_generic_failure);
+
+    status = NapiUtils::SetValue(env, napiCastController->loopMode_, property);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "loopMode", property), napi_generic_failure);
+
+    status = NapiUtils::SetValue(env, napiCastController->playSpeed_, property);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "playSpeed", property), napi_generic_failure);
+
     status = NapiUtils::SetValue(env, napiCastController->currentTime_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "currentIndex", property), napi_generic_failure);
+    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "currentTime", property), napi_generic_failure);
 
     out = instance;
     return napi_ok;
 }
+
+napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastController::Start");
+    struct ConcreteContext : public ContextBase {
+        PlayInfoHolder playInfoHolder_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("Start failed : no memory");
+        NapiUtils::ThrowError(env, "Start failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->playInfoHolder_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get play info holder failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_CAST_CONTROLLER_START_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("Start failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "Start failed : castController_ is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->Start(context->playInfoHolder_);
+        if (ret != AVSESSION_SUCCESS) {
+            ErrCodeToMessage(ret, context->errMessage);
+            SLOGE("CastController Start failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "Start", executor, complete);
+}
+
+napi_value NapiAVCastController::UpdateMediaInfo(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastController::UpdateMediaInfo");
+    struct ConcreteContext : public ContextBase {
+        MediaInfo mediaInfo_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("UpdateMediaInfo failed : no memory");
+        NapiUtils::ThrowError(env, "UpdateMediaInfo failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->mediaInfo_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get play info holder failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_CAST_CONTROLLER_UPDATE_MEDIA_INFO_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("Start failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "Start failed : castController_ is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->UpdateMediaInfo(context->mediaInfo_);
+        if (ret != AVSESSION_SUCCESS) {
+            ErrCodeToMessage(ret, context->errMessage);
+            SLOGE("CastController UpdateMediaInfo failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "UpdateMediaInfo", executor, complete);
+}
+
 
 napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_info info)
 {
@@ -174,102 +295,6 @@ napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_
     };
 
     return NapiAsyncWork::Enqueue(env, context, "SendControlCommand", executor);
-}
-
-napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
-{
-    AVSESSION_TRACE_SYNC_START("NapiAVCastController::Start");
-    struct ConcreteContext : public ContextBase {
-        PlayInfoHolder playInfoHolder_;
-    };
-    auto context = std::make_shared<ConcreteContext>();
-    if (context == nullptr) {
-        SLOGE("Start failed : no memory");
-        NapiUtils::ThrowError(env, "Start failed : no memory",
-            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
-        return NapiUtils::GetUndefinedValue(env);
-    }
-
-    auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->playInfoHolder_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get play info holder failed",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-    };
-    context->GetCbInfo(env, info, inputParser);
-    context->taskId = NAPI_CAST_CONTROLLER_START_TASK_ID;
-
-    auto executor = [context]() {
-        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
-            SLOGE("Start failed : controller is nullptr");
-            context->status = napi_generic_failure;
-            context->errMessage = "Start failed : castController_ is nullptr";
-            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
-            return;
-        }
-        int32_t ret = napiCastController->castController_->Start(context->playInfoHolder_);
-        if (ret != AVSESSION_SUCCESS) {
-            ErrCodeToMessage(ret, context->errMessage);
-            SLOGE("CastController Start failed:%{public}d", ret);
-            context->status = napi_generic_failure;
-            context->errCode = NapiAVSessionManager::errcode_[ret];
-        }
-    };
-
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
-    return NapiAsyncWork::Enqueue(env, context, "Start", executor, complete);
-}
-
-napi_value NapiAVCastController::Update(napi_env env, napi_callback_info info)
-{
-    AVSESSION_TRACE_SYNC_START("NapiAVCastController::Update");
-    struct ConcreteContext : public ContextBase {
-        MediaInfo mediaInfo_;
-    };
-    auto context = std::make_shared<ConcreteContext>();
-    if (context == nullptr) {
-        SLOGE("Update failed : no memory");
-        NapiUtils::ThrowError(env, "Update failed : no memory",
-            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
-        return NapiUtils::GetUndefinedValue(env);
-    }
-
-    auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->mediaInfo_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get play info holder failed",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-    };
-    context->GetCbInfo(env, info, inputParser);
-    context->taskId = NAPI_CAST_CONTROLLER_UPDATE_TASK_ID;
-
-    auto executor = [context]() {
-        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
-            SLOGE("Start failed : controller is nullptr");
-            context->status = napi_generic_failure;
-            context->errMessage = "Start failed : castController_ is nullptr";
-            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
-            return;
-        }
-        int32_t ret = napiCastController->castController_->Update(context->mediaInfo_);
-        if (ret != AVSESSION_SUCCESS) {
-            ErrCodeToMessage(ret, context->errMessage);
-            SLOGE("CastController Start failed:%{public}d", ret);
-            context->status = napi_generic_failure;
-            context->errCode = NapiAVSessionManager::errcode_[ret];
-        }
-    };
-
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
-    return NapiAsyncWork::Enqueue(env, context, "Update", executor, complete);
 }
 
 napi_status NapiAVCastController::RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
@@ -430,38 +455,51 @@ napi_value NapiAVCastController::OffEvent(napi_env env, napi_callback_info info)
     return NapiUtils::GetUndefinedValue(env);
 }
 
-napi_status NapiAVCastController::OnStateChanged(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnStateChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_STATE_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnVolumeChanged(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnMediaItemChange(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_STATE_CHANGE, callback);
+}
+
+napi_status NapiAVCastController::OnVolumeChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
     return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VOLUME_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnSeekDone(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnLoopModeChange(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
+    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_LOOP_MODE_CHANGE, callback);
+}
+
+napi_status NapiAVCastController::OnPlaySpeedChange(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
+    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_PLAY_SPEED_CHANGE, callback);
+}
+
+napi_status NapiAVCastController::OnPositionChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_SEEK_DONE, callback);
+    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_POSITON_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnPlaySpeedChanged(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnVideoSizeChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_SPEED_DONE, callback);
+    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnTimeUpdate(napi_env env, NapiAVCastController* napiCastController,
-    napi_value param, napi_value callback)
-{
-    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_TIME_UPDATE, callback);
-}
-
-napi_status NapiAVCastController::OnPlayerError(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnError(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
     return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_ERROR, callback);
@@ -473,29 +511,41 @@ napi_status NapiAVCastController::OffStateChange(napi_env env, NapiAVCastControl
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_STATE_CHANGE, callback);
 }
 
+napi_status NapiAVCastController::OffMediaItemChange(napi_env env, NapiAVCastController* napiCastController,
+    napi_value callback)
+{
+    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_MEDIA_ITEM_CHANGE, callback);
+}
+
 napi_status NapiAVCastController::OffVolumeChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VOLUME_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OffSeekDone(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OffLoopModeChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_SEEK_DONE, callback);
+    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_LOOP_MODE_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OffPlaySpeedChanged(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
+napi_status NapiAVCastController::OffPlaySpeedChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
 {
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_SPEED_DONE, callback);
+    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_PLAY_SPEED_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OffTimeUpdate(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
+napi_status NapiAVCastController::OffPositionChange(napi_env env, NapiAVCastController* napiCastController,
+    napi_value callback)
 {
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_TIME_UPDATE, callback);
+    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_POSITON_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OffPlayerError(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
+napi_status NapiAVCastController::OffVideoSizeChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
+{
+    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, callback);
+}
+
+napi_status NapiAVCastController::OffError(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
 {
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_ERROR, callback);
 }
@@ -520,5 +570,4 @@ void NapiAVCastController::ErrCodeToMessage(int32_t errCode, std::string& messag
             break;
     }
 }
-
-}
+} // namespace OHOS::AVSession

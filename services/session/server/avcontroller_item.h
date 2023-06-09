@@ -73,7 +73,7 @@ public:
 
     void HandleValidCommandChange(const std::vector<int32_t>& cmds);
 
-    void HandleOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo);
+    void HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo);
 
     void HandleSetSessionEvent(const std::string& event, const AAFwk::WantParams& args);
 

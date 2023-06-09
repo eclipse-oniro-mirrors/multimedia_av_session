@@ -341,7 +341,7 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
     }
     for (int i = 0; i < deviceInfoSize; i++) {
         DeviceInfo deviceInfo;
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceCategory_), false, "Read deviceCategory failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
@@ -362,9 +362,12 @@ int32_t AVSessionServiceStub::HandleStopCast(MessageParcel& data, MessageParcel&
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStopCast");
     SLOGI("HandleStopCast start");
-    std::string sessionId = data.ReadString();
-
-    int32_t ret = StopCast(sessionId);
+    SessionToken sessionToken {};
+    sessionToken.sessionId = data.ReadString();
+    sessionToken.pid = data.ReadInt32();
+    sessionToken.uid = data.ReadInt32();
+    
+    int32_t ret = StopCast(sessionToken);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StopCast failed");
     SLOGI("StopCast ret %{public}d", ret);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");

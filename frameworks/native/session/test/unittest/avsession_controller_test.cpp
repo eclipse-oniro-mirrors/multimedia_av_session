@@ -128,7 +128,7 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const int32_t deviceState,
+    void OnOutputDeviceChange(const int32_t connectionState,
         const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
 
     void OnSessionEventChange(const std::string& event, const OHOS::AAFwk::WantParams& args) override {};

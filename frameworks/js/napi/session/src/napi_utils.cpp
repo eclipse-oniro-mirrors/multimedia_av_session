@@ -26,7 +26,6 @@
 #include "extension_context.h"
 #include "ability_context.h"
 #include "napi_common_want.h"
-#include "napi_play_info.h"
 #include "napi_play_info_holder.h"
 
 namespace OHOS::AVSession {
@@ -814,9 +813,9 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
 
     napi_value property = nullptr;
-    status = SetValue(env, in.deviceCategory_, property);
+    status = SetValue(env, in.castCategory_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
-    status = napi_set_named_property(env, out, "deviceCategory", property);
+    status = napi_set_named_property(env, out, "castCategory", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
     status = SetValue(env, in.deviceId_, property);
@@ -1024,15 +1023,27 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, SessionToken& out)
     status = GetValue(env, value, out.sessionId);
     CHECK_RETURN(status == napi_ok, "get SessionToken sessionId value failed", status);
 
-    status = napi_get_named_property(env, in, "pid", &value);
-    CHECK_RETURN(status == napi_ok, "get SessionToken pid failed", status);
-    status = GetValue(env, value, out.pid);
-    CHECK_RETURN(status == napi_ok, "get SessionToken pid value failed", status);
+    bool hasPid = false;
+    NAPI_CALL_BASE(env, napi_has_named_property(env, in, "pid", &hasPid), napi_invalid_arg);
+    if (hasPid) {
+        status = napi_get_named_property(env, in, "pid", &value);
+        CHECK_RETURN(status == napi_ok, "get SessionToken pid failed", status);
+        status = GetValue(env, value, out.pid);
+        CHECK_RETURN(status == napi_ok, "get SessionToken pid value failed", status);
+    } else {
+        out.pid = 0;
+    }
 
-    status = napi_get_named_property(env, in, "uid", &value);
-    CHECK_RETURN(status == napi_ok, "get SessionToken uid failed", status);
-    status = GetValue(env, value, out.uid);
-    CHECK_RETURN(status == napi_ok, "get SessionToken uid value failed", status);
+    bool hasUid = false;
+    NAPI_CALL_BASE(env, napi_has_named_property(env, in, "uid", &hasUid), napi_invalid_arg);
+    if (hasUid) {
+        status = napi_get_named_property(env, in, "uid", &value);
+        CHECK_RETURN(status == napi_ok, "get SessionToken uid failed", status);
+        status = GetValue(env, value, out.pid);
+        CHECK_RETURN(status == napi_ok, "get SessionToken uid value failed", status);
+    } else {
+        out.uid = 0;
+    }
     return napi_ok;
 }
 
@@ -1174,10 +1185,10 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<AudioSt
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
 {
     napi_value value {};
-    auto status = napi_get_named_property(env, in, "deviceCategory", &value);
-    CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceCategory_ failed", status);
-    status = GetValue(env, value, out.deviceCategory_);
-    CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceCategory_ value failed", status);
+    auto status = napi_get_named_property(env, in, "castCategory", &value);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo castCategory_ failed", status);
+    status = GetValue(env, value, out.castCategory_);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo castCategory_ value failed", status);
 
     status = napi_get_named_property(env, in, "deviceId", &value);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceId_ failed", status);
@@ -1194,74 +1205,64 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     status = GetValue(env, value, out.deviceType_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ value failed", status);
 
-    status = napi_get_named_property(env, in, "ipAddress", &value);
-    CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress_ failed", status);
-    status = GetValue(env, value, out.ipAddress_);
-    CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress_ value failed", status);
+    bool hasIpAddress = false;
+    napi_has_named_property(env, in, "ipAddress", &hasIpAddress);
+    if (hasIpAddress) {
+        status = napi_get_named_property(env, in, "ipAddress", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress failed", status);
+        status = GetValue(env, value, out.ipAddress_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress value failed", status);
+    } else {
+        out.ipAddress_ = "";
+    }
 
-    status = napi_get_named_property(env, in, "providerId", &value);
-    CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId_ failed", status);
-    status = GetValue(env, value, out.providerId_);
-    CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId_ value failed", status);
-
+    bool hasProviderId = false;
+    napi_has_named_property(env, in, "providerId", &hasProviderId);
+    if (hasProviderId) {
+        status = napi_get_named_property(env, in, "providerId", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId failed", status);
+        status = GetValue(env, value, out.providerId_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId value failed", status);
+    } else {
+        out.providerId_ = 0;
+    }
     return napi_ok;
 }
 
 /* napi_value -> OutputDeviceInfo */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, OutputDeviceInfo& out)
 {
-    uint32_t length {};
-    auto status = napi_get_array_length(env, in, &length);
-    CHECK_RETURN(status == napi_ok, "get array length failed", status);
-    for (uint32_t i = 0; i < length; ++i) {
-        napi_value element {};
-        status = napi_get_element(env, in, i, &element);
-        CHECK_RETURN((status == napi_ok) && (element != nullptr), "get element failed", status);
-        DeviceInfo DeviceInfo;
-        status = GetValue(env, element, DeviceInfo);
-        out.deviceInfos_.push_back(DeviceInfo);
+    napi_value devices = nullptr;
+    bool hasProperty = false;
+    NAPI_CALL_BASE(env, napi_has_named_property(env, in, "devices", &hasProperty), napi_invalid_arg);
+    if (!hasProperty) {
+        SLOGE("devices is not exit in OutputDeviceInfo");
+        return napi_invalid_arg;
+    }
+    NAPI_CALL_BASE(env, napi_get_named_property(env, in, "devices", &devices), napi_invalid_arg);
+    bool isArray = false;
+    NAPI_CALL_BASE(env, napi_is_array(env, devices, &isArray), napi_invalid_arg);
+    if (!isArray) {
+        SLOGE("devices is not array");
+        return napi_invalid_arg;
+    }
+
+    uint32_t arrLen = 0;
+    NAPI_CALL_BASE(env, napi_get_array_length(env, devices, &arrLen), napi_invalid_arg);
+    if (arrLen == 0) {
+        SLOGE("devices len is invalid");
+        return napi_invalid_arg;
+    }
+
+    for (uint32_t i = 0; i < arrLen; i++) {
+        napi_value item = nullptr;
+        NAPI_CALL_BASE(env, napi_get_element(env, devices, i, &item), napi_invalid_arg);
+        DeviceInfo deviceInfo;
+        napi_status status = GetValue(env, item, deviceInfo);
+        CHECK_RETURN(status == napi_ok, "not is device info", status);
+        out.deviceInfos_.push_back(deviceInfo);
     }
     return napi_ok;
-}
-
-/* napi_value -> std::vector<std::shared_ptr<PlayInfo>> */
-napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<std::shared_ptr<PlayInfo>>& out)
-{
-    SLOGD("napi_value -> std::vector<std::shared_ptr<PlayInfo>>");
-    out.clear();
-    bool isArray = false;
-    napi_is_array(env, in, &isArray);
-    CHECK_RETURN(isArray, "not an array", napi_invalid_arg);
-
-    uint32_t length = 0;
-    napi_status status = napi_get_array_length(env, in, &length);
-    CHECK_RETURN((status == napi_ok) && (length > 0), "get_array failed!", napi_invalid_arg);
-    for (uint32_t i = 0; i < length; ++i) {
-        napi_value item = nullptr;
-        status = napi_get_element(env, in, i, &item);
-        CHECK_RETURN((item != nullptr) && (status == napi_ok), "no element", napi_invalid_arg);
-        std::shared_ptr<PlayInfo> playInfo;
-        status = NapiPlayInfo::GetValue(env, item, playInfo);
-        CHECK_RETURN(status == napi_ok, "not a string", napi_invalid_arg);
-        out.push_back(playInfo);
-    }
-    return status;
-}
-
-/* napi_value <- std::vector<std::shared_ptr<PlayInfo>> */
-napi_status NapiUtils::SetValue(napi_env env, const std::vector<std::shared_ptr<PlayInfo>>& in, napi_value& out)
-{
-    SLOGD("napi_value <- std::vector<PlayInfo>");
-    napi_status status = napi_create_array_with_length(env, in.size(), &out);
-    CHECK_RETURN(status == napi_ok, "create array failed!", status);
-    int index = 0;
-    for (auto& item : in) {
-        napi_value element = nullptr;
-        NapiPlayInfo::SetValue(env, item, element);
-        status = napi_set_element(env, out, index++, element);
-        CHECK_RETURN((status == napi_ok), "napi_set_element failed!", status);
-    }
-    return status;
 }
 
 /* napi_value -> PlayInfoHolder */
@@ -1290,6 +1291,16 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, MediaInfo& out)
     status = GetValue(env, value, out.mediaUrl_);
     CHECK_RETURN(status == napi_ok, "get mediaUrl value failed", status);
 
+    bool hasStartPosition = false;
+    napi_has_named_property(env, in, "startPosition", &hasStartPosition);
+    if (hasStartPosition) {
+        status = napi_get_named_property(env, in, "startPosition", &value);
+        CHECK_RETURN(status == napi_ok, "get MediaInfo startPosition failed", status);
+        status = GetValue(env, value, out.startPosition_);
+        CHECK_RETURN(status == napi_ok, "get MediaInfo startPosition value failed", status);
+    } else {
+        out.startPosition_ = -1;
+    }
     return napi_ok;
 }
 
@@ -1309,6 +1320,13 @@ napi_status NapiUtils::SetValue(napi_env env, const MediaInfo& in, napi_value& o
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "mediaUrl", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    if (in.startPosition_ != -1) {
+        status = SetValue(env, in.startPosition_, property);
+        CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+        status = napi_set_named_property(env, out, "mediaInfo", property);
+        CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    }
 
     return napi_ok;
 }

@@ -29,8 +29,8 @@ class NapiDeviceInfoClass {
 //     using SetterType = std::function<napi_status(napi_env env, const std::shared_ptr<DeviceInfoClass>& in, napi_value& out)>;
 
 // private:
-//     static napi_status GetDeviceCategory(napi_env env, napi_value in, std::shared_ptr<DeviceInfoClass>& out);
-//     static napi_status SetDeviceCategory(napi_env env, const std::shared_ptr<DeviceInfoClass>& in, napi_value& out);
+//     static napi_status GetCastCategory(napi_env env, napi_value in, std::shared_ptr<DeviceInfoClass>& out);
+//     static napi_status SetCastCategory(napi_env env, const std::shared_ptr<DeviceInfoClass>& in, napi_value& out);
 
 //     static napi_status GetDeviceId(napi_env env, napi_value in, std::shared_ptr<DeviceInfoClass>& out);
 //     static napi_status SetDeviceId(napi_env env, const std::shared_ptr<DeviceInfoClass>& in, napi_value& out);

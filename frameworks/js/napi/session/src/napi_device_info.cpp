@@ -19,7 +19,7 @@
 
 namespace OHOS::AVSession {
 // std::map<std::string, NapiDeviceInfoClass::GetterType> NapiDeviceInfoClass::getterMap_ = {
-//     { "deviceCategory", GetDeviceCategory },
+//     { "castCategory", GetCastCategory },
 //     { "deviceId", GetDeviceId },
 //     { "deviceName", GetDeviceName },
 //     { "deviceType", GetDeviceType },
@@ -28,7 +28,7 @@ namespace OHOS::AVSession {
 // };
 
 // std::map<int32_t, NapiDeviceInfoClass::SetterType> NapiDeviceInfoClass::setterMap_ = {
-//     { DeviceInfoClass::DEVICE_INFO_KEY_DEVICE_CATEGORY, SetDeviceCategory },
+//     { DeviceInfoClass::DEVICE_INFO_KEY_DEVICE_CATEGORY, SetCastCategory },
 //     { DeviceInfoClass::DEVICE_INFO_KEY_DEVICE_ID, SetDeviceId },
 //     { DeviceInfoClass::DEVICE_INFO_KEY_DEVICE_NAME, SetDeviceName },
 //     { DeviceInfoClass::DEVICE_INFO_KEY_DEVICE_TYPE, SetDeviceType },
@@ -73,21 +73,21 @@ namespace OHOS::AVSession {
 //     return napi_ok;
 // }
 
-// napi_status NapiDeviceInfoClass::GetDeviceCategory(napi_env env, napi_value in, std::shared_ptr<DeviceInfoClass>& out)
+// napi_status NapiDeviceInfoClass::GetCastCategory(napi_env env, napi_value in, std::shared_ptr<DeviceInfoClass>& out)
 // {
 //     std::string property;
-//     auto status = NapiUtils::GetNamedProperty(env, in, "deviceCategory", property);
+//     auto status = NapiUtils::GetNamedProperty(env, in, "castCategory", property);
 //     CHECK_RETURN(status == napi_ok, "get property failed", status);
-//     out->SetDeviceCategory(property);
+//     out->SetCastCategory(property);
 //     return status;
 // }
 
-// napi_status NapiDeviceInfoClass::SetDeviceCategory(napi_env env, const std::shared_ptr<DeviceInfoClass>& in, napi_value& out)
+// napi_status NapiDeviceInfoClass::SetCastCategory(napi_env env, const std::shared_ptr<DeviceInfoClass>& in, napi_value& out)
 // {
 //     napi_value property {};
-//     auto status = NapiUtils::SetValue(env, in->GetDeviceCategory(), property);
+//     auto status = NapiUtils::SetValue(env, in->GetCastCategory(), property);
 //     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
-//     status = napi_set_named_property(env, out, "deviceCategory", property);
+//     status = napi_set_named_property(env, out, "castCategory", property);
 //     CHECK_RETURN(status == napi_ok, "set property failed", status);
 //     return status;
 // }

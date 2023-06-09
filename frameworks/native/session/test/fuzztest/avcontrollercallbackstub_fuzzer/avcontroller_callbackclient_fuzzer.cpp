@@ -45,7 +45,7 @@ class TestAVControllerCallback : public AVControllerCallback {
 
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const int32_t deviceState, const OutputDeviceInfo& outputDeviceInfo) override {};
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override {};
 
     void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
 

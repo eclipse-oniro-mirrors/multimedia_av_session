@@ -16,7 +16,6 @@
 #ifndef OHOS_NAPI_PLAY_INFO_HOLDER_H
 #define OHOS_NAPI_PLAY_INFO_HOLDER_H
 
-#include "play_info.h"
 #include "play_info_holder.h"
 #include "napi/native_api.h"
 

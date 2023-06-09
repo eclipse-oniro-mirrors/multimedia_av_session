@@ -46,6 +46,8 @@ public:
 private:
     int32_t HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetSessionType(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply);
@@ -95,6 +97,7 @@ private:
     using HandlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
     static inline HandlerFunc handlers[] = {
         &AVSessionStub::HandleGetSessionId,
+        &AVSessionStub::HandleGetSessionType,
         &AVSessionStub::HandleGetAVMetaData,
         &AVSessionStub::HandleSetAVMetaData,
         &AVSessionStub::HandleGetAVPlaybackState,

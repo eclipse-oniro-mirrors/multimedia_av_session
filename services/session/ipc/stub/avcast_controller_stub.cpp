@@ -82,7 +82,7 @@ int32_t AVCastControllerStub::HandleUpdate(MessageParcel& data, MessageParcel& r
 {
     MediaInfo mediaInfo;
     CHECK_AND_RETURN_RET_LOG(mediaInfo.ReadFromParcel(data), ERR_UNMARSHALLING, "Write mediaInfo failed");
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Update(mediaInfo)), ERR_NONE, "Write mediaInfo failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(UpdateMediaInfo(mediaInfo)), ERR_NONE, "Write mediaInfo failed");
     return ERR_NONE;
 }
 
@@ -104,9 +104,9 @@ int32_t AVCastControllerStub::HandleGetVolume(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
-int32_t AVCastControllerStub::HandleGetRepeatMode(MessageParcel& data, MessageParcel& reply)
+int32_t AVCastControllerStub::HandleGetLoopMode(MessageParcel& data, MessageParcel& reply)
 {
-    CHECK_AND_PRINT_LOG(reply.WriteDouble(GetRepeatMode()), "write double failed");
+    CHECK_AND_PRINT_LOG(reply.WriteDouble(GetLoopMode()), "write double failed");
     return ERR_NONE;
 }
 

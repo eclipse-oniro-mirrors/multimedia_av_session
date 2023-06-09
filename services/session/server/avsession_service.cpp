@@ -456,7 +456,7 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::StopCast(const std::string& sessionId)
+int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("StopCast: CheckSystemPermission failed");
@@ -465,7 +465,7 @@ int32_t AVSessionService::StopCast(const std::string& sessionId)
         return ERR_NO_PERMISSION;
     }
 
-    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
     CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
 
     return AVSESSION_SUCCESS;
@@ -502,10 +502,10 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         }
     }
 
-    int32_t deviceCategoryLocal = 1;
+    int32_t castCategoryLocal = 1;
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
-    deviceInfo.deviceCategory_ = deviceCategoryLocal;
+    deviceInfo.castCategory_ = castCategoryLocal;
     deviceInfo.deviceId_ = "0";
     deviceInfo.deviceName_ = "LocalDevice";
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
@@ -1322,13 +1322,13 @@ void AVSessionService::SetDeviceInfo(const std::vector<AudioStandard::AudioDevic
 
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.clear();
-    int32_t deviceCategory = 1; // 1 is local
+    int32_t castCategory = 1; // 1 is local
     if (!IsLocalDevice(castAudioDescriptors[0].networkId_)) {
-        deviceCategory = 2; // 2 is stream
+        castCategory = 2; // 2 is stream
     }
     for (const auto &audioDescriptor : castAudioDescriptors) {
         DeviceInfo deviceInfo;
-        deviceInfo.deviceCategory_ = deviceCategory;
+        deviceInfo.castCategory_ = castCategory;
         deviceInfo.deviceId_ = std::to_string(audioDescriptor.deviceId_);
         deviceInfo.deviceName_ = audioDescriptor.deviceName_;
         SLOGI("deviceName is %{public}s", audioDescriptor.deviceName_.c_str());
@@ -1370,8 +1370,8 @@ void AVSessionService::GetDeviceInfo(const sptr <AVSessionItem>& session,
     OutputDeviceInfo tempOutputDeviceInfo;
     session->GetOutputDevice(tempOutputDeviceInfo);
     // If not in remote, return directly
-    if (tempOutputDeviceInfo.deviceInfos_.size() == 0 || tempOutputDeviceInfo.deviceInfos_[0].deviceCategory_ == 1) {
-        SLOGI("deviceCategory is %{public}d, no need to cancel", tempOutputDeviceInfo.deviceInfos_[0].deviceCategory_);
+    if (tempOutputDeviceInfo.deviceInfos_.size() == 0 || tempOutputDeviceInfo.deviceInfos_[0].castCategory_ == 1) {
+        SLOGI("castCategory is %{public}d, no need to cancel", tempOutputDeviceInfo.deviceInfos_[0].castCategory_);
         return;
     }
     int32_t ret = GetAudioDescriptor(session->GetDescriptor().outputDeviceInfo_.deviceInfos_[0].deviceId_,

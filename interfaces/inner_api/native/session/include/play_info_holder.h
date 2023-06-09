@@ -22,15 +22,14 @@
 #include <map>
 
 #include "parcel.h"
-#include "play_info.h"
+#include "avqueue_item.h"
 
 namespace OHOS::AVSession {
 class PlayInfoHolder : public Parcelable {
 public:
     enum {
-        PLAY_INFO_HOLDER_KEY_CURRENT_INDEX = 0,
-        PLAY_INFO_HOLDER_KEY_PLAY_INFOS = 1,
-        PLAY_INFO_HOLDER_KEY_MAX = 2
+        PLAY_INFO_HOLDER_KEY_PLAY_INFOS = 0,
+        PLAY_INFO_HOLDER_KEY_MAX = 1,
     };
 
     PlayInfoHolder() = default;
@@ -39,20 +38,15 @@ public:
     static PlayInfoHolder* Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& parcel) const override;
 
-    void SetCurrentIndex(int32_t currentIndex);
-    int32_t GetCurrentTime() const;
-
-    void SetPlayInfos(const std::vector<std::shared_ptr<PlayInfo>>& playInfos);
-
-    const std::vector<std::shared_ptr<PlayInfo>>& GetPlayInfos() const;
+    void SetPlayInfos(const std::vector<AVQueueItem>& playInfos);
+    const std::vector<AVQueueItem>& GetPlayInfos() const;
 
     bool IsValid() const;
 
     void Reset();
 
 private:
-    int32_t currentIndex_ = 0;
-    std::vector<std::shared_ptr<PlayInfo>> playInfos_ = {};
+    std::vector<AVQueueItem> playInfos_ = {};
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_PLAY_INFO_HOLDER_H
