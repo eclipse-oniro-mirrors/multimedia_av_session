@@ -129,11 +129,11 @@ void NapiAVCastControllerCallback::OnLoopModeChange(const int32_t loopMode)
     HandleEvent(EVENT_CAST_LOOP_MODE_CHANGE, loopMode);
 }
 
-void NapiAVCastControllerCallback::OnPlaySpeedChange(const int32_t speed)
+void NapiAVCastControllerCallback::OnPlaySpeedChange(const double playSpeed)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlaySpeedChange");
     SLOGI("Start handle OnPlaySpeedChange event");
-    HandleEvent(EVENT_CAST_PLAY_SPEED_CHANGE, speed);
+    HandleEvent(EVENT_CAST_PLAY_SPEED_CHANGE, playSpeed);
 }
 
 void NapiAVCastControllerCallback::OnPositionChange(const int32_t seek)

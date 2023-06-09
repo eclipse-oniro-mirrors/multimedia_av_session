@@ -79,11 +79,11 @@ void AVCastControllerCallbackProxy::OnLoopModeChange(const int32_t loopMode)
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnPlaySpeedChange(const int32_t speed)
+void AVCastControllerCallbackProxy::OnPlaySpeedChange(const double playSpeed)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(speed), "write speed failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteDouble(playSpeed), "write speed failed");
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };

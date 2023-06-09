@@ -83,7 +83,7 @@ private:
     std::string surfaceId_;
     int32_t volume_;
     int32_t loopMode_;
-    int32_t playSpeed_;
+    double playSpeed_;
     int32_t currentTime_;
     std::shared_ptr<AVCastController> castController_;
     std::shared_ptr<NapiAVCastControllerCallback> callback_;

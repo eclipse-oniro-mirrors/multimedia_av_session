@@ -27,12 +27,20 @@ public:
 
     void Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
-    void OnPlayerStatusChanged(const AVCastPlayerState& playerState) override;
+    void OnStateChange(const AVCastPlayerState& state) override;
+
+    void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
 
     void OnVolumeChange(const int32_t volume) override;
 
-    void OnPlaySpeedChange(const float playSpeed) override;
+    void OnLoopModeChange(const int32_t loopMode) override;
 
+    void OnPlaySpeedChange(const double playSpeed) override;
+
+    void OnPositionChange(const int32_t position) override;
+
+    void OnVideoSizeChange(const int32_t width, const int32_t height) override;
+    
     void OnError(const int32_t errorCode, const std::string& errorMsg) override;
 
     int32_t GetDuration() override;

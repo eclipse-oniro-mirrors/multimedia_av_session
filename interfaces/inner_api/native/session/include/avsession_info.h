@@ -86,17 +86,23 @@ public:
 class IAVCastControllerProxyListener {
 public:
 
-    virtual void OnPlayerStatusChanged(const AVCastPlayerState& playerState) = 0;
 
-    // virtual void OnPositionChanged(const int32_t position, int32_t bufferPosition, int32_t duration) = 0;
+    virtual void OnStateChange(const AVCastPlayerState& state) = 0;
 
-    // virtual void OnMediaItemChanged(const PlayInfo playInfo) = 0;
+    virtual void OnMediaItemChange(const AVQueueItem& avQueueItem) = 0;
 
     virtual void OnVolumeChange(const int32_t volume) = 0;
 
-    virtual void OnPlaySpeedChange(const float playSpeed) = 0;
+    virtual void OnLoopModeChange(const int32_t loopMode) = 0;
 
+    virtual void OnPlaySpeedChange(const double playSpeed) = 0;
+
+    virtual void OnPositionChange(const int32_t position) = 0;
+
+    virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
+    
     virtual void OnError(const int32_t errorCode, const std::string& errorMsg) = 0;
+
     /**
      * @brief Deconstruct SessionListener.
      * @since 9
@@ -322,7 +328,7 @@ public:
 
     virtual void OnLoopModeChange(const int32_t loopMode) = 0;
 
-    virtual void OnPlaySpeedChange(const int32_t playSpeed) = 0;
+    virtual void OnPlaySpeedChange(const double playSpeed) = 0;
 
     virtual void OnPositionChange(const int32_t position) = 0;
 
