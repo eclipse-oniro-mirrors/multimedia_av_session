@@ -64,7 +64,7 @@ void AVCastControllerCallbackClient::OnLoopModeChange(const int32_t loopMode)
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
-void AVCastControllerCallbackClient::OnPlaySpeedChange(const double playSpeed)
+void AVCastControllerCallbackClient::OnPlaySpeedChange(const int32_t playSpeed)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 

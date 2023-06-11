@@ -130,7 +130,7 @@ napi_status NapiCastControlCommand::SetNoneParam(napi_env env, AVCastControlComm
 
 napi_status NapiCastControlCommand::GetSpeed(napi_env env, napi_value in, AVCastControlCommand& out)
 {
-    double speed {};
+    int32_t speed {};
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", speed);
     if (status != napi_ok) {
         SLOGE("get parameter failed");
@@ -143,7 +143,7 @@ napi_status NapiCastControlCommand::GetSpeed(napi_env env, napi_value in, AVCast
 
 napi_status NapiCastControlCommand::SetSpeed(napi_env env, AVCastControlCommand& in, napi_value& out)
 {
-    double speed {};
+    int32_t speed {};
     CHECK_AND_RETURN_RET_LOG(in.GetSpeed(speed) == AVSESSION_SUCCESS, napi_invalid_arg, "get parameter failed");
 
     napi_value property {};

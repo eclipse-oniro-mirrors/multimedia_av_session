@@ -42,7 +42,7 @@ AVCastControlCommand *AVCastControlCommand::Unmarshalling(Parcel& data)
                 result->SetVolume(data.ReadInt32());
                 break;
             case CAST_CONTROL_CMD_SET_SPEED:
-                result->SetSpeed(data.ReadDouble());
+                result->SetSpeed(data.ReadInt32());
                 break;
             default:
                 break;
@@ -66,8 +66,8 @@ bool AVCastControlCommand::Marshalling(Parcel& parcel) const
                 && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write volume failed");
             break;
         case CAST_CONTROL_CMD_SET_SPEED:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<double>(param_)
-                && parcel.WriteDouble(std::get<double>(param_)), false, "write speed failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
+                && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write speed failed");
             break;
         default:
             break;
@@ -94,7 +94,7 @@ int32_t AVCastControlCommand::GetCommand() const
     return cmd_;
 }
 
-int32_t AVCastControlCommand::SetSpeed(double speed)
+int32_t AVCastControlCommand::SetSpeed(int32_t speed)
 {
     if (speed <= 0) {
         return ERR_INVALID_PARAM;
@@ -103,9 +103,9 @@ int32_t AVCastControlCommand::SetSpeed(double speed)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVCastControlCommand::GetSpeed(double& speed) const
+int32_t AVCastControlCommand::GetSpeed(int32_t& speed) const
 {
-    if (!std::holds_alternative<double>(param_)) {
+    if (!std::holds_alternative<int32_t>(param_)) {
         return AVSESSION_ERROR;
     }
     speed = std::get<int32_t>(param_);

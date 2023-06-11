@@ -95,7 +95,7 @@ public:
 
     virtual void OnLoopModeChange(const int32_t loopMode) = 0;
 
-    virtual void OnPlaySpeedChange(const double playSpeed) = 0;
+    virtual void OnPlaySpeedChange(const int32_t playSpeed) = 0;
 
     virtual void OnPositionChange(const int32_t position) = 0;
 
@@ -328,7 +328,7 @@ public:
 
     virtual void OnLoopModeChange(const int32_t loopMode) = 0;
 
-    virtual void OnPlaySpeedChange(const double playSpeed) = 0;
+    virtual void OnPlaySpeedChange(const int32_t playSpeed) = 0;
 
     virtual void OnPositionChange(const int32_t position) = 0;
 

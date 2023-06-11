@@ -39,7 +39,7 @@ private:
 
     int32_t HandleGetDuration(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetSurfaceId(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetPosition(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetVolume(MessageParcel& data, MessageParcel& reply);
 
@@ -47,7 +47,9 @@ private:
 
     int32_t HandleGetPlaySpeed(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetCurrentTime(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetPlayState(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleSetDisplaySurface(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
@@ -61,11 +63,12 @@ private:
         &AVCastControllerStub::HandleStart,
         &AVCastControllerStub::HandleUpdate,
         &AVCastControllerStub::HandleGetDuration,
-        &AVCastControllerStub::HandleGetSurfaceId,
+        &AVCastControllerStub::HandleGetPosition,
         &AVCastControllerStub::HandleGetVolume,
         &AVCastControllerStub::HandleGetLoopMode,
         &AVCastControllerStub::HandleGetPlaySpeed,
-        &AVCastControllerStub::HandleGetCurrentTime,
+        &AVCastControllerStub::HandleGetPlayState,
+        &AVCastControllerStub::HandleSetDisplaySurface,
         &AVCastControllerStub::HandleRegisterCallbackInner,
         &AVCastControllerStub::HandleDestroy,
     };

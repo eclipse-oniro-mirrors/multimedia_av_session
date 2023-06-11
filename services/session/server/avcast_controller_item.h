@@ -35,7 +35,7 @@ public:
 
     void OnLoopModeChange(const int32_t loopMode) override;
 
-    void OnPlaySpeedChange(const double playSpeed) override;
+    void OnPlaySpeedChange(const int32_t playSpeed) override;
 
     void OnPositionChange(const int32_t position) override;
 
@@ -43,23 +43,25 @@ public:
     
     void OnError(const int32_t errorCode, const std::string& errorMsg) override;
 
-    int32_t GetDuration() override;
-
-    std::string GetSurfaceId() override;
-
-    int32_t GetVolume() override;
-
-    int32_t GetLoopMode() override;
-
-    double GetPlaySpeed() override;
-
-    int32_t GetCurrentTime() override;
-
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
     int32_t Start(const PlayInfoHolder& playInfoHolder) override;
 
     int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) override;
+
+    int32_t GetDuration(int32_t& duration) override;
+
+    int32_t GetPosition(int32_t& position) override;
+
+    int32_t GetVolume(int32_t& volume) override;
+
+    int32_t GetLoopMode(int32_t& loopMode) override;
+
+    int32_t GetPlaySpeed(int32_t& playSpeed) override;
+
+    int32_t GetPlayState(AVCastPlayerState& playerState) override;
+
+    int32_t SetDisplaySurface(std::string& surfaceId) override;
 
     void RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
@@ -70,12 +72,6 @@ protected:
 
 private:
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
-    int32_t duration_;
-    std::string surfaceId_;
-    int32_t volume_;
-    int32_t loopMode_;
-    double playSpeed_;
-    int32_t currentTime_;
     sptr<IAVCastControllerCallback> callback_;
 };
 } // namespace OHOS::AVSession

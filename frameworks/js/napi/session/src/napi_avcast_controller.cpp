@@ -63,6 +63,13 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("start", Start),
         DECLARE_NAPI_FUNCTION("updateMediaInfo", UpdateMediaInfo),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
+        DECLARE_NAPI_FUNCTION("getDuration", GetDuration),
+        DECLARE_NAPI_FUNCTION("getPosition", GetPosition),
+        DECLARE_NAPI_FUNCTION("getVolume", GetVolume),
+        DECLARE_NAPI_FUNCTION("getLoopMode", GetLoopMode),
+        DECLARE_NAPI_FUNCTION("getPlaySpeed", GetPlaySpeed),
+        DECLARE_NAPI_FUNCTION("getPlayState", GetPlayState),
+        DECLARE_NAPI_FUNCTION("setDisplaySurface", SetDisplaySurface),
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
@@ -111,38 +118,6 @@ napi_status NapiAVCastController::NewInstance(napi_env env, std::shared_ptr<AVCa
     NapiAVCastController* napiCastController{};
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiCastController)), napi_generic_failure);
     napiCastController->castController_ = std::move(nativeController);
-
-    napiCastController->duration_ = napiCastController->castController_->GetDuration();
-    napiCastController->surfaceId_ = napiCastController->castController_->GetSurfaceId();
-    napiCastController->volume_ = napiCastController->castController_->GetVolume();
-    napiCastController->loopMode_ = napiCastController->castController_->GetLoopMode();
-    napiCastController->playSpeed_ = napiCastController->castController_->GetPlaySpeed();
-    napiCastController->currentTime_ = napiCastController->castController_->GetCurrentTime();
-
-    napi_value property {};
-    auto status = NapiUtils::SetValue(env, napiCastController->duration_, property);
-    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "duration", property), napi_generic_failure);
-
-    status = NapiUtils::SetValue(env, napiCastController->surfaceId_, property);
-    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "surfaceId", property), napi_generic_failure);
-
-    status = NapiUtils::SetValue(env, napiCastController->volume_, property);
-    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "volume", property), napi_generic_failure);
-
-    status = NapiUtils::SetValue(env, napiCastController->loopMode_, property);
-    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "loopMode", property), napi_generic_failure);
-
-    status = NapiUtils::SetValue(env, napiCastController->playSpeed_, property);
-    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "playSpeed", property), napi_generic_failure);
-
-    status = NapiUtils::SetValue(env, napiCastController->currentTime_, property);
-    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "currentTime", property), napi_generic_failure);
 
     out = instance;
     return napi_ok;
@@ -295,6 +270,316 @@ napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_
     };
 
     return NapiAsyncWork::Enqueue(env, context, "SendControlCommand", executor);
+}
+
+napi_value NapiAVCastController::GetDuration(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        int32_t duration;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROLLER_GET_DURATION_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetDuration failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetDuration failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetDuration(context->duration);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetDuration failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetDuration failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetDuration failed : native no permission";
+            } else {
+                context->errMessage = "GetDuration failed : native server exception";
+            }
+            SLOGE("controller GetDuration failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->duration = NapiUtils::SetValue(env, context->duration, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetDuration", executor, complete);
+}
+
+napi_value NapiAVCastController::GetPosition(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        int32_t position;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROLLER_GET_POSITION_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetPosition failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetPosition failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetPosition(context->position);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetPosition failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetPosition failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetPosition failed : native no permission";
+            } else {
+                context->errMessage = "GetPosition failed : native server exception";
+            }
+            SLOGE("controller GetPosition failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->position, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetPosition", executor, complete);
+}
+
+napi_value NapiAVCastController::GetVolume(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        int32_t volume;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROLLER_GET_VOLUME_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetVolume failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetVolume failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetVolume(context->volume);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetVolume failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetVolume failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetVolume failed : native no permission";
+            } else {
+                context->errMessage = "GetVolume failed : native server exception";
+            }
+            SLOGE("controller GetVolume failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->volume, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetVolume", executor, complete);
+}
+
+napi_value NapiAVCastController::GetLoopMode(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        int32_t loopMode;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROLLER_GET_LOOPMODE_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetLoopMode failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetLoopMode failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetLoopMode(context->loopMode);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetLoopMode failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetLoopMode failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetLoopMode failed : native no permission";
+            } else {
+                context->errMessage = "GetLoopMode failed : native server exception";
+            }
+            SLOGE("controller GetLoopMode failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->loopMode, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetLoopMode", executor, complete);
+}
+
+napi_value NapiAVCastController::GetPlaySpeed(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        int32_t playSpeed;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROLLER_GET_PLAY_SPEED_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetPlaySpeed failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetPlaySpeed failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetPlaySpeed(context->playSpeed);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetPlaySpeed failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetPlaySpeed failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetPlaySpeed failed : native no permission";
+            } else {
+                context->errMessage = "GetPlaySpeed failed : native server exception";
+            }
+            SLOGE("controller GetPlaySpeed failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->playSpeed, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetPlaySpeed", executor, complete);
+}
+
+napi_value NapiAVCastController::GetPlayState(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        AVCastPlayerState playerState;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROLLER_GET_PLAY_STATE_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetPlayState failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetPlayState failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetPlayState(context->playerState);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetPlayState failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetPlayState failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetPlayState failed : native no permission";
+            } else {
+                context->errMessage = "GetPlayState failed : native server exception";
+            }
+            SLOGE("controller GetPlayState failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->playerState, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetPlayState", executor, complete);
+}
+
+napi_value NapiAVCastController::SetDisplaySurface(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastController::SetDisplaySurface");
+    struct ConcrentContext : public ContextBase {
+        std::string surfaceId;
+    };
+    auto context = std::make_shared<ConcrentContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->surfaceId);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_CAST_CONTROLLER_SET_DISPLAY_SURFACE_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("SetDisplaySurface failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "SetDisplaySurface failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->SetDisplaySurface(context->surfaceId);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetDisplaySurface failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "SetDisplaySurface failed : native controller not exist";
+            } else if (ret == ERR_SESSION_DEACTIVE) {
+                context->errMessage = "SetDisplaySurface failed : native session is not active";
+            } else if (ret == ERR_COMMAND_NOT_SUPPORT) {
+                context->errMessage = "SetDisplaySurface failed : native command not support";
+            } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
+                context->errMessage = "SetDisplaySurface failed : native command send nums overload";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SetDisplaySurface failed : native no permission";
+            } else {
+                context->errMessage = "SetDisplaySurface failed : native server exception";
+            }
+            SLOGE("controller SetDisplaySurface failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "SetDisplaySurface", executor);
 }
 
 napi_status NapiAVCastController::RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,

@@ -32,7 +32,7 @@ public:
 
     void OnLoopModeChange(const int32_t loopMode) override;
 
-    void OnPlaySpeedChange(const double playSpeed) override;
+    void OnPlaySpeedChange(const int32_t playSpeed) override;
 
     void OnPositionChange(const int32_t position) override;
 

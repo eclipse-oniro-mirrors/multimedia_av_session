@@ -44,7 +44,19 @@ public:
 
     virtual void SendControlCommand(const AVCastControlCommand& cmd) = 0;
 
+    virtual int32_t GetDuration(int32_t& duration) = 0;
 
+    virtual int32_t GetPosition(int32_t& position) = 0;
+
+    virtual int32_t GetVolume(int32_t& volume) = 0;
+
+    virtual int32_t GetLoopMode(int32_t& loopMode) = 0;
+
+    virtual int32_t GetPlaySpeed(int32_t& playSpeed) = 0;
+
+    virtual int32_t GetPlayState(AVCastPlayerState& playerState) = 0;
+
+    virtual int32_t SetDisplaySurface(std::string& surfaceId) = 0;
 
 
 

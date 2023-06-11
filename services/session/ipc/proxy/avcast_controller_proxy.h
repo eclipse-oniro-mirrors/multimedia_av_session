@@ -38,17 +38,19 @@ public:
 
     int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) override;
 
-    int32_t GetDuration() override;
+    int32_t GetDuration(int32_t& duration) override;
 
-    std::string GetSurfaceId() override;
+    int32_t GetPosition(int32_t& position) override;
 
-    int32_t GetVolume() override;
+    int32_t GetVolume(int32_t& volume) override;
 
-    int32_t GetLoopMode() override;
+    int32_t GetLoopMode(int32_t& loopMode) override;
 
-    double GetPlaySpeed() override;
+    int32_t GetPlaySpeed(int32_t& playSpeed) override;
 
-    int32_t GetCurrentTime() override;
+    int32_t GetPlayState(AVCastPlayerState& playerState) override;
+
+    int32_t SetDisplaySurface(std::string& surfaceId) override;
 
     int32_t Destroy() override;
     

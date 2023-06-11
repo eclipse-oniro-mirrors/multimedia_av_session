@@ -52,8 +52,8 @@ public:
     int32_t SetCommand(int32_t cmd);
     int32_t GetCommand() const;
 
-    int32_t SetSpeed(double speed);
-    int32_t GetSpeed(double& speed) const;
+    int32_t SetSpeed(int32_t speed);
+    int32_t GetSpeed(int32_t& speed) const;
 
     int32_t SetSeekTime(int64_t time);
     int32_t GetSeekTime(int64_t& time) const;

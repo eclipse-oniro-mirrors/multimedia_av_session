@@ -77,8 +77,8 @@ int32_t AVCastControllerCallbackStub::HandleOnLoopModeChange(MessageParcel& data
 
 int32_t AVCastControllerCallbackStub::HandleOnPlaySpeedChange(MessageParcel& data, MessageParcel& reply)
 {
-    double playSpeed;
-    CHECK_AND_RETURN_RET_LOG(data.ReadDouble(playSpeed), ERR_NONE, "read speed failed");
+    int32_t playSpeed;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(playSpeed), ERR_NONE, "read speed failed");
     OnPlaySpeedChange(playSpeed);
     return ERR_NONE;
 }

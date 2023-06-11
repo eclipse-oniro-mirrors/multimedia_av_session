@@ -45,6 +45,13 @@ private:
     static napi_value SendControlCommand(napi_env env, napi_callback_info info);
     static napi_value Start(napi_env env, napi_callback_info info);
     static napi_value UpdateMediaInfo(napi_env env, napi_callback_info info);
+    static napi_value GetDuration(napi_env env, napi_callback_info info);
+    static napi_value GetPosition(napi_env env, napi_callback_info info);
+    static napi_value GetVolume(napi_env env, napi_callback_info info);
+    static napi_value GetLoopMode(napi_env env, napi_callback_info info);
+    static napi_value GetPlaySpeed(napi_env env, napi_callback_info info);
+    static napi_value GetPlayState(napi_env env, napi_callback_info info);
+    static napi_value SetDisplaySurface(napi_env env, napi_callback_info info);
 
     static napi_status OnStateChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
@@ -79,12 +86,6 @@ private:
         const std::string& event, napi_value filter, napi_value callback);
 
     napi_ref wrapperRef_ {};
-    int32_t duration_;
-    std::string surfaceId_;
-    int32_t volume_;
-    int32_t loopMode_;
-    double playSpeed_;
-    int32_t currentTime_;
     std::shared_ptr<AVCastController> castController_;
     std::shared_ptr<NapiAVCastControllerCallback> callback_;
 

@@ -58,7 +58,7 @@ void AVCastControllerItem::OnLoopModeChange(const int32_t loopMode)
     callback_->OnLoopModeChange(loopMode);
 }
 
-void AVCastControllerItem::OnPlaySpeedChange(const double playSpeed)
+void AVCastControllerItem::OnPlaySpeedChange(const int32_t playSpeed)
 {
     SLOGI("OnPlaySpeedChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
@@ -86,36 +86,6 @@ void AVCastControllerItem::OnError(const int32_t errorCode, const std::string& e
     callback_->OnError(errorCode, errorMsg);
 }
 
-int32_t AVCastControllerItem::GetDuration()
-{
-    return duration_;
-}
-
-std::string AVCastControllerItem::GetSurfaceId()
-{
-    return surfaceId_;
-}
-
-int32_t AVCastControllerItem::GetVolume()
-{
-    return volume_;
-}
-
-int32_t AVCastControllerItem::GetLoopMode()
-{
-    return loopMode_;
-}
-
-double AVCastControllerItem::GetPlaySpeed()
-{
-    return playSpeed_;
-}
-
-int32_t AVCastControllerItem::GetCurrentTime()
-{
-    return currentTime_;
-}
-
 int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd)
 {
     SLOGI("Call SendControlCommand of cast controller proxy");
@@ -135,6 +105,42 @@ int32_t AVCastControllerItem::UpdateMediaInfo(const MediaInfo& mediaInfo)
     SLOGI("Call Update of cast controller proxy");
     castControllerProxy_->UpdateMediaInfo(mediaInfo);
     return AVSESSION_SUCCESS;
+}
+
+
+int32_t AVCastControllerItem::GetDuration(int32_t& duration)
+{
+    return castControllerProxy_->GetDuration(duration);
+}
+
+int32_t AVCastControllerItem::GetPosition(int32_t& position)
+{
+    return castControllerProxy_->GetPosition(position);
+}
+
+int32_t AVCastControllerItem::GetVolume(int32_t& volume)
+{
+    return castControllerProxy_->GetVolume(volume);
+}
+
+int32_t AVCastControllerItem::GetLoopMode(int32_t& loopMode)
+{
+    return castControllerProxy_->GetLoopMode(loopMode);
+}
+
+int32_t AVCastControllerItem::GetPlaySpeed(int32_t& playSpeed)
+{
+    return castControllerProxy_->GetPlaySpeed(playSpeed);
+}
+
+int32_t AVCastControllerItem::GetPlayState(AVCastPlayerState& playerState)
+{
+    return castControllerProxy_->GetPlayState(playerState);
+}
+
+int32_t AVCastControllerItem::SetDisplaySurface(std::string& surfaceId)
+{
+    return castControllerProxy_->SetDisplaySurface(surfaceId);
 }
 
 void AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)

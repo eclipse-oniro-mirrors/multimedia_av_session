@@ -65,17 +65,19 @@ public:
     */
     virtual int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) = 0;
 
-    virtual int32_t GetDuration() = 0;
+    virtual int32_t GetDuration(int32_t& duration) = 0;
 
-    virtual std::string GetSurfaceId() = 0;
+    virtual int32_t GetPosition(int32_t& position) = 0;
 
-    virtual int32_t GetVolume() = 0;
+    virtual int32_t GetVolume(int32_t& volume) = 0;
 
-    virtual int32_t GetLoopMode() = 0;
+    virtual int32_t GetLoopMode(int32_t& loopMode) = 0;
 
-    virtual double GetPlaySpeed() = 0;
+    virtual int32_t GetPlaySpeed(int32_t& playSpeed) = 0;
 
-    virtual int32_t GetCurrentTime() = 0;
+    virtual int32_t GetPlayState(AVCastPlayerState& playerState) = 0;
+
+    virtual int32_t SetDisplaySurface(std::string& surfaceId) = 0;
 
     virtual int32_t Destroy() = 0;
 
