@@ -26,6 +26,7 @@
       ],
       "deps": {
         "components": [
+          "napi",
           "ace_napi",
           "ipc_single",
           "libhilog",
@@ -33,8 +34,6 @@
           "system_ability_fwk",
           "libaccesstoken_sdk",
           "bytrace_core"
-        ],
-        "third_party": [
         ]
       },
       "build": {
@@ -45,7 +44,8 @@
             "//foundation/multimedia/av_session/frameworks/common:avsession_common",
             "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
             "//foundation/multimedia/av_session/frameworks/js/napi/session:avsession_napi",
-            "//foundation/multimedia/av_session/utils:avsession_utils"
+            "//foundation/multimedia/av_session/utils:avsession_utils",
+            "//foundation/multimedia/av_session/avpicker:avpicker"
           ],
           "service_group": [
             "//foundation/multimedia/av_session/services/session:avsession_item",
