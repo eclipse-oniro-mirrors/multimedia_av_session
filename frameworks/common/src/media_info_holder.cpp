@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "play_info_holder.h"
+#include "media_info_holder.h"
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-bool PlayInfoHolder::Marshalling(Parcel& parcel) const
+bool MediaInfoHolder::Marshalling(Parcel& parcel) const
 {
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(currentIndex_), false, "write currentIndex failed");
     int32_t playInfosSize = playInfos_.size();
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(playInfosSize), false, "write playInfoSize failed");
     for (auto playInfo : playInfos_) {
@@ -27,37 +28,51 @@ bool PlayInfoHolder::Marshalling(Parcel& parcel) const
     return true;
 }
 
-PlayInfoHolder *PlayInfoHolder::Unmarshalling(Parcel& data)
+MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
 {
-    auto *result = new (std::nothrow) PlayInfoHolder();
+    auto *result = new (std::nothrow) MediaInfoHolder();
 
+    int32_t currentIndex;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(currentIndex), nullptr, "write currentIndex failed");
+    result->currentIndex_ = currentIndex;
     int32_t playInfosSize;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(playInfosSize), nullptr, "write playInfoSize failed");
     for (int i = 0; i < playInfosSize; i++) {
         AVQueueItem* queueItem = AVQueueItem::Unmarshalling(data);
         result->playInfos_.emplace_back(*queueItem);
     }
-    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new PlayInfoHolder failed");
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new MediaInfoHolder failed");
     return result;
 }
 
-void PlayInfoHolder::SetPlayInfos(const std::vector<AVQueueItem>& playInfos)
+void MediaInfoHolder::SetCurrentIndex(const int32_t& currentIndex)
+{
+    currentIndex_ = currentIndex;
+}
+
+const int32_t MediaInfoHolder::GetCurrentIndex() const
+{
+    return currentIndex_;
+}
+
+void MediaInfoHolder::SetPlayInfos(const std::vector<AVQueueItem>& playInfos)
 {
     playInfos_ = playInfos;
 }
 
-const std::vector<AVQueueItem>& PlayInfoHolder::GetPlayInfos() const
+const std::vector<AVQueueItem>& MediaInfoHolder::GetPlayInfos() const
 {
     return playInfos_;
 }
 
-bool PlayInfoHolder::IsValid() const
+bool MediaInfoHolder::IsValid() const
 {
     return playInfos_.size() > 0;
 }
 
-void PlayInfoHolder::Reset()
+void MediaInfoHolder::Reset()
 {
+    currentIndex_ = 0;
     playInfos_.clear();
 }
 } // namespace OHOS::AVSession

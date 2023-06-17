@@ -18,7 +18,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
-#include "play_info_holder.h"
+#include "media_info_holder.h"
 
 namespace OHOS::AVSession {
 AVCastControllerProxy::AVCastControllerProxy(const sptr<IRemoteObject>& impl)
@@ -33,13 +33,13 @@ AVCastControllerProxy::~AVCastControllerProxy()
     Destroy();
 }
 
-int32_t AVCastControllerProxy::Start(const PlayInfoHolder& playInfoHolder)
+int32_t AVCastControllerProxy::SetMediaList(const MediaInfoHolder& mediaInfoHolder)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&playInfoHolder), ERR_UNMARSHALLING, "Write items failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&mediaInfoHolder), ERR_UNMARSHALLING, "Write items failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");

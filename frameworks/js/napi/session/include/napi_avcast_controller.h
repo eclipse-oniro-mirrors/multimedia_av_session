@@ -43,7 +43,7 @@ private:
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
     static napi_value SendControlCommand(napi_env env, napi_callback_info info);
-    static napi_value Start(napi_env env, napi_callback_info info);
+    static napi_value SetMediaList(napi_env env, napi_callback_info info);
     static napi_value UpdateMediaInfo(napi_env env, napi_callback_info info);
     static napi_value GetDuration(napi_env env, napi_callback_info info);
     static napi_value GetPosition(napi_env env, napi_callback_info info);

@@ -28,6 +28,7 @@ AVCastControllerItem::AVCastControllerItem()
 void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
 {
     castControllerProxy_ = castControllerProxy;
+    castControllerProxy_->RegisterControllerListener(shared_from_this());
 }
 
 void AVCastControllerItem::OnStateChange(const AVCastPlayerState& state)
@@ -65,11 +66,11 @@ void AVCastControllerItem::OnPlaySpeedChange(const int32_t playSpeed)
     callback_->OnPlaySpeedChange(playSpeed);
 }
 
-void AVCastControllerItem::OnPositionChange(const int32_t position)
+void AVCastControllerItem::OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration)
 {
     SLOGI("OnPositionChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPositionChange(position);
+    callback_->OnPositionChange(position, bufferPosition, duration);
 }
 
 void AVCastControllerItem::OnVideoSizeChange(const int32_t width, const int32_t height)
@@ -93,10 +94,10 @@ int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVCastControllerItem::Start(const PlayInfoHolder& playInfoHolder)
+int32_t AVCastControllerItem::SetMediaList(const MediaInfoHolder& mediaInfoHolder)
 {
     SLOGI("Call Start of cast controller proxy");
-    castControllerProxy_->Start(playInfoHolder);
+    castControllerProxy_->SetMediaList(mediaInfoHolder);
     return AVSESSION_SUCCESS;
 }
 
@@ -143,10 +144,10 @@ int32_t AVCastControllerItem::SetDisplaySurface(std::string& surfaceId)
     return castControllerProxy_->SetDisplaySurface(surfaceId);
 }
 
-void AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
+bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
 {
     SLOGI("Call RegisterControllerListener of cast controller proxy");
-    castControllerProxy->RegisterControllerListener(shared_from_this());
+    return castControllerProxy->RegisterControllerListener(shared_from_this());
 }
 
 int32_t AVCastControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)

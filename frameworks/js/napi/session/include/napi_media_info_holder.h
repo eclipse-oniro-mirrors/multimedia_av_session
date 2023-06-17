@@ -13,27 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_NAPI_PLAY_INFO_HOLDER_H
-#define OHOS_NAPI_PLAY_INFO_HOLDER_H
+#ifndef OHOS_NAPI_MEDIA_INFO_HOLDER_H
+#define OHOS_NAPI_MEDIA_INFO_HOLDER_H
 
-#include "play_info_holder.h"
+#include "media_info_holder.h"
 #include "napi/native_api.h"
 
 namespace OHOS::AVSession {
-class NapiPlayInfoHolder {
+class NapiMediaInfoHolder {
 public:
-    static napi_status GetValue(napi_env env, napi_value in, PlayInfoHolder& out);
-    static napi_status SetValue(napi_env env, const PlayInfoHolder& in, napi_value& out);
+    static napi_status GetValue(napi_env env, napi_value in, MediaInfoHolder& out);
+    static napi_status SetValue(napi_env env, const MediaInfoHolder& in, napi_value& out);
 
-    using GetterType = std::function<napi_status(napi_env, napi_value in, PlayInfoHolder& out)>;
-    using SetterType = std::function<napi_status(napi_env env, const PlayInfoHolder& in, napi_value& out)>;
+    using GetterType = std::function<napi_status(napi_env, napi_value in, MediaInfoHolder& out)>;
+    using SetterType = std::function<napi_status(napi_env env, const MediaInfoHolder& in, napi_value& out)>;
 
 private:
-    static napi_status GetCurrentTime(napi_env env, napi_value in, PlayInfoHolder& out);
-    static napi_status SetCurrentIndex(napi_env env, const PlayInfoHolder& in, napi_value& out);
+    static napi_status GetCurrentIndex(napi_env env, napi_value in, MediaInfoHolder& out);
+    static napi_status SetCurrentIndex(napi_env env, const MediaInfoHolder& in, napi_value& out);
 
-    static napi_status GetPlayInfos(napi_env env, napi_value in, PlayInfoHolder& out);
-    static napi_status SetPlayInfos(napi_env env, const PlayInfoHolder& in, napi_value& out);
+    static napi_status GetPlayInfos(napi_env env, napi_value in, MediaInfoHolder& out);
+    static napi_status SetPlayInfos(napi_env env, const MediaInfoHolder& in, napi_value& out);
 
     static std::map<std::string, GetterType> getterMap_;
     static std::map<int32_t, SetterType> setterMap_;
@@ -43,4 +43,4 @@ private:
     static constexpr int ENUM_INDEX = 2;
 };
 }
-#endif // OHOS_NAPI_PLAY_INFO_HOLDER_H
+#endif // OHOS_NAPI_MEDIA_INFO_HOLDER_H

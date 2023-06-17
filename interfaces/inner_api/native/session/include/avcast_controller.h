@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "play_info_holder.h"
+#include "media_info_holder.h"
 #include "avsession_info.h"
 #include "key_event.h"
 #include "i_avcast_controller_proxy.h"
@@ -42,7 +42,7 @@ public:
      * @return Returns check whether the system permissions are supported
      * @since 9
     */
-    virtual int32_t Start(const PlayInfoHolder& playInfoHolder) = 0;
+    virtual int32_t SetMediaList(const MediaInfoHolder& mediaInfoHolder) = 0;
 
     virtual int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) = 0;
 

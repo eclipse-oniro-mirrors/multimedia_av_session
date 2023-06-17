@@ -74,13 +74,13 @@ void AVCastControllerCallbackClient::OnPlaySpeedChange(const int32_t playSpeed)
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
-void AVCastControllerCallbackClient::OnPositionChange(const int32_t position)
+void AVCastControllerCallbackClient::OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, position]() { callback->OnPositionChange(position); }, EVENT_NAME),
+        .AVSessionPostTask([callback, position, bufferPosition, duration]() { callback->OnPositionChange(position, bufferPosition, duration); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
 }
 

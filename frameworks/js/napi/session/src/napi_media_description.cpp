@@ -28,7 +28,17 @@ std::map<std::string, NapiMediaDescription::GetterType> NapiMediaDescription::ge
     { "icon",  GetIcon },
     { "iconUri", GetIconUri },
     { "extras", GetExtras },
+    { "mediaType", GetMediaType },
+    { "mediaSize", GetMediaSize },
+    { "albumTitle", GetAlbumTitle },
+    { "albumCoverUri", GetAlbumCoverUri },
+    { "lyricContent", GetLyricContent },
+    { "lyricUri", GetLyricUri },
+    { "artist", GetArtist },
     { "mediaUri", GetMediaUri },
+    { "duration", GetDuration },
+    { "startPosition", GetStartPosition },
+    { "appName", GetAppName },
 };
 
 std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setterMap_ = {
@@ -39,7 +49,17 @@ std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setter
     { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ICON,  SetIcon },
     { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ICON_URI, SetIconUri },
     { AVMediaDescription::MEDAI_DESCRIPTION_KEY_EXTRAS, SetExtras },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_MEDIA_TYPE, SetMediaType },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_MEDIA_SIZE, SetMediaSize },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ALBUM_TITLE, SetAlbumTitle },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ALBUM_COVER_URI, SetAlbumCoverUri },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_LYRIC_CONTENT, SetLyricContent },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_LYRIC_URI, SetLyricUri },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ARTIST, SetArtist },
     { AVMediaDescription::MEDAI_DESCRIPTION_KEY_MEDIA_URI, SetMediaUri },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_DURATION, SetDuration },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_START_POSITION, SetStartPosition },
+    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_APP_NAME, SetAppName },
 };
 
 napi_status NapiMediaDescription::GetValue(napi_env env, napi_value in, AVMediaDescription& out)
@@ -227,6 +247,139 @@ napi_status NapiMediaDescription::SetExtras(napi_env env, const AVMediaDescripti
     return status;
 }
 
+napi_status NapiMediaDescription::GetMediaType(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "mediaType", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetMediaType(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetMediaType(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetMediaType(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "mediaType", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetMediaSize(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "mediaSize", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetMediaSize(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetMediaSize(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetMediaSize(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "mediaSize", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetAlbumTitle(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "albumTitle", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetAlbumTitle(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetAlbumTitle(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetAlbumTitle(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "albumTitle", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetAlbumCoverUri(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "albumCoverUri", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetAlbumCoverUri(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetAlbumCoverUri(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetAlbumCoverUri(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "albumCoverUri", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetLyricContent(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "lyricContent", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetLyricContent(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetLyricContent(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetLyricContent(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "lyricContent", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetLyricUri(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "lyricUri", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetLyricUri(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetLyricUri(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetLyricUri(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "lyricUri", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetArtist(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "artist", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetArtist(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetArtist(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetArtist(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "artist", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
 napi_status NapiMediaDescription::GetMediaUri(napi_env env, napi_value in, AVMediaDescription& out)
 {
     std::string property;
@@ -245,4 +398,62 @@ napi_status NapiMediaDescription::SetMediaUri(napi_env env, const AVMediaDescrip
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }
+
+napi_status NapiMediaDescription::GetDuration(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "duration", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetDuration(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetDuration(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetDuration(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "duration", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetStartPosition(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "startPosition", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetStartPosition(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetStartPosition(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetStartPosition(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "startPosition", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetAppName(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "appName", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetAppName(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetAppName(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetAppName(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "appName", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
 }

@@ -17,7 +17,7 @@
 #define OHOS_AVROUTER_IMPL_H
 
 #include "av_router.h"
-
+#include "avcast_provider_manager.h"
 
 namespace OHOS::AVSession {
 class AVRouterImpl : public AVRouter {
@@ -34,15 +34,19 @@ public:
 
     int32_t OnCastServerDied(int32_t providerId) override;
 
-    std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int32_t castHandler) override;
+    std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int64_t castHandler) override;
 
     int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo) override;
+
+    int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) override;
 
     int32_t StopCast(const int64_t castHandle) override;
 
     int32_t RegisterCallback(int64_t castHandleconst, std::shared_ptr<IAVCastSessionStateListener> callback) override;
 
-    int32_t RegisterCastControllerProxyListener(const int64_t castHandle, const std::shared_ptr<IAVCastControllerProxyListener>& castControllerProxyListener) override;
+    int32_t UnRegisterCallback(int64_t castHandleconst, std::shared_ptr<IAVCastSessionStateListener> callback) override;
+
+    // int32_t RegisterCastControllerProxyListener(const int64_t castHandle, const std::shared_ptr<IAVCastControllerProxyListener>& castControllerProxyListener) override;
 
 protected:
 
@@ -50,8 +54,8 @@ private:
     std::recursive_mutex servicePtrLock_;
     IAVSessionServiceListener *servicePtr_;
     std::recursive_mutex providerManagerLock_;
-    // std::map<int32_t, sptr<AVCastProviderManager>> providerManagerMap_; 
-    // int32_t providerNumber = 0;
+    std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
+    int32_t providerNumber_ = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

@@ -101,6 +101,26 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const int32_t firs
     }
 }
 
+void NapiAVCastControllerCallback::HandleEvent(int32_t event, const int32_t firstParam, const int32_t secondParam, const int32_t thirdParam)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callbacks_[event].empty()) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        asyncCallback_->Call(*ref, [firstParam, secondParam, thirdParam](napi_env env, int& argc, napi_value *argv) {
+            argc = NapiUtils::ARGC_TWO;
+            auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
+            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            status = NapiUtils::SetValue(env, secondParam, argv[1]);
+            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            status = NapiUtils::SetValue(env, thirdParam, argv[2]);
+            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+        });
+    }
+}
+
 void NapiAVCastControllerCallback::OnStateChange(const AVCastPlayerState& state)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnStateChange");
@@ -136,11 +156,11 @@ void NapiAVCastControllerCallback::OnPlaySpeedChange(const int32_t playSpeed)
     HandleEvent(EVENT_CAST_PLAY_SPEED_CHANGE, playSpeed);
 }
 
-void NapiAVCastControllerCallback::OnPositionChange(const int32_t seek)
+void NapiAVCastControllerCallback::OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPositionChange");
     SLOGI("Start handle OnPositionChange event");
-    HandleEvent(EVENT_CAST_POSITON_CHANGE, seek);
+    HandleEvent(EVENT_CAST_POSITON_CHANGE, position, bufferPosition, duration);
 }
 
 void NapiAVCastControllerCallback::OnVideoSizeChange(const int32_t width, const int32_t height)

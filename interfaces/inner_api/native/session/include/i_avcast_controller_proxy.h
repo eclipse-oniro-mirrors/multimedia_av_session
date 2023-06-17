@@ -18,7 +18,7 @@
 
 #include <string>
 #include "avplayback_state.h"
-#include "play_info_holder.h"
+#include "media_info_holder.h"
 #include "media_info.h"
 #include "avcast_control_command.h"
 #include "avsession_info.h"
@@ -30,19 +30,21 @@
 namespace OHOS::AVSession {
 class IAVCastControllerProxy {
 public:
-    virtual void Init() = 0;
 
-    virtual void release() = 0;
+    IAVCastControllerProxy () = default;
+    virtual ~IAVCastControllerProxy () = default;
 
-    virtual void RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener> iAVCastControllerProxyListener) = 0;
+    virtual void Release() = 0;
 
-    virtual void UnregisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener> iAVCastControllerProxyListener) = 0;
+    virtual int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener> iAVCastControllerProxyListener) = 0;
 
-    virtual void Start(const PlayInfoHolder& playInfoHolder) = 0;
+    virtual int32_t UnregisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener> iAVCastControllerProxyListener) = 0;
+
+    virtual int32_t SetMediaList(const MediaInfoHolder& mediaInfoHolder) = 0;
 
     virtual void UpdateMediaInfo(const MediaInfo& mediaInfo) = 0;
 
-    virtual void SendControlCommand(const AVCastControlCommand& cmd) = 0;
+    virtual void SendControlCommand(const AVCastControlCommand cmd) = 0;
 
     virtual int32_t GetDuration(int32_t& duration) = 0;
 

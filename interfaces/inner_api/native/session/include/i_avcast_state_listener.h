@@ -17,7 +17,7 @@
 #define OHOS_I_AVCAST_STATE_LISTENER_H
 
 #include <string>
-#include "device_info.h"
+#include "avsession_descriptor.h"
 
 /**
  * @brief Router is a part related to cast media

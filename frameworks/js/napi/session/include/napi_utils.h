@@ -28,9 +28,8 @@
 #include "want_agent.h"
 #include "napi_base_context.h"
 #include "ability.h"
-#include "play_info_holder.h"
+#include "media_info_holder.h"
 #include "media_info.h"
-#include "device_info.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -182,9 +181,9 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, DeviceInfo& out);
     static napi_status SetValue(napi_env env, const DeviceInfo& in, napi_value& out);
 
-    /* PlayInfoHolder <-> napi_value */
-    static napi_status GetValue(napi_env env, napi_value in, PlayInfoHolder& out);
-    static napi_status SetValue(napi_env env, const PlayInfoHolder& in, napi_value& out);
+    /* MediaInfoHolder <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, MediaInfoHolder& out);
+    static napi_status SetValue(napi_env env, const MediaInfoHolder& in, napi_value& out);
 
     /* napi_value <-> MediaInfo */
     static napi_status GetValue(napi_env env, napi_value in, MediaInfo& out);

@@ -15,24 +15,24 @@
 
 #include "avcast_provider_manager.h"
 #include "av_router.h"
-
+#include "avsession_log.h"
 namespace OHOS::AVSession {
 AVCastProviderManager::AVCastProviderManager()
 {
     SLOGD("AVCastProviderManager construct");
 }
 
-// void AVCastProviderManager::Init(int32_t providerId, std::shared_ptr<AVCastProvider> provider)
-// {
-//     providerId_ = providerId;
-//     provider_ = provider;
-// }
+void AVCastProviderManager::Init(int32_t providerId, std::shared_ptr<AVCastProvider> provider)
+{
+    providerId_ = providerId;
+    provider_ = provider;
+}
 
 void AVCastProviderManager::OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos)
 {
     SLOGI("On device available");
     for (int i = 0; i < deviceInfos.size(); i++) {
-        deviceInfos[i].providerId_ = provider_.id;
+        deviceInfos[i].providerId_ = providerId_;
     }
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_ = deviceInfos;

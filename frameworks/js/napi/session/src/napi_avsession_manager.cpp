@@ -85,6 +85,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemAVKeyEvent", SendSystemAVKeyEvent),
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemControlCommand", SendSystemControlCommand),
         DECLARE_NAPI_STATIC_FUNCTION("startCastDiscovery", StartCastDiscovery),
+        DECLARE_NAPI_STATIC_FUNCTION("stopCastDiscovery", StopCastDiscovery),
         DECLARE_NAPI_STATIC_FUNCTION("startCast", StartCast),
         DECLARE_NAPI_STATIC_FUNCTION("stopCast", StopCast),
     };
@@ -603,14 +604,14 @@ napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        if (argc == ARGC_ZERO) {
-            context->castDeviceCapability_ = 0; // 0 is default cast device capability
+        if (argc == ARGC_ONE && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
+            && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)) {
+            context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->castDeviceCapability_);
+            CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid castDeviceCapability",
+                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        } else {
+            context->castDeviceCapability_ = 2; // 2 is stream
         }
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->castDeviceCapability_);
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok),
-            "Invalid castDeviceCapability", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_START_CAST_DISCOVERY_TASK_ID;
@@ -826,26 +827,31 @@ void NapiAVSessionManager::HandleServiceDied()
 
 napi_status NapiAVSessionManager::OffSessionCreate(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SESSION_CREATED, callback);
 }
 
 napi_status NapiAVSessionManager::OffSessionDestroy(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SESSION_DESTROYED, callback);
 }
 
 napi_status NapiAVSessionManager::OffTopSessionChange(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED, callback);
 }
 
 napi_status NapiAVSessionManager::OffAudioSessionChecked(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_AUDIO_SESSION_CHECKED, callback);
 }
 
 napi_status NapiAVSessionManager::OffDeviceAvailable(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_AVAILABLE, callback);
 }
 

@@ -17,7 +17,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
-#include "play_info_holder.h"
+#include "media_info_holder.h"
 
 namespace OHOS::AVSession {
 bool AVCastControllerStub::CheckInterfaceToken(MessageParcel& data)
@@ -69,11 +69,11 @@ int32_t AVCastControllerStub::HandleSendControlCommand(MessageParcel& data, Mess
 
 int32_t AVCastControllerStub::HandleStart(MessageParcel& data, MessageParcel& reply)
 {
-    sptr<PlayInfoHolder> playInfoHolder = data.ReadParcelable<PlayInfoHolder>();
-    if (playInfoHolder == nullptr) {
+    sptr<MediaInfoHolder> mediaInfoHolder = data.ReadParcelable<MediaInfoHolder>();
+    if (mediaInfoHolder == nullptr) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write Start ret failed");
     } else {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Start(*playInfoHolder)), ERR_NONE, "Write playInfoHolder failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetMediaList(*mediaInfoHolder)), ERR_NONE, "Write mediaInfoHolder failed");
     }
     return ERR_NONE;
 }

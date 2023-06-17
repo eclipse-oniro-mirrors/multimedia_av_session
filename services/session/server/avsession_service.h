@@ -278,6 +278,8 @@ private:
 
     std::recursive_mutex sortFileReadWriteLock_;
 
+    std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
     static constexpr const char *ABILITY_FILE_NAME = "abilityinfo";
     static constexpr const char *DEFAULT_SESSION_ID = "default";

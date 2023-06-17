@@ -24,6 +24,13 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteString(subtitle_) &&
         parcel.WriteString(description_) &&
         parcel.WriteString(iconUri_) &&
+        parcel.WriteString(mediaType_) &&
+        parcel.WriteInt32(mediaSize_) &&
+        parcel.WriteString(albumTitle_) &&
+        parcel.WriteString(albumCoverUri_) &&
+        parcel.WriteString(lyricContent_) &&
+        parcel.WriteString(lyricUri_) &&
+        parcel.WriteString(artist_) &&
         parcel.WriteString(mediaUri_) &&
         parcel.WriteInt32(duration_) &&
         parcel.WriteInt32(startPosition_) &&
@@ -50,6 +57,27 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
     }
     if (!data.ReadString(result->iconUri_)) {
         SLOGD("AVMediaDescription Unmarshalling iconUri null ");
+    }
+    if (!data.ReadString(result->mediaType_)) {
+        SLOGD("AVMediaDescription Unmarshalling mediaType_ null ");
+    }
+    if (!data.ReadInt32(result->mediaSize_)) {
+        SLOGD("AVMediaDescription Unmarshalling mediaSize_ null ");
+    }
+    if (!data.ReadString(result->albumTitle_)) {
+        SLOGD("AVMediaDescription Unmarshalling albumTitle_ null ");
+    }
+    if (!data.ReadString(result->albumCoverUri_)) {
+        SLOGD("AVMediaDescription Unmarshalling albumCoverUri_ null ");
+    }
+    if (!data.ReadString(result->lyricContent_)) {
+        SLOGD("AVMediaDescription Unmarshalling lyricContent_ null ");
+    }
+    if (!data.ReadString(result->lyricUri_)) {
+        SLOGD("AVMediaDescription Unmarshalling lyricUri_ null ");
+    }
+    if (!data.ReadString(result->artist_)) {
+        SLOGD("AVMediaDescription Unmarshalling artist_ null ");
     }
     if (!data.ReadString(result->mediaUri_)) {
         SLOGD("AVMediaDescription Unmarshalling mediaUri null ");
@@ -144,14 +172,84 @@ std::shared_ptr<AAFwk::WantParams> AVMediaDescription::GetExtras() const
     return extras_;
 }
 
-void AVMediaDescription::SetMediaUri(const std::string& mediaId)
+void AVMediaDescription::SetMediaUri(const std::string& mediaUri)
 {
-    mediaUri_ = mediaId;
+    mediaUri_ = mediaUri;
 }
 
 std::string AVMediaDescription::GetMediaUri() const
 {
     return mediaUri_;
+}
+
+void AVMediaDescription::SetMediaType(const std::string& mediaType)
+{
+    mediaType_ = mediaType;
+}
+
+std::string AVMediaDescription::GetMediaType() const
+{
+    return mediaType_;
+}
+
+void AVMediaDescription::SetMediaSize(const int32_t mediaSize)
+{
+    mediaSize_ = mediaSize;
+}
+
+int32_t AVMediaDescription::GetMediaSize() const
+{
+    return mediaSize_;
+}
+
+void AVMediaDescription::SetAlbumTitle(const std::string& albumTitle)
+{
+    albumTitle_ = albumTitle;
+}
+
+std::string AVMediaDescription::GetAlbumTitle() const
+{
+    return albumTitle_;
+}
+
+void AVMediaDescription::SetAlbumCoverUri(const std::string& albumCoverUri)
+{
+    albumCoverUri_ = albumCoverUri;
+}
+
+std::string AVMediaDescription::GetAlbumCoverUri() const
+{
+    return albumCoverUri_;
+}
+
+void AVMediaDescription::SetLyricContent(const std::string& lyricContent)
+{
+    lyricContent_ = lyricContent;
+}
+
+std::string AVMediaDescription::GetLyricContent() const
+{
+    return lyricContent_;
+}
+
+void AVMediaDescription::SetLyricUri(const std::string& lyricUri)
+{
+    lyricUri_ = lyricUri;
+}
+
+std::string AVMediaDescription::GetLyricUri() const
+{
+    return lyricUri_;
+}
+
+void AVMediaDescription::SetArtist(const std::string& artist)
+{
+    artist_ = artist;
+}
+
+std::string AVMediaDescription::GetArtist() const
+{
+    return artist_;
 }
 
 void AVMediaDescription::SetDuration(const int32_t duration)
@@ -198,6 +296,13 @@ void AVMediaDescription::Reset()
     icon_ = nullptr;
     iconUri_ = "";
     extras_ = nullptr;
+    mediaType_ = "";
+    mediaSize_ = 0;
+    albumTitle_ = "";
+    albumCoverUri_ = "";
+    lyricContent_ = "";
+    lyricUri_ = "";
+    artist_ = "";
     mediaUri_ = "";
     duration_ = 0;
     startPosition_ = 0;

@@ -30,7 +30,7 @@ public:
 
     // void Init(const std::shared_ptr<IAVCastControllerProxy> castControllerProxy) override;
 
-    int32_t Start(const PlayInfoHolder& PlayInfoHolder) override;
+    int32_t SetMediaList(const MediaInfoHolder& MediaInfoHolder) override;
 
     int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) override;
 

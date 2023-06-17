@@ -97,7 +97,7 @@ public:
 
     virtual void OnPlaySpeedChange(const int32_t playSpeed) = 0;
 
-    virtual void OnPositionChange(const int32_t position) = 0;
+    virtual void OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
 
     virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
     
@@ -330,7 +330,7 @@ public:
 
     virtual void OnPlaySpeedChange(const int32_t playSpeed) = 0;
 
-    virtual void OnPositionChange(const int32_t position) = 0;
+    virtual void OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
 
     virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
 
@@ -351,7 +351,7 @@ public:
      * @param castHandle The combination of providerId and castId.
      * @since 9
     */
-    virtual void OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo) = 0;
+    virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) = 0;
 
     /**
      * @brief Deconstruct IAVCastSessionStateListener.
@@ -378,6 +378,94 @@ enum SessionDataCategory {
     SESSION_DATA_COMMON_COMMAND = 6,
     SESSION_DATA_EXTRAS = 7,
     SESSION_DATA_CATEGORY_MAX = 8,
+};
+
+enum AVCastCategory {
+    /**
+     * The default cast type "local", media can be routed on the same device, 
+     * including internal speakers or audio jacks on the device itself, A2DP devices.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @since 10
+     */
+    CATEGORY_LOCAL = 0,
+
+    /**
+     * Cast+ mirror capability
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @systemapi
+     * @since 10
+     */
+    CATEGORY_CAST_MIRROR = 1,
+
+    /**
+     * The Cast+ Stream indicating the media is presenting on a different device
+     * the application need get an AVCastController to control remote playback.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @since 10
+     */
+    CATEGORY_CAST_STREAM = 2,
+
+    /**
+     * audio stream is presenting on a different device
+     * it is transparent to the application which can still controll the playback by local player.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @systemapi
+     * @since 10
+     */
+    CATEGORY_AUDIO_STREAMING = 256,
+};
+
+/**
+ * Define the device connection state.
+ * @syscap SystemCapability.Multimedia.AVSession.Core
+ * @since 10
+ */
+enum ConnectionState {
+    /**
+     * A connection state indicating the device is in the process of connecting.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    STATE_CONNECTING = 0,
+    /**
+     * A connection state indicating the device is connected.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    STATE_CONNECTED = 1,
+    /**
+     * The default connection state indicating the device is disconnected.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    STATE_DISCONNECTED = 5,
+};
+
+enum DeviceType {
+    /**
+     * A device type indicating the route is on internal speakers or audio jacks on the device itself.
+     * @since 10
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     */
+    DEVICE_TYPE_LOCAL = 0,
+    /**
+     * A device type indicating the route is on a TV.
+     * @since 10
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     */
+    DEVICE_TYPE_TV = 2,
+    /**
+     * A device type indicating the route is on a smart speaker.
+     * @since 10
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     */
+    DEVICE_TYPE_SPEAKER = 3,
+    /**
+     * A device type indicating the route is on a bluetooth device.
+     * @since 10
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     */
+    DEVICE_TYPE_BLUETOOTH = 10,
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

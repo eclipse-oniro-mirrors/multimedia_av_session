@@ -13,27 +13,37 @@
  * limitations under the License.
  */
 
-#include "napi_play_info_holder.h"
+#include "napi_media_info_holder.h"
 #include "avsession_log.h"
 #include "avsession_pixel_map_adapter.h"
 #include "napi_utils.h"
 #include "pixel_map_napi.h"
 
 namespace OHOS::AVSession {
-std::map<std::string, NapiPlayInfoHolder::GetterType> NapiPlayInfoHolder::getterMap_ = {
+std::map<std::string, NapiMediaInfoHolder::GetterType> NapiMediaInfoHolder::getterMap_ = {
+    { "currentIndex", GetCurrentIndex },
     { "playInfos", GetPlayInfos },
 };
 
-std::map<int32_t, NapiPlayInfoHolder::SetterType> NapiPlayInfoHolder::setterMap_ = {
-    { PlayInfoHolder::PLAY_INFO_HOLDER_KEY_PLAY_INFOS, SetPlayInfos },
+std::map<int32_t, NapiMediaInfoHolder::SetterType> NapiMediaInfoHolder::setterMap_ = {
+    { MediaInfoHolder::MEDIA_INFO_HOLDER_KEY_CURRENT_INDEX, SetCurrentIndex },
+    { MediaInfoHolder::MEDIA_INFO_HOLDER_KEY_PLAY_INFOS, SetPlayInfos },
 };
 
-napi_status NapiPlayInfoHolder::GetValue(napi_env env, napi_value in, PlayInfoHolder& out)
+napi_status NapiMediaInfoHolder::GetValue(napi_env env, napi_value in, MediaInfoHolder& out)
 {
+
+    bool hasCurrentIndex = false;
+    napi_has_named_property(env, in, "currentIndex", &hasCurrentIndex);
+    if (!hasCurrentIndex) {
+        SLOGE("currentIndex is not exit in MediaInfoHolder");
+        return napi_invalid_arg;
+    }
+
     bool hasProperty = false;
     napi_has_named_property(env, in, "playInfos", &hasProperty);
     if (!hasProperty) {
-        SLOGE("playInfos is not exit in PlayInfoHolder");
+        SLOGE("playInfos is not exit in MediaInfoHolder");
         return napi_invalid_arg;
     }
 
@@ -56,12 +66,12 @@ napi_status NapiPlayInfoHolder::GetValue(napi_env env, napi_value in, PlayInfoHo
     return napi_ok;
 }
 
-napi_status NapiPlayInfoHolder::SetValue(napi_env env, const PlayInfoHolder& in, napi_value& out)
+napi_status NapiMediaInfoHolder::SetValue(napi_env env, const MediaInfoHolder& in, napi_value& out)
 {
     napi_status status = napi_create_object(env, &out);
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
 
-    for (int i = 0; i < PlayInfoHolder::PLAY_INFO_HOLDER_KEY_MAX; ++i) {
+    for (int i = 0; i < MediaInfoHolder::MEDIA_INFO_HOLDER_KEY_MAX; ++i) {
         auto setter = setterMap_[i];
         if (setter(env, in, out) != napi_ok) {
             SLOGE("set property %{public}d failed", i);
@@ -71,7 +81,26 @@ napi_status NapiPlayInfoHolder::SetValue(napi_env env, const PlayInfoHolder& in,
     return napi_ok;
 }
 
-napi_status NapiPlayInfoHolder::GetPlayInfos(napi_env env, napi_value in, PlayInfoHolder& out)
+napi_status NapiMediaInfoHolder::GetCurrentIndex(napi_env env, napi_value in, MediaInfoHolder& out)
+{
+    int32_t property {};
+    auto status = NapiUtils::GetNamedProperty(env, in, "currentIndex", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetCurrentIndex(property);
+    return status;
+}
+
+napi_status NapiMediaInfoHolder::SetCurrentIndex(napi_env env, const MediaInfoHolder& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetCurrentIndex(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "currentIndex", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaInfoHolder::GetPlayInfos(napi_env env, napi_value in, MediaInfoHolder& out)
 {
     std::vector<AVQueueItem> property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "playInfos", property);
@@ -80,7 +109,7 @@ napi_status NapiPlayInfoHolder::GetPlayInfos(napi_env env, napi_value in, PlayIn
     return status;
 }
 
-napi_status NapiPlayInfoHolder::SetPlayInfos(napi_env env, const PlayInfoHolder& in, napi_value& out)
+napi_status NapiMediaInfoHolder::SetPlayInfos(napi_env env, const MediaInfoHolder& in, napi_value& out)
 {
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetPlayInfos(), property);

@@ -38,7 +38,9 @@ public:
         CAST_CONTROL_CMD_SEEK = 7,
         CAST_CONTROL_CMD_SET_VOLUME = 8,
         CAST_CONTROL_CMD_SET_SPEED = 9,
-        CAST_CONTROL_CMD_MAX = 10,
+        CAST_CONTROL_CMD_SET_LOOP_MODE = 10,
+        CAST_CONTROL_CMD_TOGGLE_FAVORITE = 11,
+        CAST_CONTROL_CMD_MAX = 12,
     };
 
     AVCastControlCommand();
@@ -52,14 +54,23 @@ public:
     int32_t SetCommand(int32_t cmd);
     int32_t GetCommand() const;
 
-    int32_t SetSpeed(int32_t speed);
-    int32_t GetSpeed(int32_t& speed) const;
+    int32_t SetForwardTime(int32_t forwardTime);
+    int32_t GetForwardTime(int32_t& forwardTime) const;
 
-    int32_t SetSeekTime(int64_t time);
-    int32_t GetSeekTime(int64_t& time) const;
+    int32_t SetRewindTime(int32_t rewindTime);
+    int32_t GetRewindTime(int32_t& rewindTime) const;
+
+    int32_t SetSeekTime(int32_t seekTime);
+    int32_t GetSeekTime(int32_t& seekTime) const;
 
     int32_t SetVolume(int32_t volume);
     int32_t GetVolume(int32_t& volume) const;
+
+    int32_t SetSpeed(int32_t speed);
+    int32_t GetSpeed(int32_t& speed) const;
+
+    int32_t SetLoopMode(int32_t loopMode);
+    int32_t GetLoopMode(int32_t& loopMode) const;
 
     const static inline std::vector<int32_t> localCapability {
         CAST_CONTROL_CMD_PLAY,
@@ -72,12 +83,13 @@ public:
         CAST_CONTROL_CMD_SEEK,
         CAST_CONTROL_CMD_SET_VOLUME,
         CAST_CONTROL_CMD_SET_SPEED,
+        CAST_CONTROL_CMD_SET_LOOP_MODE,
+        CAST_CONTROL_CMD_TOGGLE_FAVORITE,
     };
 
 private:
     int32_t cmd_ = CAST_CONTROL_CMD_INVALID;
     std::variant<int32_t, double, int64_t> param_;
-    // TODO: playinfo的 mediaImage
 };
 }
 #endif // OHOS_AVCAST_CONTROL_COMMAND_H

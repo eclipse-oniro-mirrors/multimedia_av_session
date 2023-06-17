@@ -21,7 +21,7 @@
 #include "avcast_controller_stub.h"
 
 namespace OHOS::AVSession {
-class AVCastControllerItem : public AVCastControllerStub, public IAVCastControllerProxyListener, public std::enable_shared_from_this<AVCastControllerItem> {
+class AVCastControllerItem : public AVCastControllerStub, public IAVCastControllerProxyListener, public std::enable_shared_from_this<IAVCastControllerProxyListener> {
 public:
     AVCastControllerItem();
 
@@ -37,7 +37,7 @@ public:
 
     void OnPlaySpeedChange(const int32_t playSpeed) override;
 
-    void OnPositionChange(const int32_t position) override;
+    void OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
 
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     
@@ -45,7 +45,7 @@ public:
 
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
-    int32_t Start(const PlayInfoHolder& playInfoHolder) override;
+    int32_t SetMediaList(const MediaInfoHolder& mediaInfoHolder) override;
 
     int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) override;
 
@@ -63,7 +63,7 @@ public:
 
     int32_t SetDisplaySurface(std::string& surfaceId) override;
 
-    void RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
+    bool RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
     int32_t Destroy() override;
 

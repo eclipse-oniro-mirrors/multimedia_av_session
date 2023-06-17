@@ -46,7 +46,7 @@ public:
     void OnVolumeChange(const int32_t volume) override;
     void OnLoopModeChange(const int32_t loopMode) override;
     void OnPlaySpeedChange(const int32_t playSpeed) override;
-    void OnPositionChange(const int32_t position) override;
+    void OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     void OnError(const int32_t errorCode, const std::string& errorMsg) override;
 
@@ -64,6 +64,8 @@ private:
 
     template<typename T>
     void HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam);
+
+    void HandleEvent(int32_t event, const int32_t firstParam, const int32_t secondParam, const int32_t thirdParam);
 
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;

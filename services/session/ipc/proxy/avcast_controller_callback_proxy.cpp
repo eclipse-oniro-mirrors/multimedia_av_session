@@ -93,11 +93,13 @@ void AVCastControllerCallbackProxy::OnPlaySpeedChange(const int32_t playSpeed)
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnPositionChange(const int32_t seek)
+void AVCastControllerCallbackProxy::OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(seek), "write seek failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(position), "write position failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(bufferPosition), "write bufferPosition failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(duration), "write duration failed");
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };

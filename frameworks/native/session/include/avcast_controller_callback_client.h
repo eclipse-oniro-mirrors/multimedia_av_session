@@ -36,7 +36,7 @@ public:
 
     void OnPlaySpeedChange(const int32_t playSpeed) override;
 
-    void OnPositionChange(const int32_t position) override;
+    void OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
 
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     

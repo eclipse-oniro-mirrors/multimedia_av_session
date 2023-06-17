@@ -50,8 +50,38 @@ private:
     static napi_status GetExtras(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetExtras(napi_env env, const AVMediaDescription& in, napi_value& out);
 
+    static napi_status GetMediaType(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetMediaType(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetMediaSize(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetMediaSize(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetAlbumTitle(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetAlbumTitle(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetAlbumCoverUri(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetAlbumCoverUri(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetLyricContent(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetLyricContent(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetLyricUri(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetLyricUri(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetArtist(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetArtist(napi_env env, const AVMediaDescription& in, napi_value& out);
+
     static napi_status GetMediaUri(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetMediaUri(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetDuration(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetDuration(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetStartPosition(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetStartPosition(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetAppName(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetAppName(napi_env env, const AVMediaDescription& in, napi_value& out);
 
     static std::map<std::string, GetterType> getterMap_;
     static std::map<int32_t, SetterType> setterMap_;

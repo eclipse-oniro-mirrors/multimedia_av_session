@@ -41,6 +41,7 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
     : descriptor_(descriptor)
 {
     SLOGD("constructor id=%{public}s", descriptor_.sessionId_.c_str());
+    cssListener_ = std::make_shared<CssListener>(this);
 }
 
 AVSessionItem::~AVSessionItem()
@@ -293,16 +294,17 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
         castControllerProxy_ = AVRouter::GetInstance().GetRemoteController(castHandle_);
     }
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, nullptr, "Get castController proxy failed");
-    CHECK_AND_RETURN_RET_LOG(castControllers_.size() > 50, nullptr, "allocated controllers exceed the maximum number");
+    // CHECK_AND_RETURN_RET_LOG(castControllers_.size() > 50, nullptr, "allocated controllers exceed the maximum number");
 
     sptr<AVCastControllerItem> castController = new (std::nothrow) AVCastControllerItem();
     CHECK_AND_RETURN_RET_LOG(castController != nullptr, nullptr, "malloc AVCastController failed");
-    castController->Init(castControllerProxy_);
-    castControllers_.emplace_back(castController);
+    std::shared_ptr<AVCastControllerItem> sharedPtr = std::shared_ptr<AVCastControlelrItem>(castController.GetRefPtr(),
+        [holder = castController](const auto*) {});
 
-    castController->RegisterControllerListener(castControllerProxy_);
+    sharedPtr->Init(castControllerProxy_);
+    castControllers_.emplace_back(sharedPtr);
     
-    sptr<IRemoteObject> remoteObject = castController->AsObject();
+    sptr<IRemoteObject> remoteObject = castController;
 
     return remoteObject;
 }
@@ -402,11 +404,37 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 
     castHandle_ = castHandle;
 
+    AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
     // Register castHandle and avsession item to provider, as IAVCastSessionStateListener
-    AVRouter::GetInstance().RegisterCallback(castHandle_, shared_from_this());
 
 
     return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo)
+{
+    SLOGI("Add device process");
+    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_);
+    int32_T castId = static_cast<int32_t>(castHandle_);
+    AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo);
+    return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+{
+    SLOGI("OnCastStateChange");
+    OutputDeviceInfo outputDeviceInfo;
+    if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
+        outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);
+    } else {
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    }
+    descriptor_.outputDevcieInfo_ = outputDeviceInfo;
+    HandleOutputDeviceChange(castState, outputDeviceInfo);
+    std::lock_guard controllersLockGuard(controllersLock_);
+    for (const auto& controller : controllers_) {
+        controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
+    }
 }
 
 int32_t AVSessionItem::StopCast()
@@ -416,21 +444,12 @@ int32_t AVSessionItem::StopCast()
     CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
     // std::shared_ptr<IAVCastSessionStateListener> callback = dynamic_cast<std::shared_ptr<IAVCastSessionStateListener>>(shared_from_this());
-    // AVRouter::GetInstance().RegisterCallback(shared_from_this(), castHandle_);
+    AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
 
 
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionItem::OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo)
-{
-    SLOGI("OnCastStateChange");
-    HandleOutputDeviceChange(castState, outputDeviceInfo);
-    std::lock_guard controllersLockGuard(controllersLock_);
-    for (const auto& controller : controllers_) {
-        controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
-    }
-}
 
 AVSessionDescriptor AVSessionItem::GetDescriptor()
 {
@@ -703,7 +722,7 @@ void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, cons
 
 void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
 {
-    descriptor_.outputDeviceInfo_.deviceInfos_ = info.deviceInfos_;
+    descriptor_.outputDeviceInfo_ = info;
     int32_t connectionStateConnected = 1;
     HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
     std::lock_guard controllersLockGuard(controllersLock_);
@@ -791,5 +810,10 @@ int32_t AVSessionItem::SinkCancelCastAudio()
     GetDescriptor().outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     SLOGI("SinkCancelCastAudio");
     return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
+{
+    castDeviceInfoMAp_[deviceInfo.deviceId_] = deviceInfo;
 }
 } // namespace OHOS::AVSession

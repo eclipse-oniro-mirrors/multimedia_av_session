@@ -30,12 +30,27 @@ namespace OHOS::AVSession {
 class AVControllerItem;
 class RemoteSessionSink;
 class RemoteSessionSource;
-class AVSessionItem : public AVSessionStub, public IAVCastSessionStateListener,
-    public std::enable_shared_from_this<AVSessionItem> {
+class AVSessionItem : public AVSessionStub {
+class CssListener : public IAVCastSessionStateListener {
+public:
+    CssListener(AVSessionItem *ptr)
+    {
+        ptr_ = ptr;
+    }
+
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+    {
+        ptr_->OnCastStateChange(castState, deviceInfo);
+    }
+
+    AVSessionItem *ptr_;
+};
 public:
     explicit AVSessionItem(const AVSessionDescriptor& descriptor);
 
     ~AVSessionItem() override;
+
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
     std::string GetSessionId() override;
 
@@ -143,11 +158,13 @@ public:
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
 
-    int32_t StopCast();
+    int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo);
 
-    void OnCastStateChange(int32_t castState, OutputDeviceInfo outputDeviceInfo) override;
+    int32_t StopCast();
     
     sptr<IRemoteObject> GetAVCastControllerInner() override;
+
+    void UpdateCastDeviceMap(DeviceInfo deviceInfo);
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
@@ -209,8 +226,11 @@ private:
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
-    std::vector<sptr<AVCastControllerItem>> castControllers_;
+    std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
+    std::shared_ptr<CssListener> cssListener_;
+    std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
 
+    std::map<std::string, DeviceInfo> castDeviceInfoMap_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H

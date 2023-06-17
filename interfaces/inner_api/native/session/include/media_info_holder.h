@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_PLAY_INFO_HOLDER_H
-#define OHOS_PLAY_INFO_HOLDER_H
+#ifndef OHOS_MEDIA_INFO_HOLDER_H
+#define OHOS_MEDIA_INFO_HOLDER_H
 
 #include <bitset>
 #include <memory>
@@ -25,18 +25,22 @@
 #include "avqueue_item.h"
 
 namespace OHOS::AVSession {
-class PlayInfoHolder : public Parcelable {
+class MediaInfoHolder : public Parcelable {
 public:
     enum {
-        PLAY_INFO_HOLDER_KEY_PLAY_INFOS = 0,
-        PLAY_INFO_HOLDER_KEY_MAX = 1,
+        MEDIA_INFO_HOLDER_KEY_CURRENT_INDEX = 0,
+        MEDIA_INFO_HOLDER_KEY_PLAY_INFOS = 1,
+        MEDIA_INFO_HOLDER_KEY_MAX = 2,
     };
 
-    PlayInfoHolder() = default;
-    ~PlayInfoHolder() = default;
+    MediaInfoHolder() = default;
+    ~MediaInfoHolder() = default;
 
-    static PlayInfoHolder* Unmarshalling(Parcel& data);
+    static MediaInfoHolder* Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& parcel) const override;
+
+    void SetCurrentIndex(const int32_t& currentIndex);
+    const int32_t& GetCurrentIndex() const;
 
     void SetPlayInfos(const std::vector<AVQueueItem>& playInfos);
     const std::vector<AVQueueItem>& GetPlayInfos() const;
@@ -46,7 +50,8 @@ public:
     void Reset();
 
 private:
+    int32_t currentIndex_ = 0;
     std::vector<AVQueueItem> playInfos_ = {};
 };
 } // namespace OHOS::AVSession
-#endif // OHOS_PLAY_INFO_HOLDER_H
+#endif // OHOS_MEDIA_INFO_HOLDER_H

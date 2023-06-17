@@ -35,14 +35,20 @@ public:
     static napi_status SetValue(napi_env env, AVCastControlCommand& in, napi_value& out);
 
     static napi_status GetNoneParam(napi_env env, napi_value in, AVCastControlCommand& out);
+    static napi_status GetForwardTime(napi_env env, napi_value in, AVCastControlCommand& out);
+    static napi_status GetRewindTime(napi_env env, napi_value in, AVCastControlCommand& out);
     static napi_status GetSpeed(napi_env env, napi_value in, AVCastControlCommand& out);
     static napi_status GetSeekTime(napi_env env, napi_value in, AVCastControlCommand& out);
     static napi_status GetVolume(napi_env env, napi_value in, AVCastControlCommand& out);
+    static napi_status GetLoopMode(napi_env env, napi_value in, AVCastControlCommand& out);
 
     static napi_status SetNoneParam(napi_env env, AVCastControlCommand& in, napi_value& out);
+    static napi_status SetForwardTime(napi_env env, AVCastControlCommand& in, napi_value& out);
+    static napi_status SetRewindTime(napi_env env, AVCastControlCommand& in, napi_value& out);
     static napi_status SetSpeed(napi_env env, AVCastControlCommand& in, napi_value& out);
     static napi_status SetSeekTime(napi_env env, AVCastControlCommand& in, napi_value& out);
     static napi_status SetVolume(napi_env env, AVCastControlCommand& in, napi_value& out);
+    static napi_status SetLoopMode(napi_env env, AVCastControlCommand& in, napi_value& out);
 
 private:
     static std::map<std::string, std::tuple<GetterType, SetterType, int32_t>> commandMap_;

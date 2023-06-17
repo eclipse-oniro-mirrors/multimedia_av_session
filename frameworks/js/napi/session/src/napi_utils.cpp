@@ -26,7 +26,7 @@
 #include "extension_context.h"
 #include "ability_context.h"
 #include "napi_common_want.h"
-#include "napi_play_info_holder.h"
+#include "napi_media_info_holder.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 4096;
@@ -850,14 +850,21 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
 napi_status NapiUtils::SetValue(napi_env env, const OutputDeviceInfo& in, napi_value& out)
 {
     SLOGD("napi_value <- OutputDeviceInfo");
-    napi_status status = napi_create_array_with_length(env, in.deviceInfos_.size(), &out);
+    napi_value temp {};
+    napi_create_object(env, &out);
+
+    napi_status status = napi_create_array_with_length(env, in.deviceInfos_.size(), &temp);
     CHECK_RETURN((status == napi_ok), "create_array failed!", status);
     int index = 0;
+    SLOGD("The length of deviceInfos is %{public}d", static_cast<int32_t>(in.deviceInfos_.size()));
     for (const auto& item : in.deviceInfos_) {
         napi_value entry = nullptr;
-        SetValue(env, item, entry);
-        napi_set_element(env, out, index++, entry);
+        status = SetValue(env, item, entry);
+        CHECK_RETURN((status == napi_ok), "create array failed!", status);
+        napi_set_element(env, temp, index++, entry);
     }
+    status = napi_set_named_property(env, out, "devices", temp);
+    CHECK_RETURN((status == napi_ok), "set named property devices failed", status);
     return status;
 }
 
@@ -1210,7 +1217,26 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     if (hasIpAddress) {
         status = napi_get_named_property(env, in, "ipAddress", &value);
         CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress failed", status);
-        status = GetValue(env, value, out.ipAddress_);
+
+        napi_valuetype type = napi_undefined;
+        napi_status status = napi_typeof(env, value, &type);
+        CHECK_RETURN((status == napi_ok) && type == napi_string, "invalid typ for ipAddress", napi_invalid_arg);
+
+        size_t maxLen = STR_MAX_LENGTH;
+        status = napi_get_value_string_utf8(env, value, nullptr, 0, &maxLen);
+        if(maxLen == 0) {
+            out.ipAddress_ = "";
+        } else {
+            if(maxLen <= 0 || maxLen >= STR_MAX_LENGTH) {
+                return napi_invalid_arg;
+            }
+            char buf[STR_MAX_LENGTH + STR_TAIL_LENGTH] {};
+            size_t len = 0;
+            status = napi_get_value_string_utf8(env, value, buf, maxLen + STR_TAIL_LENGTH, &len);
+            if (status == napi_ok) {
+                out.ipAddress_ = std::string(buf);
+            }
+        }
         CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress value failed", status);
     } else {
         out.ipAddress_ = "";
@@ -1265,16 +1291,16 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, OutputDeviceInfo& o
     return napi_ok;
 }
 
-/* napi_value -> PlayInfoHolder */
-napi_status NapiUtils::GetValue(napi_env env, napi_value in, PlayInfoHolder& out)
+/* napi_value -> MediaInfoHolder */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, MediaInfoHolder& out)
 {
-    return NapiPlayInfoHolder::GetValue(env, in, out);
+    return NapiMediaInfoHolder::GetValue(env, in, out);
 }
 
-/* napi_value <-> PlayInfoHolder */
-napi_status NapiUtils::SetValue(napi_env env, const PlayInfoHolder& in, napi_value& out)
+/* napi_value <-> MediaInfoHolder */
+napi_status NapiUtils::SetValue(napi_env env, const MediaInfoHolder& in, napi_value& out)
 {
-    return NapiPlayInfoHolder::SetValue(env, in, out);
+    return NapiMediaInfoHolder::SetValue(env, in, out);
 }
 
 /* napi_value -> MediaInfo */

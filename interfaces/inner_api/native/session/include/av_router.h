@@ -16,7 +16,6 @@
 #ifndef OHOS_AVROUTER_H
 #define OHOS_AVROUTER_H
 
-#include <string>
 #include "avsession_descriptor.h"
 #include "avsession_info.h"
 #include "i_avsession_service_listener.h"
@@ -67,7 +66,7 @@ public:
 
     virtual int32_t OnCastServerDied(int32_t providerId) = 0;
 
-    virtual std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int32_t castHandler) = 0;
+    virtual std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int64_t castHandler) = 0;
 
     /**
      * Start cast process.
@@ -77,6 +76,7 @@ public:
      * @since 10
     */
     virtual int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
      * Start cast process.
@@ -95,15 +95,7 @@ public:
      * @since 10
     */
     virtual int32_t RegisterCallback(int64_t castHandleconst, std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
-
-    /**
-     * @brief Listen for AVRouter Callback event.
-     *
-     * @param callback Listen for AVSession Callback event{@link AVSessionCallback}.
-     * @return Returns whether the return is successful.
-     * @since 10
-    */
-    virtual int32_t RegisterCastControllerProxyListener(const int64_t castHandle, const std::shared_ptr<IAVCastControllerProxyListener>& castController) = 0;
+    virtual int32_t UnRegisterCallback(int64_t castHandleconst, std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_H

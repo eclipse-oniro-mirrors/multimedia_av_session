@@ -18,6 +18,7 @@
 #include "napi_avsession.h"
 #include "napi_avsession_controller.h"
 #include "napi_avsession_enum.h"
+#include "napi_avcast_controller.h"
 
 namespace OHOS::AVSession {
 static napi_value Export(napi_env env, napi_value exports)
@@ -26,6 +27,7 @@ static napi_value Export(napi_env env, napi_value exports)
     NapiAVSessionManager::Init(env, exports);
     NapiAVSession::Init(env, exports);
     NapiAVSessionController::Init(env, exports);
+    NapiAVCastController::Init(env, exports);
 
     return exports;
 }

@@ -58,7 +58,7 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
     }
     result->extras_ = std::shared_ptr<AAFwk::WantParams>(parcel.ReadParcelable<AAFwk::WantParams>());
     if (result->extras_ == nullptr) {
-        SLOGE("Read AVPlaybackState failed, the extras is null");
+        SLOGI("Read AVPlaybackState failed, the extras is null");
     }
     return result;
 }

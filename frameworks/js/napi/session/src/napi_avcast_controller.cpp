@@ -60,7 +60,7 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
     napi_property_descriptor descriptors[] = {
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
-        DECLARE_NAPI_FUNCTION("start", Start),
+        DECLARE_NAPI_FUNCTION("setMediaList", SetMediaList),
         DECLARE_NAPI_FUNCTION("updateMediaInfo", UpdateMediaInfo),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
         DECLARE_NAPI_FUNCTION("getDuration", GetDuration),
@@ -123,11 +123,11 @@ napi_status NapiAVCastController::NewInstance(napi_env env, std::shared_ptr<AVCa
     return napi_ok;
 }
 
-napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
+napi_value NapiAVCastController::SetMediaList(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastController::Start");
     struct ConcreteContext : public ContextBase {
-        PlayInfoHolder playInfoHolder_;
+        MediaInfoHolder mediaInfoHolder_;
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
@@ -140,7 +140,7 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->playInfoHolder_);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->mediaInfoHolder_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get play info holder failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
@@ -156,7 +156,7 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
             return;
         }
-        int32_t ret = napiCastController->castController_->Start(context->playInfoHolder_);
+        int32_t ret = napiCastController->castController_->SetMediaList(context->mediaInfoHolder_);
         if (ret != AVSESSION_SUCCESS) {
             ErrCodeToMessage(ret, context->errMessage);
             SLOGE("CastController Start failed:%{public}d", ret);
@@ -793,45 +793,53 @@ napi_status NapiAVCastController::OnError(napi_env env, NapiAVCastController* na
 napi_status NapiAVCastController::OffStateChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_STATE_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffMediaItemChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_MEDIA_ITEM_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffVolumeChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VOLUME_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffLoopModeChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_LOOP_MODE_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffPlaySpeedChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_PLAY_SPEED_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffPositionChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_POSITON_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffVideoSizeChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffError(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_ERROR, callback);
 }
 

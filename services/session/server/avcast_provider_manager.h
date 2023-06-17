@@ -17,24 +17,27 @@
 #define OHOS_AVCAST_PROVIDER_MANAGER_H
 
 #include "i_avcast_state_listener.h"
-
+#include "av_cast_provider.h"
 
 namespace OHOS::AVSession {
 class AVCastProviderManager : public IAVCastStateListener {
 public:
     AVCastProviderManager();
 
-    // void Init(int32_t providerId, std::shared_ptr<AVCastProvider> provider);
+    virtual ~AVCastProviderManager() = default;
+
+    void Init(int32_t providerId, std::shared_ptr<AVCastProvider> provider);
 
     void OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos) override;
 
     void OnCastServerDied() override;
 
+    std::shared_ptr<AVCastProvider> provider_;
+
 protected:
 
 private:
     int32_t providerId_;
-    // std::shared_ptr<AVCastProvider> provider_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_PROVIDER_MANAGER_H

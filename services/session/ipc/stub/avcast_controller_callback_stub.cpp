@@ -87,7 +87,11 @@ int32_t AVCastControllerCallbackStub::HandleOnPositionChange(MessageParcel& data
 {
     int32_t position;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(position), ERR_NONE, "read seek failed");
-    OnPositionChange(position);
+    int32_t bufferPosition;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(bufferPosition), ERR_NONE, "read seek failed");
+    int32_t duration;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(duration), ERR_NONE, "read seek failed");
+    OnPositionChange(position, bufferPosition, duration);
     return ERR_NONE;
 }
 

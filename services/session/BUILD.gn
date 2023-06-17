@@ -122,6 +122,7 @@ ohos_shared_library("avsession_service") {
     "audio_framework:audio_client",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cast_engine:cast_engine_client",
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
@@ -151,12 +152,16 @@ ohos_shared_library("avsession_router") {
     cfi = true
     debug = false
   }
-  ipc_sources = [
+  ipc_sources = [   
   ]
 
   service_sources = [
     "server/avrouter.cpp",
     "server/avrouter_impl.cpp",
+    "server/avcast_provider_manager.cpp",
+    "server/hw_cast_provider.cpp",
+    "server/hw_cast_provider_session.cpp",
+    "server/hw_cast_stream_player.cpp", 
   ]
 
   adapter_sources = [
@@ -168,6 +173,7 @@ ohos_shared_library("avsession_router") {
     "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
     "//foundation/multimedia/av_session/services/session/adapter",
     "./server",
+    "./ipc/stub",
   ]
 
   cflags = [
@@ -215,6 +221,7 @@ ohos_shared_library("avsession_router") {
     "audio_framework:audio_client",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cast_engine:cast_engine_client",
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
@@ -328,6 +335,7 @@ ohos_shared_library("avsession_item") {
     "audio_framework:audio_client",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cast_engine:cast_engine_client",
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
