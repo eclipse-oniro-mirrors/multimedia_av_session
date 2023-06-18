@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,10 +22,13 @@
 
 #include "audio_system_manager.h"
 #include "av_session.h"
-#include "avcast_controller.h"
 #include "avsession_controller.h"
 #include "avsession_info.h"
 #include "key_event.h"
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "avcast_controller.h"
+#endif
 
 namespace OHOS::AVSession {
 class AVSessionManager {
@@ -98,8 +101,10 @@ public:
     virtual int32_t CreateController(const std::string& sessionId,
         std::shared_ptr<AVSessionController>& controller) = 0;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     virtual int32_t GetAVCastController(const std::string& sessionId,
         std::shared_ptr<AVCastController>& castController) = 0;
+#endif
 
     /**
      * @brief Listen for sessionListener callback event.
@@ -166,6 +171,7 @@ public:
     */
     virtual int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
      * Discovery nearby devices that can be cast.
      *
@@ -202,7 +208,7 @@ public:
      * @since 10
     */
     virtual int32_t StopCast(const SessionToken& sessionToken) = 0;
-
+#endif
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

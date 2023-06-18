@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 #include "accesstoken_kit.h"
 #include "app_manager_adapter.h"
 #include "audio_adapter.h"
-#include "av_router.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_info.h"
@@ -48,6 +47,10 @@
 #include "bundle_status_adapter.h"
 #include "params_config_operator.h"
 #include "avsession_service.h"
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "av_router.h"
+#endif
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -92,7 +95,10 @@ void AVSessionService::OnStart()
     backgroundAudioController_.Init(this);
     AddInnerSessionListener(&backgroundAudioController_);
 #endif
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVRouter::GetInstance().Init(this);
+#endif
 
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     AddSystemAbilityListener(AUDIO_POLICY_SERVICE_ID);
@@ -425,12 +431,13 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
     }
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     for (DeviceInfo deviceInfo : castOutputDeviceInfo.deviceInfos_) {
         castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
         for (const auto& session : GetContainer().GetAllSessions()) {
-            session->UpdateCastDeviceMAP(deviceInfo);
+            session->UpdateCastDeviceMap(deviceInfo);
         }
     }
     std::lock_guard lockGuard(sessionListenersLock_);
@@ -476,6 +483,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 
     return AVSESSION_SUCCESS;
 }
+#endif
 
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
@@ -968,6 +976,7 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     return AVSESSION_SUCCESS;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
     SLOGI("Start get cast controller");
@@ -977,6 +986,7 @@ int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId,
     object = result;
     return AVSESSION_SUCCESS;
 }
+#endif
 
 void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener)
 {
@@ -1320,7 +1330,7 @@ int32_t AVSessionService::SetBasicInfo(std::string& sessionInfo)
 }
 
 void AVSessionService::SetDeviceInfo(const std::vector<AudioStandard::AudioDeviceDescriptor>& castAudioDescriptors,
-                                         sptr <AVSessionItem>& session)
+    sptr <AVSessionItem>& session)
 {
     CHECK_AND_RETURN_LOG(session != nullptr && castAudioDescriptors.size() > 0, "invalid argument");
     SLOGI("castAudioDescriptors size is %{public}d", static_cast<int32_t>(castAudioDescriptors.size()));
@@ -1345,8 +1355,8 @@ void AVSessionService::SetDeviceInfo(const std::vector<AudioStandard::AudioDevic
 }
 
 bool AVSessionService::GetAudioDescriptorByDeviceId(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>>&
-                                                    descriptors, const std::string& deviceId,
-                                                    AudioStandard::AudioDeviceDescriptor& audioDescriptor)
+    descriptors, const std::string& deviceId,
+    AudioStandard::AudioDeviceDescriptor& audioDescriptor)
 {
     for (const auto& descriptor : descriptors) {
         if (std::to_string(descriptor->deviceId_) == deviceId) {
@@ -1361,9 +1371,9 @@ bool AVSessionService::GetAudioDescriptorByDeviceId(const std::vector<sptr<Audio
 }
 
 void AVSessionService::GetDeviceInfo(const sptr <AVSessionItem>& session,
-                                         const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors,
-                                         std::vector<AudioStandard::AudioDeviceDescriptor>& castSinkDescriptors,
-                                         std::vector<AudioStandard::AudioDeviceDescriptor>& cancelSinkDescriptors)
+    const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors,
+    std::vector<AudioStandard::AudioDeviceDescriptor>& castSinkDescriptors,
+    std::vector<AudioStandard::AudioDeviceDescriptor>& cancelSinkDescriptors)
 {
     if (descriptors.size() != 1) {
         SLOGI("descriptor size is %{public}d, not support", static_cast<int32_t>(descriptors.size()));

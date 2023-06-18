@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//build/ohos/ace/ace.gni")
+import("//foundation/multimedia/av_session/castplus_cast_engine_part.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
 ohos_shared_library("avsession_napi") {
@@ -29,19 +30,16 @@ ohos_shared_library("avsession_napi") {
   sources = [
     "src/napi_async_callback.cpp",
     "src/napi_async_work.cpp",
-    "src/napi_cast_control_command.cpp",
-    "src/napi_avcast_controller.cpp",
-    "src/napi_avcast_controller_callback.cpp",
-    "src/napi_device_info.cpp",
-    "src/napi_media_info_holder.cpp",
     "src/napi_avcontroller_callback.cpp",
     "src/napi_avsession.cpp",
     "src/napi_avsession_callback.cpp",
     "src/napi_avsession_controller.cpp",
     "src/napi_avsession_enum.cpp",
     "src/napi_avsession_manager.cpp",
+    "src/napi_cast_control_command.cpp",
     "src/napi_control_command.cpp",
     "src/napi_media_description.cpp",
+    "src/napi_media_info_holder.cpp",
     "src/napi_meta_data.cpp",
     "src/napi_module.cpp",
     "src/napi_playback_state.cpp",
@@ -54,7 +52,6 @@ ohos_shared_library("avsession_napi") {
     "$ability_runtime_dir/frameworks/js/napi/inner/napi_common:napi_common",
     "//foundation/multimedia/av_session/frameworks/common:avsession_common",
     "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
-    "//foundation/multimedia/av_session/frameworks/native/session:avsession_cast_client",
     "//foundation/multimedia/av_session/utils:avsession_utils",
   ]
 
@@ -81,8 +78,21 @@ ohos_shared_library("avsession_napi") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  cflags = []
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    sources += [
+      "src/napi_avcast_controller.cpp",
+      "src/napi_avcast_controller_callback.cpp",
+    ]
+    deps +=
+        [ "$av_session_dir/frameworks/native/session:avsession_cast_client" ]
+  }
+
   if (multimedia_av_session_enable_trace_control) {
-    cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
     external_deps += [ "hitrace_native:hitrace_meter" ]
   }
   if (multimedia_av_session_enable_sysevent_control) {

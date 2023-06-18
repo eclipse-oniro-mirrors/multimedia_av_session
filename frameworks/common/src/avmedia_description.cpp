@@ -43,54 +43,22 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
 {
     auto *result = new (std::nothrow) AVMediaDescription();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVMediaDescription failed");
-    if (!data.ReadString(result->mediaId_)) {
-        SLOGD("AVMediaDescription Unmarshalling mediaId null ");
-    }
-    if (!data.ReadString(result->title_)) {
-        SLOGD("AVMediaDescription Unmarshalling title null ");
-    }
-    if (!data.ReadString(result->subtitle_)) {
-        SLOGD("AVMediaDescription Unmarshalling subtitle null ");
-    }
-    if (!data.ReadString(result->description_)) {
-        SLOGD("AVMediaDescription Unmarshalling description null ");
-    }
-    if (!data.ReadString(result->iconUri_)) {
-        SLOGD("AVMediaDescription Unmarshalling iconUri null ");
-    }
-    if (!data.ReadString(result->mediaType_)) {
-        SLOGD("AVMediaDescription Unmarshalling mediaType_ null ");
-    }
-    if (!data.ReadInt32(result->mediaSize_)) {
-        SLOGD("AVMediaDescription Unmarshalling mediaSize_ null ");
-    }
-    if (!data.ReadString(result->albumTitle_)) {
-        SLOGD("AVMediaDescription Unmarshalling albumTitle_ null ");
-    }
-    if (!data.ReadString(result->albumCoverUri_)) {
-        SLOGD("AVMediaDescription Unmarshalling albumCoverUri_ null ");
-    }
-    if (!data.ReadString(result->lyricContent_)) {
-        SLOGD("AVMediaDescription Unmarshalling lyricContent_ null ");
-    }
-    if (!data.ReadString(result->lyricUri_)) {
-        SLOGD("AVMediaDescription Unmarshalling lyricUri_ null ");
-    }
-    if (!data.ReadString(result->artist_)) {
-        SLOGD("AVMediaDescription Unmarshalling artist_ null ");
-    }
-    if (!data.ReadString(result->mediaUri_)) {
-        SLOGD("AVMediaDescription Unmarshalling mediaUri null ");
-    }
-    if (!data.ReadInt32(result->duration_)) {
-        SLOGD("AVMediaDescription Unmarshalling duration null ");
-    }
-    if (!data.ReadInt32(result->startPosition_)) {
-        SLOGD("AVMediaDescription Unmarshalling startPosition null ");
-    }
-    if (!data.ReadString(result->appName_)) {
-        SLOGD("AVMediaDescription Unmarshalling appName null ");
-    }
+    data.ReadString(result->mediaId_);
+    data.ReadString(result->title_);
+    data.ReadString(result->subtitle_);
+    data.ReadString(result->description_);
+    data.ReadString(result->iconUri_);
+    data.ReadString(result->mediaType_);
+    data.ReadInt32(result->mediaSize_);
+    data.ReadString(result->albumTitle_);
+    data.ReadString(result->albumCoverUri_);
+    data.ReadString(result->lyricContent_);
+    data.ReadString(result->lyricUri_);
+    data.ReadString(result->artist_);
+    data.ReadString(result->mediaUri_);
+    data.ReadInt32(result->duration_);
+    data.ReadInt32(result->startPosition_);
+    data.ReadString(result->appName_);
     result->icon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->icon_ == nullptr) {
         SLOGD("read AVMediaDescription - icon null");

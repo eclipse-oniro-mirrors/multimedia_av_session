@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,7 +85,9 @@ public:
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
+#endif
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
@@ -113,11 +115,13 @@ public:
         return NotifyAudioSessionCheck(uid);
     }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
     int32_t StopCast(const SessionToken& sessionToken) override;
+#endif
 
 private:
     static SessionContainer& GetContainer();
@@ -278,7 +282,9 @@ private:
 
     std::recursive_mutex sortFileReadWriteLock_;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+#endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
     static constexpr const char *ABILITY_FILE_NAME = "abilityinfo";

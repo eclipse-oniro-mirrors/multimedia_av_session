@@ -17,8 +17,8 @@
 #define OHOS_AVCAST_PROVIDER_MANAGER_H
 
 #include "i_avcast_state_listener.h"
-#include "av_cast_provider.h"
 
+#include "av_cast_provider.h"
 namespace OHOS::AVSession {
 class AVCastProviderManager : public IAVCastStateListener {
 public:

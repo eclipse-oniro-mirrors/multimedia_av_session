@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include "key_event.h"
 #include "napi_async_work.h"
 #include "napi_avcast_controller_callback.h"
-#include "napi_avcast_controller.h"
+#include "napi_cast_control_command.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
 #include "napi_utils.h"
@@ -28,21 +28,20 @@
 #include "napi_avsession_manager.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
-
-#include "napi_cast_control_command.h"
+#include "napi_avcast_controller.h"
 
 namespace OHOS::AVSession {
 static __thread napi_ref AVCastControllerConstructorRef = nullptr;
 std::map<std::string, std::pair<NapiAVCastController::OnEventHandlerType,
     NapiAVCastController::OffEventHandlerType>> NapiAVCastController::EventHandlers_ = {
-    { "stateChange", { OnStateChange, OffStateChange } },
-    { "mediaItemChange", { OnMediaItemChange, OffMediaItemChange } },
-    { "volumeChange", { OnVolumeChange, OffVolumeChange } },
-    { "loopModeChange", { OnLoopModeChange, OffLoopModeChange } },
-    { "playSpeedChange", { OnPlaySpeedChange, OffPlaySpeedChange } },
-    { "positionChange", { OnPositionChange, OffPositionChange } }, // seek done -> positionChange
-    { "videoSizeChange", { OnVideoSizeChange, OffVideoSizeChange } }, // timeUpdate -> videoSizeChange
-    { "error", { OnError, OffError } },
+    { "stateChange", { OnStateChanged, OffStateChange } },
+    { "mediaItemChange", { OnMediaItemChanged, OffMediaItemChange } },
+    { "volumeChange", { OnVolumeChanged, OffVolumeChange } },
+    { "loopModeChange", { OnLoopModeChanged, OffLoopModeChange } },
+    { "playSpeedChange", { OnPlaySpeedChanged, OffPlaySpeedChange } },
+    { "positionChange", { OnPositionChanged, OffPositionChange } }, // seek done -> positionChange
+    { "videoSizeChange", { OnVideoSizeChanged, OffVideoSizeChange } }, // timeUpdate -> videoSizeChange
+    { "error", { OnPlayerError, OffError } },
 };
 
 NapiAVCastController::NapiAVCastController()
@@ -73,7 +72,7 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
-    napi_value constructor{};
+    napi_value constructor {};
     auto status = napi_define_class(env, "AVCastController", NAPI_AUTO_LENGTH, ConstructorCallback, nullptr,
         property_count, descriptors, &constructor);
     if (status != napi_ok) {
@@ -111,12 +110,14 @@ napi_value NapiAVCastController::ConstructorCallback(napi_env env, napi_callback
 napi_status NapiAVCastController::NewInstance(napi_env env, std::shared_ptr<AVCastController>& nativeController,
     napi_value& out)
 {
-    napi_value constructor{};
-    NAPI_CALL_BASE(env, napi_get_reference_value(env, AVCastControllerConstructorRef, &constructor), napi_generic_failure);
-    napi_value instance{};
+    napi_value constructor {};
+    NAPI_CALL_BASE(env, napi_get_reference_value(env, AVCastControllerConstructorRef, &constructor),
+        napi_generic_failure);
+    napi_value instance {};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
-    NapiAVCastController* napiCastController{};
-    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiCastController)), napi_generic_failure);
+    NapiAVCastController* napiCastController {};
+    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiCastController)),
+        napi_generic_failure);
     napiCastController->castController_ = std::move(nativeController);
 
     out = instance;
@@ -230,7 +231,7 @@ napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_
     auto input = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiCastControlCommand::GetValue(env, argv[ARGV_FIRST], context->castCommand_); // TODO:: add napi cast control command
+        context->status = NapiCastControlCommand::GetValue(env, argv[ARGV_FIRST], context->castCommand_);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
@@ -740,107 +741,131 @@ napi_value NapiAVCastController::OffEvent(napi_env env, napi_callback_info info)
     return NapiUtils::GetUndefinedValue(env);
 }
 
-napi_status NapiAVCastController::OnStateChange(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnStateChanged(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_STATE_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnMediaItemChange(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnMediaItemChanged(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_STATE_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnVolumeChange(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnVolumeChanged(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VOLUME_CHANGE, callback);
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_VOLUME_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnLoopModeChange(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnLoopModeChanged(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_LOOP_MODE_CHANGE, callback);
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_LOOP_MODE_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnPlaySpeedChange(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnPlaySpeedChanged(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_PLAY_SPEED_CHANGE, callback);
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_PLAY_SPEED_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnPositionChange(napi_env env, NapiAVCastController* napiCastController,
-        napi_value param, napi_value callback)
-{
-    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_POSITON_CHANGE, callback);
-}
-
-napi_status NapiAVCastController::OnVideoSizeChange(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnPositionChanged(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, callback);
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_POSITON_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OnError(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnVideoSizeChanged(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env, NapiAVCastControllerCallback::EVENT_CAST_ERROR, callback);
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, callback);
+}
+
+napi_status NapiAVCastController::OnPlayerError(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_ERROR, callback);
 }
 
 napi_status NapiAVCastController::OffStateChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_STATE_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_STATE_CHANGE,
+        callback);
 }
 
 napi_status NapiAVCastController::OffMediaItemChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_MEDIA_ITEM_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_MEDIA_ITEM_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffVolumeChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VOLUME_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_VOLUME_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffLoopModeChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_LOOP_MODE_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_LOOP_MODE_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OffPlaySpeedChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
+napi_status NapiAVCastController::OffPlaySpeedChange(napi_env env,
+    NapiAVCastController* napiCastController, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_PLAY_SPEED_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_PLAY_SPEED_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffPositionChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_POSITON_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_POSITON_CHANGE, callback);
 }
 
-napi_status NapiAVCastController::OffVideoSizeChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
+napi_status NapiAVCastController::OffVideoSizeChange(napi_env env,
+    NapiAVCastController* napiCastController, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, callback);
 }
 
 napi_status NapiAVCastController::OffError(napi_env env, NapiAVCastController* napiCastController, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env, NapiAVCastControllerCallback::EVENT_CAST_ERROR, callback);
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_ERROR, callback);
 }
 
 void NapiAVCastController::ErrCodeToMessage(int32_t errCode, std::string& message)

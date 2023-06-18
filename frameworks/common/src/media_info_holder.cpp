@@ -50,7 +50,7 @@ void MediaInfoHolder::SetCurrentIndex(const int32_t& currentIndex)
     currentIndex_ = currentIndex;
 }
 
-const int32_t MediaInfoHolder::GetCurrentIndex() const
+int32_t MediaInfoHolder::GetCurrentIndex() const
 {
     return currentIndex_;
 }

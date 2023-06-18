@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,10 @@
 #include "avsession_log.h"
 #include "avsession_proxy.h"
 #include "avsession_controller_proxy.h"
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
+#endif
 
 namespace OHOS::AVSession {
 AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject>& impl)
@@ -182,6 +185,7 @@ int32_t AVSessionServiceProxy::CreateControllerInner(const std::string& sessionI
     return ret;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionServiceProxy::GetAVCastController(const std::string& sessionId,
     std::shared_ptr<AVCastController>& castController)
 {
@@ -217,6 +221,7 @@ int32_t AVSessionServiceProxy::GetAVCastControllerInner(const std::string& sessi
     }
     return ret;
 }
+#endif
 
 int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
@@ -336,6 +341,7 @@ int32_t AVSessionServiceProxy::CastAudioForAll(const std::vector<AudioStandard::
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionServiceProxy::StartCastDiscovery(const int32_t castDeviceCapability)
 {
     MessageParcel data;
@@ -382,7 +388,8 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
     int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfoSize), ERR_MARSHALLING, "write deviceInfoSize failed");
     for (const DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.castCategory_), ERR_MARSHALLING, "write castCategory failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.castCategory_),
+            ERR_MARSHALLING, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceId_), ERR_MARSHALLING, "write deviceId failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceName_), ERR_MARSHALLING, "write deviceName failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.deviceType_), ERR_MARSHALLING, "write deviceType failed");
@@ -418,4 +425,5 @@ int32_t AVSessionServiceProxy::StopCast(const SessionToken& sessionToken)
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
+#endif
 } // namespace OHOS::AVSession

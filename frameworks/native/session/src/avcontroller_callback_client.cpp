@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,8 +84,9 @@ void AVControllerCallbackClient::OnOutputDeviceChange(const int32_t connectionSt
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, connectionState, info]() { callback->OnOutputDeviceChange(connectionState, info); },
-            EVENT_NAME),
+        .AVSessionPostTask([callback, connectionState, info]() {
+            callback->OnOutputDeviceChange(connectionState, info);
+        }, EVENT_NAME),
         "AVControllerCallbackClient handler postTask failed");
 }
 

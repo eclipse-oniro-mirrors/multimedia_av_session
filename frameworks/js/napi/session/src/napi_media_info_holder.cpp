@@ -32,7 +32,6 @@ std::map<int32_t, NapiMediaInfoHolder::SetterType> NapiMediaInfoHolder::setterMa
 
 napi_status NapiMediaInfoHolder::GetValue(napi_env env, napi_value in, MediaInfoHolder& out)
 {
-
     bool hasCurrentIndex = false;
     napi_has_named_property(env, in, "currentIndex", &hasCurrentIndex);
     if (!hasCurrentIndex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,14 +139,16 @@ napi_status NapiCastControlCommand::GetForwardTime(napi_env env, napi_value in, 
         return status;
     }
 
-    CHECK_AND_RETURN_RET_LOG(out.SetForwardTime(forwardTime) == AVSESSION_SUCCESS, napi_invalid_arg, "set parameter failed");
+    CHECK_AND_RETURN_RET_LOG(out.SetForwardTime(forwardTime) == AVSESSION_SUCCESS, napi_invalid_arg,
+        "set parameter failed");
     return status;
 }
 
 napi_status NapiCastControlCommand::SetForwardTime(napi_env env, AVCastControlCommand& in, napi_value& out)
 {
     int32_t forwardTime {};
-    CHECK_AND_RETURN_RET_LOG(in.GetForwardTime(forwardTime) == AVSESSION_SUCCESS, napi_invalid_arg, "get parameter failed");
+    CHECK_AND_RETURN_RET_LOG(in.GetForwardTime(forwardTime) == AVSESSION_SUCCESS, napi_invalid_arg,
+        "get parameter failed");
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, forwardTime, property);
@@ -169,14 +171,16 @@ napi_status NapiCastControlCommand::GetRewindTime(napi_env env, napi_value in, A
         return status;
     }
 
-    CHECK_AND_RETURN_RET_LOG(out.SetRewindTime(rewindTime) == AVSESSION_SUCCESS, napi_invalid_arg, "set parameter failed");
+    CHECK_AND_RETURN_RET_LOG(out.SetRewindTime(rewindTime) == AVSESSION_SUCCESS, napi_invalid_arg,
+        "set parameter failed");
     return status;
 }
 
 napi_status NapiCastControlCommand::SetRewindTime(napi_env env, AVCastControlCommand& in, napi_value& out)
 {
     int32_t rewindTime {};
-    CHECK_AND_RETURN_RET_LOG(in.GetRewindTime(rewindTime) == AVSESSION_SUCCESS, napi_invalid_arg, "get parameter failed");
+    CHECK_AND_RETURN_RET_LOG(in.GetRewindTime(rewindTime) == AVSESSION_SUCCESS, napi_invalid_arg,
+        "get parameter failed");
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, rewindTime, property);

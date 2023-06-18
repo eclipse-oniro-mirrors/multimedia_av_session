@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,22 +53,22 @@ private:
     static napi_value GetPlayState(napi_env env, napi_callback_info info);
     static napi_value SetDisplaySurface(napi_env env, napi_callback_info info);
 
-    static napi_status OnStateChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnStateChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnMediaItemChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnMediaItemChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
 
-    static napi_status OnVolumeChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnVolumeChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnLoopModeChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnLoopModeChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnPlaySpeedChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnPlaySpeedChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnPositionChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnPositionChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnVideoSizeChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnVideoSizeChanged(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnError(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnPlayerError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
 
     static napi_status OffStateChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);

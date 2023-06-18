@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,7 +153,9 @@ int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     return service ? service->CreateController(sessionId, controller) : ERR_SERVICE_NOT_EXIST;
 }
 
-int32_t AVSessionManagerImpl::GetAVCastController(const std::string& sessionId, std::shared_ptr<AVCastController>& castController)
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+int32_t AVSessionManagerImpl::GetAVCastController(const std::string& sessionId,
+    std::shared_ptr<AVCastController>& castController)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::GetAVCastController");
     if (sessionId.empty()) {
@@ -164,6 +166,7 @@ int32_t AVSessionManagerImpl::GetAVCastController(const std::string& sessionId, 
     auto service = GetService();
     return service ? service->GetAVCastController(sessionId, castController) : ERR_SERVICE_NOT_EXIST;
 }
+#endif
 
 int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener>& listener)
 {
@@ -254,6 +257,7 @@ int32_t AVSessionManagerImpl::CastAudioForAll(const std::vector<AudioStandard::A
     return service ? service->CastAudioForAll(descriptors) : ERR_SERVICE_NOT_EXIST;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionManagerImpl::StartCastDiscovery(const int32_t castDeviceCapability)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartCastDiscovery");
@@ -281,6 +285,7 @@ int32_t AVSessionManagerImpl::StopCast(const SessionToken& sessionToken)
     auto service = GetService();
     return service ? service->StopCast(sessionToken) : ERR_SERVICE_NOT_EXIST;
 }
+#endif
 
 void AVSessionManagerImpl::RegisterClientDeathObserver()
 {

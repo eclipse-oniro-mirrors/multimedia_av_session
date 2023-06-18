@@ -40,7 +40,7 @@ public:
     bool Marshalling(Parcel& parcel) const override;
 
     void SetCurrentIndex(const int32_t& currentIndex);
-    const int32_t& GetCurrentIndex() const;
+    int32_t GetCurrentIndex() const;
 
     void SetPlayInfos(const std::vector<AVQueueItem>& playInfos);
     const std::vector<AVQueueItem>& GetPlayInfos() const;

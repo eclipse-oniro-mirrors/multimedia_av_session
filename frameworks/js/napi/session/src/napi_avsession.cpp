@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include "napi_avsession.h"
-#include "avcast_controller.h"
 #include "avsession_controller.h"
 #include "napi_async_work.h"
 #include "napi_utils.h"
@@ -25,10 +24,13 @@
 #include "want_params.h"
 #include "want_agent.h"
 #include "avsession_trace.h"
-#include "napi_avcast_controller.h"
 #include "napi_avsession_controller.h"
 #include "napi_avsession_manager.h"
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "avcast_controller.h"
+#include "napi_avcast_controller.h"
+#endif
 namespace OHOS::AVSession {
 static __thread napi_ref AVSessionConstructorRef = nullptr;
 std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventHandlers_ = {
@@ -98,7 +100,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("releaseCast", ReleaseCast),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
-    napi_value constructor{};
+    napi_value constructor {};
     auto status = napi_define_class(env, "AVSession", NAPI_AUTO_LENGTH, ConstructorCallback, nullptr,
                                     propertyCount, descriptors, &constructor);
     if (status != napi_ok) {
@@ -132,7 +134,7 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
 
 napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out)
 {
-    napi_value constructor{};
+    napi_value constructor {};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVSessionConstructorRef, &constructor), napi_generic_failure);
     napi_value instance{};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
@@ -140,7 +142,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiAvSession)), napi_generic_failure);
     napiAvSession->session_ = std::move(nativeSession);
     napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
-    napiAvSession->sessionType_ = napiAvSession->session_->GetSessionType();    
+    napiAvSession->sessionType_ = napiAvSession->session_->GetSessionType();
     SLOGI("sessionId=%{public}s", napiAvSession->sessionId_.c_str());
 
     napi_value property {};
@@ -655,13 +657,15 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
 
 napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info info)
 {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     struct ConcreteContext : public ContextBase {
         std::shared_ptr<AVCastController> castController_;
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("GetAVCastController failed : no memory");
-        NapiUtils::ThrowError(env, "GetAVCastController failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        NapiUtils::ThrowError(env, "GetAVCastController failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
@@ -691,6 +695,9 @@ napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info i
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetAVCastController", executor, complete);
+#else
+    return nullptr;
+#endif
 }
 
 napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
@@ -898,6 +905,7 @@ napi_value NapiAVSession::SetSessionEvent(napi_env env, napi_callback_info info)
 
 napi_value NapiAVSession::ReleaseCast(napi_env env, napi_callback_info info)
 {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto context = std::make_shared<ContextBase>();
     if (context == nullptr) {
         SLOGE("ReleaseCast failed : no memory");
@@ -932,6 +940,9 @@ napi_value NapiAVSession::ReleaseCast(napi_env env, napi_callback_info info)
         output = NapiUtils::GetUndefinedValue(env);
     };
     return NapiAsyncWork::Enqueue(env, context, "ReleaseCast", executor, complete);
+#else
+    return nullptr;
+#endif
 }
 
 void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,7 +184,8 @@ void AVSessionCallbackProxy::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
         "send request failed");
 }
 
-void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
+void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
+    const OutputDeviceInfo& outputDeviceInfo)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");

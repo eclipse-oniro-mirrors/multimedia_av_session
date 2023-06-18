@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,9 +60,11 @@ int32_t AVCastControllerStub::HandleSendControlCommand(MessageParcel& data, Mess
     AVSESSION_TRACE_SYNC_START("AVCastControllerStub::SendControlCommand");
     sptr<AVCastControlCommand> cmd = data.ReadParcelable<AVCastControlCommand>();
     if (cmd == nullptr) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_UNMARSHALLING, "write SendCommand ret failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING),
+            ERR_UNMARSHALLING, "write SendCommand ret failed");
     } else {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SendControlCommand(*cmd)), ERR_UNMARSHALLING, "write SendCommand ret failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SendControlCommand(*cmd)),
+            ERR_UNMARSHALLING, "write SendCommand ret failed");
     }
     return ERR_NONE;
 }
@@ -73,7 +75,8 @@ int32_t AVCastControllerStub::HandleStart(MessageParcel& data, MessageParcel& re
     if (mediaInfoHolder == nullptr) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write Start ret failed");
     } else {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetMediaList(*mediaInfoHolder)), ERR_NONE, "Write mediaInfoHolder failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetMediaList(*mediaInfoHolder)),
+            ERR_NONE, "Write mediaInfoHolder failed");
     }
     return ERR_NONE;
 }

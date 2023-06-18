@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,17 +23,21 @@
 #include "avsession_callback_proxy.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
+#endif
 
 namespace OHOS::AVSession {
 class AVControllerItem;
 class RemoteSessionSink;
 class RemoteSessionSource;
 class AVSessionItem : public AVSessionStub {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 class CssListener : public IAVCastSessionStateListener {
 public:
-    CssListener(AVSessionItem *ptr)
+    explicit CssListener(AVSessionItem *ptr)
     {
         ptr_ = ptr;
     }
@@ -45,12 +49,15 @@ public:
 
     AVSessionItem *ptr_;
 };
+#endif
 public:
     explicit AVSessionItem(const AVSessionDescriptor& descriptor);
 
     ~AVSessionItem() override;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
+#endif
 
     std::string GetSessionId() override;
 
@@ -154,6 +161,7 @@ public:
 
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t ReleaseCast() override;
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
@@ -165,6 +173,7 @@ public:
     sptr<IRemoteObject> GetAVCastControllerInner() override;
 
     void UpdateCastDeviceMap(DeviceInfo deviceInfo);
+#endif
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
@@ -221,6 +230,7 @@ private:
     std::recursive_mutex remoteSinkLock_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_;
 
@@ -231,6 +241,7 @@ private:
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+#endif
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H

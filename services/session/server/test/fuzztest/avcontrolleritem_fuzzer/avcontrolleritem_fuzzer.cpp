@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,8 @@
 
 using namespace std;
 using namespace OHOS;
-using namespace OHOS::AVSession;
-
+namespace OHOS {
+namespace AVSession {
 const int32_t MAX_CODE_TEST = 17;
 const int32_t MAX_CODE_LEN = 512;
 const int32_t MIN_SIZE_NUM = 4;
@@ -85,7 +85,7 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
     avControllerItem->Destroy();
 }
 
-void OHOS::AVSession::AvControllerItemRemoteRequestTest(const uint8_t* data, size_t size)
+void AvControllerItemRemoteRequestTest(const uint8_t* data, size_t size)
 {
     auto avControllerItemFuzzer = std::make_unique<AvControllerItemFuzzer>();
     if (avControllerItemFuzzer == nullptr) {
@@ -94,7 +94,7 @@ void OHOS::AVSession::AvControllerItemRemoteRequestTest(const uint8_t* data, siz
     avControllerItemFuzzer->FuzzOnRemoteRequest(data, size);
 }
 
-void OHOS::AVSession::AvControllerItemDataTest(const uint8_t* data, size_t size)
+void AvControllerItemDataTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
@@ -152,15 +152,15 @@ void OHOS::AVSession::AvControllerItemDataTest(const uint8_t* data, size_t size)
     avControllerItem->GetSessionId();
     avControllerItem->GetPid();
     avControllerItem->HasSession(sessionId);
-    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    auto keyEvent = MMI::KeyEvent::Create();
     keyEvent->SetKeyCode(*(reinterpret_cast<const int32_t*>(data)));
-    OHOS::MMI::KeyEvent::KeyItem item;
+    MMI::KeyEvent::KeyItem item;
     item.SetKeyCode(*(reinterpret_cast<const int32_t*>(data)));
     keyEvent->AddKeyItem(item);
     bool isActive = *(reinterpret_cast<const bool*>(data));
     avControllerItem->IsSessionActive(isActive);
     avControllerItem->SendAVKeyEvent(*(keyEvent.get()));
-    OHOS::AbilityRuntime::WantAgent::WantAgent ability;
+    AbilityRuntime::WantAgent::WantAgent ability;
     avControllerItem->GetLaunchAbility(ability);
     if (code <= AVControlCommand::SESSION_CMD_MAX) {
         AVControlCommand command;
@@ -170,7 +170,7 @@ void OHOS::AVSession::AvControllerItemDataTest(const uint8_t* data, size_t size)
     avControllerItem->Destroy();
 }
 
-void OHOS::AVSession::AvControllerItemTest(const uint8_t* data, size_t size)
+void AvControllerItemTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
@@ -206,8 +206,13 @@ void OHOS::AVSession::AvControllerItemTest(const uint8_t* data, size_t size)
         SLOGI("avControllerItem is null");
         return;
     }
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    AvControllerItemTestImpl(data, size, avControllerItem);
+}
 
+void AvControllerItemTestImpl(const uint8_t* data, size_t size,
+    sptr<AVControllerItem> avControllerItem)
+{
+    std::string deviceId(reinterpret_cast<const char*>(data), size);
     AVPlaybackState controllerBackState;
     controllerBackState.SetState(*(reinterpret_cast<const int32_t*>(data)));
     avControllerItem->HandlePlaybackStateChange(controllerBackState);
@@ -219,21 +224,26 @@ void OHOS::AVSession::AvControllerItemTest(const uint8_t* data, size_t size)
     std::vector<int32_t> controlCmds;
     controlCmds.push_back(*(reinterpret_cast<const int32_t*>(data)));
     avControllerItem->HandleValidCommandChange(controlCmds);
-    int32_t connectionState;
-    OutputDeviceInfo deviceInfo;
-    deviceInfo.isRemote_ = *(reinterpret_cast<const bool*>(data));
-    deviceInfo.deviceIds_.push_back(deviceId);
-    avControllerItem->HandleOutputDeviceChange(connectionState, deviceInfo);
+    int32_t connectionState = 0;
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = *(reinterpret_cast<const int32_t*>(data));
+    deviceInfo.deviceId_ = deviceId;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    avControllerItem->HandleOutputDeviceChange(connectionState, outputDeviceInfo);
     avControllerItem->HandleSessionDestroy();
     avControllerItem->Destroy();
 }
+
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AvControllerItemRemoteRequestTest(data, size);
-    OHOS::AVSession::AvControllerItemDataTest(data, size);
-    OHOS::AVSession::AvControllerItemTest(data, size);
+    AvControllerItemRemoteRequestTest(data, size);
+    AvControllerItemDataTest(data, size);
+    AvControllerItemTest(data, size);
     return 0;
 }
+} // namespace AVSession
+} // namespace OHOS

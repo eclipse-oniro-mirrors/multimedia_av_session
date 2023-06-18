@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,6 +176,8 @@ public:
     /* OutputDeviceInfo <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, OutputDeviceInfo& out);
     static napi_status SetValue(napi_env env, const OutputDeviceInfo& in, napi_value& out);
+
+    static napi_status GetOptionalString(napi_env env, napi_value in, DeviceInfo& out);
 
     /* DeviceInfo <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, DeviceInfo& out);

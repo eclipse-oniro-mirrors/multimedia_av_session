@@ -21,27 +21,28 @@
 #include "avcast_controller_stub.h"
 
 namespace OHOS::AVSession {
-class AVCastControllerItem : public AVCastControllerStub, public IAVCastControllerProxyListener, public std::enable_shared_from_this<IAVCastControllerProxyListener> {
+class AVCastControllerItem : public AVCastControllerStub, public IAVCastControllerProxyListener,
+    public std::enable_shared_from_this<IAVCastControllerProxyListener> {
 public:
     AVCastControllerItem();
 
     void Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
-    void OnStateChange(const AVCastPlayerState& state) override;
+    void OnStateChanged(const AVCastPlayerState& state) override;
 
-    void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
+    void OnMediaItemChanged(const AVQueueItem& avQueueItem) override;
 
-    void OnVolumeChange(const int32_t volume) override;
+    void OnVolumeChanged(const int32_t volume) override;
 
-    void OnLoopModeChange(const int32_t loopMode) override;
+    void OnLoopModeChanged(const int32_t loopMode) override;
 
-    void OnPlaySpeedChange(const int32_t playSpeed) override;
+    void OnPlaySpeedChanged(const int32_t playSpeed) override;
 
-    void OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
+    void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
 
-    void OnVideoSizeChange(const int32_t width, const int32_t height) override;
+    void OnVideoSizeChanged(const int32_t width, const int32_t height) override;
     
-    void OnError(const int32_t errorCode, const std::string& errorMsg) override;
+    void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 

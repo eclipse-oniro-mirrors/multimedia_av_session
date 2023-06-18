@@ -31,18 +31,21 @@ void AVCastProviderManager::Init(int32_t providerId, std::shared_ptr<AVCastProvi
 void AVCastProviderManager::OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos)
 {
     SLOGI("On device available");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     for (int i = 0; i < deviceInfos.size(); i++) {
         deviceInfos[i].providerId_ = providerId_;
     }
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_ = deviceInfos;
     AVRouter::GetInstance().OnDeviceAvailable(outputDeviceInfo);
+#endif
 }
 
 void AVCastProviderManager::OnCastServerDied()
 {
     SLOGI("On cast server died");
-    // AVRouter::GetInstance().OnCastServerDied(provider_.id);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVRouter::GetInstance().OnCastServerDied(providerId_);
+#endif
 }
-
 } // namespace OHOS::AVSession

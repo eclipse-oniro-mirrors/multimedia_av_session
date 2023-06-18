@@ -16,7 +16,7 @@
 #ifndef AV_CAST_PROVIDER_H
 #define AV_CAST_PROVIDER_H
 
-#include "cast_engine_common_h"
+#include "cast_engine_common.h"
 #include "i_avcast_state_listener.h"
 #include "avsession_descriptor.h"
 #include "i_avcast_controller_proxy.h"
@@ -25,7 +25,7 @@ namespace OHOS::AVSession {
 class AVCastProvider {
 public:
     AVCastProvider() = default;
-    virtual ~AVCastProvider() = default; 
+    virtual ~AVCastProvider() = default;
 
     virtual void Init() = 0;
     virtual bool StartDiscovery(int castCapability) = 0;
@@ -38,8 +38,10 @@ public:
     virtual int StartCastSession() = 0;
     virtual void StopCastSession(int castId) = 0;
     virtual std::shared_ptr<IAVCastControllerProxy> GetRemoteController(int castId) = 0;
-    virtual bool RegisterCastSessionStateListener(int castId, std::shared_ptr<IAVCastSessionStateListener> listener) = 0;
-    virtual bool UnRegisterCastSessionStateListener(int castId, std::shared_ptr<IAVCastSessionStateListener> listener) = 0;
+    virtual bool RegisterCastSessionStateListener(int castId,
+        std::shared_ptr<IAVCastSessionStateListener> listener) = 0;
+    virtual bool UnRegisterCastSessionStateListener(int castId,
+        std::shared_ptr<IAVCastSessionStateListener> listener) = 0;
 };
 } // namespace OHOS::AVSession
 

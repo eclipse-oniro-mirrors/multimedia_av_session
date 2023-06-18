@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1188,6 +1188,41 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<AudioSt
     return napi_ok;
 }
 
+napi_status NapiUtils::GetOptionalString(napi_env env, napi_value in, DeviceInfo& out)
+{
+    napi_value value {};
+    bool hasIpAddress = false;
+    napi_has_named_property(env, in, "ipAddress", &hasIpAddress);
+    if (hasIpAddress) {
+        napi_status status = napi_get_named_property(env, in, "ipAddress", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress failed", status);
+
+        napi_valuetype type = napi_undefined;
+        status = napi_typeof(env, value, &type);
+        CHECK_RETURN((status == napi_ok) && type == napi_string, "invalid typ for ipAddress", napi_invalid_arg);
+
+        size_t maxLen = STR_MAX_LENGTH;
+        status = napi_get_value_string_utf8(env, value, nullptr, 0, &maxLen);
+        if (maxLen == 0) {
+            out.ipAddress_ = "";
+        } else {
+            if (maxLen <= 0 || maxLen >= STR_MAX_LENGTH) {
+                return napi_invalid_arg;
+            }
+            char buf[STR_MAX_LENGTH + STR_TAIL_LENGTH] {};
+            size_t len = 0;
+            status = napi_get_value_string_utf8(env, value, buf, maxLen + STR_TAIL_LENGTH, &len);
+            if (status == napi_ok) {
+                out.ipAddress_ = std::string(buf);
+            }
+        }
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress value failed", status);
+    } else {
+        out.ipAddress_ = "";
+    }
+    return napi_ok;
+}
+
 /* napi_value -> DeviceInfo */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
 {
@@ -1212,35 +1247,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     status = GetValue(env, value, out.deviceType_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ value failed", status);
 
-    bool hasIpAddress = false;
-    napi_has_named_property(env, in, "ipAddress", &hasIpAddress);
-    if (hasIpAddress) {
-        status = napi_get_named_property(env, in, "ipAddress", &value);
-        CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress failed", status);
-
-        napi_valuetype type = napi_undefined;
-        napi_status status = napi_typeof(env, value, &type);
-        CHECK_RETURN((status == napi_ok) && type == napi_string, "invalid typ for ipAddress", napi_invalid_arg);
-
-        size_t maxLen = STR_MAX_LENGTH;
-        status = napi_get_value_string_utf8(env, value, nullptr, 0, &maxLen);
-        if(maxLen == 0) {
-            out.ipAddress_ = "";
-        } else {
-            if(maxLen <= 0 || maxLen >= STR_MAX_LENGTH) {
-                return napi_invalid_arg;
-            }
-            char buf[STR_MAX_LENGTH + STR_TAIL_LENGTH] {};
-            size_t len = 0;
-            status = napi_get_value_string_utf8(env, value, buf, maxLen + STR_TAIL_LENGTH, &len);
-            if (status == napi_ok) {
-                out.ipAddress_ = std::string(buf);
-            }
-        }
-        CHECK_RETURN(status == napi_ok, "get DeviceInfo ipAddress value failed", status);
-    } else {
-        out.ipAddress_ = "";
-    }
+    CHECK_RETURN(GetOptionalString(env, in, out) == napi_ok, "get DeviceInfo ip address value failed", status);
 
     bool hasProviderId = false;
     napi_has_named_property(env, in, "providerId", &hasProviderId);

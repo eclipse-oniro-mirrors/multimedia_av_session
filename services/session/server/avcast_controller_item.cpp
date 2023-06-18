@@ -31,60 +31,61 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
     castControllerProxy_->RegisterControllerListener(shared_from_this());
 }
 
-void AVCastControllerItem::OnStateChange(const AVCastPlayerState& state)
+void AVCastControllerItem::OnStateChanged(const AVCastPlayerState& state)
 {
-    SLOGI("OnStateChange");
+    SLOGI("OnStateChanged");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnStateChange(state);
+    callback_->OnStateChanged(state);
 }
 
-void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
+void AVCastControllerItem::OnMediaItemChanged(const AVQueueItem& avQueueItem)
 {
-    SLOGI("OnMediaItemChange");
+    SLOGI("OnMediaItemChanged");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnMediaItemChange(avQueueItem);
+    callback_->OnMediaItemChanged(avQueueItem);
 }
 
-void AVCastControllerItem::OnVolumeChange(const int32_t volume)
+void AVCastControllerItem::OnVolumeChanged(const int32_t volume)
 {
-    SLOGI("OnVolumeChange");
+    SLOGI("OnVolumeChanged");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnVolumeChange(volume);
+    callback_->OnVolumeChanged(volume);
 }
 
-void AVCastControllerItem::OnLoopModeChange(const int32_t loopMode)
+void AVCastControllerItem::OnLoopModeChanged(const int32_t loopMode)
 {
-    SLOGI("OnLoopModeChange");
+    SLOGI("OnLoopModeChanged");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnLoopModeChange(loopMode);
+    callback_->OnLoopModeChanged(loopMode);
 }
 
-void AVCastControllerItem::OnPlaySpeedChange(const int32_t playSpeed)
+void AVCastControllerItem::OnPlaySpeedChanged(const int32_t playSpeed)
 {
-    SLOGI("OnPlaySpeedChange");
+    SLOGI("OnPlaySpeedChanged");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlaySpeedChange(playSpeed);
+    callback_->OnPlaySpeedChanged(playSpeed);
 }
 
-void AVCastControllerItem::OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration)
+void AVCastControllerItem::OnPositionChanged(const int32_t position,
+    const int32_t bufferPosition, const int32_t duration)
 {
-    SLOGI("OnPositionChange");
+    SLOGI("OnPositionChanged");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPositionChange(position, bufferPosition, duration);
+    callback_->OnPositionChanged(position, bufferPosition, duration);
 }
 
-void AVCastControllerItem::OnVideoSizeChange(const int32_t width, const int32_t height)
+void AVCastControllerItem::OnVideoSizeChanged(const int32_t width, const int32_t height)
 {
-    SLOGI("OnVideoSizeChange");
+    SLOGI("OnVideoSizeChanged");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnVideoSizeChange(width, height);
+    callback_->OnVideoSizeChanged(width, height);
 }
 
-void AVCastControllerItem::OnError(const int32_t errorCode, const std::string& errorMsg)
+void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
 {
-    SLOGI("OnError");
+    SLOGI("OnPlayerError");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnError(errorCode, errorMsg);
+    callback_->OnPlayerError(errorCode, errorMsg);
 }
 
 int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd)

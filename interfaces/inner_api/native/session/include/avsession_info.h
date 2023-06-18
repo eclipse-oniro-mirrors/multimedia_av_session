@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,23 +85,21 @@ public:
 
 class IAVCastControllerProxyListener {
 public:
+    virtual void OnStateChanged(const AVCastPlayerState& state) = 0;
 
+    virtual void OnMediaItemChanged(const AVQueueItem& avQueueItem) = 0;
 
-    virtual void OnStateChange(const AVCastPlayerState& state) = 0;
+    virtual void OnVolumeChanged(const int32_t volume) = 0;
 
-    virtual void OnMediaItemChange(const AVQueueItem& avQueueItem) = 0;
+    virtual void OnLoopModeChanged(const int32_t loopMode) = 0;
 
-    virtual void OnVolumeChange(const int32_t volume) = 0;
+    virtual void OnPlaySpeedChanged(const int32_t playSpeed) = 0;
 
-    virtual void OnLoopModeChange(const int32_t loopMode) = 0;
+    virtual void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
 
-    virtual void OnPlaySpeedChange(const int32_t playSpeed) = 0;
-
-    virtual void OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
-
-    virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
+    virtual void OnVideoSizeChanged(const int32_t width, const int32_t height) = 0;
     
-    virtual void OnError(const int32_t errorCode, const std::string& errorMsg) = 0;
+    virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
 
     /**
      * @brief Deconstruct SessionListener.
@@ -320,21 +318,21 @@ public:
 
 class AVCastControllerCallback {
 public:
-    virtual void OnStateChange(const AVCastPlayerState& state) = 0;
+    virtual void OnStateChanged(const AVCastPlayerState& state) = 0;
 
-    virtual void OnMediaItemChange(const AVQueueItem& avQueueItem) = 0;
+    virtual void OnMediaItemChanged(const AVQueueItem& avQueueItem) = 0;
 
-    virtual void OnVolumeChange(const int32_t volume) = 0;
+    virtual void OnVolumeChanged(const int32_t volume) = 0;
 
-    virtual void OnLoopModeChange(const int32_t loopMode) = 0;
+    virtual void OnLoopModeChanged(const int32_t loopMode) = 0;
 
-    virtual void OnPlaySpeedChange(const int32_t playSpeed) = 0;
+    virtual void OnPlaySpeedChanged(const int32_t playSpeed) = 0;
 
-    virtual void OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
+    virtual void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
 
-    virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
+    virtual void OnVideoSizeChanged(const int32_t width, const int32_t height) = 0;
 
-    virtual void OnError(const int32_t errorCode, const std::string& errorMsg) = 0;
+    virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
 
     /**
      * @brief Deconstruct AVControllerCallback.
@@ -382,7 +380,7 @@ enum SessionDataCategory {
 
 enum AVCastCategory {
     /**
-     * The default cast type "local", media can be routed on the same device, 
+     * The default cast type "local", media can be routed on the same device,
      * including internal speakers or audio jacks on the device itself, A2DP devices.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @since 10

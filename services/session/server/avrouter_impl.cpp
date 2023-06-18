@@ -33,7 +33,7 @@ void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
     SLOGI("Start init AVRouter");
     servicePtr_ = servicePtr;
     std::shared_ptr<HwCastProvider> hwProvider = std::make_shared<HwCastProvider>();
-    hwProvider->init();
+    hwProvider->Init();
     providerNumber_++;
     std::shared_ptr<AVCastProviderManager> avCastProviderManager = std::make_shared<AVCastProviderManager>();
     avCastProviderManager->Init(providerNumber_, hwProvider);
@@ -60,7 +60,7 @@ int32_t AVRouterImpl::StopCastDiscovery()
     std::lock_guard lockGuard(providerManagerLock_);
 
     for (const auto& [providerNumber_, providerManager] : providerManagerMap_) {
-        providerManager->provider->StopDiscovery();
+        providerManager->provider_->StopDiscovery();
     }
     return AVSESSION_SUCCESS;
 }
@@ -81,7 +81,7 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
 {
     SLOGI("AVRouterImpl received OnCastServerDied event");
 
-    if (providerManagerMap_.find(providerNumber) != providerManagerMap_.end()){
+    if (providerManagerMap_.find(providerNumber) != providerManagerMap_.end()) {
         providerManagerMap_.erase(providerNumber);
     } else {
         return AVSESSION_ERROR;
@@ -89,15 +89,17 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
     return AVSESSION_SUCCESS;
 }
 
-std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const int64_t castHandler)
+std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const int64_t castHandle)
 {
     SLOGI("AVRouterImpl start get remote controller process");
 
+    // The first 32 bits are providerId, the last 32 bits are castId
     int32_t providerNumber = castHandle >> 32;
+    // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
-        AVSESSION_ERROR, "Can not find corresponding provider");
-    return providerManagerMap_[providerNumber].GetRemoteController(castId);
+        nullptr, "Can not find corresponding provider");
+    return providerManagerMap_[providerNumber]->provider_->GetRemoteController(castId);
 }
 
 int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
@@ -105,18 +107,19 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     SLOGI("AVRouterImpl start cast process");
 
     int64_t castHandle = -1;
-    CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(outputDeviceInfo.deviceInfos_[0].providerId_) != providerManagerMap_.end(),
-        castHandle, "Can not find corresponding provider");
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(outputDeviceInfo.deviceInfos_[0].providerId_) !=
+        providerManagerMap_.end(), castHandle, "Can not find corresponding provider");
     int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->StartCastSession();
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
-    castHandle = (temp << 32) | castId;
+    castHandle = (tempId << 32) | castId; // The first 32 bits are providerId, the last 32 bits are castId
     return castHandle;
 }
 
 int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("AVRouterImpl AddDevice process");
-    providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->AddCastDevice(castId, outputDeviceInfo.deviceInfos_[0]);
+    providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->AddCastDevice(castId,
+        outputDeviceInfo.deviceInfos_[0]);
     return AVSESSION_SUCCESS;
 }
 
@@ -126,10 +129,10 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
 
     int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
 
-    int64_t castHandle = -1;
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         castHandle, "Can not find corresponding provider");
-    int32_t castId = static_cast<int32_t>((castHandler << 32) >> 32);
+    // The first 32 bits are providerId, the last 32 bits are castId
+    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
     providerManagerMap_[providerNumber]->provider_->StopCastSession(castId);
 
     return AVSESSION_SUCCESS;
@@ -138,7 +141,9 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
 int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr<IAVCastSessionStateListener> callback)
 {
     SLOGI("AVRouterImpl register IAVCastSessionStateListener callback to provider");
+    // The first 32 bits are providerId, the last 32 bits are castId
     int32_t providerNumber = castHandle >> 32;
+    // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding provider");
@@ -146,15 +151,17 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVRouterImpl::UnRegisterCallback(int64_t castHandle, const std::shared_ptr<IAVCastSessionStateListener> callback)
+int32_t AVRouterImpl::UnRegisterCallback(int64_t castHandle,
+    const std::shared_ptr<IAVCastSessionStateListener> callback)
 {
     SLOGI("AVRouterImpl UnRegisterCallback IAVCastSessionStateListener callback to provider");
+    // The first 32 bits are providerId, the last 32 bits are castId
     int32_t providerNumber = castHandle >> 32;
+    // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding provider");
     providerManagerMap_[providerNumber]->provider_->UnRegisterCastSessionStateListener(castId, callback);
     return AVSESSION_SUCCESS;
 }
-
 } // namespace OHOS::AVSession

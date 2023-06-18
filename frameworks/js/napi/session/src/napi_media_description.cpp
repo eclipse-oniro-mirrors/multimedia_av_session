@@ -42,24 +42,24 @@ std::map<std::string, NapiMediaDescription::GetterType> NapiMediaDescription::ge
 };
 
 std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setterMap_ = {
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_MEDIA_ID, SetMediaId },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_TITLE, SetTitle },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_SUBTITLE, SetSubtitle },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_DESCRIPTION, SetDescription },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ICON,  SetIcon },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ICON_URI, SetIconUri },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_EXTRAS, SetExtras },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_MEDIA_TYPE, SetMediaType },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_MEDIA_SIZE, SetMediaSize },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ALBUM_TITLE, SetAlbumTitle },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ALBUM_COVER_URI, SetAlbumCoverUri },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_LYRIC_CONTENT, SetLyricContent },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_LYRIC_URI, SetLyricUri },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_ARTIST, SetArtist },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_MEDIA_URI, SetMediaUri },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_DURATION, SetDuration },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_START_POSITION, SetStartPosition },
-    { AVMediaDescription::MEDAI_DESCRIPTION_KEY_APP_NAME, SetAppName },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_MEDIA_ID, SetMediaId },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_TITLE, SetTitle },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_SUBTITLE, SetSubtitle },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_DESCRIPTION, SetDescription },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_ICON,  SetIcon },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_ICON_URI, SetIconUri },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_EXTRAS, SetExtras },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_MEDIA_TYPE, SetMediaType },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_MEDIA_SIZE, SetMediaSize },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_ALBUM_TITLE, SetAlbumTitle },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_ALBUM_COVER_URI, SetAlbumCoverUri },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_LYRIC_CONTENT, SetLyricContent },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_LYRIC_URI, SetLyricUri },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_ARTIST, SetArtist },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_MEDIA_URI, SetMediaUri },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_DURATION, SetDuration },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_START_POSITION, SetStartPosition },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_APP_NAME, SetAppName },
 };
 
 napi_status NapiMediaDescription::GetValue(napi_env env, napi_value in, AVMediaDescription& out)
@@ -89,7 +89,7 @@ napi_status NapiMediaDescription::SetValue(napi_env env, const AVMediaDescriptio
     napi_status status = napi_create_object(env, &out);
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
 
-    for (int i = 0; i < AVMediaDescription::MEDAI_DESCRIPTION_KEY_MAX; ++i) {
+    for (int i = 0; i < AVMediaDescription::MEDIA_DESCRIPTION_KEY_MAX; ++i) {
         auto setter = setterMap_[i];
         if (setter(env, in, out) != napi_ok) {
             SLOGE("set property %{public}d failed", i);
@@ -455,5 +455,4 @@ napi_status NapiMediaDescription::SetAppName(napi_env env, const AVMediaDescript
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }
-
 }

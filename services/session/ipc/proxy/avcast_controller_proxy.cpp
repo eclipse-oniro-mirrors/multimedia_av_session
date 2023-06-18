@@ -71,13 +71,9 @@ int32_t AVCastControllerProxy::UpdateMediaInfo(const MediaInfo& mediaInfo)
 
 int32_t AVCastControllerProxy::SendControlCommand(const AVCastControlCommand& cmd)
 {
-    
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SendControlCommand");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_COMMAND_NOT_SUPPORT, "command not valid");
-    // bool isActive {};
-    // CHECK_AND_RETURN_RET_LOG(IsSessionActive(isActive) == AVSESSION_SUCCESS &&
-    //     isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
@@ -110,9 +106,9 @@ int32_t AVCastControllerProxy::GetDuration(int32_t& duration)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        int32_t duration_;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(duration_), ERR_UNMARSHALLING, "read string failed");
-        duration = duration_;
+        int32_t tempDuration;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(tempDuration), ERR_UNMARSHALLING, "read string failed");
+        duration = tempDuration;
     }
     return ret;
 }
@@ -133,9 +129,9 @@ int32_t AVCastControllerProxy::GetPosition(int32_t& position)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        int32_t position_;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(position_), ERR_UNMARSHALLING, "read string failed");
-        position = position_;
+        int32_t temoPosition;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(temoPosition), ERR_UNMARSHALLING, "read string failed");
+        position = temoPosition;
     }
     return ret;
 }
@@ -156,9 +152,9 @@ int32_t AVCastControllerProxy::GetVolume(int32_t& volume)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        int32_t volume_;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(volume_), ERR_UNMARSHALLING, "read string failed");
-        volume = volume_;
+        int32_t tempVolume;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(tempVolume), ERR_UNMARSHALLING, "read string failed");
+        volume = tempVolume;
     }
     return ret;
 }
@@ -166,7 +162,8 @@ int32_t AVCastControllerProxy::GetVolume(int32_t& volume)
 int32_t AVCastControllerProxy::GetLoopMode(int32_t& loopMode)
 {
     MessageParcel parcel;
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), AVSESSION_ERROR, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
+        AVSESSION_ERROR, "write interface token failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
@@ -178,9 +175,9 @@ int32_t AVCastControllerProxy::GetLoopMode(int32_t& loopMode)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        int32_t loopMode_;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(loopMode_), ERR_UNMARSHALLING, "read string failed");
-        loopMode = loopMode_;
+        int32_t tempLoopMode;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(tempLoopMode), ERR_UNMARSHALLING, "read string failed");
+        loopMode = tempLoopMode;
     }
     return ret;
 }
@@ -188,7 +185,8 @@ int32_t AVCastControllerProxy::GetLoopMode(int32_t& loopMode)
 int32_t AVCastControllerProxy::GetPlaySpeed(int32_t& playSpeed)
 {
     MessageParcel parcel;
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), AVSESSION_ERROR, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
+        AVSESSION_ERROR, "write interface token failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
@@ -200,9 +198,9 @@ int32_t AVCastControllerProxy::GetPlaySpeed(int32_t& playSpeed)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        int32_t playSpeed_;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(playSpeed_), ERR_UNMARSHALLING, "read string failed");
-        playSpeed = playSpeed_;
+        int32_t tempPlaySpeed;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(tempPlaySpeed), ERR_UNMARSHALLING, "read string failed");
+        playSpeed = tempPlaySpeed;
     }
     return ret;
 }
@@ -210,7 +208,8 @@ int32_t AVCastControllerProxy::GetPlaySpeed(int32_t& playSpeed)
 int32_t AVCastControllerProxy::GetPlayState(AVCastPlayerState& playState)
 {
     MessageParcel parcel;
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), AVSESSION_ERROR, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
+        AVSESSION_ERROR, "write interface token failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
@@ -222,9 +221,9 @@ int32_t AVCastControllerProxy::GetPlayState(AVCastPlayerState& playState)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        AVCastPlayerState playState_;
-        CHECK_AND_RETURN_RET_LOG(playState_.ReadFromParcel(reply), ERR_UNMARSHALLING, "read string failed");
-        playState = playState_;
+        AVCastPlayerState tempPlayState;
+        CHECK_AND_RETURN_RET_LOG(tempPlayState.ReadFromParcel(reply), ERR_UNMARSHALLING, "read string failed");
+        playState = tempPlayState;
     }
     return ret;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ AVCastControllerCallbackProxy::AVCastControllerCallbackProxy(const sptr<IRemoteO
     SLOGD("construct");
 }
 
-void AVCastControllerCallbackProxy::OnStateChange(const AVCastPlayerState& state)
+void AVCastControllerCallbackProxy::OnStateChanged(const AVCastPlayerState& state)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -37,7 +37,7 @@ void AVCastControllerCallbackProxy::OnStateChange(const AVCastPlayerState& state
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnMediaItemChange(const AVQueueItem& avQueueItem)
+void AVCastControllerCallbackProxy::OnMediaItemChanged(const AVQueueItem& avQueueItem)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -51,7 +51,7 @@ void AVCastControllerCallbackProxy::OnMediaItemChange(const AVQueueItem& avQueue
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnVolumeChange(const int32_t volume)
+void AVCastControllerCallbackProxy::OnVolumeChanged(const int32_t volume)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -65,7 +65,7 @@ void AVCastControllerCallbackProxy::OnVolumeChange(const int32_t volume)
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnLoopModeChange(const int32_t loopMode)
+void AVCastControllerCallbackProxy::OnLoopModeChanged(const int32_t loopMode)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -79,7 +79,7 @@ void AVCastControllerCallbackProxy::OnLoopModeChange(const int32_t loopMode)
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnPlaySpeedChange(const int32_t playSpeed)
+void AVCastControllerCallbackProxy::OnPlaySpeedChanged(const int32_t playSpeed)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -93,7 +93,8 @@ void AVCastControllerCallbackProxy::OnPlaySpeedChange(const int32_t playSpeed)
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration)
+void AVCastControllerCallbackProxy::OnPositionChanged(const int32_t position,
+    const int32_t bufferPosition, const int32_t duration)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -109,7 +110,7 @@ void AVCastControllerCallbackProxy::OnPositionChange(const int32_t position, con
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnVideoSizeChange(const int32_t width, const int32_t height)
+void AVCastControllerCallbackProxy::OnVideoSizeChanged(const int32_t width, const int32_t height)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -124,7 +125,7 @@ void AVCastControllerCallbackProxy::OnVideoSizeChange(const int32_t width, const
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnError(const int32_t errorCode, const std::string& errorMsg)
+void AVCastControllerCallbackProxy::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");

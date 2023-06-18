@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,6 @@
 namespace OHOS::AVSession {
 class AVCastController {
 public:
-    // virtual void Init(const std::shared_ptr<IAVCastControllerProxy> castControllerProxy) = 0;
     /**
      * @brief Get current playing status infos.
      *
@@ -55,7 +54,6 @@ public:
     */
     virtual int32_t SendControlCommand(const AVCastControlCommand& cmd) = 0;
 
-    
     /**
      * @brief Listen for AVController Callback event.
      *
@@ -88,5 +86,4 @@ public:
     virtual ~AVCastController() = default;
 };
 } // namespace OHOS::AVSession
-
 #endif // OHOS_AVCAST_CONTROLLER_H

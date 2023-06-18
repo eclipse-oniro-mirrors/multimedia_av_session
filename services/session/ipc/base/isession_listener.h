@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ public:
         LISTENER_CMD_ON_RELEASE,
         LISTENER_CMD_TOP_CHANGED,
         LISTENER_CMD_AUDIO_CHECKED,
-        LISTENER_CMD_DEVICE_FOUND,
+        LISTENER_CMD_DEVICE_AVAILABLE,
         LISTENER_CMD_MAX
     };
 

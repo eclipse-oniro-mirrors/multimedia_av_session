@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,6 @@ public:
     explicit AVCastControllerProxy(const sptr<IRemoteObject>& impl);
 
     ~AVCastControllerProxy() override;
-
-    // void Init(const std::shared_ptr<IAVCastControllerProxy> castControllerProxy) override;
 
     int32_t SetMediaList(const MediaInfoHolder& MediaInfoHolder) override;
 
@@ -65,5 +63,4 @@ private:
     std::recursive_mutex controllerProxyLock_;
 };
 }
-
 #endif // OHOS_AVCAST_CONTROLLER_PROXY_H

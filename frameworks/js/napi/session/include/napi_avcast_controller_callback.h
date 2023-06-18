@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,14 +41,14 @@ public:
     NapiAVCastControllerCallback();
     ~NapiAVCastControllerCallback() override;
 
-    void OnStateChange(const AVCastPlayerState& state) override;
-    void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
-    void OnVolumeChange(const int32_t volume) override;
-    void OnLoopModeChange(const int32_t loopMode) override;
-    void OnPlaySpeedChange(const int32_t playSpeed) override;
-    void OnPositionChange(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
-    void OnVideoSizeChange(const int32_t width, const int32_t height) override;
-    void OnError(const int32_t errorCode, const std::string& errorMsg) override;
+    void OnStateChanged(const AVCastPlayerState& state) override;
+    void OnMediaItemChanged(const AVQueueItem& avQueueItem) override;
+    void OnVolumeChanged(const int32_t volume) override;
+    void OnLoopModeChanged(const int32_t loopMode) override;
+    void OnPlaySpeedChanged(const int32_t playSpeed) override;
+    void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
+    void OnVideoSizeChanged(const int32_t width, const int32_t height) override;
+    void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

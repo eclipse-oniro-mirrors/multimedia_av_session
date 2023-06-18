@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,10 @@ public:
 protected:
     virtual int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) = 0;
     virtual sptr<IRemoteObject> GetControllerInner() = 0;
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     virtual sptr<IRemoteObject> GetAVCastControllerInner() = 0;
+#endif
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_H

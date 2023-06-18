@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,10 @@
 #include "want_agent.h"
 #include "want_params.h"
 #include "avsession_controller.h"
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller.h"
+#endif
 
 /**
  * @brief Session, which can be used to set metadata, play status information and other operations.
@@ -157,6 +160,7 @@ public:
     */
     virtual std::shared_ptr<AVSessionController> GetController() = 0;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
      * @brief Get the controller corresponding to this session.
      *
@@ -164,6 +168,7 @@ public:
      * @since 9
     */
     virtual std::shared_ptr<AVCastController> GetAVCastController() = 0;
+#endif
 
     /**
      * @brief Listen for AVSession Callback event.
@@ -234,7 +239,9 @@ public:
     */
     virtual int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) = 0;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     virtual int32_t ReleaseCast() = 0;
+#endif
 
     /**
      * @brief Deconstruct AVSession object.

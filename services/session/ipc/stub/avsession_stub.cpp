@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,6 +223,7 @@ int32_t AVSessionStub::HandleGetController(MessageParcel& data, MessageParcel& r
     return ERR_NONE;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionStub::HandleGetAVCastController(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> castController = GetAVCastControllerInner();
@@ -234,6 +235,7 @@ int32_t AVSessionStub::HandleGetAVCastController(MessageParcel& data, MessagePar
     CHECK_AND_RETURN_RET_LOG(reply.WriteRemoteObject(castController), ERR_NONE, "write object failed");
     return ERR_NONE;
 }
+#endif
 
 int32_t AVSessionStub::HandleActivate(MessageParcel& data, MessageParcel& reply)
 {
@@ -281,9 +283,11 @@ int32_t AVSessionStub::HandleSetSessionEvent(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionStub::HandleReleaseCast(MessageParcel& data, MessageParcel& reply)
 {
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ReleaseCast()), ERR_NONE, "WriteInt32 failed");
     return ERR_NONE;
 }
+#endif
 } // namespace OHOS::AVSession

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ enum AVSessionTraceTaskId : int32_t {
     NAPI_SET_AV_QUEUE_TITLE_TASK_ID = 12,
     NAPI_SET_AV_QUEUE_ITEMS_TASK_ID = 13,
     NAPI_SET_EXTRAS_TASK_ID = 14,
-    NAPI_START_CAST_DISCOVERY_TASK_ID= 15,
+    NAPI_START_CAST_DISCOVERY_TASK_ID = 15,
     NAPI_STOP_CAST_DISCOVERY_TASK_ID = 16,
     NAPI_START_CAST_TASK_ID = 17,
     NAPI_STOP_CAST_TASK_ID = 18,
