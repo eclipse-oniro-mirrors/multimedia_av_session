@@ -26,7 +26,6 @@
 #include "avcontrolleritem_fuzzer.h"
 
 using namespace std;
-using namespace OHOS;
 namespace OHOS {
 namespace AVSession {
 const int32_t MAX_CODE_TEST = 17;

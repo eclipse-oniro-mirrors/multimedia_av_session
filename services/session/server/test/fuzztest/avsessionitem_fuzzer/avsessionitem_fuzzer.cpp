@@ -31,8 +31,8 @@
 #include "avsessionitem_fuzzer.h"
 
 using namespace std;
-using namespace OHOS;
-namespace OHOS::AVSession {
+namespace OHOS {
+namespace AVSession {
 const int32_t MAX_CODE_TEST  = 21;
 const int32_t MAX_CODE_LEN  = 512;
 const int32_t MIN_SIZE_NUM = 4;
@@ -51,7 +51,7 @@ void AvSessionItemFuzzer::AvSessionItemFuzzerTest(uint8_t* data, size_t size)
     std::string bundleName(reinterpret_cast<const char*>(data), size);
     std::string abilityName(reinterpret_cast<const char*>(data), size);
 
-    OHOS::AppExecFwk::ElementName elementName;
+    AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
 
@@ -78,7 +78,7 @@ void AvSessionItemFuzzer::AvSessionItemFuzzerTest(uint8_t* data, size_t size)
     avSessionItem->OnRemoteRequest(code, dataMessageParcel, reply, option);
 }
 
-void OHOS::AVSession::AvSessionItemTest(uint8_t *data, size_t size)
+void AvSessionItemTest(uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
@@ -116,7 +116,7 @@ void OHOS::AVSession::AvSessionItemTest(uint8_t *data, size_t size)
     AvSessionItemTestImpl(metaData, avState, top, info, controlCommand);
 }
 
-void OHOS::AVSession::AvSessionItemTestImpl(AVMetaData metaData, AVPlaybackState avState, bool top,
+void AvSessionItemTestImpl(AVMetaData metaData, AVPlaybackState avState, bool top,
     OutputDeviceInfo info, AVControlCommand controlCommand)
 {
     AVSessionDescriptor descriptor;
@@ -145,7 +145,7 @@ void OHOS::AVSession::AvSessionItemTestImpl(AVMetaData metaData, AVPlaybackState
     avSessionItem.GetRemoteSource();
 }
 
-void OHOS::AVSession::AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)
+void AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)
 {
     auto avSessionItem = std::make_unique<AvSessionItemFuzzer>();
     if (avSessionItem == nullptr) {
@@ -159,8 +159,9 @@ void OHOS::AVSession::AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AvSessionItemOnRemoteRequest(const_cast<uint8_t*>(data), size);
-    OHOS::AVSession::AvSessionItemTest(const_cast<uint8_t*>(data), size);
+    AvSessionItemOnRemoteRequest(const_cast<uint8_t*>(data), size);
+    AvSessionItemTest(const_cast<uint8_t*>(data), size);
     return 0;
 }
-} // namespace OHOS::AVSession
+} // namespace AVSession
+} // namespace OHOS
