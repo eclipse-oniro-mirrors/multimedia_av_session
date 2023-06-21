@@ -136,7 +136,8 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(castHandleToOutputDeviceMap_.find(castId) != castHandleToOutputDeviceMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding castId");
-    providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId, castHandleToOutputDeviceMap_[castId].deviceInfos_[0]);
+    providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId,
+        castHandleToOutputDeviceMap_[castId].deviceInfos_[0]);
     providerManagerMap_[providerNumber]->provider_->StopCastSession(castId);
 
     return AVSESSION_SUCCESS;
