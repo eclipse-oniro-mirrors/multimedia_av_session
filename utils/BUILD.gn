@@ -46,8 +46,10 @@ ohos_shared_library("avsession_utils") {
     "hiviewdfx_hilog_native:libhilog",
   ]
 
+  cflags = []
+
   if (multimedia_av_session_enable_trace_control) {
-    cflags = [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
     external_deps += [ "hitrace_native:hitrace_meter" ]
   }
   if (multimedia_av_session_enable_sysevent_control) {

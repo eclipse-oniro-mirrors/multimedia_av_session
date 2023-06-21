@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,10 @@
 #include "avsession_controller.h"
 #include "avsession_errors.h"
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "avcast_controller.h"
+#endif
+
 namespace OHOS::AVSession {
 class AVSessionServiceProxy : public IRemoteProxy<IAVSessionService> {
 public:
@@ -43,6 +47,12 @@ public:
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t GetAVCastController(const std::string& sessionId, std::shared_ptr<AVCastController>& controller);
+
+    int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
+#endif
+
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
@@ -61,6 +71,16 @@ public:
     {
         return AVSESSION_SUCCESS;
     }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t StartCastDiscovery(int32_t castDeviceCapability);
+
+    int32_t StopCastDiscovery();
+
+    int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
+
+    int32_t StopCast(const SessionToken& sessionToken) override;
+#endif
 
 private:
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;

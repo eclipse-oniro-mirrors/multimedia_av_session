@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,11 +237,11 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
     }
 }
 
-void AVControllerItem::HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
+void AVControllerItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
 {
     std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnOutputDeviceChange(outputDeviceInfo);
+    callback_->OnOutputDeviceChange(connectionState, outputDeviceInfo);
 }
 
 void AVControllerItem::HandleActiveStateChange(bool isActive)
@@ -305,4 +305,4 @@ void AVControllerItem::SetServiceCallbackForRelease(const std::function<void(AVC
     std::lock_guard lockGuard(serviceCallbackMutex_);
     serviceCallback_ = callback;
 }
-} // OHOS::AVSession
+} // namespace OHOS::AVSession

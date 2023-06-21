@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,8 @@ public:
 
     std::string GetSessionId() override;
 
+    std::string GetSessionType() override;
+
     int32_t GetAVMetaData(AVMetaData& meta) override;
 
     int32_t SetAVMetaData(const AVMetaData& meta) override;
@@ -59,6 +61,10 @@ public:
 
     std::shared_ptr<AVSessionController> GetController() override;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::shared_ptr<AVCastController> GetAVCastController() override;
+#endif
+
     int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) override;
 
     int32_t Activate() override;
@@ -75,15 +81,27 @@ public:
 
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t ReleaseCast() override;
+#endif
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    sptr<IRemoteObject> GetAVCastControllerInner() override;
+#endif
 
 private:
     sptr<IAVSessionCallback> callback_;
     static inline BrokerDelegator<AVSessionProxy> delegator_;
     bool isDestroyed_ = {};
     std::shared_ptr<AVSessionController> controller_;
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::shared_ptr<AVCastController> castController_;
+#endif
 };
 }
 #endif // OHOS_AVSESSION_PROXY_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,13 @@ public:
         return AVSESSION_SUCCESS;
     }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+#endif
+
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override
     {
         return AVSESSION_SUCCESS;
@@ -87,6 +94,17 @@ public:
     int32_t ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
                                     std::string& output) override;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
+    int32_t StopCast(const SessionToken& sessionToken) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+#endif
 private:
     static inline BrokerDelegator<RemoteSessionCommandProcess> delegator_;
 };

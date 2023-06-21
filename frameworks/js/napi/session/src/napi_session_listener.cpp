@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,13 @@ void NapiSessionListener::OnAudioSessionChecked(const int32_t uid)
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnAudioSessionCheck");
     SLOGI("uid=%{public}d checked", uid);
     HandleEvent(EVENT_AUDIO_SESSION_CHECKED, uid);
+}
+
+void NapiSessionListener::OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
+{
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceAvailable");
+    SLOGI("Start handle device found event");
+    HandleEvent(EVENT_DEVICE_AVAILABLE, castOutputDeviceInfo);
 }
 
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)

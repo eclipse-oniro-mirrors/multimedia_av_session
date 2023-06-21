@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
     }
     result->extras_ = std::shared_ptr<AAFwk::WantParams>(parcel.ReadParcelable<AAFwk::WantParams>());
     if (result->extras_ == nullptr) {
-        SLOGE("Read AVPlaybackState failed, the extras is null");
+        SLOGI("Read AVPlaybackState failed, the extras is null");
     }
     return result;
 }

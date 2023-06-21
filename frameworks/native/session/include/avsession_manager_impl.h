@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,11 @@ public:
 
     int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller) override;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t GetAVCastController(const std::string& sessionId,
+        std::shared_ptr<AVCastController>& castController) override;
+#endif
+
     int32_t GetActivatedSessionDescriptors(std::vector<AVSessionDescriptor>& activatedSessions) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
@@ -61,6 +66,16 @@ public:
                       const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
 
     int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t StartCastDiscovery(int32_t castDeviceCapability) override;
+
+    int32_t StopCastDiscovery() override;
+
+    int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
+
+    int32_t StopCast(const SessionToken& sessionToken) override;
+#endif
 
 private:
     sptr<AVSessionServiceProxy> GetService();

@@ -26,15 +26,35 @@
       ],
       "deps": {
         "components": [
+          "ability_base",
+          "ability_runtime",
+          "access_token",
           "ace_napi",
+          "ability_base",
+          "audio_framework",
+          "bundle_framework",
+          "bytrace_core",
+          "c_utils",
+          "data_object",
+          "device_manager",
+          "dsoftbus",
+          "hisysevent_native",
+          "hitrace_native",
+          "hiviewdfx_hilog_native",
+          "input",
+          "ipc",
+          "libcrypto_shared",
           "ipc_single",
           "libhilog",
-          "samgr_proxy",
+          "multimedia_image_framework",
+          "napi",
+          "safwk",
+          "samgr",
           "system_ability_fwk",
-          "libaccesstoken_sdk",
-          "bytrace_core"
+          "libaccesstoken_sdk"
         ],
         "third_party": [
+          "openssl"
         ]
       },
       "build": {

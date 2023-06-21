@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ public:
         EVENT_SESSION_DESTROYED,
         EVENT_TOP_SESSION_CHANGED,
         EVENT_AUDIO_SESSION_CHECKED,
+        EVENT_DEVICE_AVAILABLE,
         EVENT_TYPE_MAX
     };
 
@@ -43,6 +44,7 @@ public:
     void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
     void OnAudioSessionChecked(const int32_t uid) override;
+    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,6 +153,21 @@ int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     return service ? service->CreateController(sessionId, controller) : ERR_SERVICE_NOT_EXIST;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+int32_t AVSessionManagerImpl::GetAVCastController(const std::string& sessionId,
+    std::shared_ptr<AVCastController>& castController)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::GetAVCastController");
+    if (sessionId.empty()) {
+        SLOGE("sessionId is invalid");
+        return ERR_INVALID_PARAM;
+    }
+
+    auto service = GetService();
+    return service ? service->GetAVCastController(sessionId, castController) : ERR_SERVICE_NOT_EXIST;
+}
+#endif
+
 int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener>& listener)
 {
     if (listener == nullptr) {
@@ -241,6 +256,36 @@ int32_t AVSessionManagerImpl::CastAudioForAll(const std::vector<AudioStandard::A
     auto service = GetService();
     return service ? service->CastAudioForAll(descriptors) : ERR_SERVICE_NOT_EXIST;
 }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+int32_t AVSessionManagerImpl::StartCastDiscovery(const int32_t castDeviceCapability)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartCastDiscovery");
+    auto service = GetService();
+    return service ? service->StartCastDiscovery(castDeviceCapability) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::StopCastDiscovery()
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StopCastDiscovery");
+    auto service = GetService();
+    return service ? service->StopCastDiscovery() : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartCast");
+    auto service = GetService();
+    return service ? service->StartCast(sessionToken, outputDeviceInfo) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::StopCast(const SessionToken& sessionToken)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StopCast");
+    auto service = GetService();
+    return service ? service->StopCast(sessionToken) : ERR_SERVICE_NOT_EXIST;
+}
+#endif
 
 void AVSessionManagerImpl::RegisterClientDeathObserver()
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const OutputDeviceInfo& info) override;
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info) override;
 
     void AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 

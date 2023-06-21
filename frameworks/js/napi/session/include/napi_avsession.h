@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,7 @@ private:
     static napi_value SetLaunchAbility(napi_env env, napi_callback_info info);
     static napi_value SetAudioStreamId(napi_env env, napi_callback_info info);
     static napi_value GetController(napi_env env, napi_callback_info info);
+    static napi_value GetAVCastController(napi_env env, napi_callback_info info);
     static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
     static napi_value Activate(napi_env env, napi_callback_info info);
     static napi_value Deactivate(napi_env env, napi_callback_info info);
@@ -59,6 +60,7 @@ private:
     static napi_value SetAVQueueItems(napi_env env, napi_callback_info info);
     static napi_value SetAVQueueTitle(napi_env env, napi_callback_info info);
     static napi_value SetExtras(napi_env env, napi_callback_info info);
+    static napi_value ReleaseCast(napi_env env, napi_callback_info info);
 
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -96,6 +98,7 @@ private:
 
     napi_ref wrapperRef_ {};
     std::string sessionId_ ;
+    std::string sessionType_ ;
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
 
