@@ -120,6 +120,7 @@ int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& ou
     SLOGI("AVRouterImpl AddDevice process");
     providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->AddCastDevice(castId,
         outputDeviceInfo.deviceInfos_[0]);
+    castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
     return AVSESSION_SUCCESS;
 }
 
@@ -133,6 +134,9 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
         castHandle, "Can not find corresponding provider");
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    CHECK_AND_RETURN_RET_LOG(castHandleToOutputDeviceMap_.find(castId) != castHandleToOutputDeviceMap_.end(),
+        AVSESSION_ERROR, "Can not find corresponding castId");
+    providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId, castHandleToOutputDeviceMap_[castId].deviceInfos_[0]);
     providerManagerMap_[providerNumber]->provider_->StopCastSession(castId);
 
     return AVSESSION_SUCCESS;

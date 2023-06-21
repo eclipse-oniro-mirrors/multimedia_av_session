@@ -55,6 +55,7 @@ private:
     std::recursive_mutex providerManagerLock_;
     std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
     int32_t providerNumber_ = 0;
+    std::map<int32_t, OutputDeviceInfo> castHandleToOutputDeviceMap_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

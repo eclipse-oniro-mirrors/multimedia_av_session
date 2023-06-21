@@ -449,9 +449,9 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 int32_t AVSessionItem::StopCast()
 {
     SLOGI("Stop cast process");
+    AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
     int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
     CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
-    AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
     return AVSESSION_SUCCESS;
 }
 #endif
