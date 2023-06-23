@@ -35,6 +35,7 @@
           "bundle_framework",
           "bytrace_core",
           "c_utils",
+          "cast_engine",
           "data_object",
           "device_manager",
           "dsoftbus",
