@@ -28,25 +28,21 @@ public:
 
     ~AVCastControllerProxy() override;
 
-    int32_t SetMediaList(const MediaInfoHolder& MediaInfoHolder) override;
-
-    int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) override;
-
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
+
+    int32_t Start(const AVQueueItem& avQueueItem) override;
+
+    int32_t Prepare(const AVQueueItem& avQueueItem) override;
+
+    int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
 
     int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) override;
 
     int32_t GetDuration(int32_t& duration) override;
 
-    int32_t GetPosition(int32_t& position) override;
+    int32_t GetCastAVPlaybackState(AVPlaybackState& state) override;
 
-    int32_t GetVolume(int32_t& volume) override;
-
-    int32_t GetLoopMode(int32_t& loopMode) override;
-
-    int32_t GetPlaySpeed(int32_t& playSpeed) override;
-
-    int32_t GetPlayState(AVCastPlayerState& playerState) override;
+    int32_t GetCurrentItem(AVQueueItem& currentItem) override;
 
     int32_t SetDisplaySurface(std::string& surfaceId) override;
 

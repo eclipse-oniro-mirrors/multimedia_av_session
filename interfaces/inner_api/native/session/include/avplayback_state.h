@@ -25,13 +25,16 @@ class AVPlaybackState : public Parcelable {
 public:
     enum {
         PLAYBACK_STATE_INITIAL = 0,
-        PLAYBACK_STATE_PREPARING = 1,
-        PLAYBACK_STATE_PLAYING = 2,
-        PLAYBACK_STATE_PAUSED = 3,
+        PLAYBACK_STATE_PREPARE = 1,
+        PLAYBACK_STATE_PLAY = 2,
+        PLAYBACK_STATE_PAUSE = 3,
         PLAYBACK_STATE_FAST_FORWARD = 4,
         PLAYBACK_STATE_REWIND = 5,
         PLAYBACK_STATE_STOP = 6,
-        PLAYBACK_STATE_MAX = 7
+        PLAYBACK_STATE_COMPLETED = 7,
+        PLAYBACK_STATE_RELEASED = 8,
+        PLAYBACK_STATE_ERROR = 9,
+        PLAYBACK_STATE_MAX = 10,
     };
 
     enum {
@@ -42,8 +45,9 @@ public:
         PLAYBACK_KEY_LOOP_MODE = 4,
         PLAYBACK_KEY_IS_FAVORITE = 5,
         PLAYBACK_KEY_ACTIVE_ITEM_ID = 6,
-        PLAYBACK_KEY_EXTRAS = 7,
-        PLAYBACK_KEY_MAX = 8,
+        PLAYBACK_KEY_VOLUME = 7,
+        PLAYBACK_KEY_EXTRAS = 8,
+        PLAYBACK_KEY_MAX = 9,
     };
 
     enum {
@@ -89,6 +93,9 @@ public:
     void SetActiveItemId(int32_t activeItemId);
     int32_t GetActiveItemId() const;
 
+    void SetVolume(int32_t volume);
+    int32_t GetVolume() const;
+
     void SetExtras(const std::shared_ptr<AAFwk::WantParams>& extras);
     std::shared_ptr<AAFwk::WantParams> GetExtras() const;
 
@@ -105,6 +112,7 @@ public:
         PLAYBACK_KEY_LOOP_MODE,
         PLAYBACK_KEY_IS_FAVORITE,
         PLAYBACK_KEY_ACTIVE_ITEM_ID,
+        PLAYBACK_KEY_VOLUME,
     };
 
 private:
@@ -117,6 +125,7 @@ private:
     int32_t loopMode_ = LOOP_MODE_SEQUENCE;
     bool isFavorite_ {};
     int32_t activeItemId_ {};
+    int32_t volume_ = 0;
     std::shared_ptr<AAFwk::WantParams> extras_ = nullptr;
 
     static void CloneState(const AVPlaybackState& from, AVPlaybackState& to);
@@ -126,6 +135,7 @@ private:
     static void CloneLoopMode(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneIsFavorite(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneActiveItemId(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneVolume(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneExtras(const AVPlaybackState& from, AVPlaybackState& to);
 
     using CloneActionType = void(*)(const AVPlaybackState& from, AVPlaybackState& to);
@@ -137,6 +147,7 @@ private:
         &AVPlaybackState::CloneLoopMode,
         &AVPlaybackState::CloneIsFavorite,
         &AVPlaybackState::CloneActiveItemId,
+        &AVPlaybackState::CloneVolume,
         &AVPlaybackState::CloneExtras,
     };
 };

@@ -43,10 +43,11 @@ int32_t AVCastControllerCallbackStub::OnRemoteRequest(uint32_t code, MessageParc
 
 int32_t AVCastControllerCallbackStub::HandleOnStateChange(MessageParcel& data, MessageParcel& reply)
 {
-    AVCastPlayerState castPlayerState;
-    CHECK_AND_RETURN_RET_LOG(data.ReadString(castPlayerState.castPlayerState_), false, "Read castPlayerState failed");
-    AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::OnStateChanged");
-    OnStateChanged(castPlayerState);
+    sptr<AVPlaybackState> state = data.ReadParcelable<AVPlaybackState>();
+
+    CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read PlaybackState failed");
+    AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::HandleOnStateChange");
+    OnCastPlaybackStateChange(*state);
     return ERR_NONE;
 }
 
@@ -55,43 +56,19 @@ int32_t AVCastControllerCallbackStub::HandleOnMediaItemChange(MessageParcel& dat
     AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::HandleOnMediaItemChange");
     AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
     CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
-    OnMediaItemChanged(*item);
+    OnMediaItemChange(*item);
     return ERR_NONE;
 }
 
-int32_t AVCastControllerCallbackStub::HandleOnVolumeChange(MessageParcel& data, MessageParcel& reply)
+int32_t AVCastControllerCallbackStub::HandleOnPlayNext(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t volume;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(volume), ERR_NONE, "read volume failed");
-    OnVolumeChanged(volume);
+    OnPlayNext();
     return ERR_NONE;
 }
 
-int32_t AVCastControllerCallbackStub::HandleOnLoopModeChange(MessageParcel& data, MessageParcel& reply)
+int32_t AVCastControllerCallbackStub::HandleOnPlayPrevious(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t loopMode;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(loopMode), ERR_NONE, "read loopMode failed");
-    OnLoopModeChanged(loopMode);
-    return ERR_NONE;
-}
-
-int32_t AVCastControllerCallbackStub::HandleOnPlaySpeedChange(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t playSpeed;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(playSpeed), ERR_NONE, "read speed failed");
-    OnPlaySpeedChanged(playSpeed);
-    return ERR_NONE;
-}
-
-int32_t AVCastControllerCallbackStub::HandleOnPositionChange(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t position;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(position), ERR_NONE, "read seek failed");
-    int32_t bufferPosition;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(bufferPosition), ERR_NONE, "read seek failed");
-    int32_t duration;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(duration), ERR_NONE, "read seek failed");
-    OnPositionChanged(position, bufferPosition, duration);
+    OnPlayPrevious();
     return ERR_NONE;
 }
 
@@ -101,7 +78,7 @@ int32_t AVCastControllerCallbackStub::HandleOnVideoSizeChange(MessageParcel& dat
     int32_t height;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(width), ERR_NONE, "read time failed");
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(height), ERR_NONE, "read time failed");
-    OnVideoSizeChanged(width, height);
+    OnVideoSizeChange(width, height);
     return ERR_NONE;
 }
 

@@ -921,7 +921,7 @@ napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info inf
                                    "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             callback = argv[ARGV_SECOND];
         } else {
-            CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THERE, "invalid argument number",
+            CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE, "invalid argument number",
                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
             CHECK_ARGS_RETURN_VOID(

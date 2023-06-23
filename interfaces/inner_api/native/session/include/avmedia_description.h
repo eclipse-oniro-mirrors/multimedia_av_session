@@ -46,8 +46,9 @@ public:
         MEDIA_DESCRIPTION_KEY_MEDIA_URI = 14,
         MEDIA_DESCRIPTION_KEY_DURATION = 15,
         MEDIA_DESCRIPTION_KEY_START_POSITION = 16,
-        MEDIA_DESCRIPTION_KEY_APP_NAME = 17,
-        MEDIA_DESCRIPTION_KEY_MAX = 18,
+        MEDIA_DESCRIPTION_KEY_CREDITS_POSITION = 17,
+        MEDIA_DESCRIPTION_KEY_APP_NAME = 18,
+        MEDIA_DESCRIPTION_KEY_MAX = 19,
     };
 
     AVMediaDescription() = default;
@@ -108,6 +109,9 @@ public:
     void SetStartPosition(const int32_t startPosition);
     int32_t GetStartPosition() const;
 
+    void SetCreditsPosition(const int32_t creditsPosition);
+    int32_t GetCreditsPosition() const;
+
     void SetAppName(const std::string& appName);
     std::string GetAppName() const;
     
@@ -133,6 +137,7 @@ private:
     std::string mediaUri_ = "";
     int32_t duration_ = 0;
     int32_t startPosition_ = 0;
+    int32_t creditsPosition_ = 0;
     std::string appName_ = "";
 };
 } // namespace OHOS::AVSession

@@ -158,7 +158,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
     g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
-    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
@@ -211,7 +211,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
     g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
-    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSED);
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
@@ -263,7 +263,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent003, TestSize.Level1)
     g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
-    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
@@ -316,7 +316,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent004, TestSize.Level1)
     g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
-    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
@@ -370,7 +370,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent005, TestSize.Level1)
     g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
-    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
@@ -425,7 +425,7 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent006, TestSize.Level1)
     g_metaData.SetLyric("xxxxx");
     avsession_->SetAVMetaData(g_metaData);
 
-    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAYING);
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);

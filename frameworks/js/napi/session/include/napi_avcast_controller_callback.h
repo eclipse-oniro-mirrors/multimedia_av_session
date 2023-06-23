@@ -27,12 +27,10 @@ namespace OHOS::AVSession {
 class NapiAVCastControllerCallback : public AVCastControllerCallback {
 public:
     enum {
-        EVENT_CAST_STATE_CHANGE,
+        EVENT_CAST_PLAYBACK_STATE_CHANGE,
         EVENT_CAST_MEDIA_ITEM_CHANGE,
-        EVENT_CAST_VOLUME_CHANGE,
-        EVENT_CAST_LOOP_MODE_CHANGE,
-        EVENT_CAST_PLAY_SPEED_CHANGE,
-        EVENT_CAST_POSITON_CHANGE,
+        EVENT_CAST_PLAY_NEXT,
+        EVENT_CAST_PLAY_PREVIOUS,
         EVENT_CAST_VIDEO_SIZE_CHANGE,
         EVENT_CAST_ERROR,
         EVENT_CAST_TYPE_MAX,
@@ -41,13 +39,11 @@ public:
     NapiAVCastControllerCallback();
     ~NapiAVCastControllerCallback() override;
 
-    void OnStateChanged(const AVCastPlayerState& state) override;
-    void OnMediaItemChanged(const AVQueueItem& avQueueItem) override;
-    void OnVolumeChanged(const int32_t volume) override;
-    void OnLoopModeChanged(const int32_t loopMode) override;
-    void OnPlaySpeedChanged(const int32_t playSpeed) override;
-    void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
-    void OnVideoSizeChanged(const int32_t width, const int32_t height) override;
+    void OnCastPlaybackStateChange(const AVPlaybackState& state) override;
+    void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
+    void OnPlayNext() override;
+    void OnPlayPrevious() override;
+    void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
@@ -66,6 +62,8 @@ private:
     void HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam);
 
     void HandleEvent(int32_t event, const int32_t firstParam, const int32_t secondParam, const int32_t thirdParam);
+
+    void HandleErrorEvent(int32_t event, const int32_t errorCode, const std::string& errorMsg);
 
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;

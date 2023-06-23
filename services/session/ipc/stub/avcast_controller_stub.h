@@ -34,21 +34,17 @@ private:
 
     int32_t HandleStart(MessageParcel& data, MessageParcel& reply);
     
-    int32_t HandleUpdate(MessageParcel& data, MessageParcel& reply);
+    int32_t HandlePrepare(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetDuration(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetPosition(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetCastAVPlayBackState(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleGetVolume(MessageParcel& data, MessageParcel& reply);
-
-    int32_t HandleGetLoopMode(MessageParcel& data, MessageParcel& reply);
-
-    int32_t HandleGetPlaySpeed(MessageParcel& data, MessageParcel& reply);
-
-    int32_t HandleGetPlayState(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetCurrentItem(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleSetDisplaySurface(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleSetCastPlaybackFilter(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
@@ -60,14 +56,12 @@ private:
     static inline HandlerFunc handlers[] = {
         &AVCastControllerStub::HandleSendControlCommand,
         &AVCastControllerStub::HandleStart,
-        &AVCastControllerStub::HandleUpdate,
+        &AVCastControllerStub::HandlePrepare,
         &AVCastControllerStub::HandleGetDuration,
-        &AVCastControllerStub::HandleGetPosition,
-        &AVCastControllerStub::HandleGetVolume,
-        &AVCastControllerStub::HandleGetLoopMode,
-        &AVCastControllerStub::HandleGetPlaySpeed,
-        &AVCastControllerStub::HandleGetPlayState,
+        &AVCastControllerStub::HandleGetCastAVPlayBackState,
+        &AVCastControllerStub::HandleGetCurrentItem,
         &AVCastControllerStub::HandleSetDisplaySurface,
+        &AVCastControllerStub::HandleSetCastPlaybackFilter,
         &AVCastControllerStub::HandleRegisterCallbackInner,
         &AVCastControllerStub::HandleDestroy,
     };

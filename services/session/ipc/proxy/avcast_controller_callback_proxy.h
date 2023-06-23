@@ -24,19 +24,15 @@ class AVCastControllerCallbackProxy : public IRemoteProxy<IAVCastControllerCallb
 public:
     explicit AVCastControllerCallbackProxy(const sptr<IRemoteObject>& impl);
 
-    void OnStateChanged(const AVCastPlayerState& state) override;
+    void OnCastPlaybackStateChange(const AVPlaybackState& state) override;
 
-    void OnMediaItemChanged(const AVQueueItem& avQueueItem) override;
+    void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
 
-    void OnVolumeChanged(const int32_t volume) override;
+    void OnPlayNext() override;
 
-    void OnLoopModeChanged(const int32_t loopMode) override;
+    void OnPlayPrevious() override;
 
-    void OnPlaySpeedChanged(const int32_t playSpeed) override;
-
-    void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
-
-    void OnVideoSizeChanged(const int32_t width, const int32_t height) override;
+    void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 

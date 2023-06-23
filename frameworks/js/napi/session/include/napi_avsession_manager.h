@@ -44,6 +44,7 @@ private:
     static napi_value SendSystemControlCommand(napi_env env, napi_callback_info info);
     static napi_value StartCastDiscovery(napi_env env, napi_callback_info info);
     static napi_value StopCastDiscovery(napi_env env, napi_callback_info info);
+    static napi_value SetDiscoverable(napi_env env, napi_callback_info info);
     static napi_value StartCast(napi_env env, napi_callback_info info);
     static napi_value StopCast(napi_env env, napi_callback_info info);
 
@@ -77,7 +78,7 @@ private:
     static constexpr size_t ARGC_ZERO = 0;
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
-    static constexpr size_t ARGC_THERE = 3;
+    static constexpr size_t ARGC_THREE = 3;
 
     static constexpr size_t ARGV_FIRST = 0;
     static constexpr size_t ARGV_SECOND = 1;

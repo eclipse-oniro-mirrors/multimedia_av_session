@@ -28,41 +28,33 @@ public:
 
     void Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
-    void OnStateChanged(const AVCastPlayerState& state) override;
+    void OnCastPlaybackStateChange(const AVPlaybackState& state) override;
 
-    void OnMediaItemChanged(const AVQueueItem& avQueueItem) override;
+    void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
 
-    void OnVolumeChanged(const int32_t volume) override;
+    void OnPlayNext() override;
 
-    void OnLoopModeChanged(const int32_t loopMode) override;
+    void OnPlayPrevious() override;
 
-    void OnPlaySpeedChanged(const int32_t playSpeed) override;
-
-    void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) override;
-
-    void OnVideoSizeChanged(const int32_t width, const int32_t height) override;
+    void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
-    int32_t SetMediaList(const MediaInfoHolder& mediaInfoHolder) override;
+    int32_t Start(const AVQueueItem& avQueueItem) override;
 
-    int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) override;
+    int32_t Prepare(const AVQueueItem& avQueueItem) override;
 
     int32_t GetDuration(int32_t& duration) override;
 
-    int32_t GetPosition(int32_t& position) override;
+    int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
 
-    int32_t GetVolume(int32_t& volume) override;
-
-    int32_t GetLoopMode(int32_t& loopMode) override;
-
-    int32_t GetPlaySpeed(int32_t& playSpeed) override;
-
-    int32_t GetPlayState(AVCastPlayerState& playerState) override;
+    int32_t GetCurrentItem(AVQueueItem& currentItem) override;
 
     int32_t SetDisplaySurface(std::string& surfaceId) override;
+
+    int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
 
     bool RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
@@ -74,6 +66,8 @@ protected:
 private:
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
     sptr<IAVCastControllerCallback> callback_;
+    AVPlaybackState::PlaybackStateMaskType castPlaybackMask_;
+    AVQueueItem currentAVQueueItem_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_ITEM_H

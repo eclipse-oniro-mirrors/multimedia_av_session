@@ -989,11 +989,11 @@ HWTEST_F(AVSessionControllerTest, SetPlaybackFilter001, TestSize.Level1)
     EXPECT_EQ(controller_->SetPlaybackFilter(filter), AVSESSION_SUCCESS);
     AVPlaybackState state;
     state.SetLoopMode(AVPlaybackState::LOOP_MODE_LIST);
-    state.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARING);
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARE);
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
 
     sleep(1);
-    EXPECT_EQ(callback->state_.GetState(), AVPlaybackState::PLAYBACK_STATE_PREPARING);
+    EXPECT_EQ(callback->state_.GetState(), AVPlaybackState::PLAYBACK_STATE_PREPARE);
     EXPECT_EQ(callback->state_.GetLoopMode(), AVPlaybackState::LOOP_MODE_LIST);
 }
 
@@ -1012,11 +1012,11 @@ HWTEST_F(AVSessionControllerTest, SetPlaybackFilter002, TestSize.Level1)
     EXPECT_EQ(controller_->SetPlaybackFilter(filter), AVSESSION_SUCCESS);
     AVPlaybackState state;
     state.SetLoopMode(AVPlaybackState::LOOP_MODE_LIST);
-    state.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARING);
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARE);
     EXPECT_EQ(avsession_->SetAVPlaybackState(state), AVSESSION_SUCCESS);
 
     sleep(1);
-    EXPECT_NE(callback->state_.GetState(), AVPlaybackState::PLAYBACK_STATE_PREPARING);
+    EXPECT_NE(callback->state_.GetState(), AVPlaybackState::PLAYBACK_STATE_PREPARE);
     EXPECT_NE(callback->state_.GetLoopMode(), AVPlaybackState::LOOP_MODE_LIST);
 }
 

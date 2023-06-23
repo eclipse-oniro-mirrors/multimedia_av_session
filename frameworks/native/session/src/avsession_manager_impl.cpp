@@ -272,6 +272,13 @@ int32_t AVSessionManagerImpl::StopCastDiscovery()
     return service ? service->StopCastDiscovery() : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::SetDiscoverable(const bool enable)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SetDiscoverable");
+    auto service = GetService();
+    return service ? service->SetDiscoverable(enable) : ERR_SERVICE_NOT_EXIST;
+}
+
 int32_t AVSessionManagerImpl::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartCast");

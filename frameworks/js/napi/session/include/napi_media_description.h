@@ -80,6 +80,9 @@ private:
     static napi_status GetStartPosition(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetStartPosition(napi_env env, const AVMediaDescription& in, napi_value& out);
 
+    static napi_status GetCreditsPosition(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetCreditsPosition(napi_env env, const AVMediaDescription& in, napi_value& out);
+
     static napi_status GetAppName(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetAppName(napi_env env, const AVMediaDescription& in, napi_value& out);
 

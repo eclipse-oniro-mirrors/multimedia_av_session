@@ -57,6 +57,8 @@ public:
 
     virtual int32_t StopCastDiscovery() = 0;
 
+    virtual int32_t SetDiscoverable(const bool enable) = 0;
+
     /**
      * Notify Router that the device has been discovered.
      *

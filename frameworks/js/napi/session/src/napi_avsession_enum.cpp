@@ -56,9 +56,20 @@ static napi_value ExportAVCastCategory(napi_env env)
     napi_create_object(env, &result);
 
     (void)SetNamedProperty(env, result, "CATEGORY_LOCAL", AVCastCategory::CATEGORY_LOCAL);
-    (void)SetNamedProperty(env, result, "CATEGORY_CAST_MIRROR", AVCastCategory::CATEGORY_CAST_MIRROR);
-    (void)SetNamedProperty(env, result, "CATEGORY_CAST_STREAM", AVCastCategory::CATEGORY_CAST_STREAM);
-    (void)SetNamedProperty(env, result, "CATEGORY_AUDIO_STREAMING", AVCastCategory::CATEGORY_AUDIO_STREAMING);
+    (void)SetNamedProperty(env, result, "CATEGORY_REMOTE ", AVCastCategory::CATEGORY_REMOTE);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportProtocolType(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "TYPE_LOCAL", ProtocolType::TYPE_LOCAL);
+    (void)SetNamedProperty(env, result, "TYPE_CAST_PLUS_MIRROR ", ProtocolType::TYPE_CAST_PLUS_MIRROR);
+    (void)SetNamedProperty(env, result, "TYPE_CAST_PLUS_STREAM ", ProtocolType::TYPE_CAST_PLUS_STREAM);
 
     napi_object_freeze(env, result);
     return result;
@@ -97,12 +108,15 @@ static napi_value ExportPlaybackState(napi_env env)
     napi_create_object(env, &result);
 
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_INITIAL", AVPlaybackState::PLAYBACK_STATE_INITIAL);
-    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_PREPARE", AVPlaybackState::PLAYBACK_STATE_PREPARING);
-    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_PLAY", AVPlaybackState::PLAYBACK_STATE_PLAYING);
-    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_PAUSE", AVPlaybackState::PLAYBACK_STATE_PAUSED);
+    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_PREPARE", AVPlaybackState::PLAYBACK_STATE_PREPARE);
+    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_PLAY", AVPlaybackState::PLAYBACK_STATE_PLAY);
+    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_PAUSE", AVPlaybackState::PLAYBACK_STATE_PAUSE);
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_FAST_FORWARD", AVPlaybackState::PLAYBACK_STATE_FAST_FORWARD);
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_REWIND", AVPlaybackState::PLAYBACK_STATE_REWIND);
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_STOP", AVPlaybackState::PLAYBACK_STATE_STOP);
+    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_COMPLETED", AVPlaybackState::PLAYBACK_STATE_COMPLETED);
+    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_RELEASED", AVPlaybackState::PLAYBACK_STATE_RELEASED);
+    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_ERROR", AVPlaybackState::PLAYBACK_STATE_ERROR);
 
     napi_object_freeze(env, result);
     return result;
@@ -112,6 +126,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
         DECLARE_NAPI_PROPERTY("AVCastCategory", ExportAVCastCategory(env)),
+        DECLARE_NAPI_PROPERTY("ProtocolType", ExportProtocolType(env)),
         DECLARE_NAPI_PROPERTY("ConnectionState", ExportConnectionState(env)),
         DECLARE_NAPI_PROPERTY("DeviceType", ExportDeviceType(env)),
         DECLARE_NAPI_PROPERTY("LoopMode", ExportLoopMode(env)),

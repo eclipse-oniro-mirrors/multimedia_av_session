@@ -30,6 +30,7 @@ public:
     virtual void Init() = 0;
     virtual bool StartDiscovery(int castCapability) = 0;
     virtual void StopDiscovery() = 0;
+    virtual int32_t SetDiscoverable(const bool enable) = 0;
     virtual void Release() = 0;
     virtual bool RegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener) = 0;
     virtual bool UnRegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener) = 0;

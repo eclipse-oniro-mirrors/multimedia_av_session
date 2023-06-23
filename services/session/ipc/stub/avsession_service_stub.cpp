@@ -333,6 +333,22 @@ int32_t AVSessionServiceStub::HandleStopCastDiscovery(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleSetDiscoverable");
+    SLOGI("HandleSetDiscoverable start");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    bool enable;
+    CHECK_AND_RETURN_RET_LOG(data.ReadBool(enable), AVSESSION_ERROR, "write enable info failed");
+    int32_t ret = AVRouter::GetInstance().SetDiscoverable(enable);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleSetDiscoverable failed");
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel& reply)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE

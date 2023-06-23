@@ -516,10 +516,9 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         }
     }
 
-    int32_t castCategoryLocal = 1;
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
-    deviceInfo.castCategory_ = castCategoryLocal;
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
     deviceInfo.deviceId_ = "0";
     deviceInfo.deviceName_ = "LocalDevice";
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
@@ -1041,7 +1040,7 @@ void AVSessionService::HandleEventHandlerCallBack()
         if (topSession_) {
             SLOGI("HandleEventHandlerCallBack ONE_CLICK with topSession_ ");
             auto playbackState = topSession_->GetPlaybackState();
-            if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAYING) {
+            if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
                 cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
             } else {
                 cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
@@ -1338,9 +1337,9 @@ void AVSessionService::SetDeviceInfo(const std::vector<AudioStandard::AudioDevic
 
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.clear();
-    int32_t castCategory = 1; // 1 is local
+    int32_t castCategory = AVCastCategory::CATEGORY_LOCAL;
     if (!IsLocalDevice(castAudioDescriptors[0].networkId_)) {
-        castCategory = 2; // 2 is stream
+        castCategory = AVCastCategory::CATEGORY_REMOTE;
     }
     for (const auto &audioDescriptor : castAudioDescriptors) {
         DeviceInfo deviceInfo;

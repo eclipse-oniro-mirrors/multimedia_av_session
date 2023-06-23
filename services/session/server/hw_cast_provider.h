@@ -36,6 +36,7 @@ public:
     void Init() override;
     bool StartDiscovery(int castCapability) override;
     void StopDiscovery() override;
+    int32_t SetDiscoverable(const bool enable) override;
     void Release() override;
     int StartCastSession() override;
     void StopCastSession(int castId) override;

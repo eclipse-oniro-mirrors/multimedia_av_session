@@ -241,7 +241,7 @@ public:
 
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
-    static constexpr size_t ARGC_THERE = 3;
+    static constexpr size_t ARGC_THREE = 3;
 
     static constexpr size_t ARGV_FIRST = 0;
     static constexpr size_t ARGV_SECOND = 1;

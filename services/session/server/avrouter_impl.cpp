@@ -65,6 +65,18 @@ int32_t AVRouterImpl::StopCastDiscovery()
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVRouterImpl::SetDiscoverable(const bool enable)
+{
+    SLOGI("AVRouterImpl SetDiscoverable");
+
+    std::lock_guard lockGuard(providerManagerLock_);
+
+    for (const auto& [providerNumber_, providerManager] : providerManagerMap_) {
+        providerManager->provider_->SetDiscoverable(enable);
+    }
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVRouterImpl::OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo)
 {
     SLOGI("AVRouterImpl received OnDeviceAvailable event");

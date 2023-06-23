@@ -24,76 +24,57 @@ AVCastControllerCallbackClient::AVCastControllerCallbackClient(
     SLOGD("construct");
 }
 
-void AVCastControllerCallbackClient::OnStateChanged(const AVCastPlayerState& state)
+void AVCastControllerCallbackClient::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, state]() { callback->OnStateChanged(state); }, EVENT_NAME),
+        .AVSessionPostTask([callback, state]() { callback->OnCastPlaybackStateChange(state); }, EVENT_NAME),
+        "AVCastControllerCallbackClient handler postTask failed");
+    if (castPlaybackStateListener_) {
+        castPlaybackStateListener_(state);
+    }
+}
+
+void AVCastControllerCallbackClient::OnMediaItemChange(const AVQueueItem& avQueueItem)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, avQueueItem]() { callback->OnMediaItemChange(avQueueItem); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
-void AVCastControllerCallbackClient::OnMediaItemChanged(const AVQueueItem& avQueueItem)
+void AVCastControllerCallbackClient::OnPlayNext()
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, avQueueItem]() { callback->OnMediaItemChanged(avQueueItem); }, EVENT_NAME),
+        .AVSessionPostTask([callback]() { callback->OnPlayNext(); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
-void AVCastControllerCallbackClient::OnVolumeChanged(const int32_t volume)
+void AVCastControllerCallbackClient::OnPlayPrevious()
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, volume]() { callback->OnVolumeChanged(volume); }, EVENT_NAME),
+        .AVSessionPostTask([callback]() { callback->OnPlayPrevious(); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
-void AVCastControllerCallbackClient::OnLoopModeChanged(const int32_t loopMode)
-{
-    CHECK_AND_RETURN_LOG(callback_, "callback is null");
-
-    auto callback = callback_;
-    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, loopMode]() { callback->OnLoopModeChanged(loopMode); }, EVENT_NAME),
-        "AVCastControllerCallbackClient handler postTask failed");
-}
-
-void AVCastControllerCallbackClient::OnPlaySpeedChanged(const int32_t playSpeed)
-{
-    CHECK_AND_RETURN_LOG(callback_, "callback is null");
-
-    auto callback = callback_;
-    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, playSpeed]() { callback->OnPlaySpeedChanged(playSpeed); }, EVENT_NAME),
-        "AVCastControllerCallbackClient handler postTask failed");
-}
-
-void AVCastControllerCallbackClient::OnPositionChanged(const int32_t position,
-    const int32_t bufferPosition, const int32_t duration)
-{
-    CHECK_AND_RETURN_LOG(callback_, "callback is null");
-
-    auto callback = callback_;
-    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, position, bufferPosition, duration]() {
-            callback->OnPositionChanged(position, bufferPosition, duration);
-        }, EVENT_NAME), "AVCastControllerCallbackClient handler postTask failed");
-}
-
-void AVCastControllerCallbackClient::OnVideoSizeChanged(const int32_t width, const int32_t height)
+void AVCastControllerCallbackClient::OnVideoSizeChange(const int32_t width, const int32_t height)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
         .AVSessionPostTask([callback, width, height]() {
-            callback->OnVideoSizeChanged(width, height);
+            callback->OnVideoSizeChange(width, height);
         }, EVENT_NAME), "AVCastControllerCallbackClient handler postTask failed");
 }
 
@@ -106,6 +87,12 @@ void AVCastControllerCallbackClient::OnPlayerError(const int32_t errorCode, cons
         .AVSessionPostTask([callback, errorCode, errorMsg]() {
             callback->OnPlayerError(errorCode, errorMsg);
         }, EVENT_NAME), "AVCastControllerCallbackClient handler postTask failed");
+}
+
+void AVCastControllerCallbackClient::AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>&
+    listener)
+{
+    castPlaybackStateListener_ = listener;
 }
 
 AVCastControllerCallbackClient::~AVCastControllerCallbackClient()

@@ -208,6 +208,8 @@ public:
      * @since 10
     */
     virtual int32_t StopCast(const SessionToken& sessionToken) = 0;
+
+    virtual int32_t SetDiscoverable(const bool enable) = 0;
 #endif
 };
 } // namespace OHOS::AVSession
