@@ -26,7 +26,7 @@ public:
 
     bool CheckSystemPermission();
 
-    bool CheckSystemPermissionByUid(int uid);
+    static bool CheckSystemPermissionByUid(int uid);
 
 private:
     static constexpr const char* MANAGE_MEDIA_RESOURCES = "ohos.permission.MANAGE_MEDIA_RESOURCES";
