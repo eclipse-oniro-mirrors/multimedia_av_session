@@ -81,6 +81,7 @@ void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::str
 int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd)
 {
     SLOGI("Call SendControlCommand of cast controller proxy");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     castControllerProxy_->SendControlCommand(cmd);
     return AVSESSION_SUCCESS;
 }
@@ -88,6 +89,7 @@ int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd
 int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
 {
     SLOGI("Call Start of cast controller proxy");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     castControllerProxy_->Start(avQueueItem);
     currentAVQueueItem_ = avQueueItem;
     return AVSESSION_SUCCESS;
@@ -96,17 +98,20 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
 int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
 {
     SLOGI("Call prepare of cast controller proxy");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     castControllerProxy_->Prepare(avQueueItem);
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVCastControllerItem::GetDuration(int32_t& duration)
 {
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     return castControllerProxy_->GetDuration(duration);
 }
 
 int32_t AVCastControllerItem::GetCastAVPlaybackState(AVPlaybackState& avPlaybackState)
 {
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     return castControllerProxy_->GetCastAVPlaybackState(avPlaybackState);
 }
 
@@ -118,6 +123,7 @@ int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 
 int32_t AVCastControllerItem::SetDisplaySurface(std::string& surfaceId)
 {
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     return castControllerProxy_->SetDisplaySurface(surfaceId);
 }
 
@@ -130,6 +136,7 @@ int32_t AVCastControllerItem::SetCastPlaybackFilter(const AVPlaybackState::Playb
 bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
 {
     SLOGI("Call RegisterControllerListener of cast controller proxy");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     return castControllerProxy->RegisterControllerListener(shared_from_this());
 }
 

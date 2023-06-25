@@ -138,7 +138,6 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
-    mediaInfoList.emplace_back(mediaInfo);
 
     if (streamPlayer_ && streamPlayer_->Play(mediaInfo)) {
         SLOGI("Set media info and start successed");
@@ -165,7 +164,6 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
-    mediaInfoList.emplace_back(mediaInfo);
 
     if (streamPlayer_ && streamPlayer_->Load(mediaInfo)) {
         SLOGI("Set media info and prepare successed");
