@@ -31,9 +31,8 @@
 #include "avsessionitem_fuzzer.h"
 
 using namespace std;
-using namespace OHOS;
-using namespace OHOS::AVSession;
-
+namespace OHOS {
+namespace AVSession {
 const int32_t MAX_CODE_TEST  = 21;
 const int32_t MAX_CODE_LEN  = 512;
 const int32_t MIN_SIZE_NUM = 4;
@@ -52,7 +51,7 @@ void AvSessionItemFuzzer::AvSessionItemFuzzerTest(uint8_t* data, size_t size)
     std::string bundleName(reinterpret_cast<const char*>(data), size);
     std::string abilityName(reinterpret_cast<const char*>(data), size);
 
-    OHOS::AppExecFwk::ElementName elementName;
+    AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
 
@@ -79,7 +78,7 @@ void AvSessionItemFuzzer::AvSessionItemFuzzerTest(uint8_t* data, size_t size)
     avSessionItem->OnRemoteRequest(code, dataMessageParcel, reply, option);
 }
 
-void OHOS::AVSession::AvSessionItemTest(uint8_t *data, size_t size)
+void AvSessionItemTest(uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
@@ -107,15 +106,27 @@ void OHOS::AVSession::AvSessionItemTest(uint8_t *data, size_t size)
     controlCommand.SetCommand(cmd);
 
     OutputDeviceInfo info;
-    info.isRemote_ = true;
-    std::string deviceIds(reinterpret_cast<const char *>(data), size);
-    info.deviceIds_.push_back(deviceIds);
-    std::string deviceNames(reinterpret_cast<const char *>(data), size);
-    info.deviceNames_.push_back(deviceNames);
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 0;
+    std::string deviceId(reinterpret_cast<const char *>(data), size);
+    deviceInfo.deviceId_= deviceId;
+    std::string deviceName(reinterpret_cast<const char *>(data), size);
+    deviceInfo.deviceName_ = deviceName;
+    info.deviceInfos_.push_back(deviceInfo);
+    AvSessionItemTestImpl(metaData, avState, top, info, controlCommand);
+}
 
+void AvSessionItemTestImpl(AVMetaData metaData, AVPlaybackState avState, bool top,
+    OutputDeviceInfo info, AVControlCommand controlCommand)
+{
     AVSessionDescriptor descriptor;
     AVSessionItem avSessionItem(descriptor);
-
+    avSessionItem.ExecuteControllerCommand(controlCommand);
+    avSessionItem.SetTop(top);
+    avSessionItem.SetOutputDevice(info);
+    avSessionItem.GetOutputDevice(info);
+    avSessionItem.AddSupportCommand(controlCommand.GetCommand());
+    avSessionItem.DeleteSupportCommand(controlCommand.GetCommand());
     avSessionItem.GetSessionId();
     avSessionItem.GetAVMetaData(metaData);
     avSessionItem.SetAVMetaData(metaData);
@@ -124,23 +135,17 @@ void OHOS::AVSession::AvSessionItemTest(uint8_t *data, size_t size)
     avSessionItem.Deactivate();
     avSessionItem.IsActive();
     avSessionItem.Destroy();
-    avSessionItem.AddSupportCommand(cmd);
-    avSessionItem.DeleteSupportCommand(cmd);
     avSessionItem.SetAVPlaybackState(avState);
     avSessionItem.GetPlaybackState();
     avSessionItem.GetMetaData();
     avSessionItem.GetSupportCommand();
-    avSessionItem.ExecuteControllerCommand(controlCommand);
     avSessionItem.GetPid();
     avSessionItem.GetUid();
     avSessionItem.GetAbilityName();
-    avSessionItem.SetTop(top);
-    avSessionItem.SetOutputDevice(info);
-    avSessionItem.GetOutputDevice(info);
     avSessionItem.GetRemoteSource();
 }
 
-void OHOS::AVSession::AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)
+void AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)
 {
     auto avSessionItem = std::make_unique<AvSessionItemFuzzer>();
     if (avSessionItem == nullptr) {
@@ -154,7 +159,9 @@ void OHOS::AVSession::AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AvSessionItemOnRemoteRequest(const_cast<uint8_t*>(data), size);
-    OHOS::AVSession::AvSessionItemTest(const_cast<uint8_t*>(data), size);
+    AvSessionItemOnRemoteRequest(const_cast<uint8_t*>(data), size);
+    AvSessionItemTest(const_cast<uint8_t*>(data), size);
     return 0;
 }
+} // namespace AVSession
+} // namespace OHOS

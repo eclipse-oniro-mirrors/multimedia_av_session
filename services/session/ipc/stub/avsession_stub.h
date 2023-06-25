@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,10 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "avcast_controller.h"
+#endif
+
 namespace OHOS::AVSession {
 class AVSessionStub : public IRemoteStub<IAVSession> {
 public:
@@ -37,8 +41,18 @@ public:
     {
         return nullptr;
     }
+    
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::shared_ptr<AVCastController> GetAVCastController() override
+    {
+        return nullptr;
+    }
+#endif
+
 private:
     int32_t HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetSessionType(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
@@ -55,6 +69,12 @@ private:
     int32_t HandleSetExtras(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetController(MessageParcel& data, MessageParcel& reply);
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t HandleGetAVCastController(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleReleaseCast(MessageParcel& data, MessageParcel& reply);
+#endif
 
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
@@ -85,6 +105,7 @@ private:
     using HandlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
     static inline HandlerFunc handlers[] = {
         &AVSessionStub::HandleGetSessionId,
+        &AVSessionStub::HandleGetSessionType,
         &AVSessionStub::HandleGetAVMetaData,
         &AVSessionStub::HandleSetAVMetaData,
         &AVSessionStub::HandleGetAVPlaybackState,
@@ -97,6 +118,9 @@ private:
         &AVSessionStub::HandleSetExtras,
         &AVSessionStub::HandleSetLaunchAbility,
         &AVSessionStub::HandleGetController,
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        &AVSessionStub::HandleGetAVCastController,
+#endif
         &AVSessionStub::HandleRegisterCallbackInner,
         &AVSessionStub::HandleActivate,
         &AVSessionStub::HandleDeactivate,
@@ -105,6 +129,9 @@ private:
         &AVSessionStub::HandleAddSupportCommand,
         &AVSessionStub::HandleDeleteSupportCommand,
         &AVSessionStub::HandleSetSessionEvent,
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        &AVSessionStub::HandleReleaseCast,
+#endif
     };
 };
 }

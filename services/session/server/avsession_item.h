@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,17 +24,44 @@
 #include "avcontrol_command.h"
 #include "audio_info.h"
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "i_avcast_controller_proxy.h"
+#include "avcast_controller_item.h"
+#endif
+
 namespace OHOS::AVSession {
 class AVControllerItem;
 class RemoteSessionSink;
 class RemoteSessionSource;
 class AVSessionItem : public AVSessionStub {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+class CssListener : public IAVCastSessionStateListener {
+public:
+    explicit CssListener(AVSessionItem *ptr)
+    {
+        ptr_ = ptr;
+    }
+
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+    {
+        ptr_->OnCastStateChange(castState, deviceInfo);
+    }
+
+    AVSessionItem *ptr_;
+};
+#endif
 public:
     explicit AVSessionItem(const AVSessionDescriptor& descriptor);
 
     ~AVSessionItem() override;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
+#endif
+
     std::string GetSessionId() override;
+
+    std::string GetSessionType() override;
 
     int32_t GetAVMetaData(AVMetaData& meta) override;
 
@@ -88,7 +115,7 @@ public:
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
-    void HandleOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo);
+    void HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo);
 
     void HandleSkipToQueueItem(const int32_t& itemId);
 
@@ -133,6 +160,21 @@ public:
     int32_t SinkCancelCastAudio();
 
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t ReleaseCast() override;
+
+    int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
+
+    int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo);
+
+    int32_t StopCast();
+    
+    sptr<IRemoteObject> GetAVCastControllerInner() override;
+
+    void UpdateCastDeviceMap(DeviceInfo deviceInfo);
+#endif
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
@@ -187,6 +229,19 @@ private:
     std::shared_ptr<RemoteSessionSource> remoteSource_;
     std::recursive_mutex remoteSinkLock_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::recursive_mutex castHandleLock_;
+    int64_t castHandle_;
+
+    std::recursive_mutex castControllerProxyLock_;
+    std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
+    std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
+    std::shared_ptr<CssListener> cssListener_;
+    std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
+
+    std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+#endif
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H

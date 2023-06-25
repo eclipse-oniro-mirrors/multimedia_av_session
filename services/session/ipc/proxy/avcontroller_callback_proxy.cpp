@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,13 +92,23 @@ void AVControllerCallbackProxy::OnValidCommandChange(const std::vector<int32_t>&
         "send request failed");
 }
 
-void AVControllerCallbackProxy::OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo)
+void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
+    const OutputDeviceInfo& outputDeviceInfo)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteBool(outputDeviceInfo.isRemote_), "write isRemote_ failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteStringVector(outputDeviceInfo.deviceIds_), "write deviceIds_ failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteStringVector(outputDeviceInfo.deviceNames_), "write deviceNames_ failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(connectionState), "write connectionState failed");
+
+    int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfoSize), "write deviceInfoSize failed");
+    for (DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.castCategory_), "write castCategory failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.deviceId_), "write deviceId failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.deviceName_), "write deviceName failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.deviceType_), "write deviceType failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.ipAddress_), "write ipAddress failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.providerId_), "write providerId failed");
+    }
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };

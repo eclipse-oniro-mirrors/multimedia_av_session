@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,9 +42,17 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(uid_), false, "write uid failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isActive_), false, "write isActive failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isTopSession_), false, "write isTopSession failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteBool(outputDeviceInfo_.isRemote_), false, "write isRemote failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteStringVector(outputDeviceInfo_.deviceIds_), false, "write deviceIds failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteStringVector(outputDeviceInfo_.deviceNames_), false, "write deviceNames failed");
+
+    int32_t deviceInfoSize = outputDeviceInfo_.deviceInfos_.size();
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+    for (DeviceInfo deviceInfo : outputDeviceInfo_.deviceInfos_) {
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceId_), false, "write deviceId failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.ipAddress_), false, "write ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.providerId_), false, "write providerId failed");
+    }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
 }
@@ -58,9 +66,19 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(uid_), false, "Read uid failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isActive_), false, "Read isActive failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isTopSession_), false, "Read isTopSession failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadBool(outputDeviceInfo_.isRemote_), false, "Read isRemote failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadStringVector(&outputDeviceInfo_.deviceIds_), false, "Read deviceIds failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadStringVector(&outputDeviceInfo_.deviceNames_), false, "Read deviceNames failed");
+
+    int32_t deviceInfoSize;
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+    for (int i = 0; i < deviceInfoSize; i++) {
+        DeviceInfo deviceInfo;
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
+    }
 
     sptr elementName = in.ReadParcelable<AppExecFwk::ElementName>();
     if (elementName == nullptr) {
@@ -70,4 +88,60 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
     elementName_ = *elementName;
     return true;
 }
+
+bool DeviceInfo::WriteToParcel(Parcel& out) const
+{
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castCategory_), false, "write castCategory failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceId_), false, "write deviceId failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceName_), false, "write deviceName failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceType_), false, "write deviceType failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(ipAddress_), false, "write ipAddress failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(providerId_), false, "write providerId failed");
+
+    return true;
 }
+
+bool DeviceInfo::ReadFromParcel(Parcel& in)
+{
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(castCategory_), false, "Read castCategory failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceId_), false, "Read deviceId failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceName_), false, "Read deviceName failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceType_), false, "Read deviceType failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(ipAddress_), false, "Read ipAddress failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(providerId_), false, "Read providerId failed");
+
+    return true;
+}
+
+bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
+{
+    int32_t deviceInfoSize = deviceInfos_.size();
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+    for (DeviceInfo deviceInfo : deviceInfos_) {
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceId_), false, "write deviceId failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.ipAddress_), false, "write ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.providerId_), false, "write providerId failed");
+    }
+    return true;
+}
+
+bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
+{
+    int32_t deviceInfoSize;
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+    for (int i = 0; i < deviceInfoSize; i++) {
+        DeviceInfo deviceInfo;
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        deviceInfos_.emplace_back(deviceInfo);
+    }
+    return true;
+}
+} // namespace OHOS::AVSession

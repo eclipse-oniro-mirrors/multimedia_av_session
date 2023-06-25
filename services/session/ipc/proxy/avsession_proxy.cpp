@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,10 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_trace.h"
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "avcast_controller_proxy.h"
+#endif
 
 namespace OHOS::AVSession {
 AVSessionProxy::AVSessionProxy(const sptr<IRemoteObject>& impl)
@@ -49,6 +53,23 @@ std::string AVSessionProxy::GetSessionId()
     std::string sessionId;
     CHECK_AND_RETURN_RET_LOG(reply.ReadString(sessionId), "", "read sessionId failed");
     return sessionId;
+}
+
+std::string AVSessionProxy::GetSessionType()
+{
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, "", "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), "", "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, "", "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_SESSION_TYPE, data, reply, option) == 0,
+        "", "send request failed");
+
+    std::string sessionType;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadString(sessionType), "", "read sessionType failed");
+    return sessionType;
 }
 
 int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback)
@@ -388,6 +409,44 @@ std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
     return controller_;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+sptr<IRemoteObject> AVSessionProxy::GetAVCastControllerInner()
+{
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+                             nullptr, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, nullptr, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_AVCAST_CONTROLLER, data, reply, option) == 0,
+        nullptr, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), nullptr, "read int32 failed");
+    sptr <IRemoteObject> castController = nullptr;
+    if (ret == AVSESSION_SUCCESS) {
+        castController = reply.ReadRemoteObject();
+        CHECK_AND_RETURN_RET_LOG(castController != nullptr, nullptr, "read IRemoteObject failed");
+    }
+    return castController;
+}
+
+std::shared_ptr<AVCastController> AVSessionProxy::GetAVCastController()
+{
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(castController_ == nullptr, castController_,
+        "controller already exist");
+    sptr <IRemoteObject> object = GetAVCastControllerInner();
+    CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
+    auto castController = iface_cast<AVCastControllerProxy>(object);
+    castController_ = std::shared_ptr<AVCastController>(castController.GetRefPtr(),
+        [holder = castController](const auto*) {});
+    return castController_;
+}
+#endif
+
 int32_t AVSessionProxy::Activate()
 {
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
@@ -500,4 +559,23 @@ int32_t AVSessionProxy::SetSessionEvent(const std::string& event, const AAFwk::W
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+int32_t AVSessionProxy::ReleaseCast()
+{
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_RELEASE_CAST, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
+#endif
+} // namespace OHOS::AVSession

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avcast_player_state.h"
 #include "avmedia_description.h"
 #include "avqueue_item.h"
 #include "avsession_descriptor.h"
@@ -68,10 +69,43 @@ public:
     virtual void OnAudioSessionChecked(const int32_t uid) {};
 
     /**
+     * @brief Listen for the event of device discovery.
+     *
+     * @param { OutputDeviceInfo } castOutputDeviceInfo - Discovered device info.
+     * @since 10
+    */
+    virtual void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) {};
+
+    /**
      * @brief Deconstruct SessionListener.
      * @since 9
     */
     virtual ~SessionListener() = default;
+};
+
+class IAVCastControllerProxyListener {
+public:
+    virtual void OnStateChanged(const AVCastPlayerState& state) = 0;
+
+    virtual void OnMediaItemChanged(const AVQueueItem& avQueueItem) = 0;
+
+    virtual void OnVolumeChanged(const int32_t volume) = 0;
+
+    virtual void OnLoopModeChanged(const int32_t loopMode) = 0;
+
+    virtual void OnPlaySpeedChanged(const int32_t playSpeed) = 0;
+
+    virtual void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
+
+    virtual void OnVideoSizeChanged(const int32_t width, const int32_t height) = 0;
+    
+    virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
+
+    /**
+     * @brief Deconstruct SessionListener.
+     * @since 9
+    */
+    virtual ~IAVCastControllerProxyListener() = default;
 };
 
 class AVSessionCallback {
@@ -163,10 +197,11 @@ public:
     /**
      * @brief Monitor and play device change events.
      *
+     * @param connectionState Event callback of device state.
      * @param outputDeviceInfo Event callback of device information.
      * @since 9
     */
-    virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
      * @brief Listen for command events.
@@ -235,10 +270,11 @@ public:
     /**
      * @brief Monitor and play device change events.
      *
+     * @param connectionState Event callback of device state.
      * @param outputDeviceInfo Device related information callback.
      * @since 9
     */
-    virtual void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
      * @brief Listen for changes in custom events of the session.
@@ -280,6 +316,49 @@ public:
     virtual ~AVControllerCallback() = default;
 };
 
+class AVCastControllerCallback {
+public:
+    virtual void OnStateChanged(const AVCastPlayerState& state) = 0;
+
+    virtual void OnMediaItemChanged(const AVQueueItem& avQueueItem) = 0;
+
+    virtual void OnVolumeChanged(const int32_t volume) = 0;
+
+    virtual void OnLoopModeChanged(const int32_t loopMode) = 0;
+
+    virtual void OnPlaySpeedChanged(const int32_t playSpeed) = 0;
+
+    virtual void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
+
+    virtual void OnVideoSizeChanged(const int32_t width, const int32_t height) = 0;
+
+    virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
+
+    /**
+     * @brief Deconstruct AVControllerCallback.
+     * @since 9
+    */
+    virtual ~AVCastControllerCallback() = default;
+};
+
+class IAVCastSessionStateListener {
+public:
+    /**
+     * @brief Listen to the change of cast state change.
+     *
+     * @param castHandle The combination of providerId and castId.
+     * @since 9
+    */
+    virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) = 0;
+
+    /**
+     * @brief Deconstruct IAVCastSessionStateListener.
+     * @since 10
+    */
+    virtual ~IAVCastSessionStateListener() = default;
+};
+
+
 struct SessionToken {
     std::string sessionId;
     pid_t pid;
@@ -297,6 +376,94 @@ enum SessionDataCategory {
     SESSION_DATA_COMMON_COMMAND = 6,
     SESSION_DATA_EXTRAS = 7,
     SESSION_DATA_CATEGORY_MAX = 8,
+};
+
+enum AVCastCategory {
+    /**
+     * The default cast type "local", media can be routed on the same device,
+     * including internal speakers or audio jacks on the device itself, A2DP devices.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @since 10
+     */
+    CATEGORY_LOCAL = 0,
+
+    /**
+     * Cast+ mirror capability
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @systemapi
+     * @since 10
+     */
+    CATEGORY_CAST_MIRROR = 1,
+
+    /**
+     * The Cast+ Stream indicating the media is presenting on a different device
+     * the application need get an AVCastController to control remote playback.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @since 10
+     */
+    CATEGORY_CAST_STREAM = 2,
+
+    /**
+     * audio stream is presenting on a different device
+     * it is transparent to the application which can still controll the playback by local player.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @systemapi
+     * @since 10
+     */
+    CATEGORY_AUDIO_STREAMING = 256,
+};
+
+/**
+ * Define the device connection state.
+ * @syscap SystemCapability.Multimedia.AVSession.Core
+ * @since 10
+ */
+enum ConnectionState {
+    /**
+     * A connection state indicating the device is in the process of connecting.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    STATE_CONNECTING = 0,
+    /**
+     * A connection state indicating the device is connected.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    STATE_CONNECTED = 1,
+    /**
+     * The default connection state indicating the device is disconnected.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    STATE_DISCONNECTED = 5,
+};
+
+enum DeviceType {
+    /**
+     * A device type indicating the route is on internal speakers or audio jacks on the device itself.
+     * @since 10
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     */
+    DEVICE_TYPE_LOCAL = 0,
+    /**
+     * A device type indicating the route is on a TV.
+     * @since 10
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     */
+    DEVICE_TYPE_TV = 2,
+    /**
+     * A device type indicating the route is on a smart speaker.
+     * @since 10
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     */
+    DEVICE_TYPE_SPEAKER = 3,
+    /**
+     * A device type indicating the route is on a bluetooth device.
+     * @since 10
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     */
+    DEVICE_TYPE_BLUETOOTH = 10,
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ public:
         SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID,
         SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS,
         SERVICE_CMD_CREATE_CONTROLLER,
+        SERVICE_CMD_GET_AV_CAST_CONTROLLER,
         SERVICE_CMD_REGISTER_SESSION_LISTENER,
         SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT,
         SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND,
@@ -41,6 +42,10 @@ public:
         SERVICE_CMD_CAST_AUDIO,
         SERVICE_CMD_CAST_AUDIO_FOR_ALL,
         SERVICE_CMD_SEND_COMMAND_TO_REMOTE,
+        SERVICE_CMD_START_CAST_DISCOVERY,
+        SERVICE_CMD_STOP_CAST_DISCOVERY,
+        SERVICE_CMD_START_CAST,
+        SERVICE_CMD_STOP_CAST,
         SERVICE_CMD_MAX
     };
 
@@ -63,6 +68,10 @@ public:
 
     virtual int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    virtual int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
+#endif
+
     virtual int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
 
     virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
@@ -78,6 +87,12 @@ public:
 
     virtual int32_t ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
                                             std::string& output) = 0;
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) = 0;
+
+    virtual int32_t StopCast(const SessionToken& sessionToken) = 0;
+#endif
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_SERVICE_H

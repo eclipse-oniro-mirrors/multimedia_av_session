@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& assertId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
-    void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
 
@@ -77,6 +77,9 @@ private:
 
     template<typename T>
     void HandleEvent(int32_t event, const std::string& firstParam, const T& secondParam);
+
+    template<typename T>
+    void HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam);
 
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;

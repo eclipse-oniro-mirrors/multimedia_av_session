@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,7 +166,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
-    void OnOutputDeviceChange(const OutputDeviceInfo& outputDeviceInfo) override;
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
 
@@ -236,7 +236,7 @@ void AVSessionCastAudioCallbackImpl::OnMediaKeyEvent(const OHOS::MMI::KeyEvent& 
     SLOGE("OnMediaKeyEvent");
     g_onCall = AVSESSION_SUCCESS;
 }
-void AVSessionCastAudioCallbackImpl::OnOutputDeviceChange(const OutputDeviceInfo& info)
+void AVSessionCastAudioCallbackImpl::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info)
 {
     SLOGE("OnOutputDeviceChange");
     g_onCall = AVSESSION_SUCCESS;
@@ -505,13 +505,13 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice001, TestSize.Level1)
     auto ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(avsession_->GetSessionId(), descriptor);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGE("avsession get deviceIds_ size %{public}d",
-          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceIds_.size()));
-    SLOGE("avsession get deviceId0 %{public}s", descriptor.outputDeviceInfo_.deviceIds_[0].c_str());
-    ASSERT_NE(descriptor.outputDeviceInfo_.deviceIds_.size(), 0);
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceInfos_.size()));
+    SLOGE("avsession get deviceId0 %{public}s", descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_.c_str());
+    ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
     SLOGE("avsession get deviceNames_ size %{public}d",
-          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceNames_.size()));
-    SLOGE("avsession get deviceName0 %{public}s", descriptor.outputDeviceInfo_.deviceNames_[0].c_str());
-    ASSERT_NE(descriptor.outputDeviceInfo_.deviceNames_.size(), 0);
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceInfos_.size()));
+    SLOGE("avsession get deviceName0 %{public}s", descriptor.outputDeviceInfo_.deviceInfos_[0].deviceName_.c_str());
+    ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
     SLOGE("GetOutputDevice001 End");
 }
 
@@ -562,13 +562,13 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice004, TestSize.Level1)
     ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(controller->GetSessionId(), descriptor);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGE("controller get deviceIds_ size %{public}d",
-          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceIds_.size()));
-    SLOGE("controller get deviceId0 %{public}s", descriptor.outputDeviceInfo_.deviceIds_[0].c_str());
-    ASSERT_NE(descriptor.outputDeviceInfo_.deviceIds_.size(), 0);
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceInfos_.size()));
+    SLOGE("controller get deviceId0 %{public}s", descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_.c_str());
+    ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
     SLOGE("controller get deviceNames_ size %{public}d",
-          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceNames_.size()));
-    SLOGE("controller get deviceName0 %{public}s", descriptor.outputDeviceInfo_.deviceNames_[0].c_str());
-    ASSERT_NE(descriptor.outputDeviceInfo_.deviceNames_.size(), 0);
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceInfos_.size()));
+    SLOGE("controller get deviceName0 %{public}s", descriptor.outputDeviceInfo_.deviceInfos_[0].deviceName_.c_str());
+    ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
     if (controller != nullptr) {
     ret = controller->Destroy();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
@@ -591,8 +591,7 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
     auto ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(avsession_->GetSessionId(),
                                                                                 descriptor1);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    ASSERT_NE(descriptor1.outputDeviceInfo_.deviceIds_.size(), 0);
-    ASSERT_NE(descriptor1.outputDeviceInfo_.deviceNames_.size(), 0);
+    ASSERT_NE(descriptor1.outputDeviceInfo_.deviceInfos_.size(), 0);
 
     std::shared_ptr<AVSessionController> controller = nullptr;
     ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller);
@@ -602,13 +601,13 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
     AVSessionDescriptor descriptor2;
     ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(controller->GetSessionId(), descriptor2);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    ASSERT_NE(descriptor2.outputDeviceInfo_.deviceIds_.size(), 0);
-    ASSERT_NE(descriptor2.outputDeviceInfo_.deviceNames_.size(), 0);
+    ASSERT_NE(descriptor2.outputDeviceInfo_.deviceInfos_.size(), 0);
 
-    EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceIds_.size(), descriptor2.outputDeviceInfo_.deviceIds_.size());
-    EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceIds_[0], descriptor2.outputDeviceInfo_.deviceIds_[0]);
-    EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceNames_.size(), descriptor2.outputDeviceInfo_.deviceNames_.size());
-    EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceNames_[0], descriptor2.outputDeviceInfo_.deviceNames_[0]);
+    EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceInfos_.size(), descriptor2.outputDeviceInfo_.deviceInfos_.size());
+    EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceInfos_[0].deviceId_,
+        descriptor2.outputDeviceInfo_.deviceInfos_[0].deviceId_);
+    EXPECT_EQ(descriptor1.outputDeviceInfo_.deviceInfos_[0].deviceName_,
+        descriptor2.outputDeviceInfo_.deviceInfos_[0].deviceName_);
     if (controller != nullptr) {
         ret = controller->Destroy();
         EXPECT_EQ(ret, AVSESSION_SUCCESS);

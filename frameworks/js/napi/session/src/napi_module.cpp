@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,10 @@
 #include "napi_avsession_controller.h"
 #include "napi_avsession_enum.h"
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "napi_avcast_controller.h"
+#endif
+
 namespace OHOS::AVSession {
 static napi_value Export(napi_env env, napi_value exports)
 {
@@ -26,6 +30,10 @@ static napi_value Export(napi_env env, napi_value exports)
     NapiAVSessionManager::Init(env, exports);
     NapiAVSession::Init(env, exports);
     NapiAVSessionController::Init(env, exports);
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    NapiAVCastController::Init(env, exports);
+#endif
 
     return exports;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@
 #include "want_agent.h"
 #include "napi_base_context.h"
 #include "ability.h"
+#include "media_info_holder.h"
+#include "media_info.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -101,9 +103,6 @@ public:
     /* napi_value <-> AppExecFwk::ElementName */
     static napi_status SetValue(napi_env env, const AppExecFwk::ElementName& in, napi_value& out);
 
-    /* napi_value <-> OutputDeviceInfo */
-    static napi_status SetValue(napi_env env, const OutputDeviceInfo& in, napi_value& out);
-
     /* napi_value <-> AVSessionDescriptor */
     static napi_status SetValue(napi_env env, const AVSessionDescriptor& in, napi_value& out);
 
@@ -143,6 +142,10 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, AVPlaybackState& out);
     static napi_status SetValue(napi_env env, const AVPlaybackState& in, napi_value& out);
 
+    /* napi_value <-> AVCastPlayerState */
+    static napi_status GetValue(napi_env env, napi_value in, AVCastPlayerState& out);
+    static napi_status SetValue(napi_env env, const AVCastPlayerState& in, napi_value& out);
+
     /* napi_value <-> std::vector<std::string> */
     static napi_status GetValue(napi_env env, napi_value in, std::vector<std::string>& out);
     static napi_status SetValue(napi_env env, const std::vector<std::string>& in, napi_value& out);
@@ -169,6 +172,24 @@ public:
 
     /* std::vector<AVSessionDescriptor> <-> napi_value */
     static napi_status SetValue(napi_env env, const std::vector<AVSessionDescriptor>& in, napi_value& out);
+
+    /* OutputDeviceInfo <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, OutputDeviceInfo& out);
+    static napi_status SetValue(napi_env env, const OutputDeviceInfo& in, napi_value& out);
+
+    static napi_status GetOptionalString(napi_env env, napi_value in, DeviceInfo& out);
+
+    /* DeviceInfo <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, DeviceInfo& out);
+    static napi_status SetValue(napi_env env, const DeviceInfo& in, napi_value& out);
+
+    /* MediaInfoHolder <-> napi_value */
+    static napi_status GetValue(napi_env env, napi_value in, MediaInfoHolder& out);
+    static napi_status SetValue(napi_env env, const MediaInfoHolder& in, napi_value& out);
+
+    /* napi_value <-> MediaInfo */
+    static napi_status GetValue(napi_env env, napi_value in, MediaInfo& out);
+    static napi_status SetValue(napi_env env, const MediaInfo& in, napi_value& out);
 
     /* napi_get_named_property wrapper */
     template <typename T>

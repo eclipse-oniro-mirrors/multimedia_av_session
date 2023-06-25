@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,19 +168,16 @@ void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionServic
             .append("bundle name                  : " + descriptor.elementName_.GetBundleName() + "\n")
             .append("ability name                 : " + descriptor.elementName_.GetAbilityName() + "\n");
 
-        std::string isRemote = descriptor.outputDeviceInfo_.isRemote_ ? "true" : "false";
-        std::vector<std::string> deviceIds = descriptor.outputDeviceInfo_.deviceIds_;
         result.append("outputdevice\n")
-            .append("        outputdevice is remote       : " + isRemote + "\n")
-            .append("        the count of devices         : " + std::to_string(deviceIds.size()) +
+            .append("        the count of devices         : " +
+            std::to_string(descriptor.outputDeviceInfo_.deviceInfos_.size()) +
             "\n        device id                    : ");
-        for (const auto& deviceId : deviceIds) {
-            result.append(deviceId + "  ");
+        for (const auto& deviceInfo : descriptor.outputDeviceInfo_.deviceInfos_) {
+            result.append(deviceInfo.deviceId_ + "  ");
         }
         result.append("\n        device name                  : ");
-        std::vector<std::string> deviceNames = descriptor.outputDeviceInfo_.deviceNames_;
-        for (const auto& deviceName : deviceNames) {
-            result.append(deviceName + "  ");
+        for (const auto& deviceInfo : descriptor.outputDeviceInfo_.deviceInfos_) {
+            result.append(deviceInfo.deviceName_ + "  ");
         }
         result.append("\n\nRelated Controllers:\n")
             .append("the count of controllers     : " + std::to_string(session->controllers_.size()) + "\n")

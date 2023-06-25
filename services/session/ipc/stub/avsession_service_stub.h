@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ private:
     int32_t HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetAVCastControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemAVKeyEvent(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemControlCommand(MessageParcel& data, MessageParcel& reply);
@@ -37,6 +38,10 @@ private:
     int32_t HandleCastAudio(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCastAudioForAll(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRemoteCastAudio(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStartCastDiscovery(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStopCastDiscovery(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStartCast(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStopCast(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
@@ -46,6 +51,7 @@ private:
         &AVSessionServiceStub::HandleGetSessionDescriptorsById,
         &AVSessionServiceStub::HandleGetHistoricalSessionDescriptors,
         &AVSessionServiceStub::HandleCreateControllerInner,
+        &AVSessionServiceStub::HandleGetAVCastControllerInner,
         &AVSessionServiceStub::HandleRegisterSessionListener,
         &AVSessionServiceStub::HandleSendSystemAVKeyEvent,
         &AVSessionServiceStub::HandleSendSystemControlCommand,
@@ -53,6 +59,10 @@ private:
         &AVSessionServiceStub::HandleCastAudio,
         &AVSessionServiceStub::HandleCastAudioForAll,
         &AVSessionServiceStub::HandleRemoteCastAudio,
+        &AVSessionServiceStub::HandleStartCastDiscovery,
+        &AVSessionServiceStub::HandleStopCastDiscovery,
+        &AVSessionServiceStub::HandleStartCast,
+        &AVSessionServiceStub::HandleStopCast,
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;

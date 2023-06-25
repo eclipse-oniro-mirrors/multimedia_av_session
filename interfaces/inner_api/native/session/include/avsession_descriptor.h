@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,23 @@
 #include "element_name.h"
 
 namespace OHOS::AVSession {
+struct DeviceInfo {
+    bool WriteToParcel(Parcel& out) const;
+    bool ReadFromParcel(Parcel& in);
+
+    int32_t castCategory_;
+    std::string deviceId_;
+    std::string deviceName_;
+    int32_t deviceType_;
+    std::string ipAddress_;
+    int32_t providerId_;
+};
+
 struct OutputDeviceInfo {
-    bool isRemote_ {};
-    std::vector<std::string> deviceIds_;
-    std::vector<std::string> deviceNames_;
+    bool WriteToParcel(Parcel& out) const;
+    bool ReadFromParcel(Parcel& in);
+
+    std::vector<DeviceInfo> deviceInfos_;
 };
 
 struct AVHistoryDescriptor {

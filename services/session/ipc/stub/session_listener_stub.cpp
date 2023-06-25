@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,15 @@ int32_t SessionListenerStub::HandleOnAudioSessionChecked(MessageParcel& data, Me
     int32_t uid = data.ReadInt32();
     OnAudioSessionChecked(uid);
     reply.WriteInt32(AVSESSION_SUCCESS);
+    return ERR_NONE;
+}
+
+int32_t SessionListenerStub::HandleOnDeviceAvailable(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("SessionListenerStub::HandleOnDeviceAvailable");
+    OutputDeviceInfo castOutputDeviceInfo;
+    CHECK_AND_RETURN_RET_LOG(castOutputDeviceInfo.ReadFromParcel(data), ERR_NONE, "read castOutputDeviceInfo failed");
+    OnDeviceAvailable(castOutputDeviceInfo);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

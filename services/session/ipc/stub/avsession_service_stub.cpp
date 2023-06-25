@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include "avsession_service_stub.h"
+#include "av_router.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "session_listener_proxy.h"
 #include "client_death_proxy.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
+#include "avsession_service_stub.h"
 
 using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
@@ -118,6 +119,22 @@ int32_t AVSessionServiceStub::HandleCreateControllerInner(MessageParcel& data, M
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");
     }
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleGetAVCastControllerInner(MessageParcel& data, MessageParcel& reply)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleGetAVCastControllerInner");
+    sptr<IRemoteObject> object;
+    int32_t ret = GetAVCastControllerInner(data.ReadString(), object);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");
+    }
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
     return ERR_NONE;
 }
 
@@ -284,6 +301,97 @@ int32_t AVSessionServiceStub::HandleRemoteCastAudio(MessageParcel& data, Message
     }
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(reply.WriteString(output), ERR_NONE, "write int32 failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStartCastDiscovery(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCastDiscovery");
+    SLOGI("HandleStartCastDiscovery start");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    auto castDeviceCapability = data.ReadInt32();
+    int32_t ret = AVRouter::GetInstance().StartCastDiscovery(castDeviceCapability);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStartCastDiscovery failed");
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStopCastDiscovery(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStopCastDiscovery");
+    SLOGI("HandleStopCastDiscovery start");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t ret = AVRouter::GetInstance().StopCastDiscovery();
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStopCastDiscovery failed");
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel& reply)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCast");
+    SLOGI("HandleStartCast start");
+    SessionToken sessionToken {};
+    sessionToken.sessionId = data.ReadString();
+    sessionToken.pid = data.ReadInt32();
+    sessionToken.uid = data.ReadInt32();
+
+    OutputDeviceInfo outputDeviceInfo;
+    int32_t deviceInfoSize;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+
+    if (deviceInfoSize > RECEIVE_DEVICE_NUM_MAX) {
+        SLOGI("receive deviceNum over range");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    for (int i = 0; i < deviceInfoSize; i++) {
+        DeviceInfo deviceInfo;
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    }
+
+    int32_t ret = StartCast(sessionToken, outputDeviceInfo);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
+    SLOGI("StartCast ret %{public}d", ret);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    SLOGI("HandleStartCast success");
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStopCast(MessageParcel& data, MessageParcel& reply)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStopCast");
+    SLOGI("HandleStopCast start");
+    SessionToken sessionToken {};
+    sessionToken.sessionId = data.ReadString();
+    sessionToken.pid = data.ReadInt32();
+    sessionToken.uid = data.ReadInt32();
+    
+    int32_t ret = StopCast(sessionToken);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StopCast failed");
+    SLOGI("StopCast ret %{public}d", ret);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    SLOGI("HandleStopCast success");
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession
