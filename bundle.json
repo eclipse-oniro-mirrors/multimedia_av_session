@@ -30,7 +30,6 @@
           "ability_runtime",
           "access_token",
           "ace_napi",
-          "ability_base",
           "audio_framework",
           "bundle_framework",
           "bytrace_core",
@@ -52,6 +51,7 @@
           "napi",
           "safwk",
           "samgr",
+          "samgr_proxy",
           "system_ability_fwk"
         ],
         "third_party": [
@@ -67,7 +67,11 @@
             "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
             "//foundation/multimedia/av_session/frameworks/js/napi/session:avsession_napi",
             "//foundation/multimedia/av_session/utils:avsession_utils",
-            "//foundation/multimedia/av_session/avpicker:avpicker"
+            "//foundation/multimedia/av_session/avpicker:avpicker",
+            "//foundation/multimedia/av_session/mediaControlExtension/MediaControlExtension:mediacontrolextensionability_napi",
+            "//foundation/multimedia/av_session/mediaControlExtension/MediaControlExtensionContext:mediacontrolextensioncontext_napi",
+            "//foundation/multimedia/av_session/mediaControlExtension/ModuleLoader:media_control_extension_module",
+            "//foundation/multimedia/av_session/mediaControlExtension/ModuleLoader:media_control_extension"
           ],
           "service_group": [
             "//foundation/multimedia/av_session/services/session:avsession_item",
