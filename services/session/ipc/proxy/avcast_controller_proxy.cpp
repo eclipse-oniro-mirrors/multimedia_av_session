@@ -33,42 +33,6 @@ AVCastControllerProxy::~AVCastControllerProxy()
     Destroy();
 }
 
-int32_t AVCastControllerProxy::SetMediaList(const MediaInfoHolder& mediaInfoHolder)
-{
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
-    MessageParcel parcel;
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
-        "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&mediaInfoHolder), ERR_UNMARSHALLING, "Write items failed");
-
-    auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_START, parcel, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "send request failed");
-    int32_t ret = AVSESSION_ERROR;
-    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
-}
-
-int32_t AVCastControllerProxy::UpdateMediaInfo(const MediaInfo& mediaInfo)
-{
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
-    MessageParcel parcel;
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
-        "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(mediaInfo.WriteToParcel(parcel), ERR_UNMARSHALLING, "Write items failed");
-
-    auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_UPDATE, parcel, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "send request failed");
-    int32_t ret = AVSESSION_ERROR;
-    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
-}
-
 int32_t AVCastControllerProxy::SendControlCommand(const AVCastControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SendControlCommand");
@@ -86,6 +50,42 @@ int32_t AVCastControllerProxy::SendControlCommand(const AVCastControlCommand& cm
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_SEND_CONTROL_COMMAND, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_START, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVCastControllerProxy::Prepare(const AVQueueItem& avQueueItem)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_PREPARE, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
@@ -113,53 +113,7 @@ int32_t AVCastControllerProxy::GetDuration(int32_t& duration)
     return ret;
 }
 
-int32_t AVCastControllerProxy::GetPosition(int32_t& position)
-{
-    MessageParcel parcel;
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
-        "write interface token failed");
-
-    auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_POSITION, parcel, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "send request failed");
-
-    int32_t ret = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
-        int32_t temoPosition;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(temoPosition), ERR_UNMARSHALLING, "read string failed");
-        position = temoPosition;
-    }
-    return ret;
-}
-
-int32_t AVCastControllerProxy::GetVolume(int32_t& volume)
-{
-    MessageParcel parcel;
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
-        "write interface token failed");
-
-    auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_VOLUME, parcel, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "send request failed");
-
-    int32_t ret = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
-        int32_t tempVolume;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(tempVolume), ERR_UNMARSHALLING, "read string failed");
-        volume = tempVolume;
-    }
-    return ret;
-}
-
-int32_t AVCastControllerProxy::GetLoopMode(int32_t& loopMode)
+int32_t AVCastControllerProxy::GetCastAVPlaybackState(AVPlaybackState& state)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
@@ -169,20 +123,20 @@ int32_t AVCastControllerProxy::GetLoopMode(int32_t& loopMode)
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_LOOP_MODE, parcel, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_CAST_AV_PLAYBACK_STATE, parcel,
+        reply, option) == 0, AVSESSION_ERROR, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        int32_t tempLoopMode;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(tempLoopMode), ERR_UNMARSHALLING, "read string failed");
-        loopMode = tempLoopMode;
+        sptr<AVPlaybackState> state_ = reply.ReadParcelable<AVPlaybackState>();
+        CHECK_AND_RETURN_RET_LOG(state_ != nullptr, ERR_UNMARSHALLING, "read AVPlaybackState failed");
+        state = *state_;
     }
     return ret;
 }
 
-int32_t AVCastControllerProxy::GetPlaySpeed(int32_t& playSpeed)
+int32_t AVCastControllerProxy::GetCurrentItem(AVQueueItem& currentItem)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
@@ -192,38 +146,15 @@ int32_t AVCastControllerProxy::GetPlaySpeed(int32_t& playSpeed)
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_PLAY_SPEED, parcel, reply, option) == 0,
-        AVSESSION_ERROR, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_CURRENT_ITEM, parcel,
+        reply, option) == 0, AVSESSION_ERROR, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        int32_t tempPlaySpeed;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(tempPlaySpeed), ERR_UNMARSHALLING, "read string failed");
-        playSpeed = tempPlaySpeed;
-    }
-    return ret;
-}
-
-int32_t AVCastControllerProxy::GetPlayState(AVCastPlayerState& playState)
-{
-    MessageParcel parcel;
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
-        AVSESSION_ERROR, "write interface token failed");
-
-    auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
-    MessageParcel reply;
-    MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_PLAY_STATE, parcel, reply, option) == 0,
-        AVSESSION_ERROR, "send request failed");
-
-    int32_t ret = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
-        AVCastPlayerState tempPlayState;
-        CHECK_AND_RETURN_RET_LOG(tempPlayState.ReadFromParcel(reply), ERR_UNMARSHALLING, "read string failed");
-        playState = tempPlayState;
+        sptr<AVQueueItem> currentItem_ = reply.ReadParcelable<AVQueueItem>();
+        CHECK_AND_RETURN_RET_LOG(currentItem_ != nullptr, ERR_UNMARSHALLING, "read AVQueueItem failed");
+        currentItem = *currentItem_;
     }
     return ret;
 }
@@ -242,6 +173,25 @@ int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_SET_DISPLAY_SURFACE, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVCastControllerProxy::SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteString(filter.to_string()), ERR_MARSHALLING, "write filter failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_SET_CAST_PLAYBACK_FILTER, parcel, reply,
+        option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;

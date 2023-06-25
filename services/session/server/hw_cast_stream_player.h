@@ -32,14 +32,10 @@ public:
     void Init();
     void Release() override;
     void SendControlCommand(const AVCastControlCommand castControlCommand) override;
-    int32_t SetMediaList(const MediaInfoHolder &mediaInfoHolder) override;
-    void UpdateMediaInfo(const MediaInfo &mediaInfo) override;
+    int32_t Start(const AVQueueItem& avQueueItem) override;
+    int32_t Prepare(const AVQueueItem& avQueueItem) override;
     int32_t GetDuration(int32_t &duration) override;
-    int32_t GetPosition(int32_t &position) override;
-    int32_t GetVolume(int32_t &volume) override;
-    int32_t GetLoopMode(int32_t &loopMode) override;
-    int32_t GetPlaySpeed(int32_t &playSpeed) override;
-    int32_t GetPlayState(AVCastPlayerState &playerState) override;
+    int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
     int32_t SetDisplaySurface(std::string &surfaceId) override;
     int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
     int32_t UnRegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
@@ -49,6 +45,8 @@ public:
     void OnMediaItemChanged(const CastEngine::MediaInfo &mediaInfo) override;
     void OnVolumeChanged(int volume) override;
     void OnLoopModeChanged(const CastEngine::LoopMode loopMode) override;
+    void OnNextRequest() override;
+    void OnPreviousRequest() override;
     void OnPlaySpeedChanged(const CastEngine::PlaybackSpeed speed) override;
     void OnPlayerError(int errorCode, const std::string &errorMsg) override;
     void OnVideoSizeChanged(int width, int height) override;
@@ -59,18 +57,30 @@ private:
     std::mutex mutex_;
     std::shared_ptr<CastEngine::IStreamPlayer> streamPlayer_;
     std::vector<std::shared_ptr<IAVCastControllerProxyListener>> streamPlayerListenerList_;
-    std::map<CastEngine::PlayerStates, std::string> castPlusStateToString_ = {
-        {CastEngine::PlayerStates::PLAYER_STATE_ERROR, "error"},
-        {CastEngine::PlayerStates::PLAYER_IDLE, "idle"},
-        {CastEngine::PlayerStates::PLAYER_STATE_ERROR, "error"},
-        {CastEngine::PlayerStates::PLAYER_INITIALIZED, "initialized"},
-        {CastEngine::PlayerStates::PLAYER_PREPARING, "preparing"},
-        {CastEngine::PlayerStates::PLAYER_PREPARED, "prepared"},
-        {CastEngine::PlayerStates::PLAYER_STARTED, "started"},
-        {CastEngine::PlayerStates::PLAYER_PAUSED, "paused"},
-        {CastEngine::PlayerStates::PLAYER_STOPPED, "stopped"},
-        {CastEngine::PlayerStates::PLAYER_PLAYBACK_COMPLETE, "completed"},
-        {CastEngine::PlayerStates::PLAYER_RELEASED, "released"}
+    std::map<CastEngine::PlayerStates, int32_t> castPlusStateToString_ = {
+        {CastEngine::PlayerStates::PLAYER_STATE_ERROR, AVPlaybackState::PLAYBACK_STATE_ERROR},
+        {CastEngine::PlayerStates::PLAYER_IDLE, AVPlaybackState::PLAYBACK_STATE_INITIAL},
+        {CastEngine::PlayerStates::PLAYER_INITIALIZED, AVPlaybackState::PLAYBACK_STATE_INITIAL},
+        {CastEngine::PlayerStates::PLAYER_PREPARING, AVPlaybackState::PLAYBACK_STATE_PREPARE},
+        {CastEngine::PlayerStates::PLAYER_PREPARED, AVPlaybackState::PLAYBACK_STATE_PREPARE},
+        {CastEngine::PlayerStates::PLAYER_STARTED, AVPlaybackState::PLAYBACK_STATE_PLAY},
+        {CastEngine::PlayerStates::PLAYER_PAUSED, AVPlaybackState::PLAYBACK_STATE_PAUSE},
+        {CastEngine::PlayerStates::PLAYER_STOPPED, AVPlaybackState::PLAYBACK_STATE_STOP},
+        {CastEngine::PlayerStates::PLAYER_PLAYBACK_COMPLETE, AVPlaybackState::PLAYBACK_STATE_COMPLETED},
+        {CastEngine::PlayerStates::PLAYER_RELEASED, AVPlaybackState::PLAYBACK_STATE_RELEASED},
+    };
+    std::map<CastEngine::PlaybackSpeed, double> castPlusSpeedToDouble_ = {
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_0_75_X, 0.75},
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_00_X, 1.00},
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_25_X, 1.25},
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_75_X, 1.75},
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_2_00_X, 2.00},
+    };
+    std::map<CastEngine::LoopMode, int32_t> castPlusLoopModeToInt_ = {
+        {CastEngine::LoopMode::LOOP_MODE_SEQUENCE, AVPlaybackState::LOOP_MODE_SEQUENCE},
+        {CastEngine::LoopMode::LOOP_MODE_SINGLE, AVPlaybackState::LOOP_MODE_SINGLE},
+        {CastEngine::LoopMode::LOOP_MODE_LIST, AVPlaybackState::LOOP_MODE_LIST},
+        {CastEngine::LoopMode::LOOP_MODE_SHUFFLE, AVPlaybackState::LOOP_MODE_SHUFFLE},
     };
 };
 } // namespace OHOS::AVSession

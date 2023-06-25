@@ -67,10 +67,8 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_COMMAND_NOT_SUPPORT, 6600105},
     {ERR_SESSION_DEACTIVE, 6600106},
     {ERR_COMMAND_SEND_EXCEED_MAX, 6600107},
-    {ERR_CONNECT_TIMEOUT, 6600108},
-    {ERR_REMOTE_UNSUPORT_FORMAT, 6600109},
-    {ERR_CAST_SERVICE_DIED, 6600110},
-    {ERR_REMOTE_CONNECTION_NOT_EXIST, 6600111},
+    {ERR_DEVICE_CONNECTION_FAILED, 6600108},
+    {ERR_REMOTE_CONNECTION_NOT_EXIST, 6600109},
     {ERR_NO_PERMISSION, 202},
     {ERR_INVALID_PARAM, 401},
 };
@@ -89,6 +87,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemControlCommand", SendSystemControlCommand),
         DECLARE_NAPI_STATIC_FUNCTION("startCastDiscovery", StartCastDiscovery),
         DECLARE_NAPI_STATIC_FUNCTION("stopCastDiscovery", StopCastDiscovery),
+        DECLARE_NAPI_STATIC_FUNCTION("setDiscoverable", SetDiscoverable),
         DECLARE_NAPI_STATIC_FUNCTION("startCast", StartCast),
         DECLARE_NAPI_STATIC_FUNCTION("stopCast", StopCast),
     };
@@ -116,7 +115,7 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         // require 3 arguments <context> <tag> <type>
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THERE, "invalid arguments",
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->elementName_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid context",
@@ -619,7 +618,7 @@ napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid castDeviceCapability",
                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         } else {
-            context->castDeviceCapability_ = 2; // 2 is stream
+            context->castDeviceCapability_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
         }
     };
     context->GetCbInfo(env, info, input);
@@ -682,6 +681,46 @@ napi_value NapiAVSessionManager::StopCastDiscovery(napi_env env, napi_callback_i
         output = NapiUtils::GetUndefinedValue(env);
     };
     return NapiAsyncWork::Enqueue(env, context, "StopCastDiscovery", executor, complete);
+#else
+    return nullptr;
+#endif
+}
+
+napi_value NapiAVSessionManager::SetDiscoverable(napi_env env, napi_callback_info info)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::SetDiscoverable");
+    struct ConcreteContext : public ContextBase {
+        bool enable_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->enable_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get streamIds_ failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_SET_DISCOVERABLE_TASK_ID;
+
+    auto executor = [context]() {
+        int32_t ret = AVSessionManager::GetInstance().SetDiscoverable(context->enable_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SetDiscoverable failed : native no permission";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "SetDiscoverable failed : native invalid parameters";
+            } else if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetDiscoverable failed : native session not exist";
+            } else {
+                context->errMessage = "SetDiscoverable failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetDiscoverable", executor);
 #else
     return nullptr;
 #endif

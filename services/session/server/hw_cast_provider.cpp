@@ -35,18 +35,21 @@ void HwCastProvider::Init()
     CastSessionManager::GetInstance().RegisterListener(shared_from_this());
 }
 
-
 bool HwCastProvider::StartDiscovery(int castCapability)
 {
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
     return CastSessionManager::GetInstance().StartDiscovery(castCapability);
 }
 
-
 void HwCastProvider::StopDiscovery()
 {
     SLOGI("stop discovery");
     CastSessionManager::GetInstance().StopDiscovery();
+}
+
+int32_t HwCastProvider::SetDiscoverable(const bool enable)
+{
+    return CastSessionManager::GetInstance().SetDiscoverable(enable);
 }
 
 void HwCastProvider::Release()
@@ -62,7 +65,7 @@ void HwCastProvider::Release()
 int HwCastProvider::StartCastSession()
 {
     SLOGI("StartCastSession begin");
-    CastSessionProperty property = {ProtocolType::CAST_PLUS_STREAM, EndType::CAST_SOURCE};
+    CastSessionProperty property = {CastEngine::ProtocolType::CAST_PLUS_STREAM, CastEngine::EndType::CAST_SOURCE};
     std::shared_ptr<ICastSession> castSession = nullptr;
     CastSessionManager::GetInstance().CreateCastSession(property, castSession);
     int castId;
@@ -255,6 +258,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     std::vector<DeviceInfo> deviceInfoList;
     for (CastRemoteDevice castRemoteDevice : deviceList) {
         DeviceInfo deviceInfo;
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         deviceInfo.deviceId_ = castRemoteDevice.deviceId;
         deviceInfo.deviceName_ = castRemoteDevice.deviceName;
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);

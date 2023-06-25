@@ -452,6 +452,14 @@ int32_t AVSessionItem::StopCast()
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
     int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
     CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "LocalDevice";
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    SetOutputDevice(outputDeviceInfo);
     return AVSESSION_SUCCESS;
 }
 #endif

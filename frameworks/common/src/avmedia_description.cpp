@@ -34,6 +34,7 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteString(mediaUri_) &&
         parcel.WriteInt32(duration_) &&
         parcel.WriteInt32(startPosition_) &&
+        parcel.WriteInt32(creditsPosition_) &&
         parcel.WriteString(appName_) &&
         parcel.WriteParcelable(icon_.get()) &&
         parcel.WriteParcelable(extras_.get());
@@ -58,6 +59,7 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
     data.ReadString(result->mediaUri_);
     data.ReadInt32(result->duration_);
     data.ReadInt32(result->startPosition_);
+    data.ReadInt32(result->creditsPosition_);
     data.ReadString(result->appName_);
     result->icon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->icon_ == nullptr) {
@@ -240,6 +242,16 @@ int32_t AVMediaDescription::GetStartPosition() const
     return startPosition_;
 }
 
+void AVMediaDescription::SetCreditsPosition(const int32_t creditsPosition)
+{
+    creditsPosition_ = creditsPosition;
+}
+
+int32_t AVMediaDescription::GetCreditsPosition() const
+{
+    return creditsPosition_;
+}
+
 void AVMediaDescription::SetAppName(const std::string& appName)
 {
     appName_ = appName;
@@ -274,6 +286,7 @@ void AVMediaDescription::Reset()
     mediaUri_ = "";
     duration_ = 0;
     startPosition_ = 0;
+    creditsPosition_ = 0;
     appName_ = "";
 }
 } // namespace OHOS::AVSession

@@ -43,43 +43,37 @@ private:
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
     static napi_value SendControlCommand(napi_env env, napi_callback_info info);
-    static napi_value SetMediaList(napi_env env, napi_callback_info info);
-    static napi_value UpdateMediaInfo(napi_env env, napi_callback_info info);
+    static napi_value Start(napi_env env, napi_callback_info info);
+    static napi_value Prepare(napi_env env, napi_callback_info info);
     static napi_value GetDuration(napi_env env, napi_callback_info info);
-    static napi_value GetPosition(napi_env env, napi_callback_info info);
-    static napi_value GetVolume(napi_env env, napi_callback_info info);
-    static napi_value GetLoopMode(napi_env env, napi_callback_info info);
-    static napi_value GetPlaySpeed(napi_env env, napi_callback_info info);
-    static napi_value GetPlayState(napi_env env, napi_callback_info info);
+    static napi_value GetCastAVPlaybackState(napi_env env, napi_callback_info info);
+    static napi_value GetCurrentItem(napi_env env, napi_callback_info info);
     static napi_value SetDisplaySurface(napi_env env, napi_callback_info info);
+    static napi_status SetCastPlaybackStateFilter(napi_env env, NapiAVCastController *napiCastController,
+        napi_value filter);
 
-    static napi_status OnStateChanged(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnPlaybackStateChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnMediaItemChanged(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnMediaItemChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
 
-    static napi_status OnVolumeChanged(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnPlayNext(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnLoopModeChanged(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnPlayPrevious(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnPlaySpeedChanged(napi_env env, NapiAVCastController* napiCastController,
-        napi_value param, napi_value callback);
-    static napi_status OnPositionChanged(napi_env env, NapiAVCastController* napiCastController,
-        napi_value param, napi_value callback);
-    static napi_status OnVideoSizeChanged(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnVideoSizeChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
     static napi_status OnPlayerError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
 
-    static napi_status OffStateChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffMediaItemChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffVolumeChange(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OffPlaybackStateChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value callback);
-    static napi_status OffLoopModeChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffPlaySpeedChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffPositionChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
+    static napi_status OffMediaItemChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
+    static napi_status OffPlayNext(napi_env env, NapiAVCastController* napiCastController,
+        napi_value callback);
+    static napi_status OffPlayPrevious(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffVideoSizeChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffError(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
+    static napi_status OffPlayerError(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
@@ -91,7 +85,7 @@ private:
 
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
-    static constexpr size_t ARGC_THERE = 3;
+    static constexpr size_t ARGC_THREE = 3;
 
     static constexpr size_t ARGV_FIRST = 0;
     static constexpr size_t ARGV_SECOND = 1;

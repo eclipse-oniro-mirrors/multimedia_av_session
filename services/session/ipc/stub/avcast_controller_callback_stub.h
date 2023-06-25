@@ -30,13 +30,9 @@ private:
 
     int32_t HandleOnMediaItemChange(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleOnVolumeChange(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnPlayNext(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleOnLoopModeChange(MessageParcel& data, MessageParcel& reply);
-
-    int32_t HandleOnPlaySpeedChange(MessageParcel& data, MessageParcel& reply);
-
-    int32_t HandleOnPositionChange(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnPlayPrevious(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnVideoSizeChange(MessageParcel& data, MessageParcel& reply);
 
@@ -48,10 +44,8 @@ private:
     static inline HandlerFunc handlers[] = {
         &AVCastControllerCallbackStub::HandleOnStateChange,
         &AVCastControllerCallbackStub::HandleOnMediaItemChange,
-        &AVCastControllerCallbackStub::HandleOnVolumeChange,
-        &AVCastControllerCallbackStub::HandleOnLoopModeChange,
-        &AVCastControllerCallbackStub::HandleOnPlaySpeedChange,
-        &AVCastControllerCallbackStub::HandleOnPositionChange,
+        &AVCastControllerCallbackStub::HandleOnPlayNext,
+        &AVCastControllerCallbackStub::HandleOnPlayPrevious,
         &AVCastControllerCallbackStub::HandleOnVideoSizeChange,
         &AVCastControllerCallbackStub::HandleOnPlayerError,
     };

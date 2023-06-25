@@ -55,6 +55,9 @@ private:
     static napi_status GetActiveItemId(napi_env env, napi_value in, AVPlaybackState& out);
     static napi_status SetActiveItemId(napi_env env, const AVPlaybackState& in, napi_value& out);
 
+    static napi_status GetVolume(napi_env env, napi_value in, AVPlaybackState& out);
+    static napi_status SetVolume(napi_env env, const AVPlaybackState& in, napi_value& out);
+
     static napi_status GetExtras(napi_env env, napi_value in, AVPlaybackState& out);
     static napi_status SetExtras(napi_env env, const AVPlaybackState& in, napi_value& out);
 

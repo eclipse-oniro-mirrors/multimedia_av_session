@@ -71,21 +71,25 @@ int32_t AVCastControllerStub::HandleSendControlCommand(MessageParcel& data, Mess
 
 int32_t AVCastControllerStub::HandleStart(MessageParcel& data, MessageParcel& reply)
 {
-    sptr<MediaInfoHolder> mediaInfoHolder = data.ReadParcelable<MediaInfoHolder>();
-    if (mediaInfoHolder == nullptr) {
+    sptr<AVQueueItem> avQueueItem = data.ReadParcelable<AVQueueItem>();
+    if (avQueueItem == nullptr) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write Start ret failed");
     } else {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetMediaList(*mediaInfoHolder)),
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Start(*avQueueItem)),
             ERR_NONE, "Write mediaInfoHolder failed");
     }
     return ERR_NONE;
 }
 
-int32_t AVCastControllerStub::HandleUpdate(MessageParcel& data, MessageParcel& reply)
+int32_t AVCastControllerStub::HandlePrepare(MessageParcel& data, MessageParcel& reply)
 {
-    MediaInfo mediaInfo;
-    CHECK_AND_RETURN_RET_LOG(mediaInfo.ReadFromParcel(data), ERR_UNMARSHALLING, "Write mediaInfo failed");
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(UpdateMediaInfo(mediaInfo)), ERR_NONE, "Write mediaInfo failed");
+    sptr<AVQueueItem> avQueueItem = data.ReadParcelable<AVQueueItem>();
+    if (avQueueItem == nullptr) {
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write prepare ret failed");
+    } else {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Prepare(*avQueueItem)),
+            ERR_NONE, "Write mediaInfoHolder failed");
+    }
     return ERR_NONE;
 }
 
@@ -100,57 +104,24 @@ int32_t AVCastControllerStub::HandleGetDuration(MessageParcel& data, MessageParc
     return ERR_NONE;
 }
 
-int32_t AVCastControllerStub::HandleGetPosition(MessageParcel& data, MessageParcel& reply)
+int32_t AVCastControllerStub::HandleGetCastAVPlayBackState(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t position;
-    int32_t ret = GetPosition(position);
+    AVPlaybackState state;
+    int32_t ret = GetCastAVPlaybackState(state);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(position), ERR_UNMARSHALLING, "write int32 failed");
+        CHECK_AND_PRINT_LOG(reply.WriteParcelable(&state), "write CastAVPlaybackState failed");
     }
     return ERR_NONE;
 }
 
-int32_t AVCastControllerStub::HandleGetVolume(MessageParcel& data, MessageParcel& reply)
+int32_t AVCastControllerStub::HandleGetCurrentItem(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t volume;
-    int32_t ret = GetVolume(volume);
+    AVQueueItem currentItem;
+    int32_t ret = GetCurrentItem(currentItem);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(volume), ERR_UNMARSHALLING, "write int32 failed");
-    }
-    return ERR_NONE;
-}
-
-int32_t AVCastControllerStub::HandleGetLoopMode(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t loopMode;
-    int32_t ret = GetLoopMode(loopMode);
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(loopMode), ERR_NONE, "write int32 failed");
-    }
-    return ERR_NONE;
-}
-
-int32_t AVCastControllerStub::HandleGetPlaySpeed(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t playSpeed;
-    int32_t ret = GetPlaySpeed(playSpeed);
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(playSpeed), ERR_NONE, "write int32 failed");
-    }
-    return ERR_NONE;
-}
-
-int32_t AVCastControllerStub::HandleGetPlayState(MessageParcel& data, MessageParcel& reply)
-{
-    AVCastPlayerState playState;
-    int32_t ret = GetPlayState(playState);
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_RETURN_RET_LOG(playState.WriteToParcel(reply), ERR_NONE, "write int32 failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteParcelable(&currentItem), ERR_NONE, "Write currentItem failed");
     }
     return ERR_NONE;
 }
@@ -161,6 +132,23 @@ int32_t AVCastControllerStub::HandleSetDisplaySurface(MessageParcel& data, Messa
     auto surfaceId = data.ReadString();
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetDisplaySurface(surfaceId)),
         ERR_NONE, "WriteInt32 result failed");
+    return ERR_NONE;
+}
+
+int32_t AVCastControllerStub::HandleSetCastPlaybackFilter(MessageParcel& data, MessageParcel& reply)
+{
+    std::string str = data.ReadString();
+    if (str.length() != AVPlaybackState::PLAYBACK_KEY_MAX) {
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SetCastPlaybackFilter ret failed");
+        return ERR_NONE;
+    }
+    if (str.find_first_not_of("01") != std::string::npos) {
+        SLOGI("mask string not all 0 or 1");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write int32 failed");
+        return ERR_NONE;
+    }
+    AVPlaybackState::PlaybackStateMaskType filter(str);
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(SetCastPlaybackFilter(filter)), "write int32 failed");
     return ERR_NONE;
 }
 

@@ -121,39 +121,56 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
     }
 }
 
-int32_t HwCastStreamPlayer::SetMediaList(const MediaInfoHolder &mediaInfoHolder)
+int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
 {
-    CastEngine::MediaInfoHolder info;
-    info.currentIndex = mediaInfoHolder.GetCurrentIndex();
-    std::vector<CastEngine::MediaInfo> mediaInfoList;
-    for (AVQueueItem item: mediaInfoHolder.GetPlayInfos()) {
-        std::shared_ptr<AVMediaDescription> mediaDescription = item.GetDescription();
-        CastEngine::MediaInfo mediaInfo;
-        mediaInfo.mediaId = mediaDescription->GetMediaId();
-        mediaInfo.mediaName = mediaDescription->GetTitle();
-        mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
-        mediaInfo.mediaType = mediaDescription->GetMediaType();
-        mediaInfo.mediaSize = mediaDescription->GetMediaSize();
-        mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
-        mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
-        mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
-        mediaInfo.mediaArtist = mediaDescription->GetArtist();
-        mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
-        mediaInfo.appIconUrl = mediaDescription->GetIconUri();
-        mediaInfo.appName = mediaDescription->GetAppName();
-        mediaInfoList.emplace_back(mediaInfo);
-    }
-    info.mediaInfoList = mediaInfoList;
-    if (streamPlayer_ && streamPlayer_->Start(info)) {
-        SLOGI("SetMediaList successed");
+    CastEngine::MediaInfo mediaInfo;
+    std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
+    mediaInfo.mediaId = mediaDescription->GetMediaId();
+    mediaInfo.mediaName = mediaDescription->GetTitle();
+    mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
+    mediaInfo.mediaType = mediaDescription->GetMediaType();
+    mediaInfo.mediaSize = mediaDescription->GetMediaSize();
+    mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
+    mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
+    mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
+    mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
+    mediaInfo.mediaArtist = mediaDescription->GetArtist();
+    mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
+    mediaInfo.appIconUrl = mediaDescription->GetIconUri();
+    mediaInfo.appName = mediaDescription->GetAppName();
+
+    if (streamPlayer_ && streamPlayer_->Play(mediaInfo)) {
+        SLOGI("Set media info and start successed");
         return AVSESSION_SUCCESS;
     }
-    SLOGE("SetMediaList failed");
+    SLOGE("Set media info and start failed");
     return AVSESSION_ERROR;
 }
 
-void HwCastStreamPlayer::UpdateMediaInfo(const MediaInfo &mediaInfo)
+int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
 {
+    CastEngine::MediaInfo mediaInfo;
+    std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
+    mediaInfo.mediaId = mediaDescription->GetMediaId();
+    mediaInfo.mediaName = mediaDescription->GetTitle();
+    mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
+    mediaInfo.mediaType = mediaDescription->GetMediaType();
+    mediaInfo.mediaSize = mediaDescription->GetMediaSize();
+    mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
+    mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
+    mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
+    mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
+    mediaInfo.mediaArtist = mediaDescription->GetArtist();
+    mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
+    mediaInfo.appIconUrl = mediaDescription->GetIconUri();
+    mediaInfo.appName = mediaDescription->GetAppName();
+
+    if (streamPlayer_ && streamPlayer_->Load(mediaInfo)) {
+        SLOGI("Set media info and prepare successed");
+        return AVSESSION_SUCCESS;
+    }
+    SLOGE("Set media info and prepare failed");
+    return AVSESSION_ERROR;
 }
 
 int32_t HwCastStreamPlayer::GetDuration(int32_t& duration)
@@ -168,69 +185,37 @@ int32_t HwCastStreamPlayer::GetDuration(int32_t& duration)
     return AVSESSION_SUCCESS;
 }
 
-int32_t HwCastStreamPlayer::GetPosition(int32_t &position)
+int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackState)
 {
-    SLOGI("GetPosition begin");
-    if (!streamPlayer_) {
-        SLOGE("streamPlayer is nullptr");
-        return AVSESSION_ERROR;
-    }
-    streamPlayer_->GetPosition(position);
-    SLOGI("GetPosition successed");
-    return AVSESSION_SUCCESS;
-}
-
-int32_t HwCastStreamPlayer::GetVolume(int32_t &volume)
-{
-    SLOGI("GetVolume begin");
-    if (!streamPlayer_) {
-        SLOGE("streamPlayer is nullptr");
-        return AVSESSION_ERROR;
-    }
-    streamPlayer_->GetVolume(volume);
-    SLOGI("GetVolume successed");
-    return AVSESSION_SUCCESS;
-}
-
-int32_t HwCastStreamPlayer::GetLoopMode(int32_t &loopMode)
-{
-    SLOGI("GetLoopMode begin");
-    if (!streamPlayer_) {
-        SLOGE("streamPlayer is nullptr");
-        return AVSESSION_ERROR;
-    }
-    CastEngine::LoopMode castLoopMode;
-    streamPlayer_->GetLoopMode(castLoopMode);
-    loopMode = static_cast<int32_t>(castLoopMode);
-    SLOGI("GetLoopMode successed");
-    return AVSESSION_SUCCESS;
-}
-
-int32_t HwCastStreamPlayer::GetPlaySpeed(int32_t &playSpeed)
-{
-    SLOGI("GetPlaySpeed begin");
-    if (!streamPlayer_) {
-        SLOGE("streamPlayer is nullptr");
-        return AVSESSION_ERROR;
-    }
-    CastEngine::PlaybackSpeed castPlaybackSpeed;
-    streamPlayer_->GetPlaySpeed(castPlaybackSpeed);
-    playSpeed = static_cast<int32_t>(castPlaybackSpeed);
-    SLOGI("GetPlaySpeed successed");
-    return AVSESSION_SUCCESS;
-}
-
-int32_t HwCastStreamPlayer::GetPlayState(AVCastPlayerState &playerState)
-{
-    SLOGI("GetPlayState begin");
+    SLOGI("GetCastAVPlaybackState begin");
     if (!streamPlayer_) {
         SLOGE("streamPlayer is nullptr");
         return AVSESSION_ERROR;
     }
     CastEngine::PlayerStates castPlayerStates;
     streamPlayer_->GetPlayerStatus(castPlayerStates);
-    playerState.castPlayerState_ = castPlusStateToString_[castPlayerStates];
-    SLOGI("GetPlayState successed");
+    if (castPlusStateToString_.count(castPlayerStates) != 0) {
+        avPlaybackState.SetState(castPlusStateToString_[castPlayerStates]);
+    }
+    CastEngine::PlaybackSpeed castPlaybackSpeed;
+    streamPlayer_->GetPlaySpeed(castPlaybackSpeed);
+    if (castPlusSpeedToDouble_.count(castPlaybackSpeed) != 0) {
+        avPlaybackState.SetSpeed(castPlusSpeedToDouble_[castPlaybackSpeed]);
+    }
+    int castPosition;
+    streamPlayer_->GetPosition(castPosition);
+    AVPlaybackState::Position position;
+    position.updateTime_ = static_cast<int64_t>(castPosition);
+    avPlaybackState.SetPosition(position);
+    CastEngine::LoopMode castLoopMode;
+    streamPlayer_->GetLoopMode(castLoopMode);
+    if (castPlusLoopModeToInt_.count(castLoopMode) != 0) {
+        avPlaybackState.SetLoopMode(castPlusLoopModeToInt_[castLoopMode]);
+    }
+    int32_t castVolume;
+    streamPlayer_->GetVolume(castVolume);
+    avPlaybackState.SetVolume(castVolume);
+    SLOGI("GetCastAVPlaybackState successed");
     return AVSESSION_SUCCESS;
 }
 
@@ -288,27 +273,31 @@ int32_t HwCastStreamPlayer::UnRegisterControllerListener(std::shared_ptr<IAVCast
 
 void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackState, bool isPlayWhenReady)
 {
-    AVCastPlayerState avCastPlayerState;
+    AVPlaybackState avCastPlaybackState;
     if (castPlusStateToString_.count(playbackState) == 0) {
         SLOGE("current playbackState status is not exist in castPlusStateToString_");
-        avCastPlayerState.castPlayerState_ = "error";
+        avCastPlaybackState.SetState(AVPlaybackState::PLAYBACK_STATE_ERROR);
     } else {
-        avCastPlayerState.castPlayerState_ = castPlusStateToString_[playbackState];
+        avCastPlaybackState.SetState(castPlusStateToString_[playbackState]);
     }
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
-            SLOGI("trigger the OnStateChanged for registered listeners");
-            listener->OnStateChanged(avCastPlayerState);
+            SLOGI("trigger the OnCastPlaybackStateChange for registered listeners");
+            listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
 }
 
 void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int duration)
 {
+    AVPlaybackState avCastPlaybackState;
+    AVPlaybackState::Position castPosition;
+    castPosition.updateTime_ = position;
+    avCastPlaybackState.SetPosition(castPosition);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
-            SLOGI("trigger the OnPositionChanged for registered listeners");
-            listener->OnPositionChanged(position, bufferPosition, duration);
+            SLOGI("trigger the OnPositionChange for registered listeners");
+            listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
 }
@@ -332,38 +321,72 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     queueItem.SetDescription(mediaDescription);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
-            SLOGI("trigger the OnMediaItemChanged for registered listeners");
-            listener->OnMediaItemChanged(queueItem);
+            SLOGI("trigger the OnMediaItemChange for registered listeners");
+            listener->OnMediaItemChange(queueItem);
+        }
+    }
+}
+
+void HwCastStreamPlayer::OnNextRequest()
+{
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnPlayNext for registered listeners");
+            listener->OnPlayNext();
+        }
+    }
+}
+
+void HwCastStreamPlayer::OnPreviousRequest()
+{
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnPlayPrevious for registered listeners");
+            listener->OnPlayPrevious();
         }
     }
 }
 
 void HwCastStreamPlayer::OnVolumeChanged(int volume)
 {
+    AVPlaybackState avCastPlaybackState;
+    avCastPlaybackState.SetVolume(volume);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnVolumeChanged for registered listeners");
-            listener->OnVolumeChanged(volume);
+            listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
 }
 
 void HwCastStreamPlayer::OnLoopModeChanged(const CastEngine::LoopMode loopMode)
 {
+    AVPlaybackState avCastPlaybackState;
+    if (castPlusLoopModeToInt_.count(loopMode) == 0) {
+        SLOGE("current playbackState status is not exist in castPlusStateToString_");
+    } else {
+        avCastPlaybackState.SetLoopMode(castPlusLoopModeToInt_[loopMode]);
+    }
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnLoopModeChanged for registered listeners");
-            listener->OnLoopModeChanged(static_cast<int>(loopMode));
+            listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
 }
 
 void HwCastStreamPlayer::OnPlaySpeedChanged(const CastEngine::PlaybackSpeed speed)
 {
+    AVPlaybackState avCastPlaybackState;
+    if (castPlusSpeedToDouble_.count(speed) == 0) {
+        SLOGE("current speed is not exist in castPlusSpeedToDouble_");
+        return;
+    }
+    avCastPlaybackState.SetSpeed(castPlusSpeedToDouble_[speed]);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
-            SLOGI("trigger the OnPlaySpeedChanged for registered listeners");
-            listener->OnPlaySpeedChanged(static_cast<double>(speed));
+            SLOGI("trigger the OnPositionChange for registered listeners");
+            listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
 }
@@ -382,8 +405,8 @@ void HwCastStreamPlayer::OnVideoSizeChanged(int width, int height)
 {
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
-            SLOGI("trigger the OnVideoSizeChanged for registered listeners");
-            listener->OnVideoSizeChanged(width, height);
+            SLOGI("trigger the OnVideoSizeChange for registered listeners");
+            listener->OnVideoSizeChange(width, height);
         }
     }
 }

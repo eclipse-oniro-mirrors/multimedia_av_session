@@ -38,6 +38,7 @@ std::map<std::string, NapiMediaDescription::GetterType> NapiMediaDescription::ge
     { "mediaUri", GetMediaUri },
     { "duration", GetDuration },
     { "startPosition", GetStartPosition },
+    { "creditsPosition", GetCreditsPosition },
     { "appName", GetAppName },
 };
 
@@ -59,6 +60,7 @@ std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setter
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_MEDIA_URI, SetMediaUri },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_DURATION, SetDuration },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_START_POSITION, SetStartPosition },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_CREDITS_POSITION, SetCreditsPosition },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_APP_NAME, SetAppName },
 };
 
@@ -433,6 +435,25 @@ napi_status NapiMediaDescription::SetStartPosition(napi_env env, const AVMediaDe
     auto status = NapiUtils::SetValue(env, in.GetStartPosition(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "startPosition", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetCreditsPosition(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "creditsPosition", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetCreditsPosition(property);
+    return status;
+}
+
+napi_status NapiMediaDescription::SetCreditsPosition(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetCreditsPosition(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "creditsPosition", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }

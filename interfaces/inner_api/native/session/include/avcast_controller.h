@@ -35,17 +35,6 @@ namespace OHOS::AVSession {
 class AVCastController {
 public:
     /**
-     * @brief Get current playing status infos.
-     *
-     * @param state Current playing status infos {@link AVPlaybackState}.
-     * @return Returns check whether the system permissions are supported
-     * @since 9
-    */
-    virtual int32_t SetMediaList(const MediaInfoHolder& mediaInfoHolder) = 0;
-
-    virtual int32_t UpdateMediaInfo(const MediaInfo& mediaInfo) = 0;
-
-    /**
      * Send commands to its corresponding session through the controller.
      *
      * @param cmd Commands and parameters related to the session {@link AVControlCommand}.
@@ -54,6 +43,9 @@ public:
     */
     virtual int32_t SendControlCommand(const AVCastControlCommand& cmd) = 0;
 
+    virtual int32_t Start(const AVQueueItem& avQueueItem) = 0;
+
+    virtual int32_t Prepare(const AVQueueItem& avQueueItem) = 0;
     /**
      * @brief Listen for AVController Callback event.
      *
@@ -65,17 +57,13 @@ public:
 
     virtual int32_t GetDuration(int32_t& duration) = 0;
 
-    virtual int32_t GetPosition(int32_t& position) = 0;
+    virtual int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) = 0;
 
-    virtual int32_t GetVolume(int32_t& volume) = 0;
-
-    virtual int32_t GetLoopMode(int32_t& loopMode) = 0;
-
-    virtual int32_t GetPlaySpeed(int32_t& playSpeed) = 0;
-
-    virtual int32_t GetPlayState(AVCastPlayerState& playerState) = 0;
+    virtual int32_t GetCurrentItem(AVQueueItem& currentItem) = 0;
 
     virtual int32_t SetDisplaySurface(std::string& surfaceId) = 0;
+
+    virtual int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) = 0;
 
     virtual int32_t Destroy() = 0;
 

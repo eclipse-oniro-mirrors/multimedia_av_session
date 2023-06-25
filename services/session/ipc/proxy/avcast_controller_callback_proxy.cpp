@@ -23,21 +23,22 @@ AVCastControllerCallbackProxy::AVCastControllerCallbackProxy(const sptr<IRemoteO
     SLOGD("construct");
 }
 
-void AVCastControllerCallbackProxy::OnStateChanged(const AVCastPlayerState& state)
+void AVCastControllerCallbackProxy::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteString(state.castPlayerState_), "write cast PlaybackState failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&state), "write PlaybackState failed");
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
-    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_STATE_CHANGE, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_CAST_PLAYBACK_STATE_CHANGE,
+        parcel, reply, option) == 0,
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnMediaItemChanged(const AVQueueItem& avQueueItem)
+void AVCastControllerCallbackProxy::OnMediaItemChange(const AVQueueItem& avQueueItem)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
@@ -51,66 +52,33 @@ void AVCastControllerCallbackProxy::OnMediaItemChanged(const AVQueueItem& avQueu
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnVolumeChanged(const int32_t volume)
+void AVCastControllerCallbackProxy::OnPlayNext()
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(volume), "write volume failed");
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
-    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_VOLUME_CHANGE, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_PLAY_NEXT, parcel, reply, option) == 0,
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnLoopModeChanged(const int32_t loopMode)
+void AVCastControllerCallbackProxy::OnPlayPrevious()
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(loopMode), "write loopMode failed");
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
-    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_LOOP_MODE_CHANGE, parcel, reply, option) == 0,
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_PLAY_PREVIOUS, parcel, reply, option) == 0,
         "send request failed");
 }
 
-void AVCastControllerCallbackProxy::OnPlaySpeedChanged(const int32_t playSpeed)
-{
-    MessageParcel parcel;
-    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(playSpeed), "write speed failed");
-
-    MessageParcel reply;
-    MessageOption option = { MessageOption::TF_ASYNC };
-    auto remote = Remote();
-    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
-    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_PLAY_SPEED_CHANGE, parcel, reply, option) == 0,
-        "send request failed");
-}
-
-void AVCastControllerCallbackProxy::OnPositionChanged(const int32_t position,
-    const int32_t bufferPosition, const int32_t duration)
-{
-    MessageParcel parcel;
-    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(position), "write position failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(bufferPosition), "write bufferPosition failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(duration), "write duration failed");
-
-    MessageParcel reply;
-    MessageOption option = { MessageOption::TF_ASYNC };
-    auto remote = Remote();
-    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
-    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_POSITION_CHANGE, parcel, reply, option) == 0,
-        "send request failed");
-}
-
-void AVCastControllerCallbackProxy::OnVideoSizeChanged(const int32_t width, const int32_t height)
+void AVCastControllerCallbackProxy::OnVideoSizeChange(const int32_t width, const int32_t height)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");

@@ -122,53 +122,65 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event,
     }
 }
 
-void NapiAVCastControllerCallback::OnStateChanged(const AVCastPlayerState& state)
+void NapiAVCastControllerCallback::HandleErrorEvent(int32_t event, const int32_t errorCode,
+    const std::string& errorMsg)
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnStateChanged");
-    SLOGI("Start handle OnStateChanged event");
-    HandleEvent(EVENT_CAST_STATE_CHANGE, state);
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callbacks_[event].empty()) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        asyncCallback_->Call(*ref, [errorCode, errorMsg](napi_env env, int& argc, napi_value *argv) {
+            napi_status status = napi_create_object(env, argv);
+            CHECK_RETURN_VOID((status == napi_ok) && (argv != nullptr), "create object failed");
+
+            napi_value property = nullptr;
+            status = NapiUtils::SetValue(env, errorCode, property);
+            CHECK_RETURN_VOID((status == napi_ok) && (property != nullptr), "create property failed");
+            status = napi_set_named_property(env, *argv, "code", property);
+            CHECK_RETURN_VOID(status == napi_ok, "napi_set_named_property failed");
+
+            status = NapiUtils::SetValue(env, errorMsg, property);
+            CHECK_RETURN_VOID((status == napi_ok) && (property != nullptr), "create property failed");
+            status = napi_set_named_property(env, *argv, "message", property);
+            CHECK_RETURN_VOID(status == napi_ok, "napi_set_named_property failed");
+        });
+    }
 }
 
-void NapiAVCastControllerCallback::OnMediaItemChanged(const AVQueueItem& avQueueItem)
+void NapiAVCastControllerCallback::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnMediaItemChanged");
-    SLOGI("Start handle OnStateChanged event");
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnCastPlaybackStateChange");
+    SLOGI("Start handle OnCastPlaybackStateChange event");
+    HandleEvent(EVENT_CAST_PLAYBACK_STATE_CHANGE, state);
+}
+
+void NapiAVCastControllerCallback::OnMediaItemChange(const AVQueueItem& avQueueItem)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnMediaItemChange");
+    SLOGI("Start handle OnCastPlaybackStateChange event");
     HandleEvent(EVENT_CAST_MEDIA_ITEM_CHANGE, avQueueItem);
 }
 
-void NapiAVCastControllerCallback::OnVolumeChanged(const int32_t volume)
+void NapiAVCastControllerCallback::OnPlayNext()
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnVolumeChanged");
-    SLOGI("Start handle OnVolumeChanged event");
-    HandleEvent(EVENT_CAST_VOLUME_CHANGE, volume);
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayNext");
+    SLOGI("Start handle OnPlayNext event");
+    HandleEvent(EVENT_CAST_PLAY_NEXT);
 }
 
-void NapiAVCastControllerCallback::OnLoopModeChanged(const int32_t loopMode)
+void NapiAVCastControllerCallback::OnPlayPrevious()
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnLoopModeChanged");
-    SLOGI("Start handle OnLoopModeChanged event");
-    HandleEvent(EVENT_CAST_LOOP_MODE_CHANGE, loopMode);
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayPrevious");
+    SLOGI("Start handle OnPlayPrevious event");
+    HandleEvent(EVENT_CAST_PLAY_PREVIOUS);
 }
 
-void NapiAVCastControllerCallback::OnPlaySpeedChanged(const int32_t playSpeed)
+void NapiAVCastControllerCallback::OnVideoSizeChange(const int32_t width, const int32_t height)
 {
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlaySpeedChanged");
-    SLOGI("Start handle OnPlaySpeedChanged event");
-    HandleEvent(EVENT_CAST_PLAY_SPEED_CHANGE, playSpeed);
-}
-
-void NapiAVCastControllerCallback::OnPositionChanged(const int32_t position,
-    const int32_t bufferPosition, const int32_t duration)
-{
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPositionChanged");
-    SLOGI("Start handle OnPositionChanged event");
-    HandleEvent(EVENT_CAST_POSITON_CHANGE, position, bufferPosition, duration);
-}
-
-void NapiAVCastControllerCallback::OnVideoSizeChanged(const int32_t width, const int32_t height)
-{
-    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnVideoSizeChanged");
-    SLOGI("Start handle OnVideoSizeChanged event");
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnVideoSizeChange");
+    SLOGI("Start handle OnVideoSizeChange event");
     HandleEvent(EVENT_CAST_VIDEO_SIZE_CHANGE, width, height);
 }
 
@@ -176,7 +188,7 @@ void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const 
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayerError");
     SLOGI("Start handle OnPlayerError event");
-    HandleEvent(EVENT_CAST_ERROR, errorCode, errorMsg);
+    HandleErrorEvent(EVENT_CAST_ERROR, errorCode, errorMsg);
 }
 
 napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)

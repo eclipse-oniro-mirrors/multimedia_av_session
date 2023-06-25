@@ -31,54 +31,44 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
     castControllerProxy_->RegisterControllerListener(shared_from_this());
 }
 
-void AVCastControllerItem::OnStateChanged(const AVCastPlayerState& state)
+void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
-    SLOGI("OnStateChanged");
+    SLOGI("OnCastPlaybackStateChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnStateChanged(state);
+    AVPlaybackState stateOut;
+    if (state.CopyToByMask(castPlaybackMask_, stateOut)) {
+        SLOGI("update cast playback state");
+        AVSESSION_TRACE_SYNC_START("AVCastControllerItem::OnCastPlaybackStateChange");
+        callback_->OnCastPlaybackStateChange(stateOut);
+    }
 }
 
-void AVCastControllerItem::OnMediaItemChanged(const AVQueueItem& avQueueItem)
+void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
 {
-    SLOGI("OnMediaItemChanged");
+    SLOGI("OnMediaItemChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnMediaItemChanged(avQueueItem);
+    callback_->OnMediaItemChange(avQueueItem);
 }
 
-void AVCastControllerItem::OnVolumeChanged(const int32_t volume)
+void AVCastControllerItem::OnPlayNext()
 {
-    SLOGI("OnVolumeChanged");
+    SLOGI("OnPlayNext");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnVolumeChanged(volume);
+    callback_->OnPlayNext();
 }
 
-void AVCastControllerItem::OnLoopModeChanged(const int32_t loopMode)
+void AVCastControllerItem::OnPlayPrevious()
 {
-    SLOGI("OnLoopModeChanged");
+    SLOGI("OnPlayPrevious");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnLoopModeChanged(loopMode);
+    callback_->OnPlayPrevious();
 }
 
-void AVCastControllerItem::OnPlaySpeedChanged(const int32_t playSpeed)
+void AVCastControllerItem::OnVideoSizeChange(const int32_t width, const int32_t height)
 {
-    SLOGI("OnPlaySpeedChanged");
+    SLOGI("OnVideoSizeChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlaySpeedChanged(playSpeed);
-}
-
-void AVCastControllerItem::OnPositionChanged(const int32_t position,
-    const int32_t bufferPosition, const int32_t duration)
-{
-    SLOGI("OnPositionChanged");
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPositionChanged(position, bufferPosition, duration);
-}
-
-void AVCastControllerItem::OnVideoSizeChanged(const int32_t width, const int32_t height)
-{
-    SLOGI("OnVideoSizeChanged");
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnVideoSizeChanged(width, height);
+    callback_->OnVideoSizeChange(width, height);
 }
 
 void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
@@ -91,63 +81,62 @@ void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::str
 int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd)
 {
     SLOGI("Call SendControlCommand of cast controller proxy");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     castControllerProxy_->SendControlCommand(cmd);
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVCastControllerItem::SetMediaList(const MediaInfoHolder& mediaInfoHolder)
+int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
 {
     SLOGI("Call Start of cast controller proxy");
-    castControllerProxy_->SetMediaList(mediaInfoHolder);
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    castControllerProxy_->Start(avQueueItem);
+    currentAVQueueItem_ = avQueueItem;
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVCastControllerItem::UpdateMediaInfo(const MediaInfo& mediaInfo)
+int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
 {
-    SLOGI("Call Update of cast controller proxy");
-    castControllerProxy_->UpdateMediaInfo(mediaInfo);
+    SLOGI("Call prepare of cast controller proxy");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    castControllerProxy_->Prepare(avQueueItem);
     return AVSESSION_SUCCESS;
 }
-
 
 int32_t AVCastControllerItem::GetDuration(int32_t& duration)
 {
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     return castControllerProxy_->GetDuration(duration);
 }
 
-int32_t AVCastControllerItem::GetPosition(int32_t& position)
+int32_t AVCastControllerItem::GetCastAVPlaybackState(AVPlaybackState& avPlaybackState)
 {
-    return castControllerProxy_->GetPosition(position);
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    return castControllerProxy_->GetCastAVPlaybackState(avPlaybackState);
 }
 
-int32_t AVCastControllerItem::GetVolume(int32_t& volume)
+int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 {
-    return castControllerProxy_->GetVolume(volume);
-}
-
-int32_t AVCastControllerItem::GetLoopMode(int32_t& loopMode)
-{
-    return castControllerProxy_->GetLoopMode(loopMode);
-}
-
-int32_t AVCastControllerItem::GetPlaySpeed(int32_t& playSpeed)
-{
-    return castControllerProxy_->GetPlaySpeed(playSpeed);
-}
-
-int32_t AVCastControllerItem::GetPlayState(AVCastPlayerState& playerState)
-{
-    return castControllerProxy_->GetPlayState(playerState);
+    currentItem =  currentAVQueueItem_;
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVCastControllerItem::SetDisplaySurface(std::string& surfaceId)
 {
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     return castControllerProxy_->SetDisplaySurface(surfaceId);
+}
+
+int32_t AVCastControllerItem::SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
+{
+    castPlaybackMask_ = filter;
+    return AVSESSION_SUCCESS;
 }
 
 bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
 {
     SLOGI("Call RegisterControllerListener of cast controller proxy");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     return castControllerProxy->RegisterControllerListener(shared_from_this());
 }
 

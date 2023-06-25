@@ -41,23 +41,15 @@ public:
     virtual int32_t UnRegisterControllerListener(
         const std::shared_ptr<IAVCastControllerProxyListener> iAVCastControllerProxyListener) = 0;
 
-    virtual int32_t SetMediaList(const MediaInfoHolder& mediaInfoHolder) = 0;
+    virtual int32_t Start(const AVQueueItem& avQueueItem) = 0;
 
-    virtual void UpdateMediaInfo(const MediaInfo& mediaInfo) = 0;
+    virtual int32_t Prepare(const AVQueueItem& avQueueItem) = 0;
 
     virtual void SendControlCommand(const AVCastControlCommand cmd) = 0;
 
     virtual int32_t GetDuration(int32_t& duration) = 0;
 
-    virtual int32_t GetPosition(int32_t& position) = 0;
-
-    virtual int32_t GetVolume(int32_t& volume) = 0;
-
-    virtual int32_t GetLoopMode(int32_t& loopMode) = 0;
-
-    virtual int32_t GetPlaySpeed(int32_t& playSpeed) = 0;
-
-    virtual int32_t GetPlayState(AVCastPlayerState& playerState) = 0;
+    virtual int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) = 0;
 
     virtual int32_t SetDisplaySurface(std::string& surfaceId) = 0;
 };

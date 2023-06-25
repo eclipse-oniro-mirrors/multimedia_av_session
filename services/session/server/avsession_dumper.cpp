@@ -39,9 +39,9 @@ std::map<std::string, AVSessionDumper::DumpActionType> AVSessionDumper::funcMap_
 
 std::map<int32_t, std::string> AVSessionDumper::playBackStates_ = {
     { AVPlaybackState::PLAYBACK_STATE_INITIAL, "initial" },
-    { AVPlaybackState::PLAYBACK_STATE_PREPARING, "preparing" },
-    { AVPlaybackState::PLAYBACK_STATE_PLAYING, "playing" },
-    { AVPlaybackState::PLAYBACK_STATE_PAUSED, "paused" },
+    { AVPlaybackState::PLAYBACK_STATE_PREPARE, "preparing" },
+    { AVPlaybackState::PLAYBACK_STATE_PLAY, "playing" },
+    { AVPlaybackState::PLAYBACK_STATE_PAUSE, "paused" },
     { AVPlaybackState::PLAYBACK_STATE_FAST_FORWARD, "fast_forward" },
     { AVPlaybackState::PLAYBACK_STATE_REWIND, "rewind" },
     { AVPlaybackState::PLAYBACK_STATE_STOP, "stop" },

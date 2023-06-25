@@ -32,6 +32,7 @@ bool AVPlaybackState::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(loopMode_) &&
         parcel.WriteBool(isFavorite_) &&
         parcel.WriteInt32(activeItemId_) &&
+        parcel.WriteInt32(volume_) &&
         parcel.WriteParcelable(extras_.get());
 }
 
@@ -51,7 +52,8 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
         !parcel.ReadInt64(result->bufferedTime_) ||
         !parcel.ReadInt32(result->loopMode_) ||
         !parcel.ReadBool(result->isFavorite_) ||
-        !parcel.ReadInt32(result->activeItemId_)) {
+        !parcel.ReadInt32(result->activeItemId_) ||
+        !parcel.ReadInt32(result->volume_)) {
         SLOGE("Read AVPlaybackState failed");
         delete result;
         return nullptr;
@@ -72,7 +74,8 @@ bool AVPlaybackState::IsValid() const
         position_.updateTime_ >= 0 &&
         bufferedTime_ >= 0 &&
         loopMode_ >= LOOP_MODE_SEQUENCE &&
-        loopMode_ <= LOOP_MODE_SHUFFLE;
+        loopMode_ <= LOOP_MODE_SHUFFLE &&
+        volume_ >= 0;
 }
 
 void AVPlaybackState::SetState(int32_t state)
@@ -117,6 +120,12 @@ void AVPlaybackState::SetActiveItemId(int32_t activeItemId)
     activeItemId_ = activeItemId;
 }
 
+void AVPlaybackState::SetVolume(int32_t volume)
+{
+    mask_.set(PLAYBACK_KEY_VOLUME);
+    volume_ = volume;
+}
+
 void AVPlaybackState::SetExtras(const std::shared_ptr<AAFwk::WantParams>& extras)
 {
     mask_.set(PLAYBACK_KEY_EXTRAS);
@@ -156,6 +165,11 @@ bool AVPlaybackState::GetFavorite() const
 int32_t AVPlaybackState::GetActiveItemId() const
 {
     return activeItemId_;
+}
+
+int32_t AVPlaybackState::GetVolume() const
+{
+    return volume_;
 }
 
 std::shared_ptr<AAFwk::WantParams> AVPlaybackState::GetExtras() const
@@ -230,6 +244,11 @@ void AVPlaybackState::CloneIsFavorite(const AVPlaybackState& from, AVPlaybackSta
 void AVPlaybackState::CloneActiveItemId(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.activeItemId_ = from.activeItemId_;
+}
+
+void AVPlaybackState::CloneVolume(const AVPlaybackState& from, AVPlaybackState& to)
+{
+    to.volume_ = from.volume_;
 }
 
 void AVPlaybackState::CloneExtras(const AVPlaybackState& from, AVPlaybackState& to)

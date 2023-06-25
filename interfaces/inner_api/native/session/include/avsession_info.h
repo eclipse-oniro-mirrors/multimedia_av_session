@@ -85,19 +85,15 @@ public:
 
 class IAVCastControllerProxyListener {
 public:
-    virtual void OnStateChanged(const AVCastPlayerState& state) = 0;
+    virtual void OnCastPlaybackStateChange(const AVPlaybackState& state) = 0;
 
-    virtual void OnMediaItemChanged(const AVQueueItem& avQueueItem) = 0;
+    virtual void OnMediaItemChange(const AVQueueItem& avQueueItem) = 0;
 
-    virtual void OnVolumeChanged(const int32_t volume) = 0;
+    virtual void OnPlayNext() = 0;
 
-    virtual void OnLoopModeChanged(const int32_t loopMode) = 0;
+    virtual void OnPlayPrevious() = 0;
 
-    virtual void OnPlaySpeedChanged(const int32_t playSpeed) = 0;
-
-    virtual void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
-
-    virtual void OnVideoSizeChanged(const int32_t width, const int32_t height) = 0;
+    virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
     
     virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
 
@@ -318,19 +314,15 @@ public:
 
 class AVCastControllerCallback {
 public:
-    virtual void OnStateChanged(const AVCastPlayerState& state) = 0;
+    virtual void OnCastPlaybackStateChange(const AVPlaybackState& state) = 0;
 
-    virtual void OnMediaItemChanged(const AVQueueItem& avQueueItem) = 0;
+    virtual void OnMediaItemChange(const AVQueueItem& avQueueItem) = 0;
 
-    virtual void OnVolumeChanged(const int32_t volume) = 0;
+    virtual void OnPlayNext() = 0;
 
-    virtual void OnLoopModeChanged(const int32_t loopMode) = 0;
+    virtual void OnPlayPrevious() = 0;
 
-    virtual void OnPlaySpeedChanged(const int32_t playSpeed) = 0;
-
-    virtual void OnPositionChanged(const int32_t position, const int32_t bufferPosition, const int32_t duration) = 0;
-
-    virtual void OnVideoSizeChanged(const int32_t width, const int32_t height) = 0;
+    virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
 
     virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
 
@@ -388,12 +380,30 @@ enum AVCastCategory {
     CATEGORY_LOCAL = 0,
 
     /**
+     * The remote category indicating the media is presenting on a remote device,
+     * the application needs to get an AVCastController to control remote playback.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @since 10
+     */
+    CATEGORY_REMOTE = 1,
+};
+
+enum ProtocolType {
+    /**
+     * The default cast type "local", media can be routed on the same device,
+     * including internal speakers or audio jacks on the device itself, A2DP devices.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @since 10
+     */
+    TYPE_LOCAL = 0,
+
+    /**
      * Cast+ mirror capability
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @systemapi
      * @since 10
      */
-    CATEGORY_CAST_MIRROR = 1,
+    TYPE_CAST_PLUS_MIRROR  = 1,
 
     /**
      * The Cast+ Stream indicating the media is presenting on a different device
@@ -401,16 +411,7 @@ enum AVCastCategory {
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @since 10
      */
-    CATEGORY_CAST_STREAM = 2,
-
-    /**
-     * audio stream is presenting on a different device
-     * it is transparent to the application which can still controll the playback by local player.
-     * @syscap SystemCapability.Multimedia.AVSession.AVCast
-     * @systemapi
-     * @since 10
-     */
-    CATEGORY_AUDIO_STREAMING = 256,
+    TYPE_CAST_PLUS_STREAM  = 2,
 };
 
 /**

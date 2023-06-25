@@ -40,6 +40,7 @@ private:
     int32_t HandleRemoteCastAudio(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStartCastDiscovery(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStopCastDiscovery(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleSetDiscoverable(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStartCast(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStopCast(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
@@ -61,6 +62,7 @@ private:
         &AVSessionServiceStub::HandleRemoteCastAudio,
         &AVSessionServiceStub::HandleStartCastDiscovery,
         &AVSessionServiceStub::HandleStopCastDiscovery,
+        &AVSessionServiceStub::HandleSetDiscoverable,
         &AVSessionServiceStub::HandleStartCast,
         &AVSessionServiceStub::HandleStopCast,
     };
