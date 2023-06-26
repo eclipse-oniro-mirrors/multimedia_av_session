@@ -78,6 +78,20 @@ void AVCastControllerCallbackProxy::OnPlayPrevious()
         "send request failed");
 }
 
+void AVCastControllerCallbackProxy::OnSeekDone(const int32_t seekNumber)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(seekNumber), "write seekNumber failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_SEEK_DONE, parcel, reply, option) == 0,
+        "send request failed");
+}
+
 void AVCastControllerCallbackProxy::OnVideoSizeChange(const int32_t width, const int32_t height)
 {
     MessageParcel parcel;

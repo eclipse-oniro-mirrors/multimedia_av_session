@@ -34,6 +34,8 @@ private:
 
     int32_t HandleOnPlayPrevious(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnSeekDone(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleOnVideoSizeChange(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnPlayerError(MessageParcel& data, MessageParcel& reply);
@@ -46,6 +48,7 @@ private:
         &AVCastControllerCallbackStub::HandleOnMediaItemChange,
         &AVCastControllerCallbackStub::HandleOnPlayNext,
         &AVCastControllerCallbackStub::HandleOnPlayPrevious,
+        &AVCastControllerCallbackStub::HandleOnSeekDone,
         &AVCastControllerCallbackStub::HandleOnVideoSizeChange,
         &AVCastControllerCallbackStub::HandleOnPlayerError,
     };

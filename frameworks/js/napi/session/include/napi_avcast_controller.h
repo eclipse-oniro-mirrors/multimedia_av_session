@@ -61,6 +61,8 @@ private:
         napi_value param, napi_value callback);
     static napi_status OnPlayPrevious(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
+    static napi_status OnSeekDone(napi_env env, NapiAVCastController* napiCastController,
+        napi_value param, napi_value callback);
     static napi_status OnVideoSizeChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
     static napi_status OnPlayerError(napi_env env, NapiAVCastController* napiCastController,
@@ -72,6 +74,7 @@ private:
     static napi_status OffPlayNext(napi_env env, NapiAVCastController* napiCastController,
         napi_value callback);
     static napi_status OffPlayPrevious(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
+    static napi_status OffSeekDone(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffVideoSizeChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffPlayerError(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
 

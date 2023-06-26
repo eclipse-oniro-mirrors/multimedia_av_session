@@ -64,6 +64,13 @@ void AVCastControllerItem::OnPlayPrevious()
     callback_->OnPlayPrevious();
 }
 
+void AVCastControllerItem::OnSeekDone(const int32_t seekNumber)
+{
+    SLOGI("OnSeekDone");
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnSeekDone(seekNumber);
+}
+
 void AVCastControllerItem::OnVideoSizeChange(const int32_t width, const int32_t height)
 {
     SLOGI("OnVideoSizeChange");

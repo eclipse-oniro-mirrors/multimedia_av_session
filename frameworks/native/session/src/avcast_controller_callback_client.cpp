@@ -67,6 +67,16 @@ void AVCastControllerCallbackClient::OnPlayPrevious()
         "AVCastControllerCallbackClient handler postTask failed");
 }
 
+void AVCastControllerCallbackClient::OnSeekDone(const int32_t seekNumber)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, seekNumber]() { callback->OnSeekDone(seekNumber); }, EVENT_NAME),
+        "AVCastControllerCallbackClient handler postTask failed");
+}
+
 void AVCastControllerCallbackClient::OnVideoSizeChange(const int32_t width, const int32_t height)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");

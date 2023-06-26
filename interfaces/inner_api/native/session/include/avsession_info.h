@@ -93,6 +93,8 @@ public:
 
     virtual void OnPlayPrevious() = 0;
 
+    virtual void OnSeekDone(const int32_t seekNumber) = 0;
+
     virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
     
     virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
@@ -321,6 +323,8 @@ public:
     virtual void OnPlayNext() = 0;
 
     virtual void OnPlayPrevious() = 0;
+
+    virtual void OnSeekDone(const int32_t seekNumber) = 0;
 
     virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
 

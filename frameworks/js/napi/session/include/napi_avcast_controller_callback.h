@@ -31,6 +31,7 @@ public:
         EVENT_CAST_MEDIA_ITEM_CHANGE,
         EVENT_CAST_PLAY_NEXT,
         EVENT_CAST_PLAY_PREVIOUS,
+        EVENT_CAST_SEEK_DONE,
         EVENT_CAST_VIDEO_SIZE_CHANGE,
         EVENT_CAST_ERROR,
         EVENT_CAST_TYPE_MAX,
@@ -43,6 +44,7 @@ public:
     void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
     void OnPlayNext() override;
     void OnPlayPrevious() override;
+    void OnSeekDone(const int32_t seekNumber) override;
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 

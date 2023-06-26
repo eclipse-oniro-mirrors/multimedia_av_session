@@ -72,6 +72,14 @@ int32_t AVCastControllerCallbackStub::HandleOnPlayPrevious(MessageParcel& data, 
     return ERR_NONE;
 }
 
+int32_t AVCastControllerCallbackStub::HandleOnSeekDone(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t seekNumber;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(seekNumber), ERR_NONE, "read seekNumber failed");
+    OnSeekDone(seekNumber);
+    return ERR_NONE;
+}
+
 int32_t AVCastControllerCallbackStub::HandleOnVideoSizeChange(MessageParcel& data, MessageParcel& reply)
 {
     int32_t width;

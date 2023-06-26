@@ -177,6 +177,13 @@ void NapiAVCastControllerCallback::OnPlayPrevious()
     HandleEvent(EVENT_CAST_PLAY_PREVIOUS);
 }
 
+void NapiAVCastControllerCallback::OnSeekDone(const int32_t seekNumber)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnSeekDone");
+    SLOGI("Start handle OnSeekDone event");
+    HandleEvent(EVENT_CAST_SEEK_DONE, seekNumber);
+}
+
 void NapiAVCastControllerCallback::OnVideoSizeChange(const int32_t width, const int32_t height)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnVideoSizeChange");
