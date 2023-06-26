@@ -133,6 +133,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
+    mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
     mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
     mediaInfo.mediaArtist = mediaDescription->GetArtist();
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
@@ -159,6 +160,7 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
+    mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
     mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
     mediaInfo.mediaArtist = mediaDescription->GetArtist();
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
