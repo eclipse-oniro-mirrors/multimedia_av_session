@@ -101,11 +101,6 @@ public:
     virtual int32_t CreateController(const std::string& sessionId,
         std::shared_ptr<AVSessionController>& controller) = 0;
 
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    virtual int32_t GetAVCastController(const std::string& sessionId,
-        std::shared_ptr<AVCastController>& castController) = 0;
-#endif
-
     /**
      * @brief Listen for sessionListener callback event.
      *
@@ -172,6 +167,9 @@ public:
     virtual int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    virtual int32_t GetAVCastController(const std::string& sessionId,
+        std::shared_ptr<AVCastController>& castController) = 0;
+
     /**
      * Discovery nearby devices that can be cast.
      *
