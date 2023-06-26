@@ -13,8 +13,8 @@
 
 import("//build/ohos.gni")
 import("//build/ohos/ace/ace.gni")
-import("//foundation/multimedia/av_session/castplus_cast_engine_part.gni")
-import("//foundation/multimedia/av_session/config.gni")
+import("../../../../castplus_cast_engine_part.gni")
+import("../../../../config.gni")
 
 ohos_shared_library("avsession_napi") {
   sanitize = {
@@ -23,8 +23,8 @@ ohos_shared_library("avsession_napi") {
   }
   include_dirs = [
     "include",
-    "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
-    "//foundation/multimedia/av_session/frameworks/native/session/include",
+    "../../../../interfaces/inner_api/native/session/include",
+    "../../../native/session/include",
   ]
 
   sources = [
@@ -49,10 +49,9 @@ ohos_shared_library("avsession_napi") {
   ]
 
   deps = [
-    "$ability_runtime_dir/frameworks/js/napi/inner/napi_common:napi_common",
-    "//foundation/multimedia/av_session/frameworks/common:avsession_common",
-    "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
-    "//foundation/multimedia/av_session/utils:avsession_utils",
+    "../../../../utils:avsession_utils",
+    "../../../common:avsession_common",
+    "../../../native/session:avsession_client",
   ]
 
   external_deps = [
@@ -64,6 +63,7 @@ ohos_shared_library("avsession_napi") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_manager",
     "ability_runtime:napi_base_context",
+    "ability_runtime:napi_common",
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokenid_sdk",
     "audio_framework:audio_client",
@@ -87,8 +87,7 @@ ohos_shared_library("avsession_napi") {
       "src/napi_avcast_controller.cpp",
       "src/napi_avcast_controller_callback.cpp",
     ]
-    deps +=
-        [ "$av_session_dir/frameworks/native/session:avsession_cast_client" ]
+    deps += [ "../../session:avsession_cast_client" ]
   }
 
   if (multimedia_av_session_enable_trace_control) {

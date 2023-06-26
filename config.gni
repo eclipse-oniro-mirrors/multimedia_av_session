@@ -15,6 +15,4 @@ declare_args() {
   multimedia_av_session_enable_background_audio_control = true
   multimedia_av_session_enable_trace_control = true
   multimedia_av_session_enable_sysevent_control = true
-  ability_runtime_dir = "//foundation/ability/ability_runtime"
-  av_session_dir = "//foundation/multimedia/av_session"
 }

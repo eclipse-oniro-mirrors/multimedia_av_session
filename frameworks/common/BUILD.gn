@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 
 config("avsession_common_config") {
-  include_dirs = [ "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include" ]
+  include_dirs = [ "../../interfaces/inner_api/native/session/include" ]
 }
 
 ohos_shared_library("avsession_common") {
@@ -39,7 +39,7 @@ ohos_shared_library("avsession_common") {
 
   public_configs = [ ":avsession_common_config" ]
 
-  public_deps = [ "//foundation/multimedia/av_session/utils:avsession_utils" ]
+  public_deps = [ "../../utils:avsession_utils" ]
 
   external_deps = [
     "ability_base:want",

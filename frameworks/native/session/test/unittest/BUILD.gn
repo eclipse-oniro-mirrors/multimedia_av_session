@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
-import("//foundation/multimedia/av_session/config.gni")
+import("../../../../../config.gni")
 
 module_output_path = "multimedia_av_session/session"
 
@@ -28,11 +28,11 @@ config("module_private_config") {
 }
 
 common_deps = [
-  "$av_session_dir/frameworks/common:avsession_common",
-  "$av_session_dir/frameworks/native/session:avsession_client",
-  "$av_session_dir/services/session:avsession_item",
-  "$av_session_dir/services/session:avsession_service",
-  "$av_session_dir/utils:avsession_utils",
+  "../../../../../services/session:avsession_item",
+  "../../../../../services/session:avsession_service",
+  "../../../../../utils:avsession_utils",
+  "../../../../common:avsession_common",
+  "../../../session:avsession_client",
   "//third_party/googletest:gtest_main",
 ]
 

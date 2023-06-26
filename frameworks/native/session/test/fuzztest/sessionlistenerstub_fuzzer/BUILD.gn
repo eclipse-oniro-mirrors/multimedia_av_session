@@ -19,17 +19,17 @@ module_output_path = "multimedia_av_session/sessionfuzzer"
 ##############################fuzztest##########################################
 ohos_fuzztest("SessionListenerStubFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/sessionlistenerstub_fuzzer"
+  fuzz_config_file = "../sessionlistenerstub_fuzzer"
 
   include_dirs = [
-    "//foundation/multimedia/av_session/services/session/ipc/base",
-    "//foundation/multimedia/av_session/services/session/ipc/proxy",
-    "//foundation/multimedia/av_session/services/session/ipc/stub",
-    "//foundation/multimedia/av_session/services/session/adapter",
-    "//foundation/multimedia/av_session/utils",
-    "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/",
-    "//foundation/multimedia/av_session/frameworks/native/session/include",
-    "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
+    "../",
+    "../../../include",
+    "../../../../../../utils",
+    "../../../../../../services/session/ipc/base",
+    "../../../../../../services/session/ipc/proxy",
+    "../../../../../../services/session/ipc/stub",
+    "../../../../../../services/session/adapter",
+    "../../../../../../interfaces/inner_api/native/session/include",
   ]
   cflags = [
     "-g",
@@ -38,7 +38,7 @@ ohos_fuzztest("SessionListenerStubFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "session_listenerstub_fuzzer.cpp" ]
-  deps = [ "//foundation/multimedia/av_session/frameworks/native/session:avsession_client" ]
+  deps = [ "../../../../session:avsession_client" ]
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
