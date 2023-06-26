@@ -49,6 +49,7 @@ public:
     void OnPreviousRequest() override;
     void OnPlaySpeedChanged(const CastEngine::PlaybackSpeed speed) override;
     void OnPlayerError(int errorCode, const std::string &errorMsg) override;
+    void OnSeekDone(int32_t seekDone) override;
     void OnVideoSizeChanged(int width, int height) override;
     
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);

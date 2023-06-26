@@ -32,6 +32,7 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteString(lyricUri_) &&
         parcel.WriteString(artist_) &&
         parcel.WriteString(mediaUri_) &&
+        parcel.WriteString(fdSrc_) &&
         parcel.WriteInt32(duration_) &&
         parcel.WriteInt32(startPosition_) &&
         parcel.WriteInt32(creditsPosition_) &&
@@ -57,6 +58,7 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
     data.ReadString(result->lyricUri_);
     data.ReadString(result->artist_);
     data.ReadString(result->mediaUri_);
+    data.ReadString(result->fdSrc_);
     data.ReadInt32(result->duration_);
     data.ReadInt32(result->startPosition_);
     data.ReadInt32(result->creditsPosition_);
@@ -152,6 +154,15 @@ std::string AVMediaDescription::GetMediaUri() const
     return mediaUri_;
 }
 
+void AVMediaDescription::SetFdSrc(const std::string& fdSrc)
+{
+    fdSrc_ = fdSrc;
+}
+
+std::string AVMediaDescription::GetFdSrc() const
+{
+    return fdSrc_;
+}
 void AVMediaDescription::SetMediaType(const std::string& mediaType)
 {
     mediaType_ = mediaType;
@@ -284,6 +295,7 @@ void AVMediaDescription::Reset()
     lyricUri_ = "";
     artist_ = "";
     mediaUri_ = "";
+    fdSrc_ = "";
     duration_ = 0;
     startPosition_ = 0;
     creditsPosition_ = 0;

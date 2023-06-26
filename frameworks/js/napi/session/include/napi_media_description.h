@@ -74,6 +74,9 @@ private:
     static napi_status GetMediaUri(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetMediaUri(napi_env env, const AVMediaDescription& in, napi_value& out);
 
+    static napi_status GetFdSrc(napi_env env, napi_value in, AVMediaDescription& out);
+    static napi_status SetFdSrc(napi_env env, const AVMediaDescription& in, napi_value& out);
+
     static napi_status GetDuration(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetDuration(napi_env env, const AVMediaDescription& in, napi_value& out);
 

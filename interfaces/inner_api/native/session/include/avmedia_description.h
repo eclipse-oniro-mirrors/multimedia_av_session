@@ -44,11 +44,12 @@ public:
         MEDIA_DESCRIPTION_KEY_LYRIC_URI = 12,
         MEDIA_DESCRIPTION_KEY_ARTIST = 13,
         MEDIA_DESCRIPTION_KEY_MEDIA_URI = 14,
-        MEDIA_DESCRIPTION_KEY_DURATION = 15,
-        MEDIA_DESCRIPTION_KEY_START_POSITION = 16,
-        MEDIA_DESCRIPTION_KEY_CREDITS_POSITION = 17,
-        MEDIA_DESCRIPTION_KEY_APP_NAME = 18,
-        MEDIA_DESCRIPTION_KEY_MAX = 19,
+        MEDIA_DESCRIPTION_KEY_FD_SRC = 15,
+        MEDIA_DESCRIPTION_KEY_DURATION = 16,
+        MEDIA_DESCRIPTION_KEY_START_POSITION = 17,
+        MEDIA_DESCRIPTION_KEY_CREDITS_POSITION = 18,
+        MEDIA_DESCRIPTION_KEY_APP_NAME = 19,
+        MEDIA_DESCRIPTION_KEY_MAX = 20,
     };
 
     AVMediaDescription() = default;
@@ -103,6 +104,9 @@ public:
     void SetMediaUri(const std::string& mediaUri);
     std::string GetMediaUri() const;
 
+    void SetFdSrc(const std::string& fdSrc);
+    std::string GetFdSrc() const;
+
     void SetDuration(const int32_t duration);
     int32_t GetDuration() const;
 
@@ -135,6 +139,7 @@ private:
     std::string lyricUri_ = "";
     std::string artist_ = "";
     std::string mediaUri_ = "";
+    std::string fdSrc_ = "";
     int32_t duration_ = 0;
     int32_t startPosition_ = 0;
     int32_t creditsPosition_ = 0;

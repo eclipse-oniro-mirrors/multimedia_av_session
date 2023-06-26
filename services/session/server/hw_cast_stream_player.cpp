@@ -127,7 +127,11 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
     mediaInfo.mediaId = mediaDescription->GetMediaId();
     mediaInfo.mediaName = mediaDescription->GetTitle();
-    mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
+    if (mediaDescription->GetMediaUri() == "") {
+        mediaInfo.mediaUrl = mediaDescription->GetFdSrc();
+    } else {
+        mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
+    }
     mediaInfo.mediaType = mediaDescription->GetMediaType();
     mediaInfo.mediaSize = mediaDescription->GetMediaSize();
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
@@ -154,7 +158,11 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
     mediaInfo.mediaId = mediaDescription->GetMediaId();
     mediaInfo.mediaName = mediaDescription->GetTitle();
-    mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
+    if (mediaDescription->GetMediaUri() == "") {
+        mediaInfo.mediaUrl = mediaDescription->GetFdSrc();
+    } else {
+        mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
+    }
     mediaInfo.mediaType = mediaDescription->GetMediaType();
     mediaInfo.mediaSize = mediaDescription->GetMediaSize();
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
@@ -399,6 +407,16 @@ void HwCastStreamPlayer::OnPlayerError(int errorCode, const std::string &errorMs
         if (listener != nullptr) {
             SLOGI("trigger the OnPlayerError for registered listeners");
             listener->OnPlayerError(errorCode, errorMsg);
+        }
+    }
+}
+
+void HwCastStreamPlayer::OnSeekDone(int32_t seekNumber)
+{
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnSeekDone for registered listeners");
+            listener->OnSeekDone(seekNumber);
         }
     }
 }

@@ -33,6 +33,8 @@ public:
 
     void OnPlayPrevious() override;
 
+    void OnSeekDone(const int32_t seekNumber) override;
+
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;

@@ -92,6 +92,12 @@ void HwCastProvider::StopCastSession(int castId)
 {
     SLOGI("StopCastSession begin");
     std::lock_guard<std::mutex> lock(mutex_);
+        
+    auto hwCastStreamPlayer = avCastControllerMap_[castId];
+    if (hwCastStreamPlayer) {
+        hwCastStreamPlayer->Release();
+    }
+
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("no need to release castSession for castId %{public}d is not exit in hwCastProviderSessionMap_", castId);
         return;
@@ -102,11 +108,6 @@ void HwCastProvider::StopCastSession(int castId)
     }
     hwCastProviderSessionMap_.erase(castId);
     castFlag_[castId] = false;
-    
-    auto hwCastStreamPlayer = avCastControllerMap_[castId];
-    if (hwCastStreamPlayer) {
-        hwCastStreamPlayer->Release();
-    }
     avCastControllerMap_.erase(castId);
 }
 
