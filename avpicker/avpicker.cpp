@@ -19,16 +19,16 @@
 #include "napi/native_node_api.h"
 
 extern const char _binary_avpicker_abc_start[];
-extern const char _binaty_avpicker_abc_end[];
+extern const char _binary_avpicker_abc_end[];
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_avpicker_Get_ABCCode(const char **buf, int *buflen)
+void NAPI_avpicker_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_avpicker_abc_start;
     }
     if (buflen != nullptr) {
-        *buflen = _binaty_avpicker_abc_end - _binary_avpicker_abc_start;
+        *buflen = _binary_avpicker_abc_end - _binary_avpicker_abc_start;
     }
 }
 
