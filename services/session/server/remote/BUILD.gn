@@ -12,18 +12,18 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/multimedia/av_session/castplus_cast_engine_part.gni")
-import("//foundation/multimedia/av_session/config.gni")
+import("../../../../castplus_cast_engine_part.gni")
+import("../../../../config.gni")
 
 ###############################################################################
 
 common_include_dirs = [
-  "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
-  "//foundation/multimedia/av_session/services/session/server",
-  "//foundation/multimedia/av_session/services/session/ipc/base",
-  "//foundation/multimedia/av_session/services/session/ipc/proxy",
-  "//foundation/multimedia/av_session/services/session/ipc/stub",
-  "//foundation/multimedia/av_session/services/session/server/remote",
+  "../",
+  "../remote",
+  "../../ipc/base",
+  "../../ipc/proxy",
+  "../../ipc/stub",
+  "../../../../interfaces/inner_api/native/session/include",
   "//third_party/json/single_include",
 ]
 
@@ -51,7 +51,7 @@ common_cflags = []
 
 if (castplus_cast_engine_enable) {
   common_cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-  common_deps += [ "$av_session_dir/services/session:avsession_cast_item" ]
+  common_deps += [ "../../../session:avsession_cast_item" ]
 }
 
 if (multimedia_av_session_enable_trace_control) {

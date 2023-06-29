@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/multimedia/av_session/config.gni")
+import("../config.gni")
 
 openssl_dir = "//third_party/openssl"
 config("avsession_utils_config") {

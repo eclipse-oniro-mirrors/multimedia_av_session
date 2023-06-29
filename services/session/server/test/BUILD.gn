@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
-import("//foundation/multimedia/av_session/config.gni")
+import("../../../../config.gni")
 
 module_output_path = "multimedia_av_session/session"
 
@@ -40,9 +40,9 @@ ohos_unittest("AVSessionServiceTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "//foundation/multimedia/av_session/frameworks/common:avsession_common",
-    "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
-    "//foundation/multimedia/av_session/utils:avsession_utils",
+    "../../../../frameworks/common:avsession_common",
+    "../../../../frameworks/native/session:avsession_client",
+    "../../../../utils:avsession_utils",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -162,7 +162,7 @@ ohos_unittest("AudioAdapterTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "$av_session_dir/services/session:avsession_server",
+    "../../../session:avsession_server",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -180,7 +180,7 @@ ohos_unittest("RemoteUtilsTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "$av_session_dir/services/session:avsession_server",
+    "../../../session:avsession_server",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -202,7 +202,7 @@ ohos_unittest("SessionStackTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "$av_session_dir/services/session:avsession_server",
+    "../../../session:avsession_server",
     "//third_party/googletest:gtest_main",
   ]
 

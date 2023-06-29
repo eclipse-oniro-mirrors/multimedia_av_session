@@ -12,8 +12,8 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/multimedia/av_session/castplus_cast_engine_part.gni")
-import("//foundation/multimedia/av_session/config.gni")
+import("../../castplus_cast_engine_part.gni")
+import("../../config.gni")
 
 openssl_dir = "//third_party/openssl"
 
@@ -21,8 +21,8 @@ group("avsession_server") {
   deps = [
     ":avsession_item",
     ":avsession_service",
-    "//foundation/multimedia/av_session/sa_profile:avsession_sa_profile",
-    "//foundation/multimedia/av_session/services/etc:avsession_service.rc",
+    "../../sa_profile:avsession_sa_profile",
+    "../etc:avsession_service.rc",
   ]
 }
 
@@ -60,14 +60,14 @@ ohos_shared_library("avsession_service") {
   sources = ipc_sources + adapter_sources + service_sources
 
   include_dirs = [
-    "//foundation/multimedia/av_session/frameworks/native/session/include",
-    "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
-    "//foundation/multimedia/av_session/services/session/ipc/base",
-    "//foundation/multimedia/av_session/services/session/ipc/proxy",
-    "//foundation/multimedia/av_session/services/session/ipc/stub",
-    "//foundation/multimedia/av_session/services/session/adapter",
-    "//foundation/multimedia/av_session/services/session/server",
-    "//foundation/multimedia/av_session/services/session/server/remote",
+    "ipc/base",
+    "ipc/proxy",
+    "ipc/stub",
+    "adapter",
+    "server",
+    "server/remote",
+    "../../frameworks/native/session/include",
+    "../../interfaces/inner_api/native/session/include",
     "//third_party/json/single_include",
     "$openssl_dir/include/",
   ]
@@ -134,7 +134,7 @@ ohos_shared_library("avsession_service") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     external_deps += [ "cast_engine:cast_engine_client" ]
     deps += [
-      "$av_session_dir/frameworks/native/session:avsession_cast_client",
+      "../../frameworks/native/session:avsession_cast_client",
       "./../session:avsession_cast_item",
       "./../session:avsession_router",
     ]
@@ -175,7 +175,7 @@ ohos_shared_library("avsession_router") {
   sources = ipc_sources + adapter_sources + service_sources
 
   include_dirs = [
-    "$av_session_dir/interfaces/inner_api/native/session/include",
+    "../../interfaces/inner_api/native/session/include",
     "./adapter",
     "./server",
     "./ipc/stub",
@@ -213,8 +213,8 @@ ohos_shared_library("avsession_router") {
   defines += [ "SYSTEM_LIB_PATH = ${system_lib_path}" ]
 
   deps = [
-    "$av_session_dir/frameworks/common:avsession_common",
-    "$av_session_dir/utils:avsession_utils",
+    "../../frameworks/common:avsession_common",
+    "../../utils:avsession_utils",
   ]
 
   external_deps = [
@@ -328,8 +328,8 @@ ohos_shared_library("avsession_item") {
   defines += [ "SYSTEM_LIB_PATH = ${system_lib_path}" ]
 
   deps = [
-    "//foundation/multimedia/av_session/frameworks/common:avsession_common",
-    "//foundation/multimedia/av_session/utils:avsession_utils",
+    "../../frameworks/common:avsession_common",
+    "../../utils:avsession_utils",
     "//third_party/openssl:libcrypto_shared",
   ]
 
@@ -356,7 +356,7 @@ ohos_shared_library("avsession_item") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     external_deps += [ "cast_engine:cast_engine_client" ]
     deps += [
-      "$av_session_dir/frameworks/native/session:avsession_cast_client",
+      "../../frameworks/native/session:avsession_cast_client",
       "./../session:avsession_cast_item",
       "./../session:avsession_router",
     ]
@@ -436,8 +436,8 @@ ohos_shared_library("avsession_cast_item") {
   defines += [ "SYSTEM_LIB_PATH = ${system_lib_path}" ]
 
   deps = [
-    "$av_session_dir/frameworks/common:avsession_common",
-    "$av_session_dir/utils:avsession_utils",
+    "../../frameworks/common:avsession_common",
+    "../../utils:avsession_utils",
     "//third_party/openssl:libcrypto_shared",
   ]
 

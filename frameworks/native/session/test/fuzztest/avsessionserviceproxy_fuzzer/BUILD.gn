@@ -19,9 +19,9 @@ module_output_path = "multimedia_av_session/sessionfuzzer"
 ##############################fuzztest##########################################
 ohos_fuzztest("AvSessionServiceProxyFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/avsessionserviceproxy_fuzzer"
+  fuzz_config_file = "../avsessionserviceproxy_fuzzer"
 
-  include_dirs = [ "//foundation/multimedia/av_session/frameworks/native/session/test/fuzztest/" ]
+  include_dirs = [ "../" ]
   cflags = [
     "-g",
     "-O0",
@@ -29,7 +29,7 @@ ohos_fuzztest("AvSessionServiceProxyFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "avsessionserviceproxy_fuzzer.cpp" ]
-  deps = [ "//foundation/multimedia/av_session/frameworks/native/session:avsession_client" ]
+  deps = [ "../../../../session:avsession_client" ]
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",

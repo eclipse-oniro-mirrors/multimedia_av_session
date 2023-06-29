@@ -19,12 +19,13 @@ module_output_path = "multimedia_av_session/sessionfuzzer"
 ##############################fuzztest##########################################
 ohos_fuzztest("AbilityConnectHelperFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//foundation/multimedia/av_session/services/session/server/test/fuzztest/abilityconnecthelper_fuzzer"
+  fuzz_config_file = "../abilityconnecthelper_fuzzer"
+
   include_dirs = [
-    "//foundation/multimedia/av_session/services/session/adapter",
-    "//foundation/multimedia/av_session/services/session/server/test/fuzztest/",
-    "//foundation/multimedia/av_session/services/session/server",
-    "//foundation/multimedia/av_session/services/session/server/remote",
+    "../",
+    "../../../remote",
+    "../../../../adapter",
+    "../../../../server",
   ]
   cflags = [
     "-g",

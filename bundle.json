@@ -13,14 +13,13 @@
       "name": "av_session",
       "subsystem": "multimedia",
       "syscap": [
-          "SystemCapability.Multimedia.AVSession",
           "SystemCapability.Multimedia.AVSession.Core",
           "SystemCapability.Multimedia.AVSession.Manager"
       ],
       "features": [],
       "adapted_system_type": [ "standard" ],
-      "rom": "10000KB",
-      "ram": "10000KB",
+      "rom": "3000KB",
+      "ram": "5120KB",
       "hisysevent_config": [
           "//foundation/multimedia/av_session/hisysevent.yaml"
       ],
@@ -38,6 +37,7 @@
           "data_object",
           "device_manager",
           "dsoftbus",
+          "eventhandler",
           "hisysevent_native",
           "hitrace_native",
           "hiviewdfx_hilog_native",

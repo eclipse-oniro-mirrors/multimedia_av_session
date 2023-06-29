@@ -19,15 +19,15 @@ module_output_path = "multimedia_av_session/sessionfuzzer"
 ##############################fuzztest##########################################
 ohos_fuzztest("SessionListenerProxyFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//foundation/multimedia/av_session/services/session/server/test/fuzztest/sessionlistenerproxy_fuzzer"
+  fuzz_config_file = "../sessionlistenerproxy_fuzzer"
 
   include_dirs = [
-    "//foundation/multimedia/av_session/services/session/ipc/base",
-    "//foundation/multimedia/av_session/services/session/ipc/proxy",
-    "//foundation/multimedia/av_session/services/session/ipc/stub",
-    "//foundation/multimedia/av_session/services/session/adapter",
-    "//foundation/multimedia/av_session/utils",
-    "//foundation/multimedia/av_session/services/session/server/test/fuzztest/",
+    "../",
+    "../../../../adapter",
+    "../../../../ipc/base",
+    "../../../../ipc/proxy",
+    "../../../../ipc/stub",
+    "../../../../../../utils",
   ]
   cflags = [
     "-g",

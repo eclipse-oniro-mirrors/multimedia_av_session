@@ -12,16 +12,16 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/multimedia/av_session/castplus_cast_engine_part.gni")
-import("//foundation/multimedia/av_session/config.gni")
+import("../../../castplus_cast_engine_part.gni")
+import("../../../config.gni")
 
 config("avsession_client_config") {
   include_dirs = [
-    "//foundation/multimedia/av_session/frameworks/native/session/include",
-    "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
-    "//foundation/multimedia/av_session/services/session/ipc/base",
-    "//foundation/multimedia/av_session/services/session/ipc/proxy",
-    "//foundation/multimedia/av_session/services/session/ipc/stub",
+    "include",
+    "../../../interfaces/inner_api/native/session/include",
+    "../../../services/session/ipc/base",
+    "../../../services/session/ipc/proxy",
+    "../../../services/session/ipc/stub",
   ]
 }
 
@@ -32,12 +32,12 @@ ohos_shared_library("avsession_client") {
     debug = false
   }
   ipc_sources = [
-    "//foundation/multimedia/av_session/services/session/ipc/proxy/avsession_controller_proxy.cpp",
-    "//foundation/multimedia/av_session/services/session/ipc/proxy/avsession_proxy.cpp",
-    "//foundation/multimedia/av_session/services/session/ipc/proxy/avsession_service_proxy.cpp",
-    "//foundation/multimedia/av_session/services/session/ipc/stub/avcontroller_callback_stub.cpp",
-    "//foundation/multimedia/av_session/services/session/ipc/stub/avsession_callback_stub.cpp",
-    "//foundation/multimedia/av_session/services/session/ipc/stub/session_listener_stub.cpp",
+    "../../../services/session/ipc/proxy/avsession_controller_proxy.cpp",
+    "../../../services/session/ipc/proxy/avsession_proxy.cpp",
+    "../../../services/session/ipc/proxy/avsession_service_proxy.cpp",
+    "../../../services/session/ipc/stub/avcontroller_callback_stub.cpp",
+    "../../../services/session/ipc/stub/avsession_callback_stub.cpp",
+    "../../../services/session/ipc/stub/session_listener_stub.cpp",
   ]
 
   client_sources = [
@@ -54,8 +54,8 @@ ohos_shared_library("avsession_client") {
   public_configs = [ ":avsession_client_config" ]
 
   public_deps = [
-    "$av_session_dir/frameworks/common:avsession_common",
-    "$av_session_dir/utils:avsession_utils",
+    "../../../utils:avsession_utils",
+    "../../common:avsession_common",
   ]
 
   external_deps = [
@@ -98,8 +98,8 @@ ohos_shared_library("avsession_cast_client") {
     debug = false
   }
   ipc_sources = [
-    "$av_session_dir/services/session/ipc/proxy/avcast_controller_proxy.cpp",
-    "$av_session_dir/services/session/ipc/stub/avcast_controller_callback_stub.cpp",
+    "../../../services/session/ipc/proxy/avcast_controller_proxy.cpp",
+    "../../../services/session/ipc/stub/avcast_controller_callback_stub.cpp",
   ]
 
   client_sources = [ "src/avcast_controller_callback_client.cpp" ]
@@ -109,8 +109,8 @@ ohos_shared_library("avsession_cast_client") {
   public_configs = [ ":avsession_client_config" ]
 
   public_deps = [
-    "//foundation/multimedia/av_session/frameworks/common:avsession_common",
-    "//foundation/multimedia/av_session/utils:avsession_utils",
+    "../../../utils:avsession_utils",
+    "../../common:avsession_common",
   ]
 
   external_deps = [
