@@ -1364,6 +1364,66 @@ napi_status NapiUtils::SetValue(napi_env env, const MediaInfo& in, napi_value& o
     return napi_ok;
 }
 
+/* napi_value -> AVFileDescriptor */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVFileDescriptor& out)
+{
+    napi_value value {};
+    auto status = napi_get_named_property(env, in, "fd", &value);
+    CHECK_RETURN(status == napi_ok, "get fd failed", status);
+    status = GetValue(env, value, out.fd_);
+    CHECK_RETURN(status == napi_ok, "get fd value failed", status);
+
+    bool hasOffset = false;
+    napi_has_named_property(env, in, "offset", &hasOffset);
+    if (hasOffset) {
+        status = napi_get_named_property(env, in, "offset", &value);
+        CHECK_RETURN(status == napi_ok, "get offset failed", status);
+        status = GetValue(env, value, out.offset_);
+        CHECK_RETURN(status == napi_ok, "get offset value failed", status);
+    } else {
+        out.offset_ = 0;
+    }
+
+    bool hasLength = false;
+    napi_has_named_property(env, in, "length", &hasLength);
+    if (hasLength) {
+        status = napi_get_named_property(env, in, "length", &value);
+        CHECK_RETURN(status == napi_ok, "get length failed", status);
+        status = GetValue(env, value, out.length_);
+        CHECK_RETURN(status == napi_ok, "get length value failed", status);
+    } else {
+        out.length_ = -1;
+    }
+    return napi_ok;
+}
+
+/* napi_value <- AVFileDescriptor */
+napi_status NapiUtils::SetValue(napi_env env, const AVFileDescriptor& in, napi_value& out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
+
+    napi_value property = nullptr;
+    status = SetValue(env, in.fd_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "fd", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    if (in.offset_ != 0) {
+    status = SetValue(env, in.offset_, property);
+        CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+        status = napi_set_named_property(env, out, "offset", property);
+        CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    }
+
+    if (in.length_ != -1) {
+    status = SetValue(env, in.length_, property);
+        CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+        status = napi_set_named_property(env, out, "length", property);
+        CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    }
+    return napi_ok;
+}
 
 napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t napiCode)
 {

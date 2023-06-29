@@ -435,6 +435,7 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     for (DeviceInfo deviceInfo : castOutputDeviceInfo.deviceInfos_) {
+        std::lock_guard lockGuard(castDeviceInfoMapLock_);
         castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
         for (const auto& session : GetContainer().GetAllSessions()) {
             session->UpdateCastDeviceMap(deviceInfo);

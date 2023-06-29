@@ -48,59 +48,114 @@ public:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
-     * Get AVRouter instance.
-     * @param { AVCastDeviceCapability } castDeviceCapability - The type of device you want to discover.
-     * @return { number } Whether the device discovery operation was successful
+     * @brief Starting to discover devices.
+     *
+     * @param { int32_t } castDeviceCapability - The type of device want to discover.
+     * @return { int32_t } Whether the device discovery operation was successful.
      * @since 10
     */
     virtual int32_t StartCastDiscovery(int32_t castDeviceCapability) = 0;
 
+    /**
+     * @brief Stop Discovering Devices
+     *
+     * @return { int32_t } Whether the stop operation was successful
+     * @since 10
+    */
     virtual int32_t StopCastDiscovery() = 0;
 
+    /**
+     * @brief Used on the Sink end to set whether it can be discovered or not.
+     *
+     * @param { const bool } enable - whether the sink device can be discovered or not.
+     * @return { int32_t } Whether the operation was successful
+     * @since 10
+    */
     virtual int32_t SetDiscoverable(const bool enable) = 0;
 
     /**
-     * Notify Router that the device has been discovered.
+     * @brief Notify Router that the device has been discovered (device is available).
      *
      * @param { OutputDeviceInfo } castOutputDeviceInfo - Discovered device infos.
-     * @return { number } Whether the notify operation was successful
+     * @return { int32_t } Whether the notify operation was successful.
      * @since 10
     */
     virtual int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) = 0;
 
+    /**
+     * @brief Notify Router that the the cast engine servie has died.
+     *
+     * @param { int32_t } providerId - Provider ID corresponding to cast engine service.
+     * @return { int32_t } Whether the notify operation was successful.
+     * @since 10
+    */
     virtual int32_t OnCastServerDied(int32_t providerId) = 0;
 
+    /**
+     * @brief Get the cast controller specified by castHandle.
+     *
+     * @param { const int64_t } castHandle - castHandle corresponding to cast engine session.
+     * @return { std::shared_ptr<IAVCastControllerProxy> } Obtained cast controller.
+     * @since 10
+    */
     virtual std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int64_t castHandle) = 0;
 
     /**
-     * Start cast process.
+     * @brief Start cast process.
      *
-     * @param { OutputDeviceInfo } outputDeviceInfo - .
-     * @return { number } Whether the start cast operation was successful
+     * @param { OutputDeviceInfo } outputDeviceInfo - Output device ready for use.
+     * @return { int64_t } ID returned after successful start of cast.
      * @since 10
     */
     virtual int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo) = 0;
+    
+    /**
+     * @brief Notify CastEngine to add (connect) remote devices.
+     *
+     * @param { int32_t } castId - Find the corresponding provider through this ID.
+     * @param { OutputDeviceInfo } outputDeviceInfo - Devices to be connected.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 10
+    */
     virtual int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
-     * Start cast process.
+     * @brief Stop cast process.
      *
-     * @param { OutputDeviceInfo } outputDeviceInfo - .
-     * @return { number } Whether the start cast operation was successful
+     * @param { const int64_t } castHandle - The ID corresponding to the provider that needs to be stopped.
+     * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
     virtual int32_t StopCast(const int64_t castHandle) = 0;
 
     /**
+     * @brief Stop cast session process.
+     *
+     * @param { const int64_t } castHandle - The ID corresponding to the provider that needs to be stopped.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 10
+    */
+    virtual int32_t StopCastSession(const int64_t castHandle) = 0;
+
+    /**
      * @brief Listen for AVRouter Callback event.
      *
-     * @param callback Listen for AVSession Callback event{@link AVSessionCallback}.
-     * @return Returns whether the return is successful.
+     * @param { int64_t } castHandleconst - The ID corresponding to the provider.
+     * @param { std::shared_ptr<IAVCastSessionStateListener> } callback - Callback function.
+     * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
     virtual int32_t RegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
 
+    /**
+     * @brief Cancel listening for AVRouter Callback event.
+     *
+     * @param { int64_t } castHandleconst - The ID corresponding to the provider.
+     * @param { std::shared_ptr<IAVCastSessionStateListener> } callback - Callback function.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 10
+    */
     virtual int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
 #endif

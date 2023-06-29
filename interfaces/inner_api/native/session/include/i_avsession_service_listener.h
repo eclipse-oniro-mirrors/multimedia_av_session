@@ -32,7 +32,6 @@ public:
      * Notify Router that the device has been discovered.
      *
      * @param { OutputDeviceInfo } castOutputDeviceInfo - Discovered device infos.
-     * @return { number } Whether the notify operation was successful
      * @since 10
     */
     virtual void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) = 0;

@@ -85,11 +85,11 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("off", OffEvent),
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemAVKeyEvent", SendSystemAVKeyEvent),
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemControlCommand", SendSystemControlCommand),
-        DECLARE_NAPI_STATIC_FUNCTION("startCastDiscovery", StartCastDiscovery),
-        DECLARE_NAPI_STATIC_FUNCTION("stopCastDiscovery", StopCastDiscovery),
+        DECLARE_NAPI_STATIC_FUNCTION("startCastDeviceDiscovery", StartCastDiscovery),
+        DECLARE_NAPI_STATIC_FUNCTION("stopCastDeviceDiscovery", StopCastDiscovery),
         DECLARE_NAPI_STATIC_FUNCTION("setDiscoverable", SetDiscoverable),
-        DECLARE_NAPI_STATIC_FUNCTION("startCast", StartCast),
-        DECLARE_NAPI_STATIC_FUNCTION("stopCast", StopCast),
+        DECLARE_NAPI_STATIC_FUNCTION("startCasting", StartCast),
+        DECLARE_NAPI_STATIC_FUNCTION("stopCasting", StopCast),
     };
 
     napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),

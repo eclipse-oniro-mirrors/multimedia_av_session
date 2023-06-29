@@ -30,6 +30,7 @@
 #include "ability.h"
 #include "media_info_holder.h"
 #include "media_info.h"
+#include "av_file_descriptor.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -190,6 +191,10 @@ public:
     /* napi_value <-> MediaInfo */
     static napi_status GetValue(napi_env env, napi_value in, MediaInfo& out);
     static napi_status SetValue(napi_env env, const MediaInfo& in, napi_value& out);
+
+    /* napi_value <-> AVFileDescriptor */
+    static napi_status GetValue(napi_env env, napi_value in, AVFileDescriptor& out);
+    static napi_status SetValue(napi_env env, const AVFileDescriptor& in, napi_value& out);
 
     /* napi_get_named_property wrapper */
     template <typename T>

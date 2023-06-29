@@ -13,33 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_I_AVCAST_STATE_LISTENER_H
-#define OHOS_I_AVCAST_STATE_LISTENER_H
+#ifndef OHOS_AV_FILE_DESCRIPTOR_H
+#define OHOS_AV_FILE_DESCRIPTOR_H
 
-#include <string>
-#include "avsession_descriptor.h"
+#include "parcel.h"
+#include "element_name.h"
 
-/**
- * @brief Router is a part related to cast media
- * @since 10
- */
 namespace OHOS::AVSession {
-class IAVCastStateListener {
-public:
-    /**
-     * Notify Router that the device has been discovered.
-     *
-     * @param { std::vector<DeviceInfo> } deviceInfos - Discovered device infos.
-     * @since 10
-    */
-    virtual void OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos) = 0;
+struct AVFileDescriptor {
+    bool WriteToParcel(Parcel& out) const;
+    bool ReadFromParcel(Parcel& in);
 
-    /**
-     * Notify Router that the cast engine service has died.
-     *
-     * @since 10
-    */
-    virtual void OnCastServerDied() = 0;
+    int32_t fd_;
+    int64_t offset_;
+    int64_t length_;
 };
 } // namespace OHOS::AVSession
-#endif // OHOS_I_AVCAST_STATE_LISTENER_H
+#endif // OHOS_AV_FILE_DESCRIPTOR_H

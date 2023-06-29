@@ -163,6 +163,24 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
     providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId,
         castHandleToOutputDeviceMap_[castId].deviceInfos_[0]);
+
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
+{
+    SLOGI("AVRouterImpl stop cast process");
+
+    int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
+
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
+        castHandle, "Can not find corresponding provider");
+    // The first 32 bits are providerId, the last 32 bits are castId
+    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    CHECK_AND_RETURN_RET_LOG(castHandleToOutputDeviceMap_.find(castId) != castHandleToOutputDeviceMap_.end(),
+        AVSESSION_ERROR, "Can not find corresponding castId");
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
+        && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
     providerManagerMap_[providerNumber]->provider_->StopCastSession(castId);
 
     return AVSESSION_SUCCESS;

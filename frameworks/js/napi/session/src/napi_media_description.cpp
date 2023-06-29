@@ -59,7 +59,7 @@ std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setter
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_LYRIC_URI, SetLyricUri },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_ARTIST, SetArtist },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_MEDIA_URI, SetMediaUri },
-    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_MEDIA_URI, SetFdSrc },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_FD_SRC, SetFdSrc },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_DURATION, SetDuration },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_START_POSITION, SetStartPosition },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_CREDITS_POSITION, SetCreditsPosition },
@@ -405,7 +405,7 @@ napi_status NapiMediaDescription::SetMediaUri(napi_env env, const AVMediaDescrip
 
 napi_status NapiMediaDescription::GetFdSrc(napi_env env, napi_value in, AVMediaDescription& out)
 {
-    std::string property;
+    AVFileDescriptor property;
     auto status = NapiUtils::GetNamedProperty(env, in, "fdSrc", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetFdSrc(property);

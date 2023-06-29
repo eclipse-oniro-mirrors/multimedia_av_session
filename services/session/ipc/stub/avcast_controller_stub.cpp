@@ -72,9 +72,12 @@ int32_t AVCastControllerStub::HandleSendControlCommand(MessageParcel& data, Mess
 int32_t AVCastControllerStub::HandleStart(MessageParcel& data, MessageParcel& reply)
 {
     sptr<AVQueueItem> avQueueItem = data.ReadParcelable<AVQueueItem>();
+    AVFileDescriptor avFileDescriptor;
+    avFileDescriptor.fd_ = data.ReadFileDescriptor();
     if (avQueueItem == nullptr) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write Start ret failed");
     } else {
+        avQueueItem->GetDescription()->SetFdSrc(avFileDescriptor);
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Start(*avQueueItem)),
             ERR_NONE, "Write mediaInfoHolder failed");
     }
