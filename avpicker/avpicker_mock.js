@@ -17,7 +17,7 @@ var Prompt = globalThis.requireNapi('prompt');
 var commonEventManager = globalThis.requireNapi('commonEventManager');
 var AVSessionManager = globalThis.requireNapi('multimedia.avsession');
 
-const TAG = 'avpicker_component ';
+const TAG = 'avpicker_component_mock ';
 
 export class AVCastPicker extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1) {
@@ -76,15 +76,16 @@ export class AVCastPicker extends ViewPU {
         });
         this.observeComponentCreation((elmtId, isInitialRender) => {
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            UIExtensionComponent.create({ abilityName: 'AVPickerUIExtAbility', bundleName: 'com.ohos.systemui' });
-            UIExtensionComponent.size({ width: '100%', height: '100%' })
-            isInitialRender || UIExtensionComponent.pop();
+            Button.createWithLabel("AVCastPicker");
+            Button.type(ButtonType.Circle);
+            Button.size({ width: "100%", height: "100%"});
+            isInitialRender || Button.pop();
             ViewStackProcessor.StopGetAccessRecording();
         });
-        UIExtensionComponent.pop();
+        Button.pop();
         Column.pop();
     }
-    
+
     rerender() {
         this.updateDirtyElements();
     }
