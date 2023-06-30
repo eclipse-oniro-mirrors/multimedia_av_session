@@ -87,7 +87,7 @@ ohos_shared_library("avsession_napi") {
       "src/napi_avcast_controller.cpp",
       "src/napi_avcast_controller_callback.cpp",
     ]
-    deps += [ "../../session:avsession_cast_client" ]
+    deps += [ "../../../native/session:avsession_cast_client" ]
   }
 
   if (multimedia_av_session_enable_trace_control) {
