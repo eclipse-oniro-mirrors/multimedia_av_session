@@ -58,8 +58,9 @@ sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string&
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, nullptr, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_CREATE_SESSION, data, reply, option) == 0,
-                             nullptr, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION), data, reply, option) == 0,
+        nullptr, "send request failed");
 
     int32_t res = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(res), nullptr, "read res failed");
@@ -76,8 +77,10 @@ int32_t AVSessionServiceProxy::GetAllSessionDescriptors(std::vector<AVSessionDes
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS, data, reply, option) == 0,
-                             ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
@@ -107,7 +110,9 @@ int32_t AVSessionServiceProxy::GetSessionDescriptorsBySessionId(const std::strin
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID),\
+        data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
@@ -130,7 +135,9 @@ int32_t AVSessionServiceProxy::GetHistoricalSessionDescriptors(int32_t maxSize,
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS),\
+        data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
@@ -175,8 +182,9 @@ int32_t AVSessionServiceProxy::CreateControllerInner(const std::string& sessionI
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_CREATE_CONTROLLER, data, reply, option) == 0,
-                             ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_CONTROLLER), data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
@@ -212,7 +220,9 @@ int32_t AVSessionServiceProxy::GetAVCastControllerInner(const std::string& sessi
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_GET_AV_CAST_CONTROLLER, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_AV_CAST_CONTROLLER),\
+        data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
@@ -234,8 +244,10 @@ int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListen
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_REGISTER_SESSION_LISTENER, data, reply, option) == 0,
-                             ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
@@ -251,8 +263,10 @@ int32_t AVSessionServiceProxy::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEven
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT, data, reply, option) == 0,
-                             ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
@@ -268,8 +282,10 @@ int32_t AVSessionServiceProxy::SendSystemControlCommand(const AVControlCommand& 
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND, data, reply, option) == 0,
-                             ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
@@ -285,8 +301,10 @@ int32_t AVSessionServiceProxy::RegisterClientDeathObserver(const sptr<IClientDea
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_REGISTER_CLIENT_DEATH, data, reply, option) == 0,
-                             ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_CLIENT_DEATH),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
@@ -312,8 +330,9 @@ int32_t AVSessionServiceProxy::CastAudio(const SessionToken& token,
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_CAST_AUDIO, data, reply, option) == 0,
-                             ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CAST_AUDIO), data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
@@ -335,8 +354,9 @@ int32_t AVSessionServiceProxy::CastAudioForAll(const std::vector<AudioStandard::
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_CAST_AUDIO_FOR_ALL, data, reply, option) == 0,
-                             ERR_IPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CAST_AUDIO_FOR_ALL), data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
@@ -354,7 +374,9 @@ int32_t AVSessionServiceProxy::StartCastDiscovery(const int32_t castDeviceCapabi
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_START_CAST_DISCOVERY, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST_DISCOVERY),\
+        data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
@@ -370,7 +392,8 @@ int32_t AVSessionServiceProxy::StopCastDiscovery()
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_STOP_CAST_DISCOVERY, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST_DISCOVERY), data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
@@ -387,7 +410,8 @@ int32_t AVSessionServiceProxy::SetDiscoverable(const bool enable)
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_SET_DISCOVERYABLE, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SET_DISCOVERYABLE), data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
@@ -418,7 +442,8 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_START_CAST, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST), data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
@@ -437,7 +462,8 @@ int32_t AVSessionServiceProxy::StopCast(const SessionToken& sessionToken)
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SERVICE_CMD_STOP_CAST, data, reply, option) == 0,
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST), data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
