@@ -22,7 +22,7 @@ extern const char _binary_avpicker_abc_start[];
 extern const char _binary_avpicker_abc_end[];
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_avpicker_GetABCCode(const char **buf, int *buflen)
+void NAPI_multimedia_avCastPicker_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_avpicker_abc_start;
@@ -35,11 +35,11 @@ void NAPI_avpicker_GetABCCode(const char **buf, int *buflen)
 /**
  * Module define
 */
-static napi_module avpickerModule = {
+static napi_module avCastPickerModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "avpicker",
+    .nm_modname = "multimedia.avCastPicker",
     .nm_priv = ((void*)0),
     .reserved = {0},
 };
@@ -49,5 +49,5 @@ static napi_module avpickerModule = {
 */
 extern "C" __attribute__((constructor)) void AVPickerRegisterModule(void)
 {
-    napi_module_register(&avpickerModule);
+    napi_module_register(&avCastPickerModule);
 }
