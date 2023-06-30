@@ -45,6 +45,7 @@ void HwCastStreamPlayer::Release()
     if (streamPlayer_) {
         streamPlayer_->UnregisterListener();
         streamPlayer_->Release();
+        streamPlayer_ = nullptr;
     }
 }
 
@@ -57,19 +58,19 @@ void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castContr
     }
     switch (castControlCommand.GetCommand()) {
         case AVCastControlCommand::CAST_CONTROL_CMD_PLAY:
-            streamPlayer_ ->Play();
+            streamPlayer_->Play();
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_PAUSE:
-            streamPlayer_ ->Pause();
+            streamPlayer_->Pause();
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_STOP:
-            streamPlayer_ ->Stop();
+            streamPlayer_->Stop();
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT:
-            streamPlayer_ ->Next();
+            streamPlayer_->Next();
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS:
-            streamPlayer_ ->Previous();
+            streamPlayer_->Previous();
             break;
         default:
             SendControlCommandWithParams(castControlCommand);
@@ -85,33 +86,33 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
             streamPlayer_->GetPosition(currentPosition);
             int32_t forwardTime;
             castControlCommand.GetForwardTime(forwardTime);
-            streamPlayer_ ->Seek(currentPosition + forwardTime);
+            streamPlayer_->Seek(currentPosition + forwardTime);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_REWIND:
             streamPlayer_->GetPosition(currentPosition);
             int32_t rewindTime;
             castControlCommand.GetRewindTime(rewindTime);
-            streamPlayer_ ->Seek(rewindTime > currentPosition ? 0 : currentPosition - rewindTime);
+            streamPlayer_->Seek(rewindTime > currentPosition ? 0 : currentPosition - rewindTime);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SEEK:
             int32_t seekTime;
             castControlCommand.GetSeekTime(seekTime);
-            streamPlayer_ ->Seek(seekTime);
+            streamPlayer_->Seek(seekTime);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SET_VOLUME:
             int32_t volume;
             castControlCommand.GetVolume(volume);
-            streamPlayer_ ->SetVolume(volume);
+            streamPlayer_->SetVolume(volume);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED:
             int32_t speed;
             castControlCommand.GetSpeed(speed);
-            streamPlayer_ ->SetSpeed(static_cast<CastEngine::PlaybackSpeed>(speed));
+            streamPlayer_->SetSpeed(static_cast<CastEngine::PlaybackSpeed>(speed));
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE:
             int32_t loopMode;
             castControlCommand.GetLoopMode(loopMode);
-            streamPlayer_ ->SetLoopMode(static_cast<CastEngine::LoopMode>(loopMode));
+            streamPlayer_->SetLoopMode(static_cast<CastEngine::LoopMode>(loopMode));
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE:
             break;
@@ -121,6 +122,11 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
     }
 }
 
+AVQueueItem HwCastStreamPlayer::GetCurrentItem()
+{
+    return currentAVQueueItem_;
+}
+
 int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
 {
     CastEngine::MediaInfo mediaInfo;
@@ -128,7 +134,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.mediaId = mediaDescription->GetMediaId();
     mediaInfo.mediaName = mediaDescription->GetTitle();
     if (mediaDescription->GetMediaUri() == "") {
-        mediaInfo.mediaUrl = mediaDescription->GetFdSrc();
+        mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
     } else {
         mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
     }
@@ -144,12 +150,18 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
 
-    if (streamPlayer_ && streamPlayer_->Play(mediaInfo)) {
-        SLOGI("Set media info and start successed");
-        return AVSESSION_SUCCESS;
+    std::lock_guard lockGuard(streamPlayerLock_);
+    if (!streamPlayer_ || currentAVQueueItem_.GetDescription()->GetMediaId() != mediaInfo.mediaId ||
+        streamPlayer_->Play() != AVSESSION_SUCCESS) {
+        SLOGE("Set media info and start failed");
+        return AVSESSION_ERROR;
     }
-    SLOGE("Set media info and start failed");
-    return AVSESSION_ERROR;
+    if (streamPlayer_->Play(mediaInfo) != AVSESSION_SUCCESS) {
+        SLOGE("Set media info and start failed");
+        return AVSESSION_ERROR;
+    }
+    currentAVQueueItem_ = avQueueItem;
+    return AVSESSION_SUCCESS;
 }
 
 int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
@@ -159,7 +171,7 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.mediaId = mediaDescription->GetMediaId();
     mediaInfo.mediaName = mediaDescription->GetTitle();
     if (mediaDescription->GetMediaUri() == "") {
-        mediaInfo.mediaUrl = mediaDescription->GetFdSrc();
+        mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
     } else {
         mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
     }
@@ -175,8 +187,10 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
 
-    if (streamPlayer_ && streamPlayer_->Load(mediaInfo)) {
+    std::lock_guard lockGuard(streamPlayerLock_);
+    if (streamPlayer_ && streamPlayer_->Load(mediaInfo) == AVSESSION_SUCCESS) {
         SLOGI("Set media info and prepare successed");
+        currentAVQueueItem_ = avQueueItem;
         return AVSESSION_SUCCESS;
     }
     SLOGE("Set media info and prepare failed");
@@ -248,7 +262,7 @@ int32_t HwCastStreamPlayer::RegisterControllerListener(std::shared_ptr<IAVCastCo
         SLOGE("RegisterControllerListener failed for the listener is nullptr");
         return AVSESSION_ERROR;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(streamPlayerLock_);
     if (find(streamPlayerListenerList_.begin(), streamPlayerListenerList_.end(), listener)
         != streamPlayerListenerList_.end()) {
         SLOGE("listener is already in streamPlayerListenerList_");
@@ -266,7 +280,7 @@ int32_t HwCastStreamPlayer::UnRegisterControllerListener(std::shared_ptr<IAVCast
         SLOGE("UnRegisterCastSessionStateListener failed for the listener is nullptr");
         return AVSESSION_ERROR;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(streamPlayerLock_);
     for (auto iter = streamPlayerListenerList_.begin(); iter != streamPlayerListenerList_.end();) {
         if (*iter == listener) {
             iter = streamPlayerListenerList_.erase(iter);

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "hw_cast_provider_session.h"
+#include <thread>
 #include "avsession_log.h"
+#include "hw_cast_provider_session.h"
 
 using namespace OHOS::CastEngine;
 
@@ -40,8 +41,11 @@ void HwCastProviderSession::Release()
         SLOGE("castSession_ is not exist");
         return;
     }
-    castSession_->UnregisterListener();
-    castSession_->Release();
+    auto self = shared_from_this();
+    std::thread([self]() {
+        self->castSession->Release();
+        self->castSession = nullptr;
+    }).detach();
 }
 
 bool HwCastProviderSession::AddDevice(std::string deviceId)

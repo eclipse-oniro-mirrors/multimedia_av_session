@@ -32,6 +32,7 @@ public:
     void Init();
     void Release() override;
     void SendControlCommand(const AVCastControlCommand castControlCommand) override;
+    AVQueueItem GetCurrentItem() override;
     int32_t Start(const AVQueueItem& avQueueItem) override;
     int32_t Prepare(const AVQueueItem& avQueueItem) override;
     int32_t GetDuration(int32_t &duration) override;
@@ -55,9 +56,10 @@ public:
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
 private:
-    std::mutex mutex_;
+    std::recursive_mutex streamPlayerLock_;
     std::shared_ptr<CastEngine::IStreamPlayer> streamPlayer_;
     std::vector<std::shared_ptr<IAVCastControllerProxyListener>> streamPlayerListenerList_;
+    AVQueueItem currentAVQueueItem_;
     std::map<CastEngine::PlayerStates, int32_t> castPlusStateToString_ = {
         {CastEngine::PlayerStates::PLAYER_STATE_ERROR, AVPlaybackState::PLAYBACK_STATE_ERROR},
         {CastEngine::PlayerStates::PLAYER_IDLE, AVPlaybackState::PLAYBACK_STATE_INITIAL},

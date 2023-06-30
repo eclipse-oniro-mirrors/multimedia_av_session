@@ -283,6 +283,7 @@ private:
     std::recursive_mutex sortFileReadWriteLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::recursive_mutex castDeviceInfoMapLock_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
 #endif
 

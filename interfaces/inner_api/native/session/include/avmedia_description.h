@@ -24,6 +24,7 @@
 #include "parcel.h"
 #include "avsession_pixel_map.h"
 #include "want_params.h"
+#include "av_file_descriptor.h"
 
 namespace OHOS::AVSession {
 class AVMediaDescription : public Parcelable {
@@ -104,8 +105,8 @@ public:
     void SetMediaUri(const std::string& mediaUri);
     std::string GetMediaUri() const;
 
-    void SetFdSrc(const std::string& fdSrc);
-    std::string GetFdSrc() const;
+    void SetFdSrc(const AVFileDescriptor& fdSrc);
+    AVFileDescriptor GetFdSrc() const;
 
     void SetDuration(const int32_t duration);
     int32_t GetDuration() const;
@@ -139,7 +140,7 @@ private:
     std::string lyricUri_ = "";
     std::string artist_ = "";
     std::string mediaUri_ = "";
-    std::string fdSrc_ = "";
+    AVFileDescriptor fdSrc_;
     int32_t duration_ = 0;
     int32_t startPosition_ = 0;
     int32_t creditsPosition_ = 0;

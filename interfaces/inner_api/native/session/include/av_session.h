@@ -164,7 +164,7 @@ public:
     /**
      * @brief Get the controller corresponding to this session.
      *
-     * @return Return to session controller{@link AVSessionController}.
+     * @return { std::shared_ptr<AVCastController> } Return AVCast controller.
      * @since 9
     */
     virtual std::shared_ptr<AVCastController> GetAVCastController() = 0;
@@ -240,6 +240,13 @@ public:
     virtual int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) = 0;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+
+    /**
+     * @brief Release cast process.
+     *
+     * @return { int32_t } Return whether the release is successful
+     * @since 10
+    */
     virtual int32_t ReleaseCast() = 0;
 #endif
 

@@ -97,13 +97,6 @@ int32_t AVSessionItem::Destroy()
 
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetAVMetaData: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession getavmetadata checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::string sessionId = GetSessionId();
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
@@ -141,13 +134,6 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 
 int32_t AVSessionItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetAVMetaData: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession getavqueueitems checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     std::lock_guard queueItemsLockGuard(queueItemsLock_);
     items = queueItems_;
     return AVSESSION_SUCCESS;
@@ -176,13 +162,6 @@ int32_t AVSessionItem::SetAVQueueItems(const std::vector<AVQueueItem>& items)
 
 int32_t AVSessionItem::GetAVQueueTitle(std::string& title)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetAVQueueTitle: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession getavqueuetitle checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     title = queueTitle_;
     return AVSESSION_SUCCESS;
 }
@@ -227,13 +206,6 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 
 int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetAVPlaybackState: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-                            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-                            "ERROR_MSG", "avsession getavplaybackstate checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     state = playbackState_;
     return AVSESSION_SUCCESS;
 }
@@ -246,13 +218,6 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
 
 int32_t AVSessionItem::GetExtras(AAFwk::WantParams& extras)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("GetExtras: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-            "CALLER_PID", GetCallingPid(), "SESSION_ID", descriptor_.sessionId_,
-            "ERROR_MSG", "avsession getextras checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     extras = extras_;
     return AVSESSION_SUCCESS;
 }
@@ -296,8 +261,10 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
 {
     if (castControllerProxy_ == nullptr) {
         SLOGI("CastControllerProxy is null, start get new proxy");
-
-        castControllerProxy_ = AVRouter::GetInstance().GetRemoteController(castHandle_);
+        {
+            std::lock_guard lockGuard(castHandleLock_);
+            castControllerProxy_ = AVRouter::GetInstance().GetRemoteController(castHandle_);
+        }
     }
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, nullptr, "Get castController proxy failed");
 
@@ -410,6 +377,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
+    std::lock_guard lockGuard(castHandleLock_);
     castHandle_ = castHandle;
 
     AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
@@ -420,6 +388,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("Add device process");
+    std::lock_guard lockGuard(castHandleLock_);
     AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_);
     int32_t castId = static_cast<int32_t>(castHandle_);
     AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo);
@@ -438,6 +407,12 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     if (castState == 6) { // 6 is connected status
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
     }
+
+    if (castState == 5) { // 5 is disconnected status
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+        AVRouter::GetInstance().StopCastSession(castHandle_);
+        castControlelrProxy_ = nullptr;
+    }
     
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     std::lock_guard controllersLockGuard(controllersLock_);
@@ -449,9 +424,12 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 int32_t AVSessionItem::StopCast()
 {
     SLOGI("Stop cast process");
-    AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
-    int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
-    CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
+    {
+        std::lock_guard lockGuard(castHandleLock_);
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+        int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
+        CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
+    }
 
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
@@ -792,7 +770,7 @@ int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, c
 
     OutputDeviceInfo outputDeviceInfo;
     GetOutputDevice(outputDeviceInfo);
-    int32_t castCategoryStreaming = 2;
+    int32_t castCategoryStreaming = ProtocolType::TYPE_CAST_PLUS_STREAM;
     for (int32_t i = 0; i < outputDeviceInfo.deviceInfos_.size(); i++) {
         outputDeviceInfo.deviceInfos_[i].castCategory_ = castCategoryStreaming;
     }

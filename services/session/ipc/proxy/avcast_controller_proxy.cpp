@@ -61,6 +61,8 @@ int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteFileDescriptor(avQueueItem.GetDescription()->GetFdSrc().fd_),
+        ERR_UNMARSHALLING, "Write avQueueItem failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");

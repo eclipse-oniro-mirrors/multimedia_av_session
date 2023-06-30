@@ -44,6 +44,8 @@ public:
 
     int32_t StopCast(const int64_t castHandle) override;
 
+    int32_t StopCastSession(const int64_t castHandle) override;
+
     int32_t RegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) override;
 
