@@ -18,11 +18,19 @@ import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
 es2abc_gen_abc("gen_avpicker_abc") {
-  src_js = rebase_path("avpicker.js")
-  dst_file = rebase_path(target_out_dir + "/avpicker.abc")
-  in_puts = [ "avpicker.js" ]
-  out_puts = [ target_out_dir + "/avpicker.abc" ]
-  extra_args = [ "--module" ]
+  if (use_mingw_win || use_mac || use_linux) {
+    src_js = rebase_path("avpicker_mock.js")
+    dst_file = rebase_path(target_out_dir + "/avpicker.abc")
+    in_puts = [ "avpicker_mock.js" ]
+    out_puts = [ target_out_dir + "/avpicker.abc" ]
+    extra_args = [ "--module" ]
+  } else {
+    src_js = rebase_path("avpicker.js")
+    dst_file = rebase_path(target_out_dir + "/avpicker.abc")
+    in_puts = [ "avpicker.js" ]
+    out_puts = [ target_out_dir + "/avpicker.abc" ]
+    extra_args = [ "--module" ]
+  }
 }
 
 gen_js_obj("avpicker_abc") {
@@ -39,7 +47,7 @@ gen_obj("avpicker_abc_preview") {
   snapshot_dep = [ ":gen_avpicker_abc" ]
 }
 
-ohos_shared_library("avpicker") {
+ohos_shared_library("avcastpicker") {
   sources = [ "avpicker.cpp" ]
 
   if (use_mingw_win || use_mac || use_linux) {
@@ -58,7 +66,7 @@ ohos_shared_library("avpicker") {
 
   external_deps = [ "napi:ace_napi" ]
 
-  relative_install_dir = "module"
+  relative_install_dir = "module/multimedia"
   subsystem_name = "multimedia"
   part_name = "av_session"
 }
