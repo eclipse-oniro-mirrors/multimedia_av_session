@@ -161,6 +161,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         return AVSESSION_ERROR;
     }
     currentAVQueueItem_ = avQueueItem;
+    SLOGI("Set media info and start successfully");
     return AVSESSION_SUCCESS;
 }
 
