@@ -43,8 +43,8 @@ void HwCastProviderSession::Release()
     }
     auto self = shared_from_this();
     std::thread([self]() {
-        self->castSession->Release();
-        self->castSession = nullptr;
+        self->castSession_->Release();
+        self->castSession_ = nullptr;
     }).detach();
 }
 
