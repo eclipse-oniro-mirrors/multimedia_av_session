@@ -480,6 +480,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     }
 
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "StopCast: session is not exist");
     CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
 
     return AVSESSION_SUCCESS;
@@ -981,6 +982,7 @@ int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId,
 {
     SLOGI("Start get cast controller");
     auto session = GetContainer().GetSessionById(sessionId);
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "StopCast: session is not exist");
     auto result = session->GetAVCastControllerInner();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, AVSESSION_ERROR, "GetAVCastControllerInner failed");
     object = result;
