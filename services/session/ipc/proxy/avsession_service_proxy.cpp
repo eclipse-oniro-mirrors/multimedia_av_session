@@ -32,7 +32,7 @@ AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject>& impl)
 std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::string& tag, int32_t type,
                                                                 const AppExecFwk::ElementName& elementName)
 {
-    auto object = CreateSessionInner(tag, type, elementName);
+    auto object = AVSessionServiceProxy::CreateSessionInner(tag, type, elementName);
     if (object == nullptr) {
         SLOGI("object is nullptr");
         return nullptr;
@@ -153,7 +153,7 @@ int32_t AVSessionServiceProxy::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {
     sptr<IRemoteObject> object;
-    auto ret = CreateControllerInner(sessionId, object);
+    auto ret = AVSessionServiceProxy::CreateControllerInner(sessionId, object);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateControllerInner failed");
 
     auto controllerObject = iface_cast<AVSessionControllerProxy>(object);
@@ -190,7 +190,7 @@ int32_t AVSessionServiceProxy::GetAVCastController(const std::string& sessionId,
     std::shared_ptr<AVCastController>& castController)
 {
     sptr<IRemoteObject> object;
-    auto ret = GetAVCastControllerInner(sessionId, object);
+    auto ret = AVSessionServiceProxy::GetAVCastControllerInner(sessionId, object);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateControllerInner failed");
 
     auto castControllerObject = iface_cast<AVCastControllerProxy>(object);
