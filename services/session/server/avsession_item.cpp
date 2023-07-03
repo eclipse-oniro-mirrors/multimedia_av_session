@@ -770,7 +770,7 @@ int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, c
     OutputDeviceInfo outputDeviceInfo;
     GetOutputDevice(outputDeviceInfo);
     int32_t castCategoryStreaming = ProtocolType::TYPE_CAST_PLUS_STREAM;
-    for (int32_t i = 0; i < outputDeviceInfo.deviceInfos_.size(); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size()); i++) {
         outputDeviceInfo.deviceInfos_[i].castCategory_ = castCategoryStreaming;
     }
     SetOutputDevice(outputDeviceInfo);
