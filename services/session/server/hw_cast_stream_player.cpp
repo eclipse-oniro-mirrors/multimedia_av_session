@@ -151,12 +151,16 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.appName = mediaDescription->GetAppName();
 
     std::lock_guard lockGuard(streamPlayerLock_);
-    if (!streamPlayer_ || currentAVQueueItem_.GetDescription()->GetMediaId() != mediaInfo.mediaId ||
-        streamPlayer_->Play() != AVSESSION_SUCCESS) {
+    if (!streamPlayer_) {
         SLOGE("Set media info and start failed");
         return AVSESSION_ERROR;
     }
-    if (streamPlayer_->Play(mediaInfo) != AVSESSION_SUCCESS) {
+    if (currentAVQueueItem_.GetDescription()->GetMediaId() == mediaInfo.mediaId) {
+        if (streamPlayer_->Play() != AVSESSION_SUCCESS) {
+            SLOGE("Set media info and start failed");
+            return AVSESSION_ERROR;
+        }
+    } else if (streamPlayer_->Play(mediaInfo) != AVSESSION_SUCCESS) {
         SLOGE("Set media info and start failed");
         return AVSESSION_ERROR;
     }
@@ -230,7 +234,7 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
     int castPosition;
     streamPlayer_->GetPosition(castPosition);
     AVPlaybackState::Position position;
-    position.updateTime_ = static_cast<int64_t>(castPosition);
+    position.elapsedTime_ = static_cast<int64_t>(castPosition);
     avPlaybackState.SetPosition(position);
     CastEngine::LoopMode castLoopMode;
     streamPlayer_->GetLoopMode(castLoopMode);
@@ -315,10 +319,20 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
 
 void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int duration)
 {
+    if (position == -1 && bufferPosition == -1) { // -1 is invalid(default) data
+        SLOGW("Invalid position change callback");
+        return;
+    }
     AVPlaybackState avCastPlaybackState;
-    AVPlaybackState::Position castPosition;
-    castPosition.updateTime_ = position;
-    avCastPlaybackState.SetPosition(castPosition);
+    if (position != -1) { // -1 is invalid(default) position
+        AVPlaybackState::Position castPosition;
+        castPosition.elapsedTime_ = position;
+        avCastPlaybackState.SetPosition(castPosition);
+    }
+    if (bufferPosition != -1) { // -1 is invalid(default) bufferPosition
+        avCastPlaybackState.SetBufferedTime(bufferPosition);
+    }
+
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnPositionChange for registered listeners");

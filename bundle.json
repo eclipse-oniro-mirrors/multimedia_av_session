@@ -13,6 +13,7 @@
       "name": "av_session",
       "subsystem": "multimedia",
       "syscap": [
+          "SystemCapability.Multimedia.AVSession.AVCast",
           "SystemCapability.Multimedia.AVSession.Core",
           "SystemCapability.Multimedia.AVSession.Manager"
       ],
