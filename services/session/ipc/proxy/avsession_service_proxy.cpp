@@ -404,7 +404,7 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
 
     int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfoSize), ERR_MARSHALLING, "write deviceInfoSize failed");
-    for (const DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
+    for (const auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.castCategory_),
             ERR_MARSHALLING, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceId_), ERR_MARSHALLING, "write deviceId failed");

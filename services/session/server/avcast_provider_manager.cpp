@@ -32,7 +32,7 @@ void AVCastProviderManager::OnDeviceAvailable(std::vector<DeviceInfo> deviceInfo
 {
     SLOGI("On device available");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    for (int i = 0; i < deviceInfos.size(); i++) {
+    for (size_t i = 0; i < deviceInfos.size(); i++) {
         deviceInfos[i].providerId_ = providerId_;
     }
     OutputDeviceInfo outputDeviceInfo;
