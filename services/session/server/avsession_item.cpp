@@ -413,7 +413,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         AVRouter::GetInstance().StopCastSession(castHandle_);
         castControllerProxy_ = nullptr;
     }
-    
+
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     std::lock_guard controllersLockGuard(controllersLock_);
     for (const auto& controller : controllers_) {
