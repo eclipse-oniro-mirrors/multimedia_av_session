@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-var Prompt = globalThis.requireNapi('prompt');
-var commonEventManager = globalThis.requireNapi('commonEventManager');
-var AVSessionManager = globalThis.requireNapi('multimedia.avsession');
-
 const TAG = 'avpicker_component_mock ';
 
 export class AVCastPicker extends ViewPU {
@@ -41,25 +37,6 @@ export class AVCastPicker extends ViewPU {
 
     aboutToAppear() {
         console.info(TAG + 'aboutToAppear');
-        let subscriber = undefined;
-        let subscribeInfo = {
-            events: ['avpickerCommunication']
-        };
-        commonEventManager.createSubscriber(subscribeInfo, (err, data) => {
-            if (err) {
-                console.info(TAG + 'createSubscriber fail, err : ' + err);
-                return;
-            }
-            subscriber = data;
-            commonEventManager.subscribe(subscriber, (err, data) => {
-                if (err) {
-                    console.info(TAG + 'subscribe fail, err : ' + err);
-                    return;
-                }
-                console.info(TAG + 'subscriber get message : ' + JSON.stringify(data));
-                Prompt.showToast({ message: String(data.data), duration: 1500, bottom: 30 });
-            });
-        });
     }
 
     aboutToDisappear() {
