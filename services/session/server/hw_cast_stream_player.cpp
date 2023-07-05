@@ -134,7 +134,12 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.mediaId = mediaDescription->GetMediaId();
     mediaInfo.mediaName = mediaDescription->GetTitle();
     if (mediaDescription->GetMediaUri() == "") {
-        mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
+        if (mediaDescription->GetFdSrc().fd_ == 0) {
+            SLOGW("No media id and fd src");
+            mediaInfo.mediaUrl = "http:";
+        } else {
+            mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
+        }
     } else {
         mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
     }
@@ -155,7 +160,8 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         SLOGE("Set media info and start failed");
         return AVSESSION_ERROR;
     }
-    if (currentAVQueueItem_.GetDescription()->GetMediaId() == mediaInfo.mediaId) {
+    if (currentAVQueueItem_.GetDescription() && currentAVQueueItem_.GetDescription()->GetMediaUri() != "http:" &&
+        currentAVQueueItem_.GetDescription()->GetMediaId() == mediaInfo.mediaId) {
         if (streamPlayer_->Play() != AVSESSION_SUCCESS) {
             SLOGE("Set media info and start failed");
             return AVSESSION_ERROR;
@@ -176,7 +182,13 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.mediaId = mediaDescription->GetMediaId();
     mediaInfo.mediaName = mediaDescription->GetTitle();
     if (mediaDescription->GetMediaUri() == "") {
-        mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
+        if (mediaDescription->GetFdSrc().fd_ == 0) {
+            SLOGW("No media id and fd src");
+            mediaInfo.mediaUrl = "http:";
+            avQueueItem.GetDescription()->SetMediaUri("http:");
+        } else {
+            mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
+        }
     } else {
         mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
     }
@@ -234,7 +246,7 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
     int castPosition;
     streamPlayer_->GetPosition(castPosition);
     AVPlaybackState::Position position;
-    position.elapsedTime_ = static_cast<int64_t>(castPosition);
+    position.updateTime_ = static_cast<int64_t>(castPosition);
     avPlaybackState.SetPosition(position);
     CastEngine::LoopMode castLoopMode;
     streamPlayer_->GetLoopMode(castLoopMode);
@@ -319,20 +331,19 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
 
 void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int duration)
 {
-    if (position == -1 && bufferPosition == -1) { // -1 is invalid(default) data
+    if (position == -1 && bufferPosition == -1) { // -1 is invalid(default) value
         SLOGW("Invalid position change callback");
         return;
     }
     AVPlaybackState avCastPlaybackState;
-    if (position != -1) { // -1 is invalid(default) position
+    if (position != -1) { // -1 is invalid position
         AVPlaybackState::Position castPosition;
         castPosition.elapsedTime_ = position;
         avCastPlaybackState.SetPosition(castPosition);
     }
-    if (bufferPosition != -1) { // -1 is invalid(default) bufferPosition
+    if (bufferPosition != -1) { // -1 is invalid buffer position
         avCastPlaybackState.SetBufferedTime(bufferPosition);
     }
-
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnPositionChange for registered listeners");
@@ -458,5 +469,10 @@ void HwCastStreamPlayer::OnVideoSizeChanged(int width, int height)
             listener->OnVideoSizeChange(width, height);
         }
     }
+}
+
+void HwCastStreamPlayer::OneEndOfStream(int isLooping)
+{
+    SLOGI("Received EndOfStream callback, value is %{public}d", isLooping);
 }
 } // namespace OHOS::AVSession
