@@ -41,7 +41,7 @@ int32_t AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code < SERVICE_CMD_MAX) {
+    if (code < static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX)) {
         return (this->*handlers[code])(data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

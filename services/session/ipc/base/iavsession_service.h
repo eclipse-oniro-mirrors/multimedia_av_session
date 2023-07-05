@@ -19,6 +19,7 @@
 #include "audio_system_manager.h"
 #include "iremote_broker.h"
 #include "iav_session.h"
+#include "iavsession_service_ipc_interface_code.h"
 #include "iclient_death.h"
 #include "isession_listener.h"
 #include "key_event.h"
@@ -27,28 +28,6 @@ namespace OHOS::AVSession {
 class IAVSessionService : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.avsession.IAVSessionService");
-
-    enum {
-        SERVICE_CMD_CREATE_SESSION,
-        SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS,
-        SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID,
-        SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS,
-        SERVICE_CMD_CREATE_CONTROLLER,
-        SERVICE_CMD_GET_AV_CAST_CONTROLLER,
-        SERVICE_CMD_REGISTER_SESSION_LISTENER,
-        SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT,
-        SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND,
-        SERVICE_CMD_REGISTER_CLIENT_DEATH,
-        SERVICE_CMD_CAST_AUDIO,
-        SERVICE_CMD_CAST_AUDIO_FOR_ALL,
-        SERVICE_CMD_SEND_COMMAND_TO_REMOTE,
-        SERVICE_CMD_START_CAST_DISCOVERY,
-        SERVICE_CMD_STOP_CAST_DISCOVERY,
-        SERVICE_CMD_SET_DISCOVERYABLE,
-        SERVICE_CMD_START_CAST,
-        SERVICE_CMD_STOP_CAST,
-        SERVICE_CMD_MAX
-    };
 
     enum RemoteServiceCommand {
         COMMAND_INVALID = -1,

@@ -35,8 +35,10 @@ int32_t RemoteSessionCommandProcess::ProcessCastAudioCommand(const RemoteService
     CHECK_AND_RETURN_RET_LOG(data.WriteString(input), ERR_MARSHALLING, "write input failed");
     MessageParcel reply;
     MessageOption option;
-    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(SERVICE_CMD_SEND_COMMAND_TO_REMOTE, data, reply, option) == 0,
-                             ERR_RPC_SEND_REQUEST, "send request failed");
+    CHECK_AND_RETURN_RET_LOG(Remote()->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_COMMAND_TO_REMOTE),\
+        data, reply, option) == 0,
+        ERR_RPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_MARSHALLING, "read reply failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "send remote request failed");
