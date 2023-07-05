@@ -123,7 +123,7 @@ ohos_shared_library("avsession_service") {
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
@@ -142,11 +142,11 @@ ohos_shared_library("avsession_service") {
 
   if (multimedia_av_session_enable_trace_control) {
     cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
-    external_deps += [ "hitrace_native:hitrace_meter" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
   }
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 
   subsystem_name = "multimedia"
@@ -229,7 +229,7 @@ ohos_shared_library("avsession_router") {
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
@@ -244,11 +244,11 @@ ohos_shared_library("avsession_router") {
 
   if (multimedia_av_session_enable_trace_control) {
     cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
-    external_deps += [ "hitrace_native:hitrace_meter" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
   }
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 
   subsystem_name = "multimedia"
@@ -345,7 +345,7 @@ ohos_shared_library("avsession_item") {
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
@@ -364,11 +364,11 @@ ohos_shared_library("avsession_item") {
 
   if (multimedia_av_session_enable_trace_control) {
     cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
-    external_deps += [ "hitrace_native:hitrace_meter" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
   }
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 
   subsystem_name = "multimedia"
@@ -453,7 +453,7 @@ ohos_shared_library("avsession_cast_item") {
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
@@ -468,11 +468,11 @@ ohos_shared_library("avsession_cast_item") {
 
   if (multimedia_av_session_enable_trace_control) {
     cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
-    external_deps += [ "hitrace_native:hitrace_meter" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
   }
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 
   subsystem_name = "multimedia"

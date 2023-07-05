@@ -46,7 +46,7 @@ ohos_fuzztest("BkGrAudioControllerFuzzTest") {
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",

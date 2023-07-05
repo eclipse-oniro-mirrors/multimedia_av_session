@@ -69,7 +69,7 @@ ohos_shared_library("avsession_napi") {
     "audio_framework:audio_client",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image",
@@ -92,11 +92,11 @@ ohos_shared_library("avsession_napi") {
 
   if (multimedia_av_session_enable_trace_control) {
     cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
-    external_deps += [ "hitrace_native:hitrace_meter" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
   }
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
   relative_install_dir = "module/multimedia"
 

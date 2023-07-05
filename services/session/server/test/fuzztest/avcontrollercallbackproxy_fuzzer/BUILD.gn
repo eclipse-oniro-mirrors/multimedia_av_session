@@ -38,7 +38,7 @@ ohos_fuzztest("AVControllerCallbackProxyFuzzTest") {
     "ability_runtime:wantagent_innerkits",
     "audio_framework:audio_client",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",

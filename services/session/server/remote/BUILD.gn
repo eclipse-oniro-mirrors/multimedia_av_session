@@ -40,7 +40,7 @@ common_external_deps = [
   "audio_framework:audio_client",
   "c_utils:utils",
   "data_object:distributeddataobject_impl",
-  "hiviewdfx_hilog_native:libhilog",
+  "hilog:libhilog",
   "input:libmmi-client",
   "ipc:ipc_single",
   "safwk:system_ability_fwk",
@@ -56,12 +56,12 @@ if (castplus_cast_engine_enable) {
 
 if (multimedia_av_session_enable_trace_control) {
   common_cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
-  common_external_deps += [ "hitrace_native:hitrace_meter" ]
+  common_external_deps += [ "hitrace:hitrace_meter" ]
 }
 
 if (multimedia_av_session_enable_sysevent_control) {
   common_cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
-  common_external_deps += [ "hisysevent_native:libhisysevent" ]
+  common_external_deps += [ "hisysevent:libhisysevent" ]
 }
 
 ohos_shared_library("remote_session_source") {
