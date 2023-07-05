@@ -441,7 +441,7 @@ enum ConnectionState {
      * @syscap SystemCapability.Multimedia.AVSession.Core
      * @since 10
      */
-    STATE_DISCONNECTED = 5,
+    STATE_DISCONNECTED = 6,
 };
 
 enum DeviceType {

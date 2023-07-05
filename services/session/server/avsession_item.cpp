@@ -51,6 +51,10 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
 AVSessionItem::~AVSessionItem()
 {
     SLOGD("destroy id=%{public}s", descriptor_.sessionId_.c_str());
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    StopCast();
+    SLOGD("Stop cast finished");
+#endif
 }
 
 std::string AVSessionItem::GetSessionId()
@@ -404,7 +408,8 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     } else {
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
-    if (castState == 6) { // 6 is connected status
+    if (castState == 6) { // 6 is connected status (stream)
+        castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
     }
 
@@ -412,6 +417,13 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         AVRouter::GetInstance().StopCastSession(castHandle_);
         castControllerProxy_ = nullptr;
+        OutputDeviceInfo localDevice;
+        DeviceInfo localInfo;
+        localInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        localInfo.deviceId_ = "0";
+        localInfo.deviceName_ = "LocalDevice";
+        localDevice.deviceInfos_.emplace_back(localInfo);
+        descriptor_.outputDeviceInfo_ = localDevice;
     }
 
     HandleOutputDeviceChange(castState, outputDeviceInfo);
