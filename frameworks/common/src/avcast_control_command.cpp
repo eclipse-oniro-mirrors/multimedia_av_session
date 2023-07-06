@@ -66,6 +66,14 @@ bool AVCastControlCommand::Marshalling(Parcel& parcel) const
         return false;
     }
     switch (cmd_) {
+        case CAST_CONTROL_CMD_FAST_FORWARD:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
+                && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write fast forward time failed");
+            break;
+        case CAST_CONTROL_CMD_REWIND:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
+                && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write rewind time failed");
+            break;
         case CAST_CONTROL_CMD_SEEK:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
                 && parcel.WriteInt64(std::get<int32_t>(param_)), false, "write seek time failed");
@@ -78,7 +86,12 @@ bool AVCastControlCommand::Marshalling(Parcel& parcel) const
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
                 && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write speed failed");
             break;
+        case CAST_CONTROL_CMD_SET_LOOP_MODE:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
+                && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write loop mode failed");
+            break;
         default:
+            SLOGD("Param of AVCastCommand is not exist");
             break;
     }
     return true;
