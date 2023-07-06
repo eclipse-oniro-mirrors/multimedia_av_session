@@ -43,18 +43,18 @@ ohos_shared_library("avsession_utils") {
   external_deps = [
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 
   cflags = []
 
   if (multimedia_av_session_enable_trace_control) {
     cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
-    external_deps += [ "hitrace_native:hitrace_meter" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
   }
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 
   subsystem_name = "multimedia"

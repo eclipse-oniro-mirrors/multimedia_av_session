@@ -95,8 +95,8 @@ ohos_shared_library("media_control_extension") {
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "c_utils:utils",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_napi_common",
   ]
 
@@ -119,7 +119,7 @@ ohos_shared_library("media_control_extension_module") {
     "ability_base:want",
     "ability_runtime:runtime",
     "bundle_framework:appexecfwk_core",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "napi:ace_napi",
   ]
 
