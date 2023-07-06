@@ -112,7 +112,7 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
         case AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE:
             int32_t loopMode;
             castControlCommand.GetLoopMode(loopMode);
-            streamPlayer_->SetLoopMode(static_cast<CastEngine::LoopMode>(loopMode));
+            streamPlayer_->SetLoopMode(static_cast<CastEngine::LoopMode>(loopMode + 1)); // Convert loop mode
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE:
             break;
@@ -362,6 +362,8 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetMediaSize(mediaInfo.mediaSize);
     mediaDescription->SetStartPosition(static_cast<uint32_t>(mediaInfo.startPosition));
     mediaDescription->SetDuration(static_cast<uint32_t>(mediaInfo.duration));
+    mediaDescription->SetCreditsPosition(static_cast<int32_t>(mediaInfo.closingCreditsPosition));
+    mediaDescription->SetAlbumCoverUri(mediaInfo.albumCoverUrl);
     mediaDescription->SetAlbumTitle(mediaInfo.albumTitle);
     mediaDescription->SetArtist(mediaInfo.mediaArtist);
     mediaDescription->SetLyricUri(mediaInfo.lrcUrl);
