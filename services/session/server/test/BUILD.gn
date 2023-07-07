@@ -57,9 +57,9 @@ ohos_unittest("AVSessionServiceTest") {
     "device_manager:devicemanagersdk",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
   ]
 }
@@ -86,9 +86,9 @@ ohos_unittest("AppManagerAdapterTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
@@ -116,9 +116,9 @@ ohos_unittest("AbilityConnectHelperTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
@@ -146,9 +146,9 @@ ohos_unittest("BkGrAudioControllerTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
