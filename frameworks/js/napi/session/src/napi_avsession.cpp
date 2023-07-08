@@ -97,7 +97,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setAVQueueItems", SetAVQueueItems),
         DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
         DECLARE_NAPI_FUNCTION("getAVCastController", GetAVCastController),
-        DECLARE_NAPI_FUNCTION("stopCast", ReleaseCast),
+        DECLARE_NAPI_FUNCTION("stopCasting", ReleaseCast),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor {};
