@@ -12,4 +12,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- services\session\ipc\base\iavsession_service_ipc_interface_code.h @leonchan5
+ services/session/ipc/base/iavsession_service_ipc_interface_code.h @leonchan5
