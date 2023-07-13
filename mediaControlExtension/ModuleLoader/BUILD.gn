@@ -98,6 +98,7 @@ ohos_shared_library("media_control_extension") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_napi_common",
+    "napi:ace_napi",
   ]
 
   subsystem_name = "multimedia"
