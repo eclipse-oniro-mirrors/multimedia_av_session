@@ -53,7 +53,8 @@
           "safwk",
           "samgr",
           "samgr_proxy",
-          "system_ability_fwk"
+          "system_ability_fwk",
+          "window_manager"
         ],
         "third_party": [
           "openssl"
