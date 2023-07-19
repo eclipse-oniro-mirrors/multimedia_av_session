@@ -218,6 +218,10 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
 bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
     for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
+            SLOGI("Remote sessions do not need to be saved to history");
+            continue;
+        }
         if (session->GetUid() != info.uid) {
             continue;
         }
