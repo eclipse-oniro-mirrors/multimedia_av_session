@@ -46,9 +46,9 @@ ohos_fuzztest("AudioAdapterInterfaceFuzzTest") {
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
     "hilog:libhilog",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

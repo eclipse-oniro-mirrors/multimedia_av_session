@@ -47,9 +47,9 @@ common_external_deps = [
   "device_manager:devicemanagersdk",
   "dsoftbus:softbus_client",
   "hilog:libhilog",
+  "image_framework:image_native",
   "input:libmmi-client",
   "ipc:ipc_single",
-  "multimedia_image_framework:image_native",
   "samgr:samgr_proxy",
 ]
 

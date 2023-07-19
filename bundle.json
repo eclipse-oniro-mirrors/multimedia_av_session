@@ -48,7 +48,7 @@
           "libcrypto_shared",
           "ipc_single",
           "libhilog",
-          "multimedia_image_framework",
+          "image_framework",
           "napi",
           "safwk",
           "samgr",

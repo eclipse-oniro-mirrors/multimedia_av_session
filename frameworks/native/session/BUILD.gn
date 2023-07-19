@@ -64,9 +64,9 @@ ohos_shared_library("avsession_client") {
     "audio_framework:audio_client",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
   ]
 
@@ -119,9 +119,9 @@ ohos_shared_library("avsession_cast_client") {
     "audio_framework:audio_client",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
   ]
 
