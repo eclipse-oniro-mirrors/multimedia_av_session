@@ -48,7 +48,7 @@ public:
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    int32_t GetAVCastController(const std::string& sessionId, std::shared_ptr<AVCastController>& controller);
+    int32_t GetAVCastController(const std::string& sessionId, std::shared_ptr<AVCastController>& castController);
 
     int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 #endif

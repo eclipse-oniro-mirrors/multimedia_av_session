@@ -47,7 +47,7 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability)
 
     std::lock_guard lockGuard(providerManagerLock_);
 
-    for (const auto& [providerNumber_, providerManager] : providerManagerMap_) {
+    for (const auto& [number, providerManager] : providerManagerMap_) {
         CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
             AVSESSION_ERROR, "provider is nullptr");
         providerManager->provider_->StartDiscovery(castDeviceCapability);
@@ -61,7 +61,7 @@ int32_t AVRouterImpl::StopCastDiscovery()
 
     std::lock_guard lockGuard(providerManagerLock_);
 
-    for (const auto& [providerNumber_, providerManager] : providerManagerMap_) {
+    for (const auto& [number, providerManager] : providerManagerMap_) {
         CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
             AVSESSION_ERROR, "provider is nullptr");
         providerManager->provider_->StopDiscovery();
@@ -75,7 +75,7 @@ int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 
     std::lock_guard lockGuard(providerManagerLock_);
 
-    for (const auto& [providerNumber_, providerManager] : providerManagerMap_) {
+    for (const auto& [number, providerManager] : providerManagerMap_) {
         CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
             AVSESSION_ERROR, "provider is nullptr");
         providerManager->provider_->SetDiscoverable(enable);

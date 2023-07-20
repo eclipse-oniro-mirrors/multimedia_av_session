@@ -1206,7 +1206,7 @@ napi_status NapiUtils::GetOptionalString(napi_env env, napi_value in, DeviceInfo
         if (maxLen == 0) {
             out.ipAddress_ = "";
         } else {
-            if (maxLen <= 0 || maxLen >= STR_MAX_LENGTH) {
+            if (maxLen < 0 || maxLen >= STR_MAX_LENGTH) {
                 return napi_invalid_arg;
             }
             char buf[STR_MAX_LENGTH + STR_TAIL_LENGTH] {};

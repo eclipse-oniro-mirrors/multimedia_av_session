@@ -300,7 +300,7 @@ int32_t HwCastStreamPlayer::UnRegisterControllerListener(std::shared_ptr<IAVCast
     std::lock_guard lockGuard(streamPlayerLock_);
     for (auto iter = streamPlayerListenerList_.begin(); iter != streamPlayerListenerList_.end();) {
         if (*iter == listener) {
-            iter = streamPlayerListenerList_.erase(iter);
+            streamPlayerListenerList_.erase(iter);
             SLOGI("UnRegisterControllerListener successed, and erase it from streamPlayerListenerList_");
             return AVSESSION_SUCCESS;
         } else {

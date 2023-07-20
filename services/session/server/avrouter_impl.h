@@ -34,7 +34,7 @@ public:
 
     int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) override;
 
-    int32_t OnCastServerDied(int32_t providerId) override;
+    int32_t OnCastServerDied(int32_t providerNumber) override;
 
     std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int64_t castHandle) override;
 
