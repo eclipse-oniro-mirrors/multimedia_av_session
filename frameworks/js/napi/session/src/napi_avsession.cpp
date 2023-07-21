@@ -1092,10 +1092,10 @@ napi_status NapiAVSession::OnSkipToQueueItem(napi_env env, NapiAVSession* napiSe
 
 napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_PLAY)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1105,10 +1105,10 @@ napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession, nap
 
 napi_status NapiAVSession::OffPause(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PAUSE, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PAUSE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_PAUSE)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PAUSE);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1118,10 +1118,10 @@ napi_status NapiAVSession::OffPause(napi_env env, NapiAVSession* napiSession, na
 
 napi_status NapiAVSession::OffStop(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_STOP, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_STOP, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_STOP)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_STOP);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1131,10 +1131,10 @@ napi_status NapiAVSession::OffStop(napi_env env, NapiAVSession* napiSession, nap
 
 napi_status NapiAVSession::OffPlayNext(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_NEXT, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_NEXT, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_PLAY_NEXT)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1144,10 +1144,11 @@ napi_status NapiAVSession::OffPlayNext(napi_env env, NapiAVSession* napiSession,
 
 napi_status NapiAVSession::OffPlayPrevious(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_PREVIOUS, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_PREVIOUS, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_PLAY_PREVIOUS)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1157,10 +1158,10 @@ napi_status NapiAVSession::OffPlayPrevious(napi_env env, NapiAVSession* napiSess
 
 napi_status NapiAVSession::OffFastForward(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_FAST_FORWARD, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_FAST_FORWARD, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_FAST_FORWARD)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_FAST_FORWARD);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1170,10 +1171,10 @@ napi_status NapiAVSession::OffFastForward(napi_env env, NapiAVSession* napiSessi
 
 napi_status NapiAVSession::OffRewind(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_REWIND, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_REWIND, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_REWIND)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_REWIND);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1183,10 +1184,10 @@ napi_status NapiAVSession::OffRewind(napi_env env, NapiAVSession* napiSession, n
 
 napi_status NapiAVSession::OffSeek(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SEEK, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SEEK, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_SEEK)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_SEEK);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1196,10 +1197,10 @@ napi_status NapiAVSession::OffSeek(napi_env env, NapiAVSession* napiSession, nap
 
 napi_status NapiAVSession::OffSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SET_SPEED, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SET_SPEED, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_SET_SPEED)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_SET_SPEED);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1209,10 +1210,10 @@ napi_status NapiAVSession::OffSetSpeed(napi_env env, NapiAVSession* napiSession,
 
 napi_status NapiAVSession::OffSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SET_LOOP_MODE, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SET_LOOP_MODE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_SET_LOOP_MODE)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
@@ -1222,10 +1223,10 @@ napi_status NapiAVSession::OffSetLoopMode(napi_env env, NapiAVSession* napiSessi
 
 napi_status NapiAVSession::OffToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE, callback);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE)) {
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");

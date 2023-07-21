@@ -48,7 +48,7 @@ void HwCastProviderSession::Release()
     }).detach();
 }
 
-bool HwCastProviderSession::AddDevice(std::string deviceId)
+bool HwCastProviderSession::AddDevice(const std::string deviceId)
 {
     SLOGI("AddDevice in HwCastProviderSession");
     if (!castSession_) {
@@ -111,7 +111,7 @@ bool HwCastProviderSession::UnRegisterCastSessionStateListener(std::shared_ptr<I
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto iter = castSessionStateListenerList_.begin(); iter != castSessionStateListenerList_.end();) {
         if (*iter == listener) {
-            iter = castSessionStateListenerList_.erase(iter);
+            castSessionStateListenerList_.erase(iter);
             return true;
         } else {
             ++iter;

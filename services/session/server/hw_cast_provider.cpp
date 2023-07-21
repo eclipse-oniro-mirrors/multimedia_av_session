@@ -171,7 +171,7 @@ bool HwCastProvider::UnRegisterCastStateListener(std::shared_ptr<IAVCastStateLis
     }
     for (auto iter = castStateListenerList_.begin(); iter != castStateListenerList_.end();) {
         if (*iter == listener) {
-            iter = castStateListenerList_.erase(iter);
+            castStateListenerList_.erase(iter);
             SLOGI("UnRegisterCastStateListener successed, and erase it from castStateListenerList_");
             return true;
         } else {
