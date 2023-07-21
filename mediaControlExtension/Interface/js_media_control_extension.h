@@ -164,7 +164,7 @@ private:
     JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
-    std::unordered_map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
+    std::unordered_map<int32_t, sptr<Rosen::Window>> uiWindowMap_;
     std::unordered_set<uint64_t> foregroundWindows_;
 };
 }  // namespace AbilityRuntime

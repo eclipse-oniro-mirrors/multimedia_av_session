@@ -218,7 +218,7 @@ void JsMediaControlExtension::OnCommandWindow(const AAFwk::Want &want, const spt
         HILOG_ERROR("sessionInfo is nullptr.");
         return;
     }
-    HILOG_DEBUG("begin. persistentId: %{private}" PRIu64", winCmd: %{public}d", sessionInfo->persistentId, winCmd);
+    HILOG_DEBUG("begin. persistentId: %{private}d, winCmd: %{public}d", sessionInfo->persistentId, winCmd);
     Extension::OnCommandWindow(want, sessionInfo, winCmd);
     switch (winCmd) {
         case AAFwk::WIN_CMD_FOREGROUND:
@@ -344,7 +344,7 @@ void JsMediaControlExtension::BackgroundWindow(const sptr<AAFwk::SessionInfo> &s
     }
     auto persistentId = sessionInfo->persistentId;
     if (uiWindowMap_.find(persistentId) == uiWindowMap_.end()) {
-        HILOG_ERROR("Fail to find uiWindow, persistentId=%{private}" PRIu64"", persistentId);
+        HILOG_ERROR("Fail to find uiWindow, persistentId=%{private}d", persistentId);
         return;
     }
     auto& uiWindow = uiWindowMap_[persistentId];
@@ -365,7 +365,7 @@ void JsMediaControlExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sess
     }
     auto persistentId = sessionInfo->persistentId;
     if (uiWindowMap_.find(persistentId) == uiWindowMap_.end()) {
-        HILOG_ERROR("Fail to find uiWindow, persistentId=%{private}" PRIu64"", persistentId);
+        HILOG_ERROR("Fail to find uiWindow, persistentId=%{private}d", persistentId);
         return;
     }
     auto& uiWindow = uiWindowMap_[persistentId];
