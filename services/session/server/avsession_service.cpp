@@ -751,7 +751,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
             tempDescriptors.push_back(descriptor);
         }
     }
-    if (tempDescriptors.size() == 0) {
+    if (tempDescriptors.size() == 0 && GetContainer().GetAllSessions().size() == 0) {
         SLOGE("GetHistoricalSessionDescriptors read empty, return default!");
         AVSessionDescriptor descriptor;
         descriptor.sessionId_ = DEFAULT_SESSION_ID;
