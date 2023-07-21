@@ -108,6 +108,15 @@ void BundleStatusAdapter::NotifyBundleRemoved(const std::string bundleName)
     bundleStatusListeners_.erase(bundleName);
 }
 
+std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
+{
+    std::string bundleName {""};
+    if (bundleMgrProxy != nullptr) {
+        bundleMgrProxy->GetNameForUid(uid, bundleName);
+    }
+    return bundleName;
+}
+
 BundleStatusCallbackImpl::BundleStatusCallbackImpl(const std::function<void(const std::string)>& callback)
 {
     SLOGI("Create bundle status instance");
