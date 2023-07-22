@@ -28,7 +28,7 @@ void AVCastProviderManager::Init(int32_t providerId, std::shared_ptr<AVCastProvi
     provider_ = provider;
 }
 
-void AVCastProviderManager::OnDeviceAvailable(const std::vector<DeviceInfo> deviceInfos)
+void AVCastProviderManager::OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos)
 {
     SLOGI("On device available");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
