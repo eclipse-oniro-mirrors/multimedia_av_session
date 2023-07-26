@@ -370,6 +370,5 @@ HWTEST_F(AVCastControllerTest, SendControlCommand008, TestSize.Level1)
     AVCastControlCommand command;
     EXPECT_EQ(castController_->SendControlCommand(command), AVSESSION_SUCCESS);
 }
-
 } // namespace AVSession
 } // namespace OHOS
