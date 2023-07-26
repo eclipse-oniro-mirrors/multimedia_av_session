@@ -1259,8 +1259,49 @@ HWTEST_F(AVSessionControllerTest, GetAVQueueTitle001, TestSize.Level1)
 {
     SLOGE("GetAVQueueTitle001 Begin");
     std::string title = "AVQueueTitle";
+    std::string getTitle;
     EXPECT_EQ(avsession_->SetAVQueueTitle(title), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->GetAVQueueTitle(getTitle), AVSESSION_SUCCESS);
+    EXPECT_EQ(getTitle, title);
     SLOGE("GetAVQueueTitle001 End");
+}
+
+/**
+* @tc.name: SkipToQueueItem001
+* @tc.desc: Skip to queue items of current application
+* @tc.type: FUNC
+* @tc.require: I6RJST
+*/
+HWTEST_F(AVSessionControllerTest, SkipToQueueItem001, TestSize.Level1)
+{
+    SLOGE("SkipToQueueItem001 Begin");
+    int32_t itemId = 1;
+    std::string mediaId = "id";
+    std::vector<AVQueueItem> items;
+    AVQueueItem queueItem;
+    queueItem.SetItemId(itemId);
+    AVMediaDescription description;
+    description.SetMediaId(mediaId);
+    queueItem.SetDescription(std::make_shared<AVMediaDescription>(description));
+    items.push_back(queueItem);
+    EXPECT_EQ(avsession_->SetAVQueueItems(items), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->SkipToQueueItem(itemId), AVSESSION_SUCCESS);
+    SLOGE("SkipToQueueItem001 End");
+}
+
+/**
+* @tc.name: HasSession001
+* @tc.desc: Skip to queue items of current application
+* @tc.type: FUNC
+* @tc.require: I6RJST
+*/
+HWTEST_F(AVSessionControllerTest, HasSession001, TestSize.Level1)
+{
+    SLOGE("HasSession001 Begin");
+    std::shared_ptr<AVSessionController> controller2 = nullptr;
+    auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller2);
+    ASSERT_NE(ret, AVSESSION_SUCCESS);
+    SLOGE("HasSession001 End");
 }
 
 /**
