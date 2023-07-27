@@ -197,9 +197,9 @@ if (castplus_cast_engine_enable) {
       "../../include/",
       "../../../../../../interfaces/inner_api/native/session/include/",
       "../../../../../services/session/adapter",
+      "../../../../../services/session/ipc/server",
       "../../../../../services/session/server/",
       "../../../../../services/session/server/remote",
-      "../../../../../services/session/ipc/server",
     ]
 
     external_deps = common_external_deps
