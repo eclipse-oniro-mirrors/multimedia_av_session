@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,24 +15,22 @@
 
 #include <gtest/gtest.h>
 
-#include "avsession_manager.h"
-#include "avsession_errors.h"
-#include "want_agent.h"
+#include "accesstoken_kit.h"
+#include "avcast_control_command.h"
+#include "avcast_controller_item.h"
+#include "avmedia_description.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
-#include "avmedia_description.h"
 #include "avqueue_item.h"
+#include "avsession_manager.h"
+#include "avsession_errors.h"
 #include "avsession_log.h"
-#include "avcontrol_command.h"
-#include "avcast_control_command.h"
-#include "iavcast_controller.h"
-#include "avcast_controller_item.h"
-#include "hw_cast_stream_player.h"
-
-#include "accesstoken_kit.h"
 #include "bool_wrapper.h"
+#include "hw_cast_stream_player.h"
+#include "iavcast_controller.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
+#include "want_agent.h"
 
 
 using namespace testing::ext;
@@ -62,7 +60,6 @@ static HapPolicyParams g_policy = {
     .domain = "test.domain",
     .permList = {
         {
-            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
             .bundleName = "ohos.permission_test.demo",
             .grantMode = 1,
             .availableLevel = APL_NORMAL,
@@ -74,7 +71,6 @@ static HapPolicyParams g_policy = {
     },
     .permStateList = {
         {
-            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
             .isGeneral = true,
             .resDeviceID = { "local" },
             .grantStatus = { PermissionState::PERMISSION_GRANTED },
@@ -229,7 +225,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand001, TestSize.Level1)
 
 /**
 * @tc.name: SendControlCommand002
-* @tc.desc: send command, check if AVControlCommand is invalid
+* @tc.desc: send command, check if AVCastControlCommand is invalid
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -251,7 +247,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand002, TestSize.Level1)
 
 /**
 * @tc.name: SendControlCommand003
-* @tc.desc: send command, check if AVControlCommand is invalid
+* @tc.desc: send command, check if AVCastControlCommand is invalid
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -273,7 +269,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand003, TestSize.Level1)
 
 /**
 * @tc.name: SendControlCommand004
-* @tc.desc: send command, check if AVControlCommand is invalid
+* @tc.desc: send command, check if AVCastControlCommand is invalid
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -295,7 +291,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand004, TestSize.Level1)
 
 /**
 * @tc.name: SendControlCommand005
-* @tc.desc: send command, check if AVControlCommand is invalid
+* @tc.desc: send command, check if AVCastControlCommand is invalid
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -317,7 +313,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand005, TestSize.Level1)
 
 /**
 * @tc.name: SendControlCommand006
-* @tc.desc: send command, check if AVControlCommand is invalid
+* @tc.desc: send command, check if AVCastControlCommand is invalid
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -339,7 +335,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand006, TestSize.Level1)
 
 /**
 * @tc.name: SendControlCommand007
-* @tc.desc: send command, check if AVControlCommand is invalid
+* @tc.desc: send command, check if AVCastControlCommand is invalid
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -361,7 +357,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand007, TestSize.Level1)
 
 /**
 * @tc.name: SendControlCommand008
-* @tc.desc: send command, check if AVControlCommand is invalid
+* @tc.desc: send command, check if AVCastControlCommand is invalid
 * @tc.type: FUNC
 * @tc.require:
 */
