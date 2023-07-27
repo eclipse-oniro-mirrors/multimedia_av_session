@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
-import("../../../../../config.gni")
 import("../../../../../castplus_cast_engine_part.gni")
+import("../../../../../config.gni")
 
 module_output_path = "multimedia_av_session/session"
 
@@ -188,7 +188,7 @@ if (castplus_cast_engine_enable) {
 
     deps += [
       "../../../../../services/session:avsession_cast_item",
-      "../../../../../services/session:avsession_router"
+      "../../../../../services/session:avsession_router",
     ]
 
     visibility = [ ":*" ]
@@ -213,8 +213,8 @@ if (castplus_cast_engine_enable) {
       "audio_framework:audio_client",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
-	  "cast_engine:cast_engine_client",
       "c_utils:utils",
+      "cast_engine:cast_engine_client",
       "data_object:distributeddataobject_impl",
       "device_manager:devicemanagersdk",
       "hilog:libhilog",
@@ -225,7 +225,6 @@ if (castplus_cast_engine_enable) {
     ]
   }
 }
-
 
 ###############################################################################
 group("av_session_unittest") {
@@ -244,9 +243,7 @@ group("av_session_unittest") {
   ]
 
   if (castplus_cast_engine_enable) {
-    deps += [
-      ":AVCastControllerTest",
-    ]
+    deps += [ ":AVCastControllerTest" ]
   }
 }
 ###############################################################################
