@@ -1231,7 +1231,7 @@ HWTEST_F(AVSessionControllerTest, OnRemoteRequest001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetAVQueueItems001, TestSize.Level1)
 {
-    SLOGE("GetAVQueueItems001 Begin");
+    SLOGD("GetAVQueueItems001 Begin");
     int32_t itemId = 1;
     std::string mediaId = "id";
     std::vector<AVQueueItem> items;
@@ -1246,7 +1246,7 @@ HWTEST_F(AVSessionControllerTest, GetAVQueueItems001, TestSize.Level1)
     EXPECT_EQ(controller_->GetAVQueueItems(receivedItems), AVSESSION_SUCCESS);
     EXPECT_EQ(receivedItems[0].GetItemId(), itemId);
     EXPECT_EQ(receivedItems[0].GetDescription()->GetMediaId(), mediaId);
-    SLOGE("GetAVQueueItems001 End");
+    SLOGD("GetAVQueueItems001 End");
 }
 
 /**
@@ -1257,10 +1257,51 @@ HWTEST_F(AVSessionControllerTest, GetAVQueueItems001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetAVQueueTitle001, TestSize.Level1)
 {
-    SLOGE("GetAVQueueTitle001 Begin");
+    SLOGD("GetAVQueueTitle001 Begin");
     std::string title = "AVQueueTitle";
+    std::string getTitle;
     EXPECT_EQ(avsession_->SetAVQueueTitle(title), AVSESSION_SUCCESS);
-    SLOGE("GetAVQueueTitle001 End");
+    EXPECT_EQ(controller_->GetAVQueueTitle(getTitle), AVSESSION_SUCCESS);
+    EXPECT_EQ(getTitle, title);
+    SLOGD("GetAVQueueTitle001 End");
+}
+
+/**
+* @tc.name: SkipToQueueItem001
+* @tc.desc: Skip to queue items of current application
+* @tc.type: FUNC
+* @tc.require: I6RJST
+*/
+HWTEST_F(AVSessionControllerTest, SkipToQueueItem001, TestSize.Level1)
+{
+    SLOGD("SkipToQueueItem001 Begin");
+    int32_t itemId = 1;
+    std::string mediaId = "id";
+    std::vector<AVQueueItem> items;
+    AVQueueItem queueItem;
+    queueItem.SetItemId(itemId);
+    AVMediaDescription description;
+    description.SetMediaId(mediaId);
+    queueItem.SetDescription(std::make_shared<AVMediaDescription>(description));
+    items.push_back(queueItem);
+    EXPECT_EQ(avsession_->SetAVQueueItems(items), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->SkipToQueueItem(itemId), AVSESSION_SUCCESS);
+    SLOGD("SkipToQueueItem001 End");
+}
+
+/**
+* @tc.name: HasSession001
+* @tc.desc: Skip to queue items of current application
+* @tc.type: FUNC
+* @tc.require: I6RJST
+*/
+HWTEST_F(AVSessionControllerTest, HasSession001, TestSize.Level1)
+{
+    SLOGD("HasSession001 Begin");
+    std::shared_ptr<AVSessionController> controller2 = nullptr;
+    auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller2);
+    ASSERT_NE(ret, AVSESSION_SUCCESS);
+    SLOGD("HasSession001 End");
 }
 
 /**
