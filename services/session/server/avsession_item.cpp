@@ -438,6 +438,7 @@ int32_t AVSessionItem::StopCast()
     SLOGI("Stop cast process");
     {
         std::lock_guard lockGuard(castHandleLock_);
+        CHECK_AND_RETURN_RET_LOG(castHandle_ == 0, AVSESSION_SUCCESS, "Not cast session, return");
         int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
         CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     }

@@ -83,7 +83,27 @@ void AvSessionItemTest(uint8_t *data, size_t size)
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
+    sptr<AVSessionService> service = new AVSessionService(AVSESSION_SERVICE_ID);
+    if (!service) {
+        SLOGI("service is null");
+        return;
+    }
+    std::string tag("audio");
+    int32_t type = 0;
+    AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("bundleName");
+    elementName.SetAbilityName("abilityName");
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+    sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
+    if (!avSessionItem) {
+        SLOGI("avSessionItem is null");
+        return;
+    }
+    AvSessionItemTestImpl(avSessionItem, data, size);
+}
 
+void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
+{
     AVPlaybackState avState;
     int32_t state = *(reinterpret_cast<const int32_t *>(data));
     avState.SetState(state);
@@ -113,36 +133,29 @@ void AvSessionItemTest(uint8_t *data, size_t size)
     std::string deviceName(reinterpret_cast<const char *>(data), size);
     deviceInfo.deviceName_ = deviceName;
     info.deviceInfos_.push_back(deviceInfo);
-    AvSessionItemTestImpl(metaData, avState, top, info, controlCommand);
-}
 
-void AvSessionItemTestImpl(AVMetaData metaData, AVPlaybackState avState, bool top,
-    OutputDeviceInfo info, AVControlCommand controlCommand)
-{
-    AVSessionDescriptor descriptor;
-    AVSessionItem avSessionItem(descriptor);
-    avSessionItem.ExecuteControllerCommand(controlCommand);
-    avSessionItem.SetTop(top);
-    avSessionItem.SetOutputDevice(info);
-    avSessionItem.GetOutputDevice(info);
-    avSessionItem.AddSupportCommand(controlCommand.GetCommand());
-    avSessionItem.DeleteSupportCommand(controlCommand.GetCommand());
-    avSessionItem.GetSessionId();
-    avSessionItem.GetAVMetaData(metaData);
-    avSessionItem.SetAVMetaData(metaData);
-    avSessionItem.GetAVPlaybackState(avState);
-    avSessionItem.Activate();
-    avSessionItem.Deactivate();
-    avSessionItem.IsActive();
-    avSessionItem.Destroy();
-    avSessionItem.SetAVPlaybackState(avState);
-    avSessionItem.GetPlaybackState();
-    avSessionItem.GetMetaData();
-    avSessionItem.GetSupportCommand();
-    avSessionItem.GetPid();
-    avSessionItem.GetUid();
-    avSessionItem.GetAbilityName();
-    avSessionItem.GetRemoteSource();
+    avSessionItem->ExecuteControllerCommand(controlCommand);
+    avSessionItem->SetTop(top);
+    avSessionItem->SetOutputDevice(info);
+    avSessionItem->GetOutputDevice(info);
+    avSessionItem->AddSupportCommand(controlCommand.GetCommand());
+    avSessionItem->DeleteSupportCommand(controlCommand.GetCommand());
+    avSessionItem->GetSessionId();
+    avSessionItem->GetAVMetaData(metaData);
+    avSessionItem->SetAVMetaData(metaData);
+    avSessionItem->GetAVPlaybackState(avState);
+    avSessionItem->Activate();
+    avSessionItem->Deactivate();
+    avSessionItem->IsActive();
+    avSessionItem->Destroy();
+    avSessionItem->SetAVPlaybackState(avState);
+    avSessionItem->GetPlaybackState();
+    avSessionItem->GetMetaData();
+    avSessionItem->GetSupportCommand();
+    avSessionItem->GetPid();
+    avSessionItem->GetUid();
+    avSessionItem->GetAbilityName();
+    avSessionItem->GetRemoteSource();
 }
 
 void AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)

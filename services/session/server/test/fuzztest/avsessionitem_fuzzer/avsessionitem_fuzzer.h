@@ -24,8 +24,7 @@
 namespace OHOS::AVSession {
 void AvSessionItemOnRemoteRequest(uint8_t* data, size_t size);
 void AvSessionItemTest(uint8_t* data, size_t size);
-void AvSessionItemTestImpl(AVMetaData metaData, AVPlaybackState avState, bool top, OutputDeviceInfo info,
-    AVControlCommand controlCommand);
+void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size);
 
 class AvSessionItemFuzzer {
 public:
