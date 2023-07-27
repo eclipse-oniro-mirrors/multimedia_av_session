@@ -14,6 +14,7 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("../../../../../../castplus_cast_engine_part.gni")
 module_output_path = "multimedia_av_session/sessionfuzzer"
 
 ##############################fuzztest##########################################
@@ -41,5 +42,13 @@ ohos_fuzztest("AvSessionProxyFuzzTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../../../services/session:avsession_cast_item",
+      "../../../../session:avsession_cast_client",
+    ]
+  }
 }
 ###############################################################################
