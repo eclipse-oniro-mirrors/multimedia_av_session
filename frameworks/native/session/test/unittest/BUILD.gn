@@ -213,6 +213,7 @@ if (castplus_cast_engine_enable) {
       "audio_framework:audio_client",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+	  "cast_engine:cast_engine_client",
       "c_utils:utils",
       "data_object:distributeddataobject_impl",
       "device_manager:devicemanagersdk",
@@ -221,7 +222,6 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
-      "cast_engine:cast_engine_client",
     ]
   }
 }
