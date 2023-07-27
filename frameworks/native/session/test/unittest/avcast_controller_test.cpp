@@ -32,7 +32,6 @@
 #include "token_setproc.h"
 #include "want_agent.h"
 
-
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 
