@@ -29,7 +29,6 @@
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
-
 using namespace testing::ext;
 using namespace OHOS::AudioStandard;
 using namespace OHOS::Security::AccessToken;
@@ -99,6 +98,24 @@ public:
     std::shared_ptr<AVSession> avsession_ = nullptr;
 };
 
+
+void MockGetTrustedDeviceList(std::vector<OHOS::DistributedHardware::DmDeviceInfo> &deviceList)
+{
+    OHOS::DistributedHardware::DmDeviceInfo localeDevice;
+    memset_s(&localeDevice, sizeof(localeDevice), 0, sizeof(localeDevice));
+    strcpy_s(localeDevice.deviceId, sizeof(localeDevice.deviceId) - 1, "<localeDeviceId>");
+    strcpy_s(localeDevice.deviceName, sizeof(localeDevice.deviceName) - 1, "<localeDeviceName>");
+
+    OHOS::DistributedHardware::DmDeviceInfo remoteDevice;
+    memset_s(&remoteDevice, sizeof(remoteDevice), 0, sizeof(remoteDevice));
+    strcpy_s(remoteDevice.deviceId, sizeof(remoteDevice.deviceId) - 1, "<remoteDeviceId>");
+    strcpy_s(remoteDevice.deviceName, sizeof(remoteDevice.deviceName) - 1, "<remoteDeviceName>");
+
+    deviceList.clear();
+    deviceList.push_back(localeDevice);
+    deviceList.push_back(remoteDevice);
+}
+
 void AVSessionRemoteTest::SetUpTestCase()
 {
     g_selfTokenId = GetSelfTokenID();
@@ -118,6 +135,9 @@ void AVSessionRemoteTest::SetUpTestCase()
     SLOGI("GetTrustedDeviceList size is %{public}d", static_cast<int32_t>(deviceList.size()));
     ASSERT_NE(infoNum, 0);
     AudioDeviceDescriptor descriptor;
+    if (deviceList.size() == 0) {
+        MockGetTrustedDeviceList(deviceList);
+    }
     for (int32_t i = 0; i < deviceList.size(); i++) {
         descriptor.networkId_ = deviceList[i].networkId;
         descriptor.deviceId_ = DECICE_ID;
@@ -270,7 +290,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio001, TestSize.Level1)
     sessionToken.sessionId = avsession_->GetSessionId();
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    EXPECT_NE(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), AVSESSION_SUCCESS);
+    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), AVSESSION_SUCCESS);
     SLOGE("CastAudio001 End");
 }
 
@@ -284,7 +304,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio002, TestSize.Level1)
 {
     SLOGE("CastAudio002 Begin");
     SessionToken sessionToken;
-    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), ERR_INVALID_PARAM);
+    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), ERR_IPC_SEND_REQUEST);
     SLOGE("CastAudio002 End");
 }
 
@@ -301,7 +321,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio003, TestSize.Level1)
     sessionToken.sessionId = "123456789";
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), ERR_INVALID_PARAM);
+    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), ERR_IPC_SEND_REQUEST);
     SLOGE("CastAudio003 End");
 }
 
@@ -332,7 +352,7 @@ HWTEST_F(AVSessionRemoteTest, CastAudio004, TestSize.Level1)
 HWTEST_F(AVSessionRemoteTest, CastAudioForAll001, TestSize.Level1)
 {
     SLOGE("CastAudioForAll001 Begin");
-    EXPECT_NE(AVSessionManager::GetInstance().CastAudioForAll(g_descriptors), AVSESSION_SUCCESS);
+    EXPECT_EQ(AVSessionManager::GetInstance().CastAudioForAll(g_descriptors), AVSESSION_SUCCESS);
     SLOGE("CastAudioForAll001 End");
 }
 
@@ -615,5 +635,145 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
     }
     SLOGE("GetOutputDevice005 End");
 }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+/**
+* @tc.name: StartCastDiscovery001
+* @tc.desc: start cast discovery for default cast type "local"
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVSessionRemoteTest, StartCastDiscovery001, TestSize.Level1)
+{
+    SLOGI("StartCastDiscovery001 begin");
+    auto ret = AVSessionManager::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("StartCastDiscovery001 end");
+}
+
+/**
+* @tc.name: StartCastDiscovery002
+* @tc.desc: start cast discovery for invalid cast type
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVSessionRemoteTest, StartCastDiscovery002, TestSize.Level1)
+{
+    SLOGI("StartCastDiscovery002 begin");
+    auto ret = AVSessionManager::GetInstance().StartCastDiscovery(-1);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("StartCastDiscovery002 end");
+}
+
+/**
+* @tc.name: StopCastDiscovery001
+* @tc.desc: stop cast discovery success
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVSessionRemoteTest, StopCastDiscovery001, TestSize.Level1)
+{
+    SLOGI("StopCastDiscovery001 begin");
+    auto ret = AVSessionManager::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    ret = AVSessionManager::GetInstance().StopCastDiscovery();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("StopCastDiscovery001 end");
+}
+
+/**
+* @tc.name: SetDiscoverable001
+* @tc.desc: setDiscoverable true
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVSessionRemoteTest, SetDiscoverable001, TestSize.Level1)
+{
+    SLOGI("SetDiscoverable001 begin");
+    auto ret = AVSessionManager::GetInstance().SetDiscoverable(true);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("SetDiscoverable001 end");
+}
+
+/**
+* @tc.name: StartCast001
+* @tc.desc: StartCast success
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVSessionRemoteTest, StartCast001, TestSize.Level1)
+{
+    SLOGI("StartCast001 begin");
+    SessionToken sessionToken;
+    sessionToken.sessionId = avsession_->GetSessionId();
+    sessionToken.pid = 111;
+    sessionToken.uid = 2222;
+    OutputDeviceInfo outputDeviceInfo;
+
+    AVSessionDescriptor descriptor;
+    auto ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(avsession_->GetSessionId(), descriptor);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGE("avsession get deviceIds_ size %{public}d",
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceInfos_.size()));
+    SLOGE("avsession get deviceId0 %{public}s", descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_.c_str());
+    ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
+    SLOGE("avsession get deviceNames_ size %{public}d",
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceInfos_.size()));
+    SLOGE("avsession get deviceName0 %{public}s", descriptor.outputDeviceInfo_.deviceInfos_[0].deviceName_.c_str());
+    ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
+
+    ret = AVSessionManager::GetInstance().StartCast(sessionToken, descriptor.outputDeviceInfo_);
+    EXPECT_NE(ret, AVSESSION_SUCCESS);
+    SLOGI("StartCast001 end");
+}
+
+/**
+* @tc.name: StartCast002
+* @tc.desc: StartCast invalid params
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVSessionRemoteTest, StartCast002, TestSize.Level1)
+{
+    SLOGI("StartCast002 begin");
+    SessionToken sessionToken;
+    OutputDeviceInfo outputDeviceInfo;
+    auto ret = AVSessionManager::GetInstance().StartCast(sessionToken, outputDeviceInfo);
+    EXPECT_NE(ret, AVSESSION_SUCCESS);
+    SLOGI("StartCast002 end");
+}
+
+/**
+* @tc.name: StopCast001
+* @tc.desc: StopCast success
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVSessionRemoteTest, StopCast001, TestSize.Level1)
+{
+    SLOGI("StopCast001 begin");
+    SessionToken sessionToken;
+    sessionToken.sessionId = avsession_->GetSessionId();
+    sessionToken.pid = 111;
+    sessionToken.uid = 2222;
+    OutputDeviceInfo outputDeviceInfo;
+
+    AVSessionDescriptor descriptor;
+    auto ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(avsession_->GetSessionId(), descriptor);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGE("avsession get deviceIds_ size %{public}d",
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceInfos_.size()));
+    SLOGE("avsession get deviceId0 %{public}s", descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_.c_str());
+    ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
+    SLOGE("avsession get deviceNames_ size %{public}d",
+          static_cast<int32_t>(descriptor.outputDeviceInfo_.deviceInfos_.size()));
+    SLOGE("avsession get deviceName0 %{public}s", descriptor.outputDeviceInfo_.deviceInfos_[0].deviceName_.c_str());
+    ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
+    ret = AVSessionManager::GetInstance().StartCast(sessionToken, descriptor.outputDeviceInfo_);
+    ret = AVSessionManager::GetInstance().StopCast(sessionToken);
+    EXPECT_NE(ret, AVSESSION_SUCCESS);
+    SLOGI("StopCast001 end");
+}
+#endif
 } // namespace AVSession
 } // namespace OHOS

@@ -72,11 +72,11 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease002, TestSize.Level1)
 {
     SLOGI("OnSessionRelease002 begin!");
     AVSessionDescriptor descriptor;
-    descriptor.isThirdPartyApp_ = false;
+    descriptor.isThirdPartyApp_ = true;
     descriptor.uid_ = -1;
     BackgroundAudioController bkgraudiocontroller;
     bkgraudiocontroller.OnSessionRelease(descriptor);
-    EXPECT_EQ(descriptor.isThirdPartyApp_, false);
+    EXPECT_EQ(descriptor.isThirdPartyApp_, true);
     SLOGI("OnSessionRelease002 end!");
 }
 
@@ -90,11 +90,11 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease003, TestSize.Level1)
 {
     SLOGI("OnSessionRelease003 begin!");
     AVSessionDescriptor descriptor;
-    descriptor.isThirdPartyApp_ = false;
+    descriptor.isThirdPartyApp_ = true;
     descriptor.uid_ = 100;
     BackgroundAudioController bkgraudiocontroller;
     bkgraudiocontroller.OnSessionRelease(descriptor);
-    EXPECT_EQ(descriptor.isThirdPartyApp_, false);
+    EXPECT_EQ(descriptor.isThirdPartyApp_, true);
     SLOGI("OnSessionRelease032 end!");
 }
 

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "audio_adapter.h"
+#include "avsession_errors.h"
 #include "avsession_log.h"
 #include "audio_info.h"
 
@@ -82,4 +83,36 @@ static HWTEST(AudioAdapterTest, OnRendererStateChange001, TestSize.Level1)
     EXPECT_EQ(infoExpected->sessionId, infoActual->sessionId);
     EXPECT_EQ(infoExpected->rendererState, infoActual->rendererState);
     SLOGI("OnRendererStateChange001 end!");
+}
+
+/**
+* @tc.name: PauseAudioStream002
+* @tc.desc: pause audio stream for valid uid TEST_CLIENT_UID
+* @tc.type: FUNC
+* @tc.require: AR000H31KJ
+*/
+static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level1)
+{
+    SLOGI("PauseAudioStream001 begin!");
+    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->sessionId = AudioAdapterTest::TEST_SESSION_ID;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    AudioRendererChangeInfos infosExpected;
+    infosExpected.push_back(std::move(info));
+    AudioRendererChangeInfos infosActual;
+
+    AudioAdapter::GetInstance().Init();
+    AudioAdapter::GetInstance().AddStreamRendererStateListener([&infosActual](const AudioRendererChangeInfos& infos) {
+        SLOGI("AddStreamRendererStateListener start!");
+        for (const auto& info : infos) {
+            std::unique_ptr<AudioRendererChangeInfo> infoActual = std::make_unique<AudioRendererChangeInfo>();
+            *infoActual = *info;
+            infosActual.push_back(std::move(infoActual));
+        }
+        SLOGI("AddStreamRendererStateListener end!");
+    });
+    auto ret = AudioAdapter::GetInstance().PauseAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    EXPECT_NE(ret, AVSESSION_ERROR_BASE);
+    SLOGI("PauseAudioStream001 end!");
 }
