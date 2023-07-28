@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
+import("../../../../castplus_cast_engine_part.gni")
 import("../../../../config.gni")
 
 module_output_path = "multimedia_av_session/session"
@@ -222,11 +223,49 @@ ohos_unittest("SessionStackTest") {
   ]
 }
 
+ohos_unittest("AVRouterTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avrouter_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "../../../session:avsession_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "audio_framework:audio_client",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "data_object:distributeddataobject_impl",
+    "device_manager:devicemanagersdk",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  if (castplus_cast_engine_enable) {
+    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [ "../../../session:avsession_router" ]
+  }
+}
+
 ###############################################################################
 group("av_session_server_unittest") {
   testonly = true
 
   deps = [
+    ":AVRouterTest",
     ":AVSessionServiceTest",
     ":AbilityConnectHelperTest",
     ":AbilityConnectHelperTest",

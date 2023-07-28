@@ -137,6 +137,10 @@ ohos_unittest("AVSessionRemoteTest") {
 
   configs = [ ":module_private_config" ]
 
+  if (castplus_cast_engine_enable) {
+    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+  }
+
   deps = common_deps
 
   external_deps = common_external_deps
