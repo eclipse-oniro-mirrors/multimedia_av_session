@@ -21,7 +21,6 @@
 using namespace testing::ext;
 namespace OHOS {
 namespace AVSession {
-
 class AVRouterTest : public testing::Test {
 public:
     static void SetUpTestCase();
