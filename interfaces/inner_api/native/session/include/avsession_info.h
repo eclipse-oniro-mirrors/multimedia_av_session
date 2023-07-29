@@ -470,5 +470,76 @@ enum DeviceType {
      */
     DEVICE_TYPE_BLUETOOTH = 10,
 };
+
+/**
+ * Enumerates ErrorCode types, returns in BusinessError.code.
+ * @enum { number }
+ * @syscap SystemCapability.Multimedia.AVSession.Core
+ * @since 10
+ */
+enum AVSessionErrorCode {
+    /**
+     * Session service exception.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    ERR_CODE_SERVICE_EXCEPTION = 6600101,
+
+    /**
+     * The session does not exist
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    ERR_CODE_SESSION_NOT_EXIST = 6600102,
+
+    /**
+     * The session controller does not exist.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    ERR_CODE_CONTROLLER_NOT_EXIST = 6600103,
+
+    /**
+     * The remote session connection failed.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    ERR_CODE_REMOTE_CONNECTION_ERR = 6600104,
+
+    /**
+     * Invalid session command.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    ERR_CODE_COMMAND_INVALID = 6600105,
+
+    /**
+     * The session is not activated.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    ERR_CODE_SESSION_INACTIVE = 6600106,
+
+    /**
+     * Too many commands or events.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    ERR_CODE_MESSAGE_OVERLOAD = 6600107,
+
+    /**
+     * Device connecting failed.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    ERR_CODE_DEVICE_CONNECTION_FAILED = 6600108,
+
+    /**
+     * The remote connection is not established.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    ERR_CODE_REMOTE_CONNECTION_NOT_EXIST = 6600109,
+}
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H
