@@ -540,6 +540,6 @@ enum AVSessionErrorCode {
      * @since 10
      */
     ERR_CODE_REMOTE_CONNECTION_NOT_EXIST = 6600109,
-}
+};
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

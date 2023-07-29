@@ -129,13 +129,17 @@ static napi_value ExportAVSessionErrorCode(napi_env env)
 
     (void)SetNamedProperty(env, result, "ERR_CODE_SERVICE_EXCEPTION", AVSessionErrorCode::ERR_CODE_SERVICE_EXCEPTION);
     (void)SetNamedProperty(env, result, "ERR_CODE_SESSION_NOT_EXIST", AVSessionErrorCode::ERR_CODE_SESSION_NOT_EXIST);
-    (void)SetNamedProperty(env, result, "ERR_CODE_CONTROLLER_NOT_EXIST", AVSessionErrorCode::ERR_CODE_CONTROLLER_NOT_EXIST);
-    (void)SetNamedProperty(env, result, "ERR_CODE_REMOTE_CONNECTION_ERR", AVSessionErrorCode::ERR_CODE_REMOTE_CONNECTION_ERR);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CONTROLLER_NOT_EXIST",
+        AVSessionErrorCode::ERR_CODE_CONTROLLER_NOT_EXIST);
+    (void)SetNamedProperty(env, result, "ERR_CODE_REMOTE_CONNECTION_ERR",
+        AVSessionErrorCode::ERR_CODE_REMOTE_CONNECTION_ERR);
     (void)SetNamedProperty(env, result, "ERR_CODE_COMMAND_INVALID", AVSessionErrorCode::ERR_CODE_COMMAND_INVALID);
     (void)SetNamedProperty(env, result, "ERR_CODE_SESSION_INACTIVE", AVSessionErrorCode::ERR_CODE_SESSION_INACTIVE);
     (void)SetNamedProperty(env, result, "ERR_CODE_MESSAGE_OVERLOAD", AVSessionErrorCode::ERR_CODE_MESSAGE_OVERLOAD);
-    (void)SetNamedProperty(env, result, "ERR_CODE_DEVICE_CONNECTION_FAILED", AVSessionErrorCode::ERR_CODE_DEVICE_CONNECTION_FAILED);
-    (void)SetNamedProperty(env, result, "ERR_CODE_REMOTE_CONNECTION_NOT_EXIST", AVSessionErrorCode::ERR_CODE_REMOTE_CONNECTION_NOT_EXIST);
+    (void)SetNamedProperty(env, result, "ERR_CODE_DEVICE_CONNECTION_FAILED",
+        AVSessionErrorCode::ERR_CODE_DEVICE_CONNECTION_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_REMOTE_CONNECTION_NOT_EXIST",
+        AVSessionErrorCode::ERR_CODE_REMOTE_CONNECTION_NOT_EXIST);
 
     napi_object_freeze(env, result);
     return result;
