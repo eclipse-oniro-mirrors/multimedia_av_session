@@ -56,7 +56,7 @@ static napi_value ExportAVCastCategory(napi_env env)
     napi_create_object(env, &result);
 
     (void)SetNamedProperty(env, result, "CATEGORY_LOCAL", AVCastCategory::CATEGORY_LOCAL);
-    (void)SetNamedProperty(env, result, "CATEGORY_REMOTE ", AVCastCategory::CATEGORY_REMOTE);
+    (void)SetNamedProperty(env, result, "CATEGORY_REMOTE", AVCastCategory::CATEGORY_REMOTE);
 
     napi_object_freeze(env, result);
     return result;
@@ -68,8 +68,8 @@ static napi_value ExportProtocolType(napi_env env)
     napi_create_object(env, &result);
 
     (void)SetNamedProperty(env, result, "TYPE_LOCAL", ProtocolType::TYPE_LOCAL);
-    (void)SetNamedProperty(env, result, "TYPE_CAST_PLUS_MIRROR ", ProtocolType::TYPE_CAST_PLUS_MIRROR);
-    (void)SetNamedProperty(env, result, "TYPE_CAST_PLUS_STREAM ", ProtocolType::TYPE_CAST_PLUS_STREAM);
+    (void)SetNamedProperty(env, result, "TYPE_CAST_PLUS_MIRROR", ProtocolType::TYPE_CAST_PLUS_MIRROR);
+    (void)SetNamedProperty(env, result, "TYPE_CAST_PLUS_STREAM", ProtocolType::TYPE_CAST_PLUS_STREAM);
 
     napi_object_freeze(env, result);
     return result;
@@ -95,7 +95,7 @@ static napi_value ExportDeviceType(napi_env env)
 
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_LOCAL", DeviceType::DEVICE_TYPE_LOCAL);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_TV", DeviceType::DEVICE_TYPE_TV);
-    (void)SetNamedProperty(env, result, "DEVICE_TYPE_SPEAKER", DeviceType::DEVICE_TYPE_SPEAKER);
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_SMART_SPEAKER", DeviceType::DEVICE_TYPE_SPEAKER);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_BLUETOOTH", DeviceType::DEVICE_TYPE_BLUETOOTH);
 
     napi_object_freeze(env, result);
@@ -122,6 +122,29 @@ static napi_value ExportPlaybackState(napi_env env)
     return result;
 }
 
+static napi_value ExportAVSessionErrorCode(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "ERR_CODE_SERVICE_EXCEPTION", AVSessionErrorCode::ERR_CODE_SERVICE_EXCEPTION);
+    (void)SetNamedProperty(env, result, "ERR_CODE_SESSION_NOT_EXIST", AVSessionErrorCode::ERR_CODE_SESSION_NOT_EXIST);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CONTROLLER_NOT_EXIST",
+        AVSessionErrorCode::ERR_CODE_CONTROLLER_NOT_EXIST);
+    (void)SetNamedProperty(env, result, "ERR_CODE_REMOTE_CONNECTION_ERR",
+        AVSessionErrorCode::ERR_CODE_REMOTE_CONNECTION_ERR);
+    (void)SetNamedProperty(env, result, "ERR_CODE_COMMAND_INVALID", AVSessionErrorCode::ERR_CODE_COMMAND_INVALID);
+    (void)SetNamedProperty(env, result, "ERR_CODE_SESSION_INACTIVE", AVSessionErrorCode::ERR_CODE_SESSION_INACTIVE);
+    (void)SetNamedProperty(env, result, "ERR_CODE_MESSAGE_OVERLOAD", AVSessionErrorCode::ERR_CODE_MESSAGE_OVERLOAD);
+    (void)SetNamedProperty(env, result, "ERR_CODE_DEVICE_CONNECTION_FAILED",
+        AVSessionErrorCode::ERR_CODE_DEVICE_CONNECTION_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_REMOTE_CONNECTION_NOT_EXIST",
+        AVSessionErrorCode::ERR_CODE_REMOTE_CONNECTION_NOT_EXIST);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -131,6 +154,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DeviceType", ExportDeviceType(env)),
         DECLARE_NAPI_PROPERTY("LoopMode", ExportLoopMode(env)),
         DECLARE_NAPI_PROPERTY("PlaybackState", ExportPlaybackState(env)),
+        DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
