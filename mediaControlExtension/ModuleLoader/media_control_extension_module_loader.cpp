@@ -29,7 +29,7 @@ std::map<std::string, std::string> MediaControlExtensionModuleLoader::GetParams(
 {
     std::map<std::string, std::string> params;
     // type means extension type in ExtensionAbilityType of extension_ability_info.h, 16 means MediaControlExtension.
-    params.insert(std::pair<std::string, std::string>("type", "20"));
+    params.insert(std::pair<std::string, std::string>("type", "400"));
     // extension name
     params.insert(std::pair<std::string, std::string>("name", "MediaControlExtensionAbility"));
     return params;
