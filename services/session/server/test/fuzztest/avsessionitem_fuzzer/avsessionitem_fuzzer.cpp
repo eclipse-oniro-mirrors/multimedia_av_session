@@ -33,7 +33,7 @@
 using namespace std;
 namespace OHOS {
 namespace AVSession {
-const int32_t MAX_CODE_TEST  = 21;
+const int32_t MAX_CODE_TEST  = 24;
 const int32_t MAX_CODE_LEN  = 512;
 const int32_t MIN_SIZE_NUM = 4;
 
@@ -113,8 +113,8 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* dat
     metaData.SetAssetId(assetId);
 
     std::vector<int32_t> cmds;
-    int32_t _cmds = *(reinterpret_cast<const int32_t *>(data));
-    cmds.push_back(_cmds);
+    int32_t fuzzCmds = *(reinterpret_cast<const int32_t *>(data));
+    cmds.push_back(fuzzCmds);
 
     bool top = *(reinterpret_cast<const bool *>(data));
 
