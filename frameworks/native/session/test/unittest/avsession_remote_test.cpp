@@ -771,7 +771,7 @@ HWTEST_F(AVSessionRemoteTest, StopCast001, TestSize.Level1)
     ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
     ret = AVSessionManager::GetInstance().StartCast(sessionToken, descriptor.outputDeviceInfo_);
     ret = AVSessionManager::GetInstance().StopCast(sessionToken);
-    EXPECT_NE(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("StopCast001 end");
 }
 #endif

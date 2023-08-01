@@ -865,5 +865,68 @@ HWTEST_F(AvsessionTest, Destroy002, TestSize.Level1)
     avsession_ = nullptr;
     SLOGE("Destroy002 End");
 }
+
+/**
+* @tc.name: GetSessionType001
+* @tc.desc: GetSessionType
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, GetSessionType001, TestSize.Level1)
+{
+    SLOGD("GetSessionType001 Begin");
+    EXPECT_EQ(avsession_->GetSessionType(), "audio");
+    SLOGD("GetSessionType001 End");
+}
+
+/**
+* @tc.name: GetAVQueueItems001
+* @tc.desc: get que items
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, GetAVQueueItems001, TestSize.Level1)
+{
+    SLOGD("GetAVQueueItems001 Begin");
+    std::vector<AVQueueItem> items;
+    EXPECT_EQ(avsession_->GetAVQueueItems(items), AVSESSION_SUCCESS);
+    SLOGD("GetAVQueueItems001 End");
+}
+
+/**
+* @tc.name: GetAVQueueTitle001
+* @tc.desc: get av que title
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, GetAVQueueTitle001, TestSize.Level1)
+{
+    SLOGD("GetAVQueueTitle001 Begin");
+    std::string title1 = "AVQueueTitle";
+    std::string title2;
+    EXPECT_EQ(avsession_->SetAVQueueTitle(title1), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->GetAVQueueTitle(title2), AVSESSION_SUCCESS);
+    SLOGD("GetAVQueueTitle001 End");
+}
+
+/**
+* @tc.name: GetExtras001
+* @tc.desc: get extras
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, GetExtras001, TestSize.Level1)
+{
+    SLOGD("GetExtras001 Begin");
+    std::shared_ptr<OHOS::AAFwk::WantParams> wantParamsIn = nullptr;
+    wantParamsIn = std::make_shared<OHOS::AAFwk::WantParams>();
+    std::string keyStr = "1234567";
+    bool valueBool = true;
+    wantParamsIn->SetParam(keyStr, OHOS::AAFwk::Boolean::Box(valueBool));
+    OHOS::AAFwk::WantParams wantParamsOut;
+    EXPECT_EQ(avsession_->SetExtras(*wantParamsIn), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->GetExtras(wantParamsOut), AVSESSION_SUCCESS);
+    SLOGD("GetExtras001 End");
+}
 } // namespace AVSession
 } // namespace OHOS
