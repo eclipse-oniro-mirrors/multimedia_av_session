@@ -14,6 +14,7 @@
 import("//build/ohos.gni")
 import("../../castplus_cast_engine_part.gni")
 import("../../config.gni")
+import("../../efficiency_manager_part.gni")
 
 openssl_dir = "//third_party/openssl"
 
@@ -138,6 +139,11 @@ ohos_shared_library("avsession_service") {
       "./../session:avsession_cast_item",
       "./../session:avsession_router",
     ]
+  }
+
+  if (efficiency_manager_enable_in_avsession) {
+    cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
+    external_deps += [ "efficiency_manager:suspend_manager_client" ]
   }
 
   if (multimedia_av_session_enable_trace_control) {

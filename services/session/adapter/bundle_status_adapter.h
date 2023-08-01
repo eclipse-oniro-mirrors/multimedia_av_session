@@ -33,6 +33,8 @@ public:
 
     bool IsAudioPlayback(const std::string& bundleName, const std::string& abilityName);
 
+    std::string GetBundleNameFromUid(const int32_t uid);
+
 private:
     BundleStatusAdapter();
 

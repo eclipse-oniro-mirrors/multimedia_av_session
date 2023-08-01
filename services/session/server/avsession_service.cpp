@@ -48,6 +48,11 @@
 #include "params_config_operator.h"
 #include "avsession_service.h"
 
+#ifdef EFFICIENCY_MANAGER_ENABLE
+#include "continuous_task_app_info.h"
+#include "suspend_manager_client.h"
+#endif
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
 #endif
@@ -471,6 +476,18 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
 
     int32_t ret = session->StartCast(outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
+
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    int32_t uid = session->GetDescriptor().uid_;
+    int32_t pid = session->GetDescriptor().pid_;
+    std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    CHECK_AND_RETURN_RET_LOG(bundleName != "", ret, "GetBundleNameFromUid failed");
+    SuspendManager::ContinuousTaskAppInfo appInfo(uid, pid, bundleName,
+        SuspendManager::ContinuousTaskState::TASK_START);
+    ErrCode suspendManagerErr = SuspendManager::SuspendManagerClient::GetInstance().ReportContinuousTaskEvent(
+        SuspendManager:ReportEventType::DIS_COMP_CHANGE, appInfo, AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN_RET_LOG(suspendManagerErr == ERR_OK, AVSESSION_ERROR, "Report continuous task event failed");
+#endif
     return AVSESSION_SUCCESS;
 }
 
@@ -486,7 +503,25 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "StopCast: session is not exist");
     CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
+    if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
+        SLOGI("Stop cast at sink, start destroy sink avsession");
+        session->Destroy();
+        return AVSESSION_SUCCESS;
+    }
 
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    SLOGI("Stop register continuous task");
+    int32_t uid = session->GetDescriptor().uid_;
+    int32_t pid = session->GetDescriptor().pid_;
+    std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    CHECK_AND_RETURN_RET_LOG(bundleName != "", ret, "GetBundleNameFromUid failed");
+    SuspendManager::ContinuousTaskAppInfo appInfo(uid, pid, bundleName,
+        SuspendManager::ContinuousTaskState::TASK_END);
+    ErrCode suspendManagerErr = SuspendManager::SuspendManagerClient::GetInstance().ReportContinuousTaskEvent(
+        SuspendManager:ReportEventType::DIS_COMP_CHANGE, appInfo, AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN_RET_LOG(suspendManagerErr == ERR_OK, AVSESSION_ERROR, "Report continuous task event failed");
+    SLOGI("Report continuous task evenet for pid: %{public}d finished", pid);
+#endif
     return AVSESSION_SUCCESS;
 }
 #endif
