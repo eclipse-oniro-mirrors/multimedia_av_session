@@ -85,8 +85,8 @@ void OHOS::AVSession::AvsessionControllerProxyTest(uint8_t* data, size_t size)
     metaData.SetAssetId(_data);
 
     std::vector<int32_t> cmds;
-    int32_t _cmds = *(reinterpret_cast<const int32_t*>(data));
-    cmds.push_back(_cmds);
+    int32_t fuzzCmds = *(reinterpret_cast<const int32_t*>(data));
+    cmds.push_back(fuzzCmds);
 
     bool isActive = *(reinterpret_cast<const bool*>(data));
 
