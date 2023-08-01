@@ -38,6 +38,7 @@
           "data_object",
           "device_manager",
           "dsoftbus",
+          "efficiency_manager",
           "eventhandler",
           "hilog",
           "hisysevent",
