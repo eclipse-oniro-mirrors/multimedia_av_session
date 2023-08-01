@@ -23,7 +23,9 @@ ohos_shared_library("avsession_utils") {
   install_enable = true
   sanitize = {
     cfi = true
+    cfi_cross_dso = true
     debug = false
+    blocklist = "../cfi_blocklist.txt"
   }
   sources = [
     "src/avsession_event_handler.cpp",
