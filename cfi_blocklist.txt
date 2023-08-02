@@ -1,0 +1,2 @@
+src:*frameworks/native/session/src/avsession_manager_impl.cpp
+src:*services/session/ipc/proxy/avsession_service_proxy.cpp

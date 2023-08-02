@@ -27,10 +27,6 @@ config("avsession_client_config") {
 
 ohos_shared_library("avsession_client") {
   install_enable = true
-  sanitize = {
-    cfi = true
-    debug = false
-  }
   ipc_sources = [
     "../../../services/session/ipc/proxy/avsession_controller_proxy.cpp",
     "../../../services/session/ipc/proxy/avsession_proxy.cpp",
@@ -95,7 +91,9 @@ ohos_shared_library("avsession_cast_client") {
   install_enable = true
   sanitize = {
     cfi = true
+    cfi_cross_dso = true
     debug = false
+    blocklist = "../../../cfi_blocklist.txt"
   }
   ipc_sources = [
     "../../../services/session/ipc/proxy/avcast_controller_proxy.cpp",
