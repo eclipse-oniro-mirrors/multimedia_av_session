@@ -26,6 +26,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "bool_wrapper.h"
+#include "hw_cast_provider.h"
 #include "hw_cast_stream_player.h"
 #include "iavcast_controller.h"
 #include "nativetoken_kit.h"
@@ -575,6 +576,158 @@ HWTEST_F(AVCastControllerTest, OnPlayerError001, TestSize.Level1)
     int32_t errorCode = 0;
     std::string errorMsg = "errorMsg";
     castController_->OnPlayerError(errorCode, errorMsg);
+}
+
+/**
+* @tc.name: StartCastDiscovery001
+* @tc.desc: StartCastDiscovery
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, StartCastDiscovery001, TestSize.Level1)
+{
+    EXPECT_EQ(AVSessionManager::GetInstance().StartCastDiscovery(1), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: StopCastDiscovery001
+* @tc.desc: StopCastDiscovery
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, StopCastDiscovery001, TestSize.Level1)
+{
+    EXPECT_EQ(AVSessionManager::GetInstance().StopCastDiscovery(), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: SetDiscoverable001
+* @tc.desc: SetDiscoverable
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, SetDiscoverable001, TestSize.Level1)
+{
+    EXPECT_EQ(AVSessionManager::GetInstance().SetDiscoverable(true), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: StartCast001
+* @tc.desc: StartCast
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, StartCast001, TestSize.Level1)
+{
+    SessionToken sessionToken;
+    sessionToken.sessionId = avsession_->GetSessionId();
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "deviceId";
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    EXPECT_EQ(AVSessionManager::GetInstance().StartCast(sessionToken, outputDeviceInfo), -1007);
+}
+
+/**
+* @tc.name: StopCast001
+* @tc.desc: StopCast
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, StopCast001, TestSize.Level1)
+{
+    SessionToken sessionToken;
+    sessionToken.sessionId = avsession_->GetSessionId();
+    EXPECT_EQ(AVSessionManager::GetInstance().StopCast(sessionToken), -1007);
+}
+
+HWTEST_F(AVCastControllerTest, StartDiscovery001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+    EXPECT_EQ(hwCastProvider.StartDiscovery(2), true);
+}
+
+HWTEST_F(AVCastControllerTest, StopDiscovery001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+    hwCastProvider.StopDiscovery();
+}
+
+HWTEST_F(AVCastControllerTest, Release001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+    hwCastProvider.Release();
+}
+
+HWTEST_F(AVCastControllerTest, StartCastSession001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+    EXPECT_EQ(hwCastProvider.StartCastSession(), AVSESSION_SUCCESS);
+}
+
+HWTEST_F(AVCastControllerTest, StopCastSession001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+    hwCastProvider.StopCastSession(2);
+}
+
+HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+
+    DeviceInfo deviceInfo1;
+    deviceInfo1.castCategory_ = 1;
+    deviceInfo1.deviceId_ = "deviceid1";
+    deviceInfo1.deviceName_ = "devicename1";
+    deviceInfo1.deviceType_ = 1;
+    deviceInfo1.ipAddress_ = "ipAddress1";
+    deviceInfo1.providerId_ = 1;
+
+    EXPECT_EQ(hwCastProvider.AddCastDevice(1, deviceInfo1), false);
+}
+
+HWTEST_F(AVCastControllerTest, RemoveCastDevice001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+
+    DeviceInfo deviceInfo1;
+    deviceInfo1.castCategory_ = 1;
+    deviceInfo1.deviceId_ = "deviceid1";
+    deviceInfo1.deviceName_ = "devicename1";
+    deviceInfo1.deviceType_ = 1;
+    deviceInfo1.ipAddress_ = "ipAddress1";
+    deviceInfo1.providerId_ = 1;
+
+    EXPECT_EQ(hwCastProvider.RemoveCastDevice(1, deviceInfo1), false);
+}
+
+HWTEST_F(AVCastControllerTest, RegisterCastStateListener001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+
+    EXPECT_EQ(hwCastProvider.RegisterCastStateListener(nullptr), false);
+}
+
+HWTEST_F(AVCastControllerTest, UnRegisterCastStateListener001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+
+    EXPECT_EQ(hwCastProvider.UnRegisterCastStateListener(nullptr), false);
+}
+
+HWTEST_F(AVCastControllerTest, RegisterCastSessionStateListener001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+
+    EXPECT_EQ(hwCastProvider.RegisterCastSessionStateListener(2, nullptr), false);
+}
+
+HWTEST_F(AVCastControllerTest, UnRegisterCastSessionStateListener001, TestSize.Level1)
+{
+    HwCastProvider hwCastProvider;
+
+    EXPECT_EQ(hwCastProvider.UnRegisterCastSessionStateListener(2, nullptr), false);
 }
 } // namespace AVSession
 } // namespace OHOS

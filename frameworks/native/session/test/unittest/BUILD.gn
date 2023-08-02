@@ -188,6 +188,8 @@ if (castplus_cast_engine_enable) {
 
     configs = [ ":module_private_config" ]
 
+    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+
     deps = common_deps
 
     deps += [
