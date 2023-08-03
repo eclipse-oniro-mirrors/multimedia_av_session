@@ -545,6 +545,9 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
     int32_t uid = 0;
     listener->OnAudioSessionChecked(uid);
     sleep(1);
+    OutputDeviceInfo outputDeviceInfo;
+    listener->OnDeviceAvailable(outputDeviceInfo);
+    sleep(1);
     session->Destroy();
 
     SLOGI("RegisterSessionListener002 end");
