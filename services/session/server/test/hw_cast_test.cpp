@@ -629,7 +629,7 @@ public:
         return 0;
     };
 
-    int RegisterListener(std::shared_ptr<OHOS::CastEngine::IStreamPlayerListener> listener)
+    int RegisterListener(std::shared_ptr<OHOS::CastEngine::IStreamPlayerListener> listener) override
     {
         return 0;
     };
@@ -663,7 +663,7 @@ public:
     {
         return 0;
     };
-    
+
     int Pause() override
     {
         return 0;
