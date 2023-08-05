@@ -44,7 +44,7 @@ public:
     void OnStateChanged(const CastEngine::PlayerStates playbackState, bool isPlayWhenReady) override;
     void OnPositionChanged(int position, int bufferPosition, int duration) override;
     void OnMediaItemChanged(const CastEngine::MediaInfo &mediaInfo) override;
-    void OnVolumeChanged(int volume) override;
+    void OnVolumeChanged(int volume, int maxVolume) override;
     void OnLoopModeChanged(const CastEngine::LoopMode loopMode) override;
     void OnNextRequest() override;
     void OnPreviousRequest() override;
