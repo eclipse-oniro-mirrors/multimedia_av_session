@@ -68,6 +68,20 @@ std::shared_ptr<ICastSession> CreateSession()
     return session;
 }
 
+std::shared_ptr<AVMediaDescription> CreateAVMediaDescription()
+{
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->Reset();
+    description->SetMediaId("123");
+    description->SetTitle("Title");
+    description->SetSubtitle("SubTitle");
+    description->SetDescription("This is music description");
+    description->SetIcon(nullptr);
+    description->SetIconUri("xxxxx");
+    description->SetExtras(nullptr);
+    return description;
+}
+
 void HwCastStreamPlayerTest::SetUpTestCase()
 {}
 
@@ -162,15 +176,7 @@ HWTEST_P(HwCastStreamPlayerTest, SendControlCommand001, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, Start001, TestSize.Level1)
 {
     SLOGI("Start001 begin!");
-    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
-    description->Reset();
-    description->SetMediaId("123");
-    description->SetTitle("Title");
-    description->SetSubtitle("SubTitle");
-    description->SetDescription("This is music description");
-    description->SetIcon(nullptr);
-    description->SetIconUri("xxxxx");
-    description->SetExtras(nullptr);
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
     description->SetMediaUri("");
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
@@ -188,15 +194,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start001, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, Start002, TestSize.Level1)
 {
     SLOGI("Start002 begin!");
-    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
-    description->Reset();
-    description->SetMediaId("123");
-    description->SetTitle("Title");
-    description->SetSubtitle("SubTitle");
-    description->SetDescription("This is music description");
-    description->SetIcon(nullptr);
-    description->SetIconUri("xxxxx");
-    description->SetExtras(nullptr);
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
     description->SetMediaUri("");
     AVFileDescriptor avFileDescriptor;
     avFileDescriptor.fd_ = 100;
@@ -217,15 +215,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start002, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, Start003, TestSize.Level1)
 {
     SLOGI("Start003 begin!");
-    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
-    description->Reset();
-    description->SetMediaId("123");
-    description->SetTitle("Title");
-    description->SetSubtitle("SubTitle");
-    description->SetDescription("This is music description");
-    description->SetIcon(nullptr);
-    description->SetIconUri("xxxxx");
-    description->SetExtras(nullptr);
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
     description->SetMediaUri("Media url");
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
@@ -244,15 +234,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start003, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, Prepare001, TestSize.Level1)
 {
     SLOGI("Prepare001 begin!");
-    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
-    description->Reset();
-    description->SetMediaId("123");
-    description->SetTitle("Title");
-    description->SetSubtitle("SubTitle");
-    description->SetDescription("This is music description");
-    description->SetIcon(nullptr);
-    description->SetIconUri("xxxxx");
-    description->SetExtras(nullptr);
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
     description->SetMediaUri("");
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
@@ -272,15 +254,7 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare001, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, Prepare002, TestSize.Level1)
 {
     SLOGI("Prepare002 begin!");
-    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
-    description->Reset();
-    description->SetMediaId("123");
-    description->SetTitle("Title");
-    description->SetSubtitle("SubTitle");
-    description->SetDescription("This is music description");
-    description->SetIcon(nullptr);
-    description->SetIconUri("xxxxx");
-    description->SetExtras(nullptr);
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
     description->SetMediaUri("");
     AVFileDescriptor avFileDescriptor;
     avFileDescriptor.fd_ = 100;
