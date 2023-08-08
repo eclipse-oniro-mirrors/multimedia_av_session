@@ -311,11 +311,11 @@ if (castplus_cast_engine_enable) {
     configs = [ ":module_private_config" ]
 
     deps = [
-      "//third_party/googletest:gtest_main",
-      "../../../session:avsession_item",
+      "../../../../frameworks/common:avsession_common",
       "../../../session:avsession_cast_item",
+      "../../../session:avsession_item",
       "../../../session:avsession_router",
-      "../../../../frameworks/common:avsession_common"
+      "//third_party/googletest:gtest_main",
     ]
 
     external_deps = [
@@ -329,6 +329,7 @@ if (castplus_cast_engine_enable) {
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
+      "cast_engine:cast_engine_client",
       "data_object:distributeddataobject_impl",
       "device_manager:devicemanagersdk",
       "hilog:libhilog",
@@ -336,7 +337,6 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
-      "cast_engine:cast_engine_client",
     ]
   }
 }
@@ -354,9 +354,9 @@ group("av_session_server_unittest") {
     ":AudioAdapterTest",
     ":BkGrAudioControllerTest",
     ":BkGrAudioControllerTest",
+    ":HwCastStreamPlayerTest",
     ":RemoteUtilsTest",
     ":SessionStackTest",
-    ":HwCastStreamPlayerTest",
   ]
 
   if (castplus_cast_engine_enable) {
