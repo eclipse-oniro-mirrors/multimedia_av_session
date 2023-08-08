@@ -302,6 +302,45 @@ if (castplus_cast_engine_enable) {
   }
 }
 
+if (castplus_cast_engine_enable) {
+  ohos_unittest("HwCastStreamPlayerTest") {
+    module_out_path = module_out_path
+
+    sources = [ "hw_cast_stream_player_test.cpp" ]
+
+    configs = [ ":module_private_config" ]
+
+    deps = [
+      "//third_party/googletest:gtest_main",
+      "../../../session:avsession_item",
+      "../../../session:avsession_cast_item",
+      "../../../session:avsession_router",
+      "../../../../frameworks/common:avsession_common"
+    ]
+
+    external_deps = [
+      "ability_base:want",
+      "ability_runtime:app_manager",
+      "ability_runtime:wantagent_innerkits",
+      "access_token:libaccesstoken_sdk",
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
+      "audio_framework:audio_client",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
+      "data_object:distributeddataobject_impl",
+      "device_manager:devicemanagersdk",
+      "hilog:libhilog",
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+      "cast_engine:cast_engine_client",
+    ]
+  }
+}
+
 ###############################################################################
 group("av_session_server_unittest") {
   testonly = true
@@ -317,6 +356,7 @@ group("av_session_server_unittest") {
     ":BkGrAudioControllerTest",
     ":RemoteUtilsTest",
     ":SessionStackTest",
+    ":HwCastStreamPlayerTest",
   ]
 
   if (castplus_cast_engine_enable) {
