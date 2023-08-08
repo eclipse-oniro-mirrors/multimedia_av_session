@@ -14,15 +14,16 @@
  */
 
 #include <gtest/gtest.h>
-#include "avcast_controller_item.h"
-#include "avsession_errors.h"
-#include "avsession_log.h"
-#include "cast_session_manager.h"
-#include "hw_cast_provider.h"
-#include "hw_cast_stream_player.h"
+
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
+#include "cast_session_manager.h"
+#include "avcast_controller_item.h"
+#include "avsession_errors.h"
+#include "avsession_log.h"
+#include "hw_cast_provider.h"
+#include "hw_cast_stream_player.h"
 
 using namespace testing::ext;
 using namespace OHOS::CastEngine::CastEngineClient;
@@ -133,11 +134,11 @@ INSTANTIATE_TEST_CASE_P(SendControlCommand, HwCastStreamPlayerTest, testing::Val
 ));
 
 /**
-* @tc.name: SendControlCommand001
-* @tc.desc: SendControlCommand all test
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: SendControlCommand001
+ * @tc.desc: SendControlCommand all test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_P(HwCastStreamPlayerTest, SendControlCommand001, TestSize.Level1)
 {
     SLOGI("SendControlCommand001 begin!");
@@ -153,11 +154,11 @@ HWTEST_P(HwCastStreamPlayerTest, SendControlCommand001, TestSize.Level1)
 }
 
 /**
-* @tc.name: Start001
-* @tc.desc: start no media id and fd src
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: Start001
+ * @tc.desc: start no media id and fd src
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, Start001, TestSize.Level1)
 {
     SLOGI("Start001 begin!");
@@ -179,11 +180,11 @@ HWTEST_F(HwCastStreamPlayerTest, Start001, TestSize.Level1)
 }
 
 /**
-* @tc.name: Start002
-* @tc.desc: start with fd src
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: Start002
+ * @tc.desc: start with fd src
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, Start002, TestSize.Level1)
 {
     SLOGI("Start002 begin!");
@@ -208,11 +209,11 @@ HWTEST_F(HwCastStreamPlayerTest, Start002, TestSize.Level1)
 }
 
 /**
-* @tc.name: Start003
-* @tc.desc: start same media
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: Start003
+ * @tc.desc: start same media
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, Start003, TestSize.Level1)
 {
     SLOGI("Start003 begin!");
@@ -235,11 +236,11 @@ HWTEST_F(HwCastStreamPlayerTest, Start003, TestSize.Level1)
 }
 
 /**
-* @tc.name: Prepare001
-* @tc.desc: prepare no media id and fd src
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: Prepare001
+ * @tc.desc: prepare no media id and fd src
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, Prepare001, TestSize.Level1)
 {
     SLOGI("Prepare001 begin!");
@@ -263,11 +264,11 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare001, TestSize.Level1)
 }
 
 /**
-* @tc.name: Prepare002
-* @tc.desc: prepare with fd src
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: Prepare002
+ * @tc.desc: prepare with fd src
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, Prepare002, TestSize.Level1)
 {
     SLOGI("Prepare002 begin!");
@@ -294,11 +295,11 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare002, TestSize.Level1)
 }
 
 /**
-* @tc.name: GetDuration001
-* @tc.desc: GetDuration
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: GetDuration001
+ * @tc.desc: GetDuration
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, GetDuration001, TestSize.Level1)
 {
     SLOGI("GetDuration001 begin!");
@@ -308,11 +309,11 @@ HWTEST_F(HwCastStreamPlayerTest, GetDuration001, TestSize.Level1)
 }
 
 /**
-* @tc.name: GetCastAVPlaybackState001
-* @tc.desc: GetCastAVPlaybackState
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: GetCastAVPlaybackState001
+ * @tc.desc: GetCastAVPlaybackState
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState001, TestSize.Level1)
 {
     SLOGI("GetCastAVPlaybackState001 begin!");
@@ -322,11 +323,11 @@ HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState001, TestSize.Level1)
 }
 
 /**
-* @tc.name: SetDisplaySurface001
-* @tc.desc: SetDisplaySurface
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: SetDisplaySurface001
+ * @tc.desc: SetDisplaySurface
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, SetDisplaySurface001, TestSize.Level1)
 {
     SLOGI("SetDisplaySurface001 begin!");
@@ -336,11 +337,11 @@ HWTEST_F(HwCastStreamPlayerTest, SetDisplaySurface001, TestSize.Level1)
 }
 
 /**
-* @tc.name: RegisterControllerListener001
-* @tc.desc: RegisterControllerListener invalid listener
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: RegisterControllerListener001
+ * @tc.desc: RegisterControllerListener invalid listener
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener001, TestSize.Level1)
 {
     SLOGI("RegisterControllerListener001 begin!");
@@ -349,11 +350,11 @@ HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener001, TestSize.Level1)
 }
 
 /**
-* @tc.name: RegisterControllerListener002
-* @tc.desc: RegisterControllerListener repeat
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: RegisterControllerListener002
+ * @tc.desc: RegisterControllerListener repeat
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener002, TestSize.Level1)
 {
     SLOGI("RegisterControllerListener002 begin!");
@@ -364,11 +365,11 @@ HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener002, TestSize.Level1)
 }
 
 /**
-* @tc.name: UnRegisterControllerListener001
-* @tc.desc: UnRegisterControllerListener invalid listener
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: UnRegisterControllerListener001
+ * @tc.desc: UnRegisterControllerListener invalid listener
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener001, TestSize.Level1)
 {
     SLOGI("UnRegisterControllerListener001 begin!");
@@ -377,11 +378,11 @@ HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener001, TestSize.Level
 }
 
 /**
-* @tc.name: UnRegisterControllerListener002
-* @tc.desc: UnRegisterControllerListener success
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: UnRegisterControllerListener002
+ * @tc.desc: UnRegisterControllerListener success
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener002, TestSize.Level1)
 {
     SLOGI("UnRegisterControllerListener002 begin!");
@@ -392,11 +393,11 @@ HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener002, TestSize.Level
 }
 
 /**
-* @tc.name: UnRegisterControllerListener003
-* @tc.desc: UnRegisterControllerListener failed
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: UnRegisterControllerListener003
+ * @tc.desc: UnRegisterControllerListener failed
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener003, TestSize.Level1)
 {
     SLOGI("UnRegisterControllerListener003 begin!");
@@ -408,11 +409,11 @@ HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener003, TestSize.Level
 }
 
 /**
-* @tc.name: OnStateChanged001
-* @tc.desc: OnStateChanged
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnStateChanged001
+ * @tc.desc: OnStateChanged
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnStateChanged001, TestSize.Level1)
 {
     SLOGI("OnStateChanged001 begin!");
@@ -424,11 +425,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnStateChanged001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnPositionChanged001
-* @tc.desc: OnPositionChanged invalid
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnPositionChanged001
+ * @tc.desc: OnPositionChanged invalid
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged001, TestSize.Level1)
 {
     SLOGI("OnPositionChanged001 begin!");
@@ -440,11 +441,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnPositionChanged002
-* @tc.desc: OnPositionChanged
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnPositionChanged002
+ * @tc.desc: OnPositionChanged
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged002, TestSize.Level1)
 {
     SLOGI("OnPositionChanged002 begin!");
@@ -456,11 +457,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged002, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnMediaItemChanged001
-* @tc.desc: OnMediaItemChanged
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnMediaItemChanged001
+ * @tc.desc: OnMediaItemChanged
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged001, TestSize.Level1)
 {
     SLOGI("OnMediaItemChanged001 begin!");
@@ -473,11 +474,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnNextRequest001
-* @tc.desc: OnNextRequest
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnNextRequest001
+ * @tc.desc: OnNextRequest
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnNextRequest001, TestSize.Level1)
 {
     SLOGI("OnNextRequest001 begin!");
@@ -489,11 +490,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnNextRequest001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnPreviousRequest001
-* @tc.desc: OnPreviousRequest
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnPreviousRequest001
+ * @tc.desc: OnPreviousRequest
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnPreviousRequest001, TestSize.Level1)
 {
     SLOGI("OnPreviousRequest001 begin!");
@@ -505,11 +506,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnPreviousRequest001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnVolumeChanged001
-* @tc.desc: OnVolumeChanged
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnVolumeChanged001
+ * @tc.desc: OnVolumeChanged
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged001, TestSize.Level1)
 {
     SLOGI("OnVolumeChanged001 begin!");
@@ -521,11 +522,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnLoopModeChanged001
-* @tc.desc: OnLoopModeChanged
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnLoopModeChanged001
+ * @tc.desc: OnLoopModeChanged
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged001, TestSize.Level1)
 {
     SLOGI("OnLoopModeChanged001 begin!");
@@ -537,11 +538,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnPlaySpeedChanged001
-* @tc.desc: OnPlaySpeedChanged
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnPlaySpeedChanged001
+ * @tc.desc: OnPlaySpeedChanged
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged001, TestSize.Level1)
 {
     SLOGI("OnPlaySpeedChanged001 begin!");
@@ -553,11 +554,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnPlayerError001
-* @tc.desc: OnPlayerError
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnPlayerError001
+ * @tc.desc: OnPlayerError
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnPlayerError001, TestSize.Level1)
 {
     SLOGI("OnPlayerError001 begin!");
@@ -569,11 +570,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlayerError001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnSeekDone001
-* @tc.desc: OnSeekDone
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnSeekDone001
+ * @tc.desc: OnSeekDone
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnSeekDone001, TestSize.Level1)
 {
     SLOGI("OnSeekDone001 begin!");
@@ -586,11 +587,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnSeekDone001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnVideoSizeChanged001
-* @tc.desc: OnVideoSizeChanged
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnVideoSizeChanged001
+ * @tc.desc: OnVideoSizeChanged
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged001, TestSize.Level1)
 {
     SLOGI("OnVideoSizeChanged001 begin!");
@@ -602,11 +603,11 @@ HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnEndOfStream001
-* @tc.desc: OnEndOfStream
-* @tc.type: FUNC
-* @tc.require: NA
-*/
+ * @tc.name: OnEndOfStream001
+ * @tc.desc: OnEndOfStream
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
 HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream001, TestSize.Level1)
 {
     SLOGI("OnEndOfStream001 begin!");
