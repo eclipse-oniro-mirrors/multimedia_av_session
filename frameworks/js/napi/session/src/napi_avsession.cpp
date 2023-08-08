@@ -119,6 +119,7 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
         auto* napiSession = reinterpret_cast<NapiAVSession*>(data);
         napi_delete_reference(env, napiSession->wrapperRef_);
         delete napiSession;
+        napiSession = nullptr;
     };
     auto* napiSession = new(std::nothrow) NapiAVSession();
     if (napiSession == nullptr) {

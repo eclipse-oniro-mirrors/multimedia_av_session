@@ -88,6 +88,7 @@ napi_value NapiAVCastController::ConstructorCallback(napi_env env, napi_callback
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(data);
         napi_delete_reference(env, napiCastController->wrapperRef_);
         delete napiCastController;
+        napiCastController = nullptr;
     };
 
     auto* napiCastController = new(std::nothrow) NapiAVCastController();

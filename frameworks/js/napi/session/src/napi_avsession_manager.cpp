@@ -928,6 +928,7 @@ napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callbac
              ++callbackRef) {
             napi_status ret = napi_delete_reference(env, *callbackRef);
             CHECK_AND_RETURN_RET_LOG(napi_ok == ret, ret, "delete callback reference failed");
+            *callbackRef = nullptr;
         }
         serviceDiedCallbacks_.clear();
         return napi_ok;
