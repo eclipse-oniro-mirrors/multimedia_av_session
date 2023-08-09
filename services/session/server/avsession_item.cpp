@@ -52,8 +52,10 @@ AVSessionItem::~AVSessionItem()
 {
     SLOGD("destroy id=%{public}s", descriptor_.sessionId_.c_str());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    StopCast();
-    SLOGD("Stop cast finished");
+    if (descriptor_.sessionTag_ != "RemoteCast") {
+        SLOGW("Session destroy at source, release cast");
+        ReleaseCast();
+    }
 #endif
 }
 
@@ -91,8 +93,9 @@ int32_t AVSessionItem::Destroy()
             controllers_.erase(it++);
         }
     }
-
+    SLOGI("AVSessionItem send service destroy event to service, check serviceCallback exist");
     if (serviceCallback_) {
+        SLOGI("AVSessionItem send service destroy event to service");
         serviceCallback_(*this);
     }
     SLOGI("Destroy success");
@@ -263,6 +266,7 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
 {
+    SLOGI("Start get avcast controller inner");
     if (castControllerProxy_ == nullptr) {
         SLOGI("CastControllerProxy is null, start get new proxy");
         {
@@ -399,6 +403,17 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
     return AVSESSION_SUCCESS;
 }
 
+bool AVSessionItem::IsCastSinkSession(int32_t castState)
+{
+    SLOGI("IsCastSinkSession for castState %{public}d, sessionTag is %{public}s", castState,
+        descriptor_.sessionTag_.c_str());
+    if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
+        SLOGI("A cast sink session is being disconnected");
+        return Destroy() == true;
+    }
+    return false;
+}
+
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("OnCastStateChange");
@@ -411,12 +426,16 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     if (castState == 6) { // 6 is connected status (stream)
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
+        SLOGI("Start get remote controller");
     }
 
     if (castState == 5) { // 5 is disconnected status
+        castState = 6; // 6 is disconnected status of AVSession
+        SLOGI("Is remotecast, received disconnect event");
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         AVRouter::GetInstance().StopCastSession(castHandle_);
         castControllerProxy_ = nullptr;
+
         OutputDeviceInfo localDevice;
         DeviceInfo localInfo;
         localInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
@@ -431,16 +450,25 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     for (const auto& controller : controllers_) {
         controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
     }
+    SLOGI("Start check is cast sink session for state");
+    if (IsCastSinkSession(castState)) {
+        SLOGE("Cast sink session start to disconnect");
+        return;
+    }
 }
 
 int32_t AVSessionItem::StopCast()
 {
+    if (descriptor_.sessionTag_ == "RemoteCast") {
+        return AVRouter::GetInstance().StopCastSession(castHandle_);
+    }
     SLOGI("Stop cast process");
     {
         std::lock_guard lockGuard(castHandleLock_);
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
         int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
-        CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
+        SLOGI("StopCast the castHandle is %{public}ld", castHandle_);
+        CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
     }
 
     OutputDeviceInfo outputDeviceInfo;
@@ -451,6 +479,18 @@ int32_t AVSessionItem::StopCast()
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     SetOutputDevice(outputDeviceInfo);
     return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::SetCastHandle(const int64_t castHandle)
+{
+    castHandle_ = castHandle;
+    SLOGI("Cast handle is %{public}ld", castHandle_);
+}
+
+void AVSessionItem::RegisterDeviceStateCallback()
+{
+    SLOGI("Start register callback for device state change");
+    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_);
 }
 #endif
 
@@ -712,6 +752,7 @@ void AVSessionItem::HandleControllerRelease(pid_t pid)
 
 void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback)
 {
+    SLOGI("SetServiceCallbackForRelease in");
     serviceCallback_ = callback;
 }
 

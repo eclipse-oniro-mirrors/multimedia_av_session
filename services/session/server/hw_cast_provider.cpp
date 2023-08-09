@@ -54,10 +54,13 @@ int32_t HwCastProvider::SetDiscoverable(const bool enable)
 
 void HwCastProvider::Release()
 {
-    hwCastProviderSessionMap_.clear();
-    avCastControllerMap_.clear();
-    castStateListenerList_.clear();
-    castFlag_.clear();
+    {
+        std::lock_guard lockGuard(mutexLock_);
+        hwCastProviderSessionMap_.clear();
+        avCastControllerMap_.clear();
+        castStateListenerList_.clear();
+        castFlag_.clear();
+    }
     CastSessionManager::GetInstance().UnregisterListener();
     CastSessionManager::GetInstance().Release();
 }
@@ -70,7 +73,7 @@ int HwCastProvider::StartCastSession()
     CastSessionManager::GetInstance().CreateCastSession(property, castSession);
     int castId;
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard lockGuard(mutexLock_);
         std::vector<bool>::iterator iter = find(castFlag_.begin(), castFlag_.end(), false);
         if (iter == castFlag_.end()) {
             SLOGE("StartCastSession faileded");
@@ -91,7 +94,7 @@ int HwCastProvider::StartCastSession()
 void HwCastProvider::StopCastSession(int castId)
 {
     SLOGI("StopCastSession begin");
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutexLock_);
         
     auto hwCastStreamPlayer = avCastControllerMap_[castId];
     if (hwCastStreamPlayer) {
@@ -114,7 +117,7 @@ void HwCastProvider::StopCastSession(int castId)
 bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
 {
     SLOGI("AddCastDevice with config castSession and corresonding castId is %{public}d", castId);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutexLock_);
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("the castId corresonding to castSession is not exist");
         return false;
@@ -131,7 +134,7 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
 bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo)
 {
     SLOGI("RemoveCastDevice with config castSession and corresonding castId is %{public}d", castId);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutexLock_);
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("the castId corresonding to castSession is not exist");
         return false;
@@ -147,7 +150,7 @@ bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo)
 
 bool HwCastProvider::RegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutexLock_);
     if (listener == nullptr) {
         SLOGE("RegisterCastStateListener the listener is nullptr");
         return false;
@@ -164,7 +167,7 @@ bool HwCastProvider::RegisterCastStateListener(std::shared_ptr<IAVCastStateListe
 
 bool HwCastProvider::UnRegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutexLock_);
     if (listener == nullptr) {
         SLOGE("UnRegisterCastStateListener the listener is nullptr");
         return false;
@@ -185,7 +188,8 @@ bool HwCastProvider::UnRegisterCastStateListener(std::shared_ptr<IAVCastStateLis
 
 std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int castId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    SLOGI("Provider get remote controller");
+    std::lock_guard lockGuard(mutexLock_);
     if (avCastControllerMap_.find(castId) != avCastControllerMap_.end()) {
         SLOGI("the castId corresonding to streamPlayer is already exist");
         return avCastControllerMap_[castId];
@@ -207,7 +211,7 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
     }
     hwCastStreamPlayer->Init();
     avCastControllerMap_[castId] = hwCastStreamPlayer;
-
+    SLOGI("Create streamPlayer finished");
     return hwCastStreamPlayer;
 }
 
@@ -218,7 +222,7 @@ bool HwCastProvider::RegisterCastSessionStateListener(int castId,
         SLOGE("RegisterCastSessionStateListener failed for the listener is nullptr");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutexLock_);
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("RegisterCastSessionStateListener failed for the castSession corresponding to castId is not exit");
         return false;
@@ -239,7 +243,7 @@ bool HwCastProvider::UnRegisterCastSessionStateListener(int castId,
         SLOGE("UnRegisterCastSessionStateListener failed for the listener is nullptr");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutexLock_);
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("UnRegisterCastSessionStateListener failed for the castSession corresponding to castId is not exit");
         return false;
@@ -258,6 +262,10 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
 {
     std::vector<DeviceInfo> deviceInfoList;
     for (CastRemoteDevice castRemoteDevice : deviceList) {
+        if (castRemoteDevice.subDeviceType == CastEngine::SubDeviceType::SUB_DEVICE_MATEBOOK_PAD) {
+            SLOGW("Found untrusted devices");
+            continue;
+        }
         DeviceInfo deviceInfo;
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         deviceInfo.deviceId_ = castRemoteDevice.deviceId;
@@ -270,6 +278,17 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         if (listener != nullptr) {
             SLOGI("trigger the OnDeviceAvailable for registered listeners");
             listener->OnDeviceAvailable(deviceInfoList);
+        }
+    }
+}
+
+void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
+{
+    SLOGI("Received on device offline event");
+    for (auto listener : castStateListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnDeviceOffline for registered listeners");
+            listener->OnDeviceOffline(deviceId);
         }
     }
 }

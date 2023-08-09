@@ -18,6 +18,7 @@
 #include "avsession_log.h"
 #include "avsession_trace.h"
 #include "media_info_holder.h"
+#include "surface_utils.h"
 
 namespace OHOS::AVSession {
 bool AVCastControllerStub::CheckInterfaceToken(MessageParcel& data)
@@ -90,6 +91,13 @@ int32_t AVCastControllerStub::HandlePrepare(MessageParcel& data, MessageParcel& 
     if (avQueueItem == nullptr) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write prepare ret failed");
     } else {
+        if (data.ReadBool()) {
+            SLOGD("Need get fd from proxy");
+            AVFileDescriptor avFileDescriptor;
+            avFileDescriptor.fd_ = data.ReadFileDescriptor();
+            SLOGD("Prepare received fd %{public}d", avFileDescriptor.fd_);
+            avQueueItem->GetDescription()->SetFdSrc(avFileDescriptor);
+        }
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Prepare(*avQueueItem)),
             ERR_NONE, "Write mediaInfoHolder failed");
     }
@@ -132,9 +140,25 @@ int32_t AVCastControllerStub::HandleGetCurrentItem(MessageParcel& data, MessageP
 int32_t AVCastControllerStub::HandleSetDisplaySurface(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::HandleSetDisplaySurface");
-    auto surfaceId = data.ReadString();
+    sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+    if (remoteObj == nullptr) {
+        SLOGE("BufferProducer is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    sptr<IBufferProducer> producer = iface_cast<IBufferProducer>(remoteObj);
+
+    auto pSurface = Surface::CreateSurfaceAsProducer(producer);
+    CHECK_AND_RETURN_RET_LOG(pSurface != nullptr, AVSESSION_ERROR, "Surface provider is null");
+    auto surfaceInstance = SurfaceUtils::GetInstance();
+    CHECK_AND_RETURN_RET_LOG(surfaceInstance != nullptr, AVSESSION_ERROR, "Surface instance is null");
+    surfaceInstance->Add(pSurface->GetUniqueId(), pSurface);
+    uint64_t uniqueId = pSurface->GetUniqueId();
+
+    auto surfaceId = std::to_string(uniqueId);
+    SLOGI("Get surface id uint64_t: %{public}lu, get the string: %{public}s", uniqueId, surfaceId.c_str());
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetDisplaySurface(surfaceId)),
-        ERR_NONE, "WriteInt32 result failed");
+        AVSESSION_ERROR, "WriteInt32 result failed");
     return ERR_NONE;
 }
 

@@ -56,6 +56,8 @@ public:
     ~AVSessionItem() override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    bool IsCastSinkSession(int32_t castState);
+
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 #endif
 
@@ -169,10 +171,14 @@ public:
     int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo);
 
     int32_t StopCast();
-    
+
     sptr<IRemoteObject> GetAVCastControllerInner() override;
 
     void UpdateCastDeviceMap(DeviceInfo deviceInfo);
+
+    void SetCastHandle(int64_t castHandle);
+
+    void RegisterDeviceStateCallback();
 #endif
 
 protected:

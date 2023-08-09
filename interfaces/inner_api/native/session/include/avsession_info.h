@@ -77,6 +77,14 @@ public:
     virtual void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) {};
 
     /**
+     * @brief Listen for the event of device offline.
+     *
+     * @param { std::string& } deviceId - Offlined device ID.
+     * @since 10
+    */
+    virtual void OnDeviceOffline(const std::string& deviceId) {};
+
+    /**
      * @brief Deconstruct SessionListener.
      * @since 9
     */
@@ -98,6 +106,8 @@ public:
     virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
     
     virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
+
+    virtual void OnEndOfStream(const int32_t isLooping) = 0;
 
     /**
      * @brief Deconstruct SessionListener.
@@ -330,6 +340,8 @@ public:
 
     virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
 
+    virtual void OnEndOfStream(const int32_t isLooping) = 0;
+
     /**
      * @brief Deconstruct AVControllerCallback.
      * @since 9
@@ -469,6 +481,20 @@ enum DeviceType {
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     DEVICE_TYPE_BLUETOOTH = 10,
+};
+
+enum CastEngineConnectState {
+    CONNECTING = 0,
+    CONNECTED = 1,
+    PAUSED = 2,
+    PLAYING = 3,
+    DISCONNECTING = 4,
+    DISCONNECTED = 5,
+    STREAM = 6,
+    MIRROR_TO_UI = 7,
+    UI_TO_MIRROR = 8,
+    UICAST = 9,
+    DEVICE_STATE_MAX = 10,
 };
 
 /**

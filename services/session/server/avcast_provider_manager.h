@@ -30,6 +30,10 @@ public:
 
     void OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos) override;
 
+    void OnDeviceOffline(const std::string& deviceId) override;
+
+    void OnSessionCreated(const int32_t castId) override;
+
     void OnCastServerDied() override;
 
     std::shared_ptr<AVCastProvider> provider_;

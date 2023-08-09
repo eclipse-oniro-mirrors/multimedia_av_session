@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "hw_cast_stream_player.h"
+#include "int_wrapper.h"
 #include "avsession_log.h"
 #include "avcast_player_state.h"
 #include "avqueue_item.h"
 #include "avmedia_description.h"
 #include "avsession_errors.h"
-#include "hw_cast_stream_player.h"
 
 using namespace OHOS::CastEngine;
 
@@ -153,7 +154,11 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
-    mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
+    if (mediaDescription->GetIconUri() == "") {
+        mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
+    } else {
+        mediaInfo.albumCoverUrl = mediaDescription->GetIconUri();
+    }
     mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
     mediaInfo.mediaArtist = mediaDescription->GetArtist();
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
@@ -202,7 +207,11 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
-    mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
+    if (mediaDescription->GetIconUri() == "") {
+        mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
+    } else {
+        mediaInfo.albumCoverUrl = mediaDescription->GetIconUri();
+    }
     mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
     mediaInfo.mediaArtist = mediaDescription->GetArtist();
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
@@ -350,7 +359,7 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
 
 void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int duration)
 {
-    if (position == -1 && bufferPosition == -1) { // -1 is invalid(default) value
+    if (position == -1 && bufferPosition == -1 && duration == -1) { // -1 is invalid(default) value
         SLOGW("Invalid position change callback");
         return;
     }
@@ -371,6 +380,12 @@ void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int
         wantParams->SetParam("duration", intIt);
         avCastPlaybackState.SetExtras(wantParam);
         SLOGD("Received duration: %{public}d", duration);
+    }
+    if (duration != -1) {
+        std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
+        sptr<AAFwk::IInterface> intIt = AAFwk::Integer::Box(duration);
+        wantParams->SetParam("duration", intIt);
+        avCastPlaybackState.SetExtras(wantParams);
     }
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
@@ -523,6 +538,27 @@ void HwCastStreamPlayer::OnVideoSizeChanged(int width, int height)
 
 void HwCastStreamPlayer::OnEndOfStream(int isLooping)
 {
-    SLOGD("Received EndOfStream callback, value is %{public}d", isLooping);
+    SLOGI("Received EndOfStream callback, value is %{public}d", isLooping);
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnEndOfStream for registered listeners");
+            listener->OnEndOfStream(isLooping);
+        }
+    }
+
+    AVPlaybackState avCastPlaybackState;
+    std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
+    sptr<AAFwk::IInterface> intIt = AAFwk::Integer::Box(isLooping);
+    if (wantParams == nullptr || intIt == nullptr) {
+        return;
+    }
+    wantParams->SetParam("endofstream", intIt);
+    avCastPlaybackState.SetExtras(wantParams);
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnEndOfStream for registered listeners");
+            listener->OnCastPlaybackStateChange(avCastPlaybackState);
+        }
+    }
 }
 } // namespace OHOS::AVSession

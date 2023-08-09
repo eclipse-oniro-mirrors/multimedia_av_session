@@ -81,6 +81,13 @@ void NapiSessionListener::OnDeviceAvailable(const OutputDeviceInfo& castOutputDe
     HandleEvent(EVENT_DEVICE_AVAILABLE, castOutputDeviceInfo);
 }
 
+void NapiSessionListener::OnDeviceOffline(const std::string& deviceId)
+{
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceOffline");
+    SLOGI("Start handle device offline event");
+    HandleEvent(EVENT_DEVICE_OFFLINE, deviceId);
+}
+
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

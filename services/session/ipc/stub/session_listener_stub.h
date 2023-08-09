@@ -35,6 +35,8 @@ private:
 
     int32_t HandleOnDeviceAvailable(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnDeviceOffline(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t(SessionListenerStub::*)(MessageParcel&, MessageParcel&);
@@ -44,6 +46,7 @@ private:
         &SessionListenerStub::HandleOnTopSessionChange,
         &SessionListenerStub::HandleOnAudioSessionChecked,
         &SessionListenerStub::HandleOnDeviceAvailable,
+        &SessionListenerStub::HandleOnDeviceOffline,
     };
 };
 }

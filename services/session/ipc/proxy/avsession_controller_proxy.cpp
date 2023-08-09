@@ -394,6 +394,7 @@ int32_t AVSessionControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject
 
 int32_t AVSessionControllerProxy::Destroy()
 {
+    SLOGI("Proxy received destroy event");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,

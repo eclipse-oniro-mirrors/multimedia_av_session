@@ -99,4 +99,12 @@ int32_t AVCastControllerCallbackStub::HandleOnPlayerError(MessageParcel& data, M
     OnPlayerError(errorCode, errorMsg);
     return ERR_NONE;
 }
+
+int32_t AVCastControllerCallbackStub::HandleOnEndOfStream(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t isLooping;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(isLooping), ERR_NONE, "read isLooping failed");
+    OnEndOfStream(isLooping);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

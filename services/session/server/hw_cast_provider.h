@@ -49,6 +49,7 @@ public:
     bool UnRegisterCastSessionStateListener(int castId, std::shared_ptr<IAVCastSessionStateListener> listener) override;
 
     void OnDeviceFound(const std::vector<CastEngine::CastRemoteDevice> &deviceList) override;
+    void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void OnServiceDied() override;
 
@@ -58,7 +59,7 @@ private:
     std::map<int, std::shared_ptr<HwCastProviderSession>> hwCastProviderSessionMap_;
     std::map<int, std::shared_ptr<IAVCastControllerProxy>> avCastControllerMap_;
     std::vector<std::shared_ptr<IAVCastStateListener>> castStateListenerList_;
-    std::mutex mutex_;
+    std::recursive_mutex mutexLock_;
 };
 } // namespace OHOS::AVSession
 
