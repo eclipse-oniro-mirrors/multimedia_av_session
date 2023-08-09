@@ -270,12 +270,6 @@ ohos_shared_library("avsession_router") {
 
 ohos_shared_library("avsession_item") {
   install_enable = true
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-    blocklist = "../../cfi_blocklist.txt"
-  }
   ipc_sources = [
     "ipc/proxy/avcontroller_callback_proxy.cpp",
     "ipc/proxy/avsession_callback_proxy.cpp",
