@@ -191,7 +191,7 @@ void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(data.WriteInt32(connectionState), "write connectionState failed");
 
-    int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
+    int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfoSize), "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
         CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.castCategory_), "write castCategory failed");

@@ -238,7 +238,7 @@ private:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
-    int64_t castHandle_;
+    int64_t castHandle_ = 0;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
