@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "hw_cast_provider_session.h"
 #include <thread>
 #include "avsession_log.h"
-#include "hw_cast_provider_session.h"
 
 using namespace OHOS::CastEngine;
 
@@ -98,7 +98,7 @@ bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAV
         return false;
     }
     castSessionStateListenerList_.emplace_back(listener);
-
+    SLOGD("Provider session register cast session state listener finished");
     return true;
 }
 

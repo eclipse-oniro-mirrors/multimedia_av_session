@@ -40,6 +40,8 @@ private:
 
     int32_t HandleOnPlayerError(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnEndOfStream(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t (AVCastControllerCallbackStub::*)(MessageParcel& data, MessageParcel& reply);
@@ -51,6 +53,7 @@ private:
         &AVCastControllerCallbackStub::HandleOnSeekDone,
         &AVCastControllerCallbackStub::HandleOnVideoSizeChange,
         &AVCastControllerCallbackStub::HandleOnPlayerError,
+        &AVCastControllerCallbackStub::HandleOnEndOfStream,
     };
 };
 }

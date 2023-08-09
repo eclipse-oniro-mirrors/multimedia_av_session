@@ -39,6 +39,8 @@ public:
     
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
+    void OnEndOfStream(const int32_t isLooping) override;
+
     void AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 
 private:

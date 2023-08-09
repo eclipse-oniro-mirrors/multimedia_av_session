@@ -25,36 +25,49 @@ SessionListenerClient::SessionListenerClient(const std::shared_ptr<SessionListen
 
 void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
-    if (listener_) {
-        listener_->OnSessionCreate(descriptor);
+    auto copiedListener = listener_;
+    if (copiedListener) {
+        copiedListener->OnSessionCreate(descriptor);
     }
 }
 
 void SessionListenerClient::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
-    if (listener_) {
-        listener_->OnSessionRelease(descriptor);
+    auto copiedListener = listener_;
+    if (copiedListener) {
+        copiedListener->OnSessionRelease(descriptor);
     }
 }
 
 void SessionListenerClient::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
-    if (listener_) {
-        listener_->OnTopSessionChange(descriptor);
+    auto copiedListener = listener_;
+    if (copiedListener) {
+        copiedListener->OnTopSessionChange(descriptor);
     }
 }
 
 void SessionListenerClient::OnAudioSessionChecked(const int32_t uid)
 {
-    if (listener_) {
-        listener_->OnAudioSessionChecked(uid);
+    auto copiedListener = listener_;
+    if (copiedListener) {
+        copiedListener->OnAudioSessionChecked(uid);
     }
 }
 
 void SessionListenerClient::OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
-    if (listener_) {
-        listener_->OnDeviceAvailable(castOutputDeviceInfo);
+    auto copiedListener = listener_;
+    if (copiedListener) {
+        copiedListener->OnDeviceAvailable(castOutputDeviceInfo);
+    }
+}
+
+void SessionListenerClient::OnDeviceOffline(const std::string& deviceId)
+{
+    auto copiedListener = listener_;
+    if (copiedListener) {
+        copiedListener->OnDeviceOffline(deviceId);
     }
 }
 } // namespace OHOS::AVSession

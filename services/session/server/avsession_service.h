@@ -116,7 +116,11 @@ public:
     }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    void CreateSessionByCast(const int64_t castHandle) override;
+
     void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
+
+    void NotifyDeviceOffline(const std::string& deviceId) override;
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 

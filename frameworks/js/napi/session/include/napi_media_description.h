@@ -90,7 +90,7 @@ private:
     static napi_status SetAppName(napi_env env, const AVMediaDescription& in, napi_value& out);
 
     static void CheckAndSetDefaultString(napi_status status, std::string& defaultStr);
-    static void CheckAndSetDefaultInt(napi_status status, int32_t& defaultStr);
+    static void CheckAndSetDefaultInt(napi_status status, int32_t& defaultInt);
 
     static std::map<std::string, GetterType> getterMap_;
     static std::map<int32_t, SetterType> setterMap_;

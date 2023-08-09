@@ -35,6 +35,8 @@ public:
     void OnAudioSessionChecked(const int32_t uid) override;
 
     void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
+
+    void OnDeviceOffline(const std::string& deviceId) override;
     
 private:
     std::shared_ptr<SessionListener> listener_;

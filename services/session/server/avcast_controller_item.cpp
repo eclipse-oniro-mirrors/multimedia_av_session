@@ -85,6 +85,13 @@ void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::str
     callback_->OnPlayerError(errorCode, errorMsg);
 }
 
+void AVCastControllerItem::OnEndOfStream(const int32_t isLooping)
+{
+    SLOGI("OnEndOfStream");
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnEndOfStream(isLooping);
+}
+
 int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd)
 {
     SLOGI("Call SendControlCommand of cast controller proxy");

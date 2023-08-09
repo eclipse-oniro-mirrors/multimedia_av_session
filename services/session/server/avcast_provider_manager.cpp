@@ -41,6 +41,22 @@ void AVCastProviderManager::OnDeviceAvailable(std::vector<DeviceInfo> deviceInfo
 #endif
 }
 
+void AVCastProviderManager::OnSessionCreated(const int32_t castId)
+{
+    SLOGI("On cast session created");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVRouter::GetInstance().OnCastSessionCreated(castId);
+#endif
+}
+
+void AVCastProviderManager::OnDeviceOffline(const std::string& deviceId)
+{
+    SLOGI("On device offline");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVRouter::GetInstance().OnDeviceOffline(deviceId);
+#endif
+}
+
 void AVCastProviderManager::OnCastServerDied()
 {
     SLOGI("On cast server died");

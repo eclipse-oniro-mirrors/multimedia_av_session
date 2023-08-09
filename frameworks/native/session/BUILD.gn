@@ -125,6 +125,10 @@ ohos_shared_library("avsession_cast_client") {
 
   cflags = []
 
+  if (castplus_cast_engine_enable) {
+    external_deps += [ "graphic_2d:surface" ]
+  }
+
   if (multimedia_av_session_enable_trace_control) {
     cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
     external_deps += [ "hitrace:hitrace_meter" ]

@@ -436,8 +436,6 @@ sptr<IRemoteObject> AVSessionProxy::GetAVCastControllerInner()
 std::shared_ptr<AVCastController> AVSessionProxy::GetAVCastController()
 {
     CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
-    CHECK_AND_RETURN_RET_LOG(castController_ == nullptr, castController_,
-        "controller already exist");
     sptr <IRemoteObject> object = GetAVCastControllerInner();
     CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
     auto castController = iface_cast<AVCastControllerProxy>(object);

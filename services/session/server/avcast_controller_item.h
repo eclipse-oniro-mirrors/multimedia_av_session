@@ -42,6 +42,8 @@ public:
     
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
+    void OnEndOfStream(const int32_t isLooping) override;
+
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
     int32_t Start(const AVQueueItem& avQueueItem) override;

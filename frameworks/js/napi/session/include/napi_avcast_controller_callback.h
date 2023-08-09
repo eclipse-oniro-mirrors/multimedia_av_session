@@ -34,6 +34,7 @@ public:
         EVENT_CAST_SEEK_DONE,
         EVENT_CAST_VIDEO_SIZE_CHANGE,
         EVENT_CAST_ERROR,
+        EVENT_CAST_END_OF_STREAM,
         EVENT_CAST_TYPE_MAX,
     };
 
@@ -47,6 +48,7 @@ public:
     void OnSeekDone(const int32_t seekNumber) override;
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
+    void OnEndOfStream(const int32_t isLooping) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

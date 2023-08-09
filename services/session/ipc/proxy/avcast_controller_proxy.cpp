@@ -19,6 +19,7 @@
 #include "avsession_log.h"
 #include "avsession_trace.h"
 #include "media_info_holder.h"
+#include "surface_utils.h"
 
 namespace OHOS::AVSession {
 AVCastControllerProxy::AVCastControllerProxy(const sptr<IRemoteObject>& impl)
@@ -63,6 +64,7 @@ int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteFileDescriptor(avQueueItem.GetDescription()->GetFdSrc().fd_),
         ERR_UNMARSHALLING, "Write avQueueItem failed");
+    SLOGD("Start received fd %{public}d", avQueueItem.GetDescription()->GetFdSrc().fd_);
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
@@ -81,6 +83,14 @@ int32_t AVCastControllerProxy::Prepare(const AVQueueItem& avQueueItem)
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
+    if (avQueueItem.GetDescription()->GetFdSrc().fd_ == 0) {
+        parcel.WriteBool(false);
+    } else {
+        parcel.WriteBool(true);
+        CHECK_AND_RETURN_RET_LOG(parcel.WriteFileDescriptor(avQueueItem.GetDescription()->GetFdSrc().fd_),
+            ERR_UNMARSHALLING, "Write avQueueItem failed");
+    }
+    SLOGD("Prepare received fd %{public}d", avQueueItem.GetDescription()->GetFdSrc().fd_);
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
@@ -164,15 +174,36 @@ int32_t AVCastControllerProxy::GetCurrentItem(AVQueueItem& currentItem)
 int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SetDisplaySurface");
-    MessageParcel parcel;
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
-        "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteString(surfaceId), ERR_MARSHALLING, "write surfaceId failed");
+    errno = 0;
+    uint64_t surfaceUniqueId = static_cast<uint64_t>(std::strtoll(surfaceId.c_str(), nullptr, 10));
+    if (errno == ERANGE) {
+        return ERR_INVALID_PARAM;
+    }
 
-    auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    sptr<Surface> surface = SurfaceUtils::GetInstance()->GetSurface(surfaceUniqueId);
+    if (!surface) {
+        SLOGE("surface is null, surface uniqueId %{public}lu", surfaceUniqueId);
+        return AVSESSION_ERROR;
+    }
+    sptr<IBufferProducer> producer = surface->GetProducer();
+    if (!producer) {
+        SLOGE("producer is null");
+        return AVSESSION_ERROR;
+    }
+
+    MessageParcel parcel;
     MessageParcel reply;
     MessageOption option;
+
+    if (!parcel.WriteInterfaceToken(GetDescriptor())) {
+        SLOGE("Failed to write the interface token");
+        return AVSESSION_ERROR;
+    }
+    if (!parcel.WriteRemoteObject(producer->AsObject())) {
+        SLOGE("Failed to write surface producer");
+        return AVSESSION_ERROR;
+    }
+    auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_SET_DISPLAY_SURFACE, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 

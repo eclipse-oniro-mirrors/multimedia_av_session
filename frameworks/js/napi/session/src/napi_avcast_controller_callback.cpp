@@ -198,6 +198,13 @@ void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const 
     HandleErrorEvent(EVENT_CAST_ERROR, errorCode, errorMsg);
 }
 
+void NapiAVCastControllerCallback::OnEndOfStream(const int32_t isLooping)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnEndOfStream");
+    SLOGI("Start handle OnEndOfStream event");
+    HandleEvent(EVENT_CAST_END_OF_STREAM, isLooping);
+}
+
 napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

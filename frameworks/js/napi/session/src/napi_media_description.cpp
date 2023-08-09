@@ -246,7 +246,7 @@ napi_status NapiMediaDescription::GetExtras(napi_env env, napi_value in, AVMedia
 {
     AAFwk::WantParams property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "extras", property);
-    if (status!= napi_ok) {
+    if (status != napi_ok) {
         SLOGD("extras is null");
         return napi_ok;
     }
@@ -367,6 +367,7 @@ napi_status NapiMediaDescription::SetLyricContent(napi_env env, const AVMediaDes
 
 napi_status NapiMediaDescription::GetLyricUri(napi_env env, napi_value in, AVMediaDescription& out)
 {
+    SLOGD("Start get LyricUri from napi_value");
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "lyricUri", property);
     CheckAndSetDefaultString(status, property);
@@ -376,6 +377,7 @@ napi_status NapiMediaDescription::GetLyricUri(napi_env env, napi_value in, AVMed
 
 napi_status NapiMediaDescription::SetLyricUri(napi_env env, const AVMediaDescription& in, napi_value& out)
 {
+    SLOGD("Start set LyricUri from napi_value");
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetLyricUri(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
@@ -386,6 +388,7 @@ napi_status NapiMediaDescription::SetLyricUri(napi_env env, const AVMediaDescrip
 
 napi_status NapiMediaDescription::GetArtist(napi_env env, napi_value in, AVMediaDescription& out)
 {
+    SLOGD("Start get Artist from napi_value");
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "artist", property);
     CheckAndSetDefaultString(status, property);
@@ -395,6 +398,7 @@ napi_status NapiMediaDescription::GetArtist(napi_env env, napi_value in, AVMedia
 
 napi_status NapiMediaDescription::SetArtist(napi_env env, const AVMediaDescription& in, napi_value& out)
 {
+    SLOGD("Start set Artist from napi_value");
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetArtist(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
@@ -405,6 +409,7 @@ napi_status NapiMediaDescription::SetArtist(napi_env env, const AVMediaDescripti
 
 napi_status NapiMediaDescription::GetMediaUri(napi_env env, napi_value in, AVMediaDescription& out)
 {
+    SLOGD("Start get MediaUri from napi_value");
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "mediaUri", property);
     CheckAndSetDefaultString(status, property);
@@ -414,6 +419,7 @@ napi_status NapiMediaDescription::GetMediaUri(napi_env env, napi_value in, AVMed
 
 napi_status NapiMediaDescription::SetMediaUri(napi_env env, const AVMediaDescription& in, napi_value& out)
 {
+    SLOGD("Start set MediaUri from napi_value");
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetMediaUri(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
@@ -424,6 +430,7 @@ napi_status NapiMediaDescription::SetMediaUri(napi_env env, const AVMediaDescrip
 
 napi_status NapiMediaDescription::GetFdSrc(napi_env env, napi_value in, AVMediaDescription& out)
 {
+    SLOGD("Start get FdSrc from napi_value");
     AVFileDescriptor property;
     auto status = NapiUtils::GetNamedProperty(env, in, "fdSrc", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
@@ -433,6 +440,7 @@ napi_status NapiMediaDescription::GetFdSrc(napi_env env, napi_value in, AVMediaD
 
 napi_status NapiMediaDescription::SetFdSrc(napi_env env, const AVMediaDescription& in, napi_value& out)
 {
+    SLOGD("Start set FdSrc from napi_value");
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetFdSrc(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
@@ -443,6 +451,7 @@ napi_status NapiMediaDescription::SetFdSrc(napi_env env, const AVMediaDescriptio
 
 napi_status NapiMediaDescription::GetDuration(napi_env env, napi_value in, AVMediaDescription& out)
 {
+    SLOGD("Start get Duration from napi_value");
     int32_t property;
     auto status = NapiUtils::GetNamedProperty(env, in, "duration", property);
     CheckAndSetDefaultInt(status, property);
@@ -452,6 +461,7 @@ napi_status NapiMediaDescription::GetDuration(napi_env env, napi_value in, AVMed
 
 napi_status NapiMediaDescription::SetDuration(napi_env env, const AVMediaDescription& in, napi_value& out)
 {
+    SLOGD("Start set Duration from napi_value");
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetDuration(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
@@ -462,6 +472,7 @@ napi_status NapiMediaDescription::SetDuration(napi_env env, const AVMediaDescrip
 
 napi_status NapiMediaDescription::GetStartPosition(napi_env env, napi_value in, AVMediaDescription& out)
 {
+    SLOGD("Start get StartPosition from napi_value");
     int32_t property;
     auto status = NapiUtils::GetNamedProperty(env, in, "startPosition", property);
     CheckAndSetDefaultInt(status, property);
@@ -471,6 +482,7 @@ napi_status NapiMediaDescription::GetStartPosition(napi_env env, napi_value in, 
 
 napi_status NapiMediaDescription::SetStartPosition(napi_env env, const AVMediaDescription& in, napi_value& out)
 {
+    SLOGD("Start set StartPosition from napi_value");
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetStartPosition(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
@@ -481,6 +493,7 @@ napi_status NapiMediaDescription::SetStartPosition(napi_env env, const AVMediaDe
 
 napi_status NapiMediaDescription::GetCreditsPosition(napi_env env, napi_value in, AVMediaDescription& out)
 {
+    SLOGD("Start get CreditsPosition from napi_value");
     int32_t property;
     auto status = NapiUtils::GetNamedProperty(env, in, "creditsPosition", property);
     CheckAndSetDefaultInt(status, property);
@@ -490,6 +503,7 @@ napi_status NapiMediaDescription::GetCreditsPosition(napi_env env, napi_value in
 
 napi_status NapiMediaDescription::SetCreditsPosition(napi_env env, const AVMediaDescription& in, napi_value& out)
 {
+    SLOGD("Start set CreditsPosition from napi_value");
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetCreditsPosition(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
@@ -500,6 +514,7 @@ napi_status NapiMediaDescription::SetCreditsPosition(napi_env env, const AVMedia
 
 napi_status NapiMediaDescription::GetAppName(napi_env env, napi_value in, AVMediaDescription& out)
 {
+    SLOGD("Start get app name from napi_value");
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "appName", property);
     CheckAndSetDefaultString(status, property);
@@ -509,6 +524,7 @@ napi_status NapiMediaDescription::GetAppName(napi_env env, napi_value in, AVMedi
 
 napi_status NapiMediaDescription::SetAppName(napi_env env, const AVMediaDescription& in, napi_value& out)
 {
+    SLOGD("Start set app name from napi_value");
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetAppName(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);

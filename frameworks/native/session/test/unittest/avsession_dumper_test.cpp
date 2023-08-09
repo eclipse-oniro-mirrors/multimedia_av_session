@@ -377,6 +377,10 @@ public:
     {
     };
 
+    void OnDeviceOffline(const std::string& deviceId) override
+    {
+    };
+
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;

@@ -41,6 +41,7 @@ std::map<std::string, std::pair<NapiAVCastController::OnEventHandlerType,
     { "seekDone", { OnSeekDone, OffSeekDone } },
     { "videoSizeChange", { OnVideoSizeChange, OffVideoSizeChange } }, // timeUpdate -> videoSizeChange
     { "error", { OnPlayerError, OffPlayerError } },
+    { "endOfStream", { OnEndOfStream, OffEndOfStream } },
 };
 
 NapiAVCastController::NapiAVCastController()
@@ -673,6 +674,13 @@ napi_status NapiAVCastController::OnPlayerError(napi_env env, NapiAVCastControll
         NapiAVCastControllerCallback::EVENT_CAST_ERROR, callback);
 }
 
+napi_status NapiAVCastController::OnEndOfStream(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_END_OF_STREAM, callback);
+}
+
 napi_status NapiAVCastController::OffPlaybackStateChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
@@ -734,6 +742,15 @@ napi_status NapiAVCastController::OffPlayerError(napi_env env, NapiAVCastControl
         napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_ERROR, callback);
+}
+
+napi_status NapiAVCastController::OffEndOfStream(napi_env env, NapiAVCastController* napiCastController,
+    napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_END_OF_STREAM, callback);
 }
 
 void NapiAVCastController::ErrCodeToMessage(int32_t errCode, std::string& message)

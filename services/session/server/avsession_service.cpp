@@ -441,6 +441,19 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void AVSessionService::CreateSessionByCast(const int64_t castHandle)
+{
+    AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("castBundleName");
+    elementName.SetAbilityName("castAbilityName");
+    sptr<AVSessionItem> sinkSession = CreateSessionInner("RemoteCast",
+        AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN_LOG(sinkSession != nullptr, "CreateSession at sink failed");
+    SLOGI("Create Cast sink sessionId %{public}s", sinkSession->GetSessionId().c_str());
+    sinkSession->SetCastHandle(castHandle);
+    sinkSession->RegisterDeviceStateCallback();
+}
+
 void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     for (DeviceInfo deviceInfo : castOutputDeviceInfo.deviceInfos_) {
@@ -457,6 +470,18 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
         listener->OnDeviceAvailable(castOutputDeviceInfo);
+    }
+}
+
+void AVSessionService::NotifyDeviceOffline(const std::string& deviceId)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    for (const auto& listener : innerSessionListeners_) {
+        listener->OnDeviceOffline(deviceId);
+    }
+    for (const auto& [pid, listener] : sessionListeners_) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceOffline");
+        listener->OnDeviceOffline(deviceId);
     }
 }
 
@@ -548,7 +573,10 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     }
     result->SetPid(GetCallingPid());
     result->SetUid(GetCallingUid());
-    result->SetServiceCallbackForRelease([this](AVSessionItem& session) { HandleSessionRelease(session); });
+    result->SetServiceCallbackForRelease([this](AVSessionItem& session) {
+        SLOGI("Start handle session release event");
+        HandleSessionRelease(session);
+    });
     SLOGI("success sessionId=%{public}s", result->GetSessionId().c_str());
     {
         std::lock_guard lockGuard(sessionAndControllerLock_);
@@ -571,7 +599,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
 sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                           const AppExecFwk::ElementName& elementName)
 {
-    SLOGI("enter");
+    SLOGI("CreateSessionInner enter");
     CHECK_AND_RETURN_RET_LOG(!tag.empty(), nullptr, "tag is empty");
     CHECK_AND_RETURN_RET_LOG(type == AVSession::SESSION_TYPE_AUDIO || type == AVSession::SESSION_TYPE_VIDEO,
         nullptr, "type is invalid");
@@ -1220,7 +1248,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
 
 void AVSessionService::HandleSessionRelease(AVSessionItem& session)
 {
-    SLOGI("sessionId=%{public}s", session.GetSessionId().c_str());
+    SLOGI("HandleSessionRelease, sessionId=%{public}s", session.GetSessionId().c_str());
     NotifySessionRelease(session.GetDescriptor());
     std::lock_guard lockGuard(sessionAndControllerLock_);
     GetContainer().RemoveSession(session.GetPid(), session.GetAbilityName());

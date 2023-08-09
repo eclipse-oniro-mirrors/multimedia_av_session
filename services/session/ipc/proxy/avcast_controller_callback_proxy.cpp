@@ -121,4 +121,18 @@ void AVCastControllerCallbackProxy::OnPlayerError(const int32_t errorCode, const
     CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_ERROR, parcel, reply, option) == 0,
         "send request failed");
 }
+
+void AVCastControllerCallbackProxy::OnEndOfStream(const int32_t isLooping)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(isLooping), "write isLooping failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_END_OF_STREAM, parcel, reply, option) == 0,
+        "send request failed");
+}
 } // namespace OHOS::AVSession
