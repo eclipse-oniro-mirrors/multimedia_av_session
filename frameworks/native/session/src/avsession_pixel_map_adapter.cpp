@@ -92,8 +92,8 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     pixelMap->GetImageInfo(imageInfo);
     const auto* buffer = reinterpret_cast<uint8_t*>(&imageInfo);
     uint16_t imageInfoSize = static_cast<uint16_t>(sizeof(Media::ImageInfo));
-    int32_t pixelDataSize = pixelMap->GetByteCount();
-    size_t bufferSize = IMAGE_BYTE_SIZE + imageInfoSize + DATA_BYTE_SIZE + pixelDataSize;
+    uint32_t pixelDataSize = static_cast<uint32_t>(pixelMap->GetByteCount());
+    size_t bufferSize = static_cast<size_t>(IMAGE_BYTE_SIZE + imageInfoSize + DATA_BYTE_SIZE + pixelDataSize);
     imgBuffer.reserve(bufferSize);
     imgBuffer.insert(imgBuffer.begin(), (imageInfoSize & 0xFF00) >> OFFSET_BYTE);
     imgBuffer.insert(imgBuffer.begin() + imgBuffer.size(), (imageInfoSize & 0x00FF));
