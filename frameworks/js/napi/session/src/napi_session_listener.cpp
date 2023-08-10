@@ -114,6 +114,7 @@ napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, nap
         for (auto& callbackRef : callbacks_[event]) {
             napi_status ret = napi_delete_reference(env, callbackRef);
             CHECK_AND_RETURN_RET_LOG(napi_ok == ret, ret, "delete callback reference failed");
+            callbackRef = nullptr;
         }
         callbacks_[event].clear();
         return napi_ok;

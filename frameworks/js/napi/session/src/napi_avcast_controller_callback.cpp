@@ -237,6 +237,7 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
             napi_status ret = napi_delete_reference(env, *callbackRef);
             CHECK_AND_RETURN_RET_LOG(ret == napi_ok, ret, "delete callback reference failed");
+            *callbackRef = nullptr;
         }
         callbacks_[event].clear();
         return napi_ok;

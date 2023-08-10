@@ -99,6 +99,7 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(data);
         napi_delete_reference(env, napiController->wrapperRef_);
         delete napiController;
+        napiController = nullptr;
     };
 
     auto* napiController = new(std::nothrow) NapiAVSessionController();

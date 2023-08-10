@@ -32,6 +32,8 @@ ContextBase::~ContextBase()
         }
         napi_delete_reference(env, selfRef);
         env = nullptr;
+        callbackRef = nullptr;
+        selfRef = nullptr;
     }
 }
 
