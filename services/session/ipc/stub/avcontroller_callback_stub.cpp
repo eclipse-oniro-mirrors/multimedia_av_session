@@ -122,8 +122,9 @@ int32_t AVControllerCallbackStub::HandleOnSessionEventChange(MessageParcel& data
 int32_t AVControllerCallbackStub::HandleOnQueueItemsChange(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<AVQueueItem> items_;
+    int32_t maxItemNumber = 1000; // A maximum of 1000 queue items can be processed at a time
     int32_t itemNum = data.ReadInt32();
-    CHECK_AND_RETURN_RET_LOG(itemNum >= 0, ERR_NONE, "read int32 itemNum failed");
+    CHECK_AND_RETURN_RET_LOG((itemNum >= 0) && (itemNum < maxItemNumber), ERR_NONE, "read int32 itemNum failed");
     for (int32_t i = 0; i < itemNum; i++) {
         AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
         CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
