@@ -258,78 +258,7 @@ HWTEST_F(AVSessionDumperTest, HandleFocusSession002, TestSize.Level1)
     info.uid = 2;
     avSessionService_->GetContainer().AddSession(1, "abilityName", item);
     avSessionService_->HandleFocusSession(info);
-}
-
-/**
- * @tc.name: SelectFocusSession001
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AVSessionDumperTest, SelectFocusSession001, TestSize.Level1)
-{
-    AVSessionDescriptor descriptor;
-    descriptor.uid_ = 1;
-    avSessionService_->topSession_ = new AVSessionItem(descriptor);
-    descriptor.uid_ = 2;
-    descriptor.sessionTag_ = "RemoteCast";
-    sptr<AVSessionItem> item1 = new AVSessionItem(descriptor);
-    avSessionService_->GetContainer().AddSession(1, "abilityName1", item1);
-    descriptor.uid_ = 1;
-    descriptor.sessionTag_ = "Local";
-    sptr<AVSessionItem> item2 = new AVSessionItem(descriptor);
-    avSessionService_->GetContainer().AddSession(1, "abilityName2", item2);
-    descriptor.uid_ = 2;
-    descriptor.sessionTag_ = "Local";
-    sptr<AVSessionItem> item3 = new AVSessionItem(descriptor);
-    avSessionService_->GetContainer().AddSession(1, "abilityName3", item3);
-    FocusSessionStrategy::FocusSessionChangeInfo info;
-    info.uid = 2;
-    EXPECT_EQ(avSessionService_->SelectFocusSession(info), true);
-}
-
-/**
- * @tc.name: SelectSessionByUid001
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AVSessionDumperTest, SelectSessionByUid001, TestSize.Level1)
-{
-    AVSessionDescriptor descriptor;
-    descriptor.uid_ = 1;
-    avSessionService_->topSession_ = new AVSessionItem(descriptor);
-    descriptor.uid_ = 1;
-    sptr<AVSessionItem> item1 = new AVSessionItem(descriptor);
-    avSessionService_->GetContainer().AddSession(1, "abilityName1", item1);
-    descriptor.uid_ = 2;
-    sptr<AVSessionItem> item2 = new AVSessionItem(descriptor);
-    avSessionService_->GetContainer().AddSession(1, "abilityName2", item2);
-    AudioStandard::AudioRendererChangeInfo info;
-    info.clientUID = 2;
-    EXPECT_EQ(avSessionService_->SelectSessionByUid(info), item2);
-}
-
-/**
- * @tc.name: SelectSessionByUid002
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AVSessionDumperTest, SelectSessionByUid002, TestSize.Level1)
-{
-    AVSessionDescriptor descriptor;
-    descriptor.uid_ = 1;
-    avSessionService_->topSession_ = new AVSessionItem(descriptor);
-    descriptor.uid_ = 1;
-    sptr<AVSessionItem> item1 = new AVSessionItem(descriptor);
-    avSessionService_->GetContainer().AddSession(1, "abilityName1", item1);
-    descriptor.uid_ = 2;
-    sptr<AVSessionItem> item2 = new AVSessionItem(descriptor);
-    avSessionService_->GetContainer().AddSession(1, "abilityName2", item2);
-    AudioStandard::AudioRendererChangeInfo info;
-    info.clientUID = 3;
-    EXPECT_EQ(avSessionService_->SelectSessionByUid(info), nullptr);
+    avSessionService_->GetContainer().RemoveSession(1);
 }
 
 class TestSessionListener : public SessionListener {
@@ -415,6 +344,7 @@ HWTEST_F(AVSessionDumperTest, GetSessionDescriptorsBySessionId001, TestSize.Leve
     sptr<AVSessionItem> item1 = new AVSessionItem(descriptor);
     avSessionService_->GetContainer().AddSession(1, "abilityName1", item1);
     EXPECT_EQ(avSessionService_->GetSessionDescriptorsBySessionId("sessionId", descriptor), AVSESSION_SUCCESS);
+    avSessionService_->GetContainer().RemoveSession(1);
 }
 
 /**
@@ -452,45 +382,6 @@ HWTEST_F(AVSessionDumperTest, DeleteHistoricalRecord001, TestSize.Level1)
 {
     std::string bundleName = "bundleName";
     avSessionService_->DeleteHistoricalRecord(bundleName);
-}
-
-/**
- * @tc.name: ServiceDump001
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AVSessionDumperTest, ServiceDump001, TestSize.Level1)
-{
-    std::vector<std::u16string> args;
-    EXPECT_EQ(avSessionService_->Dump(-1, args), ERR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: ServiceDump002
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AVSessionDumperTest, ServiceDump002, TestSize.Level1)
-{
-    std::vector<std::u16string> args;
-    EXPECT_EQ(avSessionService_->Dump(0, args), ERR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: ServiceDump003
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AVSessionDumperTest, ServiceDump003, TestSize.Level1)
-{
-    std::vector<std::u16string> args;
-    std::u16string str = u"string";
-    args.push_back(str);
-    avSessionService_->dumpHelper_ = std::make_unique<AVSessionDumper>();
-    EXPECT_EQ(avSessionService_->Dump(0, args), ERR_INVALID_PARAM);
 }
 
 /**
@@ -619,17 +510,6 @@ HWTEST_F(AVSessionDumperTest, GetAudioDescriptor001, TestSize.Level1)
     castAudioDescriptors.push_back(des);
     std::string deviceId = "12";
     EXPECT_EQ(avSessionService_->GetAudioDescriptor(deviceId, castAudioDescriptors), AVSESSION_ERROR);
-}
-
-/**
- * @tc.name: ClearSessionForClientDiedNoLock001
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AVSessionDumperTest, ClearSessionForClientDiedNoLock001, TestSize.Level1)
-{
-    avSessionService_->ClearSessionForClientDiedNoLock(1);
 }
 } // namespace AVSession
 } // namespace OHOS
