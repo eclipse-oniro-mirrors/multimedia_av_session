@@ -441,6 +441,23 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+
+void AVSessionService::ReleaseCastSession()
+{
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
+            std::string sessionId = session->GetDescriptor().sessionId_;
+            SLOGI("Already has a cast session %{public}s", sessionId.c_str());
+            UpdateTopSession(nullptr);
+            auto session = GetContainer().RemoveSession(sessionId);
+            session->UnRegisterDeviceStateCallback();
+            session->StopCastSession();
+            session->ReleaseAVCastControllerInner();
+            session->Destroy();
+        }
+    }
+}
+
 void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 {
     AppExecFwk::ElementName elementName;
@@ -506,11 +523,11 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     int32_t uid = session->GetDescriptor().uid_;
     int32_t pid = session->GetDescriptor().pid_;
     std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
-    CHECK_AND_RETURN_RET_LOG(bundleName != "", ret, "GetBundleNameFromUid failed");
+    CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
     SuspendManager::ContinuousTaskAppInfo appInfo(uid, pid, bundleName,
         SuspendManager::ContinuousTaskState::TASK_START);
     ErrCode suspendManagerErr = SuspendManager::SuspendManagerClient::GetInstance().ReportContinuousTaskEvent(
-        SuspendManager:ReportEventType::DIS_COMP_CHANGE, appInfo, AVSESSION_SERVICE_ID);
+        SuspendManager::ReportEventType::DIS_COMP_CHANGE, appInfo, AVSESSION_SERVICE_ID);
     CHECK_AND_RETURN_RET_LOG(suspendManagerErr == ERR_OK, AVSESSION_ERROR, "Report continuous task event failed");
 #endif
     return AVSESSION_SUCCESS;
@@ -545,7 +562,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     ErrCode suspendManagerErr = SuspendManager::SuspendManagerClient::GetInstance().ReportContinuousTaskEvent(
         SuspendManager:ReportEventType::DIS_COMP_CHANGE, appInfo, AVSESSION_SERVICE_ID);
     CHECK_AND_RETURN_RET_LOG(suspendManagerErr == ERR_OK, AVSESSION_ERROR, "Report continuous task event failed");
-    SLOGI("Report continuous task evenet for pid: %{public}d finished", pid);
+    SLOGI("Report continuous task event for pid: %{public}d finished", pid);
 #endif
     return AVSESSION_SUCCESS;
 }

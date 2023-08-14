@@ -280,7 +280,7 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
         return AVSESSION_ERROR;
     }
     wantParams->SetParam("maxCastVolume", intIt);
-    avCastPlaybackState.SetExtras(wantParam);
+    avPlaybackState.SetExtras(wantParams);
 
     SLOGI("GetCastAVPlaybackState successed");
     return AVSESSION_SUCCESS;
@@ -378,14 +378,8 @@ void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int
         std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
         sptr<AAFwk::IInterface> intIt = AAFwk::Integer::Box(duration);
         wantParams->SetParam("duration", intIt);
-        avCastPlaybackState.SetExtras(wantParam);
-        SLOGD("Received duration: %{public}d", duration);
-    }
-    if (duration != -1) {
-        std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
-        sptr<AAFwk::IInterface> intIt = AAFwk::Integer::Box(duration);
-        wantParams->SetParam("duration", intIt);
         avCastPlaybackState.SetExtras(wantParams);
+        SLOGD("Received duration: %{public}d", duration);
     }
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
@@ -459,7 +453,7 @@ void HwCastStreamPlayer::OnVolumeChanged(int volume, int maxVolume)
         return;
     }
     wantParams->SetParam("maxCastVolume", intIt);
-    avCastPlaybackState.SetExtras(wantParam);
+    avCastPlaybackState.SetExtras(wantParams);
 
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
@@ -493,7 +487,7 @@ void HwCastStreamPlayer::OnPlaySpeedChanged(const CastEngine::PlaybackSpeed spee
         SLOGE("current speed is not exist in castPlusSpeedToDouble_");
         return;
     }
-    SLOGD("StreamPlayer received play speed changed event: %{public}d", castPlusSpeedToDouble_[speed]);
+    SLOGD("StreamPlayer received play speed changed event: %{public}f", castPlusSpeedToDouble_[speed]);
     avCastPlaybackState.SetSpeed(castPlusSpeedToDouble_[speed]);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
@@ -538,7 +532,7 @@ void HwCastStreamPlayer::OnVideoSizeChanged(int width, int height)
 
 void HwCastStreamPlayer::OnEndOfStream(int isLooping)
 {
-    SLOGI("Received EndOfStream callback, value is %{public}d", isLooping);
+    SLOGD("Received EndOfStream callback, value is %{public}d", isLooping);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnEndOfStream for registered listeners");
@@ -554,6 +548,8 @@ void HwCastStreamPlayer::OnEndOfStream(int isLooping)
     }
     wantParams->SetParam("endofstream", intIt);
     avCastPlaybackState.SetExtras(wantParams);
+    SLOGD("Received end of stream event: %{public}d", isLooping);
+
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnEndOfStream for registered listeners");

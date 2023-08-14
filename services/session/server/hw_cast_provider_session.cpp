@@ -87,6 +87,7 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
 
 bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener)
 {
+    SLOGI("RegisterCastSessionStateListener");
     if (listener == nullptr) {
         SLOGE("RegisterCastSessionStateListener failed for the listener is nullptr");
         return false;
@@ -123,6 +124,7 @@ bool HwCastProviderSession::UnRegisterCastSessionStateListener(std::shared_ptr<I
 
 void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &stateInfo)
 {
+    SLOGD("OnDeviceState %{public}d", static_cast<int>(stateInfo.deviceState));
     if (castSessionStateListenerList_.size() == 0) {
         SLOGI("current has not registered listener");
         return;

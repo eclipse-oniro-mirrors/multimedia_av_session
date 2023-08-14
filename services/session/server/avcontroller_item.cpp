@@ -239,6 +239,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
 
 void AVControllerItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
 {
+    SLOGD("Connection state %{public}d", connectionState);
     std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnOutputDeviceChange(connectionState, outputDeviceInfo);

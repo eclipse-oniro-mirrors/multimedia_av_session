@@ -23,7 +23,7 @@ namespace OHOS::AVSession {
 class BundleStatusAdapter {
 public:
     static BundleStatusAdapter& GetInstance();
-    
+
     ~BundleStatusAdapter();
 
     void Init();

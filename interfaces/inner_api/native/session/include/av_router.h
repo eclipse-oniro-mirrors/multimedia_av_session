@@ -92,9 +92,17 @@ public:
     virtual int32_t OnDeviceOffline(const std::string& deviceId) = 0;
 
     /**
+     * @brief Release current session.
+     *
+     * @since 10
+    */
+    virtual int32_t ReleaseCurrentCastSession() = 0;
+
+    /**
      * @brief Notify Router that the cast session has created.
      *
      * @param { int32_t } castId - Cast id for AVRouter's control.
+     * @return { int32_t } Whether the notify operation was successful.
      * @since 10
     */
     virtual int32_t OnCastSessionCreated(const int32_t castId) = 0;
