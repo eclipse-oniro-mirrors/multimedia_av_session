@@ -16,6 +16,7 @@
 #ifndef OHOS_NAPI_AVSESSION_CONTROLLER_H
 #define OHOS_NAPI_AVSESSION_CONTROLLER_H
 
+#include <mutex>
 #include "avsession_controller.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"
@@ -109,6 +110,7 @@ private:
     std::string sessionId_;
     std::shared_ptr<AVSessionController> controller_;
     std::shared_ptr<NapiAVControllerCallback> callback_;
+    static std::mutex uvMutex_;
 
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
