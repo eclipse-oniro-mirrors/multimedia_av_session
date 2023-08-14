@@ -297,6 +297,43 @@ void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
 
 void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession)
 {
+    std::thread([this, castSession]() {
+        SLOGI("Cast provider received session create event");
+        for (auto listener : castStateListenerList_) {
+            listener->OnSessionNeedDestroy();
+        }
+        int32_t castId;
+        {
+            std::lock_guard lockGuard(mutexLock_);
+            std::vector<bool>::iterator iter = find(castFlag_.begin(), castFlag_.end(), false);
+            if (iter == castFlag_.end()) {
+                SLOGE("Do not trigger callback due to the castFlag_ used up");
+                return;
+            }
+            *iter = true;
+            castId = iter - castFlag_.begin();
+        }
+        auto hwCastProvidrSession = std::make_shared<HwCastProviderSession>(castSession);
+        if (hwCastProviderSession) {
+            hwCastProviderSession->Init();
+        }
+        {
+            std::lock_guard lockGuard(mutexLock_);
+            hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+            std::shared_ptr<IStreamPlayer> streamPlayer = hwCastProviderSession->CreateStreamPlayer();
+            std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlyer>(streamPlayer);
+            if (!hwCastStreamPlayer) {
+                SLOGE("the created hwCastStreamPlayer is nullptr");
+                return;
+            }
+            hwCastStreamPlayer->Init();
+            avCastControllerMap_[castId] = hwCastStreamPlayer;
+        }
+        SLOGI("Create streamPlayer finished %{public}d", castId);
+        for (auto listener : castStateListenerList_) {
+            listener->OnSessionCreated(castId);
+        }
+    }).detach();
 }
 
 void HwCastProvider::OnServiceDied()
