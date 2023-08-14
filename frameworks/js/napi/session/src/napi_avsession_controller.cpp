@@ -45,6 +45,7 @@ std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     { "queueTitleChange", { OnQueueTitleChange, OffQueueTitleChange } },
     { "extrasChange", { OnExtrasChange, OffExtrasChange } },
 };
+std::mutex NapiAVSessionController::uvMutex_;
 
 NapiAVSessionController::NapiAVSessionController()
 {
@@ -720,6 +721,8 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
+        std::lock_guard<std::mutex> lock(uvMutex_);
+        SLOGI("Start NapiAVSessionController destroy process");
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
         if (napiController->controller_ == nullptr) {
             SLOGE("Destroy controller failed : controller is nullptr");
