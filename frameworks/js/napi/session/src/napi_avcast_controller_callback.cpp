@@ -195,7 +195,17 @@ void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const 
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayerError");
     SLOGI("Start handle OnPlayerError event");
-    HandleErrorEvent(EVENT_CAST_ERROR, errorCode, errorMsg);
+    MediaServiceExtErrCodeAPI9 jsErr;
+    if (MSERRCODE_INFOS.count(static_cast<MediaServiceErrCode>(errorCode)) != 0 &&
+        MSERRCODE_TO_EXTERRORCODEAPI9.count(static_cast<MediaServiceErrCode>(errorCode)) != 0) {
+        jsErr = MSERRCODE_TO_EXTERRORCODEAPI9.at(static_cast<MediaServiceErrCode>(errorCode));
+    } else {
+        SLOGW("Can not match error code, user default");
+        // If error not in map, need add error and should not return default MSERR_EXT_API9_IO.
+        jsErr = MSERR_EXT_API9_IO;
+    }
+    SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
+    HandleErrorEvent(EVENT_CAST_ERROR, static_cast<int32_t>(jsErr), errorMsg);
 }
 
 void NapiAVCastControllerCallback::OnEndOfStream(const int32_t isLooping)
