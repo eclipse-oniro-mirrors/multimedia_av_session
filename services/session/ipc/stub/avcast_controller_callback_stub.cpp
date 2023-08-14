@@ -54,7 +54,7 @@ int32_t AVCastControllerCallbackStub::HandleOnStateChange(MessageParcel& data, M
 int32_t AVCastControllerCallbackStub::HandleOnMediaItemChange(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::HandleOnMediaItemChange");
-    AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
+    sptr<AVQueueItem> avQueueItem = data.ReadParcelable<AVQueueItem>();
     CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
     OnMediaItemChange(*item);
     return ERR_NONE;
