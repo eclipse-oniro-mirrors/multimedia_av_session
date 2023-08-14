@@ -43,6 +43,13 @@ public:
     virtual void OnDeviceOffline(const std::string& deviceId) = 0;
 
     /**
+     * Notify Router that the cast session should be destroy.
+     *
+     * @since 10
+    */
+    virtual void OnSessionNeedDestroy() = 0;
+
+    /**
      * Notify Router that the cast session has created.
      *
      * @param { int32_t } castId - Cast id for AVRouter's control.

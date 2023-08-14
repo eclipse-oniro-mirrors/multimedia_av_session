@@ -14,6 +14,7 @@
  */
 
 #include "hw_cast_provider.h"
+#include <thread>
 #include "cast_session_manager.h"
 #include "hw_cast_stream_player.h"
 #include "avsession_log.h"
@@ -218,6 +219,7 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,
     std::shared_ptr<IAVCastSessionStateListener> listener)
 {
+    SLOGD("RegisterCastSessionStateListener for castId %{public}d", castId);
     if (listener == nullptr) {
         SLOGE("RegisterCastSessionStateListener failed for the listener is nullptr");
         return false;
@@ -263,7 +265,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     std::vector<DeviceInfo> deviceInfoList;
     for (CastRemoteDevice castRemoteDevice : deviceList) {
         if (castRemoteDevice.subDeviceType == CastEngine::SubDeviceType::SUB_DEVICE_MATEBOOK_PAD) {
-            SLOGW("Found untrusted devices");
+            SLOGW("Found untrusted devices.");
             continue;
         }
         DeviceInfo deviceInfo;

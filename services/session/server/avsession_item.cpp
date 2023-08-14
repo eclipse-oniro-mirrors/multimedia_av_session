@@ -288,6 +288,15 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
 
     return remoteObject;
 }
+
+void AVSessionItem::ReleaseAVCastControllerInner()
+{
+    SLOGI("Release AVCastControllerInner");
+    for (auto controller : castControllers_) {
+        controller->Destroy();
+    }
+    castControllerProxy_ = nullptr;
+}
 #endif
 
 int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback>& callback)
@@ -491,6 +500,25 @@ void AVSessionItem::RegisterDeviceStateCallback()
 {
     SLOGI("Start register callback for device state change");
     AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_);
+    OutputDeviceInfo localDevice;
+    DeviceInfo localInfo;
+    localInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    localInfo.deviceId_ = "0";
+    localInfo.deviceName_ = "LocalDevice";
+    localDevice.deviceInfos_.emplace_back(localInfo);
+    descriptor_.outputDeviceInfo_ = localDevice;
+}
+
+void AVSessionItem::UnRegisterDeviceStateCallback()
+{
+    SLOGI("Stop unregister callback for device state change");
+    AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+}
+
+void AVSessionItem::StopCastSession()
+{
+    SLOGI("Stop cast session process");
+    AVRouter::GetInstance().StopCastSession(castHandle_);
 }
 #endif
 
@@ -758,6 +786,7 @@ void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSess
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
 {
+    SLOGI("Connection state %{public}d", connectionState);
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnOutputDeviceChange");
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");

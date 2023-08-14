@@ -41,6 +41,14 @@ void AVCastProviderManager::OnDeviceAvailable(std::vector<DeviceInfo> deviceInfo
 #endif
 }
 
+void AVCastProviderManager::OnSessionNeedDestroy()
+{
+    SLOGI("On cast session need destroy");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVRouter::GetInstance().ReleaseCurrentCastSession();
+#endif
+}
+
 void AVCastProviderManager::OnSessionCreated(const int32_t castId)
 {
     SLOGI("On cast session created");

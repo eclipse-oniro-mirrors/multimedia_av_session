@@ -36,6 +36,8 @@ public:
 
     int32_t OnDeviceOffline(const std::string& deviceId) override;
 
+    void ReleaseCurrentCastSession() override;
+
     int32_t OnCastSessionCreated(const int32_t castId) override;
 
     int32_t OnCastServerDied(int32_t providerNumber) override;

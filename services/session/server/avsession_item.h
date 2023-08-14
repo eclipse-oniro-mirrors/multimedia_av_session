@@ -174,11 +174,17 @@ public:
 
     sptr<IRemoteObject> GetAVCastControllerInner() override;
 
+    void ReleaseAVCastControllerInner();
+
     void UpdateCastDeviceMap(DeviceInfo deviceInfo);
 
     void SetCastHandle(int64_t castHandle);
 
     void RegisterDeviceStateCallback();
+
+    void UnRegisterDeviceStateCallback();
+
+    void StopCastSession();
 #endif
 
 protected:

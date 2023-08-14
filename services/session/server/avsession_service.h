@@ -116,6 +116,8 @@ public:
     }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    void ReleaseCastSession() override;
+
     void CreateSessionByCast(const int64_t castHandle) override;
 
     void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;

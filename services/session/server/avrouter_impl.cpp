@@ -31,7 +31,10 @@ AVRouterImpl::AVRouterImpl()
 void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
 {
     SLOGI("Start init AVRouter");
-    servicePtr_ = servicePtr;
+    {
+        std::lock_guard lockGuard(servicePtrLock_);
+        servicePtr_ = servicePtr;
+    }
     std::shared_ptr<HwCastProvider> hwProvider = std::make_shared<HwCastProvider>();
     hwProvider->Init();
     providerNumber_++;
@@ -95,6 +98,13 @@ int32_t AVRouterImpl::OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo)
     return AVSESSION_SUCCESS;
 }
 
+void AVRouterImpl::ReleaseCurrentCastSession()
+{
+    SLOGI("Start ReleaseCurrentCastSession");
+    std::lock_guard lockGuard(servicePtrLock_);
+    servicePtr_->ReleaseCastSession();
+}
+
 int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
 {
     SLOGI("AVRouterImpl On cast session created, cast id is %{public}d", castId);
@@ -106,7 +116,10 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
         providerManagerMap_[1]->provider_ ! = nullptr, AVSESSION_ERROR, "provider is nullptr");
     int64_t tempId = 1;
     castHandle = (tempId << 32) | castId; // The first 32 bits are providerId, the last 32 bits are castId
-    servicePtr_->CreateSessionByCast(castHandle);
+    {
+        std::lock_guard lockGuard(servicePtrLock_);
+        servicePtr_->CreateSessionByCast(castHandle);
+    }
     OutputDeviceInfo outputDeviceInfo;
     castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
     return AVSESSION_SUCCESS;
