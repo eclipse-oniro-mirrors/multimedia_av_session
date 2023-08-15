@@ -25,6 +25,11 @@ AVCastControllerItem::AVCastControllerItem()
     SLOGD("AVCastControllerItem construct");
 }
 
+AVCastControllerItem::~AVCastControllerItem()
+{
+    SLOGD("AVCastControllerItem destruct");
+}
+
 void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
 {
     castControllerProxy_ = castControllerProxy;

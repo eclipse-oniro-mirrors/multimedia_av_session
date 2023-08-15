@@ -26,6 +26,8 @@ class AVCastControllerItem : public AVCastControllerStub, public IAVCastControll
 public:
     AVCastControllerItem();
 
+    ~AVCastControllerItem();
+
     void Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
     void OnCastPlaybackStateChange(const AVPlaybackState& state) override;
