@@ -200,7 +200,7 @@ void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const 
         MSERRCODE_TO_EXTERRORCODEAPI9.count(static_cast<MediaServiceErrCode>(errorCode)) != 0) {
         jsErr = MSERRCODE_TO_EXTERRORCODEAPI9.at(static_cast<MediaServiceErrCode>(errorCode));
     } else {
-        SLOGW("Can not match error code, user default");
+        SLOGW("Can not match error code, use default");
         // If error not in map, need add error and should not return default MSERR_EXT_API9_IO.
         jsErr = MSERR_EXT_API9_IO;
     }

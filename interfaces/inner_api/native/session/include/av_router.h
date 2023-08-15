@@ -92,11 +92,11 @@ public:
     virtual int32_t OnDeviceOffline(const std::string& deviceId) = 0;
 
     /**
-     * @brief Release current session.
+     * @brief Release current cast session.
      *
      * @since 10
     */
-    virtual int32_t ReleaseCurrentCastSession() = 0;
+    virtual void ReleaseCurrentCastSession() = 0;
 
     /**
      * @brief Notify Router that the cast session has created.

@@ -556,11 +556,11 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     int32_t uid = session->GetDescriptor().uid_;
     int32_t pid = session->GetDescriptor().pid_;
     std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
-    CHECK_AND_RETURN_RET_LOG(bundleName != "", ret, "GetBundleNameFromUid failed");
+    CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
     SuspendManager::ContinuousTaskAppInfo appInfo(uid, pid, bundleName,
         SuspendManager::ContinuousTaskState::TASK_END);
     ErrCode suspendManagerErr = SuspendManager::SuspendManagerClient::GetInstance().ReportContinuousTaskEvent(
-        SuspendManager:ReportEventType::DIS_COMP_CHANGE, appInfo, AVSESSION_SERVICE_ID);
+        SuspendManager::ReportEventType::DIS_COMP_CHANGE, appInfo, AVSESSION_SERVICE_ID);
     CHECK_AND_RETURN_RET_LOG(suspendManagerErr == ERR_OK, AVSESSION_ERROR, "Report continuous task event failed");
     SLOGI("Report continuous task event for pid: %{public}d finished", pid);
 #endif

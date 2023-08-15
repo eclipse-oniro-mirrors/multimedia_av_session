@@ -307,13 +307,13 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
             std::lock_guard lockGuard(mutexLock_);
             std::vector<bool>::iterator iter = find(castFlag_.begin(), castFlag_.end(), false);
             if (iter == castFlag_.end()) {
-                SLOGE("Do not trigger callback due to the castFlag_ used up");
+                SLOGE("Do not trigger callback due to the castFlag_ used up.");
                 return;
             }
             *iter = true;
             castId = iter - castFlag_.begin();
         }
-        auto hwCastProvidrSession = std::make_shared<HwCastProviderSession>(castSession);
+        auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
         if (hwCastProviderSession) {
             hwCastProviderSession->Init();
         }
@@ -321,7 +321,7 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
             std::lock_guard lockGuard(mutexLock_);
             hwCastProviderSessionMap_[castId] = hwCastProviderSession;
             std::shared_ptr<IStreamPlayer> streamPlayer = hwCastProviderSession->CreateStreamPlayer();
-            std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlyer>(streamPlayer);
+            std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(streamPlayer);
             if (!hwCastStreamPlayer) {
                 SLOGE("the created hwCastStreamPlayer is nullptr");
                 return;
