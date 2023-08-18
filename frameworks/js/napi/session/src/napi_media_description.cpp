@@ -77,8 +77,8 @@ napi_status NapiMediaDescription::GetValue(napi_env env, napi_value in, AVMediaD
     for (const auto& name : propertyNames) {
         auto it = getterMap_.find(name);
         if (it == getterMap_.end()) {
-            SLOGE("property %{public}s is not of mediadescription", name.c_str());
-            return napi_invalid_arg;
+            SLOGW("property %{public}s is not of mediadescription", name.c_str());
+            continue;
         }
         auto getter = it->second;
         if (getter(env, in, out) != napi_ok) {
