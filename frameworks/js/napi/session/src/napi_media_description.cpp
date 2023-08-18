@@ -153,10 +153,8 @@ napi_status NapiMediaDescription::GetAssetId(napi_env env, napi_value in, AVMedi
     if (status == napi_ok) {
         SLOGI("MediaDescription has assetId, use assetId: %{public}s", property.c_str());
         out.SetMediaId(property);
-    } else {
-        return status;
     }
-    return napi_ok;
+    return status;
 }
 
 napi_status NapiMediaDescription::GetTitle(napi_env env, napi_value in, AVMediaDescription& out)
