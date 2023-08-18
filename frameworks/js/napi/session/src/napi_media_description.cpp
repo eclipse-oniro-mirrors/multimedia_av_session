@@ -250,7 +250,7 @@ napi_status NapiMediaDescription::GetIconUri(napi_env env, napi_value in, AVMedi
     if (status == napi_ok && out.GetIconUri() != "") {
         out.SetIconUri(property);
     }
-    return napi_ok;
+    return status;
 }
 
 napi_status NapiMediaDescription::SetIconUri(napi_env env, const AVMediaDescription& in, napi_value& out)
