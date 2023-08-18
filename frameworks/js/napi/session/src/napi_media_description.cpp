@@ -150,12 +150,10 @@ napi_status NapiMediaDescription::GetAssetId(napi_env env, napi_value in, AVMedi
     SLOGD("Start get assetId");
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "assetId", property);
-    if (status == napi_ok && property != "") {
+    if (status == napi_ok) {
         SLOGI("MediaDescription has assetId, use assetId: %{public}s", property.c_str());
         out.SetMediaId(property);
-    }
-    if (status != napi_ok && out.GetMediaId() == "") {
-        SLOGW("MediaDescription does not contain assetId and mediaId");
+    } else {
         return status;
     }
     return napi_ok;
