@@ -543,7 +543,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     }
 
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
-    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "StopCast: session is not exist");
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_SUCCESS, "StopCast: session is not exist");
     CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
     if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
         SLOGI("Stop cast at sink, start destroy sink avsession");
