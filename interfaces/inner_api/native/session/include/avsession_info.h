@@ -442,18 +442,20 @@ enum ConnectionState {
      * @since 10
      */
     STATE_CONNECTING = 0,
-    /**
-     * A connection state indicating the device is connected.
-     * @syscap SystemCapability.Multimedia.AVSession.Core
-     * @since 10
-     */
-    STATE_CONNECTED = 1,
+
     /**
      * The default connection state indicating the device is disconnected.
      * @syscap SystemCapability.Multimedia.AVSession.Core
      * @since 10
      */
-    STATE_DISCONNECTED = 6,
+    STATE_DISCONNECTED = 5,
+
+    /**
+     * A connection state indicating the device is connected.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 10
+     */
+    STATE_CONNECTED = 6,
 };
 
 enum DeviceType {
@@ -463,18 +465,21 @@ enum DeviceType {
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     DEVICE_TYPE_LOCAL = 0,
+
     /**
      * A device type indicating the route is on a TV.
      * @since 10
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      */
     DEVICE_TYPE_TV = 2,
+
     /**
      * A device type indicating the route is on a smart speaker.
      * @since 10
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      */
     DEVICE_TYPE_SPEAKER = 3,
+
     /**
      * A device type indicating the route is on a bluetooth device.
      * @since 10
