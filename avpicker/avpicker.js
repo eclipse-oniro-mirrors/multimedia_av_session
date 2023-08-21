@@ -76,7 +76,13 @@ export class AVCastPicker extends ViewPU {
         });
         this.observeComponentCreation((elmtId, isInitialRender) => {
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            UIExtensionComponent.create({ abilityName: 'AVPickerUIExtAbility', bundleName: 'com.ohos.systemui' });
+            UIExtensionComponent.create(
+                {
+                    abilityName: 'AVPickerUIExtAbility',
+                    bundleName: 'com.ohos.systemui',
+                    parameters: {'ability.want.params.uiExtensionType':'sysPicker/mediaControl'}
+                }
+            );
             UIExtensionComponent.size({ width: '100%', height: '100%' })
             isInitialRender || UIExtensionComponent.pop();
             ViewStackProcessor.StopGetAccessRecording();
