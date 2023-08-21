@@ -247,7 +247,8 @@ napi_status NapiMediaDescription::GetIconUri(napi_env env, napi_value in, AVMedi
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "iconUri", property);
-    if (status == napi_ok && out.GetIconUri() != "") {
+    if (status == napi_ok) {
+        SLOGD("Get icon uri %{public}s", property.c_str());
         out.SetIconUri(property);
     }
     return status;
