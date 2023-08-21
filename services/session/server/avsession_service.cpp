@@ -592,7 +592,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     result->SetUid(GetCallingUid());
     result->SetServiceCallbackForRelease([this](AVSessionItem& session) {
         SLOGI("Start handle session release event");
-        HandleSessionRelease(session);
+        HandleSessionRelease(session.GetDescriptor().sessionId_);
     });
     SLOGI("success sessionId=%{public}s", result->GetSessionId().c_str());
     {
@@ -1263,27 +1263,28 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
     }
 }
 
-void AVSessionService::HandleSessionRelease(AVSessionItem& session)
+void AVSessionService::HandleSessionRelease(std::string sessionId)
 {
-    SLOGI("HandleSessionRelease, sessionId=%{public}s", session.GetSessionId().c_str());
-    NotifySessionRelease(session.GetDescriptor());
+    SLOGI("HandleSessionRelease, sessionId=%{public}s", sessionId.c_str());
+
+    sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
+    NotifySessionRelease(sessionItem->GetDescriptor());
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    GetContainer().RemoveSession(session.GetPid(), session.GetAbilityName());
-    if (topSession_.GetRefPtr() == &session) {
+    GetContainer().RemoveSession(sessionItem->GetPid(), sessionItem->GetAbilityName());
+    if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
+        SLOGD("Top session is released session");
         UpdateTopSession(nullptr);
     }
-    if (session.GetRemoteSource() != nullptr) {
-        auto sessionPtr = GetContainer().GetSessionById(session.GetSessionId());
-        if (sessionPtr != nullptr) {
-            int32_t ret = CancelCastAudioForClientExit(session.GetPid(), sessionPtr);
-            SLOGI("CancelCastAudioForClientExit ret is %{public}d", ret);
-        }
+    if (sessionItem->GetRemoteSource() != nullptr) {
+        int32_t ret = CancelCastAudioForClientExit(sessionItem->GetPid(), sessionItem);
+        SLOGI("CancelCastAudioForClientExit ret is %{public}d", ret);
     } else {
         SLOGI("GetContainer has no this session");
     }
-    HISYSEVENT_ADD_LIFE_CYCLE_INFO(session.GetDescriptor().elementName_.GetBundleName(),
+    HISYSEVENT_ADD_LIFE_CYCLE_INFO(sessionItem->GetDescriptor().elementName_.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()),
-        session.GetDescriptor().sessionType_, false);
+        sessionItem->GetDescriptor().sessionType_, false);
 }
 
 void AVSessionService::HandleControllerRelease(AVControllerItem& controller)
