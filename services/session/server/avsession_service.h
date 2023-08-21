@@ -99,7 +99,7 @@ public:
 
     void OnClientDied(pid_t pid);
 
-    void HandleSessionRelease(AVSessionItem& session);
+    void HandleSessionRelease(std::string sessionId);
 
     void HandleControllerRelease(AVControllerItem& controller);
 
