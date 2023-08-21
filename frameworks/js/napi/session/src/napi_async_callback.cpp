@@ -78,7 +78,7 @@ void NapiAsyncCallback::Call(napi_ref method, NapiArgsGetter getter)
     CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
     work->data = new DataContext{env_, method, std::move(getter)};
-    int res = uv_queue_work(loop_, work, [](uv_work_t* work) {}, AfterWorkCallback);
+    int res = uv_queue_work_with_qos(loop_, work, [](uv_work_t* work) {}, AfterWorkCallback, uv_qos_user_initiated);
     CHECK_RETURN_VOID(res == 0, "uv queue work failed");
 }
 }
