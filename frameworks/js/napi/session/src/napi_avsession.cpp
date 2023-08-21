@@ -93,6 +93,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
         DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice),
+        DECLARE_NAPI_FUNCTION("getOutputDeviceSync", GetOutputDeviceSync),
         DECLARE_NAPI_FUNCTION("dispatchSessionEvent", SetSessionEvent),
         DECLARE_NAPI_FUNCTION("setAVQueueItems", SetAVQueueItems),
         DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
@@ -739,6 +740,40 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetOutputDevice", executor, complete);
+}
+
+napi_value NapiAVSession::GetOutputDeviceSync(napi_env env, napi_callback_info info)
+{
+    SLOGD("Start GetOutputDeviceSync");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("GetOutputDeviceSync failed : no memory");
+        NapiUtils::ThrowError(env, "GetOutputDeviceSync failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info, NapiCbInfoParser(), true);
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession->session_ == nullptr) {
+        context->status = napi_generic_failure;
+        context->errMessage = "GetOutputDeviceSync failed : session is nullptr";
+        context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    AVSessionDescriptor descriptor;
+    AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(napiSession->session_->GetSessionId(),
+        descriptor);
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, descriptor.outputDeviceInfo_, output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
 }
 
 napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
