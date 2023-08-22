@@ -49,10 +49,12 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        sptr<AVPlaybackState> state_ = reply.ReadParcelable<AVPlaybackState>();
-        CHECK_AND_RETURN_RET_LOG(state_ != nullptr, ERR_UNMARSHALLING, "read AVPlaybackState failed");
-        state = *state_;
-        currentState_ = *state_;
+        AVPlaybackState* statePtr = reply.ReadParcelable<AVPlaybackState>();
+        CHECK_AND_RETURN_RET_LOG(statePtr != nullptr, ERR_UNMARSHALLING, "read AVPlaybackState failed");
+        state = *statePtr;
+
+        std::lock_guard lockGuard(currentStateLock_);
+        currentState_ = *statePtr;
     }
     return ret;
 }
@@ -368,7 +370,10 @@ int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVContr
     callback_ = new(std::nothrow) AVControllerCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVControllerCallbackClient failed");
 
-    callback_->AddListenerForPlaybackState([this](const AVPlaybackState& state) { currentState_ = state; });
+    callback_->AddListenerForPlaybackState([this](const AVPlaybackState& state) {
+        std::lock_guard lockGuard(currentStateLock_);
+        currentState_ = state;
+    });
 
     return RegisterCallbackInner(callback_);
 }
@@ -432,7 +437,11 @@ std::string AVSessionControllerProxy::GetSessionId()
 
 int64_t AVSessionControllerProxy::GetRealPlaybackPosition()
 {
-    auto position = currentState_.GetPosition();
+    AVPlaybackState::Position position;
+    {
+        std::lock_guard lockGuard(currentStateLock_);
+        position = currentState_.GetPosition();
+    }
     CHECK_AND_RETURN_RET_LOG(position.updateTime_ > 0, 0, "playbackState not update");
     auto now = std::chrono::system_clock::now();
     auto nowMS = std::chrono::time_point_cast<std::chrono::milliseconds>(now);

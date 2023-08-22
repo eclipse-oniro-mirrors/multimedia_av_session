@@ -71,6 +71,7 @@ protected:
 
 private:
     static inline BrokerDelegator<AVSessionControllerProxy> delegator_;
+    std::recursive_mutex currentStateLock_;
     AVPlaybackState currentState_;
     bool isDestroy_ = false;
 
