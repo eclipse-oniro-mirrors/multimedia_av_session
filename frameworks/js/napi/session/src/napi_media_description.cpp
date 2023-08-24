@@ -250,8 +250,11 @@ napi_status NapiMediaDescription::GetIconUri(napi_env env, napi_value in, AVMedi
     if (status == napi_ok) {
         SLOGD("Get icon uri %{public}s", property.c_str());
         out.SetIconUri(property);
+    } else {
+        out.SetIconUri("");
+        SLOGW("GetIconUri failed, set icon uri to null");
     }
-    return status;
+    return napi_ok;
 }
 
 napi_status NapiMediaDescription::SetIconUri(napi_env env, const AVMediaDescription& in, napi_value& out)
@@ -276,7 +279,12 @@ napi_status NapiMediaDescription::GetMediaImage(napi_env env, napi_value in, AVM
     if (type == napi_string) {
         std::string uri;
         status = NapiUtils::GetValue(env, property, uri);
-        CHECK_RETURN(status == napi_ok, "get property failed", status);
+        if (status != napi_ok) {
+            SLOGW("GetMediaImage failed, set media image uri to null");
+            out.SetIconUri("");
+            return napi_ok;
+        }
+        SLOGD("Get media image, set icon uri %{public}s", uri.c_str());
         out.SetIconUri(uri);
     } else if (type == napi_object) {
         auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, property);
