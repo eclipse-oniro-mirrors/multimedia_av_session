@@ -748,7 +748,8 @@ napi_value NapiAVSession::GetOutputDeviceSync(napi_env env, napi_callback_info i
     auto context = std::make_shared<ContextBase>();
     if (context == nullptr) {
         SLOGE("GetOutputDeviceSync failed : no memory");
-        NapiUtils::ThrowError(env, "GetOutputDeviceSync failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        NapiUtils::ThrowError(env, "GetOutputDeviceSync failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
 

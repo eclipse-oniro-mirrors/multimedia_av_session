@@ -189,7 +189,6 @@ napi_value NapiAVSessionController::GetAVPlaybackStateSync(napi_env env, napi_ca
 {
     SLOGD("Start GetAVPlaybackStateSync");
     auto context = std::make_shared<ContextBase>();
-
     if (context == nullptr) {
         SLOGE("OnEvent failed : no memory");
         NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
