@@ -33,14 +33,14 @@ public:
 
     napi_env GetEnv() const;
 
-    void Call(napi_ref method, NapiArgsGetter getter = NapiArgsGetter());
+    void Call(napi_ref& method, NapiArgsGetter getter = NapiArgsGetter());
 
 private:
     static void AfterWorkCallback(uv_work_t* work, int aStatus);
 
     struct DataContext {
         napi_env env;
-        napi_ref method;
+        napi_ref& method;
         NapiArgsGetter getter;
     };
     napi_env env_ = nullptr;

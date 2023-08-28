@@ -69,7 +69,7 @@ void NapiAsyncCallback::AfterWorkCallback(uv_work_t* work, int aStatus)
     napi_close_handle_scope(context->env, scope);
 }
 
-void NapiAsyncCallback::Call(napi_ref method, NapiArgsGetter getter)
+void NapiAsyncCallback::Call(napi_ref& method, NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
