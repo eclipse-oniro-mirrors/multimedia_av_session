@@ -12,17 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "avsessionmanager_fuzzer.h"
 #include <string>
 #include <memory>
-
 #include "avsession_errors.h"
 #include "avsession_manager_impl.h"
-#include "avsessionmanager_fuzzer.h"
 
 using namespace std;
-using namespace OHOS;
-using namespace OHOS::AVSession;
-
+namespace OHOS {
+namespace AVSession {
 constexpr int32_t MAX_CODE_LEN  = 512;
 constexpr int32_t TIME = 1000;
 constexpr int32_t MIN_SIZE_NUM = 4;
@@ -98,7 +97,7 @@ bool AVSessionManagerFuzzer::SendSystemControlCommandFuzzTest(const uint8_t *dat
     return result;
 }
 
-bool OHOS::AVSession::AVSessionManagerInterfaceTest(uint8_t* data, size_t size)
+bool AVSessionManagerInterfaceTest(uint8_t* data, size_t size)
 {
     auto avSessionManager = std::make_unique<AVSessionManagerFuzzer>();
     if (avSessionManager == nullptr) {
@@ -108,7 +107,7 @@ bool OHOS::AVSession::AVSessionManagerInterfaceTest(uint8_t* data, size_t size)
     return avSessionManager->AVSessionManagerFuzzTest(data, size);
 }
 
-void OHOS::AVSession::AVSessionManagerTest(uint8_t* data, size_t size)
+void AVSessionManagerTestClient(uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         SLOGI("Invalid data");
@@ -144,11 +143,59 @@ void OHOS::AVSession::AVSessionManagerTest(uint8_t* data, size_t size)
     avSessionManagerImpl.CastAudio(sessionToken, deviceDescriptor);
 }
 
+void AVSessionManagerTestServer(uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
+
+    int32_t type = (*reinterpret_cast<const int32_t *>(data)) % 2; // valid type 0-1
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+
+    // To test the server interface, the session must be legal
+    std::shared_ptr <AVSession> avSession = AVSessionManager::GetInstance().CreateSession("FuzzTest", type,
+        elementName);
+    if (!avSession) {
+        SLOGI("avSession is null");
+        return;
+    }
+    std::shared_ptr <AVSessionController> avSessionController;
+    int32_t ret = AVSessionManager::GetInstance().CreateController(avSession->GetSessionId(), avSessionController);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGI("CreateController fail");
+        return;
+    }
+    if (!avSessionController) {
+        SLOGI("avSessionController is null");
+        return;
+    }
+
+    SessionToken sessionToken;
+    sessionToken.sessionId = avSession->GetSessionId();
+    std::vector<AudioStandard::AudioDeviceDescriptor> deviceDescriptor;
+    AudioStandard::AudioDeviceDescriptor audioDeviceDescriptor;
+    deviceDescriptor.push_back(audioDeviceDescriptor);
+    AVSessionManagerImpl avSessionManagerImpl;
+    avSessionManagerImpl.CastAudio(sessionToken, deviceDescriptor);
+
+    if (avSession != nullptr) {
+        avSession->Destroy();
+    }
+    if (avSessionController != nullptr) {
+        avSessionController->Destroy();
+    }
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AVSessionManagerInterfaceTest(data, size);
-    OHOS::AVSession::AVSessionManagerTest(data, size);
+    AVSessionManagerInterfaceTest(data, size);
+    AVSessionManagerTestClient(data, size);
+    AVSessionManagerTestServer(data, size);
     return 0;
 }
+} // namespace AVSession
+} // namespace OHOS

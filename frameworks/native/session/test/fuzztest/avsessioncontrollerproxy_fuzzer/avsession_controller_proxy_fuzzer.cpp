@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
+#include "avsession_controller_proxy_fuzzer.h"
 #include <iostream>
 #include <cstddef>
 #include <cstdint>
-
 #include "avsession_callback_proxy.h"
 #include "avsession_controller_proxy.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
-#include "avsession_controller_proxy_fuzzer.h"
+#include "avsession_manager_impl.h"
 
 using namespace std;
-using namespace OHOS;
-using namespace OHOS::AVSession;
-
+namespace OHOS {
+namespace AVSession {
 constexpr int32_t MAX_CODE_TEST  = 12;
 constexpr int32_t MAX_CODE_LEN = 512;
 constexpr int32_t MIN_SIZE_NUM = 4;
+static char g_testBundleName[] = "test.ohos.avsession";
+static char g_testAbilityName[] = "test.ability";
 
 bool AvsessionControllerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {
@@ -63,14 +64,14 @@ bool AvsessionControllerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     return result == AVSESSION_SUCCESS;
 }
 
-bool OHOS::AVSession::AvsessionControllerProxySendRequest(uint8_t* data, size_t size)
+bool AvsessionControllerProxySendRequest(uint8_t* data, size_t size)
 {
     auto avsessionProxy = std::make_unique<AvsessionControllerProxyFuzzer>();
     CHECK_AND_RETURN_RET_LOG(avsessionProxy != nullptr, false, "avsessionProxy is null");
     return avsessionProxy->FuzzSendRequest(data, size);
 }
 
-void OHOS::AVSession::AvsessionControllerProxyTest(uint8_t* data, size_t size)
+void AvsessionControllerProxyTest(uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
@@ -108,11 +109,49 @@ void OHOS::AVSession::AvsessionControllerProxyTest(uint8_t* data, size_t size)
     avSessionControllerProxy.GetExtras(wantParams);
 }
 
+void AvsessionItemTest(uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
+    std::string fuzzString(reinterpret_cast<const char*>(data), size);
+
+    int32_t type = (*reinterpret_cast<const int32_t *>(data)) % 2; // valid type 0-1
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    AAFwk::WantParams wantParams;
+
+    // To test the server interface, the session must be legal
+    std::shared_ptr <AVSession> avSession = AVSessionManager::GetInstance().CreateSession("FuzzTest", type,
+        elementName);
+    if (!avSession) {
+        SLOGI("avSession is null");
+        return;
+    }
+    std::shared_ptr <AVSessionController> avSessionController;
+    int32_t ret = AVSessionManager::GetInstance().CreateController(avSession->GetSessionId(), avSessionController);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGI("CreateController fail");
+        return;
+    }
+    if (!avSessionController) {
+        SLOGI("avSessionController is null");
+        return;
+    }
+    avSession->Activate();
+    avSession->SetSessionEvent(fuzzString, wantParams);
+    avSessionController->SendCommonCommand(fuzzString, wantParams);
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AvsessionControllerProxySendRequest(data, size);
-    OHOS::AVSession::AvsessionControllerProxyTest(data, size);
+    AvsessionControllerProxySendRequest(data, size);
+    AvsessionControllerProxyTest(data, size);
+    AvsessionItemTest(data, size);
     return 0;
 }
+} // namespace AVSession
+} // namespace OHOS
