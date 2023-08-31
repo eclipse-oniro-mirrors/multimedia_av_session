@@ -54,6 +54,7 @@ AVSessionItem::~AVSessionItem()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (descriptor_.sessionTag_ != "RemoteCast") {
         SLOGW("Session destroy at source, release cast");
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         ReleaseCast();
     }
 #endif
@@ -454,7 +455,9 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     std::lock_guard controllersLockGuard(controllersLock_);
+    SLOGD("AVCastController map size is %{public}zu", controllers_.size());
     for (const auto& controller : controllers_) {
+        CHECK_AND_RETURN_LOG(controller.second != nullptr, "Controller is nullptr, return");
         controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
     }
     SLOGI("Start check is cast sink session for state");
