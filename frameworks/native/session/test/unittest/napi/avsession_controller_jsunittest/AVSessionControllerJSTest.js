@@ -1535,12 +1535,11 @@ describe("AVSessionControllerJsTest", function () {
   it("GetAVQueueTitleSync001", 0, async function (done) {
     console.info(TAG + "GetAVQueueTitleSync001 start");
     try {
-      let queueTitle = "tempQueueTitle";
-      await session.setAVQueueTitle(queueTitle);
+      await session.setAVQueueTitle(QUEUE_TITLE);
       sleep(200);
       let currentQueueTitle = controller.getAVQueueTitleSync();
-      console.log(`Get queue title: ${currentMetaData}`);
-      expect(currentQueueTitle).assertEqual("tempQueueTitle");
+      console.log(`Get queue title: ${currentQueueTitle}`);
+      expect(currentQueueTitle).assertEqual(QUEUE_TITLE);
     } catch (err) {
       expect().assertFail();
     }
@@ -1557,14 +1556,11 @@ describe("AVSessionControllerJsTest", function () {
   it("GetAVQueueItemSync001", 0, async function (done) {
     console.info(TAG + "GetAVQueueItemSync001 start");
     try {
-      let queueItem = {
-        itemId: 0
-      };
-      await session.setAVQueueItem(queueItem);
+      await session.setAVQueueItems(ITEMS_ARRAY);
       sleep(200);
       let currentQueueItem = controller.getAVQueueItemsSync();
       console.log(`Get queue item: ${currentQueueItem}`);
-      expect(currentQueueItem.itemId).assertEqual(0);
+      expect(currentQueueItem[0].itemId).assertEqual(ITEMS_ARRAY[0].itemId);
     } catch (err) {
       expect().assertFail();
     }
@@ -1573,13 +1569,13 @@ describe("AVSessionControllerJsTest", function () {
   })
 
   /*
-   * @tc.name:GetAVQueueItemSync001
-   * @tc.desc:Get av queue item - sync
+   * @tc.name:GetOutputDeviceSync001
+   * @tc.desc:Get output device - sync
    * @tc.type: FUNC
    * @tc.require: I7V81A
    */
-  it("GetAVQueueItemSync001", 0, async function (done) {
-    console.info(TAG + "GetAVQueueItemSync001 start");
+  it("GetOutputDeviceSync001", 0, async function (done) {
+    console.info(TAG + "GetOutputDeviceSync001 start");
     try {
       let outputDeviceInfo = controller.getOutputDeviceSync();
       console.log(`Get output device info: ${outputDeviceInfo}`);
@@ -1587,7 +1583,7 @@ describe("AVSessionControllerJsTest", function () {
     } catch (err) {
       expect().assertFail();
     }
-    console.info(TAG + "GetAVQueueItemSync001 finished");
+    console.info(TAG + "GetOutputDeviceSync001 finished");
     done();
   })
 
@@ -1604,7 +1600,7 @@ describe("AVSessionControllerJsTest", function () {
       sleep(200);
       let isActive = controller.isActiveSync();
       console.log(`Get session active state: ${isActive}`);
-      expect(isActive).assertEqual(1);
+      expect(isActive).assertEqual(true);
     } catch (err) {
       expect().assertFail();
     }
