@@ -1478,4 +1478,154 @@ describe("AVSessionControllerJsTest", function () {
     await sleep(200);
   })
 
+  /*
+   * @tc.name:GetAVPlaybackStateSync001
+   * @tc.desc:Get av playback state - sync
+   * @tc.type: FUNC
+   * @tc.require: I7V81A
+   */
+  it("GetAVPlaybackStateSync001", 0, async function (done) {
+    console.info(TAG + "GetAVPlaybackStateSync001 start");
+    try {
+      let playbackState = {
+        state: 0
+      }
+      await session.setAVPlaybackState(playbackState);
+      sleep(200);
+      let currentPlaybackState = controller.getAVPlaybackStateSync();
+      console.log(`Get playback state: ${playbackState}`);
+      expect(currentPlaybackState.state).assertEqual(0);
+    } catch (err) {
+      expect().assertFail();
+    }
+    console.info(TAG + "GetAVPlaybackStateSync001 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:GetAVMetadataSync001
+   * @tc.desc:Get av metadata - sync
+   * @tc.type: FUNC
+   * @tc.require: I7V81A
+   */
+  it("GetAVMetadataSync001", 0, async function (done) {
+    console.info(TAG + "GetAVMetadataSync001 start");
+    try {
+      let metaData = {
+        assetId: "0"
+      }
+      await session.setAVMetadata(metaData);
+      sleep(200);
+      let currentMetaData = controller.getAVMetadataSync();
+      console.log(`Get metadata: ${currentMetaData}`);
+      expect(currentMetaData.assetId).assertEqual("0");
+    } catch (err) {
+      expect().assertFail();
+    }
+    console.info(TAG + "GetAVMetadataSync001 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:GetAVQueueTitleSync001
+   * @tc.desc:Get av queue title - sync
+   * @tc.type: FUNC
+   * @tc.require: I7V81A
+   */
+  it("GetAVQueueTitleSync001", 0, async function (done) {
+    console.info(TAG + "GetAVQueueTitleSync001 start");
+    try {
+      await session.setAVQueueTitle(QUEUE_TITLE);
+      sleep(200);
+      let currentQueueTitle = controller.getAVQueueTitleSync();
+      console.log(`Get queue title: ${currentQueueTitle}`);
+      expect(currentQueueTitle).assertEqual(QUEUE_TITLE);
+    } catch (err) {
+      expect().assertFail();
+    }
+    console.info(TAG + "GetAVQueueTitleSync001 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:GetAVQueueItemSync001
+   * @tc.desc:Get av queue item - sync
+   * @tc.type: FUNC
+   * @tc.require: I7V81A
+   */
+  it("GetAVQueueItemSync001", 0, async function (done) {
+    console.info(TAG + "GetAVQueueItemSync001 start");
+    try {
+      await session.setAVQueueItems(ITEMS_ARRAY);
+      sleep(200);
+      let currentQueueItem = controller.getAVQueueItemsSync();
+      console.log(`Get queue item: ${currentQueueItem}`);
+      expect(currentQueueItem[0].itemId).assertEqual(ITEMS_ARRAY[0].itemId);
+    } catch (err) {
+      expect().assertFail();
+    }
+    console.info(TAG + "GetAVQueueItemSync001 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:GetOutputDeviceSync001
+   * @tc.desc:Get output device - sync
+   * @tc.type: FUNC
+   * @tc.require: I7V81A
+   */
+  it("GetOutputDeviceSync001", 0, async function (done) {
+    console.info(TAG + "GetOutputDeviceSync001 start");
+    try {
+      let outputDeviceInfo = controller.getOutputDeviceSync();
+      console.log(`Get output device info: ${outputDeviceInfo}`);
+      expect(outputDeviceInfo.devices[0].deviceId).assertEqual("0");
+    } catch (err) {
+      expect().assertFail();
+    }
+    console.info(TAG + "GetOutputDeviceSync001 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:IsActiveSync001
+   * @tc.desc:Is session active - sync
+   * @tc.type: FUNC
+   * @tc.require: I7V81A
+   */
+  it("IsActiveSync001", 0, async function (done) {
+    console.info(TAG + "IsActiveSync001 start");
+    try {
+      await session.activate();
+      sleep(200);
+      let isActive = controller.isActiveSync();
+      console.log(`Get session active state: ${isActive}`);
+      expect(isActive).assertEqual(true);
+    } catch (err) {
+      expect().assertFail();
+    }
+    console.info(TAG + "IsActiveSync001 finished");
+    done();
+  })
+
+  /*
+   * @tc.name:GetValidCommandsSync001
+   * @tc.desc:Get valid commands - sync
+   * @tc.type: FUNC
+   * @tc.require: I7V81A
+   */
+  it("GetValidCommandsSync001", 0, async function (done) {
+    console.info(TAG + "GetValidCommandsSync001 start");
+    try {
+      session.on('play', () => {});
+      sleep(200);
+      let validCommands = controller.getValidCommandsSync();
+      console.log(`Get valid commands: ${validCommands}`);
+      expect(validCommands[0]).assertEqual(0);
+    } catch (err) {
+      expect().assertFail();
+    }
+    console.info(TAG + "GetValidCommandsSync001 finished");
+    done();
+  })
 })

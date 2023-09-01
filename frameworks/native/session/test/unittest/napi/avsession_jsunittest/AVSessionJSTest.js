@@ -468,4 +468,21 @@ describe("AVSessionJsTest", function () {
     }
     done();
   })
+
+  /*
+   * @tc.name: GetOutputDeviceSync001
+   * @tc.desc: Get output device - sync
+   * @tc.type: FUNC
+   * @tc.require: I7V81A
+   */
+  it("GetOutputDeviceSync001", 0, async function (done) {
+    try {
+      let outputDeviceInfo = session.getOutputDeviceSync();
+      console.log(`Get output device info: ${outputDeviceInfo}`);
+      expect(outputDeviceInfo.devices[0].deviceId).assertEqual("0");
+    } catch (err) {
+      expect().assertFail();
+    }
+    done();
+  })
 })
