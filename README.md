@@ -66,6 +66,16 @@ The structure of the repository directory is as follows:
 └── bundle.json                            # Compilation file
 ```
 
+## Constraints
+
+For detailed constraints, please refer to [Constraints](https://gitee.com/openharmony/docs/blob/master/en/application-dev/media/avsession-overview.md)
+
+## API Reference
+
+For detailed interface reference, please refer to [Reference](https://gitee.com/openharmony/docs/blob/master/en/application-dev/reference/apis/js-apis-avsession.md)
+
+For instructions on using AVSession, please refer to [AVSession Overview](https://gitee.com/openharmony/docs/blob/master/en/application-dev/media/avsession-overview.md)
+
 ## Repositories Involved
 
 [**multimedia_av_session**](https://gitee.com/openharmony/multimedia_av_session)
