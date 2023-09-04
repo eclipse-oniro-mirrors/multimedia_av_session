@@ -426,19 +426,21 @@ bool AVSessionItem::IsCastSinkSession(int32_t castState)
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
-    SLOGD("OnCastStateChange, cast state: %{public}d, deviceId: %{public}s", castState, deviceInfo.deviceId_.c_str());
+    SLOGI("OnCastStateChange");
     OutputDeviceInfo outputDeviceInfo;
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
         outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);
     } else {
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
-    if (castState == ConnectionState::STATE_CONNECTED) {
+    if (castState == 6) { // 6 is connected status (stream)
+        castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         SLOGI("Start get remote controller");
     }
 
-    if (castState == ConnectionState::STATE_DISCONNECTED) {
+    if (castState == 5) { // 5 is disconnected status
+        castState = 6; // 6 is disconnected status of AVSession
         SLOGI("Is remotecast, received disconnect event");
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         AVRouter::GetInstance().StopCastSession(castHandle_);
