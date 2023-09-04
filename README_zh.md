@@ -74,7 +74,7 @@ AVSession部件为系统提供了统一的媒体控制能力，当三方应用�
 
 详细接口说明请参考[API文档](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-avsession.md)
 
-使用说明请参考[开发指导](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/media/avsession-guidelines.md)
+使用说明请参考[开发指导](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/media/avsession-overview.md)
 
 ## 相关仓<a name="section1533973044317"></a>
 
