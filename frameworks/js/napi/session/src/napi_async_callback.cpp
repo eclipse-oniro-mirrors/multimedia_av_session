@@ -123,8 +123,9 @@ void NapiAsyncCallback::CallWithFlag(napi_ref& method, std::shared_ptr<bool> isV
     auto* work = new (std::nothrow) uv_work_t;
     CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
-    work->data = new DataContextWithFlag{env_, method, isValid, std::move(getter)};
-    int res = uv_queue_work_with_qos(loop_, work, [](uv_work_t* work) {}, AfterWorkCallbackWithFlag, uv_qos_user_initiated);
+    work->data = new DataContextWithFlag{ env_, method, isValid, std::move(getter) };
+    int res = uv_queue_work_with_qos(loop_, work, [](uv_work_t* work) {}, AfterWorkCallbackWithFlag,
+        uv_qos_user_initiated);
     CHECK_RETURN_VOID(res == 0, "uv queue work failed");
 }
 }
