@@ -295,7 +295,7 @@ napi_status NapiMediaDescription::GetMediaImage(napi_env env, napi_value in, AVM
         out.SetIcon(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
     } else {
         SLOGE("mediaImage property value type invalid");
-        return napi_invalid_arg;
+        out.SetIconUri("");
     }
 
     return status;
