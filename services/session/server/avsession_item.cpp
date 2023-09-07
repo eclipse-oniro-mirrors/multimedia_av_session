@@ -84,15 +84,19 @@ int32_t AVSessionItem::Destroy()
     std::string sessionId = descriptor_.sessionId_;
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileName);
-
+    std::list<sptr<AVControllerItem>> controllerList;
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         SLOGI("size=%{public}d", static_cast<int>(controllers_.size()));
         for (auto it = controllers_.begin(); it != controllers_.end();) {
             SLOGI("pid=%{public}d", it->first);
-            it->second->HandleSessionDestroy();
+            controllerList.push_back(it->second);
             controllers_.erase(it++);
         }
+    }
+    SLOGD("Send session destroy event to controller");
+    for (auto& controller : controllerList) {
+        controller->HandleSessionDestroy();
     }
     SLOGI("AVSessionItem send service destroy event to service, check serviceCallback exist");
     if (serviceCallback_) {
@@ -456,11 +460,13 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     }
 
     HandleOutputDeviceChange(castState, outputDeviceInfo);
-    std::lock_guard controllersLockGuard(controllersLock_);
-    SLOGD("AVCastController map size is %{public}zu", controllers_.size());
-    for (const auto& controller : controllers_) {
-        CHECK_AND_RETURN_LOG(controller.second != nullptr, "Controller is nullptr, return");
-        controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
+    {
+        std::lock_guard controllersLockGuard(controllersLock_);
+        SLOGD("AVCastController map size is %{public}zu", controllers_.size());
+        for (const auto& controller : controllers_) {
+            CHECK_AND_RETURN_LOG(controller.second != nullptr, "Controller is nullptr, return");
+            controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
+        }
     }
     SLOGI("Start check is cast sink session for state");
     if (IsCastSinkSession(castState)) {
