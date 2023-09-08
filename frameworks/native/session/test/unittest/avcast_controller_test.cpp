@@ -16,6 +16,10 @@
 #include <gtest/gtest.h>
 
 #include "accesstoken_kit.h"
+#include "bool_wrapper.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+#include "want_agent.h"
 #include "avcast_control_command.h"
 #include "avcast_controller_item.h"
 #include "avmedia_description.h"
@@ -25,13 +29,11 @@
 #include "avsession_manager.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
-#include "bool_wrapper.h"
-#include "hw_cast_provider.h"
 #include "hw_cast_stream_player.h"
 #include "iavcast_controller.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
-#include "want_agent.h"
+#define private public
+#include "hw_cast_provider.h"
+#undef private
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -652,12 +654,14 @@ HWTEST_F(AVCastControllerTest, StopDiscovery001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     hwCastProvider.StopDiscovery();
+    EXPECT_EQ(hwCastProvider.MAX_CAST_SESSION_SIZE, 16); // 16 is real max cast session size;
 }
 
 HWTEST_F(AVCastControllerTest, Release001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     hwCastProvider.Release();
+    EXPECT_EQ(hwCastProvider.MAX_CAST_SESSION_SIZE, 16); // 16 is real max cast session size;
 }
 
 HWTEST_F(AVCastControllerTest, StartCastSession001, TestSize.Level1)
@@ -670,6 +674,7 @@ HWTEST_F(AVCastControllerTest, StopCastSession001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     hwCastProvider.StopCastSession(2);
+    EXPECT_EQ(hwCastProvider.MAX_CAST_SESSION_SIZE, 16); // 16 is real max cast session size;
 }
 
 HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)

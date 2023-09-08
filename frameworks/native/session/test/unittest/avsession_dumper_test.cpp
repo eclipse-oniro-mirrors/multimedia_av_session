@@ -198,6 +198,7 @@ HWTEST_F(AVSessionDumperTest, Dump001, TestSize.Level1)
 HWTEST_F(AVSessionDumperTest, OnDump001, TestSize.Level1)
 {
     avSessionService_->OnDump();
+    EXPECT_NE(avSessionService_, nullptr);
 }
 
 /**
@@ -209,6 +210,7 @@ HWTEST_F(AVSessionDumperTest, OnDump001, TestSize.Level1)
 HWTEST_F(AVSessionDumperTest, OnStop001, TestSize.Level1)
 {
     avSessionService_->OnStop();
+    EXPECT_NE(avSessionService_, nullptr);
 }
 
 /**
@@ -223,6 +225,7 @@ HWTEST_F(AVSessionDumperTest, UpdataTopSession001, TestSize.Level1)
     avSessionService_->topSession_ = new AVSessionItem(descriptor);
     auto item = new AVSessionItem(descriptor);
     avSessionService_->UpdateTopSession(item);
+    EXPECT_NE(avSessionService_, nullptr);
 }
 
 /**
@@ -239,6 +242,7 @@ HWTEST_F(AVSessionDumperTest, HandleFocusSession001, TestSize.Level1)
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = 1;
     avSessionService_->HandleFocusSession(info);
+    EXPECT_NE(avSessionService_, nullptr);
 }
 
 /**
@@ -259,6 +263,7 @@ HWTEST_F(AVSessionDumperTest, HandleFocusSession002, TestSize.Level1)
     avSessionService_->GetContainer().AddSession(1, "abilityName", item);
     avSessionService_->HandleFocusSession(info);
     avSessionService_->GetContainer().RemoveSession(1);
+    EXPECT_NE(avSessionService_, nullptr);
 }
 
 class TestSessionListener : public SessionListener {
@@ -329,6 +334,7 @@ HWTEST_F(AVSessionDumperTest, NotifyAudioSessionCheck001, TestSize.Level1)
     sptr<TestISessionListener> iListener = new TestISessionListener();
     avSessionService_->AddSessionListener(1, iListener);
     avSessionService_->NotifyAudioSessionCheck(1);
+    EXPECT_NE(avSessionService_, nullptr);
 }
 
 /**
@@ -382,6 +388,7 @@ HWTEST_F(AVSessionDumperTest, DeleteHistoricalRecord001, TestSize.Level1)
 {
     std::string bundleName = "bundleName";
     avSessionService_->DeleteHistoricalRecord(bundleName);
+    EXPECT_NE(avSessionService_, nullptr);
 }
 
 /**
@@ -448,6 +455,7 @@ HWTEST_F(AVSessionDumperTest, SetDeviceInfo001, TestSize.Level1)
     descriptor.sessionId_ = "sessionId";
     sptr<AVSessionItem> item1 = new AVSessionItem(descriptor);
     avSessionService_->SetDeviceInfo(castAudioDescriptors, item1);
+    EXPECT_NE(item1, nullptr);
 }
 
 /**

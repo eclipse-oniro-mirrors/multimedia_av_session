@@ -444,6 +444,7 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 
 void AVSessionService::ReleaseCastSession()
 {
+    SLOGI("Start release cast session");
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
             std::string sessionId = session->GetDescriptor().sessionId_;
