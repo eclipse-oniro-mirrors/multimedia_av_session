@@ -714,7 +714,8 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("GetOutputDevice failed : no memory");
-        NapiUtils::ThrowError(env, "GetOutputDevice failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        NapiUtils::ThrowError(env, "GetOutputDevice failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
