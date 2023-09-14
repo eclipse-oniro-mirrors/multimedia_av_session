@@ -44,18 +44,25 @@ private:
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
     static napi_value GetAVPlaybackState(napi_env env, napi_callback_info info);
+    static napi_value GetAVPlaybackStateSync(napi_env env, napi_callback_info info);
     static napi_value GetAVMetaData(napi_env env, napi_callback_info info);
+    static napi_value GetAVMetaDataSync(napi_env env, napi_callback_info info);
     static napi_value SendAVKeyEvent(napi_env env, napi_callback_info info);
     static napi_value GetLaunchAbility(napi_env env, napi_callback_info info);
     static napi_value GetValidCommands(napi_env env, napi_callback_info info);
+    static napi_value GetValidCommandsSync(napi_env env, napi_callback_info info);
     static napi_value IsSessionActive(napi_env env, napi_callback_info info);
+    static napi_value IsSessionActiveSync(napi_env env, napi_callback_info info);
     static napi_value SendControlCommand(napi_env env, napi_callback_info info);
     static napi_value SendCommonCommand(napi_env env, napi_callback_info info);
     static napi_value Destroy(napi_env env, napi_callback_info info);
     static napi_value GetRealPlaybackPositionSync(napi_env env, napi_callback_info info);
     static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
+    static napi_value GetOutputDeviceSync(napi_env env, napi_callback_info info);
     static napi_value GetAVQueueItems(napi_env env, napi_callback_info info);
+    static napi_value GetAVQueueItemsSync(napi_env env, napi_callback_info info);
     static napi_value GetAVQueueTitle(napi_env env, napi_callback_info info);
+    static napi_value GetAVQueueTitleSync(napi_env env, napi_callback_info info);
     static napi_value SkipToQueueItem(napi_env env, napi_callback_info info);
     static napi_value GetExtras(napi_env env, napi_callback_info info);
 

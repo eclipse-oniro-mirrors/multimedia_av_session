@@ -63,18 +63,25 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
         DECLARE_NAPI_FUNCTION("getAVPlaybackState", GetAVPlaybackState),
+        DECLARE_NAPI_FUNCTION("getAVPlaybackStateSync", GetAVPlaybackStateSync),
         DECLARE_NAPI_FUNCTION("getAVMetadata", GetAVMetaData),
+        DECLARE_NAPI_FUNCTION("getAVMetadataSync", GetAVMetaDataSync),
         DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice),
+        DECLARE_NAPI_FUNCTION("getOutputDeviceSync", GetOutputDeviceSync),
         DECLARE_NAPI_FUNCTION("sendAVKeyEvent", SendAVKeyEvent),
         DECLARE_NAPI_FUNCTION("getLaunchAbility", GetLaunchAbility),
         DECLARE_NAPI_FUNCTION("getRealPlaybackPositionSync", GetRealPlaybackPositionSync),
         DECLARE_NAPI_FUNCTION("isActive", IsSessionActive),
+        DECLARE_NAPI_FUNCTION("isActiveSync", IsSessionActiveSync),
         DECLARE_NAPI_FUNCTION("destroy", Destroy),
         DECLARE_NAPI_FUNCTION("getValidCommands", GetValidCommands),
+        DECLARE_NAPI_FUNCTION("getValidCommandsSync", GetValidCommandsSync),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
         DECLARE_NAPI_FUNCTION("sendCommonCommand", SendCommonCommand),
         DECLARE_NAPI_FUNCTION("getAVQueueItems", GetAVQueueItems),
+        DECLARE_NAPI_FUNCTION("getAVQueueItemsSync", GetAVQueueItemsSync),
         DECLARE_NAPI_FUNCTION("getAVQueueTitle", GetAVQueueTitle),
+        DECLARE_NAPI_FUNCTION("getAVQueueTitleSync", GetAVQueueTitleSync),
         DECLARE_NAPI_FUNCTION("skipToQueueItem", SkipToQueueItem),
         DECLARE_NAPI_FUNCTION("getExtras", GetExtras),
     };
@@ -178,6 +185,55 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
     return NapiAsyncWork::Enqueue(env, context, "GetAVPlaybackState", executor, complete);
 }
 
+napi_value NapiAVSessionController::GetAVPlaybackStateSync(napi_env env, napi_callback_info info)
+{
+    SLOGD("Start GetAVPlaybackStateSync");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    context->GetCbInfo(env, info, NapiCbInfoParser(), true);
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController->controller_ == nullptr) {
+        SLOGI("GetAVPlaybackStateSync failed : controller is nullptr");
+        NapiUtils::ThrowError(env, "GetAVPlaybackStateSync failed : controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    AVPlaybackState state;
+    int32_t ret = napiController->controller_->GetAVPlaybackState(state);
+    SLOGD("Get playback state: %{public}d", state.GetState());
+    if (ret != AVSESSION_SUCCESS) {
+        std::string errMessage;
+        if (ret == ERR_SESSION_NOT_EXIST) {
+            errMessage = "GetAVPlaybackStateSync failed : native session not exist";
+        } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "GetAVPlaybackStateSync failed : native controller not exist";
+        } else if (ret == ERR_NO_PERMISSION) {
+            errMessage = "GetAVPlaybackStateSync failed : native no permission";
+        } else {
+            ret = AVSESSION_ERROR;
+            errMessage = "GetAVPlaybackStateSync failed : native server exception";
+        }
+        SLOGE("controller GetAVPlaybackStateSync failed:%{public}d", ret);
+        NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, state, output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
+}
+
 napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
@@ -219,6 +275,55 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetAVMetaData", executor, complete);
+}
+
+napi_value NapiAVSessionController::GetAVMetaDataSync(napi_env env, napi_callback_info info)
+{
+    SLOGD("Start GetAVMetaDataSync");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info, NapiCbInfoParser(), true);
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController->controller_ == nullptr) {
+        SLOGE("GetAVMetaDataSync failed : controller is nullptr");
+        NapiUtils::ThrowError(env, "GetAVMetaDataSync failed : controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    AVMetaData data;
+    int32_t ret = napiController->controller_->GetAVMetaData(data);
+    if (ret != AVSESSION_SUCCESS) {
+        std::string errMessage;
+        if (ret == ERR_SESSION_NOT_EXIST) {
+            errMessage = "GetAVMetaDataSync failed : native session not exist";
+        } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "GetAVMetaDataSync failed : native controller not exist";
+        } else if (ret == ERR_NO_PERMISSION) {
+            errMessage = "GetAVMetaDataSync failed : native no permission";
+        } else {
+            ret = AVSESSION_ERROR;
+            errMessage = "GetAVMetaDataSync failed : native server exception";
+        }
+        SLOGE("controller GetAVMetaDataSync failed:%{public}d", ret);
+        NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, data, output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
 }
 
 napi_value NapiAVSessionController::GetAVQueueItems(napi_env env, napi_callback_info info)
@@ -264,6 +369,56 @@ napi_value NapiAVSessionController::GetAVQueueItems(napi_env env, napi_callback_
     return NapiAsyncWork::Enqueue(env, context, "GetAVQueueItems", executor, complete);
 }
 
+napi_value NapiAVSessionController::GetAVQueueItemsSync(napi_env env, napi_callback_info info)
+{
+    SLOGD("Start GetAVQueueItemsSync");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info, NapiCbInfoParser(), true);
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController->controller_ == nullptr) {
+        SLOGE("GetAVQueueItemsSync failed : controller is nullptr");
+        NapiUtils::ThrowError(env, "GetAVQueueItemsSync failed : controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    std::vector<AVQueueItem> items;
+    int32_t ret = napiController->controller_->GetAVQueueItems(items);
+    SLOGD("Get queueItem size: %{public}zu", items.size());
+    if (ret != AVSESSION_SUCCESS) {
+        std::string errMessage;
+        if (ret == ERR_SESSION_NOT_EXIST) {
+            errMessage = "GetAVQueueItemsSync failed : native session not exist";
+        } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "GetAVQueueItemsSync failed : native controller not exist";
+        } else if (ret == ERR_NO_PERMISSION) {
+            errMessage = "GetAVQueueItemsSync failed : native no permission";
+        } else {
+            ret = AVSESSION_ERROR;
+            errMessage = "GetAVQueueItemsSync failed : native server exception";
+        }
+        SLOGE("controller GetAVQueueItemsSync failed:%{public}d", ret);
+        NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, items, output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
+}
+
 napi_value NapiAVSessionController::GetAVQueueTitle(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
@@ -305,6 +460,56 @@ napi_value NapiAVSessionController::GetAVQueueTitle(napi_env env, napi_callback_
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetAVQueueTitle", executor, complete);
+}
+
+napi_value NapiAVSessionController::GetAVQueueTitleSync(napi_env env, napi_callback_info info)
+{
+    SLOGD("Start GetAVQueueTitleSync");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info, NapiCbInfoParser(), true);
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController->controller_ == nullptr) {
+        SLOGE("GetAVQueueTitleSync failed : controller is nullptr");
+        NapiUtils::ThrowError(env, "GetAVQueueTitleSync failed : controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    std::string title;
+    int32_t ret = napiController->controller_->GetAVQueueTitle(title);
+    SLOGD("Get queue title: %{public}s", title.c_str());
+    if (ret != AVSESSION_SUCCESS) {
+        std::string errMessage;
+        if (ret == ERR_SESSION_NOT_EXIST) {
+            errMessage = "GetAVQueueTitleSync failed : native session not exist";
+        } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "GetAVQueueTitleSync failed : native controller not exist";
+        } else if (ret == ERR_NO_PERMISSION) {
+            errMessage = "GetAVQueueTitleSync failed : native no permission";
+        } else {
+            ret = AVSESSION_ERROR;
+            errMessage = "GetAVQueueTitleSync failed : native server exception";
+        }
+        SLOGE("controller GetAVQueueTitleSync failed:%{public}d", ret);
+        NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, title, output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
 }
 
 napi_value NapiAVSessionController::SkipToQueueItem(napi_env env, napi_callback_info info)
@@ -540,6 +745,56 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
     return NapiAsyncWork::Enqueue(env, context, "GetValidCommands", executor, complete);
 }
 
+napi_value NapiAVSessionController::GetValidCommandsSync(napi_env env, napi_callback_info info)
+{
+    SLOGD("Start GetValidCommandsSync");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info, NapiCbInfoParser(), true);
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController->controller_ == nullptr) {
+        SLOGE("GetValidCommandsSync failed : controller is nullptr");
+        NapiUtils::ThrowError(env, "GetValidCommandsSync failed : controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    std::vector<int32_t> cmds;
+    int32_t ret = napiController->controller_->GetValidCommands(cmds);
+    SLOGD("Get valid commands size: %{public}zu", cmds.size());
+    if (ret != AVSESSION_SUCCESS) {
+        std::string errMessage;
+        if (ret == ERR_SESSION_NOT_EXIST) {
+            errMessage = "GetValidCommandsSync failed : native session not exist";
+        } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "GetValidCommandsSync failed : native controller not exist";
+        } else if (ret == ERR_NO_PERMISSION) {
+            errMessage = "GetValidCommandsSync failed : native no permission";
+        } else {
+            ret = AVSESSION_ERROR;
+            errMessage = "GetValidCommandsSync failed : native server exception";
+        }
+        SLOGE("controller GetValidCommandsSync failed:%{public}d", ret);
+        NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, cmds, output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
+}
+
 napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
@@ -581,6 +836,56 @@ napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_
     };
 
     return NapiAsyncWork::Enqueue(env, context, "IsSessionActive", executor, complete);
+}
+
+napi_value NapiAVSessionController::IsSessionActiveSync(napi_env env, napi_callback_info info)
+{
+    SLOGD("Start IsSessionActiveSync");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info, NapiCbInfoParser(), true);
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController->controller_ == nullptr) {
+        SLOGE("IsSessionActiveSync failed : controller is nullptr");
+        NapiUtils::ThrowError(env, "IsSessionActiveSync failed : controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    bool isActive {};
+    int32_t ret = napiController->controller_->IsSessionActive(isActive);
+    SLOGD("Get session active state: %{public}d", static_cast<int32_t>(isActive));
+    if (ret != AVSESSION_SUCCESS) {
+        std::string errMessage;
+        if (ret == ERR_SESSION_NOT_EXIST) {
+            errMessage = "IsSessionActiveSync failed : native session not exist";
+        } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "IsSessionActiveSync failed : native controller not exist";
+        } else if (ret == ERR_NO_PERMISSION) {
+            errMessage = "IsSessionActiveSync failed : native no permission";
+        } else {
+            ret = AVSESSION_ERROR;
+            errMessage = "IsSessionActiveSync failed : native server exception";
+        }
+        SLOGE("controller IsSessionActiveSync failed:%{public}d", ret);
+        NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, isActive, output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
 }
 
 napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callback_info info)
@@ -812,6 +1117,40 @@ napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetOutputDevice", executor, complete);
+}
+
+napi_value NapiAVSessionController::GetOutputDeviceSync(napi_env env, napi_callback_info info)
+{
+    SLOGD("Start GetOutputDeviceSync");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info, NapiCbInfoParser(), true);
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController->controller_ == nullptr) {
+        SLOGE("GetOutputDeviceSync failed : controller is nullptr");
+        NapiUtils::ThrowError(env, "GetOutputDeviceSync failed : controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    AVSessionDescriptor descriptor;
+    AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(napiController->controller_->GetSessionId(),
+        descriptor);
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, descriptor.outputDeviceInfo_, output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
 }
 
 napi_status NapiAVSessionController::SetPlaybackStateFilter(napi_env env, NapiAVSessionController *napiController,
