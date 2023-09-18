@@ -309,6 +309,24 @@ int32_t AVSessionServiceProxy::RegisterClientDeathObserver(const sptr<IClientDea
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
+int32_t AVSessionServiceProxy::Close(void)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
+}
+
 int32_t AVSessionServiceProxy::CastAudio(const SessionToken& token,
                                          const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors)
 {

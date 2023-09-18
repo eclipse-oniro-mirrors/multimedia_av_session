@@ -129,6 +129,8 @@ public:
     int32_t StopCast(const SessionToken& sessionToken) override;
 #endif
 
+    int32_t Close(void) override;
+
 private:
     static SessionContainer& GetContainer();
 
@@ -254,6 +256,8 @@ private:
     bool LoadStringFromFileEx(const std::string& filePath, std::string& content);
 
     bool SaveStringToFileEx(const std::string& filePath, const std::string& content);
+
+    void ClearClientResources(pid_t pid);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 

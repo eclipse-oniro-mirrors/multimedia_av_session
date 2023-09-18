@@ -1226,15 +1226,34 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionService::OnClientDied(pid_t pid)
+void AVSessionService::ClearClientResources(pid_t pid)
 {
-    SLOGI("pid=%{public}d", pid);
     RemoveSessionListener(pid);
     RemoveClientDeathObserver(pid);
 
     std::lock_guard lockGuard(sessionAndControllerLock_);
     ClearSessionForClientDiedNoLock(pid);
     ClearControllerForClientDiedNoLock(pid);
+}
+
+int32_t AVSessionService::Close(void)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("Close: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+                            "ERROR_MSG", "avsessionservice Close checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    auto pid = GetCallingPid();
+    SLOGI("pid=%{public}d", pid);
+    ClearClientResources(pid);
+    return AVSESSION_SUCCESS;
+}
+
+void AVSessionService::OnClientDied(pid_t pid)
+{
+    SLOGI("pid=%{public}d", pid);
+    ClearClientResources(pid);
 }
 
 void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)

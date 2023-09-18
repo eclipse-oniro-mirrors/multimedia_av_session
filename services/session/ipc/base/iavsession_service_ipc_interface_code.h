@@ -39,6 +39,7 @@ enum class AvsessionSeviceInterfaceCode {
     SERVICE_CMD_SET_DISCOVERYABLE,
     SERVICE_CMD_START_CAST,
     SERVICE_CMD_STOP_CAST,
+    SERVICE_CMD_CLOSE,
     SERVICE_CMD_MAX
 };
 } // namespace OHOS::AVSession
