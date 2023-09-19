@@ -22,11 +22,13 @@
 namespace OHOS::AVSession {
 std::map<std::string, NapiMediaDescription::GetterType> NapiMediaDescription::getterMap_ = {
     { "mediaId", GetMediaId },
+    { "assetId", GetAssetId },
     { "title", GetTitle },
     { "subtitle", GetSubtitle },
     { "description", GetDescription },
     { "icon",  GetIcon },
     { "iconUri", GetIconUri },
+    { "mediaImage", GetMediaImage },
     { "extras", GetExtras },
     { "mediaType", GetMediaType },
     { "mediaSize", GetMediaSize },
@@ -75,8 +77,8 @@ napi_status NapiMediaDescription::GetValue(napi_env env, napi_value in, AVMediaD
     for (const auto& name : propertyNames) {
         auto it = getterMap_.find(name);
         if (it == getterMap_.end()) {
-            SLOGE("property %{public}s is not of mediadescription", name.c_str());
-            return napi_invalid_arg;
+            SLOGW("property %{public}s is not of mediadescription", name.c_str());
+            continue;
         }
         auto getter = it->second;
         if (getter(env, in, out) != napi_ok) {
@@ -123,7 +125,10 @@ napi_status NapiMediaDescription::GetMediaId(napi_env env, napi_value in, AVMedi
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "mediaId", property);
-    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    if (status != napi_ok) {
+        status = NapiUtils::GetNamedProperty(env, in, "assetId", property);
+        CHECK_RETURN(status == napi_ok, "get property failed", status);
+    }
     out.SetMediaId(property);
     return status;
 }
@@ -134,7 +139,21 @@ napi_status NapiMediaDescription::SetMediaId(napi_env env, const AVMediaDescript
     auto status = NapiUtils::SetValue(env, in.GetMediaId(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "mediaId", property);
-    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    CHECK_RETURN(status == napi_ok, "set property mediaId failed", status);
+    status = napi_set_named_property(env, out, "assetId", property);
+    CHECK_RETURN(status == napi_ok, "set property assetId failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetAssetId(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    SLOGD("Start get assetId");
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "assetId", property);
+    if (status == napi_ok) {
+        SLOGI("MediaDescription has assetId, use assetId: %{public}s", property.c_str());
+        out.SetMediaId(property);
+    }
     return status;
 }
 
@@ -199,7 +218,7 @@ napi_status NapiMediaDescription::GetIcon(napi_env env, napi_value in, AVMediaDe
 {
     napi_value property {};
     auto status = napi_get_named_property(env, in, "icon", &property);
-    CHECK_RETURN((status == napi_ok) && (property != nullptr), "get property failed", status);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "get property icon failed", napi_ok);
     auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, property);
     if (pixelMap == nullptr) {
         SLOGE("unwrap failed");
@@ -219,6 +238,7 @@ napi_status NapiMediaDescription::SetIcon(napi_env env, const AVMediaDescription
     napi_value property = Media::PixelMapNapi::CreatePixelMap(env,
         AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
     auto status = napi_set_named_property(env, out, "icon", property);
+    status = napi_set_named_property(env, out, "mediaImage", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }
@@ -227,9 +247,10 @@ napi_status NapiMediaDescription::GetIconUri(napi_env env, napi_value in, AVMedi
 {
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "iconUri", property);
-    CheckAndSetDefaultString(status, property);
-    out.SetIconUri(property);
-    return napi_ok;
+    if (status == napi_ok && out.GetIconUri() != "") {
+        out.SetIconUri(property);
+    }
+    return status;
 }
 
 napi_status NapiMediaDescription::SetIconUri(napi_env env, const AVMediaDescription& in, napi_value& out)
@@ -238,7 +259,36 @@ napi_status NapiMediaDescription::SetIconUri(napi_env env, const AVMediaDescript
     auto status = NapiUtils::SetValue(env, in.GetIconUri(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "iconUri", property);
+    status = napi_set_named_property(env, out, "mediaImage", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetMediaImage(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    napi_value property {};
+    auto status = napi_get_named_property(env, in, "mediaImage", &property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "get mediaImage property failed", napi_ok);
+    napi_valuetype type = napi_undefined;
+    status = napi_typeof(env, property, &type);
+    CHECK_RETURN(status == napi_ok, "get napi_value type failed", status);
+    if (type == napi_string) {
+        std::string uri;
+        status = NapiUtils::GetValue(env, property, uri);
+        CHECK_RETURN(status == napi_ok, "get property failed", status);
+        out.SetIconUri(uri);
+    } else if (type == napi_object) {
+        auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, property);
+        if (pixelMap == nullptr) {
+            SLOGE("unwrap failed");
+            return napi_invalid_arg;
+        }
+        out.SetIcon(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+    } else {
+        SLOGE("mediaImage property value type invalid");
+        return napi_invalid_arg;
+    }
+
     return status;
 }
 
