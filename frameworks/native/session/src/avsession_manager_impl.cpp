@@ -49,14 +49,14 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
     }
     service_ = iface_cast<AVSessionServiceProxy>(object);
     if (service_ != nullptr) {
-        auto recipient = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDie(); });
-        if (recipient == nullptr) {
+        serviceDeathRecipient_ = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDie(); });
+        if (serviceDeathRecipient_ == nullptr) {
             SLOGE("register ServiceDeathRecipient failed");
             return nullptr;
         }
 
         sptr<IAVSessionService> serviceBase = service_;
-        serviceBase->AsObject()->AddDeathRecipient(recipient);
+        serviceBase->AsObject()->AddDeathRecipient(serviceDeathRecipient_);
 
         SLOGD("get service success");
         RegisterClientDeathObserver();
@@ -255,6 +255,20 @@ int32_t AVSessionManagerImpl::CastAudioForAll(const std::vector<AudioStandard::A
     CHECK_AND_RETURN_RET_LOG(descriptors.size() > 0, ERR_INVALID_PARAM, "devices size is zero");
     auto service = GetService();
     return service ? service->CastAudioForAll(descriptors) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::Close(void)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::Close");
+    int32_t ret = ERR_SERVICE_NOT_EXIST;
+    auto service = GetService();
+    if (service) {
+        sptr<IAVSessionService> serviceBase = service;
+        serviceBase->AsObject()->RemoveDeathRecipient(serviceDeathRecipient_);
+        serviceDeathRecipient_ = nullptr;
+        ret = service->Close();
+    }
+    return ret;
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE

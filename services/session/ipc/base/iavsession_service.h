@@ -73,6 +73,8 @@ public:
 
     virtual int32_t StopCast(const SessionToken& sessionToken) = 0;
 #endif
+
+    virtual int32_t Close() = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_SERVICE_H

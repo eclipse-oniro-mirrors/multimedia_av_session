@@ -84,6 +84,8 @@ public:
     int32_t StopCast(const SessionToken& sessionToken) override;
 #endif
 
+    int32_t Close(void) override;
+
 private:
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;
 };

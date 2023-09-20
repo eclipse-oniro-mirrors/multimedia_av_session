@@ -105,6 +105,11 @@ public:
         return AVSESSION_SUCCESS;
     }
 #endif
+
+    int32_t Close(void) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 private:
     static inline BrokerDelegator<RemoteSessionCommandProcess> delegator_;
 };

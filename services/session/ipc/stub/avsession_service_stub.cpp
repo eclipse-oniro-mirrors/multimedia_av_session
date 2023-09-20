@@ -220,6 +220,14 @@ int32_t AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel& d
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleClose(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t ret = Close();
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "Close failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleCastAudio(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CastAudio");

@@ -166,6 +166,13 @@ public:
     */
     virtual int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
 
+    /**
+     * Close avsession manager, clear resources.
+     *
+     * @return Returns whether close the avsession manager.
+     */
+    virtual int32_t Close(void) = 0;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     virtual int32_t GetAVCastController(const std::string& sessionId,
         std::shared_ptr<AVCastController>& castController) = 0;
