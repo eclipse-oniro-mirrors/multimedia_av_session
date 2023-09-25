@@ -117,7 +117,11 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
         case AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE:
             int32_t loopMode;
             castControlCommand.GetLoopMode(loopMode);
-            streamPlayer_->SetLoopMode(static_cast<CastEngine::LoopMode>(loopMode + 1)); // Convert loop mode
+            if (intLoopModeToCastPlus_.count(loopMode) != 0) {
+                streamPlayer_->SetLoopMode(intLoopModeToCastPlus_[castLoopMode]);
+            } else {
+                SLOGE("invalid LoopMode: %{public}d", loopMode);
+            }
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE:
             break;

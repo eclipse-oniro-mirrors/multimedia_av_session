@@ -78,12 +78,12 @@ void AvsessionControllerProxyTest(uint8_t* data, size_t size)
     }
 
     AVPlaybackState state;
-    int32_t _state = *(reinterpret_cast<const int32_t*>(data));
-    state.SetState(_state);
+    int32_t stateTemp = *(reinterpret_cast<const int32_t*>(data));
+    state.SetState(stateTemp);
 
     AVMetaData metaData;
-    std::string _data(reinterpret_cast<const char*>(data), size);
-    metaData.SetAssetId(_data);
+    std::string dataTemp(reinterpret_cast<const char*>(data), size);
+    metaData.SetAssetId(dataTemp);
 
     std::vector<int32_t> cmds;
     int32_t fuzzCmds = *(reinterpret_cast<const int32_t*>(data));

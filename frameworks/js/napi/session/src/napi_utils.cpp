@@ -941,13 +941,15 @@ napi_status NapiUtils::GetDateValue(napi_env env, napi_value value, double& resu
     CHECK_RETURN(env != nullptr, "env is nullptr", napi_invalid_arg);
     CHECK_RETURN(value != nullptr, "value is nullptr", napi_invalid_arg);
 
-    auto engine = reinterpret_cast<NativeEngine*>(env);
-    auto nativeValue = reinterpret_cast<NativeValue*>(value);
-    auto isDate = nativeValue->IsDate();
+    SLOGD("GetDateValue in");
+    bool isDate = false;
+    napi_is_date(env, value, &isDate);
     if (isDate) {
-        auto nativeDate = reinterpret_cast<NativeDate*>(nativeValue->GetInterface(NativeDate::INTERFACE_ID));
-        result = nativeDate->GetTime();
-        engine->ClearLastError();
+        napi_status status = napi_get_date_value(env, value, &result);
+        if (status != napi_ok) {
+            SLOGE("get date error");
+        }
+        SLOGD("GetDateValue out");
         return napi_ok;
     } else {
         SLOGE("value is not date type");
@@ -959,10 +961,12 @@ napi_status NapiUtils::SetDateValue(napi_env env, double time, napi_value& resul
 {
     CHECK_RETURN(env != nullptr, "env is nullptr", napi_invalid_arg);
 
-    auto engine = reinterpret_cast<NativeEngine*>(env);
-    auto resultValue = engine->CreateDate(time);
-    result = reinterpret_cast<napi_value>(resultValue);
-    engine->ClearLastError();
+    SLOGD("SetDateValue in");
+    napi_status status = napi_create_date(env, time, &result);
+    if (status != napi_ok) {
+        SLOGE("create date error");
+    }
+    SLOGD("SetDateValue out");
     return napi_ok;
 }
 

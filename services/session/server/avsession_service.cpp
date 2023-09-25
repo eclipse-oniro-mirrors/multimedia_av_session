@@ -1291,7 +1291,6 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
     NotifySessionRelease(sessionItem->GetDescriptor());
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    GetContainer().RemoveSession(sessionItem->GetPid(), sessionItem->GetAbilityName());
     if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
         SLOGD("Top session is released session");
         UpdateTopSession(nullptr);
@@ -1305,6 +1304,8 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(sessionItem->GetDescriptor().elementName_.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()),
         sessionItem->GetDescriptor().sessionType_, false);
+    SLOGI("HandleSessionRelease, remove session: sessionId=%{public}s", sessionId.c_str());
+    GetContainer().RemoveSession(sessionItem->GetPid(), sessionItem->GetAbilityName());
 }
 
 void AVSessionService::HandleControllerRelease(AVControllerItem& controller)

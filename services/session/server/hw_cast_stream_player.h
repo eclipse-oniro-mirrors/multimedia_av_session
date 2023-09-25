@@ -86,6 +86,12 @@ private:
         {CastEngine::LoopMode::LOOP_MODE_LIST, AVPlaybackState::LOOP_MODE_LIST},
         {CastEngine::LoopMode::LOOP_MODE_SHUFFLE, AVPlaybackState::LOOP_MODE_SHUFFLE},
     };
+    std::map<int32_t, CastEngine::LoopMode> intLoopModeToCastPlus_ = {
+        {AVPlaybackState::LOOP_MODE_SEQUENCE, CastEngine::LoopMode::LOOP_MODE_SEQUENCE},
+        {AVPlaybackState::LOOP_MODE_SINGLE, CastEngine::LoopMode::LOOP_MODE_SINGLE},
+        {AVPlaybackState::LOOP_MODE_LIST, CastEngine::LoopMode::LOOP_MODE_LIST},
+        {AVPlaybackState::LOOP_MODE_SHUFFLE, CastEngine::LoopMode::LOOP_MODE_SHUFFLE},
+    };
 };
 } // namespace OHOS::AVSession
 
