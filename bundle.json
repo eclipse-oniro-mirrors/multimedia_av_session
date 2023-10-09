@@ -63,11 +63,7 @@
             "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
             "//foundation/multimedia/av_session/frameworks/js/napi/session:avsession_napi",
             "//foundation/multimedia/av_session/utils:avsession_utils",
-            "//foundation/multimedia/av_session/avpicker:avcastpicker",
-            "//foundation/multimedia/av_session/mediaControlExtension/MediaControlExtension:mediacontrolextensionability_napi",
-            "//foundation/multimedia/av_session/mediaControlExtension/MediaControlExtensionContext:mediacontrolextensioncontext_napi",
-            "//foundation/multimedia/av_session/mediaControlExtension/ModuleLoader:media_control_extension_module",
-            "//foundation/multimedia/av_session/mediaControlExtension/ModuleLoader:media_control_extension"
+            "//foundation/multimedia/av_session/avpicker:avcastpicker"
           ],
           "service_group": [
             "//foundation/multimedia/av_session/services/session:avsession_item",
