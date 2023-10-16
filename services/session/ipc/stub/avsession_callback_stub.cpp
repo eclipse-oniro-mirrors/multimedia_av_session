@@ -82,14 +82,18 @@ int32_t AVSessionCallbackStub::HandleOnPlayPrevious(MessageParcel& data, Message
 int32_t AVSessionCallbackStub::HandleOnFastForward(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnFastForward");
-    OnFastForward();
+    int32_t time = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(time), ERR_NONE, "read time failed");
+    OnFastForward(time);
     return ERR_NONE;
 }
 
 int32_t AVSessionCallbackStub::HandleOnRewind(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnRewind");
-    OnRewind();
+    int32_t time = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(time), ERR_NONE, "read time failed");
+    OnRewind(time);
     return ERR_NONE;
 }
 

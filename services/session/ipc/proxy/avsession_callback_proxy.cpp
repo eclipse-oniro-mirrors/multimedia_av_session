@@ -88,10 +88,11 @@ void AVSessionCallbackProxy::OnPlayPrevious()
         "send request failed");
 }
 
-void AVSessionCallbackProxy::OnFastForward()
+void AVSessionCallbackProxy::OnFastForward(int64_t time)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt64(time), "write time failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
@@ -101,10 +102,11 @@ void AVSessionCallbackProxy::OnFastForward()
         "send request failed");
 }
 
-void AVSessionCallbackProxy::OnRewind()
+void AVSessionCallbackProxy::OnRewind(int64_t time)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt64(time), "write time failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");

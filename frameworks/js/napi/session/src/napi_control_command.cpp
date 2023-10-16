@@ -26,8 +26,8 @@ std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlComm
     { "stop", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_STOP } },
     { "playNext", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY_NEXT } },
     { "playPrevious", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY_PREVIOUS } },
-    { "fastForward", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_FAST_FORWARD } },
-    { "rewind", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_REWIND } },
+    { "fastForward", { GetForwardTime, SetForwardTime, AVControlCommand::SESSION_CMD_FAST_FORWARD } },
+    { "rewind", { GetRewindTime, SetRewindTime, AVControlCommand::SESSION_CMD_REWIND } },
     { "seek", { GetSeekTime, SetSeekTime, AVControlCommand::SESSION_CMD_SEEK } },
     { "setSpeed", { GetSpeed, SetSpeed, AVControlCommand::SESSION_CMD_SET_SPEED } },
     { "setLoopMode", { GetLoopMode, SetLoopMode, AVControlCommand::SESSION_CMD_SET_LOOP_MODE } },
@@ -151,6 +151,70 @@ napi_status NapiControlCommand::SetSpeed(napi_env env, AVControlCommand& in, nap
     auto status = NapiUtils::SetValue(env, speed, property);
     if (status != napi_ok) {
         SLOGE("create speed property failed");
+        return status;
+    }
+
+    status = napi_set_named_property(env, out, "parameter", property);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "set parameter property failed");
+    return status;
+}
+
+napi_status NapiControlCommand::GetForwardTime(napi_env env, napi_value in, AVControlCommand& out)
+{
+    int64_t time {};
+    auto status = NapiUtils::GetNamedProperty(env, in, "parameter", time);
+    if (status != napi_ok) {
+        SLOGE("get ForwardTime parameter failed");
+        return status;
+    }
+
+    SLOGD("GetForwardTime with time %{public}jd", static_cast<int64_t>(time));
+    CHECK_AND_RETURN_RET_LOG(out.SetForwardTime(time) == AVSESSION_SUCCESS, napi_invalid_arg, "set parameter failed");
+    return status;
+}
+
+napi_status NapiControlCommand::SetForwardTime(napi_env env, AVControlCommand& in, napi_value& out)
+{
+    int64_t time {};
+    CHECK_AND_RETURN_RET_LOG(in.GetForwardTime(time) == AVSESSION_SUCCESS, napi_invalid_arg, "get parameter failed");
+    SLOGD("SetForwardTime with time %{public}jd", static_cast<int64_t>(time));
+
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, time, property);
+    if (status != napi_ok) {
+        SLOGE("create ForwardTime property failed");
+        return status;
+    }
+
+    status = napi_set_named_property(env, out, "parameter", property);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "set parameter property failed");
+    return status;
+}
+
+napi_status NapiControlCommand::GetRewindTime(napi_env env, napi_value in, AVControlCommand& out)
+{
+    int64_t time {};
+    auto status = NapiUtils::GetNamedProperty(env, in, "parameter", time);
+    if (status != napi_ok) {
+        SLOGE("get RewindTime parameter failed");
+        return status;
+    }
+
+    SLOGD("GetRewindTime with time %{public}jd", static_cast<int64_t>(time));
+    CHECK_AND_RETURN_RET_LOG(out.SetRewindTime(time) == AVSESSION_SUCCESS, napi_invalid_arg, "set parameter failed");
+    return status;
+}
+
+napi_status NapiControlCommand::SetRewindTime(napi_env env, AVControlCommand& in, napi_value& out)
+{
+    int64_t time {};
+    CHECK_AND_RETURN_RET_LOG(in.GetRewindTime(time) == AVSESSION_SUCCESS, napi_invalid_arg, "get parameter failed");
+    SLOGD("SetRewindTime with time %{public}jd", static_cast<int64_t>(time));
+
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, time, property);
+    if (status != napi_ok) {
+        SLOGE("create RewindTime property failed");
         return status;
     }
 

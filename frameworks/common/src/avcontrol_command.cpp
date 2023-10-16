@@ -35,6 +35,12 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
         int32_t cmd = data.ReadInt32();
         result->SetCommand(cmd);
         switch (cmd) {
+            case SESSION_CMD_FAST_FORWARD:
+                result->SetForwardTime(data.ReadInt64());
+                break;
+            case SESSION_CMD_REWIND:
+                result->SetRewindTime(data.ReadInt64());
+                break;
             case SESSION_CMD_SEEK:
                 result->SetSeekTime(data.ReadInt64());
                 break;
@@ -60,6 +66,14 @@ bool AVControlCommand::Marshalling(Parcel& parcel) const
         return false;
     }
     switch (cmd_) {
+        case SESSION_CMD_FAST_FORWARD:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_)
+                && parcel.WriteInt64(std::get<int64_t>(param_)), false, "write fast forward time failed");
+            break;
+        case SESSION_CMD_REWIND:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_)
+                && parcel.WriteInt64(std::get<int64_t>(param_)), false, "write rewind time failed");
+            break;
         case SESSION_CMD_SEEK:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_)
                 && parcel.WriteInt64(std::get<int64_t>(param_)), false, "write seek time failed");
@@ -116,6 +130,50 @@ int32_t AVControlCommand::GetSpeed(double& speed) const
         return AVSESSION_ERROR;
     }
     speed = std::get<double>(param_);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::SetForwardTime(int64_t forwardTime)
+{
+    SLOGD("SetForwardTime with time %{public}jd", static_cast<int64_t>(forwardTime));
+    if (forwardTime < 0) {
+        SLOGE("SetForwardTime error");
+        return ERR_INVALID_PARAM;
+    }
+    param_ = forwardTime;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::GetForwardTime(int64_t& forwardTime) const
+{
+    if (!std::holds_alternative<int64_t>(param_)) {
+        SLOGE("GetForwardTime error");
+        return AVSESSION_ERROR;
+    }
+    forwardTime = std::get<int64_t>(param_);
+    SLOGE("GetForwardTime with time %{public}jd", static_cast<int64_t>(forwardTime));
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::SetRewindTime(int64_t rewindTime)
+{
+    SLOGD("SetRewindTime with time %{public}jd", static_cast<int64_t>(rewindTime));
+    if (rewindTime < 0) {
+        SLOGE("SetRewindTime error");
+        return ERR_INVALID_PARAM;
+    }
+    param_ = rewindTime;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::GetRewindTime(int64_t& rewindTime) const
+{
+    if (!std::holds_alternative<int64_t>(param_)) {
+        SLOGE("GetRewindTime error");
+        return AVSESSION_ERROR;
+    }
+    rewindTime = std::get<int64_t>(param_);
+    SLOGE("GetRewindTime with time %{public}jd", static_cast<int64_t>(rewindTime));
     return AVSESSION_SUCCESS;
 }
 

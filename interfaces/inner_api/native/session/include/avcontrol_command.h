@@ -56,6 +56,12 @@ public:
     int32_t SetSpeed(double speed);
     int32_t GetSpeed(double& speed) const;
 
+    int32_t SetForwardTime(int64_t forwardTime);
+    int32_t GetForwardTime(int64_t& forwardTime) const;
+
+    int32_t SetRewindTime(int64_t rewindTime);
+    int32_t GetRewindTime(int64_t& rewindTime) const;
+
     int32_t SetSeekTime(int64_t time);
     int32_t GetSeekTime(int64_t& time) const;
 
