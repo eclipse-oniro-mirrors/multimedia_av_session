@@ -125,16 +125,16 @@ void NapiAVSessionCallback::OnPlayPrevious()
     HandleEvent(EVENT_PLAY_PREVIOUS);
 }
 
-void NapiAVSessionCallback::OnFastForward()
+void NapiAVSessionCallback::OnFastForward(int64_t time)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnFastForward");
-    HandleEvent(EVENT_FAST_FORWARD);
+    HandleEvent(EVENT_FAST_FORWARD, time);
 }
 
-void NapiAVSessionCallback::OnRewind()
+void NapiAVSessionCallback::OnRewind(int64_t time)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnRewind");
-    HandleEvent(EVENT_REWIND);
+    HandleEvent(EVENT_REWIND, time);
 }
 
 void NapiAVSessionCallback::OnSeek(int64_t time)

@@ -79,6 +79,9 @@ private:
     static napi_status GetNextAssetId(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetNextAssetId(napi_env env, const AVMetaData& in, napi_value& out);
 
+    static napi_status GetSkipIntervals(napi_env env, napi_value in, AVMetaData& out);
+    static napi_status SetSkipIntervals(napi_env env, const AVMetaData& in, napi_value& out);
+
     static std::map<std::string, GetterType> getterMap_;
     static std::map<int32_t, SetterType> setterMap_;
     static std::pair<std::string, int32_t> filterMap_[AVMetaData::META_KEY_MAX];

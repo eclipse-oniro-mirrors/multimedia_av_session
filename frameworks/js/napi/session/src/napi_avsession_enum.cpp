@@ -18,6 +18,7 @@
 #include "napi/native_common.h"
 #include "avcontrol_command.h"
 #include "avplayback_state.h"
+#include "avmeta_data.h"
 #include "avsession_info.h"
 #include "napi_avsession_enum.h"
 
@@ -45,6 +46,19 @@ static napi_value ExportLoopMode(napi_env env)
     (void)SetNamedProperty(env, result, "LOOP_MODE_SINGLE", AVPlaybackState::LOOP_MODE_SINGLE);
     (void)SetNamedProperty(env, result, "LOOP_MODE_LIST", AVPlaybackState::LOOP_MODE_LIST);
     (void)SetNamedProperty(env, result, "LOOP_MODE_SHUFFLE", AVPlaybackState::LOOP_MODE_SHUFFLE);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportSkipIntervals(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "SECONDS_10", AVMetaData::SECONDS_10);
+    (void)SetNamedProperty(env, result, "SECONDS_15", AVMetaData::SECONDS_15);
+    (void)SetNamedProperty(env, result, "SECONDS_30", AVMetaData::SECONDS_30);
 
     napi_object_freeze(env, result);
     return result;
@@ -95,7 +109,7 @@ static napi_value ExportDeviceType(napi_env env)
 
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_LOCAL", DeviceType::DEVICE_TYPE_LOCAL);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_TV", DeviceType::DEVICE_TYPE_TV);
-    (void)SetNamedProperty(env, result, "DEVICE_TYPE_SMART_SPEAKER", DeviceType::DEVICE_TYPE_SPEAKER);
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_SMART_SPEAKER", DeviceType::DEVICE_TYPE_SMART_SPEAKER);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_BLUETOOTH", DeviceType::DEVICE_TYPE_BLUETOOTH);
 
     napi_object_freeze(env, result);
@@ -153,6 +167,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("ConnectionState", ExportConnectionState(env)),
         DECLARE_NAPI_PROPERTY("DeviceType", ExportDeviceType(env)),
         DECLARE_NAPI_PROPERTY("LoopMode", ExportLoopMode(env)),
+        DECLARE_NAPI_PROPERTY("SkipIntervals", ExportSkipIntervals(env)),
         DECLARE_NAPI_PROPERTY("PlaybackState", ExportPlaybackState(env)),
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
     };

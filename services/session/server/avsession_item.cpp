@@ -683,7 +683,9 @@ void AVSessionItem::HandleOnFastForward(const AVControlCommand& cmd)
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnFastForward");
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnFastForward();
+    int64_t time = 0;
+    CHECK_AND_RETURN_LOG(cmd.GetForwardTime(time) == AVSESSION_SUCCESS, "GetForwardTime failed");
+    callback_->OnFastForward(time);
 }
 
 void AVSessionItem::HandleOnRewind(const AVControlCommand& cmd)
@@ -691,7 +693,9 @@ void AVSessionItem::HandleOnRewind(const AVControlCommand& cmd)
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnRewind");
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnRewind();
+    int64_t time = 0;
+    CHECK_AND_RETURN_LOG(cmd.GetRewindTime(time) == AVSESSION_SUCCESS, "GetForwardTime failed");
+    callback_->OnRewind(time);
 }
 
 void AVSessionItem::HandleOnSeek(const AVControlCommand& cmd)

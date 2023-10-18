@@ -48,7 +48,14 @@ public:
         META_KEY_LYRIC = 13,
         META_KEY_PREVIOUS_ASSET_ID = 14,
         META_KEY_NEXT_ASSET_ID = 15,
-        META_KEY_MAX = 16
+        META_KEY_SKIP_INTERVALS = 16,
+        META_KEY_MAX = 17
+    };
+
+    enum {
+        SECONDS_10 = 10,
+        SECONDS_15 = 15,
+        SECONDS_30 = 30,
     };
 
     using MetaMaskType = std::bitset<META_KEY_MAX>;
@@ -107,6 +114,9 @@ public:
     void SetNextAssetId(const std::string& assetId);
     std::string GetNextAssetId() const;
 
+    void SetSkipIntervals(int32_t skipIntervals);
+    int32_t GetSkipIntervals() const;
+
     void Reset();
 
     MetaMaskType GetMetaMask() const;
@@ -133,6 +143,7 @@ public:
         META_KEY_LYRIC,
         META_KEY_PREVIOUS_ASSET_ID,
         META_KEY_NEXT_ASSET_ID,
+        META_KEY_SKIP_INTERVALS
     };
 
 private:
@@ -154,6 +165,7 @@ private:
     std::string lyric_ = "";
     std::string previousAssetId_ = "";
     std::string nextAssetId_ = "";
+    int32_t skipIntervals_ = SECONDS_15;
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneTitle(const AVMetaData& from, AVMetaData& to);
@@ -171,6 +183,7 @@ private:
     static void CloneLyric(const AVMetaData& from, AVMetaData& to);
     static void ClonePreviousAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneNextAssetId(const AVMetaData& from, AVMetaData& to);
+    static void CloneSkipIntervals(const AVMetaData& from, AVMetaData& to);
 
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
@@ -190,6 +203,7 @@ private:
         &AVMetaData::CloneLyric,
         &AVMetaData::ClonePreviousAssetId,
         &AVMetaData::CloneNextAssetId,
+        &AVMetaData::CloneSkipIntervals
     };
 };
 } // namespace OHOS::AVSession

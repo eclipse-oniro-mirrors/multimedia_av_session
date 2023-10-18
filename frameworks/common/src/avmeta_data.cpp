@@ -35,6 +35,7 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(lyric_) &&
         parcel.WriteString(previousAssetId_) &&
         parcel.WriteString(nextAssetId_) &&
+        parcel.WriteInt32(skipIntervals_) &&
         parcel.WriteParcelable(mediaImage_.get());
 }
 
@@ -61,7 +62,8 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
         !data.ReadString(result->description_) ||
         !data.ReadString(result->lyric_) ||
         !data.ReadString(result->previousAssetId_) ||
-        !data.ReadString(result->nextAssetId_)) {
+        !data.ReadString(result->nextAssetId_) ||
+        !data.ReadInt32(result->skipIntervals_)) {
         SLOGE("read AVMetaData failed");
         delete result;
         return nullptr;
@@ -257,6 +259,19 @@ std::string AVMetaData::GetNextAssetId() const
     return nextAssetId_;
 }
 
+void AVMetaData::SetSkipIntervals(int32_t skipIntervals)
+{
+    SLOGD("SetSkipIntervals %{public}d", static_cast<int32_t>(skipIntervals));
+    skipIntervals_ = skipIntervals;
+    metaMask_.set(META_KEY_SKIP_INTERVALS);
+}
+
+int32_t AVMetaData::GetSkipIntervals() const
+{
+    SLOGD("GetSkipIntervals %{public}d", static_cast<int32_t>(skipIntervals_));
+    return skipIntervals_;
+}
+
 AVMetaData::MetaMaskType AVMetaData::GetMetaMask() const
 {
     return metaMask_;
@@ -406,5 +421,9 @@ void AVMetaData::ClonePreviousAssetId(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneNextAssetId(const AVMetaData& from, AVMetaData& to)
 {
     to.nextAssetId_ = from.nextAssetId_;
+}
+void AVMetaData::CloneSkipIntervals(const AVMetaData& from, AVMetaData& to)
+{
+    to.skipIntervals_ = from.skipIntervals_;
 }
 } // namespace OHOS::AVSession

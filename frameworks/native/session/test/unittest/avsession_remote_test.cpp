@@ -179,8 +179,8 @@ public:
     void OnStop() override;
     void OnPlayNext() override;
     void OnPlayPrevious() override;
-    void OnFastForward() override;
-    void OnRewind() override;
+    void OnFastForward(int64_t time) override;
+    void OnRewind(int64_t time) override;
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
@@ -218,12 +218,12 @@ void AVSessionCastAudioCallbackImpl::OnPlayPrevious()
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlayPrevious %{public}d", g_onCall);
 }
-void AVSessionCastAudioCallbackImpl::OnFastForward()
+void AVSessionCastAudioCallbackImpl::OnFastForward(int64_t time)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnFastForward %{public}d", g_onCall);
 }
-void AVSessionCastAudioCallbackImpl::OnRewind()
+void AVSessionCastAudioCallbackImpl::OnRewind(int64_t time)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnRewind %{public}d", g_onCall);
