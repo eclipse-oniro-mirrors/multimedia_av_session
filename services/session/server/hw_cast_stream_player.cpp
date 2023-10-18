@@ -561,4 +561,32 @@ void HwCastStreamPlayer::OnEndOfStream(int isLooping)
         }
     }
 }
+
+void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
+{
+    SLOGD("Stream player received PlayRequest event");
+    std::shared_ptr<AVMediaDescription> mediaDescription = std::make_shared<AVMediaDescription>();
+    mediaDescription->SetMediaId(mediaInfo.mediaId);
+    mediaDescription->SetTitle(mediaInfo.mediaName);
+    mediaDescription->SetMediaUri(mediaInfo.mediaUrl);
+    mediaDescription->SetMediaType(mediaInfo.mediaType);
+    mediaDescription->SetMediaSize(mediaInfo.mediaSize);
+    mediaDescription->SetStartPosition(static_cast<uint32_t>(mediaInfo.startPosition));
+    mediaDescription->SetDuration(static_cast<uint32_t>(mediaInfo.duration));
+    mediaDescription->SetCreditsPosition(static_cast<int32_t>(mediaInfo.closingCreditsPosition));
+    mediaDescription->SetAlbumCoverUri(mediaInfo.albumCoverUrl);
+    mediaDescription->SetAlbumTitle(mediaInfo.albumTitle);
+    mediaDescription->SetArtist(mediaInfo.mediaArtist);
+    mediaDescription->SetLyricUri(mediaInfo.lrcUrl);
+    mediaDescription->SetIconUri(mediaInfo.appIconUrl);
+    mediaDescription->SetAppName(mediaInfo.appName);
+    AVQueueItem queueItem;
+    queueItem.SetDescription(mediaDescription);
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnPlayRequest for registered listeners");
+        }
+    }
+    std::lock_guard lockGuard(streamPlayerLock_);
+}
 } // namespace OHOS::AVSession

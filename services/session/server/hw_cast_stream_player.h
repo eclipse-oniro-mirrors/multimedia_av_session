@@ -53,6 +53,7 @@ public:
     void OnSeekDone(int32_t seekNumber) override;
     void OnVideoSizeChanged(int width, int height) override;
     void OnEndOfStream(int isLooping) override;
+    void OnPlayRequest(const CastEngine::MediaInfo &mediaInfo) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
