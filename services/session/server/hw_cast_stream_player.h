@@ -73,6 +73,7 @@ private:
         {CastEngine::PlayerStates::PLAYER_STOPPED, AVPlaybackState::PLAYBACK_STATE_STOP},
         {CastEngine::PlayerStates::PLAYER_PLAYBACK_COMPLETE, AVPlaybackState::PLAYBACK_STATE_COMPLETED},
         {CastEngine::PlayerStates::PLAYER_RELEASED, AVPlaybackState::PLAYBACK_STATE_RELEASED},
+        {CastEngine::PlayerStates::PLAYER_BUFFERING, AVPlaybackState::PLAYBACK_STATE_PREPARE}
     };
     std::map<CastEngine::PlaybackSpeed, double> castPlusSpeedToDouble_ = {
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_0_75_X, 0.75},
