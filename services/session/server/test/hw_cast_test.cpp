@@ -619,7 +619,23 @@ public:
     {
         return 0;
     };
+
+    int FastForward(const int32_t delta) override
+    {
+        return 0;
+    };
+
+    int FastRewind(const int32_t delta) override
+    {
+        return 0;
+    };
+
     int SetVolume(const int32_t volume) override
+    {
+        return 0;
+    };
+
+    int SetMute(bool mute) override
     {
         return 0;
     };
@@ -693,6 +709,11 @@ public:
     };
 
     int GetVolume(int32_t &volume) override
+    {
+        return 0;
+    };
+
+    int GetMute(bool &mute) override
     {
         return 0;
     };

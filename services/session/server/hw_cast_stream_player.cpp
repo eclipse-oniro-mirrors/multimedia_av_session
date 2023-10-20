@@ -84,20 +84,17 @@ void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castContr
 
 void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand castControlCommand)
 {
-    int32_t currentPosition = 0;
     std::lock_guard lockGuard(streamPlayerLock_);
     switch (castControlCommand.GetCommand()) {
         case AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD:
-            streamPlayer_->GetPosition(currentPosition);
             int32_t forwardTime;
             castControlCommand.GetForwardTime(forwardTime);
-            streamPlayer_->Seek(currentPosition + forwardTime);
+            streamPlayer_->FastForward(forwardTime);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_REWIND:
-            streamPlayer_->GetPosition(currentPosition);
             int32_t rewindTime;
             castControlCommand.GetRewindTime(rewindTime);
-            streamPlayer_->Seek(rewindTime > currentPosition ? 0 : currentPosition - rewindTime);
+            streamPlayer_->FastRewind(rewindTime);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SEEK:
             int32_t seekTime;
