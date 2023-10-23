@@ -28,6 +28,7 @@ group("avsession_server") {
 }
 
 ohos_shared_library("avsession_service") {
+  stack_protector_ret = true
   install_enable = true
   sanitize = {
     cfi = true
