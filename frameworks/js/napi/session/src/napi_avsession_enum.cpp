@@ -159,6 +159,17 @@ static napi_value ExportAVSessionErrorCode(napi_env env)
     return result;
 }
 
+static napi_value ExportDisplayTag(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "AUDIO_VIVID", AVMetaData::DISPLAY_TAG_AUDIO_VIVID);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -170,6 +181,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("SkipIntervals", ExportSkipIntervals(env)),
         DECLARE_NAPI_PROPERTY("PlaybackState", ExportPlaybackState(env)),
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
+        DECLARE_NAPI_PROPERTY("DisplayTag", ExportDisplayTag(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
