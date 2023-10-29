@@ -36,6 +36,7 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(previousAssetId_) &&
         parcel.WriteString(nextAssetId_) &&
         parcel.WriteInt32(skipIntervals_) &&
+        parcel.WriteInt32(displayTags_) &&
         parcel.WriteParcelable(mediaImage_.get());
 }
 
@@ -63,7 +64,8 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
         !data.ReadString(result->lyric_) ||
         !data.ReadString(result->previousAssetId_) ||
         !data.ReadString(result->nextAssetId_) ||
-        !data.ReadInt32(result->skipIntervals_)) {
+        !data.ReadInt32(result->skipIntervals_) ||
+        !data.ReadInt32(result->displayTags_)) {
         SLOGE("read AVMetaData failed");
         delete result;
         return nullptr;
@@ -272,6 +274,19 @@ int32_t AVMetaData::GetSkipIntervals() const
     return skipIntervals_;
 }
 
+void AVMetaData::SetDisplayTags(int32_t displayTags)
+{
+    SLOGD("SetDisplayTags %{public}d", static_cast<int32_t>(displayTags));
+    displayTags_ = displayTags;
+    metaMask_.set(META_KEY_DISPLAY_TAGS);
+}
+
+int32_t AVMetaData::GetDisplayTags() const
+{
+    SLOGD("GetDisplayTags %{public}d", static_cast<int32_t>(displayTags_));
+    return displayTags_;
+}
+
 AVMetaData::MetaMaskType AVMetaData::GetMetaMask() const
 {
     return metaMask_;
@@ -296,6 +311,7 @@ void AVMetaData::Reset()
     lyric_ = "";
     previousAssetId_ = "";
     nextAssetId_ = "";
+    displayTags_ = 0;
 }
 
 bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
@@ -340,7 +356,8 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
 
 bool AVMetaData::IsValid() const
 {
-    return duration_ >= AVMetaData::DURATION_ALWAYS_PLAY && publishDate_ >= 0;
+    return duration_ >= AVMetaData::DURATION_ALWAYS_PLAY && publishDate_ >= 0
+        && displayTags_ <= AVMetaData::DISPLAY_TAG_ALL && displayTags_ != 0;
 }
 
 void AVMetaData::CloneAssetId(const AVMetaData& from, AVMetaData& to)
@@ -425,5 +442,9 @@ void AVMetaData::CloneNextAssetId(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneSkipIntervals(const AVMetaData& from, AVMetaData& to)
 {
     to.skipIntervals_ = from.skipIntervals_;
+}
+void AVMetaData::CloneDisplayTags(const AVMetaData& from, AVMetaData& to)
+{
+    to.displayTags_ = from.displayTags_;
 }
 } // namespace OHOS::AVSession
