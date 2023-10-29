@@ -49,13 +49,20 @@ public:
         META_KEY_PREVIOUS_ASSET_ID = 14,
         META_KEY_NEXT_ASSET_ID = 15,
         META_KEY_SKIP_INTERVALS = 16,
-        META_KEY_MAX = 17
+        META_KEY_DISPLAY_TAGS = 17,
+        META_KEY_MAX = 18
     };
 
     enum {
         SECONDS_10 = 10,
         SECONDS_15 = 15,
         SECONDS_30 = 30,
+    };
+
+    enum {
+        DISPLAY_TAG_AUDIO_VIVID = 1,
+        // indicate all supported sound source for gold flag, you should make OR operation if add new options
+        DISPLAY_TAG_ALL = DISPLAY_TAG_AUDIO_VIVID
     };
 
     using MetaMaskType = std::bitset<META_KEY_MAX>;
@@ -117,6 +124,9 @@ public:
     void SetSkipIntervals(int32_t skipIntervals);
     int32_t GetSkipIntervals() const;
 
+    void SetDisplayTags(int32_t displayTags);
+    int32_t GetDisplayTags() const;
+
     void Reset();
 
     MetaMaskType GetMetaMask() const;
@@ -143,7 +153,8 @@ public:
         META_KEY_LYRIC,
         META_KEY_PREVIOUS_ASSET_ID,
         META_KEY_NEXT_ASSET_ID,
-        META_KEY_SKIP_INTERVALS
+        META_KEY_SKIP_INTERVALS,
+        META_KEY_DISPLAY_TAGS
     };
 
 private:
@@ -166,6 +177,7 @@ private:
     std::string previousAssetId_ = "";
     std::string nextAssetId_ = "";
     int32_t skipIntervals_ = SECONDS_15;
+    int32_t displayTags_ = 0;
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneTitle(const AVMetaData& from, AVMetaData& to);
@@ -184,6 +196,7 @@ private:
     static void ClonePreviousAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneNextAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneSkipIntervals(const AVMetaData& from, AVMetaData& to);
+    static void CloneDisplayTags(const AVMetaData& from, AVMetaData& to);
 
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
@@ -203,7 +216,8 @@ private:
         &AVMetaData::CloneLyric,
         &AVMetaData::ClonePreviousAssetId,
         &AVMetaData::CloneNextAssetId,
-        &AVMetaData::CloneSkipIntervals
+        &AVMetaData::CloneSkipIntervals,
+        &AVMetaData::CloneDisplayTags
     };
 };
 } // namespace OHOS::AVSession
