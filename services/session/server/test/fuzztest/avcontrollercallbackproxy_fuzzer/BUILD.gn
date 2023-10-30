@@ -14,7 +14,7 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
-module_output_path = "multimedia_av_session/sessionfuzzer"
+module_output_path = "av_session/av_session"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("AVControllerCallbackProxyFuzzTest") {
