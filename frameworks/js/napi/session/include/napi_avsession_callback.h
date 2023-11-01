@@ -42,6 +42,9 @@ public:
         EVENT_OUTPUT_DEVICE_CHANGE,
         EVENT_SEND_COMMON_COMMAND,
         EVENT_SKIP_TO_QUEUE_ITEM,
+        EVENT_AVCALL_ANSWER,
+        EVENT_AVCALL_HANG_UP,
+        EVENT_AVCALL_TOGGLE_CALL_MUTE,
         EVENT_TYPE_MAX
     };
 
@@ -63,6 +66,9 @@ public:
     void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
+    void OnAVCallAnswer() override;
+    void OnAVCallHangUp() override;
+    void OnAVCallToggleCallMute() override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

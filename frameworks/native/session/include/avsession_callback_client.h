@@ -27,6 +27,9 @@ public:
     explicit AVSessionCallbackClient(const std::shared_ptr<AVSessionCallback>& callback);
     ~AVSessionCallbackClient();
 
+    void OnAVCallAnswer() override;
+    void OnAVCallHangUp() override;
+    void OnAVCallToggleCallMute() override;
     void OnPlay() override;
     void OnPause() override;
     void OnStop() override;

@@ -107,6 +107,19 @@ int32_t AVSessionItem::Destroy()
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionItem::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
+{
+    CHECK_AND_RETURN_RET_LOG(avCallMetaData_.CopyFrom(avCallMetaData), AVSESSION_ERROR, "AVCallMetaData set error");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SetAVCallState(const AVCallState& avCallState)
+{
+    CHECK_AND_RETURN_RET_LOG(avCallState_.CopyFrom(avCallState), AVSESSION_ERROR, "AVCallState set error");
+    return AVSESSION_SUCCESS;
+}
+
+
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
     std::string sessionId = GetSessionId();

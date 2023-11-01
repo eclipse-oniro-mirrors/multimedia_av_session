@@ -128,6 +128,48 @@ int32_t AVSessionProxy::Destroy()
     return ret;
 }
 
+int32_t AVSessionProxy::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVCallMetaData");
+    CHECK_AND_RETURN_RET_LOG(avCallMetaData.IsValid(), ERR_INVALID_PARAM, "invalid call meta data");
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&avCallMetaData),
+        ERR_MARSHALLING, "WriteParcelable failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_AVCALL_META_DATA, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionProxy::SetAVCallState(const AVCallState& avCallState)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVCallState");
+    CHECK_AND_RETURN_RET_LOG(avCallState.IsValid(), ERR_INVALID_PARAM, "av call state not valid");
+    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&avCallState),
+        ERR_MARSHALLING, "Write state failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_AVCALL_STATE, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
 int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVMetaData");

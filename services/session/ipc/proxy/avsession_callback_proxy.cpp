@@ -23,6 +23,45 @@ AVSessionCallbackProxy::AVSessionCallbackProxy(const sptr<IRemoteObject>& impl)
     SLOGD("construct");
 }
 
+void AVSessionCallbackProxy::OnAVCallAnswer()
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_AVCALL_ANSWER, data, reply, option) == 0,
+        "send request failed");
+}
+
+void AVSessionCallbackProxy::OnAVCallHangUp()
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_AVCALL_HANGUP, data, reply, option) == 0,
+        "send request failed");
+}
+
+void AVSessionCallbackProxy::OnAVCallToggleCallMute()
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_AVCALL_TOGGLE_CALL_MUTE, data, reply, option) == 0,
+        "send request failed");
+}
+
 void AVSessionCallbackProxy::OnPlay()
 {
     MessageParcel data;
