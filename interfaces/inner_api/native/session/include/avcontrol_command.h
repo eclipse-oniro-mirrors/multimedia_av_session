@@ -39,7 +39,10 @@ public:
         SESSION_CMD_SET_SPEED = 8,
         SESSION_CMD_SET_LOOP_MODE = 9,
         SESSION_CMD_TOGGLE_FAVORITE = 10,
-        SESSION_CMD_MAX = 11
+        SESSION_CMD_AVCALL_ANSWER = 11,
+        SESSION_CMD_AVCALL_HANG_UP = 12,
+        SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE = 13,
+        SESSION_CMD_MAX = 14
     };
 
     AVControlCommand();
@@ -71,6 +74,9 @@ public:
     int32_t SetAssetId(const std::string& assetId);
     int32_t GetAssetId(std::string& assetId) const;
 
+    int32_t SetAVCallMuted(const bool isAVCallMuted);
+    int32_t IsAVCallMuted(bool& isAVCallMuted) const;
+
     const static inline std::vector<int32_t> localCapability {
         SESSION_CMD_PLAY,
         SESSION_CMD_PAUSE,
@@ -83,11 +89,14 @@ public:
         SESSION_CMD_SET_SPEED,
         SESSION_CMD_SET_LOOP_MODE,
         SESSION_CMD_TOGGLE_FAVORITE,
+        SESSION_CMD_AVCALL_ANSWER,
+        SESSION_CMD_AVCALL_HANG_UP,
+        SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE,
     };
 
 private:
     int32_t cmd_ = SESSION_CMD_INVALID;
-    std::variant<int32_t, double, int64_t, std::string> param_;
+    std::variant<int32_t, double, int64_t, bool, std::string> param_;
 };
 }
 #endif // OHOS_AVCONTROL_COMMAND_H

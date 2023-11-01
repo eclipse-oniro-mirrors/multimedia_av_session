@@ -53,6 +53,9 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
             case SESSION_CMD_TOGGLE_FAVORITE:
                 result->SetAssetId(data.ReadString());
                 break;
+            case SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE:
+                result->SetAVCallMuted(data.ReadBool());
+                break;
             default:
                 break;
         }
@@ -228,6 +231,21 @@ int32_t AVControlCommand::GetAssetId(std::string& assetId) const
         return AVSESSION_ERROR;
     }
     assetId = std::get<std::string>(param_);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::SetAVCallMuted(const bool isAVCallMuted)
+{
+    param_ = isAVCallMuted;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::IsAVCallMuted(bool& isAVCallMuted) const
+{
+    if (!std::holds_alternative<bool>(param_)) {
+        return AVSESSION_ERROR;
+    }
+    isAVCallMuted = std::get<bool>(param_);
     return AVSESSION_SUCCESS;
 }
 } // namespace OHOS::AVSession
