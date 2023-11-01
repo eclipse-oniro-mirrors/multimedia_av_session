@@ -32,6 +32,8 @@ ohos_shared_library("avsession_napi") {
   sources = [
     "src/napi_async_callback.cpp",
     "src/napi_async_work.cpp",
+    "src/napi_avcall_meta_data.cpp",
+    "src/napi_avcall_state.cpp",
     "src/napi_avcontroller_callback.cpp",
     "src/napi_avsession.cpp",
     "src/napi_avsession_callback.cpp",
