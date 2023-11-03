@@ -38,7 +38,8 @@ public:
     enum {
         SESSION_TYPE_INVALID = -1,
         SESSION_TYPE_AUDIO = 0,
-        SESSION_TYPE_VIDEO = 1
+        SESSION_TYPE_VIDEO = 1,
+        SESSION_TYPE_VOICE_CALL = 2
     };
 
     /**

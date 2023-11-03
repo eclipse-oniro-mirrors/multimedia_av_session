@@ -32,6 +32,9 @@ std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlComm
     { "setSpeed", { GetSpeed, SetSpeed, AVControlCommand::SESSION_CMD_SET_SPEED } },
     { "setLoopMode", { GetLoopMode, SetLoopMode, AVControlCommand::SESSION_CMD_SET_LOOP_MODE } },
     { "toggleFavorite", { GetAssetId, SetAssetId, AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE } },
+    { "answer", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_ANSWER } },
+    { "hangUp", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_HANG_UP } },
+    { "toggleCallMute", { IsAVCallMuted, SetAVCallMuted, AVControlCommand::SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE } },
 };
 
 int32_t NapiControlCommand::ConvertCommand(const std::string& cmd)
@@ -302,6 +305,38 @@ napi_status NapiControlCommand::SetAssetId(napi_env env, AVControlCommand& in, n
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, assetId, property);
+    if (status != napi_ok) {
+        SLOGE("create speed property failed");
+        return status;
+    }
+
+    status = napi_set_named_property(env, out, "parameter", property);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "set parameter property failed");
+    return status;
+}
+
+napi_status NapiControlCommand::IsAVCallMuted(napi_env env, napi_value in, AVControlCommand& out)
+{
+    bool isAVCallMuted;
+    auto status = NapiUtils::GetNamedProperty(env, in, "parameter", isAVCallMuted);
+    if (status != napi_ok) {
+        SLOGE("get parameter failed");
+        return status;
+    }
+
+    CHECK_AND_RETURN_RET_LOG(out.SetAVCallMuted(isAVCallMuted) == AVSESSION_SUCCESS,
+        napi_invalid_arg, "set parameter failed");
+    return status;
+}
+
+napi_status NapiControlCommand::SetAVCallMuted(napi_env env, AVControlCommand& in, napi_value& out)
+{
+    bool isAVCallMuted;
+    CHECK_AND_RETURN_RET_LOG(in.IsAVCallMuted(isAVCallMuted) == AVSESSION_SUCCESS,
+        napi_invalid_arg, "get parameter failed");
+
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, isAVCallMuted, property);
     if (status != napi_ok) {
         SLOGE("create speed property failed");
         return status;

@@ -17,6 +17,7 @@
 
 #include "napi/native_common.h"
 #include "avcontrol_command.h"
+#include "avcall_state.h"
 #include "avplayback_state.h"
 #include "avmeta_data.h"
 #include "avsession_info.h"
@@ -136,6 +137,23 @@ static napi_value ExportPlaybackState(napi_env env)
     return result;
 }
 
+static napi_value ExportAVCallState(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "CALL_STATE_IDLE", AVCallState::AVCALL_STATE_IDLE);
+    (void)SetNamedProperty(env, result, "CALL_STATE_INCOMING", AVCallState::AVCALL_STATE_INCOMING);
+    (void)SetNamedProperty(env, result, "CALL_STATE_ACTIVE", AVCallState::AVCALL_STATE_ACTIVE);
+    (void)SetNamedProperty(env, result, "AVCALL_STATE_DIALING", AVCallState::AVCALL_STATE_DIALING);
+    (void)SetNamedProperty(env, result, "AVCALL_STATE_WAITING", AVCallState::AVCALL_STATE_WAITING);
+    (void)SetNamedProperty(env, result, "AVCALL_STATE_HOLDING", AVCallState::AVCALL_STATE_HOLDING);
+    (void)SetNamedProperty(env, result, "AVCALL_STATE_DISCONNECTING", AVCallState::AVCALL_STATE_DISCONNECTING);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 static napi_value ExportAVSessionErrorCode(napi_env env)
 {
     napi_value result = nullptr;
@@ -180,6 +198,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("LoopMode", ExportLoopMode(env)),
         DECLARE_NAPI_PROPERTY("SkipIntervals", ExportSkipIntervals(env)),
         DECLARE_NAPI_PROPERTY("PlaybackState", ExportPlaybackState(env)),
+        DECLARE_NAPI_PROPERTY("CallState", ExportAVCallState(env)),
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
         DECLARE_NAPI_PROPERTY("DisplayTag", ExportDisplayTag(env)),
     };
