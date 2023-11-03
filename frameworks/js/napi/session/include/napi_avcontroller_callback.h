@@ -37,12 +37,16 @@ public:
         EVENT_QUEUE_ITEMS_CHANGE,
         EVENT_QUEUE_TITLE_CHANGE,
         EVENT_EXTRAS_CHANGE,
+        EVENT_AVCALL_META_DATA_CHANGE,
+        EVENT_AVCALL_STATE_CHANGE,
         EVENT_TYPE_MAX,
     };
 
     NapiAVControllerCallback();
     ~NapiAVControllerCallback() override;
 
+    void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) override;
+    void OnAVCallStateChange(const AVCallState& avCallState) override;
     void OnSessionDestroy() override;
     void OnPlaybackStateChange(const AVPlaybackState& state) override;
     void OnMetaDataChange(const AVMetaData& data) override;

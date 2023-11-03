@@ -66,6 +66,10 @@ private:
 
     int32_t HandleGetValidCommands(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleSetAVCallMetaFilter(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleSetAVCallStateFilter(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleSetMetaFilter(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleSetPlaybackFilter(MessageParcel& data, MessageParcel& reply);
@@ -87,6 +91,8 @@ private:
         &AVSessionControllerStub::HandleGetValidCommands,
         &AVSessionControllerStub::HandleSendControlCommand,
         &AVSessionControllerStub::HandleSendCommonCommand,
+        &AVSessionControllerStub::HandleSetAVCallMetaFilter,
+        &AVSessionControllerStub::HandleSetAVCallStateFilter,
         &AVSessionControllerStub::HandleSetMetaFilter,
         &AVSessionControllerStub::HandleSetPlaybackFilter,
         &AVSessionControllerStub::HandleIsSessionActive,

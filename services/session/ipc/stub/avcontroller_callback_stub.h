@@ -28,6 +28,10 @@ private:
 
     int32_t HandleOnSessionDestroy(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnAVCallMetadataChange(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleOnAVCallStateChange(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleOnPlaybackStateChange(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnMetadataChange(MessageParcel& data, MessageParcel& reply);
@@ -51,6 +55,8 @@ private:
     using HandlerFunc = int32_t (AVControllerCallbackStub::*)(MessageParcel& data, MessageParcel& reply);
     static inline HandlerFunc handlers[] = {
         &AVControllerCallbackStub::HandleOnSessionDestroy,
+        &AVControllerCallbackStub::HandleOnAVCallMetadataChange,
+        &AVControllerCallbackStub::HandleOnAVCallStateChange,
         &AVControllerCallbackStub::HandleOnPlaybackStateChange,
         &AVControllerCallbackStub::HandleOnMetadataChange,
         &AVControllerCallbackStub::HandleOnActiveStateChange,

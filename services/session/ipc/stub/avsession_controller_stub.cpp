@@ -196,6 +196,40 @@ int32_t AVSessionControllerStub::HandleGetValidCommands(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
+int32_t AVSessionControllerStub::HandleSetAVCallMetaFilter(MessageParcel& data, MessageParcel& reply)
+{
+    std::string str = data.ReadString();
+    if (str.length() != AVCallMetaData::AVCALL_META_KEY_MAX) {
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SetAVCallMetaFilter ret failed");
+        return ERR_NONE;
+    }
+    if (str.find_first_not_of("01") != std::string::npos) {
+        SLOGI("mask string not 0 or 1");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write int32 failed");
+        return ERR_NONE;
+    }
+    AVCallMetaData::AVCallMetaMaskType filter(str);
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(SetAVCallMetaFilter(filter)), "write int32 failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleSetAVCallStateFilter(MessageParcel& data, MessageParcel& reply)
+{
+    std::string str = data.ReadString();
+    if (str.length() != AVCallState::AVCALL_STATE_KEY_MAX) {
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SetAVCallStateFilter ret failed");
+        return ERR_NONE;
+    }
+    if (str.find_first_not_of("01") != std::string::npos) {
+        SLOGI("mask string not all 0 or 1");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write int32 failed");
+        return ERR_NONE;
+    }
+    AVCallState::AVCallStateMaskType filter(str);
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(SetAVCallStateFilter(filter)), "write int32 failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionControllerStub::HandleSetMetaFilter(MessageParcel& data, MessageParcel& reply)
 {
     std::string str = data.ReadString();

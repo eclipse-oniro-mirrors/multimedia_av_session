@@ -76,7 +76,7 @@ public:
     int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
 
     int32_t SetAVQueueItems(const std::vector<AVQueueItem>& items) override;
-    
+
     int32_t GetAVQueueTitle(std::string& title) override;
 
     int32_t SetAVQueueTitle(const std::string& title) override;
@@ -104,6 +104,10 @@ public:
     AVSessionDescriptor GetDescriptor();
 
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
+
+    AVCallState GetAVCallState();
+
+    AVCallMetaData GetAVCallMetaData();
 
     AVPlaybackState GetPlaybackState();
 

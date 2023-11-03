@@ -37,6 +37,10 @@ constexpr int32_t MIN_SIZE_NUM  = 4;
 class TestAVControllerCallback : public AVControllerCallback {
     void OnSessionDestroy() override;
 
+    void OnAVCallStateChange(const AVCallState& avCallState) override {};
+
+    void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) override {};
+
     void OnPlaybackStateChange(const AVPlaybackState& state) override;
 
     void OnMetaDataChange(const AVMetaData& data) override;

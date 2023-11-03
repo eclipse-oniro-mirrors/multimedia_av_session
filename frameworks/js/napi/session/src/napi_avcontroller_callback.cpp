@@ -106,6 +106,18 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
     }
 }
 
+void NapiAVControllerCallback::OnAVCallStateChange(const AVCallState& avCallState)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnAVCallStateChange");
+    HandleEvent(EVENT_AVCALL_STATE_CHANGE, avCallState);
+}
+
+void NapiAVControllerCallback::OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnAVCallMetaDataChange");
+    HandleEvent(EVENT_AVCALL_META_DATA_CHANGE, avCallMetaData);
+}
+
 void NapiAVControllerCallback::OnSessionDestroy()
 {
     HandleEvent(EVENT_SESSION_DESTROY);

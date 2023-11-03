@@ -120,6 +120,10 @@ class AVControllerCallbackImpl : public AVControllerCallback {
 public:
     void OnSessionDestroy() override;
 
+    void OnAVCallStateChange(const AVCallState& avCallState) override {};
+
+    void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) override {};
+
     void OnPlaybackStateChange(const AVPlaybackState& state) override;
 
     void OnMetaDataChange(const AVMetaData& data) override;
@@ -191,6 +195,10 @@ bool IsAVPlaybackStateEqual(AVPlaybackState& state1,  AVPlaybackState& state2)
 
 class AVSessionControllerStubTest : public AVSessionControllerStub {
 public:
+    int32_t GetAVCallState(AVCallState& avCallState) override;
+    int32_t GetAVCallMetaData(AVCallMetaData& avCallMetaData) override;
+    int32_t SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter) override;
+    int32_t SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter) override;
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
     int32_t GetAVMetaData(AVMetaData& data) override;
     int32_t SendAVKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
@@ -209,6 +217,23 @@ public:
     std::string GetSessionId() override;
     int32_t RegisterCallbackInner(const OHOS::sptr<IRemoteObject>& callback) override;
 };
+
+int32_t AVSessionControllerStubTest::GetAVCallState(AVCallState& avCallState)
+{
+    return 0;
+}
+int32_t AVSessionControllerStubTest::GetAVCallMetaData(AVCallMetaData& avCallMetaData)
+{
+    return 0;
+}
+int32_t AVSessionControllerStubTest::SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter)
+{
+    return 0;
+}
+int32_t AVSessionControllerStubTest::SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter)
+{
+    return 0;
+}
 
 int32_t AVSessionControllerStubTest::GetAVPlaybackState(AVPlaybackState& state)
 {

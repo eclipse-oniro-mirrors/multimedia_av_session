@@ -30,8 +30,10 @@ bool AVCallState::Marshalling(Parcel& parcel) const
 AVCallState *AVCallState::Unmarshalling(Parcel& parcel)
 {
     std::string mask;
-    CHECK_AND_RETURN_RET_LOG(parcel.ReadString(mask) && mask.length() == AVCALL_KEY_MAX, nullptr, "mask not valid");
-    CHECK_AND_RETURN_RET_LOG(mask.find_first_not_of("01") == std::string::npos, nullptr, "mask string not 0 or 1");
+    CHECK_AND_RETURN_RET_LOG(parcel.ReadString(mask) && mask.length() == AVCALL_STATE_KEY_MAX,
+        nullptr, "mask not valid");
+    CHECK_AND_RETURN_RET_LOG(mask.find_first_not_of("01") == std::string::npos,
+        nullptr, "mask string not 0 or 1");
 
     auto *result = new (std::nothrow) AVCallState();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVCallState failed");
@@ -52,7 +54,7 @@ bool AVCallState::IsValid() const
 
 void AVCallState::SetAVCallState(int32_t avCallState)
 {
-    mask_.set(AVCALL_KEY_STATE);
+    mask_.set(AVCALL_STATE_KEY_STATE);
     avCallState_ = avCallState;
 }
 
@@ -63,7 +65,7 @@ int32_t AVCallState::GetAVCallState() const
 
 void AVCallState::SetAVCallMuted(bool isAVCallMuted)
 {
-    mask_.set(AVCALL_KEY_IS_MUTED);
+    mask_.set(AVCALL_STATE_KEY_IS_MUTED);
     isAVCallMuted_ = isAVCallMuted;
 }
 
@@ -94,7 +96,7 @@ bool AVCallState::CopyToByMask(AVCallStateMaskType& mask, AVCallState& out) cons
 bool AVCallState::CopyFrom(const AVCallState& in)
 {
     bool result = false;
-    for (int i = 0; i < AVCALL_KEY_MAX; i++) {
+    for (int i = 0; i < AVCALL_STATE_KEY_MAX; i++) {
         if (in.mask_.test(i)) {
             cloneActions[i](in, *this);
             mask_.set(i);

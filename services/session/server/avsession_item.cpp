@@ -70,6 +70,9 @@ std::string AVSessionItem::GetSessionType()
     if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
         return "video";
     }
+    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
+        return "voice_call";
+    }
     return "audio";
 }
 
@@ -548,6 +551,21 @@ AVSessionDescriptor AVSessionItem::GetDescriptor()
 {
     return descriptor_;
 }
+
+AVCallState AVSessionItem::GetAVCallState()
+{
+    return avCallState_;
+}
+
+AVCallMetaData AVSessionItem::GetAVCallMetaData()
+{
+    std::string sessionId = GetSessionId();
+    std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+    AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
+    return avCallMetaData_;
+}
+
 
 AVPlaybackState AVSessionItem::GetPlaybackState()
 {
