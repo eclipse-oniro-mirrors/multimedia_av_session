@@ -27,6 +27,8 @@ ohos_shared_library("avsession_common") {
   }
   sources = [
     "src/av_file_descriptor.cpp",
+    "src/avcall_meta_data.cpp",
+    "src/avcall_state.cpp",
     "src/avcast_control_command.cpp",
     "src/avcast_player_state.cpp",
     "src/avcontrol_command.cpp",
