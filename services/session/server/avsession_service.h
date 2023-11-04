@@ -127,6 +127,8 @@ public:
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
     int32_t StopCast(const SessionToken& sessionToken) override;
+
+    int32_t checkEnableCast(bool enable) override;
 #endif
 
     int32_t Close(void) override;
@@ -295,6 +297,7 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+    bool isInCast_ = false;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
@@ -308,6 +311,7 @@ private:
     int32_t pressCount_ {};
     int32_t maxHistoryNums = 10;
     bool isFirstPress_ = true;
+    bool isSourceInCast_ = false;
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;

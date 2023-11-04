@@ -82,6 +82,11 @@ public:
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
     int32_t StopCast(const SessionToken& sessionToken) override;
+
+    int32_t checkEnableCast(bool enable) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 #endif
 
     int32_t Close(void) override;

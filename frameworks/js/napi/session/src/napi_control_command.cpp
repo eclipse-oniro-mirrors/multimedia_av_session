@@ -17,6 +17,7 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "napi_utils.h"
+#include "avmeta_data.h"
 
 namespace OHOS::AVSession {
 std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlCommand::SetterType, int32_t>>
@@ -167,8 +168,9 @@ napi_status NapiControlCommand::GetForwardTime(napi_env env, napi_value in, AVCo
     int64_t time {};
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", time);
     if (status != napi_ok) {
-        SLOGE("get ForwardTime parameter failed");
-        return status;
+        SLOGI("get ForwardTime parameter failed but set default");
+        time = AVMetaData::SECONDS_15;
+        status = napi_ok;
     }
 
     SLOGD("GetForwardTime with time %{public}jd", static_cast<int64_t>(time));
@@ -199,8 +201,9 @@ napi_status NapiControlCommand::GetRewindTime(napi_env env, napi_value in, AVCon
     int64_t time {};
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", time);
     if (status != napi_ok) {
-        SLOGE("get RewindTime parameter failed");
-        return status;
+        SLOGI("get RewindTime parameter failed but set default");
+        time = AVMetaData::SECONDS_15;
+        status = napi_ok;
     }
 
     SLOGD("GetRewindTime with time %{public}jd", static_cast<int64_t>(time));

@@ -101,10 +101,6 @@ void AVSessionService::OnStart()
     AddInnerSessionListener(&backgroundAudioController_);
 #endif
 
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    AVRouter::GetInstance().Init(this);
-#endif
-
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     AddSystemAbilityListener(AUDIO_POLICY_SERVICE_ID);
     AddSystemAbilityListener(APP_MGR_SERVICE_ID);
@@ -223,8 +219,8 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
 bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
     for (const auto& session : GetContainer().GetAllSessions()) {
-        if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
-            SLOGI("Remote sessions do not need to be saved to history");
+        if (session->GetDescriptor().sessionTag_ == "RemoteCast" || session->GetSessionType() == "video") {
+            SLOGI("Remote or video sessions do not need to be saved to history");
             continue;
         }
         if (session->GetUid() != info.uid) {
@@ -442,6 +438,21 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 
+void AVSessionService::checkEnableCast(bool enable)
+{
+    SLOGD("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
+    if (enable == true && isInCast_ == false) {
+        AVRouter::GetInstance().Init(this);
+        isInCast+ = true;
+    } else if (enable == false && isInCast_ == true) {
+        AVRouter::GetInstance().Release();
+        isInCast+ = false;
+    } else {
+        SLOGD("AVRouter Init in nothing change");
+    }
+    return AVSESSION_SUCCESS;
+}
+
 void AVSessionService::ReleaseCastSession()
 {
     SLOGI("Start release cast session");
@@ -461,6 +472,10 @@ void AVSessionService::ReleaseCastSession()
 
 void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 {
+    if (isSourceInCast_) {
+        SLOGI("Create Cast in source, return");
+        return;
+    }
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName("castBundleName");
     elementName.SetAbilityName("castAbilityName");
@@ -519,6 +534,8 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
 
     int32_t ret = session->StartCast(outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
+    SLOGD("StartCast set isSourceInCast");
+    isSourceInCast_ = true;
 
 #ifdef EFFICIENCY_MANAGER_ENABLE
     int32_t uid = session->GetDescriptor().uid_;
@@ -666,7 +683,11 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
                                       elementName);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, session, "session is nullptr");
 
-    refreshSortFileOnCreateSession(session->GetSessionId(), elementName);
+    if (session->GetSessionType() != "video") {
+        refreshSortFileOnCreateSession(session->GetSessionId(), elementName);
+    } else {
+        SLOGI("video sessions do not need to be saved to history");
+    }
 
     {
         std::lock_guard lockGuard1(abilityManagerLock_);
@@ -810,6 +831,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
             "ERROR_MSG", "avsessionservice GetHistoricalSessionDescriptors checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
+
     std::lock_guard lockGuard(sessionAndControllerLock_);
     std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
     std::string oldSortContent;
@@ -1306,6 +1328,12 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
         sessionItem->GetDescriptor().sessionType_, false);
     SLOGI("HandleSessionRelease, remove session: sessionId=%{public}s", sessionId.c_str());
     GetContainer().RemoveSession(sessionItem->GetPid(), sessionItem->GetAbilityName());
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    if (GetContainer().GetAllSessions().size() <= 0) {
+        SLOGI("call disable cast on no session alive");
+        checkEnableCast(false);
+    }
+#endif
 }
 
 void AVSessionService::HandleControllerRelease(AVControllerItem& controller)
