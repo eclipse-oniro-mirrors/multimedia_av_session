@@ -104,6 +104,11 @@ public:
     {
         return AVSESSION_SUCCESS;
     }
+
+    int32_t checkEnableCast(bool enable) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 #endif
 
     int32_t Close(void) override

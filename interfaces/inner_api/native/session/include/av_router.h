@@ -46,6 +46,13 @@ public:
     */
     virtual void Init(IAVSessionServiceListener *servicePtr) = 0;
 
+    /**
+     * Release AVRouter instance.
+     *
+     * @since 10
+    */
+    virtual void Release() = 0;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
      * @brief Starting to discover devices.

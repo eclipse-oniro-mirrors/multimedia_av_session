@@ -22,6 +22,8 @@
 #include "avcast_provider_manager.h"
 #include "hw_cast_provider.h"
 
+std::shared_ptr<HwCastProvider> AVRouterImpl::hwProvider_;
+
 namespace OHOS::AVSession {
 AVRouterImpl::AVRouterImpl()
 {
@@ -35,13 +37,28 @@ void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_ = servicePtr;
     }
-    std::shared_ptr<HwCastProvider> hwProvider = std::make_shared<HwCastProvider>();
-    hwProvider->Init();
+    hwProvider_ = std:make_shared<HwCastProvider>();
+    hwProvider_->Init();
     providerNumber_++;
     std::shared_ptr<AVCastProviderManager> avCastProviderManager = std::make_shared<AVCastProviderManager>();
-    avCastProviderManager->Init(providerNumber_, hwProvider);
+    avCastProviderManager->Init(providerNumber_, hwProvider_);
     providerManagerMap_[providerNumber_] = avCastProviderManager;
-    hwProvider->RegisterCastStateListener(avCastProviderManager);
+    hwProvider_->RegisterCastStateListener(avCastProviderManager);
+}
+
+void AVRouterImpl::Release()
+{
+    SLOGI("Start Release AVRouter");
+    if (hwProvider_ == nullptr) {
+        SLOGE("Start Release AVRouter err for no provider");
+        return;
+    }
+    std::lock_ground lockGuard(providerManagerLock_);
+
+    hwProvider_->Release();
+    providerNumber_ = 0;
+    providerManagerMap_.clear();
+    SLOGD("Release AVRouter done");
 }
 
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability)
@@ -74,7 +91,7 @@ int32_t AVRouterImpl::StopCastDiscovery()
 
 int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 {
-    SLOGI("AVRouterImpl SetDiscoverable");
+    SLOGI("AVRouterImpl SetDiscoverable %{public}d", enable);
 
     std::lock_guard lockGuard(providerManagerLock_);
 
@@ -83,6 +100,7 @@ int32_t AVRouterImpl::SetDiscoverable(const bool enable)
             AVSESSION_ERROR, "provider is nullptr");
         providerManager->provider_->SetDiscoverable(enable);
     }
+
     return AVSESSION_SUCCESS;
 }
 

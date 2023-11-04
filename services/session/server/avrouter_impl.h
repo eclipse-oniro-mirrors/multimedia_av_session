@@ -26,6 +26,8 @@ public:
 
     void Init(IAVSessionServiceListener *servicePtr) override;
 
+    void Release() override;
+
     int32_t StartCastDiscovery(int32_t castDeviceCapability) override;
 
     int32_t StopCastDiscovery() override;

@@ -55,6 +55,7 @@ int32_t HwCastProvider::SetDiscoverable(const bool enable)
 
 void HwCastProvider::Release()
 {
+    SLOGI("Release the HwCastProvider");
     {
         std::lock_guard lockGuard(mutexLock_);
         hwCastProviderSessionMap_.clear();
@@ -64,6 +65,7 @@ void HwCastProvider::Release()
     }
     CastSessionManager::GetInstance().UnregisterListener();
     CastSessionManager::GetInstance().Release();
+    SLOGD("Release done");
 }
 
 int HwCastProvider::StartCastSession()
