@@ -357,7 +357,7 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
 bool AVMetaData::IsValid() const
 {
     return duration_ >= AVMetaData::DURATION_ALWAYS_PLAY && publishDate_ >= 0
-        && displayTags_ <= AVMetaData::DISPLAY_TAG_ALL && displayTags_ != 0;
+        && displayTags_ <= AVMetaData::DISPLAY_TAG_ALL;
 }
 
 void AVMetaData::CloneAssetId(const AVMetaData& from, AVMetaData& to)
