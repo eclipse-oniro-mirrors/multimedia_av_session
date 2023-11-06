@@ -122,6 +122,11 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE:
             break;
+        case AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_MUTE:
+            bool enableMute;
+            streamPlayer_->GetMute(enableMute);
+            streamPlayer_->SetMute(!enableMute);
+            break;
         default:
             SLOGE("invalid command");
             break;

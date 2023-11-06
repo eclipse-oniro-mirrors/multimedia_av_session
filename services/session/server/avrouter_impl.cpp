@@ -46,12 +46,16 @@ void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
     hwProvider_->RegisterCastStateListener(avCastProviderManager);
 }
 
-void AVRouterImpl::Release()
+bool AVRouterImpl::Release()
 {
     SLOGI("Start Release AVRouter");
+    if (hasSessionAlive_) {
+        SLOGE("has session alive, return");
+        return true;
+    }
     if (hwProvider_ == nullptr) {
         SLOGE("Start Release AVRouter err for no provider");
-        return;
+        return false;
     }
     std::lock_ground lockGuard(providerManagerLock_);
 
@@ -59,6 +63,7 @@ void AVRouterImpl::Release()
     providerNumber_ = 0;
     providerManagerMap_.clear();
     SLOGD("Release AVRouter done");
+    return false;
 }
 
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability)
@@ -196,6 +201,8 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->StartCastSession();
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     castHandle = (tempId << 32) | castId; // The first 32 bits are providerId, the last 32 bits are castId
+    hasSessionAlive_ = true;
+
     return castHandle;
 }
 
@@ -225,6 +232,7 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
     providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId,
         castHandleToOutputDeviceMap_[castId].deviceInfos_[0]);
+    hasSessionAlive_ = false;
 
     return AVSESSION_SUCCESS;
 }
@@ -244,6 +252,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
     providerManagerMap_[providerNumber]->provider_->StopCastSession(castId);
+    hasSessionAlive_ = false;
 
     return AVSESSION_SUCCESS;
 }

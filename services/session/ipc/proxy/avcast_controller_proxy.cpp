@@ -171,6 +171,28 @@ int32_t AVCastControllerProxy::GetCurrentItem(AVQueueItem& currentItem)
     return ret;
 }
 
+int32_t AVCastControllerProxy::GetValidCommands(std::vector<int32_t>& cmds)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_VALID_COMMANDS, parcel,
+        reply, option) == 0, AVSESSION_ERROR, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32Vector(&cmds), ERR_UNMARSHALLING, "read int32 vector failed");
+    }
+    return ret;
+}
+
 int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SetDisplaySurface");

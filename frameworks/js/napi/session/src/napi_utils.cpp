@@ -847,6 +847,15 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     status = napi_set_named_property(env, out, "providerId", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
+    status = SetValue(env, in.supportedProtocols_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "supportedProtocols", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.authenticationStatus_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "authenticationStatus", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
     return napi_ok;
 }
 
@@ -1266,6 +1275,28 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
         CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId value failed", status);
     } else {
         out.providerId_ = 0;
+    }
+
+    bool hasSupportedProtocols = false;
+    napi_has_named_property(env, in, "supportedProtocols", &hasSupportedProtocols);
+    if (hasSupportedProtocols) {
+        status = napi_get_named_property(env, in, "supportedProtocols", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedProtocols failed", status);
+        status = GetValue(env, value, out.supportedProtocols_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedProtocols value failed", status);
+    } else {
+        out.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
+    }
+
+    bool hasAuthenticationStatus = false;
+    napi_has_named_property(env, in, "authenticationStatus", &hasAuthenticationStatus);
+    if (hasAuthenticationStatus) {
+        status = napi_get_named_property(env, in, "authenticationStatus", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo authenticationStatus failed", status);
+        status = GetValue(env, value, out.authenticationStatus_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo authenticationStatus value failed", status);
+    } else {
+        out.authenticationStatus_ = 0;
     }
     return napi_ok;
 }

@@ -179,6 +179,18 @@ int32_t AVCastControllerStub::HandleSetCastPlaybackFilter(MessageParcel& data, M
     return ERR_NONE;
 }
 
+
+int32_t AVCastControllerStub::HandleGetValidCommands(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> cmds;
+    int32_t ret = GetValidCommands(cmds);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteInt32Vector(cmds), "write cmd int32 vector failed");
+    }
+    return ERR_NONE;
+}
+
 int32_t AVCastControllerStub::HandleDestroy(MessageParcel& data, MessageParcel& reply)
 {
     CHECK_AND_PRINT_LOG(reply.WriteInt32(Destroy()), "write release() ret failed");

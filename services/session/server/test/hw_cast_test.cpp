@@ -874,7 +874,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams007, Tes
 
 /**
  * @tc.name: HwCastStreamPlayerSendControlCommandWithParams008
- * @tc.desc: cmd : CAST_CONTROL_CMD_INVALID
+ * @tc.desc: cmd : CAST_CONTROL_CMD_TOGGLE_MUTE
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -886,9 +886,28 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams008, Tes
     EXPECT_EQ(streamplayer != nullptr, true);
     streamplayer->Init();
     AVCastControlCommand cmd;
-    cmd.SetCommand(OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_INVALID);
+    cmd.SetCommand(OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_MUTE);
     streamplayer->SendControlCommandWithParams(cmd);
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams008 end!");
+}
+
+/**
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams009
+ * @tc.desc: cmd : CAST_CONTROL_CMD_INVALID
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams009, TestSize.Level1)
+{
+    SLOGI("HwCastStreamPlayerSendControlCommandWithParams009 begin!");
+    std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
+    std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(player);
+    EXPECT_EQ(streamplayer != nullptr, true);
+    streamplayer->Init();
+    AVCastControlCommand cmd;
+    cmd.SetCommand(OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_INVALID);
+    streamplayer->SendControlCommandWithParams(cmd);
+    SLOGI("HwCastStreamPlayerSendControlCommandWithParams009 end!");
 }
 
 /**

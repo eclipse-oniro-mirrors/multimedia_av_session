@@ -40,7 +40,8 @@ public:
         CAST_CONTROL_CMD_SET_SPEED = 9,
         CAST_CONTROL_CMD_SET_LOOP_MODE = 10,
         CAST_CONTROL_CMD_TOGGLE_FAVORITE = 11,
-        CAST_CONTROL_CMD_MAX = 12,
+        CAST_CONTROL_CMD_TOGGLE_MUTE = 12,
+        CAST_CONTROL_CMD_MAX = 13,
     };
 
     AVCastControlCommand();
@@ -85,11 +86,12 @@ public:
         CAST_CONTROL_CMD_SET_SPEED,
         CAST_CONTROL_CMD_SET_LOOP_MODE,
         CAST_CONTROL_CMD_TOGGLE_FAVORITE,
+        CAST_CONTROL_CMD_TOGGLE_MUTE,
     };
 
 private:
     int32_t cmd_ = CAST_CONTROL_CMD_INVALID;
-    std::variant<int32_t, double, int64_t> param_;
+    std::variant<int32_t, double, int64_t, bool> param_;
 };
 }
 #endif // OHOS_AVCAST_CONTROL_COMMAND_H

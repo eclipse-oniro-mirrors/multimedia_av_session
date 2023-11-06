@@ -267,7 +267,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     std::vector<DeviceInfo> deviceInfoList;
     for (CastRemoteDevice castRemoteDevice : deviceList) {
         if (castRemoteDevice.subDeviceType == CastEngine::SubDeviceType::SUB_DEVICE_MATEBOOK_PAD) {
-            SLOGW("Found untrusted devices.");
+            SLOGW("Found untrusted devices. with subDeviceType %{public}d",
+                static_cast<int>(castRemoteDevice.subDeviceType));
             continue;
         }
         DeviceInfo deviceInfo;
@@ -276,6 +277,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceName_ = castRemoteDevice.deviceName;
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
+        deviceInfo.supportedProtocols_ = ProtocalType::TYPE_CAST_PLUS_STREAM;
+        deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType);
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {

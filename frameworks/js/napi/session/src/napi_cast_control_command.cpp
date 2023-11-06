@@ -33,6 +33,7 @@ std::map<std::string, std::tuple<NapiCastControlCommand::GetterType, NapiCastCon
     { "setSpeed", { GetSpeed, SetSpeed, AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED } },
     { "setLoopMode", { GetLoopMode, SetLoopMode, AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE } },
     { "toggleFavorite", { GetNoneParam, SetNoneParam, AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE } },
+    { "toggleMute", { GetNoneParam, SetNoneParam, AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_MUTE } },
 };
 
 int32_t NapiCastControlCommand::ConvertCommand(const std::string& cmd)

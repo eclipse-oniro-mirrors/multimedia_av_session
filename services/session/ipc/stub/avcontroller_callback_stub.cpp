@@ -101,6 +101,10 @@ int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.supportedProtocols_), false,
+            "Read supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
+            "Read authenticationStatus failed");
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
 

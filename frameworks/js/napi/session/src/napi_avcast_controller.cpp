@@ -65,6 +65,8 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getDuration", GetDuration),
         DECLARE_NAPI_FUNCTION("getAVPlaybackState", GetCastAVPlaybackState),
         DECLARE_NAPI_FUNCTION("getCurrentItem", GetCurrentItem),
+        DECLARE_NAPI_FUNCTION("getValidCommands", getValidCommands),
+        DECLARE_NAPI_FUNCTION("release", release),
         DECLARE_NAPI_FUNCTION("setDisplaySurface", SetDisplaySurface),
     };
 
@@ -397,6 +399,51 @@ napi_value NapiAVCastController::GetCurrentItem(napi_env env, napi_callback_info
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetCurrentItem", executor, complete);
+}
+
+napi_value NapiAVCastController::getValidCommands(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<std::string> stringCmds;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROLLER_GET_CURRENT_ITEM_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetValidCommands failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetValidCommands failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        std::vector<int32_t> cmds;
+        int32_t ret = napiCastController->castController_->GetValidCommands(cmds);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetValidCommands failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetValidCommands failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetValidCommands failed : native no permission";
+            } else {
+                context->errMessage = "GetValidCommands failed : native server exception";
+            }
+            SLOGE("controller GetValidCommands failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+        context->stringCmds = NapiCastControlCommand::ConvertCommands(cmds);
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->stringCmds, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetValidCommands", executor, complete);
 }
 
 napi_value NapiAVCastController::SetDisplaySurface(napi_env env, napi_callback_info info)

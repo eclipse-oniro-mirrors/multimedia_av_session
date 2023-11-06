@@ -30,10 +30,12 @@ AVCastControllerItem::~AVCastControllerItem()
     SLOGD("AVCastControllerItem destruct");
 }
 
-void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
+void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy,
+    const std::function<void(int32_t, std::vector<int32_t>&)>& validCommandsChangecallback)
 {
     castControllerProxy_ = castControllerProxy;
     castControllerProxy_->RegisterControllerListener(shared_from_this());
+    validCommandsChangecallback_ = validCommandsChangecallback;
 }
 
 void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
@@ -60,6 +62,7 @@ void AVCastControllerItem::OnPlayNext()
     SLOGI("OnPlayNext");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlayNext();
+    validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT, supportedCastCmds_);
 }
 
 void AVCastControllerItem::OnPlayPrevious()
@@ -67,6 +70,7 @@ void AVCastControllerItem::OnPlayPrevious()
     SLOGI("OnPlayPrevious");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlayPrevious();
+    validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS, supportedCastCmds_);
 }
 
 void AVCastControllerItem::OnSeekDone(const int32_t seekNumber)
@@ -137,6 +141,12 @@ int32_t AVCastControllerItem::GetCastAVPlaybackState(AVPlaybackState& avPlayback
 int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 {
     currentItem =  castControllerProxy_->GetCurrentItem();
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVCastControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
+{
+    cmds = validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_INVALID, cmds);
     return AVSESSION_SUCCESS;
 }
 

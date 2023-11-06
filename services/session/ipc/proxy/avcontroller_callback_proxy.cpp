@@ -108,6 +108,10 @@ void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionSta
         CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.deviceType_), "write deviceType failed");
         CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.ipAddress_), "write ipAddress failed");
         CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.providerId_), "write providerId failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.supportedProtocols_),
+            "write supportedProtocols failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.authenticationStatus_),
+            "write authenticationStatus failed");
     }
 
     MessageParcel reply;

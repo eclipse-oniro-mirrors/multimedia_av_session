@@ -82,6 +82,9 @@ private:
     static napi_status GetSkipIntervals(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetSkipIntervals(napi_env env, const AVMetaData& in, napi_value& out);
 
+    static napi_status GetFilter(napi_env env, napi_value in, AVMetaData& out);
+    static napi_status SetFilter(napi_env env, const AVMetaData& in, napi_value& out);
+
     static napi_status GetDisplayTags(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetDisplayTags(napi_env env, const AVMetaData& in, napi_value& out);
 

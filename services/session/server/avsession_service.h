@@ -253,13 +253,16 @@ private:
 
     const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
 
-    void refreshSortFileOnCreateSession(const std::string& sessionId, const AppExecFwk::ElementName& elementName);
+    void refreshSortFileOnCreateSession(const std::string& sessionId, const std::string& sessionType,
+        const AppExecFwk::ElementName& elementName);
 
     bool LoadStringFromFileEx(const std::string& filePath, std::string& content);
 
     bool SaveStringToFileEx(const std::string& filePath, const std::string& content);
 
     void ClearClientResources(pid_t pid);
+
+    int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 

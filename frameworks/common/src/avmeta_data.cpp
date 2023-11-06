@@ -36,6 +36,7 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(previousAssetId_) &&
         parcel.WriteString(nextAssetId_) &&
         parcel.WriteInt32(skipIntervals_) &&
+        parcel.WriteInt32(filter_) &&
         parcel.WriteInt32(displayTags_) &&
         parcel.WriteParcelable(mediaImage_.get());
 }
@@ -65,6 +66,7 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
         !data.ReadString(result->previousAssetId_) ||
         !data.ReadString(result->nextAssetId_) ||
         !data.ReadInt32(result->skipIntervals_) ||
+        !data.ReadInt32(result->filter_) ||
         !data.ReadInt32(result->displayTags_)) {
         SLOGE("read AVMetaData failed");
         delete result;
@@ -274,6 +276,19 @@ int32_t AVMetaData::GetSkipIntervals() const
     return skipIntervals_;
 }
 
+void AVMetaData::SetFilter(int32_t filter)
+{
+    SLOGD("SetFilter %{public}d", static_cast<int32_t>(filter));
+    filter_ = filter;
+    metaMask_.set(META_KEY_FILTER);
+}
+
+int32_t AVMetaData::GetFilter() const
+{
+    SLOGD("GetFilter %{public}d", static_cast<int32_t>(filter_));
+    return filter_;
+}
+
 void AVMetaData::SetDisplayTags(int32_t displayTags)
 {
     SLOGD("SetDisplayTags %{public}d", static_cast<int32_t>(displayTags));
@@ -439,10 +454,17 @@ void AVMetaData::CloneNextAssetId(const AVMetaData& from, AVMetaData& to)
 {
     to.nextAssetId_ = from.nextAssetId_;
 }
+
 void AVMetaData::CloneSkipIntervals(const AVMetaData& from, AVMetaData& to)
 {
     to.skipIntervals_ = from.skipIntervals_;
 }
+
+void AVMetaData::CloneFilter(const AVMetaData& from, AVMetaData& to)
+{
+    to.filter_ = from.filter_;
+}
+
 void AVMetaData::CloneDisplayTags(const AVMetaData& from, AVMetaData& to)
 {
     to.displayTags_ = from.displayTags_;

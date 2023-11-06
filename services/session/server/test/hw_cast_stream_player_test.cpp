@@ -144,6 +144,7 @@ INSTANTIATE_TEST_CASE_P(SendControlCommand, HwCastStreamPlayerTest, testing::Val
     AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED,
     AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE,
     AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE,
+    AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_MUTE,
     AVCastControlCommand::CAST_CONTROL_CMD_MAX
 ));
 
