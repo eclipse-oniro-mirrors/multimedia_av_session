@@ -73,6 +73,22 @@ public:
     virtual int32_t SetAVMetaData(const AVMetaData& meta) = 0;
 
     /**
+     * Set the metadata related with current call.
+     * @param { AVCallMetadata } data {@link AVCallMetadata}
+     * @since 11
+     */
+    virtual int32_t SetAVCallMetaData(const AVCallMetaData& meta) = 0;
+
+    /**
+     * @brief Set session avcall status information.
+     *
+     * @param state Current avcall status infos {@link AVCallState}.
+     * @return Return whether the setting is successful.
+     * @since 11
+    */
+    virtual int32_t SetAVCallState(const AVCallState& avCallState) = 0;
+
+    /**
      * @brief Get current playing status infos.
      *
      * @param state Current playing status infos {@link AVPlaybackState}.

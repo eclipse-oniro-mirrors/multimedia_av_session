@@ -19,6 +19,8 @@
 #include "iav_session.h"
 #include "iremote_proxy.h"
 #include "want_agent.h"
+#include "avcall_meta_data.h"
+#include "avcall_state.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avmeta_data.h"
@@ -36,6 +38,10 @@ public:
     std::string GetSessionId() override;
 
     std::string GetSessionType() override;
+
+    int32_t SetAVCallMetaData(const AVCallMetaData& avCallMetaData) override;
+
+    int32_t SetAVCallState(const AVCallState& avCallState) override;
 
     int32_t GetAVMetaData(AVMetaData& meta) override;
 

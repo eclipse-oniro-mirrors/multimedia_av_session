@@ -92,7 +92,8 @@ std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string
         SLOGE("param is invalid");
         return nullptr;
     }
-    if (type != AVSession::SESSION_TYPE_AUDIO && type != AVSession::SESSION_TYPE_VIDEO) {
+    if (type != AVSession::SESSION_TYPE_AUDIO && type != AVSession::SESSION_TYPE_VIDEO
+        && type != AVSession::SESSION_TYPE_VOICE_CALL) {
         SLOGE("type is invalid");
         return nullptr;
     }

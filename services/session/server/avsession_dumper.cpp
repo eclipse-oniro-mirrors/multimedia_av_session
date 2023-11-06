@@ -161,6 +161,8 @@ void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionServic
             result.append("session type                 : audio\n");
         } else if (descriptor.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
             result.append("session type                 : video\n");
+        } else if (descriptor.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
+            result.append("session type                 : voice_call\n");
         } else {
             result.append("session type is invalid.\n");
         }

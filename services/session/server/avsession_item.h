@@ -65,6 +65,10 @@ public:
 
     std::string GetSessionType() override;
 
+    int32_t SetAVCallMetaData(const AVCallMetaData& avCallMetaData) override;
+
+    int32_t SetAVCallState(const AVCallState& avCallState) override;
+
     int32_t GetAVMetaData(AVMetaData& meta) override;
 
     int32_t SetAVMetaData(const AVMetaData& meta) override;
@@ -221,6 +225,9 @@ private:
 
     std::recursive_mutex controllersLock_;
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
+    AVCallMetaData avCallMetaData_;
+    AVCallState avCallState_;
+
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;

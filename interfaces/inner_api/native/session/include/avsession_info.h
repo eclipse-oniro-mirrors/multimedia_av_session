@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "avcall_meta_data.h"
+#include "avcall_state.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
 #include "avcast_player_state.h"
@@ -231,7 +233,25 @@ public:
      * @since 10
      */
     virtual void OnSkipToQueueItem(int32_t itemId) = 0;
-    
+
+    /**
+     * Register answer command callback.
+     * @since 11
+     */
+    virtual void OnAVCallAnswer() = 0;
+
+    /**
+     * Register hangUp command callback.
+     * @since 11
+     */
+    virtual void OnAVCallHangUp() = 0;
+
+    /**
+     * Register toggleCallMute command callback.
+     * @since 11
+     */
+    virtual void OnAVCallToggleCallMute() = 0;
+
     /**
      * @brief Deconstruct AVSessionCallback.
      * @since 9

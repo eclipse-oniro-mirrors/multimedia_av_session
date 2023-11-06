@@ -22,6 +22,9 @@ namespace OHOS::AVSession {
 class AVSessionCallbackProxy : public IRemoteProxy<IAVSessionCallback> {
 public:
     explicit AVSessionCallbackProxy(const sptr<IRemoteObject>& impl);
+    void OnAVCallAnswer() override;
+    void OnAVCallHangUp() override;
+    void OnAVCallToggleCallMute() override;
     void OnPlay() override;
     void OnPause() override;
     void OnStop() override;

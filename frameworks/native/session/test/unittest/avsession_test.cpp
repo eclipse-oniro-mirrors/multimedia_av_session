@@ -152,6 +152,9 @@ public:
         const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
     void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override {};
+    void OnAVCallAnswer() override {};
+    void OnAVCallHangUp() override {};
+    void OnAVCallToggleCallMute() override {};
 
     ~AVSessionCallbackImpl() override;
 };
