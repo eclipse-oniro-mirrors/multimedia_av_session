@@ -47,6 +47,26 @@ int32_t AVControllerCallbackStub::HandleOnSessionDestroy(MessageParcel& data, Me
     return ERR_NONE;
 }
 
+int32_t AVControllerCallbackStub::HandleOnAVCallMetadataChange(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<AVCallMetaData> metaData = data.ReadParcelable<AVCallMetaData>();
+
+    CHECK_AND_RETURN_RET_LOG(metaData != nullptr, ERR_NONE, "read AVCall MetaData failed");
+    AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnAVCallMetaDataChange");
+    OnAVCallMetaDataChange(*metaData);
+    return ERR_NONE;
+}
+
+int32_t AVControllerCallbackStub::HandleOnAVCallStateChange(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<AVCallState> state = data.ReadParcelable<AVCallState>();
+
+    CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read AVCallState failed");
+    AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnAVCallStateChange");
+    OnAVCallStateChange(*state);
+    return ERR_NONE;
+}
+
 int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel& data, MessageParcel& reply)
 {
     sptr<AVPlaybackState> state = data.ReadParcelable<AVPlaybackState>();

@@ -123,6 +123,14 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, AAFwk::WantParams& out);
     static napi_status SetValue(napi_env env, const AAFwk::WantParams& in, napi_value& out);
 
+    /* napi_value <-> AVCallMetaData */
+    static napi_status GetValue(napi_env env, napi_value in, AVCallMetaData& out);
+    static napi_status SetValue(napi_env env, const AVCallMetaData& in, napi_value& out);
+
+    /* napi_value <-> AVCallState */
+    static napi_status GetValue(napi_env env, napi_value in, AVCallState& out);
+    static napi_status SetValue(napi_env env, const AVCallState& in, napi_value& out);
+
     /* napi_value <-> AVMetaData */
     static napi_status GetValue(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetValue(napi_env env, const AVMetaData& in, napi_value& out);

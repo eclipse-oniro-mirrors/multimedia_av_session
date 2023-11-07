@@ -34,6 +34,23 @@ namespace OHOS::AVSession {
 class AVSessionController {
 public:
     /**
+     * @brief Get current avcall status infos.
+     *
+     * @param state Current avcall status infos {@link AVCallState}.
+     * @return Returns check whether the system permissions are supported
+     * @since 11
+    */
+    virtual int32_t GetAVCallState(AVCallState& avCallState) = 0;
+
+    /**
+     * @brief Get current avcall meta data infos.
+     *
+     * @param state Current avcall meta data infos {@link AVCallMetaData}.
+     * @return Returns check whether the system permissions are supported
+     * @since 11
+    */
+    virtual int32_t GetAVCallMetaData(AVCallMetaData& avCallMetaData) = 0;
+    /**
      * @brief Get current playing status infos.
      *
      * @param state Current playing status infos {@link AVPlaybackState}.
@@ -114,6 +131,24 @@ public:
      * @since 9
     */
     virtual int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback) = 0;
+
+    /**
+     * @brief Set avcall meta filter.
+     *
+     * @param filter AVCall Meta filter{@link AVCallMetaMaskType}.
+     * @return Returns whether set successful.
+     * @since 9
+    */
+    virtual int32_t SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter) = 0;
+
+    /**
+     * @brief Set avcall state filter.
+     *
+     * @param filter AVCall State {@link AVCallStateMaskType}.
+     * @return Returns whether set successful.
+     * @since 9
+    */
+    virtual int32_t SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter) = 0;
 
     /**
      * @brief Set meta filter.

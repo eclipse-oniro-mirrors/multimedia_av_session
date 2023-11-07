@@ -22,11 +22,11 @@ std::map<std::string, NapiAVCallState::GetterType> NapiAVCallState::getterMap_ =
 };
 
 std::map<int32_t, NapiAVCallState::SetterType> NapiAVCallState::setterMap_ = {
-    { AVCallState::AVCALL_KEY_STATE, SetAVCallState },
+    { AVCallState::AVCALL_STATE_KEY_STATE, SetAVCallState },
 };
 
 std::map<std::string, int32_t> NapiAVCallState::filterMap_ = {
-    { "avCallState", AVCallState::AVCALL_KEY_STATE },
+    { "avCallState", AVCallState::AVCALL_STATE_KEY_STATE },
 };
 
 napi_status NapiAVCallState::ConvertFilter(napi_env env, napi_value filter,
@@ -94,7 +94,7 @@ napi_status NapiAVCallState::SetValue(napi_env env, const AVCallState& in, napi_
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
 
     auto mask = in.GetMask();
-    for (int i = 0; i < AVCallState::AVCALL_KEY_MAX; ++i) {
+    for (int i = 0; i < AVCallState::AVCALL_STATE_KEY_MAX; ++i) {
         if (!mask.test(i)) {
             continue;
         }

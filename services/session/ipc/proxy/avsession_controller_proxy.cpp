@@ -32,6 +32,54 @@ AVSessionControllerProxy::~AVSessionControllerProxy()
     Destroy();
 }
 
+int32_t AVSessionControllerProxy::GetAVCallMetaData(AVCallMetaData& avCallMetaData)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AVCALL_META_DATA, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        sptr<AVCallMetaData> data = reply.ReadParcelable<AVCallMetaData>();
+        CHECK_AND_RETURN_RET_LOG(data != nullptr, ERR_UNMARSHALLING, "read AVCallMetaData failed");
+        avCallMetaData = *data;
+    }
+    return ret;
+}
+
+int32_t AVSessionControllerProxy::GetAVCallState(AVCallState& avCallState)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AVCALL_STATE, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        AVCallState* statePtr = reply.ReadParcelable<AVCallState>();
+        CHECK_AND_RETURN_RET_LOG(statePtr != nullptr, ERR_UNMARSHALLING, "read AVCallState failed");
+        avCallState = *statePtr;
+    }
+    return ret;
+}
+
 int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
@@ -319,6 +367,44 @@ int32_t AVSessionControllerProxy::SendCommonCommand(const std::string& commonCom
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_COMMON_COMMAND, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "Send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionControllerProxy::SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteString(filter.to_string()), ERR_MARSHALLING, "write filter failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_AVCALL_META_FILTER, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionControllerProxy::SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteString(filter.to_string()), ERR_MARSHALLING, "write filter failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_AVCALL_STATE_FILTER, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;

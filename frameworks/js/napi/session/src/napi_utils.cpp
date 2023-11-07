@@ -17,6 +17,8 @@
 #include "securec.h"
 #include "avsession_log.h"
 #include "av_session.h"
+#include "napi_avcall_meta_data.h"
+#include "napi_avcall_state.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
 #include "napi_media_description.h"
@@ -394,6 +396,28 @@ napi_status NapiUtils::SetValue(napi_env env, const AAFwk::WantParams& in, napi_
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     out = AppExecFwk::WrapWantParams(env, in);
     return status;
+}
+
+/* napi_value <-> AVCallMetaData */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVCallMetaData& out)
+{
+    return NapiAVCallMetaData::GetValue(env, in, out);
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AVCallMetaData& in, napi_value& out)
+{
+    return NapiAVCallMetaData::SetValue(env, in, out);
+}
+
+/* napi_value <-> AVCallState */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVCallState& out)
+{
+    return NapiAVCallState::GetValue(env, in, out);
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AVCallState& in, napi_value& out)
+{
+    return NapiAVCallState::SetValue(env, in, out);
 }
 
 /* napi_value <-> AVMetaData */

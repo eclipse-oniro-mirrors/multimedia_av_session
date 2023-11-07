@@ -36,6 +36,36 @@ void AVControllerCallbackProxy::OnSessionDestroy()
         "send request failed");
 }
 
+void AVControllerCallbackProxy::OnAVCallMetaDataChange(const AVCallMetaData& data)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&data), "write AVCallMetaData failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_AVCALL_METADATA_CHANGE, parcel, reply, option) == 0,
+        "send request failed");
+}
+
+
+void AVControllerCallbackProxy::OnAVCallStateChange(const AVCallState& state)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&state), "write AVCallState failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_AVCALL_STATE_CHANGE, parcel, reply, option) == 0,
+        "send request failed");
+}
+
+
 void AVControllerCallbackProxy::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     MessageParcel parcel;

@@ -261,6 +261,22 @@ public:
 
 class AVControllerCallback {
 public:
+
+    /**
+     * @brief Listen for avcall metadata change events.
+     *
+     * @param avCallMetaData is the changed avcall metadata.
+     * @since 11
+    */
+    virtual void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) = 0;
+
+    /**
+     * @brief Listening session avcall status change event.
+     *
+     * @param avCallState Session related avcall state.
+     * @since 11
+    */
+    virtual void OnAVCallStateChange(const AVCallState& avCallState) = 0;
     /**
      * @brief Session Destroy.
      * @since 9

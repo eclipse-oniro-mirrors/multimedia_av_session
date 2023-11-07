@@ -43,6 +43,8 @@ private:
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
+    static napi_value GetAVCallState(napi_env env, napi_callback_info info);
+    static napi_value GetAVCallMetaData(napi_env env, napi_callback_info info);
     static napi_value GetAVPlaybackState(napi_env env, napi_callback_info info);
     static napi_value GetAVPlaybackStateSync(napi_env env, napi_callback_info info);
     static napi_value GetAVMetaData(napi_env env, napi_callback_info info);
@@ -66,6 +68,10 @@ private:
     static napi_value SkipToQueueItem(napi_env env, napi_callback_info info);
     static napi_value GetExtras(napi_env env, napi_callback_info info);
 
+    static napi_status OnAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
+        napi_value param, napi_value callback);
+    static napi_status OnAVCallStateChange(napi_env env, NapiAVSessionController* napiController,
+        napi_value param, napi_value callback);
     static napi_status OnSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                         napi_value param, napi_value callback);
     static napi_status OnPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
@@ -87,6 +93,10 @@ private:
     static napi_status OnExtrasChange(napi_env env, NapiAVSessionController* napiController,
         napi_value param, napi_value callback);
 
+    static napi_status OffAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
+        napi_value callback);
+    static napi_status OffAVCallStateChange(napi_env env, NapiAVSessionController* napiController,
+        napi_value callback);
     static napi_status OffSessionDestroy(napi_env env, NapiAVSessionController* napiController, napi_value callback);
     static napi_status OffPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
                                               napi_value callback);
@@ -105,6 +115,8 @@ private:
     static napi_status OffExtrasChange(napi_env env, NapiAVSessionController* napiController,
         napi_value callback);
 
+    static napi_status SetAVCallMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
+    static napi_status SetAVCallStateFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
     static napi_status SetPlaybackStateFilter(napi_env env, NapiAVSessionController* napiController,
                                               napi_value filter);
     static napi_status SetMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);

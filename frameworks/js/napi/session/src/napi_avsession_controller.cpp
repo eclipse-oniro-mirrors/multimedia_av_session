@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "napi_avcall_meta_data.h"
+#include "napi_avcall_state.h"
 #include "key_event.h"
 #include "napi_async_work.h"
 #include "napi_avcontroller_callback.h"
@@ -34,6 +36,8 @@ namespace OHOS::AVSession {
 static __thread napi_ref AVControllerConstructorRef = nullptr;
 std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     NapiAVSessionController::OffEventHandlerType>> NapiAVSessionController::EventHandlers_ = {
+    { "callMetadataChange", { OnAVCallMetaDataChange, OffAVCallMetaDataChange } },
+    { "callStateChange", { OnAVCallStateChange, OffAVCallStateChange } },
     { "sessionDestroy", { OnSessionDestroy, OffSessionDestroy } },
     { "metadataChange", { OnMetaDataChange, OffMetaDataChange } },
     { "playbackStateChange", { OnPlaybackStateChange, OffPlaybackStateChange } },
@@ -62,6 +66,8 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
     napi_property_descriptor descriptors[] = {
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
+        DECLARE_NAPI_FUNCTION("getAVCallState", GetAVCallState),
+        DECLARE_NAPI_FUNCTION("getCallMetadata", GetAVCallMetaData),
         DECLARE_NAPI_FUNCTION("getAVPlaybackState", GetAVPlaybackState),
         DECLARE_NAPI_FUNCTION("getAVPlaybackStateSync", GetAVPlaybackStateSync),
         DECLARE_NAPI_FUNCTION("getAVMetadata", GetAVMetaData),
@@ -232,6 +238,91 @@ napi_value NapiAVSessionController::GetAVPlaybackStateSync(napi_env env, napi_ca
         return NapiUtils::GetUndefinedValue(env);
     }
     return output;
+}
+
+napi_value NapiAVSessionController::GetAVCallMetaData(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        AVCallMetaData avCallMetaData;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("GetAVCallMetaData failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetAVCallMetaData failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->GetAVCallMetaData(context->avCallMetaData);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetAVCallMetaData failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetAVCallMetaData failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetAVCallMetaData failed : native no permission";
+            } else {
+                context->errMessage = "GetAVCallMetaData failed : native server exception";
+            }
+            SLOGE("controller GetAVCallMetaData failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiAVCallMetaData::SetValue(env, context->avCallMetaData, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "GetAVCallMetaData", executor, complete);
+}
+
+napi_value NapiAVSessionController::GetAVCallState(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        AVCallState avCallState;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("GetAVCallState failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetAVCallState failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->GetAVCallState(context->avCallState);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetAVCallState failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetAVCallState failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetAVCallState failed : native no permission";
+            } else {
+                context->errMessage = "GetAVCallState failed : native server exception";
+            }
+            SLOGE("controller GetAVCallState failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiAVCallState::SetValue(env, context->avCallState, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetAVCallState", executor, complete);
 }
 
 napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_info info)
@@ -1153,6 +1244,34 @@ napi_value NapiAVSessionController::GetOutputDeviceSync(napi_env env, napi_callb
     return output;
 }
 
+napi_status NapiAVSessionController::SetAVCallMetaFilter(napi_env env, NapiAVSessionController* napiController,
+    napi_value filter)
+{
+    AVCallMetaData::AVCallMetaMaskType avCallMetaMask;
+    auto status = NapiAVCallMetaData::ConvertFilter(env, filter, avCallMetaMask);
+    CHECK_RETURN(status == napi_ok, "convert filter failed", status);
+    auto ret = napiController->controller_->SetAVCallMetaFilter(avCallMetaMask);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("controller SetAVCallMetaFilter failed:%{public}d", ret);
+        status = napi_generic_failure;
+    }
+    return status;
+}
+
+napi_status NapiAVSessionController::SetAVCallStateFilter(napi_env env, NapiAVSessionController *napiController,
+    napi_value filter)
+{
+    AVCallState::AVCallStateMaskType avCallStateMask;
+    auto status = NapiAVCallState::ConvertFilter(env, filter, avCallStateMask);
+    CHECK_RETURN(status == napi_ok, "convert filter failed", status);
+    auto ret = napiController->controller_->SetAVCallStateFilter(avCallStateMask);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("controller SetAVCallStateFilter failed:%{public}d", ret);
+        status = napi_generic_failure;
+    }
+    return status;
+}
+
 napi_status NapiAVSessionController::SetPlaybackStateFilter(napi_env env, NapiAVSessionController *napiController,
                                                             napi_value filter)
 {
@@ -1334,6 +1453,26 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     return NapiUtils::GetUndefinedValue(env);
 }
 
+napi_status NapiAVSessionController::OnAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value param, napi_value callback)
+{
+    if (SetAVCallMetaFilter(env, napiController, param) != napi_ok) {
+        return napi_generic_failure;
+    }
+    return napiController->callback_->AddCallback(env,
+        NapiAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE, callback);
+}
+
+napi_status NapiAVSessionController::OnAVCallStateChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value param, napi_value callback)
+{
+    if (SetAVCallStateFilter(env, napiController, param) != napi_ok) {
+        return napi_generic_failure;
+    }
+    return napiController->callback_->AddCallback(env,
+        NapiAVControllerCallback::EVENT_AVCALL_STATE_CHANGE, callback);
+}
+
 napi_status NapiAVSessionController::OnSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                                       napi_value param, napi_value callback)
 {
@@ -1404,6 +1543,24 @@ napi_status NapiAVSessionController::OnExtrasChange(napi_env env, NapiAVSessionC
     napi_value param, napi_value callback)
 {
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_EXTRAS_CHANGE,
+        callback);
+}
+
+napi_status NapiAVSessionController::OffAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE,
+        callback);
+}
+
+napi_status NapiAVSessionController::OffAVCallStateChange(napi_env env, NapiAVSessionController* napiController,
+    napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_AVCALL_STATE_CHANGE,
         callback);
 }
 

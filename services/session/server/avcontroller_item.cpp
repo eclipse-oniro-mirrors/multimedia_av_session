@@ -49,6 +49,22 @@ int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callb
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::GetAVCallMetaData(AVCallMetaData& avCallMetaData)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    avCallMetaData = session_->GetAVCallMetaData();
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControllerItem::GetAVCallState(AVCallState& avCallState)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    avCallState = session_->GetAVCallState();
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 {
     std::lock_guard lockGuard(sessionMutex_);
@@ -150,6 +166,20 @@ int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, co
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter)
+{
+    std::lock_guard lockGuard(avCallMetaMaskMutex_);
+    avCallMetaMask_ = filter;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControllerItem::SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter)
+{
+    std::lock_guard lockGuard(avCallStateMaskMutex_);
+    avCallStateMask_ = filter;
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType& filter)
 {
     std::lock_guard lockGuard(metaMaskMutex_);
@@ -203,6 +233,39 @@ void AVControllerItem::HandleSessionDestroy()
     std::lock_guard sessionLockGuard(sessionMutex_);
     session_ = nullptr;
     sessionId_.clear();
+}
+
+void AVControllerItem::HandleAVCallStateChange(const AVCallState& avCallState)
+{
+    std::lock_guard callbackLockGuard(callbackMutex_);
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVCallState stateOut;
+    std::lock_guard avCallStateLockGuard(avCallStateMaskMutex_);
+    if (avCallState.CopyToByMask(avCallStateMask_, stateOut)) {
+        SLOGI("update avcall state");
+        AVSESSION_TRACE_SYNC_START("AVControllerItem::OnAVCallStateChange");
+        callback_->OnAVCallStateChange(stateOut);
+    }
+}
+
+void AVControllerItem::HandleAVCallMetaDataChange(const AVCallMetaData& avCallMetaData)
+{
+    std::lock_guard callbackLockGuard(callbackMutex_);
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVCallMetaData metaOut;
+    std::lock_guard avCallMetaDataMaskLockGuard(avCallMetaMaskMutex_);
+    if (avCallMetaData.CopyToByMask(avCallMetaMask_, metaOut)) {
+        if ((avCallMetaMask_.test(AVCallMetaData::AVCALL_META_KEY_MEDIA_IMAGE)) &&
+            (metaOut.GetMediaImage() != nullptr)) {
+            std::string fileName = AVSessionUtils::GetCachePathName() + sessionId_ + AVSessionUtils::GetFileSuffix();
+            std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaOut.GetMediaImage();
+            AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
+            metaOut.SetMediaImage(innerPixelMap);
+        }
+        SLOGI("update avcall meta data");
+        AVSESSION_TRACE_SYNC_START("AVControllerItem::OnAVCallMetaDataChange");
+        callback_->OnAVCallMetaDataChange(metaOut);
+    }
 }
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)

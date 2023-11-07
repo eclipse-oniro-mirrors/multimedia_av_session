@@ -35,12 +35,12 @@ public:
     };
 
     enum {
-        AVCALL_KEY_STATE = 0,
-        AVCALL_KEY_IS_MUTED = 1,
-        AVCALL_KEY_MAX = 2,
+        AVCALL_STATE_KEY_STATE = 0,
+        AVCALL_STATE_KEY_IS_MUTED = 1,
+        AVCALL_STATE_KEY_MAX = 2,
     };
 
-    using AVCallStateMaskType = std::bitset<AVCALL_KEY_MAX>;
+    using AVCallStateMaskType = std::bitset<AVCALL_STATE_KEY_MAX>;
 
     AVCallState();
     ~AVCallState() override = default;
@@ -62,8 +62,8 @@ public:
     bool CopyFrom(const AVCallState& in);
 
     const static inline std::vector<int32_t> localCapability {
-        AVCALL_KEY_STATE,
-        AVCALL_KEY_IS_MUTED,
+        AVCALL_STATE_KEY_STATE,
+        AVCALL_STATE_KEY_IS_MUTED,
     };
 
 private:
@@ -76,7 +76,7 @@ private:
     static void CloneAVCallIsMuted(const AVCallState& from, AVCallState& to);
 
     using CloneActionType = void(*)(const AVCallState& from, AVCallState& to);
-    static inline CloneActionType cloneActions[AVCALL_KEY_MAX] = {
+    static inline CloneActionType cloneActions[AVCALL_STATE_KEY_MAX] = {
         &AVCallState::CloneAVCallState,
         &AVCallState::CloneAVCallIsMuted,
     };
