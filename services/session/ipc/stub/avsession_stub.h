@@ -54,6 +54,10 @@ private:
 
     int32_t HandleGetSessionType(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleSetAVCallMetaData(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleSetAVCallState(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply);
@@ -132,6 +136,8 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         &AVSessionStub::HandleReleaseCast,
 #endif
+        &AVSessionStub::HandleSetAVCallMetaData,
+        &AVSessionStub::HandleSetAVCallState,
     };
 };
 }

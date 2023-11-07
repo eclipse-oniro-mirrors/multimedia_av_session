@@ -145,10 +145,10 @@ static napi_value ExportAVCallState(napi_env env)
     (void)SetNamedProperty(env, result, "CALL_STATE_IDLE", AVCallState::AVCALL_STATE_IDLE);
     (void)SetNamedProperty(env, result, "CALL_STATE_INCOMING", AVCallState::AVCALL_STATE_INCOMING);
     (void)SetNamedProperty(env, result, "CALL_STATE_ACTIVE", AVCallState::AVCALL_STATE_ACTIVE);
-    (void)SetNamedProperty(env, result, "AVCALL_STATE_DIALING", AVCallState::AVCALL_STATE_DIALING);
-    (void)SetNamedProperty(env, result, "AVCALL_STATE_WAITING", AVCallState::AVCALL_STATE_WAITING);
-    (void)SetNamedProperty(env, result, "AVCALL_STATE_HOLDING", AVCallState::AVCALL_STATE_HOLDING);
-    (void)SetNamedProperty(env, result, "AVCALL_STATE_DISCONNECTING", AVCallState::AVCALL_STATE_DISCONNECTING);
+    (void)SetNamedProperty(env, result, "CALL_STATE_DIALING", AVCallState::AVCALL_STATE_DIALING);
+    (void)SetNamedProperty(env, result, "CALL_STATE_WAITING", AVCallState::AVCALL_STATE_WAITING);
+    (void)SetNamedProperty(env, result, "CALL_STATE_HOLDING", AVCallState::AVCALL_STATE_HOLDING);
+    (void)SetNamedProperty(env, result, "CALL_STATE_DISCONNECTING", AVCallState::AVCALL_STATE_DISCONNECTING);
 
     napi_object_freeze(env, result);
     return result;

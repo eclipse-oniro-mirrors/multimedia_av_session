@@ -44,6 +44,27 @@ bool AVSessionCallbackStub::CheckInterfaceToken(MessageParcel& data)
     return true;
 }
 
+int32_t AVSessionCallbackStub::HandleOnAVCallAnswer(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlay");
+    OnAVCallAnswer();
+    return ERR_NONE;
+}
+
+int32_t AVSessionCallbackStub::HandleOnAVCallHangUp(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlay");
+    OnAVCallHangUp();
+    return ERR_NONE;
+}
+
+int32_t AVSessionCallbackStub::HandleOnAVCallToggleCallMute(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlay");
+    OnAVCallToggleCallMute();
+    return ERR_NONE;
+}
+
 int32_t AVSessionCallbackStub::HandleOnPlay(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlay");

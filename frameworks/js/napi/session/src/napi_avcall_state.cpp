@@ -18,15 +18,18 @@
 
 namespace OHOS::AVSession {
 std::map<std::string, NapiAVCallState::GetterType> NapiAVCallState::getterMap_ = {
-    { "avCallState", GetAVCallState },
+    { "state", GetAVCallState },
+    { "muted", IsAVCallMuted },
 };
 
 std::map<int32_t, NapiAVCallState::SetterType> NapiAVCallState::setterMap_ = {
     { AVCallState::AVCALL_STATE_KEY_STATE, SetAVCallState },
+    { AVCallState::AVCALL_STATE_KEY_IS_MUTED, SetAVCallMuted },
 };
 
 std::map<std::string, int32_t> NapiAVCallState::filterMap_ = {
-    { "avCallState", AVCallState::AVCALL_STATE_KEY_STATE },
+    { "state", AVCallState::AVCALL_STATE_KEY_STATE },
+    { "muted", AVCallState::AVCALL_STATE_KEY_IS_MUTED },
 };
 
 napi_status NapiAVCallState::ConvertFilter(napi_env env, napi_value filter,
@@ -111,7 +114,7 @@ napi_status NapiAVCallState::SetValue(napi_env env, const AVCallState& in, napi_
 napi_status NapiAVCallState::GetAVCallState(napi_env env, napi_value in, AVCallState& out)
 {
     int32_t property;
-    auto status = NapiUtils::GetNamedProperty(env, in, "avCallState", property);
+    auto status = NapiUtils::GetNamedProperty(env, in, "state", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetAVCallState(property);
     return status;
@@ -130,7 +133,7 @@ napi_status NapiAVCallState::SetAVCallState(napi_env env, const AVCallState& in,
 napi_status NapiAVCallState::IsAVCallMuted(napi_env env, napi_value in, AVCallState& out)
 {
     bool property;
-    auto status = NapiUtils::GetNamedProperty(env, in, "isAVCallMuted", property);
+    auto status = NapiUtils::GetNamedProperty(env, in, "muted", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetAVCallMuted(property);
     return status;

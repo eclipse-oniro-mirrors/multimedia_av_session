@@ -44,6 +44,10 @@ private:
 
     int32_t HandleDestroy(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetAVCallState(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetAVCallMetaData(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleSendControlCommand(MessageParcel& data, MessageParcel& reply);
@@ -91,8 +95,6 @@ private:
         &AVSessionControllerStub::HandleGetValidCommands,
         &AVSessionControllerStub::HandleSendControlCommand,
         &AVSessionControllerStub::HandleSendCommonCommand,
-        &AVSessionControllerStub::HandleSetAVCallMetaFilter,
-        &AVSessionControllerStub::HandleSetAVCallStateFilter,
         &AVSessionControllerStub::HandleSetMetaFilter,
         &AVSessionControllerStub::HandleSetPlaybackFilter,
         &AVSessionControllerStub::HandleIsSessionActive,
@@ -101,6 +103,10 @@ private:
         &AVSessionControllerStub::HandleGetAVQueueTitle,
         &AVSessionControllerStub::HandleSkipToQueueItem,
         &AVSessionControllerStub::HandleGetExtras,
+        &AVSessionControllerStub::HandleGetAVCallMetaData,
+        &AVSessionControllerStub::HandleSetAVCallMetaFilter,
+        &AVSessionControllerStub::HandleGetAVCallState,
+        &AVSessionControllerStub::HandleSetAVCallStateFilter,
     };
 };
 } // namespace OHOS::AVSession

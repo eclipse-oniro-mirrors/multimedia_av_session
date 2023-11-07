@@ -155,7 +155,8 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     napiAvSession->session_ = std::move(nativeSession);
     napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
     napiAvSession->sessionType_ = napiAvSession->session_->GetSessionType();
-    SLOGI("sessionId=%{public}s", napiAvSession->sessionId_.c_str());
+    SLOGI("sessionId=%{public}s, sessionType:%{public}s", napiAvSession->sessionId_.c_str(),
+        napiAvSession->sessionType_.c_str());
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, napiAvSession->sessionId_, property);

@@ -60,6 +60,28 @@ int32_t AVSessionControllerStub::HandleDestroy(MessageParcel& data, MessageParce
     return ERR_NONE;
 }
 
+int32_t AVSessionControllerStub::HandleGetAVCallState(MessageParcel& data, MessageParcel& reply)
+{
+    AVCallState state;
+    int32_t ret = GetAVCallState(state);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteParcelable(&state), "write AVCallState failed");
+    }
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleGetAVCallMetaData(MessageParcel& data, MessageParcel& reply)
+{
+    AVCallMetaData metaData;
+    int32_t ret = GetAVCallMetaData(metaData);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteParcelable(&metaData), "write AVCallMetaData failed");
+    }
+    return ERR_NONE;
+}
+
 int32_t AVSessionControllerStub::HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply)
 {
     AVPlaybackState state;

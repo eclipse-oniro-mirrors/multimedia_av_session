@@ -669,6 +669,30 @@ void AVSessionItem::HandleSkipToQueueItem(const int32_t& itemId)
     callback_->OnSkipToQueueItem(itemId);
 }
 
+void AVSessionItem::HandleOnAVCallAnswer(const AVControlCommand& cmd)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnAVCallAnswer");
+    std::lock_guard callbackLockGuard(callbackLock_);
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnAVCallAnswer();
+}
+
+void AVSessionItem::HandleOnAVCallHangUp(const AVControlCommand& cmd)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnAVCallHangUp");
+    std::lock_guard callbackLockGuard(callbackLock_);
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnAVCallHangUp();
+}
+
+void AVSessionItem::HandleOnAVCallToggleCallMute(const AVControlCommand& cmd)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnAVCallToggleCallMute");
+    std::lock_guard callbackLockGuard(callbackLock_);
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    callback_->OnAVCallToggleCallMute();
+}
+
 void AVSessionItem::HandleOnPlay(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlay");
