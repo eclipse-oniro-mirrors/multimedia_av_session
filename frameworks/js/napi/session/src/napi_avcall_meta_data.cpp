@@ -23,7 +23,7 @@ namespace OHOS::AVSession {
 std::map<std::string, NapiAVCallMetaData::GetterType> NapiAVCallMetaData::getterMap_ = {
     {"name", GetName},
     {"phoneNumber", GetPhoneNumber},
-    {"mediaImage", GetMediaImage}
+    {"avatar", GetMediaImage}
 };
 
 std::map<int32_t, NapiAVCallMetaData::SetterType> NapiAVCallMetaData::setterMap_ = {
@@ -36,8 +36,8 @@ std::map<int32_t, NapiAVCallMetaData::SetterType> NapiAVCallMetaData::setterMap_
 std::pair<std::string, int32_t> NapiAVCallMetaData::filterMap_[] = {
     {"name", AVCallMetaData::AVCALL_META_KEY_NAME},
     {"phoneNumber", AVCallMetaData::AVCALL_META_KEY_PHONE_NUMBER},
-    {"mediaImage", AVCallMetaData::AVCALL_META_KEY_MEDIA_IMAGE},
-    {"mediaImage", AVCallMetaData::AVCALL_META_KEY_MEDIA_IMAGE_URI},
+    {"avatar", AVCallMetaData::AVCALL_META_KEY_MEDIA_IMAGE},
+    {"avatar", AVCallMetaData::AVCALL_META_KEY_MEDIA_IMAGE_URI},
 };
 
 napi_status NapiAVCallMetaData::ConvertFilter(napi_env env, napi_value filter, AVCallMetaData::AVCallMetaMaskType& mask)
@@ -173,7 +173,7 @@ napi_status NapiAVCallMetaData::SetPhoneNumber(napi_env env, const AVCallMetaDat
 napi_status NapiAVCallMetaData::GetMediaImage(napi_env env, napi_value in, AVCallMetaData& out)
 {
     napi_value property {};
-    auto status = napi_get_named_property(env, in, "mediaImage", &property);
+    auto status = napi_get_named_property(env, in, "avatar", &property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "get property failed", status);
     napi_valuetype type = napi_undefined;
     status = napi_typeof(env, property, &type);
@@ -208,7 +208,7 @@ napi_status NapiAVCallMetaData::SetMediaImage(napi_env env, const AVCallMetaData
 
     napi_value property = Media::PixelMapNapi::CreatePixelMap(env,
         AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
-    auto status = napi_set_named_property(env, out, "mediaImage", property);
+    auto status = napi_set_named_property(env, out, "avatar", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }
@@ -224,7 +224,7 @@ napi_status NapiAVCallMetaData::SetMediaImageUri(napi_env env, const AVCallMetaD
     napi_value property {};
     auto status = NapiUtils::SetValue(env, uri, property);
     CHECK_RETURN(status == napi_ok, "create property failed", status);
-    status = napi_set_named_property(env, out, "mediaImage", property);
+    status = napi_set_named_property(env, out, "avtar", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }

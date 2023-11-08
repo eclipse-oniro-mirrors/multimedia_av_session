@@ -1353,7 +1353,8 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::s
 
 static bool IsThreeParamForOnEvent(const std::string& event)
 {
-    return event == "metadataChange" || event == "playbackStateChange";
+    return event == "metadataChange" || event == "playbackStateChange" ||
+        event == "callMetadataChange" || event == "callStateChange";
 }
 
 napi_value NapiAVSessionController::OnEvent(napi_env env, napi_callback_info info)

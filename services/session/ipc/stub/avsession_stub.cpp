@@ -75,6 +75,34 @@ int32_t AVSessionStub::HandleDestroy(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleSetAVCallMetaData(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::SetAVCallMetaData");
+    sptr avCallMetaData = data.ReadParcelable<AVCallMetaData>();
+    if (avCallMetaData == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
+    }
+    int32_t ret = SetAVCallMetaData(*avCallMetaData);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAVCallMetaData failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleSetAVCallState(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::SetAVCallState");
+    sptr avCallState = data.ReadParcelable<AVCallState>();
+    if (avCallState == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
+    }
+    int32_t ret = SetAVCallState(*avCallState);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAVCallState failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionStub::HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply)
 {
     AVPlaybackState avPlaybackState;

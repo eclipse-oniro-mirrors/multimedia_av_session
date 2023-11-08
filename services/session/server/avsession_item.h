@@ -200,6 +200,9 @@ protected:
     sptr<IRemoteObject> GetControllerInner() override;
 
 private:
+    void HandleOnAVCallAnswer(const AVControlCommand& cmd);
+    void HandleOnAVCallHangUp(const AVControlCommand& cmd);
+    void HandleOnAVCallToggleCallMute(const AVControlCommand& cmd);
     void HandleOnPlay(const AVControlCommand& cmd);
     void HandleOnPause(const AVControlCommand& cmd);
     void HandleOnStop(const AVControlCommand& cmd);
@@ -225,6 +228,9 @@ private:
         &AVSessionItem::HandleOnSetSpeed,
         &AVSessionItem::HandleOnSetLoopMode,
         &AVSessionItem::HandleOnToggleFavorite,
+        &AVSessionItem::HandleOnAVCallAnswer,
+        &AVSessionItem::HandleOnAVCallHangUp,
+        &AVSessionItem::HandleOnAVCallToggleCallMute,
     };
 
     std::recursive_mutex controllersLock_;

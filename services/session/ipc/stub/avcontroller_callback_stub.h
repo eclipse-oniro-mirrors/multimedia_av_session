@@ -43,7 +43,7 @@ private:
     int32_t HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnSessionEventChange(MessageParcel& data, MessageParcel& reply);
-    
+
     int32_t HandleOnQueueItemsChange(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnQueueTitleChange(MessageParcel& data, MessageParcel& reply);
@@ -55,8 +55,6 @@ private:
     using HandlerFunc = int32_t (AVControllerCallbackStub::*)(MessageParcel& data, MessageParcel& reply);
     static inline HandlerFunc handlers[] = {
         &AVControllerCallbackStub::HandleOnSessionDestroy,
-        &AVControllerCallbackStub::HandleOnAVCallMetadataChange,
-        &AVControllerCallbackStub::HandleOnAVCallStateChange,
         &AVControllerCallbackStub::HandleOnPlaybackStateChange,
         &AVControllerCallbackStub::HandleOnMetadataChange,
         &AVControllerCallbackStub::HandleOnActiveStateChange,
@@ -66,6 +64,8 @@ private:
         &AVControllerCallbackStub::HandleOnQueueItemsChange,
         &AVControllerCallbackStub::HandleOnQueueTitleChange,
         &AVControllerCallbackStub::HandleOnExtrasChange,
+        &AVControllerCallbackStub::HandleOnAVCallMetadataChange,
+        &AVControllerCallbackStub::HandleOnAVCallStateChange,
     };
 };
 }
