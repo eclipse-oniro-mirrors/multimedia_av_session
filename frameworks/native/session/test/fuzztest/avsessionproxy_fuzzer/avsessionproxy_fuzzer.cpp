@@ -18,6 +18,8 @@
 
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avcall_meta_data.h"
+#include "avcall_state.h"
 #include "avsessionproxy_fuzzer.h"
 
 using namespace std;
@@ -80,11 +82,25 @@ void OHOS::AVSession::AvsessionProxyTest(uint8_t* data, size_t size)
     int32_t state = *(reinterpret_cast<const int32_t*>(data));
     avState.SetState(state);
 
+    AVCallMetaData callMetaData;
+    std::string dataToS(std::to_string((int32_t)data));
+    std::string strCallMetaData(dataToS);
+    callMetaData.SetName(strCallMetaData);
+    callMetaData.SetPhoneNumber(strCallMetaData);
+
+    AVCallState avCallState;
+    int32_t callState = std::stoi(dataToS);
+    avCallState.SetAVCallState(callState);
+    bool mute = std::stoi(dataToS);
+    avCallState.SetAVCallMuted(mute);
+
     int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
     AAFwk::WantParams wantParams;
 
     sptr<IRemoteObject> impl = nullptr;
     AVSessionProxy avSessionProxy(impl);
+    avSessionProxy.SetAVCallMetaData(callMetaData);
+    avSessionProxy.SetAVCallState(avCallState);
     avSessionProxy.GetAVMetaData(metaData);
     avSessionProxy.SetAVMetaData(metaData);
     avSessionProxy.GetAVPlaybackState(avState);

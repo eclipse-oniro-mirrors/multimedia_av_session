@@ -28,6 +28,8 @@
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
 #include "avcontrol_command.h"
+#include "avcall_meta_data.h"
+#include "avcall_state.h"
 #include "avsessionitem_fuzzer.h"
 
 using namespace std;
@@ -100,6 +102,7 @@ void AvSessionItemTest(uint8_t *data, size_t size)
         return;
     }
     AvSessionItemTestImpl(avSessionItem, data, size);
+    AvSessionCallItemTest(avSessionItem, data, size);
 }
 
 void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
@@ -156,6 +159,24 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* dat
     avSessionItem->GetUid();
     avSessionItem->GetAbilityName();
     avSessionItem->GetRemoteSource();
+}
+
+void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
+{
+    AVCallMetaData callMetaData;
+    std::string dataToS(std::to_string((int32_t)data));
+    std::string strCallMetaData(dataToS);
+    callMetaData.SetName(strCallMetaData);
+    callMetaData.SetPhoneNumber(strCallMetaData);
+
+    AVCallState avCallState;
+    int32_t callState = std::stoi(dataToS);
+    avCallState.SetAVCallState(callState);
+    bool mute = std::stoi(dataToS);
+    avCallState.SetAVCallMuted(mute);
+
+    avSessionItem->SetAVCallMetaData(callMetaData);
+    avSessionItem->SetAVCallState(avCallState);
 }
 
 void AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)

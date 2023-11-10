@@ -25,6 +25,7 @@ namespace OHOS::AVSession {
 void AvSessionItemOnRemoteRequest(uint8_t* data, size_t size);
 void AvSessionItemTest(uint8_t* data, size_t size);
 void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size);
+void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size);
 
 class AvSessionItemFuzzer {
 public:
