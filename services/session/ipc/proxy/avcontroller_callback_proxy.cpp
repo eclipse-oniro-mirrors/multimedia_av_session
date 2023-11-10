@@ -171,7 +171,7 @@ void AVControllerCallbackProxy::OnQueueItemsChange(const std::vector<AVQueueItem
     for (auto &parcelable : items) {
         CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&parcelable), "Write items failed");
     }
-    
+
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();

@@ -1246,6 +1246,8 @@ napi_status NapiAVSession::OnSkipToQueueItem(napi_env env, NapiAVSession* napiSe
 
 napi_status NapiAVSession::OnAVCallAnswer(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_AVCALL_ANSWER);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_AVCALL_ANSWER, callback);
@@ -1253,6 +1255,8 @@ napi_status NapiAVSession::OnAVCallAnswer(napi_env env, NapiAVSession* napiSessi
 
 napi_status NapiAVSession::OnAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_AVCALL_HANG_UP);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_AVCALL_HANG_UP, callback);
@@ -1260,6 +1264,8 @@ napi_status NapiAVSession::OnAVCallHangUp(napi_env env, NapiAVSession* napiSessi
 
 napi_status NapiAVSession::OnAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE, callback);

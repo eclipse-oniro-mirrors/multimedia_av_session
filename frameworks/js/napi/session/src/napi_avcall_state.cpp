@@ -125,7 +125,7 @@ napi_status NapiAVCallState::SetAVCallState(napi_env env, const AVCallState& in,
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetAVCallState(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
-    status = napi_set_named_property(env, out, "avCallState", property);
+    status = napi_set_named_property(env, out, "state", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }
@@ -144,7 +144,7 @@ napi_status NapiAVCallState::SetAVCallMuted(napi_env env, const AVCallState& in,
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.IsAVCallMuted(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
-    status = napi_set_named_property(env, out, "isAVCallMuted", property);
+    status = napi_set_named_property(env, out, "muted", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }

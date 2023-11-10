@@ -113,12 +113,34 @@ int32_t AVSessionItem::Destroy()
 int32_t AVSessionItem::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
 {
     CHECK_AND_RETURN_RET_LOG(avCallMetaData_.CopyFrom(avCallMetaData), AVSESSION_ERROR, "AVCallMetaData set error");
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = avCallMetaData_.GetMediaImage();
+    if (innerPixelMap != nullptr) {
+        std::string sessionId = GetSessionId();
+        std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
+        AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
+        innerPixelMap->Clear();
+        avCallMetaData_.SetMediaImage(innerPixelMap);
+    }
+
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            controller->HandleAVCallMetaDataChange(avCallMetaData);
+        }
+    }
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::SetAVCallState(const AVCallState& avCallState)
 {
     CHECK_AND_RETURN_RET_LOG(avCallState_.CopyFrom(avCallState), AVSESSION_ERROR, "AVCallState set error");
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            SLOGI("pid=%{public}d", pid);
+            controller->HandleAVCallStateChange(avCallState);
+        }
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -561,7 +583,7 @@ AVCallMetaData AVSessionItem::GetAVCallMetaData()
 {
     std::string sessionId = GetSessionId();
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
-    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = avCallMetaData_.GetMediaImage();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
     return avCallMetaData_;
 }
