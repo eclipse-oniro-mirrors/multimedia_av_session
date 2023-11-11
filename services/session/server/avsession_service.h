@@ -146,6 +146,7 @@ private:
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
+    void NotifySystemUI();
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
     void RemoveClientDeathObserver(pid_t pid);
@@ -305,6 +306,7 @@ private:
     static constexpr const char *DEFAULT_SESSION_ID = "default";
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
+    static constexpr const int32_t SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER = 2;
 
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
 
