@@ -117,6 +117,7 @@ ohos_shared_library("avsession_service") {
 
   external_deps = [
     "ability_base:want",
+    "ability_base:zuri",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -127,10 +128,12 @@ ohos_shared_library("avsession_service") {
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
+    "distributed_notification_service:ans_innerkits",
     "graphic_2d:surface",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

@@ -46,6 +46,10 @@
 #include "avsession_event_handler.h"
 #include "bundle_status_adapter.h"
 #include "params_config_operator.h"
+#include "notification_content.h"
+#include "notification_helper.h"
+#include "notification_request.h"
+#include "notification_constant.h"
 #include "avsession_service.h"
 
 #ifdef EFFICIENCY_MANAGER_ENABLE
@@ -199,6 +203,9 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
         descriptor = topSession_->GetDescriptor();
     }
     NotifyTopSessionChanged(descriptor);
+    if (AVPlaybackState::PLAYBACK_STATE_PLAY == newTopSession->GetPlaybackState().GetState()) {
+        AVSessionService::NotifySystemUI();
+    }
 }
 
 void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
@@ -1334,6 +1341,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
         checkEnableCast(false);
     }
 #endif
+    AVSessionService::NotifySystemUI();
 }
 
 void AVSessionService::HandleControllerRelease(AVControllerItem& controller)
@@ -1969,5 +1977,27 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
         return false;
     }
     return true;
+}
+
+void AVSessionService::NotifySystemUI()
+{
+    Notification::NotificationRequest request;
+    std::shared_ptr<Notification::NotificationLocalLiveViewContent> localLiveViewContent =
+        std::make_shared<Notification::NotificationLocalLiveViewContent>();
+    CHECK_AND_RETURN_LOG(localLiveViewContent != nullptr, "avsession item local live view content nullptr error");
+    localLiveViewContent->SetType(SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER);
+    localLiveViewContent->SetTitle("AVSession NotifySystemUI");
+    localLiveViewContent->SetText("AVSession NotifySystemUI");
+
+    std::shared_ptr<Notification::NotificationContent> content =
+        std::make_shared<Notification::NotificationContent>(localLiveViewContent);
+    CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
+
+    request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
+    request.SetNotificationId(0);
+    request.SetContent(content);
+    request.SetCreatorUid(getuid());
+    int32_t result = Notification::NotificationHelper::PublishNotification(request);
+    SLOGI("AVSession service PublishNotification uid %{public}d, result %{public}d", getuid(), result);
 }
 } // namespace OHOS::AVSession
