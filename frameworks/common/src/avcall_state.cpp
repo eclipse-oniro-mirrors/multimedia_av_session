@@ -24,7 +24,8 @@ AVCallState::AVCallState()
 bool AVCallState::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(mask_.to_string()) &&
-        parcel.WriteInt32(avCallState_);
+        parcel.WriteInt32(avCallState_) &&
+        parcel.WriteBool(isAVCallMuted_);
 }
 
 AVCallState *AVCallState::Unmarshalling(Parcel& parcel)
@@ -38,7 +39,8 @@ AVCallState *AVCallState::Unmarshalling(Parcel& parcel)
     auto *result = new (std::nothrow) AVCallState();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVCallState failed");
     result->mask_ = AVCallStateMaskType(mask);
-    if (!parcel.ReadInt32(result->avCallState_)) {
+    if (!parcel.ReadInt32(result->avCallState_) ||
+        !parcel.ReadBool(result->isAVCallMuted_)) {
         SLOGE("Read AVCallState failed");
         delete result;
         return nullptr;
@@ -83,7 +85,7 @@ bool AVCallState::CopyToByMask(AVCallStateMaskType& mask, AVCallState& out) cons
 {
     bool result = false;
     auto intersection = mask_ & mask;
-    for (int i = 0; i < AVCALL_STATE_MAX; i++) {
+    for (int i = 0; i < AVCALL_STATE_KEY_MAX; i++) {
         if (intersection.test(i)) {
             cloneActions[i](*this, out);
             out.mask_.set(i);

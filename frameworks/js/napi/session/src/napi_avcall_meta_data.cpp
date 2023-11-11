@@ -191,7 +191,7 @@ napi_status NapiAVCallMetaData::GetMediaImage(napi_env env, napi_value in, AVCal
         }
         out.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
     } else {
-        SLOGE("mediaImage property value type invalid");
+        SLOGE("avatar property value type invalid");
         return napi_invalid_arg;
     }
 
