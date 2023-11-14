@@ -57,7 +57,7 @@ export struct AVCastPicker {
         })
         .onReceive((data) => {
           console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
-          if (this.onStateChange !== null) {
+          if (this.onStateChange != null) {
             if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
               this.onStateChange(AVCastPickerState.STATE_APPEARING);
             } else {
