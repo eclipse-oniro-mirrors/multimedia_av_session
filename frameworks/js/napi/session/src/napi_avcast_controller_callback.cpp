@@ -55,7 +55,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const T& param)
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [param](napi_env env, int& argc, napi_value *argv) {
+        asyncCallback_->CallWithFlag(*ref, isValid_, [param](napi_env env, int& argc, napi_value *argv) {
             argc = NapiUtils::ARGC_ONE;
             auto status = NapiUtils::SetValue(env, param, *argv);
             CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
@@ -236,6 +236,9 @@ napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t even
         }
     }
     callbacks_[event].push_back(ref);
+    if (event == EVENT_CAST_PLAYBACK_STATE_CHANGE) {
+        isValid_ = std::make_shared<bool>(true);
+    }
     return napi_ok;
 }
 
@@ -250,6 +253,9 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
             *callbackRef = nullptr;
         }
         callbacks_[event].clear();
+        if (event == EVENT_CAST_PLAYBACK_STATE_CHANGE) {
+            *isValid_ = false;
+        }
         return napi_ok;
     }
     napi_ref ref = nullptr;

@@ -229,6 +229,7 @@ private:
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_CAST_TYPE_MAX] {};
+    std::shared_ptr<bool> isValid_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVCAST_CONTROLLER_CALLBACK_H
