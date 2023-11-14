@@ -13,87 +13,86 @@
  * limitations under the License.
  */
 
-var Prompt = globalThis.requireNapi('prompt');
-var commonEventManager = globalThis.requireNapi('commonEventManager');
-var AVSessionManager = globalThis.requireNapi('multimedia.avsession');
+const TAG = 'avcastpicker_component ';
 
-const TAG = 'avpicker_component ';
+export var AVCastPickerState;
+!function(e) {
+  e[e.STATE_APPEARING = 0] = 'STATE_APPEARING';
+  e[e.STATE_DISAPPEARING = 1] = 'STATE_DISAPPEARING';
+}(AVCastPickerState || (AVCastPickerState = {}));
 
 export class AVCastPicker extends ViewPU {
-  constructor(parent, params, __localStorage, elmtId = -1) {
-    super(parent, __localStorage, elmtId);
-    this.setInitiallyProvidedValue(params);
+  constructor(e, t, o, n = -1) {
+    super(e, o, n);
+    this.__normalColor = new SynchedPropertySimpleOneWayPU(t.normalColor, this, 'normalColor');
+    this.__activeColor = new SynchedPropertySimpleOneWayPU(t.activeColor, this, 'activeColor');
+    this.onStateChange = void 0;
+    this.setInitiallyProvidedValue(t);
   }
 
-  setInitiallyProvidedValue(params) {
+  setInitiallyProvidedValue(e) {
+    void 0 === e.normalColor && this.__normalColor.set('#000000');
+    void 0 === e.activeColor && this.__activeColor.set('#000000');
+    void 0 !== e.onStateChange && (this.onStateChange = e.onStateChange);
   }
 
-  updateStateVars(params) {
+  updateStateVars(e) {
+    this.__normalColor.reset(e.normalColor);
+    this.__activeColor.reset(e.activeColor);
   }
 
-  purgeVariableDependenciesOnElmtId(rmElmtId) {
+  purgeVariableDependenciesOnElmtId(e) {
+    this.__normalColor.purgeDependencyOnElmtId(e);
+    this.__activeColor.purgeDependencyOnElmtId(e);
   }
 
   aboutToBeDeleted() {
+    this.__normalColor.aboutToBeDeleted();
+    this.__activeColor.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
 
-  aboutToAppear() {
-    console.info(TAG + 'aboutToAppear');
-    let subscriber = undefined;
-    let subscribeInfo = {
-      events: ['avpickerCommunication']
-    };
-    commonEventManager.createSubscriber(subscribeInfo, (err, data) => {
-      if (err) {
-        console.info(TAG + 'createSubscriber fail, err : ' + err);
-        return;
-      }
-      subscriber = data;
-      commonEventManager.subscribe(subscriber, (err, data) => {
-        if (err) {
-          console.info(TAG + 'subscribe fail, err : ' + err);
-          return;
-        }
-        console.info(TAG + 'subscriber get message : ' + JSON.stringify(data));
-        Prompt.showToast({ message: String(data.data), duration: 1500, bottom: 30 });
-      });
-    });
+  get normalColor() {
+    return this.__normalColor.get();
   }
 
-  aboutToDisappear() {
-    console.info(TAG + 'aboutToDisappear');
+  set normalColor(e) {
+    this.__normalColor.set(e);
+  }
+
+  get activeColor() {
+    return this.__activeColor.get();
+  }
+
+  set activeColor(e) {
+    this.__activeColor.set(e);
   }
 
   initialRender() {
-    this.observeComponentCreation((elmtId, isInitialRender) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+    this.observeComponentCreation2(((e, t) => {
       Column.create();
-      Column.size({ width: '100%', height: '100%' })
-      isInitialRender || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((elmtId, isInitialRender) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      UIExtensionComponent.create(
-        {
-          abilityName: 'AVPickerUIExtAbility',
-          bundleName: 'com.ohos.systemui',
-          parameters: {'ability.want.params.uiExtensionType':'sysPicker/mediaControl'}
-        }
-      );
-      UIExtensionComponent.size({ width: '100%', height: '100%' })
-      isInitialRender || UIExtensionComponent.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    UIExtensionComponent.pop();
+      Column.size({ width: '100%', height: '100%' });
+    }), Column);
+    this.observeComponentCreation2(((e, t) => {
+      UIExtensionComponent.create({
+        abilityName: 'UIExtAbility',
+        bundleName: 'com.huawei.hmos.mediacontroller',
+        parameters: { normalColor: this.normalColor }
+      });
+      UIExtensionComponent.onReceive((e => {
+        console.info(TAG, `picker state change : ${JSON.stringify(e.state)}`);
+        null !== this.onStateChange && (parseInt(JSON.stringify(e.state)) === AVCastPickerState.STATE_APPEARING ?
+          this.onStateChange(AVCastPickerState.STATE_APPEARING) :
+          this.onStateChange(AVCastPickerState.STATE_DISAPPEARING));
+      }));
+      UIExtensionComponent.size({ width: '100%', height: '100%' });
+    }), UIExtensionComponent);
     Column.pop();
   }
-  
+
   rerender() {
     this.updateDirtyElements();
   }
 }
-
 export default AVCastPicker;
