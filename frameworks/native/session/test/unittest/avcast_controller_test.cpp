@@ -450,6 +450,18 @@ HWTEST_F(AVCastControllerTest, GetCurrentItem001, TestSize.Level1)
 }
 
 /**
+* @tc.name: GetValidCommands001
+* @tc.desc: GetValidCommands
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, GetValidCommands001, TestSize.Level1)
+{
+    std::vector<int32_t> cmds;
+    EXPECT_EQ(castController_->GetValidCommands(cmds), AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: SetDisplaySurface001
 * @tc.desc: SetDisplaySurface
 * @tc.type: FUNC
@@ -688,6 +700,8 @@ HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)
     deviceInfo1.deviceType_ = 1;
     deviceInfo1.ipAddress_ = "ipAddress1";
     deviceInfo1.providerId_ = 1;
+    deviceInfo1.supportedProtocols_ = 3;
+    deviceInfo1.authenticationStatus_ = 1;
 
     EXPECT_EQ(hwCastProvider.AddCastDevice(1, deviceInfo1), false);
 }
@@ -703,6 +717,8 @@ HWTEST_F(AVCastControllerTest, RemoveCastDevice001, TestSize.Level1)
     deviceInfo1.deviceType_ = 1;
     deviceInfo1.ipAddress_ = "ipAddress1";
     deviceInfo1.providerId_ = 1;
+    deviceInfo1.supportedProtocols_ = 1;
+    deviceInfo1.authenticationStatus_ = 0;
 
     EXPECT_EQ(hwCastProvider.RemoveCastDevice(1, deviceInfo1), false);
 }

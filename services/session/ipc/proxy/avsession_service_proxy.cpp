@@ -454,6 +454,10 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.deviceType_), ERR_MARSHALLING, "write deviceType failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.ipAddress_), ERR_MARSHALLING, "write ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.providerId_), ERR_MARSHALLING, "write providerId failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedProtocols_), ERR_MARSHALLING,
+            "write supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.authenticationStatus_), ERR_MARSHALLING,
+            "write authenticationStatus failed");
     }
 
     auto remote = Remote();

@@ -23,6 +23,7 @@
 #include "avsession_callback_proxy.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
+#include "avcast_control_command.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
@@ -172,6 +173,10 @@ public:
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t AddSupportCastCommand(int32_t cmd);
+
+    int32_t DeleteSupportCastCommand(int32_t cmd);
+
     int32_t ReleaseCast() override;
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
@@ -247,6 +252,7 @@ private:
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
     AAFwk::WantParams extras_;
     std::vector<int32_t> supportedCmd_;
+    std::vector<int32_t> supportedCastCmds_;
     std::recursive_mutex callbackLock_;
     sptr<IAVSessionCallback> callback_;
     std::recursive_mutex remoteCallbackLock_;

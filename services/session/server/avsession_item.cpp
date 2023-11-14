@@ -324,7 +324,18 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     std::shared_ptr<AVCastControllerItem> sharedPtr = std::shared_ptr<AVCastControllerItem>(castController.GetRefPtr(),
         [holder = castController](const auto*) {});
 
-    sharedPtr->Init(castControllerProxy_);
+    auto callback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
+        SLOGI("add cast valid command %{public}d", cmd);
+        if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_INVALID) {
+            supportedCastCmds = supportedCastCmds_;
+            return;
+        }
+        AddSupportCastCommand(cmd);
+        supportedCastCmds = supportedCastCmds_;
+        return;
+    }
+
+    sharedPtr->Init(castControllerProxy_, callback);
     castControllers_.emplace_back(sharedPtr);
     
     sptr<IRemoteObject> remoteObject = castController;
@@ -423,6 +434,28 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+
+int32_t AVSessionItem::AddSupportCastCommand(int32_t cmd)
+{
+    CHECK_AND_RETURN_RET_LOG(cmd > AVCastControlCommand::CAST_CONTROL_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
+    CHECK_AND_RETURN_RET_LOG(cmd < AVCastControlCommand::CAST_CONTROL_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    auto iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(), cmd);
+    CHECK_AND_RETURN_RET_LOG(iter == supportedCastCmds_.end(), AVSESSION_SUCCESS, "cmd already been added");
+    supportedCastCmds_.push_back(cmd);
+    std::lock_guard controllerLockGuard(controllersLock_);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
+{
+    CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
+    CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    auto iter = std::remove(supportedCastCmds_.begin(), supportedCastCmds_.end(), cmd);
+    supportedCastCmds_.erase(iter, supportedCastCmds_.end());
+    std::lock_guard controllerLockGuard(controllersLock_);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVSessionItem::ReleaseCast()
 {
     SLOGI("Release cast process");

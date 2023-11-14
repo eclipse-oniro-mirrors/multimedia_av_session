@@ -121,7 +121,7 @@ bool HwCastProviderSession::UnRegisterCastSessionStateListener(std::shared_ptr<I
 
 void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &stateInfo)
 {
-    SLOGD("OnDeviceState %{public}d", static_cast<int>(stateInfo.deviceState));
+    SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(stateInfo.deviceState));
     if (castSessionStateListenerList_.size() == 0) {
         SLOGI("current has not registered listener");
         return;

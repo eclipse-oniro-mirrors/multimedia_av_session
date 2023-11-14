@@ -241,6 +241,10 @@ void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
         CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.deviceType_), "write deviceType failed");
         CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.ipAddress_), "write ipAddress failed");
         CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.providerId_), "write providerId failed");
+        CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.supportedProtocols_),
+            "write supportedProtocols failed");
+        CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.authenticationStatus_),
+            "write authenticationStatus failed");
     }
 
     auto remote = Remote();

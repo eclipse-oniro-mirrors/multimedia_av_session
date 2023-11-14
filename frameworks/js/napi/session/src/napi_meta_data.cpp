@@ -37,6 +37,7 @@ std::map<std::string, NapiMetaData::GetterType> NapiMetaData::getterMap_ = {
     { "previousAssetId", GetPreviousAssetId },
     { "nextAssetId", GetNextAssetId },
     { "skipIntervals", GetSkipIntervals },
+    { "filter", GetFilter },
     { "displayTags", GetDisplayTags }
 };
 
@@ -58,6 +59,7 @@ std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
     { AVMetaData::META_KEY_PREVIOUS_ASSET_ID, SetPreviousAssetId },
     { AVMetaData::META_KEY_NEXT_ASSET_ID, SetNextAssetId },
     { AVMetaData::META_KEY_SKIP_INTERVALS, SetSkipIntervals },
+    { AVMetaData::META_KEY_FILTER, SetFilter },
     { AVMetaData::META_KEY_DISPLAY_TAGS, SetDisplayTags }
 };
 
@@ -79,6 +81,7 @@ std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
     { "previousAssetId", AVMetaData::META_KEY_PREVIOUS_ASSET_ID },
     { "nextAssetId", AVMetaData::META_KEY_NEXT_ASSET_ID },
     { "skipIntervals", AVMetaData::META_KEY_SKIP_INTERVALS },
+    { "filter", AVMetaData::META_KEY_FILTER },
     { "displayTags", AVMetaData::META_KEY_DISPLAY_TAGS }
 };
 
@@ -519,6 +522,27 @@ napi_status NapiMetaData::SetSkipIntervals(napi_env env, const AVMetaData& in, n
     auto status = NapiUtils::SetValue(env, in.GetSkipIntervals(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "skipIntervals", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMetaData::GetFilter(napi_env env, napi_value in, AVMetaData& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "filter", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    SLOGD("GetFilter %{public}d", static_cast<int32_t>(property));
+    out.SetFilter(property);
+    return status;
+}
+
+napi_status NapiMetaData::SetFilter(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    napi_value property {};
+    SLOGD("SetFilter %{public}d", static_cast<int32_t>(in.GetFilter()));
+    auto status = NapiUtils::SetValue(env, in.GetFilter(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "filter", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }

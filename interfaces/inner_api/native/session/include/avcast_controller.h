@@ -61,6 +61,8 @@ public:
 
     virtual int32_t GetCurrentItem(AVQueueItem& currentItem) = 0;
 
+    virtual int32_t GetValidCommands(std::vector<int32_t>& cmds) = 0;
+
     virtual int32_t SetDisplaySurface(std::string& surfaceId) = 0;
 
     virtual int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) = 0;

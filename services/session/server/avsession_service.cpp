@@ -226,8 +226,8 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
 bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
     for (const auto& session : GetContainer().GetAllSessions()) {
-        if (session->GetDescriptor().sessionTag_ == "RemoteCast" || session->GetSessionType() == "video") {
-            SLOGI("Remote or video sessions do not need to be saved to history");
+        if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
+            SLOGI("Remote sessions do not need to be saved to history");
             continue;
         }
         if (session->GetUid() != info.uid) {
@@ -258,6 +258,7 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         value["sessionId"] = session->GetSessionId();
         value["bundleName"] = session->GetBundleName();
         value["abilityName"] = session->GetAbilityName();
+        value["sessionType"] = session->GetSessionType();
         if (values.size() <= 0) {
             values.push_back(value);
         } else {
@@ -447,13 +448,12 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 
 void AVSessionService::checkEnableCast(bool enable)
 {
-    SLOGD("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
+    SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
     if (enable == true && isInCast_ == false) {
         AVRouter::GetInstance().Init(this);
-        isInCast+ = true;
+        isInCast_ = true;
     } else if (enable == false && isInCast_ == true) {
-        AVRouter::GetInstance().Release();
-        isInCast+ = false;
+        isInCast_ = AVRouter::GetInstance().Release();
     } else {
         SLOGD("AVRouter Init in nothing change");
     }
@@ -690,11 +690,7 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
                                       elementName);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, session, "session is nullptr");
 
-    if (session->GetSessionType() != "video") {
-        refreshSortFileOnCreateSession(session->GetSessionId(), elementName);
-    } else {
-        SLOGI("video sessions do not need to be saved to history");
-    }
+    refreshSortFileOnCreateSession(session->GetSessionId(), session->GetSessionType(), elementName);
 
     {
         std::lock_guard lockGuard1(abilityManagerLock_);
@@ -715,7 +711,7 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
     return session;
 }
 
-void AVSessionService::refreshSortFileOnCreateSession(const std::string& sessionId,
+void AVSessionService::refreshSortFileOnCreateSession(const std::string& sessionId, const std::string& sessionType,
                                                       const AppExecFwk::ElementName& elementName)
 {
     std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
@@ -745,6 +741,7 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
         value["sessionId"] = sessionId;
         value["bundleName"] = elementName.GetBundleName();
         value["abilityName"] = elementName.GetAbilityName();
+        value["sessionType"] = sessionType;
         if (values.size() <= 0) {
             values.push_back(value);
         } else {
@@ -829,6 +826,45 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors)
+{
+    std::string oldSortContent;
+    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
+        SLOGE("GetHistoricalSessionDescriptorsFromFile read sort fail, Return!");
+        return AVSESSION_ERROR;
+    }
+
+    nlohmann::json sortValues = json::parse(oldSortContent, nullptr, false);
+    CHECK_AND_RETURN_RET_LOG(!sortValues.is_discarded(), AVSESSION_ERROR, "json object is null");
+    for (const auto& value : sortValues) {
+        if (value["sessionType"] == "video") {
+            SLOGI("GetHistoricalSessionDescriptorsFromFile with no video type session");
+            continue;
+        }
+        auto session = GetContainer().GetSessionById(value["sessionId"]);
+        if (session != nullptr) {
+            descriptors.push_back(session->GetDescriptor());
+        } else {
+            AVSessionDescriptor descriptor;
+            descriptor.sessionId_ = value["sessionId"];
+            descriptor.elementName_.SetBundleName(value["bundleName"]);
+            descriptor.elementName_.SetAbilityName(value["abilityName"]);
+            descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+            descriptors.push_back(descriptor);
+        }
+    }
+    if (descriptors.size() == 0 && GetContainer().GetAllSessions().size() == 0) {
+        SLOGE("GetHistoricalSessionDescriptorsFromFile read empty, return default!");
+        AVSessionDescriptor descriptor;
+        descriptor.sessionId_ = DEFAULT_SESSION_ID;
+        descriptor.elementName_.SetBundleName(DEFAULT_BUNDLE_NAME);
+        descriptor.elementName_.SetAbilityName(DEFAULT_ABILITY_NAME);
+        descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+        descriptors.push_back(descriptor);
+    }
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
                                                           std::vector<AVSessionDescriptor>& descriptors)
 {
@@ -841,34 +877,9 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
 
     std::lock_guard lockGuard(sessionAndControllerLock_);
     std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
-    std::string oldSortContent;
+
     std::vector<AVSessionDescriptor> tempDescriptors;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
-        SLOGE("GetHistoricalSessionDescriptors read sort fail, Return!");
-        return AVSESSION_ERROR;
-    }
-    nlohmann::json sortValues = json::parse(oldSortContent, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!sortValues.is_discarded(), AVSESSION_ERROR, "json object is null");
-    for (const auto& value : sortValues) {
-        auto session = GetContainer().GetSessionById(value["sessionId"]);
-        if (session != nullptr) {
-            tempDescriptors.push_back(session->GetDescriptor());
-        } else {
-            AVSessionDescriptor descriptor;
-            descriptor.sessionId_ = value["sessionId"];
-            descriptor.elementName_.SetBundleName(value["bundleName"]);
-            descriptor.elementName_.SetAbilityName(value["abilityName"]);
-            tempDescriptors.push_back(descriptor);
-        }
-    }
-    if (tempDescriptors.size() == 0 && GetContainer().GetAllSessions().size() == 0) {
-        SLOGE("GetHistoricalSessionDescriptors read empty, return default!");
-        AVSessionDescriptor descriptor;
-        descriptor.sessionId_ = DEFAULT_SESSION_ID;
-        descriptor.elementName_.SetBundleName(DEFAULT_BUNDLE_NAME);
-        descriptor.elementName_.SetAbilityName(DEFAULT_ABILITY_NAME);
-        tempDescriptors.push_back(descriptor);
-    }
+    GetHistoricalSessionDescriptorsFromFile(tempDescriptors);
     if (maxSize < 0 || maxSize > maxHistoryNums) {
         maxSize = unSetHistoryNum;
     }

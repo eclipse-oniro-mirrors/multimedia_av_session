@@ -49,8 +49,9 @@ public:
         META_KEY_PREVIOUS_ASSET_ID = 14,
         META_KEY_NEXT_ASSET_ID = 15,
         META_KEY_SKIP_INTERVALS = 16,
-        META_KEY_DISPLAY_TAGS = 17,
-        META_KEY_MAX = 18
+        META_KEY_FILTER = 17,
+        META_KEY_DISPLAY_TAGS = 18,
+        META_KEY_MAX = 19
     };
 
     enum {
@@ -124,6 +125,9 @@ public:
     void SetSkipIntervals(int32_t skipIntervals);
     int32_t GetSkipIntervals() const;
 
+    void SetFilter(int32_t filter);
+    int32_t GetFilter() const;
+
     void SetDisplayTags(int32_t displayTags);
     int32_t GetDisplayTags() const;
 
@@ -154,6 +158,7 @@ public:
         META_KEY_PREVIOUS_ASSET_ID,
         META_KEY_NEXT_ASSET_ID,
         META_KEY_SKIP_INTERVALS,
+        META_KEY_FILTER,
         META_KEY_DISPLAY_TAGS
     };
 
@@ -177,6 +182,7 @@ private:
     std::string previousAssetId_ = "";
     std::string nextAssetId_ = "";
     int32_t skipIntervals_ = SECONDS_15;
+    int32_t filter_ = 2;
     int32_t displayTags_ = 0;
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
@@ -196,6 +202,7 @@ private:
     static void ClonePreviousAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneNextAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneSkipIntervals(const AVMetaData& from, AVMetaData& to);
+    static void CloneFilter(const AVMetaData& from, AVMetaData& to);
     static void CloneDisplayTags(const AVMetaData& from, AVMetaData& to);
 
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
@@ -217,6 +224,7 @@ private:
         &AVMetaData::ClonePreviousAssetId,
         &AVMetaData::CloneNextAssetId,
         &AVMetaData::CloneSkipIntervals,
+        &AVMetaData::CloneFilter,
         &AVMetaData::CloneDisplayTags
     };
 };

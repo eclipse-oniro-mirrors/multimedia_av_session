@@ -52,6 +52,10 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.ipAddress_), false, "write ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.providerId_), false, "write providerId failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedProtocols_), false,
+            "write supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.authenticationStatus_), false,
+            "write authenticationStatus failed");
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -77,6 +81,10 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.supportedProtocols_), false,
+            "Read supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.authenticationStatus_), false,
+            "Read authenticationStatus failed");
         outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     }
 
@@ -97,6 +105,10 @@ bool DeviceInfo::WriteToParcel(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceType_), false, "write deviceType failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(ipAddress_), false, "write ipAddress failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(providerId_), false, "write providerId failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportedProtocols_), false,
+        "write supportedProtocols failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(authenticationStatus_), false,
+        "write authenticationStatus failed");
 
     return true;
 }
@@ -109,6 +121,10 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceType_), false, "Read deviceType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(ipAddress_), false, "Read ipAddress failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(providerId_), false, "Read providerId failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedProtocols_), false,
+        "Read supportedProtocols failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(authenticationStatus_), false,
+        "Read authenticationStatus failed");
 
     return true;
 }
@@ -124,6 +140,10 @@ bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.ipAddress_), false, "write ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.providerId_), false, "write providerId failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedProtocols_), false,
+            "Read supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.authenticationStatus_), false,
+            "Read authenticationStatus failed");
     }
     return true;
 }
@@ -140,6 +160,10 @@ bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.supportedProtocols_), false,
+            "Read supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.authenticationStatus_), false,
+            "Read authenticationStatus failed");
         deviceInfos_.emplace_back(deviceInfo);
     }
     return true;

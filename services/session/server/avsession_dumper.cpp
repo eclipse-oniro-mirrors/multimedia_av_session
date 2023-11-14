@@ -107,6 +107,7 @@ void AVSessionDumper::ShowMetaData(std::string& result, const AVSessionService& 
             result.append("        previous assetid     : " + metaData.GetPreviousAssetId() + "\n");
             result.append("        next assetid         : " + metaData.GetNextAssetId() + "\n");
             result.append("        skip intervals       : " + std::to_string(metaData.GetSkipIntervals()) + "\n");
+            result.append("        filter               : " + std::to_string(metaData.GetFilter()) + "\n");
         }
     }
 }
