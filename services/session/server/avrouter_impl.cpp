@@ -22,7 +22,7 @@
 #include "avcast_provider_manager.h"
 #include "hw_cast_provider.h"
 
-std::shared_ptr<HwCastProvider> AVRouterImpl::hwProvider_;
+static std::shared_ptr<OHOS::AVSession::HwCastProvider> hwProvider_;
 
 namespace OHOS::AVSession {
 AVRouterImpl::AVRouterImpl()

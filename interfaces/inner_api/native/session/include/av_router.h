@@ -51,7 +51,7 @@ public:
      *
      * @since 10
     */
-    virtual void Release() = 0;
+    virtual bool Release() = 0;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
