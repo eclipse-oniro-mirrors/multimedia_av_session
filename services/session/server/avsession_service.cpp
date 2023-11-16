@@ -213,6 +213,9 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("same session");
+        if (AVPlaybackState::PLAYBACK_STATE_PLAY == topSession_->GetPlaybackState().GetState()) {
+            AVSessionService::NotifySystemUI();
+        }
         return;
     }
     for (const auto& session : GetContainer().GetAllSessions()) {

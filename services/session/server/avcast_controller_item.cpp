@@ -146,7 +146,7 @@ int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 
 int32_t AVCastControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 {
-    cmds = validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_INVALID, cmds);
+    validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_INVALID, cmds);
     return AVSESSION_SUCCESS;
 }
 

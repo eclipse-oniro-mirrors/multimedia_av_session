@@ -49,7 +49,6 @@ private:
     static napi_value GetCastAVPlaybackState(napi_env env, napi_callback_info info);
     static napi_value GetCurrentItem(napi_env env, napi_callback_info info);
     static napi_value getValidCommands(napi_env env, napi_callback_info info);
-    static napi_value release(napi_env env, napi_callback_info info);
     static napi_value SetDisplaySurface(napi_env env, napi_callback_info info);
     static napi_status SetCastPlaybackStateFilter(napi_env env, NapiAVCastController *napiCastController,
         napi_value filter);

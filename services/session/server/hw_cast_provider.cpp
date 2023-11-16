@@ -277,7 +277,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceName_ = castRemoteDevice.deviceName;
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
-        deviceInfo.supportedProtocols_ = ProtocalType::TYPE_CAST_PLUS_STREAM;
+        deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
         deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType);
         deviceInfoList.emplace_back(deviceInfo);
     }
