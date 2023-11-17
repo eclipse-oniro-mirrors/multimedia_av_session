@@ -38,6 +38,7 @@ public:
     
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
+    void OnEndOfStream(const int32_t isLooping) override;
 private:
     static inline BrokerDelegator<AVCastControllerCallbackProxy> delegator_;
 };

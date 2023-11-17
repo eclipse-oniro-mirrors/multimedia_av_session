@@ -17,6 +17,8 @@
 #include "avsession_controller.h"
 #include "napi_async_work.h"
 #include "napi_utils.h"
+#include "napi_avcall_meta_data.h"
+#include "napi_avcall_state.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
 #include "napi_media_description.h"
@@ -49,6 +51,9 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "outputDeviceChange", OnOutputDeviceChange },
     { "commonCommand", OnCommonCommand },
     { "skipToQueueItem", OnSkipToQueueItem },
+    { "answer", OnAVCallAnswer },
+    { "hangUp", OnAVCallHangUp },
+    { "toggleCallMute", OnAVCallToggleCallMute },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
     { "play", OffPlay },
@@ -66,6 +71,9 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "outputDeviceChange", OffOutputDeviceChange },
     { "commonCommand", OffCommonCommand },
     { "skipToQueueItem", OffSkipToQueueItem },
+    { "answer", OffAVCallAnswer },
+    { "hangUp", OffAVCallHangUp },
+    { "toggleCallMute", OffAVCallToggleCallMute },
 };
 
 NapiAVSession::NapiAVSession()
@@ -82,7 +90,9 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor descriptors[] = {
         DECLARE_NAPI_FUNCTION("setAVMetadata", SetAVMetaData),
+        DECLARE_NAPI_FUNCTION("setCallMetadata", SetAVCallMetaData),
         DECLARE_NAPI_FUNCTION("setAVPlaybackState", SetAVPlaybackState),
+        DECLARE_NAPI_FUNCTION("setAVCallState", SetAVCallState),
         DECLARE_NAPI_FUNCTION("setLaunchAbility", SetLaunchAbility),
         DECLARE_NAPI_FUNCTION("setExtras", SetExtras),
         DECLARE_NAPI_FUNCTION("setAudioStreamId", SetAudioStreamId),
@@ -93,6 +103,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
         DECLARE_NAPI_FUNCTION("getOutputDevice", GetOutputDevice),
+        DECLARE_NAPI_FUNCTION("getOutputDeviceSync", GetOutputDeviceSync),
         DECLARE_NAPI_FUNCTION("dispatchSessionEvent", SetSessionEvent),
         DECLARE_NAPI_FUNCTION("setAVQueueItems", SetAVQueueItems),
         DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
@@ -119,6 +130,7 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
         auto* napiSession = reinterpret_cast<NapiAVSession*>(data);
         napi_delete_reference(env, napiSession->wrapperRef_);
         delete napiSession;
+        napiSession = nullptr;
     };
     auto* napiSession = new(std::nothrow) NapiAVSession();
     if (napiSession == nullptr) {
@@ -143,7 +155,8 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     napiAvSession->session_ = std::move(nativeSession);
     napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
     napiAvSession->sessionType_ = napiAvSession->session_->GetSessionType();
-    SLOGI("sessionId=%{public}s", napiAvSession->sessionId_.c_str());
+    SLOGI("sessionId=%{public}s, sessionType:%{public}s", napiAvSession->sessionId_.c_str(),
+        napiAvSession->sessionType_.c_str());
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, napiAvSession->sessionId_, property);
@@ -269,6 +282,112 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
     return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::SetAVCallMetaData(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVCallMetadata");
+    struct ConcreteContext : public ContextBase {
+        AVCallMetaData avCallMetaData;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetAVCallMetaData failed : no memory");
+        NapiUtils::ThrowError(env, "SetAVCallMetaData failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiAVCallMetaData::GetValue(env, argv[ARGV_FIRST], context->avCallMetaData);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get av call meta data failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SET_AVCALL_META_DATA_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SetAVCallMetaData failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->SetAVCallMetaData(context->avCallMetaData);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetAVCallMetaData failed : native session not exist";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "SetAVCallMetaData failed : native invalid parameters";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SetAVCallMetaData failed : native no permission";
+            } else {
+                context->errMessage = "SetAVCallMetaData failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetAVCallMetaData", executor, complete);
+}
+
+napi_value NapiAVSession::SetAVCallState(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVCallState");
+    struct ConcreteContext : public ContextBase {
+        AVCallState avCallState;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetAVCallState failed : no memory");
+        NapiUtils::ThrowError(env, "SetAVCallState failed : no memory",
+                              NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiAVCallState::GetValue(env, argv[ARGV_FIRST], context->avCallState);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get avCallState failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SET_AV_CALL_STATE_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SetAVCallState failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->SetAVCallState(context->avCallState);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetAVCallState failed : native session not exist";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "SetAVCallState failed : native invalid parameters";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SetAVCallState failed : native no permission";
+            } else {
+                context->errMessage = "SetAVCallState failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetAVCallState", executor, complete);
 }
 
 napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
@@ -740,6 +859,41 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
     return NapiAsyncWork::Enqueue(env, context, "GetOutputDevice", executor, complete);
 }
 
+napi_value NapiAVSession::GetOutputDeviceSync(napi_env env, napi_callback_info info)
+{
+    SLOGD("Start GetOutputDeviceSync");
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("GetOutputDeviceSync failed : no memory");
+        NapiUtils::ThrowError(env, "GetOutputDeviceSync failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info, NapiCbInfoParser(), true);
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession->session_ == nullptr) {
+        context->status = napi_generic_failure;
+        context->errMessage = "GetOutputDeviceSync failed : session is nullptr";
+        context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    AVSessionDescriptor descriptor;
+    AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(napiSession->session_->GetSessionId(),
+        descriptor);
+    napi_value output {};
+    auto status = NapiUtils::SetValue(env, descriptor.outputDeviceInfo_, output);
+    if (status != napi_ok) {
+        SLOGE("convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    return output;
+}
+
 napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
@@ -1090,6 +1244,33 @@ napi_status NapiAVSession::OnSkipToQueueItem(napi_env env, NapiAVSession* napiSe
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, callback);
 }
 
+napi_status NapiAVSession::OnAVCallAnswer(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_AVCALL_ANSWER);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_AVCALL_ANSWER, callback);
+}
+
+napi_status NapiAVSession::OnAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_AVCALL_HANG_UP);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_AVCALL_HANG_UP, callback);
+}
+
+napi_status NapiAVSession::OnAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE, callback);
+}
+
 napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1258,5 +1439,26 @@ napi_status NapiAVSession::OffSkipToQueueItem(napi_env env, NapiAVSession* napiS
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, callback);
+}
+
+napi_status NapiAVSession::OffAVCallAnswer(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_AVCALL_ANSWER, callback);
+}
+
+napi_status NapiAVSession::OffAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_AVCALL_HANG_UP, callback);
+}
+
+napi_status NapiAVSession::OffAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE, callback);
 }
 }

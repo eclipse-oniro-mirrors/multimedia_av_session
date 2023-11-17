@@ -39,6 +39,10 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(previousAssetId_) &&
         parcel.WriteString(nextAssetId_) &&
         parcel.WriteParcelable(mediaImage_.get() &&
+        parcel.WriteInt32(skipIntervals_) &&
+        parcel.WriteInt32(filter_) &&
+        parcel.WriteInt32(displayTags_) &&
+        parcel.WriteParcelable(mediaImage_.get() &&
         parcel.WriteParcelable(avQueueImage_.get());
 }
 
@@ -68,7 +72,10 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
         !data.ReadString(result->description_) ||
         !data.ReadString(result->lyric_) ||
         !data.ReadString(result->previousAssetId_) ||
-        !data.ReadString(result->nextAssetId_)) {
+        !data.ReadString(result->nextAssetId_) ||
+        !data.ReadInt32(result->skipIntervals_) ||
+        !data.ReadInt32(result->filter_) ||
+        !data.ReadInt32(result->displayTags_)) {
         SLOGE("read AVMetaData failed");
         delete result;
         return nullptr;
@@ -314,6 +321,45 @@ std::string AVMetaData::GetNextAssetId() const
     return nextAssetId_;
 }
 
+void AVMetaData::SetSkipIntervals(int32_t skipIntervals)
+{
+    SLOGD("SetSkipIntervals %{public}d", static_cast<int32_t>(skipIntervals));
+    skipIntervals_ = skipIntervals;
+    metaMask_.set(META_KEY_SKIP_INTERVALS);
+}
+
+int32_t AVMetaData::GetSkipIntervals() const
+{
+    SLOGD("GetSkipIntervals %{public}d", static_cast<int32_t>(skipIntervals_));
+    return skipIntervals_;
+}
+
+void AVMetaData::SetFilter(int32_t filter)
+{
+    SLOGD("SetFilter %{public}d", static_cast<int32_t>(filter));
+    filter_ = filter;
+    metaMask_.set(META_KEY_FILTER);
+}
+
+int32_t AVMetaData::GetFilter() const
+{
+    SLOGD("GetFilter %{public}d", static_cast<int32_t>(filter_));
+    return filter_;
+}
+
+void AVMetaData::SetDisplayTags(int32_t displayTags)
+{
+    SLOGD("SetDisplayTags %{public}d", static_cast<int32_t>(displayTags));
+    displayTags_ = displayTags;
+    metaMask_.set(META_KEY_DISPLAY_TAGS);
+}
+
+int32_t AVMetaData::GetDisplayTags() const
+{
+    SLOGD("GetDisplayTags %{public}d", static_cast<int32_t>(displayTags_));
+    return displayTags_;
+}
+
 AVMetaData::MetaMaskType AVMetaData::GetMetaMask() const
 {
     return metaMask_;
@@ -342,6 +388,7 @@ void AVMetaData::Reset()
     lyric_ = "";
     previousAssetId_ = "";
     nextAssetId_ = "";
+    displayTags_ = 0;
 }
 
 bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
@@ -386,7 +433,8 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
 
 bool AVMetaData::IsValid() const
 {
-    return duration_ >= AVMetaData::DURATION_ALWAYS_PLAY && publishDate_ >= 0;
+    return duration_ >= AVMetaData::DURATION_ALWAYS_PLAY && publishDate_ >= 0
+        && displayTags_ <= AVMetaData::DISPLAY_TAG_ALL;
 }
 
 void AVMetaData::CloneAssetId(const AVMetaData& from, AVMetaData& to)
@@ -487,5 +535,20 @@ void AVMetaData::ClonePreviousAssetId(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneNextAssetId(const AVMetaData& from, AVMetaData& to)
 {
     to.nextAssetId_ = from.nextAssetId_;
+}
+
+void AVMetaData::CloneSkipIntervals(const AVMetaData& from, AVMetaData& to)
+{
+    to.skipIntervals_ = from.skipIntervals_;
+}
+
+void AVMetaData::CloneFilter(const AVMetaData& from, AVMetaData& to)
+{
+    to.filter_ = from.filter_;
+}
+
+void AVMetaData::CloneDisplayTags(const AVMetaData& from, AVMetaData& to)
+{
+    to.displayTags_ = from.displayTags_;
 }
 } // namespace OHOS::AVSession

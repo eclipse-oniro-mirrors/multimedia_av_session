@@ -17,6 +17,8 @@
 #include "securec.h"
 #include "avsession_log.h"
 #include "av_session.h"
+#include "napi_avcall_meta_data.h"
+#include "napi_avcall_state.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
 #include "napi_media_description.h"
@@ -38,6 +40,8 @@ int32_t NapiUtils::ConvertSessionType(const std::string& typeString)
         return AVSession::SESSION_TYPE_AUDIO;
     } else if (typeString == "video") {
         return AVSession::SESSION_TYPE_VIDEO;
+    } else if (typeString == "voice_call") {
+        return AVSession::SESSION_TYPE_VOICE_CALL;
     } else {
         return AVSession::SESSION_TYPE_INVALID;
     }
@@ -49,6 +53,8 @@ std::string NapiUtils::ConvertSessionType(int32_t type)
         return "audio";
     } else if (type == AVSession::SESSION_TYPE_VIDEO) {
         return "video";
+    } else if (type == AVSession::SESSION_TYPE_VOICE_CALL) {
+        return "voice_call";
     } else {
         return "";
     }
@@ -433,6 +439,28 @@ napi_status NapiUtils::SetValue(napi_env env, const AAFwk::WantParams& in, napi_
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     out = AppExecFwk::WrapWantParams(env, in);
     return status;
+}
+
+/* napi_value <-> AVCallMetaData */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVCallMetaData& out)
+{
+    return NapiAVCallMetaData::GetValue(env, in, out);
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AVCallMetaData& in, napi_value& out)
+{
+    return NapiAVCallMetaData::SetValue(env, in, out);
+}
+
+/* napi_value <-> AVCallState */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVCallState& out)
+{
+    return NapiAVCallState::GetValue(env, in, out);
+}
+
+napi_status NapiUtils::SetValue(napi_env env, const AVCallState& in, napi_value& out)
+{
+    return NapiAVCallState::SetValue(env, in, out);
 }
 
 /* napi_value <-> AVMetaData */
@@ -901,6 +929,15 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     status = napi_set_named_property(env, out, "providerId", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
+    status = SetValue(env, in.supportedProtocols_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "supportedProtocols", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.authenticationStatus_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "authenticationStatus", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
     return napi_ok;
 }
 
@@ -999,13 +1036,15 @@ napi_status NapiUtils::GetDateValue(napi_env env, napi_value value, double& resu
     CHECK_RETURN(env != nullptr, "env is nullptr", napi_invalid_arg);
     CHECK_RETURN(value != nullptr, "value is nullptr", napi_invalid_arg);
 
-    auto engine = reinterpret_cast<NativeEngine*>(env);
-    auto nativeValue = reinterpret_cast<NativeValue*>(value);
-    auto isDate = nativeValue->IsDate();
+    SLOGD("GetDateValue in");
+    bool isDate = false;
+    napi_is_date(env, value, &isDate);
     if (isDate) {
-        auto nativeDate = reinterpret_cast<NativeDate*>(nativeValue->GetInterface(NativeDate::INTERFACE_ID));
-        result = nativeDate->GetTime();
-        engine->ClearLastError();
+        napi_status status = napi_get_date_value(env, value, &result);
+        if (status != napi_ok) {
+            SLOGE("get date error");
+        }
+        SLOGD("GetDateValue out");
         return napi_ok;
     } else {
         SLOGE("value is not date type");
@@ -1017,10 +1056,12 @@ napi_status NapiUtils::SetDateValue(napi_env env, double time, napi_value& resul
 {
     CHECK_RETURN(env != nullptr, "env is nullptr", napi_invalid_arg);
 
-    auto engine = reinterpret_cast<NativeEngine*>(env);
-    auto resultValue = engine->CreateDate(time);
-    result = reinterpret_cast<napi_value>(resultValue);
-    engine->ClearLastError();
+    SLOGD("SetDateValue in");
+    napi_status status = napi_create_date(env, time, &result);
+    if (status != napi_ok) {
+        SLOGE("create date error");
+    }
+    SLOGD("SetDateValue out");
     return napi_ok;
 }
 
@@ -1316,6 +1357,28 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
         CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId value failed", status);
     } else {
         out.providerId_ = 0;
+    }
+
+    bool hasSupportedProtocols = false;
+    napi_has_named_property(env, in, "supportedProtocols", &hasSupportedProtocols);
+    if (hasSupportedProtocols) {
+        status = napi_get_named_property(env, in, "supportedProtocols", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedProtocols failed", status);
+        status = GetValue(env, value, out.supportedProtocols_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedProtocols value failed", status);
+    } else {
+        out.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
+    }
+
+    bool hasAuthenticationStatus = false;
+    napi_has_named_property(env, in, "authenticationStatus", &hasAuthenticationStatus);
+    if (hasAuthenticationStatus) {
+        status = napi_get_named_property(env, in, "authenticationStatus", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo authenticationStatus failed", status);
+        status = GetValue(env, value, out.authenticationStatus_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo authenticationStatus value failed", status);
+    } else {
+        out.authenticationStatus_ = 0;
     }
     return napi_ok;
 }

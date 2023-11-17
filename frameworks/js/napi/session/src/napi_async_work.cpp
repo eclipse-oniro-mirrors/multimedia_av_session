@@ -32,6 +32,8 @@ ContextBase::~ContextBase()
         }
         napi_delete_reference(env, selfRef);
         env = nullptr;
+        callbackRef = nullptr;
+        selfRef = nullptr;
     }
 }
 
@@ -119,7 +121,7 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
             GenerateOutput(ctxt);
         },
         reinterpret_cast<void*>(ctxt.get()), &ctxt->work);
-    napi_queue_async_work(ctxt->env, ctxt->work);
+    napi_queue_async_work_with_qos(ctxt->env, ctxt->work, napi_qos_user_initiated);
     ctxt->hold = ctxt; // save crossing-thread ctxt.
     return promise;
 }

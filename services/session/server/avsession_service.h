@@ -104,7 +104,7 @@ public:
 
     void OnClientDied(pid_t pid);
 
-    void HandleSessionRelease(AVSessionItem& session);
+    void HandleSessionRelease(std::string sessionId);
 
     void HandleControllerRelease(AVControllerItem& controller);
 
@@ -121,12 +121,22 @@ public:
     }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    void ReleaseCastSession() override;
+
+    void CreateSessionByCast(const int64_t castHandle) override;
+
     void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
+
+    void NotifyDeviceOffline(const std::string& deviceId) override;
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
     int32_t StopCast(const SessionToken& sessionToken) override;
+
+    int32_t checkEnableCast(bool enable) override;
 #endif
+
+    int32_t Close(void) override;
 
 private:
     static SessionContainer& GetContainer();
@@ -141,6 +151,7 @@ private:
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
+    void NotifySystemUI();
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
     void RemoveClientDeathObserver(pid_t pid);
@@ -248,11 +259,16 @@ private:
 
     const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
 
-    void refreshSortFileOnCreateSession(const std::string& sessionId, const AppExecFwk::ElementName& elementName);
+    void refreshSortFileOnCreateSession(const std::string& sessionId, const std::string& sessionType,
+        const AppExecFwk::ElementName& elementName);
 
     bool LoadStringFromFileEx(const std::string& filePath, std::string& content);
 
     bool SaveStringToFileEx(const std::string& filePath, const std::string& content);
+
+    void ClearClientResources(pid_t pid);
+
+    int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
@@ -290,6 +306,7 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+    bool isInCast_ = false;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
@@ -297,12 +314,14 @@ private:
     static constexpr const char *DEFAULT_SESSION_ID = "default";
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
+    static constexpr const int32_t SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER = 2;
 
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
 
     int32_t pressCount_ {};
     int32_t maxHistoryNums = 10;
     bool isFirstPress_ = true;
+    bool isSourceInCast_ = false;
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;

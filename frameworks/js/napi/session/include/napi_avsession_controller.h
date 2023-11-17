@@ -16,6 +16,7 @@
 #ifndef OHOS_NAPI_AVSESSION_CONTROLLER_H
 #define OHOS_NAPI_AVSESSION_CONTROLLER_H
 
+#include <mutex>
 #include "avsession_controller.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"
@@ -42,22 +43,35 @@ private:
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
+    static napi_value GetAVCallState(napi_env env, napi_callback_info info);
+    static napi_value GetAVCallMetaData(napi_env env, napi_callback_info info);
     static napi_value GetAVPlaybackState(napi_env env, napi_callback_info info);
+    static napi_value GetAVPlaybackStateSync(napi_env env, napi_callback_info info);
     static napi_value GetAVMetaData(napi_env env, napi_callback_info info);
+    static napi_value GetAVMetaDataSync(napi_env env, napi_callback_info info);
     static napi_value SendAVKeyEvent(napi_env env, napi_callback_info info);
     static napi_value GetLaunchAbility(napi_env env, napi_callback_info info);
     static napi_value GetValidCommands(napi_env env, napi_callback_info info);
+    static napi_value GetValidCommandsSync(napi_env env, napi_callback_info info);
     static napi_value IsSessionActive(napi_env env, napi_callback_info info);
+    static napi_value IsSessionActiveSync(napi_env env, napi_callback_info info);
     static napi_value SendControlCommand(napi_env env, napi_callback_info info);
     static napi_value SendCommonCommand(napi_env env, napi_callback_info info);
     static napi_value Destroy(napi_env env, napi_callback_info info);
     static napi_value GetRealPlaybackPositionSync(napi_env env, napi_callback_info info);
     static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
+    static napi_value GetOutputDeviceSync(napi_env env, napi_callback_info info);
     static napi_value GetAVQueueItems(napi_env env, napi_callback_info info);
+    static napi_value GetAVQueueItemsSync(napi_env env, napi_callback_info info);
     static napi_value GetAVQueueTitle(napi_env env, napi_callback_info info);
+    static napi_value GetAVQueueTitleSync(napi_env env, napi_callback_info info);
     static napi_value SkipToQueueItem(napi_env env, napi_callback_info info);
     static napi_value GetExtras(napi_env env, napi_callback_info info);
 
+    static napi_status OnAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
+        napi_value param, napi_value callback);
+    static napi_status OnAVCallStateChange(napi_env env, NapiAVSessionController* napiController,
+        napi_value param, napi_value callback);
     static napi_status OnSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                         napi_value param, napi_value callback);
     static napi_status OnPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
@@ -79,6 +93,10 @@ private:
     static napi_status OnExtrasChange(napi_env env, NapiAVSessionController* napiController,
         napi_value param, napi_value callback);
 
+    static napi_status OffAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
+        napi_value callback);
+    static napi_status OffAVCallStateChange(napi_env env, NapiAVSessionController* napiController,
+        napi_value callback);
     static napi_status OffSessionDestroy(napi_env env, NapiAVSessionController* napiController, napi_value callback);
     static napi_status OffPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
                                               napi_value callback);
@@ -97,6 +115,8 @@ private:
     static napi_status OffExtrasChange(napi_env env, NapiAVSessionController* napiController,
         napi_value callback);
 
+    static napi_status SetAVCallMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
+    static napi_status SetAVCallStateFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
     static napi_status SetPlaybackStateFilter(napi_env env, NapiAVSessionController* napiController,
                                               napi_value filter);
     static napi_status SetMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
@@ -109,6 +129,7 @@ private:
     std::string sessionId_;
     std::shared_ptr<AVSessionController> controller_;
     std::shared_ptr<NapiAVControllerCallback> callback_;
+    static std::mutex uvMutex_;
 
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;

@@ -44,6 +44,8 @@ public:
 
     int32_t GetCurrentItem(AVQueueItem& currentItem) override;
 
+    int32_t GetValidCommands(std::vector<int32_t>& cmds) override;
+
     int32_t SetDisplaySurface(std::string& surfaceId) override;
 
     int32_t Destroy() override;

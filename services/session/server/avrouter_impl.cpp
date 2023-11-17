@@ -22,6 +22,8 @@
 #include "avcast_provider_manager.h"
 #include "hw_cast_provider.h"
 
+static std::shared_ptr<OHOS::AVSession::HwCastProvider> hwProvider_;
+
 namespace OHOS::AVSession {
 AVRouterImpl::AVRouterImpl()
 {
@@ -31,14 +33,37 @@ AVRouterImpl::AVRouterImpl()
 void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
 {
     SLOGI("Start init AVRouter");
-    servicePtr_ = servicePtr;
-    std::shared_ptr<HwCastProvider> hwProvider = std::make_shared<HwCastProvider>();
-    hwProvider->Init();
+    {
+        std::lock_guard lockGuard(servicePtrLock_);
+        servicePtr_ = servicePtr;
+    }
+    hwProvider_ = std:make_shared<HwCastProvider>();
+    hwProvider_->Init();
     providerNumber_++;
     std::shared_ptr<AVCastProviderManager> avCastProviderManager = std::make_shared<AVCastProviderManager>();
-    avCastProviderManager->Init(providerNumber_, hwProvider);
+    avCastProviderManager->Init(providerNumber_, hwProvider_);
     providerManagerMap_[providerNumber_] = avCastProviderManager;
-    hwProvider->RegisterCastStateListener(avCastProviderManager);
+    hwProvider_->RegisterCastStateListener(avCastProviderManager);
+}
+
+bool AVRouterImpl::Release()
+{
+    SLOGI("Start Release AVRouter");
+    if (hasSessionAlive_) {
+        SLOGE("has session alive, return");
+        return true;
+    }
+    if (hwProvider_ == nullptr) {
+        SLOGE("Start Release AVRouter err for no provider");
+        return false;
+    }
+    std::lock_ground lockGuard(providerManagerLock_);
+
+    hwProvider_->Release();
+    providerNumber_ = 0;
+    providerManagerMap_.clear();
+    SLOGD("Release AVRouter done");
+    return false;
 }
 
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability)
@@ -71,7 +96,7 @@ int32_t AVRouterImpl::StopCastDiscovery()
 
 int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 {
-    SLOGI("AVRouterImpl SetDiscoverable");
+    SLOGI("AVRouterImpl SetDiscoverable %{public}d", enable);
 
     std::lock_guard lockGuard(providerManagerLock_);
 
@@ -80,6 +105,7 @@ int32_t AVRouterImpl::SetDiscoverable(const bool enable)
             AVSESSION_ERROR, "provider is nullptr");
         providerManager->provider_->SetDiscoverable(enable);
     }
+
     return AVSESSION_SUCCESS;
 }
 
@@ -92,6 +118,45 @@ int32_t AVRouterImpl::OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo)
         return ERR_SERVICE_NOT_EXIST;
     }
     servicePtr_->NotifyDeviceAvailable(castOutputDeviceInfo);
+    return AVSESSION_SUCCESS;
+}
+
+void AVRouterImpl::ReleaseCurrentCastSession()
+{
+    SLOGI("Start ReleaseCurrentCastSession");
+    std::lock_guard lockGuard(servicePtrLock_);
+    servicePtr_->ReleaseCastSession();
+}
+
+int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
+{
+    SLOGI("AVRouterImpl On cast session created, cast id is %{public}d", castId);
+
+    int64_t castHandle = -1;
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(1) !=
+        providerManagerMap_.end(), castHandle, "Can not find corresponding provider");
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_[1] != nullptr &&
+        providerManagerMap_[1]->provider_ ! = nullptr, AVSESSION_ERROR, "provider is nullptr");
+    int64_t tempId = 1;
+    castHandle = (tempId << 32) | castId; // The first 32 bits are providerId, the last 32 bits are castId
+    {
+        std::lock_guard lockGuard(servicePtrLock_);
+        servicePtr_->CreateSessionByCast(castHandle);
+    }
+    OutputDeviceInfo outputDeviceInfo;
+    castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVRouterImpl::OnDeviceOffline(const std::string& deviceId)
+{
+    SLOGI("AVRouterImpl received OnDeviceOffline event");
+
+    std::lock_guard lockGuard(servicePtrLock_);
+    if (servicePtr_ == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+    servicePtr_->NotifyDeviceOffline(deviceId);
     return AVSESSION_SUCCESS;
 }
 
@@ -113,6 +178,7 @@ std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const 
 
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t providerNumber = castHandle >> 32;
+    SLOGD("Get remote controller of provider %{public}d", providerNumber);
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
@@ -135,6 +201,8 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->StartCastSession();
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     castHandle = (tempId << 32) | castId; // The first 32 bits are providerId, the last 32 bits are castId
+    hasSessionAlive_ = true;
+
     return castHandle;
 }
 
@@ -152,17 +220,19 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
     SLOGI("AVRouterImpl stop cast process");
 
     int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
-
+    SLOGI("Stop cast, the provider number is %{public}d", providerNumber);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         castHandle, "Can not find corresponding provider");
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    SLOGI("Stop cast, the castId is %{public}d", castId);
     CHECK_AND_RETURN_RET_LOG(castHandleToOutputDeviceMap_.find(castId) != castHandleToOutputDeviceMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding castId");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
     providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId,
         castHandleToOutputDeviceMap_[castId].deviceInfos_[0]);
+    hasSessionAlive_ = false;
 
     return AVSESSION_SUCCESS;
 }
@@ -182,6 +252,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
     providerManagerMap_[providerNumber]->provider_->StopCastSession(castId);
+    hasSessionAlive_ = false;
 
     return AVSESSION_SUCCESS;
 }
@@ -198,6 +269,7 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
     providerManagerMap_[providerNumber]->provider_->RegisterCastSessionStateListener(castId, callback);
+    SLOGD("AVRouter impl register callback finished");
     return AVSESSION_SUCCESS;
 }
 

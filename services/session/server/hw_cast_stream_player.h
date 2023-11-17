@@ -53,6 +53,7 @@ public:
     void OnSeekDone(int32_t seekNumber) override;
     void OnVideoSizeChanged(int width, int height) override;
     void OnEndOfStream(int isLooping) override;
+    void OnPlayRequest(const CastEngine::MediaInfo &mediaInfo) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
@@ -72,6 +73,7 @@ private:
         {CastEngine::PlayerStates::PLAYER_STOPPED, AVPlaybackState::PLAYBACK_STATE_STOP},
         {CastEngine::PlayerStates::PLAYER_PLAYBACK_COMPLETE, AVPlaybackState::PLAYBACK_STATE_COMPLETED},
         {CastEngine::PlayerStates::PLAYER_RELEASED, AVPlaybackState::PLAYBACK_STATE_RELEASED},
+        {CastEngine::PlayerStates::PLAYER_BUFFERING, AVPlaybackState::PLAYBACK_STATE_PREPARE}
     };
     std::map<CastEngine::PlaybackSpeed, double> castPlusSpeedToDouble_ = {
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_0_75_X, 0.75},
@@ -85,6 +87,12 @@ private:
         {CastEngine::LoopMode::LOOP_MODE_SINGLE, AVPlaybackState::LOOP_MODE_SINGLE},
         {CastEngine::LoopMode::LOOP_MODE_LIST, AVPlaybackState::LOOP_MODE_LIST},
         {CastEngine::LoopMode::LOOP_MODE_SHUFFLE, AVPlaybackState::LOOP_MODE_SHUFFLE},
+    };
+    std::map<int32_t, CastEngine::LoopMode> intLoopModeToCastPlus_ = {
+        {AVPlaybackState::LOOP_MODE_SEQUENCE, CastEngine::LoopMode::LOOP_MODE_SEQUENCE},
+        {AVPlaybackState::LOOP_MODE_SINGLE, CastEngine::LoopMode::LOOP_MODE_SINGLE},
+        {AVPlaybackState::LOOP_MODE_LIST, CastEngine::LoopMode::LOOP_MODE_LIST},
+        {AVPlaybackState::LOOP_MODE_SHUFFLE, CastEngine::LoopMode::LOOP_MODE_SHUFFLE},
     };
 };
 } // namespace OHOS::AVSession

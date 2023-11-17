@@ -38,7 +38,10 @@ std::map<std::string, NapiMetaData::GetterType> NapiMetaData::getterMap_ = {
     { "description", GetDescription },
     { "lyric", GetLyric },
     { "previousAssetId", GetPreviousAssetId },
-    { "nextAssetId", GetNextAssetId }
+    { "nextAssetId", GetNextAssetId },
+    { "skipIntervals", GetSkipIntervals },
+    { "filter", GetFilter },
+    { "displayTags", GetDisplayTags }
 };
 
 std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
@@ -62,6 +65,9 @@ std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
     { AVMetaData::META_KEY_LYRIC, SetLyric },
     { AVMetaData::META_KEY_PREVIOUS_ASSET_ID, SetPreviousAssetId },
     { AVMetaData::META_KEY_NEXT_ASSET_ID, SetNextAssetId },
+    { AVMetaData::META_KEY_SKIP_INTERVALS, SetSkipIntervals },
+    { AVMetaData::META_KEY_FILTER, SetFilter },
+    { AVMetaData::META_KEY_DISPLAY_TAGS, SetDisplayTags }
 };
 
 std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
@@ -84,7 +90,10 @@ std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
     { "description", AVMetaData::META_KEY_DESCRIPTION },
     { "lyric", AVMetaData::META_KEY_LYRIC },
     { "previousAssetId", AVMetaData::META_KEY_PREVIOUS_ASSET_ID },
-    { "nextAssetId", AVMetaData::META_KEY_NEXT_ASSET_ID }
+    { "nextAssetId", AVMetaData::META_KEY_NEXT_ASSET_ID },
+    { "skipIntervals", AVMetaData::META_KEY_SKIP_INTERVALS },
+    { "filter", AVMetaData::META_KEY_FILTER },
+    { "displayTags", AVMetaData::META_KEY_DISPLAY_TAGS }
 };
 
 napi_status NapiMetaData::ConvertFilter(napi_env env, napi_value filter, AVMetaData::MetaMaskType& mask)
@@ -604,6 +613,69 @@ napi_status NapiMetaData::SetNextAssetId(napi_env env, const AVMetaData& in, nap
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "nextAssetId", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMetaData::GetSkipIntervals(napi_env env, napi_value in, AVMetaData& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "skipIntervals", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    SLOGD("GetSkipIntervals %{public}d", static_cast<int32_t>(property));
+    out.SetSkipIntervals(property);
+    return status;
+}
+
+napi_status NapiMetaData::SetSkipIntervals(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    napi_value property {};
+    SLOGD("SetSkipIntervals %{public}d", static_cast<int32_t>(in.GetSkipIntervals()));
+    auto status = NapiUtils::SetValue(env, in.GetSkipIntervals(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "skipIntervals", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMetaData::GetFilter(napi_env env, napi_value in, AVMetaData& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "filter", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    SLOGD("GetFilter %{public}d", static_cast<int32_t>(property));
+    out.SetFilter(property);
+    return status;
+}
+
+napi_status NapiMetaData::SetFilter(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    napi_value property {};
+    SLOGD("SetFilter %{public}d", static_cast<int32_t>(in.GetFilter()));
+    auto status = NapiUtils::SetValue(env, in.GetFilter(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "filter", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMetaData::GetDisplayTags(napi_env env, napi_value in, AVMetaData& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "displayTags", property);
+    CHECK_RETURN(status == napi_ok, "get property displayTags failed", status);
+    SLOGD("GetDisplayTags %{public}d", static_cast<int32_t>(property));
+    out.SetDisplayTags(property);
+    return status;
+}
+
+napi_status NapiMetaData::SetDisplayTags(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    napi_value property {};
+    SLOGD("SetDisplayTags %{public}d", static_cast<int32_t>(in.GetDisplayTags()));
+    auto status = NapiUtils::SetValue(env, in.GetDisplayTags(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property displayTags failed", status);
+    status = napi_set_named_property(env, out, "displayTags", property);
+    CHECK_RETURN(status == napi_ok, "set property displayTags failed", status);
     return status;
 }
 }

@@ -89,4 +89,18 @@ void SessionListenerProxy::OnDeviceAvailable(const OutputDeviceInfo& castOutputD
     CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_DEVICE_AVAILABLE, data, reply, option) == 0,
         "send request fail");
 }
+
+void SessionListenerProxy::OnDeviceOffline(const std::string& deviceId)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteString(deviceId), "write deviceId failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_DEVICE_OFFLINE, data, reply, option) == 0,
+        "send request fail");
+}
 } // namespace OHOS::AVSession

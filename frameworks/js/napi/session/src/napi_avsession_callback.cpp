@@ -125,16 +125,16 @@ void NapiAVSessionCallback::OnPlayPrevious()
     HandleEvent(EVENT_PLAY_PREVIOUS);
 }
 
-void NapiAVSessionCallback::OnFastForward()
+void NapiAVSessionCallback::OnFastForward(int64_t time)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnFastForward");
-    HandleEvent(EVENT_FAST_FORWARD);
+    HandleEvent(EVENT_FAST_FORWARD, time);
 }
 
-void NapiAVSessionCallback::OnRewind()
+void NapiAVSessionCallback::OnRewind(int64_t time)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnRewind");
-    HandleEvent(EVENT_REWIND);
+    HandleEvent(EVENT_REWIND, time);
 }
 
 void NapiAVSessionCallback::OnSeek(int64_t time)
@@ -184,6 +184,24 @@ void NapiAVSessionCallback::OnSkipToQueueItem(int32_t itemId)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnSkipToQueueItem");
     HandleEvent(EVENT_SKIP_TO_QUEUE_ITEM, itemId);
+}
+
+void NapiAVSessionCallback::OnAVCallAnswer()
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnAnswer");
+    HandleEvent(EVENT_AVCALL_ANSWER);
+}
+
+void NapiAVSessionCallback::OnAVCallHangUp()
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnHangUp");
+    HandleEvent(EVENT_AVCALL_HANG_UP);
+}
+
+void NapiAVSessionCallback::OnAVCallToggleCallMute()
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnToggleCallMute");
+    HandleEvent(EVENT_AVCALL_TOGGLE_CALL_MUTE);
 }
 
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "hw_cast_provider_session.h"
 #include <thread>
 #include "avsession_log.h"
-#include "hw_cast_provider_session.h"
 
 using namespace OHOS::CastEngine;
 
@@ -41,11 +41,8 @@ void HwCastProviderSession::Release()
         SLOGE("castSession_ is not exist");
         return;
     }
-    auto self = shared_from_this();
-    std::thread([self]() {
-        self->castSession_->Release();
-        self->castSession_ = nullptr;
-    }).detach();
+    self->castSession_->Release();
+    self->castSession_ = nullptr;
 }
 
 bool HwCastProviderSession::AddDevice(const std::string deviceId)
@@ -87,6 +84,7 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
 
 bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener)
 {
+    SLOGI("RegisterCastSessionStateListener");
     if (listener == nullptr) {
         SLOGE("RegisterCastSessionStateListener failed for the listener is nullptr");
         return false;
@@ -98,7 +96,7 @@ bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAV
         return false;
     }
     castSessionStateListenerList_.emplace_back(listener);
-
+    SLOGD("Provider session register cast session state listener finished");
     return true;
 }
 
@@ -123,6 +121,7 @@ bool HwCastProviderSession::UnRegisterCastSessionStateListener(std::shared_ptr<I
 
 void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &stateInfo)
 {
+    SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(stateInfo.deviceState));
     if (castSessionStateListenerList_.size() == 0) {
         SLOGI("current has not registered listener");
         return;
@@ -130,6 +129,8 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     for (auto listener : castSessionStateListenerList_) {
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = stateInfo.deviceId;
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+        deviceInfo.deviceName_ = "Remote";
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered listeners");
             listener->OnCastStateChange(static_cast<int>(stateInfo.deviceState), deviceInfo);

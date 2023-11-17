@@ -47,6 +47,26 @@ int32_t AVControllerCallbackStub::HandleOnSessionDestroy(MessageParcel& data, Me
     return ERR_NONE;
 }
 
+int32_t AVControllerCallbackStub::HandleOnAVCallMetadataChange(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<AVCallMetaData> metaData = data.ReadParcelable<AVCallMetaData>();
+
+    CHECK_AND_RETURN_RET_LOG(metaData != nullptr, ERR_NONE, "read AVCall MetaData failed");
+    AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnAVCallMetaDataChange");
+    OnAVCallMetaDataChange(*metaData);
+    return ERR_NONE;
+}
+
+int32_t AVControllerCallbackStub::HandleOnAVCallStateChange(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<AVCallState> state = data.ReadParcelable<AVCallState>();
+
+    CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read AVCallState failed");
+    AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnAVCallStateChange");
+    OnAVCallStateChange(*state);
+    return ERR_NONE;
+}
+
 int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel& data, MessageParcel& reply)
 {
     sptr<AVPlaybackState> state = data.ReadParcelable<AVPlaybackState>();
@@ -90,6 +110,9 @@ int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data
     OutputDeviceInfo outputDeviceInfo;
     int32_t deviceInfoSize;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+    int32_t maxDeviceInfoSize = 1000; // A maximum of 1000 device change events can be processed at a time
+    CHECK_AND_RETURN_RET_LOG((deviceInfoSize >= 0) && (deviceInfoSize < maxDeviceInfoSize),
+        false, "deviceInfoSize is illegal");
     for (int i = 0; i < deviceInfoSize; i++) {
         DeviceInfo deviceInfo;
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
@@ -98,6 +121,10 @@ int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.supportedProtocols_), false,
+            "Read supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
+            "Read authenticationStatus failed");
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
 
@@ -119,8 +146,9 @@ int32_t AVControllerCallbackStub::HandleOnSessionEventChange(MessageParcel& data
 int32_t AVControllerCallbackStub::HandleOnQueueItemsChange(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<AVQueueItem> items_;
+    int32_t maxItemNumber = 1000; // A maximum of 1000 queue items can be processed at a time
     int32_t itemNum = data.ReadInt32();
-    CHECK_AND_RETURN_RET_LOG(itemNum >= 0, ERR_NONE, "read int32 itemNum failed");
+    CHECK_AND_RETURN_RET_LOG((itemNum >= 0) && (itemNum < maxItemNumber), ERR_NONE, "read int32 itemNum failed");
     for (int32_t i = 0; i < itemNum; i++) {
         AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
         CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");

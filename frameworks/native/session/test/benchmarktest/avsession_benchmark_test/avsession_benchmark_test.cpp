@@ -93,8 +93,8 @@ public:
     void OnStop() override;
     void OnPlayNext() override;
     void OnPlayPrevious() override;
-    void OnFastForward() override;
-    void OnRewind() override;
+    void OnFastForward(int64_t time) override;
+    void OnRewind(int64_t time) override;
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
@@ -103,6 +103,9 @@ public:
     void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override {};
     void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override {};
+    void OnAVCallAnswer() override {};
+    void OnAVCallHangUp() override {};
+    void OnAVCallToggleCallMute() override {};
 
     ~AVSessionCallbackImpl() override;
 };
@@ -136,12 +139,12 @@ void AVSessionCallbackImpl::OnPlayPrevious()
     SLOGI("OnPlayPrevious %{public}d", g_onCall);
 }
 
-void AVSessionCallbackImpl::OnFastForward()
+void AVSessionCallbackImpl::OnFastForward(int64_t time)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGI("OnFastForward %{public}d", g_onCall);
 }
-void AVSessionCallbackImpl::OnRewind()
+void AVSessionCallbackImpl::OnRewind(int64_t time)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGI("OnRewind %{public}d", g_onCall);

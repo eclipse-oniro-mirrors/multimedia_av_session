@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "avcall_meta_data.h"
+#include "avcall_state.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
 #include "avcast_player_state.h"
@@ -77,6 +79,14 @@ public:
     virtual void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) {};
 
     /**
+     * @brief Listen for the event of device offline.
+     *
+     * @param { std::string& } deviceId - Offlined device ID.
+     * @since 10
+    */
+    virtual void OnDeviceOffline(const std::string& deviceId) {};
+
+    /**
      * @brief Deconstruct SessionListener.
      * @since 9
     */
@@ -98,6 +108,8 @@ public:
     virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
     
     virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
+
+    virtual void OnEndOfStream(const int32_t isLooping) = 0;
 
     /**
      * @brief Deconstruct SessionListener.
@@ -140,15 +152,19 @@ public:
 
     /**
      * @brief Fast forward.
+     *
+     * @param time fastforward skip intervals
      * @since 9
     */
-    virtual void OnFastForward() = 0;
+    virtual void OnFastForward(int64_t time) = 0;
 
     /**
      * @brief Fast rewind.
+     *
+     * @param time rewind skip intervals
      * @since 9
     */
-    virtual void OnRewind() = 0;
+    virtual void OnRewind(int64_t time) = 0;
 
     /**
      * @brief Seek to the specified time.
@@ -217,7 +233,25 @@ public:
      * @since 10
      */
     virtual void OnSkipToQueueItem(int32_t itemId) = 0;
-    
+
+    /**
+     * Register answer command callback.
+     * @since 11
+     */
+    virtual void OnAVCallAnswer() = 0;
+
+    /**
+     * Register hangUp command callback.
+     * @since 11
+     */
+    virtual void OnAVCallHangUp() = 0;
+
+    /**
+     * Register toggleCallMute command callback.
+     * @since 11
+     */
+    virtual void OnAVCallToggleCallMute() = 0;
+
     /**
      * @brief Deconstruct AVSessionCallback.
      * @since 9
@@ -227,6 +261,22 @@ public:
 
 class AVControllerCallback {
 public:
+
+    /**
+     * @brief Listen for avcall metadata change events.
+     *
+     * @param avCallMetaData is the changed avcall metadata.
+     * @since 11
+    */
+    virtual void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) = 0;
+
+    /**
+     * @brief Listening session avcall status change event.
+     *
+     * @param avCallState Session related avcall state.
+     * @since 11
+    */
+    virtual void OnAVCallStateChange(const AVCallState& avCallState) = 0;
     /**
      * @brief Session Destroy.
      * @since 9
@@ -329,6 +379,8 @@ public:
     virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
 
     virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
+
+    virtual void OnEndOfStream(const int32_t isLooping) = 0;
 
     /**
      * @brief Deconstruct AVControllerCallback.
@@ -462,13 +514,27 @@ enum DeviceType {
      * @since 10
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      */
-    DEVICE_TYPE_SPEAKER = 3,
+    DEVICE_TYPE_SMART_SPEAKER = 3,
     /**
      * A device type indicating the route is on a bluetooth device.
      * @since 10
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     DEVICE_TYPE_BLUETOOTH = 10,
+};
+
+enum CastEngineConnectState {
+    CONNECTING = 0,
+    CONNECTED = 1,
+    PAUSED = 2,
+    PLAYING = 3,
+    DISCONNECTING = 4,
+    DISCONNECTED = 5,
+    STREAM = 6,
+    MIRROR_TO_UI = 7,
+    UI_TO_MIRROR = 8,
+    UICAST = 9,
+    DEVICE_STATE_MAX = 10,
 };
 
 /**

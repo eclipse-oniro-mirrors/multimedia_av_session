@@ -23,6 +23,45 @@ AVSessionCallbackProxy::AVSessionCallbackProxy(const sptr<IRemoteObject>& impl)
     SLOGD("construct");
 }
 
+void AVSessionCallbackProxy::OnAVCallAnswer()
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_AVCALL_ANSWER, data, reply, option) == 0,
+        "send request failed");
+}
+
+void AVSessionCallbackProxy::OnAVCallHangUp()
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_AVCALL_HANGUP, data, reply, option) == 0,
+        "send request failed");
+}
+
+void AVSessionCallbackProxy::OnAVCallToggleCallMute()
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_AVCALL_TOGGLE_CALL_MUTE, data, reply, option) == 0,
+        "send request failed");
+}
+
 void AVSessionCallbackProxy::OnPlay()
 {
     MessageParcel data;
@@ -88,10 +127,11 @@ void AVSessionCallbackProxy::OnPlayPrevious()
         "send request failed");
 }
 
-void AVSessionCallbackProxy::OnFastForward()
+void AVSessionCallbackProxy::OnFastForward(int64_t time)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt64(time), "write time failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
@@ -101,10 +141,11 @@ void AVSessionCallbackProxy::OnFastForward()
         "send request failed");
 }
 
-void AVSessionCallbackProxy::OnRewind()
+void AVSessionCallbackProxy::OnRewind(int64_t time)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt64(time), "write time failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
@@ -191,7 +232,7 @@ void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(data.WriteInt32(connectionState), "write connectionState failed");
 
-    int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
+    int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfoSize), "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
         CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.castCategory_), "write castCategory failed");
@@ -200,6 +241,10 @@ void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
         CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.deviceType_), "write deviceType failed");
         CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.ipAddress_), "write ipAddress failed");
         CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.providerId_), "write providerId failed");
+        CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.supportedProtocols_),
+            "write supportedProtocols failed");
+        CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.authenticationStatus_),
+            "write authenticationStatus failed");
     }
 
     auto remote = Remote();

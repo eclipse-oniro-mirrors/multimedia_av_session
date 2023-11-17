@@ -1,0 +1,65 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/test.gni")
+import("../../../../../../castplus_cast_engine_part.gni")
+module_output_path = "av_session/av_session"
+
+##############################fuzztest##########################################
+ohos_fuzztest("AVSessionServiceFuzzTest") {
+  module_out_path = module_output_path
+  fuzz_config_file = "../avsessionservice_fuzzer"
+  include_dirs = [
+    "../",
+    "../../../remote",
+    "../../../../adapter",
+    "../../../../server",
+  ]
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+  sources = [ "avsessionservice_fuzzer.cpp" ]
+  deps = [
+    "./../../../../../../frameworks/native/session:avsession_client",
+    "./../../../../../session:avsession_item",
+    "./../../../../../session:avsession_service",
+  ]
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "audio_framework:audio_client",
+    "c_utils:utils",
+    "data_object:distributeddataobject_impl",
+    "device_manager:devicemanagersdk",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../../session:avsession_cast_item",
+    ]
+  }
+}
+###############################################################################

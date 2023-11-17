@@ -30,6 +30,7 @@
 #include "avsession_controller.h"
 
 namespace OHOS::AVSession {
+class ServiceDeathRecipient;
 class AVSessionManagerImpl : public AVSessionManager {
 public:
     AVSessionManagerImpl();
@@ -71,6 +72,8 @@ public:
     
     int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId);
 
+    int32_t Close(void) override;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t StartCastDiscovery(int32_t castDeviceCapability) override;
 
@@ -92,6 +95,7 @@ private:
 
     std::mutex lock_;
     sptr<AVSessionServiceProxy> service_;
+    sptr<ServiceDeathRecipient> serviceDeathRecipient_;
     sptr<ISessionListener> listener_;
     sptr<ClientDeathStub> clientDeath_;
     DeathCallback deathCallback_;

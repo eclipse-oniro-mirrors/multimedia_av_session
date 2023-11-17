@@ -84,4 +84,12 @@ int32_t SessionListenerStub::HandleOnDeviceAvailable(MessageParcel& data, Messag
     OnDeviceAvailable(castOutputDeviceInfo);
     return ERR_NONE;
 }
+
+int32_t SessionListenerStub::HandleOnDeviceOffline(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("SessionListenerStub::HandleOnDeviceOffline");
+    auto deviceId = data.ReadString();
+    OnDeviceOffline(deviceId);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

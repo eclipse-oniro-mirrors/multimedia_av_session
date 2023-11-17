@@ -32,6 +32,8 @@ private:
     static napi_status GetMediaId(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetMediaId(napi_env env, const AVMediaDescription& in, napi_value& out);
 
+    static napi_status GetAssetId(napi_env env, napi_value in, AVMediaDescription& out);
+
     static napi_status GetTitle(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetTitle(napi_env env, const AVMediaDescription& in, napi_value& out);
 
@@ -46,6 +48,8 @@ private:
 
     static napi_status GetIconUri(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetIconUri(napi_env env, const AVMediaDescription& in, napi_value& out);
+
+    static napi_status GetMediaImage(napi_env env, napi_value in, AVMediaDescription& out);
 
     static napi_status GetExtras(napi_env env, napi_value in, AVMediaDescription& out);
     static napi_status SetExtras(napi_env env, const AVMediaDescription& in, napi_value& out);
@@ -90,7 +94,7 @@ private:
     static napi_status SetAppName(napi_env env, const AVMediaDescription& in, napi_value& out);
 
     static void CheckAndSetDefaultString(napi_status status, std::string& defaultStr);
-    static void CheckAndSetDefaultInt(napi_status status, int32_t& defaultStr);
+    static void CheckAndSetDefaultInt(napi_status status, int32_t& defaultInt);
 
     static std::map<std::string, GetterType> getterMap_;
     static std::map<int32_t, SetterType> setterMap_;

@@ -42,6 +42,8 @@ private:
 
     int32_t HandleGetCurrentItem(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetValidCommands(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleSetDisplaySurface(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleSetCastPlaybackFilter(MessageParcel& data, MessageParcel& reply);
@@ -60,6 +62,7 @@ private:
         &AVCastControllerStub::HandleGetDuration,
         &AVCastControllerStub::HandleGetCastAVPlayBackState,
         &AVCastControllerStub::HandleGetCurrentItem,
+        &AVCastControllerStub::HandleGetValidCommands,
         &AVCastControllerStub::HandleSetDisplaySurface,
         &AVCastControllerStub::HandleSetCastPlaybackFilter,
         &AVCastControllerStub::HandleRegisterCallbackInner,

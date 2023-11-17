@@ -77,7 +77,11 @@ public:
     virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     virtual int32_t StopCast(const SessionToken& sessionToken) = 0;
+
+    virtual int32_t checkEnableCast(bool enable) = 0;
 #endif
+
+    virtual int32_t Close() = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_SERVICE_H

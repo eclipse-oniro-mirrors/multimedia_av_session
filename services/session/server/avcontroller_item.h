@@ -31,10 +31,14 @@ public:
 
     ~AVControllerItem() override;
 
+    int32_t GetAVCallState(AVCallState& avCallState) override;
+
+    int32_t GetAVCallMetaData(AVCallMetaData& avCallMetaData) override;
+
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
     int32_t GetAVMetaData(AVMetaData& data) override;
-    
+
     int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
 
     int32_t GetAVQueueTitle(std::string& title) override;
@@ -55,6 +59,10 @@ public:
 
     int32_t SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
 
+    int32_t SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter) override;
+
+    int32_t SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter) override;
+
     int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
 
     int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
@@ -64,6 +72,10 @@ public:
     std::string GetSessionId() override;
 
     void HandleSessionDestroy();
+
+    void HandleAVCallStateChange(const AVCallState& avCallState);
+
+    void HandleAVCallMetaDataChange(const AVCallMetaData& avCallMetaData);
 
     void HandlePlaybackStateChange(const AVPlaybackState& state);
 
@@ -78,7 +90,7 @@ public:
     void HandleSetSessionEvent(const std::string& event, const AAFwk::WantParams& args);
 
     void HandleQueueItemsChange(const std::vector<AVQueueItem>& items);
-    
+
     void HandleQueueTitleChange(const std::string& title);
 
     void HandleExtrasChange(const AAFwk::WantParams& extras);
@@ -99,6 +111,10 @@ private:
     sptr<AVSessionItem> session_;
     std::recursive_mutex callbackMutex_;
     sptr<IAVControllerCallback> callback_;
+    std::recursive_mutex avCallMetaMaskMutex_;
+    AVCallMetaData::AVCallMetaMaskType avCallMetaMask_;
+    std::recursive_mutex avCallStateMaskMutex_;
+    AVCallState::AVCallStateMaskType avCallStateMask_;
     std::recursive_mutex metaMaskMutex_;
     AVMetaData::MetaMaskType metaMask_;
     std::recursive_mutex playbackMaskMutex_;

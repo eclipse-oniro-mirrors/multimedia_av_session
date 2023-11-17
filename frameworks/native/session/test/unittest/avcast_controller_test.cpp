@@ -16,6 +16,10 @@
 #include <gtest/gtest.h>
 
 #include "accesstoken_kit.h"
+#include "bool_wrapper.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+#include "want_agent.h"
 #include "avcast_control_command.h"
 #include "avcast_controller_item.h"
 #include "avmedia_description.h"
@@ -25,13 +29,11 @@
 #include "avsession_manager.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
-#include "bool_wrapper.h"
-#include "hw_cast_provider.h"
 #include "hw_cast_stream_player.h"
 #include "iavcast_controller.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
-#include "want_agent.h"
+#define private public
+#include "hw_cast_provider.h"
+#undef private
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -122,7 +124,12 @@ void AVCastControllerTest::SetUp()
     ASSERT_NE(controller_, nullptr);
 
     std::shared_ptr<HwCastStreamPlayer> HwCastStreamPlayer_ = std::make_shared<HwCastStreamPlayer>(nullptr);
-    castController_->Init(HwCastStreamPlayer_);
+    auto callback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
+        SLOGI("add cast valid command %{public}d", cmd);
+        supportedCastCmds = supportedCastCmds_;
+        return;
+    }
+    castController_->Init(HwCastStreamPlayer_, callback);
 }
 
 void AVCastControllerTest::TearDown()
@@ -448,6 +455,18 @@ HWTEST_F(AVCastControllerTest, GetCurrentItem001, TestSize.Level1)
 }
 
 /**
+* @tc.name: GetValidCommands001
+* @tc.desc: GetValidCommands
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, GetValidCommands001, TestSize.Level1)
+{
+    std::vector<int32_t> cmds;
+    EXPECT_EQ(castController_->GetValidCommands(cmds), AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: SetDisplaySurface001
 * @tc.desc: SetDisplaySurface
 * @tc.type: FUNC
@@ -652,12 +671,14 @@ HWTEST_F(AVCastControllerTest, StopDiscovery001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     hwCastProvider.StopDiscovery();
+    EXPECT_EQ(hwCastProvider.MAX_CAST_SESSION_SIZE, 16); // 16 is real max cast session size;
 }
 
 HWTEST_F(AVCastControllerTest, Release001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     hwCastProvider.Release();
+    EXPECT_EQ(hwCastProvider.MAX_CAST_SESSION_SIZE, 16); // 16 is real max cast session size;
 }
 
 HWTEST_F(AVCastControllerTest, StartCastSession001, TestSize.Level1)
@@ -670,6 +691,7 @@ HWTEST_F(AVCastControllerTest, StopCastSession001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     hwCastProvider.StopCastSession(2);
+    EXPECT_EQ(hwCastProvider.MAX_CAST_SESSION_SIZE, 16); // 16 is real max cast session size;
 }
 
 HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)
@@ -683,6 +705,8 @@ HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)
     deviceInfo1.deviceType_ = 1;
     deviceInfo1.ipAddress_ = "ipAddress1";
     deviceInfo1.providerId_ = 1;
+    deviceInfo1.supportedProtocols_ = 3;
+    deviceInfo1.authenticationStatus_ = 1;
 
     EXPECT_EQ(hwCastProvider.AddCastDevice(1, deviceInfo1), false);
 }
@@ -698,6 +722,8 @@ HWTEST_F(AVCastControllerTest, RemoveCastDevice001, TestSize.Level1)
     deviceInfo1.deviceType_ = 1;
     deviceInfo1.ipAddress_ = "ipAddress1";
     deviceInfo1.providerId_ = 1;
+    deviceInfo1.supportedProtocols_ = 1;
+    deviceInfo1.authenticationStatus_ = 0;
 
     EXPECT_EQ(hwCastProvider.RemoveCastDevice(1, deviceInfo1), false);
 }

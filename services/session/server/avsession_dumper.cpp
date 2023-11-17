@@ -106,6 +106,8 @@ void AVSessionDumper::ShowMetaData(std::string& result, const AVSessionService& 
             result.append("        lyric                : " + metaData.GetLyric() + "\n");
             result.append("        previous assetid     : " + metaData.GetPreviousAssetId() + "\n");
             result.append("        next assetid         : " + metaData.GetNextAssetId() + "\n");
+            result.append("        skip intervals       : " + std::to_string(metaData.GetSkipIntervals()) + "\n");
+            result.append("        filter               : " + std::to_string(metaData.GetFilter()) + "\n");
         }
     }
 }
@@ -160,6 +162,8 @@ void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionServic
             result.append("session type                 : audio\n");
         } else if (descriptor.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
             result.append("session type                 : video\n");
+        } else if (descriptor.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
+            result.append("session type                 : voice_call\n");
         } else {
             result.append("session type is invalid.\n");
         }

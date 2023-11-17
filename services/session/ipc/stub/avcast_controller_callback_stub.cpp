@@ -54,7 +54,7 @@ int32_t AVCastControllerCallbackStub::HandleOnStateChange(MessageParcel& data, M
 int32_t AVCastControllerCallbackStub::HandleOnMediaItemChange(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::HandleOnMediaItemChange");
-    AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
+    sptr<AVQueueItem> item = data.ReadParcelable<AVQueueItem>();
     CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
     OnMediaItemChange(*item);
     return ERR_NONE;
@@ -97,6 +97,14 @@ int32_t AVCastControllerCallbackStub::HandleOnPlayerError(MessageParcel& data, M
     std::string errorMsg;
     CHECK_AND_RETURN_RET_LOG(data.ReadString(errorMsg), ERR_NONE, "read time failed");
     OnPlayerError(errorCode, errorMsg);
+    return ERR_NONE;
+}
+
+int32_t AVCastControllerCallbackStub::HandleOnEndOfStream(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t isLooping;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(isLooping), ERR_NONE, "read isLooping failed");
+    OnEndOfStream(isLooping);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

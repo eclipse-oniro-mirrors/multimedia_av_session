@@ -364,6 +364,24 @@ int32_t AVSessionServiceProxy::RegisterClientDeathObserver(const sptr<IClientDea
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
+int32_t AVSessionServiceProxy::Close(void)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
+}
+
 int32_t AVSessionServiceProxy::CastAudio(const SessionToken& token,
                                          const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors)
 {
@@ -481,7 +499,7 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionToken.pid), ERR_MARSHALLING, "write pid failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionToken.uid), ERR_MARSHALLING, "write uid failed");
 
-    int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
+    int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfoSize), ERR_MARSHALLING, "write deviceInfoSize failed");
     for (const auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.castCategory_),
@@ -491,6 +509,10 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.deviceType_), ERR_MARSHALLING, "write deviceType failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.ipAddress_), ERR_MARSHALLING, "write ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.providerId_), ERR_MARSHALLING, "write providerId failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedProtocols_), ERR_MARSHALLING,
+            "write supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.authenticationStatus_), ERR_MARSHALLING,
+            "write authenticationStatus failed");
     }
 
     auto remote = Remote();

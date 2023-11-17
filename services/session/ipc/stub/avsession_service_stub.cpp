@@ -246,6 +246,14 @@ int32_t AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel& d
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleClose(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t ret = Close();
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "Close failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleCastAudio(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CastAudio");
@@ -366,6 +374,7 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool enable;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(enable), AVSESSION_ERROR, "write enable info failed");
+    checkEnableCast(enable);
     int32_t ret = AVRouter::GetInstance().SetDiscoverable(enable);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleSetDiscoverable failed");
@@ -379,7 +388,9 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCast");
-    SLOGI("HandleStartCast start");
+    SLOGI("HandleStartCast start and set no discoverable");
+    int32_t result = AVRouter::GetInstance().SetDiscoverable(false);
+    CHECK_AND_RETURN_RET_LOG(result == AVSESSION_SUCCESS, ERR_NONE, "HandleStartCast to set discoverable failed");
     SessionToken sessionToken {};
     sessionToken.sessionId = data.ReadString();
     sessionToken.pid = data.ReadInt32();
@@ -402,6 +413,10 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.supportedProtocols_), false,
+            "Read supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
+            "Read authenticationStatus failed");
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
 

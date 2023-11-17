@@ -58,6 +58,7 @@ private:
     static napi_status OnTopSessionChange(napi_env env, napi_value callback);
     static napi_status OnAudioSessionChecked(napi_env env, napi_value callback);
     static napi_status OnDeviceAvailable(napi_env env, napi_value callback);
+    static napi_status OnDeviceOffline(napi_env env, napi_value callback);
     static napi_status OnServiceDie(napi_env env, napi_value callback);
 
     static napi_status OffSessionCreate(napi_env env, napi_value callback);
@@ -65,6 +66,7 @@ private:
     static napi_status OffTopSessionChange(napi_env env, napi_value callback);
     static napi_status OffAudioSessionChecked(napi_env env, napi_value callback);
     static napi_status OffDeviceAvailable(napi_env env, napi_value callback);
+    static napi_status OffDeviceOffline(napi_env env, napi_value callback);
     static napi_status OffServiceDie(napi_env env, napi_value callback);
 
     static void HandleServiceDied();

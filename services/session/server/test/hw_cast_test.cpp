@@ -43,11 +43,11 @@ void HwCastTest::TearDown()
 {}
 
 /**
-* @tc.name: HwCastStreamPlayerInit001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerInit001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerInit001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerInit001 begin!");
@@ -58,11 +58,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerInit001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerRelease001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerRelease001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerRelease001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerRelease001 begin!");
@@ -73,11 +73,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerRelease001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommand001
-* @tc.desc: cmd : CAST_CONTROL_CMD_INVALID
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommand001
+ * @tc.desc: cmd : CAST_CONTROL_CMD_INVALID
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand001 begin!");
@@ -91,11 +91,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand001, TestSize.Leve
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommand002
-* @tc.desc: cmd : CAST_CONTROL_CMD_PLAY
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommand002
+ * @tc.desc: cmd : CAST_CONTROL_CMD_PLAY
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand002, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand002 begin!");
@@ -109,11 +109,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand002, TestSize.Leve
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommand003
-* @tc.desc: cmd : CAST_CONTROL_CMD_PAUSE
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommand003
+ * @tc.desc: cmd : CAST_CONTROL_CMD_PAUSE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand003, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand003 begin!");
@@ -127,11 +127,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand003, TestSize.Leve
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommand004
-* @tc.desc: cmd : CAST_CONTROL_CMD_STOP
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommand004
+ * @tc.desc: cmd : CAST_CONTROL_CMD_STOP
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand004, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand004 begin!");
@@ -145,11 +145,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand004, TestSize.Leve
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommand005
-* @tc.desc: cmd : CAST_CONTROL_CMD_PLAY_NEXT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommand005
+ * @tc.desc: cmd : CAST_CONTROL_CMD_PLAY_NEXT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand005, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand005 begin!");
@@ -163,11 +163,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand005, TestSize.Leve
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommand006
-* @tc.desc: cmd : CAST_CONTROL_CMD_PLAY_PREVIOUS
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommand006
+ * @tc.desc: cmd : CAST_CONTROL_CMD_PLAY_PREVIOUS
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand006, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand006 begin!");
@@ -181,11 +181,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand006, TestSize.Leve
 }
 
 /**
-* @tc.name: HwCastStreamPlayerGetCurrentItem001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerGetCurrentItem001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerGetCurrentItem001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerGetCurrentItem001 begin!");
@@ -197,11 +197,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerGetCurrentItem001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerStart001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerStart001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerStart001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerStart001 begin!");
@@ -225,11 +225,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerStart001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerPrepare001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerPrepare001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerPrepare001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerPrepare001 begin!");
@@ -253,11 +253,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerPrepare001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerGetDuration001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerGetDuration001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerGetDuration001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerGetDuration001 begin!");
@@ -271,11 +271,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerGetDuration001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerGetCastAVPlaybackState001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerGetCastAVPlaybackState001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerGetCastAVPlaybackState001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerGetCastAVPlaybackState001 begin!");
@@ -289,11 +289,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerGetCastAVPlaybackState001, TestSize.
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSetDisplaySurface001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSetDisplaySurface001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSetDisplaySurface001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSetDisplaySurface001 begin!");
@@ -307,11 +307,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSetDisplaySurface001, TestSize.Level
 }
 
 /**
-* @tc.name: HwCastStreamPlayerRegisterControllerListener001
-* @tc.desc: Listener is nullptr
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerRegisterControllerListener001
+ * @tc.desc: Listener is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerRegisterControllerListener001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerRegisterControllerListener001 begin!");
@@ -324,11 +324,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerRegisterControllerListener001, TestS
 }
 
 /**
-* @tc.name: HwCastStreamPlayerUnRegisterControllerListener001
-* @tc.desc: Listener is nullptr
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerUnRegisterControllerListener001
+ * @tc.desc: Listener is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerUnRegisterControllerListener001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerUnRegisterControllerListener001 begin!");
@@ -341,11 +341,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerUnRegisterControllerListener001, Tes
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnStateChanged001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnStateChanged001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnStateChanged001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnStateChanged001 begin!");
@@ -358,11 +358,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnStateChanged001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnPositionChanged001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnPositionChanged001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnPositionChanged001 begin!");
@@ -377,11 +377,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged001, TestSize.Level
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnPositionChanged002
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnPositionChanged002
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged002, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnPositionChanged002 begin!");
@@ -396,11 +396,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged002, TestSize.Level
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnPositionChanged003
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnPositionChanged003
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged003, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnPositionChanged003 begin!");
@@ -415,11 +415,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged003, TestSize.Level
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnPositionChanged004
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnPositionChanged004
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged004, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnPositionChanged004 begin!");
@@ -434,11 +434,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged004, TestSize.Level
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnMediaItemChanged001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnMediaItemChanged001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnMediaItemChanged001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnMediaItemChanged001 begin!");
@@ -451,11 +451,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnMediaItemChanged001, TestSize.Leve
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnVolumeChanged001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnVolumeChanged001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnVolumeChanged001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnVolumeChanged001 begin!");
@@ -468,11 +468,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnVolumeChanged001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnLoopModeChanged001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnLoopModeChanged001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnLoopModeChanged001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnLoopModeChanged001 begin!");
@@ -485,11 +485,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnLoopModeChanged001, TestSize.Level
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnNextRequest001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnNextRequest001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnNextRequest001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnNextRequest001 begin!");
@@ -501,11 +501,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnNextRequest001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnPreviousRequest001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnPreviousRequest001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnPreviousRequest001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnPreviousRequest001 begin!");
@@ -517,11 +517,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPreviousRequest001, TestSize.Level
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnPlaySpeedChanged001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnPlaySpeedChanged001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnPlaySpeedChanged001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnPlaySpeedChanged001 begin!");
@@ -534,11 +534,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPlaySpeedChanged001, TestSize.Leve
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnPlayerError001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnPlayerError001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayerError001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnPlayerError001 begin!");
@@ -552,11 +552,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayerError001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnSeekDone001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnSeekDone001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnSeekDone001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnSeekDone001 begin!");
@@ -569,11 +569,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnSeekDone001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnVideoSizeChanged001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnVideoSizeChanged001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnVideoSizeChanged001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnVideoSizeChanged001 begin!");
@@ -587,11 +587,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnVideoSizeChanged001, TestSize.Leve
 }
 
 /**
-* @tc.name: HwCastStreamPlayerOnEndOfStream001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerOnEndOfStream001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerOnEndOfStream001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerOnEndOfStream001 begin!");
@@ -619,7 +619,23 @@ public:
     {
         return 0;
     };
+
+    int FastForward(const int32_t delta) override
+    {
+        return 0;
+    };
+
+    int FastRewind(const int32_t delta) override
+    {
+        return 0;
+    };
+
     int SetVolume(const int32_t volume) override
+    {
+        return 0;
+    };
+
+    int SetMute(bool mute) override
     {
         return 0;
     };
@@ -697,6 +713,11 @@ public:
         return 0;
     };
 
+    int GetMute(bool &mute) override
+    {
+        return 0;
+    };
+
     int GetLoopMode(OHOS::CastEngine::LoopMode &loopMode) override
     {
         return 0;
@@ -719,11 +740,11 @@ public:
 };
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommandWithParams001
-* @tc.desc: cmd : CAST_CONTROL_CMD_FAST_FORWARD
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams001
+ * @tc.desc: cmd : CAST_CONTROL_CMD_FAST_FORWARD
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams001, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams001 begin!");
@@ -738,11 +759,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams001, Tes
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommandWithParams002
-* @tc.desc: cmd : CAST_CONTROL_CMD_REWIND
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams002
+ * @tc.desc: cmd : CAST_CONTROL_CMD_REWIND
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams002, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams002 begin!");
@@ -757,11 +778,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams002, Tes
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommandWithParams003
-* @tc.desc: cmd : CAST_CONTROL_CMD_SEEK
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams003
+ * @tc.desc: cmd : CAST_CONTROL_CMD_SEEK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams003, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams003 begin!");
@@ -776,11 +797,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams003, Tes
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommandWithParams004
-* @tc.desc: cmd : CAST_CONTROL_CMD_SET_VOLUME
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams004
+ * @tc.desc: cmd : CAST_CONTROL_CMD_SET_VOLUME
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams004, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams004 begin!");
@@ -795,11 +816,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams004, Tes
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommandWithParams005
-* @tc.desc: cmd : CAST_CONTROL_CMD_SET_SPEED
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams005
+ * @tc.desc: cmd : CAST_CONTROL_CMD_SET_SPEED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams005, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams005 begin!");
@@ -814,11 +835,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams005, Tes
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommandWithParams006
-* @tc.desc: cmd : CAST_CONTROL_CMD_SET_LOOP_MODE
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams006
+ * @tc.desc: cmd : CAST_CONTROL_CMD_SET_LOOP_MODE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams006, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams006 begin!");
@@ -833,11 +854,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams006, Tes
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommandWithParams007
-* @tc.desc: cmd : CAST_CONTROL_CMD_TOGGLE_FAVORITE
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams007
+ * @tc.desc: cmd : CAST_CONTROL_CMD_TOGGLE_FAVORITE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams007, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams007 begin!");
@@ -852,11 +873,11 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams007, Tes
 }
 
 /**
-* @tc.name: HwCastStreamPlayerSendControlCommandWithParams008
-* @tc.desc: cmd : CAST_CONTROL_CMD_INVALID
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams008
+ * @tc.desc: cmd : CAST_CONTROL_CMD_TOGGLE_MUTE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams008, TestSize.Level1)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams008 begin!");
@@ -865,17 +886,36 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams008, Tes
     EXPECT_EQ(streamplayer != nullptr, true);
     streamplayer->Init();
     AVCastControlCommand cmd;
-    cmd.SetCommand(OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_INVALID);
+    cmd.SetCommand(OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_MUTE);
     streamplayer->SendControlCommandWithParams(cmd);
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams008 end!");
 }
 
 /**
-* @tc.name: HwCastProviderInit001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastStreamPlayerSendControlCommandWithParams009
+ * @tc.desc: cmd : CAST_CONTROL_CMD_INVALID
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams009, TestSize.Level1)
+{
+    SLOGI("HwCastStreamPlayerSendControlCommandWithParams009 begin!");
+    std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
+    std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(player);
+    EXPECT_EQ(streamplayer != nullptr, true);
+    streamplayer->Init();
+    AVCastControlCommand cmd;
+    cmd.SetCommand(OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_INVALID);
+    streamplayer->SendControlCommandWithParams(cmd);
+    SLOGI("HwCastStreamPlayerSendControlCommandWithParams009 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderInit001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderInit001, TestSize.Level1)
 {
     SLOGI("HwCastProviderInit001 begin!");
@@ -886,11 +926,11 @@ static HWTEST(HwCastTest, HwCastProviderInit001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderStartDiscovery001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderStartDiscovery001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderStartDiscovery001, TestSize.Level1)
 {
     SLOGI("HwCastProviderStartDiscovery001 begin!");
@@ -903,11 +943,11 @@ static HWTEST(HwCastTest, HwCastProviderStartDiscovery001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderStopDiscovery001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderStopDiscovery001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderStopDiscovery001, TestSize.Level1)
 {
     SLOGI("HwCastProviderStopDiscovery001 begin!");
@@ -919,11 +959,11 @@ static HWTEST(HwCastTest, HwCastProviderStopDiscovery001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderSetDiscoverable001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderSetDiscoverable001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderSetDiscoverable001, TestSize.Level1)
 {
     SLOGI("HwCastProviderSetDiscoverable001 begin!");
@@ -936,11 +976,11 @@ static HWTEST(HwCastTest, HwCastProviderSetDiscoverable001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderRelease001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderRelease001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderRelease001, TestSize.Level1)
 {
     SLOGI("HwCastProviderRelease001 begin!");
@@ -952,11 +992,11 @@ static HWTEST(HwCastTest, HwCastProviderRelease001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderStartCastSession001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderStartCastSession001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderStartCastSession001, TestSize.Level1)
 {
     SLOGI("HwCastProviderStartCastSession001 begin!");
@@ -968,11 +1008,11 @@ static HWTEST(HwCastTest, HwCastProviderStartCastSession001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderStopCastSession001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderStopCastSession001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderStopCastSession001, TestSize.Level1)
 {
     SLOGI("HwCastProviderStopCastSession001 begin!");
@@ -985,11 +1025,11 @@ static HWTEST(HwCastTest, HwCastProviderStopCastSession001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderAddCastDevice001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderAddCastDevice001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderAddCastDevice001, TestSize.Level1)
 {
     SLOGI("HwCastProviderAddCastDevice001 begin!");
@@ -1003,11 +1043,11 @@ static HWTEST(HwCastTest, HwCastProviderAddCastDevice001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderRemoveCastDevice001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderRemoveCastDevice001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderRemoveCastDevice001, TestSize.Level1)
 {
     SLOGI("HwCastProviderRemoveCastDevice001 begin!");
@@ -1021,11 +1061,11 @@ static HWTEST(HwCastTest, HwCastProviderRemoveCastDevice001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderGetRemoteController001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderGetRemoteController001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderGetRemoteController001, TestSize.Level1)
 {
     SLOGI("HwCastProviderGetRemoteController001 begin!");
@@ -1038,11 +1078,11 @@ static HWTEST(HwCastTest, HwCastProviderGetRemoteController001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderRegisterCastStateListener001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderRegisterCastStateListener001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderRegisterCastStateListener001, TestSize.Level1)
 {
     SLOGI("HwCastProviderRegisterCastStateListener001 begin!");
@@ -1054,11 +1094,11 @@ static HWTEST(HwCastTest, HwCastProviderRegisterCastStateListener001, TestSize.L
 }
 
 /**
-* @tc.name: HwCastProviderUnregisterCastStateListener001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderUnregisterCastStateListener001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderUnregisterCastStateListener001, TestSize.Level1)
 {
     SLOGI("HwCastProviderUnregisterCastStateListener001 begin!");
@@ -1070,11 +1110,11 @@ static HWTEST(HwCastTest, HwCastProviderUnregisterCastStateListener001, TestSize
 }
 
 /**
-* @tc.name: HwCastProviderRegisterCastSessionStateListener001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderRegisterCastSessionStateListener001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderRegisterCastSessionStateListener001, TestSize.Level1)
 {
     SLOGI("HwCastProviderRegisterCastSessionStateListener001 begin!");
@@ -1087,11 +1127,11 @@ static HWTEST(HwCastTest, HwCastProviderRegisterCastSessionStateListener001, Tes
 }
 
 /**
-* @tc.name: HwCastProviderUnregisterCastSessionStateListener001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderUnregisterCastSessionStateListener001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderUnregisterCastSessionStateListener001, TestSize.Level1)
 {
     SLOGI("HwCastProviderUnregisterCastSessionStateListener001 begin!");
@@ -1104,11 +1144,11 @@ static HWTEST(HwCastTest, HwCastProviderUnregisterCastSessionStateListener001, T
 }
 
 /**
-* @tc.name: HwCastProviderOnDeviceFound001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderOnDeviceFound001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderOnDeviceFound001, TestSize.Level1)
 {
     SLOGI("HwCastProviderOnDeviceFound001 begin!");
@@ -1121,11 +1161,11 @@ static HWTEST(HwCastTest, HwCastProviderOnDeviceFound001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderOnSessionCreated001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderOnSessionCreated001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level1)
 {
     SLOGI("HwCastProviderOnSessionCreated001 begin!");
@@ -1137,11 +1177,11 @@ static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderOnServiceDied001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderOnServiceDied001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderOnServiceDied001, TestSize.Level1)
 {
     SLOGI("HwCastProviderOnServiceDied001 begin!");
@@ -1153,11 +1193,11 @@ static HWTEST(HwCastTest, HwCastProviderOnServiceDied001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderSessionInit001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderSessionInit001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderSessionInit001, TestSize.Level1)
 {
     SLOGI("HwCastProviderSessionInit001 begin!");
@@ -1168,11 +1208,11 @@ static HWTEST(HwCastTest, HwCastProviderSessionInit001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderSessionRelease001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderSessionRelease001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderSessionRelease001, TestSize.Level1)
 {
     SLOGI("HwCastProviderSessionRelease001 begin!");
@@ -1184,11 +1224,11 @@ static HWTEST(HwCastTest, HwCastProviderSessionRelease001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderSessionOnDeviceState001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderSessionOnDeviceState001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderSessionOnDeviceState001, TestSize.Level1)
 {
     SLOGI("HwCastProviderSessionOnDeviceState001 begin!");
@@ -1202,11 +1242,11 @@ static HWTEST(HwCastTest, HwCastProviderSessionOnDeviceState001, TestSize.Level1
 }
 
 /**
-* @tc.name: HwCastProviderSessionAddDevice001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderSessionAddDevice001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderSessionAddDevice001, TestSize.Level1)
 {
     SLOGI("HwCastProviderSessionAddDevice001 begin!");
@@ -1219,11 +1259,11 @@ static HWTEST(HwCastTest, HwCastProviderSessionAddDevice001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderSessionRemoveDevice001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderSessionRemoveDevice001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderSessionRemoveDevice001, TestSize.Level1)
 {
     SLOGI("HwCastProviderSessionRemoveDevice001 begin!");
@@ -1236,11 +1276,11 @@ static HWTEST(HwCastTest, HwCastProviderSessionRemoveDevice001, TestSize.Level1)
 }
 
 /**
-* @tc.name: HwCastProviderSessionCreateStreamPlayer001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderSessionCreateStreamPlayer001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderSessionCreateStreamPlayer001, TestSize.Level1)
 {
     SLOGI("HwCastProviderSessionCreateStreamPlayer001 begin!");
@@ -1252,11 +1292,11 @@ static HWTEST(HwCastTest, HwCastProviderSessionCreateStreamPlayer001, TestSize.L
 }
 
 /**
-* @tc.name: HwCastProviderSessionRegisterCastSessionStateListener001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderSessionRegisterCastSessionStateListener001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderSessionRegisterCastSessionStateListener001, TestSize.Level1)
 {
     SLOGI("HwCastProviderSessionRegisterCastSessionStateListener001 begin!");
@@ -1268,11 +1308,11 @@ static HWTEST(HwCastTest, HwCastProviderSessionRegisterCastSessionStateListener0
 }
 
 /**
-* @tc.name: HwCastProviderSessionUnregisterCastSessionStateListener001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HwCastProviderSessionUnregisterCastSessionStateListener001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 static HWTEST(HwCastTest, HwCastProviderSessionUnregisterCastSessionStateListener001, TestSize.Level1)
 {
     SLOGI("HwCastProviderSessionUnregisterCastSessionStateListener001 begin!");

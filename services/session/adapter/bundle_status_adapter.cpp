@@ -122,7 +122,7 @@ BundleStatusCallbackImpl::BundleStatusCallbackImpl(const std::function<void(cons
     SLOGI("Create bundle status instance");
     callback_ = callback;
 }
-   
+
 BundleStatusCallbackImpl::~BundleStatusCallbackImpl()
 {
     SLOGI("Destroy bundle status instance");

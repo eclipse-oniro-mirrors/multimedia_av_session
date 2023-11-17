@@ -16,56 +16,71 @@
 const TAG = 'avpicker_component_mock ';
 
 export class AVCastPicker extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1) {
-        super(parent, __localStorage, elmtId);
-        this.setInitiallyProvidedValue(params);
-    }
+  constructor(parent, params, __localStorage, elmtId = -1) {
+    super(parent, __localStorage, elmtId);
+    this.setInitiallyProvidedValue(params);
+  }
 
-    setInitiallyProvidedValue(params) {
-    }
+  setInitiallyProvidedValue(params) {
+  }
 
-    updateStateVars(params) {
-    }
+  updateStateVars(params) {
+  }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-    }
+  purgeVariableDependenciesOnElmtId(rmElmtId) {
+  }
 
-    aboutToBeDeleted() {
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
+  aboutToBeDeleted() {
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal();
+  }
 
-    aboutToAppear() {
-        console.info(TAG + 'aboutToAppear');
-    }
+  aboutToAppear() {
+    console.info(TAG + 'aboutToAppear');
+  }
 
-    aboutToDisappear() {
-        console.info(TAG + 'aboutToDisappear');
-    }
+  aboutToDisappear() {
+    console.info(TAG + 'aboutToDisappear');
+  }
 
-    initialRender() {
-        this.observeComponentCreation((elmtId, isInitialRender) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            Column.create();
-            Column.size({ width: '100%', height: '100%' })
-            isInitialRender || Column.pop();
-            ViewStackProcessor.StopGetAccessRecording();
-        });
-        this.observeComponentCreation((elmtId, isInitialRender) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            Button.createWithLabel("AVCastPicker");
-            Button.type(ButtonType.Circle);
-            Button.size({ width: "100%", height: "100%"});
-            isInitialRender || Button.pop();
-            ViewStackProcessor.StopGetAccessRecording();
-        });
+  initialRender() {
+    this.observeComponentCreation((elmtId, isInitialRender) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      Column.create();
+      Column.size({ width: '100%', height: '100%' })
+      isInitialRender || Column.pop();
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((elmtId, isInitialRender) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      Button.createWithChild();
+      Button.type(ButtonType.Circle);
+      Button.backgroundColor('#00000000');
+      Button.width('100%');
+      Button.height('100%');
+      if (!isInitialRender) {
         Button.pop();
-        Column.pop();
-    }
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((elmtId, isInitialRender) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      Image.create({ "id": 125830232, "type": 20000, params: [] });
+      Image.width('100%');
+      Image.height('100%');
+      Image.draggable(false);
+      if (!isInitialRender) {
+        Image.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    Button.pop();
+    Column.pop();
+  }
 
-    rerender() {
-        this.updateDirtyElements();
-    }
+  rerender() {
+    this.updateDirtyElements();
+  }
 }
 
 export default AVCastPicker;

@@ -35,6 +35,29 @@ public:
     virtual void OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos) = 0;
 
     /**
+     * Listen for the event of device offline.
+     *
+     * @param { std::string& } deviceId - Offlined device ID.
+     * @since 10
+    */
+    virtual void OnDeviceOffline(const std::string& deviceId) = 0;
+
+    /**
+     * Notify Router that the cast session should be destroy.
+     *
+     * @since 10
+    */
+    virtual void OnSessionNeedDestroy() = 0;
+
+    /**
+     * Notify Router that the cast session has created.
+     *
+     * @param { int32_t } castId - Cast id for AVRouter's control.
+     * @since 10
+    */
+    virtual void OnSessionCreated(const int32_t castId) = 0;
+
+    /**
      * Notify Router that the cast engine service has died.
      *
      * @since 10

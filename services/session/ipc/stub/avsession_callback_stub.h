@@ -26,6 +26,9 @@ public:
 private:
     static bool CheckInterfaceToken(MessageParcel& data);
 
+    int32_t HandleOnAVCallAnswer(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnAVCallHangUp(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnAVCallToggleCallMute(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnPlay(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnPause(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnStop(MessageParcel& data, MessageParcel& reply);
@@ -58,6 +61,9 @@ private:
         &AVSessionCallbackStub::HandleOnOutputDeviceChange,
         &AVSessionCallbackStub::HandleOnCommonCommand,
         &AVSessionCallbackStub::HandleOnSkipToQueueItem,
+        &AVSessionCallbackStub::HandleOnAVCallAnswer,
+        &AVSessionCallbackStub::HandleOnAVCallHangUp,
+        &AVSessionCallbackStub::HandleOnAVCallToggleCallMute,
     };
 };
 } // namespace OHOS::AVSession

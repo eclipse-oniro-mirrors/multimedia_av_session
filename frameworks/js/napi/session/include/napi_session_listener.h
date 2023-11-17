@@ -34,6 +34,7 @@ public:
         EVENT_TOP_SESSION_CHANGED,
         EVENT_AUDIO_SESSION_CHECKED,
         EVENT_DEVICE_AVAILABLE,
+        EVENT_DEVICE_OFFLINE,
         EVENT_TYPE_MAX
     };
 
@@ -45,6 +46,7 @@ public:
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
     void OnAudioSessionChecked(const int32_t uid) override;
     void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
+    void OnDeviceOffline(const std::string& deviceId) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

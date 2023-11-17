@@ -17,7 +17,9 @@
 
 #include "napi/native_common.h"
 #include "avcontrol_command.h"
+#include "avcall_state.h"
 #include "avplayback_state.h"
+#include "avmeta_data.h"
 #include "avsession_info.h"
 #include "napi_avsession_enum.h"
 
@@ -45,6 +47,19 @@ static napi_value ExportLoopMode(napi_env env)
     (void)SetNamedProperty(env, result, "LOOP_MODE_SINGLE", AVPlaybackState::LOOP_MODE_SINGLE);
     (void)SetNamedProperty(env, result, "LOOP_MODE_LIST", AVPlaybackState::LOOP_MODE_LIST);
     (void)SetNamedProperty(env, result, "LOOP_MODE_SHUFFLE", AVPlaybackState::LOOP_MODE_SHUFFLE);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportSkipIntervals(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "SECONDS_10", AVMetaData::SECONDS_10);
+    (void)SetNamedProperty(env, result, "SECONDS_15", AVMetaData::SECONDS_15);
+    (void)SetNamedProperty(env, result, "SECONDS_30", AVMetaData::SECONDS_30);
 
     napi_object_freeze(env, result);
     return result;
@@ -95,7 +110,7 @@ static napi_value ExportDeviceType(napi_env env)
 
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_LOCAL", DeviceType::DEVICE_TYPE_LOCAL);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_TV", DeviceType::DEVICE_TYPE_TV);
-    (void)SetNamedProperty(env, result, "DEVICE_TYPE_SMART_SPEAKER", DeviceType::DEVICE_TYPE_SPEAKER);
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_SMART_SPEAKER", DeviceType::DEVICE_TYPE_SMART_SPEAKER);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_BLUETOOTH", DeviceType::DEVICE_TYPE_BLUETOOTH);
 
     napi_object_freeze(env, result);
@@ -117,6 +132,23 @@ static napi_value ExportPlaybackState(napi_env env)
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_COMPLETED", AVPlaybackState::PLAYBACK_STATE_COMPLETED);
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_RELEASED", AVPlaybackState::PLAYBACK_STATE_RELEASED);
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_ERROR", AVPlaybackState::PLAYBACK_STATE_ERROR);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportAVCallState(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "CALL_STATE_IDLE", AVCallState::AVCALL_STATE_IDLE);
+    (void)SetNamedProperty(env, result, "CALL_STATE_INCOMING", AVCallState::AVCALL_STATE_INCOMING);
+    (void)SetNamedProperty(env, result, "CALL_STATE_ACTIVE", AVCallState::AVCALL_STATE_ACTIVE);
+    (void)SetNamedProperty(env, result, "CALL_STATE_DIALING", AVCallState::AVCALL_STATE_DIALING);
+    (void)SetNamedProperty(env, result, "CALL_STATE_WAITING", AVCallState::AVCALL_STATE_WAITING);
+    (void)SetNamedProperty(env, result, "CALL_STATE_HOLDING", AVCallState::AVCALL_STATE_HOLDING);
+    (void)SetNamedProperty(env, result, "CALL_STATE_DISCONNECTING", AVCallState::AVCALL_STATE_DISCONNECTING);
 
     napi_object_freeze(env, result);
     return result;
@@ -145,6 +177,17 @@ static napi_value ExportAVSessionErrorCode(napi_env env)
     return result;
 }
 
+static napi_value ExportDisplayTag(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "AUDIO_VIVID", AVMetaData::DISPLAY_TAG_AUDIO_VIVID);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -153,8 +196,11 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("ConnectionState", ExportConnectionState(env)),
         DECLARE_NAPI_PROPERTY("DeviceType", ExportDeviceType(env)),
         DECLARE_NAPI_PROPERTY("LoopMode", ExportLoopMode(env)),
+        DECLARE_NAPI_PROPERTY("SkipIntervals", ExportSkipIntervals(env)),
         DECLARE_NAPI_PROPERTY("PlaybackState", ExportPlaybackState(env)),
+        DECLARE_NAPI_PROPERTY("CallState", ExportAVCallState(env)),
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
+        DECLARE_NAPI_PROPERTY("DisplayTag", ExportDisplayTag(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

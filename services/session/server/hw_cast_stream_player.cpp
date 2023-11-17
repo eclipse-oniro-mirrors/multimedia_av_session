@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "hw_cast_stream_player.h"
+#include "int_wrapper.h"
 #include "avsession_log.h"
 #include "avcast_player_state.h"
 #include "avqueue_item.h"
 #include "avmedia_description.h"
 #include "avsession_errors.h"
-#include "hw_cast_stream_player.h"
 
 using namespace OHOS::CastEngine;
 
@@ -83,20 +84,17 @@ void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castContr
 
 void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand castControlCommand)
 {
-    int32_t currentPosition = 0;
     std::lock_guard lockGuard(streamPlayerLock_);
     switch (castControlCommand.GetCommand()) {
         case AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD:
-            streamPlayer_->GetPosition(currentPosition);
             int32_t forwardTime;
             castControlCommand.GetForwardTime(forwardTime);
-            streamPlayer_->Seek(currentPosition + forwardTime);
+            streamPlayer_->FastForward(forwardTime);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_REWIND:
-            streamPlayer_->GetPosition(currentPosition);
             int32_t rewindTime;
             castControlCommand.GetRewindTime(rewindTime);
-            streamPlayer_->Seek(rewindTime > currentPosition ? 0 : currentPosition - rewindTime);
+            streamPlayer_->FastRewind(rewindTime);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SEEK:
             int32_t seekTime;
@@ -116,9 +114,18 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
         case AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE:
             int32_t loopMode;
             castControlCommand.GetLoopMode(loopMode);
-            streamPlayer_->SetLoopMode(static_cast<CastEngine::LoopMode>(loopMode + 1)); // Convert loop mode
+            if (intLoopModeToCastPlus_.count(loopMode) != 0) {
+                streamPlayer_->SetLoopMode(intLoopModeToCastPlus_[loopMode]);
+            } else {
+                SLOGE("invalid LoopMode: %{public}d", loopMode);
+            }
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE:
+            break;
+        case AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_MUTE:
+            bool enableMute;
+            streamPlayer_->GetMute(enableMute);
+            streamPlayer_->SetMute(!enableMute);
             break;
         default:
             SLOGE("invalid command");
@@ -153,7 +160,11 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
-    mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
+    if (mediaDescription->GetIconUri() == "") {
+        mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
+    } else {
+        mediaInfo.albumCoverUrl = mediaDescription->GetIconUri();
+    }
     mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
     mediaInfo.mediaArtist = mediaDescription->GetArtist();
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
@@ -202,7 +213,11 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
-    mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
+    if (mediaDescription->GetIconUri() == "") {
+        mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
+    } else {
+        mediaInfo.albumCoverUrl = mediaDescription->GetIconUri();
+    }
     mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
     mediaInfo.mediaArtist = mediaDescription->GetArtist();
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
@@ -271,7 +286,7 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
         return AVSESSION_ERROR;
     }
     wantParams->SetParam("maxCastVolume", intIt);
-    avCastPlaybackState.SetExtras(wantParam);
+    avPlaybackState.SetExtras(wantParams);
 
     SLOGI("GetCastAVPlaybackState successed");
     return AVSESSION_SUCCESS;
@@ -350,7 +365,7 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
 
 void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int duration)
 {
-    if (position == -1 && bufferPosition == -1) { // -1 is invalid(default) value
+    if (position == -1 && bufferPosition == -1 && duration == -1) { // -1 is invalid(default) value
         SLOGW("Invalid position change callback");
         return;
     }
@@ -369,7 +384,7 @@ void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int
         std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
         sptr<AAFwk::IInterface> intIt = AAFwk::Integer::Box(duration);
         wantParams->SetParam("duration", intIt);
-        avCastPlaybackState.SetExtras(wantParam);
+        avCastPlaybackState.SetExtras(wantParams);
         SLOGD("Received duration: %{public}d", duration);
     }
     for (auto listener : streamPlayerListenerList_) {
@@ -444,7 +459,7 @@ void HwCastStreamPlayer::OnVolumeChanged(int volume, int maxVolume)
         return;
     }
     wantParams->SetParam("maxCastVolume", intIt);
-    avCastPlaybackState.SetExtras(wantParam);
+    avCastPlaybackState.SetExtras(wantParams);
 
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
@@ -478,7 +493,7 @@ void HwCastStreamPlayer::OnPlaySpeedChanged(const CastEngine::PlaybackSpeed spee
         SLOGE("current speed is not exist in castPlusSpeedToDouble_");
         return;
     }
-    SLOGD("StreamPlayer received play speed changed event: %{public}d", castPlusSpeedToDouble_[speed]);
+    SLOGD("StreamPlayer received play speed changed event: %{public}f", castPlusSpeedToDouble_[speed]);
     avCastPlaybackState.SetSpeed(castPlusSpeedToDouble_[speed]);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
@@ -524,5 +539,56 @@ void HwCastStreamPlayer::OnVideoSizeChanged(int width, int height)
 void HwCastStreamPlayer::OnEndOfStream(int isLooping)
 {
     SLOGD("Received EndOfStream callback, value is %{public}d", isLooping);
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnEndOfStream for registered listeners");
+            listener->OnEndOfStream(isLooping);
+        }
+    }
+
+    AVPlaybackState avCastPlaybackState;
+    std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
+    sptr<AAFwk::IInterface> intIt = AAFwk::Integer::Box(isLooping);
+    if (wantParams == nullptr || intIt == nullptr) {
+        return;
+    }
+    wantParams->SetParam("endofstream", intIt);
+    avCastPlaybackState.SetExtras(wantParams);
+    SLOGD("Received end of stream event: %{public}d", isLooping);
+
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnEndOfStream for registered listeners");
+            listener->OnCastPlaybackStateChange(avCastPlaybackState);
+        }
+    }
+}
+
+void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
+{
+    SLOGD("Stream player received PlayRequest event");
+    std::shared_ptr<AVMediaDescription> mediaDescription = std::make_shared<AVMediaDescription>();
+    mediaDescription->SetMediaId(mediaInfo.mediaId);
+    mediaDescription->SetTitle(mediaInfo.mediaName);
+    mediaDescription->SetMediaUri(mediaInfo.mediaUrl);
+    mediaDescription->SetMediaType(mediaInfo.mediaType);
+    mediaDescription->SetMediaSize(mediaInfo.mediaSize);
+    mediaDescription->SetStartPosition(static_cast<uint32_t>(mediaInfo.startPosition));
+    mediaDescription->SetDuration(static_cast<uint32_t>(mediaInfo.duration));
+    mediaDescription->SetCreditsPosition(static_cast<int32_t>(mediaInfo.closingCreditsPosition));
+    mediaDescription->SetAlbumCoverUri(mediaInfo.albumCoverUrl);
+    mediaDescription->SetAlbumTitle(mediaInfo.albumTitle);
+    mediaDescription->SetArtist(mediaInfo.mediaArtist);
+    mediaDescription->SetLyricUri(mediaInfo.lrcUrl);
+    mediaDescription->SetIconUri(mediaInfo.appIconUrl);
+    mediaDescription->SetAppName(mediaInfo.appName);
+    AVQueueItem queueItem;
+    queueItem.SetDescription(mediaDescription);
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnPlayRequest for registered listeners");
+        }
+    }
+    std::lock_guard lockGuard(streamPlayerLock_);
 }
 } // namespace OHOS::AVSession

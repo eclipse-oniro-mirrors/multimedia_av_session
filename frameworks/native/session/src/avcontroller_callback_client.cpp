@@ -34,6 +34,26 @@ void AVControllerCallbackClient::OnSessionDestroy()
         "AVControllerCallbackClient handler postTask failed");
 }
 
+void AVControllerCallbackClient::OnAVCallMetaDataChange(const AVCallMetaData& data)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, data]() { callback->OnAVCallMetaDataChange(data); }, EVENT_NAME),
+        "AVControllerCallbackClient handler postTask failed");
+}
+
+void AVControllerCallbackClient::OnAVCallStateChange(const AVCallState& state)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, state]() { callback->OnAVCallStateChange(state); }, EVENT_NAME),
+        "AVControllerCallbackClient handler postTask failed");
+}
+
 void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");

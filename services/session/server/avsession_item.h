@@ -23,6 +23,7 @@
 #include "avsession_callback_proxy.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
+#include "avcast_control_command.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
@@ -56,12 +57,18 @@ public:
     ~AVSessionItem() override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    bool IsCastSinkSession(int32_t castState);
+
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 #endif
 
     std::string GetSessionId() override;
 
     std::string GetSessionType() override;
+
+    int32_t SetAVCallMetaData(const AVCallMetaData& avCallMetaData) override;
+
+    int32_t SetAVCallState(const AVCallState& avCallState) override;
 
     int32_t GetAVMetaData(AVMetaData& meta) override;
 
@@ -70,7 +77,7 @@ public:
     int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
 
     int32_t SetAVQueueItems(const std::vector<AVQueueItem>& items) override;
-    
+
     int32_t GetAVQueueTitle(std::string& title) override;
 
     int32_t SetAVQueueTitle(const std::string& title) override;
@@ -98,6 +105,10 @@ public:
     AVSessionDescriptor GetDescriptor();
 
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
+
+    AVCallState GetAVCallState();
+
+    AVCallMetaData GetAVCallMetaData();
 
     AVPlaybackState GetPlaybackState();
 
@@ -162,6 +173,10 @@ public:
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t AddSupportCastCommand(int32_t cmd);
+
+    int32_t DeleteSupportCastCommand(int32_t cmd);
+
     int32_t ReleaseCast() override;
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
@@ -169,10 +184,20 @@ public:
     int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo);
 
     int32_t StopCast();
-    
+
     sptr<IRemoteObject> GetAVCastControllerInner() override;
 
+    void ReleaseAVCastControllerInner();
+
     void UpdateCastDeviceMap(DeviceInfo deviceInfo);
+
+    void SetCastHandle(int64_t castHandle);
+
+    void RegisterDeviceStateCallback();
+
+    void UnRegisterDeviceStateCallback();
+
+    void StopCastSession();
 #endif
 
 protected:
@@ -180,6 +205,9 @@ protected:
     sptr<IRemoteObject> GetControllerInner() override;
 
 private:
+    void HandleOnAVCallAnswer(const AVControlCommand& cmd);
+    void HandleOnAVCallHangUp(const AVControlCommand& cmd);
+    void HandleOnAVCallToggleCallMute(const AVControlCommand& cmd);
     void HandleOnPlay(const AVControlCommand& cmd);
     void HandleOnPause(const AVControlCommand& cmd);
     void HandleOnStop(const AVControlCommand& cmd);
@@ -205,10 +233,16 @@ private:
         &AVSessionItem::HandleOnSetSpeed,
         &AVSessionItem::HandleOnSetLoopMode,
         &AVSessionItem::HandleOnToggleFavorite,
+        &AVSessionItem::HandleOnAVCallAnswer,
+        &AVSessionItem::HandleOnAVCallHangUp,
+        &AVSessionItem::HandleOnAVCallToggleCallMute,
     };
 
     std::recursive_mutex controllersLock_;
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
+    AVCallMetaData avCallMetaData_;
+    AVCallState avCallState_;
+
     AVSessionDescriptor descriptor_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
@@ -218,6 +252,7 @@ private:
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
     AAFwk::WantParams extras_;
     std::vector<int32_t> supportedCmd_;
+    std::vector<int32_t> supportedCastCmds_;
     std::recursive_mutex callbackLock_;
     sptr<IAVSessionCallback> callback_;
     std::recursive_mutex remoteCallbackLock_;
@@ -232,7 +267,7 @@ private:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
-    int64_t castHandle_;
+    int64_t castHandle_ = 0;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;

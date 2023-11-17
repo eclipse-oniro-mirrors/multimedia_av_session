@@ -19,6 +19,7 @@
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_callback_proxy.h"
 #include "avcast_controller_stub.h"
+#include "avcast_control_command.h"
 
 namespace OHOS::AVSession {
 class AVCastControllerItem : public AVCastControllerStub, public IAVCastControllerProxyListener,
@@ -26,7 +27,10 @@ class AVCastControllerItem : public AVCastControllerStub, public IAVCastControll
 public:
     AVCastControllerItem();
 
-    void Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
+    ~AVCastControllerItem();
+
+    void Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy,
+        const std::function<void(int32_t, std::vector<int32_t>&)>& validCommandsChangecallback);
 
     void OnCastPlaybackStateChange(const AVPlaybackState& state) override;
 
@@ -42,6 +46,8 @@ public:
     
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
+    void OnEndOfStream(const int32_t isLooping) override;
+
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
     int32_t Start(const AVQueueItem& avQueueItem) override;
@@ -53,6 +59,8 @@ public:
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
 
     int32_t GetCurrentItem(AVQueueItem& currentItem) override;
+
+    int32_t GetValidCommands(std::vector<int32_t>& cmds) override;
 
     int32_t SetDisplaySurface(std::string& surfaceId) override;
 
@@ -70,6 +78,8 @@ private:
     sptr<IAVCastControllerCallback> callback_;
     AVPlaybackState::PlaybackStateMaskType castPlaybackMask_;
     AVQueueItem currentAVQueueItem_;
+    std::vector<int32_t> supportedCastCmds_;
+    std::function<void(int32_t, std::vector<int32_t>&)> validCommandsChangecallback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_ITEM_H

@@ -43,6 +43,7 @@ std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAV
     { "topSessionChange", { OnTopSessionChange, OffTopSessionChange } },
     { "sessionServiceDie", { OnServiceDie, OffServiceDie } },
     { "deviceAvailable", { OnDeviceAvailable, OffDeviceAvailable } },
+    { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
 };
 
 std::shared_ptr<NapiSessionListener> NapiAVSessionManager::listener_;
@@ -947,6 +948,11 @@ napi_status NapiAVSessionManager::OnDeviceAvailable(napi_env env, napi_value cal
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_AVAILABLE, callback);
 }
 
+napi_status NapiAVSessionManager::OnDeviceOffline(napi_env env, napi_value callback)
+{
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_OFFLINE, callback);
+}
+
 napi_status NapiAVSessionManager::OnServiceDie(napi_env env, napi_value callback)
 {
     napi_ref ref = nullptr;
@@ -1012,6 +1018,12 @@ napi_status NapiAVSessionManager::OffDeviceAvailable(napi_env env, napi_value ca
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_AVAILABLE, callback);
 }
 
+napi_status NapiAVSessionManager::OffDeviceOffline(napi_env env, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_OFFLINE, callback);
+}
+
 napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)
 {
     AVSessionManager::GetInstance().UnregisterServiceDeathCallback();
@@ -1020,6 +1032,7 @@ napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callbac
              ++callbackRef) {
             napi_status ret = napi_delete_reference(env, *callbackRef);
             CHECK_AND_RETURN_RET_LOG(napi_ok == ret, ret, "delete callback reference failed");
+            *callbackRef = nullptr;
         }
         serviceDiedCallbacks_.clear();
         return napi_ok;

@@ -26,12 +26,14 @@
 namespace OHOS::AVSession {
 NapiAVControllerCallback::NapiAVControllerCallback()
 {
-    SLOGI("construct");
+    SLOGI("Construct NapiAVControllerCallback");
+    isValid_ = std::make_shared<bool>(true);
 }
 
 NapiAVControllerCallback::~NapiAVControllerCallback()
 {
-    SLOGI("destroy");
+    SLOGI("Destroy NapiAVControllerCallback");
+    *isValid_ = false;
 }
 
 void NapiAVControllerCallback::HandleEvent(int32_t event)
@@ -42,7 +44,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event)
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref);
+        asyncCallback_->CallWithFlag(*ref, isValid_);
     }
 }
 
@@ -55,7 +57,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [param](napi_env env, int& argc, napi_value *argv) {
+        asyncCallback_->CallWithFlag(*ref, isValid_, [param](napi_env env, int& argc, napi_value *argv) {
             argc = NapiUtils::ARGC_ONE;
             auto status = NapiUtils::SetValue(env, param, *argv);
             CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
@@ -72,7 +74,8 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const std::string& fir
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
+        asyncCallback_->CallWithFlag(*ref, isValid_, [firstParam, secondParam](napi_env env, int& argc,
+            napi_value *argv) {
             argc = NapiUtils::ARGC_TWO;
             auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
             CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
@@ -92,7 +95,8 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
+        asyncCallback_->CallWithFlag(*ref, isValid_, [firstParam, secondParam](napi_env env, int& argc,
+            napi_value *argv) {
             argc = NapiUtils::ARGC_TWO;
             auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
             CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
@@ -100,6 +104,18 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
             CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
         });
     }
+}
+
+void NapiAVControllerCallback::OnAVCallStateChange(const AVCallState& avCallState)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnAVCallStateChange");
+    HandleEvent(EVENT_AVCALL_STATE_CHANGE, avCallState);
+}
+
+void NapiAVControllerCallback::OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnAVCallMetaDataChange");
+    HandleEvent(EVENT_AVCALL_META_DATA_CHANGE, avCallMetaData);
 }
 
 void NapiAVControllerCallback::OnSessionDestroy()
@@ -191,6 +207,7 @@ napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
             napi_status ret = napi_delete_reference(env, *callbackRef);
             CHECK_AND_RETURN_RET_LOG(ret == napi_ok, ret, "delete callback reference failed");
+            *callbackRef = nullptr;
         }
         callbacks_[event].clear();
         return napi_ok;

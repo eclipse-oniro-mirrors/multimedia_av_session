@@ -15,7 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#define private public
 #include "avsession_dumper.h"
+#undef private
 
 using namespace testing::ext;
 
@@ -45,11 +47,11 @@ void AVSessionDumperTest::TearDown()
 {}
 
 /**
-* @tc.name: ShowHelp001
-* @tc.desc: Test whether the string returned by showHelp is correct
-* @tc.type: FUNC
-* @tc.require: I6RW8M
-*/
+ * @tc.name: ShowHelp001
+ * @tc.desc: Test whether the string returned by showHelp is correct
+ * @tc.type: FUNC
+ * @tc.require: I6RW8M
+ */
 HWTEST_F(AVSessionDumperTest, ShowHelp001, TestSize.Level1)
 {
     SLOGI("ShowHelp001 begin");
@@ -72,11 +74,11 @@ HWTEST_F(AVSessionDumperTest, ShowHelp001, TestSize.Level1)
 }
 
 /**
-* @tc.name: ShowTrustedDevicesInfo001
-* @tc.desc: Test whether the string returned by ShowTrustedDevicesInfo is correct
-* @tc.type: FUNC
-* @tc.require: I6RW8M
-*/
+ * @tc.name: ShowTrustedDevicesInfo001
+ * @tc.desc: Test whether the string returned by ShowTrustedDevicesInfo is correct
+ * @tc.type: FUNC
+ * @tc.require: I6RW8M
+ */
 HWTEST_F(AVSessionDumperTest, ShowTrustedDevicesInfo001, TestSize.Level1)
 {
     SLOGI("ShowTrustedDevicesInfo001 begin");
@@ -91,11 +93,11 @@ HWTEST_F(AVSessionDumperTest, ShowTrustedDevicesInfo001, TestSize.Level1)
 }
 
 /**
-* @tc.name: ShowSessionInfo001
-* @tc.desc: Test whether the string returned by ShowSessionInfo is correct
-* @tc.type: FUNC
-* @tc.require: I6RW8M
-*/
+ * @tc.name: ShowSessionInfo001
+ * @tc.desc: Test whether the string returned by ShowSessionInfo is correct
+ * @tc.type: FUNC
+ * @tc.require: I6RW8M
+ */
 HWTEST_F(AVSessionDumperTest, ShowSessionInfo001, TestSize.Level1)
 {
     SLOGI("ShowSessionInfo001 begin");
@@ -110,11 +112,11 @@ HWTEST_F(AVSessionDumperTest, ShowSessionInfo001, TestSize.Level1)
 }
 
 /**
-* @tc.name: ShowControllerInfo001
-* @tc.desc: Test whether the string returned by ShowControllerInfo is correct
-* @tc.type: FUNC
-* @tc.require: I6RW8M
-*/
+ * @tc.name: ShowControllerInfo001
+ * @tc.desc: Test whether the string returned by ShowControllerInfo is correct
+ * @tc.type: FUNC
+ * @tc.require: I6RW8M
+ */
 HWTEST_F(AVSessionDumperTest, ShowControllerInfo, TestSize.Level1)
 {
     SLOGI("ShowControllerInfo begin");
@@ -129,11 +131,11 @@ HWTEST_F(AVSessionDumperTest, ShowControllerInfo, TestSize.Level1)
 }
 
 /**
-* @tc.name: ShowErrorInfo001
-* @tc.desc: Test whether errorInfo can be obtained
-* @tc.type: FUNC
-* @tc.require: I6RW8M
-*/
+ * @tc.name: ShowErrorInfo001
+ * @tc.desc: Test whether errorInfo can be obtained
+ * @tc.type: FUNC
+ * @tc.require: I6RW8M
+ */
 HWTEST_F(AVSessionDumperTest, ShowErrorInfo001, TestSize.Level1)
 {
     SLOGI("ShowErrorInfo001 begin");
@@ -150,11 +152,11 @@ HWTEST_F(AVSessionDumperTest, ShowErrorInfo001, TestSize.Level1)
 }
 
 /**
-* @tc.name: ShowIllegalInfo001
-* @tc.desc: Show illegal info
-* @tc.type: FUNC
-* @tc.require: I6RW8M
-*/
+ * @tc.name: ShowIllegalInfo001
+ * @tc.desc: Show illegal info
+ * @tc.type: FUNC
+ * @tc.require: I6RW8M
+ */
 HWTEST_F(AVSessionDumperTest, ShowIllegalInfo001, TestSize.Level1)
 {
     SLOGI("ShowIllegalInfo001 begin");
@@ -170,11 +172,11 @@ HWTEST_F(AVSessionDumperTest, ShowIllegalInfo001, TestSize.Level1)
 }
 
 /**
-* @tc.name: Dump001
-* @tc.desc: Test dump function in unexpected situations
-* @tc.type: FUNC
-* @tc.require: I6RW8M
-*/
+ * @tc.name: Dump001
+ * @tc.desc: Test dump function in unexpected situations
+ * @tc.type: FUNC
+ * @tc.require: I6RW8M
+ */
 HWTEST_F(AVSessionDumperTest, Dump001, TestSize.Level1)
 {
     SLOGI("Dump001 begin");
@@ -185,6 +187,337 @@ HWTEST_F(AVSessionDumperTest, Dump001, TestSize.Level1)
     dumper.Dump(args, actualString, *avSessionService_);
     EXPECT_EQ(actualString, illegalInformation);
     SLOGI("Dump001 end");
+}
+
+/**
+ * @tc.name: OnDump001
+ * @tc.desc: avsession service ondump
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, OnDump001, TestSize.Level1)
+{
+    avSessionService_->OnDump();
+    EXPECT_NE(avSessionService_, nullptr);
+}
+
+/**
+ * @tc.name: OnStop001
+ * @tc.desc: avsession service onstop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, OnStop001, TestSize.Level1)
+{
+    avSessionService_->OnStop();
+    EXPECT_NE(avSessionService_, nullptr);
+}
+
+/**
+ * @tc.name: UpdataTopSession001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, UpdataTopSession001, TestSize.Level1)
+{
+    AVSessionDescriptor descriptor;
+    avSessionService_->topSession_ = new AVSessionItem(descriptor);
+    auto item = new AVSessionItem(descriptor);
+    avSessionService_->UpdateTopSession(item);
+    EXPECT_NE(avSessionService_, nullptr);
+}
+
+/**
+ * @tc.name: HandleFocusSession001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, HandleFocusSession001, TestSize.Level1)
+{
+    AVSessionDescriptor descriptor;
+    descriptor.uid_ = 1;
+    avSessionService_->topSession_ = new AVSessionItem(descriptor);
+    FocusSessionStrategy::FocusSessionChangeInfo info;
+    info.uid = 1;
+    avSessionService_->HandleFocusSession(info);
+    EXPECT_NE(avSessionService_, nullptr);
+}
+
+/**
+ * @tc.name: HandleFocusSession002
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, HandleFocusSession002, TestSize.Level1)
+{
+    AVSessionDescriptor descriptor;
+    descriptor.uid_ = 1;
+    avSessionService_->topSession_ = new AVSessionItem(descriptor);
+    descriptor.uid_ = 2;
+    sptr<AVSessionItem> item = new AVSessionItem(descriptor);
+    FocusSessionStrategy::FocusSessionChangeInfo info;
+    info.uid = 2;
+    avSessionService_->GetContainer().AddSession(1, "abilityName", item);
+    avSessionService_->HandleFocusSession(info);
+    avSessionService_->GetContainer().RemoveSession(1);
+    EXPECT_NE(avSessionService_, nullptr);
+}
+
+class TestSessionListener : public SessionListener {
+public:
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s created", descriptor.sessionId_.c_str());
+    }
+
+    void OnSessionRelease(const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s released", descriptor.sessionId_.c_str());
+    }
+
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
+    }
+
+    void OnAudioSessionChecked(const int32_t uid) override
+    {
+        SLOGI("uid=%{public}d checked", uid);
+    }
+};
+
+class TestISessionListener : public ISessionListener {
+public:
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override
+    {
+    };
+
+    void OnSessionRelease(const AVSessionDescriptor& descriptor) override
+    {
+    };
+
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override
+    {
+    };
+
+    void OnAudioSessionChecked(const int32_t uid) override
+    {
+    };
+
+    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override
+    {
+    };
+
+    void OnDeviceOffline(const std::string& deviceId) override
+    {
+    };
+
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    };
+};
+
+/**
+ * @tc.name: NotifyAudioSessionCheck001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, NotifyAudioSessionCheck001, TestSize.Level1)
+{
+    TestSessionListener listener;
+    avSessionService_->AddInnerSessionListener(&listener);
+    sptr<TestISessionListener> iListener = new TestISessionListener();
+    avSessionService_->AddSessionListener(1, iListener);
+    avSessionService_->NotifyAudioSessionCheck(1);
+    EXPECT_NE(avSessionService_, nullptr);
+}
+
+/**
+ * @tc.name: GetSessionDescriptorsBySessionId001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, GetSessionDescriptorsBySessionId001, TestSize.Level1)
+{
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = "sessionId";
+    sptr<AVSessionItem> item1 = new AVSessionItem(descriptor);
+    avSessionService_->GetContainer().AddSession(1, "abilityName1", item1);
+    EXPECT_EQ(avSessionService_->GetSessionDescriptorsBySessionId("sessionId", descriptor), AVSESSION_SUCCESS);
+    avSessionService_->GetContainer().RemoveSession(1);
+}
+
+/**
+ * @tc.name: StartDefaultAbilityByCall001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, StartDefaultAbilityByCall001, TestSize.Level1)
+{
+    std::string sessionId = "sessionId";
+    EXPECT_EQ(avSessionService_->StartDefaultAbilityByCall(sessionId), -1016);
+}
+
+/**
+ * @tc.name: StartAbilityByCall001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, StartAbilityByCall001, TestSize.Level1)
+{
+    std::string sessionIdNeeded = "sessionIdNeeded";
+    std::string sessionId = "sessionId";
+    EXPECT_EQ(avSessionService_->StartAbilityByCall(sessionIdNeeded, sessionId), AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: DeleteHistoricalRecord001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, DeleteHistoricalRecord001, TestSize.Level1)
+{
+    std::string bundleName = "bundleName";
+    avSessionService_->DeleteHistoricalRecord(bundleName);
+    EXPECT_NE(avSessionService_, nullptr);
+}
+
+/**
+ * @tc.name: GetService001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, GetService001, TestSize.Level1)
+{
+    std::string deviceId = "deviceId";
+    EXPECT_EQ(avSessionService_->GetService(deviceId), nullptr);
+}
+
+/**
+ * @tc.name: IsLocalDevice001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, IsLocalDevice001, TestSize.Level1)
+{
+    std::string networkId = "networkId";
+    EXPECT_EQ(avSessionService_->IsLocalDevice(networkId), true);
+}
+
+/**
+ * @tc.name: GetTrustedDeviceName001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, GetTrustedDeviceName001, TestSize.Level1)
+{
+    std::string networkId = "networkId";
+    std::string deviceName = "deviceName";
+    EXPECT_EQ(avSessionService_->GetTrustedDeviceName(networkId, deviceName), AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: SetBasicInfo001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, SetBasicInfo001, TestSize.Level1)
+{
+    std::string basicInfo = "basicInfo";
+    EXPECT_EQ(avSessionService_->SetBasicInfo(basicInfo), AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: SetDeviceInfo001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, SetDeviceInfo001, TestSize.Level1)
+{
+    std::vector<AudioStandard::AudioDeviceDescriptor> castAudioDescriptors;
+    AudioStandard::AudioDeviceDescriptor des;
+    castAudioDescriptors.push_back(des);
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = "sessionId";
+    sptr<AVSessionItem> item1 = new AVSessionItem(descriptor);
+    avSessionService_->SetDeviceInfo(castAudioDescriptors, item1);
+    EXPECT_NE(item1, nullptr);
+}
+
+/**
+ * @tc.name: GetAudioDescriptorByDeviceId001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, GetAudioDescriptorByDeviceId001, TestSize.Level1)
+{
+    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> castAudioDescriptors;
+    sptr<AudioStandard::AudioDeviceDescriptor> des = new AudioStandard::AudioDeviceDescriptor();
+    AudioStandard::AudioDeviceDescriptor res;
+    des->deviceId_ = 12;
+    castAudioDescriptors.push_back(des);
+    std::string deviceId = "12";
+    EXPECT_EQ(avSessionService_->GetAudioDescriptorByDeviceId(castAudioDescriptors, deviceId, res), true);
+}
+
+/**
+ * @tc.name: GetAudioDescriptorByDeviceId002
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, GetAudioDescriptorByDeviceId002, TestSize.Level1)
+{
+    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> castAudioDescriptors;
+    sptr<AudioStandard::AudioDeviceDescriptor> des = new AudioStandard::AudioDeviceDescriptor();
+    AudioStandard::AudioDeviceDescriptor res;
+    des->deviceId_ = 11;
+    castAudioDescriptors.push_back(des);
+    std::string deviceId = "12";
+    EXPECT_EQ(avSessionService_->GetAudioDescriptorByDeviceId(castAudioDescriptors, deviceId, res), false);
+}
+
+/**
+ * @tc.name: SelectOutputDevice001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, SelectOutputDevice001, TestSize.Level1)
+{
+    AudioStandard::AudioDeviceDescriptor des;
+    EXPECT_EQ(avSessionService_->SelectOutputDevice(1, des), AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: GetAudioDescriptor001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionDumperTest, GetAudioDescriptor001, TestSize.Level1)
+{
+    std::vector<AudioStandard::AudioDeviceDescriptor> castAudioDescriptors;
+    AudioStandard::AudioDeviceDescriptor des;
+    des.deviceId_ = 11;
+    castAudioDescriptors.push_back(des);
+    std::string deviceId = "12";
+    EXPECT_EQ(avSessionService_->GetAudioDescriptor(deviceId, castAudioDescriptors), AVSESSION_ERROR);
 }
 } // namespace AVSession
 } // namespace OHOS

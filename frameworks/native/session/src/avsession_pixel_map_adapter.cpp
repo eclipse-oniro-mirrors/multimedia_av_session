@@ -15,6 +15,9 @@
 
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_log.h"
+#include "securec.h"
+
+using namespace OHOS::Media;
 
 namespace OHOS::AVSession {
 namespace {
@@ -75,6 +78,31 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
     return std::move(result);
 }
 
+bool AVSessionPixelMapAdapter::CopyPixMapToDst(Media::PixelMap &source, void* dstPixels, uint32_t bufferSize)
+{
+    if (source.GetAllocatorType() == AllocatorType::DMA_ALLOC) {
+        SLOGD("CopyPixMapToDst in dma");
+        ImageInfo imageInfo;
+        source.GetImageInfo(imageInfo);
+        for (int i = 0; i < imageInfo.size.height; ++i) {
+            if (memcpy_s(dstPixels, source.GetRowBytes(),
+                source.GetPixels() + i * source.GetRowStride(), source.GetRowBytes()) != 0) {
+                SLOGE("copy source memory size %{public}u fail", bufferSize);
+                return false;
+            }
+            // Move the destination buffer pointer to the next row
+            dstPixels = reinterpret_cast<uint8_t *>(dstPixels) + source.GetRowBytes();
+        }
+    } else  {
+        SLOGE("CopyPixMapToDst in normal way");
+        if (memcpy_s(dstPixels, bufferSize, source.GetPixels(), bufferSize) != 0) {
+            SLOGE("copy source memory size %{public}u fail", bufferSize);
+            return false;
+        }
+    }
+    return true;
+}
+
 std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
@@ -82,9 +110,24 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     originalPixelMapBytes_ = pixelMap->GetByteCount();
     originalWidth_ = pixelMap->GetWidth();
     originalHeight_ = pixelMap->GetHeight();
+    Media::ImageInfo imageInfoTemp;
+    pixelMap->GetImageInfo(imageInfoTemp);
+    const std::shared_ptr<Media::PixelMap>& pixelMapTemp = std::make_shared<Media::PixelMap>();
+    pixelMapTemp->SetImageInfo(imageInfoTemp);
+    uint32_t dataSize = originalPixelMapBytes_;
+    void* dataAddr = malloc(dataSize);
+    if (dataAddr == nullptr) {
+        SLOGE("create dataSize with null, return");
+        return nullptr;
+    }
+    bool res = CopyPixMapToDst(*pixelMap, dataAddr, dataSize);
+    SLOGD("CopyPixMapToDst res: %{public}d", res);
+    pixelMapTemp->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
     if (originalPixelMapBytes_ > MAX_PIXEL_BUFFER_SIZE) {
+        SLOGI("imgBufferSize greater than limited");
         float scaleRatio = static_cast<float>(MAX_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_);
-        pixelMap->scale(scaleRatio, scaleRatio);
+        pixelMapTemp->scale(scaleRatio, scaleRatio);
+        originalPixelMapBytes_ = pixelMapTemp->GetByteCount();
     }
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> imgBuffer;
@@ -92,13 +135,12 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     pixelMap->GetImageInfo(imageInfo);
     const auto* buffer = reinterpret_cast<uint8_t*>(&imageInfo);
     uint16_t imageInfoSize = static_cast<uint16_t>(sizeof(Media::ImageInfo));
-    int32_t pixelDataSize = pixelMap->GetByteCount();
-    size_t bufferSize = IMAGE_BYTE_SIZE + imageInfoSize + DATA_BYTE_SIZE + pixelDataSize;
+    uint32_t pixelDataSize = static_cast<uint32_t>(pixelMap->GetByteCount());
+    size_t bufferSize = static_cast<size_t>(IMAGE_BYTE_SIZE + imageInfoSize + DATA_BYTE_SIZE + pixelDataSize);
     imgBuffer.reserve(bufferSize);
     imgBuffer.insert(imgBuffer.begin(), (imageInfoSize & 0xFF00) >> OFFSET_BYTE);
     imgBuffer.insert(imgBuffer.begin() + imgBuffer.size(), (imageInfoSize & 0x00FF));
     imgBuffer.insert(imgBuffer.begin() + imgBuffer.size(), buffer, buffer + imageInfoSize);
-
     uint32_t computedValue = 0xFF000000;
     for (uint8_t i = 0; i < DATA_BYTE_SIZE; i++) {
         uint8_t tmpValue = ((pixelDataSize & computedValue) >> (OFFSET_BYTE * (DATA_BYTE_SIZE - i - 1)));
@@ -108,6 +150,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     imgBuffer.insert(imgBuffer.begin() + imgBuffer.size(), pixelMap->GetPixels(),
         pixelMap->GetPixels() + pixelDataSize);
     innerPixelMap->SetInnerImgBuffer(imgBuffer);
+    free(dataAddr);
     return innerPixelMap;
 }
 } // namespace OHOS::AVSession

@@ -28,6 +28,10 @@ public:
 
     ~AVSessionControllerProxy() override;
 
+    int32_t GetAVCallState(AVCallState& avCallState) override;
+
+    int32_t GetAVCallMetaData(AVCallMetaData& avCallMetaData) override;
+
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
     int32_t GetAVMetaData(AVMetaData& data) override;
@@ -45,6 +49,10 @@ public:
     int32_t SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
 
     int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback) override;
+
+    int32_t SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter) override;
+
+    int32_t SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter) override;
 
     int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
 
@@ -71,6 +79,7 @@ protected:
 
 private:
     static inline BrokerDelegator<AVSessionControllerProxy> delegator_;
+    std::recursive_mutex currentStateLock_;
     AVPlaybackState currentState_;
     bool isDestroy_ = false;
 

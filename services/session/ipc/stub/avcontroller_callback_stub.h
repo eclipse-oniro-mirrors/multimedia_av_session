@@ -28,6 +28,10 @@ private:
 
     int32_t HandleOnSessionDestroy(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnAVCallMetadataChange(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleOnAVCallStateChange(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleOnPlaybackStateChange(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnMetadataChange(MessageParcel& data, MessageParcel& reply);
@@ -39,7 +43,7 @@ private:
     int32_t HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnSessionEventChange(MessageParcel& data, MessageParcel& reply);
-    
+
     int32_t HandleOnQueueItemsChange(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleOnQueueTitleChange(MessageParcel& data, MessageParcel& reply);
@@ -60,6 +64,8 @@ private:
         &AVControllerCallbackStub::HandleOnQueueItemsChange,
         &AVControllerCallbackStub::HandleOnQueueTitleChange,
         &AVControllerCallbackStub::HandleOnExtrasChange,
+        &AVControllerCallbackStub::HandleOnAVCallMetadataChange,
+        &AVControllerCallbackStub::HandleOnAVCallStateChange,
     };
 };
 }

@@ -26,6 +26,8 @@ public:
 
     void Init(IAVSessionServiceListener *servicePtr) override;
 
+    bool Release() override;
+
     int32_t StartCastDiscovery(int32_t castDeviceCapability) override;
 
     int32_t StopCastDiscovery() override;
@@ -33,6 +35,12 @@ public:
     int32_t SetDiscoverable(const bool enable) override;
 
     int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) override;
+
+    int32_t OnDeviceOffline(const std::string& deviceId) override;
+
+    void ReleaseCurrentCastSession() override;
+
+    int32_t OnCastSessionCreated(const int32_t castId) override;
 
     int32_t OnCastServerDied(int32_t providerNumber) override;
 
@@ -60,6 +68,7 @@ private:
     std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
     int32_t providerNumber_ = 0;
     std::map<int32_t, OutputDeviceInfo> castHandleToOutputDeviceMap_;
+    bool hasSessionAlive_ = false;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

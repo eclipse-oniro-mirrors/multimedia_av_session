@@ -40,7 +40,7 @@ private:
     static std::once_flag onceFlag_;
     std::map<pid_t, int32_t> commandLimits_;
     std::unique_ptr<Utils::Timer> timer_;
-    uint32_t timerId_;
+    uint32_t timerId_ = 0;
     static constexpr int32_t COMMAND_SEND_NUM_MAX = 10;
     static constexpr int32_t COMMAND_SEND_TIME = 1000;
 };

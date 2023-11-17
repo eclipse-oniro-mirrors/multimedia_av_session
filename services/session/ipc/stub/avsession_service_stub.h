@@ -45,6 +45,7 @@ private:
     int32_t HandleSetDiscoverable(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStartCast(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStopCast(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleClose(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
@@ -69,6 +70,7 @@ private:
         &AVSessionServiceStub::HandleSetDiscoverable,
         &AVSessionServiceStub::HandleStartCast,
         &AVSessionServiceStub::HandleStopCast,
+        &AVSessionServiceStub::HandleClose,
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;

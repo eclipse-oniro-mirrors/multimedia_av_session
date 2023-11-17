@@ -71,7 +71,8 @@ int32_t AbilityConnectHelper::StartAbilityByCall(const std::string& bundleName, 
     if (remote == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
     }
-    if (remote->SendRequest(AAFwk::IAbilityManager::START_CALL_ABILITY, data, reply, option) != 0) {
+    if (remote->SendRequest(static_cast<uint32_t>(AAFwk::AbilityManagerInterfaceCode::START_CALL_ABILITY),
+        data, reply, option) != 0) {
         SLOGE("Send request error");
         return ERR_IPC_SEND_REQUEST;
     }

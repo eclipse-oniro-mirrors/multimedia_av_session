@@ -46,6 +46,13 @@ public:
     */
     virtual void Init(IAVSessionServiceListener *servicePtr) = 0;
 
+    /**
+     * Release AVRouter instance.
+     *
+     * @since 10
+    */
+    virtual bool Release() = 0;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
      * @brief Starting to discover devices.
@@ -81,6 +88,31 @@ public:
      * @since 10
     */
     virtual int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) = 0;
+
+    /**
+     * @brief Notify Router that the device is offline.
+     *
+     * @param { std::string& } deviceId - Offlined device ID.
+     * @return { int32_t } Whether the notify operation was successful.
+     * @since 10
+    */
+    virtual int32_t OnDeviceOffline(const std::string& deviceId) = 0;
+
+    /**
+     * @brief Release current cast session.
+     *
+     * @since 10
+    */
+    virtual void ReleaseCurrentCastSession() = 0;
+
+    /**
+     * @brief Notify Router that the cast session has created.
+     *
+     * @param { int32_t } castId - Cast id for AVRouter's control.
+     * @return { int32_t } Whether the notify operation was successful.
+     * @since 10
+    */
+    virtual int32_t OnCastSessionCreated(const int32_t castId) = 0;
 
     /**
      * @brief Notify Router that the the cast engine servie has died.

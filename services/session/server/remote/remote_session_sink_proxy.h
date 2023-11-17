@@ -43,8 +43,8 @@ private:
 
     int32_t UnLoadSinkImplement();
 
-    void *handle_;
-    RemoteSessionSinkImpl *sinkImpl_;
+    void *handle_ = nullptr;
+    RemoteSessionSinkImpl *sinkImpl_ = nullptr;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_REMOTE_SESSION_SINK_PROXY_H

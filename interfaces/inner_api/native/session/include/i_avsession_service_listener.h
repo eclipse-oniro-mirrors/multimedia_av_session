@@ -29,12 +29,35 @@ public:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
+     * Release cast session at sink end.
+     *
+     * @since 10
+    */
+    virtual void ReleaseCastSession() = 0;
+
+    /**
+     * Create a new session at sink device.
+     *
+     * @param { int64_t } castHandle - Cast handle for cast session.
+     * @since 10
+    */
+    virtual void CreateSessionByCast(const int64_t castHandle) = 0;
+
+    /**
      * Notify Router that the device has been discovered.
      *
      * @param { OutputDeviceInfo } castOutputDeviceInfo - Discovered device infos.
      * @since 10
     */
     virtual void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) = 0;
+
+    /**
+     * Notify Router that the device has been offlined.
+     *
+     * @param { std::string& } deviceId - Offlined device ID.
+     * @since 10
+    */
+    virtual void NotifyDeviceOffline(const std::string& deviceId) = 0;
 #endif
 };
 } // namespace OHOS::AVSession

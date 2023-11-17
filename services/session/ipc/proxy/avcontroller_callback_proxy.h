@@ -26,6 +26,10 @@ public:
 
     void OnSessionDestroy() override;
 
+    void OnAVCallMetaDataChange(const AVCallMetaData& data) override;
+
+    void OnAVCallStateChange(const AVCallState& state) override;
+
     void OnPlaybackStateChange(const AVPlaybackState& state) override;
 
     void OnMetaDataChange(const AVMetaData& data) override;

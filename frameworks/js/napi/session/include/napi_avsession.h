@@ -46,6 +46,8 @@ private:
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
+    static napi_value SetAVCallMetaData(napi_env env, napi_callback_info info);
+    static napi_value SetAVCallState(napi_env env, napi_callback_info info);
     static napi_value SetAVMetaData(napi_env env, napi_callback_info info);
     static napi_value SetAVPlaybackState(napi_env env, napi_callback_info info);
     static napi_value SetLaunchAbility(napi_env env, napi_callback_info info);
@@ -53,6 +55,7 @@ private:
     static napi_value GetController(napi_env env, napi_callback_info info);
     static napi_value GetAVCastController(napi_env env, napi_callback_info info);
     static napi_value GetOutputDevice(napi_env env, napi_callback_info info);
+    static napi_value GetOutputDeviceSync(napi_env env, napi_callback_info info);
     static napi_value Activate(napi_env env, napi_callback_info info);
     static napi_value Deactivate(napi_env env, napi_callback_info info);
     static napi_value Destroy(napi_env env, napi_callback_info info);
@@ -77,6 +80,9 @@ private:
     static napi_status OnOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnAVCallAnswer(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -93,6 +99,9 @@ private:
     static napi_status OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffAVCallAnswer(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
 

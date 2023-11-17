@@ -36,6 +36,36 @@ void AVControllerCallbackProxy::OnSessionDestroy()
         "send request failed");
 }
 
+void AVControllerCallbackProxy::OnAVCallMetaDataChange(const AVCallMetaData& data)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&data), "write AVCallMetaData failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_AVCALL_METADATA_CHANGE, parcel, reply, option) == 0,
+        "send request failed");
+}
+
+
+void AVControllerCallbackProxy::OnAVCallStateChange(const AVCallState& state)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&state), "write AVCallState failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_AVCALL_STATE_CHANGE, parcel, reply, option) == 0,
+        "send request failed");
+}
+
+
 void AVControllerCallbackProxy::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     MessageParcel parcel;
@@ -99,7 +129,7 @@ void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionSta
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(parcel.WriteInt32(connectionState), "write connectionState failed");
 
-    int32_t deviceInfoSize = outputDeviceInfo.deviceInfos_.size();
+    int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfoSize), "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
         CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.castCategory_), "write castCategory failed");
@@ -108,6 +138,10 @@ void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionSta
         CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.deviceType_), "write deviceType failed");
         CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.ipAddress_), "write ipAddress failed");
         CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.providerId_), "write providerId failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.supportedProtocols_),
+            "write supportedProtocols failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.authenticationStatus_),
+            "write authenticationStatus failed");
     }
 
     MessageParcel reply;
@@ -141,7 +175,7 @@ void AVControllerCallbackProxy::OnQueueItemsChange(const std::vector<AVQueueItem
     for (auto &parcelable : items) {
         CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&parcelable), "Write items failed");
     }
-    
+
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();

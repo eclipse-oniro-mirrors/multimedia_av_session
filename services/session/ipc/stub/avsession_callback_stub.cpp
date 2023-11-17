@@ -44,6 +44,27 @@ bool AVSessionCallbackStub::CheckInterfaceToken(MessageParcel& data)
     return true;
 }
 
+int32_t AVSessionCallbackStub::HandleOnAVCallAnswer(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlay");
+    OnAVCallAnswer();
+    return ERR_NONE;
+}
+
+int32_t AVSessionCallbackStub::HandleOnAVCallHangUp(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlay");
+    OnAVCallHangUp();
+    return ERR_NONE;
+}
+
+int32_t AVSessionCallbackStub::HandleOnAVCallToggleCallMute(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlay");
+    OnAVCallToggleCallMute();
+    return ERR_NONE;
+}
+
 int32_t AVSessionCallbackStub::HandleOnPlay(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlay");
@@ -82,14 +103,18 @@ int32_t AVSessionCallbackStub::HandleOnPlayPrevious(MessageParcel& data, Message
 int32_t AVSessionCallbackStub::HandleOnFastForward(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnFastForward");
-    OnFastForward();
+    int32_t time = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(time), ERR_NONE, "read time failed");
+    OnFastForward(time);
     return ERR_NONE;
 }
 
 int32_t AVSessionCallbackStub::HandleOnRewind(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnRewind");
-    OnRewind();
+    int32_t time = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(time), ERR_NONE, "read time failed");
+    OnRewind(time);
     return ERR_NONE;
 }
 
@@ -146,6 +171,9 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
     OutputDeviceInfo outputDeviceInfo;
     int32_t deviceInfoSize;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+    int32_t maxDeviceInfoSize = 1000; // A maximum of 1000 device change events can be processed at a time
+    CHECK_AND_RETURN_RET_LOG((deviceInfoSize >= 0) && (deviceInfoSize < maxDeviceInfoSize),
+        false, "deviceInfoSize is illegal");
     for (int i = 0; i < deviceInfoSize; i++) {
         DeviceInfo deviceInfo;
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
@@ -154,6 +182,10 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.supportedProtocols_), false,
+            "Read supportedProtocols failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
+            "Read authenticationStatus failed");
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
     
