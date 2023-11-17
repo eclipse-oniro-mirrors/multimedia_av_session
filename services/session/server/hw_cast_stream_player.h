@@ -54,6 +54,7 @@ public:
     void OnVideoSizeChanged(int width, int height) override;
     void OnEndOfStream(int isLooping) override;
     void OnPlayRequest(const CastEngine::MediaInfo &mediaInfo) override;
+    void OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
