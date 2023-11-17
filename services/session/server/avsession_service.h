@@ -37,6 +37,7 @@
 #include "audio_adapter.h"
 #include "remote_session_command_process.h"
 #include "i_avsession_service_listener.h"
+#include "avqueue_info.h"
 
 namespace OHOS::AVSession {
 class AVSessionDumper;
@@ -82,6 +83,10 @@ public:
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
+    
+    int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize, std::vector<AVQueueInfo>& avQueueInfos) override;
+    
+    int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) override;
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 

@@ -110,6 +110,32 @@ int32_t AVSessionServiceStub::HandleGetHistoricalSessionDescriptors(MessageParce
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<AVQueueInfo> avQueueInfos;
+    auto maxSize = data.ReadInt32();
+    auto maxAppSize = data.ReadInt32();
+    int32_t ret = GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(avQueueInfos.size()), ERR_NONE, "write size failed");
+    for (const auto& avQueueInfo : avQueueInfos) {
+        if (!avQueueInfo.Marshalling(reply)) {
+            SLOGI("write avQueueInfo failed");
+            break;
+        }
+    }
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStartMediaIntent(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName = data.ReadString();
+    std::string asserId = data.ReadString();
+    int32_t ret = StartMediaIntent(bundleName, asserId);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CreateControllerInner");

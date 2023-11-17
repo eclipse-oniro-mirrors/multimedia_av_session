@@ -37,6 +37,8 @@ private:
     static napi_value CreateAVSession(napi_env env, napi_callback_info info);
     static napi_value GetAllSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info);
+    static napi_value GetHistoricalAVQueueInfos(napi_env env, napi_callback_info info);
+    static napi_value StartMediaIntent(napi_env env, napi_callback_info info);
     static napi_value CreateController(napi_env env, napi_callback_info info);
     static napi_value GetAVCastController(napi_env env, napi_callback_info info);
     static napi_value CastAudio(napi_env env, napi_callback_info info);

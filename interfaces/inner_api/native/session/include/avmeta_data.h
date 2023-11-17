@@ -36,19 +36,23 @@ public:
         META_KEY_TITLE = 1,
         META_KEY_ARTIST = 2,
         META_KEY_AUTHOR = 3,
-        META_KEY_ALBUM = 4,
-        META_KEY_WRITER = 5,
-        META_KEY_COMPOSER = 6,
-        META_KEY_DURATION = 7,
-        META_KEY_MEDIA_IMAGE = 8,
-        META_KEY_MEDIA_IMAGE_URI = 9,
-        META_KEY_PUBLISH_DATE = 10,
-        META_KEY_SUBTITLE = 11,
-        META_KEY_DESCRIPTION = 12,
-        META_KEY_LYRIC = 13,
-        META_KEY_PREVIOUS_ASSET_ID = 14,
-        META_KEY_NEXT_ASSET_ID = 15,
-        META_KEY_MAX = 16
+        META_KEY_AVQUEUE_NAME = 4,
+        META_KEY_AVQUEUE_ID = 5,
+        META_KEY_AVQUEUE_IMAGE = 6,
+        META_KEY_AVQUEUE_IMAGE_URI = 7,
+        META_KEY_ALBUM = 8,
+        META_KEY_WRITER = 9,
+        META_KEY_COMPOSER = 10,
+        META_KEY_DURATION = 11,
+        META_KEY_MEDIA_IMAGE = 12,
+        META_KEY_MEDIA_IMAGE_URI = 13,
+        META_KEY_PUBLISH_DATE = 14,
+        META_KEY_SUBTITLE = 15,
+        META_KEY_DESCRIPTION = 16,
+        META_KEY_LYRIC = 17,
+        META_KEY_PREVIOUS_ASSET_ID = 18,
+        META_KEY_NEXT_ASSET_ID = 19,
+        META_KEY_MAX = 20
     };
 
     using MetaMaskType = std::bitset<META_KEY_MAX>;
@@ -70,6 +74,18 @@ public:
 
     void SetAuthor(const std::string& author);
     std::string GetAuthor() const;
+    
+    void AVQueueInfo::SetAVQueueName(const std::string& avQueueName);
+    std::string AVQueueInfo::GetAVQueueName() const;
+  
+    void AVQueueInfo::SetAVQueueId(const std::string& avQueueId);
+    std::string AVQueueInfo::GetAVQueueId() const;
+  
+    void AVQueueInfo::SetAVQueueImage(const std::shared_ptr<AVSessionPixelMap>& avQueueImage);
+    std::shared_ptr<AVSessionPixelMap> AVQueueInfo::GetAVQueueImage() const;
+  
+    void AVQueueInfo::SetAVQueueImageUri(const std::string& avQueueImageUri);
+    std::string AVQueueInfo::GetAVQueueImageUri() const;
 
     void SetAlbum(const std::string& album);
     std::string GetAlbum() const;
@@ -121,6 +137,10 @@ public:
         META_KEY_TITLE,
         META_KEY_ARTIST,
         META_KEY_AUTHOR,
+        META_KEY_AVQUEUE_NAME,
+        META_KEY_AVQUEUE_ID,
+        META_KEY_AVQUEUE_IMAGE,
+        META_KEY_AVQUEUE_IMAGE_URI,
         META_KEY_ALBUM,
         META_KEY_WRITER,
         META_KEY_COMPOSER,
@@ -142,6 +162,10 @@ private:
     std::string title_ = "";
     std::string artist_ = "";
     std::string author_ = "";
+    std::string avQueueName_ = "";
+    std::string avQueueId = "";
+    std::shared_ptr<AVSessionPixelMap> avQueueImage_ = nullptr;
+    std::string avQueueImageUri_ = "";
     std::string album_ = "";
     std::string writer_ = "";
     std::string composer_ = "";
@@ -159,6 +183,10 @@ private:
     static void CloneTitle(const AVMetaData& from, AVMetaData& to);
     static void CloneArtist(const AVMetaData& from, AVMetaData& to);
     static void CloneAuthor(const AVMetaData& from, AVMetaData& to);
+    static void CloneAVQueueName(const AVMetaData& from, AVMetaData& to);
+    static void CloneAVQueueId(const AVMetaData& from, AVMetaData& to);
+    static void CloneAVQueueImage(const AVMetaData& from, AVMetaData& to);
+    static void CloneAVQueueImageUri(const AVMetaData& from, AVMetaData& to);
     static void CloneAlbum(const AVMetaData& from, AVMetaData& to);
     static void CloneWriter(const AVMetaData& from, AVMetaData& to);
     static void CloneComposer(const AVMetaData& from, AVMetaData& to);
@@ -178,6 +206,10 @@ private:
         &AVMetaData::CloneTitle,
         &AVMetaData::CloneArtist,
         &AVMetaData::CloneAuthor,
+        &AVMetaData::CloneAVQueueName,
+        &AVMetaData::CloneAVQueueId,
+        &AVMetaData::CloneAVQueueImage,
+        &AVMetaData::CloneAVQueueImageUri,
         &AVMetaData::CloneAlbum,
         &AVMetaData::CloneWriter,
         &AVMetaData::CloneComposer,

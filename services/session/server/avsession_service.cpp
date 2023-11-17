@@ -807,6 +807,16 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
     return AVSESSION_SUCCESS;
 }
 
+int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize, std::vector<AVQueueInfo>& avQueueInfos)
+{
+  return AVSESSION_SUCCESS;
+}
+
+int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId)
+{
+  return AVSESSION_SUCCESS;
+}
+
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session)
 {
     SLOGI("pid=%{public}d sessionId=%{public}s", pid, session->GetSessionId().c_str());

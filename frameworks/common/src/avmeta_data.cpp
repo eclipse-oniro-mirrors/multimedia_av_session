@@ -24,6 +24,9 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(title_) &&
         parcel.WriteString(artist_) &&
         parcel.WriteString(author_) &&
+        parcel.WriteString(avQueueName_) &&
+        parcel.WriteString(avQueueId_) &&
+        parcel.WriteString(avQueueImageUri_) &&
         parcel.WriteString(album_) &&
         parcel.WriteString(writer_) &&
         parcel.WriteString(composer_) &&
@@ -35,7 +38,8 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(lyric_) &&
         parcel.WriteString(previousAssetId_) &&
         parcel.WriteString(nextAssetId_) &&
-        parcel.WriteParcelable(mediaImage_.get());
+        parcel.WriteParcelable(mediaImage_.get() &&
+        parcel.WriteParcelable(avQueueImage_.get());
 }
 
 AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
@@ -51,6 +55,9 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
         !data.ReadString(result->title_) ||
         !data.ReadString(result->artist_) ||
         !data.ReadString(result->author_) ||
+        !data.ReadString(avQueueName_) ||
+        !data.ReadString(avQueueId_) ||
+        !data.ReadString(avQueueImageUri_)
         !data.ReadString(result->album_) ||
         !data.ReadString(result->writer_) ||
         !data.ReadString(result->composer_) ||
@@ -68,6 +75,12 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
     }
     result->mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->metaMask_.test(META_KEY_MEDIA_IMAGE) && result->mediaImage_ == nullptr) {
+        SLOGE("read PixelMap failed");
+        delete result;
+        return nullptr;
+    }
+    result->avQueueImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
+    if (result->metaMask_.test(META_KEY_AVQUEUE_IMAGE) && result->avQueueImage_ == nullptr) {
         SLOGE("read PixelMap failed");
         delete result;
         return nullptr;
@@ -117,6 +130,50 @@ void AVMetaData::SetAuthor(const std::string& author)
 std::string AVMetaData::GetAuthor() const
 {
     return author_;
+}
+
+void AVMetaData::SetAVQueueName(const std::string& avQueueName)
+{
+    avQueueName_ = avQueueName;
+    metaMask_.set(META_KEY_AVQUEUE_NAME);
+}
+
+std::string AVMetaData::GetAVQueueName() const
+{
+    return avQueueName_;
+}
+
+void AVMetaData::SetAVQueueId(const std::string& avQueueId)
+{
+    avQueueId_ = avQueueId;
+    metaMask_.set(META_KEY_AVQUEUE_ID);
+}
+
+std::string AVMetaData::GetAVQueueId() const
+{
+    return avQueueId_;
+}
+
+void AVMetaData::SetAVQueueImage(const std::shared_ptr<AVSessionPixelMap>& avQueueImage)
+{
+    avQueueImage_ = avQueueImage;
+    metaMask_.set(META_KEY_AVQUEUE_IMAGE);
+}
+
+std::shared_ptr<AVSessionPixelMap> AVMetaData::GetAVQueueImage() const
+{
+    return avQueueImage_;
+}
+
+void AVMetaData::SetAVQueueImageUri(const std::string& avQueueImageUri)
+{
+    avQueueImageUri_ = avQueueImageUri;
+    metaMask_.set(META_KEY_AVQUEUE_IMAGE_URI);
+}
+
+std::string AVMetaData::GetAVQueueImageUri() const
+{
+    return avQueueImageUri_;
 }
 
 void AVMetaData::SetAlbum(const std::string& album)
@@ -269,6 +326,10 @@ void AVMetaData::Reset()
     title_ = "";
     artist_ = "";
     author_ = "";
+    avQueueName_ = "";
+    avQueueId = "";
+    avQueueImage_ = nullptr;
+    avQueueImageUri_ = "";
     album_ = "";
     writer_ = "";
     composer_ = "";
@@ -346,6 +407,26 @@ void AVMetaData::CloneArtist(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneAuthor(const AVMetaData& from, AVMetaData& to)
 {
     to.author_ = from.author_;
+}
+
+void CloneAVQueueName(const AVMetaData& from, AVMetaData& to)
+{
+  to.avQueueName_ = from.avQueueName_;
+}
+
+void CloneAVQueueId(const AVMetaData& from, AVMetaData& to)
+{
+  to.avQueueId_ = from.avQueueId_;
+}
+
+void CloneAVQueueImage(const AVMetaData& from, AVMetaData& to)
+{
+  to.avQueueImage_ = from.avQueueName_;
+}
+
+void CloneAVQueueImageUri(const AVMetaData& from, AVMetaData& to)
+{
+  to.avQueueImageUri_ = from.avQueueImageUri_;
 }
 
 void AVMetaData::CloneAlbum(const AVMetaData& from, AVMetaData& to)

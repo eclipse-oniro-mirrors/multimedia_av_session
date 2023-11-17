@@ -31,6 +31,7 @@
 #include "media_info_holder.h"
 #include "media_info.h"
 #include "av_file_descriptor.h"
+#include "avqueue_info.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -173,6 +174,12 @@ public:
 
     /* std::vector<AVSessionDescriptor> <-> napi_value */
     static napi_status SetValue(napi_env env, const std::vector<AVSessionDescriptor>& in, napi_value& out);
+    
+    /* napi_value <-> AVQueueInfo */
+    static napi_status SetValue(napi_env env, const AVQueueInfo& in, napi_value& out);
+
+    /* napi_value <-> std::vector<AVQueueInfo> */
+    static napi_status SetValue(napi_env env, const std::vector<AVQueueInfo>& in, napi_value& out);
 
     /* OutputDeviceInfo <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, OutputDeviceInfo& out);

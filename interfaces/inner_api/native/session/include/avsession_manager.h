@@ -25,6 +25,7 @@
 #include "avsession_controller.h"
 #include "avsession_info.h"
 #include "key_event.h"
+#include "avqueue_info.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller.h"
@@ -89,6 +90,17 @@ public:
      * @since 9
     */
     virtual int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) = 0;
+    
+    /**
+     * Get historical AVQueueInfo.
+     *
+     * @param maxSize data write maxSize.
+     * @param maxAppSize max app count.
+     * @param avQueueInfo obtain history play avqueue {@link AVQueueInfo}.
+     * @return Returns whether to obtain AVQueueInfo successfully.
+     * @since 11
+    */
+    virtual int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize, std::vector<AVQueueInfo>& avQueueInfo) = 0;
 
     /**
      * Create a session controller based on the session ID.
@@ -165,6 +177,16 @@ public:
      * @since 9
     */
     virtual int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
+    
+    /**
+     * Get historical AVQueueInfo.
+     *
+     * @param bundleName bundleName.
+     * @param assetId assetId of media for play intent.
+     * @return Returns whether to Start Media Intent successfully.
+     * @since 11
+    */
+    virtual int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) = 0;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     virtual int32_t GetAVCastController(const std::string& sessionId,
