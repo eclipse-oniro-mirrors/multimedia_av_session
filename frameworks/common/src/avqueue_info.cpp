@@ -33,7 +33,7 @@ bool AVQueueInfo::Unmarshalling(Parcel& data)
         !data.ReadString(avQueueId_) ||
         !data.ReadString(avQueueImageUri_)) {
         SLOGE("read AVQueueInfo failed");
-        return nullptr;
+        return false;
     }
     avQueueImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (avQueueImage_ == nullptr) {

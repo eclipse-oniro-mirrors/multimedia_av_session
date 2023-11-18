@@ -142,7 +142,7 @@ int32_t AVSessionManagerImpl::GetHistoricalSessionDescriptors(int32_t maxSize,
 }
 
 int32_t AVSessionManagerImpl::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
-  std::vector<AVQueueInfo>& avQueueInfo)
+    std::vector<AVQueueInfo>& avQueueInfo)
 {
     auto service = GetService();
     return service ? service->GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfo) : ERR_SERVICE_NOT_EXIST;

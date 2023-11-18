@@ -29,6 +29,8 @@
 #include "ability_context.h"
 #include "napi_common_want.h"
 #include "napi_media_info_holder.h"
+#include "pixel_map_napi.h"
+#include "avsession_pixel_map_adapter.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 4096;

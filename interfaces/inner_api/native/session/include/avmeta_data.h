@@ -89,18 +89,18 @@ public:
 
     void SetAuthor(const std::string& author);
     std::string GetAuthor() const;
-    
-    void AVQueueInfo::SetAVQueueName(const std::string& avQueueName);
-    std::string AVQueueInfo::GetAVQueueName() const;
+
+    void SetAVQueueName(const std::string& avQueueName);
+    std::string GetAVQueueName() const;
   
-    void AVQueueInfo::SetAVQueueId(const std::string& avQueueId);
-    std::string AVQueueInfo::GetAVQueueId() const;
+    void SetAVQueueId(const std::string& avQueueId);
+    std::string GetAVQueueId() const;
   
-    void AVQueueInfo::SetAVQueueImage(const std::shared_ptr<AVSessionPixelMap>& avQueueImage);
-    std::shared_ptr<AVSessionPixelMap> AVQueueInfo::GetAVQueueImage() const;
+    void SetAVQueueImage(const std::shared_ptr<AVSessionPixelMap>& avQueueImage);
+    std::shared_ptr<AVSessionPixelMap> GetAVQueueImage() const;
   
-    void AVQueueInfo::SetAVQueueImageUri(const std::string& avQueueImageUri);
-    std::string AVQueueInfo::GetAVQueueImageUri() const;
+    void SetAVQueueImageUri(const std::string& avQueueImageUri);
+    std::string GetAVQueueImageUri() const;
 
     void SetAlbum(const std::string& album);
     std::string GetAlbum() const;
@@ -190,7 +190,7 @@ private:
     std::string artist_ = "";
     std::string author_ = "";
     std::string avQueueName_ = "";
-    std::string avQueueId = "";
+    std::string avQueueId_ = "";
     std::shared_ptr<AVSessionPixelMap> avQueueImage_ = nullptr;
     std::string avQueueImageUri_ = "";
     std::string album_ = "";

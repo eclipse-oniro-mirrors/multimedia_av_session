@@ -38,11 +38,10 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(lyric_) &&
         parcel.WriteString(previousAssetId_) &&
         parcel.WriteString(nextAssetId_) &&
-        parcel.WriteParcelable(mediaImage_.get() &&
         parcel.WriteInt32(skipIntervals_) &&
         parcel.WriteInt32(filter_) &&
         parcel.WriteInt32(displayTags_) &&
-        parcel.WriteParcelable(mediaImage_.get() &&
+        parcel.WriteParcelable(mediaImage_.get()) &&
         parcel.WriteParcelable(avQueueImage_.get());
 }
 
@@ -59,9 +58,9 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
         !data.ReadString(result->title_) ||
         !data.ReadString(result->artist_) ||
         !data.ReadString(result->author_) ||
-        !data.ReadString(avQueueName_) ||
-        !data.ReadString(avQueueId_) ||
-        !data.ReadString(avQueueImageUri_)
+        !data.ReadString(result->avQueueName_) ||
+        !data.ReadString(result->avQueueId_) ||
+        !data.ReadString(result->avQueueImageUri_) ||
         !data.ReadString(result->album_) ||
         !data.ReadString(result->writer_) ||
         !data.ReadString(result->composer_) ||
@@ -373,7 +372,7 @@ void AVMetaData::Reset()
     artist_ = "";
     author_ = "";
     avQueueName_ = "";
-    avQueueId = "";
+    avQueueId_ = "";
     avQueueImage_ = nullptr;
     avQueueImageUri_ = "";
     album_ = "";
@@ -457,24 +456,24 @@ void AVMetaData::CloneAuthor(const AVMetaData& from, AVMetaData& to)
     to.author_ = from.author_;
 }
 
-void CloneAVQueueName(const AVMetaData& from, AVMetaData& to)
+void AVMetaData::CloneAVQueueName(const AVMetaData& from, AVMetaData& to)
 {
-  to.avQueueName_ = from.avQueueName_;
+    to.avQueueName_ = from.avQueueName_;
 }
 
-void CloneAVQueueId(const AVMetaData& from, AVMetaData& to)
+void AVMetaData::CloneAVQueueId(const AVMetaData& from, AVMetaData& to)
 {
-  to.avQueueId_ = from.avQueueId_;
+    to.avQueueId_ = from.avQueueId_;
 }
 
-void CloneAVQueueImage(const AVMetaData& from, AVMetaData& to)
+void AVMetaData::CloneAVQueueImage(const AVMetaData& from, AVMetaData& to)
 {
-  to.avQueueImage_ = from.avQueueName_;
+    to.avQueueImage_ = from.avQueueImage_;
 }
 
-void CloneAVQueueImageUri(const AVMetaData& from, AVMetaData& to)
+void AVMetaData::CloneAVQueueImageUri(const AVMetaData& from, AVMetaData& to)
 {
-  to.avQueueImageUri_ = from.avQueueImageUri_;
+    to.avQueueImageUri_ = from.avQueueImageUri_;
 }
 
 void AVMetaData::CloneAlbum(const AVMetaData& from, AVMetaData& to)

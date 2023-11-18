@@ -100,7 +100,8 @@ public:
      * @return Returns whether to obtain AVQueueInfo successfully.
      * @since 11
     */
-    virtual int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize, std::vector<AVQueueInfo>& avQueueInfo) = 0;
+    virtual int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+        std::vector<AVQueueInfo>& avQueueInfo) = 0;
 
     /**
      * Create a session controller based on the session ID.
@@ -179,7 +180,7 @@ public:
     virtual int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
     
     /**
-     * Get historical AVQueueInfo.
+     * Start Media Intent
      *
      * @param bundleName bundleName.
      * @param assetId assetId of media for play intent.

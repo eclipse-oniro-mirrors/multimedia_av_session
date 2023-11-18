@@ -31,32 +31,31 @@ namespace OHOS::AVSession {
 class AVQueueInfo : public Parcelable {
 public:
 
-  AVQueueInfo() = default;
-  ~AVQueueInfo() = default;
-  
-  bool AVQueueInfo::Unmarshalling(Parcel& data);
-  bool AVQueueInfo::Marshalling(Parcel& parcel) const;
-  
+    AVQueueInfo() = default;
+    ~AVQueueInfo() = default;
 
-  void AVQueueInfo::SetBundleName(const std::string& bundleName);
-  std::string AVQueueInfo::GetBundleName() const;
+    bool Unmarshalling(Parcel& data);
+    bool Marshalling(Parcel& parcel) const;
 
-  void AVQueueInfo::SetAVQueueName(const std::string& avQueueName);
-  std::string AVQueueInfo::GetAVQueueName() const;
+    void SetBundleName(const std::string& bundleName);
+    std::string GetBundleName() const;
 
-  void AVQueueInfo::SetAVQueueId(const std::string& avQueueId);
-  std::string AVQueueInfo::GetAVQueueId() const;
+    void SetAVQueueName(const std::string& avQueueName);
+    std::string GetAVQueueName() const;
 
-  void AVQueueInfo::SetAVQueueImage(const std::shared_ptr<AVSessionPixelMap>& avQueueImage);
-  std::shared_ptr<AVSessionPixelMap> AVQueueInfo::GetAVQueueImage() const;
+    void SetAVQueueId(const std::string& avQueueId);
+    std::string GetAVQueueId() const;
 
-  void AVQueueInfo::SetAVQueueImageUri(const std::string& avQueueImageUri);
-  std::string AVQueueInfo::GetAVQueueImageUri() const;
+    void SetAVQueueImage(const std::shared_ptr<AVSessionPixelMap>& avQueueImage);
+    std::shared_ptr<AVSessionPixelMap> GetAVQueueImage() const;
+
+    void SetAVQueueImageUri(const std::string& avQueueImageUri);
+    std::string GetAVQueueImageUri() const;
 
 private:
     std::string bundleName_ = "";
     std::string avQueueName_ = "";
-    std::string avQueueId = "";
+    std::string avQueueId_ = "";
     std::shared_ptr<AVSessionPixelMap> avQueueImage_ = nullptr;
     std::string avQueueImageUri_ = "";
 };

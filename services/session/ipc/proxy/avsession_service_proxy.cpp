@@ -156,7 +156,8 @@ int32_t AVSessionServiceProxy::GetHistoricalSessionDescriptors(int32_t maxSize,
     return ret;
 }
 
-int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize, std::vector<AVQueueInfo>& avQueueInfos)
+int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+    std::vector<AVQueueInfo>& avQueueInfos)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,

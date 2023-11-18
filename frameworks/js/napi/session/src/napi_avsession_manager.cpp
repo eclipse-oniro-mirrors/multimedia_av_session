@@ -260,8 +260,8 @@ napi_value NapiAVSessionManager::GetHistoricalAVQueueInfos(napi_env env, napi_ca
     context->GetCbInfo(env, info, input);
 
     auto executor = [context]() {
-        int32_t ret = AVSessionManager::GetInstance().GetHistoricalAVQueueInfos(context->maxSize_, context->maxAppSize_
-            context->avQueueInfos_);
+        int32_t ret = AVSessionManager::GetInstance().GetHistoricalAVQueueInfos(context->maxSize_,
+            context->maxAppSize_, context->avQueueInfos_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetHistoricalAVQueueInfos failed : native no permission";

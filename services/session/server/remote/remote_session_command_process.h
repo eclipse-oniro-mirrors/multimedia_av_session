@@ -47,6 +47,17 @@ public:
     {
         return AVSESSION_SUCCESS;
     }
+    
+    int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+      std::vector<AVQueueInfo>& avQueueInfo) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
+    int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override
     {

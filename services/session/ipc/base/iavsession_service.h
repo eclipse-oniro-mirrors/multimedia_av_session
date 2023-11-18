@@ -47,7 +47,8 @@ public:
 
     virtual int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) = 0;
     
-    virtual int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize, std::vector<AVQueueInfo>& avQueueInfos) = 0;
+    virtual int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+                                              std::vector<AVQueueInfo>& avQueueInfos) = 0;
     
     virtual int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) = 0;
 

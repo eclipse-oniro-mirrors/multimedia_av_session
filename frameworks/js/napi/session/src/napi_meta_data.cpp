@@ -26,8 +26,8 @@ std::map<std::string, NapiMetaData::GetterType> NapiMetaData::getterMap_ = {
     { "artist", GetArtist },
     { "author", GetAuthor },
     { "avQueueName",  GetAVQueueName },
-    { "avQueueId",  GetAvQueueId },
-    { "avQueueImage",  GetAvQueueImage },
+    { "avQueueId",  GetAVQueueId },
+    { "avQueueImage",  GetAVQueueImage },
     { "album",  GetAlbum },
     { "writer", GetWriter },
     { "composer", GetComposer },
@@ -276,7 +276,7 @@ napi_status NapiMetaData::GetAVQueueName(napi_env env, napi_value in, AVMetaData
 napi_status NapiMetaData::SetAVQueueName(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
-    auto status = NapiUtils::SetValue(env, in.GetAvQueueName(), property);
+    auto status = NapiUtils::SetValue(env, in.GetAVQueueName(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "avQueueName", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
@@ -295,7 +295,7 @@ napi_status NapiMetaData::GetAVQueueId(napi_env env, napi_value in, AVMetaData& 
 napi_status NapiMetaData::SetAVQueueId(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
-    auto status = NapiUtils::SetValue(env, in.GetAvQueueId(), property);
+    auto status = NapiUtils::SetValue(env, in.GetAVQueueId(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "avQueueId", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
@@ -319,14 +319,12 @@ napi_status NapiMetaData::GetAVQueueImage(napi_env env, napi_value in, AVMetaDat
     } else if (type == napi_object) {
         auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, property);
         if (pixelMap == nullptr) {
-            SLOGE("unwrap failed");
+            SLOGE("unwrap avqueue pixelMap failed");
             return napi_invalid_arg;
         }
-        out.SetAVQueue
-        
-        Image(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        out.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
     } else {
-        SLOGE("mediaImage property value type invalid");
+        SLOGE("avqueueimage property value type invalid");
         return napi_invalid_arg;
     }
 
@@ -337,7 +335,7 @@ napi_status NapiMetaData::SetAVQueueImage(napi_env env, const AVMetaData& in, na
 {
     auto pixelMap = in.GetAVQueueImage();
     if (pixelMap == nullptr) {
-        SLOGI("media image is none");
+        SLOGI("avqueue image is none");
         return napi_ok;
     }
 
@@ -352,7 +350,7 @@ napi_status NapiMetaData::SetAVQueueImageUri(napi_env env, const AVMetaData& in,
 {
     auto uri = in.GetAVQueueImageUri();
     if (uri.empty()) {
-        SLOGI("media image uri empty");
+        SLOGI("avqueue image uri empty");
         return napi_ok;
     }
 

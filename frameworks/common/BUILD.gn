@@ -35,12 +35,12 @@ ohos_shared_library("avsession_common") {
     "src/avmedia_description.cpp",
     "src/avmeta_data.cpp",
     "src/avplayback_state.cpp",
+    "src/avqueue_info.cpp",
     "src/avqueue_item.cpp",
     "src/avsession_descriptor.cpp",
     "src/avsession_pixel_map.cpp",
     "src/media_info.cpp",
     "src/media_info_holder.cpp",
-    "src/avqueue_info.cpp",
   ]
 
   public_configs = [ ":avsession_common_config" ]

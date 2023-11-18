@@ -84,7 +84,8 @@ public:
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
     
-    int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize, std::vector<AVQueueInfo>& avQueueInfos) override;
+    int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+                                      std::vector<AVQueueInfo>& avQueueInfos) override;
     
     int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) override;
 
