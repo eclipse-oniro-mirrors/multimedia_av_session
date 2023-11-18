@@ -52,6 +52,9 @@ public:
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
+    
+    int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+        std::vector<AVQueueInfo>& avQueueInfo) override;
 
     int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) override;
 
@@ -67,6 +70,8 @@ public:
                       const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
 
     int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
+    
+    int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) override;
 
     int32_t Close(void) override;
 

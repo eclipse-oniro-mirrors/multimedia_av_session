@@ -896,6 +896,29 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+                                                    std::vector<AVQueueInfo>& avQueueInfos)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("GetHistoricalAVQueueInfos: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice GetHistoricalAVQueueInfos checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::StartMediaIntent(const std::string& bundleName, const std::string& assetId)
+{
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("StartMediaIntent: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice StartMediaIntent checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
+    return AVSESSION_SUCCESS;
+}
+
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session)
 {
     SLOGI("pid=%{public}d sessionId=%{public}s", pid, session->GetSessionId().c_str());

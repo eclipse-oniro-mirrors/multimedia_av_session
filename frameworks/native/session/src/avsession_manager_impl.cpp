@@ -141,6 +141,19 @@ int32_t AVSessionManagerImpl::GetHistoricalSessionDescriptors(int32_t maxSize,
     return service ? service->GetHistoricalSessionDescriptors(maxSize, descriptors) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+    std::vector<AVQueueInfo>& avQueueInfo)
+{
+    auto service = GetService();
+    return service ? service->GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfo) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::StartMediaIntent(const std::string& bundleName, const std::string& assetId)
+{
+    auto service = GetService();
+    return service ? service->StartMediaIntent(bundleName, assetId) : ERR_SERVICE_NOT_EXIST;
+}
+
 int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {

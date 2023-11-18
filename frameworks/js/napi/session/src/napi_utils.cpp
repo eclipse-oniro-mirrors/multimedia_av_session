@@ -29,6 +29,8 @@
 #include "ability_context.h"
 #include "napi_common_want.h"
 #include "napi_media_info_holder.h"
+#include "pixel_map_napi.h"
+#include "avsession_pixel_map_adapter.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 4096;
@@ -222,6 +224,49 @@ napi_status NapiUtils::SetValue(napi_env env, const AVSessionDescriptor& in, nap
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "outputDevice", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    return napi_ok;
+}
+
+/* napi_value <-> AVQueueInfo */
+napi_status NapiUtils::SetValue(napi_env env, const AVQueueInfo& in, napi_value& out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
+
+    napi_value property = nullptr;
+    status = SetValue(env, in.GetBundleName(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "bundleName", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.GetAVQueueName(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "avQueueName", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.GetAVQueueId(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "avQueueId", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    
+    auto pixelMap = in.GetAVQueueImage();
+    if (pixelMap != nullptr) {
+        SLOGD(" napi setvalue has avqueueimage");
+        property = Media::PixelMapNapi::CreatePixelMap(env, AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
+        status = napi_set_named_property(env, out, "avQueueImage", property);
+        CHECK_RETURN(status == napi_ok, "set property failed", status);
+        return napi_ok;
+    }
+    
+    auto uri = in.GetAVQueueImageUri();
+    if (!uri.empty()) {
+        SLOGD(" napi setvalue has avqueueimageuri");
+        status = NapiUtils::SetValue(env, uri, property);
+        CHECK_RETURN(status == napi_ok, "create property failed", status);
+        status = napi_set_named_property(env, out, "avQueueImage", property);
+        CHECK_RETURN(status == napi_ok, "set property failed", status);
+    }
 
     return napi_ok;
 }
@@ -823,6 +868,21 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<double>& in, nap
 napi_status NapiUtils::SetValue(napi_env env, const std::vector<AVSessionDescriptor>& in, napi_value& out)
 {
     SLOGD("napi_value <- std::vector<AVSessionDescriptor>  %{public}d", static_cast<int>(in.size()));
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN((status == napi_ok), "create_array failed!", status);
+    int index = 0;
+    for (const auto& item : in) {
+        napi_value entry = nullptr;
+        SetValue(env, item, entry);
+        napi_set_element(env, out, index++, entry);
+    }
+    return status;
+}
+
+/* std::vector<AVQueueInfo> <-> napi_value */
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<AVQueueInfo>& in, napi_value& out)
+{
+    SLOGD("napi_value <- std::vector<AVQueueInfo>  %{public}d", static_cast<int>(in.size()));
     napi_status status = napi_create_array_with_length(env, in.size(), &out);
     CHECK_RETURN((status == napi_ok), "create_array failed!", status);
     int index = 0;

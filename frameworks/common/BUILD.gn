@@ -35,6 +35,7 @@ ohos_shared_library("avsession_common") {
     "src/avmedia_description.cpp",
     "src/avmeta_data.cpp",
     "src/avplayback_state.cpp",
+    "src/avqueue_info.cpp",
     "src/avqueue_item.cpp",
     "src/avsession_descriptor.cpp",
     "src/avsession_pixel_map.cpp",

@@ -156,6 +156,62 @@ int32_t AVSessionServiceProxy::GetHistoricalSessionDescriptors(int32_t maxSize,
     return ret;
 }
 
+int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+    std::vector<AVQueueInfo>& avQueueInfos)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(maxSize), ERR_MARSHALLING, "write maxSize failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(maxAppSize), ERR_MARSHALLING, "write maxAppSize failed");
+    
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_HISTORY_AVQUEUE_INFOS),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        uint32_t size {};
+        CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
+        CHECK_AND_RETURN_RET_LOG(size, ret, "size=0");
+
+        std::vector<AVQueueInfo> result(size);
+        for (auto& avqueueInfo : result) {
+            CHECK_AND_RETURN_RET_LOG(avqueueInfo.Unmarshalling(reply), ERR_UNMARSHALLING, "read avqueueInfo failed");
+        }
+        avQueueInfos = result;
+    }
+    return ret;
+}
+
+int32_t AVSessionServiceProxy::StartMediaIntent(const std::string& bundleName, const std::string& assetId)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(bundleName), ERR_MARSHALLING, "write bundleName failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(assetId), ERR_MARSHALLING, "write assetId failed");
+    
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_MEDIA_INTENT),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    return ret;
+}
+
 int32_t AVSessionServiceProxy::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {

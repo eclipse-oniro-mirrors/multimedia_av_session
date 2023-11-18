@@ -43,6 +43,11 @@ public:
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
 
+    int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
+                                      std::vector<AVQueueInfo>& avQueueInfos) override;
+
+    int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) override;
+
     int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller);
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
