@@ -34,7 +34,9 @@ public:
         PLAYBACK_STATE_COMPLETED = 7,
         PLAYBACK_STATE_RELEASED = 8,
         PLAYBACK_STATE_ERROR = 9,
-        PLAYBACK_STATE_MAX = 10,
+        PLAYBACK_STATE_IDLE = 10,
+        PLAYBACK_STATE_BUFFERING = 11,
+        PLAYBACK_STATE_MAX = 12,
     };
 
     enum {

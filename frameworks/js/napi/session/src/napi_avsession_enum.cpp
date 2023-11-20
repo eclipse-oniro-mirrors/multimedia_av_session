@@ -132,6 +132,8 @@ static napi_value ExportPlaybackState(napi_env env)
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_COMPLETED", AVPlaybackState::PLAYBACK_STATE_COMPLETED);
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_RELEASED", AVPlaybackState::PLAYBACK_STATE_RELEASED);
     (void)SetNamedProperty(env, result, "PLAYBACK_STATE_ERROR", AVPlaybackState::PLAYBACK_STATE_ERROR);
+    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_IDLE", AVPlaybackState::PLAYBACK_STATE_IDLE);
+    (void)SetNamedProperty(env, result, "PLAYBACK_STATE_BUFFERING", AVPlaybackState::PLAYBACK_STATE_BUFFERING);
 
     napi_object_freeze(env, result);
     return result;
