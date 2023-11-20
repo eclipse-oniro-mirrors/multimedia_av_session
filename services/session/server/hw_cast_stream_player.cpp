@@ -591,4 +591,9 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
     }
     std::lock_guard lockGuard(streamPlayerLock_);
 }
+
+void OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    SLOGD("Stream player received ImageChanged event");
+}
 } // namespace OHOS::AVSession
