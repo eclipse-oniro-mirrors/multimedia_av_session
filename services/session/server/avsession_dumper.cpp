@@ -45,6 +45,11 @@ std::map<int32_t, std::string> AVSessionDumper::playBackStates_ = {
     { AVPlaybackState::PLAYBACK_STATE_FAST_FORWARD, "fast_forward" },
     { AVPlaybackState::PLAYBACK_STATE_REWIND, "rewind" },
     { AVPlaybackState::PLAYBACK_STATE_STOP, "stop" },
+    { AVPlaybackState::PLAYBACK_STATE_COMPLETED, "complete" },
+    { AVPlaybackState::PLAYBACK_STATE_RELEASED, "released" },
+    { AVPlaybackState::PLAYBACK_STATE_ERROR, "error" },
+    { AVPlaybackState::PLAYBACK_STATE_IDLE, "idle" },
+    { AVPlaybackState::PLAYBACK_STATE_BUFFERING, "buffering" },
 };
 
 std::map<int32_t, std::string> AVSessionDumper::deviceTypeId_ = {
