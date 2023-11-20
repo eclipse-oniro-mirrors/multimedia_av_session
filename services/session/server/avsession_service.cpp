@@ -203,9 +203,6 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
         descriptor = topSession_->GetDescriptor();
     }
     NotifyTopSessionChanged(descriptor);
-    if (AVPlaybackState::PLAYBACK_STATE_PLAY == newTopSession->GetPlaybackState().GetState()) {
-        AVSessionService::NotifySystemUI();
-    }
 }
 
 void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
@@ -213,14 +210,13 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("same session");
-        if (AVPlaybackState::PLAYBACK_STATE_PLAY == topSession_->GetPlaybackState().GetState()) {
-            AVSessionService::NotifySystemUI();
-        }
+        AVSessionService::NotifySystemUI();
         return;
     }
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetUid() == info.uid) {
             UpdateTopSession(session);
+            AVSessionService::NotifySystemUI();
             return;
         }
     }
@@ -1378,7 +1374,6 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
         checkEnableCast(false);
     }
 #endif
-    AVSessionService::NotifySystemUI();
 }
 
 void AVSessionService::HandleControllerRelease(AVControllerItem& controller)
