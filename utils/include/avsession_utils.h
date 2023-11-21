@@ -45,7 +45,7 @@ public:
         size_t imgBufferSize = innerPixelMap->GetInnerImgBuffer().size();
         SLOGI("imgBufferSize=%{public}zu", imgBufferSize);
         if (imgBufferSize > MAX_FILE_SIZE || imgBufferSize <= 0) {
-            SLOGE("error, dataSize larger than %{public}d", MAX_FILE_SIZE);
+            SLOGE("error, dataSize larger than %{public}d or invalid", MAX_FILE_SIZE);
             return;
         }
 
@@ -83,7 +83,7 @@ public:
         ifile.read((char*)&imgBufferSize, sizeof(size_t));
         SLOGI("imgBufferSize=%{public}zu", imgBufferSize);
         if (imgBufferSize > MAX_FILE_SIZE || imgBufferSize <= 0) {
-            SLOGE("error, dataSize larger than %{public}d", MAX_FILE_SIZE);
+            SLOGE("error, dataSize larger than %{public}d or invalid", MAX_FILE_SIZE);
             ifile.close();
             return;
         }

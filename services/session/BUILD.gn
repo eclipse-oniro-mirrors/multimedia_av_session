@@ -250,6 +250,7 @@ ohos_shared_library("avsession_router") {
     "device_manager:devicemanagersdk",
     "graphic_2d:surface",
     "hilog:libhilog",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
