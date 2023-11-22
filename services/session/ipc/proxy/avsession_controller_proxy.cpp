@@ -214,6 +214,8 @@ int32_t AVSessionControllerProxy::GetExtras(AAFwk::WantParams& extras)
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
+    std::lock_guard lockGuard(controllerProxyLock_);
+    SLOGI("get extras sendRequest");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_EXTRAS, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 

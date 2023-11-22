@@ -92,7 +92,7 @@ void NapiAsyncCallback::AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus)
     napi_value global {};
     napi_get_global(context->env, &global);
     napi_value function {};
-    CHECK_RETURN_VOID(*context->isValid, "avcontroller callback is invalid");
+    CHECK_RETURN_VOID(*context->isValid, "callback when callback is invalid");
     napi_get_reference_value(context->env, context->method, &function);
     napi_value result;
     napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);

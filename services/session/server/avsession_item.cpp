@@ -648,6 +648,18 @@ std::string AVSessionItem::GetQueueTitle()
 
 std::vector<int32_t> AVSessionItem::GetSupportCommand()
 {
+    if (descriptor_.elementName_.GetBundleName() == "castBundleName"
+        && descriptor_.elementName_.GetAbilityName() == "castAbilityName") {
+        SLOGI("GetSupportCommand when cast session");
+        std::vector<int32_t> supportedCmdForCastSession {
+            AVControlCommand::SESSION_CMD_PLAY,
+            AVControlCommand::SESSION_CMD_PAUSE,
+            AVControlCommand::SESSION_CMD_STOP,
+            AVControlCommand::SESSION_CMD_PLAY_NEXT,
+            AVControlCommand::SESSION_CMD_PLAY_PREVIOUS
+        };
+        return supportedCmdForCastSession;
+    }
     return supportedCmd_;
 }
 

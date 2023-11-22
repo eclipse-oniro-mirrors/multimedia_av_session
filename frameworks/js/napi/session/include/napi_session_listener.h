@@ -55,9 +55,13 @@ private:
     template<typename T>
     void HandleEvent(int32_t event, const T& param);
 
+    template<typename T>
+    void HandleEvent(int32_t event, const T& param, bool checkValid);
+
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::mutex lock_;
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
+    std::shared_ptr<bool> isValid_ = std::make_shared<bool>(false);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_SESSIONLISTENER_H
