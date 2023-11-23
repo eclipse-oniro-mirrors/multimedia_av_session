@@ -130,9 +130,8 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = stateInfo.deviceId;
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
-        deviceInfo.deviceName_ = "Remote";
         if (listener != nullptr) {
-            SLOGI("trigger the OnCastStateChange for registered listeners");
+            SLOGI("trigger the OnCastStateChange for registered listeners here");
             listener->OnCastStateChange(static_cast<int>(stateInfo.deviceState), deviceInfo);
         }
     }

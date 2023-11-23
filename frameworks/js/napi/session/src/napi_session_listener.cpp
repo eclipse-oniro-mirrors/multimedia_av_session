@@ -47,6 +47,23 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param)
     }
 }
 
+template<typename T>
+void NapiSessionListener::HandleEvent(int32_t event, const T& param, bool checkValid)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callbacks_[event].empty()) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+    for (auto& ref : callbacks_[event]) {
+        asyncCallback_->CallWithFlag(ref, isValid_, [param](napi_env env, int& argc, napi_value* argv) {
+            argc = 1;
+            NapiUtils::SetValue(env, param, *argv);
+        });
+    }
+    SLOGI("handle event %{public}d", static_cast<int32_t>(event));
+}
+
 void NapiSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnSessionCreate");
@@ -78,7 +95,7 @@ void NapiSessionListener::OnDeviceAvailable(const OutputDeviceInfo& castOutputDe
 {
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceAvailable");
     SLOGI("Start handle device found event");
-    HandleEvent(EVENT_DEVICE_AVAILABLE, castOutputDeviceInfo);
+    HandleEvent(EVENT_DEVICE_AVAILABLE, castOutputDeviceInfo, true);
 }
 
 void NapiSessionListener::OnDeviceOffline(const std::string& deviceId)
@@ -104,12 +121,21 @@ napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_v
         asyncCallback_ = std::make_shared<NapiAsyncCallback>(env);
     }
     callbacks_[event].push_back(ref);
+    SLOGI("add callback %{public}d", static_cast<int32_t>(event));
+    if (event == EVENT_DEVICE_AVAILABLE) {
+        isValid_ = std::make_shared<bool>(true);
+    }
     return napi_ok;
 }
 
 napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    SLOGI("remove callback %{public}d", static_cast<int32_t>(event));
+    if (event == EVENT_DEVICE_AVAILABLE) {
+        SLOGI("remove device available listen callback");
+        *isValid_ = false;
+    }
     if (callback == nullptr) {
         for (auto& callbackRef : callbacks_[event]) {
             napi_status ret = napi_delete_reference(env, callbackRef);
