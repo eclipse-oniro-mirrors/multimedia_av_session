@@ -1267,8 +1267,14 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStandard::Audi
         GetValue(env, value, out.volumeGroupId_);
     }
 
-    GetSampleRate(env, in, out.audioStreamInfo_.samplingRate);
-    GetChannels(env, in, out.audioStreamInfo_.channels);
+    AudioStandard::AudioSamplingRate audioSamplingRate;
+    GetSampleRate(env, in, audioSamplingRate);
+    out.audioStreamInfo_.samplingRate = {audioSamplingRate};
+
+    AudioStandard::AudioChannel audioChannel;
+    GetChannels(env, in, audioChannel);
+    out.audioStreamInfo_.channels = {audioChannel};
+
     GetChannelMasks(env, in, out.channelMasks_);
     return napi_ok;
 }
