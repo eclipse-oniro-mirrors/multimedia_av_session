@@ -875,8 +875,9 @@ napi_value NapiAVSessionController::GetValidCommandsSync(napi_env env, napi_call
         return NapiUtils::GetUndefinedValue(env);
     }
 
+    std::vector<std::string> stringCmds = NapiControlCommand::ConvertCommands(cmds);
     napi_value output {};
-    auto status = NapiUtils::SetValue(env, cmds, output);
+    auto status = NapiUtils::SetValue(env, stringCmds, output);
     if (status != napi_ok) {
         SLOGE("convert native object to javascript object failed");
         NapiUtils::ThrowError(env, "convert native object to javascript object failed",
