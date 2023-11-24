@@ -117,6 +117,82 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
     return bundleName;
 }
 
+bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std::string& supportModule,
+                                              std::string& profile)
+{
+    if (bundleMgrProxy == nullptr) {
+        return false;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!bundleMgrProxy->GetBundleInfo(bundleName, GET_BUNDLE_INFO_WITH_HAP_MODULE, bundleInfo, START_USER_ID)) {
+        SLOGE("IsSupportPlayIntent, GetBundleInfo=%{public}s fail", bundleName.c_str());
+        return false;
+    }
+    bool isSupportIntent = false;
+    for (std::string module : bundleInfo.moduleNames) {
+        auto ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::INTENT_PROFILE, bundleName, module,
+            profile, START_USER_ID);
+        if (ret == 0) {
+            SLOGI("IsSupportPlayIntent, GetJsonProfile success, profile=%{public}s", profile.c_str());
+            isSupportIntent = true;
+            supportModule = module;
+            break;
+        }
+    }
+    if (!isSupportIntent) {
+        SLOGE("Bundle=%{public}s does not support insight intent", bundleName.c_str());
+        return false;
+    }
+    SLOGD("IsSupportPlayIntent, GetJsonProfile profile=%{public}s", profile.c_str());
+    // check bundle support background mode & playmusiclist intent
+    nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
+    CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
+    for (const auto& value : profileValues["insightIntents"]) {
+        std::string intentName = value["intentName"];
+        auto modeValues = value["uiAbility"]["executeMode"];
+        auto mode = std::find(modeValues.begin(), modeValues.end(), "background");
+        SLOGD("check GetPlayIntentParam, insightIntent=%{public}s", intentName.c_str());
+        if ((intentName == PLAY_MUSICLIST_INTENT || intentName == PLAY_MUSIC_INTENT) && mode != modeValues.end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
+                                             AppExecFwk::InsightIntentExecuteParam &executeParam)
+{
+    if (bundleMgrProxy == nullptr) {
+        return false;
+    }
+    std::string supportModule;
+    std::string profile;
+    if (!IsSupportPlayIntent(bundleName, supportModule, profile)) {
+        SLOGE("GetPlayIntentParam, bundle=%{public}s does not support play intent", bundleName.c_str());
+        return false;
+    }
+    SLOGD("GetPlayIntentParam, GetJsonProfile profile=%{public}s", profile.c_str());
+    nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
+    CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
+    for (const auto& value : profileValues["insightIntents"]) {
+        std::string intentName = value["intentName"];
+        SLOGD("check GetPlayIntentParam, insightIntent=%{public}s", intentName.c_str());
+        if (intentName == PLAY_MUSICLIST_INTENT) {
+            executeParam.bundleName_ = bundleName;
+            executeParam.moduleName_ = supportModule;
+            executeParam.abilityName_ = value["uiAbility"]["ability"];
+            executeParam.insightIntentName_ = intentName;
+            executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+            std::shared_ptr<AppExecFwk::WantParams> wantParam = std::make_shared<AppExecFwk::WantParams>();
+            wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(INTERFACE_TYPE, assetId));
+            executeParam.insightIntentParam_ = wantParam;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 BundleStatusCallbackImpl::BundleStatusCallbackImpl(const std::function<void(const std::string)>& callback)
 {
     SLOGI("Create bundle status instance");

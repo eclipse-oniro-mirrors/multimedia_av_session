@@ -171,6 +171,8 @@ public:
     int32_t SinkCancelCastAudio();
 
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
+    
+    void SetServiceCallbackForAVQueueInfo(const std::function<void(AVSessionItem&)>& callback);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t AddSupportCastCommand(int32_t cmd);
@@ -205,6 +207,7 @@ protected:
     sptr<IRemoteObject> GetControllerInner() override;
 
 private:
+    bool HasAvQueueInfo();
     void HandleOnAVCallAnswer(const AVControlCommand& cmd);
     void HandleOnAVCallHangUp(const AVControlCommand& cmd);
     void HandleOnAVCallToggleCallMute(const AVControlCommand& cmd);
@@ -264,6 +267,8 @@ private:
     std::shared_ptr<RemoteSessionSource> remoteSource_;
     std::recursive_mutex remoteSinkLock_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
+    
+    std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;

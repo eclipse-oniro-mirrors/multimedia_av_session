@@ -294,6 +294,13 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
             AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
             metaOut.SetMediaImage(innerPixelMap);
         }
+        if ((metaMask_.test(AVMetaData::META_KEY_AVQUEUE_IMAGE)) && (metaOut.GetAVQueueImage() != nullptr)) {
+            std::string avQueueFile = AVSessionUtils::GetFixedPathName() + session_->GetBundleName() + "_" +
+                metaOut.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+            std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaOut.GetAVQueueImage();
+            AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFile);
+            metaOut.SetAVQueueImage(avQueuePixelMap);
+        }
         SLOGI("update meta data");
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         callback_->OnMetaDataChange(metaOut);

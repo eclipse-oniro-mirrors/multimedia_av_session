@@ -23,6 +23,7 @@
 #include "element_name.h"
 #include "iremote_stub.h"
 #include "want.h"
+#include "insight_intent_execute_param.h"
 
 namespace OHOS::AVSession {
 class AbilityConnectHelper {
@@ -30,6 +31,8 @@ public:
     static AbilityConnectHelper& GetInstance();
 
     int32_t StartAbilityByCall(const std::string &bundleName, const std::string &abilityName);
+    
+    int32_t StartMediaIntent(AppExecFwk::InsightIntentExecuteParam &executeParam);
 
 private:
    sptr<IRemoteObject> GetSystemAbility();

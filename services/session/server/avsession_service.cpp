@@ -50,6 +50,8 @@
 #include "notification_helper.h"
 #include "notification_request.h"
 #include "notification_constant.h"
+#include "insight_intent_execute_param.h"
+#include "ability_connect_helper.h"
 #include "avsession_service.h"
 
 #ifdef EFFICIENCY_MANAGER_ENABLE
@@ -338,6 +340,7 @@ void AVSessionService::InitBMS()
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
         CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
         auto callback = [this](std::string bundleName) {
+            DeleteAVQueueInfoRecord(bundleName);
             DeleteHistoricalRecord(bundleName);
         };
         for (auto value : values) {
@@ -622,6 +625,10 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         SLOGI("Start handle session release event");
         HandleSessionRelease(session.GetDescriptor().sessionId_);
     });
+    result->SetServiceCallbackForAVQueueInfo([this](AVSessionItem& session) {
+        // add played avqueue info
+        AddAvQueueInfoToFile(session);
+    });
     SLOGI("success sessionId=%{public}s", result->GetSessionId().c_str());
     {
         std::lock_guard lockGuard(sessionAndControllerLock_);
@@ -693,7 +700,12 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
                                       elementName);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, session, "session is nullptr");
 
-    refreshSortFileOnCreateSession(session->GetSessionId(), session->GetSessionType(), elementName);
+    std::string supportModule;
+    std::string profile;
+    if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
+        SLOGI("bundleName=%{public}s support play intent, refreshSortFile", elementName.GetBundleName().c_str());
+        refreshSortFileOnCreateSession(session->GetSessionId(), session->GetSessionType(), elementName);
+    }
 
     {
         std::lock_guard lockGuard1(abilityManagerLock_);
@@ -725,6 +737,7 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
         CHECK_AND_RETURN_LOG(!values.is_discarded(), "sort json object is null");
         if (oldSortContent.find(elementName.GetBundleName()) == string::npos) {
             auto callback = [this](std::string bundleName) {
+                DeleteAVQueueInfoRecord(bundleName);
                 DeleteHistoricalRecord(bundleName);
             };
             if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(elementName.GetBundleName(), callback)) {
@@ -905,7 +918,104 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
             "ERROR_MSG", "avsessionservice GetHistoricalAVQueueInfos checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
+
+    std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
+    std::string oldAVQueueInfoContent;
+    std::vector<AVQueueInfo> tempAVQueueInfos;
+    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldAVQueueInfoContent)) {
+        SLOGE("GetHistoricalAVQueueInfos read avqueueinfo fail, Return!");
+        return AVSESSION_ERROR;
+    }
+
+    nlohmann::json avQueueValues = json::parse(oldAVQueueInfoContent, nullptr, false);
+    CHECK_AND_RETURN_RET_LOG(!avQueueValues.is_discarded(), AVSESSION_ERROR, "json object is null");
+    for (const auto& value : avQueueValues) {
+        AVQueueInfo avQueueInfo;
+        avQueueInfo.SetBundleName(value["bundleName"]);
+        avQueueInfo.SetAVQueueName(value["avQueueName"]);
+        avQueueInfo.SetAVQueueId(value["avQueueId"]);
+        std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
+        AVSessionUtils::ReadImageFromFile(avQueuePixelMap, value["avQueueImage"]);
+        avQueueInfo.SetAVQueueImage(avQueuePixelMap);
+        avQueueInfo.SetAVQueueImageUri(value["avQueueImageUri"]);
+        tempAVQueueInfos.push_back(avQueueInfo);
+    }
+    for (auto iterator = tempAVQueueInfos.begin(); iterator != tempAVQueueInfos.end(); ++iterator) {
+        avQueueInfos.push_back(*iterator);
+    }
+    SLOGI("get historical avqueueinfo size=%{public}d", static_cast<int>(avQueueInfos.size()));
     return AVSESSION_SUCCESS;
+}
+
+bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, AVSessionItem& session)
+{
+    nlohmann::json values = json::parse(oldContent, nullptr, false);
+    CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), false, "avQueue json object is null");
+    AVMetaData meta = session.GetMetaData();
+    for (auto& value : values) {
+        if (bundleName == value["bundleName"] && meta.GetAVQueueId() == value["avQueueId"]) {
+            if (meta.GetAVQueueName() == value["avQueueName"]) {
+                return false;
+            }
+            values.erase(std::remove(values.begin(), values.end(), value));
+        }
+    }
+    if (values.size() >= (size_t)maxAVQueueInfoLen) {
+        values.erase(values.end() - 1);
+    }
+
+    nlohmann::json value;
+    value["bundleName"] = bundleName;
+    value["avQueueName"] = meta.GetAVQueueName();
+    value["avQueueId"] = meta.GetAVQueueId();
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = meta.GetAVQueueImage();
+    if (innerPixelMap != nullptr) {
+        std::string fileName = AVSessionUtils::GetFixedPathName() + bundleName + "_" +
+            meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+        AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
+        innerPixelMap->Clear();
+        meta.SetAVQueueImage(innerPixelMap);
+        value["avQueueImage"] = fileName;
+    } else {
+        value["avQueueImage"] = "";
+    }
+    value["avQueueImageUri"] = meta.GetAVQueueImageUri();
+    if (values.size() <= 0) {
+        values.push_back(value);
+    } else {
+        values.insert(values.begin(), value);
+    }
+    std::string newContent = values.dump();
+    SLOGD("SaveAvQueueInfo::Dump json object finished");
+    if (!SaveStringToFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, newContent)) {
+        SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
+        return false;
+    }
+    return true;
+}
+
+void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
+{
+    // check is this session support playmusiclist intent
+    std::lock_guard lockGuard(sessionAndControllerLock_);
+    std::string bundleName = session.GetBundleName();
+    std::string supportModule;
+    std::string profile;
+    if (!BundleStatusAdapter::GetInstance().IsSupportPlayIntent(bundleName, supportModule, profile)) {
+        SLOGE("bundleName=%{public}s does not support play intent", bundleName.c_str());
+        return;
+    }
+
+    std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
+    std::string oldContent;
+    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldContent)) {
+        SLOGE("AddAvQueueInfoToFile read avqueueinfo fail, Return!");
+        return;
+    }
+    if (!SaveAvQueueInfo(oldContent, bundleName, session)) {
+        SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
+        return;
+    }
 }
 
 int32_t AVSessionService::StartMediaIntent(const std::string& bundleName, const std::string& assetId)
@@ -916,7 +1026,18 @@ int32_t AVSessionService::StartMediaIntent(const std::string& bundleName, const 
             "ERROR_MSG", "avsessionservice StartMediaIntent checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
-    return AVSESSION_SUCCESS;
+    // get execute param
+    AppExecFwk::InsightIntentExecuteParam executeParam;
+    bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName, assetId, executeParam);
+    if (!isSupport || executeParam.insightIntentName_.empty()) {
+        SLOGE("StartMediaIntent GetPlayIntentParam fail, Return!");
+        return AVSESSION_ERROR;
+    }
+    int32_t ret = AbilityConnectHelper::GetInstance().StartMediaIntent(executeParam);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("StartMediaIntent fail: %{public}d", ret);
+    }
+    return ret;
 }
 
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session)
@@ -1345,6 +1466,38 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
     SLOGD("DeleteHistoricalRecord::Dump json object finished");
     if (!SaveStringToFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
+        return;
+    }
+}
+
+void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
+{
+    std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
+    SLOGI("DeleteAVQueueInfoRecord, bundleName=%{public}s", bundleName.c_str());
+    std::string oldContent;
+    std::string newContent;
+    nlohmann::json values;
+    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldContent)) {
+        SLOGE("LoadStringFromFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
+        return;
+    }
+    values = json::parse(oldContent, nullptr, false);
+    CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
+    for (auto it = values.begin(); it != values.end();) {
+        if (it->at("bundleName") == bundleName) {
+            std::string avQueueId = it->at("avQueueId");
+            std::string fileName = AVSessionUtils::GetFixedPathName() + bundleName + "_" +
+                avQueueId + AVSessionUtils::GetFileSuffix();
+            AVSessionUtils::DeleteFile(fileName);
+            values.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    newContent = values.dump();
+    SLOGD("DeleteAVQueueInfoRecord::Dump json object finished");
+    if (!SaveStringToFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, newContent)) {
+        SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return;
     }
 }
