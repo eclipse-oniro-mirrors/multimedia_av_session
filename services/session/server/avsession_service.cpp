@@ -2028,7 +2028,7 @@ void AVSessionService::NotifySystemUI()
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetNotificationId(0);
     request.SetContent(content);
-    request.SetCreatorUid(getuid());
+    request.SetCreatorUid(topSession_ ? topSession_->GetUid() : 0);
     int32_t result = Notification::NotificationHelper::PublishNotification(request);
     SLOGI("AVSession service PublishNotification uid %{public}d, result %{public}d", getuid(), result);
 }
