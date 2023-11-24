@@ -592,8 +592,36 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
     std::lock_guard lockGuard(streamPlayerLock_);
 }
 
-void OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap)
+void HwCastStreamPlayer::OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap)
 {
     SLOGD("Stream player received ImageChanged event");
+}
+
+void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    SLOGI("Received AlbumCoverChanged callback");
+    if (pixelMap == nullptr) {
+        SLOGE("Invalid pixelMap null");
+        return;
+    }
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = AVSessionPixelMapAdapter::ConvertToInner(pixelMap);
+    if (innerPixelMap == nullptr) {
+        SLOGE("Invalid innerPixelMap null");
+        return;
+    }
+
+    std::shared_ptr<AVMediaDescription> mediaDescription = currentAVQueueItem_.GetDescription();
+    mediaDescription->SetIcon(innerPixelMap);
+    AVQueueItem queueItem;
+    queueItem.SetDescription(mediaDescription);
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnMediaItemChange for registered listeners on Album change");
+            listener->OnMediaItemChange(queueItem);
+        }
+    }
+
+    std::lock_guard lockGuard(streamPlayerLock_);
+    currentAVQueueItem_ = queueItem;
 }
 } // namespace OHOS::AVSession

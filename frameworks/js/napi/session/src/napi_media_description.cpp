@@ -262,8 +262,13 @@ napi_status NapiMediaDescription::SetIconUri(napi_env env, const AVMediaDescript
     napi_value property {};
     auto status = NapiUtils::SetValue(env, in.GetIconUri(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
-    status = napi_set_named_property(env, out, "iconUri", property);
-    status = napi_set_named_property(env, out, "mediaImage", property);
+    if (in.GetIconUri().length() <= 0 || in.GetIcon() != nullptr) {
+        status = napi_set_named_property(env, out, "iconUri", property);
+    } else {
+        status = napi_set_named_property(env, out, "iconUri", property);
+        status = napi_set_named_property(env, out, "mediaImage", property);
+    }
+
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }

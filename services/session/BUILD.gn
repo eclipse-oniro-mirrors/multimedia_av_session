@@ -193,7 +193,8 @@ ohos_shared_library("avsession_router") {
   sources = ipc_sources + adapter_sources + service_sources
 
   include_dirs = [
-    "../../interfaces/inner_api/native/session/include",
+    "./../../frameworks/native/session/include",
+    "./../../interfaces/inner_api/native/session/include",
     "./adapter",
     "./server",
     "./ipc/stub",
@@ -232,6 +233,7 @@ ohos_shared_library("avsession_router") {
 
   deps = [
     "../../frameworks/common:avsession_common",
+    "../../frameworks/native/session:avsession_client",
     "../../utils:avsession_utils",
   ]
 
