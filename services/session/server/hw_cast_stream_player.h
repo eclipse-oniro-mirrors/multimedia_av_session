@@ -21,6 +21,7 @@
 #include "cast_engine_common.h"
 #include "i_stream_player.h"
 #include "i_avcast_controller_proxy.h"
+#include "avsession_pixel_map_adapter.h"
 
 namespace OHOS::AVSession {
 class HwCastStreamPlayer : public IAVCastControllerProxy, public CastEngine::IStreamPlayerListener,
@@ -55,6 +56,7 @@ public:
     void OnEndOfStream(int isLooping) override;
     void OnPlayRequest(const CastEngine::MediaInfo &mediaInfo) override;
     void OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
+    void OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
