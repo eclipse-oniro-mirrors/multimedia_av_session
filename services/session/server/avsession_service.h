@@ -138,6 +138,8 @@ public:
 #endif
 
     int32_t Close(void) override;
+    
+    void AddAvQueueInfoToFile(AVSessionItem& session);
 
 private:
     static SessionContainer& GetContainer();
@@ -257,6 +259,8 @@ private:
     bool IsHistoricalSession(const std::string& sessionId);
 
     void DeleteHistoricalRecord(const std::string& bundleName);
+    
+    void DeleteAVQueueInfoRecord(const std::string& bundleName);
 
     const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
 
@@ -268,6 +272,8 @@ private:
     bool SaveStringToFileEx(const std::string& filePath, const std::string& content);
 
     void ClearClientResources(pid_t pid);
+    
+    bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, AVSessionItem& session);
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 
@@ -303,6 +309,7 @@ private:
     friend class AVSessionDumper;
 
     std::recursive_mutex sortFileReadWriteLock_;
+    std::recursive_mutex avQueueFileReadWriteLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
@@ -316,6 +323,7 @@ private:
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
     static constexpr const int32_t SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER = 2;
+    static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
 
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
 
@@ -331,6 +339,7 @@ private:
     const int32_t CLICK_TIMEOUT = 500;
     const int32_t defMaxHistoryNum = 10;
     const int32_t maxFileLength = 32 * 1024 * 1024;
+    const int32_t maxAVQueueInfoLen = 5;
 };
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {

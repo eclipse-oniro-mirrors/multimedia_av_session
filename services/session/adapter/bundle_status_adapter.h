@@ -18,6 +18,7 @@
 
 #include "bundle_mgr_proxy.h"
 #include "bundle_status_callback_host.h"
+#include "insight_intent_execute_param.h"
 
 namespace OHOS::AVSession {
 class BundleStatusAdapter {
@@ -34,6 +35,11 @@ public:
     bool IsAudioPlayback(const std::string& bundleName, const std::string& abilityName);
 
     std::string GetBundleNameFromUid(const int32_t uid);
+    
+    bool IsSupportPlayIntent(const std::string& bundleName, std::string& supportModule, std::string& profile);
+    
+    bool GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
+                            AppExecFwk::InsightIntentExecuteParam &executeParam);
 
 private:
     BundleStatusAdapter();
@@ -45,6 +51,16 @@ private:
     std::map<std::string, std::function<void(const std::string)>> bundleStatusListeners_;
 
     const int32_t BACKGROUND_MODE_DEMAND = 2;
+
+    const int32_t GET_BUNDLE_INFO_WITH_HAP_MODULE = 0x00000002;
+
+    const int32_t START_USER_ID = 100;
+
+    const int32_t INTERFACE_TYPE = 9;
+
+    const std::string PLAY_MUSICLIST_INTENT = "playMusicList";
+
+    const std::string PLAY_MUSIC_INTENT = "playMusic";
 };
 
 class BundleStatusCallbackImpl : public AppExecFwk::BundleStatusCallbackHost {

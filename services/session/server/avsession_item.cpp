@@ -151,8 +151,21 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
+
+    std::string avQueueFile = AVSessionUtils::GetFixedPathName() + GetBundleName() + "_" +
+        metaData_.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
+    AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFile);
+    
     meta = metaData_;
     return AVSESSION_SUCCESS;
+}
+
+bool AVSessionItem::HasAvQueueInfo()
+{
+    return !metaData_.GetAVQueueName().empty() && !metaData_.GetAVQueueId().empty() &&
+        (metaData_.GetAVQueueImage() != nullptr || !metaData_.GetAVQueueImageUri().empty()) &&
+        playbackState_.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY;
 }
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
@@ -165,6 +178,10 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
         innerPixelMap->Clear();
         metaData_.SetMediaImage(innerPixelMap);
+    }
+
+    if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
+        serviceCallbackForAddAVQueueInfo_(*this);
     }
 
     {
@@ -246,6 +263,11 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
             controller->HandlePlaybackStateChange(state);
         }
     }
+    
+    if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
+        serviceCallbackForAddAVQueueInfo_(*this);
+    }
+
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
         SLOGI("set remote AVPlaybackState");
@@ -633,6 +655,11 @@ AVMetaData AVSessionItem::GetMetaData()
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
+
+    std::string avQueueFile = AVSessionUtils::GetFixedPathName() + GetBundleName() + "_" +
+        metaData_.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
+    AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFile);
     return metaData_;
 }
 
@@ -917,6 +944,12 @@ void AVSessionItem::SetServiceCallbackForRelease(const std::function<void(AVSess
 {
     SLOGI("SetServiceCallbackForRelease in");
     serviceCallback_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForAVQueueInfo(const std::function<void(AVSessionItem&)>& callback)
+{
+    SLOGI("SetServiceCallbackForAVQueueInfo in");
+    serviceCallbackForAddAVQueueInfo_ = callback;
 }
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)

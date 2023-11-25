@@ -100,6 +100,9 @@ void AVSessionDumper::ShowMetaData(std::string& result, const AVSessionService& 
             result.append("        title                : " + metaData.GetTitle() + "\n");
             result.append("        artist               : " + metaData.GetArtist() + "\n");
             result.append("        author               : " + metaData.GetAuthor() + "\n");
+            result.append("        avqueue name         : " + metaData.GetAVQueueName() + "\n");
+            result.append("        avqueue id           : " + metaData.GetAVQueueId() + "\n");
+            result.append("        avqueue url          : " + metaData.GetAVQueueImageUri() + "\n");
             result.append("        album                : " + metaData.GetAlbum() + "\n");
             result.append("        writer               : " + metaData.GetWriter() + "\n");
             result.append("        composer             : " + metaData.GetComposer() + "\n");

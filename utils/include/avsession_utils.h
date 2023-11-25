@@ -36,8 +36,10 @@ public:
             return;
         }
 
-        char realPath[PATH_MAX] = { 0x00 };
-        if (realpath(AVSessionUtils::GetCachePathName(), realPath) == nullptr) {
+        char realCachePath[PATH_MAX] = { 0x00 };
+        char realFixedPath[PATH_MAX] = { 0x00 };
+        if (realpath(AVSessionUtils::GetCachePathName(), realCachePath) == nullptr ||
+            realpath(AVSessionUtils::GetFixedPathName(), realFixedPath) == nullptr) {
             SLOGE("check path failed %{public}s", AVSessionUtils::GetCachePathName());
             return;
         }
@@ -67,8 +69,10 @@ public:
             return;
         }
 
-        char realPath[PATH_MAX] = { 0x00 };
-        if (realpath(AVSessionUtils::GetCachePathName(), realPath) == nullptr) {
+        char realCachePath[PATH_MAX] = { 0x00 };
+        char realFixedPath[PATH_MAX] = { 0x00 };
+        if (realpath(AVSessionUtils::GetCachePathName(), realCachePath) == nullptr ||
+            realpath(AVSessionUtils::GetFixedPathName(), realFixedPath) == nullptr) {
             SLOGE("check path failed %{public}s", AVSessionUtils::GetCachePathName());
             return;
         }
@@ -116,6 +120,11 @@ public:
     {
         return CACHE_PATH_NAME;
     }
+    
+    static const char* GetFixedPathName()
+    {
+        return FIXED_PATH_NAME;
+    }
 
     static const char* GetFileSuffix()
     {
@@ -124,6 +133,7 @@ public:
 
 private:
     static constexpr const char* CACHE_PATH_NAME = "/data/service/el1/public/av_session/cache/";
+    static constexpr const char* FIXED_PATH_NAME = "/data/service/el1/public/av_session/";
     static constexpr const char* FILE_SUFFIX = ".image.dat";
 };
 } // namespace OHOS::AVSession
