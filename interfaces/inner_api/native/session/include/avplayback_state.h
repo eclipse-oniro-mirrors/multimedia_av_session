@@ -53,10 +53,12 @@ public:
     };
 
     enum {
+        LOOP_MODE_UNDEFINED = -1,
         LOOP_MODE_SEQUENCE = 0,
         LOOP_MODE_SINGLE = 1,
         LOOP_MODE_LIST = 2,
-        LOOP_MODE_SHUFFLE = 3
+        LOOP_MODE_SHUFFLE = 3,
+        LOOP_MODE_CUSTOM = 4
     };
 
     struct Position {
