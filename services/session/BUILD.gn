@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("../../castplus_cast_engine_part.gni")
+import("../../collaborationfwk_part.gni")
 import("../../config.gni")
 import("../../efficiency_manager_part.gni")
 
@@ -45,9 +46,16 @@ ohos_shared_library("avsession_service") {
   service_sources = [
     "server/avsession_dumper.cpp",
     "server/avsession_service.cpp",
+    "server/avsession_service_ext.cpp",
     "server/background_audio_controller.cpp",
     "server/focus_session_strategy.cpp",
+    "server/migrate/migrate_avsession_manager.cpp",
+    "server/migrate/migrate_avsession_server.cpp",
     "server/session_stack.cpp",
+    "server/softbus/softbus_distributed_data_manager.cpp",
+    "server/softbus/softbus_session.cpp",
+    "server/softbus/softbus_session_manager.cpp",
+    "server/softbus/softbus_session_server.cpp",
   ]
 
   adapter_sources = [
@@ -69,6 +77,8 @@ ohos_shared_library("avsession_service") {
     "ipc/stub",
     "adapter",
     "server",
+    "server/migrate",
+    "server/softbus",
     "server/remote",
     "../../frameworks/native/session/include",
     "../../interfaces/inner_api/native/session/include",
@@ -112,6 +122,7 @@ ohos_shared_library("avsession_service") {
     "./../../frameworks/common:avsession_common",
     "./../../utils:avsession_utils",
     "./../session:avsession_item",
+    "//third_party/jsoncpp:jsoncpp",
     "//third_party/openssl:libcrypto_shared",
   ]
 
@@ -130,6 +141,7 @@ ohos_shared_library("avsession_service") {
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
     "distributed_notification_service:ans_innerkits",
+    "dsoftbus:softbus_client",
     "graphic_2d:surface",
     "hilog:libhilog",
     "input:libmmi-client",
@@ -138,6 +150,11 @@ ohos_shared_library("avsession_service") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (collaborationfwk_enable) {
+    cflags += [ "-DCOLLABORATIONFWK_ENABLE" ]
+    external_deps += [ "CollaborationFwk:collaborationfwk_client" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -374,6 +391,11 @@ ohos_shared_library("avsession_item") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (collaborationfwk_enable) {
+    cflags += [ "-DCOLLABORATIONFWK_ENABLE" ]
+    external_deps += [ "CollaborationFwk:collaborationfwk_client" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]

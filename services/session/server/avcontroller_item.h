@@ -101,6 +101,8 @@ public:
 
     void SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback);
 
+    int32_t RegisterAVControllerCallback(const std::shared_ptr<AVControllerCallback> &callback);
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 
@@ -111,6 +113,7 @@ private:
     sptr<AVSessionItem> session_;
     std::recursive_mutex callbackMutex_;
     sptr<IAVControllerCallback> callback_;
+    std::shared_ptr<AVControllerCallback> innerCallback_;
     std::recursive_mutex avCallMetaMaskMutex_;
     AVCallMetaData::AVCallMetaMaskType avCallMetaMask_;
     std::recursive_mutex avCallStateMaskMutex_;
