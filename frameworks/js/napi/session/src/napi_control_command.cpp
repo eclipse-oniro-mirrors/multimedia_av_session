@@ -265,7 +265,7 @@ napi_status NapiControlCommand::GetLoopMode(napi_env env, napi_value in, AVContr
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", loopMode);
     if (status != napi_ok) {
         SLOGE("get parameter failed");
-        return status;
+        loopMode = AVPlaybackState::LOOP_MODE_UNDEFINED;
     }
 
     CHECK_AND_RETURN_RET_LOG(out.SetLoopMode(loopMode) == AVSESSION_SUCCESS, napi_invalid_arg, "set parameter failed");

@@ -152,7 +152,11 @@ void NapiAVSessionCallback::OnSetSpeed(double speed)
 void NapiAVSessionCallback::OnSetLoopMode(int32_t loopMode)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnSetLoopMode");
-    HandleEvent(EVENT_SET_LOOP_MODE, loopMode);
+    if (loopMode == AVPlaybackState::LOOP_MODE_UNDEFINED) {
+        HandleEvent(EVENT_SET_LOOP_MODE);
+    } else {
+        HandleEvent(EVENT_SET_LOOP_MODE, loopMode);
+    }
 }
 
 void NapiAVSessionCallback::OnToggleFavorite(const std::string& assertId)

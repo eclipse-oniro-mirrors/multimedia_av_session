@@ -200,7 +200,7 @@ int32_t AVControlCommand::GetSeekTime(int64_t& time) const
 
 int32_t AVControlCommand::SetLoopMode(int32_t mode)
 {
-    if (mode < AVPlaybackState::LOOP_MODE_SEQUENCE || mode > AVPlaybackState::LOOP_MODE_SHUFFLE) {
+    if (mode < AVPlaybackState::LOOP_MODE_UNDEFINED || mode > AVPlaybackState::LOOP_MODE_CUSTOM) {
         return ERR_INVALID_PARAM;
     }
     param_ = mode;
