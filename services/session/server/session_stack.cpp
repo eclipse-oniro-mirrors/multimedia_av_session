@@ -25,6 +25,7 @@ int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr
         return ERR_SESSION_EXCEED_MAX;
     }
     sessions_.insert(std::make_pair(std::make_pair(pid, abilityName), item));
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
     stack_.push_front(item);
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_CREATE_SESSION);
     return AVSESSION_SUCCESS;
@@ -33,6 +34,7 @@ int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr
 std::vector<sptr<AVSessionItem>> SessionStack::RemoveSession(pid_t pid)
 {
     std::vector<sptr<AVSessionItem>> result;
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
     for (auto it = sessions_.begin(); it != sessions_.end();) {
         if (it->first.first == pid) {
             std::string sessionId = it->second->GetSessionId();
@@ -79,6 +81,7 @@ sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid, const std::string& ab
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileName);
     sessions_.erase(it);
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
     stack_.remove(result);
     return result;
 }
@@ -106,6 +109,7 @@ bool SessionStack::PidHasSession(pid_t pid)
 
 sptr<AVSessionItem> SessionStack::GetSessionById(const std::string& sessionId)
 {
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
     for (const auto& session : stack_) {
         if (session->GetSessionId() == sessionId) {
             return session;
@@ -117,6 +121,7 @@ sptr<AVSessionItem> SessionStack::GetSessionById(const std::string& sessionId)
 std::vector<sptr<AVSessionItem>> SessionStack::GetAllSessions()
 {
     std::vector<sptr<AVSessionItem>> result;
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
     for (const auto& session : stack_) {
         result.push_back(session);
     }
