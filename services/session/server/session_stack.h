@@ -42,6 +42,7 @@ public:
 private:
     std::map<std::pair<pid_t, std::string>, sptr<AVSessionItem>> sessions_;
     std::list<sptr<AVSessionItem>> stack_;
+    std::recursive_mutex sessionStackLock_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_SESSION_STACK_H

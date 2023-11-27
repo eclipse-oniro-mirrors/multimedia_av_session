@@ -163,7 +163,7 @@ int32_t AVRouterImpl::OnDeviceOffline(const std::string& deviceId)
 int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
 {
     SLOGI("AVRouterImpl received OnCastServerDied event");
-
+    std::lock_guard lockGuard(providerManagerLock_);
     if (providerManagerMap_.find(providerNumber) != providerManagerMap_.end()) {
         providerManagerMap_.erase(providerNumber);
     } else {

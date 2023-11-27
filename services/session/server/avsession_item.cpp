@@ -358,8 +358,10 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     }
 
     sharedPtr->Init(castControllerProxy_, callback);
-    castControllers_.emplace_back(sharedPtr);
-    
+    {
+        std::lock_guard lockGuard(castControllersLock_);
+        castControllers_.emplace_back(sharedPtr);
+    }
     sptr<IRemoteObject> remoteObject = castController;
 
     return remoteObject;
@@ -368,6 +370,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
 void AVSessionItem::ReleaseAVCastControllerInner()
 {
     SLOGI("Release AVCastControllerInner");
+    std::lock_guard lockGuard(castControllersLock_);
     for (auto controller : castControllers_) {
         controller->Destroy();
     }
