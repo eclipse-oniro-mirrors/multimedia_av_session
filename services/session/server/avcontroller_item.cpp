@@ -45,7 +45,15 @@ int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callb
 {
     std::lock_guard lockGuard(callbackMutex_);
     callback_ = iface_cast<AVControllerCallbackProxy>(callback);
-    CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "RegisterCallbackInner callback_ is nullptr");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControllerItem::RegisterAVControllerCallback(const std::shared_ptr<AVControllerCallback> &callback)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    innerCallback_ = callback;
+    CHECK_AND_RETURN_RET_LOG(innerCallback_ != nullptr, AVSESSION_ERROR, "RegisterCallbackInner callback_ is nullptr");
     return AVSESSION_SUCCESS;
 }
 
@@ -199,6 +207,7 @@ int32_t AVControllerItem::Destroy()
     {
         std::lock_guard callbackLockGuard(callbackMutex_);
         callback_ = nullptr;
+        innerCallback_ = nullptr;
     }
     {
         std::lock_guard sessionLockGuard(sessionMutex_);
@@ -229,6 +238,9 @@ void AVControllerItem::HandleSessionDestroy()
         if (callback_ != nullptr) {
             callback_->OnSessionDestroy();
         }
+        if (innerCallback_ != nullptr) {
+            innerCallback_->OnSessionDestroy();
+        }
     }
     std::lock_guard sessionLockGuard(sessionMutex_);
     session_ = nullptr;
@@ -238,20 +250,23 @@ void AVControllerItem::HandleSessionDestroy()
 void AVControllerItem::HandleAVCallStateChange(const AVCallState& avCallState)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVCallState stateOut;
     std::lock_guard avCallStateLockGuard(avCallStateMaskMutex_);
     if (avCallState.CopyToByMask(avCallStateMask_, stateOut)) {
         SLOGI("update avcall state");
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnAVCallStateChange");
-        callback_->OnAVCallStateChange(stateOut);
+        if (callback_ != nullptr) {
+            callback_->OnAVCallStateChange(stateOut);
+        }
+        if (innerCallback_ != nullptr) {
+            innerCallback_->OnAVCallStateChange(stateOut);
+        }
     }
 }
 
 void AVControllerItem::HandleAVCallMetaDataChange(const AVCallMetaData& avCallMetaData)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVCallMetaData metaOut;
     std::lock_guard avCallMetaDataMaskLockGuard(avCallMetaMaskMutex_);
     if (avCallMetaData.CopyToByMask(avCallMetaMask_, metaOut)) {
@@ -264,27 +279,35 @@ void AVControllerItem::HandleAVCallMetaDataChange(const AVCallMetaData& avCallMe
         }
         SLOGI("update avcall meta data");
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnAVCallMetaDataChange");
-        callback_->OnAVCallMetaDataChange(metaOut);
+        if (callback_ != nullptr) {
+            callback_->OnAVCallMetaDataChange(metaOut);
+        }
+        if (innerCallback_ != nullptr) {
+            innerCallback_->OnAVCallMetaDataChange(metaOut);
+        }
     }
 }
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVPlaybackState stateOut;
     std::lock_guard playbackLockGuard(playbackMaskMutex_);
     if (state.CopyToByMask(playbackMask_, stateOut)) {
         SLOGI("update playback state");
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnPlaybackStateChange");
-        callback_->OnPlaybackStateChange(stateOut);
+        if (callback_ != nullptr) {
+            callback_->OnPlaybackStateChange(stateOut);
+        }
+        if (innerCallback_ != nullptr) {
+            innerCallback_->OnPlaybackStateChange(stateOut);
+        }
     }
 }
 
 void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVMetaData metaOut;
     std::lock_guard metaMaskLockGuard(metaMaskMutex_);
     if (data.CopyToByMask(metaMask_, metaOut)) {
@@ -303,7 +326,12 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
         }
         SLOGI("update meta data");
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
-        callback_->OnMetaDataChange(metaOut);
+        if (callback_ != nullptr) {
+            callback_->OnMetaDataChange(metaOut);
+        }
+        if (innerCallback_ != nullptr) {
+            innerCallback_->OnMetaDataChange(metaOut);
+        }
     }
 }
 

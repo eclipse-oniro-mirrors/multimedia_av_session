@@ -112,6 +112,11 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(APP_MGR_SERVICE_ID);
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+
+#ifdef COLLABORATIONFWK_ENABLE
+    AddSystemAbilityListener(CollaborationFwk::COLLABORATIONFWK_SA_ID);
+#endif
+
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
@@ -144,6 +149,11 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
             InitBMS();
             break;
+#ifdef COLLABORATIONFWK_ENABLE
+        case CollaborationFwk::COLLABORATIONFWK_SA_ID:
+            InitAllConnect();
+            break;
+#endif
         default:
             SLOGE("undefined system ability %{public}d", systemAbilityId);
     }
@@ -1268,12 +1278,6 @@ void AVSessionService::RemoveSessionListener(pid_t pid)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     sessionListeners_.erase(pid);
-}
-
-void AVSessionService::AddInnerSessionListener(SessionListener* listener)
-{
-    std::lock_guard lockGuard(sessionListenersLock_);
-    innerSessionListeners_.push_back(listener);
 }
 
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)

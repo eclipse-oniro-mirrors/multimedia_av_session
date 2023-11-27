@@ -38,6 +38,11 @@
 #include "remote_session_command_process.h"
 #include "i_avsession_service_listener.h"
 #include "avqueue_info.h"
+#include "migrate/migrate_avsession_server.h"
+
+#ifdef COLLABORATIONFWK_ENABLE
+#include "allconnect_manager.h"
+#endif
 
 namespace OHOS::AVSession {
 class AVSessionDumper;
@@ -121,6 +126,12 @@ public:
         return NotifyAudioSessionCheck(uid);
     }
 
+#ifdef COLLABORATIONFWK_ENABLE
+    void InitAllConnect();
+    void SuperLauncher(std::string key, std::string deviceId, std::string serviceName,
+        std::string extraInfo, int32_t state);
+#endif
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void ReleaseCastSession() override;
 
@@ -163,6 +174,7 @@ private:
     void RemoveSessionListener(pid_t pid);
 
     void AddInnerSessionListener(SessionListener* listener);
+    void RemoveInnerSessionListener(SessionListener* listener);
 
     sptr<AVSessionItem> SelectSessionByUid(const AudioStandard::AudioRendererChangeInfo& info);
 
@@ -311,6 +323,8 @@ private:
     std::recursive_mutex sortFileReadWriteLock_;
     std::recursive_mutex avQueueFileReadWriteLock_;
 
+    std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
@@ -341,6 +355,25 @@ private:
     const int32_t maxFileLength = 32 * 1024 * 1024;
     const int32_t maxAVQueueInfoLen = 5;
 };
+
+#ifdef COLLABORATIONFWK_ENABLE
+class CSImpl : public CollaborationFwk::CallbackSkeleton {
+public:
+    explicit CSImpl(AVSessionService *ptr)
+    {
+        ptr_ = ptr;
+    }
+    ~CSImpl() {}
+    int32_t OnServiceStateChanged(std::string key, std::string deviceId, std::string serviceName,
+        std::string extraInfo, int32_t state)
+    {
+        ptr_->SuperLauncher(key, deviceId, serviceName, extraInfo, state);
+        return 0;
+    }
+
+    AVSessionService *ptr_;
+};
+#endif
 
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
