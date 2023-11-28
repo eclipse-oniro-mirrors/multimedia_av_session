@@ -20,6 +20,8 @@
 #include "want_agent.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
+#include "avcall_state.h"
+#include "avcall_meta_data.h"
 #include "avmedia_description.h"
 #include "avqueue_item.h"
 #include "avsession_log.h"
@@ -38,6 +40,8 @@ namespace AVSession {
 static int32_t g_onCall = AVSESSION_ERROR;
 static int32_t g_sessionId = AVSESSION_ERROR;
 static AVMetaData g_metaData;
+static AVCallMetaData g_avCallMetaData;
+static AVCallState g_avCallState;
 static AVPlaybackState g_playbackState;
 static char g_testSessionTag[] = "test";
 static char g_testBundleName[] = "test.ohos.avsession";
@@ -232,6 +236,53 @@ void AVSessionCallbackImpl::OnCommonCommand(const std::string& commonCommand,
 
 AVSessionCallbackImpl::~AVSessionCallbackImpl()
 {
+}
+
+/**
+ * @tc.name: SetAVCallMetaData001
+ * @tc.desc: Return the result of set avcall meta data
+ * @tc.type: FUNC
+ */
+HWTEST_F(AvsessionTest, SetAVCallMetaData001, TestSize.Level1)
+{
+    SLOGE("SetAVCallMetaData001 Begin");
+    g_avCallMetaData.Reset();
+    g_avCallMetaData.SetName("");
+    g_avCallMetaData.SetPhoneNumber("123456789");
+
+    EXPECT_EQ(avsession_->SetAVCallMetaData(g_avCallMetaData), AVSESSION_ERROR);
+    SLOGE("SetAVCallMetaData001 End");
+}
+
+/**
+ * @tc.name: SetAVCallMetaData002
+ * @tc.desc: Return the result of set avcall meta data
+ * @tc.type: FUNC
+ */
+HWTEST_F(AvsessionTest, SetAVCallMetaData002, TestSize.Level1)
+{
+    SLOGE("SetAVCallMetaData002 Begin");
+    g_avCallMetaData.Reset();
+    g_avCallMetaData.SetName("xiaoming");
+    g_avCallMetaData.SetPhoneNumber("123456789");
+
+    EXPECT_EQ(avsession_->SetAVCallMetaData(g_avCallMetaData), AVSESSION_SUCCESS);
+    SLOGE("SetAVCallMetaData002 End");
+}
+
+/**
+ * @tc.name: SetAVCallState001
+ * @tc.desc: Return the result of set avcall meta data
+ * @tc.type: FUNC
+ */
+HWTEST_F(AvsessionTest, SetAVCallState001, TestSize.Level1)
+{
+    SLOGE("SetAVCallState001 Begin");
+    g_avCallState.SetAVCallState(2);
+    g_avCallState.SetAVCallMuted(false);
+
+    EXPECT_EQ(avsession_->SetAVCallState(g_avCallState), AVSESSION_SUCCESS);
+    SLOGE("SetAVCallState001 End");
 }
 
 /**

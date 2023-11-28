@@ -118,6 +118,30 @@ ohos_unittest("AVMetaDataTest") {
   external_deps = common_external_deps
 }
 
+ohos_unittest("AVCallMetaDataTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcallmeta_data_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVCallStateTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcall_state_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
 ohos_unittest("AVSessionPermissionTest") {
   module_out_path = module_output_path
 
@@ -237,6 +261,8 @@ group("av_session_unittest") {
   testonly = true
 
   deps = [
+    ":AVCallMetaDataTest",
+    ":AVCallStateTest",
     ":AVDumperTest",
     ":AVMediaDescriptionTest",
     ":AVMetaDataTest",
