@@ -245,7 +245,6 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
             continue;
         }
         std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
-        SLOGI("true");
         std::string oldSortContent;
         if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
             SLOGE("SelectFocusSession read sort fail !");
@@ -253,28 +252,32 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         }
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
         CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), true, "json object is null");
-        const std::string bundleNameTop = session->GetBundleName();
-        const std::string abilityNameTop = session->GetAbilityName();
+        bool sessionExist = false;
         for (auto value : values) {
-            if (bundleNameTop == value["bundleName"] &&
-                abilityNameTop == value["abilityName"]) {
+            if (session->GetBundleName() == value["bundleName"] &&
+                session->GetAbilityName() == value["abilityName"]) {
                 values.erase(std::remove(values.begin(), values.end(), value));
+                sessionExist = true;
                 break;
             }
         }
-        if (values.size() >= (size_t)maxHistoryNums) {
-            values.erase(values.end() - 1);
+        if (sessionExist) {
+            SLOGI("SelectFocusSession sessionExist, change order");
+            if (values.size() >= (size_t)maxHistoryNums) {
+                values.erase(values.end() - 1);
+            }
+            nlohmann::json value;
+            value["sessionId"] = session->GetSessionId();
+            value["bundleName"] = session->GetBundleName();
+            value["abilityName"] = session->GetAbilityName();
+            value["sessionType"] = session->GetSessionType();
+            if (values.size() <= 0) {
+                values.push_back(value);
+            } else {
+                values.insert(values.begin(), value);
+            }
         }
-        nlohmann::json value;
-        value["sessionId"] = session->GetSessionId();
-        value["bundleName"] = session->GetBundleName();
-        value["abilityName"] = session->GetAbilityName();
-        value["sessionType"] = session->GetSessionType();
-        if (values.size() <= 0) {
-            values.push_back(value);
-        } else {
-            values.insert(values.begin(), value);
-        }
+
         std::string newSortContent = values.dump();
         SLOGD("SelectFocusSession::Dump json object finished");
         if (!SaveStringToFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, newSortContent)) {
@@ -282,7 +285,6 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         }
         return true;
     }
-    SLOGI("false");
     return false;
 }
 
@@ -863,17 +865,12 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
             SLOGI("GetHistoricalSessionDescriptorsFromFile with no video type session");
             continue;
         }
-        auto session = GetContainer().GetSessionById(value["sessionId"]);
-        if (session != nullptr) {
-            descriptors.push_back(session->GetDescriptor());
-        } else {
-            AVSessionDescriptor descriptor;
-            descriptor.sessionId_ = value["sessionId"];
-            descriptor.elementName_.SetBundleName(value["bundleName"]);
-            descriptor.elementName_.SetAbilityName(value["abilityName"]);
-            descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
-            descriptors.push_back(descriptor);
-        }
+        AVSessionDescriptor descriptor;
+        descriptor.sessionId_ = value["sessionId"];
+        descriptor.elementName_.SetBundleName(value["bundleName"]);
+        descriptor.elementName_.SetAbilityName(value["abilityName"]);
+        descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+        descriptors.push_back(descriptor);
     }
     if (descriptors.size() == 0 && GetContainer().GetAllSessions().size() == 0) {
         SLOGE("GetHistoricalSessionDescriptorsFromFile read empty, return default!");
