@@ -126,7 +126,9 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         SLOGI("current has not registered listener");
         return;
     }
+    std::unique_lock<std::mutex> lock(mutex_);
     for (auto listener : castSessionStateListenerList_) {
+        lock.unlock();
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = stateInfo.deviceId;
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
@@ -134,6 +136,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
             SLOGI("trigger the OnCastStateChange for registered listeners here");
             listener->OnCastStateChange(static_cast<int>(stateInfo.deviceState), deviceInfo);
         }
+        lock.lock();
     }
 }
 
