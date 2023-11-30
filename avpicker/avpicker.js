@@ -82,7 +82,7 @@ export class AVCastPicker extends ViewPU {
       });
       UIExtensionComponent.onReceive((e => {
         console.info(TAG, `picker state change : ${JSON.stringify(e.state)}`);
-        null !== this.onStateChange && (parseInt(JSON.stringify(e.state)) === AVCastPickerState.STATE_APPEARING ?
+        null != this.onStateChange && (parseInt(JSON.stringify(e.state)) === AVCastPickerState.STATE_APPEARING ?
           this.onStateChange(AVCastPickerState.STATE_APPEARING) :
           this.onStateChange(AVCastPickerState.STATE_DISAPPEARING));
       }));

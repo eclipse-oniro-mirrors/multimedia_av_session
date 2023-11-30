@@ -1497,10 +1497,17 @@ napi_status NapiUtils::SetValue(napi_env env, const MediaInfo& in, napi_value& o
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVFileDescriptor& out)
 {
     napi_value value {};
-    auto status = napi_get_named_property(env, in, "fd", &value);
-    CHECK_RETURN(status == napi_ok, "get fd failed", status);
-    status = GetValue(env, value, out.fd_);
-    CHECK_RETURN(status == napi_ok, "get fd value failed", status);
+    auto status = napi_ok;
+    bool hasFd = false;
+    napi_has_named_property(env, in, "fd", &hasFd);
+    if (hasFd) {
+        status = napi_get_named_property(env, in, "fd", &value);
+        CHECK_RETURN(status == napi_ok, "get fd failed", status);
+        status = GetValue(env, value, out.fd_);
+        CHECK_RETURN(status == napi_ok, "get fd value failed", status);
+    } else {
+        out.fd_ = 0;
+    }
 
     bool hasOffset = false;
     napi_has_named_property(env, in, "offset", &hasOffset);
