@@ -76,6 +76,7 @@ protected:
 private:
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
     sptr<IAVCastControllerCallback> callback_;
+    std::recursive_mutex itemCallbackLock_;
     AVPlaybackState::PlaybackStateMaskType castPlaybackMask_;
     AVQueueItem currentAVQueueItem_;
     std::vector<int32_t> supportedCastCmds_;

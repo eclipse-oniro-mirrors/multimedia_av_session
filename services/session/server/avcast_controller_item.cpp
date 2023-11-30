@@ -43,6 +43,7 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
     SLOGI("OnCastPlaybackStateChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVPlaybackState stateOut;
+    std::lock_guard lockGuard(itemCallbackLock_);
     if (state.CopyToByMask(castPlaybackMask_, stateOut)) {
         SLOGI("update cast playback state");
         AVSESSION_TRACE_SYNC_START("AVCastControllerItem::OnCastPlaybackStateChange");
@@ -54,6 +55,7 @@ void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
 {
     SLOGI("OnMediaItemChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnMediaItemChange(avQueueItem);
 }
 
@@ -61,6 +63,7 @@ void AVCastControllerItem::OnPlayNext()
 {
     SLOGI("OnPlayNext");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayNext();
     validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT, supportedCastCmds_);
 }
@@ -69,6 +72,7 @@ void AVCastControllerItem::OnPlayPrevious()
 {
     SLOGI("OnPlayPrevious");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayPrevious();
     validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS, supportedCastCmds_);
 }
@@ -77,6 +81,7 @@ void AVCastControllerItem::OnSeekDone(const int32_t seekNumber)
 {
     SLOGI("OnSeekDone");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnSeekDone(seekNumber);
 }
 
@@ -84,6 +89,7 @@ void AVCastControllerItem::OnVideoSizeChange(const int32_t width, const int32_t 
 {
     SLOGI("OnVideoSizeChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnVideoSizeChange(width, height);
 }
 
@@ -91,6 +97,7 @@ void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::str
 {
     SLOGI("OnPlayerError");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayerError(errorCode, errorMsg);
 }
 
@@ -98,6 +105,7 @@ void AVCastControllerItem::OnEndOfStream(const int32_t isLooping)
 {
     SLOGI("OnEndOfStream");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnEndOfStream(isLooping);
 }
 
@@ -172,6 +180,7 @@ bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastCon
 int32_t AVCastControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
     callback_ = iface_cast<AVCastControllerCallbackProxy>(callback);
+    std::lock_guard lockGuard(itemCallbackLock_);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
     return AVSESSION_SUCCESS;
 }
@@ -182,6 +191,7 @@ int32_t AVCastControllerItem::Destroy()
     if (castControllerProxy_) {
         castControllerProxy_ = nullptr;
     }
+    std::lock_guard lockGuard(itemCallbackLock_);
     if (callback_) {
         callback_ = nullptr;
     }
