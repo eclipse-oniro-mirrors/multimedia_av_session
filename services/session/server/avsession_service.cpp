@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <iostream>
 #include <regex>
+#include <dlfcn.h>
 
 #include "accesstoken_kit.h"
 #include "app_manager_adapter.h"
@@ -54,11 +55,6 @@
 #include "ability_connect_helper.h"
 #include "avsession_service.h"
 
-#ifdef EFFICIENCY_MANAGER_ENABLE
-#include "continuous_task_app_info.h"
-#include "suspend_manager_client.h"
-#endif
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
 #endif
@@ -72,6 +68,16 @@ using namespace nlohmann;
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
+static const std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) +
+    std::string("platformsdk/libsuspend_manager_client.z.so");
+
+class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
+    void OnConnected() {}
+    void OnDisconnected() {}
+    void OnResponse(int32_t notificationId, sptr<Notification::NotificationButtonOption> buttonOption) {}
+    void OnDied() {}
+};
+
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
 
 AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
@@ -563,11 +569,24 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     int32_t pid = session->GetDescriptor().pid_;
     std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
     CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
-    SuspendManager::ContinuousTaskAppInfo appInfo(uid, pid, bundleName,
-        SuspendManager::ContinuousTaskState::TASK_START);
-    ErrCode suspendManagerErr = SuspendManager::SuspendManagerClient::GetInstance().ReportContinuousTaskEvent(
-        SuspendManager::ReportEventType::DIS_COMP_CHANGE, appInfo, AVSESSION_SERVICE_ID);
-    CHECK_AND_RETURN_RET_LOG(suspendManagerErr == ERR_OK, AVSESSION_ERROR, "Report continuous task event failed");
+
+    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
+    if (realpath(g_sourceLibraryPath.cstr(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check libsuspend_manager_client path failed %{public}s", g_sourceLibraryPath.c_str());
+        return AVSESSION_ERROR;
+    }
+    void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
+    if (handle_ == nullptr) {
+        SLOGE("failed to open library libsuspend_manager_client reaseon %{public}s", dlerror());
+        return AVSESSION_ERROR;
+    }
+    SLOGI("open library libsuspend_manager_client success");
+    typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
+        const std::string bundleName, int32_t taskState, int32_t serviceId);
+    handler reportContinuousTaskEventEx = (handler)(dlsym(handle_, "ReportContinuousTaskEventEx"));
+    ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 1, AVSESSION_SERVICE_ID);
+    SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
+    dlclose(handle_);
 #endif
     return AVSESSION_SUCCESS;
 }
@@ -596,12 +615,24 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     int32_t pid = session->GetDescriptor().pid_;
     std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
     CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
-    SuspendManager::ContinuousTaskAppInfo appInfo(uid, pid, bundleName,
-        SuspendManager::ContinuousTaskState::TASK_END);
-    ErrCode suspendManagerErr = SuspendManager::SuspendManagerClient::GetInstance().ReportContinuousTaskEvent(
-        SuspendManager::ReportEventType::DIS_COMP_CHANGE, appInfo, AVSESSION_SERVICE_ID);
-    CHECK_AND_RETURN_RET_LOG(suspendManagerErr == ERR_OK, AVSESSION_ERROR, "Report continuous task event failed");
-    SLOGI("Report continuous task event for pid: %{public}d finished", pid);
+
+    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
+    if (realpath(g_sourceLibraryPath.cstr(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check libsuspend_manager_client path failed %{public}s when stop cast", g_sourceLibraryPath.c_str());
+        return AVSESSION_ERROR;
+    }
+    void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
+    if (handle_ == nullptr) {
+        SLOGE("failed to open library libsuspend_manager_client when stop cast, reaseon %{public}s", dlerror());
+        return AVSESSION_ERROR;
+    }
+    SLOGI("open library libsuspend_manager_client success when stop cast");
+    typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
+        const std::string bundleName, int32_t taskState, int32_t serviceId);
+    handler reportContinuousTaskEventEx = (handler)(dlsym(handle_, "ReportContinuousTaskEventEx"));
+    ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 2, AVSESSION_SERVICE_ID);
+    SLOGI("reportContinuousTaskEventEx done when stop cast, result: %{public}d", errCode);
+    dlclose(handle_);
 #endif
     return AVSESSION_SUCCESS;
 }
@@ -2167,6 +2198,10 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 void AVSessionService::NotifySystemUI()
 {
+    auto notificationSubscriber = NotificationSubscriber();
+    int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(notificationSubscriber);
+    CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
+
     Notification::NotificationRequest request;
     std::shared_ptr<Notification::NotificationLocalLiveViewContent> localLiveViewContent =
         std::make_shared<Notification::NotificationLocalLiveViewContent>();
@@ -2183,7 +2218,7 @@ void AVSessionService::NotifySystemUI()
     request.SetNotificationId(0);
     request.SetContent(content);
     request.SetCreatorUid(topSession_ ? topSession_->GetUid() : 0);
-    int32_t result = Notification::NotificationHelper::PublishNotification(request);
-    SLOGI("AVSession service PublishNotification uid %{public}d, result %{public}d", getuid(), result);
+    result = Notification::NotificationHelper::PublishNotification(request);
+    SLOGI("AVSession service PublishNotification uid %{public}d, result %{public}d", topSession_->GetUid(), result);
 }
 } // namespace OHOS::AVSession

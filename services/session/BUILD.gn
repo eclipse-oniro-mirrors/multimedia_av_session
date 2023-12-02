@@ -171,7 +171,6 @@ ohos_shared_library("avsession_service") {
 
   if (efficiency_manager_enable_in_avsession) {
     cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
-    external_deps += [ "efficiency_manager:suspend_manager_client" ]
   }
 
   if (multimedia_av_session_enable_trace_control) {
