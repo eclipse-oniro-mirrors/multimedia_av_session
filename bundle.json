@@ -36,7 +36,6 @@
           "data_object",
           "device_manager",
           "dsoftbus",
-          "efficiency_manager",
           "eventhandler",
           "graphic_2d",
           "hilog",
