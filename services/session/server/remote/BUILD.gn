@@ -43,6 +43,7 @@ common_external_deps = [
   "hilog:libhilog",
   "input:libmmi-client",
   "ipc:ipc_single",
+  "relational_store:common_type",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
