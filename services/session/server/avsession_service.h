@@ -80,6 +80,8 @@ public:
 
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                            const AppExecFwk::ElementName& elementName) override;
 
@@ -111,6 +113,8 @@ public:
     void OnClientDied(pid_t pid);
 
     void HandleSessionRelease(std::string sessionId);
+
+    void HandleCallStartEvent();
 
     void HandleControllerRelease(AVControllerItem& controller);
 
@@ -153,6 +157,8 @@ public:
     void AddAvQueueInfoToFile(AVSessionItem& session);
 
 private:
+    void CheckInitCast();
+
     static SessionContainer& GetContainer();
 
     std::string AllocSessionId();
@@ -328,7 +334,6 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
-    bool isInCast_ = false;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
@@ -340,11 +345,14 @@ private:
     static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
 
     const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
+    const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
+    const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";
 
     int32_t pressCount_ {};
     int32_t maxHistoryNums = 10;
     bool isFirstPress_ = true;
     bool isSourceInCast_ = false;
+    bool isInCast_ = false;
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;

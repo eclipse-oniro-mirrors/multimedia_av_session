@@ -52,6 +52,15 @@ void HwCastStreamPlayer::Release()
     streamPlayerListenerList_.clear();
 }
 
+int32_t HwCastStreamPlayer::CheckCastTime(int32_t time)
+{
+    if (time < castMinTime) {
+        return castMinTime * time;
+    } else {
+        return time;
+    }
+}
+
 void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castControlCommand)
 {
     SLOGI("send command to streamPlayer");
@@ -89,12 +98,12 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
         case AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD:
             int32_t forwardTime;
             castControlCommand.GetForwardTime(forwardTime);
-            streamPlayer_->FastForward(forwardTime);
+            streamPlayer_->FastForward(CheckCastTime(forwardTime));
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_REWIND:
             int32_t rewindTime;
             castControlCommand.GetRewindTime(rewindTime);
-            streamPlayer_->FastRewind(rewindTime);
+            streamPlayer_->FastRewind(CheckCastTime(rewindTime));
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SEEK:
             int32_t seekTime;

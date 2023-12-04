@@ -61,6 +61,9 @@ public:
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
 private:
+    int32_t CheckCastTime(int32_t time);
+
+    int32_t castMinTime = 1000;
     std::recursive_mutex streamPlayerLock_;
     std::shared_ptr<CastEngine::IStreamPlayer> streamPlayer_;
     std::recursive_mutex streamPlayerListenerLock_;

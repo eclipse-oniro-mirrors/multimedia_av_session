@@ -31,6 +31,57 @@ AbilityConnectHelper& AbilityConnectHelper::GetInstance()
     return abilityConnectHelper;
 }
 
+int32_t AbilityConnectHelper::StartAbilityForegroundByCall(const std::string& bundleName,
+    const std::string& abilityName)
+{
+    SLOGI("StartAbilityForegroundByCall bundleName=%{public}s abilityName=%{public}s",
+        bundleName.c_str(), abilityName.c_str());
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(ABILITY_MANAGER_INTERFACE_TOKEN)) {
+        SLOGE("write interface token failed");
+        return ERR_MARSHALLING;
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", bundleName, abilityName);
+    want.SetElement(element);
+    want.SetParam("ohos.aafwk.param.callAbilityToForeground", true);
+
+    if (!data.WriteParcelable(&want)) {
+        SLOGE("want write failed");
+        return ERR_INVALID_PARAM;
+    }
+    sptr<AAFwk::IAbilityConnection> connect = new(std::nothrow) AbilityConnectCallback();
+    if (connect == nullptr) {
+        SLOGE("connect is nullptr");
+        return ERR_NO_MEMORY;
+    }
+    if (!data.WriteRemoteObject(connect->AsObject())) {
+        SLOGE("resolve write failed");
+        return ERR_MARSHALLING;
+    }
+    if (!data.WriteBool(false)) {
+        SLOGE("Failed to write flag");
+        return ERR_MARSHALLING;
+    }
+    if (!data.WriteInt32(-1)) { // -1 is default connect id of ability manager
+        SLOGE("Failed to write connect id");
+        return ERR_MARSHALLING;
+    }
+
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(AAFwk::AbilityManagerInterfaceCode::START_CALL_ABILITY),
+        data, reply, option) != 0) {
+        SLOGE("Send request error");
+        return ERR_IPC_SEND_REQUEST;
+    }
+    return reply.ReadInt32() == ERR_OK ? AVSESSION_SUCCESS : ERR_ABILITY_NOT_AVAILABLE;
+}
+
 int32_t AbilityConnectHelper::StartAbilityByCall(const std::string& bundleName, const std::string& abilityName)
 {
     SLOGI("bundleName=%{public}s abilityName=%{public}s", bundleName.c_str(), abilityName.c_str());

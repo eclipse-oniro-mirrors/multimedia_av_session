@@ -156,6 +156,8 @@ public:
 
     void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);
 
+    void SetServiceCallbackForCallStart(const std::function<void(AVSessionItem&)>& callback);
+
     void SetOutputDevice(const OutputDeviceInfo& info);
 
     void GetOutputDevice(OutputDeviceInfo& info);
@@ -261,6 +263,7 @@ private:
     std::recursive_mutex remoteCallbackLock_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;
     std::function<void(AVSessionItem&)> serviceCallback_;
+    std::function<void(AVSessionItem&)> callStartCallback_;
     friend class AVSessionDumper;
 
     std::recursive_mutex remoteSourceLock_;
@@ -269,6 +272,9 @@ private:
     std::shared_ptr<RemoteSessionSink> remoteSink_;
     
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
+
+    int32_t castConnectStateForDisconnect_ = 5;
+    int32_t castConnectStateForConnected_ = 6;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
