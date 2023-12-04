@@ -949,9 +949,11 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
     nlohmann::json values = json::parse(oldContent, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), false, "avQueue json object is null");
     AVMetaData meta = session.GetMetaData();
+    auto it = values.begin();
     for (auto& value : values) {
         if (bundleName == value["bundleName"] && meta.GetAVQueueId() == value["avQueueId"]) {
-            if (meta.GetAVQueueName() == value["avQueueName"]) {
+            if (meta.GetAVQueueId() == it->at("avQueueId")) {
+                SLOGI("SaveAvQueueInfo avqueue=%{public}s is first, return", meta.GetAVQueueId().c_str());
                 return false;
             }
             values.erase(std::remove(values.begin(), values.end(), value));
@@ -1193,6 +1195,37 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
     }
     return ret;
 }
+
+int32_t AVSessionService::StartHistoricalSession(const std::string& sessionId)
+{
+    std::string bundleName;
+    {
+        std::string sortContent;
+        std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
+        if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, sortContent)) {
+            SLOGE("StartHistoricalSession read sort failed, filename=%{public}s", SORT_FILE_NAME);
+            return AVSESSION_ERROR;
+        }
+        nlohmann::json values = json::parse(sortContent, nullptr, false);
+        CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), AVSESSION_ERROR, "sort json object is null");
+        for (const auto& value : values) {
+            if (value["sessionId"] == sessionId) {
+                SLOGI("StartHistoricalSession find session historical, sessionId=%{public}s", sessionId.c_str());
+                bundleName = value["bundleName"];
+            }
+        }
+    }
+    if (bundleName.empty()) {
+        SLOGE("StartHistoricalSession failed, bundlename is empry");
+        return AVSESSION_ERROR;
+    }
+    auto ret = StartMediaIntent(bundleName, "");
+    SLOGD("StartHistoricalSession StartMediaIntent for: %{public}s", bundleName.c_str());
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("default StartMediaIntent failed: %{public}d", ret);
+    }
+    return ret;
+}
     
 int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
@@ -1212,14 +1245,13 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
         }
     } else {
         if (IsHistoricalSession(sessionId)) {
-            auto ret = StartAbilityByCall(sessionId, sessionIdInner);
+            auto ret = StartHistoricalSession(sessionId);
             if (ret != AVSESSION_SUCCESS) {
-                SLOGE("StartAbilityByCall failed: %{public}d", ret);
+                SLOGE("StartHistoricalSession failed: %{public}d", ret);
                 return ret;
             }
-        } else {
-            sessionIdInner = sessionId;
         }
+        sessionIdInner = sessionId;
     }
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
