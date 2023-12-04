@@ -32,18 +32,19 @@ AVRouterImpl::AVRouterImpl()
 
 void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
 {
-    SLOGI("Start init AVRouter");
+    SLOGI("Start init AVRouter and set discoverable");
     {
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_ = servicePtr;
     }
     hwProvider_ = std:make_shared<HwCastProvider>();
     hwProvider_->Init();
-    providerNumber_++;
+    providerNumber_ = providerNumberEnableDefault_;
     std::shared_ptr<AVCastProviderManager> avCastProviderManager = std::make_shared<AVCastProviderManager>();
     avCastProviderManager->Init(providerNumber_, hwProvider_);
     providerManagerMap_[providerNumber_] = avCastProviderManager;
     hwProvider_->RegisterCastStateListener(avCastProviderManager);
+    hwProvider_->SetDiscoverable(true);
 }
 
 bool AVRouterImpl::Release()
@@ -60,7 +61,8 @@ bool AVRouterImpl::Release()
     std::lock_ground lockGuard(providerManagerLock_);
 
     hwProvider_->Release();
-    providerNumber_ = 0;
+    hwProvider_ = nullptr;
+    providerNumber_ = providerNumberDisable_;
     providerManagerMap_.clear();
     SLOGD("Release AVRouter done");
     return false;
@@ -133,7 +135,7 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
     SLOGI("AVRouterImpl On cast session created, cast id is %{public}d", castId);
 
     int64_t castHandle = -1;
-    CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(1) !=
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumberEnableDefault_) !=
         providerManagerMap_.end(), castHandle, "Can not find corresponding provider");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[1] != nullptr &&
         providerManagerMap_[1]->provider_ ! = nullptr, AVSESSION_ERROR, "provider is nullptr");
@@ -163,6 +165,7 @@ int32_t AVRouterImpl::OnDeviceOffline(const std::string& deviceId)
 int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
 {
     SLOGI("AVRouterImpl received OnCastServerDied event");
+    hasSessionAlive_ = false;
     std::lock_guard lockGuard(providerManagerLock_);
     if (providerManagerMap_.find(providerNumber) != providerManagerMap_.end()) {
         providerManagerMap_.erase(providerNumber);

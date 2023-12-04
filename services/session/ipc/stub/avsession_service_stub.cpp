@@ -375,7 +375,12 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
     bool enable;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(enable), AVSESSION_ERROR, "write enable info failed");
     checkEnableCast(enable);
-    int32_t ret = AVRouter::GetInstance().SetDiscoverable(enable);
+    int32_t ret = AVSESSION_SUCCESS;
+    if (enable) {
+        ret = AVRouter::GetInstance().SetDiscoverable(enable);
+    }
+
+    AVRouter::GetInstance().SetDiscoverable(enable);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleSetDiscoverable failed");
 #else

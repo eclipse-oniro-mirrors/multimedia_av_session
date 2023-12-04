@@ -53,6 +53,7 @@
 #include "notification_constant.h"
 #include "insight_intent_execute_param.h"
 #include "ability_connect_helper.h"
+#include "if_system_ability_manager.h"
 #include "avsession_service.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -70,6 +71,7 @@ using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
 static const std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) +
     std::string("platformsdk/libsuspend_manager_client.z.so");
+static const int32_t CAST_ENGINE_SA_ID = 65546;
 
 class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
     void OnConnected() {}
@@ -118,6 +120,7 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(APP_MGR_SERVICE_ID);
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    AddSystemAbilityListener(CAST_ENGINE_SA_ID);
 
 #ifdef COLLABORATIONFWK_ENABLE
     AddSystemAbilityListener(CollaborationFwk::COLLABORATIONFWK_SA_ID);
@@ -160,9 +163,38 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             InitAllConnect();
             break;
 #endif
+        case CAST_ENGINE_SA_ID:
+            CheckInitCast();
+            break;
         default:
             SLOGE("undefined system ability %{public}d", systemAbilityId);
     }
+}
+
+void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    if (systemAbilityId == CAST_ENGINE_SA_ID) {
+        SLOGE("on cast engine remove ability");
+        isInCast_ = false;
+    }
+}
+
+void AVSessionService::CheckInitCast()
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("AVSessionService CheckInitCast in");
+    sptr<ISystemAbilityManager> samgrProxy;
+    samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgrProxy == nullptr) {
+        SLOGE("AVSessionService CheckInitCast with samgrProxy null");
+        return;
+    }
+    if (samgrProxy->CheckSystemAbility(CAST_ENGINE_SA_ID) == nullptr) {
+        checkEnableCast(false);
+    } else {
+        checkEnableCast(true);
+    }
+#endif
 }
 
 void AVSessionService::InitKeyEvent()
@@ -470,8 +502,8 @@ void AVSessionService::checkEnableCast(bool enable)
 {
     SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
     if (enable == true && isInCast_ == false) {
-        AVRouter::GetInstance().Init(this);
         isInCast_ = true;
+        AVRouter::GetInstance().Init(this);
     } else if (enable == false && isInCast_ == true) {
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
@@ -499,6 +531,7 @@ void AVSessionService::ReleaseCastSession()
 
 void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 {
+    SLOGI("AVSessionService CreateSessionByCast in");
     if (isSourceInCast_) {
         SLOGI("Create Cast in source, return");
         return;
@@ -638,6 +671,13 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 }
 #endif
 
+void AVSessionService::HandleCallStartEvent()
+{
+    SLOGI("Start handle CallStartEvent");
+    AbilityConnectHelper::GetInstance().StartAbilityForegroundByCall(MEDIA_CONTROL_BUNDLENAME,
+        MEDIA_CONTROL_ABILITYNAME);
+}
+
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
 {
@@ -667,6 +707,10 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     result->SetServiceCallbackForAVQueueInfo([this](AVSessionItem& session) {
         // add played avqueue info
         AddAvQueueInfoToFile(session);
+    });
+    result->SetServiceCallbackForCallStart([this](AVSessionItem& session) {
+        SLOGI("Start handle call start event for %{public}s", (session.GetDescriptor().sessionId_).c_str());
+        HandleCallStartEvent();
     });
     SLOGI("success sessionId=%{public}s", result->GetSessionId().c_str());
     {
@@ -1260,9 +1304,11 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     }
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    if (GetPresentController(pid, sessionIdInner) != nullptr) {
-        SLOGI("controller already exist");
-        return ERR_CONTROLLER_IS_EXIST;
+    auto controllerAlreadyExist = GetPresentController(pid, sessionIdInner);
+    if (controllerAlreadyExist != nullptr) {
+        SLOGI("controller already exist, try pass instance");
+        object = controllerAlreadyExist;
+        return AVSESSION_SUCCESS;
     }
 
     auto session = GetContainer().GetSessionById(sessionIdInner);

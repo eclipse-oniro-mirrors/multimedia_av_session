@@ -53,6 +53,7 @@ void HwCastProvider::StopDiscovery()
 
 int32_t HwCastProvider::SetDiscoverable(const bool enable)
 {
+    SLOGI("SetDiscoverable in %{public}d", static_cast<int32_t>(enable));
     return CastSessionManager::GetInstance().SetDiscoverable(enable);
 }
 
@@ -99,7 +100,7 @@ int HwCastProvider::StartCastSession()
 }
 void HwCastProvider::StopCastSession(int castId)
 {
-    SLOGI("StopCastSession begin");
+    SLOGI("StopCastSession begin with %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
         
     auto hwCastStreamPlayer = avCastControllerMap_[castId];
@@ -194,7 +195,7 @@ bool HwCastProvider::UnRegisterCastStateListener(std::shared_ptr<IAVCastStateLis
 
 std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int castId)
 {
-    SLOGI("Provider get remote controller");
+    SLOGI("Provider get remote controller with castId %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
     if (avCastControllerMap_.find(castId) != avCastControllerMap_.end()) {
         SLOGI("the castId corresonding to streamPlayer is already exist");
@@ -269,6 +270,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
 {
     std::vector<DeviceInfo> deviceInfoList;
     for (CastRemoteDevice castRemoteDevice : deviceList) {
+        SLOGI("get devices with deviceName %{public}s", castRemoteDevice.deviceName.c_str());
         DeviceInfo deviceInfo;
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         deviceInfo.deviceId_ = castRemoteDevice.deviceId;

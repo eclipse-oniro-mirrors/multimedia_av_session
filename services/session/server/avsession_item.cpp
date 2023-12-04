@@ -526,20 +526,23 @@ bool AVSessionItem::IsCastSinkSession(int32_t castState)
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
-    SLOGI("OnCastStateChange");
+    SLOGI("OnCastStateChange in with state %{public}d", static_cast<int32_t>(castState));
     OutputDeviceInfo outputDeviceInfo;
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
         outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);
     } else {
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
-    if (castState == 6) { // 6 is connected status (stream)
+    if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
-        SLOGI("Start get remote controller");
+        if (callStartCallback_) {
+            SLOGI("AVSessionItem send callStart event to service for connected");
+            callStartCallback_(*this);
+        }
     }
 
-    if (castState == 5) { // 5 is disconnected status
+    if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
         SLOGI("Is remotecast, received disconnect event");
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
@@ -560,6 +563,10 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         std::lock_guard controllersLockGuard(controllersLock_);
         SLOGD("AVCastController map size is %{public}zu", controllers_.size());
         for (const auto& controller : controllers_) {
+            if (controllers_.size() <= 0) {
+                SLOGE("lopp in empty controllers, break");
+                break;
+            }
             CHECK_AND_RETURN_LOG(controller.second != nullptr, "Controller is nullptr, return");
             controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
         }
@@ -686,7 +693,8 @@ std::vector<int32_t> AVSessionItem::GetSupportCommand()
             AVControlCommand::SESSION_CMD_PAUSE,
             AVControlCommand::SESSION_CMD_STOP,
             AVControlCommand::SESSION_CMD_PLAY_NEXT,
-            AVControlCommand::SESSION_CMD_PLAY_PREVIOUS
+            AVControlCommand::SESSION_CMD_PLAY_PREVIOUS,
+            AVControlCommand::SESSION_CMD_SEEK
         };
         return supportedCmdForCastSession;
     }
@@ -953,6 +961,12 @@ void AVSessionItem::SetServiceCallbackForAVQueueInfo(const std::function<void(AV
 {
     SLOGI("SetServiceCallbackForAVQueueInfo in");
     serviceCallbackForAddAVQueueInfo_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForCallStart(const std::function<void(AVSessionItem&)>& callback)
+{
+    SLOGI("SetServiceCallbackForCallStart in");
+    callStartCallback_ = callback;
 }
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)

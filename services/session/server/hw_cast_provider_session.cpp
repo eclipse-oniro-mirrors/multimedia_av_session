@@ -121,7 +121,8 @@ bool HwCastProviderSession::UnRegisterCastSessionStateListener(std::shared_ptr<I
 
 void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &stateInfo)
 {
-    SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(stateInfo.deviceState));
+    int32_t deviceState = static_cast<int32_t>(stateInfo.deviceState);
+    SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(deviceState));
     if (castSessionStateListenerList_.size() == 0) {
         SLOGI("current has not registered listener");
         return;
@@ -131,10 +132,11 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         lock.unlock();
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = stateInfo.deviceId;
-        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+        deviceInfo.deviceName_ = "RemoteCast";
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
         if (listener != nullptr) {
-            SLOGI("trigger the OnCastStateChange for registered listeners here");
-            listener->OnCastStateChange(static_cast<int>(stateInfo.deviceState), deviceInfo);
+            SLOGI("trigger the OnCastStateChange for registered listeners");
+            listener->OnCastStateChange(static_cast<int>(deviceState), deviceInfo);
         }
         lock.lock();
     }
@@ -142,5 +144,6 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
 
 void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const std::string &jsonParam)
 {
+    SLOGI("OnEvent from cast");
 }
 }

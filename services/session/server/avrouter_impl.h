@@ -69,6 +69,8 @@ private:
     int32_t providerNumber_ = 0;
     std::map<int32_t, OutputDeviceInfo> castHandleToOutputDeviceMap_;
     bool hasSessionAlive_ = false;
+    int32_t providerNumberEnableDefault_ = 1;
+    int32_t providerNumberDisable_ = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H
