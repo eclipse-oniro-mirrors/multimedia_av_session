@@ -24,6 +24,9 @@ using namespace OHOS::CastEngine::CastEngineClient;
 using namespace OHOS::CastEngine;
 
 namespace OHOS::AVSession {
+const uint32_t UNTRUSTED_DEVICE = 0;
+const uint32_t TRUSTED_DEVICE = 1;
+
 HwCastProvider::~HwCastProvider()
 {
     SLOGI("destruct the HwCastProvider");
@@ -273,7 +276,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
         deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
-        deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType);
+        deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType) == 0 ?
+            TRUSTED_DEVICE : UNTRUSTED_DEVICE;
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {
