@@ -128,7 +128,7 @@ public:
 
 #ifdef COLLABORATIONFWK_ENABLE
     void InitAllConnect();
-    void SuperLauncher(std::string key, std::string deviceId, std::string serviceName,
+    void SuperLauncher(std::string deviceId, std::string serviceName,
         std::string extraInfo, int32_t state);
 #endif
 
@@ -364,10 +364,10 @@ public:
         ptr_ = ptr;
     }
     ~CSImpl() {}
-    int32_t OnServiceStateChanged(std::string key, std::string deviceId, std::string serviceName,
-        std::string extraInfo, int32_t state)
+    int32_t OnServiceStateChanged(std::string deviceId, std::string serviceName,
+        std::string extraInfo, int32_t state, int pid)
     {
-        ptr_->SuperLauncher(key, deviceId, serviceName, extraInfo, state);
+        ptr_->SuperLauncher(deviceId, serviceName, extraInfo, state);
         return 0;
     }
 

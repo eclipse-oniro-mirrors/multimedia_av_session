@@ -23,11 +23,11 @@ void AVSessionService::InitAllConnect()
 {
     SLOGI("start register allconnect...");
     int32_t ret = CollaborationFwk::AllConnectManager::GetInstance()
-        .SubscribeServiceState("avsession", new CSImpl(this));
+        .SubscribeServiceState(new CSImpl(this));
     CHECK_AND_RETURN_LOG(ret == 0, "InitAllConnect error, ret is %{public}d", ret);
 }
 
-void AVSessionService::SuperLauncher(std::string key, std::string deviceId, std::string serviceName,
+void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
     std::string extraInfo, int32_t state)
 {
     SLOGI("SuperLauncher deviceId: %{public}s, serviceName: %{public}s, state: %{public}d",

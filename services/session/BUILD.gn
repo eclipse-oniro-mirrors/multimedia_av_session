@@ -154,6 +154,7 @@ ohos_shared_library("avsession_service") {
   if (collaborationfwk_enable) {
     cflags += [ "-DCOLLABORATIONFWK_ENABLE" ]
     external_deps += [ "CollaborationFwk:collaborationfwk_client" ]
+    external_deps += [ "CollaborationFwk:cfwk_allconnect_client" ]
   }
 
   if (castplus_cast_engine_enable) {
@@ -394,6 +395,7 @@ ohos_shared_library("avsession_item") {
   if (collaborationfwk_enable) {
     cflags += [ "-DCOLLABORATIONFWK_ENABLE" ]
     external_deps += [ "CollaborationFwk:collaborationfwk_client" ]
+    external_deps += [ "CollaborationFwk:cfwk_allconnect_client" ]
   }
 
   if (castplus_cast_engine_enable) {
