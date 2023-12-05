@@ -275,6 +275,8 @@ private:
     void HandleEventHandlerCallBack();
 
     bool IsHistoricalSession(const std::string& sessionId);
+    
+    int32_t StartHistoricalSession(const std::string& sessionId);
 
     void DeleteHistoricalRecord(const std::string& bundleName);
     
