@@ -47,11 +47,21 @@ void AudioAdapter::Init()
     if (ret != 0) {
         SLOGE("register audio renderer event listener failed");
     }
+    ret = AudioStandard::AudioSystemManager::GetInstance()->SetDeviceChangeCallback(
+        AudioStandard::DeviceFlag::ALL_DEVICES_FLAG, shared_from_this());
+    if (ret != 0) {
+        SLOGE("register audio device changed event listener failed");
+    }
 }
 
 void AudioAdapter::AddStreamRendererStateListener(const StateListener& listener)
 {
     listeners_.push_back(listener);
+}
+
+void AudioAdapter::AddDeviceChangeListener(const DeviceChangeListener& listener)
+{
+    deviceChangeListeners_.push_back(listener);
 }
 
 int32_t AudioAdapter::PauseAudioStream(int32_t uid)
@@ -70,6 +80,15 @@ void AudioAdapter::OnRendererStateChange(const AudioRendererChangeInfos& infos)
     for (const auto& listener : listeners_) {
         if (listener) {
             listener(infos);
+        }
+    }
+}
+
+void AudioAdapter::OnDeviceChange(const DeviceChangeAction& deviceChangeAction)
+{
+    for (const auto& listener : deviceChangeListeners_) {
+        if (listener) {
+            listener(deviceChangeAction);
         }
     }
 }

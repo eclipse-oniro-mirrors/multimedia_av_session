@@ -24,10 +24,13 @@
 
 namespace OHOS::AVSession {
 using AudioRendererChangeInfos = std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>>;
+using DeviceChangeAction = AudioStandard::DeviceChangeAction;
 class AudioAdapter : public AudioStandard::AudioRendererStateChangeCallback,
+                     public AudioStandard::AudioManagerDeviceChangeCallback,
                      public std::enable_shared_from_this<AudioAdapter> {
 public:
     using StateListener = std::function<void(const AudioRendererChangeInfos& infos)>;
+    using DeviceChangeListener = std::function<void(const DeviceChangeAction& deviceChangeAction)>;
     static AudioAdapter& GetInstance();
 
     AudioAdapter();
@@ -37,9 +40,13 @@ public:
 
     void AddStreamRendererStateListener(const StateListener& listener);
 
+    void AddDeviceChangeListener(const DeviceChangeListener& listener);
+
     int32_t PauseAudioStream(int32_t uid);
 
     void OnRendererStateChange(const AudioRendererChangeInfos& infos) override;
+
+    void OnDeviceChange(const DeviceChangeAction& deviceChangeAction) override;
 
     bool GetRendererState(int32_t uid, AudioStandard::RendererState& rendererState);
 
@@ -47,6 +54,7 @@ private:
     static std::shared_ptr<AudioAdapter> instance_;
     static std::once_flag onceFlag_;
     std::vector<StateListener> listeners_;
+    std::vector<DeviceChangeListener> deviceChangeListeners_;
 };
 }
 #endif // AV_SESSION_AUDIO_ADAPTER_H
