@@ -788,7 +788,8 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
 
     std::string supportModule;
     std::string profile;
-    if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
+    if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile) ||
+        DEFAULT_BUNDLE_NAME == elementName.GetBundleName()) {
         SLOGI("bundleName=%{public}s support play intent, refreshSortFile", elementName.GetBundleName().c_str());
         refreshSortFileOnCreateSession(session->GetSessionId(), session->GetSessionType(), elementName);
     }
@@ -1329,13 +1330,14 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
         }
     } else {
         if (IsHistoricalSession(sessionId)) {
-            auto ret = StartHistoricalSession(sessionId);
+            auto ret = StartAbilityByCall(sessionId, sessionIdInner);
             if (ret != AVSESSION_SUCCESS) {
-                SLOGE("StartHistoricalSession failed: %{public}d", ret);
+                SLOGE("StartAbilityByCall failed: %{public}d", ret);
                 return ret;
             }
+        } else {
+            sessionIdInner = sessionId;
         }
-        sessionIdInner = sessionId;
     }
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionAndControllerLock_);
