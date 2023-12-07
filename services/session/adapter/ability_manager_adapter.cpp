@@ -17,6 +17,7 @@
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "bundle_status_adapter.h"
 #include "ability_connect_helper.h"
 
 namespace OHOS::AVSession {
@@ -37,7 +38,16 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
         return ERR_START_ABILITY_IS_RUNNING;
     }
     status_ = Status::ABILITY_STATUS_RUNNING;
-    int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName_, abilityName_);
+    // start executeIntent
+    AppExecFwk::InsightIntentExecuteParam executeParam;
+    bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName_, "", executeParam);
+    int32_t ret = AVSESSION_ERROR;
+    if (isSupport && !executeParam.insightIntentName_.empty()) {
+        SLOGI("Start Ability mediaintent");
+        ret = AbilityConnectHelper::GetInstance().StartMediaIntent(executeParam);
+    } else {
+        ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName_, abilityName_);
+    }
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("Start Ability failed: %{public}d", ret);
         status_ = Status::ABILITY_STATUS_INIT;
