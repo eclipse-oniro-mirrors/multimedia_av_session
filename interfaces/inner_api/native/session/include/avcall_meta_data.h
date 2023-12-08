@@ -23,8 +23,12 @@
 #include "parcel.h"
 #include "avsession_pixel_map.h"
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#ifndef WINDOWS_PLATFORM
+#ifndef MAC_PLATFORM
+#ifndef IOS_PLATFORM
 #include <malloc.h>
+#endif
+#endif
 #endif
 
 namespace OHOS::AVSession {

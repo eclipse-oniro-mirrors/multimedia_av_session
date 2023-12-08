@@ -144,6 +144,7 @@ ohos_shared_library("avsession_service") {
     "dsoftbus:softbus_client",
     "graphic_2d:surface",
     "hilog:libhilog",
+    "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
     "relational_store:common_type",

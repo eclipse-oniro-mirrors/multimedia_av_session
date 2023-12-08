@@ -54,6 +54,8 @@
 #include "insight_intent_execute_param.h"
 #include "ability_connect_helper.h"
 #include "if_system_ability_manager.h"
+#include "parameter.h"
+#include "parameters.h"
 #include "avsession_service.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -69,7 +71,7 @@ using namespace nlohmann;
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
-static const std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) +
+static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
     std::string("platformsdk/libsuspend_manager_client.z.so");
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 
@@ -126,6 +128,17 @@ void AVSessionService::OnStart()
 
 #ifdef COLLABORATIONFWK_ENABLE
     AddSystemAbilityListener(CollaborationFwk::COLLABORATIONFWK_SA_ID);
+#endif
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
+    SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
+    int32_t is2in1 = strcmp(deviceProp.c_str(), "2in1");
+    if (is2in1 == 0) {
+        SLOGI("startup enable cast check 2in1");
+        checkEnableCast(true);
+        AVRouter::GetInstance().SetDiscoverable(true);
+    }
 #endif
 
     HISYSEVENT_REGITER;
@@ -609,8 +622,8 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
 
     char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(g_sourceLibraryPath.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check libsuspend_manager_client path failed %{public}s", g_sourceLibraryPath.c_str());
+    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check libsuspend_manager_client path failed %{public}s", SOURCE_LIBRARY_PATH.c_str());
         return AVSESSION_ERROR;
     }
     void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
@@ -655,8 +668,8 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
 
     char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(g_sourceLibraryPath.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check libsuspend_manager_client path failed %{public}s when stop cast", g_sourceLibraryPath.c_str());
+    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check libsuspend_manager_client path failed %{public}s when stop cast", SOURCE_LIBRARY_PATH.c_str());
         return AVSESSION_ERROR;
     }
     void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cstdio>
+
 #include "av_router.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
@@ -20,6 +22,8 @@
 #include "client_death_proxy.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
+#include "parameter.h"
+#include "parameters.h"
 #include "avsession_service_stub.h"
 
 using namespace OHOS::AudioStandard;
@@ -376,7 +380,11 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(enable), AVSESSION_ERROR, "write enable info failed");
     checkEnableCast(enable);
     int32_t ret = AVSESSION_SUCCESS;
-    if (enable) {
+
+    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
+    SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
+    int32_t is2in1 = strcmp(deviceProp.c_str(), "2in1");
+    if (enable && is2in1 == 0) {
         ret = AVRouter::GetInstance().SetDiscoverable(enable);
     }
 
@@ -393,9 +401,6 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCast");
-    SLOGI("HandleStartCast start and set no discoverable");
-    int32_t result = AVRouter::GetInstance().SetDiscoverable(false);
-    CHECK_AND_RETURN_RET_LOG(result == AVSESSION_SUCCESS, ERR_NONE, "HandleStartCast to set discoverable failed");
     SessionToken sessionToken {};
     sessionToken.sessionId = data.ReadString();
     sessionToken.pid = data.ReadInt32();

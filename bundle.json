@@ -28,6 +28,7 @@
         "components": [
           "ability_base",
           "ability_runtime",
+          "init",
           "access_token",
           "audio_framework",
           "bundle_framework",
