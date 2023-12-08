@@ -80,6 +80,8 @@ class NotificationSubscriber : public Notification::NotificationLocalLiveViewSub
     void OnDied() {}
 };
 
+static const auto NOTIFICATION_SUBSCRIBER = NotificationSubscriber();
+
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
 
 AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
@@ -2281,8 +2283,7 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 void AVSessionService::NotifySystemUI(bool isDeviceChanged)
 {
-    auto notificationSubscriber = NotificationSubscriber();
-    int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(notificationSubscriber);
+    int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
 
     Notification::NotificationRequest request;
