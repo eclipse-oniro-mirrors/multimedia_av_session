@@ -83,7 +83,8 @@ void OHOS::AVSession::AvsessionProxyTest(uint8_t* data, size_t size)
     avState.SetState(state);
 
     AVCallMetaData callMetaData;
-    std::string dataToS(std::to_string((int32_t)data));
+    int32_t numberDate = *(reinterpret_cast<const int32_t*>(data));
+    std::string dataToS(std::to_string(numberDate));
     std::string strCallMetaData(dataToS);
     callMetaData.SetName(strCallMetaData);
     callMetaData.SetPhoneNumber(strCallMetaData);

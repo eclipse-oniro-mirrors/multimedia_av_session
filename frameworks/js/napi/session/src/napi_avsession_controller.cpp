@@ -664,6 +664,8 @@ napi_value NapiAVSessionController::GetExtras(napi_env env, napi_callback_info i
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
+        std::lock_guard<std::mutex> lock(uvMutex_);
+        SLOGI("Start NapiAVSessionController GetExtras process");
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
         if (napiController->controller_ == nullptr) {
             SLOGE("GetExtras failed : controller is nullptr");
