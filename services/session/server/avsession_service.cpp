@@ -275,13 +275,17 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("same session");
-        AVSessionService::NotifySystemUI(false);
+        if (info.streamUsage == STREAM_USAGE_MEDIA) {
+            AVSessionService::NotifySystemUI(false);
+        }
         return;
     }
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetUid() == info.uid) {
             UpdateTopSession(session);
-            AVSessionService::NotifySystemUI(false);
+            if (info.streamUsage == STREAM_USAGE_MEDIA) {
+                AVSessionService::NotifySystemUI(false);
+            }
             return;
         }
     }
@@ -2322,8 +2326,8 @@ void AVSessionService::NotifySystemUI(bool isDeviceChanged)
 
 void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
-    SLOGI("AVSessionService HandleDeviceChange");
     for (auto &audioDeviceDescriptor : deviceChangeAction.deviceDescriptors) {
+        SLOGI("AVSessionService HandleDeviceChange device type %{public}d", audioDeviceDescriptor->deviceType_);
         if (audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADSET ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADPHONES ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_USB_HEADSET ||
