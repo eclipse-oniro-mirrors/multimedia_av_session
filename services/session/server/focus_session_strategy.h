@@ -25,8 +25,10 @@
 namespace OHOS::AVSession {
 class FocusSessionStrategy {
 public:
+    using StreamUsage = AudioStandard::StreamUsage;
     struct FocusSessionChangeInfo {
         int32_t uid {};
+        StreamUsage streamUsage {};
     };
     using FocusSessionChangeCallback = std::function<void(const FocusSessionChangeInfo&)>;
     using FocusSessionSelector = std::function<bool(const FocusSessionChangeInfo&)>;

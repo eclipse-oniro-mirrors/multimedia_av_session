@@ -93,6 +93,7 @@ bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos& in
         }
         SLOGI("uid=%{public}d state=%{public}d", info->clientUID, info->rendererState);
         sessionInfo.uid = info->clientUID;
+        sessionInfo.streamUsage = info->rendererInfo.streamUsage;
         if (selector_ != nullptr && !selector_(sessionInfo)) {
             continue;
         }
