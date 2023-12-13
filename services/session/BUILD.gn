@@ -100,7 +100,7 @@ ohos_shared_library("avsession_service") {
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
 
   defines = []
-  if (target_cpu == "arm64") {
+  if (target_cpu == "arm64" || target_cpu == "riscv64") {
     system_lib_path = "\"/system/lib64/\""
   } else {
     system_lib_path = "\"/system/lib/\""
