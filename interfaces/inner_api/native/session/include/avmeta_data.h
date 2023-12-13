@@ -20,6 +20,7 @@
 #include <string>
 #include <map>
 
+#include "iremote_proxy.h"
 #include "parcel.h"
 #include "avsession_pixel_map.h"
 
@@ -77,6 +78,9 @@ public:
 
     static AVMetaData* Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& parcel) const override;
+    
+    static bool UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut);
+    static bool MarshallingExceptImg(MessageParcel& data, const AVMetaData metaIn);
 
     void SetAssetId(const std::string& assetId);
     std::string GetAssetId() const;
@@ -143,6 +147,12 @@ public:
 
     void SetFilter(int32_t filter);
     int32_t GetFilter() const;
+    
+    void SetMediaLength(int32_t mediaLength);
+    int32_t GetMediaLength() const;
+
+    void SetAVQueueLength(int32_t avQueueLength);
+    int32_t GetAVQueueLength() const;
 
     void SetDisplayTags(int32_t displayTags);
     int32_t GetDisplayTags() const;
@@ -207,6 +217,8 @@ private:
     std::string nextAssetId_ = "";
     int32_t skipIntervals_ = SECONDS_15;
     int32_t filter_ = 2;
+    int32_t mediaLength_ = 0;
+    int32_t avQueueLength_ = 0;
     int32_t displayTags_ = 0;
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);

@@ -49,6 +49,7 @@ public:
     void OnExtrasChange(const AAFwk::WantParams& extras) override;
 
 private:
+    int32_t GetPixelMapBuffer(AVMetaData& metaData, MessageParcel& parcel);
     static inline BrokerDelegator<AVControllerCallbackProxy> delegator_;
 };
 } // namespace OHOS::AVSession

@@ -100,6 +100,7 @@ protected:
 #endif
 
 private:
+    int32_t GetPixelMapBuffer(AVMetaData& metaData, MessageParcel& parcel);
     sptr<IAVSessionCallback> callback_;
     static inline BrokerDelegator<AVSessionProxy> delegator_;
     bool isDestroyed_ = {};

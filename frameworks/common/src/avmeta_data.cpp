@@ -94,6 +94,65 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
     return result;
 }
 
+bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData metaIn)
+{
+    return data.WriteString(metaIn.metaMask_.to_string()) &&
+        data.WriteString(metaIn.assetId_) &&
+        data.WriteString(metaIn.title_) &&
+        data.WriteString(metaIn.artist_) &&
+        data.WriteString(metaIn.author_) &&
+        data.WriteString(metaIn.avQueueName_) &&
+        data.WriteString(metaIn.avQueueId_) &&
+        data.WriteString(metaIn.avQueueImageUri_) &&
+        data.WriteString(metaIn.album_) &&
+        data.WriteString(metaIn.writer_) &&
+        data.WriteString(metaIn.composer_) &&
+        data.WriteInt64(metaIn.duration_) &&
+        data.WriteString(metaIn.mediaImageUri_) &&
+        data.WriteDouble(metaIn.publishDate_) &&
+        data.WriteString(metaIn.subTitle_) &&
+        data.WriteString(metaIn.description_) &&
+        data.WriteString(metaIn.lyric_) &&
+        data.WriteString(metaIn.previousAssetId_) &&
+        data.WriteString(metaIn.nextAssetId_) &&
+        data.WriteInt32(metaIn.skipIntervals_) &&
+        data.WriteInt32(metaIn.filter_) &&
+        data.WriteInt32(metaIn.mediaLength_) &&
+        data.WriteInt32(metaIn.avQueueLength_) &&
+        data.WriteInt32(metaIn.displayTags_);
+}
+
+bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut)
+{
+    std::string mask;
+    data.ReadString(mask);
+    metaOut.metaMask_ = MetaMaskType(mask);
+
+    return !data.ReadString(metaOut.assetId_) ||
+        !data.ReadString(metaOut.title_) ||
+        !data.ReadString(metaOut.artist_) ||
+        !data.ReadString(metaOut.author_) ||
+        !data.ReadString(metaOut.avQueueName_) ||
+        !data.ReadString(metaOut.avQueueId_) ||
+        !data.ReadString(metaOut.avQueueImageUri_) ||
+        !data.ReadString(metaOut.album_) ||
+        !data.ReadString(metaOut.writer_) ||
+        !data.ReadString(metaOut.composer_) ||
+        !data.ReadInt64(metaOut.duration_) ||
+        !data.ReadString(metaOut.mediaImageUri_) ||
+        !data.ReadDouble(metaOut.publishDate_) ||
+        !data.ReadString(metaOut.subTitle_) ||
+        !data.ReadString(metaOut.description_) ||
+        !data.ReadString(metaOut.lyric_) ||
+        !data.ReadString(metaOut.previousAssetId_) ||
+        !data.ReadString(metaOut.nextAssetId_) ||
+        !data.ReadInt32(metaOut.skipIntervals_) ||
+        !data.ReadInt32(metaOut.filter_) ||
+        !data.ReadInt32(metaOut.mediaLength_) ||
+        !data.ReadInt32(metaOut.avQueueLength_) ||
+        !data.ReadInt32(metaOut.displayTags_);
+}
+
 void AVMetaData::SetAssetId(const std::string& assetId)
 {
     assetId_ = assetId;
@@ -344,6 +403,26 @@ int32_t AVMetaData::GetFilter() const
 {
     SLOGD("GetFilter %{public}d", static_cast<int32_t>(filter_));
     return filter_;
+}
+
+void AVMetaData::SetMediaLength(int32_t mediaLength)
+{
+    mediaLength_ = mediaLength;
+}
+
+int32_t AVMetaData::GetMediaLength() const
+{
+    return mediaLength_;
+}
+
+void AVMetaData::SetAVQueueLength(int32_t avQueueLength)
+{
+    avQueueLength_ = avQueueLength;
+}
+
+int32_t AVMetaData::GetAVQueueLength() const
+{
+    return avQueueLength_;
 }
 
 void AVMetaData::SetDisplayTags(int32_t displayTags)

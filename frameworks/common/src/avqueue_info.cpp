@@ -83,6 +83,16 @@ std::shared_ptr<AVSessionPixelMap> AVQueueInfo::GetAVQueueImage() const
     return avQueueImage_;
 }
 
+void AVQueueInfo::SetAVQueueLength(const int32_t avQueueLength)
+{
+    avQueueLength_ = avQueueLength;
+}
+
+int32_t AVQueueInfo::GetAVQueueLength() const
+{
+    return avQueueLength_;
+}
+
 void AVQueueInfo::SetAVQueueImageUri(const std::string& avQueueImageUri)
 {
     avQueueImageUri_ = avQueueImageUri;

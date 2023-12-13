@@ -79,11 +79,42 @@ int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel& dat
 
 int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, MessageParcel& reply)
 {
-    sptr<AVMetaData> metaData = data.ReadParcelable<AVMetaData>();
-
-    CHECK_AND_RETURN_RET_LOG(metaData != nullptr, ERR_NONE, "read MetaData failed");
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnMetaDataChange");
-    OnMetaDataChange(*metaData);
+    int twoImageLength = data.ReadInt32();
+    if (twoImageLength == 0) {
+        sptr avMetaData = data.ReadParcelable<AVMetaData>();
+        CHECK_AND_RETURN_RET_LOG(avMetaData != nullptr, ERR_NONE, "read MetaData failed");
+        OnMetaDataChange(*avMetaData);
+        return ERR_NONE;
+    }
+
+    AVMetaData meta;
+    AVMetaData::UnmarshallingExceptImg(data, meta);
+    const char *buffer = nullptr;
+    if ((buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength))) == nullptr) {
+        SLOGE("read raw data failed, length = %{public}d", twoImageLength);
+        return AVSESSION_ERROR;
+    }
+
+    int mediaImageLength = meta.GetMediaLength();
+    auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::vector<uint8_t> mediaImageBuffer;
+    for (int i = 0; i < mediaImageLength; i++) {
+        mediaImageBuffer.push_back((uint8_t)buffer[i]);
+    }
+    mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
+    meta.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
+
+    if (twoImageLength > mediaImageLength) {
+        auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+        std::vector<uint8_t> avQueueImageBuffer;
+        for (int j = mediaImageLength; j < twoImageLength; j++) {
+            avQueueImageBuffer.push_back((uint8_t)buffer[j]);
+        }
+        avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
+        meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
+    }
+    OnMetaDataChange(meta);
     return ERR_NONE;
 }
 
