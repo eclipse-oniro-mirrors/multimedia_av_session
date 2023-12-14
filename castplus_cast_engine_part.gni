@@ -13,7 +13,7 @@
 
 if (!defined(global_parts_info) ||
     defined(global_parts_info.castplus_cast_engine)) {
-  castplus_cast_engine_enable = true
+  castplus_cast_engine_enable = false
 } else {
   castplus_cast_engine_enable = false
 }
