@@ -16,7 +16,7 @@ import("../../../../castplus_cast_engine_part.gni")
 import("../../../../config.gni")
 
 ###############################################################################
-commontype_dir = "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/common_type"
+
 common_include_dirs = [
   "../",
   "../remote",

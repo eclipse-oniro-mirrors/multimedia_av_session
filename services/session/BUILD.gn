@@ -18,7 +18,7 @@ import("../../config.gni")
 import("../../efficiency_manager_part.gni")
 
 openssl_dir = "//third_party/openssl"
-commontype_dir = "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/common_type"
+
 group("avsession_server") {
   deps = [
     ":avsession_item",

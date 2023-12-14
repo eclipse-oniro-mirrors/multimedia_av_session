@@ -16,3 +16,5 @@ declare_args() {
   multimedia_av_session_enable_trace_control = true
   multimedia_av_session_enable_sysevent_control = true
 }
+
+commontype_dir = "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/common_type"
