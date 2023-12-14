@@ -38,7 +38,7 @@ bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const st
     SLOGI("AVSessionEventHandler ProxyPostTask");
 
     if (!handler_) {
-        auto runner = AppExecFwk::EventRunner::Create("AVSessionEventHandler");
+        auto runner = AppExecFwk::EventRunner::Create("OS_AVSessionHdl");
         handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
     return handler_->PostTask(callback, name, delayTime);
