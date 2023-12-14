@@ -16,7 +16,7 @@ import("../../../../castplus_cast_engine_part.gni")
 import("../../../../config.gni")
 
 ###############################################################################
-
+commontype_dir = "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/common_type"
 common_include_dirs = [
   "../",
   "../remote",
@@ -25,6 +25,7 @@ common_include_dirs = [
   "../../ipc/stub",
   "../../../../interfaces/inner_api/native/session/include",
   "//third_party/json/single_include",
+  "$commontype_dir/include",
 ]
 
 common_deps = [
@@ -43,7 +44,6 @@ common_external_deps = [
   "hilog:libhilog",
   "input:libmmi-client",
   "ipc:ipc_single",
-  "relational_store:common_type",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
