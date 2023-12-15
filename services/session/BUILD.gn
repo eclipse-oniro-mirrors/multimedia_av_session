@@ -84,6 +84,7 @@ ohos_shared_library("avsession_service") {
     "../../interfaces/inner_api/native/session/include",
     "//third_party/json/single_include",
     "$openssl_dir/include/",
+    "$commontype_dir/include",
   ]
 
   cflags = [
@@ -147,7 +148,6 @@ ohos_shared_library("avsession_service") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "relational_store:common_type",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
@@ -336,6 +336,7 @@ ohos_shared_library("avsession_item") {
     "./server",
     "./server/remote",
     "//third_party/json/single_include",
+    "$commontype_dir/include",
   ]
 
   cflags = [
@@ -390,7 +391,6 @@ ohos_shared_library("avsession_item") {
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "relational_store:common_type",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
