@@ -40,7 +40,7 @@ AVSessionProxy::~AVSessionProxy()
 
 std::string AVSessionProxy::GetSessionId()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, "", "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, "", "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), "", "write interface token failed");
     MessageParcel reply;
@@ -57,7 +57,7 @@ std::string AVSessionProxy::GetSessionId()
 
 std::string AVSessionProxy::GetSessionType()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, "", "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, "", "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), "", "write interface token failed");
     MessageParcel reply;
@@ -74,7 +74,7 @@ std::string AVSessionProxy::GetSessionType()
 
 int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback)
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(callback != nullptr, ERR_INVALID_PARAM, "callback is nullptr");
     callback_ = new(std::nothrow) AVSessionCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVSessionCallbackClient failed");
@@ -106,7 +106,7 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback>& ca
 int32_t AVSessionProxy::Destroy()
 {
     SLOGI("enter");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -132,7 +132,7 @@ int32_t AVSessionProxy::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVCallMetaData");
     CHECK_AND_RETURN_RET_LOG(avCallMetaData.IsValid(), ERR_INVALID_PARAM, "invalid call meta data");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -153,7 +153,7 @@ int32_t AVSessionProxy::SetAVCallState(const AVCallState& avCallState)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVCallState");
     CHECK_AND_RETURN_RET_LOG(avCallState.IsValid(), ERR_INVALID_PARAM, "av call state not valid");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -174,7 +174,7 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(meta.IsValid(), ERR_INVALID_PARAM, "invalid meta data");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -193,7 +193,7 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 
 int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
                              ERR_MARSHALLING, "write interface token failed");
@@ -217,7 +217,7 @@ int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
 int32_t AVSessionProxy::SetAVQueueItems(const std::vector<AVQueueItem>& items)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVQueueItems");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -238,7 +238,7 @@ int32_t AVSessionProxy::SetAVQueueItems(const std::vector<AVQueueItem>& items)
 
 int32_t AVSessionProxy::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
                              ERR_MARSHALLING, "write interface token failed");
@@ -268,7 +268,7 @@ int32_t AVSessionProxy::GetAVQueueItems(std::vector<AVQueueItem>& items)
 
 int32_t AVSessionProxy::GetAVQueueTitle(std::string& title)
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -292,7 +292,7 @@ int32_t AVSessionProxy::GetAVQueueTitle(std::string& title)
 int32_t AVSessionProxy::SetAVQueueTitle(const std::string& title)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVQueueTitle");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -311,7 +311,7 @@ int32_t AVSessionProxy::SetAVQueueTitle(const std::string& title)
 
 int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -336,7 +336,7 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVPlaybackState");
     CHECK_AND_RETURN_RET_LOG(state.IsValid(), ERR_INVALID_PARAM, "state not valid");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -355,7 +355,7 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
 
 int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -375,7 +375,7 @@ int32_t AVSessionProxy::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAg
 int32_t AVSessionProxy::GetExtras(AAFwk::WantParams& extras)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::GetExtras");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -399,7 +399,7 @@ int32_t AVSessionProxy::GetExtras(AAFwk::WantParams& extras)
 int32_t AVSessionProxy::SetExtras(const AAFwk::WantParams& extras)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetExtras");
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -418,7 +418,7 @@ int32_t AVSessionProxy::SetExtras(const AAFwk::WantParams& extras)
 
 sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, nullptr, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
                              nullptr, "write interface token failed");
@@ -441,7 +441,7 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, nullptr, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(controller_ == nullptr || controller_->IsDestroy(), controller_,
         "controller already exist");
     sptr <IRemoteObject> object = GetControllerInner();
@@ -454,7 +454,7 @@ std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 sptr<IRemoteObject> AVSessionProxy::GetAVCastControllerInner()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, nullptr, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
                              nullptr, "write interface token failed");
@@ -477,7 +477,7 @@ sptr<IRemoteObject> AVSessionProxy::GetAVCastControllerInner()
 
 std::shared_ptr<AVCastController> AVSessionProxy::GetAVCastController()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, nullptr, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, nullptr, "session is destroyed");
     sptr <IRemoteObject> object = GetAVCastControllerInner();
     CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
     auto castController = iface_cast<AVCastControllerProxy>(object);
@@ -489,7 +489,7 @@ std::shared_ptr<AVCastController> AVSessionProxy::GetAVCastController()
 
 int32_t AVSessionProxy::Activate()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -506,7 +506,7 @@ int32_t AVSessionProxy::Activate()
 
 int32_t AVSessionProxy::Deactivate()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -523,7 +523,7 @@ int32_t AVSessionProxy::Deactivate()
 
 bool AVSessionProxy::IsActive()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -540,7 +540,7 @@ bool AVSessionProxy::IsActive()
 
 int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     MessageParcel data;
@@ -561,7 +561,7 @@ int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 
 int32_t AVSessionProxy::DeleteSupportCommand(const int32_t cmd)
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     MessageParcel data;
@@ -582,7 +582,7 @@ int32_t AVSessionProxy::DeleteSupportCommand(const int32_t cmd)
 
 int32_t AVSessionProxy::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -603,7 +603,7 @@ int32_t AVSessionProxy::SetSessionEvent(const std::string& event, const AAFwk::W
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionProxy::ReleaseCast()
 {
-    CHECK_AND_RETURN_RET_LOG(isDestroyed_ == false, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");

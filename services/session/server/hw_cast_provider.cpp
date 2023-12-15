@@ -157,7 +157,9 @@ bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo)
 
 bool HwCastProvider::RegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener)
 {
+    SLOGI("RegisterCastStateListener in");
     std::lock_guard lockGuard(mutexLock_);
+    SLOGD("RegisterCastStateListener in pass lock");
     if (listener == nullptr) {
         SLOGE("RegisterCastStateListener the listener is nullptr");
         return false;
@@ -174,7 +176,9 @@ bool HwCastProvider::RegisterCastStateListener(std::shared_ptr<IAVCastStateListe
 
 bool HwCastProvider::UnRegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener)
 {
+    SLOGI("UnRegisterCastStateListener in");
     std::lock_guard lockGuard(mutexLock_);
+    SLOGD("UnRegisterCastStateListener in pass lock");
     if (listener == nullptr) {
         SLOGE("UnRegisterCastStateListener the listener is nullptr");
         return false;
@@ -195,7 +199,7 @@ bool HwCastProvider::UnRegisterCastStateListener(std::shared_ptr<IAVCastStateLis
 
 std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int castId)
 {
-    SLOGI("Provider get remote controller with castId %{public}d", castId);
+    SLOGI("get remote controller with castId %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
     if (avCastControllerMap_.find(castId) != avCastControllerMap_.end()) {
         SLOGI("the castId corresonding to streamPlayer is already exist");

@@ -35,9 +35,9 @@
 using namespace std;
 namespace OHOS {
 namespace AVSession {
-const int32_t MAX_CODE_TEST  = 24;
-const int32_t MAX_CODE_LEN  = 512;
-const int32_t MIN_SIZE_NUM = 4;
+static const int32_t MAX_CODE_TEST  = 24;
+static const int32_t MAX_CODE_LEN  = 512;
+static const int32_t MIN_SIZE_NUM = 4;
 
 void AvSessionItemFuzzer::AvSessionItemFuzzerTest(uint8_t* data, size_t size)
 {

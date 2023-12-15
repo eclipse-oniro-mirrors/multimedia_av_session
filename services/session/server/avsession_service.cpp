@@ -442,7 +442,7 @@ std::string AVSessionService::AllocSessionId()
 
     std::stringstream stream;
     for (const auto byte : hash) {
-        stream << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(byte);
+        stream << std::uppercase << std::hex << std::setfill('0') << std::setw(allocSpace) << static_cast<int>(byte);
     }
     return stream.str();
 }
@@ -727,7 +727,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         HandleSessionRelease(session.GetDescriptor().sessionId_);
     });
     result->SetServiceCallbackForAVQueueInfo([this](AVSessionItem& session) {
-        // add played avqueue info
+        SLOGI("add played avqueue info");
         AddAvQueueInfoToFile(session);
     });
     result->SetServiceCallbackForCallStart([this](AVSessionItem& session) {
@@ -1099,6 +1099,7 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
 
 void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
 {
+    SLOGI("add queueinfo to file in");
     // check is this session support playmusiclist intent
     std::lock_guard lockGuard(sessionAndControllerLock_);
     std::string bundleName = session.GetBundleName();
@@ -1108,7 +1109,7 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
         SLOGE("bundleName=%{public}s does not support play intent", bundleName.c_str());
         return;
     }
-
+    SLOGD("add queueinfo to file with queue lock check");
     std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
     std::string oldContent;
     if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldContent)) {
@@ -1119,6 +1120,7 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
         SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
         return;
     }
+    SLOGI("add queueinfo to file done");
 }
 
 int32_t AVSessionService::StartMediaIntent(const std::string& bundleName, const std::string& assetId)

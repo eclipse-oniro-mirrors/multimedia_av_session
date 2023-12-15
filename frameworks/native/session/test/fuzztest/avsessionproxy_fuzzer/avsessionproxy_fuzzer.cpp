@@ -26,9 +26,9 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-constexpr int32_t MAX_CODE_LEN  = 512;
-constexpr int32_t MAX_CODE_NUM = 14;
-constexpr int32_t MIN_SIZE_NUM = 4;
+static constexpr int32_t MAX_CODE_LEN  = 512;
+static constexpr int32_t MAX_CODE_NUM = 14;
+static constexpr int32_t MIN_SIZE_NUM = 4;
 
 bool AvsessionProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {

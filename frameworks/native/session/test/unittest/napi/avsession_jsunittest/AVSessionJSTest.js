@@ -44,12 +44,12 @@ describe("AVSessionJsTest", function () {
 
   beforeAll(async function () {
     session = await avSession.createAVSession(featureAbility.getContext(), "AVSessionDemo", 'audio').catch((err) => {
-      console.error(TAG + "Create AVSession error " + JSON.stringify(err));
+      console.error(TAG + "Create AVSession in avsessionjstest error " + JSON.stringify(err));
       expect().assertFail();
     });
     session.activate();
     controller = await avSession.createController(session.sessionId).catch((err) => {
-      console.error(TAG + "Create controller error " + JSON.stringify(err));
+      console.error(TAG + "Create controller in avsessionjstest error " + JSON.stringify(err));
       expect().assertFail();
     })
     console.info(TAG + "Create session finished, beforeAll called");

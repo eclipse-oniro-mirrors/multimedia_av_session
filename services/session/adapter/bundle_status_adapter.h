@@ -50,13 +50,13 @@ private:
 
     std::map<std::string, std::function<void(const std::string)>> bundleStatusListeners_;
 
-    const int32_t BACKGROUND_MODE_DEMAND = 2;
+    const int32_t backgroundModeDemand = 2;
 
-    const int32_t GET_BUNDLE_INFO_WITH_HAP_MODULE = 0x00000002;
+    const int32_t getBundleInfoWithHapModule = 0x00000002;
 
-    const int32_t START_USER_ID = 100;
+    const int32_t startUserId = 100;
 
-    const int32_t INTERFACE_TYPE = 9;
+    const int32_t interfaceType = 9;
 
     const std::string PLAY_MUSICLIST_INTENT = "playMusicList";
 

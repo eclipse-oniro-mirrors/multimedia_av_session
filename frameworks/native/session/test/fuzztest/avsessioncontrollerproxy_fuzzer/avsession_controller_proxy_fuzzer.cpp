@@ -26,9 +26,9 @@
 using namespace std;
 namespace OHOS {
 namespace AVSession {
-constexpr int32_t MAX_CODE_TEST  = 12;
-constexpr int32_t MAX_CODE_LEN = 512;
-constexpr int32_t MIN_SIZE_NUM = 4;
+static constexpr int32_t MAX_CODE_TEST  = 12;
+static constexpr int32_t MAX_CODE_LEN = 512;
+static constexpr int32_t MIN_SIZE_NUM = 4;
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
 

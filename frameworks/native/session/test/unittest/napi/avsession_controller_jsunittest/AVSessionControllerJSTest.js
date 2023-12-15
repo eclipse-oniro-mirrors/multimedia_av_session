@@ -62,12 +62,12 @@ describe("AVSessionControllerJsTest", function () {
 
   beforeAll(async function () {
     session = await avSession.createAVSession(featureAbility.getContext(), "AVSessionDemo", 'audio').catch((err) => {
-      console.error(TAG + "Create AVSession error " + JSON.stringify(err));
+      console.error(TAG + "Create AVSession in avsessioncontrollerjstest error " + JSON.stringify(err));
       expect().assertFail();
     });
     session.activate();
     controller = await avSession.createController(session.sessionId).catch((err) => {
-      console.error(TAG + "Create controller error " + JSON.stringify(err));
+      console.error(TAG + "Create controller in avsessioncontrollerjstest error " + JSON.stringify(err));
       expect().assertFail();
     })
     console.info(TAG + "Create session and controller finished, beforeAll called");
@@ -80,14 +80,15 @@ describe("AVSessionControllerJsTest", function () {
   })
 
   beforeEach(function () {
-    console.info(TAG + 'beforeEach called');
+    console.info(TAG + 'beforeEach in avsessioncontrollerjstest called');
   })
 
   afterEach(function () {
-    console.info(TAG + 'afterEach called');
+    console.info(TAG + 'afterEach in avsessioncontrollerjstest called');
   })
 
   function sleep(time) {
+    console.info(TAG + 'sleep in avsessioncontrollerjstest called');
     return new Promise((resolve) => setTimeout(resolve, time));
   }
 
@@ -368,16 +369,16 @@ describe("AVSessionControllerJsTest", function () {
     controller.off('sessionEvent', dynamicLyricsCallback2);
 
     await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
-      console.error(TAG + "Set session event error " + JSON.stringify(err));
+      console.error(TAG + "Set session event in offSessionEventTest002 error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
     await sleep(200);
     if (!receivedCallback && !receivedCallback2) {
-      console.log(TAG + "Received session event change event");
+      console.log(TAG + "Received session event change event in offSessionEventTest002");
       expect(true).assertTrue();
     } else {
-      console.error(TAG + "Session event change event not received");
+      console.error(TAG + "Session event change event not received in offSessionEventTest002");
       expect().assertFail();
     }
     receivedCallback = false;
@@ -396,16 +397,16 @@ describe("AVSessionControllerJsTest", function () {
     controller.off('sessionEvent');
 
     await session.dispatchSessionEvent(UPDATE_LYRICS_EVENT, UPDATE_LYRICS_WANT_PARAMS).catch((err) => {
-      console.error(TAG + "Set session event error " + JSON.stringify(err));
+      console.error(TAG + "Set session event in offSessionEventTest003 error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
     await sleep(200);
     if (!receivedCallback && !receivedCallback2) {
-      console.log(TAG + "Received session event change event");
+      console.log(TAG + "Received session event change event in offSessionEventTest003");
       expect(true).assertTrue();
     } else {
-      console.error(TAG + "Session event change event not received");
+      console.error(TAG + "Session event change event not received in offSessionEventTest003");
       expect().assertFail();
     }
     receivedCallback = false;
@@ -739,13 +740,13 @@ describe("AVSessionControllerJsTest", function () {
     });
     await sleep(200);
     if (!receivedCallback && !receivedCallback2) {
-      console.log(TAG + "Success, not received extras change event");
+      console.log(TAG + "Success in OnExtrasChange002, not received extras change event");
       expect(true).assertTrue();
     } else {
-      console.error(TAG + "Test failed, extras change event received");
+      console.error(TAG + "Test failed in OnExtrasChange002, extras change event received");
       expect().assertFail();
     }
-    console.info(TAG + "OffExtrasChange002 finished");
+    console.info(TAG + "OffExtrasChange002 finished in OnExtrasChange002");
     done();
   })
 
@@ -766,13 +767,13 @@ describe("AVSessionControllerJsTest", function () {
     });
     await sleep(200);
     if (!receivedCallback && !receivedCallback2) {
-      console.log(TAG + "Success, not received extras change event");
+      console.log(TAG + "Success in OnExtrasChange003, not received extras change event");
       expect(true).assertTrue();
     } else {
-      console.error(TAG + "Test failed, extras change event received");
+      console.error(TAG + "Test failed in OnExtrasChange003, extras change event received");
       expect().assertFail();
     }
-    console.info(TAG + "OffExtrasChange003 finished");
+    console.info(TAG + "OffExtrasChange003 finished in OnExtrasChange003");
     done();
   })
 
@@ -997,7 +998,7 @@ describe("AVSessionControllerJsTest", function () {
       console.log(TAG + "Received queue items change");
       expect(true).assertTrue();
     } else {
-      console.error(TAG + "Session queue items change  not received");
+      console.error(TAG + "Session queue items change in offQueueItemsChangeTest001 not received");
       expect().assertFail();
     }
     receivedCallback = false;
@@ -1016,16 +1017,16 @@ describe("AVSessionControllerJsTest", function () {
     controller.off('queueItemsChange', queueItemsCallback1);
     controller.off('queueItemsChange', queueItemsCallback2);
     await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
-      console.error(TAG + "offQueueItemsChangeTest001 setAVQueueItems error " + JSON.stringify(err));
+      console.error(TAG + "offQueueItemsChangeTest002 setAVQueueItems error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
     await sleep(200);
     if (!receivedCallback && !receivedCallback2) {
-      console.log(TAG + "Received queue items change");
+      console.log(TAG + "Received queue items change in offQueueItemsChangeTest002");
       expect(true).assertTrue();
     } else {
-      console.error(TAG + "Session queue items change  not received");
+      console.error(TAG + "Session queue items change in offQueueItemsChangeTest002 not received");
       expect().assertFail();
     }
     receivedCallback = false;
@@ -1043,16 +1044,16 @@ describe("AVSessionControllerJsTest", function () {
     controller.on('queueItemsChange', queueItemsCallback2);
     controller.off('queueItemsChange');
     await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
-      console.error(TAG + "offQueueItemsChangeTest001 setAVQueueItems error " + JSON.stringify(err));
+      console.error(TAG + "offQueueItemsChangeTest003 setAVQueueItems error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
     await sleep(200);
     if (!receivedCallback && !receivedCallback2) {
-      console.log(TAG + "Received queue items change");
+      console.log(TAG + "Received queue items change in offQueueItemsChangeTest003");
       expect(true).assertTrue();
     } else {
-      console.error(TAG + "Session queue items change  not received");
+      console.error(TAG + "Session queue items change in offQueueItemsChangeTest003 not received");
       expect().assertFail();
     }
     receivedCallback = false;
@@ -1116,16 +1117,16 @@ describe("AVSessionControllerJsTest", function () {
     controller.off('queueTitleChange', queueTitleCallback2);
 
     await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
-      console.error(TAG + "offQueueTitleChangeTest001 setAVQueueTitle error " + JSON.stringify(err));
+      console.error(TAG + "offQueueTitleChangeTest002 setAVQueueTitle error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
     await sleep(200);
     if (!receivedCallback && !receivedCallback2) {
-      console.log(TAG + "Received queue Title change");
+      console.log(TAG + "Received queue Title change in offQueueTitleChangeTest002");
       expect(true).assertTrue();
     } else {
-      console.error(TAG + "Session queue Title change  not received");
+      console.error(TAG + "Session queue Title change in offQueueTitleChangeTest002 not received");
       expect().assertFail();
     }
     receivedCallback = false;
@@ -1144,16 +1145,16 @@ describe("AVSessionControllerJsTest", function () {
     controller.off('queueTitleChange');
 
     await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
-      console.error(TAG + "offQueueTitleChangeTest001 setAVQueueTitle error " + JSON.stringify(err));
+      console.error(TAG + "offQueueTitleChangeTest003 setAVQueueTitle error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
     await sleep(200);
     if (!receivedCallback && !receivedCallback2) {
-      console.log(TAG + "Received queue Title change");
+      console.log(TAG + "Received queue Title change in offQueueTitleChangeTest003");
       expect(true).assertTrue();
     } else {
-      console.error(TAG + "Session queue Title change  not received");
+      console.error(TAG + "Session queue Title change in offQueueTitleChangeTest003 not received");
       expect().assertFail();
     }
     receivedCallback = false;
@@ -1375,11 +1376,11 @@ describe("AVSessionControllerJsTest", function () {
   it("GetAVQueueItemsTest001", 0, async function (done) {
     session.setAVQueueItems(ITEMS_ARRAY, (err) => {
       if (err) {
-        console.error(TAG + "setAVQueueItemsTest001 error " + JSON.stringify(err));
+        console.error(TAG + "GetAVQueueItemsTest001 error " + JSON.stringify(err));
         expect().assertFail();
         done();
       }
-      console.info(TAG + "setAVQueueItemsTest001 finished");
+      console.info(TAG + "GetAVQueueItemsTest001 finished");
       expect(true).assertTrue();
       done();
     });
@@ -1405,11 +1406,11 @@ describe("AVSessionControllerJsTest", function () {
    */
   it("GetAVQueueItemsTest002", 0, async function (done) {
     await session.setAVQueueItems(ITEMS_ARRAY).catch((err) => {
-      console.error(TAG + "setAVQueueItemsTest002 error " + JSON.stringify(err));
+      console.error(TAG + "GetAVQueueItemsTest002 error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
-    console.info(TAG + "setAVQueueItemsTest002 finished");
+    console.info(TAG + "GetAVQueueItemsTest002 finished");
     done();
     await sleep(200);
     await controller.getAVQueueItems().catch((err) => {
@@ -1431,11 +1432,11 @@ describe("AVSessionControllerJsTest", function () {
   it("GetAVQueueTitleTest001", 0, async function (done) {
     session.setAVQueueTitle(QUEUE_TITLE, (err) => {
       if (err) {
-        console.error(TAG + "setAVQueueTitleTest001 error " + JSON.stringify(err));
+        console.error(TAG + "GetAVQueueTitleTest001 error " + JSON.stringify(err));
         expect().assertFail();
         done();
       }
-      console.info(TAG + "setAVQueueTitleTest001 finished");
+      console.info(TAG + "GetAVQueueTitleTest001 finished");
       expect(true).assertTrue();
       done();
     });
@@ -1461,11 +1462,11 @@ describe("AVSessionControllerJsTest", function () {
    */
   it("GetAVQueueTitleTest002", 0, async function (done) {
     await session.setAVQueueTitle(QUEUE_TITLE).catch((err) => {
-      console.error(TAG + "setAVQueueTitleTest002 error " + JSON.stringify(err));
+      console.error(TAG + "GetAVQueueTitleTest002 error " + JSON.stringify(err));
       expect().assertFail();
       done();
     });
-    console.info(TAG + "setAVQueueTitleTest002 finished");
+    console.info(TAG + "GetAVQueueTitleTest002 finished");
     done();
     await sleep(200);
     await controller.getAVQueueTitle().catch((err) => {
