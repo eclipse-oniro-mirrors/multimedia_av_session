@@ -121,14 +121,40 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AV_META_DATA, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
-    int32_t ret = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
+    int twoImageLength = reply.ReadInt32();
+    if (twoImageLength == 0) {
         sptr<AVMetaData> data_ = reply.ReadParcelable<AVMetaData>();
         CHECK_AND_RETURN_RET_LOG(data_ != nullptr, ERR_UNMARSHALLING, "read AVMetaData failed");
         data = *data_;
+        return AVSESSION_SUCCESS;
     }
-    return ret;
+    
+    AVMetaData::UnmarshallingExceptImg(reply, data);
+    const char *buffer = nullptr;
+    if ((buffer = reinterpret_cast<const char *>(reply.ReadRawData(twoImageLength))) == nullptr) {
+        SLOGE("read raw data failed, length = %{public}d", twoImageLength);
+        return AVSESSION_ERROR;
+    }
+    
+    int mediaImageLength = data.GetMediaLength();
+    auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::vector<uint8_t> mediaImageBuffer;
+    for (int i = 0; i < mediaImageLength; i++) {
+        mediaImageBuffer.push_back((uint8_t)buffer[i]);
+    }
+    mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
+    data.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
+    
+    if (twoImageLength > mediaImageLength) {
+        auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+        std::vector<uint8_t> avQueueImageBuffer;
+        for (int i = mediaImageLength; i < twoImageLength; i++) {
+            avQueueImageBuffer.push_back((uint8_t)buffer[i]);
+        }
+        avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
+        data.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
+    }
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& items)

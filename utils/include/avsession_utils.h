@@ -27,7 +27,7 @@
 namespace OHOS::AVSession {
 class AVSessionUtils {
 public:
-    static constexpr const int32_t MAX_FILE_SIZE = 200 * 1024;
+    static constexpr const int32_t MAX_FILE_SIZE = 4 * 1024 * 1024;
 
     static void WriteImageToFile(const std::shared_ptr<AVSessionPixelMap>& innerPixelMap, const std::string& fileName)
     {

@@ -52,6 +52,9 @@ public:
 
     void SetAVQueueImage(const std::shared_ptr<AVSessionPixelMap>& avQueueImage);
     std::shared_ptr<AVSessionPixelMap> GetAVQueueImage() const;
+    
+    void SetAVQueueLength(const int32_t avQueueLength);
+    int32_t GetAVQueueLength() const;
 
     void SetAVQueueImageUri(const std::string& avQueueImageUri);
     std::string GetAVQueueImageUri() const;
@@ -61,6 +64,7 @@ private:
     std::string avQueueName_ = "";
     std::string avQueueId_ = "";
     std::shared_ptr<AVSessionPixelMap> avQueueImage_ = nullptr;
+    int32_t avQueueLength_ = 0;
     std::string avQueueImageUri_ = "";
 };
 } // namespace OHOS::AVSession

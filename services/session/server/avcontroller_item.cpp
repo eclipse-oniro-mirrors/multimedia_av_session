@@ -324,6 +324,9 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
             AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFile);
             metaOut.SetAVQueueImage(avQueuePixelMap);
         }
+        if (!metaMask_.test(AVMetaData::META_KEY_ASSET_ID)) {
+            metaOut.SetAssetId(data.GetAssetId());
+        }
         SLOGI("update meta data");
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         if (callback_ != nullptr) {

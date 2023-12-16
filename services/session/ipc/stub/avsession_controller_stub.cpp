@@ -123,10 +123,54 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
 {
     AVMetaData metaData;
     int32_t ret = GetAVMetaData(metaData);
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_PRINT_LOG(reply.WriteParcelable(&metaData), "write AVMetaData failed");
+    CHECK_AND_RETURN_RET_LOG(ret== AVSESSION_SUCCESS, ret, "GetAVMetaData failed");
+
+    int mediaImageLength = 0;
+    std::vector<uint8_t> mediaImageBuffer;
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
+    if (mediaPixelMap != nullptr) {
+        mediaImageBuffer = mediaPixelMap->GetInnerImgBuffer();
+        mediaImageLength = mediaImageBuffer.size();
+        metaData.SetMediaLength(mediaImageLength);
     }
+
+    int avQueueImageLength = 0;
+    std::vector<uint8_t> avQueueImageBuffer;
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData.GetAVQueueImage();
+    if (avQueuePixelMap != nullptr) {
+        avQueueImageBuffer = avQueuePixelMap->GetInnerImgBuffer();
+        avQueueImageLength = avQueueImageBuffer.size();
+        metaData.SetAVQueueLength(avQueueImageLength);
+    }
+
+    int twoImageLength = mediaImageLength + avQueueImageLength;
+    if (twoImageLength == 0) {
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(twoImageLength), "write twoImageLength failed");
+        CHECK_AND_PRINT_LOG(reply.WriteParcelable(&metaData), "write AVMetaData failed");
+        return ERR_NONE;
+    }
+
+    unsigned char *buffer = new (std::nothrow) unsigned char[twoImageLength];
+    if (buffer == nullptr) {
+        SLOGE("new buffer failed of length = %{public}d", twoImageLength);
+        return AVSESSION_ERROR;
+    }
+
+    for (int i = 0; i < mediaImageLength; i++) {
+        buffer[i] = mediaImageBuffer[i];
+    }
+
+    for (int j = mediaImageLength, k = 0; j < twoImageLength && k < avQueueImageLength; j++, k++) {
+        buffer[j] = avQueueImageBuffer[k];
+    }
+
+    if (!reply.WriteInt32(twoImageLength) || AVMetaData::MarshallingExceptImg(reply, metaData) ||
+        !reply.WriteRawData(buffer, twoImageLength)) {
+        SLOGE("fail to write parcel");
+        delete[] buffer;
+        return AVSESSION_ERROR;
+    }
+    delete[] buffer;
     return ERR_NONE;
 }
 
