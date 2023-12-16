@@ -40,7 +40,7 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
 
 void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
-    SLOGI("OnCastPlaybackStateChange");
+    SLOGI("OnCastPlaybackStateChange with state: %{public}d", state.GetState());
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVPlaybackState stateOut;
     std::lock_guard lockGuard(itemCallbackLock_);

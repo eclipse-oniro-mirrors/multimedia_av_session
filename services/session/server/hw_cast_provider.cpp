@@ -199,7 +199,7 @@ bool HwCastProvider::UnRegisterCastStateListener(std::shared_ptr<IAVCastStateLis
 
 std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int castId)
 {
-    SLOGI("get remote controller with castId %{public}d", castId);
+    SLOGI("get remote controller with castId %{public}d", static_cast<int32_t>(castId));
     std::lock_guard lockGuard(mutexLock_);
     if (avCastControllerMap_.find(castId) != avCastControllerMap_.end()) {
         SLOGI("the castId corresonding to streamPlayer is already exist");
