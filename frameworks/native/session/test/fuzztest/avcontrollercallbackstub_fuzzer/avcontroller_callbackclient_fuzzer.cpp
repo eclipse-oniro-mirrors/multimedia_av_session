@@ -30,9 +30,9 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-constexpr int32_t MAX_CODE_TEST = 5;
-constexpr int32_t MAX_CODE_LEN  = 512;
-constexpr int32_t MIN_SIZE_NUM  = 4;
+static constexpr int32_t MAX_CODE_TEST = 5;
+static constexpr int32_t MAX_CODE_LEN  = 512;
+static constexpr int32_t MIN_SIZE_NUM  = 4;
 
 class TestAVControllerCallback : public AVControllerCallback {
     void OnSessionDestroy() override;

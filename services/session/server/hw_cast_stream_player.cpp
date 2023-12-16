@@ -52,12 +52,12 @@ void HwCastStreamPlayer::Release()
     streamPlayerListenerList_.clear();
 }
 
-int32_t HwCastStreamPlayer::CheckCastTime(int32_t time)
+int32_t HwCastStreamPlayer::CheckCastTime(int32_t castTime)
 {
-    if (time < castMinTime) {
-        return castMinTime * time;
+    if (castTime < castMinTime) {
+        return castMinTime * castTime;
     } else {
-        return time;
+        return castTime;
     }
 }
 

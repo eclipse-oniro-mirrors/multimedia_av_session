@@ -24,9 +24,9 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-constexpr int32_t MAX_CODE_LEN  = 512;
-constexpr int32_t MAX_CODE_NUM = 3;
-constexpr int32_t MIN_SIZE_NUM = 4;
+static constexpr int32_t MAX_CODE_LEN  = 512;
+static constexpr int32_t MAX_CODE_NUM = 3;
+static constexpr int32_t MIN_SIZE_NUM = 4;
 
 int32_t SessionListenerStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
 {

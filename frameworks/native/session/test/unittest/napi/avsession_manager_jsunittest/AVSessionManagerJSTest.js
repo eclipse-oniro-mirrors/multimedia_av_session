@@ -38,18 +38,19 @@ describe("AVSessionManagerJSTest", function () {
   })
 
   afterAll(function () {
-    console.info(TAG + 'afterAll called');
+    console.info(TAG + 'afterAll in avsessionmanagerjstest called');
   })
 
   beforeEach(function () {
-    console.info(TAG + 'beforeEach called');
+    console.info(TAG + 'beforeEach in avsessionmanagerjstest called');
   })
 
   afterEach(function () {
-    console.info(TAG + 'afterEach called');
+    console.info(TAG + 'afterEach in avsessionmanagerjstest called');
   })
 
   function sleep(time) {
+    console.info(TAG + 'sleep in avsessionmanagerjstest called');
     return new Promise((resolve) => setTimeout(resolve, time));
   }
 
@@ -96,7 +97,7 @@ describe("AVSessionManagerJSTest", function () {
     if (descriptors.length >= 1) {
         expect(true).assertTrue();
     } else {
-        console.error(TAG + " get history session number : " + descriptors.length + ", error ");
+        console.error(TAG + " get history_session_number : " + descriptors.length + ", error");
         expect().assertFail();
     }
     destroySessionTask();
@@ -225,7 +226,7 @@ describe("AVSessionManagerJSTest", function () {
     if (descriptors.length >= 1) {
         expect(true).assertTrue();
     } else {
-        console.error(TAG + " get history session number : " + descriptors.length + ", error ");
+        console.error(TAG + "get history_session_number in 006 with length:" + descriptors.length + ", error");
         expect().assertFail();
     }
     destroySessionTask();

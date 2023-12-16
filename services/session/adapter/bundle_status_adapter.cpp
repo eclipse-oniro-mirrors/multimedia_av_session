@@ -92,7 +92,7 @@ bool BundleStatusAdapter::IsAudioPlayback(const std::string& bundleName, const s
     AppExecFwk::AbilityInfo abilityInfo;
     bool flag = false;
     if (bundleMgrProxy->GetAbilityInfo(bundleName, abilityName, abilityInfo)) {
-        flag = static_cast<int32_t>(abilityInfo.backgroundModes) == BACKGROUND_MODE_DEMAND ? true : false;
+        flag = static_cast<int32_t>(abilityInfo.backgroundModes) == backgroundModeDemand ? true : false;
     }
     return flag;
 }
@@ -124,14 +124,14 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
         return false;
     }
     AppExecFwk::BundleInfo bundleInfo;
-    if (!bundleMgrProxy->GetBundleInfo(bundleName, GET_BUNDLE_INFO_WITH_HAP_MODULE, bundleInfo, START_USER_ID)) {
+    if (!bundleMgrProxy->GetBundleInfo(bundleName, getBundleInfoWithHapModule, bundleInfo, startUserId)) {
         SLOGE("IsSupportPlayIntent, GetBundleInfo=%{public}s fail", bundleName.c_str());
         return false;
     }
     bool isSupportIntent = false;
     for (std::string module : bundleInfo.moduleNames) {
         auto ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::INTENT_PROFILE, bundleName, module,
-            profile, START_USER_ID);
+            profile, startUserId);
         if (ret == 0) {
             SLOGI("IsSupportPlayIntent, GetJsonProfile success, profile=%{public}s", profile.c_str());
             isSupportIntent = true;
@@ -184,7 +184,7 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
             executeParam.insightIntentName_ = intentName;
             executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
             std::shared_ptr<AppExecFwk::WantParams> wantParam = std::make_shared<AppExecFwk::WantParams>();
-            wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(INTERFACE_TYPE, assetId));
+            wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(interfaceType, assetId));
             executeParam.insightIntentParam_ = wantParam;
             return true;
         }
