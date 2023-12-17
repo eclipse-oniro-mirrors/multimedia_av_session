@@ -275,7 +275,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("same session");
-        if (info.streamUsage == STREAM_USAGE_MEDIA) {
+        if (topSession_->GetSessionType() == "audio") {
             AVSessionService::NotifySystemUI(false);
         }
         return;
@@ -283,7 +283,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetUid() == info.uid) {
             UpdateTopSession(session);
-            if (info.streamUsage == STREAM_USAGE_MEDIA) {
+            if (topSession_->GetSessionType() == "audio") {
                 AVSessionService::NotifySystemUI(false);
             }
             return;
