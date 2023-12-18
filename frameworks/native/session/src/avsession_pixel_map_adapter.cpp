@@ -21,7 +21,7 @@ using namespace OHOS::Media;
 
 namespace OHOS::AVSession {
 namespace {
-    constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 200 * 1024;
+    constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 4 * 1024 * 1024;
     constexpr uint8_t IMAGE_BYTE_SIZE = 2;
     constexpr uint8_t DATA_BYTE_SIZE = 4;
     constexpr uint8_t OFFSET_BYTE = 8;
@@ -114,7 +114,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     pixelMap->GetImageInfo(imageInfoTemp);
     const std::shared_ptr<Media::PixelMap>& pixelMapTemp = std::make_shared<Media::PixelMap>();
     pixelMapTemp->SetImageInfo(imageInfoTemp);
-    uint32_t dataSize = originalPixelMapBytes_;
+    uint32_t dataSize = static_cast<uint32_t>(originalPixelMapBytes_);
     void* dataAddr = malloc(dataSize);
     if (dataAddr == nullptr) {
         SLOGE("create dataSize with null, return");

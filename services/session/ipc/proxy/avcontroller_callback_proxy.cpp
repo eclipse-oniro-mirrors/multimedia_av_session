@@ -80,16 +80,81 @@ void AVControllerCallbackProxy::OnPlaybackStateChange(const AVPlaybackState& sta
         "send request failed");
 }
 
+int32_t AVControllerCallbackProxy::GetPixelMapBuffer(AVMetaData& metaData, MessageParcel& parcel)
+{
+    int mediaImageLength = 0;
+    std::vector<uint8_t> mediaImageBuffer;
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
+    if (mediaPixelMap != nullptr) {
+        mediaImageBuffer = mediaPixelMap->GetInnerImgBuffer();
+        mediaImageLength = mediaImageBuffer.size();
+        metaData.SetMediaLength(mediaImageLength);
+    }
+
+    int avQueueImageLength = 0;
+    std::vector<uint8_t> avQueueImageBuffer;
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData.GetAVQueueImage();
+    if (avQueuePixelMap != nullptr) {
+        avQueueImageBuffer = avQueuePixelMap->GetInnerImgBuffer();
+        avQueueImageLength = avQueueImageBuffer.size();
+        metaData.SetAVQueueLength(avQueueImageLength);
+    }
+
+    int twoImageLength = mediaImageLength + avQueueImageLength;
+    if (twoImageLength == 0) {
+        return 0;
+    }
+
+    unsigned char *buffer = new (std::nothrow) unsigned char[twoImageLength];
+    if (buffer == nullptr) {
+        SLOGE("new buffer failed of length = %{public}d", twoImageLength);
+        return -1;
+    }
+
+    for (int i = 0; i < mediaImageLength; i++) {
+        buffer[i] = mediaImageBuffer[i];
+    }
+
+    for (int j = mediaImageLength, k = 0; j < twoImageLength && k < avQueueImageLength; j++, k++) {
+        buffer[j] = avQueueImageBuffer[k];
+    }
+
+    if (!parcel.WriteInt32(twoImageLength) || AVMetaData::MarshallingExceptImg(parcel, metaData) ||
+        !parcel.WriteRawData(buffer, twoImageLength)) {
+        SLOGE("fail to write parcel");
+        delete[] buffer;
+        return -1;
+    }
+    delete[] buffer;
+    return twoImageLength;
+}
+
 void AVControllerCallbackProxy::OnMetaDataChange(const AVMetaData& data)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&data), "write AVMetaData failed");
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+
+    AVMetaData metaData;
+    CHECK_AND_RETURN_LOG(metaData.CopyFrom(data), "avmetadata CopyFrom error");
+
+    int twoImageLength = GetPixelMapBuffer(metaData, parcel);
+    if (twoImageLength == 0) {
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(twoImageLength), "write twoImageLength failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&data), "write AVMetaData failed");
+        CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_METADATA_CHANGE, parcel, reply, option) == 0,
+            "send request failed");
+        return;
+    }
+    if (twoImageLength == -1) {
+        SLOGE("fail to write parcel");
+        return;
+    }
+
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_METADATA_CHANGE, parcel, reply, option) == 0,
         "send request failed");
 }

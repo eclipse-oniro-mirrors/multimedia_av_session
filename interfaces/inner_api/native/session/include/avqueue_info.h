@@ -23,8 +23,12 @@
 #include "parcel.h"
 #include "avsession_pixel_map.h"
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#ifndef WINDOWS_PLATFORM
+#ifndef MAC_PLATFORM
+#ifndef IOS_PLATFORM
 #include <malloc.h>
+#endif
+#endif
 #endif
 
 namespace OHOS::AVSession {
@@ -48,6 +52,9 @@ public:
 
     void SetAVQueueImage(const std::shared_ptr<AVSessionPixelMap>& avQueueImage);
     std::shared_ptr<AVSessionPixelMap> GetAVQueueImage() const;
+    
+    void SetAVQueueLength(const int32_t avQueueLength);
+    int32_t GetAVQueueLength() const;
 
     void SetAVQueueImageUri(const std::string& avQueueImageUri);
     std::string GetAVQueueImageUri() const;
@@ -57,6 +64,7 @@ private:
     std::string avQueueName_ = "";
     std::string avQueueId_ = "";
     std::shared_ptr<AVSessionPixelMap> avQueueImage_ = nullptr;
+    int32_t avQueueLength_ = 0;
     std::string avQueueImageUri_ = "";
 };
 } // namespace OHOS::AVSession

@@ -19,7 +19,7 @@
 #include "remote_session_source_proxy.h"
 
 namespace OHOS::AVSession {
-static const std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) +
+static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
                                                std::string("libremote_session_source.z.so");
 
 RemoteSessionSourceProxy::RemoteSessionSourceProxy()
@@ -34,13 +34,13 @@ RemoteSessionSourceProxy::~RemoteSessionSourceProxy()
 int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_sanitize("cfi")))
 {
     char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(g_sourceLibraryPath.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check path failed %{public}s", g_sourceLibraryPath.c_str());
+    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check path failed %{public}s", SOURCE_LIBRARY_PATH.c_str());
         return AVSESSION_ERROR;
     }
     handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
     if (handle_ == nullptr) {
-        SLOGE("Failed to open library %{public}s, reason: %{public}sn", g_sourceLibraryPath.c_str(), dlerror());
+        SLOGE("Failed to open library %{public}s, reason: %{public}sn", SOURCE_LIBRARY_PATH.c_str(), dlerror());
         return AVSESSION_ERROR;
     }
     using SourceImpl = RemoteSessionSourceImpl* (*)();
@@ -51,7 +51,7 @@ int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_saniti
             dlclose(handle_);
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s", "RemoteSessionSourceImpl",
-              g_sourceLibraryPath.c_str());
+              SOURCE_LIBRARY_PATH.c_str());
         return AVSESSION_ERROR;
     }
 
@@ -68,7 +68,7 @@ int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sani
             dlclose(handle_);
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s", "DestroyRemoteSessionSourceImpl",
-              g_sourceLibraryPath.c_str());
+              SOURCE_LIBRARY_PATH.c_str());
         return AVSESSION_ERROR;
     }
     destroyRemoteSessionSourceImpl(sourceImpl_);

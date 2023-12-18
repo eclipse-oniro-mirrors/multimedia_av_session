@@ -29,9 +29,9 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const int32_t MAX_CODE_TEST = 5;
-const int32_t MAX_CODE_LEN = 512;
-const int32_t MIN_SIZE_NUM = 4;
+static const int32_t MAX_CODE_TEST = 5;
+static const int32_t MAX_CODE_LEN = 512;
+static const int32_t MIN_SIZE_NUM = 4;
 
 bool AvControllerCallbackProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
 {

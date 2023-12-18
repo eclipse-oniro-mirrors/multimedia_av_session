@@ -54,6 +54,8 @@
 #include "insight_intent_execute_param.h"
 #include "ability_connect_helper.h"
 #include "if_system_ability_manager.h"
+#include "parameter.h"
+#include "parameters.h"
 #include "avsession_service.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -69,7 +71,7 @@ using namespace nlohmann;
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
-static const std::string g_sourceLibraryPath = std::string(SYSTEM_LIB_PATH) +
+static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
     std::string("platformsdk/libsuspend_manager_client.z.so");
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 
@@ -79,6 +81,8 @@ class NotificationSubscriber : public Notification::NotificationLocalLiveViewSub
     void OnResponse(int32_t notificationId, sptr<Notification::NotificationButtonOption> buttonOption) {}
     void OnDied() {}
 };
+
+static const auto NOTIFICATION_SUBSCRIBER = NotificationSubscriber();
 
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
 
@@ -124,6 +128,17 @@ void AVSessionService::OnStart()
 
 #ifdef COLLABORATIONFWK_ENABLE
     AddSystemAbilityListener(CollaborationFwk::COLLABORATIONFWK_SA_ID);
+#endif
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
+    SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
+    int32_t is2in1 = strcmp(deviceProp.c_str(), "2in1");
+    if (is2in1 == 0) {
+        SLOGI("startup enable cast check 2in1");
+        checkEnableCast(true);
+        AVRouter::GetInstance().SetDiscoverable(true);
+    }
 #endif
 
     HISYSEVENT_REGITER;
@@ -260,13 +275,17 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("same session");
-        AVSessionService::NotifySystemUI(false);
+        if (topSession_->GetSessionType() == "audio") {
+            AVSessionService::NotifySystemUI(false);
+        }
         return;
     }
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetUid() == info.uid) {
             UpdateTopSession(session);
-            AVSessionService::NotifySystemUI(false);
+            if (topSession_->GetSessionType() == "audio") {
+                AVSessionService::NotifySystemUI(false);
+            }
             return;
         }
     }
@@ -423,7 +442,7 @@ std::string AVSessionService::AllocSessionId()
 
     std::stringstream stream;
     for (const auto byte : hash) {
-        stream << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(byte);
+        stream << std::uppercase << std::hex << std::setfill('0') << std::setw(allocSpace) << static_cast<int>(byte);
     }
     return stream.str();
 }
@@ -607,8 +626,8 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
 
     char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(g_sourceLibraryPath.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check libsuspend_manager_client path failed %{public}s", g_sourceLibraryPath.c_str());
+    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check libsuspend_manager_client path failed %{public}s", SOURCE_LIBRARY_PATH.c_str());
         return AVSESSION_ERROR;
     }
     void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
@@ -653,8 +672,8 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
 
     char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(g_sourceLibraryPath.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check libsuspend_manager_client path failed %{public}s when stop cast", g_sourceLibraryPath.c_str());
+    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check libsuspend_manager_client path failed %{public}s when stop cast", SOURCE_LIBRARY_PATH.c_str());
         return AVSESSION_ERROR;
     }
     void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
@@ -708,7 +727,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         HandleSessionRelease(session.GetDescriptor().sessionId_);
     });
     result->SetServiceCallbackForAVQueueInfo([this](AVSessionItem& session) {
-        // add played avqueue info
+        SLOGI("add played avqueue info");
         AddAvQueueInfoToFile(session);
     });
     result->SetServiceCallbackForCallStart([this](AVSessionItem& session) {
@@ -1080,6 +1099,7 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
 
 void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
 {
+    SLOGI("add queueinfo to file in");
     // check is this session support playmusiclist intent
     std::lock_guard lockGuard(sessionAndControllerLock_);
     std::string bundleName = session.GetBundleName();
@@ -1089,7 +1109,7 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
         SLOGE("bundleName=%{public}s does not support play intent", bundleName.c_str());
         return;
     }
-
+    SLOGD("add queueinfo to file with queue lock check");
     std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
     std::string oldContent;
     if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldContent)) {
@@ -1100,6 +1120,7 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
         SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
         return;
     }
+    SLOGI("add queueinfo to file done");
 }
 
 int32_t AVSessionService::StartMediaIntent(const std::string& bundleName, const std::string& assetId)
@@ -2281,8 +2302,7 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 void AVSessionService::NotifySystemUI(bool isDeviceChanged)
 {
-    auto notificationSubscriber = NotificationSubscriber();
-    int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(notificationSubscriber);
+    int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
 
     Notification::NotificationRequest request;
@@ -2308,8 +2328,8 @@ void AVSessionService::NotifySystemUI(bool isDeviceChanged)
 
 void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
-    SLOGI("AVSessionService HandleDeviceChange");
     for (auto &audioDeviceDescriptor : deviceChangeAction.deviceDescriptors) {
+        SLOGI("AVSessionService HandleDeviceChange device type %{public}d", audioDeviceDescriptor->deviceType_);
         if (audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADSET ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADPHONES ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_USB_HEADSET ||

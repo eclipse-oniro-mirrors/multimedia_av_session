@@ -32,7 +32,7 @@ AVRouterImpl::AVRouterImpl()
 
 void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
 {
-    SLOGI("Start init AVRouter and set discoverable");
+    SLOGI("Start init AVRouter");
     {
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_ = servicePtr;
@@ -44,7 +44,6 @@ void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
     avCastProviderManager->Init(providerNumber_, hwProvider_);
     providerManagerMap_[providerNumber_] = avCastProviderManager;
     hwProvider_->RegisterCastStateListener(avCastProviderManager);
-    hwProvider_->SetDiscoverable(true);
 }
 
 bool AVRouterImpl::Release()

@@ -130,14 +130,52 @@ int32_t AVSessionStub::HandleSetAVPlaybackState(MessageParcel& data, MessageParc
 int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionStub::SetAVMetaData");
-    sptr avMetaData = data.ReadParcelable<AVMetaData>();
-    if (avMetaData == nullptr) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+    int twoImageLength = data.ReadInt32();
+    if (twoImageLength == 0) {
+        sptr avMetaData = data.ReadParcelable<AVMetaData>();
+        if (avMetaData == nullptr) {
+            CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+            return ERR_NONE;
+        }
+        int32_t ret = SetAVMetaData(*avMetaData);
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVMetaData failed");
         return ERR_NONE;
     }
-    int32_t ret = SetAVMetaData(*avMetaData);
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAVPlaybackState failed");
+    
+    AVMetaData meta;
+    AVMetaData::UnmarshallingExceptImg(data, meta);
+    const char *buffer = nullptr;
+    if ((buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength))) == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        SLOGE("read raw data failed, length = %{public}d", twoImageLength);
+        return AVSESSION_ERROR;
+    }
+    
+    int mediaImageLength = meta.GetMediaLength();
+    auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::vector<uint8_t> mediaImageBuffer;
+    for (int i = 0; i < mediaImageLength; i++) {
+        mediaImageBuffer.push_back((uint8_t)buffer[i]);
+    }
+    mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
+    meta.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
+    
+    if (twoImageLength > mediaImageLength) {
+        auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+        std::vector<uint8_t> avQueueImageBuffer;
+        for (int i = mediaImageLength; i < twoImageLength; i++) {
+            avQueueImageBuffer.push_back((uint8_t)buffer[i]);
+        }
+        avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
+        meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
+    }
+    int32_t ret = SetAVMetaData(meta);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVMetaData failed");
+    if (!reply.WriteInt32(twoImageLength)) {
+        SLOGE("fail to write parcel");
+        return AVSESSION_ERROR;
+    }
     return ERR_NONE;
 }
 
