@@ -210,7 +210,7 @@ int32_t AVSessionProxy::GetPixelMapBuffer(AVMetaData& metaData, MessageParcel& d
         buffer[j] = avQueueImageBuffer[k];
     }
     
-    if (!data.WriteInt32(twoImageLength) || AVMetaData::MarshallingExceptImg(data, metaData) ||
+    if (!data.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(data, metaData) ||
         !data.WriteRawData(buffer, twoImageLength)) {
         SLOGE("fail to write parcel");
         delete[] buffer;
@@ -228,8 +228,6 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&meta),
-        ERR_MARSHALLING, "WriteParcelable failed");
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
