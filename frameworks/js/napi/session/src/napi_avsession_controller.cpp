@@ -664,6 +664,7 @@ napi_value NapiAVSessionController::GetExtras(napi_env env, napi_callback_info i
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
+        SLOGD("NapiAVSessionController GetExtras process check lock");
         std::lock_guard<std::mutex> lock(uvMutex_);
         SLOGI("Start NapiAVSessionController GetExtras process");
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
@@ -1120,6 +1121,7 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
+        SLOGD("Start NapiAVSessionController destroy process check lock");
         std::lock_guard<std::mutex> lock(uvMutex_);
         SLOGI("Start NapiAVSessionController destroy process");
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
@@ -1146,6 +1148,7 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
         }
         napiController->controller_ = nullptr;
         napiController->callback_ = nullptr;
+        SLOGI("Start NapiAVSessionController destroy process done");
     };
 
     return NapiAsyncWork::Enqueue(env, context, "IsSessionActive", executor);
@@ -1318,6 +1321,9 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::s
         NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         return napi_generic_failure;
     }
+    SLOGD("NapiAVSessionController RegisterCallback process check lock");
+    std::lock_guard<std::mutex> lock(uvMutex_);
+    SLOGI("NapiAVSessionController RegisterCallback process");
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
     if (napiController->controller_ == nullptr) {
         SLOGE("OnEvent failed : controller is nullptr");

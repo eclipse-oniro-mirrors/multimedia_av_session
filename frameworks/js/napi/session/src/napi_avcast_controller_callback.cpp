@@ -152,14 +152,14 @@ void NapiAVCastControllerCallback::HandleErrorEvent(int32_t event, const int32_t
 void NapiAVCastControllerCallback::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnCastPlaybackStateChange");
-    SLOGI("Start handle OnCastPlaybackStateChange event");
+    SLOGI("Start handle OnCastPlaybackStateChange event with state: %{public}d", state.GetState());
     HandleEvent(EVENT_CAST_PLAYBACK_STATE_CHANGE, state);
 }
 
 void NapiAVCastControllerCallback::OnMediaItemChange(const AVQueueItem& avQueueItem)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnMediaItemChange");
-    SLOGI("Start handle OnCastPlaybackStateChange event");
+    SLOGI("Start handle OnMediaItemChange event");
     HandleEvent(EVENT_CAST_MEDIA_ITEM_CHANGE, avQueueItem);
 }
 
