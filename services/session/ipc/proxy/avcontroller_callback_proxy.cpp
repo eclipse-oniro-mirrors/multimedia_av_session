@@ -119,7 +119,7 @@ int32_t AVControllerCallbackProxy::GetPixelMapBuffer(AVMetaData& metaData, Messa
         buffer[j] = avQueueImageBuffer[k];
     }
 
-    if (!parcel.WriteInt32(twoImageLength) || AVMetaData::MarshallingExceptImg(parcel, metaData) ||
+    if (!parcel.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(parcel, metaData) ||
         !parcel.WriteRawData(buffer, twoImageLength)) {
         SLOGE("fail to write parcel");
         delete[] buffer;
