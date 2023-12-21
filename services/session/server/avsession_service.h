@@ -46,6 +46,17 @@
 
 namespace OHOS::AVSession {
 class AVSessionDumper;
+
+class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    explicit ClientDeathRecipient(const std::function<void()>& callback);
+
+    void OnRemoteDied(const wptr<IRemoteObject>& object) override;
+
+private:
+    std::function<void()> callback_;
+};
+
 class AVSessionInitDMCallback : public OHOS::DistributedHardware::DmInitCallback {
 public:
     AVSessionInitDMCallback() = default;
@@ -220,7 +231,7 @@ private:
 
     void HandleDeviceChange(const AudioStandard::DeviceChangeAction& deviceChangeAction);
 
-    sptr<RemoteSessionCommandProcess> GetService(const std::string& deviceId);
+    __attribute__((no_sanitize("cfi"))) sptr<RemoteSessionCommandProcess> GetService(const std::string& deviceId);
 
     int32_t CastAudioProcess(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors,
                              const std::string& sourceSessionInfo,
@@ -334,6 +345,7 @@ private:
     std::recursive_mutex avQueueFileReadWriteLock_;
 
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
+    std::map<pid_t, ClientDeathRecipient*> clientDeathRecipientList_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
@@ -387,15 +399,5 @@ public:
     AVSessionService *ptr_;
 };
 #endif
-
-class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
-public:
-    explicit ClientDeathRecipient(const std::function<void()>& callback);
-
-    void OnRemoteDied(const wptr<IRemoteObject>& object) override;
-
-private:
-    std::function<void()> callback_;
-};
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

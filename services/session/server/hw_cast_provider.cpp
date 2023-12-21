@@ -273,6 +273,11 @@ bool HwCastProvider::UnRegisterCastSessionStateListener(int castId,
 void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceList)
 {
     std::vector<DeviceInfo> deviceInfoList;
+    if (deviceList.empty()) {
+        SLOGW("recv empty deviceList, return");
+        return;
+    }
+    SLOGI("get deviceList size %{public}d", deviceList.size());
     for (CastRemoteDevice castRemoteDevice : deviceList) {
         SLOGI("get devices with deviceName %{public}s", castRemoteDevice.deviceName.c_str());
         DeviceInfo deviceInfo;
