@@ -164,7 +164,7 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
         buffer[j] = avQueueImageBuffer[k];
     }
 
-    if (!reply.WriteInt32(twoImageLength) || AVMetaData::MarshallingExceptImg(reply, metaData) ||
+    if (!reply.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(reply, metaData) ||
         !reply.WriteRawData(buffer, twoImageLength)) {
         SLOGE("fail to write parcel");
         delete[] buffer;
