@@ -120,6 +120,9 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AV_META_DATA, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAVMetaData failed");
 
     int twoImageLength = reply.ReadInt32();
     if (twoImageLength == 0) {
