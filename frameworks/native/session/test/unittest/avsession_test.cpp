@@ -663,6 +663,10 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
                 break;
             case AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE : controlCommand.SetAssetId("callback");
                 break;
+            case AVControlCommand::SESSION_CMD_FAST_FORWARD : controlCommand.SetForwardTime(10);
+                break;
+            case AVControlCommand::SESSION_CMD_REWIND : controlCommand.SetRewindTime(10);
+                break;
             default:
                 break;
         }
