@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "audio_manager_proxy.h"
 #include "av_router.h"
 #include "avsession_service.h"
 #include "avcontroller_item.h"
@@ -37,6 +38,8 @@
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
 #endif
+
+using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
@@ -397,6 +400,14 @@ int32_t AVSessionItem::Activate()
         SLOGI("pid=%{pubic}d", pid);
         controller->HandleActiveStateChange(true);
     }
+    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
+        SLOGI("set audio scene for phone chat start");
+        AudioSystemManager *audioManager = AudioSystemManager::GetInstance();
+        AudioScene audioScene = AudioScene::AUDIO_SCENE_CALL_START;
+        if (audioManager != nullptr) {
+            audioManager->SetAudioScene(audioScene);
+        }
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -407,6 +418,14 @@ int32_t AVSessionItem::Deactivate()
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{pubic}d", pid);
         controller->HandleActiveStateChange(false);
+    }
+    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
+        SLOGI("set audio scene for phone chat end");
+        AudioSystemManager *audioManager = AudioSystemManager::GetInstance();
+        AudioScene audioScene = AudioScene::AUDIO_SCENE_CALL_END;
+        if (audioManager != nullptr) {
+            audioManager->SetAudioScene(audioScene);
+        }
     }
     return AVSESSION_SUCCESS;
 }
