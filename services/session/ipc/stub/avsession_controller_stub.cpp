@@ -123,7 +123,8 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
 {
     AVMetaData metaData;
     int32_t ret = GetAVMetaData(metaData);
-    CHECK_AND_RETURN_RET_LOG(ret== AVSESSION_SUCCESS, ret, "GetAVMetaData failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");
 
     int mediaImageLength = 0;
     std::vector<uint8_t> mediaImageBuffer;
