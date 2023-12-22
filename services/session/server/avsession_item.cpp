@@ -734,7 +734,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
     }
 
     {
-        std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
+        std::lock_guard remoteSinkLockGuard(remoteSinkLock_);
         if (remoteSink_ != nullptr) {
             SLOGI("set remote ControlCommand");
             CHECK_AND_RETURN_LOG(remoteSink_->SetControlCommand(cmd) == AVSESSION_SUCCESS, "SetControlCommand failed");
