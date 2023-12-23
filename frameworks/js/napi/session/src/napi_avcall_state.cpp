@@ -74,6 +74,7 @@ napi_status NapiAVCallState::GetValue(napi_env env, napi_value in, AVCallState& 
     std::vector<std::string> propertyNames;
     auto status = NapiUtils::GetPropertyNames(env, in, propertyNames);
     CHECK_RETURN(status == napi_ok, "get property name failed", status);
+    CHECK_RETURN(propertyNames.size() == getterMap_.size(), "avcallstate property count invalid", napi_invalid_arg);
 
     for (const auto& name : propertyNames) {
         auto it = getterMap_.find(name);
