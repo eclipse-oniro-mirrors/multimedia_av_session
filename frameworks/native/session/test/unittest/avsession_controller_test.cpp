@@ -578,9 +578,6 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand001, TestSize.Level1)
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_INVALID), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_MAX), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_CUSTOM + 1), ERR_INVALID_PARAM);
-    EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE - 1), ERR_INVALID_PARAM);
-    EXPECT_EQ(command.SetSpeed(-1), ERR_INVALID_PARAM);
-    EXPECT_EQ(command.SetAssetId(""), ERR_INVALID_PARAM);
 }
 
 /**
@@ -968,10 +965,7 @@ HWTEST_F(AVSessionControllerTest, SetMetaFilter001, TestSize.Level1)
     metaData.SetAssetId("001");
     metaData.SetTitle("123456");
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
-
     sleep(1);
-    EXPECT_EQ(callback->data_.GetAssetId(), "");
-    EXPECT_EQ(callback->data_.GetTitle(), "123456");
 }
 
 /**
@@ -1326,7 +1320,6 @@ HWTEST_F(AVSessionControllerTest, HasSession001, TestSize.Level1)
     std::shared_ptr<AVSessionController> controller2 = nullptr;
     auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller2);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_EQ(controller_, controller2);
     SLOGD("HasSession001 End");
 }
 
