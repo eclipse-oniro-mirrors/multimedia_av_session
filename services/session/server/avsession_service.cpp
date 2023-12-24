@@ -1519,12 +1519,16 @@ void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath
 void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 {
     std::lock_guard lockGuard(clientDeathObserversLock_);
+    if (clientDeathObservers_.empty()) {
+        SLOGE("try remove observer with empty list");
+        return;
+    }
     clientDeathObservers_.erase(pid);
 }
 
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
-    SLOGI("enter");
+    SLOGI("enter ClientDeathObserver register");
     auto pid = GetCallingPid();
     auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
@@ -1533,6 +1537,8 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
             "ERROR_INFO", "avsession service register client death observer malloc failed");
         return AVSESSION_ERROR;
     }
+    clientDeathRecipientList_[pid] = recipient;
+    SLOGI("add recipient to list");
 
     if (!observer->AsObject()->AddDeathRecipient(recipient)) {
         SLOGE("add death recipient for %{public}d failed", pid);
@@ -1548,11 +1554,19 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
 void AVSessionService::ClearClientResources(pid_t pid)
 {
     RemoveSessionListener(pid);
+    {
+        std::lock_guard lockGuard(sessionAndControllerLock_);
+        ClearSessionForClientDiedNoLock(pid);
+        ClearControllerForClientDiedNoLock(pid);
+    }
+    SLOGI("OnClientDied remove recipient for pid=%{public}d", pid);
+    if (clientDeathRecipientList_.empty()) {
+        SLOGE("try remove recipient with empty list");
+        return;
+    }
+    clientDeathRecipientList_.erase(pid);
+    SLOGI("remove ClientDeathObserver to %{public}d", pid);
     RemoveClientDeathObserver(pid);
-
-    std::lock_guard lockGuard(sessionAndControllerLock_);
-    ClearSessionForClientDiedNoLock(pid);
-    ClearControllerForClientDiedNoLock(pid);
 }
 
 int32_t AVSessionService::Close(void)
@@ -1708,7 +1722,8 @@ std::int32_t AVSessionService::Dump(std::int32_t fd, const std::vector<std::u16s
     return AVSESSION_SUCCESS;
 }
 
-sptr <RemoteSessionCommandProcess> AVSessionService::GetService(const std::string& deviceId)
+__attribute__((no_sanitize("cfi"))) sptr <RemoteSessionCommandProcess> AVSessionService::GetService(
+    const std::string& deviceId)
 {
     SLOGI("enter");
     auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -1721,7 +1736,9 @@ sptr <RemoteSessionCommandProcess> AVSessionService::GetService(const std::strin
         SLOGE("failed to get service");
         return nullptr;
     }
+    SLOGI("check remoteService create");
     auto remoteService = iface_cast<RemoteSessionCommandProcess>(object);
+    SLOGI("check remoteService create done");
     return remoteService;
 }
 

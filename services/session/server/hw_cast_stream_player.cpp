@@ -63,7 +63,8 @@ int32_t HwCastStreamPlayer::CheckCastTime(int32_t castTime)
 
 void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castControlCommand)
 {
-    SLOGI("send command to streamPlayer");
+    int32_t commandNum = static_cast<int32_t>(castControlCommand);
+    SLOGI("send command to streamPlayer %{public}d", commandNum);
     std::lock_guard lockGuard(streamPlayerLock_);
     if (!streamPlayer_) {
         SLOGE("streamPlayer is nullptr");

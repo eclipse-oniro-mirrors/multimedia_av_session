@@ -1312,7 +1312,8 @@ napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionCo
     return status;
 }
 
-napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
+napi_status NapiAVSessionController::RegisterCallback(napi_env env,
+    const std::shared_ptr<ContextBase>& context,
     const std::string& event, napi_value filter, napi_value callback)
 {
     auto it = EventHandlers_.find(event);
@@ -1327,8 +1328,7 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env, const std::s
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
     if (napiController->controller_ == nullptr) {
         SLOGE("OnEvent failed : controller is nullptr");
-        NapiUtils::ThrowError(env, "OnEvent failed : controller is nullptr",
-            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        NapiUtils::ThrowError(env, "OnEventFail:no CTL", NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
         return napi_generic_failure;
     }
     if (napiController->callback_ == nullptr) {

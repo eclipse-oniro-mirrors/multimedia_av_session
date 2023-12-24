@@ -33,6 +33,7 @@ void AVCastControllerCallbackProxy::OnCastPlaybackStateChange(const AVPlaybackSt
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    SLOGI("OnCastPlaybackStateChange in proxy for state %{public}d", state.GetState());
     CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_CAST_PLAYBACK_STATE_CHANGE,
         parcel, reply, option) == 0,
         "send request failed");
