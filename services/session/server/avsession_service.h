@@ -231,7 +231,8 @@ private:
 
     void HandleDeviceChange(const AudioStandard::DeviceChangeAction& deviceChangeAction);
 
-    __attribute__((no_sanitize("cfi"))) sptr<RemoteSessionCommandProcess> GetService(const std::string& deviceId);
+    __attribute__((no_sanitize("cfi"))) std::shared_ptr<RemoteSessionCommandProcess> GetService(
+        const std::string& deviceId);
 
     int32_t CastAudioProcess(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors,
                              const std::string& sourceSessionInfo,
@@ -345,7 +346,6 @@ private:
     std::recursive_mutex avQueueFileReadWriteLock_;
 
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
-    std::map<pid_t, ClientDeathRecipient*> clientDeathRecipientList_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;

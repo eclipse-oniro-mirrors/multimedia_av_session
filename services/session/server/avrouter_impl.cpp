@@ -38,12 +38,27 @@ void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
         servicePtr_ = servicePtr;
     }
     hwProvider_ = std:make_shared<HwCastProvider>();
-    hwProvider_->Init();
+    if (hwProvider_ != nullptr) {
+        hwProvider_->Init();
+    } else {
+        SLOGE("init with null pvd to init");
+        return;
+    }
     providerNumber_ = providerNumberEnableDefault_;
     std::shared_ptr<AVCastProviderManager> avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    if (avCastProviderManager == nullptr) {
+        SLOGE("init with null manager");
+        return;
+    }
     avCastProviderManager->Init(providerNumber_, hwProvider_);
     providerManagerMap_[providerNumber_] = avCastProviderManager;
-    hwProvider_->RegisterCastStateListener(avCastProviderManager);
+    if (hwProvider_ != nullptr) {
+        hwProvider_->RegisterCastStateListener(avCastProviderManager);
+    } else {
+        SLOGE("init with null pvd to registerlistener");
+        return;
+    }
+    SLOGI("init AVRouter done");
 }
 
 bool AVRouterImpl::Release()
@@ -235,6 +250,7 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
     providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId,
         castHandleToOutputDeviceMap_[castId].deviceInfos_[0]);
     hasSessionAlive_ = false;
+    SLOGI("AVRouterImpl stop cast process remove device done");
 
     return AVSESSION_SUCCESS;
 }

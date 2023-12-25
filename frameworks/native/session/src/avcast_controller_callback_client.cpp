@@ -35,6 +35,7 @@ void AVCastControllerCallbackClient::OnCastPlaybackStateChange(const AVPlaybackS
     if (castPlaybackStateListener_) {
         castPlaybackStateListener_(state);
     }
+    SLOGI("OnCastPlaybackStateChange done with state: %{public}d", static_cast<int32_t>(castState));
 }
 
 void AVCastControllerCallbackClient::OnMediaItemChange(const AVQueueItem& avQueueItem)
@@ -45,6 +46,7 @@ void AVCastControllerCallbackClient::OnMediaItemChange(const AVQueueItem& avQueu
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
         .AVSessionPostTask([callback, avQueueItem]() { callback->OnMediaItemChange(avQueueItem); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
+    SLOGI("OnCastPlaybackStateChange done");
 }
 
 void AVCastControllerCallbackClient::OnPlayNext()

@@ -47,6 +47,7 @@ int32_t AVCastControllerCallbackStub::HandleOnStateChange(MessageParcel& data, M
 
     CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read PlaybackState failed");
     AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::HandleOnStateChange");
+    SLOGI("HandleOnStateChange with state: %{public}d", state->GetState());
     OnCastPlaybackStateChange(*state);
     return ERR_NONE;
 }
@@ -56,6 +57,7 @@ int32_t AVCastControllerCallbackStub::HandleOnMediaItemChange(MessageParcel& dat
     AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::HandleOnMediaItemChange");
     sptr<AVQueueItem> item = data.ReadParcelable<AVQueueItem>();
     CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
+    SLOGI("HandleOnMediaItemChange in");
     OnMediaItemChange(*item);
     return ERR_NONE;
 }

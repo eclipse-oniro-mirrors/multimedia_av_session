@@ -63,8 +63,8 @@ int32_t HwCastStreamPlayer::CheckCastTime(int32_t castTime)
 
 void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castControlCommand)
 {
-    int32_t commandNum = static_cast<int32_t>(castControlCommand);
-    SLOGI("send command to streamPlayer %{public}d", commandNum);
+    int32_t commandNum = castControlCommand.GetCommand();
+    SLOGI("send command to streamPlayer %{public}d", static_cast<int32_t>(commandNum));
     std::lock_guard lockGuard(streamPlayerLock_);
     if (!streamPlayer_) {
         SLOGE("streamPlayer is nullptr");
@@ -146,6 +146,18 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
 AVQueueItem HwCastStreamPlayer::GetCurrentItem()
 {
     std::lock_guard lockGuard(streamPlayerLock_);
+    SLOGI("Received GetCurrentItem request");
+    int32_t duration;
+    GetDuration(duraiton);
+    std::shared_ptr<AVMediaDescription> mediaDescription = currentAVQueueItem_.GetDescription();
+    if (mediaDescription == nullptr) {
+        SLOGE("GetCurrentItem with nullptr, return with default");
+        return currentAVQueueItem_;
+    }
+    mediaDescription->SetDuration(duration);
+    AVQueueItem queueItem;
+    queueItem.SetDescription(mediaDescription);
+    currentAVQueueItem_ = queueItem;
     return currentAVQueueItem_;
 }
 
@@ -278,7 +290,7 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
     int castPosition;
     streamPlayer_->GetPosition(castPosition);
     AVPlaybackState::Position position;
-    position.updateTime_ = static_cast<int64_t>(castPosition);
+    position.elapsedTime_ = static_cast<int64_t>(castPosition);
     avPlaybackState.SetPosition(position);
     CastEngine::LoopMode castLoopMode;
     streamPlayer_->GetLoopMode(castLoopMode);
@@ -298,7 +310,7 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
     wantParams->SetParam("maxCastVolume", intIt);
     avPlaybackState.SetExtras(wantParams);
 
-    SLOGI("GetCastAVPlaybackState successed");
+    SLOGI("GetCastAVPlaybackState successed with state: %{public}d", state.GetState());
     return AVSESSION_SUCCESS;
 }
 
@@ -622,6 +634,10 @@ void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pi
     }
 
     std::shared_ptr<AVMediaDescription> mediaDescription = currentAVQueueItem_.GetDescription();
+    if (mediaDescription == nullptr) {
+        SLOGE("OnAlbumCoverChanged with nullptr mediaDescription, return with default");
+        return currentAVQueueItem_;
+    }
     mediaDescription->SetIcon(innerPixelMap);
     AVQueueItem queueItem;
     queueItem.SetDescription(mediaDescription);

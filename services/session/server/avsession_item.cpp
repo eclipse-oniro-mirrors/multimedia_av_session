@@ -194,7 +194,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
             controller->HandleMetaDataChange(meta);
         }
     }
-    SLOGD("send metadata change event to controllers done");
+    SLOGI("send metadata change event to controllers done");
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
         SLOGI("set remote AVMetaData");
@@ -261,6 +261,10 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
 
+    if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
+        serviceCallbackForAddAVQueueInfo_(*this);
+    }
+
     SLOGD("send playbackstate change event to controllers");
     {
         std::lock_guard controllerLockGuard(controllersLock_);
@@ -269,11 +273,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
             controller->HandlePlaybackStateChange(state);
         }
     }
-    SLOGD("send playbackstate change event to controllers done");
-
-    if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
-        serviceCallbackForAddAVQueueInfo_(*this);
-    }
+    SLOGI("send playbackstate change event to controllers done");
 
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {

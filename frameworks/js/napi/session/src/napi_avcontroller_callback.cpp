@@ -95,14 +95,29 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->CallWithFlag(*ref, isValid_, [firstParam, secondParam](napi_env env, int& argc,
-            napi_value *argv) {
-            argc = NapiUtils::ARGC_TWO;
-            auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-            status = NapiUtils::SetValue(env, secondParam, argv[1]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-        });
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                SLOGE("checkCallbackValid for event %{public}d", event);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d", hasFunc);
+                return hasFunc;
+            },
+            [firstParam, secondParam](napi_env env, int& argc,
+                napi_value *argv) {
+                argc = NapiUtils::ARGC_TWO;
+                auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+                status = NapiUtils::SetValue(env, secondParam, argv[1]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            });
     }
 }
 
@@ -195,6 +210,7 @@ napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, n
             return napi_generic_failure;
         }
     }
+    SLOGI("add callback with ref %{public}d, %{public}p, %{public}p", event, &ref, *(&ref));
     callbacks_[event].push_back(ref);
     return napi_ok;
 }
@@ -202,6 +218,7 @@ napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, n
 napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    SLOGI("remove callback for event %{public}d", event);
     if (callback == nullptr) {
         SLOGD("Remove callback, the callback is nullptr");
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
@@ -216,6 +233,7 @@ napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
                              napi_generic_failure, "get callback reference failed");
     CHECK_AND_RETURN_RET_LOG(ref != nullptr, napi_ok, "callback has been remove");
+    SLOGI("remove single callback with ref %{public}d, %{public}p, %{public}p", event, &ref, *(&ref));
     callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);
 }

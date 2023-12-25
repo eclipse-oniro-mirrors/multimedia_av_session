@@ -80,7 +80,9 @@ int HwCastProvider::StartCastSession()
     CastSessionManager::GetInstance().CreateCastSession(property, castSession);
     int castId;
     {
+        SLOGI("StartCastSession pre check lock");
         std::lock_guard lockGuard(mutexLock_);
+        SLOGI("StartCastSession check lock");
         std::vector<bool>::iterator iter = find(castFlag_.begin(), castFlag_.end(), false);
         if (iter == castFlag_.end()) {
             SLOGE("StartCastSession faileded");
@@ -102,7 +104,8 @@ void HwCastProvider::StopCastSession(int castId)
 {
     SLOGI("StopCastSession begin with %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
-        
+    SLOGI("StopCastSession check lock");
+
     auto hwCastStreamPlayer = avCastControllerMap_[castId];
     if (hwCastStreamPlayer) {
         hwCastStreamPlayer->Release();
@@ -125,6 +128,8 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
 {
     SLOGI("AddCastDevice with config castSession and corresonding castId is %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
+    SLOGI("add device check lock done");
+
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("the castId corresonding to castSession is not exist");
         return false;
@@ -142,6 +147,7 @@ bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo)
 {
     SLOGI("RemoveCastDevice with config castSession and corresonding castId is %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
+    SLOGI("remove device check lock");
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("the castId corresonding to castSession is not exist");
         return false;
@@ -159,7 +165,7 @@ bool HwCastProvider::RegisterCastStateListener(std::shared_ptr<IAVCastStateListe
 {
     SLOGI("RegisterCastStateListener in");
     std::lock_guard lockGuard(mutexLock_);
-    SLOGD("RegisterCastStateListener in pass lock");
+    SLOGI("RegisterCastStateListener in pass lock");
     if (listener == nullptr) {
         SLOGE("RegisterCastStateListener the listener is nullptr");
         return false;
@@ -178,7 +184,7 @@ bool HwCastProvider::UnRegisterCastStateListener(std::shared_ptr<IAVCastStateLis
 {
     SLOGI("UnRegisterCastStateListener in");
     std::lock_guard lockGuard(mutexLock_);
-    SLOGD("UnRegisterCastStateListener in pass lock");
+    SLOGI("UnRegisterCastStateListener in pass lock");
     if (listener == nullptr) {
         SLOGE("UnRegisterCastStateListener the listener is nullptr");
         return false;
@@ -201,6 +207,7 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
 {
     SLOGI("get remote controller with castId %{public}d", static_cast<int32_t>(castId));
     std::lock_guard lockGuard(mutexLock_);
+    SLOGI("get remote controller check lock with castId %{public}d", static_cast<int32_t>(castId));
     if (avCastControllerMap_.find(castId) != avCastControllerMap_.end()) {
         SLOGI("the castId corresonding to streamPlayer is already exist");
         return avCastControllerMap_[castId];
@@ -235,6 +242,7 @@ bool HwCastProvider::RegisterCastSessionStateListener(int castId,
         return false;
     }
     std::lock_guard lockGuard(mutexLock_);
+    SLOGI("register castsession state listener check lock with castId %{public}d", static_cast<int32_t>(castId));
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("RegisterCastSessionStateListener failed for the castSession corresponding to castId is not exit");
         return false;
@@ -256,6 +264,7 @@ bool HwCastProvider::UnRegisterCastSessionStateListener(int castId,
         return false;
     }
     std::lock_guard lockGuard(mutexLock_);
+    SLOGI("unregister castsession state listener check lock with castId %{public}d", static_cast<int32_t>(castId));
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("UnRegisterCastSessionStateListener failed for the castSession corresponding to castId is not exit");
         return false;
@@ -277,7 +286,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         SLOGW("recv empty deviceList, return");
         return;
     }
-    SLOGI("get deviceList size %{public}d", deviceList.size());
+    SLOGI("get deviceList size %{public}zu", deviceList.size());
     for (CastRemoteDevice castRemoteDevice : deviceList) {
         SLOGI("get devices with deviceName %{public}s", castRemoteDevice.deviceName.c_str());
         DeviceInfo deviceInfo;
@@ -312,8 +321,9 @@ void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
 
 void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession)
 {
+    SLOGI("Cast provider received session create event");
     std::thread([this, castSession]() {
-        SLOGI("Cast provider received session create event");
+        SLOGI("Cast pvd received session create event and create task thread");
         for (auto listener : castStateListenerList_) {
             listener->OnSessionNeedDestroy();
         }
@@ -327,6 +337,7 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
             }
             *iter = true;
             castId = iter - castFlag_.begin();
+            SLOGI("Cast task thread to find flag");
         }
         auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
         if (hwCastProviderSession) {
@@ -335,6 +346,7 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
         {
             std::lock_guard lockGuard(mutexLock_);
             hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+            SLOGI("Cast task thread to create player");
             std::shared_ptr<IStreamPlayer> streamPlayer = hwCastProviderSession->CreateStreamPlayer();
             std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(streamPlayer);
             if (!hwCastStreamPlayer) {

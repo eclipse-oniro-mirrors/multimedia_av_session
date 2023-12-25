@@ -224,7 +224,7 @@ napi_status NapiMediaDescription::GetIcon(napi_env env, napi_value in, AVMediaDe
         SLOGE("unwrap failed");
         return napi_invalid_arg;
     }
-    out.SetIcon(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+    out.SetIcon(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
     return status;
 }
 
@@ -297,7 +297,7 @@ napi_status NapiMediaDescription::GetMediaImage(napi_env env, napi_value in, AVM
             SLOGE("unwrap failed");
             return napi_invalid_arg;
         }
-        out.SetIcon(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        out.SetIcon(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
     } else {
         SLOGE("mediaImage property value type invalid");
         out.SetIconUri("");
