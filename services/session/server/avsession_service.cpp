@@ -1537,8 +1537,6 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
             "ERROR_INFO", "avsession service register client death observer malloc failed");
         return AVSESSION_ERROR;
     }
-    clientDeathRecipientList_[pid] = recipient;
-    SLOGI("add recipient to list");
 
     if (!observer->AsObject()->AddDeathRecipient(recipient)) {
         SLOGE("add death recipient for %{public}d failed", pid);
@@ -1559,12 +1557,6 @@ void AVSessionService::ClearClientResources(pid_t pid)
         ClearSessionForClientDiedNoLock(pid);
         ClearControllerForClientDiedNoLock(pid);
     }
-    SLOGI("OnClientDied remove recipient for pid=%{public}d", pid);
-    if (clientDeathRecipientList_.empty()) {
-        SLOGE("try remove recipient with empty list");
-        return;
-    }
-    clientDeathRecipientList_.erase(pid);
     SLOGI("remove ClientDeathObserver to %{public}d", pid);
     RemoveClientDeathObserver(pid);
 }
@@ -1722,7 +1714,7 @@ std::int32_t AVSessionService::Dump(std::int32_t fd, const std::vector<std::u16s
     return AVSESSION_SUCCESS;
 }
 
-__attribute__((no_sanitize("cfi"))) sptr <RemoteSessionCommandProcess> AVSessionService::GetService(
+__attribute__((no_sanitize("cfi"))) std::shared_ptr<RemoteSessionCommandProcess> AVSessionService::GetService(
     const std::string& deviceId)
 {
     SLOGI("enter");
@@ -1737,7 +1729,7 @@ __attribute__((no_sanitize("cfi"))) sptr <RemoteSessionCommandProcess> AVSession
         return nullptr;
     }
     SLOGI("check remoteService create");
-    auto remoteService = iface_cast<RemoteSessionCommandProcess>(object);
+    std::shared_ptr<RemoteSessionCommandProcess> remoteService = std::make_shared<RemoteSessionCommandProcess>(object);
     SLOGI("check remoteService create done");
     return remoteService;
 }

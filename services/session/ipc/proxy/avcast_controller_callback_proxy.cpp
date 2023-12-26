@@ -25,6 +25,7 @@ AVCastControllerCallbackProxy::AVCastControllerCallbackProxy(const sptr<IRemoteO
 
 void AVCastControllerCallbackProxy::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
+    SLOGI("OnCastPlaybackStateChange in proxy for state %{public}d", state.GetState());
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&state), "write PlaybackState failed");
@@ -33,14 +34,16 @@ void AVCastControllerCallbackProxy::OnCastPlaybackStateChange(const AVPlaybackSt
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
-    SLOGI("OnCastPlaybackStateChange in proxy for state %{public}d", state.GetState());
+    SLOGI("OnCastPlaybackStateChange in proxy to send request for state %{public}d", state.GetState());
     CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_CAST_PLAYBACK_STATE_CHANGE,
         parcel, reply, option) == 0,
         "send request failed");
+    SLOGI("OnCastPlaybackStateChange done in proxy for state %{public}d", state.GetState());
 }
 
 void AVCastControllerCallbackProxy::OnMediaItemChange(const AVQueueItem& avQueueItem)
 {
+    SLOGI("OnMediaItemChange in proxy");
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&avQueueItem), "Write avQueueItem failed");
@@ -49,8 +52,10 @@ void AVCastControllerCallbackProxy::OnMediaItemChange(const AVQueueItem& avQueue
     MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    SLOGI("OnMediaItemChange in proxy to send request");
     CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_MEDIA_ITEM_CHANGE, parcel, reply, option) == 0,
         "send request failed");
+    SLOGI("OnMediaItemChange in proxy done");
 }
 
 void AVCastControllerCallbackProxy::OnPlayNext()

@@ -49,6 +49,7 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
         AVSESSION_TRACE_SYNC_START("AVCastControllerItem::OnCastPlaybackStateChange");
         callback_->OnCastPlaybackStateChange(stateOut);
     }
+    SLOGI("OnCastPlaybackStateChange done with state: %{public}d", state.GetState());
 }
 
 void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
@@ -57,6 +58,7 @@ void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnMediaItemChange(avQueueItem);
+    SLOGI("OnMediaItemChange done");
 }
 
 void AVCastControllerItem::OnPlayNext()
@@ -179,8 +181,9 @@ bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastCon
 
 int32_t AVCastControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
-    callback_ = iface_cast<AVCastControllerCallbackProxy>(callback);
+    SLOGI("call RegisterCallbackInner of cast controller proxy");
     std::lock_guard lockGuard(itemCallbackLock_);
+    callback_ = iface_cast<AVCastControllerCallbackProxy>(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
     return AVSESSION_SUCCESS;
 }

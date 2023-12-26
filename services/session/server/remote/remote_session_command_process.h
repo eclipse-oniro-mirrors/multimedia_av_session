@@ -127,6 +127,7 @@ public:
         return AVSESSION_SUCCESS;
     }
 private:
+    static sptr<IRemoteObject>& impl_;
     static inline BrokerDelegator<RemoteSessionCommandProcess> delegator_;
 };
 } // namespace OHOS::AVSession
