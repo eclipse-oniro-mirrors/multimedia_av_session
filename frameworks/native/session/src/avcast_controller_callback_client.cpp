@@ -35,7 +35,7 @@ void AVCastControllerCallbackClient::OnCastPlaybackStateChange(const AVPlaybackS
     if (castPlaybackStateListener_) {
         castPlaybackStateListener_(state);
     }
-    SLOGI("OnCastPlaybackStateChange done with state: %{public}d", static_cast<int32_t>(castState));
+    SLOGI("OnCastPlaybackStateChange done with state: %{public}d", state.GetState());
 }
 
 void AVCastControllerCallbackClient::OnMediaItemChange(const AVQueueItem& avQueueItem)

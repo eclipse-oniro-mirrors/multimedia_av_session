@@ -98,7 +98,6 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
         asyncCallback_->CallWithFunc(*ref, isValid_,
             [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
-                SLOGE("checkCallbackValid for event %{public}d", event);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
                     return false;
@@ -107,7 +106,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d", hasFunc);
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [firstParam, secondParam](napi_env env, int& argc,
