@@ -148,7 +148,7 @@ AVQueueItem HwCastStreamPlayer::GetCurrentItem()
     std::lock_guard lockGuard(streamPlayerLock_);
     SLOGI("Received GetCurrentItem request");
     int32_t duration;
-    GetDuration(duraiton);
+    GetDuration(duration);
     std::shared_ptr<AVMediaDescription> mediaDescription = currentAVQueueItem_.GetDescription();
     if (mediaDescription == nullptr) {
         SLOGE("GetCurrentItem with nullptr, return with default");
@@ -310,7 +310,7 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
     wantParams->SetParam("maxCastVolume", intIt);
     avPlaybackState.SetExtras(wantParams);
 
-    SLOGI("GetCastAVPlaybackState successed with state: %{public}d", state.GetState());
+    SLOGI("GetCastAVPlaybackState successed with state: %{public}d", avPlaybackState.GetState());
     return AVSESSION_SUCCESS;
 }
 
@@ -636,7 +636,7 @@ void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pi
     std::shared_ptr<AVMediaDescription> mediaDescription = currentAVQueueItem_.GetDescription();
     if (mediaDescription == nullptr) {
         SLOGE("OnAlbumCoverChanged with nullptr mediaDescription, return with default");
-        return currentAVQueueItem_;
+        return;
     }
     mediaDescription->SetIcon(innerPixelMap);
     AVQueueItem queueItem;

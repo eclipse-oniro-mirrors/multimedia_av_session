@@ -59,7 +59,6 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const T& param)
         asyncCallback_->CallWithFunc(*ref, isValid_,
             [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
-                SLOGE("checkCallbackValid for event %{public}d", event);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
                     return false;
@@ -68,7 +67,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const T& param)
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d", hasFunc);
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [param](napi_env env, int& argc, napi_value *argv) {

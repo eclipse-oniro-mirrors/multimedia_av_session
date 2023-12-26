@@ -37,7 +37,7 @@ void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_ = servicePtr;
     }
-    hwProvider_ = std:make_shared<HwCastProvider>();
+    hwProvider_ = std::make_shared<HwCastProvider>();
     if (hwProvider_ != nullptr) {
         hwProvider_->Init();
     } else {
@@ -74,6 +74,11 @@ bool AVRouterImpl::Release()
     }
     std::lock_ground lockGuard(providerManagerLock_);
 
+    if (hwProvider_ == nullptr) {
+        SLOGE("repeat check for no pvd");
+        return false;
+    }
+    SLOGI("repeat check for pvd alive");
     hwProvider_->Release();
     hwProvider_ = nullptr;
     providerNumber_ = providerNumberDisable_;
