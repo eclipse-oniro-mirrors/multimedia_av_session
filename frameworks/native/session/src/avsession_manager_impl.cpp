@@ -282,6 +282,8 @@ int32_t AVSessionManagerImpl::Close(void)
         serviceDeathRecipient_ = nullptr;
         ret = service->Close();
     }
+    SLOGI("manager impl close with listener clear");
+    listener_.clear();
     return ret;
 }
 

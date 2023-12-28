@@ -56,12 +56,27 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
+    SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->CallWithFlag(*ref, isValid_, [param](napi_env env, int& argc, napi_value *argv) {
-            argc = NapiUtils::ARGC_ONE;
-            auto status = NapiUtils::SetValue(env, param, *argv);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-        });
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [param](napi_env env, int& argc, napi_value *argv) {
+                argc = NapiUtils::ARGC_ONE;
+                auto status = NapiUtils::SetValue(env, param, *argv);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            });
     }
 }
 
@@ -73,15 +88,30 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const std::string& fir
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
+    SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->CallWithFlag(*ref, isValid_, [firstParam, secondParam](napi_env env, int& argc,
-            napi_value *argv) {
-            argc = NapiUtils::ARGC_TWO;
-            auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-            status = NapiUtils::SetValue(env, secondParam, argv[1]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-        });
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [firstParam, secondParam](napi_env env, int& argc,
+                napi_value *argv) {
+                argc = NapiUtils::ARGC_TWO;
+                auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+                status = NapiUtils::SetValue(env, secondParam, argv[1]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            });
     }
 }
 
@@ -94,6 +124,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
+    SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
             [this, ref, event]() {

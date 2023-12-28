@@ -400,6 +400,14 @@ public:
     virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) = 0;
 
     /**
+     * @brief Listen to the change of cast event.
+     *
+     * @param castHandle The combination of providerId and castId.
+     * @since 9
+    */
+    virtual void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) = 0;
+
+    /**
      * @brief Deconstruct IAVCastSessionStateListener.
      * @since 10
     */
