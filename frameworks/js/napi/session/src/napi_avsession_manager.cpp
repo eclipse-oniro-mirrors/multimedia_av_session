@@ -80,7 +80,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("getAllSessionDescriptors", GetAllSessionDescriptors),
         DECLARE_NAPI_STATIC_FUNCTION("getHistoricalSessionDescriptors", GetHistoricalSessionDescriptors),
         DECLARE_NAPI_STATIC_FUNCTION("getHistoricalAVQueueInfos", GetHistoricalAVQueueInfos),
-        DECLARE_NAPI_STATIC_FUNCTION("startMediaIntent", StartMediaIntent),
+        DECLARE_NAPI_STATIC_FUNCTION("startAVPlayback", StartAVPlayback),
         DECLARE_NAPI_STATIC_FUNCTION("createController", CreateController),
         DECLARE_NAPI_STATIC_FUNCTION("getAVCastController", GetAVCastController),
         DECLARE_NAPI_STATIC_FUNCTION("castAudio", CastAudio),
@@ -282,7 +282,7 @@ napi_value NapiAVSessionManager::GetHistoricalAVQueueInfos(napi_env env, napi_ca
     return NapiAsyncWork::Enqueue(env, context, "GetHistoricalAVQueueInfos", executor, complete);
 }
 
-napi_value NapiAVSessionManager::StartMediaIntent(napi_env env, napi_callback_info info)
+napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
         std::string bundleName_ {};
@@ -297,30 +297,30 @@ napi_value NapiAVSessionManager::StartMediaIntent(napi_env env, napi_callback_in
             && !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null)) {
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->bundleName_);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->bundleName_.empty(),
-              " startmediaintent invalid bundlename", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+              " StartAVPlayback invalid bundlename", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             
             context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->assetId_);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->assetId_.empty(),
-              " startmediaintent invalid assetId", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+              " StartAVPlayback invalid assetId", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         }
     };
 
     context->GetCbInfo(env, info, input);
 
     auto executor = [context]() {
-        int32_t ret = AVSessionManager::GetInstance().StartMediaIntent(context->bundleName_, context->assetId_);
+        int32_t ret = AVSessionManager::GetInstance().StartAVPlayback(context->bundleName_, context->assetId_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "StartMediaIntent failed : native no permission";
+                context->errMessage = "StartAVPlayback failed : native no permission";
             } else {
-                context->errMessage = "StartMediaIntent failed : native server exception";
+                context->errMessage = "StartAVPlayback failed : native server exception";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
 
-    return NapiAsyncWork::Enqueue(env, context, "StartMediaIntent", executor);
+    return NapiAsyncWork::Enqueue(env, context, "StartAVPlayback", executor);
 }
 
 napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_info info)

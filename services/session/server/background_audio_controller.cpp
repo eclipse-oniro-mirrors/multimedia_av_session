@@ -39,6 +39,7 @@ void BackgroundAudioController::Init(AVSessionService *ptr)
         HandleAudioStreamRendererStateChange(infos);
     });
     AppManagerAdapter::GetInstance().SetAppBackgroundStateObserver([this](int32_t uid) {
+        SLOGI("set background observe for uid %{public}d", uid);
         HandleAppBackgroundState(uid);
     });
 }
@@ -48,6 +49,7 @@ void BackgroundAudioController::OnSessionCreate(const AVSessionDescriptor& descr
     std::lock_guard lockGuard(lock_);
     sessionUIDs_.insert(descriptor.uid_);
     AppManagerAdapter::GetInstance().RemoveObservedApp(descriptor.uid_);
+    SLOGI("OnSessionCreate remove observe for uid %{public}d", descriptor.uid_);
 }
 
 void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& descriptor)
@@ -60,6 +62,7 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
     if (descriptor.isThirdPartyApp_) {
         if (!AppManagerAdapter::GetInstance().IsAppBackground(descriptor.uid_)) {
             AppManagerAdapter::GetInstance().AddObservedApp(descriptor.uid_);
+            SLOGI("OnSessionRelease add observe for uid %{public}d", descriptor.uid_);
             return;
         }
         int32_t uid = descriptor.uid_;
@@ -96,6 +99,7 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
 
         if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID)) {
             AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
+            SLOGI("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
             continue;
         }
         SLOGI("pause uid=%{public}d", info->clientUID);

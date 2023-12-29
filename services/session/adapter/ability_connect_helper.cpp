@@ -80,7 +80,7 @@ int32_t AbilityConnectHelper::StartAbilityByCall(const std::string& bundleName, 
     return reply.ReadInt32() == ERR_OK ? AVSESSION_SUCCESS : ERR_ABILITY_NOT_AVAILABLE;
 }
 
-int32_t AbilityConnectHelper::StartMediaIntent(AppExecFwk::InsightIntentExecuteParam &executeParam)
+int32_t AbilityConnectHelper::StartAVPlayback(AppExecFwk::InsightIntentExecuteParam &executeParam)
 {
     SLOGD("bundleName=%{public}s abilityName=%{public}s moduleName=%{public}s IntentName=%{public}s",
         executeParam.bundleName_.c_str(), executeParam.abilityName_.c_str(),

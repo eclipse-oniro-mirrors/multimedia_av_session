@@ -148,11 +148,11 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     for (const auto& value : profileValues["insightIntents"]) {
-        std::string intentName = value["intentName"];
+        std::string insightName = value["intentName"];
         auto modeValues = value["uiAbility"]["executeMode"];
         auto mode = std::find(modeValues.begin(), modeValues.end(), "background");
-        SLOGD("check GetPlayIntentParam, insightIntent=%{public}s", intentName.c_str());
-        if ((intentName == PLAY_MUSICLIST_INTENT || intentName == PLAY_MUSIC_INTENT) && mode != modeValues.end()) {
+        SLOGD("check GetPlayIntentParam, insightIntent=%{public}s", insightName.c_str());
+        if (insightName == PLAY_MUSICLIST && mode != modeValues.end()) {
             return true;
         }
     }
@@ -175,13 +175,13 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     for (const auto& value : profileValues["insightIntents"]) {
-        std::string intentName = value["intentName"];
-        SLOGD("check GetPlayIntentParam, insightIntent=%{public}s", intentName.c_str());
-        if (intentName == PLAY_MUSICLIST_INTENT) {
+        std::string insightName = value["intentName"];
+        SLOGD("check GetPlayIntentParam, insightIntent=%{public}s", insightName.c_str());
+        if (insightName == PLAY_MUSICLIST) {
             executeParam.bundleName_ = bundleName;
             executeParam.moduleName_ = supportModule;
             executeParam.abilityName_ = value["uiAbility"]["ability"];
-            executeParam.insightIntentName_ = intentName;
+            executeParam.insightIntentName_ = insightName;
             executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
             std::shared_ptr<AppExecFwk::WantParams> wantParam = std::make_shared<AppExecFwk::WantParams>();
             wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(INTERFACE_TYPE, assetId));

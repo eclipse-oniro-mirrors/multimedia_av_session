@@ -44,7 +44,7 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
     int32_t ret = AVSESSION_ERROR;
     if (isSupport && !executeParam.insightIntentName_.empty()) {
         SLOGI("Start Ability mediaintent");
-        ret = AbilityConnectHelper::GetInstance().StartMediaIntent(executeParam);
+        ret = AbilityConnectHelper::GetInstance().StartAVPlayback(executeParam);
     } else {
         ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName_, abilityName_);
     }

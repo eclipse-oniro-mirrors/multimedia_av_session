@@ -192,11 +192,11 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
     return ERR_NONE;
 }
 
-int32_t AVSessionServiceStub::HandleStartMediaIntent(MessageParcel& data, MessageParcel& reply)
+int32_t AVSessionServiceStub::HandleStartAVPlayback(MessageParcel& data, MessageParcel& reply)
 {
     std::string bundleName = data.ReadString();
     std::string asserId = data.ReadString();
-    int32_t ret = StartMediaIntent(bundleName, asserId);
+    int32_t ret = StartAVPlayback(bundleName, asserId);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     return ERR_NONE;
 }

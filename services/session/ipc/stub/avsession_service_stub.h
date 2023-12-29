@@ -30,7 +30,7 @@ private:
     int32_t HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalAVQueueInfos(MessageParcel& data, MessageParcel& reply);
-    int32_t HandleStartMediaIntent(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStartAVPlayback(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetAVCastControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
@@ -58,7 +58,7 @@ private:
         &AVSessionServiceStub::HandleGetSessionDescriptorsById,
         &AVSessionServiceStub::HandleGetHistoricalSessionDescriptors,
         &AVSessionServiceStub::HandleGetHistoricalAVQueueInfos,
-        &AVSessionServiceStub::HandleStartMediaIntent,
+        &AVSessionServiceStub::HandleStartAVPlayback,
         &AVSessionServiceStub::HandleCreateControllerInner,
         &AVSessionServiceStub::HandleGetAVCastControllerInner,
         &AVSessionServiceStub::HandleRegisterSessionListener,
