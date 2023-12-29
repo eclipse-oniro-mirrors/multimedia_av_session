@@ -26,6 +26,7 @@ group("fuzztest") {
     "avsessionitem_fuzzer:AVSessionItemFuzzTest",
     "avsessionservice_fuzzer:AVSessionServiceFuzzTest",
     "bkgraudiocontroller_fuzzer:BkGrAudioControllerFuzzTest",
+    "migrateavsession_fuzzer:MigrateAVSessionFuzzTest",
     "sessionlistenerproxy_fuzzer:SessionListenerProxyFuzzTest",
   ]
 }
