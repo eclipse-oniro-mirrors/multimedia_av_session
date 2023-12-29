@@ -2331,6 +2331,8 @@ void AVSessionService::NotifySystemUI(bool isDeviceChanged)
     request.SetNotificationId(0);
     request.SetContent(content);
     request.SetCreatorUid(uid);
+    request.SetUnremovable(true);
+    request.SetInProgress(true);
     result = Notification::NotificationHelper::PublishNotification(request);
     SLOGI("AVSession service PublishNotification uid %{public}d, result %{public}d", uid, result);
 }
