@@ -48,6 +48,11 @@ public:
         ptr_->OnCastStateChange(castState, deviceInfo);
     }
 
+    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
+    {
+        ptr_->OnCastEventRecv(errorCode, errorMsg);
+    }
+
     AVSessionItem *ptr_;
 };
 #endif
@@ -60,6 +65,8 @@ public:
     bool IsCastSinkSession(int32_t castState);
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
+
+    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 #endif
 
     std::string GetSessionId() override;

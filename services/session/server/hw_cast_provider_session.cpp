@@ -144,6 +144,12 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
 
 void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const std::string &jsonParam)
 {
-    SLOGI("OnEvent from cast");
+    SLOGI("OnEvent from cast with eventId %{public}d, %{public}s", eventId, jsonParam.c_str());
+    for (auto listener : castSessionStateListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnCastEventRecv for registered listeners");
+            listener->OnCastEventRecv(static_cast<int>(eventId), jsonParam);
+        }
+    }
 }
 }

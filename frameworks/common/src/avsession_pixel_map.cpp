@@ -19,6 +19,7 @@
 namespace OHOS::AVSession {
 bool AVSessionPixelMap::Marshalling(Parcel& parcel) const
 {
+    SLOGD("Marshalling with size: %{public}d", static_cast<int32_t>(innerImgBuffer_.size()));
     CHECK_AND_RETURN_RET_LOG(parcel.WriteUInt8Vector(innerImgBuffer_), false, "Write innerImgBuffer data failed");
     return true;
 }

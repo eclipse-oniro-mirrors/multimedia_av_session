@@ -627,7 +627,8 @@ void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pi
         SLOGE("Invalid pixelMap null");
         return;
     }
-    std::shared_ptr<AVSessionPixelMap> innerPixelMap = AVSessionPixelMapAdapter::ConvertToInner(pixelMap);
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap =
+        AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap);
     if (innerPixelMap == nullptr) {
         SLOGE("Invalid innerPixelMap null");
         return;

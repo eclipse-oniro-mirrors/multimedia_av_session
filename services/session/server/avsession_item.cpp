@@ -265,7 +265,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
         serviceCallbackForAddAVQueueInfo_(*this);
     }
 
-    SLOGD("send playbackstate change event to controllers");
+    SLOGI("send playbackstate change event to controllers with state: %{public}d", state.GetState());
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
@@ -598,6 +598,15 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     if (IsCastSinkSession(castState)) {
         SLOGE("Cast sink session start to disconnect");
         return;
+    }
+}
+
+void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
+{
+    SLOGI("OnCastEventRecv in with code and msg %{public}dm %{public}s", errorCode, errorMsg.c_str());
+    for (auto controller : castControllers_) {
+        SLOGI("pass error to cast controller with code %{public}d", errorCode);
+        controller->OnPlayerError(errorCode, errorMsg);
     }
 }
 
