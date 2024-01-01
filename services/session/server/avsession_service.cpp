@@ -57,6 +57,7 @@
 #include "parameter.h"
 #include "parameters.h"
 #include "avsession_service.h"
+#include "want_agent_helper.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
@@ -276,7 +277,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("same session");
         if (topSession_->GetSessionType() == "audio") {
-            AVSessionService::NotifySystemUI(false);
+            AVSessionService::NotifySystemUI(nullptr);
         }
         return;
     }
@@ -284,7 +285,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         if (session->GetUid() == info.uid) {
             UpdateTopSession(session);
             if (topSession_->GetSessionType() == "audio") {
-                AVSessionService::NotifySystemUI(false);
+                AVSessionService::NotifySystemUI(nullptr);
             }
             return;
         }
@@ -2309,7 +2310,35 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
     return true;
 }
 
-void AVSessionService::NotifySystemUI(bool isDeviceChanged)
+std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWantAgent(
+    const std::shared_ptr<AVSessionDescriptor>& histroyDescriptor)
+{
+    if (!histroyDescriptor && !topSession_) {
+        SLOGE("CreateWantAgent error, histroyDescriptor and topSession_ null");
+        return nullptr;
+    }
+    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
+    flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
+    std::vector<std::shared_ptr<AAFwk::Want>> wants;
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    string bundleName = histroyDescriptor ? histroyDescriptor->elementName_.GetBundleName() : topSession_->GetBundleName();
+    string abilityName = histroyDescriptor ? histroyDescriptor->elementName_.GetAbilityName() : topSession_->GetAbilityName();
+    auto uid = histroyDescriptor ? histroyDescriptor->uid_ : topSession_->GetUid();
+    SLOGI("CreateWantAgent bundleName %{public}s, abilityName %{public}s", bundleName.c_str(), abilityName.c_str());
+    AppExecFwk::ElementName element("", bundleName, abilityName);
+    want->SetElement(element);
+    wants.push_back(want);
+    AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
+        0,
+        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITY,
+        flags,
+        wants,
+        nullptr
+    );
+    return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
+}
+
+void AVSessionService::NotifySystemUI(const std::shared_ptr<AVSessionDescriptor>& historyDescriptor)
 {
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
@@ -2319,26 +2348,30 @@ void AVSessionService::NotifySystemUI(bool isDeviceChanged)
         std::make_shared<Notification::NotificationLocalLiveViewContent>();
     CHECK_AND_RETURN_LOG(localLiveViewContent != nullptr, "avsession item local live view content nullptr error");
     localLiveViewContent->SetType(SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER);
-    localLiveViewContent->SetTitle(isDeviceChanged ? "" : "AVSession NotifySystemUI");
-    localLiveViewContent->SetText(isDeviceChanged ? "" : "AVSession NotifySystemUI");
+    localLiveViewContent->SetTitle(!historyDescriptor ? "" : "AVSession NotifySystemUI");
+    localLiveViewContent->SetText(!historyDescriptor ? "" : "AVSession NotifySystemUI");
 
     std::shared_ptr<Notification::NotificationContent> content =
         std::make_shared<Notification::NotificationContent>(localLiveViewContent);
     CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
 
-    int32_t uid = topSession_ ? topSession_->GetUid() : getuid();
+    auto uid = historyDescriptor ? historyDescriptor->uid_ : topSession_ ? topSession_->GetUid() : getuid();
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetNotificationId(0);
     request.SetContent(content);
     request.SetCreatorUid(uid);
     request.SetUnremovable(true);
     request.SetInProgress(true);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
+    CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
+    request.SetWantAgent(wantAgent);
     result = Notification::NotificationHelper::PublishNotification(request);
     SLOGI("AVSession service PublishNotification uid %{public}d, result %{public}d", uid, result);
 }
 
 void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
+    SLOGI("AVSessionService HandleDeviceChange");
     for (auto &audioDeviceDescriptor : deviceChangeAction.deviceDescriptors) {
         SLOGI("AVSessionService HandleDeviceChange device type %{public}d", audioDeviceDescriptor->deviceType_);
         if (audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADSET ||
@@ -2350,7 +2383,7 @@ void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChange
             if (deviceChangeAction.type == AudioStandard::CONNECT && descriptors.size() > 0) {
                 SLOGI("AVSessionService HandleDeviceChange begin to notifysystemui, descriptors size %{public}u", 
                     descriptors.size());
-                NotifySystemUI(true);
+                NotifySystemUI(std::make_shared<AVSessionDescriptor>(descriptors[0]));
             }
         }
     }
