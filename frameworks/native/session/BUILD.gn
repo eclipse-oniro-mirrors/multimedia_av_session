@@ -126,7 +126,7 @@ ohos_shared_library("avsession_cast_client") {
   cflags = []
 
   if (castplus_cast_engine_enable) {
-    external_deps += [ "graphic_2d:surface" ]
+    external_deps += [ "graphic_surface:surface" ]
   }
 
   if (multimedia_av_session_enable_trace_control) {
