@@ -49,7 +49,9 @@ void HwCastStreamPlayer::Release()
         streamPlayer_->Release();
         streamPlayer_ = nullptr;
     }
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     streamPlayerListenerList_.clear();
+    SLOGI("Release the HwCastStreamPlayer done");
 }
 
 int32_t HwCastStreamPlayer::CheckCastTime(int32_t castTime)
@@ -334,7 +336,7 @@ int32_t HwCastStreamPlayer::RegisterControllerListener(std::shared_ptr<IAVCastCo
         SLOGE("RegisterControllerListener failed for the listener is nullptr");
         return AVSESSION_ERROR;
     }
-    std::lock_guard lockGuard(streamPlayerLock_);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     if (find(streamPlayerListenerList_.begin(), streamPlayerListenerList_.end(), listener)
         != streamPlayerListenerList_.end()) {
         SLOGE("listener is already in streamPlayerListenerList_");
@@ -342,7 +344,7 @@ int32_t HwCastStreamPlayer::RegisterControllerListener(std::shared_ptr<IAVCastCo
     }
     SLOGI("RegisterControllerListener successed, and add it to streamPlayerListenerList_");
     streamPlayerListenerList_.emplace_back(listener);
-
+    SLOGI("RegisterControllerListener done");
     return AVSESSION_SUCCESS;
 }
 
@@ -352,7 +354,7 @@ int32_t HwCastStreamPlayer::UnRegisterControllerListener(std::shared_ptr<IAVCast
         SLOGE("UnRegisterCastSessionStateListener failed for the listener is nullptr");
         return AVSESSION_ERROR;
     }
-    std::lock_guard lockGuard(streamPlayerLock_);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto iter = streamPlayerListenerList_.begin(); iter != streamPlayerListenerList_.end();) {
         if (*iter == listener) {
             streamPlayerListenerList_.erase(iter);
@@ -377,7 +379,7 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
         SLOGD("On state changed, get state %{public}d", castPlusStateToString_[playbackState]);
         avCastPlaybackState.SetState(castPlusStateToString_[playbackState]);
     }
-    std::lock_guard lockGuard(streamPlayerListenerLock_);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnCastPlaybackStateChange for registered listeners");
@@ -410,12 +412,14 @@ void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int
         avCastPlaybackState.SetExtras(wantParams);
         SLOGD("Received duration: %{public}d", duration);
     }
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnPositionChange for registered listeners");
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
+    SLOGI("on cast position change done");
 }
 
 void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaInfo)
@@ -438,6 +442,7 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetAppName(mediaInfo.appName);
     AVQueueItem queueItem;
     queueItem.SetDescription(mediaDescription);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnMediaItemChange for registered listeners");
@@ -446,28 +451,33 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     }
     std::lock_guard lockGuard(streamPlayerLock_);
     currentAVQueueItem_ = queueItem;
+    SLOGI("Stream player received mediaItemChanged event done");
 }
 
 void HwCastStreamPlayer::OnNextRequest()
 {
     SLOGD("StreamPlayer received next request");
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnPlayNext for registered listeners");
             listener->OnPlayNext();
         }
     }
+    SLOGI("StreamPlayer received next request done");
 }
 
 void HwCastStreamPlayer::OnPreviousRequest()
 {
     SLOGD("StreamPlayer received previous request");
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnPlayPrevious for registered listeners");
             listener->OnPlayPrevious();
         }
     }
+    SLOGI("StreamPlayer received previous request done");
 }
 
 void HwCastStreamPlayer::OnVolumeChanged(int volume, int maxVolume)
@@ -484,12 +494,14 @@ void HwCastStreamPlayer::OnVolumeChanged(int volume, int maxVolume)
     wantParams->SetParam("maxCastVolume", intIt);
     avCastPlaybackState.SetExtras(wantParams);
 
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnVolumeChanged for registered listeners");
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
+    SLOGI("StreamPlayer received volume changed event done: %{public}d", volume);
 }
 
 void HwCastStreamPlayer::OnLoopModeChanged(const CastEngine::LoopMode loopMode)
@@ -501,12 +513,14 @@ void HwCastStreamPlayer::OnLoopModeChanged(const CastEngine::LoopMode loopMode)
         SLOGD("StreamPlayer received loop mode changed event: %{public}d", castPlusLoopModeToInt_[loopMode]);
         avCastPlaybackState.SetLoopMode(castPlusLoopModeToInt_[loopMode]);
     }
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnLoopModeChanged for registered listeners");
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
+    SLOGD("loop mode changed event done: %{public}d", castPlusLoopModeToInt_[loopMode]);
 }
 
 void HwCastStreamPlayer::OnPlaySpeedChanged(const CastEngine::PlaybackSpeed speed)
@@ -518,50 +532,59 @@ void HwCastStreamPlayer::OnPlaySpeedChanged(const CastEngine::PlaybackSpeed spee
     }
     SLOGD("StreamPlayer received play speed changed event: %{public}f", castPlusSpeedToDouble_[speed]);
     avCastPlaybackState.SetSpeed(castPlusSpeedToDouble_[speed]);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnPositionChange for registered listeners");
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
+    SLOGD("play speed changed event done: %{public}f", castPlusSpeedToDouble_[speed]);
 }
 
 void HwCastStreamPlayer::OnPlayerError(int errorCode, const std::string &errorMsg)
 {
     SLOGD("StreamPlayer received error event, code: %{public}d, message: %{public}s", errorCode, errorMsg.c_str());
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnPlayerError for registered listeners");
             listener->OnPlayerError(errorCode, errorMsg);
         }
     }
+    SLOGI("error event done, code: %{public}d, message: %{public}s", errorCode, errorMsg.c_str());
 }
 
 void HwCastStreamPlayer::OnSeekDone(int32_t seekNumber)
 {
     SLOGD("StreamPlayer received seek done event: %{public}d", seekNumber);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnSeekDone for registered listeners");
             listener->OnSeekDone(seekNumber);
         }
     }
+    SLOGI("StreamPlayer received seek done event done with: %{public}d", seekNumber);
 }
 
 void HwCastStreamPlayer::OnVideoSizeChanged(int width, int height)
 {
     SLOGD("StreamPlayer received video size change event, width: %{public}d, height: %{public}d", width, height);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnVideoSizeChange for registered listeners");
             listener->OnVideoSizeChange(width, height);
         }
     }
+    SLOGI("video size change event done, width: %{public}d, height: %{public}d", width, height);
 }
 
 void HwCastStreamPlayer::OnEndOfStream(int isLooping)
 {
     SLOGD("Received EndOfStream callback, value is %{public}d", isLooping);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnEndOfStream for registered listeners");
@@ -585,6 +608,7 @@ void HwCastStreamPlayer::OnEndOfStream(int isLooping)
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
+    SLOGI("Received EndOfStream callback done, value is %{public}d", isLooping);
 }
 
 void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
@@ -607,12 +631,14 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
     mediaDescription->SetAppName(mediaInfo.appName);
     AVQueueItem queueItem;
     queueItem.SetDescription(mediaDescription);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnPlayRequest for registered listeners");
         }
     }
     std::lock_guard lockGuard(streamPlayerLock_);
+    SLOGI("Stream player received PlayRequest event done");
 }
 
 void HwCastStreamPlayer::OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -642,6 +668,7 @@ void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pi
     mediaDescription->SetIcon(innerPixelMap);
     AVQueueItem queueItem;
     queueItem.SetDescription(mediaDescription);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnMediaItemChange for registered listeners on Album change");
@@ -651,5 +678,6 @@ void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pi
 
     std::lock_guard lockGuard(streamPlayerLock_);
     currentAVQueueItem_ = queueItem;
+    SLOGI("Received AlbumCoverChanged callback done");
 }
 } // namespace OHOS::AVSession

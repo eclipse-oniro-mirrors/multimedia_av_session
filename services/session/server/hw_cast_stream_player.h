@@ -66,7 +66,7 @@ private:
     int32_t castMinTime = 1000;
     std::recursive_mutex streamPlayerLock_;
     std::shared_ptr<CastEngine::IStreamPlayer> streamPlayer_;
-    std::recursive_mutex streamPlayerListenerLock_;
+    std::recursive_mutex streamPlayerListenerListLock_;
     std::vector<std::shared_ptr<IAVCastControllerProxyListener>> streamPlayerListenerList_;
     AVQueueItem currentAVQueueItem_;
     std::map<CastEngine::PlayerStates, int32_t> castPlusStateToString_ = {
