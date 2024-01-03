@@ -88,12 +88,14 @@ void AppManagerAdapter::AddObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
     observedAppUIDs_.insert(uid);
+    SLOGI(" add for uid=%{public}d ", uid);
 }
 
 void AppManagerAdapter::RemoveObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
     observedAppUIDs_.erase(uid);
+    SLOGI(" remove for uid=%{public}d ", uid);
 }
 
 void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessData)

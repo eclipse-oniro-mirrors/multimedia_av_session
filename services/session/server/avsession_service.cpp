@@ -1124,24 +1124,24 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
     SLOGI("add queueinfo to file done");
 }
 
-int32_t AVSessionService::StartMediaIntent(const std::string& bundleName, const std::string& assetId)
+int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("StartMediaIntent: CheckSystemPermission failed");
+        SLOGE("StartAVPlayback: CheckSystemPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice StartMediaIntent checksystempermission failed");
+            "ERROR_MSG", "avsessionservice StartAVPlayback checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
     // get execute param
     AppExecFwk::InsightIntentExecuteParam executeParam;
     bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName, assetId, executeParam);
     if (!isSupport || executeParam.insightIntentName_.empty()) {
-        SLOGE("StartMediaIntent GetPlayIntentParam fail, Return!");
+        SLOGE("StartAVPlayback GetPlayIntentParam fail, Return!");
         return AVSESSION_ERROR;
     }
-    int32_t ret = AbilityConnectHelper::GetInstance().StartMediaIntent(executeParam);
+    int32_t ret = AbilityConnectHelper::GetInstance().StartAVPlayback(executeParam);
     if (ret != AVSESSION_SUCCESS) {
-        SLOGE("StartMediaIntent fail: %{public}d", ret);
+        SLOGE("StartAVPlayback fail: %{public}d", ret);
     }
     return ret;
 }
@@ -1299,37 +1299,6 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
     std::lock_guard lockGuard(abilityManagerLock_);
     if (ret != ERR_START_ABILITY_IS_RUNNING) {
         abilityManager_.erase(bundleName + abilityName);
-    }
-    return ret;
-}
-
-int32_t AVSessionService::StartHistoricalSession(const std::string& sessionId)
-{
-    std::string bundleName;
-    {
-        std::string sortContent;
-        std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
-        if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, sortContent)) {
-            SLOGE("StartHistoricalSession read sort failed, filename=%{public}s", SORT_FILE_NAME);
-            return AVSESSION_ERROR;
-        }
-        nlohmann::json values = json::parse(sortContent, nullptr, false);
-        CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), AVSESSION_ERROR, "sort json object is null");
-        for (const auto& value : values) {
-            if (value["sessionId"] == sessionId) {
-                SLOGI("StartHistoricalSession find session historical, sessionId=%{public}s", sessionId.c_str());
-                bundleName = value["bundleName"];
-            }
-        }
-    }
-    if (bundleName.empty()) {
-        SLOGE("StartHistoricalSession failed, bundlename is empry");
-        return AVSESSION_ERROR;
-    }
-    auto ret = StartMediaIntent(bundleName, "");
-    SLOGD("StartHistoricalSession StartMediaIntent for: %{public}s", bundleName.c_str());
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("default StartMediaIntent failed: %{public}d", ret);
     }
     return ret;
 }

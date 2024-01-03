@@ -71,7 +71,7 @@ public:
 
     int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
     
-    int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) override;
+    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
 
     int32_t Close(void) override;
 

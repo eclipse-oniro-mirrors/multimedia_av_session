@@ -180,14 +180,14 @@ public:
     virtual int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) = 0;
     
     /**
-     * Start Media Intent
+     * Start media playback
      *
      * @param bundleName bundleName.
-     * @param assetId assetId of media for play intent.
-     * @return Returns whether to Start Media Intent successfully.
+     * @param assetId assetId of media for playback.
+     * @return Returns whether to Start media playback successfully.
      * @since 11
     */
-    virtual int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) = 0;
+    virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) = 0;
 
     /**
      * Close avsession manager, clear resources.

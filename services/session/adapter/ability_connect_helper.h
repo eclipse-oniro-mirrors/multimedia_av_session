@@ -34,7 +34,7 @@ public:
 
     int32_t StartAbilityByCall(const std::string &bundleName, const std::string &abilityName);
     
-    int32_t StartMediaIntent(AppExecFwk::InsightIntentExecuteParam &executeParam);
+    int32_t StartAVPlayback(AppExecFwk::InsightIntentExecuteParam &executeParam);
 
 private:
    sptr<IRemoteObject> GetSystemAbility();

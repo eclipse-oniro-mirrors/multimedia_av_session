@@ -105,7 +105,7 @@ public:
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                       std::vector<AVQueueInfo>& avQueueInfos) override;
     
-    int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) override;
+    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
@@ -289,8 +289,6 @@ private:
     void HandleEventHandlerCallBack();
 
     bool IsHistoricalSession(const std::string& sessionId);
-    
-    int32_t StartHistoricalSession(const std::string& sessionId);
 
     void DeleteHistoricalRecord(const std::string& bundleName);
     

@@ -235,7 +235,7 @@ int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionServiceProxy::StartMediaIntent(const std::string& bundleName, const std::string& assetId)
+int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -248,7 +248,7 @@ int32_t AVSessionServiceProxy::StartMediaIntent(const std::string& bundleName, c
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
-        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_MEDIA_INTENT),\
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_AV_PLAYBACK),\
         data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 

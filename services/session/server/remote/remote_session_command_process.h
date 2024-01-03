@@ -54,7 +54,7 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    int32_t StartMediaIntent(const std::string& bundleName, const std::string& assetId) override
+    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override
     {
         return AVSESSION_SUCCESS;
     }
