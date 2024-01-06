@@ -42,6 +42,7 @@ std::map<std::string, std::pair<NapiAVCastController::OnEventHandlerType,
     { "videoSizeChange", { OnVideoSizeChange, OffVideoSizeChange } }, // timeUpdate -> videoSizeChange
     { "error", { OnPlayerError, OffPlayerError } },
     { "endOfStream", { OnEndOfStream, OffEndOfStream } },
+    { "requestPlay", { OnPlayRequest, OffPlayRequest } },
 };
 
 NapiAVCastController::NapiAVCastController()
@@ -690,22 +691,46 @@ napi_status NapiAVCastController::OnMediaItemChange(napi_env env, NapiAVCastCont
 napi_status NapiAVCastController::OnPlayNext(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env,
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "NapiAVCastControllerCallback object is nullptr");
+    auto status = napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_PLAY_NEXT, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "AddCallback failed");
+
+    int32_t ret = napiCastController->castController_
+        ->AddAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
+    return napi_ok;
 }
 
 napi_status NapiAVCastController::OnPlayPrevious(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env,
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "NapiAVCastControllerCallback object is nullptr");
+    auto status = napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_PLAY_PREVIOUS, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "AddCallback failed");
+
+    int32_t ret = napiCastController->castController_
+        ->AddAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
+    return napi_ok;
 }
 
 napi_status NapiAVCastController::OnSeekDone(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    return napiCastController->callback_->AddCallback(env,
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "NapiAVCastControllerCallback object is nullptr");
+    auto status = napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_SEEK_DONE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "AddCallback failed");
+
+    int32_t ret = napiCastController->castController_
+        ->AddAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
+    return napi_ok;
 }
 
 napi_status NapiAVCastController::OnVideoSizeChange(napi_env env, NapiAVCastController* napiCastController,
@@ -727,6 +752,13 @@ napi_status NapiAVCastController::OnEndOfStream(napi_env env, NapiAVCastControll
 {
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_END_OF_STREAM, callback);
+}
+
+napi_status NapiAVCastController::OnPlayRequest(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_PLAY_REQUEST, callback);
 }
 
 napi_status NapiAVCastController::OffPlaybackStateChange(napi_env env, NapiAVCastController* napiCastController,
@@ -752,26 +784,50 @@ napi_status NapiAVCastController::OffPlayNext(napi_env env, NapiAVCastController
 {
     CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env,
+    auto status = napiCastController->callback_->RemoveCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_PLAY_NEXT, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+
+    if (napiCastController->callback_->IsCallbacksEmpty(NapiAVCastControllerCallback::EVENT_CAST_PLAY_NEXT)) {
+        int32_t ret = napiCastController->castController_
+            ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
+    }
+    return napi_ok;
 }
 
 napi_status NapiAVCastController::OffPlayPrevious(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
-        napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env,
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    auto status = napiCastController->callback_->RemoveCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_PLAY_PREVIOUS, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+
+    if (napiCastController->callback_->IsCallbacksEmpty(NapiAVCastControllerCallback::EVENT_CAST_PLAY_PREVIOUS)) {
+        int32_t ret = napiCastController->castController_
+            ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
+    }
+    return napi_ok;
 }
 
 napi_status NapiAVCastController::OffSeekDone(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
-        napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env,
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    auto status = napiCastController->callback_->RemoveCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_SEEK_DONE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+
+    if (napiCastController->callback_->IsCallbacksEmpty(NapiAVCastControllerCallback::EVENT_CAST_SEEK_DONE)) {
+        int32_t ret = napiCastController->castController_
+            ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
+    }
+    return napi_ok;
 }
 
 napi_status NapiAVCastController::OffVideoSizeChange(napi_env env,
@@ -799,6 +855,15 @@ napi_status NapiAVCastController::OffEndOfStream(napi_env env, NapiAVCastControl
         napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_END_OF_STREAM, callback);
+}
+
+napi_status NapiAVCastController::OffPlayRequest(napi_env env, NapiAVCastController* napiCastController,
+    napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_PLAY_REQUEST, callback);
 }
 
 void NapiAVCastController::ErrCodeToMessage(int32_t errCode, std::string& message)

@@ -111,6 +111,8 @@ public:
 
     virtual void OnEndOfStream(const int32_t isLooping) = 0;
 
+    virtual void OnPlayRequest(const AVQueueItem& avQueueItem) = 0;
+
     /**
      * @brief Deconstruct SessionListener.
      * @since 9
@@ -381,6 +383,8 @@ public:
     virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
 
     virtual void OnEndOfStream(const int32_t isLooping) = 0;
+
+    virtual void OnPlayRequest(const AVQueueItem& avQueueItem) = 0;
 
     /**
      * @brief Deconstruct AVControllerCallback.

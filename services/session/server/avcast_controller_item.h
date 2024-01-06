@@ -48,6 +48,8 @@ public:
 
     void OnEndOfStream(const int32_t isLooping) override;
 
+    void OnPlayRequest(const AVQueueItem& avQueueItem) override;
+
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
     int32_t Start(const AVQueueItem& avQueueItem) override;
@@ -68,6 +70,10 @@ public:
 
     bool RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
+    int32_t AddAvailableCommand(const int32_t cmd) override;
+
+    int32_t RemoveAvailableCommand(const int32_t cmd) override;
+
     int32_t Destroy() override;
 
 protected:
@@ -81,6 +87,7 @@ private:
     AVQueueItem currentAVQueueItem_;
     std::vector<int32_t> supportedCastCmds_;
     std::function<void(int32_t, std::vector<int32_t>&)> validCommandsChangecallback_;
+    int32_t removeCmdStep_ = 1000;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_ITEM_H

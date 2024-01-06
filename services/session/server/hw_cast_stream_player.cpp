@@ -369,6 +369,32 @@ int32_t HwCastStreamPlayer::UnRegisterControllerListener(std::shared_ptr<IAVCast
     return AVSESSION_ERROR;
 }
 
+int32_t HwCastStreamPlayer::GetValidAbility(std::vector<int32_t> validAbilityList)
+{
+    SLOGI("GetValidAbility in");
+    CastEngine::StreamCapability &streamCapability;
+    if (!streamPlayer_) {
+        SLOGE("streamPlayer is nullptr");
+        return AVSESSION_ERROR;
+    }
+    streamPlayer_->GetAvailableCapability(streamCapability);
+    checkCmdsFromAbility(streamCapability, validAbilityList);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t HwCastStreamPlayer::SetValidAbility(std::vector<int32_t> validAbilityList)
+{
+    SLOGI("SetValidAbility begin");
+    CastEngine::StreamCapability &streamCapability;
+    if (!streamPlayer_) {
+        SLOGE("streamPlayer is nullptr");
+        return AVSESSION_ERROR;
+    }
+    checkAbilityFromCmds(validAbilityList, streamCapability);
+    streamPlayer_->SetAvailableCapability(streamCapability);
+    return AVSESSION_SUCCESS;
+}
+
 void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackState, bool isPlayWhenReady)
 {
     AVPlaybackState avCastPlaybackState;
@@ -635,6 +661,7 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnPlayRequest for registered listeners");
+            listener->OnPlayRequest(queueItem);
         }
     }
     std::lock_guard lockGuard(streamPlayerLock_);
@@ -679,5 +706,88 @@ void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pi
     std::lock_guard lockGuard(streamPlayerLock_);
     currentAVQueueItem_ = queueItem;
     SLOGI("Received AlbumCoverChanged callback done");
+}
+
+void HwCastStreamPlayer::OnAvailableCapabilityChanged(const CastEngine::StreamCapability &streamCapability)
+{
+    SLOGE("Received OnAvailableCapabilityChanged callback");
+    std::vector<int32_t>& supportedCastCmds;
+    checkControlScopeChange(streamCapability, supportedCastCmds);
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnValidCommandChange for registered listeners");
+            listener->OnValidCommandChange(supportedCastCmds);
+        }
+    }
+}
+
+checkCmdsFromAbility(const CastEngine::StreamCapability &streamCapability,
+    std::vector<int32_t> supportedCastCmds)
+{
+    if (controlScope.isPlaySupported) {
+        supportedCastCmds.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
+    }
+    if (controlScope.isPauseSupported) {
+        supportedCastCmds.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
+    }
+    if (controlScope.isStopSupported) {
+        supportedCastCmds.push_back(AVCastControlCommand::CAST_CONTROL_CMD_STOP);
+    }
+    if (controlScope.isNextSupported) {
+        supportedCastCmds.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT);
+    }
+    if (controlScope.isPreviousSupported) {
+        supportedCastCmds.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
+    }
+    if (controlScope.isSeekSupported) {
+        supportedCastCmds.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+    }
+    if (controlScope.isFastForwardSupported) {
+        supportedCastCmds.push_back(AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD);
+    }
+    if (controlScope.isFastRewindSupported) {
+        supportedCastCmds.push_back(AVCastControlCommand::CAST_CONTROL_CMD_REWIND);
+    }
+    if (controlScope.isLoopModeSupported) {
+        supportedCastCmds.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE);
+    }
+}
+
+checkAbilityFromCmds(std::vector<int32_t> supportedCastCmds,
+    const CastEngine::StreamCapability &streamCapability)
+{
+    for (const int32_t cmd : supportedCastCmds) {
+        switch (cmd) {
+            case AVCastControlCommand::CAST_CONTROL_CMD_PLAY:
+                streamCapability.isPlaySupported = true;
+                break;
+            case AVCastControlCommand::CAST_CONTROL_CMD_PAUSE:
+                streamCapability.isPauseSupported = true;
+                break;
+            case AVCastControlCommand::CAST_CONTROL_CMD_STOP:
+                streamCapability.isStopSupported = true;
+                break;
+            case AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT:
+                streamCapability.isNextSupported = true;
+                break;
+            case AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS:
+                streamCapability.isPreviousSupported = true;
+                break;
+            case AVCastControlCommand::CAST_CONTROL_CMD_SEEK:
+                streamCapability.isSeekSupported = true;
+                break;
+            case AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD:
+                streamCapability.isFastForwardSupported = true;
+                break;
+            case AVCastControlCommand::CAST_CONTROL_CMD_REWIND:
+                streamCapability.isFastRewindSupported = true;
+                break;
+            case AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE:
+                streamCapability.isLoopModeSupported = true;
+                break;
+            default:
+                break;
+        }
+    }
 }
 } // namespace OHOS::AVSession

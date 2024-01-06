@@ -491,6 +491,29 @@ HWTEST_F(AVCastControllerTest, SetCastPlaybackFilter001, TestSize.Level1)
 }
 
 /**
+* @tc.name: AddAvailableCommand001
+* @tc.desc: AddAvailableCommand
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, AddAvailableCommand001, TestSize.Level1)
+{
+    EXPECT_EQ(castController_->AddAvailableCommand(0), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: RemoveAvailableCommand001
+* @tc.desc: RemoveAvailableCommand
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, RemoveAvailableCommand001, TestSize.Level1)
+{
+    EXPECT_EQ(castController_->AddAvailableCommand(0), AVSESSION_SUCCESS);
+    EXPECT_EQ(castController_->RemoveAvailableCommand(0), AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: RegisterControllerListener001
 * @tc.desc: RegisterControllerListener
 * @tc.type: FUNC

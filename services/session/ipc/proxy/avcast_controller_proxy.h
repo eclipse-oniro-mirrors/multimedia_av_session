@@ -48,6 +48,10 @@ public:
 
     int32_t SetDisplaySurface(std::string& surfaceId) override;
 
+    int32_t AddAvailableCommand(const int32_t cmd) override;
+
+    int32_t RemoveAvailableCommand(const int32_t cmd) override;
+
     int32_t Destroy() override;
     
 protected:

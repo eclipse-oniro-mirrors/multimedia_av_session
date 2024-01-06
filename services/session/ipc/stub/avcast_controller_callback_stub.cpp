@@ -109,4 +109,14 @@ int32_t AVCastControllerCallbackStub::HandleOnEndOfStream(MessageParcel& data, M
     OnEndOfStream(isLooping);
     return ERR_NONE;
 }
+
+int32_t AVCastControllerCallbackStub::HandleOnPlayRequest(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVCastControllerCallbackStub::HandleOnPlayRequest");
+    sptr<AVQueueItem> item = data.ReadParcelable<AVQueueItem>();
+    CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable preload AVQueueItem failed");
+    SLOGI("HandleOnPlayRequest in");
+    OnPlayRequest(*item);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

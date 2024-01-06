@@ -230,6 +230,13 @@ void NapiAVCastControllerCallback::OnEndOfStream(const int32_t isLooping)
     HandleEvent(EVENT_CAST_END_OF_STREAM, isLooping);
 }
 
+void NapiAVCastControllerCallback::OnPlayRequest(const AVQueueItem& avQueueItem)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayRequest");
+    SLOGI("Start handle OnPlayRequest event");
+    HandleEvent(EVENT_CAST_PLAY_REQUEST, avQueueItem);
+}
+
 napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
@@ -282,5 +289,10 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
     CHECK_AND_RETURN_RET_LOG(ref != nullptr, napi_ok, "callback has been remove");
     callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);
+}
+
+bool NapiAVCastControllerCallback::IsCallbacksEmpty(int32_t event)
+{
+    return callbacks_[event].empty();
 }
 }

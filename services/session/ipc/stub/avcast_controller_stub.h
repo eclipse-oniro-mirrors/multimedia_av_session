@@ -50,6 +50,10 @@ private:
 
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleAddAvailableCommand(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleRemoveAvailableCommand(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleDestroy(MessageParcel& data, MessageParcel& reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
@@ -67,6 +71,8 @@ private:
         &AVCastControllerStub::HandleSetCastPlaybackFilter,
         &AVCastControllerStub::HandleRegisterCallbackInner,
         &AVCastControllerStub::HandleDestroy,
+        &AVCastControllerStub::HandleAddAvailableCommand,
+        &AVCastControllerStub::HandleRemoveAvailableCommand,
     };
 };
 } // namespace OHOS::AVSession
