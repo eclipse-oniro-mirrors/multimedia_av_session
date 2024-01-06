@@ -592,5 +592,22 @@ HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream001, TestSize.Level1)
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
     SLOGI("OnEndOfStream001 end!");
 }
+
+/**
+ * @tc.name: OnPlayRequest001
+ * @tc.desc: OnPlayRequest
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest001, TestSize.Level1)
+{
+    SLOGI("OnPlayRequest001 begin!");
+    std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
+    ASSERT_EQ(hwCastStreamPlayer->RegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+    CastEngine::MediaInfo mediaInfo;
+    hwCastStreamPlayer->OnPlayRequest(mediaInfo);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+    SLOGI("OnPlayRequest001 end!");
+}
 } // namespace AVSession
 } // namespace OHOS

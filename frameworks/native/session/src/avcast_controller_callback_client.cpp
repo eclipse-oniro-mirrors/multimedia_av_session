@@ -112,6 +112,17 @@ void AVCastControllerCallbackClient::OnEndOfStream(const int32_t isLooping)
         }, EVENT_NAME), "AVCastControllerCallbackClient handler postTask failed");
 }
 
+void AVCastControllerCallbackClient::OnPlayRequest(const AVQueueItem& avQueueItem)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, avQueueItem]() {
+            callback->OnPlayRequest(avQueueItem);
+        }, EVENT_NAME), "AVCastControllerCallbackClient handler postTask failed");
+}
+
 void AVCastControllerCallbackClient::AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>&
     listener)
 {

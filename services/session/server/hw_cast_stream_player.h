@@ -41,6 +41,8 @@ public:
     int32_t SetDisplaySurface(std::string &surfaceId) override;
     int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
     int32_t UnRegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
+    int32_t SetValidAbility(std::vector<int32_t> validAbilityList) override;
+    int32_t GetValidAbility(std::vector<int32_t> validAbilityList) override;
 
     void OnStateChanged(const CastEngine::PlayerStates playbackState, bool isPlayWhenReady) override;
     void OnPositionChanged(int position, int bufferPosition, int duration) override;
@@ -57,11 +59,16 @@ public:
     void OnPlayRequest(const CastEngine::MediaInfo &mediaInfo) override;
     void OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
     void OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
+    void OnAvailableCapabilityChanged(const CastEngine::StreamCapability &mediaInfo) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
 private:
     int32_t CheckCastTime(int32_t castTime);
+    void checkCmdsFromAbility(const CastEngine::StreamCapability &streamCapability,
+        std::vector<int32_t> supportedCastCmds);
+    void checkAbilityFromCmds(std::vector<int32_t> supportedCastCmds,
+        const CastEngine::StreamCapability &streamCapability);
 
     int32_t castMinTime = 1000;
     std::recursive_mutex streamPlayerLock_;

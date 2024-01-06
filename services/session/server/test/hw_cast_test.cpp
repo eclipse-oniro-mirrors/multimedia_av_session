@@ -603,6 +603,23 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnEndOfStream001, TestSize.Level1)
     SLOGI("HwCastStreamPlayerOnEndOfStream001 end!");
 }
 
+/**
+ * @tc.name: HwCastStreamPlayerOnPlayRequest001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayRequest001, TestSize.Level1)
+{
+    SLOGI("HwCastStreamPlayerOnPlayRequest001 begin!");
+    std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
+    EXPECT_EQ(streamplayer != nullptr, true);
+    streamplayer->Init();
+    OHOS::CastEngine::MediaInfo mediaInfo;
+    streamplayer->OnPlayRequest(mediaInfo);
+    SLOGI("HwCastStreamPlayerOnPlayRequest001 end!");
+}
+
 class StreamPlayerImpl : public OHOS::CastEngine::IStreamPlayer {
 public:
     int GetPosition(int32_t& currentPosition) override

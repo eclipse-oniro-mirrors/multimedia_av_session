@@ -67,7 +67,6 @@ void AVCastControllerItem::OnPlayNext()
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayNext();
-    validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT, supportedCastCmds_);
 }
 
 void AVCastControllerItem::OnPlayPrevious()
@@ -76,7 +75,6 @@ void AVCastControllerItem::OnPlayPrevious()
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayPrevious();
-    validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS, supportedCastCmds_);
 }
 
 void AVCastControllerItem::OnSeekDone(const int32_t seekNumber)
@@ -109,6 +107,14 @@ void AVCastControllerItem::OnEndOfStream(const int32_t isLooping)
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnEndOfStream(isLooping);
+}
+
+void AVCastControllerItem::OnPlayRequest(const AVQueueItem& avQueueItem)
+{
+    SLOGI("OnPlayRequest");
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
+    callback_->OnPlayRequest(avQueueItem);
 }
 
 int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd)
@@ -156,7 +162,8 @@ int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 
 int32_t AVCastControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 {
-    validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_INVALID, cmds);
+    validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_MAX, cmds);
+    SLOGI("get available command with size %{public}d", static_cast<int32_t>(cmds.size()));
     return AVSESSION_SUCCESS;
 }
 
@@ -169,6 +176,34 @@ int32_t AVCastControllerItem::SetDisplaySurface(std::string& surfaceId)
 int32_t AVCastControllerItem::SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
     castPlaybackMask_ = filter;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVCastControllerItem::AddAvailableCommand(const int32_t cmd)
+{
+    SLOGI("add available command %{/public}d", cmd);
+    std::vector<int32_t> cmds(AVCastControlCommand::CAST_CONTROL_CMD_MAX);
+    validCommandsChangecallback_(cmd, cmds);
+    SLOGI("add available command with size %{public}d", static_cast<int32_t>(cmds.size()));
+    if (cmds.empty()) {
+        SLOGI("check is sink session with empty, not set");
+    } else {
+        castControllerProxy_->SetValidAbility(cmds);
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
+{
+    SLOGI("remove available command %{/public}d", cmd);
+    std::vector<int32_t> cmds(AVCastControlCommand::CAST_CONTROL_CMD_MAX);
+    validCommandsChangecallback_(cmd + removeCmdStep_, cmds);
+    SLOGI("remove available command with size %{public}d", static_cast<int32_t>(cmds.size()));
+    if (cmds.empty()) {
+        SLOGI("check is sink session with empty, not set");
+    } else {
+        castControllerProxy_->SetValidAbility(cmds);
+    }
     return AVSESSION_SUCCESS;
 }
 

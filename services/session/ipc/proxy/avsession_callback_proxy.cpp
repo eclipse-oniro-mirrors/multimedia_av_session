@@ -253,6 +253,7 @@ void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
     MessageOption option = { MessageOption::TF_ASYNC };
     CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_OUTPUT_DEVICE_CHANGE, data, reply, option) == 0,
                          "send request failed");
+    SLOGI("outputdevice change send connect state %{public}d", connectionState);
 }
 
 void AVSessionCallbackProxy::OnCommonCommand(const std::string& commonCommand,

@@ -357,10 +357,24 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     auto callback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
         if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_INVALID) {
+            supportedCastCmds_.clear();
             supportedCastCmds = supportedCastCmds_;
             return;
         }
-        AddSupportCastCommand(cmd);
+        if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_MAX) {
+            supportedCastCmds = supportedCastCmds_;
+            return;
+        }
+        if (descriptor_.sessionTag_ == "RemoteCast") {
+            SLOGE("sink session should mote modify valid cmds");
+            supportedCastCmds = {};
+            return;
+        }
+        if (cmd > removeCmdStep_) {
+            DeleteSupportCastCommand(cmd - removeCmdStep_);
+        } else {
+            AddSupportCastCommand(cmd);
+        }
         supportedCastCmds = supportedCastCmds_;
         return;
     }

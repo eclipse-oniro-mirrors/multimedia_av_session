@@ -124,6 +124,24 @@ public:
     virtual int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) = 0;
 
     /**
+     * @brief Set valid ability list for current cast session.
+     *
+     * @param { std::vector<int32_t> } validAbilityList - valid ability list for set.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 10
+    */
+    virtual int32_t SetValidAbility(std::vector<int32_t> validAbilityList) = 0;
+
+    /**
+     * @brief Get valid ability list for current cast session.
+     *
+     * @param { std::vector<int32_t> } validAbilityList - valid ability list for get.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 10
+    */
+    virtual int32_t GetValidAbility(std::vector<int32_t> validAbilityList) = 0;
+
+    /**
      * @brief Set display surface of the current media.
      *
      * @param { std::string& } surfaceId - Surface required for displaying images.

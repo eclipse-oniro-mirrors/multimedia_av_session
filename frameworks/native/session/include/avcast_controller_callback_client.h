@@ -41,6 +41,8 @@ public:
 
     void OnEndOfStream(const int32_t isLooping) override;
 
+    void OnPlayRequest(const AVQueueItem& avQueueItem) override;
+
     void AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 
 private:

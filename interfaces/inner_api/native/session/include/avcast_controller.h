@@ -67,6 +67,10 @@ public:
 
     virtual int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) = 0;
 
+    virtual int32_t AddAvailableCommand(const int32_t cmd) = 0;
+
+    virtual int32_t RemoveAvailableCommand(const int32_t cmd) = 0;
+
     virtual int32_t Destroy() = 0;
 
     /**

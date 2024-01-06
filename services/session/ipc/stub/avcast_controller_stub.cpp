@@ -179,6 +179,23 @@ int32_t AVCastControllerStub::HandleSetCastPlaybackFilter(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int32_t AVCastControllerStub::HandleAddAvailableCommand(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t cmd = data.ReadInt32();
+    int32_t ret = AddAvailableCommand(cmd);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "AddAvailableCommand failed");
+    return ERR_NONE;
+}
+
+int32_t AVCastControllerStub::HandleRemoveAvailableCommand(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t cmd = data.ReadInt32();
+    int32_t ret = RemoveAvailableCommand(cmd);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "RemoveAvailableCommand failed");
+    return ERR_NONE;
+}
 
 int32_t AVCastControllerStub::HandleGetValidCommands(MessageParcel& data, MessageParcel& reply)
 {
