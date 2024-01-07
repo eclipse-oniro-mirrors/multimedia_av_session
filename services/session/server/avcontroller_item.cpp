@@ -170,6 +170,8 @@ int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, co
 {
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
+    CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),
+        ERR_COMMAND_SEND_EXCEED_MAX, "common command send number exceed max");
     session_->ExecueCommonCommand(commonCommand, commandArgs);
     return AVSESSION_SUCCESS;
 }
