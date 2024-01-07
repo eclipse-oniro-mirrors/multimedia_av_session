@@ -2309,6 +2309,8 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
 
 void AVSessionService::NotifySystemUI(const std::shared_ptr<AVSessionDescriptor>& historyDescriptor)
 {
+    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
+    CHECK_AND_RETURN_LOG(strcmp(deviceProp.c_str(), "2in1") != 0, "2in1 not support");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
 
