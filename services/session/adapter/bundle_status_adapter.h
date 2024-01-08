@@ -58,9 +58,9 @@ private:
 
     const int32_t interfaceType = 9;
 
-    const std::string PLAY_MUSICLIST = "playMusicList";
+    const std::string PLAY_MUSICLIST = "PlayMusicList";
 
-    const std::string PLAY_MUSIC = "playMusic";
+    const std::string PLAY_MUSIC = "PlayMusic";
 };
 
 class BundleStatusCallbackImpl : public AppExecFwk::BundleStatusCallbackHost {
