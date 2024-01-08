@@ -43,6 +43,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event)
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
+    SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFlag(*ref, isValid_);
     }
