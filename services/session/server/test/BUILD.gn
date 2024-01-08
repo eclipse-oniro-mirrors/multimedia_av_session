@@ -12,6 +12,7 @@
 # limitations under the License.
 import("//build/test.gni")
 import("../../../../castplus_cast_engine_part.gni")
+import("../../../../collaborationfwk_part.gni")
 import("../../../../config.gni")
 
 module_output_path = "multimedia_av_session/session"
@@ -25,11 +26,91 @@ config("module_private_config") {
     "../../ipc/proxy/",
     "../../ipc/stub/",
     "../../server/",
+    "../../server/migrate/",
+    "../../server/softbus/",
     "../../server/remote/",
     "../../../../interfaces/inner_api/native/session/include/",
     "../../../../frameworks/native/session/include",
     "../../adapter/",
     "../../../../utils/include/",
+  ]
+}
+
+ohos_unittest("MigrateAVSessionTest") {
+  module_out_path = module_output_path
+
+  sources = [ "migrate_avsession_test.cpp" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "../../../../frameworks/common:avsession_common",
+    "../../../../frameworks/native/session:avsession_client",
+    "../../../../utils:avsession_utils",
+    "../../../session:avsession_item",
+    "../../../session:avsession_server",
+    "../../../session:avsession_service",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gtest_main",
+    "//third_party/jsoncpp:jsoncpp",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "audio_framework:audio_client",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+  if (collaborationfwk_enable) {
+    cflags_cc += [ "-DCOLLABORATIONFWK_ENABLE" ]
+    external_deps += [ "CollaborationFwk:cfwk_allconnect_client" ]
+  }
+}
+
+ohos_unittest("SoftbusSessionManagerTest") {
+  module_out_path = module_output_path
+
+  sources = [ "softbus_session_manager_test.cpp" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "../../../session:avsession_server",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "audio_framework:audio_client",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
   ]
 }
 
@@ -366,8 +447,10 @@ group("av_session_server_unittest") {
     ":AudioAdapterTest",
     ":BkGrAudioControllerTest",
     ":BkGrAudioControllerTest",
+    ":MigrateAVSessionTest",
     ":RemoteUtilsTest",
     ":SessionStackTest",
+    ":SoftbusSessionManagerTest",
   ]
 
   if (castplus_cast_engine_enable) {
