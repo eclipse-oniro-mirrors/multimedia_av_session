@@ -21,12 +21,14 @@
 namespace OHOS::AVSession {
 NapiAVSessionCallback::NapiAVSessionCallback()
 {
-    SLOGI("construct");
+    SLOGI("construct NapiAVSessionCallback");
+    isValid_ = std::make_shared<bool>(true);
 }
 
 NapiAVSessionCallback::~NapiAVSessionCallback()
 {
-    SLOGI("destroy");
+    SLOGI("destroy NapiAVSessionCallback");
+    *isValid_ = false;
 }
 
 void NapiAVSessionCallback::HandleEvent(int32_t event)
@@ -37,7 +39,20 @@ void NapiAVSessionCallback::HandleEvent(int32_t event)
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref);
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGI("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            });
     }
 }
 
@@ -50,10 +65,24 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const T& param)
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [param](napi_env env, int& argc, napi_value* argv) {
-            argc = NapiUtils::ARGC_ONE;
-            NapiUtils::SetValue(env, param, *argv);
-        });
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGI("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [param](napi_env env, int& argc, napi_value* argv) {
+                argc = NapiUtils::ARGC_ONE;
+                NapiUtils::SetValue(env, param, *argv);
+            });
     }
 }
 
@@ -66,13 +95,27 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const std::string& firstP
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
-            argc = NapiUtils::ARGC_TWO;
-            auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
-            CHECK_RETURN_VOID(status == napi_ok, "AVSessionCallback set first param invalid");
-            status = NapiUtils::SetValue(env, secondParam, argv[1]);
-            CHECK_RETURN_VOID(status == napi_ok, "AVSessionCallback set second param invalid");
-        });
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGI("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
+                argc = NapiUtils::ARGC_TWO;
+                auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
+                CHECK_RETURN_VOID(status == napi_ok, "AVSessionCallback set first param invalid");
+                status = NapiUtils::SetValue(env, secondParam, argv[1]);
+                CHECK_RETURN_VOID(status == napi_ok, "AVSessionCallback set second param invalid");
+            });
     }
 }
 
@@ -85,13 +128,27 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const int32_t firstParam,
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
-            argc = NapiUtils::ARGC_TWO;
-            auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
-            CHECK_RETURN_VOID(status == napi_ok, "AVSessionCallback set first param invalid");
-            status = NapiUtils::SetValue(env, secondParam, argv[1]);
-            CHECK_RETURN_VOID(status == napi_ok, "AVSessionCallback set second param invalid");
-        });
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGI("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
+                argc = NapiUtils::ARGC_TWO;
+                auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
+                CHECK_RETURN_VOID(status == napi_ok, "AVSessionCallback set first param invalid");
+                status = NapiUtils::SetValue(env, secondParam, argv[1]);
+                CHECK_RETURN_VOID(status == napi_ok, "AVSessionCallback set second param invalid");
+            });
     }
 }
 
