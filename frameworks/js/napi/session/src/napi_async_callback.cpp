@@ -123,14 +123,14 @@ void NapiAsyncCallback::AfterWorkCallbackWithFunc(uv_work_t* work, int aStatus)
     }
 
     SLOGI("queue uv_after_work_cb");
+    CHECK_RETURN_VOID(*context->isValid, "AfterWorkCallbackWithFunc failed for context is invalid.");
     napi_value global {};
     napi_get_global(context->env, &global);
     napi_value function {};
-    CHECK_RETURN_VOID(*context->isValid, "callback when callback is invalid");
-    SLOGI("callback with ref %{public}p, %{public}p", &(context->method), *(&(context->method)));
-    CHECK_RETURN_VOID(context->checkCallbackValid(), "callback but func already lost");
+    CHECK_RETURN_VOID(context->checkCallbackValid(), "Get func reference failed for func has been deleted.");
     napi_get_reference_value(context->env, context->method, &function);
     napi_value result;
+    CHECK_RETURN_VOID(context->checkCallbackValid(), "Call func failed for func has been deleted.");
     napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
     if (status != napi_ok) {
         SLOGE("call function failed status=%{public}d.", status);
