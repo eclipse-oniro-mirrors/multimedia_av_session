@@ -126,13 +126,14 @@ bool AVCallMetaData::CopyToByMask(AVCallMetaMaskType& mask, AVCallMetaData& meta
 
 bool AVCallMetaData::CopyFrom(const AVCallMetaData& metaIn)
 {
-    if (metaIn.name_.empty()) {
-        SLOGE("assetId is empty");
+    if (metaIn.name_.empty() && metaIn.phoneNumber_.empty() &&
+        metaIn.mediaImageUri_.empty() && (metaIn.mediaImage_ == nullptr)) {
+        SLOGE("AVCallMetaData is empty");
         return false;
     }
 
-    if (metaIn.name_ != name_) {
-        SLOGD("name_ not equal");
+    if (metaIn.name_ != name_ || metaIn.phoneNumber_ != phoneNumber_) {
+        SLOGD("AVCallMetaData not equal");
         *this = metaIn;
         return true;
     }
@@ -151,7 +152,7 @@ bool AVCallMetaData::CopyFrom(const AVCallMetaData& metaIn)
 
 bool AVCallMetaData::IsValid() const
 {
-    return phoneNumber_ != "";
+    return phoneNumber_ != "" || name_ != "" || mediaImage_ != nullptr || mediaImageUri_ != "";
 }
 
 void AVCallMetaData::CloneName(const AVCallMetaData& from, AVCallMetaData& to)
