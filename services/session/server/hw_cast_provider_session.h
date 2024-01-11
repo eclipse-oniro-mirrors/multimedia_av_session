@@ -44,6 +44,8 @@ private:
     std::shared_ptr<CastEngine::ICastSession> castSession_;
     std::vector<std::shared_ptr<IAVCastSessionStateListener>> castSessionStateListenerList_;
     std::mutex mutex_;
+    int32_t stashDeviceState_ = -1;
+    std::string stashDeviceId_;
 };
 } // namespace OHOS::AVSession
 

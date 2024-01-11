@@ -96,7 +96,17 @@ bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAV
         return false;
     }
     castSessionStateListenerList_.emplace_back(listener);
-    SLOGD("Provider session register cast session state listener finished");
+    SLOGI("register listener finished and check stash state %{public}d", static_cast<int32_t>(stashDeviceState_));
+    if (stashDeviceState_ > 0) {
+        DeviceInfo deviceInfo;
+        deviceInfo.deviceId_ = stashDeviceId_;
+        deviceInfo.deviceName_ = "RemoteCast";
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        if (listener != nullptr) {
+            SLOGI("retry trigger the OnCastStateChange for registered listeners");
+            listener->OnCastStateChange(static_cast<int>(stashDeviceState_), deviceInfo);
+        }
+    }
     return true;
 }
 
@@ -124,9 +134,12 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     int32_t deviceState = static_cast<int32_t>(stateInfo.deviceState);
     SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(deviceState));
     if (castSessionStateListenerList_.size() == 0) {
-        SLOGI("current has not registered listener");
+        SLOGI("current has not registered listener, stash state: %{public}d", static_cast<int32_t>(deviceState));
+        stashDeviceState_ = deviceState;
+        stashDeviceId_ = stateInfo.deviceId;
         return;
     }
+    stashDeviceState_ = -1;
     std::unique_lock<std::mutex> lock(mutex_);
     for (auto listener : castSessionStateListenerList_) {
         lock.unlock();
