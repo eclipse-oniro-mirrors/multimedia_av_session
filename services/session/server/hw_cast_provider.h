@@ -60,6 +60,7 @@ private:
     std::map<int, std::shared_ptr<IAVCastControllerProxy>> avCastControllerMap_;
     std::vector<std::shared_ptr<IAVCastStateListener>> castStateListenerList_;
     std::recursive_mutex mutexLock_;
+    bool isRelease_ = false;
 };
 } // namespace OHOS::AVSession
 

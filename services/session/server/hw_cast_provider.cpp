@@ -67,6 +67,13 @@ void HwCastProvider::Release()
         castStateListenerList_.clear();
         castFlag_.clear();
     }
+    if (!isRelease_) {
+        SLOGI("release in with check pass");
+        isRelease_ = true;
+    } else {
+        SLOGW("already in release, check return");
+        return;
+    }
     CastSessionManager::GetInstance().UnregisterListener();
     CastSessionManager::GetInstance().Release();
     SLOGD("Release done");
@@ -360,6 +367,7 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
         for (auto listener : castStateListenerList_) {
             listener->OnSessionCreated(castId);
         }
+        SLOGI("do session create notify finished %{public}d", castId);
     }).detach();
 }
 
