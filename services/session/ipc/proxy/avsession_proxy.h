@@ -105,6 +105,7 @@ private:
     static inline BrokerDelegator<AVSessionProxy> delegator_;
     bool isDestroyed_ = {};
     std::shared_ptr<AVSessionController> controller_;
+    const size_t DEFAULT_IPC_CAPACITY = 1048576; // Increase the IPC default capacity(200K) to 1M
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> castController_;
