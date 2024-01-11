@@ -286,11 +286,12 @@ int32_t AVSessionProxy::SetAVQueueItems(const std::vector<AVQueueItem>& items)
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVQueueItems");
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
+    data.SetMaxCapacity(DEFAULT_IPC_CAPACITY);
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(items.size()), ERR_UNMARSHALLING, "write items num int32 failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(items.size()), ERR_MARSHALLING, "write items num int32 failed");
     for (auto &parcelable : items) {
-        CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&parcelable), ERR_UNMARSHALLING, "Write items failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&parcelable), ERR_MARSHALLING, "Write items failed");
     }
     MessageParcel reply;
     MessageOption option;

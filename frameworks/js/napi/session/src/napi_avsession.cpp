@@ -498,9 +498,7 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
 napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVQueueItems");
-    struct ConcreteContext : public ContextBase {
-        std::vector<AVQueueItem> items_;
-    };
+    struct ConcreteContext : public ContextBase { std::vector<AVQueueItem> items_; };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         NapiUtils::ThrowError(env, "SetAVQueueItems failed : no memory",
@@ -536,6 +534,8 @@ napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
                 context->errMessage = "SetAVQueueItems failed : native invalid parameters";
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SetAVQueueItems failed : native no permission";
+            } else if (ret == ERR_MARSHALLING) {
+                context->errMessage = "SetAVQueueItems failed : item number is out of range";
             } else {
                 context->errMessage = "SetAVQueueItems failed : native server exception";
             }
@@ -543,9 +543,7 @@ napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SetAVQueueItems", executor, complete);
 }
 
