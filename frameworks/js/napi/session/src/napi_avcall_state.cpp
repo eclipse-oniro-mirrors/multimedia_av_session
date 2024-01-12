@@ -65,6 +65,7 @@ napi_status NapiAVCallState::ConvertFilter(napi_env env, napi_value filter,
             }
         }
     }
+    CHECK_RETURN(!mask.none(), "array element invalid.", napi_invalid_arg);
 
     return napi_ok;
 }
