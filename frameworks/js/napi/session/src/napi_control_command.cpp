@@ -33,6 +33,7 @@ std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlComm
     { "setSpeed", { GetSpeed, SetSpeed, AVControlCommand::SESSION_CMD_SET_SPEED } },
     { "setLoopMode", { GetLoopMode, SetLoopMode, AVControlCommand::SESSION_CMD_SET_LOOP_MODE } },
     { "toggleFavorite", { GetAssetId, SetAssetId, AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE } },
+    { "playFromAssetId", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID } },
     { "answer", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_ANSWER } },
     { "hangUp", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_HANG_UP } },
     { "toggleCallMute", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE } },

@@ -255,6 +255,14 @@ public:
     virtual void OnAVCallToggleCallMute() = 0;
 
     /**
+     * @brief Play from assetId.
+     *
+     * @param assetId Id for asset
+     * @since 11
+    */
+    virtual void OnPlayFromAssetId(int64_t assetId) = 0;
+
+    /**
      * @brief Deconstruct AVSessionCallback.
      * @since 9
     */

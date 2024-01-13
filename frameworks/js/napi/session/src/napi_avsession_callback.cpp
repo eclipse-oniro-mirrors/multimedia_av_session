@@ -265,6 +265,12 @@ void NapiAVSessionCallback::OnAVCallToggleCallMute()
     HandleEvent(EVENT_AVCALL_TOGGLE_CALL_MUTE);
 }
 
+void NapiAVSessionCallback::OnPlayFromAssetId(int64_t assetId)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPlayFromAssetId");
+    HandleEvent(EVENT_PLAY_FROM_ASSETID, assetId);
+}
+
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     SLOGI("Add callback %{public}d", event);

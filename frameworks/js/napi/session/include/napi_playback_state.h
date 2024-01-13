@@ -58,6 +58,21 @@ private:
     static napi_status GetVolume(napi_env env, napi_value in, AVPlaybackState& out);
     static napi_status SetVolume(napi_env env, const AVPlaybackState& in, napi_value& out);
 
+    static napi_status GetMaxVolume(napi_env env, napi_value in, AVPlaybackState& out);
+    static napi_status SetMaxVolume(napi_env env, const AVPlaybackState& in, napi_value& out);
+
+    static napi_status GetMuted(napi_env env, napi_value in, AVPlaybackState& out);
+    static napi_status SetMuted(napi_env env, const AVPlaybackState& in, napi_value& out);
+
+    static napi_status GetDuration(napi_env env, napi_value in, AVPlaybackState& out);
+    static napi_status SetDuration(napi_env env, const AVPlaybackState& in, napi_value& out);
+
+    static napi_status GetVideoWidth(napi_env env, napi_value in, AVPlaybackState& out);
+    static napi_status SetVideoWidth(napi_env env, const AVPlaybackState& in, napi_value& out);
+
+    static napi_status GetVideoHeight(napi_env env, napi_value in, AVPlaybackState& out);
+    static napi_status SetVideoHeight(napi_env env, const AVPlaybackState& in, napi_value& out);
+
     static napi_status GetExtras(napi_env env, napi_value in, AVPlaybackState& out);
     static napi_status SetExtras(napi_env env, const AVPlaybackState& in, napi_value& out);
 

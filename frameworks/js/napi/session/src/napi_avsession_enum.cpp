@@ -47,6 +47,7 @@ static napi_value ExportLoopMode(napi_env env)
     (void)SetNamedProperty(env, result, "LOOP_MODE_SINGLE", AVPlaybackState::LOOP_MODE_SINGLE);
     (void)SetNamedProperty(env, result, "LOOP_MODE_LIST", AVPlaybackState::LOOP_MODE_LIST);
     (void)SetNamedProperty(env, result, "LOOP_MODE_SHUFFLE", AVPlaybackState::LOOP_MODE_SHUFFLE);
+    (void)SetNamedProperty(env, result, "LOOP_MODE_CUSTOM", AVPlaybackState::LOOP_MODE_CUSTOM);
 
     napi_object_freeze(env, result);
     return result;
@@ -184,7 +185,7 @@ static napi_value ExportDisplayTag(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
 
-    (void)SetNamedProperty(env, result, "AUDIO_VIVID", AVMetaData::DISPLAY_TAG_AUDIO_VIVID);
+    (void)SetNamedProperty(env, result, "TAG_AUDIO_VIVID", AVMetaData::DISPLAY_TAG_AUDIO_VIVID);
 
     napi_object_freeze(env, result);
     return result;

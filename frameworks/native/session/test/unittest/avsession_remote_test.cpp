@@ -192,6 +192,7 @@ public:
     void OnAVCallAnswer() override {};
     void OnAVCallHangUp() override {};
     void OnAVCallToggleCallMute() override {};
+    void OnPlayFromAssetId(int64_t assetId) override {};
 
     ~AVSessionCastAudioCallbackImpl() override;
 };

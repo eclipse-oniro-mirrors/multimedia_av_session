@@ -231,6 +231,7 @@ private:
     void HandleOnSetSpeed(const AVControlCommand& cmd);
     void HandleOnSetLoopMode(const AVControlCommand& cmd);
     void HandleOnToggleFavorite(const AVControlCommand& cmd);
+    void HandleOnPlayFromAssetId(const AVControlCommand& cmd);
 
     using HandlerFuncType = void(AVSessionItem::*)(const AVControlCommand&);
     static inline HandlerFuncType cmdHandlers[] = {
@@ -248,6 +249,7 @@ private:
         &AVSessionItem::HandleOnAVCallAnswer,
         &AVSessionItem::HandleOnAVCallHangUp,
         &AVSessionItem::HandleOnAVCallToggleCallMute,
+        &AVSessionItem::HandleOnPlayFromAssetId,
     };
 
     std::recursive_mutex controllersLock_;

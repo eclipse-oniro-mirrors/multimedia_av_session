@@ -48,8 +48,13 @@ public:
         PLAYBACK_KEY_IS_FAVORITE = 5,
         PLAYBACK_KEY_ACTIVE_ITEM_ID = 6,
         PLAYBACK_KEY_VOLUME = 7,
-        PLAYBACK_KEY_EXTRAS = 8,
-        PLAYBACK_KEY_MAX = 9,
+        PLAYBACK_KEY_MAX_VOLUME,
+        PLAYBACK_KEY_MUTED,
+        PLAYBACK_KEY_DURATION,
+        PLAYBACK_KEY_VIDEO_WIDTH,
+        PLAYBACK_KEY_VIDEO_HEIGHT,
+        PLAYBACK_KEY_EXTRAS,
+        PLAYBACK_KEY_MAX,
     };
 
     enum {
@@ -100,6 +105,21 @@ public:
     void SetVolume(int32_t volume);
     int32_t GetVolume() const;
 
+    void SetMaxVolume(int32_t maxVolume);
+    int32_t GetMaxVolume() const;
+
+    void SetMuted(bool muted);
+    bool GetMuted() const;
+
+    void SetDuration(int32_t duration);
+    int32_t GetDuration() const;
+
+    void SetVideoWidth(int32_t videoWidth);
+    int32_t GetVideoWidth() const;
+
+    void SetVideoHeight(int32_t videoHeight);
+    int32_t GetVideoHeight() const;
+
     void SetExtras(const std::shared_ptr<AAFwk::WantParams>& extras);
     std::shared_ptr<AAFwk::WantParams> GetExtras() const;
 
@@ -117,6 +137,11 @@ public:
         PLAYBACK_KEY_IS_FAVORITE,
         PLAYBACK_KEY_ACTIVE_ITEM_ID,
         PLAYBACK_KEY_VOLUME,
+        PLAYBACK_KEY_MAX_VOLUME,
+        PLAYBACK_KEY_MUTED,
+        PLAYBACK_KEY_DURATION,
+        PLAYBACK_KEY_VIDEO_WIDTH,
+        PLAYBACK_KEY_VIDEO_HEIGHT,
     };
 
 private:
@@ -130,6 +155,11 @@ private:
     bool isFavorite_ {};
     int32_t activeItemId_ {};
     int32_t volume_ = 0;
+    int32_t maxVolume_ = 0;
+    bool muted_ {};
+    int32_t duration_ = 0;
+    int32_t videoWidth_ = 0;
+    int32_t videoHeight_ = 0;
     std::shared_ptr<AAFwk::WantParams> extras_ = nullptr;
 
     static void CloneState(const AVPlaybackState& from, AVPlaybackState& to);
@@ -140,6 +170,11 @@ private:
     static void CloneIsFavorite(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneActiveItemId(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneVolume(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneMaxVolume(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneMuted(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneDuration(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneVideoWidth(const AVPlaybackState& from, AVPlaybackState& to);
+    static void CloneVideoHeight(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneExtras(const AVPlaybackState& from, AVPlaybackState& to);
 
     using CloneActionType = void(*)(const AVPlaybackState& from, AVPlaybackState& to);
@@ -152,6 +187,11 @@ private:
         &AVPlaybackState::CloneIsFavorite,
         &AVPlaybackState::CloneActiveItemId,
         &AVPlaybackState::CloneVolume,
+        &AVPlaybackState::CloneMaxVolume,
+        &AVPlaybackState::CloneMuted,
+        &AVPlaybackState::CloneDuration,
+        &AVPlaybackState::CloneVideoWidth,
+        &AVPlaybackState::CloneVideoHeight,
         &AVPlaybackState::CloneExtras,
     };
 };
