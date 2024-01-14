@@ -26,6 +26,11 @@ std::map<std::string, NapiPlaybackState::GetterType> NapiPlaybackState::getterMa
     { "isFavorite", GetIsFavorite },
     { "activeItemId", GetActiveItemId },
     { "volume", GetVolume },
+    { "maxVolume", GetMaxVolume },
+    { "muted", GetMuted },
+    { "duration", GetDuration },
+    { "videoWidth", GetVideoWidth },
+    { "videoHeight", GetVideoHeight },
     { "extras", GetExtras },
 };
 
@@ -38,6 +43,11 @@ std::map<int32_t, NapiPlaybackState::SetterType> NapiPlaybackState::setterMap_ =
     { AVPlaybackState::PLAYBACK_KEY_IS_FAVORITE, SetIsFavorite },
     { AVPlaybackState::PLAYBACK_KEY_ACTIVE_ITEM_ID, SetActiveItemId },
     { AVPlaybackState::PLAYBACK_KEY_VOLUME, SetVolume },
+    { AVPlaybackState::PLAYBACK_KEY_MAX_VOLUME, SetMaxVolume },
+    { AVPlaybackState::PLAYBACK_KEY_MUTED, SetMuted },
+    { AVPlaybackState::PLAYBACK_KEY_DURATION, SetDuration },
+    { AVPlaybackState::PLAYBACK_KEY_VIDEO_WIDTH, SetVideoWidth },
+    { AVPlaybackState::PLAYBACK_KEY_VIDEO_HEIGHT, SetVideoHeight },
     { AVPlaybackState::PLAYBACK_KEY_EXTRAS, SetExtras },
 };
 
@@ -50,6 +60,11 @@ std::map<std::string, int32_t> NapiPlaybackState::filterMap_ = {
     { "isFavorite", AVPlaybackState::PLAYBACK_KEY_IS_FAVORITE },
     { "activeItemId", AVPlaybackState::PLAYBACK_KEY_ACTIVE_ITEM_ID },
     { "volume", AVPlaybackState::PLAYBACK_KEY_VOLUME },
+    { "maxVolume", AVPlaybackState::PLAYBACK_KEY_MAX_VOLUME },
+    { "muted", AVPlaybackState::PLAYBACK_KEY_MUTED },
+    { "duration", AVPlaybackState::PLAYBACK_KEY_DURATION },
+    { "videoWidth", AVPlaybackState::PLAYBACK_KEY_VIDEO_WIDTH },
+    { "videoHeight", AVPlaybackState::PLAYBACK_KEY_VIDEO_HEIGHT },
     { "extras", AVPlaybackState::PLAYBACK_KEY_EXTRAS },
 };
 
@@ -301,6 +316,101 @@ napi_status NapiPlaybackState::SetVolume(napi_env env, const AVPlaybackState& in
     auto status = NapiUtils::SetValue(env, in.GetVolume(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "volume", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiPlaybackState::GetMaxVolume(napi_env env, napi_value in, AVPlaybackState& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "maxVolume", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetMaxVolume(property);
+    return status;
+}
+
+napi_status NapiPlaybackState::SetMaxVolume(napi_env env, const AVPlaybackState& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetMaxVolume(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "maxVolume", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiPlaybackState::GetMuted(napi_env env, napi_value in, AVPlaybackState& out)
+{
+    bool property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "muted", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetMuted(property);
+    return status;
+}
+
+napi_status NapiPlaybackState::SetMuted(napi_env env, const AVPlaybackState& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetMuted(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "muted", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiPlaybackState::GetDuration(napi_env env, napi_value in, AVPlaybackState& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "duration", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetDuration(property);
+    return status;
+}
+
+napi_status NapiPlaybackState::SetDuration(napi_env env, const AVPlaybackState& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetDuration(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "duration", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiPlaybackState::GetVideoWidth(napi_env env, napi_value in, AVPlaybackState& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "videoWidth", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetVideoWidth(property);
+    return status;
+}
+
+napi_status NapiPlaybackState::SetVideoWidth(napi_env env, const AVPlaybackState& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetVideoWidth(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "videoWidth", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiPlaybackState::GetVideoHeight(napi_env env, napi_value in, AVPlaybackState& out)
+{
+    int32_t property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "videoHeight", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetVideoHeight(property);
+    return status;
+}
+
+napi_status NapiPlaybackState::SetVideoHeight(napi_env env, const AVPlaybackState& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetVideoHeight(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "videoHeight", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }

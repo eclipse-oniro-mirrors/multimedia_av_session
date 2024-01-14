@@ -69,6 +69,7 @@ std::map<int32_t, std::string> AVSessionDumper::loopMode_ = {
     { AVPlaybackState::LOOP_MODE_SINGLE, "single" },
     { AVPlaybackState::LOOP_MODE_LIST, "list" },
     { AVPlaybackState::LOOP_MODE_SHUFFLE, "shuffle" },
+    { AVPlaybackState::LOOP_MODE_CUSTOM, "custom" },
 };
 
 std::vector<std::string> AVSessionDumper::errMessage_ = {};

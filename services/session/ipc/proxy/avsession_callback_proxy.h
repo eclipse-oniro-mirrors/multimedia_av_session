@@ -40,6 +40,7 @@ public:
     void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
+    void OnPlayFromAssetId(int64_t assetId) override;
 private:
     static inline BrokerDelegator<AVSessionCallbackProxy> delegator_;
 };

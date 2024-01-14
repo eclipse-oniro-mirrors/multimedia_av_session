@@ -33,6 +33,11 @@ bool AVPlaybackState::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFavorite_) &&
         parcel.WriteInt32(activeItemId_) &&
         parcel.WriteInt32(volume_) &&
+        parcel.WriteInt32(maxVolume_) &&
+        parcel.WriteBool(muted_) &&
+        parcel.WriteInt32(duration_) &&
+        parcel.WriteInt32(videoWidth_) &&
+        parcel.WriteInt32(videoHeight_) &&
         parcel.WriteParcelable(extras_.get());
 }
 
@@ -53,7 +58,12 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
         !parcel.ReadInt32(result->loopMode_) ||
         !parcel.ReadBool(result->isFavorite_) ||
         !parcel.ReadInt32(result->activeItemId_) ||
-        !parcel.ReadInt32(result->volume_)) {
+        !parcel.ReadInt32(result->volume_) ||
+        !parcel.ReadInt32(result->maxVolume_) ||
+        !parcel.ReadBool(result->muted_) ||
+        !parcel.ReadInt32(result->duration_) ||
+        !parcel.ReadInt32(result->videoWidth_) ||
+        !parcel.ReadInt32(result->videoHeight_)) {
         SLOGE("Read AVPlaybackState failed");
         delete result;
         return nullptr;
@@ -74,8 +84,9 @@ bool AVPlaybackState::IsValid() const
         position_.updateTime_ >= 0 &&
         bufferedTime_ >= 0 &&
         loopMode_ >= LOOP_MODE_SEQUENCE &&
-        loopMode_ <= LOOP_MODE_SHUFFLE &&
-        volume_ >= 0;
+        loopMode_ <= LOOP_MODE_CUSTOM &&
+        volume_ >= 0 &&
+        maxVolume_ >= 0;
 }
 
 void AVPlaybackState::SetState(int32_t state)
@@ -126,6 +137,36 @@ void AVPlaybackState::SetVolume(int32_t volume)
     volume_ = volume;
 }
 
+void AVPlaybackState::SetMaxVolume(int32_t maxVolume)
+{
+    mask_.set(PLAYBACK_KEY_MAX_VOLUME);
+    maxVolume_ = maxVolume;
+}
+
+void AVPlaybackState::SetMuted(bool muted)
+{
+    mask_.set(PLAYBACK_KEY_MUTED);
+    muted_ = muted;
+}
+
+void AVPlaybackState::SetDuration(int32_t duration)
+{
+    mask_.set(PLAYBACK_KEY_DURATION);
+    duration_ = duration;
+}
+
+void AVPlaybackState::SetVideoWidth(int32_t videoWidth)
+{
+    mask_.set(PLAYBACK_KEY_VIDEO_WIDTH);
+    videoWidth_ = videoWidth;
+}
+
+void AVPlaybackState::SetVideoHeight(int32_t videoHeight)
+{
+    mask_.set(PLAYBACK_KEY_VIDEO_HEIGHT);
+    videoHeight_ = videoHeight;
+}
+
 void AVPlaybackState::SetExtras(const std::shared_ptr<AAFwk::WantParams>& extras)
 {
     mask_.set(PLAYBACK_KEY_EXTRAS);
@@ -170,6 +211,31 @@ int32_t AVPlaybackState::GetActiveItemId() const
 int32_t AVPlaybackState::GetVolume() const
 {
     return volume_;
+}
+
+int32_t AVPlaybackState::GetMaxVolume() const
+{
+    return maxVolume_;
+}
+
+bool AVPlaybackState::GetMuted() const
+{
+    return muted_;
+}
+
+int32_t AVPlaybackState::GetDuration() const
+{
+    return duration_;
+}
+
+int32_t AVPlaybackState::GetVideoWidth() const
+{
+    return videoWidth_;
+}
+
+int32_t AVPlaybackState::GetVideoHeight() const
+{
+    return videoHeight_;
 }
 
 std::shared_ptr<AAFwk::WantParams> AVPlaybackState::GetExtras() const
@@ -249,6 +315,31 @@ void AVPlaybackState::CloneActiveItemId(const AVPlaybackState& from, AVPlaybackS
 void AVPlaybackState::CloneVolume(const AVPlaybackState& from, AVPlaybackState& to)
 {
     to.volume_ = from.volume_;
+}
+
+void AVPlaybackState::CloneMaxVolume(const AVPlaybackState& from, AVPlaybackState& to)
+{
+    to.maxVolume_ = from.maxVolume_;
+}
+
+void AVPlaybackState::CloneMuted(const AVPlaybackState& from, AVPlaybackState& to)
+{
+    to.muted_ = from.muted_;
+}
+
+void AVPlaybackState::CloneDuration(const AVPlaybackState& from, AVPlaybackState& to)
+{
+    to.duration_ = from.duration_;
+}
+
+void AVPlaybackState::CloneVideoWidth(const AVPlaybackState& from, AVPlaybackState& to)
+{
+    to.videoWidth_ = from.videoWidth_;
+}
+
+void AVPlaybackState::CloneVideoHeight(const AVPlaybackState& from, AVPlaybackState& to)
+{
+    to.videoHeight_ = from.videoHeight_;
 }
 
 void AVPlaybackState::CloneExtras(const AVPlaybackState& from, AVPlaybackState& to)

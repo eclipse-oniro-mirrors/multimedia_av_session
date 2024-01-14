@@ -956,6 +956,16 @@ void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand& cmd)
     callback_->OnToggleFavorite(assetId);
 }
 
+void AVSessionItem::HandleOnPlayFromAssetId(const AVControlCommand& cmd)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayFromAssetId");
+    std::lock_guard callbackLockGuard(callbackLock_);
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    int64_t assetId = 0;
+    CHECK_AND_RETURN_LOG(cmd.GetSeekTime(assetId) == AVSESSION_SUCCESS, "GetAssetId failed");
+    callback_->OnPlayFromAssetId(assetId);
+}
+
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& controller)
 {
     std::lock_guard controllersLockGuard(controllersLock_);

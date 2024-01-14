@@ -38,7 +38,9 @@ std::map<std::string, std::pair<NapiAVCastController::OnEventHandlerType,
     { "mediaItemChange", { OnMediaItemChange, OffMediaItemChange } },
     { "playNext", { OnPlayNext, OffPlayNext } },
     { "playPrevious", { OnPlayPrevious, OffPlayPrevious } },
+    { "requestPlay", { OnRequestPlay, OffRequestPlay } },
     { "seekDone", { OnSeekDone, OffSeekDone } },
+    { "validCommandChange", { OnValidCommandChange, OffValidCommandChange } },
     { "videoSizeChange", { OnVideoSizeChange, OffVideoSizeChange } }, // timeUpdate -> videoSizeChange
     { "error", { OnPlayerError, OffPlayerError } },
     { "endOfStream", { OnEndOfStream, OffEndOfStream } },
@@ -447,6 +449,45 @@ napi_value NapiAVCastController::getValidCommands(napi_env env, napi_callback_in
     return NapiAsyncWork::Enqueue(env, context, "GetValidCommands", executor, complete);
 }
 
+napi_value NapiAVCastController::release(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<std::string> stringCmds;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROLLER_GET_CURRENT_ITEM_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("release failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "release failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        std::vector<int32_t> cmds;
+        int32_t ret = napiCastController->castController_->Destroy();
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "release failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "release failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "release failed : native no permission";
+            } else {
+                context->errMessage = "release failed : native server exception";
+            }
+            SLOGE("controller release failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "release", executor);
+}
+
 napi_value NapiAVCastController::SetDisplaySurface(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastController::SetDisplaySurface");
@@ -718,6 +759,12 @@ napi_status NapiAVCastController::OnPlayPrevious(napi_env env, NapiAVCastControl
     return napi_ok;
 }
 
+napi_status NapiAVCastController::OnRequestPlay(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
+    return napi_ok;
+}
+
 napi_status NapiAVCastController::OnSeekDone(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
@@ -730,6 +777,12 @@ napi_status NapiAVCastController::OnSeekDone(napi_env env, NapiAVCastController*
     int32_t ret = napiCastController->castController_
         ->AddAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
+    return napi_ok;
+}
+
+napi_status NapiAVCastController::OnValidCommandChange(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
     return napi_ok;
 }
 
@@ -813,6 +866,12 @@ napi_status NapiAVCastController::OffPlayPrevious(napi_env env, NapiAVCastContro
     return napi_ok;
 }
 
+napi_status NapiAVCastController::OffRequestPlay(napi_env env, NapiAVCastController* napiCastController,
+    napi_value callback)
+{
+    return napi_ok;
+}
+
 napi_status NapiAVCastController::OffSeekDone(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
@@ -827,6 +886,12 @@ napi_status NapiAVCastController::OffSeekDone(napi_env env, NapiAVCastController
             ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
     }
+    return napi_ok;
+}
+
+napi_status NapiAVCastController::OffValidCommandChange(napi_env env, NapiAVCastController* napiCastController,
+    napi_value callback)
+{
     return napi_ok;
 }
 

@@ -211,4 +211,13 @@ int32_t AVSessionCallbackStub::HandleOnSkipToQueueItem(MessageParcel& data, Mess
     OnSkipToQueueItem(itemId);
     return ERR_NONE;
 }
+
+int32_t AVSessionCallbackStub::HandleOnPlayFromAssetId(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlayFromAssetId");
+    int64_t assetId = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt64(assetId), ERR_NONE, "read time failed");
+    OnPlayFromAssetId(assetId);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

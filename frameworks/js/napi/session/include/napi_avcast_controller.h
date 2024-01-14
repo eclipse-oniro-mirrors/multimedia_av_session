@@ -49,6 +49,7 @@ private:
     static napi_value GetCastAVPlaybackState(napi_env env, napi_callback_info info);
     static napi_value GetCurrentItem(napi_env env, napi_callback_info info);
     static napi_value getValidCommands(napi_env env, napi_callback_info info);
+    static napi_value release(napi_env env, napi_callback_info info);
     static napi_value SetDisplaySurface(napi_env env, napi_callback_info info);
     static napi_status SetCastPlaybackStateFilter(napi_env env, NapiAVCastController *napiCastController,
         napi_value filter);
@@ -62,7 +63,11 @@ private:
         napi_value param, napi_value callback);
     static napi_status OnPlayPrevious(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
+    static napi_status OnRequestPlay(napi_env env, NapiAVCastController* napiCastController,
+        napi_value param, napi_value callback);
     static napi_status OnSeekDone(napi_env env, NapiAVCastController* napiCastController,
+        napi_value param, napi_value callback);
+    static napi_status OnValidCommandChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
     static napi_status OnVideoSizeChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
@@ -79,7 +84,10 @@ private:
     static napi_status OffPlayNext(napi_env env, NapiAVCastController* napiCastController,
         napi_value callback);
     static napi_status OffPlayPrevious(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
+    static napi_status OffRequestPlay(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffSeekDone(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
+    static napi_status OffValidCommandChange(napi_env env, NapiAVCastController* napiCastController,
+        napi_value callback);
     static napi_status OffVideoSizeChange(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffPlayerError(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffEndOfStream(napi_env env, NapiAVCastController* napiCastController, napi_value callback);

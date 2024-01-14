@@ -106,6 +106,7 @@ public:
     void OnAVCallAnswer() override {};
     void OnAVCallHangUp() override {};
     void OnAVCallToggleCallMute() override {};
+    void OnPlayFromAssetId(int64_t assetId) override;
 
     ~AVSessionCallbackImpl() override;
 };
@@ -188,6 +189,12 @@ void AVSessionCallbackImpl::OnCommonCommand(const std::string& commonCommand,
 {
     SLOGI("OnCommonCommand");
     g_onCall = AVSESSION_SUCCESS;
+}
+
+void AVSessionCallbackImpl::OnPlayFromAssetId(int64_t assetId)
+{
+    g_onCall = AVSESSION_SUCCESS;
+    SLOGI("OnPlayFromAssetId %{public}d", g_onCall);
 }
 
 AVSessionCallbackImpl::~AVSessionCallbackImpl()

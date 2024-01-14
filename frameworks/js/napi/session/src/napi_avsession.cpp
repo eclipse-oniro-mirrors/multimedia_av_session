@@ -54,6 +54,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "answer", OnAVCallAnswer },
     { "hangUp", OnAVCallHangUp },
     { "toggleCallMute", OnAVCallToggleCallMute },
+    { "playFromAssetId", OnPlayFromAssetId },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
     { "play", OffPlay },
@@ -74,6 +75,7 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "answer", OffAVCallAnswer },
     { "hangUp", OffAVCallHangUp },
     { "toggleCallMute", OffAVCallToggleCallMute },
+    { "playFromAssetId", OffPlayFromAssetId },
 };
 
 NapiAVSession::NapiAVSession()
@@ -1269,6 +1271,15 @@ napi_status NapiAVSession::OnAVCallToggleCallMute(napi_env env, NapiAVSession* n
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE, callback);
 }
 
+napi_status NapiAVSession::OnPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_PLAY_FROM_ASSETID, callback);
+}
+
 napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1458,5 +1469,19 @@ napi_status NapiAVSession::OffAVCallToggleCallMute(napi_env env, NapiAVSession* 
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE, callback);
+}
+
+napi_status NapiAVSession::OffPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_FROM_ASSETID, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+
+    if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_PLAY_FROM_ASSETID)) {
+        int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
+    }
+    return napi_ok;
 }
 }

@@ -284,4 +284,19 @@ void AVSessionCallbackProxy::OnSkipToQueueItem(int32_t itemId)
     CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_SKIP_TO_QUEUE_ITEM, data, reply, option) == 0,
         "send request failed");
 }
+
+void AVSessionCallbackProxy::OnPlayFromAssetId(int64_t assetId)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt64(assetId), "write assetId failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_PLAY_FROM_ASSETID, data, reply, option) == 0,
+        "OnPlayFromAssetId send request failed");
+}
+
 } // namespace OHOS::AVSession
