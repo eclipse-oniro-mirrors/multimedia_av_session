@@ -20,6 +20,8 @@
 #include "avqueue_item.h"
 #include "avmedia_description.h"
 #include "avsession_errors.h"
+#include "avsession_sysevent.h"
+#include "avsession_trace.h"
 
 using namespace OHOS::CastEngine;
 
@@ -70,6 +72,10 @@ void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castContr
     std::lock_guard lockGuard(streamPlayerLock_);
     if (!streamPlayer_) {
         SLOGE("streamPlayer is nullptr");
+        HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
+            "SESSION_TYPE", "cast",
+            "ERROR_TYPE", "INNER_ERROR",
+            "ERROR_INFO", "streamPlayer is nullptr");
         return;
     }
     switch (castControlCommand.GetCommand()) {
@@ -141,6 +147,7 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
             break;
         default:
             SLOGE("invalid command");
+            HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED", "ERROR_TYPE", "INNER_ERROR", "ERROR_INFO", "invalid command");
             break;
     }
 }
@@ -194,8 +201,8 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
-    SLOGD("mediaInfo albumCoverUrl is %{public}s", mediaInfo.albumCoverUrl.c_str());
     std::lock_guard lockGuard(streamPlayerLock_);
+    SLOGI("mediaInfo media is %{public}s %{public}s", mediaInfo.albumCoverUrl.c_str(), mediaInfo.mediaUrl.c_str());
     if (!streamPlayer_) {
         SLOGE("Set media info and start failed");
         return AVSESSION_ERROR;
@@ -247,8 +254,9 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
-
+    SLOGD("mediaInfo albumCoverUrl is %{public}s", mediaInfo.albumCoverUrl.c_str());
     std::lock_guard lockGuard(streamPlayerLock_);
+    SLOGI("mediaInfo mediaUrl is %{public}s", mediaInfo.mediaUrl.c_str());
     if (streamPlayer_ && streamPlayer_->Load(mediaInfo) == AVSESSION_SUCCESS) {
         SLOGI("Set media info and prepare successed");
         currentAVQueueItem_ = avQueueItem;

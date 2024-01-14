@@ -117,6 +117,8 @@ int32_t AVControllerItem::GetExtras(AAFwk::WantParams& extras)
 {
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),
+        ERR_COMMAND_SEND_EXCEED_MAX, "command send number exceed max");
     extras = session_->GetExtras();
     return AVSESSION_SUCCESS;
 }

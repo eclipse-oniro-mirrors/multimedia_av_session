@@ -568,6 +568,16 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
     SLOGI("Create Cast sink sessionId %{public}s", sinkSession->GetSessionId().c_str());
     sinkSession->SetCastHandle(castHandle);
     sinkSession->RegisterDeviceStateCallback();
+
+    HISYSEVENT_BEHAVIOR("SESSION_CAST",
+        "BUNDLE_NAME", "castBundleName",
+        "ABILITY_NAME", "castAbilityName",
+        "SESSION_PID", sinkSession->GetDescriptor().pid_,
+        "SESSION_UID", sinkSession->GetDescriptor().uid_,
+        "SESSION_ID", sinkSession->GetDescriptor().sessionId_,
+        "SESSION_TAG", sinkSession->GetDescriptor().sessionTag_,
+        "SESSION_TYPE", sinkSession->GetDescriptor().sessionType_,
+        "DETAILED_MSG", "session create from cast+ callback");
 }
 
 void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
@@ -644,6 +654,13 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
     dlclose(handle_);
 #endif
+    HISYSEVENT_BEHAVIOR("SESSION_CAST",
+        "BUNDLE_NAME", session->GetDescriptor().elementName_.GetBundleName(),
+        "MODULE_NAME", session->GetDescriptor().elementName_.GetModuleName(),
+        "ABILITY_NAME", session->GetDescriptor().elementName_.GetAbilityName(),
+        "SESSION_PID", session->GetDescriptor().pid_, "SESSION_UID", session->GetDescriptor().uid_,
+        "SESSION_ID", session->GetDescriptor().sessionId_, "SESSION_TAG", session->GetDescriptor().sessionTag_,
+        "SESSION_TYPE", session->GetDescriptor().sessionType_, "DETAILED_MSG", "start cast session");
     return AVSESSION_SUCCESS;
 }
 
