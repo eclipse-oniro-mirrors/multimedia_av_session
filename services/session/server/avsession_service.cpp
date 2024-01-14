@@ -2297,7 +2297,7 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 }
 
 std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWantAgent(
-    const std::shared_ptr<AVSessionDescriptor>& histroyDescriptor)
+    const AVSessionDescriptor* histroyDescriptor)
 {
     if (!histroyDescriptor && !topSession_) {
         SLOGE("CreateWantAgent error, histroyDescriptor and topSession_ null");
@@ -2324,7 +2324,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
 }
 
-void AVSessionService::NotifySystemUI(const std::shared_ptr<AVSessionDescriptor>& historyDescriptor)
+void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor)
 {
     auto deviceProp = system::GetParameter("const.product.devicetype", "default");
     CHECK_AND_RETURN_LOG(strcmp(deviceProp.c_str(), "2in1") != 0, "2in1 not support");
@@ -2336,8 +2336,8 @@ void AVSessionService::NotifySystemUI(const std::shared_ptr<AVSessionDescriptor>
         std::make_shared<Notification::NotificationLocalLiveViewContent>();
     CHECK_AND_RETURN_LOG(localLiveViewContent != nullptr, "avsession item local live view content nullptr error");
     localLiveViewContent->SetType(SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER);
-    localLiveViewContent->SetTitle(!historyDescriptor ? "" : "AVSession NotifySystemUI");
-    localLiveViewContent->SetText(!historyDescriptor ? "" : "AVSession NotifySystemUI");
+    localLiveViewContent->SetTitle(historyDescriptor ? "" : "AVSession NotifySystemUI");
+    localLiveViewContent->SetText(historyDescriptor ? "" : "AVSession NotifySystemUI");
 
     std::shared_ptr<Notification::NotificationContent> content =
         std::make_shared<Notification::NotificationContent>(localLiveViewContent);
@@ -2368,10 +2368,10 @@ void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChange
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_BLUETOOTH_A2DP) {
             std::vector<AVSessionDescriptor> descriptors;
             GetHistoricalSessionDescriptors(1, descriptors);
-            if (deviceChangeAction.type == AudioStandard::CONNECT && descriptors.size() > 0) {
-                SLOGI("AVSessionService HandleDeviceChange begin to notifysystemui, descriptors size %{public}u", 
-                    descriptors.size());
-                NotifySystemUI(std::make_shared<AVSessionDescriptor>(descriptors[0]));
+            if (deviceChangeAction.type == AudioStandard::CONNECT && descriptors.size() > 0
+                && descriptors[0].sessionId_ != DEFAULT_SESSION_ID) {
+                SLOGI("history bundle name %{public}s", descriptors[0].elementName_.GetBundleName().c_str());
+                NotifySystemUI(&descriptors[0]);
             }
         }
     }

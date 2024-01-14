@@ -182,7 +182,7 @@ private:
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
-    void NotifySystemUI(const std::shared_ptr<AVSessionDescriptor>& historyDescriptor);
+    void NotifySystemUI(const AVSessionDescriptor* historyDescriptor);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
     void RemoveClientDeathObserver(pid_t pid);
@@ -310,7 +310,7 @@ private:
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
-        const std::shared_ptr<AVSessionDescriptor>& histroyDescriptor);
+        const AVSessionDescriptor* histroyDescriptor);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
