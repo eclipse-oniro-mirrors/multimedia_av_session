@@ -537,9 +537,9 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     castHandle_ = castHandle;
     SLOGI("start cast handle is %{public}ld", castHandle_);
 
-    AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
+    int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
 
-    return AVSESSION_SUCCESS;
+    return ret;
 }
 
 int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo)
@@ -548,8 +548,9 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
     std::lock_guard lockGuard(castHandleLock_);
     AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_);
     int32_t castId = static_cast<int32_t>(castHandle_);
-    AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo);
-    return AVSESSION_SUCCESS;
+    int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo);
+    SLOGI("Add device process with ret %{public}d", ret);
+    return ret;
 }
 
 bool AVSessionItem::IsCastSinkSession(int32_t castState)
