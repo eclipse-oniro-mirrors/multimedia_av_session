@@ -68,8 +68,8 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getDuration", GetDuration),
         DECLARE_NAPI_FUNCTION("getAVPlaybackState", GetCastAVPlaybackState),
         DECLARE_NAPI_FUNCTION("getCurrentItem", GetCurrentItem),
-        DECLARE_NAPI_FUNCTION("getValidCommands", getValidCommands),
-        DECLARE_NAPI_FUNCTION("release", release),
+        DECLARE_NAPI_FUNCTION("getValidCommands", GetValidCommands),
+        DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("setDisplaySurface", SetDisplaySurface),
     };
 
@@ -404,7 +404,7 @@ napi_value NapiAVCastController::GetCurrentItem(napi_env env, napi_callback_info
     return NapiAsyncWork::Enqueue(env, context, "GetCurrentItem", executor, complete);
 }
 
-napi_value NapiAVCastController::getValidCommands(napi_env env, napi_callback_info info)
+napi_value NapiAVCastController::GetValidCommands(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
         std::vector<std::string> stringCmds;
@@ -449,7 +449,7 @@ napi_value NapiAVCastController::getValidCommands(napi_env env, napi_callback_in
     return NapiAsyncWork::Enqueue(env, context, "GetValidCommands", executor, complete);
 }
 
-napi_value NapiAVCastController::release(napi_env env, napi_callback_info info)
+napi_value NapiAVCastController::Release(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
         std::vector<std::string> stringCmds;

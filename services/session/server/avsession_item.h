@@ -246,10 +246,10 @@ private:
         &AVSessionItem::HandleOnSetSpeed,
         &AVSessionItem::HandleOnSetLoopMode,
         &AVSessionItem::HandleOnToggleFavorite,
+        &AVSessionItem::HandleOnPlayFromAssetId,
         &AVSessionItem::HandleOnAVCallAnswer,
         &AVSessionItem::HandleOnAVCallHangUp,
         &AVSessionItem::HandleOnAVCallToggleCallMute,
-        &AVSessionItem::HandleOnPlayFromAssetId,
     };
 
     std::recursive_mutex controllersLock_;

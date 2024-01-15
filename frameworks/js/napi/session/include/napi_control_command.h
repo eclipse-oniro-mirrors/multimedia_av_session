@@ -41,6 +41,7 @@ public:
     static napi_status GetSeekTime(napi_env env, napi_value in, AVControlCommand& out);
     static napi_status GetLoopMode(napi_env env, napi_value in, AVControlCommand& out);
     static napi_status GetAssetId(napi_env env, napi_value in, AVControlCommand& out);
+    static napi_status GetPlayFromAssetId(napi_env env, napi_value in, AVControlCommand& out);
 
     static napi_status SetNoneParam(napi_env env, AVControlCommand& in, napi_value& out);
     static napi_status SetSpeed(napi_env env, AVControlCommand& in, napi_value& out);
@@ -49,6 +50,7 @@ public:
     static napi_status SetSeekTime(napi_env env, AVControlCommand& in, napi_value& out);
     static napi_status SetLoopMode(napi_env env, AVControlCommand& in, napi_value& out);
     static napi_status SetAssetId(napi_env env, AVControlCommand& in, napi_value& out);
+    static napi_status SetPlayFromAssetId(napi_env env, AVControlCommand& in, napi_value& out);
 
 private:
     static std::map<std::string, std::tuple<GetterType, SetterType, int32_t>> commandMap_;
