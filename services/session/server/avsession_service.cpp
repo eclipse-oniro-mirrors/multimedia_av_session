@@ -950,6 +950,7 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "session not exist");
 
+    SLOGI("find descriptor by id %{public}s", sessionId.c_str());
     auto pid = GetCallingPid();
     if (pid == session->GetPid()) {
         descriptor = session->GetDescriptor();
