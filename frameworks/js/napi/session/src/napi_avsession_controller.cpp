@@ -1460,6 +1460,8 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
     if (napiController->callback_ == nullptr) {
         SLOGI("function %{public}s not register yet", eventName.c_str());
+        NapiUtils::ThrowError(env, "callback not register yet",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
@@ -1472,9 +1474,8 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
 napi_status NapiAVSessionController::OnAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
     napi_value param, napi_value callback)
 {
-    if (SetAVCallMetaFilter(env, napiController, param) != napi_ok) {
-        return napi_generic_failure;
-    }
+    napi_status status = SetAVCallMetaFilter(env, napiController, param);
+    CHECK_RETURN(status == napi_ok, "Invalid AVCallMetaDataChange.", status);
     return napiController->callback_->AddCallback(env,
         NapiAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE, callback);
 }

@@ -75,6 +75,7 @@ napi_status NapiAVCallMetaData::ConvertFilter(napi_env env, napi_value filter, A
         }
     }
 
+    CHECK_RETURN(!mask.none(), "array element invalid.", napi_invalid_arg);
     return napi_ok;
 }
 
@@ -93,7 +94,6 @@ napi_status NapiAVCallMetaData::GetValue(napi_env env, napi_value in, AVCallMeta
         auto getter = it->second;
         if (getter(env, in, out) != napi_ok) {
             SLOGE("get property %{public}s failed", name.c_str());
-            return napi_generic_failure;
         }
     }
 

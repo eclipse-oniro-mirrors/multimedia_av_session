@@ -38,15 +38,11 @@ AVCallMetaData *AVCallMetaData::Unmarshalling(Parcel& data)
     if (!data.ReadString(result->name_) ||
         !data.ReadString(result->phoneNumber_) ||
         !data.ReadString(result->mediaImageUri_)) {
-        SLOGE("read AVCallMetaData failed");
-        delete result;
-        return nullptr;
+        SLOGE("read AVCallMetaData name phoneNumber or mediaImageUri failed.");
     }
     result->mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->callMetaMask_.test(AVCALL_META_KEY_MEDIA_IMAGE) && result->mediaImage_ == nullptr) {
         SLOGE("read PixelMap failed");
-        delete result;
-        return nullptr;
     }
     return result;
 }
@@ -132,7 +128,8 @@ bool AVCallMetaData::CopyFrom(const AVCallMetaData& metaIn)
         return false;
     }
 
-    if (metaIn.name_ != name_ || metaIn.phoneNumber_ != phoneNumber_) {
+    if (metaIn.name_ != name_ && metaIn.phoneNumber_ != phoneNumber_ &&
+        (!metaIn.mediaImageUri_.empty() || (metaIn.mediaImage_ != nullptr))) {
         SLOGD("AVCallMetaData not equal");
         *this = metaIn;
         return true;

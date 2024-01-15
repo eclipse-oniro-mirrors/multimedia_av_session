@@ -274,22 +274,34 @@ void AVControllerItem::HandleAVCallMetaDataChange(const AVCallMetaData& avCallMe
     AVCallMetaData metaOut;
     std::lock_guard avCallMetaDataMaskLockGuard(avCallMetaMaskMutex_);
     if (avCallMetaData.CopyToByMask(avCallMetaMask_, metaOut)) {
-        if ((avCallMetaMask_.test(AVCallMetaData::AVCALL_META_KEY_MEDIA_IMAGE)) &&
-            (metaOut.GetMediaImage() != nullptr)) {
-            std::string fileName = AVSessionUtils::GetCachePathName() + sessionId_ + AVSessionUtils::GetFileSuffix();
-            std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaOut.GetMediaImage();
-            AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
+        if (avCallMetaMask_.test(AVCallMetaData::AVCALL_META_KEY_MEDIA_IMAGE)) {
+            std::shared_ptr<AVSessionPixelMap> innerPixelMap = nullptr;
+            if (metaOut.GetMediaImage() != nullptr) {
+                std::string fileName =
+                    AVSessionUtils::GetCachePathName() + sessionId_ + AVSessionUtils::GetFileSuffix();
+                innerPixelMap = metaOut.GetMediaImage();
+                AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
+            }
             metaOut.SetMediaImage(innerPixelMap);
         }
+
+        if (avCallMetaMask_.test(AVCallMetaData::AVCALL_META_KEY_NAME)) {
+            metaOut.SetName(avCallMetaData.GetName());
+        }
+
+        if (avCallMetaMask_.test(AVCallMetaData::AVCALL_META_KEY_PHONE_NUMBER)) {
+            metaOut.SetPhoneNumber(avCallMetaData.GetPhoneNumber());
+        }
         SLOGI("update avcall meta data");
-        AVSESSION_TRACE_SYNC_START("AVControllerItem::OnAVCallMetaDataChange");
-        if (callback_ != nullptr) {
-            callback_->OnAVCallMetaDataChange(metaOut);
-        }
-        if (innerCallback_ != nullptr) {
-            innerCallback_->OnAVCallMetaDataChange(metaOut);
-        }
     }
+
+    if (callback_ != nullptr) {
+        callback_->OnAVCallMetaDataChange(metaOut);
+    }
+    if (innerCallback_ != nullptr) {
+        innerCallback_->OnAVCallMetaDataChange(metaOut);
+    }
+    AVSESSION_TRACE_SYNC_START("AVControllerItem::OnAVCallMetaDataChange");
 }
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
