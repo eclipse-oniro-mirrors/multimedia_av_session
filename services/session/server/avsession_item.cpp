@@ -962,7 +962,7 @@ void AVSessionItem::HandleOnPlayFromAssetId(const AVControlCommand& cmd)
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int64_t assetId = 0;
-    CHECK_AND_RETURN_LOG(cmd.GetSeekTime(assetId) == AVSESSION_SUCCESS, "GetAssetId failed");
+    CHECK_AND_RETURN_LOG(cmd.GetPlayFromAssetId(assetId) == AVSESSION_SUCCESS, "Get playFromAssetId failed");
     callback_->OnPlayFromAssetId(assetId);
 }
 

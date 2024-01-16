@@ -33,7 +33,7 @@ std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlComm
     { "setSpeed", { GetSpeed, SetSpeed, AVControlCommand::SESSION_CMD_SET_SPEED } },
     { "setLoopMode", { GetLoopMode, SetLoopMode, AVControlCommand::SESSION_CMD_SET_LOOP_MODE } },
     { "toggleFavorite", { GetAssetId, SetAssetId, AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE } },
-    { "playFromAssetId", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID } },
+    { "playFromAssetId", { GetPlayFromAssetId, SetPlayFromAssetId, AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID } },
     { "answer", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_ANSWER } },
     { "hangUp", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_HANG_UP } },
     { "toggleCallMute", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE } },
@@ -311,6 +311,39 @@ napi_status NapiControlCommand::SetAssetId(napi_env env, AVControlCommand& in, n
     auto status = NapiUtils::SetValue(env, assetId, property);
     if (status != napi_ok) {
         SLOGE("create speed property failed");
+        return status;
+    }
+
+    status = napi_set_named_property(env, out, "parameter", property);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "set parameter property failed");
+    return status;
+}
+
+napi_status NapiControlCommand::GetPlayFromAssetId(napi_env env, napi_value in, AVControlCommand& out)
+{
+    int64_t playFromAssetId {};
+    auto status = NapiUtils::GetNamedProperty(env, in, "parameter", playFromAssetId);
+    if (status != napi_ok) {
+        SLOGE("get parameter failed");
+        playFromAssetId = 0;
+        status = napi_ok;
+    }
+
+    CHECK_AND_RETURN_RET_LOG(out.SetPlayFromAssetId(playFromAssetId) == AVSESSION_SUCCESS,
+        napi_invalid_arg, "set parameter failed");
+    return status;
+}
+
+napi_status NapiControlCommand::SetPlayFromAssetId(napi_env env, AVControlCommand& in, napi_value& out)
+{
+    int64_t playFromAssetId {};
+    CHECK_AND_RETURN_RET_LOG(in.GetPlayFromAssetId(playFromAssetId) == AVSESSION_SUCCESS,
+        napi_invalid_arg, "get parameter failed");
+
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, playFromAssetId, property);
+    if (status != napi_ok) {
+        SLOGE("create playFromAssetId property failed");
         return status;
     }
 

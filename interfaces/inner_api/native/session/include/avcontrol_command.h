@@ -78,6 +78,9 @@ public:
     int32_t SetAVCallMuted(const bool isAVCallMuted);
     int32_t IsAVCallMuted(bool& isAVCallMuted) const;
 
+    int32_t SetPlayFromAssetId(int64_t playFromAssetId);
+    int32_t GetPlayFromAssetId(int64_t& playFromAssetId) const;
+
     const static inline std::vector<int32_t> localCapability {
         SESSION_CMD_PLAY,
         SESSION_CMD_PAUSE,

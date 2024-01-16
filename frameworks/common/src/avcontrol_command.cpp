@@ -56,6 +56,9 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
             case SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE:
                 result->SetAVCallMuted(data.ReadBool());
                 break;
+            case SESSION_CMD_PLAY_FROM_ASSETID:
+                result->SetPlayFromAssetId(data.ReadInt64());
+                break;
             default:
                 break;
         }
@@ -92,6 +95,10 @@ bool AVControlCommand::Marshalling(Parcel& parcel) const
         case SESSION_CMD_TOGGLE_FAVORITE:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<std::string>(param_)
                 && parcel.WriteString(std::get<std::string>(param_)), false, "write toggle favorite failed");
+            break;
+        case SESSION_CMD_PLAY_FROM_ASSETID:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_)
+                && parcel.WriteInt64(std::get<int64_t>(param_)), false, "write play from assetId failed");
             break;
         default:
             break;
@@ -246,6 +253,21 @@ int32_t AVControlCommand::IsAVCallMuted(bool& isAVCallMuted) const
         return AVSESSION_ERROR;
     }
     isAVCallMuted = std::get<bool>(param_);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::SetPlayFromAssetId(int64_t playFromAssetId)
+{
+    param_ = playFromAssetId;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::GetPlayFromAssetId(int64_t& playFromAssetId) const
+{
+    if (!std::holds_alternative<int64_t>(param_)) {
+        return AVSESSION_ERROR;
+    }
+    playFromAssetId = std::get<int64_t>(param_);
     return AVSESSION_SUCCESS;
 }
 } // namespace OHOS::AVSession
