@@ -67,6 +67,8 @@ private:
         &AVControllerCallbackStub::HandleOnAVCallMetadataChange,
         &AVControllerCallbackStub::HandleOnAVCallStateChange,
     };
+
+    int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 };
 }
 #endif // OHOS_AVCONTROLLER_CALLBACK_STUB_H

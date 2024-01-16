@@ -206,9 +206,9 @@ void AVSessionService::CheckInitCast()
         return;
     }
     if (samgrProxy->CheckSystemAbility(CAST_ENGINE_SA_ID) == nullptr) {
-        checkEnableCast(false);
+        SLOGI("check cast engine has been removed");
     } else {
-        checkEnableCast(true);
+        SLOGI("check cast engine has been started");
     }
 #endif
 }

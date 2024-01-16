@@ -73,7 +73,7 @@ int32_t AVSessionControllerProxy::GetAVCallState(AVCallState& avCallState)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        AVCallState* statePtr = reply.ReadParcelable<AVCallState>();
+        sptr<AVCallState> statePtr = reply.ReadParcelable<AVCallState>();
         CHECK_AND_RETURN_RET_LOG(statePtr != nullptr, ERR_UNMARSHALLING, "read AVCallState failed");
         avCallState = *statePtr;
     }

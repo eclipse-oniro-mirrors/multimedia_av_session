@@ -139,6 +139,8 @@ private:
         &AVSessionStub::HandleSetAVCallMetaData,
         &AVSessionStub::HandleSetAVCallState,
     };
+
+    int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 };
 }
 #endif // OHOS_AVSESSION_STUB_H

@@ -81,7 +81,8 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
 {
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnMetaDataChange");
     int twoImageLength = data.ReadInt32();
-    if (twoImageLength == 0) {
+    SLOGD("read length from twoImage %{public}d", twoImageLength);
+    if (twoImageLength <= 0 || twoImageLength > MAX_IMAGE_SIZE) {
         sptr avMetaData = data.ReadParcelable<AVMetaData>();
         CHECK_AND_RETURN_RET_LOG(avMetaData != nullptr, ERR_NONE, "read MetaData failed");
         OnMetaDataChange(*avMetaData);
