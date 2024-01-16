@@ -231,10 +231,11 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("AVRouterImpl AddDevice process");
-    providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->AddCastDevice(castId,
+    bool ret = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->AddCastDevice(castId,
         outputDeviceInfo.deviceInfos_[0]);
+    SLOGI("AVRouterImpl AddDevice process with ret %{public}d", static_cast<int32_t>(ret));
     castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
-    return AVSESSION_SUCCESS;
+    return ret ? AVSESSION_SUCCESS : ERR_DEVICE_CONNECTION_FAILED;
 }
 
 int32_t AVRouterImpl::StopCast(const int64_t castHandle)
