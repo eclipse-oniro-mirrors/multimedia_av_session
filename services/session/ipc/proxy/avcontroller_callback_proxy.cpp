@@ -87,7 +87,7 @@ int32_t AVControllerCallbackProxy::GetPixelMapBuffer(AVMetaData& metaData, Messa
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
     if (mediaPixelMap != nullptr) {
         mediaImageBuffer = mediaPixelMap->GetInnerImgBuffer();
-        mediaImageLength = mediaImageBuffer.size();
+        mediaImageLength = static_cast<int>(mediaImageBuffer.size());
         metaData.SetMediaLength(mediaImageLength);
     }
 
@@ -96,7 +96,7 @@ int32_t AVControllerCallbackProxy::GetPixelMapBuffer(AVMetaData& metaData, Messa
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData.GetAVQueueImage();
     if (avQueuePixelMap != nullptr) {
         avQueueImageBuffer = avQueuePixelMap->GetInnerImgBuffer();
-        avQueueImageLength = avQueueImageBuffer.size();
+        avQueueImageLength = static_cast<int>(avQueueImageBuffer.size());
         metaData.SetAVQueueLength(avQueueImageLength);
     }
 
