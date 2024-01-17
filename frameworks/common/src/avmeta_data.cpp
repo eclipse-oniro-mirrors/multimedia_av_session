@@ -126,7 +126,17 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
 {
     std::string mask;
     data.ReadString(mask);
-    metaOut.metaMask_ = MetaMaskType(mask);
+    int32_t maskSize = static_cast<int32_t>(mask.size());
+    if (maskSize <= 0 || maskSize > META_KEY_MAX) {
+        SLOGE("get err mask, return");
+        return false;
+    }
+    SLOGI("get mask with %{public}s", mask.c_str());
+    for (size_t i = 0; i < maskSize; ++i) {
+        if (mask[i] == '1') {
+            metaOut.metaMask_.flip(i);
+        }
+    }
 
     return !data.ReadString(metaOut.assetId_) ||
         !data.ReadString(metaOut.title_) ||
