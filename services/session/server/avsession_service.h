@@ -40,10 +40,6 @@
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
 
-#ifdef COLLABORATIONFWK_ENABLE
-#include "allconnect_manager.h"
-#endif
-
 namespace OHOS::AVSession {
 class AVSessionDumper;
 
@@ -88,6 +84,8 @@ public:
     void OnStart() override;
 
     void OnStop() override;
+
+    void PullMigrateStub();
 
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 
@@ -141,11 +139,8 @@ public:
         return NotifyAudioSessionCheck(uid);
     }
 
-#ifdef COLLABORATIONFWK_ENABLE
-    void InitAllConnect();
     void SuperLauncher(std::string deviceId, std::string serviceName,
-        std::string extraInfo, int32_t state);
-#endif
+        std::string extraInfo, std::string state);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void ReleaseCastSession() override;
@@ -371,6 +366,8 @@ private:
     bool isSourceInCast_ = false;
     bool isInCast_ = false;
 
+    void *migrateStubFuncHandle_ = nullptr;
+
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;
     const int32_t THREE_CLICK = 3;
@@ -381,24 +378,5 @@ private:
     const int32_t maxAVQueueInfoLen = 5;
     const int32_t allocSpace = 2;
 };
-
-#ifdef COLLABORATIONFWK_ENABLE
-class CSImpl : public CollaborationFwk::CallbackSkeleton {
-public:
-    explicit CSImpl(AVSessionService *ptr)
-    {
-        ptr_ = ptr;
-    }
-    ~CSImpl() {}
-    int32_t OnServiceStateChanged(std::string deviceId, std::string serviceName,
-        std::string extraInfo, int32_t state, int pid)
-    {
-        ptr_->SuperLauncher(deviceId, serviceName, extraInfo, state);
-        return 0;
-    }
-
-    AVSessionService *ptr_;
-};
-#endif
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

@@ -12,7 +12,6 @@
 # limitations under the License.
 import("//build/test.gni")
 import("../../../../castplus_cast_engine_part.gni")
-import("../../../../collaborationfwk_part.gni")
 import("../../../../config.gni")
 
 module_output_path = "multimedia_av_session/session"
@@ -74,10 +73,6 @@ ohos_unittest("MigrateAVSessionTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
-  if (collaborationfwk_enable) {
-    cflags_cc += [ "-DCOLLABORATIONFWK_ENABLE" ]
-    external_deps += [ "CollaborationFwk:cfwk_allconnect_client" ]
-  }
 }
 
 ohos_unittest("SoftbusSessionManagerTest") {

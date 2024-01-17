@@ -18,42 +18,28 @@
 #include "migrate_avsession_manager.h"
 
 namespace OHOS::AVSession {
-#ifdef COLLABORATIONFWK_ENABLE
-void AVSessionService::InitAllConnect()
-{
-    SLOGI("start register allconnect...");
-    int32_t ret = CollaborationFwk::AllConnectManager::GetInstance()
-        .SubscribeServiceState(new CSImpl(this));
-    CHECK_AND_RETURN_LOG(ret == 0, "InitAllConnect error, ret is %{public}d", ret);
-}
-
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
-    std::string extraInfo, int32_t state)
+    std::string extraInfo, std::string state)
 {
-    SLOGI("SuperLauncher deviceId: %{public}s, serviceName: %{public}s, state: %{public}d",
-        deviceId.c_str(), serviceName.c_str(), state);
-    switch (state) {
-        case CollaborationFwk::BussinessStatus::IDLE:
-            MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
-            if (migrateAVSession_ != nullptr) {
-                RemoveInnerSessionListener(migrateAVSession_.get());
-            }
-            break;
-        case CollaborationFwk::BussinessStatus::CONNECTING:
-            if (migrateAVSession_ == nullptr) {
-                migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
-            }
-            migrateAVSession_->Init(this);
-            MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession_);
-            AddInnerSessionListener(migrateAVSession_.get());
-            break;
-        default:
-            break;
+    SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s",
+        serviceName.c_str(), state.c_str());
+
+    if (state == "IDLE") {
+        MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
+        if (migrateAVSession_ != nullptr) {
+            RemoveInnerSessionListener(migrateAVSession_.get());
+        }
+    } else if (state == "CONNECTING") {
+        if (migrateAVSession_ == nullptr) {
+            migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+        }
+        migrateAVSession_->Init(this);
+        MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession_);
+        AddInnerSessionListener(migrateAVSession_.get());
     }
 }
-#endif
 
-void AVSessionService::AddInnerSessionListener(SessionListener* listener)
+void AVSessionService::AddInnerSessionListener(SessionListener *listener)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     innerSessionListeners_.push_back(listener);

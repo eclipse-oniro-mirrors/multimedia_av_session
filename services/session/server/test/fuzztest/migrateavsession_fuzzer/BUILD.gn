@@ -13,7 +13,6 @@
 
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("../../../../../../collaborationfwk_part.gni")
 module_output_path = "av_session/av_session"
 
 ##############################fuzztest##########################################
@@ -54,10 +53,5 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
-
-  if (collaborationfwk_enable) {
-    cflags += [ "-DCOLLABORATIONFWK_ENABLE" ]
-    external_deps += [ "CollaborationFwk:cfwk_allconnect_client" ]
-  }
 }
 ###############################################################################
