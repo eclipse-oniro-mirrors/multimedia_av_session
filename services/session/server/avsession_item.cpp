@@ -54,6 +54,7 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
 AVSessionItem::~AVSessionItem()
 {
     SLOGD("destroy id=%{public}s", descriptor_.sessionId_.c_str());
+    std::lock_guard lockGuard(destroyLock_);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
@@ -88,6 +89,12 @@ int32_t AVSessionItem::Destroy()
             callback_.clear();
         }
     }
+    std::lock_guard lockGuard(destroyLock_);
+    if (isDestroyed_) {
+        SLOGE("return for already in destroy");
+        return AVSESSION_SUCCESS;
+    }
+    isDestroyed_ = true;
     std::string sessionId = descriptor_.sessionId_;
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileName);
@@ -559,6 +566,17 @@ bool AVSessionItem::IsCastSinkSession(int32_t castState)
         descriptor_.sessionTag_.c_str());
     if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
         SLOGI("A cast sink session is being disconnected");
+        if (!destroyLock_.try_lock()) {
+            SLOGE("check already in lock, return");
+            return true;
+        }
+        SLOGI("wait for lock to destroy");
+        std::lock_guard lockGuard(destroyLock_);
+        if (isDestroyed_) {
+            SLOGE("return for already in destroy");
+            return true;
+        }
+
         return Destroy() == true;
     }
     return false;
