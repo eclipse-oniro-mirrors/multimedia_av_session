@@ -134,7 +134,7 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
     SLOGI("get mask with %{public}s", mask.c_str());
     for (size_t i = 0; i < maskSize; ++i) {
         if (mask[i] == '1') {
-            metaOut.metaMask_.flip(i);
+            metaOut.metaMask_.flip(maskSize - i - 1);
         }
     }
 
