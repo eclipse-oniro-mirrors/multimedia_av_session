@@ -305,7 +305,7 @@ private:
 
     void ClearClientResources(pid_t pid);
     
-    bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, AVSessionItem& session);
+    bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta);
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 

@@ -192,6 +192,8 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     }
 
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
+        SLOGD(" SetAVMetaData AVQueueName: %{public}s AVQueueId: %{public}s", metaData_.GetAVQueueName().c_str(),
+            metaData_.GetAVQueueId().c_str());
         serviceCallbackForAddAVQueueInfo_(*this);
     }
 
@@ -270,6 +272,8 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
 
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
+        SLOGD(" SetAVPlaybackState AVQueueName: %{public}s AVQueueId: %{public}s", metaData_.GetAVQueueName().c_str(),
+            metaData_.GetAVQueueId().c_str());
         serviceCallbackForAddAVQueueInfo_(*this);
     }
 
