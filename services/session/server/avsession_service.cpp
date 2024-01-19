@@ -745,7 +745,6 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         HandleSessionRelease(session.GetDescriptor().sessionId_);
     });
     result->SetServiceCallbackForAVQueueInfo([this](AVSessionItem& session) {
-        SLOGI("add played avqueue info");
         AddAvQueueInfoToFile(session);
     });
     result->SetServiceCallbackForCallStart([this](AVSessionItem& session) {
@@ -1067,11 +1066,10 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
     return AVSESSION_SUCCESS;
 }
 
-bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, AVSessionItem& session)
+bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta)
 {
     nlohmann::json values = json::parse(oldContent, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), false, "avQueue json object is null");
-    AVMetaData meta = session.GetMetaData();
     auto it = values.begin();
     for (auto& value : values) {
         if (bundleName == value["bundleName"] && meta.GetAVQueueId() == value["avQueueId"]) {
@@ -1096,7 +1094,6 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
             meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
         innerPixelMap->Clear();
-        meta.SetAVQueueImage(innerPixelMap);
         value["avQueueImage"] = fileName;
     } else {
         value["avQueueImage"] = "";
@@ -1118,7 +1115,7 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
 
 void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
 {
-    SLOGI("add queueinfo to file in");
+    SLOGD("add queueinfo to file in");
     // check is this session support playmusiclist intent
     std::lock_guard lockGuard(sessionAndControllerLock_);
     std::string bundleName = session.GetBundleName();
@@ -1128,18 +1125,22 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
         SLOGE("bundleName=%{public}s does not support play intent", bundleName.c_str());
         return;
     }
-    SLOGD("add queueinfo to file with queue lock check");
+    AVMetaData meta = session.GetMetaData();
+    if (meta.GetAVQueueId().empty() || meta.GetAVQueueName().empty()) {
+        SLOGI("AddAvQueueInfoToFile avqueueinfo empty, return");
+        return;
+    }
     std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
     std::string oldContent;
     if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldContent)) {
         SLOGE("AddAvQueueInfoToFile read avqueueinfo fail, Return!");
         return;
     }
-    if (!SaveAvQueueInfo(oldContent, bundleName, session)) {
+    if (!SaveAvQueueInfo(oldContent, bundleName, meta)) {
         SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
         return;
     }
-    SLOGI("add queueinfo to file done");
+    SLOGD("add queueinfo to file done");
 }
 
 int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
