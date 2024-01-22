@@ -128,6 +128,7 @@ ohos_shared_library("avsession_service") {
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_manager",

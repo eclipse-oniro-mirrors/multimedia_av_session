@@ -18,6 +18,9 @@
 #include "avsession_log.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "want.h"
+#include "want_params_wrapper.h"
+#include "string_wrapper.h"
 
 namespace OHOS::AVSession {
 BundleStatusAdapter::BundleStatusAdapter()
@@ -183,8 +186,10 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
             executeParam.abilityName_ = value["uiAbility"]["ability"];
             executeParam.insightIntentName_ = insightName;
             executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+            AppExecFwk::WantParams innerParams;
+            innerParams.SetParam("entityId", OHOS::AAFwk::String::Box(assetId));
             std::shared_ptr<AppExecFwk::WantParams> wantParam = std::make_shared<AppExecFwk::WantParams>();
-            wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(interfaceType, assetId));
+            wantParam->SetParam("items", OHOS::AAFwk::WantParamWrapper::Box(innerParams));
             executeParam.insightIntentParam_ = wantParam;
             return true;
         }
