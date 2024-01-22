@@ -140,10 +140,7 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     std::shared_ptr<MigrateAVSessionManager> migrateManager_, int32_t sessionId, std::string deviceId)
 {
     SLOGI("MigrateTest001 TestMigrateConnect");
-#ifdef COLLABORATIONFWK_ENABLE
-    avservice_->InitAllConnect();
-    avservice_->SuperLauncher("", "SuperLauncher", "", OHOS::CollaborationFwk::BussinessStatus::CONNECTING);
-#endif
+    avservice_->SuperLauncher("", "SuperLauncher", "", "CONNECTING");
     avservice_->AddInnerSessionListener(server_.get());
 
     server_->Init(avservice_);
@@ -216,9 +213,7 @@ HWTEST_F(MigrateAVSessionTest, MigrateTest001, TestSize.Level1)
     TestMigrateSendByte(avsession_, server_, deviceId);
 
     // disconnect release
-#ifdef COLLABORATIONFWK_ENABLE
-    avservice_->SuperLauncher("", "SuperLauncher", "", OHOS::CollaborationFwk::BussinessStatus::IDLE);
-#endif
+    avservice_->SuperLauncher("", "SuperLauncher", "", "IDLE");
     avservice_->RemoveInnerSessionListener(server_.get());
     server_->OnSessionRelease(descriptor);
     server_->ClearCacheBySessionId(descriptor.sessionId_);

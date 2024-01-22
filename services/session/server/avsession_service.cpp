@@ -18,6 +18,8 @@
 #include <iostream>
 #include <regex>
 #include <dlfcn.h>
+#include <thread>
+#include <chrono>
 
 #include "accesstoken_kit.h"
 #include "app_manager_adapter.h"
@@ -59,6 +61,9 @@
 #include "avsession_service.h"
 #include "want_agent_helper.h"
 
+typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
+typedef void (*StopMigrateStubFunc)(void);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
 #endif
@@ -74,6 +79,8 @@ using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
 static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
     std::string("platformsdk/libsuspend_manager_client.z.so");
+static const std::string MIGRATE_STUB_SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
+    std::string("libavsession_migration.z.so");
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 
 class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
@@ -127,10 +134,6 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     AddSystemAbilityListener(CAST_ENGINE_SA_ID);
 
-#ifdef COLLABORATIONFWK_ENABLE
-    AddSystemAbilityListener(CollaborationFwk::COLLABORATIONFWK_SA_ID);
-#endif
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto deviceProp = system::GetParameter("const.product.devicetype", "default");
     SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
@@ -141,7 +144,7 @@ void AVSessionService::OnStart()
         AVRouter::GetInstance().SetDiscoverable(true);
     }
 #endif
-
+    PullMigrateStub();
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
@@ -153,7 +156,38 @@ void AVSessionService::OnDump()
 
 void AVSessionService::OnStop()
 {
+    StopMigrateStubFunc stopMigrateStub = (StopMigrateStubFunc)dlsym(migrateStubFuncHandle_, "StopMigrateStub");
+    if (stopMigrateStub == nullptr) {
+        SLOGE("failed to find library, reason: %{public}sn", dlerror());
+    } else {
+        stopMigrateStub();
+    }
+    dlclose(migrateStubFuncHandle_);
     CommandSendLimit::GetInstance().StopTimer();
+}
+
+void AVSessionService::PullMigrateStub()
+{
+    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
+    if (realpath(MIGRATE_STUB_SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check libmigrate_avsession_service path failed %{public}s", MIGRATE_STUB_SOURCE_LIBRARY_PATH.c_str());
+        return;
+    }
+    migrateStubFuncHandle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
+    if (migrateStubFuncHandle_ == nullptr) {
+        SLOGE("failed to dlopen library, reason: %{public}sn", dlerror());
+        return;
+    }
+    MigrateStubFunc startMigrateStub = (MigrateStubFunc)dlsym(migrateStubFuncHandle_, "StartMigrateStub");
+    if (startMigrateStub == nullptr) {
+        SLOGE("failed to find library, reason: %{public}sn", dlerror());
+        return;
+    }
+    std::thread([startMigrateStub, this]() {
+        SLOGI("create thread to keep MigrateStub");
+        startMigrateStub([this](std::string deviceId, std::string serviceName, std::string extraInfo,
+            std::string state) { SuperLauncher(deviceId, serviceName, extraInfo, state); });
+    }).detach();
 }
 
 void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -174,11 +208,6 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
             InitBMS();
             break;
-#ifdef COLLABORATIONFWK_ENABLE
-        case CollaborationFwk::COLLABORATIONFWK_SA_ID:
-            InitAllConnect();
-            break;
-#endif
         case CAST_ENGINE_SA_ID:
             CheckInitCast();
             break;
