@@ -358,6 +358,7 @@ int32_t AVSessionServiceProxy::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEven
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
                              "write interface token failed");
+    SLOGI("try SendSystemAVKeyEvent with key=%{public}d", keyEvent.GetKeyCode());
     CHECK_AND_RETURN_RET_LOG(keyEvent.WriteToParcel(data), ERR_MARSHALLING, "write keyEvent failed");
 
     auto remote = Remote();
@@ -377,6 +378,7 @@ int32_t AVSessionServiceProxy::SendSystemControlCommand(const AVControlCommand& 
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
                              "write interface token failed");
+    SLOGI("try SendSystemControlCommand with cmd=%{public}d", command.GetCommand());
     CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&command), ERR_MARSHALLING, "write keyEvent failed");
 
     auto remote = Remote();
