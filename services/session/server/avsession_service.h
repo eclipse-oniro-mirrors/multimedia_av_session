@@ -183,6 +183,7 @@ private:
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor);
+    void NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
     void RemoveClientDeathObserver(pid_t pid);
