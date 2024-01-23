@@ -2388,6 +2388,33 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     SLOGI("AVSession service PublishNotification uid %{public}d, result %{public}d", uid, result);
 }
 
+void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction)
+{
+    // historical sessions
+    std::vector<AVSessionDescriptor> hisDescriptors;
+    GetHistoricalSessionDescriptors(1, hisDescriptors);
+    // all sessions
+    std::vector<AVSessionDescriptor> activeDescriptors;
+    GetAllSessionDescriptors(activeDescriptors);
+    // historical avqueueinfos
+    std::vector<AVQueueInfo> avQueueInfos;
+    GetHistoricalAVQueueInfos(1, 1, avQueueInfos);
+    AVSessionDescriptor selectSession;
+    if (activeDescriptors.size() != 0 || hisDescriptors.size() <= 0 || avQueueInfos.size() <= 0) {
+        return;
+    }
+    for (AVSessionDescriptor session : hisDescriptors) {
+        if (session.elementName_.GetBundleName() == avQueueInfos[0].GetBundleName()) {
+            selectSession = session;
+            break;
+        }
+    }
+    if (deviceChangeAction.type == AudioStandard::CONNECT) {
+        SLOGI("history bundle name %{public}s", selectSession.elementName_.GetBundleName().c_str());
+        NotifySystemUI(&selectSession);
+    }
+}
+
 void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
     SLOGI("AVSessionService HandleDeviceChange");
@@ -2397,13 +2424,7 @@ void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChange
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADPHONES ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_USB_HEADSET ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_BLUETOOTH_A2DP) {
-            std::vector<AVSessionDescriptor> descriptors;
-            GetHistoricalSessionDescriptors(1, descriptors);
-            if (deviceChangeAction.type == AudioStandard::CONNECT && descriptors.size() > 0
-                && descriptors[0].sessionId_ != DEFAULT_SESSION_ID) {
-                SLOGI("history bundle name %{public}s", descriptors[0].elementName_.GetBundleName().c_str());
-                NotifySystemUI(&descriptors[0]);
-            }
+            NotifyDeviceChange(deviceChangeAction);
         }
     }
 }
