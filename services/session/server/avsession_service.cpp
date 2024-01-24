@@ -1524,6 +1524,11 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
         CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
             ERR_COMMAND_SEND_EXCEED_MAX, "command excuted number exceed max");
         topSession_->ExecuteControllerCommand(command);
+    } else if (command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY) {
+        SLOGI("SendSystemControlCommand code start without topSession_");
+        sptr<IRemoteObject> object;
+        int32_t ret = CreateControllerInner("default", object);
+        SLOGI("SendSystemControlCommand code start ret : %{public}d", static_cast<int32_t>(ret));
     }
     return AVSESSION_SUCCESS;
 }
