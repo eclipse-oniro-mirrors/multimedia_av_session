@@ -39,6 +39,7 @@ public:
     std::shared_ptr<CastEngine::IStreamPlayer> CreateStreamPlayer();
     bool RegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener);
     bool UnRegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener);
+    void CheckProcessDone();
 
 private:
     std::shared_ptr<CastEngine::ICastSession> castSession_;

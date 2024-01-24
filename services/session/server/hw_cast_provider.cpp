@@ -147,6 +147,7 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
         return false;
     }
 
+    lastCastId_ = castId;
     return hwCastProviderSession->AddDevice(deviceInfo.deviceId_);
 }
 
@@ -326,13 +327,33 @@ void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
     }
 }
 
+void HwCastProvider::waitSessionRelease()
+{
+    SLOGI("waitSessionRelease in");
+    std::lock_guard lockGuard(mutexLock_);
+    if (hwCastProviderSessionMap_.find(lastCastId_) == hwCastProviderSessionMap_.end()) {
+        SLOGI("waitSessionRelease for the castSession corresponding to castId is not exit");
+        return;
+    }
+    auto hwCastProviderSession = hwCastProviderSessionMap_[lastCastId_];
+    if (hwCastProviderSession == nullptr) {
+        SLOGI("waitSessionRelease for the hwCastProviderSession is nullptr");
+        return;
+    }
+    hwCastProviderSession->CheckProcessDone();
+    SLOGI("waitSessionRelease done");
+}
+
 void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession)
 {
     SLOGI("Cast provider received session create event");
     std::thread([this, castSession]() {
         SLOGI("Cast pvd received session create event and create task thread");
+        waitSessionRelease();
+        SLOGI("Cast pvd received session create event and wait session release done");
         for (auto listener : castStateListenerList_) {
             listener->OnSessionNeedDestroy();
+            SLOGI("Cast pvd received session create event and session destroy check done");
         }
         int32_t castId;
         {

@@ -61,6 +61,7 @@ private:
     std::vector<std::shared_ptr<IAVCastStateListener>> castStateListenerList_;
     std::recursive_mutex mutexLock_;
     bool isRelease_ = false;
+    int lastCastId_ = -1;
 };
 } // namespace OHOS::AVSession
 

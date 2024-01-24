@@ -93,7 +93,9 @@ public:
         }
         std::vector<std::uint8_t> imgBuffer(imgBufferSize);
         ifile.read((char*)&imgBuffer[0], imgBufferSize);
+        SLOGD("imgBuffer read done");
         innerPixelMap->SetInnerImgBuffer(imgBuffer);
+        SLOGI("imgBuffer SetInnerImgBuffer done");
         ifile.close();
     }
 

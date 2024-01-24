@@ -88,18 +88,18 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
             std::lock_guard lockGuard(lock_);
             auto it = sessionUIDs_.find(info->clientUID);
             if (it != sessionUIDs_.end()) {
-                SLOGI("uid=%{public}d has session", info->clientUID);
+                SLOGD("uid=%{public}d has session", info->clientUID);
                 continue;
             }
         }
         if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(info->clientUID)) {
-            SLOGI("uid=%{public}d is system app", info->clientUID);
+            SLOGD("uid=%{public}d is system app", info->clientUID);
             continue;
         }
 
         if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID)) {
             AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
-            SLOGI("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
+            SLOGD("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
             continue;
         }
         SLOGI("pause uid=%{public}d", info->clientUID);

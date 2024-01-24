@@ -16,6 +16,7 @@
 #define OHOS_AVSESSION_PIXEL_MAP_H
 
 #include <vector>
+#include <mutex>
 #include "parcel.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
@@ -48,6 +49,7 @@ public:
 
     void SetInnerImgBuffer(const std::vector<uint8_t>& imgBuffer)
     {
+        std::lock_guard lockGuard(bufferLock_);
         innerImgBuffer_.clear();
         innerImgBuffer_ = imgBuffer;
         if (innerImgBuffer_.capacity() < DEFAULT_BUFFER_SIZE) {
@@ -57,6 +59,7 @@ public:
 
 private:
     std::vector<uint8_t> innerImgBuffer_;
+    std::recursive_mutex bufferLock_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_PIXEL_MAP_H
