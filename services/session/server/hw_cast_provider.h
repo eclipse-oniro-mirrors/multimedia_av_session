@@ -54,6 +54,7 @@ public:
     void OnServiceDied() override;
 
 private:
+    void WaitSessionRelease();
     static const int MAX_CAST_SESSION_SIZE = 16;
     std::vector<bool> castFlag_ = std::vector<bool>(MAX_CAST_SESSION_SIZE, false);
     std::map<int, std::shared_ptr<HwCastProviderSession>> hwCastProviderSessionMap_;
