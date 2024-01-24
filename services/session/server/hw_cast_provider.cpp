@@ -327,7 +327,7 @@ void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
     }
 }
 
-void HwCastProvider::waitSessionRelease()
+void HwCastProvider::WaitSessionRelease()
 {
     SLOGI("waitSessionRelease in");
     std::lock_guard lockGuard(mutexLock_);
@@ -349,7 +349,7 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
     SLOGI("Cast provider received session create event");
     std::thread([this, castSession]() {
         SLOGI("Cast pvd received session create event and create task thread");
-        waitSessionRelease();
+        WaitSessionRelease();
         SLOGI("Cast pvd received session create event and wait session release done");
         for (auto listener : castStateListenerList_) {
             listener->OnSessionNeedDestroy();
@@ -374,6 +374,7 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
         {
             std::lock_guard lockGuard(mutexLock_);
             hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+            lastCastId_ = castId;
             SLOGI("Cast task thread to create player");
             std::shared_ptr<IStreamPlayer> streamPlayer = hwCastProviderSession->CreateStreamPlayer();
             std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(streamPlayer);
