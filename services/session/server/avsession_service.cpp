@@ -408,7 +408,7 @@ sptr <AVSessionItem> AVSessionService::SelectSessionByUid(const AudioRendererCha
 void AVSessionService::OutputDeviceChangeListener(const AudioRendererChangeInfos& infos)
 {
     for (const auto& info : infos) {
-        SLOGI("clientUID  is %{public}d, rendererState is %{public}d, deviceId is %{public}d", info->clientUID,
+        SLOGD("clientUID  is %{public}d, rendererState is %{public}d, deviceId is %{public}d", info->clientUID,
               static_cast<int32_t>(info->rendererState), info->outputDeviceInfo.deviceId);
     }
 }

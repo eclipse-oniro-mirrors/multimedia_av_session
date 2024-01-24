@@ -69,8 +69,8 @@ bool PermissionChecker::CheckSystemPermissionByUid(int uid)
 
     AccessTokenIDEx accessTokenIdEx = AccessTokenKit::GetHapTokenIDEx(uid / UID_TRANSFORM_DIVISOR, bundleName, 0);
     auto tokenId = accessTokenIdEx.tokenIdExStruct.tokenID;
-    SLOGI("CheckSystemPermissionByUid get tokenId : %{public}u", tokenId);
-    SLOGI("CheckSystemPermissionByUid get full tokenId : %{public}llu", accessTokenIdEx.tokenIDEx);
+    SLOGD("CheckSystemPermissionByUid get tokenId : %{public}u", tokenId);
+    SLOGD("CheckSystemPermissionByUid get full tokenId : %{public}llu", accessTokenIdEx.tokenIDEx);
     if (tokenId == INVALID_TOKENID) {
         SLOGE("get token id failed");
         return false;
@@ -87,7 +87,7 @@ bool PermissionChecker::CheckSystemPermissionByUid(int uid)
         SLOGI("CheckSystemPermissionByUid Not system app, fullTokenId=%{public}llu", accessTokenIdEx.tokenIDEx);
         return false;
     }
-    SLOGI("CheckSystemPermissionByUid is system app done");
+    SLOGD("CheckSystemPermissionByUid is system app done");
     return true;
 }
 } // namespace OHOS::AVSession
