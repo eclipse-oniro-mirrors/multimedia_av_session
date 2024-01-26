@@ -128,7 +128,7 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
     }
     AppExecFwk::BundleInfo bundleInfo;
     if (!bundleMgrProxy->GetBundleInfo(bundleName, getBundleInfoWithHapModule, bundleInfo, startUserId)) {
-        SLOGE("IsSupportPlayIntent, GetBundleInfo=%{public}s fail", bundleName.c_str());
+        SLOGE("GetBundleInfo=%{public}s fail", bundleName.c_str());
         return false;
     }
     bool isSupportIntent = false;
@@ -136,28 +136,36 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
         auto ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::INTENT_PROFILE, bundleName, module,
             profile, startUserId);
         if (ret == 0) {
-            SLOGI("IsSupportPlayIntent, GetJsonProfile success, profile=%{public}s", profile.c_str());
+            SLOGI("GetJsonProfile success, profile=%{public}s", profile.c_str());
             isSupportIntent = true;
             supportModule = module;
             break;
         }
     }
     if (!isSupportIntent) {
-        SLOGE("Bundle=%{public}s does not support insight intent", bundleName.c_str());
+        SLOGE("Bundle=%{public}s does not support insight", bundleName.c_str());
         return false;
     }
-    SLOGD("IsSupportPlayIntent, GetJsonProfile profile=%{public}s", profile.c_str());
     // check bundle support background mode & playmusiclist intent
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     for (const auto& value : profileValues["insightIntents"]) {
         std::string insightName = value["intentName"];
-        auto modeValues = value["uiAbility"]["executeMode"];
-        auto mode = std::find(modeValues.begin(), modeValues.end(), "background");
-        SLOGD("check GetPlayIntentParam, insightIntent=%{public}s", insightName.c_str());
-        if (insightName == PLAY_MUSICLIST && mode != modeValues.end()) {
-            return true;
+        nlohmann::json abilityValue = value["uiAbility"];
+        if (insightName != PLAY_MUSICLIST) {
+            continue;
         }
+        if (!value.contains("uiAbility") || abilityValue.is_discarded()) {
+            SLOGE("PLAY_MUSICLIST uiability discarded=%{public}d", abilityValue.is_discarded());
+            return false;
+        }
+        auto modeValues = abilityValue["executeMode"];
+        if (!abilityValue.contains("executeMode") || modeValues.is_discarded()) {
+            SLOGE("PLAY_MUSICLIST executeMode discarded=%{public}d", modeValues.is_discarded());
+            return false;
+        }
+        auto mode = std::find(modeValues.begin(), modeValues.end(), "background");
+        return (mode != modeValues.end());
     }
     return false;
 }
@@ -171,19 +179,24 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
     std::string supportModule;
     std::string profile;
     if (!IsSupportPlayIntent(bundleName, supportModule, profile)) {
-        SLOGE("GetPlayIntentParam, bundle=%{public}s does not support play intent", bundleName.c_str());
+        SLOGE("bundle=%{public}s does not support play insights", bundleName.c_str());
         return false;
     }
-    SLOGD("GetPlayIntentParam, GetJsonProfile profile=%{public}s", profile.c_str());
+    SLOGD("GetJsonProfile profile=%{public}s", profile.c_str());
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     for (const auto& value : profileValues["insightIntents"]) {
         std::string insightName = value["intentName"];
-        SLOGD("check GetPlayIntentParam, insightIntent=%{public}s", insightName.c_str());
+        nlohmann::json abilityValue = value["uiAbility"];
+        SLOGD(" insightName=%{public}s", insightName.c_str());
         if (insightName == PLAY_MUSICLIST) {
+            if (!value.contains("uiAbility") || abilityValue.is_discarded()) {
+                SLOGE("PLAY_MUSICLIST uiability discarded=%{public}d", abilityValue.is_discarded());
+                return false;
+            }
             executeParam.bundleName_ = bundleName;
             executeParam.moduleName_ = supportModule;
-            executeParam.abilityName_ = value["uiAbility"]["ability"];
+            executeParam.abilityName_ = abilityValue["ability"];
             executeParam.insightIntentName_ = insightName;
             executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
             AppExecFwk::WantParams innerParams;
