@@ -103,6 +103,7 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
 
         std::lock_guard lockGuard(currentStateLock_);
         currentState_ = *statePtr;
+        delete statePtr;
     }
     return ret;
 }
