@@ -60,4 +60,4 @@ export class AVCastPickerParam extends ViewPU {
     this.updateDirtyElements();
   }
 }
-export default AVCastPickerState;
+export default {AVCastPickerState};
