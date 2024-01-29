@@ -52,9 +52,6 @@ public:
         std::lock_guard lockGuard(bufferLock_);
         innerImgBuffer_.clear();
         innerImgBuffer_ = imgBuffer;
-        if (innerImgBuffer_.capacity() < DEFAULT_BUFFER_SIZE) {
-            innerImgBuffer_.reserve(DEFAULT_BUFFER_SIZE);
-        }
     }
 
 private:

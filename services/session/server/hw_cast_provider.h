@@ -63,6 +63,7 @@ private:
     std::recursive_mutex mutexLock_;
     bool isRelease_ = false;
     int lastCastId_ = -1;
+    std::shared_ptr<HwCastProviderSession> lastCastSession;
 };
 } // namespace OHOS::AVSession
 
