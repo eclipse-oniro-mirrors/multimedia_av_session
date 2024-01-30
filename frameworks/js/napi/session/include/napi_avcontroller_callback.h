@@ -60,6 +60,7 @@ public:
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
+    void AddCallbackForSessionDestroy(const std::function<void(void)>& sessionDestroyCallback);
 
 private:
     void HandleEvent(int32_t event);
@@ -77,6 +78,7 @@ private:
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
     std::shared_ptr<bool> isValid_;
+    std::function<void(void)> sessionDestroyCallback_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVCONTROLLER_CALLBACK_H
