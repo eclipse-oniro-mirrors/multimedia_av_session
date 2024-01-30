@@ -1332,7 +1332,7 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env,
         return napi_generic_failure;
     }
     if (napiController->callback_ == nullptr) {
-        napiController->callback_= std::make_shared<NapiAVControllerCallback>();
+        napiController->callback_ = std::make_shared<NapiAVControllerCallback>();
         if (napiController->callback_ == nullptr) {
             SLOGE("OnEvent failed : no memory");
             NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);

@@ -91,7 +91,7 @@ bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAV
         SLOGE("RegisterCastSessionStateListener failed for the listener is nullptr");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutex_);
     if (find(castSessionStateListenerList_.begin(), castSessionStateListenerList_.end(), listener)
         != castSessionStateListenerList_.end()) {
         SLOGE("listener is already in castSessionStateListenerList_");
@@ -118,7 +118,7 @@ bool HwCastProviderSession::UnRegisterCastSessionStateListener(std::shared_ptr<I
         SLOGE("UnRegisterCastSessionStateListener failed for the listener is nullptr");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutex_);
     for (auto iter = castSessionStateListenerList_.begin(); iter != castSessionStateListenerList_.end();) {
         if (*iter == listener) {
             castSessionStateListenerList_.erase(iter);
@@ -142,9 +142,8 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         return;
     }
     stashDeviceState_ = -1;
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutex_);
     for (auto listener : castSessionStateListenerList_) {
-        lock.unlock();
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = stateInfo.deviceId;
         deviceInfo.deviceName_ = "RemoteCast";
@@ -153,14 +152,13 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
             SLOGI("trigger the OnCastStateChange for registered listeners");
             listener->OnCastStateChange(static_cast<int>(deviceState), deviceInfo);
         }
-        lock.lock();
     }
 }
 
 void HwCastProviderSession::CheckProcessDone()
 {
     SLOGI("CheckProcessDone wait lock");
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard lockGuard(mutex_);
     SLOGI("CheckProcessDone wait lock done");
 }
 
