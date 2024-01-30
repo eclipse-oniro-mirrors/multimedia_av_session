@@ -49,6 +49,7 @@ std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAV
 std::shared_ptr<NapiSessionListener> NapiAVSessionManager::listener_;
 std::shared_ptr<NapiAsyncCallback> NapiAVSessionManager::asyncCallback_;
 std::list<napi_ref> NapiAVSessionManager::serviceDiedCallbacks_;
+std::mutex createControllerMutex_;
 
 std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {AVSESSION_ERROR, 6600101},
@@ -341,7 +342,6 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_CREATE_CONTROLLER_TASK_ID;
-
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().CreateController(context->sessionId_, context->controller_);
         if (ret != AVSESSION_SUCCESS) {
@@ -351,6 +351,10 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
                 context->errMessage = "CreateController failed : native invalid parameters";
             } else if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "CreateController failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_IS_EXIST) {
+                SLOGE("create controlller with already has one");
+                context->errCode = ERR_CONTROLLER_IS_EXIST;
+                return;
             } else {
                 context->errMessage = "CreateController failed : native server exception";
             }
@@ -358,13 +362,18 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
-
     auto complete = [env, context](napi_value& output) {
-        context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);
+        SLOGE("check create controller with errCode %{public}d", static_cast<int>(context->errCode));
+        std::lock_guard lockGuard(createControllerMutex_);
+        if (context->errCode == ERR_CONTROLLER_IS_EXIST) {
+            SLOGE("check create controller meet repeat for sessionId: %{public}s", context->sessionId_.c_str());
+            context->status = NapiAVSessionController::RepeatedInstance(env, context->sessionId_, output);
+        } else {
+            context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);
+        }
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
-
     return NapiAsyncWork::Enqueue(env, context, "CreateController", executor, complete);
 }
 

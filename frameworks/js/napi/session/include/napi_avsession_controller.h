@@ -34,6 +34,7 @@ public:
     static napi_value Init(napi_env env, napi_value exports);
     static napi_status NewInstance(napi_env env, std::shared_ptr<AVSessionController>& nativeController,
         napi_value& out);
+    static napi_status RepeatedInstance(napi_env env, const std::string& controllerId, napi_value& out);
 
     using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*, napi_value, napi_value)>;
     using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSessionController*, napi_value)>;
@@ -122,7 +123,7 @@ private:
     static napi_status SetMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
                                         const std::string& eventName, napi_value filter, napi_value callback);
-
+    static napi_status DoRegisterCallback(napi_env env, NapiAVSessionController* napiController);
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
 
     napi_ref wrapperRef_ {};
@@ -140,6 +141,7 @@ private:
     static constexpr size_t ARGV_THIRD = 2;
 
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> EventHandlers_;
+    static std::map<std::string, NapiAVSessionController> ControllerList_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_CONTROLLER_H

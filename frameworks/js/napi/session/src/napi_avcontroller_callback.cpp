@@ -57,7 +57,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
-    SLOGI("handle event for %{public}d", event);
+    SLOGI("handle for event: %{public}d with size: %{public}d", event, static_cast<int>(callbacks_[event].size()));
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
             [this, ref, event]() {
@@ -167,6 +167,13 @@ void NapiAVControllerCallback::OnAVCallMetaDataChange(const AVCallMetaData& avCa
 void NapiAVControllerCallback::OnSessionDestroy()
 {
     HandleEvent(EVENT_SESSION_DESTROY);
+    SLOGD("callback for sessionDestroy, check callback");
+    if (sessionDestroyCallback_ != nullptr) {
+        SLOGI("notify session Destroy for repeat");
+        sessionDestroyCallback_();
+        sessionDestroyCallback_ = nullptr;
+        SLOGD("notify session Destroy for repeat done");
+    }
 }
 
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
@@ -178,6 +185,7 @@ void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& stat
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnMetaDataChange");
+    SLOGI("do metadata change notify with title %{public}s", data.GetTitle().c_str());
     HandleEvent(EVENT_META_DATA_CHANGE, data);
 }
 
@@ -267,5 +275,11 @@ napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event
     SLOGI("remove single callback with ref %{public}d, %{public}p, %{public}p", event, &ref, *(&ref));
     callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);
+}
+
+void NapiAVControllerCallback::AddCallbackForSessionDestroy(const std::function<void(void)>& sessionDestroyCallback)
+{
+    SLOGE("add callback for session destroy notify");
+    sessionDestroyCallback_ = sessionDestroyCallback;
 }
 }

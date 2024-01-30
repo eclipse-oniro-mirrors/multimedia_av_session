@@ -44,6 +44,7 @@ AVControllerItem::~AVControllerItem()
 int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
     std::lock_guard lockGuard(callbackMutex_);
+    SLOGD("do register callback for controller %{public}d", static_cast<int>(pid_));
     callback_ = iface_cast<AVControllerCallbackProxy>(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "RegisterCallbackInner callback_ is nullptr");
     return AVSESSION_SUCCESS;
@@ -208,6 +209,7 @@ int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackState
 
 int32_t AVControllerItem::Destroy()
 {
+    SLOGI("do controller destroyfor pid %{public}d", static_cast<int>(pid_));
     {
         std::lock_guard callbackLockGuard(callbackMutex_);
         callback_ = nullptr;
@@ -343,7 +345,8 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
         if (!metaMask_.test(AVMetaData::META_KEY_ASSET_ID)) {
             metaOut.SetAssetId(data.GetAssetId());
         }
-        SLOGI("update meta data");
+        SLOGI("update meta data for pid %{public}d with title %{public}s", static_cast<int>(pid_),
+            metaOut.GetTitle().c_str());
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         if (callback_ != nullptr) {
             callback_->OnMetaDataChange(metaOut);

@@ -1382,9 +1382,8 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     std::lock_guard lockGuard(sessionAndControllerLock_);
     auto controllerAlreadyExist = GetPresentController(pid, sessionIdInner);
     if (controllerAlreadyExist != nullptr) {
-        SLOGI("controller already exist, try pass instance");
-        object = controllerAlreadyExist;
-        return AVSESSION_SUCCESS;
+        SLOGI("controller already exist, try return with no instance");
+        return ERR_CONTROLLER_IS_EXIST;
     }
 
     auto session = GetContainer().GetSessionById(sessionIdInner);
