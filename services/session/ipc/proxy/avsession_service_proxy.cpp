@@ -260,6 +260,8 @@ int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, co
 int32_t AVSessionServiceProxy::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {
+    std::lock_guard lockGuard(createControllerMutex_);
+    SLOGI("create controller in");
     sptr<IRemoteObject> object;
     auto ret = AVSessionServiceProxy::CreateControllerInner(sessionId, object);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateControllerInner failed");

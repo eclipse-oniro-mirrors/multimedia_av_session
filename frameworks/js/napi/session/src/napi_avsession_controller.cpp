@@ -49,6 +49,7 @@ std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     { "queueTitleChange", { OnQueueTitleChange, OffQueueTitleChange } },
     { "extrasChange", { OnExtrasChange, OffExtrasChange } },
 };
+std::map<std::string, NapiAVSessionController> NapiAVSessionController::ControllerList_ = {};
 std::mutex NapiAVSessionController::uvMutex_;
 
 NapiAVSessionController::NapiAVSessionController()
@@ -135,10 +136,43 @@ napi_status NapiAVSessionController::NewInstance(napi_env env, std::shared_ptr<A
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVControllerConstructorRef, &constructor), napi_generic_failure);
     napi_value instance{};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
+    CHECK_RETURN(nativeController != nullptr, "get native controller failed with null", napi_generic_failure);
     NapiAVSessionController* napiController{};
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiController)), napi_generic_failure);
     napiController->controller_ = std::move(nativeController);
     napiController->sessionId_ = napiController->controller_->GetSessionId();
+
+    CHECK_RETURN(DoRegisterCallback(env, napiController) == napi_ok, "add callback failed", napi_generic_failure);
+    SLOGI("add napiController instance to repeat list for sessionId: %{public}s", napiController->sessionId_.c_str());
+    ControllerList_[napiController->sessionId_] = *napiController;
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, napiController->sessionId_, property);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionId", property), napi_generic_failure);
+
+    out = instance;
+    return napi_ok;
+}
+
+napi_status NapiAVSessionController::RepeatedInstance(napi_env env, const std::string& controllerId, napi_value& out)
+{
+    napi_value constructor {};
+    NAPI_CALL_BASE(env, napi_get_reference_value(env, AVControllerConstructorRef, &constructor), napi_generic_failure);
+    napi_value instance{};
+    NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
+    NapiAVSessionController* napiController{};
+    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiController)), napi_generic_failure);
+    SLOGI("check repeat controller with sessionId %{public}s", controllerId.c_str());
+    if (ControllerList_.count(controllerId) <= 0) {
+        SLOGE("check repeat without cur session");
+        return napi_generic_failure;
+    }
+
+    NapiAVSessionController* repeatedNapiController = &(ControllerList_[controllerId]);
+    napiController->controller_ = repeatedNapiController->controller_;
+    napiController->sessionId_ = repeatedNapiController->sessionId_;
+    napiController->callback_ = repeatedNapiController->callback_;
+    SLOGI("check repeat controller for copy res %{public}d", (napiController->controller_ == nullptr));
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, napiController->sessionId_, property);
@@ -1146,9 +1180,11 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
             context->errCode = NapiAVSessionManager::errcode_[ret];
             return;
         }
+        ControllerList_.erase(napiController->sessionId_);
         napiController->controller_ = nullptr;
         napiController->callback_ = nullptr;
-        SLOGI("Start NapiAVSessionController destroy process done");
+        SLOGI("Start NapiAVSessionController destroy process and clear cache done for session: %{public}s",
+            napiController->sessionId_.c_str());
     };
 
     return NapiAsyncWork::Enqueue(env, context, "IsSessionActive", executor);
@@ -1312,25 +1348,9 @@ napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionCo
     return status;
 }
 
-napi_status NapiAVSessionController::RegisterCallback(napi_env env,
-    const std::shared_ptr<ContextBase>& context,
-    const std::string& event, napi_value filter, napi_value callback)
+napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSessionController* napiController)
 {
-    auto it = EventHandlers_.find(event);
-    if (it == EventHandlers_.end()) {
-        SLOGE("event name invalid");
-        NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        return napi_generic_failure;
-    }
-    SLOGD("NapiAVSessionController RegisterCallback process check lock");
-    std::lock_guard<std::mutex> lock(uvMutex_);
-    SLOGI("NapiAVSessionController RegisterCallback process");
-    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
-        SLOGE("OnEvent failed : controller is nullptr");
-        NapiUtils::ThrowError(env, "OnEvent CTL null", NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
-        return napi_generic_failure;
-    }
+    SLOGI("do register callback with for sessionId: %{public}s", napiController->sessionId_.c_str());
     if (napiController->callback_ == nullptr) {
         napiController->callback_ = std::make_shared<NapiAVControllerCallback>();
         if (napiController->callback_ == nullptr) {
@@ -1338,6 +1358,11 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env,
             NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
             return napi_generic_failure;
         }
+        std::string registerControllerId = napiController->sessionId_;
+        napiController->callback_->AddCallbackForSessionDestroy([registerControllerId]() {
+            SLOGI("repeat list erase for session destory: %{public}s", registerControllerId.c_str());
+            ControllerList_.erase(registerControllerId);
+        });
         auto ret = napiController->controller_->RegisterCallback(napiController->callback_);
         if (ret != AVSESSION_SUCCESS) {
             SLOGE("controller RegisterCallback failed:%{public}d", ret);
@@ -1357,6 +1382,32 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env,
             napiController->callback_ = nullptr;
             return napi_generic_failure;
         }
+    }
+    return napi_ok;
+}
+
+napi_status NapiAVSessionController::RegisterCallback(napi_env env,
+    const std::shared_ptr<ContextBase>& context,
+    const std::string& event, napi_value filter, napi_value callback)
+{
+    auto it = EventHandlers_.find(event);
+    if (it == EventHandlers_.end()) {
+        SLOGE("event name invalid");
+        NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        return napi_generic_failure;
+    }
+    SLOGD("NapiAVSessionController RegisterCallback process check lock");
+    std::lock_guard<std::mutex> lock(uvMutex_);
+    SLOGI("NapiAVSessionController RegisterCallback process");
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController->controller_ == nullptr) {
+        SLOGE("OnEvent failed : controller is nullptr");
+        NapiUtils::ThrowError(env, "OnEvent CTL null", NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return napi_generic_failure;
+    }
+    if (DoRegisterCallback(env, napiController) != napi_ok) {
+        SLOGE("do register callback fail!");
+        return napi_generic_failure;
     }
     if (it->second.first(env, napiController, filter, callback) != napi_ok) {
         SLOGE("add event callback failed");

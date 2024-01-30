@@ -211,7 +211,7 @@ int32_t AVSessionServiceStub::HandleCreateControllerInner(MessageParcel& data, M
     sptr<IRemoteObject> object;
     int32_t ret = CreateControllerInner(data.ReadString(), object);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
+    if (ret == AVSESSION_SUCCESS || ret == ERR_CONTROLLER_IS_EXIST) {
         CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");
     }
     return ERR_NONE;

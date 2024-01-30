@@ -101,9 +101,9 @@ int32_t AVSessionItem::Destroy()
     std::list<sptr<AVControllerItem>> controllerList;
     {
         std::lock_guard controllerLockGuard(controllersLock_);
-        SLOGI("size=%{public}d", static_cast<int>(controllers_.size()));
+        SLOGI("to release controller list size: %{public}d", static_cast<int>(controllers_.size()));
         for (auto it = controllers_.begin(); it != controllers_.end();) {
-            SLOGI("pid=%{public}d", it->first);
+            SLOGI("controller for pid: %{public}d", it->first);
             controllerList.push_back(it->second);
             controllers_.erase(it++);
         }
@@ -588,7 +588,8 @@ bool AVSessionItem::IsCastSinkSession(int32_t castState)
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
-    SLOGI("OnCastStateChange in with state %{public}d", static_cast<int32_t>(castState));
+    SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
+        deviceInfo.deviceid_.c_str());
     OutputDeviceInfo outputDeviceInfo;
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
         outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);
@@ -634,7 +635,6 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
             controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
         }
     }
-    SLOGI("Start check is cast sink session for state");
     if (IsCastSinkSession(castState)) {
         SLOGE("Cast sink session start to disconnect");
         return;
@@ -991,6 +991,7 @@ void AVSessionItem::HandleOnPlayFromAssetId(const AVControlCommand& cmd)
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& controller)
 {
     std::lock_guard controllersLockGuard(controllersLock_);
+    SLOGI("handle controller newup for pid: %{public}d", static_cast<int>(pid));
     controllers_.insert({pid, controller});
     return AVSESSION_SUCCESS;
 }
@@ -1038,6 +1039,7 @@ std::shared_ptr<RemoteSessionSource> AVSessionItem::GetRemoteSource()
 void AVSessionItem::HandleControllerRelease(pid_t pid)
 {
     std::lock_guard controllersLockGuard(controllersLock_);
+    SLOGI("handle controller release for pid: %{public}d", static_cast<int>(pid));
     controllers_.erase(pid);
 }
 
@@ -1163,6 +1165,7 @@ int32_t AVSessionItem::SinkCancelCastAudio()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 {
+    SLOGI("UpdateCastDeviceMap with id: %{public}s", deviceInfo.deviceid_.c_str());
     castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
 }
 #endif
