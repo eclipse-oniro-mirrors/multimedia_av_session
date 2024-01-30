@@ -21,6 +21,7 @@
 #include "want.h"
 #include "want_params_wrapper.h"
 #include "string_wrapper.h"
+#include "array_wrapper.h"
 
 namespace OHOS::AVSession {
 BundleStatusAdapter::BundleStatusAdapter()
@@ -199,10 +200,13 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
             executeParam.abilityName_ = abilityValue["ability"];
             executeParam.insightIntentName_ = insightName;
             executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+            // construct items array
             AppExecFwk::WantParams innerParams;
             innerParams.SetParam("entityId", OHOS::AAFwk::String::Box(assetId));
+            sptr<OHOS::AAFwk::IArray> array = new (std::nothrow) OHOS::AAFwk::Array(1, OHOS::AAFwk::g_IID_IWantParams);
+            array->Set(0, OHOS::AAFwk::WantParamWrapper::Box(innerParams));
             std::shared_ptr<AppExecFwk::WantParams> wantParam = std::make_shared<AppExecFwk::WantParams>();
-            wantParam->SetParam("items", OHOS::AAFwk::WantParamWrapper::Box(innerParams));
+            wantParam->SetParam("items", array);
             executeParam.insightIntentParam_ = wantParam;
             return true;
         }
