@@ -42,7 +42,7 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
     AppExecFwk::InsightIntentExecuteParam executeParam;
     bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName_, "", executeParam);
     int32_t ret = AVSESSION_ERROR;
-    if (isSupport && !executeParam.insightIntentName_.empty()) {
+    if (bundleName_ != defaultBundleName && isSupport && !executeParam.insightIntentName_.empty()) {
         SLOGI("Start Ability mediaintent");
         ret = AbilityConnectHelper::GetInstance().StartAVPlayback(executeParam);
     } else {
