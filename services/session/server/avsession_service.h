@@ -299,6 +299,8 @@ private:
 
     bool SaveStringToFileEx(const std::string& filePath, const std::string& content);
 
+    bool CheckStringAndCleanFile(const std::string& filePath);
+
     void ClearClientResources(pid_t pid);
     
     bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta);
@@ -341,6 +343,7 @@ private:
 
     std::recursive_mutex sortFileReadWriteLock_;
     std::recursive_mutex avQueueFileReadWriteLock_;
+    std::mutex fileCheckLock_;
 
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
 
