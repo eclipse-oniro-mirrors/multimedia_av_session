@@ -2277,6 +2277,8 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
 
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
+    std::lock_guard lockGuard(fileCheckLock_);
+    SLOGI("file load in for path: %{public}s", filePath.c_str());
     ifstream file(filePath.c_str());
     if (!file.is_open()) {
         SLOGD("file not open! try open first ! ");
@@ -2297,37 +2299,97 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
         SLOGD("file new create empty ! try set init json ");
         ofstream fileWrite;
         fileWrite.open(filePath.c_str(), ios::out | ios::trunc);
+        if (!fileWrite.is_open()) {
+            SLOGE("open file in create new failed!");
+            file.close();
+            return false;
+        }
         nlohmann::json emptyValue;
         std::string emptyContent = emptyValue.dump();
         SLOGD("LoadStringFromFileEx::Dump json object finished");
         fileWrite.write(emptyContent.c_str(), emptyContent.length());
         if (fileWrite.fail()) {
-            SLOGE("file empty init json fail ! ");
+            SLOGE("file empty init json fail !");
+            file.close();
+            fileWrite.close();
             return false;
         }
+        fileWrite.close();
     }
     content.clear();
     file.seekg(0, ios::beg);
     copy(istreambuf_iterator<char>(file), istreambuf_iterator<char>(), back_inserter(content));
-    return true;
+    file.close();
+    return CheckStringAndCleanFile(filePath);
 }
 
 bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std::string& content)
 {
+    std::lock_guard lockGuard(fileCheckLock_);
+    SLOGI("file save in for path:%{public}s, content:%{public}s", filePath.c_str(), content.c_str());
+    nlohmann::json checkValues = json::parse(content, nullptr, false);
+    CHECK_AND_RETURN_RET_LOG(!checkValues.is_discarded(), false, "recv content discarded");
     ofstream file;
     file.open(filePath.c_str(), ios::out | ios::trunc);
     if (!file.is_open()) {
-        SLOGE("open file failed! ");
+        SLOGE("open file in save failed!");
         return false;
     }
     if (content.empty()) {
-        SLOGE("write content is empty, no need to do write! ");
+        SLOGE("write content is empty, no need to do write!");
+        file.close();
+        return true;
     }
     file.write(content.c_str(), content.length());
     if (file.fail()) {
-        SLOGE("write content to file failed! ");
+        SLOGE("write content to file failed!");
+        file.close();
         return false;
     }
+    file.close();
+    return CheckStringAndCleanFile(filePath);
+}
+
+bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
+{
+    SLOGI("file check for path:%{public}s", filePath.c_str());
+    string content {};
+    ifstream fileRead(filePath.c_str());
+    if (!fileRead.is_open()) {
+        SLOGD("file not open! try open first ! ");
+        fileRead.open(filePath.c_str(), ios::app);
+        if (!fileRead.is_open()) {
+            SLOGE("open file again fail !");
+            return false;
+        }
+    }
+    content.clear();
+    fileRead.seekg(0, ios::beg);
+    copy(istreambuf_iterator<char>(fileRead), istreambuf_iterator<char>(), back_inserter(content));
+    SLOGI("check content pre clean it: %{public}s", content.c_str());
+    nlohmann::json checkValues = json::parse(content, nullptr, false);
+    if (checkValues.is_discarded()) {
+        SLOGE("check content discarded!");
+        ofstream fileWrite;
+        fileWrite.open(filePath.c_str(), ios::out | ios::trunc);
+        if (!fileWrite.is_open()) {
+            SLOGE("open file in create new failed!");
+            fileRead.close();
+            return false;
+        }
+        nlohmann::json emptyValue;
+        std::string emptyContent = emptyValue.dump();
+        SLOGD("LoadStringFromFileEx::Dump json object finished");
+        fileWrite.write(emptyContent.c_str(), emptyContent.length());
+        if (fileWrite.fail()) {
+            SLOGE("file empty init json fail !");
+            fileRead.close();
+            fileWrite.close();
+            return false;
+        }
+        fileWrite.close();
+    }
+    fileRead.close();
     return true;
 }
 
