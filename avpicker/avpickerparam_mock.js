@@ -24,7 +24,7 @@ export var AVCastPickerState;
 export class AVCastPickerParam extends ViewPU {
   constructor(e, t, o, n = -1, m = undefined) {
     super(e, o, n);
-    if (typeof m === "funcation") {
+    if (typeof m === 'funcation') {
         this.paramsGenerator_ = m;
     }
     this.setInitiallyProvidedValue(t);
