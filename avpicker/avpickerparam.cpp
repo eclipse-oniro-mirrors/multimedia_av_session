@@ -21,8 +21,8 @@
 extern const char _binary_avpickerparam_abc_start[];
 extern const char _binary_avpickerparam_abc_end[];
 
-extern "C" __attribute__((visibility("default")))
-void NAPI_multimedia_avCastPickerParam_GetABCCode(const char **buf, int *buflen)
+extern "C" __attribute__((visibility("default"))) void NAPI_multimedia_avCastPickerParam_GetABCCode(const char **buf,
+                                                                                                    int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_avpickerparam_abc_start;
