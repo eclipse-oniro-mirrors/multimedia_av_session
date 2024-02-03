@@ -274,6 +274,12 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
         return NapiUtils::GetUndefinedValue(env);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr) {
+        SLOGE("OffEvent failed : napiSession is nullptr");
+        NapiUtils::ThrowError(env, "OffEvent failed : napiSession is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
     if (napiSession->session_ == nullptr) {
         SLOGE("OffEvent failed : session is nullptr");
         NapiUtils::ThrowError(env, "OffEvent failed : session is nullptr",

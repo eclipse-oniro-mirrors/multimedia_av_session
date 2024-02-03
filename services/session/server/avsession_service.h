@@ -140,7 +140,7 @@ public:
     }
 
     void SuperLauncher(std::string deviceId, std::string serviceName,
-        std::string extraInfo, std::string state);
+        std::string extraInfo, const std::string state);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void ReleaseCastSession() override;
