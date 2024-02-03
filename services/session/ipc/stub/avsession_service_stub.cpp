@@ -130,7 +130,7 @@ int32_t AVSessionServiceStub::GetAVQueueInfosImgLength(std::vector<AVQueueInfo>&
 }
 
 
-void AVSessionServiceStub::MarshallingAVQueueInfos(MessageParcel &reply, std::vector<AVQueueInfo>& avQueueInfos)
+void AVSessionServiceStub::MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos)
 {
     CHECK_AND_RETURN_LOG(reply.WriteUint32(avQueueInfos.size()), "MarshallingAVQueueInfos size failed");
     for (const auto& avQueueInfo : avQueueInfos) {

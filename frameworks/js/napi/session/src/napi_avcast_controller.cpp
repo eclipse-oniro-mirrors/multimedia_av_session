@@ -451,10 +451,12 @@ napi_value NapiAVCastController::GetValidCommands(napi_env env, napi_callback_in
 
 napi_value NapiAVCastController::Release(napi_env env, napi_callback_info info)
 {
-    struct ConcreteContext : public ContextBase {
-        std::vector<std::string> stringCmds;
-    };
-    auto context = std::make_shared<ConcreteContext>();
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("Release failed : no memory");
+        NapiUtils::ThrowError(env, "Release failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
     context->GetCbInfo(env, info);
     context->taskId = NAPI_CAST_CONTROLLER_GET_CURRENT_ITEM_TASK_ID;
 

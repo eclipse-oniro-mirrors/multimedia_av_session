@@ -41,8 +41,8 @@ public:
     int32_t SetDisplaySurface(std::string &surfaceId) override;
     int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
     int32_t UnRegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
-    int32_t SetValidAbility(std::vector<int32_t> validAbilityList) override;
-    int32_t GetValidAbility(std::vector<int32_t> validAbilityList) override;
+    int32_t SetValidAbility(const std::vector<int32_t> validAbilityList) override;
+    int32_t GetValidAbility(const std::vector<int32_t> validAbilityList) override;
 
     void OnStateChanged(const CastEngine::PlayerStates playbackState, bool isPlayWhenReady) override;
     void OnPositionChanged(int position, int bufferPosition, int duration) override;

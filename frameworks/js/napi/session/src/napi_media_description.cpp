@@ -238,7 +238,13 @@ napi_status NapiMediaDescription::SetIcon(napi_env env, const AVMediaDescription
     napi_value property = Media::PixelMapNapi::CreatePixelMap(env,
         AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
     auto status = napi_set_named_property(env, out, "icon", property);
+    if (status != napi_ok) {
+        SLOGW("check icon with no property");
+    }
     status = napi_set_named_property(env, out, "mediaImage", property);
+    if (status != napi_ok) {
+        SLOGW("check mediaImage with no property");
+    }
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }
@@ -266,7 +272,13 @@ napi_status NapiMediaDescription::SetIconUri(napi_env env, const AVMediaDescript
         status = napi_set_named_property(env, out, "iconUri", property);
     } else {
         status = napi_set_named_property(env, out, "iconUri", property);
+        if (status != napi_ok) {
+            SLOGW("check iconUri with no property");
+        }
         status = napi_set_named_property(env, out, "mediaImage", property);
+        if (status != napi_ok) {
+            SLOGW("check mediaImage with no property");
+        }
     }
 
     CHECK_RETURN(status == napi_ok, "set property failed", status);

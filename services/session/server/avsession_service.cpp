@@ -156,7 +156,8 @@ void AVSessionService::OnDump()
 
 void AVSessionService::OnStop()
 {
-    StopMigrateStubFunc stopMigrateStub = (StopMigrateStubFunc)dlsym(migrateStubFuncHandle_, "StopMigrateStub");
+    StopMigrateStubFunc stopMigrateStub =
+        reinterpret_cast<StopMigrateStubFunc>(dlsym(migrateStubFuncHandle_, "StopMigrateStub"));
     if (stopMigrateStub == nullptr) {
         SLOGE("failed to find library, reason: %{public}sn", dlerror());
     } else {
@@ -178,7 +179,8 @@ void AVSessionService::PullMigrateStub()
         SLOGE("failed to dlopen library, reason: %{public}sn", dlerror());
         return;
     }
-    MigrateStubFunc startMigrateStub = (MigrateStubFunc)dlsym(migrateStubFuncHandle_, "StartMigrateStub");
+    MigrateStubFunc startMigrateStub =
+        reinterpret_cast<MigrateStubFunc>(dlsym(migrateStubFuncHandle_, "StartMigrateStub"));
     if (startMigrateStub == nullptr) {
         SLOGE("failed to find library, reason: %{public}sn", dlerror());
         return;
@@ -678,7 +680,7 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     SLOGI("open library libsuspend_manager_client success");
     typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
         const std::string bundleName, int32_t taskState, int32_t serviceId);
-    handler reportContinuousTaskEventEx = (handler)(dlsym(handle_, "ReportContinuousTaskEventEx"));
+    handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 1, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
     dlclose(handle_);
@@ -731,7 +733,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     SLOGI("open library libsuspend_manager_client success when stop cast");
     typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
         const std::string bundleName, int32_t taskState, int32_t serviceId);
-    handler reportContinuousTaskEventEx = (handler)(dlsym(handle_, "ReportContinuousTaskEventEx"));
+    handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 2, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done when stop cast, result: %{public}d", errCode);
     dlclose(handle_);
@@ -1686,7 +1688,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
     SLOGI("HandleSessionRelease, remove session: sessionId=%{public}s", sessionId.c_str());
     GetContainer().RemoveSession(sessionItem->GetPid(), sessionItem->GetAbilityName());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (GetContainer().GetAllSessions().size() <= 0) {
+    if (GetContainer().GetAllSessions().size() == 0) {
         SLOGI("call disable cast on no session alive");
         checkEnableCast(false);
     }
@@ -2396,8 +2398,12 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWantAgent(
     const AVSessionDescriptor* histroyDescriptor)
 {
-    if (!histroyDescriptor && !topSession_) {
-        SLOGE("CreateWantAgent error, histroyDescriptor and topSession_ null");
+    if (!histroyDescriptor) {
+        SLOGE("CreateWantAgent error, histroyDescriptor find null");
+        return nullptr;
+    }
+    if (topSession_ == nullptr) {
+        SLOGE("CreateWantAgent error, topSession_ find null");
         return nullptr;
     }
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
@@ -2466,7 +2472,7 @@ void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChange
     std::vector<AVQueueInfo> avQueueInfos;
     GetHistoricalAVQueueInfos(1, 1, avQueueInfos);
     AVSessionDescriptor selectSession;
-    if (activeDescriptors.size() != 0 || hisDescriptors.size() <= 0 || avQueueInfos.size() <= 0) {
+    if (activeDescriptors.size() != 0 || hisDescriptors.size() == 0 || avQueueInfos.size() == 0) {
         return;
     }
     for (AVSessionDescriptor session : hisDescriptors) {

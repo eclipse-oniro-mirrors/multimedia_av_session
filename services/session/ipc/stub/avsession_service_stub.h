@@ -48,7 +48,7 @@ private:
     int32_t HandleClose(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
     int32_t GetAVQueueInfosImgLength(std::vector<AVQueueInfo>& avQueueInfos);
-    void MarshallingAVQueueInfos(MessageParcel &reply, std::vector<AVQueueInfo>& avQueueInfos);
+    void MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos);
     void AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQueueInfos, unsigned char *buffer);
 
     using HandlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);

@@ -19,7 +19,7 @@
 
 namespace OHOS::AVSession {
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
-    std::string extraInfo, std::string state)
+    std::string extraInfo, const std::string state)
 {
     SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s",
         serviceName.c_str(), state.c_str());
