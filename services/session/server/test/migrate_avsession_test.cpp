@@ -178,7 +178,7 @@ void TestMigrateSendByte(OHOS::sptr<AVSessionItem> avsession_, std::shared_ptr<M
     server_->SendRemoteControllerList(deviceId);
 
     char header[] = {MSG_HEAD_MODE, SYNC_COMMAND};
-    int commandList[] = {18, 30, 31, 36, 37, 38, 39, 41, 42, 43, 46, 48, 50};
+    const int commandList[] = {18, 30, 31, 36, 37, 38, 39, 41, 42, 43, 46, 48, 50};
     for (int command : commandList) {
         std::string data = std::string(header) + "{\"PlayerId\"" + descriptor.sessionId_ +
             "\",\"MediaCommand\":" + std::to_string(command) + ",\"command\":\"\"}";
