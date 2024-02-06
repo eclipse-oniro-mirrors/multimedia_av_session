@@ -368,10 +368,6 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
             SLOGI("Cast task thread to find flag");
         }
         auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
-        if (hwCastProviderSession == nullptr) {
-            SLOGE("get hwPvdSession in create with null");
-            return;
-        }
         hwCastProviderSession->Init();
         {
             std::lock_guard lockGuard(mutexLock_);
@@ -381,10 +377,6 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
             SLOGI("Cast task thread to create player");
             std::shared_ptr<IStreamPlayer> streamPlayer = hwCastProviderSession->CreateStreamPlayer();
             std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(streamPlayer);
-            if (hwCastStreamPlayer == nullptr) {
-                SLOGE("the created hwCastStreamPlayer is nullptr");
-                return;
-            }
             hwCastStreamPlayer->Init();
             avCastControllerMap_[castId] = hwCastStreamPlayer;
         }

@@ -662,8 +662,9 @@ napi_value NapiAVCastController::OffEvent(napi_env env, napi_callback_info info)
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
         uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
         bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
-        CHECK_ARGS_RETURN_VOID(context, isSystemApp, "Check system permission error",
-            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+        if (!isSystemApp) {
+            SLOGI("check is not system app but do nothing");
+        }
 
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);

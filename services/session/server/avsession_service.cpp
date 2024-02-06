@@ -2398,21 +2398,28 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWantAgent(
     const AVSessionDescriptor* histroyDescriptor)
 {
-    if (!histroyDescriptor) {
-        SLOGE("CreateWantAgent error, histroyDescriptor find null");
-        return nullptr;
-    }
-    if (topSession_ == nullptr) {
-        SLOGE("CreateWantAgent error, topSession_ find null");
+    if (histroyDescriptor == nullptr && topSession_ == nullptr) {
+        SLOGE("CreateWantAgent error, histroyDescriptor and topSession_ null");
         return nullptr;
     }
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     std::vector<std::shared_ptr<AAFwk::Want>> wants;
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
-    string bundleName = histroyDescriptor ? histroyDescriptor->elementName_.GetBundleName() : topSession_->GetBundleName();
-    string abilityName = histroyDescriptor ? histroyDescriptor->elementName_.GetAbilityName() : topSession_->GetAbilityName();
-    auto uid = histroyDescriptor ? histroyDescriptor->uid_ : topSession_->GetUid();
+    string bundleName = DEFAULT_BUNDLE_NAME;
+    string abilityName = DEFAULT_ABILITY_NAME;
+    auto uid = -1;
+    if (topSession_ != nullptr) {
+        bundleName = topSession_->GetBundleName();
+        abilityName = topSession_->GetAbilityName();
+        uid = topSession_->GetUid();
+    }
+    if (histroyDescriptor != nullptr) {
+        SLOGI("CreateWantAgent with historyDescriptor");
+        bundleName = histroyDescriptor->elementName_.GetBundleName();
+        abilityName = histroyDescriptor->elementName_.GetAbilityName();
+        uid = histroyDescriptor->uid_;
+    }
     SLOGI("CreateWantAgent bundleName %{public}s, abilityName %{public}s", bundleName.c_str(), abilityName.c_str());
     AppExecFwk::ElementName element("", bundleName, abilityName);
     want->SetElement(element);

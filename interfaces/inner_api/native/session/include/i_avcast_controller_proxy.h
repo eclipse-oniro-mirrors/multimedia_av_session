@@ -130,7 +130,7 @@ public:
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t SetValidAbility(const std::vector<int32_t> validAbilityList) = 0;
+    virtual int32_t SetValidAbility(const std::vector<int32_t>& validAbilityList) = 0;
 
     /**
      * @brief Get valid ability list for current cast session.
@@ -139,7 +139,7 @@ public:
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t GetValidAbility(const std::vector<int32_t> validAbilityList) = 0;
+    virtual int32_t GetValidAbility(const std::vector<int32_t>& validAbilityList) = 0;
 
     /**
      * @brief Set display surface of the current media.
