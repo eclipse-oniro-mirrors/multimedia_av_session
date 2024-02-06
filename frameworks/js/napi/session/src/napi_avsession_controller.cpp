@@ -1230,13 +1230,13 @@ napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
+        if (context == nullptr) {
+            SLOGE("GetOutputDevice failed for context is nullptr");
+            return;
+        }
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
         if (napiController->controller_ == nullptr) {
             SLOGE("GetOutputDevice failed : controller is nullptr");
-            if (context == nullptr) {
-                SLOGE("GetOutputDevice failed for context is nullptr");
-                return;
-            }
             context->status = napi_generic_failure;
             context->errMessage = "GetOutputDevice failed : controller is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
