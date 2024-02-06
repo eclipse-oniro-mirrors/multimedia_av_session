@@ -375,7 +375,7 @@ int32_t HwCastStreamPlayer::UnRegisterControllerListener(std::shared_ptr<IAVCast
     return AVSESSION_ERROR;
 }
 
-int32_t HwCastStreamPlayer::GetValidAbility(const std::vector<int32_t> validAbilityList)
+int32_t HwCastStreamPlayer::GetValidAbility(const std::vector<int32_t>& validAbilityList)
 {
     SLOGI("GetValidAbility in");
     CastEngine::StreamCapability &streamCapability;
@@ -388,7 +388,7 @@ int32_t HwCastStreamPlayer::GetValidAbility(const std::vector<int32_t> validAbil
     return AVSESSION_SUCCESS;
 }
 
-int32_t HwCastStreamPlayer::SetValidAbility(const std::vector<int32_t> validAbilityList)
+int32_t HwCastStreamPlayer::SetValidAbility(const std::vector<int32_t>& validAbilityList)
 {
     SLOGI("SetValidAbility begin");
     CastEngine::StreamCapability &streamCapability;
