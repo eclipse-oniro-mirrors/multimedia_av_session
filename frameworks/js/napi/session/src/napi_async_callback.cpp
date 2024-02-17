@@ -92,6 +92,7 @@ void NapiAsyncCallback::AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus)
     napi_value global {};
     napi_get_global(context->env, &global);
     napi_value function {};
+    SLOGI("callback with flag");
     CHECK_RETURN_VOID(*context->isValid, "callback when callback is invalid");
     SLOGI("callback with ref %{public}p, %{public}p", &(context->method), *(&(context->method)));
     napi_get_reference_value(context->env, context->method, &function);
