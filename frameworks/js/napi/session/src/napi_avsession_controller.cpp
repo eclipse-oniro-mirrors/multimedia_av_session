@@ -730,6 +730,7 @@ napi_value NapiAVSessionController::GetExtras(napi_env env, napi_callback_info i
         context->status = NapiUtils::SetValue(env, context->extras_, output);
         CHECK_STATUS_RETURN_VOID(context, "Convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        SLOGI("check getextras done");
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetExtras", executor, complete);
@@ -1498,6 +1499,7 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
             callback = argv[ARGV_SECOND];
         }
     };
+    SLOGI("check offEvent eventName %{public}s", eventName.c_str());
 
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
@@ -1523,6 +1525,7 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     if (it->second.second(env, napiController, callback) != napi_ok) {
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
+    SLOGI("check offEvent done");
     return NapiUtils::GetUndefinedValue(env);
 }
 
