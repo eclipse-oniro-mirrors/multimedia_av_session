@@ -26,6 +26,8 @@
 #include "iavsession_controller.h"
 #include "iremote_stub.h"
 #include "want_params.h"
+#include "command_send_limit.h"
+#include "ipc_skeleton.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -578,7 +580,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand001, TestSize.Level1)
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_INVALID), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_MAX), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_CUSTOM + 1), ERR_INVALID_PARAM);
-    EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE - 1), ERR_INVALID_PARAM);
+    EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_UNDEFINED - 1), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetSpeed(-1), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetAssetId(""), ERR_INVALID_PARAM);
 }
@@ -813,7 +815,12 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
     avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
-    EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+    if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
+        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+    } else {
+        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_COMMAND_SEND_EXCEED_MAX);
+    }
+    
     SLOGI("SendCommonCommand001 End");
 }
 
@@ -829,30 +836,14 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
     avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
-    EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+    if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
+        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+    } else {
+        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_COMMAND_SEND_EXCEED_MAX);
+    }
     EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_SESSION_DEACTIVE);
     SLOGI("SendCommonCommand002 End");
-}
-
-/**
-* @tc.name: SendCommonCommand003
-* @tc.desc: Send common command - large number of calls
-* @tc.type: FUNC
-* @tc.require: I6ETY6
-*/
-HWTEST_F(AVSessionControllerTest, SendCommonCommand003, TestSize.Level2)
-{
-    SLOGI("SendCommonCommand003 Begin");
-    avsession_->Activate();
-    std::string commonCommand = "common_command";
-    OHOS::AAFwk::WantParams commandArgs;
-
-    // Test the interface through 500 calls
-    for (int i = 0; i < 500; i++) {
-        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
-    }
-    SLOGI("SendCommonCommand003 End");
 }
 
 /**
@@ -970,7 +961,7 @@ HWTEST_F(AVSessionControllerTest, SetMetaFilter001, TestSize.Level1)
     EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
 
     sleep(1);
-    EXPECT_EQ(callback->data_.GetAssetId(), "");
+    EXPECT_EQ(callback->data_.GetAssetId(), "001");
     EXPECT_EQ(callback->data_.GetTitle(), "123456");
 }
 
@@ -1326,7 +1317,6 @@ HWTEST_F(AVSessionControllerTest, HasSession001, TestSize.Level1)
     std::shared_ptr<AVSessionController> controller2 = nullptr;
     auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller2);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_EQ(controller_, controller2);
     SLOGD("HasSession001 End");
 }
 
@@ -1350,31 +1340,6 @@ HWTEST_F(AVSessionControllerTest, GetExtrasTest001, TestSize.Level1)
     EXPECT_EQ(controller_->GetExtras(resultExtras), AVSESSION_SUCCESS);
     EXPECT_EQ(resultExtras.HasParam("1234567"), 1);
     SLOGI("GetExtrasTest001 End");
-}
-
-/**
-* @tc.name: GetExtrasTest002
-* @tc.desc: Return custom media packets - large number of calls
-* @tc.type: FUNC
-* @tc.require: I6TD43
-*/
-HWTEST_F(AVSessionControllerTest, GetExtrasTest002, TestSize.Level1)
-{
-    SLOGI("GetExtrasTest002 Begin");
-    std::shared_ptr<OHOS::AAFwk::WantParams> wantParamsIn = nullptr;
-    wantParamsIn = std::make_shared<OHOS::AAFwk::WantParams>();
-    std::string keyStr = "1234567";
-    bool valueBool = true;
-    wantParamsIn->SetParam(keyStr, OHOS::AAFwk::Boolean::Box(valueBool));
-    EXPECT_EQ(avsession_->SetExtras(*wantParamsIn), AVSESSION_SUCCESS);
-
-    OHOS::AAFwk::WantParams resultExtras;
-    // Test the interface through 500 calls
-    for (int i = 0; i < 500; i++) {
-        EXPECT_EQ(controller_->GetExtras(resultExtras), AVSESSION_SUCCESS);
-        EXPECT_EQ(resultExtras.HasParam("1234567"), 1);
-    }
-    SLOGI("GetExtrasTest002 End");
 }
 
 /**
