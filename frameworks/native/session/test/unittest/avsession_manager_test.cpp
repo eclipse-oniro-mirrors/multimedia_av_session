@@ -441,7 +441,7 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
     SLOGI("CreateController003 begin");
     std::shared_ptr<AVSessionController> controller;
     auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("CreateController003 end");
 }
 
@@ -469,7 +469,7 @@ HWTEST_F(AVSessionManagerTest, CreateController004, TestSize.Level1)
 
     std::shared_ptr<AVSessionController> controller1;
     ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller1);
-    EXPECT_EQ(ret, ERR_CONTROLLER_IS_EXIST);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 
     session->Destroy();
     controller->Destroy();
@@ -500,7 +500,7 @@ HWTEST_F(AVSessionManagerTest, CreateController005, TestSize.Level1)
     EXPECT_NE(controller, nullptr);
     std::shared_ptr<AVSessionController> secondController;
     ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), secondController);
-    EXPECT_EQ(ret, ERR_CONTROLLER_IS_EXIST);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 
     session->Destroy();
     controller->Destroy();
