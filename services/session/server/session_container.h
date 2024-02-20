@@ -39,6 +39,8 @@ public:
     virtual sptr<AVSessionItem> GetSessionById(const std::string& sessionId) = 0;
 
     virtual std::vector<sptr<AVSessionItem>> GetAllSessions() = 0;
+    
+    virtual void UpdateSessionSort(sptr<AVSessionItem>& item);
 
     virtual ~SessionContainer() = default;
 

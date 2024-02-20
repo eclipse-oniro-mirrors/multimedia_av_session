@@ -220,6 +220,8 @@ private:
     void InitBMS();
 
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
+    
+    void RefreshFocusSessionSort(sptr<AVSessionItem> &session);
 
     void UpdateTopSession(const sptr<AVSessionItem>& newTopSession);
 

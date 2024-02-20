@@ -132,6 +132,16 @@ public:
     {
         return FILE_SUFFIX;
     }
+    
+    static std::string GetAnonySessionId(const std::string& sessionId)
+    {
+        constexpr size_t PRE_LEN = 3;
+        std::string res;
+        std::string tmpStr("******");
+        size_t len = sessionId.length();
+        res.append(sessionId, 0, PRE_LEN).append(tmpStr).append(sessionId, len - PRE_LEN, PRE_LEN);
+        return res;
+    }
 
 private:
     static constexpr const char* CACHE_PATH_NAME = "/data/service/el1/public/av_session/cache/";
