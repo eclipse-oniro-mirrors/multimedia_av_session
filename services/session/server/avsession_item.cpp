@@ -45,7 +45,7 @@ namespace OHOS::AVSession {
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
     : descriptor_(descriptor)
 {
-    SLOGD("constructor id=%{public}s", descriptor_.sessionId_.c_str());
+    SLOGD("constructor id=%{public}s", AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     cssListener_ = std::make_shared<CssListener>(this);
 #endif
@@ -53,7 +53,7 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
 
 AVSessionItem::~AVSessionItem()
 {
-    SLOGD("destroy id=%{public}s", descriptor_.sessionId_.c_str());
+    SLOGD("destroy id=%{public}s", AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str());
     std::lock_guard lockGuard(destroyLock_);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
@@ -158,6 +158,7 @@ int32_t AVSessionItem::SetAVCallState(const AVCallState& avCallState)
 
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
+    std::lock_guard lockGuard(metaDataLock_);
     std::string sessionId = GetSessionId();
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
@@ -181,6 +182,7 @@ bool AVSessionItem::HasAvQueueInfo()
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
+    std::lock_guard lockGuard(metaDataLock_);
     CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     if (innerPixelMap != nullptr) {
@@ -741,6 +743,7 @@ AVPlaybackState AVSessionItem::GetPlaybackState()
 
 AVMetaData AVSessionItem::GetMetaData()
 {
+    std::lock_guard lockGuard(metaDataLock_);
     std::string sessionId = GetSessionId();
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();

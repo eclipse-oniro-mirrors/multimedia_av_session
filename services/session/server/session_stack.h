@@ -38,6 +38,8 @@ public:
     sptr<AVSessionItem> GetSessionById(const std::string& sessionId) override;
 
     std::vector<sptr<AVSessionItem>> GetAllSessions() override;
+    
+    void UpdateSessionSort(sptr<AVSessionItem>& item) override;
 
 private:
     std::map<std::pair<pid_t, std::string>, sptr<AVSessionItem>> sessions_;
