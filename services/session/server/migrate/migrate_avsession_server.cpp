@@ -427,7 +427,7 @@ std::string MigrateAVSessionServer::ConvertMetadataInfoToStr(
     metaDataJson[MEDIA_INFO] = controlCommand;
     Json::FastWriter writer;
     std::string msg = writer.write(metaDataJson);
-    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER};
+    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER, '\0'};
     return std::string(header) + msg;
 }
 

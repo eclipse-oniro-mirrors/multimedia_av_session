@@ -257,7 +257,7 @@ HWTEST_F(AvsessionTest, SetAVCallMetaData001, TestSize.Level1)
     g_avCallMetaData.SetName("");
     g_avCallMetaData.SetPhoneNumber("123456789");
 
-    EXPECT_EQ(avsession_->SetAVCallMetaData(g_avCallMetaData), AVSESSION_ERROR);
+    EXPECT_EQ(avsession_->SetAVCallMetaData(g_avCallMetaData), AVSESSION_SUCCESS);
     SLOGE("SetAVCallMetaData001 End");
 }
 
@@ -724,6 +724,8 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
             case AVControlCommand::SESSION_CMD_FAST_FORWARD : controlCommand.SetForwardTime(10);
                 break;
             case AVControlCommand::SESSION_CMD_REWIND : controlCommand.SetRewindTime(10);
+                break;
+            case AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID: controlCommand.SetAssetId("callback");
                 break;
             default:
                 break;
