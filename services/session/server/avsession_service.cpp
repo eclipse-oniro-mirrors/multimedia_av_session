@@ -137,8 +137,8 @@ void AVSessionService::OnStart()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto deviceProp = system::GetParameter("const.product.devicetype", "default");
     SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
-    int32_t is2in1 = strcmp(deviceProp.c_str(), "2in1");
-    if (is2in1 == 0) {
+    is2in1_ = strcmp(deviceProp.c_str(), "2in1");
+    if (is2in1_ == 0) {
         SLOGI("startup enable cast check 2in1");
         checkEnableCast(true);
         AVRouter::GetInstance().SetDiscoverable(true);
@@ -1704,8 +1704,8 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
         AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     GetContainer().RemoveSession(sessionItem->GetPid(), sessionItem->GetAbilityName());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (GetContainer().GetAllSessions().size() == 0) {
-        SLOGI("call disable cast on no session alive");
+    if (GetContainer().GetAllSessions().size() == 0 && is2in1_ != 0) {
+        SLOGI("call disable cast for no session alive");
         checkEnableCast(false);
     }
 #endif

@@ -371,6 +371,7 @@ private:
     bool isFirstPress_ = true;
     bool isSourceInCast_ = false;
     bool isInCast_ = false;
+    bool is2in1_ = false;
 
     void *migrateStubFuncHandle_ = nullptr;
 

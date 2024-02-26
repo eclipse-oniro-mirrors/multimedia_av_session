@@ -14,7 +14,6 @@
  */
 
 #include "native_engine/native_engine.h"
-
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 

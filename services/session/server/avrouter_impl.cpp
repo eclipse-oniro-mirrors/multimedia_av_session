@@ -65,8 +65,7 @@ bool AVRouterImpl::Release()
 {
     SLOGI("Start Release AVRouter");
     if (hasSessionAlive_) {
-        SLOGE("has session alive, return");
-        return true;
+        SLOGE("has session alive, but continue");
     }
     if (hwProvider_ == nullptr) {
         SLOGE("Start Release AVRouter err for no provider");

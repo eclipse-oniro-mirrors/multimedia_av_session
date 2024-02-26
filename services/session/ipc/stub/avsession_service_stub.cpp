@@ -443,14 +443,20 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool enable;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(enable), AVSESSION_ERROR, "write enable info failed");
-    checkEnableCast(enable);
     int32_t ret = AVSESSION_SUCCESS;
 
     auto deviceProp = system::GetParameter("const.product.devicetype", "default");
     SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
     int32_t is2in1 = strcmp(deviceProp.c_str(), "2in1");
-    if (enable && is2in1 == 0) {
-        ret = AVRouter::GetInstance().SetDiscoverable(enable);
+    if (enable) {
+        checkEnableCast(enable);
+        if (is2in1 == 0) {
+            ret = AVRouter::GetInstance().SetDiscoverable(enable);
+        } else {
+            SLOGI("setdiscoverable not 2in1");
+        }
+    } else {
+        SLOGI("setdiscoverable not set with enable");
     }
 
     AVRouter::GetInstance().SetDiscoverable(enable);
