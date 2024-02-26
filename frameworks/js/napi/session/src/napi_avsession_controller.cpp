@@ -1181,14 +1181,18 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
             context->errCode = NapiAVSessionManager::errcode_[ret];
             return;
         }
-        ControllerList_.erase(napiController->sessionId_);
-        napiController->controller_ = nullptr;
+        SLOGI("NapiAVSessionController destroy process done for: %{public}s", napiController->sessionId_.c_str());
+    };
+    auto complete = [env, context](napi_value& output) {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
         napiController->callback_ = nullptr;
-        SLOGI("Start NapiAVSessionController destroy process and clear cache done for session: %{public}s",
-            napiController->sessionId_.c_str());
+        napiController->controller_ = nullptr;
+        ControllerList_.erase(napiController->sessionId_);
+        SLOGI("destroy and clear cache done for: %{public}s", napiController->sessionId_.c_str());
+        output = NapiUtils::GetUndefinedValue(env);
     };
 
-    return NapiAsyncWork::Enqueue(env, context, "IsSessionActive", executor);
+    return NapiAsyncWork::Enqueue(env, context, "Destroy", executor, complete);
 }
 
 napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, napi_callback_info info)
@@ -1503,6 +1507,7 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
 
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
+        SLOGE("check offEvent with status err");
         NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
         return NapiUtils::GetUndefinedValue(env);
     }
