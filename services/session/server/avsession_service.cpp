@@ -567,6 +567,8 @@ void AVSessionService::checkEnableCast(bool enable)
         isInCast_ = true;
         AVRouter::GetInstance().Init(this);
     } else if (enable == false && isInCast_ == true) {
+        CHECK_AND_RETURN_RET_LOG(!(GetContainer().GetAllSessions().size() > 0 && is2in1_ != 0),
+            AVSESSION_SUCCESS, "can not release cast with session alive");
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
         SLOGD("AVRouter Init in nothing change");
@@ -576,17 +578,16 @@ void AVSessionService::checkEnableCast(bool enable)
 
 void AVSessionService::ReleaseCastSession()
 {
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     SLOGI("Start release cast session");
     for (const auto& session : GetContainer().GetAllSessions()) {
         if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
             std::string sessionId = session->GetDescriptor().sessionId_;
             SLOGI("Already has a cast session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-            UpdateTopSession(nullptr);
-            auto session = GetContainer().RemoveSession(sessionId);
             session->UnRegisterDeviceStateCallback();
             session->StopCastSession();
             session->ReleaseAVCastControllerInner();
-            session->Destroy();
+            HandleSessionRelease(sessionId);
         }
     }
 }
@@ -717,8 +718,8 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_SUCCESS, "StopCast: session is not exist");
     CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
     if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
-        SLOGI("Stop cast at sink, start destroy sink avsession");
-        session->Destroy();
+        SLOGI("Stop cast at sink, start destroy sink avsession task");
+        HandleSessionRelease(sessionToken.sessionId);
         return AVSESSION_SUCCESS;
     }
 
@@ -1682,11 +1683,12 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
 void AVSessionService::HandleSessionRelease(std::string sessionId)
 {
     SLOGI("HandleSessionRelease, sessionId=%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    std::lock_guard lockGuard(sessionAndControllerLock_);
 
     sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
     NotifySessionRelease(sessionItem->GetDescriptor());
-    std::lock_guard lockGuard(sessionAndControllerLock_);
+    sessionItem->DestroyTask();
     if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
         SLOGD("Top session is released session");
         UpdateTopSession(nullptr);
@@ -2199,7 +2201,7 @@ int32_t AVSessionService::RemoteCancelCastAudioInner(const std::string& sessionI
 
     ret = session->SinkCancelCastAudio();
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SinkCancelCastAudio failed");
-    ClearSessionNoLock(session->GetSessionId());
+    HandleSessionRelease(session->GetSessionId());
     castAudioSessionMap_.erase(sourceDescriptor.sessionId_);
     SLOGI("cancel source session %{public}s success",
         AVSessionUtils::GetAnonySessionId(sourceDescriptor.sessionId_).c_str());
@@ -2243,28 +2245,13 @@ int32_t AVSessionService::GetAudioDescriptor(const std::string deviceId,
 
 void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid)
 {
-    auto sessions = GetContainer().RemoveSession(pid);
+    SLOGI("clear session in ");
+    auto sessions = GetContainer().GetSessionsByPid(pid);
     for (const auto& session : sessions) {
-        if (topSession_ == session) {
-            UpdateTopSession(nullptr);
-        }
-        if (session->GetRemoteSource() != nullptr) {
-            int32_t ret = CancelCastAudioForClientExit(pid, session);
-            SLOGI("CancelCastAudioForClientExit ret is %{public}d", ret);
-        }
-        SLOGI("remove sessionId=%{public}s", AVSessionUtils::GetAnonySessionId(session->GetSessionId()).c_str());
-        session->Destroy();
+        SLOGI("check session release task for id %{public}s",
+            AVSessionUtils::GetAnonySessionId(session->GetSessionId()).c_str());
+        HandleSessionRelease(session->GetSessionId());
     }
-}
-
-void AVSessionService::ClearSessionNoLock(const std::string& sessionId)
-{
-    auto session = GetContainer().RemoveSession(sessionId);
-    if (topSession_ == session) {
-        UpdateTopSession(nullptr);
-    }
-    SLOGI("remove sessionId=%{public}s", AVSessionUtils::GetAnonySessionId(session->GetSessionId()).c_str());
-    session->Destroy();
 }
 
 void AVSessionService::ClearControllerForClientDiedNoLock(pid_t pid)

@@ -28,8 +28,7 @@ using namespace OHOS::CastEngine;
 namespace OHOS::AVSession {
 HwCastStreamPlayer::~HwCastStreamPlayer()
 {
-    SLOGI("destruct the HwCastStreamPlayer");
-    Release();
+    SLOGI("destruct the HwCastStreamPlayer with release");
 }
 
 void HwCastStreamPlayer::Init()

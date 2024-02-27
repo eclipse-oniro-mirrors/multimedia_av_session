@@ -1250,13 +1250,7 @@ napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_
         AVSessionDescriptor descriptor;
         AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(napiController->controller_->GetSessionId(),
                                                                          descriptor);
-        if (context != nullptr) {
-            SLOGD("set descriptor outputDeviceInfo");
-            context->outputDeviceInfo_ = descriptor.outputDeviceInfo_;
-        } else {
-            SLOGE("GetOutputDevice failed : context is nullptr");
-            return;
-        }
+        context->outputDeviceInfo_ = descriptor.outputDeviceInfo_;
     };
 
     auto complete = [env, context](napi_value& output) {

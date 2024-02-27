@@ -109,6 +109,8 @@ public:
 
     int32_t DeleteSupportCommand(int32_t cmd) override;
 
+    int32_t DestroyTask();
+
     AVSessionDescriptor GetDescriptor();
 
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;

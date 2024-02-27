@@ -83,6 +83,16 @@ std::string AVSessionItem::GetSessionType()
 
 int32_t AVSessionItem::Destroy()
 {
+    SLOGI("AVSessionItem send service destroy event to service, check serviceCallback exist");
+    if (serviceCallback_) {
+        SLOGI("AVSessionItem send service destroy event to service");
+        serviceCallback_(*this);
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::DestroyTask()
+{
     {
         std::lock_guard lockGuard(callbackLock_);
         if (callback_) {
@@ -96,6 +106,7 @@ int32_t AVSessionItem::Destroy()
     }
     isDestroyed_ = true;
     std::string sessionId = descriptor_.sessionId_;
+    SLOGI("session destroy for:%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileName);
     std::list<sptr<AVControllerItem>> controllerList;
@@ -112,12 +123,7 @@ int32_t AVSessionItem::Destroy()
     for (auto& controller : controllerList) {
         controller->HandleSessionDestroy();
     }
-    SLOGI("AVSessionItem send service destroy event to service, check serviceCallback exist");
-    if (serviceCallback_) {
-        SLOGI("AVSessionItem send service destroy event to service");
-        serviceCallback_(*this);
-    }
-    SLOGI("Destroy success");
+    SLOGI("session destroy success");
     return AVSESSION_SUCCESS;
 }
 
@@ -688,7 +694,6 @@ void AVSessionItem::SetCastHandle(const int64_t castHandle)
 void AVSessionItem::RegisterDeviceStateCallback()
 {
     SLOGI("Start register callback for device state change");
-    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_);
     OutputDeviceInfo localDevice;
     DeviceInfo localInfo;
     localInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
@@ -696,6 +701,8 @@ void AVSessionItem::RegisterDeviceStateCallback()
     localInfo.deviceName_ = "LocalDevice";
     localDevice.deviceInfos_.emplace_back(localInfo);
     descriptor_.outputDeviceInfo_ = localDevice;
+    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_);
+    SLOGI("register callback for device state change done");
 }
 
 void AVSessionItem::UnRegisterDeviceStateCallback()
