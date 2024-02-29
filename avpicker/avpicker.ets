@@ -52,7 +52,7 @@ export struct AVCastPicker {
       UIExtensionComponent(
         {
           abilityName: 'UIExtAbility',
-          bundleName: 'com.huawei.hmos.mediacontroller',
+          bundleName: 'com.hmos.mediacontroller',
           parameters: {"normalColor": this.normalColor}
         })
         .onReceive((data) => {

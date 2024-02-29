@@ -473,7 +473,7 @@ describe("AVSessionJsTest", function () {
    * @tc.name: GetOutputDeviceSync001
    * @tc.desc: Get output device - sync
    * @tc.type: FUNC
-   * @tc.require: I7V81A
+   * @tc.require: I6ETY6
    */
   it("GetOutputDeviceSync001", 0, async function (done) {
     try {
