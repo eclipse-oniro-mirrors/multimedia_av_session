@@ -111,6 +111,18 @@ sptr<AVSessionItem> SessionStack::GetSession(pid_t pid, const std::string& abili
     return it->second;
 }
 
+std::vector<sptr<AVSessionItem>> SessionStack::GetSessionsByPid(pid_t pid)
+{
+    std::vector<sptr<AVSessionItem>> result;
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
+    for (auto it = sessions_.begin(); it != sessions_.end(); it++) {
+        if (it->first.first == pid) {
+            result.push_back(it->second);
+        }
+    }
+    return result;
+}
+
 bool SessionStack::PidHasSession(pid_t pid)
 {
     std::lock_guard sessionStackLockGuard(sessionStackLock_);

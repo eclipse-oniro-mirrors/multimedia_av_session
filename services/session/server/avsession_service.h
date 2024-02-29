@@ -207,8 +207,6 @@ private:
 
     void ClearControllerForClientDiedNoLock(pid_t pid);
 
-    void ClearSessionNoLock(const std::string& sessionId);
-
     void InitKeyEvent();
 
     void InitAudio();
