@@ -153,7 +153,7 @@ HWTEST_F(SoftbusSessionManagerTest, RemoveSessionServer001, TestSize.Level1)
 {
     SLOGI("RemoveSessionServer001 begin");
     int32_t sessionId = 123;
-    manager_->Shutdown(pkg);
+    manager_->Shutdown(sessionId);
     SLOGI("RemoveSessionServer001 end");
 }
 
@@ -221,6 +221,6 @@ HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level1)
         .pkgName = nullptr,
         .dataType = DATA_TYPE_BYTES,
     };
-    manager_->Onbind(sessionId, info);
+    manager_->OnBind(sessionId, info);
     SLOGI("OnSessionOpened001 end");
 }
