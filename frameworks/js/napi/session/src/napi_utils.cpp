@@ -1338,27 +1338,22 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     CHECK_RETURN(status == napi_ok, "get DeviceInfo castCategory_ failed", status);
     status = GetValue(env, value, out.castCategory_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo castCategory_ value failed", status);
-
     status = napi_get_named_property(env, in, "deviceId", &value);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceId_ failed", status);
     status = GetValue(env, value, out.deviceId_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceId_ value failed", status);
-
     status = napi_get_named_property(env, in, "deviceName", &value);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceName_ failed", status);
     status = GetValue(env, value, out.deviceName_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceName_ value failed", status);
-
     status = napi_get_named_property(env, in, "deviceType", &value);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ failed", status);
     status = GetValue(env, value, out.deviceType_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ value failed", status);
-
     CHECK_RETURN(GetOptionalString(env, in, out) == napi_ok, "get DeviceInfo ip address value failed", status);
-
-    bool hasProviderId = false;
-    napi_has_named_property(env, in, "providerId", &hasProviderId);
-    if (hasProviderId) {
+    bool hasKey = false;
+    napi_has_named_property(env, in, "providerId", &hasKey);
+    if (hasKey) {
         status = napi_get_named_property(env, in, "providerId", &value);
         CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId failed", status);
         status = GetValue(env, value, out.providerId_);
@@ -1366,10 +1361,8 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     } else {
         out.providerId_ = 0;
     }
-
-    bool hasSupportedProtocols = false;
-    napi_has_named_property(env, in, "supportedProtocols", &hasSupportedProtocols);
-    if (hasSupportedProtocols) {
+    napi_has_named_property(env, in, "supportedProtocols", &hasKey);
+    if (hasKey) {
         status = napi_get_named_property(env, in, "supportedProtocols", &value);
         CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedProtocols failed", status);
         status = GetValue(env, value, out.supportedProtocols_);
@@ -1377,10 +1370,8 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     } else {
         out.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
     }
-
-    bool hasAuthenticationStatus = false;
-    napi_has_named_property(env, in, "authenticationStatus", &hasAuthenticationStatus);
-    if (hasAuthenticationStatus) {
+    napi_has_named_property(env, in, "authenticationStatus", &hasKey);
+    if (hasKey) {
         status = napi_get_named_property(env, in, "authenticationStatus", &value);
         CHECK_RETURN(status == napi_ok, "get DeviceInfo authenticationStatus failed", status);
         status = GetValue(env, value, out.authenticationStatus_);

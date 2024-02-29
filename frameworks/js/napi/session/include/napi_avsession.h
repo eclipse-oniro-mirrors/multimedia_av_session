@@ -107,6 +107,9 @@ private:
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
 
+    static napi_value ThrowErrorAndReturn(napi_env env, const std::string& message, int32_t errCode);
+    static napi_value ThrowErrorAndReturnByErrCode(napi_env env, const std::string& message, int32_t errCode);
+
     napi_ref wrapperRef_ {};
     std::string sessionId_ ;
     std::string sessionType_ ;
