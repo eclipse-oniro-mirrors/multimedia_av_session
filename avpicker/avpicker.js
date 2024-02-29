@@ -77,7 +77,7 @@ export class AVCastPicker extends ViewPU {
     this.observeComponentCreation2(((e, t) => {
       UIExtensionComponent.create({
         abilityName: 'UIExtAbility',
-        bundleName: 'com.huawei.hmos.mediacontroller',
+        bundleName: 'com.hmos.mediacontroller',
         parameters: { normalColor: this.normalColor }
       });
       UIExtensionComponent.onReceive((e => {
