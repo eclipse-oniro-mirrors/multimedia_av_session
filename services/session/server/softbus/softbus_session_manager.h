@@ -18,14 +18,17 @@
 
 #include <string>
 #include <mutex>
+#include <map>
+
+#include "socket.h"
 
 namespace OHOS::AVSession {
 class SoftbusSessionListener {
 public:
-    virtual void OnSessionOpened(int32_t sessionId) = 0;
-    virtual void OnSessionClosed(int32_t sessionId) = 0;
-    virtual void OnMessageReceived(int32_t sessionId, const std::string &data) = 0;
-    virtual void OnBytesReceived(int32_t sessionId, const std::string &data) = 0;
+    virtual void OnBind(int32_t socket, PeerSocketInfo info) = 0;
+    virtual void OnShutdown(int32_t socket, ShutdownReason reason) = 0;
+    virtual void OnBytes(int32_t socket, const void *data, int32_t dataLen) = 0;
+    virtual void OnMessage(int32_t socket, const void *data, int32_t dataLen) = 0;
     virtual ~SoftbusSessionListener() = default;
 };
 
@@ -33,55 +36,47 @@ class SoftbusSessionManager {
 public:
     static SoftbusSessionManager& GetInstance();
 
-    int32_t CreateSessionServer(const std::string &pkg);
+    int32_t Socket(const std::string &pkg);
 
-    int32_t RemoveSessionServer(const std::string &pkg);
+    void Shutdown(int32_t socket);
 
-    int32_t OpenSession(const std::string &deviceId, const std::string &groupId);
+    int32_t SendMessage(int32_t socket, const std::string &data);
 
-    int32_t CloseSession(int32_t sessionId);
+    int32_t SendBytes(int32_t socket, const std::string &data);
 
-    int32_t SendMessage(int32_t sessionId, const std::string &data);
-
-    int32_t SendBytes(int32_t sessionId, const std::string &data);
-
-    int32_t ObtainPeerDeviceId(int32_t sessionId, std::string &deviceId);
-
-    int32_t GetPeerSessionName(int32_t sessionId, std::string &sessionName);
-
-    bool IsServerSide(int32_t sessionId);
+    int32_t ObtainPeerDeviceId(int32_t socket, std::string &deviceId);
 
     void AddSessionListener(std::shared_ptr<SoftbusSessionListener> softbusSessionListener);
 
     /* *
      * Callback adaptation for session channel opened.
      *
-     * @param sessionId sessionId
+     * @param socket socket
      */
-    int32_t OnSessionOpened(int32_t sessionId, int32_t result);
+    void OnBind(int32_t socket, PeerSocketInfo info);
 
     /* *
      * Callback adaptation for session channel closed.
      *
-     * @param sessionId sessionId
+     * @param socket socket
      */
-    void OnSessionClosed(int32_t sessionId);
+    void OnShutdown(int32_t socket, ShutdownReason reason);
 
     /* *
      * Callback adaptation for data received by the session channel.
      *
-     * @param sessionId sessionId
+     * @param socket socket
      * @param data data received by the session channel
      */
-    void OnMessageReceived(int32_t sessionId, const std::string &data);
-    void OnBytesReceived(int32_t sessionId, const std::string &data);
+    void OnMessage(int32_t socket, const void *data, int32_t dataLen);
+    void OnBytes(int32_t socket, const void *data, int32_t dataLen);
 
 private:
-    bool isSessionServerRunning_ = false;
-    std::recursive_mutex sessionLock_;
-    std::vector<std::shared_ptr<SoftbusSessionListener>> sessionListeners_;
+    std::recursive_mutex socketLock_;
 
-    static constexpr const int DEVICE_INFO_MAX_LENGTH = 256;
+    std::vector<std::shared_ptr<SoftbusSessionListener>> sessionListeners_;
+    std::map<int32_t, std::string> mMap_;
+    static constexpr const int QOS_COUNT = 3;
 };
 } // namespace OHOS::AVSession
 

@@ -104,16 +104,22 @@ HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.Level1)
     EXPECT_EQ(distributed_->serverMap_.size() > 0, true);
 
     int32_t sessionId = 1;
-    distributed_->SessionOpened(sessionId);
+    PeerSocketInfo info = {
+        .name = nullptr,
+        .networkId = nullptr,
+        .pkgName = nullptr,
+        .dataType = DATA_TYPE_BYTES,
+    };
+    distributed_->SessionOpened(sessionId, info);
     distributed_->SessionClosed(sessionId);
     std::string data = "111";
     distributed_->MessageReceived(sessionId, data);
     distributed_->BytesReceived(sessionId, data);
-    distributed_->OnSessionServerOpened(sessionId);
+    distributed_->OnSessionServerOpened();
     std::string deviceId = "1";
-    distributed_->OnSessionServerClosed(sessionId, deviceId);
+    distributed_->OnSessionServerClosed(sessionId);
     distributed_->OnMessageHandleReceived(sessionId, data);
-    distributed_->OnBytesServerReceived(sessionId, data);
+    distributed_->OnBytesServerReceived(data);
 
     distributed_->ReleaseServer(server);
     EXPECT_EQ(distributed_->serverMap_.size() == 0, true);
@@ -132,7 +138,7 @@ HWTEST_F(SoftbusSessionManagerTest, CreateSessionServer001, TestSize.Level1)
 {
     SLOGI("CreateSessionServer001 begin");
     std::string pkg = "111";
-    int32_t ret = manager_->CreateSessionServer(pkg);
+    int32_t ret = manager_->Socket(pkg);
     EXPECT_EQ(ret, -1);
     SLOGI("CreateSessionServer001 end");
 }
@@ -146,41 +152,9 @@ HWTEST_F(SoftbusSessionManagerTest, CreateSessionServer001, TestSize.Level1)
 HWTEST_F(SoftbusSessionManagerTest, RemoveSessionServer001, TestSize.Level1)
 {
     SLOGI("RemoveSessionServer001 begin");
-    std::string pkg = "111";
-    int32_t ret = manager_->RemoveSessionServer(pkg);
-    EXPECT_EQ(ret, -1);
-    SLOGI("RemoveSessionServer001 end");
-}
-
-/**
-* @tc.name: OpenSession001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(SoftbusSessionManagerTest, OpenSession001, TestSize.Level1)
-{
-    SLOGI("OpenSession001 begin");
-    int32_t ret = manager_->OpenSession("aaa", CONFIG_SOFTBUS_SESSION_TAG);
-    EXPECT_EQ(ret, -1);
-    SLOGI("OpenSession001 end");
-}
-
-/**
-* @tc.name: CreateSessionServer001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(SoftbusSessionManagerTest, CloseSession001, TestSize.Level1)
-{
-    SLOGI("CloseSession001 begin");
     int32_t sessionId = 123;
-    std::string pkg = "123";
-    manager_->RemoveSessionServer(pkg);
-    int32_t ret = manager_->CloseSession(sessionId);
-    EXPECT_EQ(ret, -1);
-    SLOGI("CloseSession001 end");
+    manager_->Shutdown(pkg);
+    SLOGI("RemoveSessionServer001 end");
 }
 
 /**
@@ -232,37 +206,6 @@ HWTEST_F(SoftbusSessionManagerTest, ObtainPeerDeviceId001, TestSize.Level1)
 }
 
 /**
-* @tc.name: GetPeerSessionName001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(SoftbusSessionManagerTest, GetPeerSessionName001, TestSize.Level1)
-{
-    SLOGI("GetPeerSessionName001 begin");
-    int32_t sessionId = 0;
-    std::string sessionName;
-    int32_t ret = manager_->GetPeerSessionName(sessionId, sessionName);
-    EXPECT_EQ(ret, -1);
-    SLOGI("GetPeerSessionName001 end");
-}
-
-/**
-* @tc.name: IsServerSide001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(SoftbusSessionManagerTest, IsServerSide001, TestSize.Level1)
-{
-    SLOGI("IsServerSide001 begin");
-    int32_t sessionId = 123;
-    int32_t ret = manager_->IsServerSide(sessionId);
-    EXPECT_EQ(ret, false);
-    SLOGI("IsServerSide001 end");
-}
-
-/**
 * @tc.name: OnSessionOpened001
 * @tc.desc:
 * @tc.type: FUNC
@@ -272,22 +215,12 @@ HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level1)
 {
     SLOGI("OnSessionOpened001 begin");
     int32_t sessionId = 123;
-    int32_t ret = manager_->OnSessionOpened(sessionId, AVSESSION_ERROR);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    PeerSocketInfo info = {
+        .name = nullptr,
+        .networkId = nullptr,
+        .pkgName = nullptr,
+        .dataType = DATA_TYPE_BYTES,
+    };
+    manager_->Onbind(sessionId, info);
     SLOGI("OnSessionOpened001 end");
-}
-
-/**
-* @tc.name: OnSessionOpened002
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened002, TestSize.Level1)
-{
-    SLOGI("OnSessionOpened002 begin");
-    int32_t sessionId = 456;
-    int32_t ret = manager_->OnSessionOpened(sessionId, AVSESSION_SUCCESS);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    SLOGI("OnSessionOpened002 end");
 }

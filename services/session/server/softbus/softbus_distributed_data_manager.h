@@ -30,35 +30,37 @@ class SoftbusDistributedDataManager : public std::enable_shared_from_this<Softbu
             ptr_ = ptr;
         }
 
-        void OnSessionOpened(int32_t sessionId) override
+        void OnBind(int32_t socket, PeerSocketInfo info) override
         {
             std::shared_ptr<SoftbusDistributedDataManager> manager = ptr_.lock();
             if (manager != nullptr) {
-                manager->SessionOpened(sessionId);
+                manager->SessionOpened(socket, info);
             }
         }
 
-        void OnSessionClosed(int32_t sessionId) override
+        void OnShutdown(int32_t socket, ShutdownReason reason) override
         {
             std::shared_ptr<SoftbusDistributedDataManager> manager = ptr_.lock();
             if (manager != nullptr) {
-                manager->SessionClosed(sessionId);
+                manager->SessionClosed(socket);
             }
         }
 
-        void OnMessageReceived(int32_t sessionId, const std::string &data) override
+        void OnMessage(int32_t socket, const void *data, int32_t dataLen) override
         {
             std::shared_ptr<SoftbusDistributedDataManager> manager = ptr_.lock();
+            std::string msg = std::string(static_cast<const char*>(data), dataLen);
             if (manager != nullptr) {
-                manager->MessageReceived(sessionId, data);
+                manager->MessageReceived(socket, msg);
             }
         }
 
-        void OnBytesReceived(int32_t sessionId, const std::string &data) override
+        void OnBytes(int32_t socket, const void *data, int32_t dataLen) override
         {
             std::shared_ptr<SoftbusDistributedDataManager> manager = ptr_.lock();
+            std::string msg = std::string(static_cast<const char*>(data), dataLen);
             if (manager != nullptr) {
-                manager->BytesReceived(sessionId, data);
+                manager->BytesReceived(socket, msg);
             }
         }
 
@@ -81,20 +83,29 @@ public:
     void ReleaseServer(const std::shared_ptr<SoftbusSessionServer> &server);
 
 private:
-    void SessionOpened(int32_t sessionId);
-    void SessionClosed(int32_t sessionId);
-    void MessageReceived(int32_t sessionId, const std::string &data);
-    void BytesReceived(int32_t sessionId, const std::string &data);
-    void OnSessionServerOpened(int32_t sessionId);
-    void OnSessionServerClosed(int32_t sessionId, const std::string &deviceId);
-    void OnMessageHandleReceived(int32_t sessionId, const std::string &data);
-    void OnBytesServerReceived(int32_t sessionId, const std::string &data);
+    void SessionOpened(int32_t socket, PeerSocketInfo info);
+    void SessionClosed(int32_t socket);
+    void MessageReceived(int32_t socket, const std::string &data);
+    void BytesReceived(int32_t socket, const std::string &data);
+    void OnSessionServerOpened();
+    void OnSessionServerClosed(int32_t socket);
+    void OnMessageHandleReceived(int32_t socket, const std::string &data);
+    void OnBytesServerReceived(const std::string &data);
 
     std::map<int32_t, std::shared_ptr<SoftbusSessionServer>> serverMap_;
     std::shared_ptr<SSListener> ssListener_;
     std::recursive_mutex softbusDistributedDataLock_;
 
     static constexpr const int MESSAGE_CODE_CONNECT_SERVER = 1;
+
+    PeerSocketInfo peerSocketInfo = {
+        .name = nullptr,
+        .networkId = nullptr,
+        .pkgName = nullptr,
+        .dataType = DATA_TYPE_BYTES,
+    };
+    
+    std::map<const std::string, int32_t> mMap_;
 };
 } // namespace OHOS::AVSession
 
