@@ -33,70 +33,55 @@ void SoftbusDistributedDataManager::Init()
     SoftbusSessionManager::GetInstance().AddSessionListener(ssListener_);
 }
 
-void SoftbusDistributedDataManager::SessionOpened(int32_t sessionId)
+void SoftbusDistributedDataManager::SessionOpened(int32_t socket, PeerSocketInfo info)
 {
-    std::string sessionName;
-    int32_t ret = SoftbusSessionManager::GetInstance().GetPeerSessionName(sessionId, sessionName);
-    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "GetPeerSessionName failed");
+    std::string sessionName = info.name;
+    peerSocketInfo.name = info.name;
+    peerSocketInfo.networkId = info.networkId;
+    peerSocketInfo.pkgName = info.pkgName;
+    peerSocketInfo.dataType = info.dataType;
     if (sessionName != CONFIG_SOFTBUS_SESSION_TAG) {
         SLOGE("onSessionOpened: the group id is not match the media session group. sessionName is %{public}s",
             sessionName.c_str());
         return;
     }
-    if (SoftbusSessionManager::GetInstance().IsServerSide(sessionId)) {
-        OnSessionServerOpened(sessionId);
-    }
+    OnSessionServerOpened();
 }
 
-void SoftbusDistributedDataManager::SessionClosed(int32_t sessionId)
+void SoftbusDistributedDataManager::SessionClosed(int32_t socket)
 {
-    std::string sessionName;
-    int32_t ret = SoftbusSessionManager::GetInstance().GetPeerSessionName(sessionId, sessionName);
-    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "GetPeerSessionName failed");
-    if (sessionName != CONFIG_SOFTBUS_SESSION_TAG) {
+    if (peerSocketInfo.name != CONFIG_SOFTBUS_SESSION_TAG) {
         SLOGE("onSessionOpened: the group id is not match the media session group.");
         return;
     }
-    std::string deviceId;
-    ret = SoftbusSessionManager::GetInstance().ObtainPeerDeviceId(sessionId, deviceId);
-    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "ObtainPeerDeviceId failed");
-    if (SoftbusSessionManager::GetInstance().IsServerSide(sessionId)) {
-        OnSessionServerClosed(sessionId, deviceId);
-    }
+    OnSessionServerClosed(socket);
 }
 
-void SoftbusDistributedDataManager::MessageReceived(int32_t sessionId, const std::string &data)
+void SoftbusDistributedDataManager::MessageReceived(int32_t socket, const std::string &data)
 {
-    std::string sessionName;
-    int32_t ret = SoftbusSessionManager::GetInstance().GetPeerSessionName(sessionId, sessionName);
-    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "GetPeerSessionName failed");
-    if (sessionName != CONFIG_SOFTBUS_SESSION_TAG) {
+    if (peerSocketInfo.name != CONFIG_SOFTBUS_SESSION_TAG) {
         SLOGE("onSessionOpened: the group id is not match the media session group. sessionName is %{public}s",
-            sessionName.c_str());
+            peerSocketInfo.name);
         return;
     }
-    OnMessageHandleReceived(sessionId, data);
+    OnMessageHandleReceived(socket, data);
 }
 
-void SoftbusDistributedDataManager::BytesReceived(int32_t sessionId, const std::string &data)
+void SoftbusDistributedDataManager::BytesReceived(int32_t socket, const std::string &data)
 {
-    std::string sessionName;
-    int32_t ret = SoftbusSessionManager::GetInstance().GetPeerSessionName(sessionId, sessionName);
-    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "GetPeerSessionName failed");
-    if (sessionName != CONFIG_SOFTBUS_SESSION_TAG) {
+    if (peerSocketInfo.name != CONFIG_SOFTBUS_SESSION_TAG) {
         SLOGE("onSessionOpened: the group id is not match the media session group. sessionName is %{public}s",
-            sessionName.c_str());
+            peerSocketInfo.name);
         return;
     }
-    if (SoftbusSessionManager::GetInstance().IsServerSide(sessionId)) {
-        OnBytesServerReceived(sessionId, data);
-    }
+    OnBytesServerReceived(data);
 }
 
 void SoftbusDistributedDataManager::InitSessionServer(const std::string &pkg)
 {
     SLOGI("init session server...");
-    SoftbusSessionManager::GetInstance().CreateSessionServer(pkg);
+    int32_t socket = SoftbusSessionManager::GetInstance().Socket(pkg);
+    mMap_.insert({pkg, socket});
 }
 
 void SoftbusDistributedDataManager::CreateServer(const std::shared_ptr<SoftbusSessionServer> &server)
@@ -110,6 +95,7 @@ void SoftbusDistributedDataManager::CreateServer(const std::shared_ptr<SoftbusSe
     serverMap_.insert({ characteristic, server });
 }
 
+
 void SoftbusDistributedDataManager::DestroySessionServer(const std::string &pkg)
 {
     SLOGI("destroy session server...");
@@ -118,7 +104,9 @@ void SoftbusDistributedDataManager::DestroySessionServer(const std::string &pkg)
         it->second->DisconnectAllProxy();
         serverMap_.erase(it++);
     }
-    SoftbusSessionManager::GetInstance().RemoveSessionServer(pkg);
+    int32_t mSocket = mMap_[pkg];
+    mMap_.erase(pkg);
+    SoftbusSessionManager::GetInstance().Shutdown(mSocket);
 }
 
 void SoftbusDistributedDataManager::ReleaseServer(const std::shared_ptr<SoftbusSessionServer> &server)
@@ -132,28 +120,25 @@ void SoftbusDistributedDataManager::ReleaseServer(const std::shared_ptr<SoftbusS
     }
 }
 
-void SoftbusDistributedDataManager::OnSessionServerOpened(int32_t sessionId)
+void SoftbusDistributedDataManager::OnSessionServerOpened()
 {
-    std::string deviceId;
-    SoftbusSessionManager::GetInstance().ObtainPeerDeviceId(sessionId, deviceId);
     SLOGI("OnSessionServerOpened: the peer device id is %{public}s.",
-        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+        SoftbusSessionUtils::AnonymizeDeviceId(peerSocketInfo.networkId).c_str());
 }
 
-void SoftbusDistributedDataManager::OnSessionServerClosed(int32_t sessionId, const std::string &deviceId)
+void SoftbusDistributedDataManager::OnSessionServerClosed(int32_t socket)
 {
     SLOGI("OnSessionServerClosed: the peer device id is %{public}s.",
-        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+        SoftbusSessionUtils::AnonymizeDeviceId(peerSocketInfo.networkId).c_str());
     std::lock_guard lockGuard(softbusDistributedDataLock_);
     for (auto it = serverMap_.begin(); it != serverMap_.end(); it++) {
-        it->second->DisconnectProxy(sessionId);
+        it->second->DisconnectProxy(socket);
     }
 }
 
-void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t sessionId, const std::string &data)
+void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t socket, const std::string &data)
 {
-    std::string deviceId;
-    SoftbusSessionManager::GetInstance().ObtainPeerDeviceId(sessionId, deviceId);
+    std::string deviceId = peerSocketInfo.networkId;
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onMessageHandleReceived: %{public}s", anonymizeDeviceId.c_str());
     if (data.length() > 1 && data[0] == MESSAGE_CODE_CONNECT_SERVER) {
@@ -163,14 +148,13 @@ void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t sessionId, c
             SLOGE("onMessageHandleReceived: server is invalid deviceId %{public}s", anonymizeDeviceId.c_str());
             return;
         }
-        iter->second->ConnectProxy(sessionId);
+        iter->second->ConnectProxy(socket);
     }
 }
 
-void SoftbusDistributedDataManager::OnBytesServerReceived(int32_t sessionId, const std::string &data)
+void SoftbusDistributedDataManager::OnBytesServerReceived(const std::string &data)
 {
-    std::string deviceId;
-    SoftbusSessionManager::GetInstance().ObtainPeerDeviceId(sessionId, deviceId);
+    std::string deviceId = peerSocketInfo.networkId;
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onBytesServerReceived: %{public}s", anonymizeDeviceId.c_str());
     if (data.length() > 0) {

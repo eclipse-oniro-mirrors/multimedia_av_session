@@ -17,7 +17,6 @@
 
 #include "avsession_log.h"
 #include "avsession_errors.h"
-#include "session.h"
 #include "migrate_avsession_constant.h"
 
 namespace OHOS::AVSession {
@@ -27,132 +26,100 @@ SoftbusSessionManager& SoftbusSessionManager::GetInstance()
     return softbusSessionListener;
 }
 
-static int SessionOpened(int sessionId, int result)
+static void OnBind(int32_t socket, PeerSocketInfo info)
 {
-    SLOGI("OnSessionOpend sessionId[%{public}d] result[%{public}d]", sessionId, result);
-    return SoftbusSessionManager::GetInstance().OnSessionOpened(sessionId, result);
+    SLOGI("OnBind sessionId[%{public}d] result[%{public}s]", socket, info.networkId);
+    SoftbusSessionManager::GetInstance().OnBind(socket, info);
 }
 
-static void SessionClosed(int sessionId)
+static void OnShutdown(int32_t socket, ShutdownReason reason)
 {
-    SLOGI("OnSessionClosed sessionId[%{public}d]", sessionId);
-    SoftbusSessionManager::GetInstance().OnSessionClosed(sessionId);
+    SLOGI("OnSessionClosed sessionId[%{public}d], reason[%{public}d]", socket, reason);
+    SoftbusSessionManager::GetInstance().OnShutdown(socket, reason);
 }
 
-static void BytesReceived(int sessionId, const void *data, unsigned int dataLen)
+static void OnBytes(int socket, const void *data, unsigned int dataLen)
 {
-    SLOGI("OnBytesReceived sessionId[%{public}d], datalen[%{public}d]", sessionId, dataLen);
+    SLOGI("OnBytesReceived sessionId[%{public}d], datalen[%{public}d]", socket, dataLen);
     std::string msg = std::string(static_cast<const char*>(data), dataLen);
-    SoftbusSessionManager::GetInstance().OnBytesReceived(sessionId, msg);
+    SoftbusSessionManager::GetInstance().OnBytes(socket, msg.c_str(), dataLen);
 }
 
-static void MessageReceived(int sessionId, const void *data, unsigned int dataLen)
+static void OnMessage(int socket, const void *data, unsigned int dataLen)
 {
-    SLOGI("OnMessageReceived sessionId[%{public}d], datalen[%{public}d]", sessionId, dataLen);
+    SLOGI("OnMessageReceived sessionId[%{public}d], datalen[%{public}d]", socket, dataLen);
     std::string msg = std::string(static_cast<const char*>(data), dataLen);
-    SoftbusSessionManager::GetInstance().OnMessageReceived(sessionId, msg);
+    SoftbusSessionManager::GetInstance().OnMessage(socket, msg.c_str(), dataLen);
 }
 
-static ISessionListener iSessionListener = {
-    .OnSessionOpened = SessionOpened,
-    .OnSessionClosed = SessionClosed,
-    .OnBytesReceived = BytesReceived,
-    .OnMessageReceived = MessageReceived
+static ISocketListener iSessionListener = {
+    .OnBind = OnBind,
+    .OnShutdown = OnShutdown,
+    .OnBytes = OnBytes,
+    .OnMessage = OnMessage
 };
 
-SessionAttribute sessionAttr = {
-    .dataType = TYPE_BYTES
-};
-
-int32_t SoftbusSessionManager::CreateSessionServer(const std::string &pkg)
+int32_t SoftbusSessionManager::Socket(const std::string &pkgName)
 {
-    int32_t ret =
-        ::CreateSessionServer(pkg.c_str(), std::string(CONFIG_SOFTBUS_SESSION_TAG).c_str(), &iSessionListener);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS || ret == REASON_EXIST,
-        AVSESSION_ERROR, "CreateSessionServer failed ret[%{public}d]", ret);
-    isSessionServerRunning_ = true;
-    return AVSESSION_SUCCESS;
-}
-
-int32_t SoftbusSessionManager::RemoveSessionServer(const std::string &pkg)
-{
-    int32_t ret = ::RemoveSessionServer(pkg.c_str(), std::string(CONFIG_SOFTBUS_SESSION_TAG).c_str());
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS || ret == REASON_EXIST,
-        AVSESSION_ERROR, "RemoveSessionServer failed ret[%{public}d]", ret);
-    isSessionServerRunning_ = false;
-    return AVSESSION_SUCCESS;
-}
-
-int32_t SoftbusSessionManager::OpenSession(const std::string &deviceId, const std::string &groupId)
-{
-    CHECK_AND_RETURN_RET_LOG(isSessionServerRunning_,
-        AVSESSION_ERROR,
-        "the session server is do not running, unable to open session.");
-    int32_t ret = ::OpenSession(std::string(CONFIG_SOFTBUS_SESSION_TAG).c_str(),
-        std::string(CONFIG_SOFTBUS_SESSION_TAG).c_str(), deviceId.c_str(), groupId.c_str(), &sessionAttr);
-    CHECK_AND_RETURN_RET_LOG(ret > 0, ret, "open session for device: %{public}d, return null session.", ret);
-    SLOGI("open session for device: %{public}d, return entity session.", ret);
+    SocketInfo info = {
+        .name = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG.c_str()),
+        .pkgName = const_cast<char *>(pkgName.c_str()),
+        .dataType = DATA_TYPE_BYTES
+    };
+    int32_t socket = ::Socket(info);
+    QosTV serverQos[] = {
+        {.qos = QOS_TYPE_MIN_BW,        .value = 64 * 1024 }, //最小带宽64k
+        {.qos = QOS_TYPE_MAX_LATENCY,   .value = 19000 }, //最大建链时延19s
+        {.qos = QOS_TYPE_MIN_LATENCY,   .value = 500 }, //最小建链时延0.5s
+    };
+    int32_t ret = ::Listen(socket, serverQos, QOS_COUNT, &iSessionListener);
+    if (ret == 0) {
+        SLOGI("service success ,socket[%{public}d]", socket);
+        //建立服务成功
+    } else {
+        SLOGI("service failed ,socket[%{public}d]", socket);
+        //建立服务失败，错误码
+    }
     return ret;
 }
 
-int32_t SoftbusSessionManager::CloseSession(int32_t sessionId)
+void SoftbusSessionManager::Shutdown(int32_t socket)
 {
-    CHECK_AND_RETURN_RET_LOG(isSessionServerRunning_,
-        AVSESSION_ERROR,
-        "the session server is do not running, unable to close session.");
-    ::CloseSession(sessionId);
-    return AVSESSION_SUCCESS;
+    SLOGI("socket Shutdown");
+    ::Shutdown(socket);
 }
 
-int32_t SoftbusSessionManager::SendMessage(int32_t sessionId, const std::string &data)
+int32_t SoftbusSessionManager::SendMessage(int32_t socket, const std::string &data)
 {
-    if (sessionId <= 0 || data == "") {
+    if (socket <= 0 || data == "") {
         SLOGE("the params invalid, unable to send message by session.");
         return AVSESSION_ERROR;
     }
-    int ret = ::SendMessage(sessionId, data.c_str(), data.length());
+    int ret = ::SendMessage(socket, data.c_str(), data.length());
     return ret;
 }
 
-int32_t SoftbusSessionManager::SendBytes(int32_t sessionId, const std::string &data)
+int32_t SoftbusSessionManager::SendBytes(int32_t socket, const std::string &data)
 {
-    if (sessionId <= 0 || data == "") {
+    if (socket <= 0 || data == "") {
         SLOGE("the params invalid, unable to send sendBytes by session.");
         return AVSESSION_ERROR;
     }
-    int ret = ::SendBytes(sessionId, data.c_str(), data.length());
+    int ret = ::SendBytes(socket, data.c_str(), data.length());
     return ret;
 }
 
-int32_t SoftbusSessionManager::ObtainPeerDeviceId(int32_t sessionId, std::string &deviceId)
+int32_t SoftbusSessionManager::ObtainPeerDeviceId(int32_t socket, std::string &deviceId)
 {
     CHECK_AND_RETURN_RET_LOG(
-        sessionId > 0, AVSESSION_ERROR, "the session is null, unable to obtain the peer device id.");
-    char networkId[DEVICE_INFO_MAX_LENGTH] = { 0 };
-    int ret = ::GetPeerDeviceId(sessionId, networkId, DEVICE_INFO_MAX_LENGTH);
-    deviceId = networkId;
-    return ret;
-}
-
-int32_t SoftbusSessionManager::GetPeerSessionName(int32_t sessionId, std::string &sessionName)
-{
-    CHECK_AND_RETURN_RET_LOG(
-        sessionId > 0, AVSESSION_ERROR, "the session is null, unable to obtain the peer device id.");
-    char peerSessionName[DEVICE_INFO_MAX_LENGTH] = { 0 };
-    int ret = ::GetPeerSessionName(sessionId, peerSessionName, DEVICE_INFO_MAX_LENGTH);
-    sessionName = peerSessionName;
-    return ret;
-}
-
-bool SoftbusSessionManager::IsServerSide(int32_t sessionId)
-{
-    CHECK_AND_RETURN_RET_LOG(sessionId > 0, false,
-        "the session is null, unable to judgement which side.");
-    int ret = ::GetSessionSide(sessionId);
-    if (ret == 0) {
-        return true;
+        socket > 0, AVSESSION_ERROR, "the session is null, unable to obtain the peer device id.");
+    if (mMap_.find(socket) == mMap_.end()) {
+        SLOGE("no find deviceid.");
+        return AVSESSION_ERROR;
+    } else {
+        deviceId = mMap_[socket];
+        return AVSESSION_SUCCESS;
     }
-    return false;
 }
 
 void SoftbusSessionManager::AddSessionListener(std::shared_ptr<SoftbusSessionListener> softbusSessionListener)
@@ -161,45 +128,42 @@ void SoftbusSessionManager::AddSessionListener(std::shared_ptr<SoftbusSessionLis
         SLOGE("the session listener is null, unable to add to session listener list.");
         return;
     }
-    std::lock_guard lockGuard(sessionLock_);
+    std::lock_guard lockGuard(socketLock_);
     sessionListeners_.clear();
     sessionListeners_.emplace_back(softbusSessionListener);
 }
 
-int32_t SoftbusSessionManager::OnSessionOpened(int32_t sessionId, int32_t result)
+void SoftbusSessionManager::OnBind(int32_t socket, PeerSocketInfo info)
 {
-    if (result != AVSESSION_SUCCESS) {
-        SLOGE("onSessionOpened failed.");
-        return result;
-    }
-    std::lock_guard lockGuard(sessionLock_);
+    std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
-        listener->OnSessionOpened(sessionId);
-    }
-    return AVSESSION_SUCCESS;
-}
-
-void SoftbusSessionManager::OnSessionClosed(int32_t sessionId)
-{
-    std::lock_guard lockGuard(sessionLock_);
-    for (auto listener : sessionListeners_) {
-        listener->OnSessionClosed(sessionId);
+        listener->OnBind(socket, info);
+        mMap_.insert({socket, info.networkId});
     }
 }
 
-void SoftbusSessionManager::OnMessageReceived(int32_t sessionId, const std::string &data)
+void SoftbusSessionManager::OnShutdown(int32_t socket, ShutdownReason reason)
 {
-    std::lock_guard lockGuard(sessionLock_);
+    std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
-        listener->OnMessageReceived(sessionId, data);
+        listener->OnShutdown(socket, reason);
+        mMap_.erase(socket);
     }
 }
 
-void SoftbusSessionManager::OnBytesReceived(int32_t sessionId, const std::string &data)
+void SoftbusSessionManager::OnMessage(int32_t socket, const void *data, int32_t dataLen)
 {
-    std::lock_guard lockGuard(sessionLock_);
+    std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
-        listener->OnBytesReceived(sessionId, data);
+        listener->OnMessage(socket, data, dataLen);
+    }
+}
+
+void SoftbusSessionManager::OnBytes(int32_t socket, const void *data, int32_t dataLen)
+{
+    std::lock_guard lockGuard(socketLock_);
+    for (auto listener : sessionListeners_) {
+        listener->OnBytes(socket, data, dataLen);
     }
 }
 } // namespace OHOS::AVSession

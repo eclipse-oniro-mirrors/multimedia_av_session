@@ -147,8 +147,14 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     migrateManager_->CreateLocalSessionStub("SuperLauncher", server_);
     EXPECT_EQ(migrateManager_->serverMap_.find("SuperLauncher") != migrateManager_->serverMap_.end(), true);
 
-    migrateManager_->softBusDistributedDataMgr_->SessionOpened(sessionId);
-    migrateManager_->softBusDistributedDataMgr_->OnSessionServerOpened(sessionId);
+    PeerSocketInfo info = {
+        .name = nullptr,
+        .networkId = nullptr,
+        .pkgName = nullptr,
+        .dataType = DATA_TYPE_BYTES,
+    };
+    migrateManager_->softBusDistributedDataMgr_->SessionOpened(sessionId, info);
+    migrateManager_->softBusDistributedDataMgr_->OnSessionServerOpened();
     migrateManager_->softBusDistributedDataMgr_->MessageReceived(sessionId, "");
     migrateManager_->softBusDistributedDataMgr_->OnMessageHandleReceived(sessionId, "");
     server_->ConnectProxy(sessionId);
