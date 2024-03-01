@@ -126,6 +126,12 @@ HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
     parcel->WriteBool(true);
     parcel->WriteInt32(7);
     parcel->WriteInt32(0);
+    parcel->WriteInt32(0);
+    parcel->WriteBool(false);
+    parcel->WriteInt32(0);
+    parcel->WriteInt32(0);
+    parcel->WriteInt32(0);
+
     AVPlaybackState *result = AVPlaybackState::Unmarshalling(*parcel);
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetFavorite(), true);
