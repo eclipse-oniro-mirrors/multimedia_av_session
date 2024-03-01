@@ -20,6 +20,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <regex>
 
 #include "avsession_log.h"
 #include "directory_ex.h"
@@ -136,9 +137,20 @@ public:
     static std::string GetAnonySessionId(const std::string& sessionId)
     {
         constexpr size_t PRE_LEN = 3;
+        constexpr size_t MAX_LEN = 100;
         std::string res;
         std::string tmpStr("******");
         size_t len = sessionId.length();
+
+        std::regex nameRegex("[\\w]*");
+        if (len < PRE_LEN || len > MAX_LEN) {
+            SLOGE("GetAnonySessionId err length %{public}d", static_cast<int>(len));
+            return "ERROR_LENGTH";
+        }
+        if (!std::regex_match(sessionId, nameRegex)) {
+            SLOGE("GetAnonySessionId err content");
+            return "ERROR_CONTENT";
+        }
         res.append(sessionId, 0, PRE_LEN).append(tmpStr).append(sessionId, len - PRE_LEN, PRE_LEN);
         return res;
     }
