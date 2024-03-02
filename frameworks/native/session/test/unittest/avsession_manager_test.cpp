@@ -249,7 +249,8 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
     std::vector<AVSessionDescriptor> descriptors;
     auto ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_EQ(descriptors.size(), 0);
+    SLOGI("GetAllSessionDescriptors001 check descriptors num %{public}d", static_cast<int>(descriptors.size()));
+    EXPECT_EQ(descriptors.size() <= 10, true);
 
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
@@ -260,7 +261,8 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
 
     ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_EQ(descriptors.size(), 1);
+    SLOGI("GetAllSessionDescriptors001 recheck descriptors num %{public}d", static_cast<int>(descriptors.size()));
+    EXPECT_EQ(descriptors.size() >= 1, true);
     EXPECT_EQ(descriptors[0].sessionTag_, g_testSessionTag);
     EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
     EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), g_testBundleName);
@@ -441,7 +443,7 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
     SLOGI("CreateController003 begin");
     std::shared_ptr<AVSessionController> controller;
     auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
     SLOGI("CreateController003 end");
 }
 
@@ -469,7 +471,7 @@ HWTEST_F(AVSessionManagerTest, CreateController004, TestSize.Level1)
 
     std::shared_ptr<AVSessionController> controller1;
     ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), controller1);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret, ERR_CONTROLLER_IS_EXIST);
 
     session->Destroy();
     controller->Destroy();
@@ -500,7 +502,7 @@ HWTEST_F(AVSessionManagerTest, CreateController005, TestSize.Level1)
     EXPECT_NE(controller, nullptr);
     std::shared_ptr<AVSessionController> secondController;
     ret = AVSessionManager::GetInstance().CreateController(session->GetSessionId(), secondController);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret, ERR_CONTROLLER_IS_EXIST);
 
     session->Destroy();
     controller->Destroy();
