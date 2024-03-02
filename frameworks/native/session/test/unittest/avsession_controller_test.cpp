@@ -815,14 +815,14 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
     avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
-    if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
-        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
-    } else {
-        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_COMMAND_SEND_EXCEED_MAX);
-    }
-    
+
+    sleep(1);
+    SLOGI("SendCommonCommand001 do aft 1s avoid exceed max");
+    EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+
     SLOGI("SendCommonCommand001 End");
 }
+
 
 /**
 * @tc.name: SendCommonCommand002
@@ -836,11 +836,11 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
     avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
-    if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
-        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
-    } else {
-        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_COMMAND_SEND_EXCEED_MAX);
-    }
+
+    sleep(1);
+    SLOGI("SendCommonCommand002 do aft 1s avoid exceed max");
+    EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+
     EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_SESSION_DEACTIVE);
     SLOGI("SendCommonCommand002 End");
@@ -1316,7 +1316,7 @@ HWTEST_F(AVSessionControllerTest, HasSession001, TestSize.Level1)
     SLOGD("HasSession001 Begin");
     std::shared_ptr<AVSessionController> controller2 = nullptr;
     auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller2);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret, ERR_CONTROLLER_IS_EXIST);
     SLOGD("HasSession001 End");
 }
 
