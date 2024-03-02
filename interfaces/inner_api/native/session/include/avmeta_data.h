@@ -78,7 +78,10 @@ public:
 
     static AVMetaData* Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& parcel) const override;
-    
+
+    static bool UnmarshallingCheckParamTask(Parcel& data,  AVMetaData *result);
+    static bool UnmarshallingCheckImageTask(Parcel& data,  AVMetaData *result);
+
     static bool UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut);
     static bool MarshallingExceptImg(MessageParcel& data, const AVMetaData metaIn);
 

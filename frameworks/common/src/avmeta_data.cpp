@@ -50,11 +50,23 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
     std::string mask;
     CHECK_AND_RETURN_RET_LOG(data.ReadString(mask) && mask.length() == META_KEY_MAX, nullptr, "mask not valid");
     CHECK_AND_RETURN_RET_LOG(mask.find_first_not_of("01") == std::string::npos, nullptr, "mask string not 0 or 1");
-
     auto *result = new (std::nothrow) AVMetaData();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVMetaData failed");
     result->metaMask_ = MetaMaskType(mask);
-    if (!data.ReadString(result->assetId_) ||
+    if (!UnmarshallingCheckParamTask(data, result)) {
+        delete result;
+        return nullptr;
+    }
+    if (!UnmarshallingCheckImageTask(data, result)) {
+        delete result;
+        return nullptr;
+    }
+    return result;
+}
+
+bool AVMetaData::UnmarshallingCheckParamTask(Parcel& data, AVMetaData *result)
+{
+    bool isParamSupport = (!data.ReadString(result->assetId_) ||
         !data.ReadString(result->title_) ||
         !data.ReadString(result->artist_) ||
         !data.ReadString(result->author_) ||
@@ -74,24 +86,27 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
         !data.ReadString(result->nextAssetId_) ||
         !data.ReadInt32(result->skipIntervals_) ||
         !data.ReadInt32(result->filter_) ||
-        !data.ReadInt32(result->displayTags_)) {
+        !data.ReadInt32(result->displayTags_));
+    if (isParamSupport)  {
         SLOGE("read AVMetaData failed");
-        delete result;
-        return nullptr;
+        return false;
     }
+    return true;
+}
+
+bool AVMetaData::UnmarshallingCheckImageTask(Parcel& data, AVMetaData *result)
+{
     result->mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->metaMask_.test(META_KEY_MEDIA_IMAGE) && result->mediaImage_ == nullptr) {
         SLOGE("read PixelMap failed");
-        delete result;
-        return nullptr;
+        return false;
     }
     result->avQueueImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->metaMask_.test(META_KEY_AVQUEUE_IMAGE) && result->avQueueImage_ == nullptr) {
         SLOGE("read PixelMap failed");
-        delete result;
-        return nullptr;
+        return false;
     }
-    return result;
+    return true;
 }
 
 bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData metaIn)

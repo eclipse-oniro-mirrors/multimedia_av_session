@@ -1483,7 +1483,7 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.name:GetAVPlaybackStateSync001
    * @tc.desc:Get av playback state - sync
    * @tc.type: FUNC
-   * @tc.require: I7V81A
+   * @tc.require: I6KTU4
    */
   it("GetAVPlaybackStateSync001", 0, async function (done) {
     console.info(TAG + "GetAVPlaybackStateSync001 start");
@@ -1507,7 +1507,7 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.name:GetAVMetadataSync001
    * @tc.desc:Get av metadata - sync
    * @tc.type: FUNC
-   * @tc.require: I7V81A
+   * @tc.require: I6KTU4
    */
   it("GetAVMetadataSync001", 0, async function (done) {
     console.info(TAG + "GetAVMetadataSync001 start");
@@ -1531,7 +1531,7 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.name:GetAVQueueTitleSync001
    * @tc.desc:Get av queue title - sync
    * @tc.type: FUNC
-   * @tc.require: I7V81A
+   * @tc.require: I6KTU4
    */
   it("GetAVQueueTitleSync001", 0, async function (done) {
     console.info(TAG + "GetAVQueueTitleSync001 start");
@@ -1552,7 +1552,7 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.name:GetAVQueueItemSync001
    * @tc.desc:Get av queue item - sync
    * @tc.type: FUNC
-   * @tc.require: I7V81A
+   * @tc.require: I6KTU4
    */
   it("GetAVQueueItemSync001", 0, async function (done) {
     console.info(TAG + "GetAVQueueItemSync001 start");
@@ -1573,7 +1573,7 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.name:GetOutputDeviceSync001
    * @tc.desc:Get output device - sync
    * @tc.type: FUNC
-   * @tc.require: I7V81A
+   * @tc.require: I6KTU4
    */
   it("GetOutputDeviceSync001", 0, async function (done) {
     console.info(TAG + "GetOutputDeviceSync001 start");
@@ -1592,7 +1592,7 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.name:IsActiveSync001
    * @tc.desc:Is session active - sync
    * @tc.type: FUNC
-   * @tc.require: I7V81A
+   * @tc.require: I6KTU4
    */
   it("IsActiveSync001", 0, async function (done) {
     console.info(TAG + "IsActiveSync001 start");
@@ -1613,7 +1613,7 @@ describe("AVSessionControllerJsTest", function () {
    * @tc.name:GetValidCommandsSync001
    * @tc.desc:Get valid commands - sync
    * @tc.type: FUNC
-   * @tc.require: I7V81A
+   * @tc.require: I6KTU4
    */
   it("GetValidCommandsSync001", 0, async function (done) {
     console.info(TAG + "GetValidCommandsSync001 start");
