@@ -725,7 +725,7 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
                 break;
             case AVControlCommand::SESSION_CMD_REWIND : controlCommand.SetRewindTime(10);
                 break;
-            case AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID: controlCommand.SetAssetId("callback");
+            case AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID: controlCommand.SetPlayFromAssetId(0);
                 break;
             default:
                 break;
