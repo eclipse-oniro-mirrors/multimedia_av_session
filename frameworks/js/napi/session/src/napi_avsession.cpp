@@ -164,13 +164,11 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     auto context = std::make_shared<ContextBase>();
     if (context == nullptr) {
         SLOGE("OnEvent failed : no memory");
-        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
-        return NapiUtils::GetUndefinedValue(env);
+        return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
     }
     std::string eventName;
     napi_value callback {};
     auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
-        /* require 2 arguments <event, callback> */
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
@@ -189,44 +187,51 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     auto it = onEventHandlers_.find(eventName);
     if (it == onEventHandlers_.end()) {
         SLOGE("event name invalid");
-        NapiUtils::ThrowError(env, "event name invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        return NapiUtils::GetUndefinedValue(env);
+        return ThrowErrorAndReturn(env, "event name invalid", ERR_INVALID_PARAM);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiSession->session_ == nullptr) {
         SLOGE("OnEvent failed : session is nullptr");
-        NapiUtils::ThrowError(env, "OnEvent failed : session is nullptr",
-            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
-        return NapiUtils::GetUndefinedValue(env);
+        return ThrowErrorAndReturn(env, "OnEvent failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
     if (napiSession->callback_ == nullptr) {
         napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
         if (napiSession->callback_ == nullptr) {
             SLOGE("OnEvent failed : no memory");
-            NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
-            return NapiUtils::GetUndefinedValue(env);
+            return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
         }
         int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
         if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_SESSION_NOT_EXIST) {
-                NapiUtils::ThrowError(env, "OnEvent failed : native session not exist",
-                    NapiAVSessionManager::errcode_[ret]);
-            } else if (ret == ERR_INVALID_PARAM) {
-                NapiUtils::ThrowError(env, "OnEvent failed : native invalid parameters",
-                    NapiAVSessionManager::errcode_[ret]);
-            } else if (ret == ERR_NO_PERMISSION) {
-                NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
-                    NapiAVSessionManager::errcode_[ret]);
-            } else {
-                NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
-                    NapiAVSessionManager::errcode_[ret]);
-            }
-            return NapiUtils::GetUndefinedValue(env);
+            return ThrowErrorAndReturnByErrCode(env, "OnEvent", ret);
         }
     }
     if (it->second(env, napiSession, callback) != napi_ok) {
         NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::ThrowErrorAndReturn(napi_env env, const std::string& message, int32_t errCode)
+{
+    std::string tempMessage = message;
+    NapiUtils::ThrowError(env, tempMessage.c_str(), NapiAVSessionManager::errcode_[errCode]);
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::ThrowErrorAndReturnByErrCode(napi_env env, const std::string& message, int32_t errCode)
+{
+    std::string tempMessage = message;
+    if (errCode == ERR_SESSION_NOT_EXIST) {
+        tempMessage.append(" failed : native session not exist");
+    } else if (errCode == ERR_INVALID_PARAM) {
+        tempMessage.append(" failed : native invalid parameters");
+    } else if (errCode == ERR_NO_PERMISSION) {
+        tempMessage.append(" failed : native no permission");
+    } else {
+        tempMessage.append(" failed : native server exception");
+    }
+    SLOGI("throw error message: %{public}s", tempMessage.c_str());
+    NapiUtils::ThrowError(env, tempMessage.c_str(), NapiAVSessionManager::errcode_[errCode]);
     return NapiUtils::GetUndefinedValue(env);
 }
 
@@ -381,9 +386,7 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
 napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVQueueItems");
-    struct ConcreteContext : public ContextBase {
-        std::vector<AVQueueItem> items_;
-    };
+    struct ConcreteContext : public ContextBase { std::vector<AVQueueItem> items_; };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         NapiUtils::ThrowError(env, "SetAVQueueItems failed : no memory",
@@ -426,9 +429,7 @@ napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SetAVQueueItems", executor, complete);
 }
 

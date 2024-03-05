@@ -336,7 +336,6 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
     auto input = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_string || type == napi_object),
@@ -359,7 +358,6 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_CAST_AUDIO_TASK_ID;
-
     auto executor = [context]() {
         int32_t ret = AVSESSION_ERROR;
         if (context->isAll_) {
@@ -368,24 +366,35 @@ napi_value NapiAVSessionManager::CastAudio(napi_env env, napi_callback_info info
             ret = AVSessionManager::GetInstance().CastAudio(context->sessionToken_, context->audioDeviceDescriptors_);
         }
         if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "CastAudio failed : native no permission";
-            } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "CastAudio failed : native invalid parameters";
-            } else if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "CastAudio failed : native session not exist";
-            } else {
-                context->errMessage = "CastAudio failed : native server exception";
-            }
+            ErrCodeToMessage(ret, "CastAudio", context->errMessage);
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
-
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
-
     return NapiAsyncWork::Enqueue(env, context, "CastAudio", executor, complete);
 }
+
+void NapiAVSessionManager::ErrCodeToMessage(int32_t errCode, const std::string& tag, std::string& message)
+{
+    message = tag;
+    SLOGE("check error code for message:%{public}d", errCode);
+    switch (errCode) {
+        case ERR_SESSION_NOT_EXIST:
+            message.append(" failed : native session not exist");
+            break;
+        case ERR_INVALID_PARAM:
+            message.append(" failed : native invalid parameters");
+            break;
+        case ERR_NO_PERMISSION:
+            message.append(" failed : native no permission");
+            break;
+        default:
+            message.append(" failed : native server exception");
+            break;
+    }
+}
+
 napi_status NapiAVSessionManager::RegisterNativeSessionListener(napi_env env)
 {
     if (listener_ != nullptr) {
