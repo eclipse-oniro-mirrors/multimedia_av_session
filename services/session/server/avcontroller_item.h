@@ -77,6 +77,7 @@ private:
     pid_t pid_;
     std::string sessionId_;
     sptr<AVSessionItem> session_;
+    std::recursive_mutex callbackMutex_;
     sptr<IAVControllerCallback> callback_;
     AVMetaData::MetaMaskType metaMask_;
     AVPlaybackState::PlaybackStateMaskType playbackMask_;
