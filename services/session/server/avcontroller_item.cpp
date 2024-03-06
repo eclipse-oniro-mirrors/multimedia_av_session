@@ -40,6 +40,7 @@ AVControllerItem::~AVControllerItem()
 
 int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     callback_ = iface_cast<AVControllerCallbackProxy>(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
     return AVSESSION_SUCCESS;
@@ -113,7 +114,11 @@ int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackState
 
 int32_t AVControllerItem::Destroy()
 {
-    callback_ = nullptr;
+    {
+        std::lock_guard lockGuard(callbackMutex_);
+        callback_ = nullptr;
+    }
+
     if (session_ != nullptr) {
         session_->HandleControllerRelease(pid_);
         session_ = nullptr;
@@ -132,8 +137,11 @@ std::string AVControllerItem::GetSessionId()
 
 void AVControllerItem::HandleSessionDestroy()
 {
-    if (callback_ != nullptr) {
-        callback_->OnSessionDestroy();
+    {
+        std::lock_guard lockGuard(callbackMutex_);
+        if (callback_ != nullptr) {
+            callback_->OnSessionDestroy();
+        }
     }
     session_ = nullptr;
     sessionId_.clear();
@@ -141,6 +149,7 @@ void AVControllerItem::HandleSessionDestroy()
 
 void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVPlaybackState stateOut;
     if (state.CopyToByMask(playbackMask_, stateOut)) {
@@ -152,6 +161,7 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
 
 void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVMetaData metaOut;
     if (data.CopyToByMask(metaMask_, metaOut)) {
@@ -175,12 +185,14 @@ void AVControllerItem::HandleOutputDeviceChange(const OutputDeviceInfo& outputDe
 
 void AVControllerItem::HandleActiveStateChange(bool isActive)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnActiveStateChange(isActive);
 }
 
 void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds)
 {
+    std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnValidCommandChange(cmds);
 }
