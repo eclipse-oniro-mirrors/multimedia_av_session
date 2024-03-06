@@ -364,7 +364,7 @@ std::string AVSessionService::AllocSessionId()
 
     std::stringstream stream;
     for (const auto byte : hash) {
-        stream << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(byte);
+        stream << std::uppercase << std::hex << std::setfill('0') << std::setw(allocSpace) << static_cast<int>(byte);
     }
     return stream.str();
 }

@@ -41,8 +41,8 @@ void NAPI_application_MediaControlExtensionContext_GetJSCode(const char **buf, i
     }
 
     if (bufLen != nullptr) {
-        *bufLen = _binary_media_control_extension_context_js_end
-          - _binary_media_control_extension_context_js_start;
+        *bufLen = _binary_media_control_extension_context_js_end -
+            _binary_media_control_extension_context_js_start;
     }
 }
 
@@ -54,7 +54,7 @@ void NAPI_application_MediaControlExtensionContext_GetABCCode(const char **buf, 
         *buf = _binary_media_control_extension_context_abc_start;
     }
     if (buflen != nullptr) {
-        *buflen = _binary_media_control_extension_context_abc_end
-          - _binary_media_control_extension_context_abc_start;
+        *buflen = _binary_media_control_extension_context_abc_end -
+            _binary_media_control_extension_context_abc_start;
     }
 }

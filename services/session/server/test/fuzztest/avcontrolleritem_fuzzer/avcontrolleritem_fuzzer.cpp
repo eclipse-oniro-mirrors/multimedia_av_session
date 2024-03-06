@@ -43,34 +43,20 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
     std::string bundleName(reinterpret_cast<const char*>(data), size);
     std::string abilityName(reinterpret_cast<const char*>(data), size);
     sptr<AVSessionService> service = new AVSessionService(AVSESSION_SERVICE_ID);
-    if (!service) {
-        SLOGI("service is null");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(service != nullptr, "service is null");
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
     sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
-    if (!avSessionItem) {
-        SLOGI("avSessionItem is null");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(avSessionItem != nullptr, "avSessionItem is null");
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-    if (code >= MAX_CODE_TEST) {
-        return;
-    }
+    CHECK_AND_RETURN_LOG(code < MAX_CODE_TEST, "Unsupport code");
     sptr<IRemoteObject> avControllerItemObj;
     auto ret = service->CreateControllerInner(avSessionItem->GetSessionId(), avControllerItemObj);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGI("CreateControllerInner fail");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "CreateControllerInner failed");
     avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
-    if (!avControllerItem) {
-        SLOGI("avControllerItem is null");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(avControllerItem != nullptr, "avControllerItem is null");
     MessageParcel dataMessageParcel;
     MessageParcel reply;
     MessageOption option;
@@ -95,14 +81,9 @@ void AvControllerItemRemoteRequestTest(const uint8_t* data, size_t size)
 
 void AvControllerItemDataTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
+    CHECK_AND_RETURN_LOG((data != nullptr) && (size <= MAX_CODE_LEN) && (size >= MIN_SIZE_NUM), "Invalid data");
     sptr<AVSessionService> service = new AVSessionService(AVSESSION_SERVICE_ID);
-    if (!service) {
-        SLOGI("service is null");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(service != nullptr, "service is null");
     std::string tag(reinterpret_cast<const char*>(data), size);
     int32_t type = *reinterpret_cast<const int32_t*>(data);
     std::string bundleName(reinterpret_cast<const char*>(data), size);
@@ -112,27 +93,15 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     elementName.SetAbilityName(abilityName);
     sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
-    if (!avSessionItem) {
-        SLOGI("avSessionItem is null");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(avSessionItem != nullptr, "avSessionItem is null");
     sptr<AVControllerItem> avControllerItem;
-    std::string sessionId(reinterpret_cast<const char*>(data), size);
     sptr<IRemoteObject> avControllerItemObj;
     auto ret = service->CreateControllerInner(avSessionItem->GetSessionId(), avControllerItemObj);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGI("CreateControllerInner fail");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "CreateControllerInner fail");
     avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
-    if (!avControllerItem) {
-        SLOGI("avControllerItem is null");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(avControllerItem != nullptr, "avControllerItem is null");
     auto avControllerItemFuzzer = std::make_unique<AvControllerItemFuzzer>();
-    if (avControllerItemFuzzer == nullptr) {
-        return;
-    }
+    CHECK_AND_RETURN_LOG(avControllerItemFuzzer != nullptr, "avControllerItemFuzzer is null");
     AVPlaybackState playbackstate;
     avControllerItem->GetAVPlaybackState(playbackstate);
     AVMetaData metaData;
@@ -142,12 +111,13 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     AVPlaybackState::PlaybackStateMaskType playBackFilter;
     playBackFilter.set(*(reinterpret_cast<const int32_t*>(data)));
     avControllerItem->SetPlaybackFilter(playBackFilter);
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-    if (code <= AVMetaData::META_KEY_MAX) {
-        AVMetaData::MetaMaskType metaFilter;
-        metaFilter.set(code);
-        avControllerItem->SetMetaFilter(metaFilter);
-    }
+
+    AvControllerItemDataTestSecond(avControllerItem, data, size);
+}
+
+void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem, const uint8_t* data, size_t size)
+{
+    std::string sessionId(reinterpret_cast<const char*>(data), size);
     avControllerItem->GetSessionId();
     avControllerItem->GetPid();
     avControllerItem->HasSession(sessionId);
@@ -161,6 +131,12 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     avControllerItem->SendAVKeyEvent(*(keyEvent.get()));
     AbilityRuntime::WantAgent::WantAgent ability;
     avControllerItem->GetLaunchAbility(ability);
+    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+    if (code <= AVMetaData::META_KEY_MAX) {
+        AVMetaData::MetaMaskType metaFilter;
+        metaFilter.set(code);
+        avControllerItem->SetMetaFilter(metaFilter);
+    }
     if (code <= AVControlCommand::SESSION_CMD_MAX) {
         AVControlCommand command;
         command.SetCommand(code);

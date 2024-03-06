@@ -77,8 +77,8 @@ void OHOS::AVSession::AvsessionControllerProxyTest(uint8_t* data, size_t size)
     }
 
     AVPlaybackState state;
-    int32_t _state = *(reinterpret_cast<const int32_t*>(data));
-    state.SetState(_state);
+    int32_t stateTemp = *(reinterpret_cast<const int32_t*>(data));
+    state.SetState(stateTemp);
 
     AVMetaData metaData;
     std::string _data(reinterpret_cast<const char*>(data), size);
