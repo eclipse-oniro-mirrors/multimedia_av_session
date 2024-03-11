@@ -13,6 +13,7 @@
 
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("../../../../../../castplus_cast_engine_part.gni")
 module_output_path = "av_session/av_session"
 
 ##############################fuzztest##########################################
@@ -53,5 +54,13 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../../session:avsession_cast_item",
+    ]
+  }
 }
 ###############################################################################
