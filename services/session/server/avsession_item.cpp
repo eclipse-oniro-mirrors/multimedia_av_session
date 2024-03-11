@@ -282,6 +282,8 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         SLOGD(" SetAVPlaybackState AVQueueName: %{public}s AVQueueId: %{public}s", metaData_.GetAVQueueName().c_str(),
             metaData_.GetAVQueueId().c_str());
+        std::lock_guard lockGuard(metaDataLock_);
+        SLOGI("set metaDataLock for getmetadata in service");
         serviceCallbackForAddAVQueueInfo_(*this);
     }
 

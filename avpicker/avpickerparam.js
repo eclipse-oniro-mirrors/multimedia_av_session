@@ -21,43 +21,7 @@ export var AVCastPickerState;
   e[e.STATE_DISAPPEARING = 1] = 'STATE_DISAPPEARING';
 }(AVCastPickerState || (AVCastPickerState = {}));
 
-export class AVCastPickerParam extends ViewPU {
-  constructor(e, t, o, n = -1, m = undefined) {
-    super(e, o, n);
-    if (typeof m === 'funcation') {
-      this.paramsGenerator_ = m;
-    }
-    this.setInitiallyProvidedValue(t);
-  }
-
-  setInitiallyProvidedValue(e) {
-  }
-
-  updateStateVars(g) {
-  }
-
-  purgeVariableDependenciesOnElmtId(e) {
-  }
-
-  aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-
-  initialRender() {
-    this.observeComponentCreation2(((e, t) => {
-      Column.create();
-      Column.size({ width: '100%', height: '100%' });
-    }), Column);
-    this.observeComponentCreation2(((e, t) => {
-      Text.create();
-      Text.size({ width: '100%', height: '100%' });
-    }), Text);
-    Column.pop();
-  }
-
-  rerender() {
-    this.updateDirtyElements();
-  }
+export class AVCastPickerParam {
+  // param class no need to extends ViewPU
 }
 export default {AVCastPickerState};
