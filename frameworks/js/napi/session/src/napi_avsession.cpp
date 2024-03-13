@@ -55,6 +55,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "hangUp", OnAVCallHangUp },
     { "toggleCallMute", OnAVCallToggleCallMute },
     { "playFromAssetId", OnPlayFromAssetId },
+    { "castDisplayChange", OnCastDisplayChange },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
     { "play", OffPlay },
@@ -76,6 +77,7 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "hangUp", OffAVCallHangUp },
     { "toggleCallMute", OffAVCallToggleCallMute },
     { "playFromAssetId", OffPlayFromAssetId },
+    { "castDisplayChange", OffCastDisplayChange },
 };
 
 NapiAVSession::NapiAVSession()
@@ -111,6 +113,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
         DECLARE_NAPI_FUNCTION("getAVCastController", GetAVCastController),
         DECLARE_NAPI_FUNCTION("stopCasting", ReleaseCast),
+        DECLARE_NAPI_FUNCTION("getAllCastDisplays", GetAllCastDisplays),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor {};
@@ -1114,6 +1117,55 @@ napi_value NapiAVSession::ReleaseCast(napi_env env, napi_callback_info info)
 #endif
 }
 
+napi_value NapiAVSession::GetAllCastDisplays(napi_env env, napi_callback_info info)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    struct ConcreteContext : public ContextBase {
+        std::vector<CastDisplayInfo> castDisplays_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("GetAllCastDisplays failed : no memory");
+        NapiUtils::ThrowError(env, "GetAllCastDisplays failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "GetAllCastDisplays failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->GetAllCastDisplays(context->castDisplays_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetAllCastDisplays failed : native session not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetAllCastDisplays failed : native no permission";
+            } else {
+                context->errMessage = "GetAllCastDisplays failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->castDisplays_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetAllCastDisplays", executor, complete);
+#else
+        return nullptr;
+#endif
+}
+
 void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)
 {
     switch (errCode) {
@@ -1289,6 +1341,22 @@ napi_status NapiAVSession::OnPlayFromAssetId(napi_env env, NapiAVSession* napiSe
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_PLAY_FROM_ASSETID, callback);
+}
+
+napi_status NapiAVSession::OnCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+                             "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_DISPLAY_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "AddCallback failed");
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
+                             "NapiAVSession object is nullptr");
+    napiSession->session_->StartCastDisplayListener();
+#else
+    return napi_generic_failure;
+#endif
+    return napi_ok;
 }
 
 napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
@@ -1493,6 +1561,22 @@ napi_status NapiAVSession::OffPlayFromAssetId(napi_env env, NapiAVSession* napiS
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     }
+    return napi_ok;
+}
+
+napi_status NapiAVSession::OffCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+                             "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_DISPLAY_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
+                             "NapiAVSession object is nullptr");
+    napiSession->session_->StopCastDisplayListener();
+#else
+    return napi_generic_failure;
+#endif
     return napi_ok;
 }
 }

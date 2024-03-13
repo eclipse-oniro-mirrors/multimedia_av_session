@@ -262,6 +262,31 @@ public:
      * @since 10
     */
     virtual int32_t ReleaseCast() = 0;
+
+    /**
+     * @brief Start to listen castDisplay event.
+     *
+     * @return { int32_t } Return whether the StartCastDisplayListener is successful
+     * @since 10
+    */
+    virtual int32_t StartCastDisplayListener() = 0;
+
+    /**
+     * @brief Stop to listen castDisplay event.
+     *
+     * @return { int32_t } Return whether the StartCastDisplayListener is successful
+     * @since 10
+    */
+    virtual int32_t StopCastDisplayListener() = 0;
+
+    /**
+     * @brief Get all castDisplays.
+     *
+     * @param CastDisplay array.
+     * @return { int32_t } Return whether the GetAllCastDisplays is successful
+     * @since 10
+    */
+    virtual int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) = 0;
 #endif
 
     /**

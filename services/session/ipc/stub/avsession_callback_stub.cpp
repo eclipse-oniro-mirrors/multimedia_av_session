@@ -220,4 +220,26 @@ int32_t AVSessionCallbackStub::HandleOnPlayFromAssetId(MessageParcel& data, Mess
     OnPlayFromAssetId(assetId);
     return ERR_NONE;
 }
+
+int32_t AVSessionCallbackStub::HandleOnCastDisplayChange(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnCastDisplayChange");
+    CastDisplayInfo castDisplayInfo;
+    int32_t displayState = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(displayState), ERR_NONE, "read displayState failed");
+    castDisplayInfo.displayState = static_cast<CastDisplayState>(displayState);
+    uint64_t displayId = 0;
+    CHECK_AND_RETURN_RET_LOG(data.ReadUint64(displayId), ERR_NONE, "read displayId failed");
+    castDisplayInfo.displayId = displayId;
+    std::string name = "";
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(name), ERR_NONE, "read name failed");
+    castDisplayInfo.name = name;
+    int32_t width = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(width), ERR_NONE, "read width failed");
+    castDisplayInfo.width = width;
+    int32_t height = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(height), ERR_NONE, "read height failed");
+    castDisplayInfo.height = height;
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

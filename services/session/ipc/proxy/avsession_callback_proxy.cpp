@@ -299,4 +299,22 @@ void AVSessionCallbackProxy::OnPlayFromAssetId(int64_t assetId)
         "OnPlayFromAssetId send request failed");
 }
 
+void AVSessionCallbackProxy::OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(static_cast<int32_t>(castDisplayInfo.displayState)),
+        "write displayState failed");
+    CHECK_AND_RETURN_LOG(data.WriteString(castDisplayInfo.name), "write name failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt64(castDisplayInfo.displayId), "write displayId failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(castDisplayInfo.width), "write width failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(castDisplayInfo.height), "write height failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_CAST_DISPLAY_CHANGE, data, reply, option) == 0,
+                         "OnCastDisplayChange send request failed");
+}
 } // namespace OHOS::AVSession

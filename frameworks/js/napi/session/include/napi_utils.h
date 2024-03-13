@@ -211,6 +211,12 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, AVFileDescriptor& out);
     static napi_status SetValue(napi_env env, const AVFileDescriptor& in, napi_value& out);
 
+    /* napi_value <-> CastDisplayInfo */
+    static napi_status SetValue(napi_env env, const CastDisplayInfo& in, napi_value& out);
+
+    /* napi_value <-> CastDisplayInfo Array */
+    static napi_status SetValue(napi_env env, const std::vector<CastDisplayInfo>& in, napi_value& out);
+
     /* napi_get_named_property wrapper */
     template <typename T>
     static inline napi_status GetNamedProperty(napi_env env, napi_value in, const std::string& prop, T& value)

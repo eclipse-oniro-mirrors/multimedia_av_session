@@ -69,6 +69,12 @@ public:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> GetAVCastController() override;
+
+    int32_t StartCastDisplayListener override;
+
+    int32_t StopCastDisplayListener override;
+
+    int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
 #endif
 
     int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) override;

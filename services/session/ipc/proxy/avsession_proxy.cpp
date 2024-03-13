@@ -553,6 +553,84 @@ std::shared_ptr<AVCastController> AVSessionProxy::GetAVCastController()
         [holder = castController](const auto*) {});
     return castController_;
 }
+
+int32_t AVSessionProxy::StartCastDisplayListener()
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+                             ERR_MARSHALLING, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_START_CAST_DISPLAY_LISTENER, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionProxy::StopCastDisplayListener()
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+                             ERR_MARSHALLING, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_STOP_CAST_DISPLAY_LISTENER, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionProxy::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+                             ERR_MARSHALLING, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_ALL_CAST_DISPLAYS, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_MARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        int32_t castDisplayNum = 0;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(castDisplayNum), ERR_MARSHALLING, "read castDisplayNum failed");
+        CHECK_AND_RETURN_RET_LOG(castDisplayNum > 0, ERR_MARSHALLING, "castDisplayNum is illegal");
+        std::vector<CastDisplayInfo> displays;
+        for (int32_t i = 0; i < castDisplayNum; i++) {
+            CastDisplayInfo castDisplayInfo;
+            int32_t displayState = -1;
+            CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(displayState), ERR_MARSHALLING, "read displayState failed");
+            castDisplayInfo.displayState = static_cast<CastDisplayState>(displayState);
+            uint64_t displayId = 0;
+            CHECK_AND_RETURN_RET_LOG(reply.ReadInt64(displayId), ERR_MARSHALLING, "read displayId failed");
+            castDisplayInfo.displayId = displayId;
+            std::string name = "";
+            CHECK_AND_RETURN_RET_LOG(reply.ReadString(name), ERR_MARSHALLING, "read name failed");
+            castDisplayInfo.name = name;
+            int32_t width = -1;
+            CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(width), ERR_MARSHALLING, "read width failed");
+            castDisplayInfo.width = width;
+            int32_t height = -1;
+            CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(height), ERR_MARSHALLING, "read height failed");
+            castDisplayInfo.height = height;
+            displays.push_back(castDisplayInfo);
+        }
+        castDisplays = displays;
+    }
+    return ret;
+}
 #endif
 
 int32_t AVSessionProxy::Activate()

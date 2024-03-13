@@ -46,6 +46,7 @@ public:
     void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
     void OnPlayFromAssetId(int64_t assetId) override;
+    void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;

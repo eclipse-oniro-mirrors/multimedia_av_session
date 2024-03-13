@@ -647,6 +647,45 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<uint8_t>& in, na
     return status;
 }
 
+/* napi_value <-> CastDisplayInfo */
+napi_status NapiUtils::SetValue(napi_env env, const CastDisplayInfo& in, napi_value& out)
+{
+    auto status = napi_create_object(env, &out);
+    CHECK_RETURN(status == napi_ok, "create object failed", status);
+    napi_value displayState = nullptr;
+    napi_create_int32(env, static_cast<int>(in.displayState), &displayState);
+    status = napi_set_named_property(env, out, "castDisplayState", displayState);
+    napi_value displayId = nullptr;
+    napi_create_int64(env, in.displayId, &displayId);
+    status = napi_set_named_property(env, out, "displayId", displayId);
+    napi_value name = nullptr;
+    napi_create_string_utf8(env, in.name.c_str(), in.name.size(), &name);
+    status = napi_set_named_property(env, out, "name", name);
+    napi_value width = nullptr;
+    napi_create_int32(env, in.width, &width);
+    status = napi_set_named_property(env, out, "width", width);
+    napi_value height = nullptr;
+    napi_create_int32(env, in.height, &height);
+    status = napi_set_named_property(env, out, "height", height);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+/* napi_value <-> CastDisplayInfo Array */
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<CastDisplayInfo>& in, napi_value& out)
+{
+    auto status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN(status == napi_ok, "create CastDisplayInfo Array failed", status);
+    int index = 0;
+    for (auto& item : in) {
+        napi_value element = nullptr;
+        SetValue(env, item, element);
+        status = napi_set_element(env, out, index++, element);
+        CHECK_RETURN(status == napi_ok, "napi_set_element failed", status);
+    }
+    return status;
+}
+
 template <typename T>
 void TypedArray2Vector(uint8_t* data, size_t length, napi_typedarray_type type, std::vector<T>& out)
 {
