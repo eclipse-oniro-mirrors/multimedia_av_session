@@ -1468,10 +1468,18 @@ void AVSessionService::HandleEventHandlerCallBack()
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (pressCount_ >= THREE_CLICK && topSession_) {
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
-        topSession_->ExecuteControllerCommand(cmd);
+        if (topSession_->GetDescriptor().sessionTag_ == "external_audio") {
+            SLOGI("HandleEventHandlerCallBack this is an external audio");
+        } else {
+            topSession_->ExecuteControllerCommand(cmd);
+        }
     } else if (pressCount_ == DOUBLE_CLICK && topSession_) {
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
-        topSession_->ExecuteControllerCommand(cmd);
+        if (topSession_->GetDescriptor().sessionTag_ == "external_audio") {
+            SLOGI("HandleEventHandlerCallBack this is an external audio");
+        } else {
+            topSession_->ExecuteControllerCommand(cmd);
+        }
     } else if (pressCount_ == ONE_CLICK) {
         SLOGI("HandleEventHandlerCallBack on ONE_CLICK ");
         if (!topSession_) {
@@ -1488,7 +1496,11 @@ void AVSessionService::HandleEventHandlerCallBack()
             } else {
                 cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
             }
-            topSession_->ExecuteControllerCommand(cmd);
+            if (topSession_->GetDescriptor().sessionTag_ == "external_audio") {
+                SLOGI("HandleEventHandlerCallBack this is an external audio");
+            } else {
+                topSession_->ExecuteControllerCommand(cmd);
+            }
         }
     } else {
         SLOGI("press invalid");
