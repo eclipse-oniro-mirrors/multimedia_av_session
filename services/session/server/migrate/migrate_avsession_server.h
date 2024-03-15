@@ -118,7 +118,7 @@ public:
 
 private:
     std::weak_ptr<MigrateAVSessionServer> migrateServer_;
-    std::string playerId_;
+    std::string playerId_ = "";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVER_H

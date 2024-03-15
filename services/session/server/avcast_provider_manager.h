@@ -43,7 +43,7 @@ public:
 protected:
 
 private:
-    int32_t providerId_;
+    int32_t providerId_ = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_PROVIDER_MANAGER_H

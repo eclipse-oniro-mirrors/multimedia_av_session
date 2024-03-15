@@ -63,7 +63,7 @@ protected:
 
 private:
     std::recursive_mutex servicePtrLock_;
-    IAVSessionServiceListener *servicePtr_;
+    IAVSessionServiceListener *servicePtr_ = nullptr;
     std::recursive_mutex providerManagerLock_;
     std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
     int32_t providerNumber_ = 0;

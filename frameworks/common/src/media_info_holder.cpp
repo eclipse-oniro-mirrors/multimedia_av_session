@@ -20,7 +20,7 @@ namespace OHOS::AVSession {
 bool MediaInfoHolder::Marshalling(Parcel& parcel) const
 {
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(currentIndex_), false, "write currentIndex failed");
-    int32_t playInfosSize = playInfos_.size();
+    int32_t playInfosSize = static_cast<int32_t>(playInfos_.size());
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(playInfosSize), false, "write playInfoSize failed");
     for (auto playInfo : playInfos_) {
         CHECK_AND_RETURN_RET_LOG(playInfo.Marshalling(parcel), false, "write playInfoSize failed");
@@ -31,6 +31,10 @@ bool MediaInfoHolder::Marshalling(Parcel& parcel) const
 MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
 {
     auto *result = new (std::nothrow) MediaInfoHolder();
+    if (result == nullptr) {
+        SLOGE("Unmarshalling: result new fail.");
+        return;
+    }
 
     int32_t currentIndex;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(currentIndex), nullptr, "write currentIndex failed");

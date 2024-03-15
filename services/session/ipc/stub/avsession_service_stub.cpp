@@ -121,7 +121,7 @@ int32_t AVSessionServiceStub::GetAVQueueInfosImgLength(std::vector<AVQueueInfo>&
         int avQueueImgLen = 0;
         std::shared_ptr<AVSessionPixelMap> pixelMap = avQueueInfo.GetAVQueueImage();
         if (pixelMap != nullptr) {
-            avQueueImgLen = (pixelMap->GetInnerImgBuffer()).size();
+            avQueueImgLen = static_cast<int>((pixelMap->GetInnerImgBuffer()).size());
         }
         avQueueInfo.SetAVQueueLength(avQueueImgLen);
         sumLength += avQueueImgLen;

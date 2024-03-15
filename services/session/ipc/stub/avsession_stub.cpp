@@ -147,7 +147,8 @@ int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& r
     AVMetaData meta;
     AVMetaData::UnmarshallingExceptImg(data, meta);
     const char *buffer = nullptr;
-    if ((buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength))) == nullptr) {
+    buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength));
+    if (buffer == nullptr) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
         SLOGE("read raw data failed, length = %{public}d", twoImageLength);
         return AVSESSION_ERROR;

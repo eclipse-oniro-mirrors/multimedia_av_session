@@ -92,7 +92,8 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
     AVMetaData meta;
     AVMetaData::UnmarshallingExceptImg(data, meta);
     const char *buffer = nullptr;
-    if ((buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength))) == nullptr) {
+    buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength));
+    if (buffer == nullptr) {
         SLOGE("read raw data failed, length = %{public}d", twoImageLength);
         return AVSESSION_ERROR;
     }
