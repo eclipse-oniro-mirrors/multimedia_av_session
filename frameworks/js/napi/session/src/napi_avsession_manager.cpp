@@ -497,7 +497,6 @@ void NapiAVSessionManager::ErrCodeToMessage(int32_t errCode, const std::string& 
     }
 }
 
-
 napi_status NapiAVSessionManager::RegisterNativeSessionListener(napi_env env)
 {
     if (listener_ != nullptr) {

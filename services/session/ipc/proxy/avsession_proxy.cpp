@@ -209,13 +209,15 @@ int32_t AVSessionProxy::GetPixelMapBuffer(AVMetaData& metaData, MessageParcel& d
     for (int j = mediaImageLength, k = 0; j < twoImageLength && k < avQueueImageLength; j++, k++) {
         buffer[j] = avQueueImageBuffer[k];
     }
-    
-    if (!data.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(data, metaData) ||
-        !data.WriteRawData(buffer, twoImageLength)) {
-        SLOGE("fail to write parcel");
+
+    if (!data.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(data, metaData)) {
+        SLOGE("fail to write image length & metadata except img");
         delete[] buffer;
         return -1;
     }
+    int32_t retForWriteRawData = data.WriteRawData(buffer, twoImageLength);
+    SLOGI("write img raw data ret %{public}d", retForWriteRawData);
+
     delete[] buffer;
     return twoImageLength;
 }
@@ -251,9 +253,21 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
         return AVSESSION_ERROR;
     }
 
-    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) == 0,
-        ERR_IPC_SEND_REQUEST, "send request failed");
-
+    if (remote->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) != 0) {
+        SLOGI("send request fail with raw img, try except raw");
+        MessageParcel anotherData;
+        CHECK_AND_RETURN_RET_LOG(anotherData.WriteInterfaceToken(GetDescriptor()),
+            ERR_MARSHALLING, "write interface token failed");
+        if (!anotherData.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(anotherData, metaData)){
+            SLOGE("anotherData without raw img write fail");
+            return ERR_IPC_SEND_REQUEST;
+        }
+        if (remote->SendRequest(SESSION_CMD_SET_META_DATA, anotherData, reply, option) != 0) {
+          SLOGE("send request fail with anotherData except raw img");
+          return ERR_IPC_SEND_REQUEST;
+        }
+    }
+    SLOGI("set avmetadata done");
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
