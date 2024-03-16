@@ -579,18 +579,11 @@ bool AVSessionItem::IsCastSinkSession(int32_t castState)
     SLOGI("IsCastSinkSession for castState %{public}d, sessionTag is %{public}s", castState,
         descriptor_.sessionTag_.c_str());
     if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
-        SLOGI("A cast sink session is being disconnected");
-        if (!destroyLock_.try_lock()) {
-            SLOGE("check already in lock, return");
-            return true;
-        }
-        SLOGI("wait for lock to destroy");
-        std::lock_guard lockGuard(destroyLock_);
+        SLOGI("A cast sink session is being disconnected, call destroy with service");
         if (isDestroyed_) {
             SLOGE("return for already in destroy");
             return true;
         }
-
         return Destroy() == true;
     }
     return false;

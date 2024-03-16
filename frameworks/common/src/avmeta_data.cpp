@@ -53,6 +53,7 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
     auto *result = new (std::nothrow) AVMetaData();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVMetaData failed");
     result->metaMask_ = MetaMaskType(mask);
+
     if (!UnmarshallingCheckParamTask(data, result)) {
         delete result;
         return nullptr;
@@ -66,7 +67,7 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
 
 bool AVMetaData::UnmarshallingCheckParamTask(Parcel& data, AVMetaData *result)
 {
-    bool isParamSupport = (!data.ReadString(result->assetId_) ||
+    bool isParamUnsupport = (!data.ReadString(result->assetId_) ||
         !data.ReadString(result->title_) ||
         !data.ReadString(result->artist_) ||
         !data.ReadString(result->author_) ||
@@ -87,7 +88,7 @@ bool AVMetaData::UnmarshallingCheckParamTask(Parcel& data, AVMetaData *result)
         !data.ReadInt32(result->skipIntervals_) ||
         !data.ReadInt32(result->filter_) ||
         !data.ReadInt32(result->displayTags_));
-    if (isParamSupport)  {
+    if (isParamUnsupport)  {
         SLOGE("read AVMetaData failed");
         return false;
     }
@@ -111,7 +112,7 @@ bool AVMetaData::UnmarshallingCheckImageTask(Parcel& data, AVMetaData *result)
 
 bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData metaIn)
 {
-    return data.WriteString(metaIn.metaMask_.to_string()) &&
+    bool ret = data.WriteString(metaIn.metaMask_.to_string()) &&
         data.WriteString(metaIn.assetId_) &&
         data.WriteString(metaIn.title_) &&
         data.WriteString(metaIn.artist_) &&
@@ -134,7 +135,10 @@ bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData meta
         data.WriteInt32(metaIn.filter_) &&
         data.WriteInt32(metaIn.mediaLength_) &&
         data.WriteInt32(metaIn.avQueueLength_) &&
-        data.WriteInt32(metaIn.displayTags_);
+        data.WriteInt32(metaIn.displayTags_) &&
+        data.WriteParcelable(metaIn.mediaImageSmall_.get());
+    SLOGI("MarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
+    return ret;
 }
 
 bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut)
@@ -153,7 +157,7 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
         }
     }
 
-    return !data.ReadString(metaOut.assetId_) ||
+    bool ret = !data.ReadString(metaOut.assetId_) ||
         !data.ReadString(metaOut.title_) ||
         !data.ReadString(metaOut.artist_) ||
         !data.ReadString(metaOut.author_) ||
@@ -176,6 +180,14 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
         !data.ReadInt32(metaOut.mediaLength_) ||
         !data.ReadInt32(metaOut.avQueueLength_) ||
         !data.ReadInt32(metaOut.displayTags_);
+    metaOut.mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
+    if (metaOut.metaMask_.test(META_KEY_MEDIA_IMAGE) && metaOut.mediaImage_ == nullptr) {
+        SLOGE("read small PixelMap failed");
+        return false;
+    }
+    metaOut.mediaImageSmall_ = metaOut.mediaImage_;
+    SLOGI("UnmarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
+    return ret;
 }
 
 void AVMetaData::SetAssetId(const std::string& assetId)
@@ -322,6 +334,17 @@ void AVMetaData::SetMediaImage(const std::shared_ptr<AVSessionPixelMap>& mediaIm
 std::shared_ptr<AVSessionPixelMap> AVMetaData::GetMediaImage() const
 {
     return mediaImage_;
+}
+
+void AVMetaData::SetSmallMediaImage(const std::shared_ptr<AVSessionPixelMap>& mediaImage)
+{
+    mediaImageSmall_ = mediaImage;
+    metaMask_.set(META_KEY_MEDIA_IMAGE);
+}
+
+std::shared_ptr<AVSessionPixelMap> AVMetaData::GetSmallMediaImage() const
+{
+    return mediaImageSmall_;
 }
 
 void AVMetaData::SetMediaImageUri(const std::string& mediaImageUri)
@@ -484,6 +507,7 @@ void AVMetaData::Reset()
     composer_ = "";
     duration_ = 0;
     mediaImage_ = nullptr;
+    mediaImageSmall_ = nullptr;
     mediaImageUri_ = "";
     publishDate_ = 0;
     subTitle_ = "";
@@ -603,6 +627,7 @@ void AVMetaData::CloneDuration(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneMediaImage(const AVMetaData& from, AVMetaData& to)
 {
     to.mediaImage_ = from.mediaImage_;
+    to.mediaImageSmall_ = from.mediaImageSmall_;
 }
 
 void AVMetaData::CloneMediaImageUri(const AVMetaData& from, AVMetaData& to)

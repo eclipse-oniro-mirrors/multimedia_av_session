@@ -165,12 +165,14 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
         buffer[j] = avQueueImageBuffer[k];
     }
 
-    if (!reply.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(reply, metaData) ||
-        !reply.WriteRawData(buffer, twoImageLength)) {
-        SLOGE("fail to write parcel");
+    if (!reply.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(reply, metaData)) {
+        SLOGE("fail to write image length & metadata except img");
         delete[] buffer;
         return AVSESSION_ERROR;
     }
+    int32_t retForWriteRawData = reply.WriteRawData(buffer, twoImageLength);
+    SLOGI("write img raw data ret %{public}d", retForWriteRawData);
+
     delete[] buffer;
     return ERR_NONE;
 }

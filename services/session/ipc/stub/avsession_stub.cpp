@@ -148,9 +148,11 @@ int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& r
     AVMetaData::UnmarshallingExceptImg(data, meta);
     const char *buffer = nullptr;
     if ((buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength))) == nullptr) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
-        SLOGE("read raw data failed, length = %{public}d", twoImageLength);
-        return AVSESSION_ERROR;
+        SLOGI("read raw data with null, try set without length = %{public}d", twoImageLength);
+        int32_t ret = SetAVMetaData(meta);
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetAVMetaData failed");
+        return ERR_NONE;
     }
     
     int mediaImageLength = meta.GetMediaLength();

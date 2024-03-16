@@ -457,7 +457,9 @@ napi_status NapiMetaData::GetMediaImage(napi_env env, napi_value in, AVMetaData&
             SLOGE("unwrap failed");
             return napi_invalid_arg;
         }
+        SLOGI("set mediaImage with small size");
         out.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        out.SetSmallMediaImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
     } else {
         SLOGE("mediaImage property value type invalid");
         return napi_invalid_arg;
