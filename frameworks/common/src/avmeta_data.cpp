@@ -137,8 +137,8 @@ bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData meta
         data.WriteInt32(metaIn.avQueueLength_) &&
         data.WriteInt32(metaIn.displayTags_) &&
         data.WriteParcelable(metaIn.mediaImageSmall_.get());
-        SLOGI("MarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
-        return ret;
+    SLOGI("MarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
+    return ret;
 }
 
 bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut)
