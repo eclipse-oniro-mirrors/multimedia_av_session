@@ -36,7 +36,7 @@ class SoftbusSessionManager {
 public:
     static SoftbusSessionManager& GetInstance();
 
-    int32_t Socket(const std::string &pkg);
+    int32_t Socket(const std::string &pkgName);
 
     void Shutdown(int32_t socket);
 
