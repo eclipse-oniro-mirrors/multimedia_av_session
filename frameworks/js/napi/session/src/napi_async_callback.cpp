@@ -93,7 +93,11 @@ void NapiAsyncCallback::AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus)
     napi_get_global(context->env, &global);
     napi_value function {};
     SLOGI("callback with flag");
-    CHECK_RETURN_VOID(*context->isValid, "callback when callback is invalid");
+    if (!*context->isValid) {
+        SLOGE("AfterWorkCallbackWithFlag callback when callback is invalid");
+        napi_close_handle_scope(context->env, scope);
+        return;
+    }
     SLOGI("callback with ref %{public}p, %{public}p", &(context->method), *(&(context->method)));
     napi_get_reference_value(context->env, context->method, &function);
     napi_value result;
@@ -124,14 +128,26 @@ void NapiAsyncCallback::AfterWorkCallbackWithFunc(uv_work_t* work, int aStatus)
     }
 
     SLOGI("queue uv_after_work_cb");
-    CHECK_RETURN_VOID(*context->isValid, "AfterWorkCallbackWithFunc failed for context is invalid.");
+    if (!*context->isValid) {
+        SLOGE("AfterWorkCallbackWithFunc failed for context is invalid.");
+        napi_close_handle_scope(context->env, scope);
+        return;
+    }
     napi_value global {};
     napi_get_global(context->env, &global);
     napi_value function {};
-    CHECK_RETURN_VOID(context->checkCallbackValid(), "Get func reference failed for func has been deleted.");
+    if (!context->checkCallbackValid()) {
+        SLOGE("Get func reference failed for func has been deleted.");
+        napi_close_handle_scope(context->env, scope);
+        return;
+    }
     napi_get_reference_value(context->env, context->method, &function);
     napi_value result;
-    CHECK_RETURN_VOID(context->checkCallbackValid(), "Call func failed for func has been deleted.");
+    if (!context->checkCallbackValid()) {
+        SLOGE("Call func failed for func has been deleted.");
+        napi_close_handle_scope(context->env, scope);
+        return;
+    }
     napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
     if (status != napi_ok) {
         SLOGE("call function failed status=%{public}d.", status);

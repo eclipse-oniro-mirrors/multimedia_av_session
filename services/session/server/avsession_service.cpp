@@ -2303,6 +2303,10 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
         SLOGE("LoadStringFromFileEx: filepath is null.");
         return;
     }
+    if (!verify_file(filePath)) {
+        SLOGE("LoadStringFromFileEx: filepath verify fail.");
+        return;
+    }
     SLOGI("file load in for path: %{public}s", filePath.c_str());
     ifstream file(filePath.c_str());
     if (!file.is_open()) {
