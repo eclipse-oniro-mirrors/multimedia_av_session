@@ -119,6 +119,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
+
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AV_META_DATA, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
@@ -132,15 +133,15 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
         data = *data_;
         return AVSESSION_SUCCESS;
     }
-    
+
     AVMetaData::UnmarshallingExceptImg(reply, data);
     const char *buffer = nullptr;
     buffer = reinterpret_cast<const char *>(reply.ReadRawData(twoImageLength));
     if (buffer == nullptr) {
-        SLOGE("read raw data failed, length = %{public}d", twoImageLength);
-        return AVSESSION_ERROR;
+        SLOGE("read raw data with null, length = %{public}d", twoImageLength);
+        return AVSESSION_SUCCESS;
     }
-    
+
     int mediaImageLength = data.GetMediaLength();
     auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
     if (mediaPixelMap == nullptr) {
@@ -153,7 +154,6 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     }
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
     data.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
-    
     if (twoImageLength > mediaImageLength) {
         auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
         if (avQueuePixelMap == nullptr) {

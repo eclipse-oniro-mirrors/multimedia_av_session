@@ -62,6 +62,7 @@ AVSessionItem::~AVSessionItem()
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         ReleaseCast();
     }
+    StopCastDisplayListener();
 #endif
 }
 
@@ -579,18 +580,11 @@ bool AVSessionItem::IsCastSinkSession(int32_t castState)
     SLOGI("IsCastSinkSession for castState %{public}d, sessionTag is %{public}s", castState,
         descriptor_.sessionTag_.c_str());
     if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
-        SLOGI("A cast sink session is being disconnected");
-        if (!destroyLock_.try_lock()) {
-            SLOGE("check already in lock, return");
-            return true;
-        }
-        SLOGI("wait for lock to destroy");
-        std::lock_guard lockGuard(destroyLock_);
+        SLOGI("A cast sink session is being disconnected, call destroy with service");
         if (isDestroyed_) {
             SLOGE("return for already in destroy");
             return true;
         }
-
         return Destroy() == true;
     }
     return false;
@@ -722,6 +716,80 @@ void AVSessionItem::StopCastSession()
     } else {
         SLOGE("Stop cast session process error");
     }
+}
+
+int32_t AVSessionItem::StartCastDisplayListener()
+{
+    SLOGI("StartCastDisplayListener in");
+    sptr<IAVSessionCallback> callback;
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
+        callback = callback_;
+    }
+    GetDisplayListener(callback);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::StopCastDisplayListener()
+{
+    SLOGI("StopCastDisplayListener in");
+    std::lock_guard displayListenerLockGuard(displayListenerLock_);
+    CHECK_AND_RETURN_RET_LOG(displayListener_ != nullptr, AVSESSION_ERROR, "displayListener_ is nullptr");
+    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().UnregisterScreenListener(displayListener_);
+    if (ret != Rosen::DMError::DM_OK) {
+        SLOGE("UnregisterScreenListener failed, ret: %{public}d.", ret);
+    }
+    displayListener_ = nullptr;
+    return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::GetDisplayListener(sptr<IAVSessionCallback> callback)
+{
+    SLOGI("GetDisplayListener in");
+    std::lock_guard displayListenerLockGuard(displayListenerLock_);
+    if (displayListener_ == nullptr) {
+        SLOGI("displayListener_ is null, try to create new listener");
+        displayListener_ = new HwCastDisplayListener(callback);
+        if (displayListener_ == nullptr) {
+            SLOGI("Create displayListener failed");
+            return;
+        }
+        SLOGI("Start to register display listener");
+        Rosen::DMError ret = Rosen::ScreenManager::GetInstance().RegisterScreenListener(displayListener_);
+        if (ret != Rosen::DMError::DM_OK) {
+            SLOGE("UnregisterScreenListener failed, ret: %{public}d.", ret);
+        }
+    }
+    return;
+}
+
+int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays)
+{
+    SLOGI("GetAllCastDisplays in");
+    std::vector<sptr<Rosen::Screen>> allDisplays;
+    Rosen::ScreenManager::GetInstance().GetAllScreens(allDisplays);
+    std::vector<CastDisplayInfo> displays;
+    for (auto &display : allDisplays) {
+        SLOGI("GetAllCastDisplays name: %{public}s, id: %{public}lu", display->GetName().c_str(), display->GetId());
+        If (display->GetName() == "CastEngine") {
+            SLOGI("ReportCastDisplay start in");
+            CastDisplayInfo castDisplayInfo;
+            castDisplayInfo.displayState = CastDisplayState::STATE_ON;
+            castDisplayInfo.displayId = display->GetId();
+            castDisplayInfo.name = display->GetName();
+            castDisplayInfo.width = display->GetWidth();
+            castDisplayInfo.height = display->GetHeight();
+            displays.push_back(castDisplayInfo);
+            std::lock_guard displayListenerLockGuard(displayListenerLock_);
+            if (displayListener_ != nullptr) {
+                displayListener_->SetDisplayInfo(display);
+            }
+        }
+    }
+    castDisplays = displays;
+    SLOGI("GetAllCastDisplays out");
+    return AVSESSION_SUCCESS;
 }
 #endif
 

@@ -149,9 +149,11 @@ int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& r
     const char *buffer = nullptr;
     buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength));
     if (buffer == nullptr) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
-        SLOGE("read raw data failed, length = %{public}d", twoImageLength);
-        return AVSESSION_ERROR;
+        SLOGI("read raw data with null, try set without length = %{public}d", twoImageLength);
+        int32_t ret = SetAVMetaData(meta);
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetAVMetaData failed");
+        return ERR_NONE;
     }
     
     int mediaImageLength = meta.GetMediaLength();
@@ -352,6 +354,40 @@ int32_t AVSessionStub::HandleSetSessionEvent(MessageParcel& data, MessageParcel&
 int32_t AVSessionStub::HandleReleaseCast(MessageParcel& data, MessageParcel& reply)
 {
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ReleaseCast()), ERR_NONE, "WriteInt32 failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleStartCastDisplayListener(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t ret = StartCastDisplayListener();
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "StartCastDisplayListener failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleStopCastDisplayListener(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t ret = StopCastDisplayListener();
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "StopCastDisplayListener failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleGetAllCastDisplays(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = GetAllCastDisplays(castDisplays);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAllCastDisplays failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(castDisplays.size()), ERR_NONE, "WriteInt32 failed");
+    for (auto &castDisplay : castDisplays) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(static_cast<int32_t>(castDisplay.displayState)),
+            ERR_NONE, "Write displayState failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteUint64(castDisplay.displayId), ERR_NONE, "Write displayId failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteString(castDisplay.name), ERR_NONE, "Write name failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(castDisplay.width), ERR_NONE, "Write width failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(castDisplay.height), ERR_NONE, "Write height failed");
+    }
     return ERR_NONE;
 }
 #endif

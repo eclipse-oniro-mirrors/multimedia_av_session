@@ -24,11 +24,13 @@ namespace OHOS::AVSession {
 NapiSessionListener::NapiSessionListener()
 {
     SLOGI("construct");
+    isValid_ = std::make_shared<bool>(true);
 }
 
 NapiSessionListener::~NapiSessionListener()
 {
     SLOGI("destroy");
+    *isValid_ = false;
 }
 
 template<typename T>
@@ -39,11 +41,27 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param)
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
-    for (auto& ref : callbacks_[event]) {
-        asyncCallback_->Call(ref, [param](napi_env env, int& argc, napi_value* argv) {
-            argc = 1;
-            NapiUtils::SetValue(env, param, *argv);
-        });
+
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        SLOGI("call with flag for event %{public}d", event);
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [param](napi_env env, int& argc, napi_value* argv) {
+                argc = 1;
+                NapiUtils::SetValue(env, param, *argv);
+            });
     }
 }
 
@@ -55,11 +73,26 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param, bool checkV
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
-    for (auto& ref : callbacks_[event]) {
-        asyncCallback_->CallWithFlag(ref, isValid_, [param](napi_env env, int& argc, napi_value* argv) {
-            argc = 1;
-            NapiUtils::SetValue(env, param, *argv);
-        });
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        SLOGI("call with flag for event %{public}d", event);
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [param](napi_env env, int& argc, napi_value* argv) {
+                argc = 1;
+                NapiUtils::SetValue(env, param, *argv);
+            });
     }
     SLOGI("handle event %{public}d", static_cast<int32_t>(event));
 }
@@ -122,9 +155,7 @@ napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_v
     }
     callbacks_[event].push_back(ref);
     SLOGI("add callback %{public}d", static_cast<int32_t>(event));
-    if (event == EVENT_DEVICE_AVAILABLE) {
-        isValid_ = std::make_shared<bool>(true);
-    }
+
     return napi_ok;
 }
 
@@ -132,10 +163,7 @@ napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, nap
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     SLOGI("remove callback %{public}d", static_cast<int32_t>(event));
-    if (event == EVENT_DEVICE_AVAILABLE) {
-        SLOGI("remove device available listen callback");
-        *isValid_ = false;
-    }
+
     if (callback == nullptr) {
         for (auto& callbackRef : callbacks_[event]) {
             napi_status ret = napi_delete_reference(env, callbackRef);

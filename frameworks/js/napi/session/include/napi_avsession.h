@@ -64,6 +64,7 @@ private:
     static napi_value SetAVQueueTitle(napi_env env, napi_callback_info info);
     static napi_value SetExtras(napi_env env, napi_callback_info info);
     static napi_value ReleaseCast(napi_env env, napi_callback_info info);
+    static napi_value GetAllCastDisplays(napi_env env, napi_callback_info info);
 
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -84,6 +85,7 @@ private:
     static napi_status OnAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -104,6 +106,7 @@ private:
     static napi_status OffAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
 

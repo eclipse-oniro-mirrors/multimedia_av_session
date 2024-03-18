@@ -263,6 +263,14 @@ public:
     virtual void OnPlayFromAssetId(int64_t assetId) = 0;
 
     /**
+     * @brief cast display change.
+     *
+     * @param castDisplayInfo for castDisplay
+     * @since 11
+     */
+    virtual void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) = 0;
+
+    /**
      * @brief Deconstruct AVSessionCallback.
      * @since 9
     */

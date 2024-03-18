@@ -46,6 +46,7 @@ public:
         EVENT_AVCALL_HANG_UP,
         EVENT_AVCALL_TOGGLE_CALL_MUTE,
         EVENT_PLAY_FROM_ASSETID,
+        EVENT_DISPLAY_CHANGE,
         EVENT_TYPE_MAX
     };
 
@@ -71,6 +72,7 @@ public:
     void OnAVCallHangUp() override;
     void OnAVCallToggleCallMute() override;
     void OnPlayFromAssetId(int64_t assetId) override;
+    void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
