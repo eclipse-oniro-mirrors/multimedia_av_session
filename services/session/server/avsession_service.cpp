@@ -2299,7 +2299,7 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    CHECK_AND_RETURN_RET_LOG(filePath != nullptr, false, "filepath is null");
+    CHECK_AND_RETURN_RET_LOG((filePath != nullptr), false, "filepath is null");
     CHECK_AND_RETURN_RET_LOG(verify_file(filePath), false, "filepath verify fail");
     SLOGI("file load in for path: %{public}s", filePath.c_str());
     ifstream file(filePath.c_str());

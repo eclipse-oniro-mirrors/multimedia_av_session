@@ -158,7 +158,8 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[1] != nullptr &&
         providerManagerMap_[1]->provider_ ! = nullptr, AVSESSION_ERROR, "provider is nullptr");
     int64_t tempId = 1;
-    castHandle = (static_cast<uint64_t>(tempId) << 32) | castId; // The first 32 bits are providerId, the last 32 bits are castId
+    // The first 32 bits are providerId, the last 32 bits are castId
+    castHandle = (static_cast<uint64_t>(tempId) << 32) | castId;
     {
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_->CreateSessionByCast(castHandle);

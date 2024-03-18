@@ -151,7 +151,7 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     if (!profileValues["insightIntents"].is_string()) {
         SLOGE("IsSupportPlayIntent: profileValues is not string type.");
-        return;
+        return false;
     }
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     for (const auto& value : profileValues["insightIntents"]) {
@@ -189,9 +189,9 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
     }
     SLOGD("GetJsonProfile profile=%{public}s", profile.c_str());
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
-    if (profileValues["insightIntents"].is_string()) {
+    if (!profileValues["insightIntents"].is_string()) {
         SLOGE("GetPlayIntentParam: profileValues is not string type.");
-        return;
+        return false;
     }
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     for (const auto& value : profileValues["insightIntents"]) {
@@ -199,7 +199,7 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
         nlohmann::json abilityValue = value["uiAbility"];
         if (!abilityValue.contains("uiAbility")) {
             SLOGE("GetPlayIntentParam: abilityValue is not exit before getting it.");
-            return;
+            return false;
         }
         SLOGD(" insightName=%{public}s", insightName.c_str());
         if (insightName == PLAY_MUSICLIST) {

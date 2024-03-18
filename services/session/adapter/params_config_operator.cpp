@@ -45,7 +45,7 @@ void ParamsConfigOperator::InitConfig()
         return;
     }
     nlohmann::json configs = nlohmann::json::parse(content, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!configs.is_discarded(), false, "configs is invalid");
+    CHECK_AND_RETURN_LOG(configs.is_discarded(), "configs is invalid");
     SLOGD("InitConfig::parse json object finished");
     for (auto config : configs.items()) {
         if (config.value().is_number()) {
