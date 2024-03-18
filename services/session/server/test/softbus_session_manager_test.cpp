@@ -116,7 +116,6 @@ HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.Level1)
     distributed_->MessageReceived(sessionId, data);
     distributed_->BytesReceived(sessionId, data);
     distributed_->OnSessionServerOpened();
-    std::string deviceId = "1";
     distributed_->OnSessionServerClosed(sessionId);
     distributed_->OnMessageHandleReceived(sessionId, data);
     distributed_->OnBytesServerReceived(data);
