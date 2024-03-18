@@ -111,10 +111,7 @@ void SoftbusDistributedDataManager::DestroySessionServer(const std::string &pkg)
 
 void SoftbusDistributedDataManager::ReleaseServer(const std::shared_ptr<SoftbusSessionServer> &server)
 {
-    if (server == nullptr) {
-        SLOGE("server is nullptr.");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(server != nullptr, "server is nullptr");
     int characteristic = server->GetCharacteristic();
     std::lock_guard lockGuard(softbusDistributedDataLock_);
     auto iter = serverMap_.find(characteristic);

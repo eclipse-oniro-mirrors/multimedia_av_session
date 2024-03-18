@@ -2299,14 +2299,8 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    if (filePath == nullptr) {
-        SLOGE("LoadStringFromFileEx: filepath is null.");
-        return;
-    }
-    if (!verify_file(filePath)) {
-        SLOGE("LoadStringFromFileEx: filepath verify fail.");
-        return;
-    }
+    CHECK_AND_RETURN_RET_LOG(filePath != nullptr, false, "filepath is null");
+    CHECK_AND_RETURN_RET_LOG(verify_file(filePath), false, "filepath verify fail");
     SLOGI("file load in for path: %{public}s", filePath.c_str());
     ifstream file(filePath.c_str());
     if (!file.is_open()) {
@@ -2355,10 +2349,7 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
 bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std::string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    if (filePath == nullptr) {
-        SLOGE("SaveStringToFileEx: filepath is null.");
-        return;
-    }
+    CHECK_AND_RETURN_RET_LOG(filePath != nullptr, false, "filepath is null");
     SLOGI("file save in for path:%{public}s, content:%{public}s", filePath.c_str(), content.c_str());
     nlohmann::json checkValues = json::parse(content, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!checkValues.is_discarded(), false, "recv content discarded");
@@ -2385,10 +2376,7 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 {
-    if (filePath == nullptr) {
-        SLOGE("CheckStringAndCleanFile: filepath is null.");
-        return;
-    }
+    CHECK_AND_RETURN_RET_LOG(filePath != nullptr, false, "filepath is null");
     SLOGI("file check for path:%{public}s", filePath.c_str());
     string content {};
     ifstream fileRead(filePath.c_str());

@@ -144,10 +144,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
 
     int mediaImageLength = data.GetMediaLength();
     auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
-    if (mediaPixelMap == nullptr) {
-        SLOGE("GetAVMetaData: mediaPixelMap new fail.");
-        return;
-    }
+    CHECK_AND_RETURN_RET_LOG(mediaPixelMap != nullptr, AVSESSION_ERROR, "mediaPixelMap new fail");
     std::vector<uint8_t> mediaImageBuffer;
     for (int i = 0; i < mediaImageLength; i++) {
         mediaImageBuffer.push_back((uint8_t)buffer[i]);
@@ -156,10 +153,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     data.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
     if (twoImageLength > mediaImageLength) {
         auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
-        if (avQueuePixelMap == nullptr) {
-            SLOGE("GetAVMetaData: avQueuePixelMap new fail.");
-            return;
-        }
+        CHECK_AND_RETURN_RET_LOG(avQueuePixelMap != nullptr, AVSESSION_ERROR, "avQueuePixelMap new fail");
         std::vector<uint8_t> avQueueImageBuffer;
         for (int i = mediaImageLength; i < twoImageLength; i++) {
             avQueueImageBuffer.push_back((uint8_t)buffer[i]);

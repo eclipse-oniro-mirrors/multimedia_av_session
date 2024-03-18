@@ -31,10 +31,7 @@ bool MediaInfoHolder::Marshalling(Parcel& parcel) const
 MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
 {
     auto *result = new (std::nothrow) MediaInfoHolder();
-    if (result == nullptr) {
-        SLOGE("Unmarshalling: result new fail.");
-        return;
-    }
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "result new fail");
 
     int32_t currentIndex;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(currentIndex), nullptr, "write currentIndex failed");
