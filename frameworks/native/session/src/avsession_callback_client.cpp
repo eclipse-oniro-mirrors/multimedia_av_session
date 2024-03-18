@@ -215,6 +215,16 @@ void AVSessionCallbackClient::OnPlayFromAssetId(int64_t assetId)
         "AVSessionCallbackClient handler postTask failed");
 }
 
+void AVSessionCallbackClient::OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, castDisplayInfo]() { callback->OnCastDisplayChange(castDisplayInfo); },
+        EVENT_NAME), "AVSessionCallbackClient handler postTask failed");
+}
+
 AVSessionCallbackClient::~AVSessionCallbackClient()
 {
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask(EVENT_NAME);

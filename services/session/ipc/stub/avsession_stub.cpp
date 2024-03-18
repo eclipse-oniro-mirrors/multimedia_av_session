@@ -355,5 +355,39 @@ int32_t AVSessionStub::HandleReleaseCast(MessageParcel& data, MessageParcel& rep
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ReleaseCast()), ERR_NONE, "WriteInt32 failed");
     return ERR_NONE;
 }
+
+int32_t AVSessionStub::HandleStartCastDisplayListener(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t ret = StartCastDisplayListener();
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "StartCastDisplayListener failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleStopCastDisplayListener(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t ret = StopCastDisplayListener();
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "StopCastDisplayListener failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleGetAllCastDisplays(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = GetAllCastDisplays(castDisplays);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAllCastDisplays failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(castDisplays.size()), ERR_NONE, "WriteInt32 failed");
+    for (auto &castDisplay : castDisplays) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(static_cast<int32_t>(castDisplay.displayState)),
+            ERR_NONE, "Write displayState failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteUint64(castDisplay.displayId), ERR_NONE, "Write displayId failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteString(castDisplay.name), ERR_NONE, "Write name failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(castDisplay.width), ERR_NONE, "Write width failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(castDisplay.height), ERR_NONE, "Write height failed");
+    }
+    return ERR_NONE;
+}
 #endif
 } // namespace OHOS::AVSession

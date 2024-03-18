@@ -191,6 +191,18 @@ static napi_value ExportDisplayTag(napi_env env)
     return result;
 }
 
+static napi_value ExportCastDisplayState(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "STATE_OFF", static_cast<int32_t>(CastDisplayState::STATE_OFF));
+    (void)SetNamedProperty(env, result, "STATE_ON", static_cast<int32_t>(CastDisplayState::STATE_ON));
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -204,6 +216,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("CallState", ExportAVCallState(env)),
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
         DECLARE_NAPI_PROPERTY("DisplayTag", ExportDisplayTag(env)),
+        DECLARE_NAPI_PROPERTY("CastDisplayState", ExportCastDisplayState(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

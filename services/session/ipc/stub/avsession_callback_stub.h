@@ -45,6 +45,7 @@ private:
     int32_t HandleOnCommonCommand(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnSkipToQueueItem(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnPlayFromAssetId(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnCastDisplayChange(MessageParcel& data, MessageParcel& reply);
     using HandlerFunc = int32_t(AVSessionCallbackStub::*)(MessageParcel&, MessageParcel&);
     static inline HandlerFunc handlers[] = {
         &AVSessionCallbackStub::HandleOnPlay,
@@ -66,6 +67,7 @@ private:
         &AVSessionCallbackStub::HandleOnAVCallHangUp,
         &AVSessionCallbackStub::HandleOnAVCallToggleCallMute,
         &AVSessionCallbackStub::HandleOnPlayFromAssetId,
+        &AVSessionCallbackStub::HandleOnCastDisplayChange,
     };
 };
 } // namespace OHOS::AVSession

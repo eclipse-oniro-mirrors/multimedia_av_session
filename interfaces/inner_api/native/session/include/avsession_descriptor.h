@@ -82,5 +82,18 @@ struct AVSessionBasicInfo {
     int32_t systemTime_ {};
     std::vector<int32_t> extend_;
 };
+
+enum CastDisplayState {
+    STATE_OFF,
+    STATE_ON,
+};
+
+struct CastDisplayInfo {
+    CastDisplayState displayState;
+    uint64_t displayId;
+    std::string name;
+    int32_t width;
+    int32_t height;
+};
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_DESCRIPTOR_H

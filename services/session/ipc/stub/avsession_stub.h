@@ -78,6 +78,12 @@ private:
     int32_t HandleGetAVCastController(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleReleaseCast(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleStartCastDisplayListener(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleStopCastDisplayListener(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetAllCastDisplays(MessageParcel& data, MessageParcel& reply);
 #endif
 
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
@@ -124,6 +130,9 @@ private:
         &AVSessionStub::HandleGetController,
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         &AVSessionStub::HandleGetAVCastController,
+        &AVSessionStub::HandleStartCastDisplayListener,
+        &AVSessionStub::HandleStopCastDisplayListener,
+        &AVSessionStub::HandleGetAllCastDisplays,
 #endif
         &AVSessionStub::HandleRegisterCallbackInner,
         &AVSessionStub::HandleActivate,

@@ -211,6 +211,14 @@ public:
     void UnRegisterDeviceStateCallback();
 
     void StopCastSession();
+
+    int32_t StartCastDisplayListener() override;
+
+    int32_t StopCastDisplayListener() override;
+
+    void GetDisplayListener(sptr<IAVSessionCallback> callback);
+
+    int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
 #endif
 
 protected:
@@ -302,6 +310,8 @@ private:
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
+    sptr<HwCastDisplayListener> displayListener_;
+    std::recursive_mutex displayListenerLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
 #endif
