@@ -2296,11 +2296,25 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
     }
 }
 
+//文件路径校验规范化处理
+bool AVSessionService::filePathisValid(const string& filePath, const string& functionName)
+{
+    bool flag = true;
+    char *canonicalPath = realpath(filePath.c_str(), nullptr);
+    if (canonicalPath == nullptr) {
+        flag = false;
+        SLOGE("%{public}s: filepath is invalid", functionName);
+    }
+    free(canonicalPath);
+    canonicalPath = nullptr;
+    return flag;
+}
+
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    if(&(realpath(filePath, nullptr)) == nullptr) {
-        SLOGE("LoadStringFromFileEx: filepath is null.");
+    if (!filePathisValid(filePath, "LoadStringFromFileEx")) {
+        return false;
     }
     SLOGI("file load in for path: %{public}s", filePath.c_str());
     ifstream file(filePath.c_str());
@@ -2350,11 +2364,9 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
 bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std::string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    char *canonicalPath = realpath(filePath, nullptr);
-    if(canonicalPath == nullptr) {
-        SLOGE("SaveStringToFileEx: filepath is null.");
+    if (!filePathisValid(filePath, "SaveStringToFileEx")) {
+        return false;
     }
-    free(canonicalPath);
     SLOGI("file save in for path:%{public}s, content:%{public}s", filePath.c_str(), content.c_str());
     nlohmann::json checkValues = json::parse(content, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!checkValues.is_discarded(), false, "recv content discarded");
@@ -2381,11 +2393,9 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 {
-    char *canonicalPath = realpath(filePath, nullptr);
-    if(canonicalPath == nullptr) {
-        SLOGE("SaveStringToFileEx: filepath is null.");
+    if (!filePathisValid(filePath, "CheckStringAndCleanFile")) {
+        return false;
     }
-    free(canonicalPath);
     SLOGI("file check for path:%{public}s", filePath.c_str());
     string content {};
     ifstream fileRead(filePath.c_str());

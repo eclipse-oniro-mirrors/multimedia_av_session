@@ -98,7 +98,11 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         AVPlaybackState* statePtr = reply.ReadParcelable<AVPlaybackState>();
-        CHECK_AND_RETURN_RET_LOG(statePtr != nullptr, ERR_UNMARSHALLING, "read AVPlaybackState failed");
+        if (statePtr == nullptr) {
+            SLOGE("GetAVPlaybackState: read AVPlaybackState failed");
+            delete statePtr;
+            return ERR_UNMARSHALLING;
+        }
         state = *statePtr;
 
         std::lock_guard lockGuard(currentStateLock_);
@@ -186,7 +190,11 @@ int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& item
         CHECK_AND_RETURN_RET_LOG(itemNum >= 0, ERR_UNMARSHALLING, "read int32 itemNum failed");
         for (int32_t i = 0; i < itemNum; i++) {
             AVQueueItem *item = reply.ReadParcelable<AVQueueItem>();
-            CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
+            if (item == nullptr) {
+                SLOGE("GetAVQueueItems: read parcelable AVQueueItem failed");
+                delete item;
+                return ERR_UNMARSHALLING;
+            }
             items_.emplace_back(*item);
             delete item;
         }

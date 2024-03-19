@@ -225,6 +225,11 @@ int32_t AVSessionStub::HandleSetAVQueueItems(MessageParcel& data, MessageParcel&
     for (int32_t i = 0; i < itemNum; i++) {
         AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
         CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
+        if (item == nullptr) {
+            SLOGE("HandleSetAVQueueItems: read parcelable AVQueueItem failed");
+            delete item;
+            return ERR_UNMARSHALLING;
+        }
         items_.emplace_back(*item);
         delete item;
     }
