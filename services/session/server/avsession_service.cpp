@@ -2304,7 +2304,7 @@ bool AVSessionService::filePathisValid(const string& filePath, const string& fun
     char *canonicalPath = realpath(filePath.c_str(), sourceLibraryRealPath);
     if (canonicalPath == nullptr) {
         flag = false;
-        SLOGE("%{public}s: filepath is invalid", functionName);
+        SLOGE("%{public}s: filepath is invalid", functionName.c_str());
     }
     free(canonicalPath);
     canonicalPath = nullptr;
