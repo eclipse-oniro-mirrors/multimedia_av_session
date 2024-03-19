@@ -2300,7 +2300,8 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
 bool AVSessionService::filePathisValid(const string& filePath, const string& functionName)
 {
     bool flag = true;
-    char *canonicalPath = realpath(filePath.c_str(), nullptr);
+    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
+    char *canonicalPath = realpath(filePath.c_str(), sourceLibraryRealPath);
     if (canonicalPath == nullptr) {
         flag = false;
         SLOGE("%{public}s: filepath is invalid", functionName);
