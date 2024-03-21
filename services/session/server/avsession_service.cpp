@@ -2296,9 +2296,27 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
     }
 }
 
+//文件路径校验规范化处理
+bool AVSessionService::filePathisValid(const string& filePath, const string& functionName)
+{
+    bool flag = true;
+    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
+    char *canonicalPath = realpath(filePath.c_str(), sourceLibraryRealPath);
+    if (canonicalPath == nullptr) {
+        flag = false;
+        SLOGE("%{public}s: filepath is invalid", functionName.c_str());
+    }
+    free(canonicalPath);
+    canonicalPath = nullptr;
+    return flag;
+}
+
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
+    if (!filePathisValid(filePath, "LoadStringFromFileEx")) {
+        return false;
+    }
     SLOGI("file load in for path: %{public}s", filePath.c_str());
     ifstream file(filePath.c_str());
     if (!file.is_open()) {
@@ -2347,6 +2365,9 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
 bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std::string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
+    if (!filePathisValid(filePath, "SaveStringToFileEx")) {
+        return false;
+    }
     SLOGI("file save in for path:%{public}s, content:%{public}s", filePath.c_str(), content.c_str());
     nlohmann::json checkValues = json::parse(content, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!checkValues.is_discarded(), false, "recv content discarded");
@@ -2373,6 +2394,9 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 {
+    if (!filePathisValid(filePath, "CheckStringAndCleanFile")) {
+        return false;
+    }
     SLOGI("file check for path:%{public}s", filePath.c_str());
     string content {};
     ifstream fileRead(filePath.c_str());
@@ -2472,7 +2496,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         std::make_shared<Notification::NotificationContent>(localLiveViewContent);
     CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
 
-    auto uid = topSession_ ? topSession_->GetUid() : getuid();
+    auto uid = topSession_ ? topSession_->GetUid() : static_cast<int32_t>(getuid());
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetNotificationId(0);
     request.SetContent(content);

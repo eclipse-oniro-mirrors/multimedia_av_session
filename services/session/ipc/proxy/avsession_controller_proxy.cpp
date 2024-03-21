@@ -98,7 +98,11 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         AVPlaybackState* statePtr = reply.ReadParcelable<AVPlaybackState>();
-        CHECK_AND_RETURN_RET_LOG(statePtr != nullptr, ERR_UNMARSHALLING, "read AVPlaybackState failed");
+        if (statePtr == nullptr) {
+            SLOGE("GetAVPlaybackState: read AVPlaybackState failed");
+            delete statePtr;
+            return ERR_UNMARSHALLING;
+        }
         state = *statePtr;
 
         std::lock_guard lockGuard(currentStateLock_);
@@ -136,13 +140,15 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
 
     AVMetaData::UnmarshallingExceptImg(reply, data);
     const char *buffer = nullptr;
-    if ((buffer = reinterpret_cast<const char *>(reply.ReadRawData(twoImageLength))) == nullptr) {
+    buffer = reinterpret_cast<const char *>(reply.ReadRawData(twoImageLength));
+    if (buffer == nullptr) {
         SLOGE("read raw data with null, length = %{public}d", twoImageLength);
         return AVSESSION_SUCCESS;
     }
 
     int mediaImageLength = data.GetMediaLength();
     auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
+    CHECK_AND_RETURN_RET_LOG(mediaPixelMap != nullptr, AVSESSION_ERROR, "mediaPixelMap new fail");
     std::vector<uint8_t> mediaImageBuffer;
     for (int i = 0; i < mediaImageLength; i++) {
         mediaImageBuffer.push_back((uint8_t)buffer[i]);
@@ -151,6 +157,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     data.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
     if (twoImageLength > mediaImageLength) {
         auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+        CHECK_AND_RETURN_RET_LOG(avQueuePixelMap != nullptr, AVSESSION_ERROR, "avQueuePixelMap new fail");
         std::vector<uint8_t> avQueueImageBuffer;
         for (int i = mediaImageLength; i < twoImageLength; i++) {
             avQueueImageBuffer.push_back((uint8_t)buffer[i]);
@@ -183,7 +190,11 @@ int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& item
         CHECK_AND_RETURN_RET_LOG(itemNum >= 0, ERR_UNMARSHALLING, "read int32 itemNum failed");
         for (int32_t i = 0; i < itemNum; i++) {
             AVQueueItem *item = reply.ReadParcelable<AVQueueItem>();
-            CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
+            if (item == nullptr) {
+                SLOGE("GetAVQueueItems: read parcelable AVQueueItem failed");
+                delete item;
+                return ERR_UNMARSHALLING;
+            }
             items_.emplace_back(*item);
             delete item;
         }

@@ -131,7 +131,7 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
 
 bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
 {
-    int32_t deviceInfoSize = deviceInfos_.size();
+    int32_t deviceInfoSize = static_cast<int32_t>(deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : deviceInfos_) {
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");

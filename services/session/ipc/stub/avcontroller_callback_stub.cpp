@@ -92,7 +92,8 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
     AVMetaData meta;
     AVMetaData::UnmarshallingExceptImg(data, meta);
     const char *buffer = nullptr;
-    if ((buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength))) == nullptr) {
+    buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength));
+    if (buffer == nullptr) {
         SLOGE("read raw data with null, length = %{public}d", twoImageLength);
         OnMetaDataChange(meta);
         return ERR_NONE;
@@ -184,7 +185,11 @@ int32_t AVControllerCallbackStub::HandleOnQueueItemsChange(MessageParcel& data, 
     CHECK_AND_RETURN_RET_LOG((itemNum >= 0) && (itemNum < maxItemNumber), ERR_NONE, "read int32 itemNum failed");
     for (int32_t i = 0; i < itemNum; i++) {
         AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
-        CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
+        if (item == nullptr) {
+            SLOGE("GetAVQueueItems: read parcelable AVQueueItem failed");
+            delete item;
+            return ERR_UNMARSHALLING;
+        }
         items_.emplace_back(*item);
         delete item;
     }

@@ -184,7 +184,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
     }
     mediaInfo.mediaType = mediaDescription->GetMediaType();
-    mediaInfo.mediaSize = mediaDescription->GetMediaSize();
+    mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
@@ -237,7 +237,7 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
         mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
     }
     mediaInfo.mediaType = mediaDescription->GetMediaType();
-    mediaInfo.mediaSize = mediaDescription->GetMediaSize();
+    mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());

@@ -147,7 +147,8 @@ int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& r
     AVMetaData meta;
     AVMetaData::UnmarshallingExceptImg(data, meta);
     const char *buffer = nullptr;
-    if ((buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength))) == nullptr) {
+    buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength));
+    if (buffer == nullptr) {
         SLOGI("read raw data with null, try set without length = %{public}d", twoImageLength);
         int32_t ret = SetAVMetaData(meta);
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
@@ -224,6 +225,11 @@ int32_t AVSessionStub::HandleSetAVQueueItems(MessageParcel& data, MessageParcel&
     for (int32_t i = 0; i < itemNum; i++) {
         AVQueueItem *item = data.ReadParcelable<AVQueueItem>();
         CHECK_AND_RETURN_RET_LOG(item != nullptr, ERR_UNMARSHALLING, "read parcelable AVQueueItem failed");
+        if (item == nullptr) {
+            SLOGE("HandleSetAVQueueItems: read parcelable AVQueueItem failed");
+            delete item;
+            return ERR_UNMARSHALLING;
+        }
         items_.emplace_back(*item);
         delete item;
     }

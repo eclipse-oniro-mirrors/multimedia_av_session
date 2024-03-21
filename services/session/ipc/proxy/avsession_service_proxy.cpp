@@ -226,7 +226,8 @@ int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_
     }
     UnMarshallingAVQueueInfos(reply, avQueueInfos);
     const char *buffer = nullptr;
-    if ((buffer = reinterpret_cast<const char *>(reply.ReadRawData(bufferLength))) == nullptr) {
+    buffer = reinterpret_cast<const char *>(reply.ReadRawData(bufferLength));
+    if (buffer == nullptr) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
         SLOGE("read raw data failed, length = %{public}d", bufferLength);
         return AVSESSION_ERROR;

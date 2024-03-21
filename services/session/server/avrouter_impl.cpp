@@ -158,7 +158,8 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[1] != nullptr &&
         providerManagerMap_[1]->provider_ ! = nullptr, AVSESSION_ERROR, "provider is nullptr");
     int64_t tempId = 1;
-    castHandle = (tempId << 32) | castId; // The first 32 bits are providerId, the last 32 bits are castId
+    // The first 32 bits are providerId, the last 32 bits are castId
+    castHandle = (static_cast<uint64_t>(tempId) << 32) | castId;
     {
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_->CreateSessionByCast(castHandle);
@@ -221,7 +222,8 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
         AVSESSION_ERROR, "provider is nullptr");
     int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->StartCastSession();
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
-    castHandle = (tempId << 32) | castId; // The first 32 bits are providerId, the last 32 bits are castId
+    // The first 32 bits are providerId, the last 32 bits are castId
+    castHandle = (static_cast<uint64_t>(tempId) << 32) | castId;
     hasSessionAlive_ = true;
 
     return castHandle;
@@ -241,7 +243,7 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
 {
     SLOGI("AVRouterImpl stop cast process");
 
-    int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
+    int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
     SLOGI("Stop cast, the provider number is %{public}d", providerNumber);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         castHandle, "Can not find corresponding provider");
@@ -264,7 +266,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
 {
     SLOGI("AVRouterImpl stop cast process");
 
-    int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
+    int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
 
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         castHandle, "Can not find corresponding provider");
@@ -286,7 +288,7 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t providerNumber = castHandle >> 32;
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding provider");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
@@ -301,7 +303,7 @@ int32_t AVRouterImpl::UnRegisterCallback(int64_t castHandle,
 {
     SLOGI("AVRouterImpl UnRegisterCallback IAVCastSessionStateListener callback to provider");
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t providerNumber = castHandle >> 32;
+    int32_t providerNumber = static_cast<uint64_t>(castHandle) >> 32;
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
