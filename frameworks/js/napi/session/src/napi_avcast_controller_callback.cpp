@@ -237,6 +237,13 @@ void NapiAVCastControllerCallback::OnPlayRequest(const AVQueueItem& avQueueItem)
     HandleEvent(EVENT_CAST_PLAY_REQUEST, avQueueItem);
 }
 
+void NapiAVCastControllerCallback::OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnKeyRequest");
+    SLOGI("Start handle OnKeyRequest event");
+    HandleEvent(EVENT_KEY_REQUEST, assetId, keyRequestData);
+}
+
 napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

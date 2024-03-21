@@ -39,6 +39,7 @@ public:
     int32_t GetDuration(int32_t &duration) override;
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
     int32_t SetDisplaySurface(std::string &surfaceId) override;
+    int32_t ProvideKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response);
     int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
     int32_t UnRegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
     int32_t SetValidAbility(const std::vector<int32_t>& validAbilityList) override;
@@ -60,6 +61,7 @@ public:
     void OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
     void OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
     void OnAvailableCapabilityChanged(const CastEngine::StreamCapability &mediaInfo) override;
+    void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData);
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 

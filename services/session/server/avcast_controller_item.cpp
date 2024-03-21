@@ -117,6 +117,14 @@ void AVCastControllerItem::OnPlayRequest(const AVQueueItem& avQueueItem)
     callback_->OnPlayRequest(avQueueItem);
 }
 
+void AVCastControllerItem::OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData)
+{
+    SLOGI("OnKeyRequest");
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
+    callback_->OnKeyRequest(assetId, keyRequestData);
+}
+
 int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd)
 {
     SLOGI("Call SendControlCommand of cast controller proxy");
@@ -177,6 +185,12 @@ int32_t AVCastControllerItem::SetCastPlaybackFilter(const AVPlaybackState::Playb
 {
     castPlaybackMask_ = filter;
     return AVSESSION_SUCCESS;
+}
+
+int32_t AVCastControllerItem::ProvideKeyResponse(const std::string &assetId, const std::vector<uint8_t> &response)
+{
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    return castControllerProxy_->ProvideKeyResponse(assetId, response);
 }
 
 int32_t AVCastControllerItem::AddAvailableCommand(const int32_t cmd)

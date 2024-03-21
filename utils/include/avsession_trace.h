@@ -70,6 +70,7 @@ enum AVSessionTraceTaskId : int32_t {
     NAPI_CAST_CONTROLLER_SET_DISPLAY_SURFACE_TASK_ID = 32,
     NAPI_SET_AVCALL_META_DATA_TASK_ID = 33,
     NAPI_SET_AV_CALL_STATE_TASK_ID = 34,
+    NAPI_PROVIDE_KEY_RESPONSE_TASK_ID = 35,
 };
 #ifdef ENBABLE_AVSESSION_TRACE_CONTROL
 class __attribute__((visibility("default"))) AVSessionTrace {
