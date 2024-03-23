@@ -171,7 +171,7 @@ private:
 
     bool AbilityHasSession(pid_t pid);
 
-    bool filePathisValid(const std::string& filePath, const std::string& functionName);
+    bool FilePathIsValid(const std::string& filePath, const std::string& functionName);
 
     sptr<AVControllerItem> GetPresentController(pid_t pid, const std::string& sessionId);
 
