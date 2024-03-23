@@ -2297,7 +2297,7 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
 }
 
 //文件路径校验规范化处理
-bool AVSessionService::filePathisValid(const string& filePath, const string& functionName)
+bool AVSessionService::FilePathIsValid(const string& filePath, const string& functionName)
 {
     bool flag = true;
     char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
@@ -2314,7 +2314,7 @@ bool AVSessionService::filePathisValid(const string& filePath, const string& fun
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    if (!filePathisValid(filePath, "LoadStringFromFileEx")) {
+    if (!FilePathIsValid(filePath, "LoadStringFromFileEx")) {
         return false;
     }
     SLOGI("file load in for path: %{public}s", filePath.c_str());
@@ -2365,7 +2365,7 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
 bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std::string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    if (!filePathisValid(filePath, "SaveStringToFileEx")) {
+    if (!FilePathIsValid(filePath, "SaveStringToFileEx")) {
         return false;
     }
     SLOGI("file save in for path:%{public}s, content:%{public}s", filePath.c_str(), content.c_str());
@@ -2394,7 +2394,7 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 {
-    if (!filePathisValid(filePath, "CheckStringAndCleanFile")) {
+    if (!FilePathIsValid(filePath, "CheckStringAndCleanFile")) {
         return false;
     }
     SLOGI("file check for path:%{public}s", filePath.c_str());
