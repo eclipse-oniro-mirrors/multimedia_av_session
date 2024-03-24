@@ -50,6 +50,8 @@ public:
 
     void OnPlayRequest(const AVQueueItem& avQueueItem) override;
 
+    void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override;
+
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
     int32_t Start(const AVQueueItem& avQueueItem) override;
@@ -67,6 +69,8 @@ public:
     int32_t SetDisplaySurface(std::string& surfaceId) override;
 
     int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
+
+    int32_t ProvideKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response);
 
     bool RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 

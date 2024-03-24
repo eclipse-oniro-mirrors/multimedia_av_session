@@ -43,6 +43,8 @@ public:
 
     void OnPlayRequest(const AVQueueItem& avQueueItem) override;
 
+    void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
+
     void AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 
 private:

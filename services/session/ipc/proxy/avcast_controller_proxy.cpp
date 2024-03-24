@@ -233,6 +233,44 @@ int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
+int32_t AVCastControllerProxy::ProvideKeyResponse(std::string& assetId, const std::vector<uint8_t>& response)
+{
+    AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::ProvideKeyResponse");
+    MessageParcel parcel;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!parcel.WriteInterfaceToken(GetDescriptor())) {
+        SLOGE("Failed to write the interface token");
+        return AVSESSION_ERROR;
+    }
+    if (!parcel.WriteString(assetId)) {
+        SLOGE("Failed to write assetId");
+        return AVSESSION_ERROR;
+    }
+
+    if (!parcel.WriteInt32(response.size())) {
+        SLOGE("Failed to write response size");
+        return AVSESSION_ERROR;
+    }
+    uint32_t responseMaxLen = 8 * 1024 * 1024;
+    CHECK_AND_RETURN_RET_LOG(response.size() < responseMaxLen, AVSESSION_ERROR,
+        "The size of response is too large.");
+    if (response.size() != 0) {
+        if (!parcel.WriteBuffer(response.data(), response.size())) {
+            SLOGE("AVCastControllerProxy ProvideKeyResponse write response failed");
+            return AVSESSION_ERROR;
+        }
+    }
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_PROVIDE_KEY_RESPONSE, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
 int32_t AVCastControllerProxy::SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");

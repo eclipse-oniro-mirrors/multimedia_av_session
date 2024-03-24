@@ -41,6 +41,8 @@ public:
     void OnEndOfStream(const int32_t isLooping) override;
 
     void OnPlayRequest(const AVQueueItem& avQueueItem) override;
+
+    void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
 private:
     static inline BrokerDelegator<AVCastControllerCallbackProxy> delegator_;
 };

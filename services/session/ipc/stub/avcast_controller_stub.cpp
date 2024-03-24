@@ -179,6 +179,26 @@ int32_t AVCastControllerStub::HandleSetCastPlaybackFilter(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int32_t AVCastControllerStub::HandleProvideKeyResponse(MessageParcel& data, MessageParcel& reply)
+{
+    std::string assetId = data.ReadString();
+    std::vector<uint8_t> response;
+    uint32_t responseSize = data.ReadInt32();
+    uint32_t responseMaxLen = 8 * 1024 * 1024;
+    CHECK_AND_RETURN_RET_LOG(responseSize < responseMaxLen, AVSESSION_ERROR,
+        "The size of response is too large.");
+    if (responseSize != 0) {
+        const uint8_t *responseBuf = static_cast<const uint8 *>(data.ReadBuffer(responseSize));
+        if (responseBuf == nullptr) {
+            SLOGE("AVCastControllerStub::HandleProvideKeyResponse read response failed");
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        response.assign(responseBuf, responseBuf + responseSize);
+    }
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(ProvideKeyResponse(assetId, response)), "write int32 failed");
+    return ERR_NONE;
+}
+
 int32_t AVCastControllerStub::HandleAddAvailableCommand(MessageParcel& data, MessageParcel& reply)
 {
     int32_t cmd = data.ReadInt32();

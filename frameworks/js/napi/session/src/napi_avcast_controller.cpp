@@ -45,6 +45,7 @@ std::map<std::string, std::pair<NapiAVCastController::OnEventHandlerType,
     { "error", { OnPlayerError, OffPlayerError } },
     { "endOfStream", { OnEndOfStream, OffEndOfStream } },
     { "requestPlay", { OnPlayRequest, OffPlayRequest } },
+    { "keyRequest", { OnKeyRequest, OffKeyRequest } },
 };
 
 NapiAVCastController::NapiAVCastController()
@@ -71,6 +72,7 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getValidCommands", GetValidCommands),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("setDisplaySurface", SetDisplaySurface),
+        DECLARE_NAPI_FUNCTION("provideKeyResponse", ProvideKeyResponse),
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
@@ -542,6 +544,56 @@ napi_value NapiAVCastController::SetDisplaySurface(napi_env env, napi_callback_i
     return NapiAsyncWork::Enqueue(env, context, "SetDisplaySurface", executor);
 }
 
+napi_value NapiAVCastController::ProvideKeyResponse(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastController::ProvideKeyResponse");
+    struct ConcrentContext : public ContextBase {
+        std::string assetId;
+        std::vector<uint8_t> response;
+    };
+    auto context = std::make_shared<ConcrentContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments",
+                               NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->assetId);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command",
+                               NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->response);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command",
+                               NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_PROVIDE_KEY_RESPONSE_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("SetDisplaySurface failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "SetDisplaySurface failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->ProvideKeyResponse(context->assetId, context->response);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "ProvideKeyResponse failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "ProvideKeyResponse failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "ProvideKeyResponse failed : native no permission";
+            } else {
+                context->errMessage = "ProvideKeyResponse failed : native server exception";
+            }
+            SLOGE("controller ProvideKeyResponse failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "ProvideKeyResponse", executor);
+}
+
 napi_status NapiAVCastController::RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
     const std::string& event, napi_value filter, napi_value callback)
 {
@@ -817,6 +869,13 @@ napi_status NapiAVCastController::OnPlayRequest(napi_env env, NapiAVCastControll
         NapiAVCastControllerCallback::EVENT_CAST_PLAY_REQUEST, callback);
 }
 
+napi_status NapiAVCastController::OnKeyRequest(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_KEY_REQUEST, callback);
+}
+
 napi_status NapiAVCastController::OffPlaybackStateChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
@@ -932,6 +991,15 @@ napi_status NapiAVCastController::OffPlayRequest(napi_env env, NapiAVCastControl
         napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_PLAY_REQUEST, callback);
+}
+
+napi_status NapiAVCastController::OffKeyRequest(napi_env env, NapiAVCastController* napiCastController,
+    napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_KEY_REQUEST, callback);
 }
 
 void NapiAVCastController::ErrCodeToMessage(int32_t errCode, std::string& message)

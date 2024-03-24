@@ -53,6 +53,7 @@ private:
     static napi_value SetDisplaySurface(napi_env env, napi_callback_info info);
     static napi_status SetCastPlaybackStateFilter(napi_env env, NapiAVCastController *napiCastController,
         napi_value filter);
+    static napi_value ProvideKeyResponse(napi_env env, napi_callback_info info);
 
     static napi_status OnPlaybackStateChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
@@ -77,6 +78,8 @@ private:
         napi_value param, napi_value callback);
     static napi_status OnPlayRequest(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
+    static napi_status OnKeyRequest(napi_env env, NapiAVCastController* napiCastController,
+        napi_value param, napi_value callback);
 
     static napi_status OffPlaybackStateChange(napi_env env, NapiAVCastController* napiCastController,
         napi_value callback);
@@ -92,6 +95,7 @@ private:
     static napi_status OffPlayerError(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffEndOfStream(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffPlayRequest(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
+    static napi_status OffKeyRequest(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,

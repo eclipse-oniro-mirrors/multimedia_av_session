@@ -48,6 +48,8 @@ private:
 
     int32_t HandleSetCastPlaybackFilter(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleProvideKeyResponse(MessageParcel& data, MessageParcel& reply)
+
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleAddAvailableCommand(MessageParcel& data, MessageParcel& reply);
@@ -69,6 +71,7 @@ private:
         &AVCastControllerStub::HandleGetValidCommands,
         &AVCastControllerStub::HandleSetDisplaySurface,
         &AVCastControllerStub::HandleSetCastPlaybackFilter,
+        &AVCastControllerStub::HandleProvideKeyResponse,
         &AVCastControllerStub::HandleRegisterCallbackInner,
         &AVCastControllerStub::HandleDestroy,
         &AVCastControllerStub::HandleAddAvailableCommand,
