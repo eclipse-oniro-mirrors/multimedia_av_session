@@ -2301,13 +2301,10 @@ bool AVSessionService::FilePathIsValid(const string& filePath, const string& fun
 {
     bool flag = true;
     char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    char *canonicalPath = realpath(filePath.c_str(), sourceLibraryRealPath);
-    if (canonicalPath == nullptr) {
+    if (realpath(filePath.c_str(), sourceLibraryRealPath) == nullptr) {
         flag = false;
         SLOGE("%{public}s: filepath is invalid", functionName.c_str());
     }
-    free(canonicalPath);
-    canonicalPath = nullptr;
     return flag;
 }
 
