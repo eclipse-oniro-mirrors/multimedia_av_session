@@ -26,15 +26,15 @@ es2abc_gen_abc("gen_avvolumecomponent_abc") {
 }
 
 gen_js_obj("avvolumecomponent_abc") {
-  input =
-      get_label_info(":gen_avvolumecomponent_abc", "target_out_dir") + "/avvolumecomponent.abc"
+  input = get_label_info(":gen_avvolumecomponent_abc", "target_out_dir") +
+          "/avvolumecomponent.abc"
   output = target_out_dir + "/avvolumecomponent_abc.o"
   dep = ":gen_avvolumecomponent_abc"
 }
 
 gen_obj("avvolumecomponent_abc_preview") {
-  input =
-      get_label_info(":gen_avvolumecomponent_abc", "target_out_dir") + "/avvolumecomponent.abc"
+  input = get_label_info(":gen_avvolumecomponent_abc", "target_out_dir") +
+          "/avvolumecomponent.abc"
   output = target_out_dir + "/avvolumecomponent_abc.c"
   snapshot_dep = [ ":gen_avvolumecomponent_abc" ]
 }
