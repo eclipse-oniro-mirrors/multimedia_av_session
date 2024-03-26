@@ -81,6 +81,7 @@ ohos_shared_library("avsession_napi") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "bundle_framework:appexecfwk_core",
   ]
 
   cflags = []

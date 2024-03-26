@@ -218,6 +218,7 @@ private:
     void InitDM();
 
     void InitBMS();
+    void InitRadarBMS();
 
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
     

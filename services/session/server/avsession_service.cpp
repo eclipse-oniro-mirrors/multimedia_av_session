@@ -60,6 +60,7 @@
 #include "parameters.h"
 #include "avsession_service.h"
 #include "want_agent_helper.h"
+#include "avsession_radar.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -209,6 +210,7 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             break;
         case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
             InitBMS();
+            InitRadarBMS();
             break;
         case CAST_ENGINE_SA_ID:
             CheckInitCast();
@@ -596,6 +598,8 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 {
     SLOGI("AVSessionService CreateSessionByCast in");
     if (isSourceInCast_) {
+        AVSessionRadarInfo info("AVSessionService::CreateSessionByCast");
+        AVSessionRadar::GetInstance().StartConnect(info);
         SLOGI("Create Cast in source, return");
         return;
     }
@@ -623,6 +627,9 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 
 void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
+    AVSessionRadarInfo info("AVSessionService::NotifyDeviceAvailable");
+    AVSessionRadar::GetInstance().CastDeviceAvailable(castOutputDeviceInfo, info);
+
     for (DeviceInfo deviceInfo : castOutputDeviceInfo.deviceInfos_) {
         std::lock_guard lockGuard(castDeviceInfoMapLock_);
         castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
@@ -666,7 +673,17 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
         AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
 
+    AVSessionRadarInfo info("AVSessionService::StartCast");
+    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(session->GetDescriptor().uid_);
+    AVSessionRadar::GetInstance().StartCastBegin(outputDeviceInfo, info); // todo 应用传递的outputDeviceInfo中没有networkId信息，该如何获取？
+
     int32_t ret = session->StartCast(outputDeviceInfo);
+    if (ret == AVSESSION_SUCCESS) {
+        AVSessionRadar::GetInstance().StartCastEnd(outputDeviceInfo, info);
+    } else {
+        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
+        AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
+    }
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGD("StartCast set isSourceInCast");
     isSourceInCast_ = true;
@@ -709,6 +726,10 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("StopCast: CheckSystemPermission failed");
+        AVSessionRadarInfo info("AVSessionService::StopCast");
+        info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(sessionToken.uid);
+        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ERR_NO_PERMISSION);
+        AVSessionRadar::GetInstance().FailToStopCastDiscovery(info);
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
             "ERROR_MSG", "avsessionservice StopCast checksystempermission failed");
         return ERR_NO_PERMISSION;
@@ -2546,5 +2567,11 @@ void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChange
             NotifyDeviceChange(deviceChangeAction);
         }
     }
+}
+
+void AVSessionService::InitRadarBMS()
+{
+    SLOGI("InitRadarBMS");
+    AVSessionRadar::GetInstance().InitBMS();
 }
 } // namespace OHOS::AVSession

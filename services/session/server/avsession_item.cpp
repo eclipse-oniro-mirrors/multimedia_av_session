@@ -29,6 +29,7 @@
 #include "remote_session_sink_proxy.h"
 #include "permission_checker.h"
 #include "avsession_item.h"
+#include "avsession_radar.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -434,7 +435,7 @@ int32_t AVSessionItem::Activate()
     descriptor_.isActive_ = true;
     std::lock_guard controllerLockGuard(controllersLock_);
     for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{pubic}d", pid);
+        SLOGI("pid=%{public}d", pid);
         controller->HandleActiveStateChange(true);
     }
     if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
@@ -453,7 +454,7 @@ int32_t AVSessionItem::Deactivate()
     descriptor_.isActive_ = false;
     std::lock_guard controllerLockGuard(controllersLock_);
     for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{pubic}d", pid);
+        SLOGI("pid=%{public}d", pid);
         controller->HandleActiveStateChange(false);
     }
     if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
@@ -476,12 +477,13 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 {
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    SLOGI("AddSupportCommand=%{public}d", cmd);
     auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
     supportedCmd_.push_back(cmd);
     std::lock_guard controllerLockGuard(controllersLock_);
     for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{pubic}d", pid);
+        SLOGI("pid=%{public}d", pid);
         controller->HandleValidCommandChange(supportedCmd_);
     }
     return AVSESSION_SUCCESS;
@@ -495,7 +497,7 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
     supportedCmd_.erase(iter, supportedCmd_.end());
     std::lock_guard controllerLockGuard(controllersLock_);
     for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{pubic}d", pid);
+        SLOGI("pid=%{public}d", pid);
         controller->HandleValidCommandChange(supportedCmd_);
     }
     return AVSESSION_SUCCESS;
@@ -603,6 +605,8 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
+        AVSessionRadarInfo info(__FUNCTION__);
+        AVSessionRadar::GetInstance().ConnectFinish(deviceInfo, info);
         if (callStartCallback_) {
             SLOGI("AVSessionItem send callStart event to service for connected");
             callStartCallback_(*this);
@@ -624,6 +628,9 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         localInfo.deviceName_ = "LocalDevice";
         localDevice.deviceInfos_.emplace_back(localInfo);
         descriptor_.outputDeviceInfo_ = localDevice;
+
+        AVSessionRadarInfo info(__FUNCTION__);
+        AVSessionRadar::GetInstance().StopCastFinish(deviceInfo, info);
     }
 
     HandleOutputDeviceChange(castState, outputDeviceInfo);
@@ -666,7 +673,10 @@ int32_t AVSessionItem::StopCast()
     {
         std::lock_guard lockGuard(castHandleLock_);
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
+        AVSessionRadarInfo info(__FUNCTION__);
+        AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
         int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
+        AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
         SLOGI("StopCast with unchange castHandle is %{public}ld", castHandle_);
         CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
     }

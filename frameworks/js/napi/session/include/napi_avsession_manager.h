@@ -75,6 +75,16 @@ private:
 
     static void ErrCodeToMessage(int32_t errCode, const std::string& tag, std::string& message);
 
+    static void ReportStartCastDiscoveryFailInfo(std::string func, int32_t error);
+
+    static void ReportStopCastDiscoveryFailInfo(std::string func, int32_t error);
+
+    static void ReportStartCastFailInfo(std::string func, int32_t error);
+
+    static void ReportStartCastFailInfo(std::string func, int32_t error, const OutputDeviceInfo &outputDeviceInfo);
+
+    static void ReportStopCastFailInfo(std::string func, int32_t error);
+
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> eventHandlers_;
 
     static std::shared_ptr<NapiSessionListener> listener_;

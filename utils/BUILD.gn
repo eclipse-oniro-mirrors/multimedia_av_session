@@ -31,6 +31,7 @@ ohos_shared_library("avsession_utils") {
     "src/avsession_event_handler.cpp",
     "src/avsession_sysevent.cpp",
     "src/hash_calculator.cpp",
+    "src/avsession_radar.cpp",
   ]
 
   include_dirs = [
@@ -46,6 +47,11 @@ ohos_shared_library("avsession_utils") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "device_manager:devicemanagersdk",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
   ]
 
   cflags = []

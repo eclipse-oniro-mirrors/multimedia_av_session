@@ -14,6 +14,7 @@
  */
 
 #include "avcast_controller_item.h"
+#include "avsession_radar.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
@@ -42,6 +43,14 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
 {
     SLOGI("OnCastPlaybackStateChange with state: %{public}d", state.GetState());
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) { // TODO 需实测一下一次播放是否只回调一次（暂停/播放是否会报该状态？）
+        AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
+        AVSessionRadar::GetInstance().PlayerStarted(info);
+    } else if (state.GetState() != currentState_) { // 需要根据SE给的方法来上报，否则进度上报会频繁触发打点上报
+        currentState_ = state.GetState();
+        AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
+        AVSessionRadar::GetInstance().ControlCommandRespond(info);
+    }
     AVPlaybackState stateOut;
     std::lock_guard lockGuard(itemCallbackLock_);
     if (state.CopyToByMask(castPlaybackMask_, stateOut)) {
@@ -65,6 +74,8 @@ void AVCastControllerItem::OnPlayNext()
 {
     SLOGI("OnPlayNext");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVSessionRadarInfo info("AVCastControllerItem::OnPlayNext");
+    AVSessionRadar::GetInstance().ControlCommandRespond(info);
     std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayNext();
 }
@@ -73,6 +84,8 @@ void AVCastControllerItem::OnPlayPrevious()
 {
     SLOGI("OnPlayPrevious");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVSessionRadarInfo info("AVCastControllerItem::OnPlayPrevious");
+    AVSessionRadar::GetInstance().ControlCommandRespond(info);
     std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayPrevious();
 }
@@ -81,6 +94,8 @@ void AVCastControllerItem::OnSeekDone(const int32_t seekNumber)
 {
     SLOGI("OnSeekDone");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVSessionRadarInfo info("AVCastControllerItem::OnSeekDone");
+    AVSessionRadar::GetInstance().ControlCommandRespond(info);
     std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnSeekDone(seekNumber);
 }
@@ -95,8 +110,11 @@ void AVCastControllerItem::OnVideoSizeChange(const int32_t width, const int32_t 
 
 void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
 {
-    SLOGI("OnPlayerError");
+    SLOGI("OnPlayerError error:%{public}d", errorCode);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVSessionRadarInfo info("AVCastControllerItem::OnPlayerError");
+    info.errorCode_ = errorCode;
+    AVSessionRadar::GetInstance().ControlCommandError(info);
     std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayerError(errorCode, errorMsg);
 }
@@ -113,6 +131,8 @@ void AVCastControllerItem::OnPlayRequest(const AVQueueItem& avQueueItem)
 {
     SLOGI("OnPlayRequest");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    AVSessionRadarInfo info("AVCastControllerItem::OnPlayRequest");
+    AVSessionRadar::GetInstance().ControlCommandRespond(info);
     std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayRequest(avQueueItem);
 }
@@ -129,6 +149,8 @@ int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd
 {
     SLOGI("Call SendControlCommand of cast controller proxy");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    AVSessionRadarInfo info("AVCastControllerItem::SendControlCommand");
+    AVSessionRadar::GetInstance().SendControlCommand(info);
     castControllerProxy_->SendControlCommand(cmd);
     return AVSESSION_SUCCESS;
 }
@@ -137,7 +159,14 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
 {
     SLOGI("Call Start of cast controller proxy");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
-    castControllerProxy_->Start(avQueueItem);
+    AVSessionRadarInfo info("AVCastControllerItem::Start");
+    AVSessionRadar::GetInstance().StartPlayBegin(info);
+    int32_t ret = castControllerProxy_->Start(avQueueItem);
+    if (ret != AVSESSION_SUCCESS) {
+        AVSessionRadar::GetInstance().StartPlayFailed(info);
+    } else {
+        AVSessionRadar::GetInstance().StartPlayEnd(info);
+    }
     currentAVQueueItem_ = avQueueItem;
     return AVSESSION_SUCCESS;
 }
