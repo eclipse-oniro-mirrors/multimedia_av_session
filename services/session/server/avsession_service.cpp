@@ -2446,23 +2446,33 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     std::vector<std::shared_ptr<AAFwk::Want>> wants;
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> launWantAgent;
     string bundleName = DEFAULT_BUNDLE_NAME;
     string abilityName = DEFAULT_ABILITY_NAME;
     auto uid = -1;
+    auto isCustomer = false;
     if (topSession_ != nullptr) {
         bundleName = topSession_->GetBundleName();
         abilityName = topSession_->GetAbilityName();
         uid = topSession_->GetUid();
+        launWantAgent = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(topSession_->GetLaunchAbility());
+        auto res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launWantAgent, want);
+        isCustomer = (res == AVSESSION_SUCCESS) && (bundleName == want->GetElement().GetBundleName());
+        SLOGI("CreateWantAgent GetWant res=%{public}d", res);
     }
     if (histroyDescriptor != nullptr) {
         SLOGI("CreateWantAgent with historyDescriptor");
         bundleName = histroyDescriptor->elementName_.GetBundleName();
         abilityName = histroyDescriptor->elementName_.GetAbilityName();
         uid = histroyDescriptor->uid_;
+        isCustomer = false;
     }
-    SLOGI("CreateWantAgent bundleName %{public}s, abilityName %{public}s", bundleName.c_str(), abilityName.c_str());
-    AppExecFwk::ElementName element("", bundleName, abilityName);
-    want->SetElement(element);
+    SLOGI("CreateWantAgent bundleName %{public}s, abilityName %{public}s, isCustomer %{public}d",
+        bundleName.c_str(), abilityName.c_str(), isCustomer);
+    if (!isCustomer) {
+        AppExecFwk::ElementName element("", bundleName, abilityName);
+        want->SetElement(element);
+    }
     wants.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
         0,
