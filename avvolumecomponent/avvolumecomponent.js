@@ -187,7 +187,7 @@ export class AVVolumeComponent extends ViewPU {
     this.observeComponentCreation2((y2, z2) => {
       UIExtensionComponent.create({
         abilityName: 'AVVolumeExtension',
-        bundleName: 'com.huawei.hmos.mediacontroller',
+        bundleName: 'com.hmos.mediacontroller',
         parameters: {
           "volumeStyle": this.volumeStyle,
           "sliderParameter": this.sliderParameter,
