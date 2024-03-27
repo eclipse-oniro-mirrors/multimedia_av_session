@@ -845,6 +845,21 @@ napi_value NapiAVSessionManager::SetDiscoverable(napi_env env, napi_callback_inf
 #endif
 }
 
+std::string NapiAVSessionManager::GetStartCastErrMsg(int32_t error)
+{
+    std::string err;
+    if (error == ERR_NO_PERMISSION) {
+        err = "StartCast failed : native no permission";
+    } else if (error == ERR_INVALID_PARAM) {
+        err = "StartCast failed : native invalid parameters";
+    } else if (error == ERR_SESSION_NOT_EXIST) {
+        err = "StartCast failed : native session not exist";
+    } else {
+        err = "StartCast failed : native server exception";
+    }
+    return err;
+}
+
 napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -855,33 +870,25 @@ napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        if (argc != ARGC_TWO) {
-            ReportStartCastFailInfo("NapiAVSessionManager::StartCast", ERR_INVALID_PARAM);
-        }
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        int32_t napiInvalidParamErr = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
+        CheckStartCastReportRadar(argc == ARGC_TWO, ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments", napiInvalidParamErr);
 
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
-        if (context->status != napi_ok) {
-            ReportStartCastFailInfo("NapiAVSessionManager::StartCast", ERR_INVALID_PARAM);
-        }
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_object),
-            "invalid type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        bool condition = (context->status == napi_ok) && (type == napi_object);
+        CheckStartCastReportRadar(condition, ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, condition, "invalid type invalid", napiInvalidParamErr);
+
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionToken_);
-        if (context->status != napi_ok) {
-            ReportStartCastFailInfo("NapiAVSessionManager::StartCast", ERR_INVALID_PARAM);
-        }
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok)
-            && (!context->sessionToken_.sessionId.empty()),
-            "invalid session token", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        condition = (context->status == napi_ok) && (!context->sessionToken_.sessionId.empty());
+        CheckStartCastReportRadar(condition, ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, condition, "invalid session token", napiInvalidParamErr);
+
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->outputdeviceInfo_);
-        if (context->status != napi_ok) {
-            ReportStartCastFailInfo("NapiAVSessionManager::StartCast", ERR_INVALID_PARAM);
-        }
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok)
-            && (context->outputdeviceInfo_.deviceInfos_.size() > 0),
-            "invalid outputdeviceInfo", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        condition = (context->status == napi_ok) && (context->outputdeviceInfo_.deviceInfos_.size() > 0);
+        CheckStartCastReportRadar(condition, ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, condition, "invalid outputdeviceInfo", napiInvalidParamErr);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_START_CAST_TASK_ID;
@@ -890,18 +897,10 @@ napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info
         int32_t ret = AVSESSION_ERROR;
         ret = AVSessionManager::GetInstance().StartCast(context->sessionToken_, context->outputdeviceInfo_);
         if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "StartCast failed : native no permission";
-            } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "StartCast failed : native invalid parameters";
-            } else if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "StartCast failed : native session not exist";
-            } else {
-                context->errMessage = "StartCast failed : native server exception";
-            }
+            context->errMessage = GetStartCastErrMsg(ret);
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
-            ReportStartCastFailInfo("NapiAVSessionManager::StartCast", ret, context->outputdeviceInfo_);
+            ReportStartCastFailInfo(ret, context->outputdeviceInfo_);
         }
     };
 
@@ -922,25 +921,20 @@ napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        if (argc != ARGC_ONE) {
-            ReportStopCastFailInfo("NapiAVSessionManager::StopCast", ERR_INVALID_PARAM);
-        }
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        int32_t napiInvalidParamErr = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
+        CheckStopCastReportRadar(argc == ARGC_ONE, ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments", napiInvalidParamErr);
 
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
-        if (context->status != napi_ok) {
-            ReportStopCastFailInfo("NapiAVSessionManager::StopCast", ERR_INVALID_PARAM);
-        }
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_object),
-            "invalid type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        bool condition = (context->status == napi_ok) && (type == napi_object);
+        CheckStopCastReportRadar(condition, ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, condition, "invalid type invalid", napiInvalidParamErr);
+
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->sessionToken_);
-        if (context->status != napi_ok || context->sessionToken_.sessionId.empty()) {
-            ReportStopCastFailInfo("NapiAVSessionManager::StopCast", ERR_INVALID_PARAM);
-        }
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (!context->sessionToken_.sessionId.empty()),
-            "invalid session token", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        condition = (context->status == napi_ok) && (!context->sessionToken_.sessionId.empty());
+        CheckStopCastReportRadar(condition, ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, condition, "invalid session token", napiInvalidParamErr);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_STOP_CAST_TASK_ID;
@@ -960,7 +954,7 @@ napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
-            ReportStopCastFailInfo("NapiAVSessionManager::StopCast", ret);
+            ReportStopCastFailInfo(ret);
         }
     };
 
@@ -1108,24 +1102,38 @@ void NapiAVSessionManager::ReportStopCastDiscoveryFailInfo(std::string func, int
     AVSessionRadar::GetInstance().FailToStopCastDiscovery(info);
 }
 
-void NapiAVSessionManager::ReportStartCastFailInfo(std::string func, int32_t error)
+void NapiAVSessionManager::ReportStartCastFailInfo(int32_t error)
 {
-    AVSessionRadarInfo info(func);
+    AVSessionRadarInfo info("NapiAVSessionManager::StartCast");
     info.errorCode_ = AVSessionRadar::GetRadarErrorCode(error);
     AVSessionRadar::GetInstance().FailToStartCast(info);
 }
 
-void NapiAVSessionManager::ReportStartCastFailInfo(std::string func, int32_t error, const OutputDeviceInfo &outputDeviceInfo)
+void NapiAVSessionManager::ReportStartCastFailInfo(int32_t error, const OutputDeviceInfo &outputDeviceInfo)
 {
-    AVSessionRadarInfo info(func);
+    AVSessionRadarInfo info("NapiAVSessionManager::StartCast");
     info.errorCode_ = AVSessionRadar::GetRadarErrorCode(error);
     AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
 }
 
-void NapiAVSessionManager::ReportStopCastFailInfo(std::string func, int32_t error)
+void NapiAVSessionManager::ReportStopCastFailInfo(int32_t error)
 {
-    AVSessionRadarInfo info(func);
+    AVSessionRadarInfo info("NapiAVSessionManager::StopCast");
     info.errorCode_ = AVSessionRadar::GetRadarErrorCode(error);
     AVSessionRadar::GetInstance().FailToStopCast(info);
+}
+
+void NapiAVSessionManager::CheckStartCastReportRadar(bool condition, int32_t error)
+{
+    if (!condition) {
+        ReportStartCastFailInfo(error);
+    }
+}
+
+void NapiAVSessionManager::CheckStopCastReportRadar(bool condition, int32_t error)
+{
+    if (!condition) {
+        ReportStopCastFailInfo(error);
+    }
 }
 } // namespace OHOS::AVSession

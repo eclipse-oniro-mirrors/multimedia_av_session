@@ -218,6 +218,7 @@ private:
     void InitDM();
 
     void InitBMS();
+
     void InitRadarBMS();
 
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
@@ -309,6 +310,10 @@ private:
     bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta);
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
+
+    void ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid);
+
+    void ReportStartCastEnd(std::string func, const OutputDeviceInfo &outputDeviceInfo, int32_t uid, int ret);
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
         const AVSessionDescriptor* histroyDescriptor);

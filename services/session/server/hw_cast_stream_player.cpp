@@ -206,17 +206,13 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     }
     if (currentAVQueueItem_.GetDescription() && currentAVQueueItem_.GetDescription()->GetMediaUri() != "http:" &&
         currentAVQueueItem_.GetDescription()->GetMediaId() == mediaInfo.mediaId) {
-        int32_t ret = streamPlayer_->Play();
-        if (ret != AVSESSION_SUCCESS) {
+        if (streamPlayer_->Play() != AVSESSION_SUCCESS) {
             SLOGE("Set media info and start failed");
-            return ret;
+            return AVSESSION_ERROR;
         }
-    } else  {
-        int32_t ret = streamPlayer_->Play(mediaInfo);
-        if (ret != AVSESSION_SUCCESS) {
-            SLOGE("Set media info and start failed");
-            return ret;
-        } 
+    } else if (streamPlayer_->Play(mediaInfo) != AVSESSION_SUCCESS) {
+        SLOGE("Set media info and start failed");
+        return AVSESSION_ERROR;
     }
     currentAVQueueItem_ = avQueueItem;
     SLOGI("Set media info and start successfully");

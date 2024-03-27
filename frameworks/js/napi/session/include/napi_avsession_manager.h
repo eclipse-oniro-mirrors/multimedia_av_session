@@ -79,11 +79,17 @@ private:
 
     static void ReportStopCastDiscoveryFailInfo(std::string func, int32_t error);
 
-    static void ReportStartCastFailInfo(std::string func, int32_t error);
+    static void ReportStartCastFailInfo(int32_t error);
 
-    static void ReportStartCastFailInfo(std::string func, int32_t error, const OutputDeviceInfo &outputDeviceInfo);
+    static void ReportStartCastFailInfo(int32_t error, const OutputDeviceInfo &outputDeviceInfo);
 
-    static void ReportStopCastFailInfo(std::string func, int32_t error);
+    static void ReportStopCastFailInfo(int32_t error);
+
+    static std::string GetStartCastErrMsg(int32_t error);
+
+    static void CheckStartCastReportRadar(bool condition, int32_t error);
+
+    static void CheckStopCastReportRadar(bool condition, int32_t error);
 
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> eventHandlers_;
 

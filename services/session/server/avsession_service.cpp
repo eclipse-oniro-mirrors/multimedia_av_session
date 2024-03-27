@@ -672,18 +672,9 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
         AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
-
-    AVSessionRadarInfo info("AVSessionService::StartCast");
-    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(session->GetDescriptor().uid_);
-    AVSessionRadar::GetInstance().StartCastBegin(outputDeviceInfo, info); // todo 应用传递的outputDeviceInfo中没有networkId信息，该如何获取？
-
+    ReportStartCastBegin("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_);
     int32_t ret = session->StartCast(outputDeviceInfo);
-    if (ret == AVSESSION_SUCCESS) {
-        AVSessionRadar::GetInstance().StartCastEnd(outputDeviceInfo, info);
-    } else {
-        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
-        AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
-    }
+    ReportStartCastEnd("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_, ret);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGD("StartCast set isSourceInCast");
     isSourceInCast_ = true;
@@ -726,10 +717,6 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("StopCast: CheckSystemPermission failed");
-        AVSessionRadarInfo info("AVSessionService::StopCast");
-        info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(sessionToken.uid);
-        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ERR_NO_PERMISSION);
-        AVSessionRadar::GetInstance().FailToStopCastDiscovery(info);
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
             "ERROR_MSG", "avsessionservice StopCast checksystempermission failed");
         return ERR_NO_PERMISSION;
@@ -2573,5 +2560,25 @@ void AVSessionService::InitRadarBMS()
 {
     SLOGI("InitRadarBMS");
     AVSessionRadar::GetInstance().InitBMS();
+}
+
+void AVSessionService::ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid)
+{
+    AVSessionRadarInfo info(func);
+    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    AVSessionRadar::GetInstance().StartCastBegin(outputDeviceInfo, info);
+}
+
+void AVSessionService::ReportStartCastEnd(std::string func, const OutputDeviceInfo& outputDeviceInfo,
+    int32_t uid, int ret)
+{
+    AVSessionRadarInfo info(func);
+    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    if (ret == AVSESSION_SUCCESS) {
+        AVSessionRadar::GetInstance().StartCastEnd(outputDeviceInfo, info);
+    } else {
+        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
+        AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
+    }
 }
 } // namespace OHOS::AVSession

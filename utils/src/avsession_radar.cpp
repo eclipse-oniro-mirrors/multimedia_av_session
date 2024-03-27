@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <cstdlib>
 #include "avsession_radar.h"
 #include "device_manager.h"
 #include "radar_constants.h"
@@ -46,8 +47,9 @@ int32_t AVSessionRadar::GetRadarErrorCode(int32_t err)
 {
     constexpr int32_t systemShift = 21;
     constexpr int32_t moduleShift = 16;
-    uint32_t errorCode = (AV_SESSION_SYSTEM_ID << systemShift) | (AV_SESSION_MODULE_ID << moduleShift) | (err & 0xFFFF);
-    SLOGI("GetRadarErrorCode err:%{public}d -> %{public}d", err, errorCode);
+    uint32_t errorCode =
+        (AV_SESSION_SYSTEM_ID << systemShift) | (AV_SESSION_MODULE_ID << moduleShift) | (abs(err) & 0xFFFF);
+    SLOGI("GetRadarErrorCode err:%{public}d -> %{public}d", abs(err), errorCode);
     return errorCode;
 }
 
@@ -57,8 +59,6 @@ std::string AVSessionRadar::GetLocalDeviceNetworkId()
     if (OHOS::DistributedHardware::DeviceManager::GetInstance()
         .GetLocalDeviceNetWorkId(AVSESSION_PKG_NAME, networkId) != 0) {
         SLOGE("GetLocalDeviceNetWorkId failed");
-    } else {
-        SLOGI("xwx GetLocalDeviceNetWorkId: %{public}s", networkId.c_str());
     }
 
     return networkId;
@@ -66,13 +66,11 @@ std::string AVSessionRadar::GetLocalDeviceNetworkId()
 
 std::string AVSessionRadar::GetUdidByNetworkId(const std::string &networkId)
 {
-    SLOGI("GetUdidByNetworkId networkId:%{public}s", networkId.c_str()); // TODO remove it
     std::string localDevUdid = "";
     if (OHOS::DistributedHardware::DeviceManager::GetInstance()
         .GetUdidByNetworkId(AVSESSION_PKG_NAME, networkId, localDevUdid) != 0) {
         SLOGE("GetUdidByNetworkId failed");
     }
-    SLOGI("xwx GetUdidByNetworkId: %{public}s", localDevUdid.c_str());
     return localDevUdid;
 }
 
@@ -94,7 +92,7 @@ std::string AVSessionRadar::GetLocalDevType()
         .GetLocalDeviceType(AVSESSION_PKG_NAME, localDevType) != 0) {
         SLOGE("GetLocalDevType failed");
     } else {
-        SLOGI("xwx GetLocalDevType: %{public}d", localDevType);
+        SLOGI("GetLocalDevType: %{public}d", localDevType);
     }
     return ConvertHexToString(localDevType);
 }
@@ -127,12 +125,6 @@ void AVSessionRadar::InitBMS()
 
 void AVSessionRadar::GetJsonCastDeviceList(const OutputDeviceInfo &deviceInfo, std::string& deviceList)
 {
-/*
-[
-    {PEER_UDID: 'xxx', PEER_BT_MAC:'xxx', PEER_DEV_TYPE:'09C', PEER_DEV_NAME:'华为智慧屏'},
-    {PEER_UDID: 'xxx', PEER_BT_MAC:'xxx', PEER_DEV_TYPE:'09C', PEER_DEV_NAME:'华为智慧屏'}
-]
-*/
     json jDeviceInfos = json::array();
     for (const DeviceInfo& deviceInfo : deviceInfo.deviceInfos_) {
         json jDeviceInfo;
@@ -144,16 +136,16 @@ void AVSessionRadar::GetJsonCastDeviceList(const OutputDeviceInfo &deviceInfo, s
     }
 
     deviceList = jDeviceInfos.dump();
-    SLOGI("xwx GetJsonCastDeviceList: %{public}s", deviceList.c_str());
+    SLOGI("GetJsonCastDeviceList: %{public}s", deviceList.c_str());
 }
 
 void AVSessionRadar::GetPeerInfoFromDeviceInfo(const DeviceInfo &deviceInfo, AVSessionRadarInfo &info)
 {
     info.peerUdid_ = GetAnonymousDeviceId(GetUdidByNetworkId(deviceInfo.networkId_));
     info.peerBtMac_ = "";
-    info.peerNetId_ = deviceInfo.networkId_;
+    info.peerNetId_ = GetAnonymousDeviceId(deviceInfo.networkId_);
     info.peerDevType_ = ConvertHexToString(deviceInfo.deviceType_);
-    info.isTrust_ = (deviceInfo.authenticationStatus_ == 0) ? 
+    info.isTrust_ = (deviceInfo.authenticationStatus_ == 0) ?
         static_cast<int32_t>(TrustStatus::UNTRUST) : static_cast<int32_t>(TrustStatus::TRUST);
 }
 
@@ -189,12 +181,17 @@ void AVSessionRadar::ReportHiSysEventBehavior(AVSessionRadarInfo &info)
     }
     if (info.bundleName_.empty()) {
         int32_t uid = OHOS::IPCSkeleton::GetCallingUid();
-        SLOGI("xwx %{public}s func:%{public}s callingUid:%{public}d", __FUNCTION__, info.func_.c_str(), uid);
+        SLOGI("%{public}s func:%{public}s callingUid:%{public}d", __FUNCTION__, info.func_.c_str(), uid);
         info.bundleName_ = GetBundleNameFromUid(uid);
     }
     info.CheckTriggerMode();
-    info.hostPkg_ = info.bundleName_;
-
+    if (!info.bundleName_.empty()) {
+        info.hostPkg_ =
+            (info.bundleName_.find(MEDIA_CONTROL_PKG) != std::string::npos) ? MEDIA_CONTROL_PKG : info.bundleName_;
+    }
+    if (info.errorCode_ == 0) {
+        info.errorCode_ = GetRadarErrorCode(0);
+    }
     HISYSEVENT_BEHAVIOR(AVSESSION_CAST_BEHAVIOR,
         ORG_PKG, orgPkg_,
         HOST_PKG, info.hostPkg_,
@@ -377,7 +374,16 @@ void AVSessionRadar::PlayerStarted(AVSessionRadarInfo &info)
     ReportHiSysEventBehavior(info);
 }
 
-void AVSessionRadar::SendControlCommand(AVSessionRadarInfo &info)
+void AVSessionRadar::SendControlCommandBegin(AVSessionRadarInfo &info)
+{
+    info.bizScene_ = static_cast<int32_t>(BizScene::CAST_CONTROL);
+    info.bizStage_ = static_cast<int32_t>(CastControlStage::SEND_COMMAND);
+    info.stageRes_ = static_cast<int32_t>(StageResult::IDLE);
+    info.bizState_ = static_cast<int32_t>(BizState::BEGIN);
+    ReportHiSysEventBehavior(info);
+}
+
+void AVSessionRadar::SendControlCommandEnd(AVSessionRadarInfo &info)
 {
     info.bizScene_ = static_cast<int32_t>(BizScene::CAST_CONTROL);
     info.bizStage_ = static_cast<int32_t>(CastControlStage::SEND_COMMAND);

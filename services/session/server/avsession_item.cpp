@@ -605,8 +605,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
-        AVSessionRadarInfo info(__FUNCTION__);
-        AVSessionRadar::GetInstance().ConnectFinish(deviceInfo, info);
+        ReportConnectFinish("AVSessionItem::OnCastStateChange", deviceInfo);
         if (callStartCallback_) {
             SLOGI("AVSessionItem send callStart event to service for connected");
             callStartCallback_(*this);
@@ -621,16 +620,8 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         castHandle_ = -1;
         castControllerProxy_ = nullptr;
 
-        OutputDeviceInfo localDevice;
-        DeviceInfo localInfo;
-        localInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-        localInfo.deviceId_ = "0";
-        localInfo.deviceName_ = "LocalDevice";
-        localDevice.deviceInfos_.emplace_back(localInfo);
-        descriptor_.outputDeviceInfo_ = localDevice;
-
-        AVSessionRadarInfo info(__FUNCTION__);
-        AVSessionRadar::GetInstance().StopCastFinish(deviceInfo, info);
+        SaveLocalDeviceInfo();
+        ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
     }
 
     HandleOutputDeviceChange(castState, outputDeviceInfo);
@@ -673,7 +664,7 @@ int32_t AVSessionItem::StopCast()
     {
         std::lock_guard lockGuard(castHandleLock_);
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
-        AVSessionRadarInfo info(__FUNCTION__);
+        AVSessionRadarInfo info("AVSessionItem::StopCast");
         AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
         int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
         AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
@@ -1259,4 +1250,27 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
     castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
 }
 #endif
+
+void AVSessionItem::ReportConnectFinish(std::string func, const DeviceInfo &deviceInfo)
+{
+    AVSessionRadarInfo info(func);
+    AVSessionRadar::GetInstance().ConnectFinish(deviceInfo, info);
+}
+
+void AVSessionItem::ReportStopCastFinish(std::string func, const DeviceInfo &deviceInfo)
+{
+    AVSessionRadarInfo info(func);
+    AVSessionRadar::GetInstance().StopCastFinish(deviceInfo, info);
+}
+
+void AVSessionItem::SaveLocalDeviceInfo()
+{
+    OutputDeviceInfo localDevice;
+    DeviceInfo localInfo;
+    localInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    localInfo.deviceId_ = "0";
+    localInfo.deviceName_ = "LocalDevice";
+    localDevice.deviceInfos_.emplace_back(localInfo);
+    descriptor_.outputDeviceInfo_ = localDevice;
+}
 } // namespace OHOS::AVSession

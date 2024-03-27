@@ -100,8 +100,11 @@ private:
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
         const std::string& event, napi_value filter, napi_value callback);
-    static void ReportStartFailInfo(std::string func, int error);
-    static void ReportSendControlCommandFailInfo(std::string func, int error);
+    static void ReportStartFailInfo(int error);
+    static void ReportSendControlCommandFailInfo(int error);
+    static std::string GetSendControlCommandErrMsg(int32_t error);
+    static void CheckSendCtrlCmdReportRadar(bool condition, int32_t error);
+    static void CheckStartReportRadar(bool condition, int32_t error);
 
     napi_ref wrapperRef_ {};
     std::shared_ptr<AVCastController> castController_;

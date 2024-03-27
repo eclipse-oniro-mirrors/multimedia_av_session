@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
+#ifndef OHOS_AVSESSION_RADAR_H
+#define OHOS_AVSESSION_RADAR_H
+
 #include "radar_constants.h"
 #include "element_name.h"
 #include <nlohmann/json.hpp>
 #include <string>
+#include <algorithm>
 #include "avsession_descriptor.h"
 #include "bundle_mgr_proxy.h"
 #include "bundle_status_callback_host.h"
@@ -49,7 +53,7 @@ struct AVSessionRadarInfo {
             triggerMode_ = static_cast<int32_t>(TriggerMode::UNKNOWN);
             return;
         }
-        triggerMode_ = (bundleName_ != MEDIA_CONTROL_PKG) ?
+        triggerMode_ = (bundleName_.find(MEDIA_CONTROL_PKG) == std::string::npos) ?
             static_cast<int32_t>(TriggerMode::APPLICATION) :
             static_cast<int32_t>(TriggerMode::MEDIA_CONTROL);
     }
@@ -65,7 +69,6 @@ public:
     void GetPeerInfo(const OutputDeviceInfo &outputDeviceInfo, AVSessionRadarInfo &info);
     void GetPeerInfoFromDeviceInfo(const DeviceInfo &deviceInfo, AVSessionRadarInfo &info);
 
-    // scene1
     void StartCastDiscoveryBegin(AVSessionRadarInfo &info);
     void StartCastDiscoveryEnd(AVSessionRadarInfo &info);
     void FailToStartCastDiscovery(AVSessionRadarInfo &info);
@@ -76,7 +79,6 @@ public:
     void StopCastDiscoveryEnd(AVSessionRadarInfo &info);
     void FailToStopCastDiscovery(AVSessionRadarInfo &info);
 
-    // scene2/scene3
     void StartCastBegin(const OutputDeviceInfo& outputDeviceInfo, AVSessionRadarInfo &info);
     void StartCastEnd(const OutputDeviceInfo& outputDeviceInfo, AVSessionRadarInfo &info);
     void FailToStartCast(AVSessionRadarInfo &info);
@@ -89,13 +91,12 @@ public:
     void StartPlayFailed(AVSessionRadarInfo &info);
     void PlayerStarted(AVSessionRadarInfo &info);
 
-    // scene4
-    void SendControlCommand(AVSessionRadarInfo &info);
+    void SendControlCommandBegin(AVSessionRadarInfo &info);
+    void SendControlCommandEnd(AVSessionRadarInfo &info);
     void FailToSendControlCommand(AVSessionRadarInfo &info);
     void ControlCommandRespond(AVSessionRadarInfo &info);
     void ControlCommandError(AVSessionRadarInfo &info);
 
-    // scene5
     void StopCastBegin(const OutputDeviceInfo& outputDeviceInfo, AVSessionRadarInfo &info);
     void StopCastEnd(const OutputDeviceInfo& outputDeviceInfo, AVSessionRadarInfo &info);
     void StopCastFinish(const DeviceInfo &deviceInfo, AVSessionRadarInfo &info);
@@ -122,3 +123,4 @@ private:
     sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy_;
 };
 } // namespace OHOS::AVSession
+#endif // OHOS_AVSESSION_RADAR_H

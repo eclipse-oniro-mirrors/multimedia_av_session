@@ -43,10 +43,10 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
 {
     SLOGI("OnCastPlaybackStateChange with state: %{public}d", state.GetState());
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) { // TODO 需实测一下一次播放是否只回调一次（暂停/播放是否会报该状态？）
+    if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
         AVSessionRadar::GetInstance().PlayerStarted(info);
-    } else if (state.GetState() != currentState_) { // 需要根据SE给的方法来上报，否则进度上报会频繁触发打点上报
+    } else if (state.GetState() != currentState_) {
         currentState_ = state.GetState();
         AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
         AVSessionRadar::GetInstance().ControlCommandRespond(info);
@@ -150,8 +150,9 @@ int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd
     SLOGI("Call SendControlCommand of cast controller proxy");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     AVSessionRadarInfo info("AVCastControllerItem::SendControlCommand");
-    AVSessionRadar::GetInstance().SendControlCommand(info);
+    AVSessionRadar::GetInstance().SendControlCommandBegin(info);
     castControllerProxy_->SendControlCommand(cmd);
+    AVSessionRadar::GetInstance().SendControlCommandEnd(info);
     return AVSESSION_SUCCESS;
 }
 
@@ -163,6 +164,7 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
     AVSessionRadar::GetInstance().StartPlayBegin(info);
     int32_t ret = castControllerProxy_->Start(avQueueItem);
     if (ret != AVSESSION_SUCCESS) {
+        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
         AVSessionRadar::GetInstance().StartPlayFailed(info);
     } else {
         AVSessionRadar::GetInstance().StartPlayEnd(info);

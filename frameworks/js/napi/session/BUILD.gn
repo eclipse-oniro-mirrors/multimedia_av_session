@@ -72,6 +72,7 @@ ohos_shared_library("avsession_napi") {
     "access_token:libtokenid_sdk",
     "audio_framework:audio_client",
     "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image",
@@ -81,7 +82,6 @@ ohos_shared_library("avsession_napi") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "bundle_framework:appexecfwk_core",
   ]
 
   cflags = []

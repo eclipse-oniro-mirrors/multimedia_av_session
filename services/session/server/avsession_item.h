@@ -243,6 +243,10 @@ private:
     void HandleOnToggleFavorite(const AVControlCommand& cmd);
     void HandleOnPlayFromAssetId(const AVControlCommand& cmd);
 
+    void ReportConnectFinish(std::string func, const DeviceInfo &deviceInfo);
+    void ReportStopCastFinish(std::string func, const DeviceInfo &deviceInfo);
+    void SaveLocalDeviceInfo();
+
     using HandlerFuncType = void(AVSessionItem::*)(const AVControlCommand&);
     static inline HandlerFuncType cmdHandlers[] = {
         &AVSessionItem::HandleOnPlay,
