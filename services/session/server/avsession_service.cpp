@@ -947,37 +947,11 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
     }
 
     std::lock_guard lockGuard(sessionAndControllerLock_);
-    std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
-
-    std::string oldSortContent;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
-        SLOGE("GetAllSessionDescriptors read sort fail! ");
-        for (const auto& session: GetContainer().GetAllSessions()) {
-            descriptors.push_back(session->GetDescriptor());
-        }
-        SLOGI("size=%{public}d", static_cast<int32_t>(descriptors.size()));
-        return AVSESSION_SUCCESS;
-    }
-    nlohmann::json values = json::parse(oldSortContent, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), AVSESSION_SUCCESS, "json object is null");
-    for (auto& value : values) {
-        auto session = GetContainer().GetSessionById(value["sessionId"]);
-        if (session != nullptr) {
-            descriptors.push_back(session->GetDescriptor());
-        }
-    }
-
     for (const auto& session: GetContainer().GetAllSessions()) {
-        bool duplicateSession = false;
-        for (const auto& desc: descriptors) {
-            if (desc.sessionId_ == session->GetSessionId()) {
-                duplicateSession = true;
-                break;
-            }
-        }
-        if (!duplicateSession) {
-            descriptors.push_back(session->GetDescriptor());
-        }
+        descriptors.push_back(session->GetDescriptor());
+    }
+    for (const auto& desc: descriptors) {
+        SLOGD("desc=%{public}s", desc.elementName_.GetBundleName().c_str());
     }
     SLOGI("size=%{public}d", static_cast<int32_t>(descriptors.size()));
     return AVSESSION_SUCCESS;
@@ -1461,7 +1435,7 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 
 void AVSessionService::HandleEventHandlerCallBack()
 {
-    SLOGI("handle eventHandler callback");
+    SLOGI("handle eventHandler callback isFirstPress_=%{public}d", isFirstPress_);
     AVControlCommand cmd;
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (pressCount_ >= THREE_CLICK && topSession_) {
@@ -1507,6 +1481,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
     SLOGI("key=%{public}d", keyEvent.GetKeyCode());
     if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK) {
         pressCount_++;
+        SLOGI("isFirstPress_=%{public}d", isFirstPress_);
         if (isFirstPress_) {
             auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
                 HandleEventHandlerCallBack();
