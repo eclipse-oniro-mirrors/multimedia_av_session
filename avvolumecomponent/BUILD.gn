@@ -11,8 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../avvolumecomponent_part.gni")
-import("../config.gni")
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+import("//foundation/multimedia/av_session/config.gni")
 
 es2abc_gen_abc("gen_avvolumecomponent_abc") {
   src_js = rebase_path("avvolumecomponent.js")
