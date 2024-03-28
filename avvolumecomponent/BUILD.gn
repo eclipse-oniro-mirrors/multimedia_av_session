@@ -13,8 +13,6 @@
 
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
-import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
-import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
 es2abc_gen_abc("gen_avvolumecomponent_abc") {
@@ -32,29 +30,10 @@ gen_js_obj("avvolumecomponent_abc") {
   dep = ":gen_avvolumecomponent_abc"
 }
 
-gen_obj("avvolumecomponent_abc_preview") {
-  input = get_label_info(":gen_avvolumecomponent_abc", "target_out_dir") +
-          "/avvolumecomponent.abc"
-  output = target_out_dir + "/avvolumecomponent_abc.c"
-  snapshot_dep = [ ":gen_avvolumecomponent_abc" ]
-}
-
 ohos_shared_library("avvolumecomponent") {
   sources = [ "avvolumecomponent.cpp" ]
 
-  if (use_mingw_win || use_mac || use_linux) {
-    deps = [ ":gen_obj_src_avvolumecomponent_abc_preview" ]
-  } else {
-    deps = [ ":avvolumecomponent_abc" ]
-  }
-  defines = []
-  if (use_mingw_win) {
-    defines += [ "WINDOWS_PLATFORM" ]
-  } else if (use_mac) {
-    defines += [ "MAC_PLATFORM" ]
-  } else if (use_linux) {
-    defines += [ "LINUX_PLATFORM" ]
-  }
+  deps = [ ":avvolumecomponent_abc" ]
 
   external_deps = [ "napi:ace_napi" ]
 
