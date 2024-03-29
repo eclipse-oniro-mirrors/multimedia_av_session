@@ -430,6 +430,33 @@ if (castplus_cast_engine_enable) {
   }
 }
 
+if (castplus_cast_engine_enable) {
+  ohos_unittest("AVSessionRadarTest") {
+    module_out_path = module_output_path
+
+    sources = [ "avsession_radar_test.cpp" ]
+
+    configs = [ ":module_private_config" ]
+
+    deps = [
+      "./../../../../utils:avsession_utils",
+      "//third_party/bounds_checking_function:libsec_shared",
+      "//third_party/googletest:gtest_main",
+      "//third_party/openssl:libcrypto_shared",
+    ]
+
+    external_deps = [
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "device_manager:devicemanagersdk",
+      "hilog:libhilog",
+      "ipc:ipc_single",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+    ]
+  }
+}
+
 ###############################################################################
 group("av_session_server_unittest") {
   testonly = true

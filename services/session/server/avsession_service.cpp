@@ -60,6 +60,7 @@
 #include "parameters.h"
 #include "avsession_service.h"
 #include "want_agent_helper.h"
+#include "avsession_radar.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -209,6 +210,7 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             break;
         case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
             InitBMS();
+            InitRadarBMS();
             break;
         case CAST_ENGINE_SA_ID:
             CheckInitCast();
@@ -596,6 +598,8 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 {
     SLOGI("AVSessionService CreateSessionByCast in");
     if (isSourceInCast_) {
+        AVSessionRadarInfo info("AVSessionService::CreateSessionByCast");
+        AVSessionRadar::GetInstance().StartConnect(info);
         SLOGI("Create Cast in source, return");
         return;
     }
@@ -623,6 +627,9 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 
 void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
+    AVSessionRadarInfo info("AVSessionService::NotifyDeviceAvailable");
+    AVSessionRadar::GetInstance().CastDeviceAvailable(castOutputDeviceInfo, info);
+
     for (DeviceInfo deviceInfo : castOutputDeviceInfo.deviceInfos_) {
         std::lock_guard lockGuard(castDeviceInfoMapLock_);
         castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
@@ -665,8 +672,9 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
         AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
-
+    ReportStartCastBegin("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_);
     int32_t ret = session->StartCast(outputDeviceInfo);
+    ReportStartCastEnd("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_, ret);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGD("StartCast set isSourceInCast");
     isSourceInCast_ = true;
@@ -2555,6 +2563,32 @@ void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChange
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_BLUETOOTH_A2DP) {
             NotifyDeviceChange(deviceChangeAction);
         }
+    }
+}
+
+void AVSessionService::InitRadarBMS()
+{
+    SLOGI("InitRadarBMS");
+    AVSessionRadar::GetInstance().InitBMS();
+}
+
+void AVSessionService::ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid)
+{
+    AVSessionRadarInfo info(func);
+    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    AVSessionRadar::GetInstance().StartCastBegin(outputDeviceInfo, info);
+}
+
+void AVSessionService::ReportStartCastEnd(std::string func, const OutputDeviceInfo& outputDeviceInfo,
+    int32_t uid, int ret)
+{
+    AVSessionRadarInfo info(func);
+    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    if (ret == AVSESSION_SUCCESS) {
+        AVSessionRadar::GetInstance().StartCastEnd(outputDeviceInfo, info);
+    } else {
+        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
+        AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
     }
 }
 } // namespace OHOS::AVSession

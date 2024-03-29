@@ -92,6 +92,7 @@ private:
     std::vector<int32_t> supportedCastCmds_;
     std::function<void(int32_t, std::vector<int32_t>&)> validCommandsChangecallback_;
     int32_t removeCmdStep_ = 1000;
+    int32_t currentState_ = AVPlaybackState::PLAYBACK_STATE_INITIAL;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_ITEM_H

@@ -19,6 +19,7 @@
 #include "hw_cast_stream_player.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_radar.h"
 
 using namespace OHOS::CastEngine::CastEngineClient;
 using namespace OHOS::CastEngine;
@@ -42,13 +43,30 @@ void HwCastProvider::Init()
 bool HwCastProvider::StartDiscovery(int castCapability)
 {
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
-    return CastSessionManager::GetInstance().StartDiscovery(castCapability);
+    AVSessionRadarInfo info("HwCastProvider::StartDiscovery");
+    AVSessionRadar::GetInstance().StartCastDiscoveryBegin(info);
+    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability);
+    if (ret != 0) {
+        info.errorCode_ = ret;
+        AVSessionRadar::GetInstance().FailToStartCastDiscovery(info);
+    } else {
+        AVSessionRadar::GetInstance().StartCastDiscoveryEnd(info);
+    }
+    return ret;
 }
 
 void HwCastProvider::StopDiscovery()
 {
     SLOGI("stop discovery");
-    CastSessionManager::GetInstance().StopDiscovery();
+    AVSessionRadarInfo info("HwCastProvider::StartDiscovery");
+    AVSessionRadar::GetInstance().StopCastDiscoveryBegin(info);
+    auto ret = CastSessionManager::GetInstance().StopDiscovery();
+    if (ret != 0) {
+        info.errorCode_ = ret;
+        AVSessionRadar::GetInstance().FailToStopCastDiscovery(info);
+    } else {
+        AVSessionRadar::GetInstance().StopCastDiscoveryEnd(info);
+    }
 }
 
 int32_t HwCastProvider::SetDiscoverable(const bool enable)
@@ -303,6 +321,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceName_ = castRemoteDevice.deviceName;
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
+        deviceInfo.networkId_ = castRemoteDevice.networkId;
         deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
         deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType) == 0 ?
             TRUSTED_DEVICE : UNTRUSTED_DEVICE;

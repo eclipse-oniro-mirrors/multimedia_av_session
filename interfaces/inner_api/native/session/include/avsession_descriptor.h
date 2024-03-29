@@ -27,8 +27,9 @@ struct DeviceInfo {
     int32_t castCategory_;
     std::string deviceId_;
     std::string deviceName_;
-    int32_t deviceType_;
+    std::string networkId_;
     std::string ipAddress_;
+    int32_t deviceType_;
     int32_t providerId_;
     int32_t supportedProtocols_ = 3;
     int32_t authenticationStatus_ = 0;

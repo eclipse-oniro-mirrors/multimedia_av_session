@@ -29,6 +29,7 @@
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "napi_avcast_controller.h"
+#include "avsession_radar.h"
 
 namespace OHOS::AVSession {
 static __thread napi_ref AVCastControllerConstructorRef = nullptr;
@@ -137,9 +138,12 @@ napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_
     };
     auto context = std::make_shared<ConcrentContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
+        CheckSendCtrlCmdReportRadar((argc == ARGC_ONE), ERR_INVALID_PARAM);
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+
         context->status = NapiCastControlCommand::GetValue(env, argv[ARGV_FIRST], context->castCommand_);
+        CheckSendCtrlCmdReportRadar((context->status == napi_ok), ERR_INVALID_PARAM);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
@@ -153,28 +157,16 @@ napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_
             context->status = napi_generic_failure;
             context->errMessage = "SendControlCommand failed : controller is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            ReportSendControlCommandFailInfo(ERR_CONTROLLER_NOT_EXIST);
             return;
         }
+
         int32_t ret = napiCastController->castController_->SendControlCommand(context->castCommand_);
         if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "SendControlCommand failed : native session not exist";
-            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
-                context->errMessage = "SendControlCommand failed : native controller not exist";
-            } else if (ret == ERR_SESSION_DEACTIVE) {
-                context->errMessage = "SendControlCommand failed : native session is not active";
-            } else if (ret == ERR_COMMAND_NOT_SUPPORT) {
-                context->errMessage = "SendControlCommand failed : native command not support";
-            } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
-                context->errMessage = "SendControlCommand failed : native command send nums overload";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "SendControlCommand failed : native no permission";
-            } else {
-                context->errMessage = "SendControlCommand failed : native server exception";
-            }
-            SLOGE("controller SendControlCommand failed:%{public}d", ret);
+            context->errMessage = GetSendControlCommandErrMsg(ret);
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
+            ReportSendControlCommandFailInfo(ret);
         }
     };
 
@@ -190,17 +182,19 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("Start failed : no memory");
-        NapiUtils::ThrowError(env, "Start failed : no memory",
-            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        ReportStartFailInfo(ERR_NO_MEMORY);
+        NapiUtils::ThrowError(env, "Start failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        int napiErr = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
+        CheckStartReportRadar((argc == ARGC_ONE), ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments", napiErr);
+
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->avQueueItem_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get play queue item failed",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        CheckStartReportRadar((context->status == napi_ok), ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get play queue item failed", napiErr);
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_CAST_CONTROLLER_START_TASK_ID;
@@ -212,6 +206,7 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
             context->status = napi_generic_failure;
             context->errMessage = "Start failed : castController_ is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            ReportStartFailInfo(ERR_CONTROLLER_NOT_EXIST);
             return;
         }
         int32_t ret = napiCastController->castController_->Start(context->avQueueItem_);
@@ -220,6 +215,7 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
             SLOGE("CastController Start failed:%{public}d", ret);
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
+            ReportStartFailInfo(ret);
         }
     };
 
@@ -1021,5 +1017,62 @@ void NapiAVCastController::ErrCodeToMessage(int32_t errCode, std::string& messag
             message = "SetSessionEvent failed : native server exception";
             break;
     }
+}
+
+void NapiAVCastController::ReportStartFailInfo(int error)
+{
+    AVSessionRadarInfo info("NapiAVCastController::Start");
+    info.errorCode_ = AVSessionRadar::GetRadarErrorCode(error);
+    AVSessionRadar::GetInstance().StartPlayFailed(info);
+}
+
+void NapiAVCastController::ReportSendControlCommandFailInfo(int error)
+{
+    AVSessionRadarInfo info("NapiAVCastController::SendControlCommand");
+    info.errorCode_ = AVSessionRadar::GetRadarErrorCode(error);
+    AVSessionRadar::GetInstance().FailToSendControlCommand(info);
+}
+
+void NapiAVCastController::CheckSendCtrlCmdReportRadar(bool condition, int32_t error)
+{
+    if (!condition) {
+        ReportSendControlCommandFailInfo(error);
+    }
+}
+
+void NapiAVCastController::CheckStartReportRadar(bool condition, int32_t error)
+{
+    if (!condition) {
+        ReportStartFailInfo(error);
+    }
+}
+
+std::string NapiAVCastController::GetSendControlCommandErrMsg(int32_t error)
+{
+    std::string msg;
+    switch (error) {
+        case ERR_SESSION_NOT_EXIST:
+            msg = "SendControlCommand failed : native session not exist";
+            break;
+        case ERR_CONTROLLER_NOT_EXIST:
+            msg = "SendControlCommand failed : native controller not exist";
+            break;
+        case ERR_SESSION_DEACTIVE:
+            msg = "SendControlCommand failed : native session is not active";
+            break;
+        case ERR_NO_PERMISSION:
+            msg = "SendControlCommand failed : native no permission";
+            break;
+        case ERR_COMMAND_NOT_SUPPORT:
+            msg = "SendControlCommand failed : native command not support";
+            break;
+        case ERR_COMMAND_SEND_EXCEED_MAX:
+            msg = "SendControlCommand failed : native command send nums overload";
+            break;
+        default:
+            msg = "SendControlCommand failed : native server exception";
+            break;
+    }
+    return msg;
 }
 } // namespace OHOS::AVSession
