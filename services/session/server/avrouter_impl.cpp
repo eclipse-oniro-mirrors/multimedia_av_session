@@ -282,6 +282,14 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     return AVSESSION_SUCCESS;
 }
 
+void AVRouterImpl::GetServiceAllConnectState(int32_t streamState, int64_t castHandle)
+{
+    streamState_ = streamState;
+    int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
+    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    providerManagerMap_[providerNumber]->provider_->GetStreamState(streamState_, castId);
+}
+
 int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr<IAVCastSessionStateListener> callback)
 {
     SLOGI("AVRouterImpl register IAVCastSessionStateListener callback to provider");

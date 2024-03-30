@@ -46,6 +46,7 @@ ohos_shared_library("avsession_service") {
     "server/avsession_dumper.cpp",
     "server/avsession_service.cpp",
     "server/avsession_service_ext.cpp",
+    "server/avcast_allconnect.cpp",
     "server/background_audio_controller.cpp",
     "server/focus_session_strategy.cpp",
     "server/migrate/migrate_avsession_manager.cpp",
@@ -151,6 +152,8 @@ ohos_shared_library("avsession_service") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "CollaborationFwk:cfwk_allconnect_client",
+    "CollaborationFwk:collaborationFwk_client",
     "window_manager:libdm",
     "window_manager:libwm",
   ]
@@ -391,6 +394,8 @@ ohos_shared_library("avsession_item") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "CollaborationFwk:cfwk_allconnect_client",
+    "CollaborationFwk:collaborationFwk_client",
     "window_manager:libdm",
     "window_manager:libwm",
   ]

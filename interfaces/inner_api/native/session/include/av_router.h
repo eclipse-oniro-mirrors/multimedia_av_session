@@ -190,6 +190,8 @@ public:
     */
     virtual int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
+
+    virtual void GetServiceAllConnectState(int32_t streamState, int64_t castHandle) = 0;
 #endif
 };
 } // namespace OHOS::AVSession

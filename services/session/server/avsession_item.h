@@ -61,6 +61,8 @@ public:
 
     ~AVSessionItem() override;
 
+    int32_t RegisterListenerStreamToCast();
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool IsCastSinkSession(int32_t castState);
 
@@ -299,6 +301,7 @@ private:
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
     int32_t removeCmdStep_ = 1000;
+    int32_t deviceStateAddCommand_ = -1;
     
     std::recursive_mutex destroyLock_;
     volatile bool isDestroyed_ = false;

@@ -39,6 +39,7 @@
 #include "i_avsession_service_listener.h"
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
+#include "avcast_allconnect.h"
 
 namespace OHOS::AVSession {
 class AVSessionDumper;
@@ -311,6 +312,8 @@ private:
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 
+    int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
+
     void ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid);
 
     void ReportStartCastEnd(std::string func, const OutputDeviceInfo &outputDeviceInfo, int32_t uid, int ret);
@@ -336,6 +339,10 @@ private:
 
     FocusSessionStrategy focusSessionStrategy_;
     BackgroundAudioController backgroundAudioController_;
+
+    CastAllConnectCallback *castAllConnectCallback_;
+    CollaborationFwk::ServiceStateInfo serviceStateInfo_;
+    std::maap<std::string, int32_t> castServiceNameMapState_;
 
     std::recursive_mutex castAudioSessionMapLock_;
     std::map<std::string, std::string> castAudioSessionMap_;
@@ -374,6 +381,8 @@ private:
 
     int32_t pressCount_ {};
     int32_t maxHistoryNums = 10;
+    int32_t streamState_ = 6;
+    int32_t counter = 0;
     bool isFirstPress_ = true;
     bool isSourceInCast_ = false;
     bool isInCast_ = false;

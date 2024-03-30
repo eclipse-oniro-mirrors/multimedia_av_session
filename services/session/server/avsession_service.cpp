@@ -61,6 +61,7 @@
 #include "avsession_service.h"
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
+#include "allconnect_manager.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -76,6 +77,7 @@ typedef void (*StopMigrateStubFunc)(void);
 using namespace std;
 using namespace nlohmann;
 using namespace OHOS::AudioStandard;
+using namespace OHOS::CollaborationFwk;
 
 namespace OHOS::AVSession {
 static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
@@ -122,6 +124,8 @@ void AVSessionService::OnStart()
     if (ret == AVSESSION_ERROR) {
         maxHistoryNums = defMaxHistoryNum;
     }
+    castAllConnectCallback_ = new(std::nothrow)CastAllConnectCallback();
+    CollaborationFwk::AllConnectManager::GetInstance().SubscribeServiceState(castAllConnectCallback_);
 
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
     backgroundAudioController_.Init(this);
@@ -165,6 +169,9 @@ void AVSessionService::OnStop()
         stopMigrateStub();
     }
     dlclose(migrateStubFuncHandle_);
+    CollaborationFwk::AllConnectManager::GetInstance().UnRegisterServiceDeathRecipient();
+    castAllConnectCallback_ = nullptr;
+    delete(castAllConnectCallback_);
     CommandSendLimit::GetInstance().StopTimer();
 }
 
@@ -820,6 +827,24 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     return result;
 }
 
+int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
+{
+    SLOGI("enter MirrorToStreamCast");
+    std::string serviceName;
+    int32_t state;
+    castAllConnectCallback_->GetCastAllConnectData(serviceName, state);
+    castServiceNameMapState_[serviceName] = state;
+    if (castServiceNameMapState_["HuaweiCast"] == 4 || castServiceNameMapState_["HuaweiCast-Dual"] == 4) {
+        if (is2in1_ != 0) {
+            checkEnableCast(true);
+            if (session->RegisterListenerStreamToCast() == AVSESSION_ERROR) {
+                return AVSESSION_ERROR;
+            }
+        }
+    }
+    return AVSESSION_SUCCESS;
+}
+
 sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                           const AppExecFwk::ElementName& elementName)
 {
@@ -861,6 +886,7 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
+    MirrorToStreamCast(result);
     SLOGI("success");
     return result;
 }
