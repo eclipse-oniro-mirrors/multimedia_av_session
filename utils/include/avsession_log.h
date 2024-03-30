@@ -21,7 +21,7 @@
 #include "hilog/log.h"
 
 #undef LOG_DOMAIN
-#define LOG_DOMAIN 0xD002B00
+#define LOG_DOMAIN 0xD002B50
 
 #undef LOG_TAG
 #define LOG_TAG "AVSession"
