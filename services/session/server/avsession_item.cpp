@@ -1253,14 +1253,28 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 
 void AVSessionItem::ReportConnectFinish(std::string func, const DeviceInfo &deviceInfo)
 {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSessionRadarInfo info(func);
-    AVSessionRadar::GetInstance().ConnectFinish(deviceInfo, info);
+    if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
+        DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[deviceInfo.deviceId_];
+        AVSessionRadar::GetInstance().ConnectFinish(cacheDeviceInfo, info);
+    } else {
+        AVSessionRadar::GetInstance().ConnectFinish(deviceInfo, info);
+    }
+#endif
 }
 
 void AVSessionItem::ReportStopCastFinish(std::string func, const DeviceInfo &deviceInfo)
 {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSessionRadarInfo info(func);
-    AVSessionRadar::GetInstance().StopCastFinish(deviceInfo, info);
+    if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
+        DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[deviceInfo.deviceId_];
+        AVSessionRadar::GetInstance().StopCastFinish(cacheDeviceInfo, info);
+    } else {
+        AVSessionRadar::GetInstance().StopCastFinish(deviceInfo, info);
+    }
+#endif
 }
 
 void AVSessionItem::SaveLocalDeviceInfo()

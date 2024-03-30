@@ -202,7 +202,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCastDiscovery001, TestSiz
     AVSessionRadar::GetInstance().FailToStopCastDiscovery(info);
     EXPECT_EQ(info.bizScene_, static_cast<int32_t>(BizScene::CAST_DISCOVERY));
     EXPECT_EQ(info.bizStage_, static_cast<int32_t>(CastDiscoveryStage::STOP));
-    EXPECT_EQ(info.stageRes_, static_cast<int32_t>(StageResult::SUCCESS));
+    EXPECT_EQ(info.stageRes_, static_cast<int32_t>(StageResult::FAIL));
     EXPECT_EQ(info.bizState_, static_cast<int32_t>(BizState::END));
 }
 

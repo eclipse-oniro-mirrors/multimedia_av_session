@@ -448,6 +448,7 @@ if (castplus_cast_engine_enable) {
     external_deps = [
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
       "device_manager:devicemanagersdk",
       "hilog:libhilog",
       "ipc:ipc_single",
@@ -478,6 +479,7 @@ group("av_session_server_unittest") {
 
   if (castplus_cast_engine_enable) {
     deps += [
+      ":AVSessionRadarTest",
       ":HwCastStreamPlayerTest",
       ":HwCastTest",
     ]
