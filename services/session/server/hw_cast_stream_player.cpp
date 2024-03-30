@@ -22,6 +22,7 @@
 #include "avsession_errors.h"
 #include "avsession_sysevent.h"
 #include "avsession_trace.h"
+#include "avsession_radar.h"
 
 using namespace OHOS::CastEngine;
 
@@ -75,6 +76,9 @@ void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castContr
             "SESSION_TYPE", "cast",
             "ERROR_TYPE", "INNER_ERROR",
             "ERROR_INFO", "streamPlayer is nullptr");
+        AVSessionRadarInfo info("HwCastStreamPlayer::SendControlCommand");
+        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ERR_REMOTE_CONNECTION_NOT_EXIST);
+        AVSessionRadar::GetInstance().FailToSendControlCommand(info);
         return;
     }
     switch (castControlCommand.GetCommand()) {

@@ -58,7 +58,7 @@ bool HwCastProvider::StartDiscovery(int castCapability)
 void HwCastProvider::StopDiscovery()
 {
     SLOGI("stop discovery");
-    AVSessionRadarInfo info("HwCastProvider::StartDiscovery");
+    AVSessionRadarInfo info("HwCastProvider::StopDiscovery");
     AVSessionRadar::GetInstance().StopCastDiscoveryBegin(info);
     auto ret = CastSessionManager::GetInstance().StopDiscovery();
     if (ret != 0) {
@@ -102,7 +102,12 @@ int HwCastProvider::StartCastSession()
     SLOGI("StartCastSession begin");
     CastSessionProperty property = {CastEngine::ProtocolType::CAST_PLUS_STREAM, CastEngine::EndType::CAST_SOURCE};
     std::shared_ptr<ICastSession> castSession = nullptr;
-    CastSessionManager::GetInstance().CreateCastSession(property, castSession);
+    int ret = CastSessionManager::GetInstance().CreateCastSession(property, castSession);
+    if (ret != AVSESSION_SUCCESS) {
+        AVSessionRadarInfo info("HwCastProvider::StartCastSession");
+        info.errorCode_ = ret;
+        AVSessionRadar::GetInstance().FailToStartCast(info);
+    }
     int castId;
     {
         SLOGI("StartCastSession pre check lock");
