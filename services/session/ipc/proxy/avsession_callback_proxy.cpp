@@ -305,8 +305,8 @@ void AVSessionCallbackProxy::OnCastDisplayChange(const CastDisplayInfo& castDisp
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(data.WriteInt32(static_cast<int32_t>(castDisplayInfo.displayState)),
         "write displayState failed");
+    CHECK_AND_RETURN_LOG(data.WriteUint64(castDisplayInfo.displayId), "write displayId failed");
     CHECK_AND_RETURN_LOG(data.WriteString(castDisplayInfo.name), "write name failed");
-    CHECK_AND_RETURN_LOG(data.WriteInt64(castDisplayInfo.displayId), "write displayId failed");
     CHECK_AND_RETURN_LOG(data.WriteInt32(castDisplayInfo.width), "write width failed");
     CHECK_AND_RETURN_LOG(data.WriteInt32(castDisplayInfo.height), "write height failed");
 

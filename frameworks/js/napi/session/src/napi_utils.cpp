@@ -654,10 +654,10 @@ napi_status NapiUtils::SetValue(napi_env env, const CastDisplayInfo& in, napi_va
     CHECK_RETURN(status == napi_ok, "create object failed", status);
     napi_value displayState = nullptr;
     napi_create_int32(env, static_cast<int>(in.displayState), &displayState);
-    status = napi_set_named_property(env, out, "castDisplayState", displayState);
+    status = napi_set_named_property(env, out, "state", displayState);
     napi_value displayId = nullptr;
     napi_create_int64(env, in.displayId, &displayId);
-    status = napi_set_named_property(env, out, "displayId", displayId);
+    status = napi_set_named_property(env, out, "id", displayId);
     napi_value name = nullptr;
     napi_create_string_utf8(env, in.name.c_str(), in.name.size(), &name);
     status = napi_set_named_property(env, out, "name", name);

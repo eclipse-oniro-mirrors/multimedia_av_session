@@ -240,6 +240,7 @@ int32_t AVSessionCallbackStub::HandleOnCastDisplayChange(MessageParcel& data, Me
     int32_t height = -1;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(height), ERR_NONE, "read height failed");
     castDisplayInfo.height = height;
+    OnCastDisplayChange(castDisplayInfo);
     return ERR_NONE;
 }
 } // namespace OHOS::AVSession

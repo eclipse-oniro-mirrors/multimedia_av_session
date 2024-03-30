@@ -52,6 +52,8 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm",
+    "window_manager:libwm",
   ]
 
   if (castplus_cast_engine_enable) {

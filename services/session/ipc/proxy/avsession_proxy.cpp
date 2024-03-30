@@ -632,7 +632,7 @@ int32_t AVSessionProxy::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDis
             CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(displayState), ERR_MARSHALLING, "read displayState failed");
             castDisplayInfo.displayState = static_cast<CastDisplayState>(displayState);
             uint64_t displayId = 0;
-            CHECK_AND_RETURN_RET_LOG(reply.ReadInt64(displayId), ERR_MARSHALLING, "read displayId failed");
+            CHECK_AND_RETURN_RET_LOG(reply.ReadUint64(displayId), ERR_MARSHALLING, "read displayId failed");
             castDisplayInfo.displayId = displayId;
             std::string name = "";
             CHECK_AND_RETURN_RET_LOG(reply.ReadString(name), ERR_MARSHALLING, "read name failed");
