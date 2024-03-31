@@ -834,7 +834,8 @@ int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
     int32_t state;
     castAllConnectCallback_->GetCastAllConnectData(serviceName, state);
     castServiceNameMapState_[serviceName] = state;
-    if (castServiceNameMapState_["HuaweiCast"] == 4 || castServiceNameMapState_["HuaweiCast-Dual"] == 4) {
+    if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+     castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
         if (is2in1_ != 0) {
             checkEnableCast(true);
             if (session->RegisterListenerStreamToCast() == AVSESSION_ERROR) {

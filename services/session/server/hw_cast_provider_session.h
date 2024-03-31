@@ -50,6 +50,9 @@ private:
     std::string stashDeviceId_;
     int32_t streamState_ = 0;
     int counter_ = -1;
+
+    const int32_t deviceStateConnection = 6;
+    const int32_t oneceTransmissionDeviceState = 1;
 };
 } // namespace OHOS::AVSession
 

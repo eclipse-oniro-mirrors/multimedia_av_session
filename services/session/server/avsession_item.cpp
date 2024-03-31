@@ -487,7 +487,8 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
         controller->HandleValidCommandChange(supportedCmd_);
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (deviceStateAddCommand_ == 6 && cmd == AVControlCommand::SESSION_CMD_MIRROR_TO_STREAM_CAST) {
+    if (deviceStateAddCommand_ == streamStateConnection &&
+     cmd == AVControlCommand::SESSION_CMD_MIRROR_TO_STREAM_CAST) {
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = "0";
         deviceInfo.deviceName_ = "RemoteCast";
@@ -617,8 +618,8 @@ int32_t AVSessionItem::RegisterListenerStreamToCast()
     castHandle_ = castHandle;
     AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
     CHECK_AND_RETURN_RET_LOG("castHandle != AVSESSION_ERROR", AVSESSION_ERROR, "StartCast failed");
-    AVRouter::GetInstance().GetServiceAllConnectState(6, castHandle);
-    deviceStateAddCommand_ = 6;
+    AVRouter::GetInstance().GetServiceAllConnectState(streamStateConnection, castHandle);
+    deviceStateAddCommand_ = const_cast<int32_t>(streamStateConnection);
     return AVSESSION_SUCCESS;
 }
 

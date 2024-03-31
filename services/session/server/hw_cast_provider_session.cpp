@@ -95,11 +95,11 @@ void HwCastProviderSession::GetStreamState(int32_t streamState)
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered listeners");
-            listener->OnCastStateChange(static_cast<int>(6), deviceInfo);
+            listener->OnCastStateChange(const_cast<int>(deviceStateConnection), deviceInfo);
             counter_ = 1;
         }
     }
-    stashDeviceState_ = 6;
+    stashDeviceState_ = const_cast<int32_t>(deviceStateConnection);
 }
 
 bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener)
@@ -160,7 +160,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         return;
     }
     stashDeviceState_ = -1;
-    if(deviceState == 6 && counter_ == 1) {
+    if (deviceState == deviceStateConnection && counter_ == oneceTransmissionDeviceState) {
         SLOGI("interception of one devicestate=6 transmission")
         counter_ = 0;
         return;

@@ -303,6 +303,8 @@ private:
     int32_t removeCmdStep_ = 1000;
     int32_t deviceStateAddCommand_ = -1;
     
+    const int32_t streamStateConnection = 6;
+    
     std::recursive_mutex destroyLock_;
     volatile bool isDestroyed_ = false;
 

@@ -399,6 +399,7 @@ private:
     const int32_t maxFileLength = 32 * 1024 * 1024;
     const int32_t maxAVQueueInfoLen = 5;
     const int32_t allocSpace = 2;
+    const int32_t deviceStateConnection = 4;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H
