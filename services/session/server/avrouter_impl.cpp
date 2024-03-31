@@ -272,6 +272,14 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
         castHandle, "Can not find corresponding provider");
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "RemoteCast";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
     CHECK_AND_RETURN_RET_LOG(castHandleToOutputDeviceMap_.find(castId) != castHandleToOutputDeviceMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding castId");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr

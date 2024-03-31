@@ -342,7 +342,7 @@ private:
 
     CastAllConnectCallback *castAllConnectCallback_;
     CollaborationFwk::ServiceStateInfo serviceStateInfo_;
-    std::maap<std::string, int32_t> castServiceNameMapState_;
+    std::map<std::string, int32_t> castServiceNameMapState_;
 
     std::recursive_mutex castAudioSessionMapLock_;
     std::map<std::string, std::string> castAudioSessionMap_;

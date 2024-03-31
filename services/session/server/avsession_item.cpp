@@ -614,6 +614,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast()
     deviceInfo.providerId_ = 1;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     int64_t castHandle = AVRouter::GetInstance().StartCast(OutputDeviceInfo);
+    castHandle_ = castHandle;
     AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
     CHECK_AND_RETURN_RET_LOG("castHandle != AVSESSION_ERROR", AVSESSION_ERROR, "StartCast failed");
     AVRouter::GetInstance().GetServiceAllConnectState(6, castHandle);

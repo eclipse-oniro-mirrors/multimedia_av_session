@@ -90,7 +90,7 @@ void HwCastProviderSession::GetStreamState(int32_t streamState)
     std::lock_guard lockGuard(mutex_);
     for (auto listener : castSessionStateListenerList_) {
         DeviceInfo deviceInfo;
-        deviceInfo.deviceId_ = stateInfo.deviceId;
+        deviceInfo.deviceId_ = "0";
         deviceInfo.deviceName_ = "RemoteCast";
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         if (listener != nullptr) {

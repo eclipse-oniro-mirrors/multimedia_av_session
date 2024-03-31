@@ -124,7 +124,7 @@ void AVSessionService::OnStart()
     if (ret == AVSESSION_ERROR) {
         maxHistoryNums = defMaxHistoryNum;
     }
-    castAllConnectCallback_ = new(std::nothrow)CastAllConnectCallback();
+    castAllConnectCallback_ = new (std::nothrow) CastAllConnectCallback();
     CollaborationFwk::AllConnectManager::GetInstance().SubscribeServiceState(castAllConnectCallback_);
 
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
@@ -886,7 +886,9 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
-    MirrorToStreamCast(result);
+    if (type == AVSession::SESSION_TYPE_VIDEO) {
+        MirrorToStreamCast(result);
+    }
     SLOGI("success");
     return result;
 }
