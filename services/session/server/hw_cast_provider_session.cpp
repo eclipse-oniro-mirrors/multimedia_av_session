@@ -84,7 +84,7 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
     return streamPlayerPtr;
 }
 
-void HwCastProviderSession::GetStreamState(int32_t streamState)
+void HwCastProviderSession::SetStreamState(int32_t streamState)
 {
     streamState_ = streamState;
     std::lock_guard lockGuard(mutex_);
@@ -96,10 +96,11 @@ void HwCastProviderSession::GetStreamState(int32_t streamState)
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered listeners");
             listener->OnCastStateChange(const_cast<int>(deviceStateConnection), deviceInfo);
-            counter_ = 1;
+            counter_++;
         }
     }
     stashDeviceState_ = const_cast<int32_t>(deviceStateConnection);
+    stashDeviceId_ = "0";
 }
 
 bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener)
@@ -160,7 +161,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         return;
     }
     stashDeviceState_ = -1;
-    if (deviceState == deviceStateConnection && counter_ == oneceTransmissionDeviceState) {
+    if (deviceState == deviceStateConnection && counter_ > 0) {
         SLOGI("interception of one devicestate=6 transmission")
         counter_ = 0;
         return;

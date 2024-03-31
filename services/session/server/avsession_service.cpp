@@ -830,17 +830,12 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
 int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
 {
     SLOGI("enter MirrorToStreamCast");
-    std::string serviceName;
-    int32_t state;
-    castAllConnectCallback_->GetCastAllConnectData(serviceName, state);
-    castServiceNameMapState_[serviceName] = state;
+    castAllConnectCallback_->SetCastAllConnectData(castServiceNameMapState_);
     if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
      castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
         if (is2in1_ != 0) {
             checkEnableCast(true);
-            if (session->RegisterListenerStreamToCast() == AVSESSION_ERROR) {
-                return AVSESSION_ERROR;
-            }
+            return session->RegisterListenerStreamToCast();
         }
     }
     return AVSESSION_SUCCESS;

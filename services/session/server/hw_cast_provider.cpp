@@ -259,9 +259,9 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
     return hwCastStreamPlayer;
 }
 
-void HwCastProvider::GetStreamState(int32_t streamState, int32_t castId)
+void HwCastProvider::SetStreamState(int32_t streamState, int32_t castId)
 {
-    hwCastProviderSessionMap_[castId]->GetStreamState(streamState);
+    hwCastProviderSessionMap_[castId]->SetStreamState(streamState);
 }
 
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,

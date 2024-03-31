@@ -30,10 +30,9 @@ public:
     ~CastAllConnectCallback();
     int32_t OnServiceStateChanged(std::string deviceId,
         std::string serviceName, std::string extraInfo, int32_t state, int pid) override;
-    int32_t GetCastAllConnectData(std::string& serviceName, int32_t& state);
+    int32_t SetCastAllConnectData(std::map<std::string, int32_t>& serviceNameMapState);
 private:
-    std::string serviceName_ = "NULL";
-    int32_t state_ = -1;
+    std::map<std::string, int32_t>serviceNameMapState_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_ALLCONNECT_H

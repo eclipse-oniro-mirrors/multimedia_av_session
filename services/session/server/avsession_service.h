@@ -381,8 +381,6 @@ private:
 
     int32_t pressCount_ {};
     int32_t maxHistoryNums = 10;
-    int32_t streamState_ = 6;
-    int32_t counter = 0;
     bool isFirstPress_ = true;
     bool isSourceInCast_ = false;
     bool isInCast_ = false;

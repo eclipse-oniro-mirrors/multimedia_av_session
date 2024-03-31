@@ -1292,7 +1292,7 @@ napi_status NapiAVSession::OnMediaKeyEvent(napi_env env, NapiAVSession* napiSess
 
 napi_status NapiAVSession::OnOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_MIRROR_TO_STREAM_CAST);
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_OUTPUT_DEVICE_CHANGE);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");

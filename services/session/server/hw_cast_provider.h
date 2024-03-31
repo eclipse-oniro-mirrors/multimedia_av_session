@@ -52,7 +52,7 @@ public:
     void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void OnServiceDied() override;
-    void GetStreamState(int32_t streamState, int32_t castId) override;
+    void SetStreamState(int32_t streamState, int32_t castId) override;
 
 private:
     void WaitSessionRelease();

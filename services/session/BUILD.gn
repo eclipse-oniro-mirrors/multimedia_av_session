@@ -152,8 +152,6 @@ ohos_shared_library("avsession_service") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "CollaborationFwk:cfwk_allconnect_client",
-    "CollaborationFwk:collaborationFwk_client",
     "window_manager:libdm",
     "window_manager:libwm",
   ]
@@ -163,6 +161,8 @@ ohos_shared_library("avsession_service") {
     external_deps += [
       "cast_engine:cast_engine_client",
       "graphic_surface:surface",
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationFwk_client",
     ]
     deps += [
       "../../frameworks/native/session:avsession_cast_client",
@@ -394,15 +394,17 @@ ohos_shared_library("avsession_item") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "CollaborationFwk:cfwk_allconnect_client",
-    "CollaborationFwk:collaborationFwk_client",
     "window_manager:libdm",
     "window_manager:libwm",
   ]
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [
+      "cast_engine:cast_engine_client",
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationFwk_client",
+    ]
     deps += [
       "../../frameworks/native/session:avsession_cast_client",
       "./../session:avsession_cast_item",

@@ -60,7 +60,7 @@ public:
     int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) override;
 
-    void GetServiceAllConnectState(int32_t streamState, int64_t castHandle) override;
+    void SetServiceAllConnectState(int32_t streamState, int64_t castHandle) override;
 protected:
 
 private:
@@ -73,7 +73,6 @@ private:
     bool hasSessionAlive_ = false;
     int32_t providerNumberEnableDefault_ = 1;
     int32_t providerNumberDisable_ = 0;
-    int32_t streamState_ = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H
