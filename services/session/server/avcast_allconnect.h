@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+#ifndef OHOS_AVCAST_ALLCONNECT_H
+#define OHOS_AVCAST_ALLCONNECT_H
+
+#include <string>
+
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_info.h"
@@ -24,10 +29,11 @@ public:
     CastAllConnectCallback();
     ~CastAllConnectCallback();
     int32_t OnServiceStateChanged(std::string deviceId,
-     std::string serviceName, std::string extraInfo, int32_t state, int pid) override;
+        std::string serviceName, std::string extraInfo, int32_t state, int pid) override;
     int32_t GetCastAllConnectData(std::string& serviceName, int32_t& state);
 private:
     std::string serviceName_ = "NULL";
     int32_t state_ = -1;
 };
-}
+} // namespace OHOS::AVSession
+#endif // OHOS_AVCAST_ALLCONNECT_H

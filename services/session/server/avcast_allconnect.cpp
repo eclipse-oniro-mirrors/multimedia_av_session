@@ -25,7 +25,7 @@ CastAllConnectCallback::~CastAllConnectCallback()
     SLOGI("CastAllConnectCallback destruct");
 }
 int32_t CastAllConnectCallback::OnServiceStateChanged(std::string deviceId,
- std::string serviceName, std::string extraInfo, int32_t state, int pid)
+    std::string serviceName, std::string extraInfo, int32_t state, int pid)
 {
     SLOGI("deviceId = %{public}s, serviceName = %{public}s, state = %{public}d",
      deviceId.c_str(), serviceName.c_str(), state);
