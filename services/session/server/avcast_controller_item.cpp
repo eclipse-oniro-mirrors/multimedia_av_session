@@ -161,13 +161,12 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
     SLOGI("Call Start of cast controller proxy");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     AVSessionRadarInfo info("AVCastControllerItem::Start");
-    AVSessionRadar::GetInstance().StartPlayBegin(info);
     int32_t ret = castControllerProxy_->Start(avQueueItem);
     if (ret != AVSESSION_SUCCESS) {
         info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
         AVSessionRadar::GetInstance().StartPlayFailed(info);
     } else {
-        AVSessionRadar::GetInstance().StartPlayEnd(info);
+        AVSessionRadar::GetInstance().StartPlayBegin(info);
     }
     currentAVQueueItem_ = avQueueItem;
     return AVSESSION_SUCCESS;
