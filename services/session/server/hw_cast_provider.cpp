@@ -149,7 +149,7 @@ void HwCastProvider::StopCastSession(int castId)
      castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
         hwCastProviderSessionMap_.erase(castId);
         castFlag_[castId] = false;
-     }
+    }
     avCastControllerMap_.erase(castId);
 }
 

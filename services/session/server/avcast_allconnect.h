@@ -28,7 +28,7 @@
 namespace OHOS::AVSession {
 class CastAllConnectCallback : public CollaborationFwk::CallbackSkeleton {
 public:
-    CastAllConnectCallback(IAVSessionServiceListener *servicePtr);
+    explicit CastAllConnectCallback(IAVSessionServiceListener *servicePtr);
     ~CastAllConnectCallback();
     int32_t OnServiceStateChanged(std::string deviceId,
         std::string serviceName, std::string extraInfo, int32_t state, int pid) override;

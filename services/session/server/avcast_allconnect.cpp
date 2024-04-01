@@ -33,7 +33,7 @@ int32_t CastAllConnectCallback::OnServiceStateChanged(std::string deviceId,
     std::string serviceName, std::string extraInfo, int32_t state, int pid)
 {
     SLOGI("deviceId = %{public}s, serviceName = %{public}s, state = %{public}d",
-     deviceId.c_str(), serviceName.c_str(), state);
+        deviceId.c_str(), serviceName.c_str(), state);
     serviceNameMapState_[serviceName] = state;
     servicePtr_->NotifyMirrorToStreamCast();
     return AVSESSION_SUCCESS;

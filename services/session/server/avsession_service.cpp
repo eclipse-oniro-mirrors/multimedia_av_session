@@ -58,7 +58,6 @@
 #include "if_system_ability_manager.h"
 #include "parameter.h"
 #include "parameters.h"
-#include "allconnect_manager.h"
 #include "avsession_service.h"
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
@@ -67,6 +66,7 @@ typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std
 typedef void (*StopMigrateStubFunc)(void);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "allconnect_manager.h"
 #include "av_router.h"
 #endif
 
@@ -168,9 +168,11 @@ void AVSessionService::OnStop()
         stopMigrateStub();
     }
     dlclose(migrateStubFuncHandle_);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     CollaborationFwk::AllConnectManager::GetInstance().UnRegisterServiceDeathRecipient();
     castAllConnectCallback_ = nullptr;
     delete(castAllConnectCallback_);
+#endif
     CommandSendLimit::GetInstance().StopTimer();
 }
 
@@ -826,6 +828,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     return result;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 void AVSessionService::NotifyMirrorToStreamCast()
 {
     if (topSession_ != oneceCastSession_ && topSession_->GetSessionType == "video") {
@@ -847,6 +850,7 @@ int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
     }
     return AVSESSION_SUCCESS;
 }
+#endif
 
 sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                           const AppExecFwk::ElementName& elementName)
