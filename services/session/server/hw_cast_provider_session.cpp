@@ -84,9 +84,8 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
     return streamPlayerPtr;
 }
 
-void HwCastProviderSession::SetStreamState(int32_t streamState)
+void HwCastProviderSession::SetStreamState()
 {
-    streamState_ = streamState;
     std::lock_guard lockGuard(mutex_);
     for (auto listener : castSessionStateListenerList_) {
         DeviceInfo deviceInfo;

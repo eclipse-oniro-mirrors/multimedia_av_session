@@ -52,7 +52,7 @@ public:
     void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void OnServiceDied() override;
-    void SetStreamState(int32_t streamState, int32_t castId) override;
+    void SetStreamState(int32_t castId, std::map<std::string, int32_t>& serviceNameMapState) override;
 
 private:
     void WaitSessionRelease();
@@ -60,11 +60,14 @@ private:
     std::vector<bool> castFlag_ = std::vector<bool>(MAX_CAST_SESSION_SIZE, false);
     std::map<int, std::shared_ptr<HwCastProviderSession>> hwCastProviderSessionMap_;
     std::map<int, std::shared_ptr<IAVCastControllerProxy>> avCastControllerMap_;
+    std::map<std::string, int32_t> castServiceNameMapState_;
     std::vector<std::shared_ptr<IAVCastStateListener>> castStateListenerList_;
     std::recursive_mutex mutexLock_;
     bool isRelease_ = false;
     int lastCastId_ = -1;
     std::shared_ptr<HwCastProviderSession> lastCastSession;
+
+    const int32_t deviceStateConnection = 4;
 };
 } // namespace OHOS::AVSession
 

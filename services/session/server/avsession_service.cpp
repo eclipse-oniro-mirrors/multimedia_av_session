@@ -58,10 +58,10 @@
 #include "if_system_ability_manager.h"
 #include "parameter.h"
 #include "parameters.h"
+#include "allconnect_manager.h"
 #include "avsession_service.h"
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
-#include "allconnect_manager.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -124,8 +124,6 @@ void AVSessionService::OnStart()
     if (ret == AVSESSION_ERROR) {
         maxHistoryNums = defMaxHistoryNum;
     }
-    castAllConnectCallback_ = new (std::nothrow) CastAllConnectCallback();
-    CollaborationFwk::AllConnectManager::GetInstance().SubscribeServiceState(castAllConnectCallback_);
 
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
     backgroundAudioController_.Init(this);
@@ -148,6 +146,8 @@ void AVSessionService::OnStart()
         checkEnableCast(true);
         AVRouter::GetInstance().SetDiscoverable(true);
     }
+    castAllConnectCallback_ = new (std::nothrow) CastAllConnectCallback(this);
+    CollaborationFwk::AllConnectManager::GetInstance().SubscribeServiceState(castAllConnectCallback_);
 #endif
     PullMigrateStub();
     HISYSEVENT_REGITER;
@@ -827,15 +827,23 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     return result;
 }
 
+void AVSessionService::NotifyMirrorToStreamCast()
+{
+    if (topSession_ != oneceCastSession_ && topSession_->GetSessionType == "video") {
+        MirrorToStreamCast(topSession_);
+    }
+}
+
 int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
 {
     SLOGI("enter MirrorToStreamCast");
-    castAllConnectCallback_->SetCastAllConnectData(castServiceNameMapState_);
+    oneceCastSession_ = session;
+    castAllConnectCallback_->GetCastAllConnectData(castServiceNameMapState_);
     if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
      castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
         if (is2in1_ != 0) {
             checkEnableCast(true);
-            return session->RegisterListenerStreamToCast();
+            return session->RegisterListenerStreamToCast(castServiceNameMapState_);
         }
     }
     return AVSESSION_SUCCESS;

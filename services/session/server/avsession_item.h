@@ -61,7 +61,7 @@ public:
 
     ~AVSessionItem() override;
 
-    int32_t RegisterListenerStreamToCast();
+    int32_t RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool IsCastSinkSession(int32_t castState);

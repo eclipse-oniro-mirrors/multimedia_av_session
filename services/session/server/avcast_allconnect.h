@@ -22,15 +22,17 @@
 #include "avsession_log.h"
 #include "avsession_info.h"
 #include "allconnect_manager.h"
+#include "av_router.h"
+#include "avcast_provider_manager.h"
 
 namespace OHOS::AVSession {
 class CastAllConnectCallback : public CollaborationFwk::CallbackSkeleton {
 public:
-    CastAllConnectCallback();
+    CastAllConnectCallback(IAVSessionServiceListener *servicePtr);
     ~CastAllConnectCallback();
     int32_t OnServiceStateChanged(std::string deviceId,
         std::string serviceName, std::string extraInfo, int32_t state, int pid) override;
-    int32_t SetCastAllConnectData(std::map<std::string, int32_t>& serviceNameMapState);
+    int32_t GetCastAllConnectData(std::map<std::string, int32_t>& serviceNameMapState);
 private:
     std::map<std::string, int32_t>serviceNameMapState_;
 };

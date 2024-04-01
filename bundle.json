@@ -49,9 +49,9 @@
           "safwk",
           "samgr",
           "window_manager",
+          "CollaborationFwk",
           "distributed_notification_service",
-          "relational_store",
-          "CollaborationFwk"
+          "relational_store"
         ],
         "third_party": [
           "openssl",

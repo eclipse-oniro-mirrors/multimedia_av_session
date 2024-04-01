@@ -16,9 +16,13 @@
 #include "avcast_allconnect.h"
 
 namespace OHOS::AVSession {
-CastAllConnectCallback::CastAllConnectCallback()
+CastAllConnectCallback::CastAllConnectCallback(IAVSessionServiceListener *servicePtr)
 {
     SLOGI("CastAllConnectCallback constructor");
+    {
+        std::lock_guard lockGuard(servicePtrLock_);
+        servicePtr_ = servicePtr;
+    }
 }
 
 CastAllConnectCallback::~CastAllConnectCallback()
@@ -32,12 +36,13 @@ int32_t CastAllConnectCallback::OnServiceStateChanged(std::string deviceId,
     SLOGI("deviceId = %{public}s, serviceName = %{public}s, state = %{public}d",
      deviceId.c_str(), serviceName.c_str(), state);
     serviceNameMapState_[serviceName] = state;
+    servicePtr_->NotifyMirrorToStreamCast();
     return AVSESSION_SUCCESS;
 }
 
-int32_t CastAllConnectCallback::SetCastAllConnectData(std::map<std::string, int32_t>& serviceNameMapState)
+int32_t CastAllConnectCallback::GetCastAllConnectData(std::map<std::string, int32_t>& serviceNameMapState)
 {
-    serviceNameMapState = serviceNameMapState_
+    serviceNameMapState = serviceNameMapState_;
     return AVSESSION_SUCCESS;
 }
 

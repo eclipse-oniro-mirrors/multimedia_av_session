@@ -603,7 +603,7 @@ bool AVSessionItem::IsCastSinkSession(int32_t castState)
     return false;
 }
 
-int32_t AVSessionItem::RegisterListenerStreamToCast()
+int32_t AVSessionItem::RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState)
 {
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
@@ -616,7 +616,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast()
     castHandle_ = castHandle;
     AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
     CHECK_AND_RETURN_RET_LOG("castHandle != AVSESSION_ERROR", AVSESSION_ERROR, "StartCast failed");
-    AVRouter::GetInstance().SetServiceAllConnectState(streamStateConnection, castHandle);
+    AVRouter::GetInstance().SetServiceAllConnectState(streamStateConnection, castHandle, serviceNameMapState);
     deviceStateAddCommand_ = const_cast<int32_t>(streamStateConnection);
     return AVSESSION_SUCCESS;
 }

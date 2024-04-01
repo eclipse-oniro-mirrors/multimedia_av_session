@@ -152,6 +152,8 @@ public:
 
     void NotifyDeviceOffline(const std::string& deviceId) override;
 
+    void NotifyMirrorToStreamCast() override;
+
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
     int32_t StopCast(const SessionToken& sessionToken) override;
@@ -343,6 +345,7 @@ private:
     CastAllConnectCallback *castAllConnectCallback_;
     CollaborationFwk::ServiceStateInfo serviceStateInfo_;
     std::map<std::string, int32_t> castServiceNameMapState_;
+    sptr<AVSessionItem> oneceCastSession_;
 
     std::recursive_mutex castAudioSessionMapLock_;
     std::map<std::string, std::string> castAudioSessionMap_;

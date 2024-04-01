@@ -141,11 +141,15 @@ void HwCastProvider::StopCastSession(int castId)
         return;
     }
     auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
-    if (hwCastProviderSession) {
+    if (hwCastProviderSession && (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+     castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection)) {
         hwCastProviderSession->Release();
     }
-    hwCastProviderSessionMap_.erase(castId);
-    castFlag_[castId] = false;
+    if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+     castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
+        hwCastProviderSessionMap_.erase(castId);
+        castFlag_[castId] = false;
+     }
     avCastControllerMap_.erase(castId);
 }
 
@@ -259,9 +263,10 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
     return hwCastStreamPlayer;
 }
 
-void HwCastProvider::SetStreamState(int32_t streamState, int32_t castId)
+void HwCastProvider::SetStreamState(int32_t castId, std::map<std::string, int32_t>& serviceNameMapState)
 {
-    hwCastProviderSessionMap_[castId]->SetStreamState(streamState);
+    castServiceNameMapState_ = serviceNameMapState;
+    hwCastProviderSessionMap_[castId]->SetStreamState();
 }
 
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,
