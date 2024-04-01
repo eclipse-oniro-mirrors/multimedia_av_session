@@ -77,7 +77,6 @@ typedef void (*StopMigrateStubFunc)(void);
 using namespace std;
 using namespace nlohmann;
 using namespace OHOS::AudioStandard;
-using namespace OHOS::CollaborationFwk;
 
 namespace OHOS::AVSession {
 static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +

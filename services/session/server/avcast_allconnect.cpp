@@ -20,7 +20,6 @@ CastAllConnectCallback::CastAllConnectCallback(IAVSessionServiceListener *servic
 {
     SLOGI("CastAllConnectCallback constructor");
     {
-        std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_ = servicePtr;
     }
 }

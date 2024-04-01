@@ -290,8 +290,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     return AVSESSION_SUCCESS;
 }
 
-void AVRouterImpl::SetServiceAllConnectState(int32_t streamState, int64_t castHandle,
-    std::map<std::string, int32_t>& serviceNameMapState)
+void AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, std::map<std::string, int32_t>& serviceNameMapState)
 {
     int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);

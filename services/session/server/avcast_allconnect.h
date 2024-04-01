@@ -35,6 +35,7 @@ public:
     int32_t GetCastAllConnectData(std::map<std::string, int32_t>& serviceNameMapState);
 private:
     std::map<std::string, int32_t>serviceNameMapState_;
+    IAVSessionServiceListener *servicePtr_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_ALLCONNECT_H

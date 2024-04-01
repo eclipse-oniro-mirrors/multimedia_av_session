@@ -191,7 +191,7 @@ public:
     virtual int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
 
-    virtual void SetServiceAllConnectState(int32_t streamState, int64_t castHandle,
+    virtual void SetServiceAllConnectState(int64_t castHandle,
         std::map<std::string, int32_t>& serviceNameMapState) = 0;
 #endif
 };

@@ -94,11 +94,11 @@ void HwCastProviderSession::SetStreamState()
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered listeners");
-            listener->OnCastStateChange(const_cast<int>(deviceStateConnection), deviceInfo);
+            listener->OnCastStateChange(deviceStateConnection, deviceInfo);
             counter_++;
         }
     }
-    stashDeviceState_ = const_cast<int32_t>(deviceStateConnection);
+    stashDeviceState_ = deviceStateConnection;
     stashDeviceId_ = "0";
 }
 
