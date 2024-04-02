@@ -39,7 +39,10 @@
 #include "i_avsession_service_listener.h"
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_allconnect.h"
+#endif
 
 namespace OHOS::AVSession {
 class AVSessionDumper;
@@ -314,7 +317,9 @@ private:
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
+#endif
 
     void ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid);
 
@@ -342,11 +347,6 @@ private:
     FocusSessionStrategy focusSessionStrategy_;
     BackgroundAudioController backgroundAudioController_;
 
-    CastAllConnectCallback *castAllConnectCallback_;
-    CollaborationFwk::ServiceStateInfo serviceStateInfo_;
-    std::map<std::string, int32_t> castServiceNameMapState_;
-    sptr<AVSessionItem> oneceCastSession_;
-
     std::recursive_mutex castAudioSessionMapLock_;
     std::map<std::string, std::string> castAudioSessionMap_;
 
@@ -368,6 +368,13 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+
+    CastAllConnectCallback *castAllConnectCallback_;
+    CollaborationFwk::ServiceStateInfo serviceStateInfo_;
+    std::map<std::string, int32_t> castServiceNameMapState_;
+    sptr<AVSessionItem> oneceCastSession_;
+
+    const int32_t deviceStateConnection = 4;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
@@ -400,7 +407,6 @@ private:
     const int32_t maxFileLength = 32 * 1024 * 1024;
     const int32_t maxAVQueueInfoLen = 5;
     const int32_t allocSpace = 2;
-    const int32_t deviceStateConnection = 4;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

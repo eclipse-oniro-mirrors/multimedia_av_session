@@ -532,6 +532,23 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+int32_t AVSessionItem::RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState)
+{
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "RemoteCast";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    int64_t castHandle = AVRouter::GetInstance().StartCast(OutputDeviceInfo);
+    castHandle_ = castHandle;
+    AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
+    CHECK_AND_RETURN_RET_LOG("castHandle != AVSESSION_ERROR", AVSESSION_ERROR, "StartCast failed");
+    AVRouter::GetInstance().SetServiceAllConnectState(castHandle, serviceNameMapState);
+    deviceStateAddCommand_ = const_cast<int32_t>(streamStateConnection);
+    return AVSESSION_SUCCESS;
+}
 
 int32_t AVSessionItem::AddSupportCastCommand(int32_t cmd)
 {
@@ -601,24 +618,6 @@ bool AVSessionItem::IsCastSinkSession(int32_t castState)
         return Destroy() == true;
     }
     return false;
-}
-
-int32_t AVSessionItem::RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState)
-{
-    OutputDeviceInfo outputDeviceInfo;
-    DeviceInfo deviceInfo;
-    deviceInfo.deviceId_ = "0";
-    deviceInfo.deviceName_ = "RemoteCast";
-    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
-    deviceInfo.providerId_ = 1;
-    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    int64_t castHandle = AVRouter::GetInstance().StartCast(OutputDeviceInfo);
-    castHandle_ = castHandle;
-    AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
-    CHECK_AND_RETURN_RET_LOG("castHandle != AVSESSION_ERROR", AVSESSION_ERROR, "StartCast failed");
-    AVRouter::GetInstance().SetServiceAllConnectState(castHandle, serviceNameMapState);
-    deviceStateAddCommand_ = const_cast<int32_t>(streamStateConnection);
-    return AVSESSION_SUCCESS;
 }
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)

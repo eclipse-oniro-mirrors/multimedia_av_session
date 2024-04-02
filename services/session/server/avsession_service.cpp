@@ -766,6 +766,28 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 #endif
     return AVSESSION_SUCCESS;
 }
+
+void AVSessionService::NotifyMirrorToStreamCast()
+{
+    if (topSession_ != oneceCastSession_ && topSession_->GetSessionType == "video") {
+        MirrorToStreamCast(topSession_);
+    }
+}
+
+int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
+{
+    SLOGI("enter MirrorToStreamCast");
+    oneceCastSession_ = session;
+    castAllConnectCallback_->GetCastAllConnectData(castServiceNameMapState_);
+    if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+     castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
+        if (is2in1_ != 0) {
+            checkEnableCast(true);
+            return session->RegisterListenerStreamToCast(castServiceNameMapState_);
+        }
+    }
+    return AVSESSION_SUCCESS;
+}
 #endif
 
 void AVSessionService::HandleCallStartEvent()
@@ -827,30 +849,6 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
 
     return result;
 }
-
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-void AVSessionService::NotifyMirrorToStreamCast()
-{
-    if (topSession_ != oneceCastSession_ && topSession_->GetSessionType == "video") {
-        MirrorToStreamCast(topSession_);
-    }
-}
-
-int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
-{
-    SLOGI("enter MirrorToStreamCast");
-    oneceCastSession_ = session;
-    castAllConnectCallback_->GetCastAllConnectData(castServiceNameMapState_);
-    if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
-     castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
-        if (is2in1_ != 0) {
-            checkEnableCast(true);
-            return session->RegisterListenerStreamToCast(castServiceNameMapState_);
-        }
-    }
-    return AVSESSION_SUCCESS;
-}
-#endif
 
 sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                           const AppExecFwk::ElementName& elementName)

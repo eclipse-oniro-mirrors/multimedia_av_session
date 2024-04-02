@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_allconnect.h"
 
 namespace OHOS::AVSession {
@@ -46,3 +46,4 @@ int32_t CastAllConnectCallback::GetCastAllConnectData(std::map<std::string, int3
 }
 
 }
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
