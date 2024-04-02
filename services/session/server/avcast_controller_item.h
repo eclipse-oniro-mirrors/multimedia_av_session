@@ -43,7 +43,7 @@ public:
     void OnSeekDone(const int32_t seekNumber) override;
 
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
-    
+
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
     void OnEndOfStream(const int32_t isLooping) override;
@@ -51,6 +51,8 @@ public:
     void OnPlayRequest(const AVQueueItem& avQueueItem) override;
 
     void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override;
+
+    void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
 
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
@@ -78,6 +80,10 @@ public:
 
     int32_t RemoveAvailableCommand(const int32_t cmd) override;
 
+    int32_t HandleCastValidCommandChange(const std::vector<int32_t> &cmds);
+
+    void SetSessionTag(const std::string tag);
+
     int32_t Destroy() override;
 
 protected:
@@ -93,6 +99,7 @@ private:
     std::function<void(int32_t, std::vector<int32_t>&)> validCommandsChangecallback_;
     int32_t removeCmdStep_ = 1000;
     int32_t currentState_ = AVPlaybackState::PLAYBACK_STATE_INITIAL;
+    std::string sessionTag_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_ITEM_H

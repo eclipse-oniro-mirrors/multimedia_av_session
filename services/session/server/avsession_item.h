@@ -182,13 +182,25 @@ public:
     int32_t SinkCancelCastAudio();
 
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
-    
+
     void SetServiceCallbackForAVQueueInfo(const std::function<void(AVSessionItem&)>& callback);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    void InitializeCastCommands();
+
+    void AddSessionCommandToCast(int32_t cmd);
+
+    void RemoveSessionCommandFromCast(int32_t cmd);
+
+    int32_t SessionCommandToCastCommand(int32_t cmd);
+
     int32_t AddSupportCastCommand(int32_t cmd);
 
+    bool IsCastRelevancyCommand(int32_t cmd);
+
     int32_t DeleteSupportCastCommand(int32_t cmd);
+
+    void HandleCastValidCommandChange(std::vector<int32_t> &cmds);
 
     int32_t ReleaseCast() override;
 
@@ -293,13 +305,13 @@ private:
     std::shared_ptr<RemoteSessionSource> remoteSource_;
     std::recursive_mutex remoteSinkLock_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
-    
+
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
 
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
     int32_t removeCmdStep_ = 1000;
-    
+
     std::recursive_mutex destroyLock_;
     volatile bool isDestroyed_ = false;
 

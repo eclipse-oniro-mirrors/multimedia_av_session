@@ -36,7 +36,7 @@ public:
     void OnSeekDone(const int32_t seekNumber) override;
 
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
-    
+
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
     void OnEndOfStream(const int32_t isLooping) override;
@@ -45,6 +45,8 @@ public:
 
     void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
 
+    void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override;
+
     void AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 
 private:
@@ -52,5 +54,5 @@ private:
     std::shared_ptr<AVCastControllerCallback> callback_;
     static constexpr const char* EVENT_NAME = "AVCastControllerCallback";
 };
-}
+} // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_CALLBACK_CLIENT_H

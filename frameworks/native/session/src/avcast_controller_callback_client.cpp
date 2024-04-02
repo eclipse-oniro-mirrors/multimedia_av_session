@@ -135,6 +135,17 @@ void AVCastControllerCallbackClient::OnKeyRequest(const std::string& assetId, co
         }, EVENT_NAME), "AVCastControllerCallbackClient handler postTask failed");
 }
 
+void AVCastControllerCallbackClient::OnCastValidCommandChanged(const std::vector<int32_t> &cmds)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+    SLOGI("OnCastValidCommandChanged begin, cmd size:%{public}zd", cmds.size());
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [callback, cmds]() { callback->OnCastValidCommandChanged(cmds); }, EVENT_NAME),
+        "AVCastControllerCallbackClient handler postTask failed");
+    SLOGI("OnCastValidCommandChanged end");
+}
+
 void AVCastControllerCallbackClient::AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>&
     listener)
 {

@@ -46,6 +46,8 @@ private:
 
     int32_t HandleOnKeyRequest(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnCastValidCommandChanged(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = int32_t (AVCastControllerCallbackStub::*)(MessageParcel& data, MessageParcel& reply);
@@ -60,6 +62,7 @@ private:
         &AVCastControllerCallbackStub::HandleOnEndOfStream,
         &AVCastControllerCallbackStub::HandleOnPlayRequest,
         &AVCastControllerCallbackStub::HandleOnKeyRequest,
+        &AVCastControllerCallbackStub::HandleOnCastValidCommandChanged,
     };
 };
 }
