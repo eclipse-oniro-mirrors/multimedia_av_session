@@ -750,6 +750,16 @@ public:
         return 0;
     };
 
+    int SetAvailableCapability(const OHOS::CastEngine::StreamCapability &streamCapability) override
+    {
+        return 0;
+    }
+
+    int GetAvailableCapability(OHOS::CastEngine::StreamCapability &streamCapability) override
+    {
+        return 0;
+    }
+
     int Release() override
     {
         return 0;

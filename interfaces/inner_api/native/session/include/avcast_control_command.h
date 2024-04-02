@@ -41,7 +41,8 @@ public:
         CAST_CONTROL_CMD_SET_LOOP_MODE = 10,
         CAST_CONTROL_CMD_TOGGLE_FAVORITE = 11,
         CAST_CONTROL_CMD_TOGGLE_MUTE = 12,
-        CAST_CONTROL_CMD_MAX = 13,
+        CAST_CONTROL_CMD_PLAY_STATE_CHANGE = 13,
+        CAST_CONTROL_CMD_MAX = 14,
     };
 
     AVCastControlCommand();
@@ -73,7 +74,7 @@ public:
     int32_t SetLoopMode(int32_t loopMode);
     int32_t GetLoopMode(int32_t& loopMode) const;
 
-    const static inline std::vector<int32_t> localCapability {
+    static const inline std::vector<int32_t> localCapability {
         CAST_CONTROL_CMD_PLAY,
         CAST_CONTROL_CMD_PAUSE,
         CAST_CONTROL_CMD_STOP,
@@ -93,5 +94,5 @@ private:
     int32_t cmd_ = CAST_CONTROL_CMD_INVALID;
     std::variant<int32_t, double, int64_t, bool> param_;
 };
-}
+} // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROL_COMMAND_H

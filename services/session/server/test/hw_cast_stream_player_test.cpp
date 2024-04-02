@@ -609,5 +609,61 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest001, TestSize.Level1)
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
     SLOGI("OnPlayRequest001 end!");
 }
+
+/**
+ * @tc.name: SetValidAbility001
+ * @tc.desc: SetValidAbility to cast
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, SetValidAbility001, TestSize.Level1)
+{
+    SLOGI("SetValidAbility001 begin!");
+    std::vector<int32_t> validAbilityList;
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_STOP);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT);
+    ASSERT_EQ(hwCastStreamPlayer->SetValidAbility(validAbilityList), AVSESSION_SUCCESS);
+    SLOGI("SetValidAbility001 end!");
+}
+
+/**
+ * @tc.name: GetValidAbility001
+ * @tc.desc: GetValidAbility from cast
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, GetValidAbility001, TestSize.Level1)
+{
+    SLOGI("GetValidAbility001 begin!");
+    std::vector<int32_t> validAbilityList;
+    ASSERT_EQ(hwCastStreamPlayer->GetValidAbility(validAbilityList), AVSESSION_SUCCESS);
+    SLOGI("GetValidAbility001 end!");
+}
+
+
+/**
+ * @tc.name: OnAvailableCapabilityChanged001
+ * @tc.desc: OnAvailableCapabilityChanged
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged001, TestSize.Level1)
+{
+    SLOGI("OnAvailableCapabilityChanged001 begin!");
+    std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
+    ASSERT_EQ(hwCastStreamPlayer->RegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+    CastEngine::StreamCapability streamCapability;
+    streamCapability.isPlaySupported = true;
+    streamCapability.isPauseSupported = true;
+    streamCapability.isStopSupported = true;
+    streamCapability.isNextSupported = true;
+    streamCapability.isPreviousSupported = true;
+    streamCapability.isSeekSupported = true;
+    hwCastStreamPlayer->OnAvailableCapabilityChanged(streamCapability);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+    SLOGI("OnAvailableCapabilityChanged001 end!");
+}
 } // namespace AVSession
 } // namespace OHOS

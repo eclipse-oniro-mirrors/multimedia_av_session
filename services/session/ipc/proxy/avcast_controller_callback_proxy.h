@@ -35,7 +35,7 @@ public:
     void OnSeekDone(const int32_t seekNumber) override;
 
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
-    
+
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
     void OnEndOfStream(const int32_t isLooping) override;
@@ -43,6 +43,9 @@ public:
     void OnPlayRequest(const AVQueueItem& avQueueItem) override;
 
     void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
+
+    void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) override;
+
 private:
     static inline BrokerDelegator<AVCastControllerCallbackProxy> delegator_;
 };
