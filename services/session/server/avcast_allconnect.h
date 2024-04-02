@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-
 #ifndef OHOS_AVCAST_ALLCONNECT_H
 #define OHOS_AVCAST_ALLCONNECT_H
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include <string>
 
 #include "avsession_errors.h"
@@ -39,5 +38,5 @@ private:
     IAVSessionServiceListener *servicePtr_;
 };
 } // namespace OHOS::AVSession
-#endif // OHOS_AVCAST_ALLCONNECT_H
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
+#endif // OHOS_AVCAST_ALLCONNECT_H

@@ -129,6 +129,10 @@ public:
 
     void HandleCallStartEvent();
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
+#endif
+
     void HandleControllerRelease(AVControllerItem& controller);
 
     std::int32_t Dump(std::int32_t fd, const std::vector<std::u16string>& args) override;
@@ -316,10 +320,6 @@ private:
     bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta);
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
-
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
-#endif
 
     void ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid);
 

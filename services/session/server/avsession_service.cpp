@@ -891,9 +891,11 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (type == AVSession::SESSION_TYPE_VIDEO) {
         MirrorToStreamCast(result);
     }
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("success");
     return result;
 }
