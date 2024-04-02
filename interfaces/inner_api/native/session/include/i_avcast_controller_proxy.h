@@ -35,14 +35,14 @@ public:
      *
      * @since 10
     */
-    IAVCastControllerProxy () = default;
+    IAVCastControllerProxy() = default;
 
     /**
      * @brief Deconstruct IAVCastControllerProxy object.
      *
      * @since 10
     */
-    virtual ~IAVCastControllerProxy () = default;
+    virtual ~IAVCastControllerProxy() = default;
 
     /**
      * @brief Release IAVCastControllerProxy object.
@@ -139,7 +139,7 @@ public:
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t GetValidAbility(const std::vector<int32_t>& validAbilityList) = 0;
+    virtual int32_t GetValidAbility(std::vector<int32_t> &validAbilityList) = 0;
 
     /**
      * @brief Set display surface of the current media.

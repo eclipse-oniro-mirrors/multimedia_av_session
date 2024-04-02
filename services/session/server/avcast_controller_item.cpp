@@ -145,6 +145,12 @@ void AVCastControllerItem::OnKeyRequest(const std::string &assetId, const std::v
     callback_->OnKeyRequest(assetId, keyRequestData);
 }
 
+void AVCastControllerItem::OnValidCommandChange(const std::vector<int32_t>& cmds)
+{
+    SLOGI("OnValidCommandChange");
+    HandleCastValidCommandChange(cmds);
+}
+
 int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd)
 {
     SLOGI("Call SendControlCommand of cast controller proxy");
@@ -161,13 +167,12 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
     SLOGI("Call Start of cast controller proxy");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     AVSessionRadarInfo info("AVCastControllerItem::Start");
-    AVSessionRadar::GetInstance().StartPlayBegin(info);
     int32_t ret = castControllerProxy_->Start(avQueueItem);
     if (ret != AVSESSION_SUCCESS) {
         info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
         AVSessionRadar::GetInstance().StartPlayFailed(info);
     } else {
-        AVSessionRadar::GetInstance().StartPlayEnd(info);
+        AVSessionRadar::GetInstance().StartPlayBegin(info);
     }
     currentAVQueueItem_ = avQueueItem;
     return AVSESSION_SUCCESS;
@@ -201,8 +206,14 @@ int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 
 int32_t AVCastControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 {
+    if (sessionTag_ == "RemoteCast") {
+        castControllerProxy_->GetValidAbility(cmds);
+        SLOGI("get available commands from cast with size %{public}zd", cmds.size());
+        return AVSESSION_SUCCESS;
+    }
+
     validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_MAX, cmds);
-    SLOGI("get available command with size %{public}d", static_cast<int32_t>(cmds.size()));
+    SLOGI("get available command with size %{public}zd", cmds.size());
     return AVSESSION_SUCCESS;
 }
 
@@ -250,6 +261,20 @@ int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
         castControllerProxy_->SetValidAbility(cmds);
     }
     return AVSESSION_SUCCESS;
+}
+
+int32_t AVCastControllerItem::HandleCastValidCommandChange(const std::vector<int32_t>& cmds)
+{
+    SLOGI("HandleCastValidCommandChange cmd size:%{public}zd", cmds.size());
+    CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
+    std::lock_guard lockGuard(itemCallbackLock_);
+    callback_->OnCastValidCommandChanged(cmds);
+    return AVSESSION_SUCCESS;
+}
+
+void AVCastControllerItem::SetSessionTag(const std::string tag)
+{
+    sessionTag_ = tag;
 }
 
 bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)

@@ -68,7 +68,8 @@
             "//foundation/multimedia/av_session/frameworks/js/napi/session:avsession_napi",
             "//foundation/multimedia/av_session/utils:avsession_utils",
             "//foundation/multimedia/av_session/avpicker:avcastpicker",
-            "//foundation/multimedia/av_session/avpicker:avcastpickerparam"
+            "//foundation/multimedia/av_session/avpicker:avcastpickerparam",
+            "//foundation/multimedia/av_session/avvolumecomponent:avvolumecomponent"
           ],
           "service_group": [
             "//foundation/multimedia/av_session/services/session:avsession_item",

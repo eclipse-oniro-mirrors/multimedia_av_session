@@ -22,6 +22,7 @@
 #include "napi_media_description.h"
 #include "napi_queue_item.h"
 #include "napi_utils.h"
+#include "napi_cast_control_command.h"
 
 namespace OHOS::AVSession {
 NapiAVCastControllerCallback::NapiAVCastControllerCallback()
@@ -244,6 +245,13 @@ void NapiAVCastControllerCallback::OnKeyRequest(const std::string &assetId, cons
     HandleEvent(EVENT_KEY_REQUEST, assetId, keyRequestData);
 }
 
+void NapiAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<int32_t>& cmds)
+{
+    SLOGI("Start handle OnValidCommandChanged event. cmd size:%{public}zd", cmds.size());
+    std::vector<std::string> stringCmds = NapiCastControlCommand::ConvertCommands(cmds);
+    HandleEvent(EVENT_CAST_VALID_COMMAND_CHANGED, stringCmds);
+}
+
 napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
@@ -302,4 +310,4 @@ bool NapiAVCastControllerCallback::IsCallbacksEmpty(int32_t event)
 {
     return callbacks_[event].empty();
 }
-}
+} // namespace OHOS::AVSession

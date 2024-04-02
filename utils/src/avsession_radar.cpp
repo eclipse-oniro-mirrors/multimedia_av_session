@@ -168,6 +168,53 @@ void AVSessionRadar::GetPeerInfo(const OutputDeviceInfo& outputDeviceInfo, AVSes
     }
 }
 
+void AVSessionRadar::ReportWithoutTrustInfo(AVSessionRadarInfo &info)
+{
+    HISYSEVENT_BEHAVIOR(AVSESSION_CAST_BEHAVIOR,
+        ORG_PKG, orgPkg_,
+        HOST_PKG, info.hostPkg_,
+        TO_CALL_PKG, info.toCallPkg_,
+        TRIGGER_MODE, info.triggerMode_,
+        FUNC, info.func_,
+        BIZ_SCENE, info.bizScene_,
+        BIZ_STAGE, info.bizStage_,
+        STAGE_RES, info.stageRes_,
+        BIZ_STATE, info.bizState_,
+        ERROR_CODE, info.errorCode_,
+        DISCOVERY_DEVICE_LIST, info.discoveryDeviceList_,
+        LOCAL_UDID, localUdid_,
+        LOCAL_NET_ID, localNetId_,
+        LOCAL_DEV_TYPE, localDevType_,
+        PEER_UDID, info.peerUdid_,
+        PEER_BT_MAC, info.peerBtMac_,
+        PEER_NET_ID, info.peerNetId_,
+        PEER_DEV_TYPE, info.peerDevType_);
+}
+
+void AVSessionRadar::ReportWithTrustInfo(AVSessionRadarInfo &info)
+{
+    HISYSEVENT_BEHAVIOR(AVSESSION_CAST_BEHAVIOR,
+        ORG_PKG, orgPkg_,
+        HOST_PKG, info.hostPkg_,
+        TO_CALL_PKG, info.toCallPkg_,
+        TRIGGER_MODE, info.triggerMode_,
+        FUNC, info.func_,
+        BIZ_SCENE, info.bizScene_,
+        BIZ_STAGE, info.bizStage_,
+        STAGE_RES, info.stageRes_,
+        BIZ_STATE, info.bizState_,
+        ERROR_CODE, info.errorCode_,
+        DISCOVERY_DEVICE_LIST, info.discoveryDeviceList_,
+        LOCAL_UDID, localUdid_,
+        LOCAL_NET_ID, localNetId_,
+        LOCAL_DEV_TYPE, localDevType_,
+        PEER_UDID, info.peerUdid_,
+        PEER_BT_MAC, info.peerBtMac_,
+        PEER_NET_ID, info.peerNetId_,
+        PEER_DEV_TYPE, info.peerDevType_,
+        IS_TRUST, info.isTrust_);
+}
+
 void AVSessionRadar::ReportHiSysEventBehavior(AVSessionRadarInfo &info)
 {
     if (localNetId_.empty()) {
@@ -192,27 +239,11 @@ void AVSessionRadar::ReportHiSysEventBehavior(AVSessionRadarInfo &info)
     if (info.errorCode_ == 0) {
         info.errorCode_ = GetRadarErrorCode(0);
     }
-    HISYSEVENT_BEHAVIOR(AVSESSION_CAST_BEHAVIOR,
-        ORG_PKG, orgPkg_,
-        HOST_PKG, info.hostPkg_,
-        TO_CALL_PKG, info.toCallPkg_,
-        TRIGGER_MODE, info.triggerMode_,
-        FUNC, info.func_,
-        BIZ_SCENE, info.bizScene_,
-        BIZ_STAGE, info.bizStage_,
-        STAGE_RES, info.stageRes_,
-        BIZ_STATE, info.bizState_,
-        ERROR_CODE, info.errorCode_,
-        DISCOVERY_DEVICE_LIST, info.discoveryDeviceList_,
-        LOCAL_UDID, localUdid_,
-        LOCAL_NET_ID, localNetId_,
-        LOCAL_DEV_TYPE, localDevType_,
-        PEER_UDID, info.peerUdid_,
-        PEER_BT_MAC, info.peerBtMac_,
-        PEER_NET_ID, info.peerNetId_,
-        PEER_DEV_TYPE, info.peerDevType_,
-        LOCAL_SESS_NAME, info.localSessName_,
-        PEER_SESS_NAME, info.peerSessName_);
+    if (info.isTrust_ == static_cast<int32_t>(TrustStatus::UNKOWN)) {
+        ReportWithoutTrustInfo(info);
+    } else {
+        ReportWithTrustInfo(info);
+    }
 }
 
 void AVSessionRadar::StartCastDiscoveryBegin(AVSessionRadarInfo &info)

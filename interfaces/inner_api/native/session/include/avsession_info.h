@@ -106,7 +106,7 @@ public:
     virtual void OnSeekDone(const int32_t seekNumber) = 0;
 
     virtual void OnVideoSizeChange(const int32_t width, const int32_t height) = 0;
-    
+
     virtual void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) = 0;
 
     virtual void OnEndOfStream(const int32_t isLooping) = 0;
@@ -114,6 +114,8 @@ public:
     virtual void OnPlayRequest(const AVQueueItem& avQueueItem) = 0;
 
     virtual void OnKeyRequest(std::string& assetId, const std::vector<uint8_t>& keyRequestData) = 0;
+
+    virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
     /**
      * @brief Deconstruct SessionListener.
@@ -405,6 +407,8 @@ public:
     virtual void OnPlayRequest(const AVQueueItem& avQueueItem) = 0;
 
     virtual void OnKeyRequest(std::string& assetId, const std::vector<uint8_t>& keyRequestData) = 0;
+
+    virtual void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) = 0;
 
     /**
      * @brief Deconstruct AVControllerCallback.

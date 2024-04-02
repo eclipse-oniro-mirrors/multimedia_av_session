@@ -183,4 +183,21 @@ void AVCastControllerCallbackProxy::OnKeyRequest(const std::string &assetId, con
                          "send request failed");
     SLOGI("OnKeyRequest in proxy done");
 }
+
+void AVCastControllerCallbackProxy::OnCastValidCommandChanged(const std::vector<int32_t> &cmds)
+{
+    SLOGI("OnCastValidCommandChanged in proxy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32Vector(cmds), "Write vector failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    SLOGI("OnCastValidCommandChanged in proxy to send request");
+    CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_VALID_COMMAND_CHANGED, parcel, reply, option) == 0,
+        "send request failed");
+    SLOGI("OnCastValidCommandChanged in proxy done");
+}
 } // namespace OHOS::AVSession

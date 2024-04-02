@@ -39,6 +39,7 @@ public:
         EVENT_CAST_END_OF_STREAM,
         EVENT_CAST_PLAY_REQUEST,
         EVENT_CAST_KEY_REQUEST,
+        EVENT_CAST_VALID_COMMAND_CHANGED,
         EVENT_CAST_TYPE_MAX,
     };
 
@@ -210,6 +211,7 @@ public:
     void OnEndOfStream(const int32_t isLooping) override;
     void OnPlayRequest(const AVQueueItem& avQueueItem) override;
     void OnKeyRequest(const std::string &mediaId, const std::vector<uint8_t> &keyRequestData) override;
+    void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override;
 
     bool IsCallbacksEmpty(int32_t event);
 

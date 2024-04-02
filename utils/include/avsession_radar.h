@@ -34,7 +34,7 @@ struct AVSessionRadarInfo {
     int32_t bizState_ { 0 };
     int32_t triggerMode_ { 0 };
     int32_t errorCode_ { 0 };
-    int32_t isTrust_ { 0 };
+    int32_t isTrust_ { static_cast<int32_t>(TrustStatus::UNKOWN) };
     std::string hostPkg_;
     std::string toCallPkg_ { CAST_ENGINE_PKG };
     std::string func_;
@@ -110,6 +110,8 @@ private:
     ~AVSessionRadar() = default;
     std::string GetLocalDeviceNetworkId();
     std::string GetUdidByNetworkId(const std::string &networkId);
+    void ReportWithTrustInfo(AVSessionRadarInfo &info);
+    void ReportWithoutTrustInfo(AVSessionRadarInfo &info);
     void ReportHiSysEventBehavior(AVSessionRadarInfo &info);
     std::string ConvertHexToString(int32_t hex);
     std::string GetLocalDevType();

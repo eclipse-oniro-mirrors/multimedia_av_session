@@ -140,4 +140,13 @@ int32_t AVCastControllerCallbackStub::HandleOnKeyRequest(MessageParcel& data, Me
     SLOGI("HandleOnKeyRequest out");
     return ERR_NONE;
 }
+
+int32_t AVCastControllerCallbackStub::HandleOnCastValidCommandChanged(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> cmds;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32Vector(&cmds), ERR_NONE, "read int32 vector failed");
+    SLOGI("HandleOnCastValidCommandChanged cmd size:%{public}zd", cmds.size());
+    OnCastValidCommandChanged(cmds);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession
