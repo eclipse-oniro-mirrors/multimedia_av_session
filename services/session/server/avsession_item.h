@@ -313,14 +313,7 @@ private:
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
     int32_t removeCmdStep_ = 1000;
-<<<<<<< HEAD
-    int32_t deviceStateAddCommand_ = -1;
     
-    const int32_t streamStateConnection = 6;
-    
-=======
-
->>>>>>> upstream/master
     std::recursive_mutex destroyLock_;
     volatile bool isDestroyed_ = false;
 
@@ -328,6 +321,8 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
+    int32_t deviceStateAddCommand_ = -1;
+    const int32_t streamStateConnection = 6;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
