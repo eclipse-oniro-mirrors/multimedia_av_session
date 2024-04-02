@@ -21,11 +21,17 @@
 #include "avsession_info.h"
 #include "audio_adapter.h"
 #include "app_manager_adapter.h"
+#include "background_task_mgr_helper.h"
+#include "continuous_task_callback_info.h"
 
 namespace OHOS::AVSession {
 class AVSessionService;
 class BackgroundAudioController : public SessionListener {
 public:
+    using BackgroundMode = AppExecFwk::BackgroundMode;
+    using StreamUsage = AudioStandard::StreamUsage;
+    using ContinuousTaskCallbackInfo = BackgroundTaskMgr::ContinuousTaskCallbackInfo;
+
     BackgroundAudioController();
     ~BackgroundAudioController() override;
 
@@ -37,8 +43,12 @@ public:
     void Init(AVSessionService *ptr);
 
     void HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos);
-    void HandleAppBackgroundState(int32_t uid) const;
+    void HandleAppBackgroundState(int32_t uid);
+
 private:
+    void HandleVoIPAppBackgroundState(int32_t uid) const;
+    bool IsBackgroundMode(int32_t creatorUid, BackgroundMode backgroundMode) const;
+
     std::recursive_mutex lock_;
     std::set<int32_t> sessionUIDs_;
     AVSessionService *ptr_;
