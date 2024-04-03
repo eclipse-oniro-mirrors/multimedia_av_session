@@ -65,6 +65,8 @@ void AVSessionServiceTest::TearDownTestCase()
 
 void AVSessionServiceTest::SetUp()
 {
+    system("killall -9 com.example.himusicdemo");
+    sleep(1);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
     elementName.SetAbilityName(g_testAbilityName);

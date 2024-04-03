@@ -147,10 +147,13 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     migrateManager_->CreateLocalSessionStub("SuperLauncher", server_);
     EXPECT_EQ(migrateManager_->serverMap_.find("SuperLauncher") != migrateManager_->serverMap_.end(), true);
 
+    char infoName[] = "testInfoName";
+    char infoNetworkId[] = "testInfoNetworkId";
+    char infoPkgName[] = "testInfoPkgName";
     PeerSocketInfo info = {
-        .name = nullptr,
-        .networkId = nullptr,
-        .pkgName = nullptr,
+        .name = infoName,
+        .networkId = infoNetworkId,
+        .pkgName = infoPkgName,
         .dataType = DATA_TYPE_BYTES,
     };
     migrateManager_->softBusDistributedDataMgr_->SessionOpened(sessionId, info);
