@@ -769,7 +769,11 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 
 void AVSessionService::NotifyMirrorToStreamCast()
 {
-    if (topSession_ != oneceCastSession_ && topSession_->GetSessionType == "video") {
+    if (topSession_ == nullptr) {
+        SLOGE("topsession null pointer");
+        return;
+    }
+    if (topSession_->GetSessionType() == "video") {
         MirrorToStreamCast(topSession_);
     }
 }
@@ -777,7 +781,6 @@ void AVSessionService::NotifyMirrorToStreamCast()
 int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
 {
     SLOGI("enter MirrorToStreamCast");
-    oneceCastSession_ = session;
     castAllConnectCallback_->GetCastAllConnectData(castServiceNameMapState_);
     if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
      castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {

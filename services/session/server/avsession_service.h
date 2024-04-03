@@ -372,7 +372,6 @@ private:
     CastAllConnectCallback *castAllConnectCallback_;
     CollaborationFwk::ServiceStateInfo serviceStateInfo_;
     std::map<std::string, int32_t> castServiceNameMapState_;
-    sptr<AVSessionItem> oneceCastSession_;
 
     const int32_t deviceStateConnection = 4;
 #endif

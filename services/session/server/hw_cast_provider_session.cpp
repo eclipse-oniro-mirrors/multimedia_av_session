@@ -91,7 +91,7 @@ void HwCastProviderSession::SetStreamState()
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = "0";
         deviceInfo.deviceName_ = "RemoteCast";
-        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered listeners");
             listener->OnCastStateChange(deviceStateConnection, deviceInfo);
@@ -160,8 +160,8 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         return;
     }
     stashDeviceState_ = -1;
-    if (deviceState == deviceStateConnection && counter_ > 0) {
-        SLOGI("interception of one devicestate=6 transmission")
+    if (deviceState == deviceStateConnection && counter_ >= 0) {
+        SLOGI("interception of one devicestate=6 transmission");
         counter_ = 0;
         return;
     }

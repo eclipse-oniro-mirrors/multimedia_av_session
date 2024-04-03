@@ -159,9 +159,9 @@ ohos_shared_library("avsession_service") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     external_deps += [
       "cast_engine:cast_engine_client",
-      "graphic_surface:surface",
       "CollaborationFwk:cfwk_allconnect_client",
       "CollaborationFwk:collaborationFwk_client",
+      "graphic_surface:surface",
     ]
     deps += [
       "../../frameworks/native/session:avsession_cast_client",
@@ -282,9 +282,9 @@ ohos_shared_library("avsession_router") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     external_deps += [
       "cast_engine:cast_engine_client",
-      "graphic_surface:surface",
       "CollaborationFwk:cfwk_allconnect_client",
       "CollaborationFwk:collaborationFwk_client",
+      "graphic_surface:surface",
     ]
     service_sources += [ "" ]
   }

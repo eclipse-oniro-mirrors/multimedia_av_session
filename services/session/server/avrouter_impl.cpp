@@ -276,7 +276,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "0";
     deviceInfo.deviceName_ = "RemoteCast";
-    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
     deviceInfo.providerId_ = 1;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
@@ -294,6 +294,14 @@ void AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, std::map<std::s
 {
     int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "RemoteCast";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
     providerManagerMap_[providerNumber]->provider_->SetStreamState(castId, serviceNameMapState);
 }
 

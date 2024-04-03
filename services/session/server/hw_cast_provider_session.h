@@ -48,7 +48,7 @@ private:
     std::recursive_mutex mutex_;
     int32_t stashDeviceState_ = -1;
     std::string stashDeviceId_;
-    int counter_ = 0;
+    int counter_ = -1;
 
     const int32_t deviceStateConnection = 6;
 };

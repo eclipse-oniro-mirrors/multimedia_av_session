@@ -23,7 +23,6 @@
 #include "avsession_info.h"
 #include "allconnect_manager.h"
 #include "av_router.h"
-#include "avcast_provider_manager.h"
 
 namespace OHOS::AVSession {
 class CastAllConnectCallback : public CollaborationFwk::CallbackSkeleton {
