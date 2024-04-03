@@ -489,8 +489,8 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
         SLOGI("pid=%{public}d", pid);
         controller->HandleValidCommandChange(supportedCmd_);
     }
-    AddSessionCommandToCast(cmd);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AddSessionCommandToCast(cmd);
     if (deviceStateAddCommand_ == streamStateConnection &&
      cmd == AVControlCommand::SESSION_CMD_OUTPUT_DEVICE_CHANGE) {
         DeviceInfo deviceInfo;

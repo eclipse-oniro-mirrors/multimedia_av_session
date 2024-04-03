@@ -20,6 +20,10 @@ CastAllConnectCallback::CastAllConnectCallback(IAVSessionServiceListener *servic
 {
     SLOGI("CastAllConnectCallback constructor");
     {
+        if (servicePtr == nullptr) {
+            SLOGE("servicePtr null pointer");
+            return;
+        }
         servicePtr_ = servicePtr;
     }
 }
@@ -35,6 +39,10 @@ int32_t CastAllConnectCallback::OnServiceStateChanged(std::string deviceId,
     SLOGI("deviceId = %{public}s, serviceName = %{public}s, state = %{public}d",
         deviceId.c_str(), serviceName.c_str(), state);
     serviceNameMapState_[serviceName] = state;
+    if (servicePtr == nullptr) {
+        SLOGE("servicePtr null pointer");
+        return AVSESSION_ERROR;
+    }
     servicePtr_->NotifyMirrorToStreamCast();
     return AVSESSION_SUCCESS;
 }
