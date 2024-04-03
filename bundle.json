@@ -51,7 +51,8 @@
           "samgr",
           "window_manager",
           "distributed_notification_service",
-          "relational_store"
+          "relational_store",
+          "background_task_mgr"
         ],
         "third_party": [
           "openssl",
