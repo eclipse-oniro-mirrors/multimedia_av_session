@@ -17,6 +17,10 @@
 #include "session_stack.h"
 #include "avsession_log.h"
 
+#define private public
+#include "avsession_service.h"
+#undef private
+
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
@@ -49,21 +53,20 @@ void SessionStackTest::TearDown()
 static HWTEST(SessionStackTest, RemoveSession001, TestSize.Level1)
 {
     SLOGI("RemoveSession001 begin!");
-    AVSessionDescriptor descriptor;
-    descriptor.sessionId_ = "123456";
-    descriptor.sessionTag_ = "test";
-    descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
     OHOS::AppExecFwk::ElementName elementName;
+    std::unique_ptr<AVSessionService> avSessionService_ = std::make_unique<AVSessionService>(1, true);
     elementName.SetBundleName("test.ohos.avsession");
     elementName.SetAbilityName("test.ability");
-    descriptor.isThirdPartyApp_ = true;
-    OHOS::sptr<AVSessionItem> expected = new(std::nothrow) AVSessionItem(descriptor);
-    expected->SetPid(1234);
-    expected->SetUid(1234);
-
+    OHOS::sptr <AVSessionItem> item =
+        avSessionService_->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    SLOGI("RemoveSession001 doSessionCreate done!");
+    sleep(1);
+    item->SetPid(1234);
+    item->SetUid(1234);
+    std::string sessionId = item->GetDescriptor().sessionId_;
     SessionStack sessionStack;
-    sessionStack.AddSession(1234, elementName.GetAbilityName(), expected);
-    OHOS::sptr<AVSessionItem> actual = sessionStack.RemoveSession("123456");
+    sessionStack.AddSession(1234, elementName.GetAbilityName(), item);
+    OHOS::sptr<AVSessionItem> actual = sessionStack.RemoveSession(sessionId);
 
     EXPECT_NE(actual, nullptr);
     SLOGI("RemoveSession001 end!");
