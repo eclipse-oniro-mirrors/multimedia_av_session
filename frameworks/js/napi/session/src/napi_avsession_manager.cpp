@@ -722,26 +722,21 @@ napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StartCastDiscovery");
     struct ConcreteContext : public ContextBase {
         int32_t castDeviceCapability_;
+        std::vector<std::string> drmSchemes_;
     };
     auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
-        if (argc == ARGC_ONE && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
-            && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)) {
-            context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->castDeviceCapability_);
-            if (context->status != napi_ok) {
-                ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
-            }
-            CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid castDeviceCapability",
-                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        } else {
-            context->castDeviceCapability_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
-        }
+        context->status = ProcessCastDiscoveryParams(env, argc, argv,
+            context->castDeviceCapability_, context->drmSchemes_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid params",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_START_CAST_DISCOVERY_TASK_ID;
 
     auto executor = [context]() {
-        int32_t ret = AVSessionManager::GetInstance().StartCastDiscovery(context->castDeviceCapability_);
+        int32_t ret = AVSessionManager::GetInstance().StartCastDiscovery(context->castDeviceCapability_,
+            context->drmSchemes_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "StartCastDiscovery failed : native no permission";
@@ -761,6 +756,34 @@ napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_
 #else
     return nullptr;
 #endif
+}
+
+napi_status NapiAVSessionManager::ProcessCastDiscoveryParams(
+    napi_env env, size_t argc, napi_value* argv, int32_t& castDeviceCapability, std::vector<std::string>& drmSchemes)
+{
+    napi_status status = napi_ok;
+    if (argc == ARGC_ONE && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
+        && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)) {
+        status = NapiUtils::GetValue(env, argv[ARGV_FIRST], castDeviceCapability);
+        if (status != napi_ok) {
+            ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
+        }
+    } else if (argc == ARGC_TWO && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined) &&
+        !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null) &&
+        !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_undefined) &&
+        !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null)) {
+        status = NapiUtils::GetValue(env, argv[ARGV_FIRST], castDeviceCapability);
+        if (status != napi_ok) {
+            ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
+        }
+        status = NapiUtils::GetValue(env, argv[ARGV_SECOND], drmSchemes);
+        if (status != napi_ok) {
+            ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
+        }
+    } else {
+        castDeviceCapability = ProtocolType::TYPE_CAST_PLUS_STREAM;
+    }
+    return status;
 }
 
 napi_value NapiAVSessionManager::StopCastDiscovery(napi_env env, napi_callback_info info)

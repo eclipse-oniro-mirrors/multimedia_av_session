@@ -41,7 +41,8 @@ std::map<std::string, NapiMetaData::GetterType> NapiMetaData::getterMap_ = {
     { "nextAssetId", GetNextAssetId },
     { "skipIntervals", GetSkipIntervals },
     { "filter", GetFilter },
-    { "displayTags", GetDisplayTags }
+    { "displayTags", GetDisplayTags },
+    { "drmSchemes", GetDrmSchemes }
 };
 
 std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
@@ -67,7 +68,8 @@ std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
     { AVMetaData::META_KEY_NEXT_ASSET_ID, SetNextAssetId },
     { AVMetaData::META_KEY_SKIP_INTERVALS, SetSkipIntervals },
     { AVMetaData::META_KEY_FILTER, SetFilter },
-    { AVMetaData::META_KEY_DISPLAY_TAGS, SetDisplayTags }
+    { AVMetaData::META_KEY_DISPLAY_TAGS, SetDisplayTags },
+    { AVMetaData::META_KEY_DRM_SCHEMES, SetDrmSchemes }
 };
 
 std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
@@ -93,7 +95,8 @@ std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
     { "nextAssetId", AVMetaData::META_KEY_NEXT_ASSET_ID },
     { "skipIntervals", AVMetaData::META_KEY_SKIP_INTERVALS },
     { "filter", AVMetaData::META_KEY_FILTER },
-    { "displayTags", AVMetaData::META_KEY_DISPLAY_TAGS }
+    { "displayTags", AVMetaData::META_KEY_DISPLAY_TAGS },
+    { "drmSchemes", AVMetaData::META_KEY_DRM_SCHEMES }
 };
 
 napi_status NapiMetaData::ConvertFilter(napi_env env, napi_value filter, AVMetaData::MetaMaskType& mask)
@@ -676,6 +679,26 @@ napi_status NapiMetaData::SetDisplayTags(napi_env env, const AVMetaData& in, nap
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property displayTags failed", status);
     status = napi_set_named_property(env, out, "displayTags", property);
     CHECK_RETURN(status == napi_ok, "set property displayTags failed", status);
+    return status;
+}
+
+napi_status NapiMetaData::GetDrmSchemes(napi_env env, napi_value in, AVMetaData& out)
+{
+    std::vector<std::string> property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "drmSchemes", property);
+    CHECK_RETURN(status == napi_ok, "get property drmSchemes failed", status);
+    out.SetDrmSchemes(property);
+    return status;
+}
+
+napi_status NapiMetaData::SetDrmSchemes(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    napi_value property {};
+    SLOGD("SetDrmSchemes in, drmSchemes len: %{public}u", in.GetDrmSchemes().size());
+    auto status = NapiUtils::SetValue(env, in.GetDrmSchemes(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property drmSchemes failed", status);
+    status = napi_set_named_property(env, out, "drmSchemes", property);
+    CHECK_RETURN(status == napi_ok, "set property drmSchemes failed", status);
     return status;
 }
 }

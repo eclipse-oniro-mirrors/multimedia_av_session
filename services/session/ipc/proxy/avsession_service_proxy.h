@@ -78,7 +78,7 @@ public:
     }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    int32_t StartCastDiscovery(int32_t castDeviceCapability);
+    int32_t StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes);
 
     int32_t StopCastDiscovery();
 

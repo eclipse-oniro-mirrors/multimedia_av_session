@@ -40,12 +40,12 @@ void HwCastProvider::Init()
     CastSessionManager::GetInstance().RegisterListener(shared_from_this());
 }
 
-bool HwCastProvider::StartDiscovery(int castCapability)
+bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
     AVSessionRadarInfo info("HwCastProvider::StartDiscovery");
     AVSessionRadar::GetInstance().StartCastDiscoveryBegin(info);
-    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability);
+    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability, drmSchemes);
     if (ret != 0) {
         info.errorCode_ = ret;
         AVSessionRadar::GetInstance().FailToStartCastDiscovery(info);

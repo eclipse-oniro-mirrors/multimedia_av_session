@@ -186,6 +186,17 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
             "Read supportedProtocols failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
             "Read authenticationStatus failed");
+        int32_t supportedDrmCapabilityLen = 0;
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
+            "read supportedDrmCapabilityLen failed");
+        std::vector<std::string> supportedDrmCapabilities;
+        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+            std::string supportedDrmCapability;
+            CHECK_AND_RETURN_RET_LOG(data.ReadString(supportedDrmCapability), false,
+                "read supportedDrmCapability failed");
+            supportedDrmCapabilities.emplace_back(supportedDrmCapability);
+        }
+        deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
     

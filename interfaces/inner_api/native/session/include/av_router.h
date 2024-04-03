@@ -61,7 +61,7 @@ public:
      * @return { int32_t } Whether the device discovery operation was successful.
      * @since 10
     */
-    virtual int32_t StartCastDiscovery(int32_t castDeviceCapability) = 0;
+    virtual int32_t StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes) = 0;
 
     /**
      * @brief Stop Discovering Devices

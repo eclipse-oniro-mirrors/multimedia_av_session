@@ -86,7 +86,7 @@ bool AVRouterImpl::Release()
     return false;
 }
 
-int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability)
+int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("AVRouterImpl StartCastDiscovery");
 

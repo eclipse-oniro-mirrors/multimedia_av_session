@@ -76,7 +76,7 @@ public:
     int32_t Close(void) override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    int32_t StartCastDiscovery(int32_t castDeviceCapability) override;
+    int32_t StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes) override;
 
     int32_t StopCastDiscovery() override;
 

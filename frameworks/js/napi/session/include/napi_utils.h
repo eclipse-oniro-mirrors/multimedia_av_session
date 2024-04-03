@@ -198,6 +198,7 @@ public:
     /* DeviceInfo <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, DeviceInfo& out);
     static napi_status SetValue(napi_env env, const DeviceInfo& in, napi_value& out);
+    static napi_status ProcessDeviceInfoParams(napi_env env, napi_value in, DeviceInfo& out);
 
     /* MediaInfoHolder <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, MediaInfoHolder& out);

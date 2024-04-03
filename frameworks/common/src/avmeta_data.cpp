@@ -42,7 +42,8 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(filter_) &&
         parcel.WriteInt32(displayTags_) &&
         parcel.WriteParcelable(mediaImage_.get()) &&
-        parcel.WriteParcelable(avQueueImage_.get());
+        parcel.WriteParcelable(avQueueImage_.get()) &&
+        WriteDrmSchemes(parcel);
 }
 
 AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
@@ -136,7 +137,8 @@ bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData meta
         data.WriteInt32(metaIn.mediaLength_) &&
         data.WriteInt32(metaIn.avQueueLength_) &&
         data.WriteInt32(metaIn.displayTags_) &&
-        data.WriteParcelable(metaIn.mediaImageSmall_.get());
+        data.WriteParcelable(metaIn.mediaImageSmall_.get()) &&
+        WriteDrmSchemes(data, metaIn);
     SLOGI("MarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
     return ret;
 }
@@ -179,7 +181,8 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
         !data.ReadInt32(metaOut.filter_) ||
         !data.ReadInt32(metaOut.mediaLength_) ||
         !data.ReadInt32(metaOut.avQueueLength_) ||
-        !data.ReadInt32(metaOut.displayTags_);
+        !data.ReadInt32(metaOut.displayTags_) ||
+        !ReadDrmSchemes(data, metaOut);
     metaOut.mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (metaOut.metaMask_.test(META_KEY_MEDIA_IMAGE) && metaOut.mediaImage_ == nullptr) {
         SLOGE("read small PixelMap failed");
@@ -188,6 +191,40 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
     metaOut.mediaImageSmall_ = metaOut.mediaImage_;
     SLOGI("UnmarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
     return ret;
+}
+
+bool AVMetaData::WriteDrmSchemes(Parcel& parcel) const
+{
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(drmSchemes_.size()), false,
+        "write drmSchemes size failed");
+    for (auto drmScheme : drmSchemes_) {
+        CHECK_AND_RETURN_RET_LOG(parcel.WriteString(drmScheme), false, "write drmScheme failed");
+    }
+    return true;
+}
+
+bool AVMetaData::WriteDrmSchemes(MessageParcel& parcel, const AVMetaData metaData)
+{
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(metaData.drmSchemes_.size()), false,
+        "write drmSchemes size failed");
+    for (auto drmScheme : metaData.drmSchemes_) {
+        CHECK_AND_RETURN_RET_LOG(parcel.WriteString(drmScheme), false, "write drmScheme failed");
+    }
+    return true;
+}
+
+bool AVMetaData::ReadDrmSchemes(MessageParcel& parcel, AVMetaData& metaData)
+{
+    int32_t drmSchemesLen = 0;
+    CHECK_AND_RETURN_RET_LOG(parcel.ReadInt32(drmSchemesLen), false, "read drmSchemesLen failed");
+    std::vector<std::string> drmSchemes;
+    for (int i = 0; i < drmSchemesLen; i++) {
+        std::string drmScheme;
+        CHECK_AND_RETURN_RET_LOG(parcel.ReadString(drmScheme), false, "read drmScheme failed");
+        drmSchemes.emplace_back(drmScheme);
+    }
+    metaData.drmSchemes_ = drmSchemes;
+    return true;
 }
 
 void AVMetaData::SetAssetId(const std::string& assetId)
@@ -486,6 +523,17 @@ int32_t AVMetaData::GetDisplayTags() const
     return displayTags_;
 }
 
+void AVMetaData::SetDrmSchemes(std::vector<std::string> drmSchemes)
+{
+    drmSchemes_ = drmSchemes;
+    metaMask_.set(META_KEY_DRM_SCHEMES);
+}
+
+std::vector<std::string> AVMetaData::GetDrmSchemes() const
+{
+    return drmSchemes_;
+}
+
 AVMetaData::MetaMaskType AVMetaData::GetMetaMask() const
 {
     return metaMask_;
@@ -516,6 +564,7 @@ void AVMetaData::Reset()
     previousAssetId_ = "";
     nextAssetId_ = "";
     displayTags_ = 0;
+    drmSchemes_.clear();
 }
 
 bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
@@ -678,5 +727,10 @@ void AVMetaData::CloneFilter(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneDisplayTags(const AVMetaData& from, AVMetaData& to)
 {
     to.displayTags_ = from.displayTags_;
+}
+
+void AVMetaData::CloneDrmSchemes(const AVMetaData& from, AVMetaData& to)
+{
+    to.drmSchemes_ = from.drmSchemes_;
 }
 } // namespace OHOS::AVSession

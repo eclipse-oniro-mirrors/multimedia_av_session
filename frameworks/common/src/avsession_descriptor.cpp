@@ -56,6 +56,12 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
             "write supportedProtocols failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.authenticationStatus_), false,
             "write authenticationStatus failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedDrmCapabilities_.size()), false,
+            "write supportedDrmCapabilities size failed");
+        for (auto supportedDrmCapability : deviceInfo.supportedDrmCapabilities_) {
+            CHECK_AND_RETURN_RET_LOG(out.WriteString(supportedDrmCapability), false,
+                "write supportedDrmCapability failed");
+        }
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -85,6 +91,17 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
             "Read supportedProtocols failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.authenticationStatus_), false,
             "Read authenticationStatus failed");
+        int32_t supportedDrmCapabilityLen = 0;
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
+            "read supportedDrmCapabilityLen failed");
+        std::vector<std::string> supportedDrmCapabilities;
+        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+            std::string supportedDrmCapability;
+            CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
+                "read supportedDrmCapability failed");
+            supportedDrmCapabilities.emplace_back(supportedDrmCapability);
+        }
+        deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
         outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     }
 
@@ -109,6 +126,12 @@ bool DeviceInfo::WriteToParcel(Parcel& out) const
         "write supportedProtocols failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(authenticationStatus_), false,
         "write authenticationStatus failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportedDrmCapabilities_.size()), false,
+        "write supportedDrmCapabilities size failed");
+    for (auto supportedDrmCapability : supportedDrmCapabilities_) {
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(supportedDrmCapability), false,
+            "write supportedDrmCapability failed");
+    }
 
     return true;
 }
@@ -125,6 +148,17 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
         "Read supportedProtocols failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(authenticationStatus_), false,
         "Read authenticationStatus failed");
+    int32_t supportedDrmCapabilityLen = 0;
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
+        "read supportedDrmCapabilityLen failed");
+    std::vector<std::string> supportedDrmCapabilities;
+    for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+        std::string supportedDrmCapability;
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
+            "read supportedDrmCapability failed");
+        supportedDrmCapabilities.emplace_back(supportedDrmCapability);
+    }
+    supportedDrmCapabilities_ = supportedDrmCapabilities;
 
     return true;
 }
@@ -144,6 +178,12 @@ bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
             "Read supportedProtocols failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.authenticationStatus_), false,
             "Read authenticationStatus failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedDrmCapabilities_.size()), false,
+            "write supportedDrmCapabilities size failed");
+        for (auto supportedDrmCapability : deviceInfo.supportedDrmCapabilities_) {
+            CHECK_AND_RETURN_RET_LOG(out.WriteString(supportedDrmCapability), false,
+                "write supportedDrmCapability failed");
+        }
     }
     return true;
 }
@@ -164,6 +204,17 @@ bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
             "Read supportedProtocols failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.authenticationStatus_), false,
             "Read authenticationStatus failed");
+        int32_t supportedDrmCapabilityLen = 0;
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
+            "read supportedDrmCapabilityLen failed");
+        std::vector<std::string> supportedDrmCapabilities;
+        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+            std::string supportedDrmCapability;
+            CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
+                "read supportedDrmCapability failed");
+            supportedDrmCapabilities.emplace_back(supportedDrmCapability);
+        }
+        deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
         deviceInfos_.emplace_back(deviceInfo);
     }
     return true;
