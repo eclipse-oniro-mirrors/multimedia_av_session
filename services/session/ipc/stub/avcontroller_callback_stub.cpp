@@ -71,14 +71,21 @@ int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel& dat
 {
     sptr<AVPlaybackState> state = data.ReadParcelable<AVPlaybackState>();
 
+    std::lock_guard lockGuard(onPlaybackChangeLock_);
+    SLOGI("do HandleOnPlaybackStateChange with state %{public}d", state->GetState());
+
     CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read PlaybackState failed");
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnPlaybackStateChange");
     OnPlaybackStateChange(*state);
+    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
 int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, MessageParcel& reply)
 {
+    std::lock_guard lockGuard(onMetadataChangeLock_);
+    SLOGI("do HandleOnMetadataChange");
+
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnMetaDataChange");
     int twoImageLength = data.ReadInt32();
     SLOGD("read length from twoImage %{public}d", twoImageLength);
@@ -86,6 +93,7 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
         sptr avMetaData = data.ReadParcelable<AVMetaData>();
         CHECK_AND_RETURN_RET_LOG(avMetaData != nullptr, ERR_NONE, "read MetaData failed");
         OnMetaDataChange(*avMetaData);
+        reply.WriteInt32(AVSESSION_SUCCESS);
         return ERR_NONE;
     }
 
@@ -96,6 +104,7 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
     if (buffer == nullptr) {
         SLOGE("read raw data with null, length = %{public}d", twoImageLength);
         OnMetaDataChange(meta);
+        reply.WriteInt32(AVSESSION_SUCCESS);
         return ERR_NONE;
     }
 
@@ -118,6 +127,7 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
         meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
     }
     OnMetaDataChange(meta);
+    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
@@ -133,7 +143,11 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel& data
 {
     std::vector<int32_t> cmds;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32Vector(&cmds), ERR_NONE, "read int32 vector failed");
+    std::lock_guard lockGuard(onCommandChangeLock_);
+    SLOGI("do HandleOnValidCommandChange with cmd list size %{public}d", static_cast<int>(cmds.size()));
+
     OnValidCommandChange(cmds);
+    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 

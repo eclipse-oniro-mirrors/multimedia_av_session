@@ -15,6 +15,7 @@
 
 #include "avcontroller_callback_proxy.h"
 #include "avsession_log.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 AVControllerCallbackProxy::AVControllerCallbackProxy(const sptr<IRemoteObject>& impl)
@@ -68,16 +69,21 @@ void AVControllerCallbackProxy::OnAVCallStateChange(const AVCallState& state)
 
 void AVControllerCallbackProxy::OnPlaybackStateChange(const AVPlaybackState& state)
 {
+    std::lock_guard lockGuard(onPlaybackChangeLock_);
+    SLOGI("do onPlaybackStateChange with state %{public}d", state.GetState());
+
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&state), "write PlaybackState failed");
 
     MessageParcel reply;
-    MessageOption option = { MessageOption::TF_ASYNC };
+    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_PLAYBACK_STATE_CHANGE, parcel, reply, option) == 0,
         "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    reply.ReadInt32(ret);
 }
 
 int32_t AVControllerCallbackProxy::GetPixelMapBuffer(AVMetaData& metaData, MessageParcel& parcel)
@@ -133,11 +139,14 @@ int32_t AVControllerCallbackProxy::GetPixelMapBuffer(AVMetaData& metaData, Messa
 
 void AVControllerCallbackProxy::OnMetaDataChange(const AVMetaData& data)
 {
+    std::lock_guard lockGuard(onMetadataChangeLock_);
+    SLOGI("do OnMetaDataChange");
+
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
 
     MessageParcel reply;
-    MessageOption option = { MessageOption::TF_ASYNC };
+    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
 
@@ -159,6 +168,8 @@ void AVControllerCallbackProxy::OnMetaDataChange(const AVMetaData& data)
 
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_METADATA_CHANGE, parcel, reply, option) == 0,
         "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    reply.ReadInt32(ret);
 }
 
 void AVControllerCallbackProxy::OnActiveStateChange(bool isActive)
@@ -177,16 +188,21 @@ void AVControllerCallbackProxy::OnActiveStateChange(bool isActive)
 
 void AVControllerCallbackProxy::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
+    std::lock_guard lockGuard(onValidCommandChangeLock_);
+    SLOGI("do OnValidCommandChange with cmd list size %{public}d", static_cast<int>(cmds.size()));
+
     MessageParcel parcel;
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(parcel.WriteInt32Vector(cmds), "write int32 vector failed");
 
     MessageParcel reply;
-    MessageOption option = { MessageOption::TF_ASYNC };
+    MessageOption option;
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE, parcel, reply, option) == 0,
         "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    reply.ReadInt32(ret);
 }
 
 void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,

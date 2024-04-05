@@ -226,6 +226,9 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(meta.IsValid(), ERR_INVALID_PARAM, "invalid meta data");
+    std::lock_guard lockGuard(setMetadataLock_);
+    SLOGI("SetAVMetaData in proxy");
+
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -300,7 +303,7 @@ int32_t AVSessionProxy::SetAVQueueItems(const std::vector<AVQueueItem>& items)
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVQueueItems");
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
-    data.SetMaxCapacity(DEFAULT_IPC_CAPACITY);
+    data.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(items.size()), ERR_MARSHALLING, "write items num int32 failed");
@@ -422,6 +425,9 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVPlaybackState");
     CHECK_AND_RETURN_RET_LOG(state.IsValid(), ERR_INVALID_PARAM, "state not valid");
+    std::lock_guard lockGuard(setPlaybackLock_);
+    SLOGI("SetAVPlaybackState in proxy for state %{public}d", state.GetState());
+
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -704,6 +710,9 @@ bool AVSessionProxy::IsActive()
 
 int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 {
+    std::lock_guard lockGuard(setCommandLock_);
+    SLOGI("add support command for %{public}d", cmd);
+
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
@@ -725,6 +734,9 @@ int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 
 int32_t AVSessionProxy::DeleteSupportCommand(const int32_t cmd)
 {
+    std::lock_guard lockGuard(setCommandLock_);
+    SLOGI("delete support command for %{public}d", cmd);
+
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");

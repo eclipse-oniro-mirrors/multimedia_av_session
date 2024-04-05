@@ -16,6 +16,8 @@
 #ifndef OHOS_AVCONTROLLER_CALLBACK_PROXY_H
 #define OHOS_AVCONTROLLER_CALLBACK_PROXY_H
 
+#include <mutex>
+
 #include "iavcontroller_callback.h"
 #include "iremote_proxy.h"
 
@@ -51,6 +53,9 @@ public:
 private:
     int32_t GetPixelMapBuffer(AVMetaData& metaData, MessageParcel& parcel);
     static inline BrokerDelegator<AVControllerCallbackProxy> delegator_;
+    std::mutex onMetadataChangeLock_;
+    std::mutex onPlaybackChangeLock_;
+    std::mutex onValidCommandChangeLock_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_CALLBACK_PROXY_H

@@ -16,6 +16,8 @@
 #ifndef OHOS_AVSESSION_PROXY_H
 #define OHOS_AVSESSION_PROXY_H
 
+#include <mutex>
+
 #include "iav_session.h"
 #include "iremote_proxy.h"
 #include "want_agent.h"
@@ -111,7 +113,10 @@ private:
     static inline BrokerDelegator<AVSessionProxy> delegator_;
     bool isDestroyed_ = {};
     std::shared_ptr<AVSessionController> controller_;
-    const size_t DEFAULT_IPC_CAPACITY = 1048576; // Increase the IPC default capacity(200K) to 1M
+    const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
+    std::recursive_mutex setMetadataLock_;
+    std::recursive_mutex setPlaybackLock_;
+    std::recursive_mutex setCommandLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> castController_;

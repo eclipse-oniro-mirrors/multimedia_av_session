@@ -74,6 +74,9 @@ private:
     template<typename T>
     void HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam);
 
+    template<typename T>
+    void HandleEventWithOrder(int32_t event, int state, const T& param);
+
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};

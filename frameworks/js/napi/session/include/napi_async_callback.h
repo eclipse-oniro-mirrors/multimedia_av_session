@@ -16,7 +16,9 @@
 #ifndef OHOS_NAPI_UV_QUEUE_H
 #define OHOS_NAPI_UV_QUEUE_H
 
+#include <chrono>
 #include <functional>
+#include <semaphore.h>
 #include "avsession_log.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
@@ -41,12 +43,18 @@ public:
         const std::function<bool()>& checkCallbackValid,
         NapiArgsGetter getter = NapiArgsGetter());
 
+    void CallWithOrder(napi_ref& method, std::shared_ptr<bool> isValid, int state,
+        const std::function<bool()>& checkCallbackValid,
+        NapiArgsGetter getter = NapiArgsGetter());
+
 private:
     static void AfterWorkCallback(uv_work_t* work, int aStatus);
 
     static void AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus);
 
     static void AfterWorkCallbackWithFunc(uv_work_t* work, int aStatus);
+
+    static void AfterWorkCallbackWithOrder(uv_work_t* work, int aStatus);
 
     struct DataContext {
         napi_env env;
@@ -66,8 +74,19 @@ private:
         NapiArgsGetter getter;
         std::function<bool()> checkCallbackValid;
     };
+    struct DataContextWithOrder {
+        napi_env env;
+        napi_ref& method;
+        sem_t *semaphore;
+        int state;
+        std::shared_ptr<bool> isValid;
+        NapiArgsGetter getter;
+        std::function<bool()> checkCallbackValid;
+    };
     napi_env env_ = nullptr;
     uv_loop_s* loop_ = nullptr;
+    uv_loop_s* loopOrder_ = nullptr;
+    sem_t semaphore_;
 
     static constexpr size_t ARGC_MAX = 6;
 };
