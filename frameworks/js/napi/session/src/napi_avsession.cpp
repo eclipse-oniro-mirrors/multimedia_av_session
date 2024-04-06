@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cstdio>
+
 #include "napi_avsession.h"
 #include "avsession_controller.h"
 #include "napi_async_work.h"
@@ -28,6 +30,10 @@
 #include "avsession_trace.h"
 #include "napi_avsession_controller.h"
 #include "napi_avsession_manager.h"
+#include "curl/curl.h"
+#include "image_source.h"
+#include "pixel_map.h"
+#include "avsession_pixel_map_adapter.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller.h"
@@ -406,11 +412,97 @@ napi_value NapiAVSession::SetAVCallState(napi_env env, napi_callback_info info)
     return NapiAsyncWork::Enqueue(env, context, "SetAVCallState", executor, complete);
 }
 
+size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer)
+{
+    size_t realsize = size * nmemb;
+    imgBuffer->reserve(realsize + imgBuffer->capacity());
+    for (size_t i = 0; i < realsize; i++) {
+        imgBuffer->push_back(ptr[i]);
+    }
+    return realsize;
+}
+
+int32_t DoDownload(AVMetaData& meta)
+{
+    SLOGI("DoDownload uri %{public}s, title %{public}s, assetid %{public}s",
+        meta.GetMediaImageUri().c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
+
+    CURL *easyHandle_ = curl_easy_init();
+    if (easyHandle_) {
+        // set request options
+        curl_easy_setopt(easyHandle_, CURLOPT_URL, meta.GetMediaImageUri().c_str());
+        curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, NapiAVSession::TIME_OUT_SECOND);
+        curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, "/etc/ssl/certs/" "cacert.pem");
+        curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
+
+        std::vector<std::uint8_t> imgBuffer(0);
+
+        curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, &imgBuffer);
+
+        // perform request
+        CURLcode res = curl_easy_perform(easyHandle_);
+        if (res != CURLE_OK) {
+            SLOGI("DoDownload curl easy_perform failure: %{public}s\n", curl_easy_strerror(res));
+            curl_easy_cleanup(easyHandle_);
+            return AVSESSION_ERROR;
+        } else {
+            int64_t httpCode = 0;
+            curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
+            if (httpCode >= 400) { // 400
+                SLOGI("DoDownload Http error " "%{public}" PRId64, httpCode);
+                return AVSESSION_ERROR;
+            }
+            SLOGI("DoDownload Http success " "%{public}" PRId64, httpCode);
+        }
+
+        curl_easy_cleanup(easyHandle_);
+        easyHandle_ = nullptr;
+
+        std::uint8_t buffer[imgBuffer.size()];
+        std::copy(imgBuffer.begin(), imgBuffer.end(), buffer);
+        uint32_t errorCode = 0;
+        Media::SourceOptions opts;
+        auto imageSource = Media::ImageSource::CreateImageSource(buffer, imgBuffer.size(), opts, errorCode);
+        if (errorCode || !imageSource) {
+            SLOGE("DoDownload create imageSource failed");
+            return AVSESSION_ERROR;
+        }
+        Media::DecodeOptions decodeOpts;
+        std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
+        if (errorCode || !pixelMap) {
+            SLOGE("DoDownload create pixelMap failed");
+            return AVSESSION_ERROR;
+        }
+        meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        return AVSESSION_SUCCESS;
+    }
+    return AVSESSION_ERROR;
+}
+
+void processErrMsg(std::shared_ptr<ContextBase> context, int32_t ret)
+{
+    if (ret == ERR_SESSION_NOT_EXIST) {
+        context->errMessage = "SetAVMetaData failed : native session not exist";
+    } else if (ret == ERR_INVALID_PARAM) {
+        context->errMessage = "SetAVMetaData failed : native invalid parameters";
+    } else if (ret == ERR_NO_PERMISSION) {
+        context->errMessage = "SetAVMetaData failed : native no permission";
+    } else {
+        context->errMessage = "SetAVMetaData failed : native server exception";
+    }
+    context->status = napi_generic_failure;
+    context->errCode = NapiAVSessionManager::errcode_[ret];
+}
+
 napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVMetadata");
     struct ConcreteContext : public ContextBase {
         AVMetaData metaData_;
+        std::chrono::system_clock::time_point metadataTs;
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
@@ -428,6 +520,8 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
+    context->metadataTs = std::chrono::system_clock::now();
+    reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
@@ -439,17 +533,14 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
         }
         int32_t ret = napiSession->session_->SetAVMetaData(context->metaData_);
         if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "SetAVMetaData failed : native session not exist";
-            } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "SetAVMetaData failed : native invalid parameters";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "SetAVMetaData failed : native no permission";
-            } else {
-                context->errMessage = "SetAVMetaData failed : native server exception";
+            processErrMsg(context, ret);
+            return;
+        } else if (context->metaData_.GetMediaImage() == nullptr) {
+            ret = DoDownload(context->metaData_);
+            SLOGI("DoDownload complete ret %{public}d", ret);
+            if (ret == AVSESSION_SUCCESS && context->metadataTs >= napiSession->latestMetadataTs_) {
+                napiSession->session_->SetAVMetaData(context->metaData_);
             }
-            context->status = napi_generic_failure;
-            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
     auto complete = [env](napi_value& output) {
