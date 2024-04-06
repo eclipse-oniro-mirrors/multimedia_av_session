@@ -56,7 +56,8 @@ public:
         META_KEY_SKIP_INTERVALS = 20,
         META_KEY_FILTER = 21,
         META_KEY_DISPLAY_TAGS = 22,
-        META_KEY_MAX = 23
+        META_KEY_DRM_SCHEMES = 23,
+        META_KEY_MAX = 24
     };
 
     enum {
@@ -84,6 +85,10 @@ public:
 
     static bool UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut);
     static bool MarshallingExceptImg(MessageParcel& data, const AVMetaData metaIn);
+
+    bool WriteDrmSchemes(Parcel& parcel) const;
+    static bool WriteDrmSchemes(MessageParcel& parcel, const AVMetaData metaData);
+    static bool ReadDrmSchemes(MessageParcel& parcel, AVMetaData& metaData);
 
     void SetAssetId(const std::string& assetId);
     std::string GetAssetId() const;
@@ -163,6 +168,9 @@ public:
     void SetDisplayTags(int32_t displayTags);
     int32_t GetDisplayTags() const;
 
+    void SetDrmSchemes(std::vector<std::string> drmSchemes);
+    std::vector<std::string> GetDrmSchemes() const;
+
     void Reset();
 
     MetaMaskType GetMetaMask() const;
@@ -195,7 +203,8 @@ public:
         META_KEY_NEXT_ASSET_ID,
         META_KEY_SKIP_INTERVALS,
         META_KEY_FILTER,
-        META_KEY_DISPLAY_TAGS
+        META_KEY_DISPLAY_TAGS,
+        META_KEY_DRM_SCHEMES
     };
 
 private:
@@ -227,6 +236,7 @@ private:
     int32_t mediaLength_ = 0;
     int32_t avQueueLength_ = 0;
     int32_t displayTags_ = 0;
+    std::vector<std::string> drmSchemes_;
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneTitle(const AVMetaData& from, AVMetaData& to);
@@ -251,6 +261,7 @@ private:
     static void CloneSkipIntervals(const AVMetaData& from, AVMetaData& to);
     static void CloneFilter(const AVMetaData& from, AVMetaData& to);
     static void CloneDisplayTags(const AVMetaData& from, AVMetaData& to);
+    static void CloneDrmSchemes(const AVMetaData& from, AVMetaData& to);
 
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
@@ -276,7 +287,8 @@ private:
         &AVMetaData::CloneNextAssetId,
         &AVMetaData::CloneSkipIntervals,
         &AVMetaData::CloneFilter,
-        &AVMetaData::CloneDisplayTags
+        &AVMetaData::CloneDisplayTags,
+        &AVMetaData::CloneDrmSchemes
     };
 };
 } // namespace OHOS::AVSession

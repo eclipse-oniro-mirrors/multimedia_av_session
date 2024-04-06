@@ -33,6 +33,7 @@ struct DeviceInfo {
     int32_t providerId_;
     int32_t supportedProtocols_ = 3;
     int32_t authenticationStatus_ = 0;
+    std::vector<std::string> supportedDrmCapabilities_;
 };
 
 struct OutputDeviceInfo {
@@ -85,7 +86,7 @@ struct AVSessionBasicInfo {
 };
 
 enum CastDisplayState {
-    STATE_OFF,
+    STATE_OFF = 1,
     STATE_ON,
 };
 

@@ -209,6 +209,12 @@ void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionSta
             "write supportedProtocols failed");
         CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.authenticationStatus_),
             "write authenticationStatus failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.supportedDrmCapabilities_.size()),
+            "write supportedDrmCapabilities size failed");
+        for (auto supportedDrmCapability : deviceInfo.supportedDrmCapabilities_) {
+            CHECK_AND_RETURN_LOG(parcel.WriteString(supportedDrmCapability),
+                "write supportedDrmCapability failed");
+        }
     }
 
     MessageParcel reply;

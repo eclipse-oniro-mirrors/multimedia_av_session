@@ -288,11 +288,12 @@ int32_t AVSessionManagerImpl::Close(void)
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-int32_t AVSessionManagerImpl::StartCastDiscovery(const int32_t castDeviceCapability)
+int32_t AVSessionManagerImpl::StartCastDiscovery(
+    const int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartCastDiscovery");
     auto service = GetService();
-    return service ? service->StartCastDiscovery(castDeviceCapability) : ERR_SERVICE_NOT_EXIST;
+    return service ? service->StartCastDiscovery(castDeviceCapability, drmSchemes) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::StopCastDiscovery()

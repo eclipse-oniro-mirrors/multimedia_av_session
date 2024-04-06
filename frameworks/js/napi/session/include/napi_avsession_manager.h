@@ -91,6 +91,10 @@ private:
 
     static void CheckStopCastReportRadar(bool condition, int32_t error);
 
+    static napi_status ProcessCastDiscoveryParams(
+        napi_env env, size_t argc, napi_value* argv,
+        int32_t& castDeviceCapability, std::vector<std::string>& drmSchemes);
+
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> eventHandlers_;
 
     static std::shared_ptr<NapiSessionListener> listener_;

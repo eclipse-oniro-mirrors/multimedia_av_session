@@ -52,7 +52,7 @@ public:
      * @return { bool } Whether the device discovery operation was successful.
      * @since 10
     */
-    virtual bool StartDiscovery(int castCapability) = 0;
+    virtual bool StartDiscovery(int castCapability, std::vector<std::string> drmSchemes) = 0;
 
     /**
      * @brief Stop Discovering Devices

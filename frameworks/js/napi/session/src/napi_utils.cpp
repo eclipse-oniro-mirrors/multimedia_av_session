@@ -581,7 +581,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<std::st
 
     uint32_t length = 0;
     napi_status status = napi_get_array_length(env, in, &length);
-    CHECK_RETURN((status == napi_ok) && (length > 0), "get_array failed!", napi_invalid_arg);
+    CHECK_RETURN((status == napi_ok) && (length > 0 || length == 0), "get_array failed!", napi_invalid_arg);
     for (uint32_t i = 0; i < length; ++i) {
         napi_value item = nullptr;
         status = napi_get_element(env, in, i, &item);
@@ -938,7 +938,6 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
 {
     napi_status status = napi_create_object(env, &out);
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
-
     napi_value property = nullptr;
     status = SetValue(env, in.castCategory_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
@@ -978,6 +977,11 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     status = SetValue(env, in.authenticationStatus_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "authenticationStatus", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.supportedDrmCapabilities_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "supportedDrmCapabilities", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
     return napi_ok;
 }
@@ -1390,7 +1394,17 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     status = GetValue(env, value, out.deviceType_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ value failed", status);
     CHECK_RETURN(GetOptionalString(env, in, out) == napi_ok, "get DeviceInfo ip address value failed", status);
+    status = ProcessDeviceInfoParams(env, in, out);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo ProcessDeviceInfoParams failed", status);
+
+    return napi_ok;
+}
+
+napi_status NapiUtils::ProcessDeviceInfoParams(napi_env env, napi_value in, DeviceInfo& out)
+{
+    napi_value value {};
     bool hasKey = false;
+    napi_status status = napi_ok;
     napi_has_named_property(env, in, "providerId", &hasKey);
     if (hasKey) {
         status = napi_get_named_property(env, in, "providerId", &value);
@@ -1417,6 +1431,13 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
         CHECK_RETURN(status == napi_ok, "get DeviceInfo authenticationStatus value failed", status);
     } else {
         out.authenticationStatus_ = 0;
+    }
+    napi_has_named_property(env, in, "supportedDrmCapabilities", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "supportedDrmCapabilities", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedDrmCapabilities failed", status);
+        status = GetValue(env, value, out.supportedDrmCapabilities_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedDrmCapabilities value failed", status);
     }
     return napi_ok;
 }

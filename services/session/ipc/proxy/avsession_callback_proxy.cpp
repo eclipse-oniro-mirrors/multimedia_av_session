@@ -245,6 +245,12 @@ void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
             "write supportedProtocols failed");
         CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.authenticationStatus_),
             "write authenticationStatus failed");
+        CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.supportedDrmCapabilities_.size()),
+            "write supportedDrmCapabilities size failed");
+        for (auto supportedDrmCapability : deviceInfo.supportedDrmCapabilities_) {
+            CHECK_AND_RETURN_LOG(data.WriteString(supportedDrmCapability),
+                "write supportedDrmCapability failed");
+        }
     }
 
     auto remote = Remote();
