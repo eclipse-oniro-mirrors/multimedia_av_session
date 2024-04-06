@@ -782,11 +782,13 @@ int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
 {
     SLOGI("enter MirrorToStreamCast");
     castAllConnectCallback_->GetCastAllConnectData(castServiceNameMapState_);
+    if (is2in1_ != 0) {
     if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
-     castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
-        if (is2in1_ != 0) {
+            castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
             checkEnableCast(true);
             return session->RegisterListenerStreamToCast(castServiceNameMapState_);
+        } else {
+            session->IsRemove();
         }
     }
     return AVSESSION_SUCCESS;

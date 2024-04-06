@@ -67,7 +67,8 @@ bool AVRouterImpl::Release()
     if (hasSessionAlive_) {
         SLOGE("has session alive, but continue");
     }
-    if (hwProvider_ == nullptr) {
+    if (hwProvider_ == nullptr || (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+        castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection)) {
         SLOGE("Start Release AVRouter err for no provider");
         return false;
     }
@@ -95,7 +96,7 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
     for (const auto& [number, providerManager] : providerManagerMap_) {
         CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
             AVSESSION_ERROR, "provider is nullptr");
-        providerManager->provider_->StartDiscovery(castDeviceCapability);
+        providerManager->provider_->StartDiscovery(castDeviceCapability, drmSchemes);
     }
     return AVSESSION_SUCCESS;
 }
@@ -292,6 +293,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
 
 void AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, std::map<std::string, int32_t>& serviceNameMapState)
 {
+    castServiceNameMapState_ = serviceNameMapState;
     int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
     OutputDeviceInfo outputDeviceInfo;

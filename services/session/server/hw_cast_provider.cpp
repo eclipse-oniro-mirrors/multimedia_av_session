@@ -45,7 +45,7 @@ bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string>
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
     AVSessionRadarInfo info("HwCastProvider::StartDiscovery");
     AVSessionRadar::GetInstance().StartCastDiscoveryBegin(info);
-    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability, drmSchemes);
+    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability);
     if (ret != 0) {
         info.errorCode_ = ret;
         AVSessionRadar::GetInstance().FailToStartCastDiscovery(info);
@@ -146,8 +146,8 @@ void HwCastProvider::StopCastSession(int castId)
         return;
     }
     auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
-    if (hwCastProviderSession && (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
-     castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection)) {
+    if (hwCastProviderSession && (castServiceNameMapState_["HuaweiCast"] != deviceStateConnection ||
+     castServiceNameMapState_["HuaweiCast-Dual"] != deviceStateConnection)) {
         hwCastProviderSession->Release();
     }
     if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||

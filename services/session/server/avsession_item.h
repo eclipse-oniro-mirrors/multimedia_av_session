@@ -194,6 +194,8 @@ public:
 
     int32_t SessionCommandToCastCommand(int32_t cmd);
 
+    void IsRemove();
+
     int32_t RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState);
 
     int32_t AddSupportCastCommand(int32_t cmd);

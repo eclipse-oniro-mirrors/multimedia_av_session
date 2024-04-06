@@ -539,6 +539,11 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void AVSessionItem::IsRemove()
+{
+    isRemove = 0;
+}
+
 int32_t AVSessionItem::RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState)
 {
     OutputDeviceInfo outputDeviceInfo;
@@ -812,6 +817,16 @@ int32_t AVSessionItem::StopCast()
         return ret;
     }
     SLOGI("Stop cast process");
+    if ((castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+        castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection)) {
+        if (isRemove == 1) {
+            SLOGE("isRemove = 1");
+            return AVSESSION_ERROR;
+        } else {
+            SLOGI("isRemove = 0");
+            isRemove = 1;
+        }
+    }
     {
         std::lock_guard lockGuard(castHandleLock_);
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
