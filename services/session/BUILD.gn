@@ -198,10 +198,10 @@ ohos_shared_library("avsession_router") {
   ipc_sources = []
 
   service_sources = [
+    "server/avcast_allconnect.cpp",
     "server/avcast_provider_manager.cpp",
     "server/avrouter.cpp",
     "server/avrouter_impl.cpp",
-    "server/avcast_allconnect.cpp",
     "server/hw_cast_provider.cpp",
     "server/hw_cast_provider_session.cpp",
     "server/hw_cast_stream_player.cpp",
