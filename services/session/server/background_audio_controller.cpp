@@ -92,31 +92,114 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
                 continue;
             }
         }
-        if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(info->clientUID)) {
-            SLOGD("uid=%{public}d is system app", info->clientUID);
-            continue;
-        }
-
         if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID)) {
             AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
             SLOGD("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
             continue;
         }
+        if (info->rendererInfo.streamUsage == StreamUsage::STREAM_USAGE_VOICE_COMMUNICATION) {
+            SLOGD("uid=%{public}d is voip app", info->clientUID);
+            HandleVoIPAppBackgroundState(info->clientUID);
+            continue;
+        }
+
+        if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(info->clientUID)) {
+            SLOGD("uid=%{public}d is system app", info->clientUID);
+            continue;
+        }
+
         SLOGI("pause uid=%{public}d", info->clientUID);
         ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
         AudioAdapter::GetInstance().PauseAudioStream(info->clientUID);
     }
 }
 
-void BackgroundAudioController::HandleAppBackgroundState(int32_t uid) const
+void BackgroundAudioController::HandleAppBackgroundState(int32_t uid)
 {
-    AudioStandard::RendererState rendererState = AudioStandard::RENDERER_PAUSED;
-    bool isSuccess = AudioAdapter::GetInstance().GetRendererState(uid, rendererState);
-    if (isSuccess) {
-        SLOGI("pause uid=%{public}d", uid);
-        ptr_->NotifyAudioSessionCheckTrigger(uid);
-        AudioAdapter::GetInstance().PauseAudioStream(uid);
+    {
+        std::lock_guard lockGuard(lock_);
+        auto it = sessionUIDs_.find(uid);
+        if (it != sessionUIDs_.end()) {
+            SLOGD("uid=%{public}d has session", uid);
+            return;
+        }
     }
-    SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");
+
+    std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> infos;
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(infos);
+    if (ret != 0) {
+        SLOGE("get renderer state failed");
+        return;
+    }
+
+    bool isRunning = false;
+    bool isVoIP = false;
+    for (const auto& info : infos) {
+        if (info->clientUID == uid) {
+            SLOGD("find uid=%{public}d", info->clientUID);
+            if (info->rendererState == AudioStandard::RENDERER_RUNNING) {
+                isRunning = true;
+            }
+            if (info->rendererInfo.streamUsage == StreamUsage::STREAM_USAGE_VOICE_COMMUNICATION) {
+                isVoIP = true;
+            }
+            break;
+        }
+    }
+
+    if (!isRunning) {
+        SLOGD("uid=%{public}d isn't renderer running", uid);
+        return;
+    }
+
+    if (isVoIP) {
+        SLOGD("uid=%{public}d is voip app", uid);
+        HandleVoIPAppBackgroundState(uid);
+        return;
+    }
+
+    SLOGI("pause uid=%{public}d", uid);
+    ptr_->NotifyAudioSessionCheckTrigger(uid);
+    AudioAdapter::GetInstance().PauseAudioStream(uid);
+}
+
+void BackgroundAudioController::HandleVoIPAppBackgroundState(int32_t uid) const
+{
+    if (!IsBackgroundMode(uid, BackgroundMode::AUDIO_PLAYBACK)) {
+        SLOGD("uid=%{public}d isn't audio playback", uid);
+        return;
+    }
+
+    SLOGI("pause uid=%{public}d", uid);
+    ptr_->NotifyAudioSessionCheckTrigger(uid);
+    AudioAdapter::GetInstance().PauseAudioStream(uid, AudioStandard::AudioStreamType::STREAM_VOICE_COMMUNICATION);
+}
+
+bool BackgroundAudioController::IsBackgroundMode(int32_t creatorUid, BackgroundMode backgroundMode) const
+{
+    std::vector<std::shared_ptr<ContinuousTaskCallbackInfo>> continuousTaskList;
+    ErrCode code = BackgroundTaskMgr::BackgroundTaskMgrHelper::GetContinuousTaskApps(continuousTaskList);
+    if (code != OHOS::ERR_OK) {
+        SLOGE("uid=%{public}d no continuous task list, code=%{public}d", creatorUid, code);
+        return false;
+    }
+
+    for (const auto &task : continuousTaskList) {
+        SLOGD("uid=%{public}d taskCreatorUid=%{public}d", creatorUid, task->GetCreatorUid());
+        if (task->GetCreatorUid() != creatorUid) {
+            continue;
+        }
+
+        std::vector<uint32_t> bgModeIds = task->GetTypeIds();
+        auto it = std::find_if(bgModeIds.begin(), bgModeIds.end(), [ = ](auto mode) {
+            uint32_t uMode = static_cast<uint32_t>(backgroundMode);
+            return (mode == uMode);
+        });
+        if (it != bgModeIds.end()) {
+            SLOGD("uid=%{public}d is audio playback", creatorUid);
+            return true;
+        }
+    }
+    return false;
 }
 }

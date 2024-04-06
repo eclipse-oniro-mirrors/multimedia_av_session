@@ -259,7 +259,7 @@ HWTEST_F(AvsessionTest, SetAVCallMetaData001, TestSize.Level1)
     g_avCallMetaData.SetPhoneNumber("123456789");
 
     EXPECT_EQ(avsession_->SetAVCallMetaData(g_avCallMetaData), AVSESSION_SUCCESS);
-    SLOGE("SetAVCallMetaData001 End");
+    SLOGE("SetAVCallMetaData001 enable optional params End");
 }
 
 /**

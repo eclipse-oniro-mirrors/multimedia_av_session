@@ -44,6 +44,8 @@ public:
 
     int32_t PauseAudioStream(int32_t uid);
 
+    int32_t PauseAudioStream(int32_t uid, AudioStandard::AudioStreamType type);
+
     void OnRendererStateChange(const AudioRendererChangeInfos& infos) override;
 
     void OnDeviceChange(const DeviceChangeAction& deviceChangeAction) override;

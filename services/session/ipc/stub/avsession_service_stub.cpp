@@ -413,7 +413,13 @@ int32_t AVSessionServiceStub::HandleStartCastDiscovery(MessageParcel& data, Mess
     SLOGI("HandleStartCastDiscovery start");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto castDeviceCapability = data.ReadInt32();
-    int32_t ret = AVRouter::GetInstance().StartCastDiscovery(castDeviceCapability);
+    int32_t drmSchemesLen = data.ReadInt32();
+    std::vector<std::string> drmSchemes;
+    for (int i = 0; i < drmSchemesLen; i++) {
+        std::string drmScheme = data.ReadString();
+        drmSchemes.emplace_back(drmScheme);
+    }
+    int32_t ret = AVRouter::GetInstance().StartCastDiscovery(castDeviceCapability, drmSchemes);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStartCastDiscovery failed");
 #else
@@ -498,6 +504,17 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
             "Read supportedProtocols failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
             "Read authenticationStatus failed");
+        int32_t supportedDrmCapabilityLen = 0;
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
+            "read supportedDrmCapabilityLen failed");
+        std::vector<std::string> supportedDrmCapabilities;
+        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+            std::string supportedDrmCapability;
+            CHECK_AND_RETURN_RET_LOG(data.ReadString(supportedDrmCapability), false,
+                "read supportedDrmCapability failed");
+            supportedDrmCapabilities.emplace_back(supportedDrmCapability);
+        }
+        deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
 

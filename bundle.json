@@ -15,6 +15,7 @@
       "syscap": [
           "SystemCapability.Multimedia.AVSession.AVCast",
           "SystemCapability.Multimedia.AVSession.Core",
+          "SystemCapability.Multimedia.AVSession.ExtendedDisplayCast",
           "SystemCapability.Multimedia.AVSession.Manager"
       ],
       "features": [],
@@ -51,7 +52,8 @@
           "window_manager",
           "CollaborationFwk",
           "distributed_notification_service",
-          "relational_store"
+          "relational_store",
+          "background_task_mgr"
         ],
         "third_party": [
           "openssl",

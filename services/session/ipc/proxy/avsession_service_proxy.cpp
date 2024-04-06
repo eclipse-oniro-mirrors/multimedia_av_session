@@ -486,14 +486,17 @@ int32_t AVSessionServiceProxy::CastAudioForAll(const std::vector<AudioStandard::
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-int32_t AVSessionServiceProxy::StartCastDiscovery(const int32_t castDeviceCapability)
+int32_t AVSessionServiceProxy::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(castDeviceCapability),
         ERR_MARSHALLING, "write castDeviceCapability failed");
-
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(drmSchemes.size()), ERR_MARSHALLING, "write drmSchemes size failed");
+    for (auto drmScheme : drmSchemes) {
+        CHECK_AND_RETURN_RET_LOG(data.WriteString(drmScheme), ERR_MARSHALLING, "write drmScheme failed");
+    }
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
@@ -564,6 +567,12 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
             "write supportedProtocols failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.authenticationStatus_), ERR_MARSHALLING,
             "write authenticationStatus failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedDrmCapabilities_.size()), ERR_MARSHALLING,
+            "write supportedDrmCapabilities size failed");
+        for (auto supportedDrmCapability : deviceInfo.supportedDrmCapabilities_) {
+            CHECK_AND_RETURN_RET_LOG(data.WriteString(supportedDrmCapability), ERR_MARSHALLING,
+                "write supportedDrmCapability failed");
+        }
     }
 
     auto remote = Remote();

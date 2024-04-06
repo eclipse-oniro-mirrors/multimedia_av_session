@@ -30,6 +30,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    sptr<AVSessionItem> doSessionCreateTemp();
 };
 
 void AVSessionDumperTest::SetUpTestCase()
@@ -45,6 +46,17 @@ void AVSessionDumperTest::SetUp()
 
 void AVSessionDumperTest::TearDown()
 {}
+
+sptr<AVSessionItem> AVSessionDumperTest::doSessionCreateTemp()
+{
+    SLOGI("doSessionCreateTemp begin !");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.avsession");
+    elementName.SetAbilityName("test.ability");
+    auto item = avSessionService_->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    SLOGI("doSessionCreateTemp done!");
+    return item;
+}
 
 /**
  * @tc.name: ShowHelp001
@@ -221,11 +233,12 @@ HWTEST_F(AVSessionDumperTest, OnStop001, TestSize.Level1)
  */
 HWTEST_F(AVSessionDumperTest, UpdataTopSession001, TestSize.Level1)
 {
-    AVSessionDescriptor descriptor;
-    avSessionService_->topSession_ = new AVSessionItem(descriptor);
-    auto item = new AVSessionItem(descriptor);
+    sleep(1);
+    auto item = doSessionCreateTemp();
+    avSessionService_->topSession_ = item;
     avSessionService_->UpdateTopSession(item);
     EXPECT_NE(avSessionService_, nullptr);
+    avSessionService_->HandleSessionRelease(item->GetDescriptor().sessionId_);
 }
 
 /**
@@ -236,13 +249,17 @@ HWTEST_F(AVSessionDumperTest, UpdataTopSession001, TestSize.Level1)
  */
 HWTEST_F(AVSessionDumperTest, HandleFocusSession001, TestSize.Level1)
 {
-    AVSessionDescriptor descriptor;
-    descriptor.uid_ = 1;
-    avSessionService_->topSession_ = new AVSessionItem(descriptor);
+    sleep(1);
+    SLOGI("HandleFocusSession001 in ");
+    auto item = doSessionCreateTemp();
+    avSessionService_->topSession_ = item;
     FocusSessionStrategy::FocusSessionChangeInfo info;
-    info.uid = 1;
+    info.uid = 0;
     avSessionService_->HandleFocusSession(info);
+    AVSessionDescriptor descriptor = item->GetDescriptor();
+    avSessionService_->HandleSessionRelease(descriptor.sessionId_);
     EXPECT_NE(avSessionService_, nullptr);
+    SLOGI("HandleFocusSession001 done ");
 }
 
 /**
@@ -253,17 +270,15 @@ HWTEST_F(AVSessionDumperTest, HandleFocusSession001, TestSize.Level1)
  */
 HWTEST_F(AVSessionDumperTest, HandleFocusSession002, TestSize.Level1)
 {
-    AVSessionDescriptor descriptor;
-    descriptor.uid_ = 1;
-    avSessionService_->topSession_ = new AVSessionItem(descriptor);
-    descriptor.uid_ = 2;
-    sptr<AVSessionItem> item = new AVSessionItem(descriptor);
+    sleep(1);
+    SLOGI("HandleFocusSession002 in");
+    auto item = doSessionCreateTemp();
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = 2;
-    avSessionService_->GetContainer().AddSession(1, "abilityName", item);
     avSessionService_->HandleFocusSession(info);
-    avSessionService_->GetContainer().RemoveSession(1);
     EXPECT_NE(avSessionService_, nullptr);
+    avSessionService_->HandleSessionRelease(item->GetDescriptor().sessionId_);
+    SLOGI("HandleFocusSession002 done");
 }
 
 class TestSessionListener : public SessionListener {
@@ -345,12 +360,14 @@ HWTEST_F(AVSessionDumperTest, NotifyAudioSessionCheck001, TestSize.Level1)
  */
 HWTEST_F(AVSessionDumperTest, GetSessionDescriptorsBySessionId001, TestSize.Level1)
 {
+    SLOGI("GetSessionDescriptorsBySessionId001 in");
     AVSessionDescriptor descriptor;
-    descriptor.sessionId_ = "sessionId";
-    sptr<AVSessionItem> item1 = new AVSessionItem(descriptor);
-    avSessionService_->GetContainer().AddSession(1, "abilityName1", item1);
-    EXPECT_EQ(avSessionService_->GetSessionDescriptorsBySessionId("sessionId", descriptor), AVSESSION_SUCCESS);
-    avSessionService_->GetContainer().RemoveSession(1);
+    sptr<AVSessionItem> item = doSessionCreateTemp();
+    avSessionService_->GetContainer().AddSession(1, "abilityName1", item);
+    std::string sessionId = item->GetDescriptor().sessionId_;
+    EXPECT_EQ(avSessionService_->GetSessionDescriptorsBySessionId(sessionId, descriptor), AVSESSION_SUCCESS);
+    avSessionService_->HandleSessionRelease(descriptor.sessionId_);
+    SLOGI("GetSessionDescriptorsBySessionId001 done");
 }
 
 /**
@@ -453,9 +470,10 @@ HWTEST_F(AVSessionDumperTest, SetDeviceInfo001, TestSize.Level1)
     castAudioDescriptors.push_back(des);
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = "sessionId";
-    sptr<AVSessionItem> item1 = new AVSessionItem(descriptor);
-    avSessionService_->SetDeviceInfo(castAudioDescriptors, item1);
-    EXPECT_NE(item1, nullptr);
+    sptr<AVSessionItem> item = doSessionCreateTemp();
+    avSessionService_->SetDeviceInfo(castAudioDescriptors, item);
+    EXPECT_NE(item, nullptr);
+    avSessionService_->HandleSessionRelease(item->GetDescriptor().sessionId_);
 }
 
 /**

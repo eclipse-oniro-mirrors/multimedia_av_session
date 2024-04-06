@@ -815,6 +815,7 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
     avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
+    sleep(1);
     if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
         EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
     } else {
@@ -836,6 +837,7 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
     avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
+    sleep(1);
     if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
         EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
     } else {
@@ -1316,8 +1318,8 @@ HWTEST_F(AVSessionControllerTest, HasSession001, TestSize.Level1)
     SLOGD("HasSession001 Begin");
     std::shared_ptr<AVSessionController> controller2 = nullptr;
     auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller2);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    SLOGD("HasSession001 End");
+    EXPECT_EQ(ret, ERR_CONTROLLER_IS_EXIST);
+    SLOGD("HasSession001 with controller already exist test End");
 }
 
 /**

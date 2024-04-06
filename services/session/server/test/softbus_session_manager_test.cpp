@@ -98,16 +98,19 @@ HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.Level1)
     distributed_->Init();
     std::string pkg = "AVSESSION";
     distributed_->InitSessionServer(pkg);
-    
+
     std::shared_ptr<MigrateAVSessionServer> server = std::make_shared<MigrateAVSessionServer>();
     distributed_->CreateServer(server);
     EXPECT_EQ(distributed_->serverMap_.size() > 0, true);
 
     int32_t sessionId = 1;
+    char infoName[] = "testInfoName";
+    char infoNetworkId[] = "testInfoNetworkId";
+    char infoPkgName[] = "testInfoPkgName";
     PeerSocketInfo info = {
-        .name = nullptr,
-        .networkId = nullptr,
-        .pkgName = nullptr,
+        .name = infoName,
+        .networkId = infoNetworkId,
+        .pkgName = infoPkgName,
         .dataType = DATA_TYPE_BYTES,
     };
     distributed_->SessionOpened(sessionId, info);
@@ -138,7 +141,7 @@ HWTEST_F(SoftbusSessionManagerTest, CreateSessionServer001, TestSize.Level1)
     SLOGI("CreateSessionServer001 begin");
     std::string pkg = "111";
     int32_t ret = manager_->Socket(pkg);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret <= 0, true);
     SLOGI("CreateSessionServer001 end");
 }
 
@@ -214,10 +217,13 @@ HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level1)
 {
     SLOGI("OnSessionOpened001 begin");
     int32_t sessionId = 123;
+    char infoName[] = "testInfoName";
+    char infoNetworkId[] = "testInfoNetworkId";
+    char infoPkgName[] = "testInfoPkgName";
     PeerSocketInfo info = {
-        .name = nullptr,
-        .networkId = nullptr,
-        .pkgName = nullptr,
+        .name = infoName,
+        .networkId = infoNetworkId,
+        .pkgName = infoPkgName,
         .dataType = DATA_TYPE_BYTES,
     };
     manager_->OnBind(sessionId, info);

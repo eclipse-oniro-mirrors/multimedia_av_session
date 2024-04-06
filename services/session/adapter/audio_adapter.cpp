@@ -75,6 +75,17 @@ int32_t AudioAdapter::PauseAudioStream(int32_t uid)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AudioAdapter::PauseAudioStream(int32_t uid, AudioStandard::AudioStreamType type)
+{
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
+        uid, AudioStandard::StreamSetState::STREAM_PAUSE, type);
+    if (ret != 0) {
+        SLOGE("pause uid=%{public}d failed", uid);
+        return AVSESSION_ERROR;
+    }
+    return AVSESSION_SUCCESS;
+}
+
 void AudioAdapter::OnRendererStateChange(const AudioRendererChangeInfos& infos)
 {
     for (const auto& listener : listeners_) {

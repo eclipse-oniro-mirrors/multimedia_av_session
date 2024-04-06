@@ -34,7 +34,7 @@ public:
     ~HwCastProvider() override;
 
     void Init() override;
-    bool StartDiscovery(int castCapability) override;
+    bool StartDiscovery(int castCapability, std::vector<std::string> drmSchemes) override;
     void StopDiscovery() override;
     int32_t SetDiscoverable(const bool enable) override;
     void Release() override;
