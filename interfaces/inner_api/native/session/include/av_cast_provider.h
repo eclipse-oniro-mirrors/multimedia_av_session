@@ -161,6 +161,9 @@ public:
     */
     virtual bool UnRegisterCastSessionStateListener(int castId,
         std::shared_ptr<IAVCastSessionStateListener> listener) = 0;
+
+    virtual void SetStreamState(int32_t castId,
+        std::map<std::string, int32_t>& serviceNameMapState) = 0;
 };
 } // namespace OHOS::AVSession
 #endif

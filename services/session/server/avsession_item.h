@@ -194,6 +194,10 @@ public:
 
     int32_t SessionCommandToCastCommand(int32_t cmd);
 
+    void IsRemove();
+
+    int32_t RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState);
+
     int32_t AddSupportCastCommand(int32_t cmd);
 
     bool IsCastRelevancyCommand(int32_t cmd);
@@ -311,7 +315,7 @@ private:
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
     int32_t removeCmdStep_ = 1000;
-
+    
     std::recursive_mutex destroyLock_;
     volatile bool isDestroyed_ = false;
 
@@ -319,6 +323,8 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
+    int32_t deviceStateAddCommand_ = -1;
+    const int32_t streamStateConnection = 6;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;

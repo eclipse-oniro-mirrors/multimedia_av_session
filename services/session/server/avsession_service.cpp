@@ -66,6 +66,7 @@ typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std
 typedef void (*StopMigrateStubFunc)(void);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "allconnect_manager.h"
 #include "av_router.h"
 #endif
 
@@ -144,6 +145,8 @@ void AVSessionService::OnStart()
         checkEnableCast(true);
         AVRouter::GetInstance().SetDiscoverable(true);
     }
+    castAllConnectCallback_ = new (std::nothrow) CastAllConnectCallback(this);
+    CollaborationFwk::AllConnectManager::GetInstance().SubscribeServiceState(castAllConnectCallback_);
 #endif
     PullMigrateStub();
     HISYSEVENT_REGITER;
@@ -165,6 +168,11 @@ void AVSessionService::OnStop()
         stopMigrateStub();
     }
     dlclose(migrateStubFuncHandle_);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CollaborationFwk::AllConnectManager::GetInstance().UnRegisterServiceDeathRecipient();
+    castAllConnectCallback_ = nullptr;
+    delete(castAllConnectCallback_);
+#endif
     CommandSendLimit::GetInstance().StopTimer();
 }
 
@@ -758,6 +766,33 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 #endif
     return AVSESSION_SUCCESS;
 }
+
+void AVSessionService::NotifyMirrorToStreamCast()
+{
+    if (topSession_ == nullptr) {
+        SLOGE("topsession null pointer");
+        return;
+    }
+    if (topSession_->GetSessionType() == "video") {
+        MirrorToStreamCast(topSession_);
+    }
+}
+
+int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
+{
+    SLOGI("enter MirrorToStreamCast");
+    castAllConnectCallback_->GetCastAllConnectData(castServiceNameMapState_);
+    if (is2in1_ != 0) {
+    if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+            castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
+            checkEnableCast(true);
+            return session->RegisterListenerStreamToCast(castServiceNameMapState_);
+        } else {
+            session->IsRemove();
+        }
+    }
+    return AVSESSION_SUCCESS;
+}
 #endif
 
 void AVSessionService::HandleCallStartEvent()
@@ -861,6 +896,11 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    if (type == AVSession::SESSION_TYPE_VIDEO) {
+        MirrorToStreamCast(result);
+    }
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("success");
     return result;
 }

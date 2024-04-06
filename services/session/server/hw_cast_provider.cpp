@@ -45,7 +45,7 @@ bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string>
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
     AVSessionRadarInfo info("HwCastProvider::StartDiscovery");
     AVSessionRadar::GetInstance().StartCastDiscoveryBegin(info);
-    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability, drmSchemes);
+    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability);
     if (ret != 0) {
         info.errorCode_ = ret;
         AVSessionRadar::GetInstance().FailToStartCastDiscovery(info);
@@ -146,11 +146,15 @@ void HwCastProvider::StopCastSession(int castId)
         return;
     }
     auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
-    if (hwCastProviderSession) {
+    if (hwCastProviderSession && (castServiceNameMapState_["HuaweiCast"] != deviceStateConnection ||
+     castServiceNameMapState_["HuaweiCast-Dual"] != deviceStateConnection)) {
         hwCastProviderSession->Release();
     }
-    hwCastProviderSessionMap_.erase(castId);
-    castFlag_[castId] = false;
+    if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+     castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
+        hwCastProviderSessionMap_.erase(castId);
+        castFlag_[castId] = false;
+    }
     avCastControllerMap_.erase(castId);
 }
 
@@ -262,6 +266,12 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
     avCastControllerMap_[castId] = hwCastStreamPlayer;
     SLOGI("Create streamPlayer finished");
     return hwCastStreamPlayer;
+}
+
+void HwCastProvider::SetStreamState(int32_t castId, std::map<std::string, int32_t>& serviceNameMapState)
+{
+    castServiceNameMapState_ = serviceNameMapState;
+    hwCastProviderSessionMap_[castId]->SetStreamState();
 }
 
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,

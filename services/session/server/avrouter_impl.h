@@ -59,6 +59,10 @@ public:
 
     int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) override;
+
+    void SetServiceAllConnectState(int64_t castHandle,
+        std::map<std::string, int32_t>& serviceNameMapState) override;
+
 protected:
 
 private:
@@ -66,6 +70,8 @@ private:
     IAVSessionServiceListener *servicePtr_ = nullptr;
     std::recursive_mutex providerManagerLock_;
     std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
+    std::map<std::string, int32_t> castServiceNameMapState_;
+    const int32_t deviceStateConnection = 4;
     int32_t providerNumber_ = 0;
     std::map<int32_t, OutputDeviceInfo> castHandleToOutputDeviceMap_;
     bool hasSessionAlive_ = false;

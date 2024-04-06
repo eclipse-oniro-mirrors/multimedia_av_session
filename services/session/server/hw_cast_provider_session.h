@@ -40,6 +40,7 @@ public:
     bool RegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener);
     bool UnRegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener);
     void CheckProcessDone();
+    void SetStreamState();
 
 private:
     std::shared_ptr<CastEngine::ICastSession> castSession_;
@@ -47,6 +48,9 @@ private:
     std::recursive_mutex mutex_;
     int32_t stashDeviceState_ = -1;
     std::string stashDeviceId_;
+    int counter_ = -1;
+
+    const int32_t deviceStateConnection = 6;
 };
 } // namespace OHOS::AVSession
 

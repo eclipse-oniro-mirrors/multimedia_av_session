@@ -67,7 +67,8 @@ bool AVRouterImpl::Release()
     if (hasSessionAlive_) {
         SLOGE("has session alive, but continue");
     }
-    if (hwProvider_ == nullptr) {
+    if (hwProvider_ == nullptr || (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+        castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection)) {
         SLOGE("Start Release AVRouter err for no provider");
         return false;
     }
@@ -95,7 +96,7 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
     for (const auto& [number, providerManager] : providerManagerMap_) {
         CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
             AVSESSION_ERROR, "provider is nullptr");
-        providerManager->provider_->StartDiscovery(castDeviceCapability);
+        providerManager->provider_->StartDiscovery(castDeviceCapability, drmSchemes);
     }
     return AVSESSION_SUCCESS;
 }
@@ -272,6 +273,14 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
         castHandle, "Can not find corresponding provider");
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "RemoteCast";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
     CHECK_AND_RETURN_RET_LOG(castHandleToOutputDeviceMap_.find(castId) != castHandleToOutputDeviceMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding castId");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
@@ -280,6 +289,22 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     hasSessionAlive_ = false;
 
     return AVSESSION_SUCCESS;
+}
+
+void AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, std::map<std::string, int32_t>& serviceNameMapState)
+{
+    castServiceNameMapState_ = serviceNameMapState;
+    int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
+    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "RemoteCast";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
+    providerManagerMap_[providerNumber]->provider_->SetStreamState(castId, serviceNameMapState);
 }
 
 int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr<IAVCastSessionStateListener> callback)

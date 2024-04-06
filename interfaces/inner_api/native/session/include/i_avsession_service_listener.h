@@ -58,6 +58,8 @@ public:
      * @since 10
     */
     virtual void NotifyDeviceOffline(const std::string& deviceId) = 0;
+
+    virtual void NotifyMirrorToStreamCast() = 0;
 #endif
 };
 } // namespace OHOS::AVSession

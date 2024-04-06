@@ -84,6 +84,24 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
     return streamPlayerPtr;
 }
 
+void HwCastProviderSession::SetStreamState()
+{
+    std::lock_guard lockGuard(mutex_);
+    for (auto listener : castSessionStateListenerList_) {
+        DeviceInfo deviceInfo;
+        deviceInfo.deviceId_ = "0";
+        deviceInfo.deviceName_ = "RemoteCast";
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        if (listener != nullptr) {
+            SLOGI("trigger the OnCastStateChange for registered listeners");
+            listener->OnCastStateChange(deviceStateConnection, deviceInfo);
+            counter_++;
+        }
+    }
+    stashDeviceState_ = deviceStateConnection;
+    stashDeviceId_ = "0";
+}
+
 bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener)
 {
     SLOGI("RegisterCastSessionStateListener");
@@ -142,6 +160,11 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         return;
     }
     stashDeviceState_ = -1;
+    if (deviceState == deviceStateConnection && counter_ >= 0) {
+        SLOGI("interception of one devicestate=6 transmission");
+        counter_ = 0;
+        return;
+    }
     std::lock_guard lockGuard(mutex_);
     for (auto listener : castSessionStateListenerList_) {
         DeviceInfo deviceInfo;

@@ -159,6 +159,8 @@ ohos_shared_library("avsession_service") {
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     external_deps += [
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationFwk_client",
       "cast_engine:cast_engine_client",
       "graphic_surface:surface",
     ]
@@ -197,6 +199,7 @@ ohos_shared_library("avsession_router") {
   ipc_sources = []
 
   service_sources = [
+    "server/avcast_allconnect.cpp",
     "server/avcast_provider_manager.cpp",
     "server/avrouter.cpp",
     "server/avrouter_impl.cpp",
@@ -279,6 +282,8 @@ ohos_shared_library("avsession_router") {
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     external_deps += [
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationFwk_client",
       "cast_engine:cast_engine_client",
       "graphic_surface:surface",
     ]
@@ -399,7 +404,11 @@ ohos_shared_library("avsession_item") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationFwk_client",
+      "cast_engine:cast_engine_client",
+    ]
     deps += [
       "../../frameworks/native/session:avsession_cast_client",
       "./../session:avsession_cast_item",

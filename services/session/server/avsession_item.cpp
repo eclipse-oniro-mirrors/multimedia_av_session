@@ -491,6 +491,15 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AddSessionCommandToCast(cmd);
+    if (deviceStateAddCommand_ == streamStateConnection &&
+     cmd == AVControlCommand::SESSION_CMD_OUTPUT_DEVICE_CHANGE) {
+        DeviceInfo deviceInfo;
+        deviceInfo.deviceId_ = "0";
+        deviceInfo.deviceName_ = "RemoteCast";
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        deviceInfo.providerId_ = 1;
+        OnCastStateChange(deviceStateAddCommand_, deviceInfo);
+    }
 #endif
     return AVSESSION_SUCCESS;
 }
@@ -530,6 +539,28 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void AVSessionItem::IsRemove()
+{
+    isRemove = 0;
+}
+
+int32_t AVSessionItem::RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState)
+{
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "RemoteCast";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    int64_t castHandle = AVRouter::GetInstance().StartCast(OutputDeviceInfo);
+    castHandle_ = castHandle;
+    AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
+    CHECK_AND_RETURN_RET_LOG("castHandle != AVSESSION_ERROR", AVSESSION_ERROR, "StartCast failed");
+    AVRouter::GetInstance().SetServiceAllConnectState(castHandle, serviceNameMapState);
+    deviceStateAddCommand_ = streamStateConnection;
+    return AVSESSION_SUCCESS;
+}
 
 void AVSessionItem::InitializeCastCommands()
 {
@@ -786,6 +817,16 @@ int32_t AVSessionItem::StopCast()
         return ret;
     }
     SLOGI("Stop cast process");
+    if ((castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+        castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection)) {
+        if (isRemove == 1) {
+            SLOGE("isRemove = 1");
+            return AVSESSION_ERROR;
+        } else {
+            SLOGI("isRemove = 0");
+            isRemove = 1;
+        }
+    }
     {
         std::lock_guard lockGuard(castHandleLock_);
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
