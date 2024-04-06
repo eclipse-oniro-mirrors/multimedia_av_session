@@ -16,6 +16,8 @@
 #ifndef OHOS_NAPI_AVSESSION_H
 #define OHOS_NAPI_AVSESSION_H
 
+#include <chrono>
+
 #include <map>
 #include "napi_base_context.h"
 #include "napi/native_api.h"
@@ -39,6 +41,8 @@ public:
 
     using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
     using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
+
+    static constexpr size_t TIME_OUT_SECOND = 5;
 
 private:
     static napi_value ConstructorCallback(napi_env env, napi_callback_info info);
@@ -118,6 +122,7 @@ private:
     std::string sessionType_ ;
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
+    std::chrono::system_clock::time_point latestMetadataTs_;
 
     static std::map<std::string, OnEventHandlerType> onEventHandlers_;
     static std::map<std::string, OffEventHandlerType> offEventHandlers_;

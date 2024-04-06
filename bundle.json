@@ -35,6 +35,7 @@
           "bundle_framework",
           "c_utils",
           "cast_engine",
+          "curl",
           "data_object",
           "device_manager",
           "dsoftbus",
