@@ -15,8 +15,8 @@
 
 const TAG = 'avvolumecomponent';
 
-enum AVVolumeStyle {
-  SYSTEM_BAR,
+class AVVolumeSliderParameter {
+  public sliderPosition?: Position;
 }
 
 @Component
@@ -24,7 +24,9 @@ export struct AVVolumeComponent {
   @Prop@Watch('volumeChange')
   volumeLevel?: number = 0;
   @Prop
-  volumeStyle?: AVVolumeStyle;
+  sliderParameter?: AVVolumeSliderParameter;
+  @Prop
+  sliderPosition?: Position;
 
   volumeCallback!: UIExtensionProxy;
 
@@ -40,7 +42,8 @@ export struct AVVolumeComponent {
           abilityName: 'AVVolumeExtension',
           bundleName: 'com.huawei.hmos.mediacontroller',
           parameters: {
-            'volumeStyle': this.volumeStyle,
+            'sliderParameter': this.sliderParameter,
+            'sliderPosition': this.sliderPosition,
           }
         })
         .onReceive((data) => {

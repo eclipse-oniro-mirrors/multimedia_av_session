@@ -16,56 +16,64 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {});
 }
 const TAG = 'avvolumecomponent ';
-var AVVolumeStyle;
-(function (v) {
-  v[v["SYSTEM_BAR"] = 0] = "SYSTEM_BAR";
-})(AVVolumeStyle || (AVVolumeStyle = {}));
+class AVVolumeSliderParameter {
+}
 export class AVVolumeComponent extends ViewPU {
-  constructor(p, q, r, s = -1, t = undefined, u) {
-    super(p, r, s, u);
-    if (typeof t === "function") {
-      this.paramsGenerator_ = t;
+  constructor(q, r, s, t = -1, u = undefined, v) {
+    super(q, s, t, v);
+    if (typeof u === "function") {
+      this.paramsGenerator_ = u;
     }
-    this.__volumeLevel = new SynchedPropertySimpleOneWayPU(q.volumeLevel, this, "volumeLevel");
-    this.__volumeStyle = new SynchedPropertySimpleOneWayPU(q.volumeStyle, this, "volumeStyle");
+    this.__volumeLevel = new SynchedPropertySimpleOneWayPU(r.volumeLevel, this, "volumeLevel");
+    this.__sliderParameter = new SynchedPropertyObjectOneWayPU(r.sliderParameter, this, "sliderParameter");
+    this.__sliderPosition = new SynchedPropertyObjectOneWayPU(r.sliderPosition, this, "sliderPosition");
     this.volumeCallback = undefined;
-    this.setInitiallyProvidedValue(q);
+    this.setInitiallyProvidedValue(r);
     this.declareWatch("volumeLevel", this.volumeChange);
     this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(o) {
-    if (o.volumeLevel === undefined) {
+  setInitiallyProvidedValue(p) {
+    if (p.volumeLevel === undefined) {
       this.__volumeLevel.set(0);
     }
-    if (o.volumeCallback !== undefined) {
-      this.volumeCallback = o.volumeCallback;
+    if (p.volumeCallback !== undefined) {
+      this.volumeCallback = p.volumeCallback;
     }
   }
-  updateStateVars(n) {
-    this.__volumeLevel.reset(n.volumeLevel);
-    this.__volumeStyle.reset(n.volumeStyle);
+  updateStateVars(o) {
+    this.__volumeLevel.reset(o.volumeLevel);
+    this.__sliderParameter.reset(o.sliderParameter);
+    this.__sliderPosition.reset(o.sliderPosition);
   }
-  purgeVariableDependenciesOnElmtId(m) {
-    this.__volumeLevel.purgeDependencyOnElmtId(m);
-    this.__volumeStyle.purgeDependencyOnElmtId(m);
+  purgeVariableDependenciesOnElmtId(n) {
+    this.__volumeLevel.purgeDependencyOnElmtId(n);
+    this.__sliderParameter.purgeDependencyOnElmtId(n);
+    this.__sliderPosition.purgeDependencyOnElmtId(n);
   }
   aboutToBeDeleted() {
     this.__volumeLevel.aboutToBeDeleted();
-    this.__volumeStyle.aboutToBeDeleted();
+    this.__sliderParameter.aboutToBeDeleted();
+    this.__sliderPosition.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
   get volumeLevel() {
     return this.__volumeLevel.get();
   }
-  set volumeLevel(l) {
-    this.__volumeLevel.set(l);
+  set volumeLevel(m) {
+    this.__volumeLevel.set(m);
   }
-  get volumeStyle() {
-    return this.__volumeStyle.get();
+  get sliderParameter() {
+    return this.__sliderParameter.get();
   }
-  set volumeStyle(k) {
-    this.__volumeStyle.set(k);
+  set sliderParameter(l) {
+    this.__sliderParameter.set(l);
+  }
+  get sliderPosition() {
+    return this.__sliderPosition.get();
+  }
+  set sliderPosition(k) {
+    this.__sliderPosition.set(k);
   }
   volumeChange() {
     console.info(TAG, `volumechange volumeLevel = ` + this.volumeLevel);
@@ -81,7 +89,8 @@ export class AVVolumeComponent extends ViewPU {
         abilityName: 'AVVolumeExtension',
         bundleName: 'com.hmos.mediacontroller',
         parameters: {
-          "volumeStyle": this.volumeStyle,
+          'sliderParameter': this.sliderParameter,
+          'sliderPosition': this.sliderPosition,
         }
       });
       UIExtensionComponent.onReceive((h) => {
