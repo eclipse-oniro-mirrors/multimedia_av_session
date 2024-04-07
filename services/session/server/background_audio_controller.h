@@ -46,7 +46,8 @@ public:
     void HandleAppBackgroundState(int32_t uid);
 
 private:
-    void HandleVoIPAppBackgroundState(int32_t uid) const;
+    void HandleVoIPAppBackgroundState(int32_t uid);
+    bool HasAVSession(int32_t uid);
     bool IsBackgroundMode(int32_t creatorUid, BackgroundMode backgroundMode) const;
 
     std::recursive_mutex lock_;

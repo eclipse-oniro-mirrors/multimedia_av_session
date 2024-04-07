@@ -84,14 +84,6 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
         if (info->rendererState != AudioStandard::RENDERER_RUNNING) {
             continue;
         }
-        {
-            std::lock_guard lockGuard(lock_);
-            auto it = sessionUIDs_.find(info->clientUID);
-            if (it != sessionUIDs_.end()) {
-                SLOGD("uid=%{public}d has session", info->clientUID);
-                continue;
-            }
-        }
         if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID)) {
             AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
             SLOGD("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
@@ -100,6 +92,10 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
         if (info->rendererInfo.streamUsage == StreamUsage::STREAM_USAGE_VOICE_COMMUNICATION) {
             SLOGD("uid=%{public}d is voip app", info->clientUID);
             HandleVoIPAppBackgroundState(info->clientUID);
+            continue;
+        }
+
+        if (HasAVSession(info->clientUID)) {
             continue;
         }
 
@@ -116,15 +112,6 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
 
 void BackgroundAudioController::HandleAppBackgroundState(int32_t uid)
 {
-    {
-        std::lock_guard lockGuard(lock_);
-        auto it = sessionUIDs_.find(uid);
-        if (it != sessionUIDs_.end()) {
-            SLOGD("uid=%{public}d has session", uid);
-            return;
-        }
-    }
-
     std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> infos;
     auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(infos);
     if (ret != 0) {
@@ -158,15 +145,18 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid)
         return;
     }
 
+    if (HasAVSession(uid)) {
+        return;
+    }
+
     SLOGI("pause uid=%{public}d", uid);
     ptr_->NotifyAudioSessionCheckTrigger(uid);
     AudioAdapter::GetInstance().PauseAudioStream(uid);
 }
 
-void BackgroundAudioController::HandleVoIPAppBackgroundState(int32_t uid) const
+void BackgroundAudioController::HandleVoIPAppBackgroundState(int32_t uid)
 {
-    if (!IsBackgroundMode(uid, BackgroundMode::AUDIO_PLAYBACK)) {
-        SLOGD("uid=%{public}d isn't audio playback", uid);
+    if (HasAVSession(uid) && IsBackgroundMode(uid, BackgroundMode::AUDIO_PLAYBACK)) {
         return;
     }
 
@@ -200,6 +190,21 @@ bool BackgroundAudioController::IsBackgroundMode(int32_t creatorUid, BackgroundM
             return true;
         }
     }
+    SLOGD("uid=%{public}d isn't audio playback", creatorUid);
     return false;
+}
+
+bool BackgroundAudioController::HasAVSession(int32_t uid)
+{
+    bool hasSession = false;
+    {
+        std::lock_guard lockGuard(lock_);
+        auto it = sessionUIDs_.find(uid);
+        if (it != sessionUIDs_.end()) {
+            SLOGD("uid=%{public}d has session", uid);
+            hasSession = true;
+        }
+    }
+    return hasSession;
 }
 }
