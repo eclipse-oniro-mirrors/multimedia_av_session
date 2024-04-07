@@ -152,6 +152,40 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
     }
 }
 
+template<typename T>
+void NapiAVControllerCallback::HandleEventWithOrder(int32_t event, int state, const T& param)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callbacks_[event].empty()) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+    SLOGI("handle for event: %{public}d with state: %{public}d", event, state);
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        lock_.unlock();
+        asyncCallback_->CallWithOrder(*ref, isValid_, state,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [param](napi_env env, int& argc, napi_value *argv) {
+                argc = NapiUtils::ARGC_ONE;
+                auto status = NapiUtils::SetValue(env, param, *argv);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            });
+        lock_.lock();
+    }
+}
+
 void NapiAVControllerCallback::OnAVCallStateChange(const AVCallState& avCallState)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnAVCallStateChange");
@@ -179,14 +213,14 @@ void NapiAVControllerCallback::OnSessionDestroy()
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnPlaybackStateChange");
-    HandleEvent(EVENT_PLAYBACK_STATE_CHANGE, state);
+    HandleEventWithOrder(EVENT_PLAYBACK_STATE_CHANGE, state.GetState(), state);
 }
 
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnMetaDataChange");
     SLOGI("do metadata change notify with title %{public}s", data.GetTitle().c_str());
-    HandleEvent(EVENT_META_DATA_CHANGE, data);
+    HandleEventWithOrder(EVENT_META_DATA_CHANGE, -1, data);
 }
 
 void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
@@ -197,7 +231,7 @@ void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
 void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
     std::vector<std::string> stringCmds = NapiControlCommand::ConvertCommands(cmds);
-    HandleEvent(EVENT_VALID_COMMAND_CHANGE, stringCmds);
+    HandleEventWithOrder(EVENT_VALID_COMMAND_CHANGE, static_cast<int>(cmds.size()), stringCmds);
 }
 
 void NapiAVControllerCallback::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info)

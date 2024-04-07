@@ -59,9 +59,7 @@ void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState& st
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, state]() { callback->OnPlaybackStateChange(state); }, EVENT_NAME),
-        "AVControllerCallbackClient handler postTask failed");
+    callback->OnPlaybackStateChange(state);
 
     if (playbackStateListener_) {
         playbackStateListener_(state);
@@ -73,9 +71,7 @@ void AVControllerCallbackClient::OnMetaDataChange(const AVMetaData& data)
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, data]() { callback->OnMetaDataChange(data); }, EVENT_NAME),
-        "AVControllerCallbackClient handler postTask failed");
+    callback->OnMetaDataChange(data);
 }
 
 void AVControllerCallbackClient::OnActiveStateChange(bool isActive)
@@ -93,9 +89,7 @@ void AVControllerCallbackClient::OnValidCommandChange(const std::vector<int32_t>
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
-    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, cmds]() { callback->OnValidCommandChange(cmds); }, EVENT_NAME),
-        "AVControllerCallbackClient handler postTask failed");
+    callback->OnValidCommandChange(cmds);
 }
 
 void AVControllerCallbackClient::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info)

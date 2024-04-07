@@ -24,6 +24,9 @@ NapiAsyncCallback::NapiAsyncCallback(napi_env env) : env_(env)
 {
     if (env != nullptr) {
         napi_get_uv_event_loop(env, &loop_);
+        napi_get_uv_event_loop(env, &loopOrder_);
+        int res = sem_init(&semaphore_, 0, 1);
+        SLOGI("loop to set sem with res %{public}d", res);
     }
 }
 
@@ -31,6 +34,7 @@ NapiAsyncCallback::~NapiAsyncCallback()
 {
     SLOGD("no memory leak for queue-callback");
     env_ = nullptr;
+    sem_destroy(&semaphore_);
 }
 
 napi_env NapiAsyncCallback::GetEnv() const
@@ -155,6 +159,58 @@ void NapiAsyncCallback::AfterWorkCallbackWithFunc(uv_work_t* work, int aStatus)
     napi_close_handle_scope(context->env, scope);
 }
 
+void NapiAsyncCallback::AfterWorkCallbackWithOrder(uv_work_t* work, int aStatus)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::AfterWorkCallbackWithOrder");
+    std::shared_ptr<DataContextWithOrder> context(static_cast<DataContextWithOrder*>(work->data),
+        [work](DataContextWithOrder* ptr) {
+        delete ptr;
+        delete work;
+    });
+
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(context->env, &scope);
+
+    int argc = 0;
+    napi_value argv[ARGC_MAX] = { nullptr };
+    if (context->getter) {
+        argc = ARGC_MAX;
+        context->getter(context->env, argc, argv);
+    }
+
+    SLOGI("queue uv_after_work_cb with state %{public}d", static_cast<int>(context->state));
+    if (!*context->isValid) {
+        SLOGE("AfterWorkCallbackWithOrder failed for context is invalid.");
+        napi_close_handle_scope(context->env, scope);
+        sem_post(context->semaphore);
+        return;
+    }
+    napi_value global {};
+    napi_get_global(context->env, &global);
+    napi_value function {};
+    if (!context->checkCallbackValid()) {
+        SLOGE("Get func reference failed for func has been deleted.");
+        napi_close_handle_scope(context->env, scope);
+        sem_post(context->semaphore);
+        return;
+    }
+    napi_get_reference_value(context->env, context->method, &function);
+    napi_value result;
+    if (!context->checkCallbackValid()) {
+        SLOGE("Call func failed for func has been deleted.");
+        napi_close_handle_scope(context->env, scope);
+        sem_post(context->semaphore);
+        return;
+    }
+    napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
+    if (status != napi_ok) {
+        SLOGE("call function failed status=%{public}d.", status);
+    }
+    napi_close_handle_scope(context->env, scope);
+    sem_post(context->semaphore);
+    SLOGI("queue uv_after_work_cb done with state %{public}d", static_cast<int>(context->state));
+}
+
 void NapiAsyncCallback::Call(napi_ref& method, NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
@@ -193,6 +249,40 @@ void NapiAsyncCallback::CallWithFunc(napi_ref& method, std::shared_ptr<bool> isV
 
     work->data = new DataContextWithFunc { env_, method, isValid, std::move(getter), checkCallbackValid };
     int res = uv_queue_work_with_qos(loop_, work, [](uv_work_t* work) {}, AfterWorkCallbackWithFunc,
+        uv_qos_user_initiated);
+    CHECK_RETURN_VOID(res == 0, "uv queue work failed");
+}
+
+void NapiAsyncCallback::CallWithOrder(napi_ref& method, std::shared_ptr<bool> isValid, int state,
+    const std::function<bool()>& checkCallbackValid, NapiArgsGetter getter)
+{
+    CHECK_RETURN_VOID(loopOrder_ != nullptr, "loop_ is nullptr");
+    CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
+
+    struct timespec ts;
+    int retForTime = clock_gettime(CLOCK_REALTIME, &ts);
+    int retForSem = 0;
+    if (retForTime < 0) {
+        SLOGE("sem wait time get err");
+    } else {
+        ts.tv_sec += 1;
+        retForSem = sem_timedwait(&semaphore_, &ts);
+    }
+    if (retForSem < 0) {
+        SLOGE("sem wait fail with res:%{public}d, err:%{public}s", static_cast<int>(retForSem), strerror(errno));
+        if (errno == ETIMEDOUT) {
+            sem_post(&semaphore_);
+            SLOGE("sem wait out of time, try release hold with sem post");
+        }
+    }
+    SLOGI("do CallWithOrder pass sem with state %{public}d", state);
+
+    auto* work = new (std::nothrow) uv_work_t;
+    CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
+
+    work->data =
+        new DataContextWithOrder { env_, method, &semaphore_, state, isValid, std::move(getter), checkCallbackValid };
+    int res = uv_queue_work_with_qos(loopOrder_, work, [](uv_work_t* work) {}, AfterWorkCallbackWithOrder,
         uv_qos_user_initiated);
     CHECK_RETURN_VOID(res == 0, "uv queue work failed");
 }

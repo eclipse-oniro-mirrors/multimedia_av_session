@@ -69,6 +69,10 @@ private:
     };
 
     int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+
+    std::mutex onMetadataChangeLock_;
+    std::mutex onPlaybackChangeLock_;
+    std::mutex onCommandChangeLock_;
 };
 }
 #endif // OHOS_AVCONTROLLER_CALLBACK_STUB_H
