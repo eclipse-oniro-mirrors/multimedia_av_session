@@ -27,6 +27,7 @@
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
+#include "avcast_allconnect.h"
 #include "avcast_controller_item.h"
 #endif
 
@@ -323,6 +324,7 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
+    const int32_t playingState_ = 3;
     int32_t deviceStateAddCommand_ = -1;
     const int32_t streamStateConnection = 6;
 
