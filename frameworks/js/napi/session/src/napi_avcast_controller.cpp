@@ -888,8 +888,18 @@ napi_status NapiAVCastController::OffPlaybackStateChange(napi_env env, NapiAVCas
 {
     CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
         napi_generic_failure, "callback has not been registered");
-    return napiCastController->callback_->RemoveCallback(env,
+    auto status = napiCastController->callback_->RemoveCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_PLAYBACK_STATE_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+
+    if (napiCastController->callback_
+            ->IsCallbacksEmpty(NapiAVCastControllerCallback::EVENT_CAST_PLAYBACK_STATE_CHANGE)) {
+        int32_t ret = napiCastController->castController_
+            ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure,
+            "remove stateChange cmd failed");
+    }
+    return napi_ok;
 }
 
 napi_status NapiAVCastController::OffMediaItemChange(napi_env env, NapiAVCastController* napiCastController,
@@ -929,8 +939,8 @@ napi_status NapiAVCastController::OffPlayPrevious(napi_env env, NapiAVCastContro
 
     if (napiCastController->callback_->IsCallbacksEmpty(NapiAVCastControllerCallback::EVENT_CAST_PLAY_PREVIOUS)) {
         int32_t ret = napiCastController->castController_
-            ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
-        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
+            ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "remove cmd failed");
     }
     return napi_ok;
 }
@@ -952,8 +962,8 @@ napi_status NapiAVCastController::OffSeekDone(napi_env env, NapiAVCastController
 
     if (napiCastController->callback_->IsCallbacksEmpty(NapiAVCastControllerCallback::EVENT_CAST_SEEK_DONE)) {
         int32_t ret = napiCastController->castController_
-            ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
-        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
+            ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "remove cmd failed");
     }
     return napi_ok;
 }

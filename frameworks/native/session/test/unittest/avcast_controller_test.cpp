@@ -161,6 +161,8 @@ public:
     void OnVideoSizeChange(const int32_t width, const int32_t height) override;
 
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
+    
+    void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) override;
 
     ~AVCastControllerCallbackImpl() override;
 
@@ -210,6 +212,10 @@ void AVCastControllerCallbackImpl::OnPlayerError(const int32_t errorCode, const 
 {
     errorCode_ = errorCode;
     errorMsg_ = errorMsg;
+}
+
+void AVCastControllerCallbackImpl::OnCastValidCommandChanged(const std::vector<int32_t> &cmds)
+{
 }
 
 /**
