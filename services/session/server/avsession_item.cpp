@@ -571,6 +571,12 @@ void AVSessionItem::InitializeCastCommands()
         supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SET_VOLUME);
     }
 
+    iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(),
+        AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED);
+    if (iter == supportedCastCmds_.end()) {
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED);
+    }
+
     iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
     if (iter != supportedCmd_.end()) {
         AddSessionCommandToCast(AVControlCommand::SESSION_CMD_SET_LOOP_MODE);

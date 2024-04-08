@@ -237,7 +237,7 @@ int32_t AVCastControllerItem::ProvideKeyResponse(const std::string &assetId, con
 
 int32_t AVCastControllerItem::AddAvailableCommand(const int32_t cmd)
 {
-    SLOGI("add available command %{/public}d", cmd);
+    SLOGI("add available command %{public}d", cmd);
     std::vector<int32_t> cmds(AVCastControlCommand::CAST_CONTROL_CMD_MAX);
     validCommandsChangecallback_(cmd, cmds);
     SLOGI("add available command with size %{public}d", static_cast<int32_t>(cmds.size()));
@@ -251,7 +251,7 @@ int32_t AVCastControllerItem::AddAvailableCommand(const int32_t cmd)
 
 int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
 {
-    SLOGI("remove available command %{/public}d", cmd);
+    SLOGI("remove available command %{public}d", cmd);
     std::vector<int32_t> cmds(AVCastControlCommand::CAST_CONTROL_CMD_MAX);
     validCommandsChangecallback_(cmd + removeCmdStep_, cmds);
     SLOGI("remove available command with size %{public}d", static_cast<int32_t>(cmds.size()));
