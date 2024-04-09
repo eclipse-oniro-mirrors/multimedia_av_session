@@ -27,7 +27,6 @@
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
-#include "avcast_allconnect.h"
 #include "avcast_controller_item.h"
 #endif
 
@@ -46,7 +45,7 @@ public:
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     {
-        ptr_->OnCastStateChange(castState, deviceInfo);
+        ptr_->OnCastStateChange(castState, deviceInfo, bool isDelay);
     }
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
@@ -65,7 +64,9 @@ public:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool IsCastSinkSession(int32_t castState);
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
+    void NotRemoveCastDevice(int32_t castState);
+
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isDelay);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 #endif
@@ -136,7 +137,8 @@ public:
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
-    void HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo);
+    void HandleOutputDeviceChange(const int32_t connectionState,
+        const OutputDeviceInfo& outputDeviceInfo, bool isDelay);
 
     void HandleSkipToQueueItem(const int32_t& itemId);
 
@@ -324,9 +326,12 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
-    const int32_t playingState_ = 3;
-    int32_t deviceStateAddCommand_ = -1;
+    int32_t deviceStateAddCommand_ = 0;
     const int32_t streamStateConnection = 6;
+    const int32_t deviceStateConnection = 4;
+    const int32_t playingState = 3;
+    int32_t isRemove = 0;
+    std::map<std::string, int32_t> castServiceNameMapState_;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
