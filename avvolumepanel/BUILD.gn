@@ -15,25 +15,25 @@ import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
-es2abc_gen_abc("gen_avvolumecomponent_abc") {
-  src_js = rebase_path("avvolumecomponent.js")
-  dst_file = rebase_path(target_out_dir + "/avvolumecomponent.abc")
-  in_puts = [ "avvolumecomponent.js" ]
-  out_puts = [ target_out_dir + "/avvolumecomponent.abc" ]
+es2abc_gen_abc("gen_avvolumepanel_abc") {
+  src_js = rebase_path("avvolumepanel.js")
+  dst_file = rebase_path(target_out_dir + "/avvolumepanel.abc")
+  in_puts = [ "avvolumepanel.js" ]
+  out_puts = [ target_out_dir + "/avvolumepanel.abc" ]
   extra_args = [ "--module" ]
 }
 
-gen_js_obj("avvolumecomponent_abc") {
-  input = get_label_info(":gen_avvolumecomponent_abc", "target_out_dir") +
-          "/avvolumecomponent.abc"
-  output = target_out_dir + "/avvolumecomponent_abc.o"
-  dep = ":gen_avvolumecomponent_abc"
+gen_js_obj("avvolumepanel_abc") {
+  input = get_label_info(":gen_avvolumepanel_abc", "target_out_dir") +
+          "/avvolumepanel.abc"
+  output = target_out_dir + "/avvolumepanel_abc.o"
+  dep = ":gen_avvolumepanel_abc"
 }
 
-ohos_shared_library("avvolumecomponent") {
-  sources = [ "avvolumecomponent.cpp" ]
+ohos_shared_library("avvolumepanel") {
+  sources = [ "avvolumepanel.cpp" ]
 
-  deps = [ ":avvolumecomponent_abc" ]
+  deps = [ ":avvolumepanel_abc" ]
 
   external_deps = [ "napi:ace_napi" ]
 

@@ -17,28 +17,28 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-extern const char _binary_avvolumecomponent_abc_start[];
-extern const char _binary_avvolumecomponent_abc_end[];
+extern const char _binary_avvolumepanel_abc_start[];
+extern const char _binary_avvolumepanel_abc_end[];
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_multimedia_avVolumeComponent_GetABCCode(const char **buf, int *buflen)
+void NAPI_multimedia_avVolumePanel_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
-        *buf = _binary_avvolumecomponent_abc_start;
+        *buf = _binary_avvolumepanel_abc_start;
     }
     if (buflen != nullptr) {
-        *buflen = _binary_avvolumecomponent_abc_end - _binary_avvolumecomponent_abc_start;
+        *buflen = _binary_avvolumepanel_abc_end - _binary_avvolumepanel_abc_start;
     }
 }
 
 /**
  * Module define
 */
-static napi_module avVolumeComponentModule = {
+static napi_module avVolumePanelModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "multimedia.avVolumeComponent",
+    .nm_modname = "multimedia.avVolumePanel",
     .nm_priv = ((void*)0),
     .reserved = {0},
 };
@@ -46,7 +46,7 @@ static napi_module avVolumeComponentModule = {
 /**
  * Module register function
 */
-extern "C" __attribute__((constructor)) void AvVolumeComponentRegisterModule(void)
+extern "C" __attribute__((constructor)) void AvVolumePanelRegisterModule(void)
 {
-    napi_module_register(&avVolumeComponentModule);
+    napi_module_register(&avVolumePanelModule);
 }
