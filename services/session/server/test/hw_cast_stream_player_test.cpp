@@ -312,6 +312,21 @@ HWTEST_F(HwCastStreamPlayerTest, SetDisplaySurface001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessMediaKeyResponse001
+ * @tc.desc: ProcessMediaKeyResponse
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, ProcessMediaKeyResponse001, TestSize.Level1)
+{
+    SLOGI("ProcessMediaKeyResponse001 begin!");
+    std::string assetId = "assetId";
+    std::vector<uint8_t> response;
+    ASSERT_EQ(hwCastStreamPlayer->ProcessMediaKeyResponse(assetId, response), AVSESSION_SUCCESS);
+    SLOGI("ProcessMediaKeyResponse001 end!");
+}
+
+/**
  * @tc.name: RegisterControllerListener001
  * @tc.desc: RegisterControllerListener invalid listener
  * @tc.type: FUNC
