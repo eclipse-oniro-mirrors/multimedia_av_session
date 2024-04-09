@@ -221,7 +221,8 @@ public:
      * @param outputDeviceInfo Event callback of device information.
      * @since 9
     */
-    virtual void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual void OnOutputDeviceChange(const int32_t connectionState,
+        const OutputDeviceInfo& outputDeviceInfo, bool isDelay) = 0;
 
     /**
      * @brief Listen for command events.

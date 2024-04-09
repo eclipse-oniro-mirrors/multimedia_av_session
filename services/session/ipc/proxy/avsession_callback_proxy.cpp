@@ -226,11 +226,12 @@ void AVSessionCallbackProxy::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 }
 
 void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
-    const OutputDeviceInfo& outputDeviceInfo)
+    const OutputDeviceInfo& outputDeviceInfo, bool isDelay)
 {
     MessageParcel data;
     CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(data.WriteInt32(connectionState), "write connectionState failed");
+    CHECK_AND_RETURN_LOG(data.WriteBool(isDelay), "write isDelay failed");
 
     int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfoSize), "write deviceInfoSize failed");

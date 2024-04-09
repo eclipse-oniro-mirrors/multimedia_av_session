@@ -174,14 +174,14 @@ void AVSessionCallbackClient::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 }
 
 void AVSessionCallbackClient::OnOutputDeviceChange(const int32_t connectionState,
-    const OutputDeviceInfo& outputDeviceInfo)
+    const OutputDeviceInfo& outputDeviceInfo, bool isDelay)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, connectionState, outputDeviceInfo]() {
-            callback->OnOutputDeviceChange(connectionState, outputDeviceInfo);
+        .AVSessionPostTask([callback, connectionState, outputDeviceInfo, isDelay]() {
+            callback->OnOutputDeviceChange(connectionState, outputDeviceInfo, isDelay);
         }, EVENT_NAME), "AVSessionCallbackClient handler postTask failed");
 }
 

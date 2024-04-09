@@ -15,6 +15,9 @@
 #ifndef OHOS_AVSESSION_CALLBACK_STUB_H
 #define OHOS_AVSESSION_CALLBACK_STUB_H
 
+#include <thread>
+#include <chrono>
+
 #include "iremote_stub.h"
 #include "iavsession_callback.h"
 
@@ -69,6 +72,7 @@ private:
         &AVSessionCallbackStub::HandleOnPlayFromAssetId,
         &AVSessionCallbackStub::HandleOnCastDisplayChange,
     };
+    const int32_t sleepTenMilliseconds = 100;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_CALLBACK_STUB_H

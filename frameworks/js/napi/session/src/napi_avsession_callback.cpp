@@ -229,7 +229,7 @@ void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 }
 
 void NapiAVSessionCallback::OnOutputDeviceChange(const int32_t connectionState,
-    const OutputDeviceInfo& outputDeviceInfo)
+    const OutputDeviceInfo& outputDeviceInfo, bool isDelay)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
     HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, connectionState, outputDeviceInfo);

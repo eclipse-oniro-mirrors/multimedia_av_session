@@ -498,7 +498,7 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
         deviceInfo.deviceName_ = "RemoteCast";
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
         deviceInfo.providerId_ = 1;
-        OnCastStateChange(deviceStateAddCommand_, deviceInfo);
+        OnCastStateChange(deviceStateAddCommand_, deviceInfo, true);
     }
 #endif
     return AVSESSION_SUCCESS;
@@ -546,6 +546,7 @@ void AVSessionItem::IsRemove()
 
 int32_t AVSessionItem::RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState)
 {
+    castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "0";
@@ -553,10 +554,10 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(std::map<std::string, int32_
     deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
     deviceInfo.providerId_ = 1;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    int64_t castHandle = AVRouter::GetInstance().StartCast(OutputDeviceInfo);
+    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo);
     castHandle_ = castHandle;
     AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
-    CHECK_AND_RETURN_RET_LOG("castHandle != AVSESSION_ERROR", AVSESSION_ERROR, "StartCast failed");
+    CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     AVRouter::GetInstance().SetServiceAllConnectState(castHandle, serviceNameMapState);
     deviceStateAddCommand_ = streamStateConnection;
     return AVSESSION_SUCCESS;
@@ -754,10 +755,21 @@ bool AVSessionItem::IsCastSinkSession(int32_t castState)
     return false;
 }
 
-void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+void AVSessionItem::NotRemoveCastDevice(int32_t castState)
+{
+    if (castState == playingState_ && GetSessionType() == "video" &&
+        (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+        castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection)) {
+        SLOGI(" playingState and isRemove = 1");
+        isRemove = 1;
+    }
+}
+
+void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isDelay)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceid_.c_str());
+    NotRemoveCastDevice(castState);
     OutputDeviceInfo outputDeviceInfo;
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
         outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);
@@ -786,7 +798,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
     }
 
-    HandleOutputDeviceChange(castState, outputDeviceInfo);
+    HandleOutputDeviceChange(castState, outputDeviceInfo, isDelay);
     {
         std::lock_guard controllersLockGuard(controllersLock_);
         SLOGD("AVCastController map size is %{public}zu", controllers_.size());
@@ -1314,20 +1326,21 @@ void AVSessionItem::SetServiceCallbackForCallStart(const std::function<void(AVSe
     callStartCallback_ = callback;
 }
 
-void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
+void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState,
+    const OutputDeviceInfo& outputDeviceInfo, bool isDelay)
 {
     SLOGI("Connection state %{public}d", connectionState);
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnOutputDeviceChange");
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnOutputDeviceChange(connectionState, outputDeviceInfo);
+    callback_->OnOutputDeviceChange(connectionState, outputDeviceInfo, isDelay);
 }
 
 void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
 {
     descriptor_.outputDeviceInfo_ = info;
     int32_t connectionStateConnected = 1;
-    HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
+    HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_, false);
     std::lock_guard controllersLockGuard(controllersLock_);
     for (const auto& controller : controllers_) {
         controller.second->HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
