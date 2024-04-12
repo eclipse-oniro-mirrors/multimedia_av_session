@@ -196,14 +196,12 @@ bool BackgroundAudioController::IsBackgroundMode(int32_t creatorUid, BackgroundM
 
 bool BackgroundAudioController::HasAVSession(int32_t uid)
 {
+    std::lock_guard lockGuard(lock_);
     bool hasSession = false;
-    {
-        std::lock_guard lockGuard(lock_);
-        auto it = sessionUIDs_.find(uid);
-        if (it != sessionUIDs_.end()) {
-            SLOGD("uid=%{public}d has session", uid);
-            hasSession = true;
-        }
+    auto it = sessionUIDs_.find(uid);
+    if (it != sessionUIDs_.end()) {
+        SLOGD("uid=%{public}d has session", uid);
+        hasSession = true;
     }
     return hasSession;
 }
