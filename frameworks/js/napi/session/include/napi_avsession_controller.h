@@ -131,6 +131,7 @@ private:
     std::shared_ptr<AVSessionController> controller_;
     std::shared_ptr<NapiAVControllerCallback> callback_;
     static std::mutex uvMutex_;
+    static std::mutex controllerListMutex_;
 
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
