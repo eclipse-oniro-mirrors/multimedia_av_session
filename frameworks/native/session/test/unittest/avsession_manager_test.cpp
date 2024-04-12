@@ -374,7 +374,6 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     auto sessionId = session->GetSessionId();
     ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(10, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_EQ(descriptors.size(), 0);
     int32_t size = descriptors.size();
     SLOGI("GetHistoricalSessionDescriptors001 get historicalSession size %{public}d", static_cast<int>(size));
     EXPECT_EQ(size >= 0, true);

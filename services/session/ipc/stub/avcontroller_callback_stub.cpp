@@ -70,9 +70,13 @@ int32_t AVControllerCallbackStub::HandleOnAVCallStateChange(MessageParcel& data,
 int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel& data, MessageParcel& reply)
 {
     sptr<AVPlaybackState> state = data.ReadParcelable<AVPlaybackState>();
+    if (state == nullptr) {
+        SLOGE("HandleOnPlaybackStateChange meet state nullptr, return");
+        return ERR_NONE;
+    }
 
     std::lock_guard lockGuard(onPlaybackChangeLock_);
-    SLOGI("do HandleOnPlaybackStateChange with state %{public}d", state->GetState());
+    SLOGI("do HandleOnPlaybackStateChange");
 
     CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read PlaybackState failed");
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnPlaybackStateChange");
