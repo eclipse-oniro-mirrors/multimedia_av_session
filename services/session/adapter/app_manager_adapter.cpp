@@ -116,7 +116,10 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
         for (const auto& appData : appProcessData.appDatas) {
             SLOGI("bundleName=%{public}s uid=%{public}d state=%{public}d",
                   appData.appName.c_str(), appData.uid, appProcessData.appState);
-            backgroundUIDs.insert(appData.uid);
+            auto it = observedAppUIDs_.find(appData.uid);
+            if (it != observedAppUIDs_.end()) {
+                backgroundUIDs.insert(appData.uid);
+            }
         }
     }
 
