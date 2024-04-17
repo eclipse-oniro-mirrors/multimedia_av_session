@@ -23,7 +23,6 @@ ohos_shared_library("avsession_common") {
     cfi = true
     cfi_cross_dso = true
     debug = false
-    blocklist = "../../cfi_blocklist.txt"
   }
   sources = [
     "src/av_file_descriptor.cpp",

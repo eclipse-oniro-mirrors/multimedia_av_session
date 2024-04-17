@@ -78,7 +78,6 @@ ohos_shared_library("remote_session_source") {
     cfi = true
     cfi_cross_dso = true
     debug = false
-    blocklist = "../../../../cfi_blocklist.txt"
   }
   source_sources = [ "remote_session_source_impl.cpp" ]
 
@@ -104,7 +103,6 @@ ohos_shared_library("remote_session_sink") {
     cfi = true
     cfi_cross_dso = true
     debug = false
-    blocklist = "../../../../cfi_blocklist.txt"
   }
   sink_sources = [ "remote_session_sink_impl.cpp" ]
 
