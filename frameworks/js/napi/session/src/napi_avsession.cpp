@@ -451,21 +451,21 @@ int32_t DoDownload(AVMetaData& meta)
         } else {
             int64_t httpCode = 0;
             curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
+            SLOGI("DoDownload Http result " "%{public}" PRId64, httpCode);
             if (httpCode >= 400) { // 400
-                SLOGI("DoDownload Http error " "%{public}" PRId64, httpCode);
                 return AVSESSION_ERROR;
             }
-            SLOGI("DoDownload Http success " "%{public}" PRId64, httpCode);
         }
 
         curl_easy_cleanup(easyHandle_);
         easyHandle_ = nullptr;
 
-        std::uint8_t buffer[imgBuffer.size()];
+        std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), static_cast<int>(imgBuffer.capacity()));
         std::copy(imgBuffer.begin(), imgBuffer.end(), buffer);
         uint32_t errorCode = 0;
         Media::SourceOptions opts;
         auto imageSource = Media::ImageSource::CreateImageSource(buffer, imgBuffer.size(), opts, errorCode);
+        free(buffer);
         if (errorCode || !imageSource) {
             SLOGE("DoDownload create imageSource failed");
             return AVSESSION_ERROR;
