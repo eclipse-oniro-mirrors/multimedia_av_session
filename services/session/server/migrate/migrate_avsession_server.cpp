@@ -170,23 +170,27 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
         SLOGE("json parse fail");
         return;
     }
-
-    std::string playerId = root[PLAYER_ID].asString();
+    if (!root.isMember(PLAYER_ID) || !root.isMember(MEDIA_COMMAND) ||
+        !root.isMember(COMMAND) || !root.isMember(EXTRAS)) {
+        SLOGE("json parse with error member");
+        return;
+    }
+    std::string playerId = root[PLAYER_ID].isString() ?
+        root[PLAYER_ID].asString() : "ERROR_PLAYER_ID";
     sptr<AVControllerItem> avcontroller{nullptr};
     auto res = GetControllerById(playerId, avcontroller);
     if (res != AVSESSION_SUCCESS || avcontroller == nullptr) {
         SLOGW("GetControllerById fail");
         return;
     }
-
-    int mediaCommand = root[MEDIA_COMMAND].asInt();
+    int mediaCommand = root[MEDIA_COMMAND].isInt() ? root[MEDIA_COMMAND].asInt() : -1;
     if (root["COMMAND"].empty()) {
         SLOGE("ProcControlCommand: COMMAND is not exit.");
         return;
     }
-    std::string command = root[COMMAND].asString();
+    std::string command = root[COMMAND].isString() ? root[COMMAND].asString() : "ERROR_COMMAND";
     SLOGI("ProcContolCommand mediaCommand: %{public}d", mediaCommand);
-    std::string extras = root[EXTRAS].asString();
+    std::string extras = root[EXTRAS].isString() ? root[EXTRAS].asString() : "ERROR_EXTRAS";
     switch (mediaCommand) {
         case SYNC_MEDIASESSION_CALLBACK_ON_COMMAND:
             SendCommandProc(command, avcontroller);
