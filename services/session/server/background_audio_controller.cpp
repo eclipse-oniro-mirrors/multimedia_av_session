@@ -65,11 +65,21 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
             SLOGI("OnSessionRelease add observe for uid %{public}d", descriptor.uid_);
             return;
         }
+
+        if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(descriptor.uid_)) {
+            SLOGD("uid=%{public}d is system app", descriptor.uid_);
+            return;
+        }
+
         int32_t uid = descriptor.uid_;
         AudioStandard::RendererState rendererState = AudioStandard::RENDERER_PAUSED;
         bool isSuccess = AudioAdapter::GetInstance().GetRendererState(uid, rendererState);
         if (isSuccess && rendererState != AudioStandard::RENDERER_RUNNING) {
             SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");
+            return;
+        }
+        if (!IsBackgroundMode(descriptor.uid_, BackgroundMode::AUDIO_PLAYBACK)) {
+            SLOGI("uid=%{public}d hasn't AUDIO_PLAYBACK task", descriptor.uid_);
             return;
         }
         SLOGI("pause uid=%{public}d", descriptor.uid_);
@@ -89,9 +99,9 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
             SLOGD("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
             continue;
         }
-        if (info->rendererInfo.streamUsage == StreamUsage::STREAM_USAGE_VOICE_COMMUNICATION) {
-            SLOGD("uid=%{public}d is voip app", info->clientUID);
-            HandleVoIPAppBackgroundState(info->clientUID);
+
+        if (!IsBackgroundMode(info->clientUID, BackgroundMode::AUDIO_PLAYBACK)) {
+            SLOGI("uid=%{public}d hasn't AUDIO_PLAYBACK task", info->clientUID);
             continue;
         }
 
@@ -112,36 +122,26 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
 
 void BackgroundAudioController::HandleAppBackgroundState(int32_t uid)
 {
+    if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(uid)) {
+        SLOGD("uid=%{public}d is system app", uid);
+        return;
+    }
+
     std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> infos;
     auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(infos);
     if (ret != 0) {
         SLOGE("get renderer state failed");
         return;
     }
-
-    bool isRunning = false;
-    bool isVoIP = false;
     for (const auto& info : infos) {
-        if (info->clientUID == uid) {
-            SLOGD("find uid=%{public}d", info->clientUID);
-            if (info->rendererState == AudioStandard::RENDERER_RUNNING) {
-                isRunning = true;
-            }
-            if (info->rendererInfo.streamUsage == StreamUsage::STREAM_USAGE_VOICE_COMMUNICATION) {
-                isVoIP = true;
-            }
-            break;
+        if (info->clientUID == uid and info->rendererState != AudioStandard::RENDERER_RUNNING) {
+            SLOGI("find uid=%{public}d renderer state is %{public}d, isn't running", uid, info->rendererState);
+            return;
         }
     }
 
-    if (!isRunning) {
-        SLOGD("uid=%{public}d isn't renderer running", uid);
-        return;
-    }
-
-    if (isVoIP) {
-        SLOGD("uid=%{public}d is voip app", uid);
-        HandleVoIPAppBackgroundState(uid);
+    if (!IsBackgroundMode(uid, BackgroundMode::AUDIO_PLAYBACK)) {
+        SLOGI("uid=%{public}d hasn't AUDIO_PLAYBACK task", uid);
         return;
     }
 
@@ -152,17 +152,6 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid)
     SLOGI("pause uid=%{public}d", uid);
     ptr_->NotifyAudioSessionCheckTrigger(uid);
     AudioAdapter::GetInstance().PauseAudioStream(uid);
-}
-
-void BackgroundAudioController::HandleVoIPAppBackgroundState(int32_t uid)
-{
-    if (HasAVSession(uid) && IsBackgroundMode(uid, BackgroundMode::AUDIO_PLAYBACK)) {
-        return;
-    }
-
-    SLOGI("pause uid=%{public}d", uid);
-    ptr_->NotifyAudioSessionCheckTrigger(uid);
-    AudioAdapter::GetInstance().PauseAudioStream(uid, AudioStandard::AudioStreamType::STREAM_VOICE_COMMUNICATION);
 }
 
 bool BackgroundAudioController::IsBackgroundMode(int32_t creatorUid, BackgroundMode backgroundMode) const
