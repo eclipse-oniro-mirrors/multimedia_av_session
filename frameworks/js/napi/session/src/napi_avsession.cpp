@@ -460,7 +460,7 @@ int32_t DoDownload(AVMetaData& meta)
         curl_easy_cleanup(easyHandle_);
         easyHandle_ = nullptr;
 
-        std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), static_cast<int>(imgBuffer.capacity()));
+        std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), sizeof(uint8_t));
         std::copy(imgBuffer.begin(), imgBuffer.end(), buffer);
         uint32_t errorCode = 0;
         Media::SourceOptions opts;
