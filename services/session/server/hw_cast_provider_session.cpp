@@ -91,7 +91,7 @@ void HwCastProviderSession::SetStreamState()
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = "0";
         deviceInfo.deviceName_ = "RemoteCast";
-        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered listeners");
             listener->OnCastStateChange(deviceStateConnection, deviceInfo);
