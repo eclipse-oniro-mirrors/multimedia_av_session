@@ -778,7 +778,7 @@ void AVSessionService::NotifyMirrorToStreamCast()
     }
 }
 
-int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
+__attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
 {
     SLOGI("enter MirrorToStreamCast");
     castAllConnectCallback_->GetCastAllConnectData(castServiceNameMapState_);
