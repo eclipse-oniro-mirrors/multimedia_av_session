@@ -181,15 +181,15 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
         !data.ReadInt32(metaOut.filter_) ||
         !data.ReadInt32(metaOut.mediaLength_) ||
         !data.ReadInt32(metaOut.avQueueLength_) ||
-        !data.ReadInt32(metaOut.displayTags_) ||
-        !ReadDrmSchemes(data, metaOut);
+        !data.ReadInt32(metaOut.displayTags_);
     metaOut.mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (metaOut.metaMask_.test(META_KEY_MEDIA_IMAGE) && metaOut.mediaImage_ == nullptr) {
         SLOGE("read small PixelMap failed");
         return false;
     }
     metaOut.mediaImageSmall_ = metaOut.mediaImage_;
-    SLOGI("UnmarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
+    ret = ret || !ReadDrmSchemes(data, metaOut);
+    SLOGI("UnmarshallingExceptImg with small img and drm ret %{public}d", static_cast<int>(ret));
     return ret;
 }
 
