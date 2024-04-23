@@ -27,7 +27,47 @@ export enum AVCastPickerState {
   /**
    * The picker finishes presenting.
    */
-  STATE_DISAPPEARING,
+  STATE_DISAPPEARING
+}
+
+/**
+ * Definition of av cast picker state.
+ */
+export enum AVCastPickerStyle {
+  /**
+   * The picker shows in a panel style.
+   */
+  STYLE_PANEL,
+
+  /**
+   * The picker shows in a menu style.
+   */
+  STYLE_MENU
+}
+
+enum DeviceSource {
+  /**
+   * local device
+   */
+  LOCAL,
+
+  /**
+   * cast device
+   */
+  CAST
+}
+
+/**
+ * menuItem device info
+ */
+interface AVCastPickerDeviceInfo {
+  deviceId: number | String,
+  deviceType: number,
+  deviceName: string,
+  deviceIconName: string,
+  isConnected: boolean,
+  selectedIconName: string,
+  deviceSource: DeviceSource
 }
 
 @Component
@@ -35,17 +75,124 @@ export struct AVCastPicker {
   /**
    * Assigns the color of picker component at normal state.
    */
-  @Prop normalColor: Color | number | string = '#000000';
+  @State normalColor: Color | number | string = '#000000';
 
   /**
    * Assigns the color of picker component at active state.
    */
-  @Prop activeColor: Color | number | string = '#000000';
+  @State activeColor?: Color | number | string = '#000000';
+
+  /**
+   * The device that is displayed in the menu.
+   */
+  @State deviceList: Array<AVCastPickerDeviceInfo> = [];
+
+  /**
+   * Session type transferred by the application.
+   */
+  @State sessionType: string = 'audio';
+
+  /**
+   * Display form of application transfer.
+   */
+  @State pickerStyle: AVCastPickerStyle = AVCastPickerStyle.STYLE_PANEL;
+
+  /**
+   * Whether to display the menu.
+   */
+  @State isMenuShow: boolean = false;
+
+  /**
+   * Touch item index.
+   */
+  @State touchMenuItemIndex: number = -1;
 
   /**
    * Picker state change callback.
    */
   private onStateChange?: (state: AVCastPickerState) => void;
+
+  /**
+   * UIExtensionProxy
+   */
+  private extensionProxy: UIExtensionProxy | null = null;
+
+  @Builder
+  deviceMenu() {
+    Column() {
+      ForEach(this.deviceList, (item: AVCastPickerDeviceInfo, index) => {
+        Flex({
+          direction: FlexDirection.Column,
+          justifyContent: FlexAlign.SpaceBetween,
+          alignItems: ItemAlign.End
+        }) {
+          Flex({
+            direction: FlexDirection.Row,
+            justifyContent: FlexAlign.SpaceBetween,
+            alignItems: ItemAlign.Center
+          }) {
+            Row() {
+              Image($r(item.deviceIconName))
+                .width(24)
+                .height(24)
+              Text(item.deviceName)
+                .fontSize($r('sys.float.ohos_id_text_size_body1'))
+                .fontColor(item.isConnected ? $r('sys.color.ohos_id_color_text_primary_activated')
+                  : $r('sys.color.ohos_id_color_text_primary'))
+                .width(item.isConnected ? 144 : 168)
+                .padding({
+                  left: 8,
+                  top: 12,
+                  right: 18,
+                  bottom: 12
+                })
+            }
+            .justifyContent(FlexAlign.Start)
+            .alignItems(VerticalAlign.Center)
+
+            if (item.isConnected && item.selectedIconName != null && item.selectedIconName !== undefined) {
+              Row() {
+                Image($r(item.selectedIconName))
+                  .width(24)
+                  .height(24)
+                  .fillColor($r('sys.color.ohos_id_color_activated'))
+              }
+              .justifyContent(FlexAlign.Start)
+              .alignItems(VerticalAlign.Center)
+            }
+          }
+          .constraintSize({ minHeight: 48 })
+          .padding({ left: 12, right: 12 })
+          .onTouch((event) => {
+            if (event.type === TouchType.Down) {
+              this.touchMenuItemIndex = index;
+            } else if (event.type === TouchType.Up) {
+              this.touchMenuItemIndex = -1;
+            }
+          })
+          .backgroundColor(this.touchMenuItemIndex === index
+            ? $r('sys.color.ohos_id_color_click_effect') : '#00FFFFFF')
+          .borderRadius(this.touchMenuItemIndex === index
+            ? $r('sys.float.ohos_id_corner_radius_default_m') : 0)
+
+          if (index != this.deviceList.length - 1) {
+            Divider()
+              .height(1)
+              .width(172)
+              .color($r('sys.color.ohos_id_color_list_separator'))
+              .padding({ right: 12 })
+          }
+        }
+        .width('100%')
+        .onClick(() => {
+          if (this.extensionProxy != null && !item.isConnected) {
+            this.extensionProxy.send({ 'selectedDeviceInfo': item })
+          }
+        })
+      })
+    }
+    .width(216)
+  }
 
   build() {
     Column() {
@@ -53,19 +200,65 @@ export struct AVCastPicker {
         {
           abilityName: 'UIExtAbility',
           bundleName: 'com.hmos.mediacontroller',
-          parameters: {"normalColor": this.normalColor}
+          parameters: { 'normalColor': this.normalColor, 'avCastPickerStyle': this.pickerStyle }
+        })
+        .onRemoteReady((proxy: UIExtensionProxy) => {
+          console.info(TAG, 'onRemoteReady');
+          this.extensionProxy = proxy;
         })
         .onReceive((data) => {
-          console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
-          if (this.onStateChange != null) {
-            if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
-              this.onStateChange(AVCastPickerState.STATE_APPEARING);
-            } else {
-              this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
+          if (JSON.stringify(data['state']) !== undefined) {
+            console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
+            if (this.onStateChange !== null) {
+              if (parseInt(JSON.stringify(data['state'])) == AVCastPickerState.STATE_APPEARING) {
+                this.onStateChange(AVCastPickerState.STATE_APPEARING);
+              } else {
+                this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
+              }
             }
           }
+
+          if (JSON.stringify(data['deviceList']) !== undefined) {
+            console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
+            this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
+            if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3
+              && (this.sessionType === 'voice_call' || this.sessionType === 'video_call'))
+              || this.pickerStyle === AVCastPickerStyle.STYLE_MENU) {
+              this.isMenuShow = false;
+            }
+          }
+
+          if (JSON.stringify(data['pickerStyle']) !== undefined) {
+            console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
+            this.pickerStyle = data['pickerStyle'] as AVCastPickerStyle;
+          }
+
+          if (JSON.stringify(data['sessionType']) !== undefined) {
+            console.info(TAG, `session type : ${JSON.stringify(data['sessionType'])}`);
+            this.sessionType = data['sessionType'] as string;
+          }
+
+         if (JSON.stringify(data['isShowMenu']) !== undefined) {
+            console.info(TAG, `isShowMenu : ${JSON.stringify(data['isShowMenu'])}`);
+            this.isMenuShow = data['isShowMenu'] as boolean;
+          }
         })
-      .size({width: '100%', height: '100%'})
+      .size({ width: '100%', height: '100%' })
+      .bindMenu(this.isMenuShow, this.deviceMenu(), {
+        placement: Placement.TopRight,
+        onDisappear: () => {
+          this.isMenuShow = false;
+        }
+      })
+      .onClick(() => {
+        if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3
+          && (this.sessionType === 'voice_call' || this.sessionType === 'video_call'))
+          || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+          this.isMenuShow = false;
+        } else {
+          this.isMenuShow = !this.isMenuShow;
+        }
+      })
     }.size({width: '100%', height: '100%'})
   }
 }
