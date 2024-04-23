@@ -95,7 +95,6 @@ void HwCastProviderSession::SetStreamState()
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered listeners");
             listener->OnCastStateChange(deviceStateConnection, deviceInfo);
-            counter_++;
         }
     }
     stashDeviceState_ = deviceStateConnection;
@@ -160,11 +159,6 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         return;
     }
     stashDeviceState_ = -1;
-    if (deviceState == deviceStateConnection && counter_ >= 0) {
-        SLOGI("interception of one devicestate=6 transmission");
-        counter_ = 0;
-        return;
-    }
     std::lock_guard lockGuard(mutex_);
     for (auto listener : castSessionStateListenerList_) {
         DeviceInfo deviceInfo;

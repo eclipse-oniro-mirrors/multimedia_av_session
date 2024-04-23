@@ -139,7 +139,8 @@ public:
      * @return { int64_t } ID returned after successful start of cast.
      * @since 10
     */
-    virtual int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
+        std::map<std::string, int32_t>& serviceNameMapState) = 0;
     
     /**
      * @brief Notify CastEngine to add (connect) remote devices.
@@ -155,10 +156,11 @@ public:
      * @brief Stop cast process.
      *
      * @param { const int64_t } castHandle - The ID corresponding to the provider that needs to be stopped.
+     * @param { int32_t } removeTimes - The remove times.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t StopCast(const int64_t castHandle) = 0;
+    virtual int32_t StopCast(const int64_t castHandle, int32_t removeTimes) = 0;
 
     /**
      * @brief Stop cast session process.
@@ -190,9 +192,14 @@ public:
     */
     virtual int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
-
-    virtual void SetServiceAllConnectState(int64_t castHandle,
-        std::map<std::string, int32_t>& serviceNameMapState) = 0;
+    
+    /**
+     * @brief set allconnect state.
+     *
+     * @param { int64_t } castHandle const - The ID corresponding to the provider.
+     * @since 11
+    */
+    virtual void SetServiceAllConnectState(int64_t castHandle) = 0;
 #endif
 };
 } // namespace OHOS::AVSession

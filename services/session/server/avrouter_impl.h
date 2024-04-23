@@ -46,11 +46,12 @@ public:
 
     std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int64_t castHandle) override;
 
-    int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo) override;
+    int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
+        std::map<std::string, int32_t>& serviceNameMapState) override;
 
     int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) override;
 
-    int32_t StopCast(const int64_t castHandle) override;
+    int32_t StopCast(const int64_t castHandle, int32_t removeTimes) override;
 
     int32_t StopCastSession(const int64_t castHandle) override;
 
@@ -60,8 +61,7 @@ public:
     int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) override;
 
-    void SetServiceAllConnectState(int64_t castHandle,
-        std::map<std::string, int32_t>& serviceNameMapState) override;
+    void SetServiceAllConnectState(int64_t castHandle) override;
 
 protected:
 

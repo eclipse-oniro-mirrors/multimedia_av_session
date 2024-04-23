@@ -118,10 +118,11 @@ public:
     /**
      * @brief Start cast process.
      *
+     * @param { std::shared_ptr<IAVCastSessionStateListener> } callback - Callback function.
      * @return { int } Whether the operation was successful.
      * @since 10
     */
-    virtual int StartCastSession() = 0;
+    virtual int StartCastSession(std::map<std::string, int32_t>& serviceNameMapState) = 0;
 
     /**
      * @brief Stop cast process.
@@ -161,9 +162,22 @@ public:
     */
     virtual bool UnRegisterCastSessionStateListener(int castId,
         std::shared_ptr<IAVCastSessionStateListener> listener) = 0;
+    
+    /**
+     * @brief set allconnect state.
+     *
+     * @param { int64_t } castHandle const - The ID corresponding to the castprovider.
+     * @since 11
+    */
+    virtual void SetStreamState(int32_t castId) = 0;
 
-    virtual void SetStreamState(int32_t castId,
-        std::map<std::string, int32_t>& serviceNameMapState) = 0;
+    /**
+     * @brief get mirror castid.
+     *
+     * @return { int } mirror castid.
+     * @since 11
+    */
+    virtual int GetMirrorCastId() = 0;
 };
 } // namespace OHOS::AVSession
 #endif

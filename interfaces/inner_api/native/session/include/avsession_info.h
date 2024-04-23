@@ -221,8 +221,7 @@ public:
      * @param outputDeviceInfo Event callback of device information.
      * @since 9
     */
-    virtual void OnOutputDeviceChange(const int32_t connectionState,
-        const OutputDeviceInfo& outputDeviceInfo, bool isDelay) = 0;
+    virtual void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
     /**
      * @brief Listen for command events.
@@ -505,6 +504,14 @@ enum ProtocolType {
      * @since 10
      */
     TYPE_CAST_PLUS_STREAM  = 2,
+
+    /**
+     * The DLNA type indicates the device supports DLNA protocol,
+     * the application needs to get an AVCastController to control remote playback.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @since 12
+     */
+    TYPE_DLNA = 4,
 };
 
 /**
