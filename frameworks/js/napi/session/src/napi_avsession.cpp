@@ -422,15 +422,15 @@ size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<s
     return realsize;
 }
 
-int32_t DoDownload(AVMetaData& meta)
+int32_t DoDownload(AVMetaData& meta, std::string uri)
 {
     SLOGI("DoDownload uri %{public}s, title %{public}s, assetid %{public}s",
-        meta.GetMediaImageUri().c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
+        uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
 
     CURL *easyHandle_ = curl_easy_init();
     if (easyHandle_) {
         // set request options
-        curl_easy_setopt(easyHandle_, CURLOPT_URL, meta.GetMediaImageUri().c_str());
+        curl_easy_setopt(easyHandle_, CURLOPT_URL, uri.c_str());
         curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, NapiAVSession::TIME_OUT_SECOND);
         curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -531,12 +531,14 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
+        auto uri = context->metaData_.GetMediaImageUri();
+        context->metaData_.SetMediaImageUri("");
         int32_t ret = napiSession->session_->SetAVMetaData(context->metaData_);
         if (ret != AVSESSION_SUCCESS) {
             processErrMsg(context, ret);
             return;
         } else if (context->metaData_.GetMediaImage() == nullptr) {
-            ret = DoDownload(context->metaData_);
+            ret = DoDownload(context->metaData_, uri);
             SLOGI("DoDownload complete ret %{public}d", ret);
             if (ret == AVSESSION_SUCCESS && context->metadataTs >= napiSession->latestMetadataTs_) {
                 napiSession->session_->SetAVMetaData(context->metaData_);
