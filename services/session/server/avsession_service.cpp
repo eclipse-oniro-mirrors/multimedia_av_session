@@ -2319,24 +2319,9 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
     }
 }
 
-//文件路径校验规范化处理
-bool AVSessionService::FilePathIsValid(const string& filePath, const string& functionName)
-{
-    bool flag = true;
-    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(filePath.c_str(), sourceLibraryRealPath) == nullptr) {
-        flag = false;
-        SLOGE("%{public}s: filepath is invalid", functionName.c_str());
-    }
-    return flag;
-}
-
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    if (!FilePathIsValid(filePath, "LoadStringFromFileEx")) {
-        return false;
-    }
     SLOGI("file load in for path: %{public}s", filePath.c_str());
     ifstream file(filePath.c_str());
     if (!file.is_open()) {
@@ -2385,9 +2370,6 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
 bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std::string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    if (!FilePathIsValid(filePath, "SaveStringToFileEx")) {
-        return false;
-    }
     SLOGI("file save in for path:%{public}s, content:%{public}s", filePath.c_str(), content.c_str());
     nlohmann::json checkValues = json::parse(content, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!checkValues.is_discarded(), false, "recv content discarded");
@@ -2414,9 +2396,6 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 {
-    if (!FilePathIsValid(filePath, "CheckStringAndCleanFile")) {
-        return false;
-    }
     SLOGI("file check for path:%{public}s", filePath.c_str());
     string content {};
     ifstream fileRead(filePath.c_str());
