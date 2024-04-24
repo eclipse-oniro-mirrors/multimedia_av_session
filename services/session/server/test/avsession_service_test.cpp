@@ -29,10 +29,19 @@
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 #include "accesstoken_kit.h"
+#include "system_ability_definition.h"
+#include "audio_info.h"
+
+#define private public
+#define protected public
+#include "avsession_service.h"
+#undef protected
+#undef private
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
+using namespace OHOS::AudioStandard;
 
 
 static AVMetaData g_metaData;
@@ -40,6 +49,8 @@ static AVPlaybackState g_playbackState;
 static char g_testSessionTag[] = "test";
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
+static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
+static char g_testAnotherAbilityName[] = "testAnother.ability";
 static int32_t g_playOnCall = AVSESSION_ERROR;
 static int32_t g_pauseOnCall = AVSESSION_ERROR;
 static int32_t g_nextOnCall = AVSESSION_ERROR;
@@ -53,6 +64,7 @@ public:
     void TearDown() override;
 
     std::shared_ptr<AVSession> avsession_ = nullptr;
+    AVSessionService *avservice_ = nullptr;
 };
 
 void AVSessionServiceTest::SetUpTestCase()
@@ -70,10 +82,11 @@ void AVSessionServiceTest::SetUp()
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
     elementName.SetAbilityName(g_testAbilityName);
-    avsession_ = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
-                                                               elementName);
+    avsession_ =
+        AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
     ASSERT_NE(avsession_, nullptr);
     avsession_->Activate();
+    avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
 }
 
 void AVSessionServiceTest::TearDown()
@@ -462,4 +475,109 @@ HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent006, TestSize.Level1)
     EXPECT_EQ(g_pauseOnCall, AVSESSION_SUCCESS);
     g_pauseOnCall = false;
     SLOGI("SendSystemAVKeyEvent006 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, NotifyDeviceAvailable001, TestSize.Level1)
+{
+    SLOGI("NotifyDeviceAvailable001 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("NotifyDeviceAvailable001 in!");
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "deviceId";
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    avservice_->NotifyDeviceAvailable(outputDeviceInfo);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+#endif
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("NotifyDeviceAvailable001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, NotifyMirrorToStreamCast001, TestSize.Level1)
+{
+    SLOGI("NotifyMirrorToStreamCast001 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("NotifyMirrorToStreamCast001 in!");
+    avservice_->NotifyMirrorToStreamCast();
+#endif
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("NotifyMirrorToStreamCast001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, NotifyMirrorToStreamCast002, TestSize.Level1)
+{
+    SLOGI("NotifyMirrorToStreamCast002 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("NotifyMirrorToStreamCast002 in!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avservice_->UpdateTopSession(avsessionHere_);
+    avservice_->NotifyMirrorToStreamCast();
+#endif
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("NotifyMirrorToStreamCast002 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, NotifyMirrorToStreamCast003, TestSize.Level1)
+{
+    SLOGI("NotifyMirrorToStreamCast003 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("NotifyMirrorToStreamCast002 in!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    avservice_->UpdateTopSession(avsessionHere_);
+    avservice_->NotifyMirrorToStreamCast();
+#endif
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("NotifyMirrorToStreamCast003 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, RefreshFocusSessionSort001, TestSize.Level1)
+{
+    SLOGI("RefreshFocusSessionSort001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avservice_->RefreshFocusSessionSort(avsessionHere_);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("RefreshFocusSessionSort001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, SelectSessionByUid001, TestSize.Level1)
+{
+    SLOGI("SelectSessionByUid001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    AudioRendererChangeInfo info = {};
+    info.clientUID = 0;
+    avservice_->SelectSessionByUid(info);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("SelectSessionByUid001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, SelectSessionByUid002, TestSize.Level1)
+{
+    SLOGI("SelectSessionByUid002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    AudioRendererChangeInfo info = {};
+    info.clientUID = avsessionHere_->GetUid();
+    avservice_->SelectSessionByUid(info);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("SelectSessionByUid002 end!");
 }
