@@ -88,6 +88,7 @@ public:
 
     bool WriteDrmSchemes(Parcel& parcel) const;
     static bool WriteDrmSchemes(MessageParcel& parcel, const AVMetaData metaData);
+    static bool ReadDrmSchemes(Parcel& parcel, AVMetaData *metaData);
     static bool ReadDrmSchemes(MessageParcel& parcel, AVMetaData& metaData);
 
     void SetAssetId(const std::string& assetId);
