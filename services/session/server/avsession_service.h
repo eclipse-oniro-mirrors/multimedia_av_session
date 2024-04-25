@@ -130,7 +130,7 @@ public:
     void HandleCallStartEvent();
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
+    __attribute__((no_sanitize("cfi"))) int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
 #endif
 
     void HandleControllerRelease(AVControllerItem& controller);
