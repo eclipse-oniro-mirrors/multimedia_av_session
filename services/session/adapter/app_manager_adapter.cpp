@@ -115,7 +115,7 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
                         appData.appName.c_str(), appData.uid, appProcessData.appState);
                     auto it = observedAppUIDs_.find(appData.uid);
                     if (it != observedAppUIDs_.end()) {
-                        backgroundUIDs.insert(appData.uid);
+                        backgroundUIDsForCast.insert(appData.uid);
                     }
                     serviceCallbackForAppStateChange_(appData.uid, static_cast<int>(appProcessData.appState));
                 }

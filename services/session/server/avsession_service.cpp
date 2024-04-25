@@ -446,7 +446,7 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
 {
     if (uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState:APP_STATE_FOREGROUND))
     {
-        SLOGI("enter notifyMirrorToStreamCast by isAppBackground");
+        SLOGI("enter notifyMirrorToStreamCast by isAppBackground change");
         NotifyMirrorToStreamCast();
     }
     
