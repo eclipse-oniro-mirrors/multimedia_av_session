@@ -168,11 +168,6 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnOutputDeviceChange");
     int32_t connectionState;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(connectionState), false, "write deviceInfoSize failed");
-    bool isDelay = false;
-    CHECK_AND_RETURN_RET_LOG(data.ReadBool(isDelay), false, "write isDelay failed");
-    if (isDelay) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTenMilliseconds));
-    }
 
     OutputDeviceInfo outputDeviceInfo;
     int32_t deviceInfoSize;
@@ -207,7 +202,7 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
     
-    OnOutputDeviceChange(connectionState, outputDeviceInfo, isDelay);
+    OnOutputDeviceChange(connectionState, outputDeviceInfo);
     return ERR_NONE;
 }
 

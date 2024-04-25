@@ -773,7 +773,8 @@ void AVSessionService::NotifyMirrorToStreamCast()
         SLOGE("topsession null pointer");
         return;
     }
-    if (topSession_->GetSessionType() == "video") {
+    if (topSession_->GetSessionType() == "video" &&
+        !AppManagerAdapter::GetInstance().IsAppBackground(topSession_->GetUid())) {
         MirrorToStreamCast(topSession_);
     }
 }
@@ -787,8 +788,6 @@ int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
             castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
             checkEnableCast(true);
             return session->RegisterListenerStreamToCast(castServiceNameMapState_);
-        } else {
-            session->IsRemove();
         }
     }
     return AVSESSION_SUCCESS;
@@ -897,7 +896,7 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
 
     NotifySessionCreate(result->GetDescriptor());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (type == AVSession::SESSION_TYPE_VIDEO) {
+    if (type == AVSession::SESSION_TYPE_VIDEO && !AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid())) {
         MirrorToStreamCast(result);
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE

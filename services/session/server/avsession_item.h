@@ -45,7 +45,7 @@ public:
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     {
-        ptr_->OnCastStateChange(castState, deviceInfo, bool isDelay);
+        ptr_->OnCastStateChange(castState, deviceInfo);
     }
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
@@ -64,9 +64,11 @@ public:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool IsCastSinkSession(int32_t castState);
 
-    void NotRemoveCastDevice(int32_t castState);
+    void DealCastState(int32_t castState);
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isDelay);
+    void DealDisconnect(int32_t castState, DeviceInfo deviceInfo);
+
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 #endif
@@ -137,8 +139,7 @@ public:
 
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
 
-    void HandleOutputDeviceChange(const int32_t connectionState,
-        const OutputDeviceInfo& outputDeviceInfo, bool isDelay);
+    void HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo);
 
     void HandleSkipToQueueItem(const int32_t& itemId);
 
@@ -196,8 +197,6 @@ public:
     void RemoveSessionCommandFromCast(int32_t cmd);
 
     int32_t SessionCommandToCastCommand(int32_t cmd);
-
-    void IsRemove();
 
     int32_t RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState);
 
@@ -330,7 +329,10 @@ private:
     const int32_t streamStateConnection = 6;
     const int32_t deviceStateConnection = 4;
     const int32_t playingState = 3;
-    int32_t isRemove = 0;
+    int32_t removeTimes = 0;
+    int32_t newCastState = -1;
+    int32_t counter_ = -1;
+    bool isUpdate = false;
     std::map<std::string, int32_t> castServiceNameMapState_;
 
     std::recursive_mutex castControllerProxyLock_;

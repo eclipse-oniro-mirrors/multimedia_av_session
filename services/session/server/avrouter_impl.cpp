@@ -211,17 +211,19 @@ std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const 
     return providerManagerMap_[providerNumber]->provider_->GetRemoteController(castId);
 }
 
-int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo)
+int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
+    std::map<std::string, int32_t>& serviceNameMapState)
 {
     SLOGI("AVRouterImpl start cast process");
-
+    castServiceNameMapState_ = serviceNameMapState;
     int64_t castHandle = -1;
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(outputDeviceInfo.deviceInfos_[0].providerId_) !=
         providerManagerMap_.end(), castHandle, "Can not find corresponding provider");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_] != nullptr
         && providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_ != nullptr,
         AVSESSION_ERROR, "provider is nullptr");
-    int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->StartCastSession();
+    int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].
+        providerId_]->provider_->StartCastSession(serviceNameMapState);
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     // The first 32 bits are providerId, the last 32 bits are castId
     castHandle = (static_cast<uint64_t>(tempId) << 32) | castId;
@@ -240,7 +242,7 @@ int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& ou
     return ret ? AVSESSION_SUCCESS : ERR_DEVICE_CONNECTION_FAILED;
 }
 
-int32_t AVRouterImpl::StopCast(const int64_t castHandle)
+int32_t AVRouterImpl::StopCast(const int64_t castHandle, int32_t removeTimes)
 {
     SLOGI("AVRouterImpl stop cast process");
 
@@ -250,11 +252,13 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle)
         castHandle, "Can not find corresponding provider");
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
-    SLOGI("Stop cast, the castId is %{public}d", castId);
+    SLOGI("Stop cast, the castId is %{public}d, removeTimes is %{public}d", castId, removeTimes);
     CHECK_AND_RETURN_RET_LOG(castHandleToOutputDeviceMap_.find(castId) != castHandleToOutputDeviceMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding castId");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castId != providerManagerMap_[providerNumber]->provider_->GetMirrorCastId() ||
+        removeTimes == 0, AVSESSION_ERROR, "cannot remove");
     providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId,
         castHandleToOutputDeviceMap_[castId].deviceInfos_[0]);
     hasSessionAlive_ = false;
@@ -291,9 +295,8 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     return AVSESSION_SUCCESS;
 }
 
-void AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, std::map<std::string, int32_t>& serviceNameMapState)
+void AVRouterImpl::SetServiceAllConnectState(int64_t castHandle)
 {
-    castServiceNameMapState_ = serviceNameMapState;
     int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
     int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
     OutputDeviceInfo outputDeviceInfo;
@@ -304,7 +307,7 @@ void AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, std::map<std::s
     deviceInfo.providerId_ = 1;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
-    providerManagerMap_[providerNumber]->provider_->SetStreamState(castId, serviceNameMapState);
+    providerManagerMap_[providerNumber]->provider_->SetStreamState(castId);
 }
 
 int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr<IAVCastSessionStateListener> callback)

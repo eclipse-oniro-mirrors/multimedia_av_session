@@ -187,7 +187,7 @@ public:
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const int32_t connectionState,
-        const OutputDeviceInfo& outputDeviceInfo, bool isDelay) override;
+        const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
     void OnAVCallAnswer() override {};
@@ -263,7 +263,7 @@ void AVSessionCastAudioCallbackImpl::OnMediaKeyEvent(const OHOS::MMI::KeyEvent& 
     g_onCall = AVSESSION_SUCCESS;
 }
 void AVSessionCastAudioCallbackImpl::OnOutputDeviceChange(const int32_t connectionState,
-    const OutputDeviceInfo& info, bool isDelay)
+    const OutputDeviceInfo& info)
 {
     SLOGE("OnOutputDeviceChange");
     g_onCall = AVSESSION_SUCCESS;

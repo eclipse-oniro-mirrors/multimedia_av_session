@@ -42,8 +42,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
-    void OnOutputDeviceChange(const int32_t connectionState,
-        const OutputDeviceInfo& outputDeviceInfo, bool isDelay) override;
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
     void OnPlayFromAssetId(int64_t assetId) override;
