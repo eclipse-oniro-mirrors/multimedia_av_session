@@ -38,7 +38,7 @@ public:
     void StopDiscovery() override;
     int32_t SetDiscoverable(const bool enable) override;
     void Release() override;
-    int StartCastSession() override;
+    int StartCastSession(std::map<std::string, int32_t>& serviceNameMapState) override;
     void StopCastSession(int castId) override;
     bool AddCastDevice(int castId, DeviceInfo deviceInfo) override;
     bool RemoveCastDevice(int castId, DeviceInfo deviceInfo) override;
@@ -52,22 +52,28 @@ public:
     void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void OnServiceDied() override;
-    void SetStreamState(int32_t castId, std::map<std::string, int32_t>& serviceNameMapState) override;
+    void SetStreamState(int32_t castId) override;
+    int GetMirrorCastId() override;
 
 private:
     void WaitSessionRelease();
-    static const int MAX_CAST_SESSION_SIZE = 16;
-    std::vector<bool> castFlag_ = std::vector<bool>(MAX_CAST_SESSION_SIZE, false);
+    static const int maxCastSessionSize = 0xFFFFFFF;
+    std::vector<bool> castFlag_ = std::vector<bool>(maxCastSessionSize, false);
     std::map<int, std::shared_ptr<HwCastProviderSession>> hwCastProviderSessionMap_;
     std::map<int, std::shared_ptr<IAVCastControllerProxy>> avCastControllerMap_;
-    std::map<std::string, int32_t> castServiceNameMapState_;
     std::vector<std::shared_ptr<IAVCastStateListener>> castStateListenerList_;
     std::recursive_mutex mutexLock_;
     bool isRelease_ = false;
     int lastCastId_ = -1;
+    int mirrorCastId = -1;
     std::shared_ptr<HwCastProviderSession> lastCastSession;
 
     const int32_t deviceStateConnection = 4;
+    std::map<CastEngine::CapabilityType, int32_t> castPlusTypeToAVSessionType_ = {
+        {CastEngine::CapabilityType::CAST_PLUS, ProtocolType::TYPE_CAST_PLUS_STREAM},
+        {CastEngine::CapabilityType::DLNA, ProtocolType::TYPE_DLNA},
+        {CastEngine::CapabilityType::CAST_AND_DLNA, ProtocolType::TYPE_CAST_PLUS_STREAM | ProtocolType::TYPE_DLNA}
+    };
 };
 } // namespace OHOS::AVSession
 

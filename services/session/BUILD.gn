@@ -109,7 +109,7 @@ ohos_shared_library("avsession_service") {
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
 
   defines = []
-  if (target_cpu == "arm64") {
+  if (target_cpu == "arm64" || is_emulator) {
     system_lib_path = "\"/system/lib64/\""
   } else {
     system_lib_path = "\"/system/lib/\""
@@ -242,7 +242,7 @@ ohos_shared_library("avsession_router") {
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
 
   defines = []
-  if (target_cpu == "arm64") {
+  if (target_cpu == "arm64" || is_emulator) {
     system_lib_path = "\"/system/lib64/\""
   } else {
     system_lib_path = "\"/system/lib/\""
@@ -364,7 +364,7 @@ ohos_shared_library("avsession_item") {
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
 
   defines = []
-  if (target_cpu == "arm64") {
+  if (target_cpu == "arm64" || is_emulator) {
     system_lib_path = "\"/system/lib64/\""
   } else {
     system_lib_path = "\"/system/lib/\""
@@ -481,7 +481,7 @@ ohos_shared_library("avsession_cast_item") {
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
 
   defines = []
-  if (target_cpu == "arm64") {
+  if (target_cpu == "arm64" || is_emulator) {
     system_lib_path = "\"/system/lib64/\""
   } else {
     system_lib_path = "\"/system/lib/\""

@@ -1385,10 +1385,6 @@ napi_status NapiAVSession::OnMediaKeyEvent(napi_env env, NapiAVSession* napiSess
 
 napi_status NapiAVSession::OnOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_OUTPUT_DEVICE_CHANGE);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
-#endif //CASTPLUS_CAST_ENGINE_ENABLE
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);

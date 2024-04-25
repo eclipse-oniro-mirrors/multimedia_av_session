@@ -113,7 +113,7 @@ public:
     void OnToggleFavorite(const std::string& mediaId) override {};
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override {};
     void OnOutputDeviceChange(const int32_t connectionState,
-        const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo, bool isDelay) override {};
+        const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
     void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override {};
     void OnSkipToQueueItem(int32_t itemId) override {};
     void OnAVCallAnswer() override {};

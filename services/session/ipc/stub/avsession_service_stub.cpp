@@ -415,7 +415,8 @@ int32_t AVSessionServiceStub::HandleStartCastDiscovery(MessageParcel& data, Mess
     auto castDeviceCapability = data.ReadInt32();
     int32_t drmSchemesLen = data.ReadInt32();
     std::vector<std::string> drmSchemes;
-    for (int i = 0; i < drmSchemesLen; i++) {
+    int maxLen = 10;
+    for (int i = 0; (i < drmSchemesLen) && (i < maxLen); i++) {
         std::string drmScheme = data.ReadString();
         drmSchemes.emplace_back(drmScheme);
     }

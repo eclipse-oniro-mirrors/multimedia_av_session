@@ -97,7 +97,7 @@ void HwCastProvider::Release()
     SLOGD("Release done");
 }
 
-int HwCastProvider::StartCastSession()
+int HwCastProvider::StartCastSession(std::map<std::string, int32_t>& serviceNameMapState)
 {
     SLOGI("StartCastSession begin");
     CastSessionProperty property = {CastEngine::ProtocolType::CAST_PLUS_STREAM, CastEngine::EndType::CAST_SOURCE};
@@ -130,6 +130,8 @@ int HwCastProvider::StartCastSession()
 
     return castId;
 }
+}
+
 void HwCastProvider::StopCastSession(int castId)
 {
     SLOGI("StopCastSession begin with %{public}d", castId);
@@ -146,12 +148,10 @@ void HwCastProvider::StopCastSession(int castId)
         return;
     }
     auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
-    if (hwCastProviderSession && (castServiceNameMapState_["HuaweiCast"] != deviceStateConnection ||
-     castServiceNameMapState_["HuaweiCast-Dual"] != deviceStateConnection)) {
+    if (hwCastProviderSession && castId != mirrorCastId) {
         hwCastProviderSession->Release();
     }
-    if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
-     castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
+    if (castId != mirrorCastId) {
         hwCastProviderSessionMap_.erase(castId);
         castFlag_[castId] = false;
     }
@@ -268,10 +268,16 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
     return hwCastStreamPlayer;
 }
 
-void HwCastProvider::SetStreamState(int32_t castId, std::map<std::string, int32_t>& serviceNameMapState)
+void HwCastProvider::SetStreamState(int32_t castId)
 {
-    castServiceNameMapState_ = serviceNameMapState;
     hwCastProviderSessionMap_[castId]->SetStreamState();
+    mirrorCastId = castId;
+    SLOGI("mirrorCastId is %{public}d", mirrorCastId);
+}
+
+int HwCastProvider::GetMirrorCastId()
+{
+    return mirrorCastId;
 }
 
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,
@@ -337,7 +343,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
         deviceInfo.networkId_ = castRemoteDevice.networkId;
-        deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
+        deviceInfo.supportedProtocols_ = castPlusTypeToAVSessionType_ [castRemoteDevice.capability];
         deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType) == 0 ?
             TRUSTED_DEVICE : UNTRUSTED_DEVICE;
         deviceInfoList.emplace_back(deviceInfo);

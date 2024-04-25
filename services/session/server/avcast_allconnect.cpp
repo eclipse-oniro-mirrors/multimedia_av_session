@@ -20,7 +20,7 @@ CastAllConnectCallback::CastAllConnectCallback(IAVSessionServiceListener *servic
 {
     SLOGI("CastAllConnectCallback constructor");
     {
-        if (servicePtr_ == nullptr) {
+        if (servicePtr == nullptr) {
             SLOGE("servicePtr null pointer");
             return;
         }

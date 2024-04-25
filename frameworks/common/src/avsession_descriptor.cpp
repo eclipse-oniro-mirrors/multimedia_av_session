@@ -95,7 +95,8 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
             "read supportedDrmCapabilityLen failed");
         std::vector<std::string> supportedDrmCapabilities;
-        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+        int maxLen = 10;
+        for (int i = 0; (i < supportedDrmCapabilityLen) && (i < maxLen); i++) {
             std::string supportedDrmCapability;
             CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
                 "read supportedDrmCapability failed");
@@ -152,7 +153,8 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
         "read supportedDrmCapabilityLen failed");
     std::vector<std::string> supportedDrmCapabilities;
-    for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+    int maxLen = 10;
+    for (int i = 0; (i < supportedDrmCapabilityLen) && (i < maxLen); i++) {
         std::string supportedDrmCapability;
         CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
             "read supportedDrmCapability failed");
@@ -208,7 +210,8 @@ bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
             "read supportedDrmCapabilityLen failed");
         std::vector<std::string> supportedDrmCapabilities;
-        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+        int maxLen = 10;
+        for (int i = 0; (i < supportedDrmCapabilityLen) && (i < maxLen); i++) {
             std::string supportedDrmCapability;
             CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
                 "read supportedDrmCapability failed");

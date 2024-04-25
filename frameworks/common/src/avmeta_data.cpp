@@ -41,9 +41,9 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(skipIntervals_) &&
         parcel.WriteInt32(filter_) &&
         parcel.WriteInt32(displayTags_) &&
+        WriteDrmSchemes(parcel) &&
         parcel.WriteParcelable(mediaImage_.get()) &&
-        parcel.WriteParcelable(avQueueImage_.get()) &&
-        WriteDrmSchemes(parcel);
+        parcel.WriteParcelable(avQueueImage_.get());
 }
 
 AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
@@ -88,7 +88,8 @@ bool AVMetaData::UnmarshallingCheckParamTask(Parcel& data, AVMetaData *result)
         !data.ReadString(result->nextAssetId_) ||
         !data.ReadInt32(result->skipIntervals_) ||
         !data.ReadInt32(result->filter_) ||
-        !data.ReadInt32(result->displayTags_));
+        !data.ReadInt32(result->displayTags_) ||
+        !ReadDrmSchemes(data, result));
     if (isParamUnsupport)  {
         SLOGE("read AVMetaData failed");
         return false;
@@ -137,8 +138,8 @@ bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData meta
         data.WriteInt32(metaIn.mediaLength_) &&
         data.WriteInt32(metaIn.avQueueLength_) &&
         data.WriteInt32(metaIn.displayTags_) &&
-        data.WriteParcelable(metaIn.mediaImageSmall_.get()) &&
-        WriteDrmSchemes(data, metaIn);
+        WriteDrmSchemes(data, metaIn) &&
+        data.WriteParcelable(metaIn.mediaImageSmall_.get());
     SLOGI("MarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
     return ret;
 }
@@ -213,12 +214,28 @@ bool AVMetaData::WriteDrmSchemes(MessageParcel& parcel, const AVMetaData metaDat
     return true;
 }
 
+bool AVMetaData::ReadDrmSchemes(Parcel& parcel, AVMetaData *metaData)
+{
+    int32_t drmSchemesLen = 0;
+    CHECK_AND_RETURN_RET_LOG(parcel.ReadInt32(drmSchemesLen), false, "read drmSchemesLen failed");
+    std::vector<std::string> drmSchemes;
+    int maxLen = 10;
+    for (int i = 0; (i < drmSchemesLen) && (i < maxLen); i++) {
+        std::string drmScheme;
+        CHECK_AND_RETURN_RET_LOG(parcel.ReadString(drmScheme), false, "read drmScheme failed");
+        drmSchemes.emplace_back(drmScheme);
+    }
+    metaData->drmSchemes_ = drmSchemes;
+    return true;
+}
+
 bool AVMetaData::ReadDrmSchemes(MessageParcel& parcel, AVMetaData& metaData)
 {
     int32_t drmSchemesLen = 0;
     CHECK_AND_RETURN_RET_LOG(parcel.ReadInt32(drmSchemesLen), false, "read drmSchemesLen failed");
     std::vector<std::string> drmSchemes;
-    for (int i = 0; i < drmSchemesLen; i++) {
+    int maxLen = 10;
+    for (int i = 0; (i < drmSchemesLen) && (i < maxLen); i++) {
         std::string drmScheme;
         CHECK_AND_RETURN_RET_LOG(parcel.ReadString(drmScheme), false, "read drmScheme failed");
         drmSchemes.emplace_back(drmScheme);

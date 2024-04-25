@@ -86,6 +86,7 @@ static napi_value ExportProtocolType(napi_env env)
     (void)SetNamedProperty(env, result, "TYPE_LOCAL", ProtocolType::TYPE_LOCAL);
     (void)SetNamedProperty(env, result, "TYPE_CAST_PLUS_MIRROR", ProtocolType::TYPE_CAST_PLUS_MIRROR);
     (void)SetNamedProperty(env, result, "TYPE_CAST_PLUS_STREAM", ProtocolType::TYPE_CAST_PLUS_STREAM);
+    (void)SetNamedProperty(env, result, "TYPE_DLNA", ProtocolType::TYPE_DLNA);
 
     napi_object_freeze(env, result);
     return result;
