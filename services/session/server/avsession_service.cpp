@@ -437,6 +437,19 @@ void AVSessionService::InitAMS()
 {
     SLOGI("enter");
     AppManagerAdapter::GetInstance().Init();
+    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange([this](int uid, int state){
+        HandleAppStateChange(uid, state);
+    });
+}
+
+void AVSessionService::HandleAppStateChange(int uid, int state)
+{
+    if (uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState:APP_STATE_FOREGROUND))
+    {
+        SLOGI("enter notifyMirrorToStreamCast by isAppBackground");
+        NotifyMirrorToStreamCast();
+    }
+    
 }
 
 void AVSessionService::InitDM()
@@ -898,6 +911,7 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
     NotifySessionCreate(result->GetDescriptor());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (type == AVSession::SESSION_TYPE_VIDEO) {
+        uidForAppStateChange_ = result->GetUid();
         MirrorToStreamCast(result);
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE

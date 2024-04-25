@@ -324,6 +324,8 @@ private:
     void ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid);
 
     void ReportStartCastEnd(std::string func, const OutputDeviceInfo &outputDeviceInfo, int32_t uid, int ret);
+    
+    void HandleAppStateChange(int uid, int state);
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
         const AVSessionDescriptor* histroyDescriptor);
@@ -390,6 +392,7 @@ private:
 
     int32_t pressCount_ {};
     int32_t maxHistoryNums = 10;
+    int uidForAppStateChange_ = 0;
     bool isFirstPress_ = true;
     bool isSourceInCast_ = false;
     bool isInCast_ = false;
