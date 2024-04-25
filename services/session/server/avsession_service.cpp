@@ -437,19 +437,17 @@ void AVSessionService::InitAMS()
 {
     SLOGI("enter");
     AppManagerAdapter::GetInstance().Init();
-    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange([this](int uid, int state){
+    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange([this] (int uid, int state) {
         HandleAppStateChange(uid, state);
     });
 }
 
 void AVSessionService::HandleAppStateChange(int uid, int state)
 {
-    if (uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState:APP_STATE_FOREGROUND))
-    {
+    if (uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_FOREGROUND)) {
         SLOGI("enter notifyMirrorToStreamCast by isAppBackground change");
         NotifyMirrorToStreamCast();
     }
-    
 }
 
 void AVSessionService::InitDM()
