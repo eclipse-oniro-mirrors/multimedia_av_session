@@ -97,7 +97,7 @@ void HwCastProvider::Release()
     SLOGD("Release done");
 }
 
-int HwCastProvider::StartCastSession(std::map<std::string, int32_t>& serviceNameMapState)
+int HwCastProvider::StartCastSession()
 {
     SLOGI("StartCastSession begin");
     CastSessionProperty property = {CastEngine::ProtocolType::CAST_PLUS_STREAM, CastEngine::EndType::CAST_SOURCE};

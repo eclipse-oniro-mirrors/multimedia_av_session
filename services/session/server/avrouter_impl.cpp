@@ -212,7 +212,7 @@ std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const 
 }
 
 int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
-    std::map<std::string, int32_t>& serviceNameMapState)
+    std::map<std::string, std::string>& serviceNameMapState)
 {
     SLOGI("AVRouterImpl start cast process");
     castServiceNameMapState_ = serviceNameMapState;
@@ -223,7 +223,7 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
         && providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_ != nullptr,
         AVSESSION_ERROR, "provider is nullptr");
     int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].
-        providerId_]->provider_->StartCastSession(serviceNameMapState);
+        providerId_]->provider_->StartCastSession();
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     // The first 32 bits are providerId, the last 32 bits are castId
     castHandle = (static_cast<uint64_t>(tempId) << 32) | castId;

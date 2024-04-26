@@ -40,10 +40,6 @@
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
 
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-#include "avcast_allconnect.h"
-#endif
-
 namespace OHOS::AVSession {
 class AVSessionDumper;
 
@@ -159,7 +155,7 @@ public:
 
     void NotifyDeviceOffline(const std::string& deviceId) override;
 
-    void NotifyMirrorToStreamCast() override;
+    void NotifyMirrorToStreamCast();
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
@@ -370,12 +366,8 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
-
-    CastAllConnectCallback *castAllConnectCallback_;
-    CollaborationFwk::ServiceStateInfo serviceStateInfo_;
-    std::map<std::string, int32_t> castServiceNameMapState_;
-
-    const int32_t deviceStateConnection = 4;
+    std::map<std::string, std::string> castServiceNameMapState_;
+    const std::string deviceStateConnection = "CONNECT_SUCC";
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";

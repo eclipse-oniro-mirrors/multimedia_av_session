@@ -140,7 +140,7 @@ public:
      * @since 10
     */
     virtual int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
-        std::map<std::string, int32_t>& serviceNameMapState) = 0;
+        std::map<std::string, std::string>& serviceNameMapState) = 0;
     
     /**
      * @brief Notify CastEngine to add (connect) remote devices.

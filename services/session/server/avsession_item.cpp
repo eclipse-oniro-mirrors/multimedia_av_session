@@ -542,11 +542,12 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(std::map<std::string, int32_
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     castHandle_ = castHandle;
-    AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
+    counter_ = firstStep;
+    AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
     AVRouter::GetInstance().SetServiceAllConnectState(castHandle);
     deviceStateAddCommand_ = streamStateConnection;
-    counter_ = 1;
+    counter_ = secondStep;
     return AVSESSION_SUCCESS;
 }
 
@@ -747,7 +748,11 @@ void AVSessionItem::DealCastState(int32_t castState)
     if (newCastState == castState) {
         isUpdate = false;
     } else {
-        newCastState = castState;
+        if (counter_ == firstStep) {
+            newCastState = virtualDeviceStateConnection;
+        } else {
+            newCastState = castState;
+        }
         isUpdate = true;
     }
 }
@@ -761,7 +766,6 @@ void AVSessionItem::DealDisconnect(int32_t castState, DeviceInfo deviceInfo)
         AVRouter::GetInstance().StopCastSession(castHandle_);
         castHandle_ = -1;
         castControllerProxy_ = nullptr;
-
         SaveLocalDeviceInfo();
         ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
     }
@@ -772,7 +776,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceid_.c_str());
     DealCastState(castState);
-    if (castState == streamStateConnection && counter_ > 0) {
+    if (castState == streamStateConnection && counter_ == secondStep) {
         SLOGI("interception of one devicestate=6 transmission");
         counter_ = 0;
         return;

@@ -59,10 +59,6 @@ ohos_fuzztest("AVControllerItemFuzzTest") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    external_deps += [
-      "CollaborationFwk:cfwk_allconnect_client",
-      "CollaborationFwk:collaborationfwk_client",
-    ]
     deps += [
       "../../../../../../frameworks/native/session:avsession_cast_client",
       "../../../../../session:avsession_cast_item",

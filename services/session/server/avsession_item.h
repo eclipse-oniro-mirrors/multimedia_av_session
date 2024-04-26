@@ -327,13 +327,16 @@ private:
     int64_t castHandle_ = 0;
     int32_t deviceStateAddCommand_ = 0;
     const int32_t streamStateConnection = 6;
-    const int32_t deviceStateConnection = 4;
+    const int32_t virtualDeviceStateConnection = -6;
+    const std::string deviceStateConnection = "CONNECT_SUCC";
+    const int32_t firstStep = 1;
+    const int32_t secondStep = 2;
     const int32_t playingState = 3;
     int32_t removeTimes = 0;
     int32_t newCastState = -1;
     int32_t counter_ = -1;
     bool isUpdate = false;
-    std::map<std::string, int32_t> castServiceNameMapState_;
+    std::map<std::string, std::string> castServiceNameMapState_;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
