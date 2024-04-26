@@ -38,7 +38,7 @@ public:
     void StopDiscovery() override;
     int32_t SetDiscoverable(const bool enable) override;
     void Release() override;
-    int StartCastSession(std::map<std::string, int32_t>& serviceNameMapState) override;
+    int StartCastSession() override;
     void StopCastSession(int castId) override;
     bool AddCastDevice(int castId, DeviceInfo deviceInfo) override;
     bool RemoveCastDevice(int castId, DeviceInfo deviceInfo) override;

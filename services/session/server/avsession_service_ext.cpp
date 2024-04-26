@@ -37,6 +37,10 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession_);
         AddInnerSessionListener(migrateAVSession_.get());
     }
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    castServiceNameMapState_[serviceName] = state;
+    NotifyMirrorToStreamCast();
+#endif
 }
 
 void AVSessionService::AddInnerSessionListener(SessionListener *listener)

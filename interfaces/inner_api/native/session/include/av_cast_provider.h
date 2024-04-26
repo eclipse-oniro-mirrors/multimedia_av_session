@@ -118,11 +118,10 @@ public:
     /**
      * @brief Start cast process.
      *
-     * @param { std::shared_ptr<IAVCastSessionStateListener> } callback - Callback function.
      * @return { int } Whether the operation was successful.
      * @since 10
     */
-    virtual int StartCastSession(std::map<std::string, int32_t>& serviceNameMapState) = 0;
+    virtual int StartCastSession() = 0;
 
     /**
      * @brief Stop cast process.
