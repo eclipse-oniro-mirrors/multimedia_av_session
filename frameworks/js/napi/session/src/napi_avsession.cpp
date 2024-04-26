@@ -424,7 +424,7 @@ size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<s
 
 int32_t DoDownload(AVMetaData& meta, std::string uri)
 {
-    SLOGI("DoDownload uri %{public}s, title %{public}s, assetid %{public}s",
+    SLOGI("DoDownload with both uri %{public}s, title %{public}s, assetid %{public}s",
         uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
 
     CURL *easyHandle_ = curl_easy_init();
@@ -442,7 +442,6 @@ int32_t DoDownload(AVMetaData& meta, std::string uri)
         curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, &imgBuffer);
 
-        // perform request
         CURLcode res = curl_easy_perform(easyHandle_);
         if (res != CURLE_OK) {
             SLOGI("DoDownload curl easy_perform failure: %{public}s\n", curl_easy_strerror(res));
@@ -456,10 +455,8 @@ int32_t DoDownload(AVMetaData& meta, std::string uri)
                 return AVSESSION_ERROR;
             }
         }
-
         curl_easy_cleanup(easyHandle_);
         easyHandle_ = nullptr;
-
         std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), sizeof(uint8_t));
         std::copy(imgBuffer.begin(), imgBuffer.end(), buffer);
         uint32_t errorCode = 0;
@@ -477,7 +474,7 @@ int32_t DoDownload(AVMetaData& meta, std::string uri)
             return AVSESSION_ERROR;
         }
         meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
-        return AVSESSION_SUCCESS;
+        meta.SetSmallMediaImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
     }
     return AVSESSION_ERROR;
 }

@@ -515,8 +515,10 @@ HWTEST_F(AVSessionServiceTest, NotifyMirrorToStreamCast002, TestSize.Level1)
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
     avservice_->UpdateTopSession(avsessionHere_);
     avservice_->NotifyMirrorToStreamCast();
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("NotifyMirrorToStreamCast002 end!");
@@ -532,8 +534,10 @@ HWTEST_F(AVSessionServiceTest, NotifyMirrorToStreamCast003, TestSize.Level1)
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
     avservice_->UpdateTopSession(avsessionHere_);
     avservice_->NotifyMirrorToStreamCast();
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("NotifyMirrorToStreamCast003 end!");
@@ -547,7 +551,9 @@ HWTEST_F(AVSessionServiceTest, RefreshFocusSessionSort001, TestSize.Level1)
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
     avservice_->RefreshFocusSessionSort(avsessionHere_);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("RefreshFocusSessionSort001 end!");
 }
@@ -560,9 +566,11 @@ HWTEST_F(AVSessionServiceTest, SelectSessionByUid001, TestSize.Level1)
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
     AudioRendererChangeInfo info = {};
     info.clientUID = 0;
     avservice_->SelectSessionByUid(info);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("SelectSessionByUid001 end!");
 }
@@ -575,9 +583,257 @@ HWTEST_F(AVSessionServiceTest, SelectSessionByUid002, TestSize.Level1)
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
     AudioRendererChangeInfo info = {};
     info.clientUID = avsessionHere_->GetUid();
     avservice_->SelectSessionByUid(info);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("SelectSessionByUid002 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, InitBMS001, TestSize.Level1)
+{
+    SLOGI("InitBMS001 begin!");
+    avservice_->InitBMS();
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("InitBMS001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, ReleaseCastSession001, TestSize.Level1)
+{
+    SLOGI("ReleaseCastSession001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("ReleaseCastSession001 in!");
+    avservice_->ReleaseCastSession();
+#endif
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("ReleaseCastSession001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, CreateSessionByCast001, TestSize.Level1)
+{
+    SLOGI("CreateSessionByCast001 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("CreateSessionByCast001 in!");
+    avservice_->CreateSessionByCast(0);
+#endif
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("CreateSessionByCast001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, MirrorToStreamCast001, TestSize.Level1)
+{
+    SLOGI("MirrorToStreamCast001 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("MirrorToStreamCast001 in!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    avservice_->is2in1_ = true;
+    avservice_->castServiceNameMapState_["TempCast"] == avservice_->deviceStateConnection;
+    avservice_->castServiceNameMapState_["TempCast-Dual"] == avservice_->deviceStateConnection;
+    avservice_->MirrorToStreamCast(avsessionHere_);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+#endif
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("MirrorToStreamCast001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, MirrorToStreamCast002, TestSize.Level1)
+{
+    SLOGI("MirrorToStreamCast002 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("MirrorToStreamCast002 in!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    avservice_->is2in1_ = false;
+    avservice_->castServiceNameMapState_["TempCast"] == avservice_->deviceStateConnection;
+    avservice_->castServiceNameMapState_["TempCast-Dual"] == avservice_->deviceStateConnection;
+    avservice_->MirrorToStreamCast(avsessionHere_);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+#endif
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("MirrorToStreamCast002 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, MirrorToStreamCast003, TestSize.Level1)
+{
+    SLOGI("MirrorToStreamCast003 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("MirrorToStreamCast003 in!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    avservice_->is2in1_ = false;
+    avservice_->castServiceNameMapState_["TempCast"] == -1;
+    avservice_->castServiceNameMapState_["TempCast-Dual"] == -1;
+    avservice_->MirrorToStreamCast(avsessionHere_);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+#endif
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("MirrorToStreamCast003 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, RefreshSortFileOnCreateSession001, TestSize.Level1)
+{
+    SLOGI("RefreshSortFileOnCreateSession001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    avservice_->is2in1_ = false;
+    avservice_->castServiceNameMapState_["TempCast"] == -1;
+    avservice_->castServiceNameMapState_["TempCast-Dual"] == -1;
+    avservice_->refreshSortFileOnCreateSession(avsessionHere_->GetSessionId(),
+        "audio", elementName);
+#endif
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("RefreshSortFileOnCreateSession001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, GetHistoricalAVQueueInfos001, TestSize.Level1)
+{
+    SLOGI("GetHistoricalAVQueueInfos001 begin!");
+    std::vector<AVQueueInfo> avQueueInfos_;
+    avservice_->GetHistoricalAVQueueInfos(0, 0, avQueueInfos_);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("GetHistoricalAVQueueInfos001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, SaveAvQueueInfo001, TestSize.Level1)
+{
+    SLOGI("SaveAvQueueInfo001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    AVMetaData meta = avsessionHere_->GetMetaData();
+    std::string oldContent;
+    if (!avservice_->LoadStringFromFileEx(avservice_->AVSESSION_FILE_DIR + avservice_->AVQUEUE_FILE_NAME, oldContent)) {
+        SLOGE("SaveAvQueueInfo001 read avqueueinfo fail, Return!");
+        return;
+    }
+    avservice_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("SaveAvQueueInfo001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, AddAvQueueInfoToFile001, TestSize.Level1)
+{
+    SLOGI("AddAvQueueInfoToFile001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    avservice_->AddAvQueueInfoToFile(*avsessionHere_);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("AddAvQueueInfoToFile001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, StartAVPlayback001, TestSize.Level1)
+{
+    SLOGI("StartAVPlayback001 begin!");
+    avservice_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME");
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("StartAVPlayback001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, GetSubNode001, TestSize.Level1)
+{
+    SLOGI("GetSubNode001 begin!");
+    nlohmann::json value;
+    value["bundleName"] = g_testAnotherBundleName;
+    avservice_->GetSubNode(value, "FAKE_NAME");
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("GetSubNode001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, Close001, TestSize.Level1)
+{
+    SLOGI("Close001 begin!");
+    avservice_->Close();
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("Close001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, DeleteHistoricalRecord001, TestSize.Level1)
+{
+    SLOGI("DeleteHistoricalRecord001 begin!");
+    avservice_->DeleteHistoricalRecord(g_testAnotherBundleName);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("DeleteHistoricalRecord001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, Dump001, TestSize.Level1)
+{
+    SLOGI("Dump001 begin!");std::vector<std::u16string> argsList;
+    avservice_->Dump(1, argsList);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("Dump001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, ProcessCastAudioCommand001, TestSize.Level1)
+{
+    SLOGI("ProcessCastAudioCommand001 begin!");
+    std::string sourceSessionInfo = "SOURCE";
+    std::string sinkSessionInfo = " SINK";
+    avservice_->ProcessCastAudioCommand(
+        OHOS::AVSession::AVSessionServiceStub::RemoteServiceCommand::COMMAND_CAST_AUDIO,
+        sourceSessionInfo, sinkSessionInfo);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("ProcessCastAudioCommand001 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, ProcessCastAudioCommand002, TestSize.Level1)
+{
+    SLOGI("ProcessCastAudioCommand002 begin!");
+    std::string sourceSessionInfo = "SOURCE";
+    std::string sinkSessionInfo = " SINK";
+    avservice_->ProcessCastAudioCommand(
+        OHOS::AVSession::AVSessionServiceStub::RemoteServiceCommand::COMMAND_CANCEL_CAST_AUDIO,
+        sourceSessionInfo, sinkSessionInfo);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("ProcessCastAudioCommand002 end!");
+}
+
+HWTEST_F(AVSessionServiceTest, HandleDeviceChange002, TestSize.Level1)
+{
+    SLOGI("HandleDeviceChange002 begin!");
+    DeviceChangeAction deviceChange;
+    AudioDeviceDescriptor descriptor;
+    descriptor.deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
+    deviceChange.type = static_cast<DeviceChangeType>(0);
+    deviceChange.flag = static_cast<DeviceFlag>(0);
+    deviceChange.deviceDescriptors.emplace_back(&descriptor);
+    avservice_->HandleDeviceChange(deviceChange);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("HandleDeviceChange002 end!");
 }
