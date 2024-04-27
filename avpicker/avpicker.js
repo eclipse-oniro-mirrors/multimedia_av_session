@@ -311,7 +311,11 @@ export class AVCastPicker extends ViewPU {
             UIExtensionComponent.create({
                 abilityName: 'UIExtAbility',
                 bundleName: 'com.hmos.mediacontroller',
-                parameters: { 'normalColor': this.normalColor, 'avCastPickerStyle': this.pickerStyle }
+                parameters: {
+                    'normalColor': this.normalColor, 
+                    'avCastPickerStyle': this.pickerStyle,
+                    'ability.want.params.uiExtensionType': 'sys/commonUI',
+                }
             });
             UIExtensionComponent.onRemoteReady((i) => {
                 console.info(TAG, 'onRemoteReady');
