@@ -1604,6 +1604,12 @@ void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("RegisterClientDeathObserver: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice RegisterClientDeathObserver checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SLOGI("enter ClientDeathObserver register");
     auto pid = GetCallingPid();
     auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
@@ -2163,6 +2169,12 @@ int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::Audio
 int32_t AVSessionService::ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string& input,
                                                   std::string& output)
 {
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("ProcessCastAudioCommand: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice ProcessCastAudioCommand checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SLOGI("ProcessCastAudioCommand is %{public}d", static_cast<int32_t>(command));
     CHECK_AND_RETURN_RET_LOG(command > COMMAND_INVALID && command < COMMAND_MAX, AVSESSION_ERROR, "invalid command");
     if (command == COMMAND_CAST_AUDIO) {
