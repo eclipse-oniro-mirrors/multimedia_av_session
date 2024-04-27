@@ -206,7 +206,9 @@ ohos_shared_library("avsession_router") {
     "server/hw_cast_stream_player.cpp",
   ]
 
-  adapter_sources = []
+  adapter_sources = [
+    "adapter/permission_checker.cpp",
+  ]
 
   sources = ipc_sources + adapter_sources + service_sources
 
