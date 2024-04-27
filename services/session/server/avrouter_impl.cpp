@@ -89,6 +89,12 @@ bool AVRouterImpl::Release()
 
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("StartCastDiscovery: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice StartCastDiscovery checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SLOGI("AVRouterImpl StartCastDiscovery");
 
     std::lock_guard lockGuard(providerManagerLock_);
@@ -103,6 +109,12 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
 
 int32_t AVRouterImpl::StopCastDiscovery()
 {
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("StopCastDiscovery: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice StopCastDiscovery checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SLOGI("AVRouterImpl StopCastDiscovery");
 
     std::lock_guard lockGuard(providerManagerLock_);
@@ -117,6 +129,12 @@ int32_t AVRouterImpl::StopCastDiscovery()
 
 int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 {
+    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
+        SLOGE("SetDiscoverable: CheckSystemPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice SetDiscoverable checksystempermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SLOGI("AVRouterImpl SetDiscoverable %{public}d", enable);
 
     std::lock_guard lockGuard(providerManagerLock_);
