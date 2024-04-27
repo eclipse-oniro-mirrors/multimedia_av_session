@@ -40,6 +40,11 @@
 #include "napi_avcast_controller.h"
 #endif
 namespace OHOS::AVSession {
+
+namespace {
+    constexpr int HTTP_ERROR_CODE = 400;
+}
+
 static __thread napi_ref AVSessionConstructorRef = nullptr;
 std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventHandlers_ = {
     { "play", OnPlay },
@@ -451,9 +456,7 @@ int32_t DoDownload(AVMetaData& meta, std::string uri)
             int64_t httpCode = 0;
             curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
             SLOGI("DoDownload Http result " "%{public}" PRId64, httpCode);
-            if (httpCode >= 400) { // 400
-                return AVSESSION_ERROR;
-            }
+            CHECK_AND_RETURN_RET_LOG(httpCode < HTTP_ERROR_CODE, AVSESSION_ERROR, "recv Http ERROR for DoDownload");
         }
         curl_easy_cleanup(easyHandle_);
         easyHandle_ = nullptr;
@@ -475,6 +478,7 @@ int32_t DoDownload(AVMetaData& meta, std::string uri)
         }
         meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
         meta.SetSmallMediaImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
+        return AVSESSION_SUCCESS;
     }
     return AVSESSION_ERROR;
 }

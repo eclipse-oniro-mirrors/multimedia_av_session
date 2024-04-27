@@ -641,8 +641,6 @@ HWTEST_F(AVSessionServiceTest, MirrorToStreamCast001, TestSize.Level1)
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
     avservice_->is2in1_ = true;
-    avservice_->castServiceNameMapState_["TempCast"] == avservice_->deviceStateConnection;
-    avservice_->castServiceNameMapState_["TempCast-Dual"] == avservice_->deviceStateConnection;
     avservice_->MirrorToStreamCast(avsessionHere_);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
@@ -682,9 +680,9 @@ HWTEST_F(AVSessionServiceTest, MirrorToStreamCast003, TestSize.Level1)
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
-    avservice_->is2in1_ = false;
-    avservice_->castServiceNameMapState_["TempCast"] == -1;
-    avservice_->castServiceNameMapState_["TempCast-Dual"] == -1;
+    avservice_->is2in1_ = true;
+    avservice_->castServiceNameMapState_["TempCast"] == avservice_->deviceStateConnection;
+    avservice_->castServiceNameMapState_["TempCast-Dual"] == avservice_->deviceStateConnection;
     avservice_->MirrorToStreamCast(avsessionHere_);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
@@ -701,13 +699,8 @@ HWTEST_F(AVSessionServiceTest, RefreshSortFileOnCreateSession001, TestSize.Level
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    avservice_->is2in1_ = false;
-    avservice_->castServiceNameMapState_["TempCast"] == -1;
-    avservice_->castServiceNameMapState_["TempCast-Dual"] == -1;
     avservice_->refreshSortFileOnCreateSession(avsessionHere_->GetSessionId(),
         "audio", elementName);
-#endif
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("RefreshSortFileOnCreateSession001 end!");

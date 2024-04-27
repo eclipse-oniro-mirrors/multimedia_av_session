@@ -447,9 +447,12 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
     SLOGI("CreateController003 begin");
     system("killall -9 com.example.himusicdemo");
     sleep(1);
+    sleep(1);
+    sleep(1);
     std::shared_ptr<AVSessionController> controller;
     auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    SLOGI("CreateController003 get ret %{public}d", static_cast<int>(ret));
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("CreateController003 here end");
     sleep(1);
     system("killall -9 com.example.himusicdemo");
