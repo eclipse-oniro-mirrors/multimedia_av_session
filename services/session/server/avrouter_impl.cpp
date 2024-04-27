@@ -178,7 +178,7 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
         providerManagerMap_[1]->provider_ ! = nullptr, AVSESSION_ERROR, "provider is nullptr");
     int64_t tempId = 1;
     // The first 32 bits are providerId, the last 32 bits are castId
-    castHandle = (static_cast<uint64_t>(tempId) << 32) | castId;
+    castHandle = (static_cast<uint64_t>(tempId) << 32) | static_cast<const uint32_t>(castId);
     {
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_->CreateSessionByCast(castHandle);
@@ -218,10 +218,10 @@ std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const 
     SLOGI("AVRouterImpl start get remote controller process");
 
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t providerNumber = castHandle >> 32;
+    int32_t providerNumber = static_cast<int32_t>(static_cast<const uint64_t>(castHandle) >> 32);
     SLOGD("Get remote controller of provider %{public}d", providerNumber);
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<const uint64_t>(castHandle) << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         nullptr, "Can not find corresponding provider");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr &&
@@ -244,7 +244,7 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
         providerId_]->provider_->StartCastSession();
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     // The first 32 bits are providerId, the last 32 bits are castId
-    castHandle = (static_cast<uint64_t>(tempId) << 32) | castId;
+    castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) | static_cast<uint32_t>(castId));
     hasSessionAlive_ = true;
 
     return castHandle;
@@ -269,7 +269,7 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle, int32_t removeTimes)
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         castHandle, "Can not find corresponding provider");
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<const uint64_t>(castHandle) << 32) >> 32);
     SLOGI("Stop cast, the castId is %{public}d, removeTimes is %{public}d", castId, removeTimes);
     CHECK_AND_RETURN_RET_LOG(castHandleToOutputDeviceMap_.find(castId) != castHandleToOutputDeviceMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding castId");

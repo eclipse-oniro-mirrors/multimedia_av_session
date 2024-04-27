@@ -183,7 +183,7 @@ int32_t AVCastControllerStub::HandleProvideKeyResponse(MessageParcel& data, Mess
 {
     std::string assetId = data.ReadString();
     std::vector<uint8_t> response;
-    uint32_t responseSize = data.ReadInt32();
+    uint32_t responseSize = static_cast<uint32_t>(data.ReadInt32());
     uint32_t responseMaxLen = 8 * 1024 * 1024;
     CHECK_AND_RETURN_RET_LOG(responseSize < responseMaxLen, AVSESSION_ERROR,
         "The size of response is too large.");

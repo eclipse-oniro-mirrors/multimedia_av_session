@@ -458,6 +458,11 @@ int32_t DoDownload(AVMetaData& meta, std::string uri)
         curl_easy_cleanup(easyHandle_);
         easyHandle_ = nullptr;
         std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), sizeof(uint8_t));
+        if (buffer == nullptr) {
+            SLOGE("buffer malloc fail");
+            free(buffer);
+            return AVSESSION_ERROR;
+        }
         std::copy(imgBuffer.begin(), imgBuffer.end(), buffer);
         uint32_t errorCode = 0;
         Media::SourceOptions opts;

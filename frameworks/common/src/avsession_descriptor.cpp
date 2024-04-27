@@ -43,7 +43,7 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isActive_), false, "write isActive failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isTopSession_), false, "write isTopSession failed");
 
-    int32_t deviceInfoSize = outputDeviceInfo_.deviceInfos_.size();
+    int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo_.deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : outputDeviceInfo_.deviceInfos_) {
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
