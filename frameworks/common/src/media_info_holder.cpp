@@ -49,6 +49,9 @@ MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
         delete result;
         return nullptr;
     }
+    int32_t maxPlayInfosSize = 1000;
+    CHECK_AND_RETURN_RET_LOG((playInfosSize >= 0) && (playInfosSize < maxPlayInfosSize),
+        nullptr, "playInfosSize is illegal");
     for (int i = 0; i < playInfosSize; i++) {
         AVQueueItem* queueItem = AVQueueItem::Unmarshalling(data);
         result->playInfos_.emplace_back(*queueItem);

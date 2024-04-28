@@ -107,7 +107,7 @@ napi_value NapiAVCastController::ConstructorCallback(napi_env env, napi_callback
     }
     //The last parameter of napi_wrap must be null
     if (napi_wrap(env, self, static_cast<void*>(napiCastController), finalize,
-        &(napiCastController->wrapperRef_)) != napi_ok,  nullptr) {
+        &(napiCastController->wrapperRef_),  nullptr) != napi_ok) {
         SLOGE("wrap failed");
         return nullptr;
     }

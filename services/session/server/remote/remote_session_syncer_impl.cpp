@@ -304,7 +304,8 @@ int32_t RemoteSessionSyncerImpl::GetAVQueueItems(std::vector<AVQueueItem>& items
 
     std::vector<AVQueueItem> items_;
     int32_t itemNum = parcelData.ReadInt32();
-    CHECK_AND_RETURN_RET_LOG(itemNum >= 0, AVSESSION_ERROR, "parse int32 itemNum failed");
+    int32_t maxItemNum = 1000;
+    CHECK_AND_RETURN_RET_LOG((itemNum >= 0) && (itemNum <= maxItemNum), AVSESSION_ERROR, "parse int32 itemNum failed");
     for (int32_t i = 0; i < itemNum; i++) {
         AVQueueItem *item = parcelData.ReadParcelable<AVQueueItem>();
         if (item == nullptr) {

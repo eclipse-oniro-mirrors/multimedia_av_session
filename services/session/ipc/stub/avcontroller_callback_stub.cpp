@@ -181,8 +181,10 @@ int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
             "read supportedDrmCapabilityLen failed");
         std::vector<std::string> supportedDrmCapabilities;
-        int maxLen = 10;
-        for (int i = 0; (i < supportedDrmCapabilityLen) && (i < maxLen); i++) {
+        int32_t maxSupportedDrmCapabilityLen = 10;
+        CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
+            (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
+        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
             std::string supportedDrmCapability;
             CHECK_AND_RETURN_RET_LOG(data.ReadString(supportedDrmCapability), false,
                 "read supportedDrmCapability failed");
