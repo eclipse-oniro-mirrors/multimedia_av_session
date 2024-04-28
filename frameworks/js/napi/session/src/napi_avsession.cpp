@@ -422,7 +422,7 @@ size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<s
     return realsize;
 }
 
-int32_t CurlSetRequestOptions(std::vectorstd::uint8_t& imgBuffer, std::string uri)
+int32_t CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, std::string uri)
 {
     CURL *easyHandle_ = curl_easy_init();
     if (easyHandle_) {

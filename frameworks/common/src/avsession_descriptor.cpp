@@ -45,9 +45,6 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
 
     int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo_.deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
-    int32_t maxDeviceInfoSize = 1000;
-    CHECK_AND_RETURN_RET_LOG((deviceInfoSize >= 0) && (deviceInfoSize < maxDeviceInfoSize),
-        false, "deviceInfoSize is illegal");
     for (DeviceInfo deviceInfo : outputDeviceInfo_.deviceInfos_) {
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceId_), false, "write deviceId failed");
