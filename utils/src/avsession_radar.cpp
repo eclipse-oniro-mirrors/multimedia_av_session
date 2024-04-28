@@ -48,7 +48,8 @@ int32_t AVSessionRadar::GetRadarErrorCode(int32_t err)
     constexpr int32_t systemShift = 21;
     constexpr int32_t moduleShift = 16;
     uint32_t errorCode =
-        (AV_SESSION_SYSTEM_ID << systemShift) | (AV_SESSION_MODULE_ID << moduleShift) | (abs(err) & 0xFFFF);
+        (AV_SESSION_SYSTEM_ID << systemShift) | (AV_SESSION_MODULE_ID << moduleShift) |
+        (static_cast<uint>(abs(err)) & 0xFFFF);
     SLOGI("GetRadarErrorCode err:%{public}d -> %{public}d", abs(err), errorCode);
     return errorCode;
 }

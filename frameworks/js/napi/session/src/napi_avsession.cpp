@@ -427,11 +427,8 @@ size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<s
     return realsize;
 }
 
-int32_t DoDownload(AVMetaData& meta, std::string uri)
+int32_t CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, std::string uri)
 {
-    SLOGI("DoDownload with both uri %{public}s, title %{public}s, assetid %{public}s",
-        uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
-
     CURL *easyHandle_ = curl_easy_init();
     if (easyHandle_) {
         // set request options
@@ -441,12 +438,8 @@ int32_t DoDownload(AVMetaData& meta, std::string uri)
         curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, "/etc/ssl/certs/" "cacert.pem");
         curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
-
-        std::vector<std::uint8_t> imgBuffer(0);
-
         curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, &imgBuffer);
-
         CURLcode res = curl_easy_perform(easyHandle_);
         if (res != CURLE_OK) {
             SLOGI("DoDownload curl easy_perform failure: %{public}s\n", curl_easy_strerror(res));
@@ -460,7 +453,24 @@ int32_t DoDownload(AVMetaData& meta, std::string uri)
         }
         curl_easy_cleanup(easyHandle_);
         easyHandle_ = nullptr;
+        return AVSESSION_SUCCESS;
+    }
+    return AVSESSION_ERROR;
+}
+
+int32_t DoDownload(AVMetaData& meta, std::string uri)
+{
+    SLOGI("DoDownload with both uri %{public}s, title %{public}s, assetid %{public}s",
+        uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
+
+    std::vector<std::uint8_t> imgBuffer(0);
+    if (CurlSetRequestOptions(imgBuffer, uri) == AVSESSION_SUCCESS) {
         std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), sizeof(uint8_t));
+        if (buffer == nullptr) {
+            SLOGE("buffer malloc fail");
+            free(buffer);
+            return AVSESSION_ERROR;
+        }
         std::copy(imgBuffer.begin(), imgBuffer.end(), buffer);
         uint32_t errorCode = 0;
         Media::SourceOptions opts;

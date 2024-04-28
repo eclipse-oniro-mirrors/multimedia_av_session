@@ -87,7 +87,7 @@ private:
     void SendSpecialKeepaliveData();
     std::string GetBundleName(std::string sessionId);
 
-    AVSessionService *servicePtr_;
+    AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
     std::string deviceId_;
     std::string topSessionId_;

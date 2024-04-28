@@ -54,6 +54,8 @@ struct AVHistoryDescriptor {
 
 struct AVSessionDescriptor {
     bool WriteToParcel(Parcel& out) const;
+    bool CheckBeforReadFromParcel(Parcel& in);
+    bool CheckBeforReadFromParcel(Parcel& in, DeviceInfo& deviceInfo);
     bool ReadFromParcel(Parcel& in);
 
     std::string sessionId_;

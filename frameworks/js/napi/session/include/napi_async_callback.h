@@ -86,7 +86,7 @@ private:
     napi_env env_ = nullptr;
     uv_loop_s* loop_ = nullptr;
     uv_loop_s* loopOrder_ = nullptr;
-    sem_t semaphore_;
+    sem_t semaphore_ = {};
 
     static constexpr size_t ARGC_MAX = 6;
 };

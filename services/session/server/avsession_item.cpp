@@ -958,8 +958,8 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
             castDisplayInfo.displayState = CastDisplayState::STATE_ON;
             castDisplayInfo.displayId = display->GetId();
             castDisplayInfo.name = display->GetName();
-            castDisplayInfo.width = display->GetWidth();
-            castDisplayInfo.height = display->GetHeight();
+            castDisplayInfo.width = static_cast<int32_t>(display->GetWidth());
+            castDisplayInfo.height = static_cast<int32_t>(display->GetHeight());
             displays.push_back(castDisplayInfo);
             std::lock_guard displayListenerLockGuard(displayListenerLock_);
             if (displayListener_ != nullptr) {

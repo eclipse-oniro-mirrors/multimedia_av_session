@@ -66,8 +66,8 @@ void HwCastDisplayListener::ReportCastDisplay(sptr<Rosen::Screen> displayInfo, C
     castDisplayInfo.displayState = displayState;
     castDisplayInfo.displayId = displayInfo->GetId();
     castDisplayInfo.name = displayInfo->GetName();
-    castDisplayInfo.width = displayInfo->GetWidth();
-    castDisplayInfo.height = displayInfo->GetHeight();
+    castDisplayInfo.width = static_cast<int32_t>(displayInfo->GetWidth());
+    castDisplayInfo.height = static_cast<int32_t>(displayInfo->GetHeight());
     listener_->OnCastDisplayChange(castDisplayInfo);
 }
 } // namespace OHOS::AVSession

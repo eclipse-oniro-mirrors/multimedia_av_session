@@ -34,10 +34,22 @@ MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "result new fail");
 
     int32_t currentIndex;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(currentIndex), nullptr, "write currentIndex failed");
+    if (!data.ReadInt32(currentIndex)) {
+        SLOGE("write currentIndex failed");
+        delete result;
+        return nullptr;
+    }
+    
     result->currentIndex_ = currentIndex;
     int32_t playInfosSize;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(playInfosSize), nullptr, "write playInfoSize failed");
+    if (!data.ReadInt32(playInfosSize)) {
+        SLOGE("write playInfosSize failed");
+        delete result;
+        return nullptr;
+    }
+    int32_t maxPlayInfosSize = 1000;
+    CHECK_AND_RETURN_RET_LOG((playInfosSize >= 0) && (playInfosSize < maxPlayInfosSize),
+        nullptr, "playInfosSize is illegal");
     for (int i = 0; i < playInfosSize; i++) {
         AVQueueItem* queueItem = AVQueueItem::Unmarshalling(data);
         result->playInfos_.emplace_back(*queueItem);
