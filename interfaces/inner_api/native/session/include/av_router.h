@@ -197,9 +197,10 @@ public:
      * @brief set allconnect state.
      *
      * @param { int64_t } castHandle const - The ID corresponding to the provider.
+     * @return { int32_t } Whether the operation was successful.
      * @since 11
     */
-    virtual void SetServiceAllConnectState(int64_t castHandle) = 0;
+    virtual int32_t SetServiceAllConnectState(int64_t castHandle) = 0;
 #endif
 };
 } // namespace OHOS::AVSession

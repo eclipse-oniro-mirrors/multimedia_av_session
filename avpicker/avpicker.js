@@ -52,6 +52,7 @@ export class AVCastPicker extends ViewPU {
         this.__touchMenuItemIndex = new ObservedPropertySimplePU(-1, this, 'touchMenuItemIndex');
         this.onStateChange = undefined;
         this.extensionProxy = null;
+        this.pickerClickTime = -1;
         this.setInitiallyProvidedValue(t2);
         this.finalizeConstruction();
     }
@@ -83,6 +84,9 @@ export class AVCastPicker extends ViewPU {
         }
         if (r2.extensionProxy !== undefined) {
             this.extensionProxy = r2.extensionProxy;
+        }
+        if (r2.pickerClickTime !== undefined) {
+            this.pickerClickTime = r2.pickerClickTime;
         }
     }
 
@@ -206,11 +210,11 @@ export class AVCastPicker extends ViewPU {
                         }
                     });
                     Flex.backgroundColor(this.touchMenuItemIndex === t ? { 'id': -1, 'type': 10001,
-                        params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDeafultBundleName__',
-                        'moudelName': '__harDeafultBundleName__' } : '#00FFFFFF');
+                        params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultModuleName__',
+                        'moduleName': '__harDefaultModuleName__' } : '#00FFFFFF');
                     Flex.borderRadius(this.touchMenuItemIndex === t ? { 'id': -1, 'type': 10002,
-                        params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDeafultBundleName__',
-                        'moudelName': '__harDeafultBundleName__' } : 0)
+                        params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultModuleName__',
+                        'moduleName': '__harDefaultModuleName__' } : 0)
                 }, Flex);
                 this.observeComponentCreation2((x1, y1) => {
                     Row.create();
@@ -219,26 +223,26 @@ export class AVCastPicker extends ViewPU {
                 }, Row);
                 this.observeComponentCreation2((v1, w1) => {
                     Image.create({ 'id': -1, 'type': -1,
-                        params: ['u.deviceIconName'], 'bundleName': '__harDeafultBundleName__',
-                        'moudelName': '__harDeafultBundleName__' });
+                        params: [u.deviceIconName], 'bundleName': '__harDefaultModuleName__',
+                        'moduleName': '__harDefaultModuleName__' });
                     Image.width(24);
                     Image.height(24);
                 }, Image);
                 this.observeComponentCreation2((t1, u1) => {
                     Text.create(u.deviceName);
                     Text.fontSize({ 'id': -1, 'type': 10002,
-                        params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDeafultBundleName__',
-                        'moudelName': '__harDeafultBundleName__' });
+                        params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultModuleName__',
+                        'moduleName': '__harDefaultModuleName__' });
                     Text.fontColor(u.isConnected ? { 'id': -1, 'type': 10001,
-                        params: ['sys.color.ohos_id_color_text_primary_activated'], 'bundleName': '__harDeafultBundleName__',
-                        'moudelName': '__harDeafultBundleName__' } : { 'id': -1, 'type': 10001,
-                        params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDeafultBundleName__',
-                        'moudelName': '__harDeafultBundleName__' });
+                        params: ['sys.color.ohos_id_color_text_primary_activated'], 'bundleName': '__harDefaultModuleName__',
+                        'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001,
+                        params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultModuleName__',
+                        'moduleName': '__harDefaultModuleName__' });
                     Text.width(u.isConnected ? 144 : 168)
                     Text.padding({
                         left: 8,
                         top: 12,
-                        right: 18,
+                        right: 8,
                         bottom: 12
                     })
                 }, Text);
@@ -255,13 +259,13 @@ export class AVCastPicker extends ViewPU {
                             }, Row);
                             this.observeComponentCreation2((p1, q1) => {
                                 Image.create({ 'id': -1, 'type': -1,
-                                    params: ['u.selectedIconName'], 'bundleName': '__harDeafultBundleName__',
-                                    'moudelName': '__harDeafultBundleName__' });
+                                    params: [u.selectedIconName], 'bundleName': '__harDefaultModuleName__',
+                                    'moduleName': '__harDefaultModuleName__' });
                                 Image.width(24);
                                 Image.height(24);
                                 Image.fillColor({ 'id': -1, 'type': 10001,
-                                    params: ['sys.color.ohos_id_color_activated'], 'bundleName': '__harDeafultBundleName__',
-                                    'moudelName': '__harDeafultBundleName__' });
+                                    params: ['sys.color.ohos_id_color_activated'], 'bundleName': '__harDefaultModuleName__',
+                                    'moduleName': '__harDefaultModuleName__' });
                             }, Image);
                             Row.pop();
                         })
@@ -282,8 +286,8 @@ export class AVCastPicker extends ViewPU {
                                 Divider.height(1);
                                 Divider.width(172);
                                 Divider.color({ 'id': -1, 'type': 10001,
-                                    params: ['sys.color.ohos_id_color_list_separator'], 'bundleName': '__harDeafultBundleName__',
-                                    'moudelName': '__harDeafultBundleName__' });
+                                    params: ['sys.color.ohos_id_color_list_separator'], 'bundleName': '__harDefaultModuleName__',
+                                    'moduleName': '__harDefaultModuleName__' });
                                 Divider.padding({ right: 12 });
                             }, Divider);
                         });
@@ -364,6 +368,12 @@ export class AVCastPicker extends ViewPU {
                 placement: Placement.TopRight,
                 onDisappear: () => {
                   this.isMenuShow = false;
+                },
+                onAppear: () => {
+                    if (this.extensionProxy != null && this.pickerClickTime !== -1) {
+                        this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
+                        this.pickerClickTime = -1;
+                    }
                 }
             });
             UIExtensionComponent.onClick(() => {
@@ -374,6 +384,9 @@ export class AVCastPicker extends ViewPU {
                 }
                 else {
                     this.isMenuShow = !this.isMenuShow;
+                    if (this.isMenuShow) {
+                        this.pickerClickTime = new Date().getTime();
+                    }
                 }
             });
         }), UIExtensionComponent);

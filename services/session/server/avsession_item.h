@@ -66,7 +66,7 @@ public:
 
     void DealCastState(int32_t castState);
 
-    void DealDisconnect(int32_t castState, DeviceInfo deviceInfo);
+    void DealDisconnect(DeviceInfo deviceInfo);
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 

@@ -60,7 +60,7 @@ enum DeviceSource {
 /**
  * menuItem device info
  */
-interface AVCastPickerDeviceInfo {
+export interface AVCastPickerDeviceInfo {
   deviceId: number | String,
   deviceType: number,
   deviceName: string,
@@ -80,7 +80,7 @@ export struct AVCastPicker {
   /**
    * Assigns the color of picker component at active state.
    */
-  @State activeColor?: Color | number | string = '#000000';
+  @State activeColor: Color | number | string = '#000000';
 
   /**
    * The device that is displayed in the menu.
@@ -117,6 +117,8 @@ export struct AVCastPicker {
    */
   private extensionProxy: UIExtensionProxy | null = null;
 
+  private pickerClickTime: number = -1;
+
   @Builder
   deviceMenu() {
     Column() {
@@ -143,14 +145,14 @@ export struct AVCastPicker {
                 .padding({
                   left: 8,
                   top: 12,
-                  right: 18,
+                  right: 8,
                   bottom: 12
                 })
             }
             .justifyContent(FlexAlign.Start)
             .alignItems(VerticalAlign.Center)
 
-            if (item.isConnected && item.selectedIconName != null && item.selectedIconName !== undefined) {
+            if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined) {
               Row() {
                 Image($r(item.selectedIconName))
                   .width(24)
@@ -210,7 +212,7 @@ export struct AVCastPicker {
           if (JSON.stringify(data['state']) !== undefined) {
             console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
             if (this.onStateChange !== null) {
-              if (parseInt(JSON.stringify(data['state'])) == AVCastPickerState.STATE_APPEARING) {
+              if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
                 this.onStateChange(AVCastPickerState.STATE_APPEARING);
               } else {
                 this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
@@ -223,7 +225,7 @@ export struct AVCastPicker {
             this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
             if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3
               && (this.sessionType === 'voice_call' || this.sessionType === 'video_call'))
-              || this.pickerStyle === AVCastPickerStyle.STYLE_MENU) {
+              || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
               this.isMenuShow = false;
             }
           }
@@ -248,6 +250,12 @@ export struct AVCastPicker {
         placement: Placement.TopRight,
         onDisappear: () => {
           this.isMenuShow = false;
+        },
+        onAppear: () {
+          if (this.extensionProxy != null && this.pickerClickTime !== -1) {
+              this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime});
+              this.pickerClickTime = -1;
+          }
         }
       })
       .onClick(() => {
@@ -257,6 +265,9 @@ export struct AVCastPicker {
           this.isMenuShow = false;
         } else {
           this.isMenuShow = !this.isMenuShow;
+          if (this.isMenuShow) {
+              this.pickerClickTime = new Date().getTime();
+          }
         }
       })
     }.size({width: '100%', height: '100%'})

@@ -757,18 +757,15 @@ void AVSessionItem::DealCastState(int32_t castState)
     }
 }
 
-void AVSessionItem::DealDisconnect(int32_t castState, DeviceInfo deviceInfo)
+void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
 {
-    if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
-        castState = 6; // 6 is disconnected status of AVSession
-        SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}ld", castHandle_);
-        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
-        AVRouter::GetInstance().StopCastSession(castHandle_);
-        castHandle_ = -1;
-        castControllerProxy_ = nullptr;
-        SaveLocalDeviceInfo();
-        ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
-    }
+    SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}ld", castHandle_);
+    AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+    AVRouter::GetInstance().StopCastSession(castHandle_);
+    castHandle_ = -1;
+    castControllerProxy_ = nullptr;
+    SaveLocalDeviceInfo();
+    ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
@@ -796,7 +793,10 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
             callStartCallback_(*this);
         }
     }
-    DealDisconnect(castState, deviceInfo);
+    if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
+        castState = 6; // 6 is disconnected status of AVSession
+        DealDisconnect(deviceInfo);
+    }
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
         std::lock_guard controllersLockGuard(controllersLock_);
