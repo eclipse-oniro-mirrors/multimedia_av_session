@@ -34,8 +34,7 @@ MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "result new fail");
 
     int32_t currentIndex;
-    if (!data.ReadInt32(currentIndex))
-    {
+    if (!data.ReadInt32(currentIndex)) {
         SLOGE("write currentIndex failed");
         delete result;
         return nullptr;
@@ -43,8 +42,7 @@ MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
     
     result->currentIndex_ = currentIndex;
     int32_t playInfosSize;
-    if (!data.ReadInt32(playInfosSize))
-    {
+    if (!data.ReadInt32(playInfosSize)) {
         SLOGE("write playInfosSize failed");
         delete result;
         return nullptr;

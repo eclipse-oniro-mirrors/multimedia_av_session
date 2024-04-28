@@ -461,7 +461,7 @@ int32_t DoDownload(AVMetaData& meta, std::string uri)
         uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
 
     std::vector<std::uint8_t> imgBuffer(0);
-    if (CurlSetRequestOptions(imgBuffer, uri) == AVSESSION_SUCCESS) {    
+    if (CurlSetRequestOptions(imgBuffer, uri) == AVSESSION_SUCCESS) {
         std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), sizeof(uint8_t));
         if (buffer == nullptr) {
             SLOGE("buffer malloc fail");

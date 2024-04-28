@@ -123,7 +123,7 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
         DeviceInfo deviceInfo;
         if (!CheckBeforReadFromParcel(in, deviceInfo)) {
             return false;
-        }  
+        }
     }
 
     sptr elementName = in.ReadParcelable<AppExecFwk::ElementName>();
