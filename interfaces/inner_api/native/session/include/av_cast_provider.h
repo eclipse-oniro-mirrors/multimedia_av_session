@@ -161,14 +161,15 @@ public:
     */
     virtual bool UnRegisterCastSessionStateListener(int castId,
         std::shared_ptr<IAVCastSessionStateListener> listener) = 0;
-    
+
     /**
      * @brief set allconnect state.
      *
      * @param { int64_t } castHandle const - The ID corresponding to the castprovider.
+     * @return { bool } Whether the operation was successful.
      * @since 11
     */
-    virtual void SetStreamState(int32_t castId) = 0;
+    virtual bool SetStreamState(int32_t castId) = 0;
 
     /**
      * @brief get mirror castid.

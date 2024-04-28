@@ -61,7 +61,7 @@ public:
     int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) override;
 
-    void SetServiceAllConnectState(int64_t castHandle) override;
+    int32_t SetServiceAllConnectState(int64_t castHandle) override;
 
 protected:
 

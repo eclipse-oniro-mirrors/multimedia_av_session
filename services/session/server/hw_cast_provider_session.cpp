@@ -84,7 +84,7 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
     return streamPlayerPtr;
 }
 
-void HwCastProviderSession::SetStreamState()
+bool HwCastProviderSession::SetStreamState()
 {
     std::lock_guard lockGuard(mutex_);
     for (auto listener : castSessionStateListenerList_) {
@@ -99,6 +99,7 @@ void HwCastProviderSession::SetStreamState()
     }
     stashDeviceState_ = deviceStateConnection;
     stashDeviceId_ = "0";
+    return true;
 }
 
 bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener)

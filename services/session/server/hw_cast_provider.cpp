@@ -268,11 +268,20 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
     return hwCastStreamPlayer;
 }
 
-void HwCastProvider::SetStreamState(int32_t castId)
+bool HwCastProvider::SetStreamState(int32_t castId)
 {
-    hwCastProviderSessionMap_[castId]->SetStreamState();
+    if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
+        SLOGE("SetStreamState failed for the castSession corresponding to castId is not exit");
+        return false;
+    }
+    auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
+    if (hwCastProviderSession == nullptr) {
+        SLOGE("SetStreamState failed for the hwCastProviderSession is nullptr");
+        return false;
+    }
     mirrorCastId = castId;
     SLOGI("mirrorCastId is %{public}d", mirrorCastId);
+    return hwCastProviderSession->SetStreamState();
 }
 
 int HwCastProvider::GetMirrorCastId()
