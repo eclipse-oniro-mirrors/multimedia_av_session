@@ -179,7 +179,7 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
     int64_t tempId = 1;
     // The first 32 bits are providerId, the last 32 bits are castId
     castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
-        static_cast(castId));
+        static_cast<const uint32_t>(castId));
     {
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_->CreateSessionByCast(castHandle);
