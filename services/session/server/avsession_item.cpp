@@ -1069,8 +1069,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 {
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_ALL_CTRL_COMMAND);
     int32_t code = cmd.GetCommand();
-    int32_t cmdMaxNumber = sizeof(cmdHandlers) / sizeof(cmdHandlers[0]);
-    if (code < 0 || code >= cmdMaxNumber) {
+    if (code < 0 || code >= SESSION_CMD_MAX) {
         SLOGE("controlCommand invalid");
         return;
     }
