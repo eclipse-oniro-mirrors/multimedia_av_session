@@ -368,6 +368,9 @@ private:
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
+    bool firstAppStateChangeFlag_ = false;
+    bool foreToBackFlag_ = false;
+    int appStateChangeCounter_ = 0;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
