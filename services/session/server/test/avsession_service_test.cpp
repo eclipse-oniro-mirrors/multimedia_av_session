@@ -69,6 +69,9 @@ public:
 
 void AVSessionServiceTest::SetUpTestCase()
 {
+    SLOGI("set up AVSessionServiceTest");
+    system("killall -9 com.example.himusicdemo");
+    sleep(1);
 }
 
 void AVSessionServiceTest::TearDownTestCase()
@@ -77,8 +80,7 @@ void AVSessionServiceTest::TearDownTestCase()
 
 void AVSessionServiceTest::SetUp()
 {
-    system("killall -9 com.example.himusicdemo");
-    sleep(1);
+    SLOGI("set up test function in AVSessionServiceTest");
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
     elementName.SetAbilityName(g_testAbilityName);
@@ -91,6 +93,7 @@ void AVSessionServiceTest::SetUp()
 
 void AVSessionServiceTest::TearDown()
 {
+    SLOGI("tear down test function in AVSessionServiceTest");
     [[maybe_unused]] int32_t ret = AVSESSION_ERROR;
     if (avsession_ != nullptr) {
         ret = avsession_->Destroy();
@@ -624,6 +627,7 @@ HWTEST_F(AVSessionServiceTest, CreateSessionByCast001, TestSize.Level1)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("CreateSessionByCast001 in!");
     avservice_->CreateSessionByCast(0);
+    avservice_->ClearSessionForClientDiedNoLock(getpid());
 #endif
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("CreateSessionByCast001 end!");
@@ -817,15 +821,29 @@ HWTEST_F(AVSessionServiceTest, ProcessCastAudioCommand002, TestSize.Level1)
     SLOGI("ProcessCastAudioCommand002 end!");
 }
 
+HWTEST_F(AVSessionServiceTest, HandleDeviceChange001, TestSize.Level1)
+{
+    SLOGI("HandleDeviceChange001 begin!");
+    DeviceChangeAction deviceChange;
+    deviceChange.type = static_cast<DeviceChangeType>(0);
+    deviceChange.flag = static_cast<DeviceFlag>(0);
+    avservice_->HandleDeviceChange(deviceChange);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("HandleDeviceChange001 end!");
+}
+
 HWTEST_F(AVSessionServiceTest, HandleDeviceChange002, TestSize.Level1)
 {
     SLOGI("HandleDeviceChange002 begin!");
     DeviceChangeAction deviceChange;
-    AudioDeviceDescriptor descriptor;
-    descriptor.deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
+    std::vector<OHOS::sptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
+    OHOS::sptr<AudioDeviceDescriptor> descriptor = new(std::nothrow) AudioDeviceDescriptor();
+    descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
     deviceChange.type = static_cast<DeviceChangeType>(0);
     deviceChange.flag = static_cast<DeviceFlag>(0);
-    deviceChange.deviceDescriptors.emplace_back(&descriptor);
+
+    audioDeviceDescriptors.push_back(descriptor);
+    deviceChange.deviceDescriptors = audioDeviceDescriptors;
     avservice_->HandleDeviceChange(deviceChange);
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("HandleDeviceChange002 end!");
