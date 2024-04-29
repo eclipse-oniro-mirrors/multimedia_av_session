@@ -438,8 +438,29 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_FOREGROUND)) {
-        SLOGI("enter notifyMirrorToStreamCast by isAppBackground change");
-        NotifyMirrorToStreamCast();
+        //first creat session
+        if (firstAppStateChangeFlag_) {
+            firstAppStateChangeFlag_ = false;
+            appStateChangeCounter_ = foreGroundStateCountZero;
+            return;
+        }
+        //APP_STATE_FOREGROUND To APP_STATE_BACKGROUND
+        if (foreToBackFlag_) {
+            foreToBackFlag_ = false;
+            appStateChangeCounter_ = foreGroundStateCountOne;
+            return;
+        }
+        appStateChangeCounter_++;
+        //APP_STATE_BACKGROUND To APP_STATE_FOREGROUND
+        if (appStateChangeCounter_ == foreGroundStateCountTwo) {
+            appStateChangeCounter_ = foreGroundStateCountZero;
+            SLOGI("enter notifyMirrorToStreamCast by background to foreground state change");
+            NotifyMirrorToStreamCast();
+        }
+    }
+    if (appStateChangeCounter_ == foreGroundStateCountOne &&
+        uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_BACKGROUND)) {
+        foreToBackFlag_ = true;
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 }
@@ -902,6 +923,7 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (type == AVSession::SESSION_TYPE_VIDEO && !AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid())) {
         uidForAppStateChange_ = result->GetUid();
+        firstAppStateChangeFlag_ = true;
         MirrorToStreamCast(result);
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
