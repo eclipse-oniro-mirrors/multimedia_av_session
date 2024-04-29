@@ -441,24 +441,24 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
         //first creat session
         if (firstAppStateChangeFlag_) {
             firstAppStateChangeFlag_ = false;
-            appStateChangeCounter_ = 0;
+            appStateChangeCounter_ = foreGroundStateCountZero;
             return;
         }
         //APP_STATE_FOREGROUND To APP_STATE_BACKGROUND
         if (foreToBackFlag_) {
             foreToBackFlag_ = false;
-            appStateChangeCounter_ = 1;
+            appStateChangeCounter_ = foreGroundStateCountOne;
             return;
         }
         appStateChangeCounter_++;
         //APP_STATE_BACKGROUND To APP_STATE_FOREGROUND
-        if (appStateChangeCounter_ == 2) {
-            appStateChangeCounter_ = 0;
+        if (appStateChangeCounter_ == foreGroundStateCountTwo) {
+            appStateChangeCounter_ = foreGroundStateCountZero;
             SLOGI("enter notifyMirrorToStreamCast by background to foreground state change");
             NotifyMirrorToStreamCast();
         }
     }
-    if (appStateChangeCounter_ == 1 &&
+    if (appStateChangeCounter_ == foreGroundStateCountOne &&
         uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_BACKGROUND)) {
         foreToBackFlag_ = true;
     }
