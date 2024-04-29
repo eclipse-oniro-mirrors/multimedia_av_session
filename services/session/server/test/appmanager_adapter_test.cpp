@@ -66,6 +66,11 @@ void AppManagerAdapterTest::SetUp()
     g_appProcessData.appState = OHOS::AppExecFwk::ApplicationState::APP_STATE_BACKGROUND;
 }
 
+static void AppStateChangeCallback(int uid, int state)
+{
+    SLOGI("OnAppStateChangeCallback in AppManagerAdapterTest, check %{public}d, %{public}d", uid, state);
+}
+
 /**
 * @tc.name: OnAppStateChanged001
 * @tc.desc: Verify successfully received changes
@@ -77,6 +82,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged001, testing::ext::TestS
     SLOGI("OnAppStateChanged001, start");
     AppManagerAdapter::GetInstance().Init();
     AppManagerAdapter::GetInstance().AddObservedApp(TEST_UID);
+    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange(AppStateChangeCallback);
     AppManagerAdapter::GetInstance().HandleAppStateChanged(g_appProcessData);
     AppManagerAdapter::GetInstance().RemoveObservedApp(TEST_UID);
     EXPECT_EQ(g_expectedUid, g_appData.uid);
@@ -94,6 +100,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged002, testing::ext::TestS
     SLOGI("OnAppStateChanged002, start");
     AppManagerAdapter::GetInstance().Init();
     AppManagerAdapter::GetInstance().AddObservedApp(OTHER_UID_1);
+    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange(AppStateChangeCallback);
     AppManagerAdapter::GetInstance().HandleAppStateChanged(g_appProcessData);
     AppManagerAdapter::GetInstance().RemoveObservedApp(OTHER_UID_1);
     EXPECT_NE(g_expectedUid, g_appData.uid);
@@ -112,6 +119,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged003, testing::ext::TestS
     g_appProcessData.appState = OHOS::AppExecFwk::ApplicationState::APP_STATE_FOREGROUND;
     AppManagerAdapter::GetInstance().Init();
     AppManagerAdapter::GetInstance().AddObservedApp(TEST_UID);
+    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange(AppStateChangeCallback);
     AppManagerAdapter::GetInstance().HandleAppStateChanged(g_appProcessData);
     AppManagerAdapter::GetInstance().RemoveObservedApp(TEST_UID);
     EXPECT_NE(g_expectedUid, g_appData.uid);
@@ -130,6 +138,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged004, testing::ext::TestS
     g_appProcessData.appState = OHOS::AppExecFwk::ApplicationState::APP_STATE_FOREGROUND;
     AppManagerAdapter::GetInstance().Init();
     AppManagerAdapter::GetInstance().AddObservedApp(OTHER_UID_1);
+    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange(AppStateChangeCallback);
     AppManagerAdapter::GetInstance().HandleAppStateChanged(g_appProcessData);
     AppManagerAdapter::GetInstance().RemoveObservedApp(OTHER_UID_1);
     EXPECT_NE(g_expectedUid, g_appData.uid);
@@ -147,6 +156,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged005, testing::ext::TestS
     SLOGI("OnAppStateChanged005, start");
     AppManagerAdapter::GetInstance().Init();
     AppManagerAdapter::GetInstance().AddObservedApp(TEST_UID);
+    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange(AppStateChangeCallback);
     AppManagerAdapter::GetInstance().HandleAppStateChanged(g_appProcessData);
     EXPECT_EQ(g_expectedUid, g_appData.uid);
     g_expectedUid = INVALID_UID;
@@ -169,6 +179,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged006, testing::ext::TestS
     AppManagerAdapter::GetInstance().AddObservedApp(OTHER_UID_1);
     AppManagerAdapter::GetInstance().AddObservedApp(TEST_UID);
     AppManagerAdapter::GetInstance().AddObservedApp(OTHER_UID_2);
+    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange(AppStateChangeCallback);
     AppManagerAdapter::GetInstance().HandleAppStateChanged(g_appProcessData);
     AppManagerAdapter::GetInstance().RemoveObservedApp(OTHER_UID_1);
     AppManagerAdapter::GetInstance().RemoveObservedApp(TEST_UID);
@@ -188,6 +199,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged007, testing::ext::TestS
     AppManagerAdapter::GetInstance().Init();
     AppManagerAdapter::GetInstance().AddObservedApp(OTHER_UID_1);
     AppManagerAdapter::GetInstance().AddObservedApp(OTHER_UID_2);
+    AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange(AppStateChangeCallback);
     AppManagerAdapter::GetInstance().HandleAppStateChanged(g_appProcessData);
     AppManagerAdapter::GetInstance().RemoveObservedApp(OTHER_UID_1);
     AppManagerAdapter::GetInstance().RemoveObservedApp(OTHER_UID_2);
