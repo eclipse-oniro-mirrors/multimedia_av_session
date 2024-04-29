@@ -266,7 +266,7 @@ private:
     void SaveLocalDeviceInfo();
 
     using HandlerFuncType = void(AVSessionItem::*)(const AVControlCommand&);
-    static inline HandlerFuncType cmdHandlers[] = {
+    static inline HandlerFuncType cmdHandlers[SESSION_CMD_MAX] = {
         &AVSessionItem::HandleOnPlay,
         &AVSessionItem::HandleOnPause,
         &AVSessionItem::HandleOnStop,
