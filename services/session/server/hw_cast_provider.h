@@ -57,7 +57,7 @@ public:
 
 private:
     void WaitSessionRelease();
-    static const int maxCastSessionSize = 0xFFFFFFF;
+    static const int maxCastSessionSize = 256;
     std::vector<bool> castFlag_ = std::vector<bool>(maxCastSessionSize, false);
     std::map<int, std::shared_ptr<HwCastProviderSession>> hwCastProviderSessionMap_;
     std::map<int, std::shared_ptr<IAVCastControllerProxy>> avCastControllerMap_;
