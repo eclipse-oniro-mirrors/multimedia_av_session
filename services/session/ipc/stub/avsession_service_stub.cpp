@@ -479,42 +479,32 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
 
 int32_t AVSessionServiceStub::CheckBeforeHandleStartCast(MessageParcel& data, OutputDeviceInfo& outputDeviceInfo)
 {
-    int32_t deviceInfoSize;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
-
-    if (deviceInfoSize > RECEIVE_DEVICE_NUM_MAX) {
-        SLOGI("receive deviceNum over range");
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
-        return ERR_NONE;
+    DeviceInfo deviceInfo;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.supportedProtocols_), false,
+        "Read supportedProtocols failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
+        "Read authenticationStatus failed");
+    int32_t supportedDrmCapabilityLen = 0;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
+        "read supportedDrmCapabilityLen failed");
+    int32_t maxSupportedDrmCapabilityLen = 10;
+    CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
+        (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
+    std::vector<std::string> supportedDrmCapabilities;
+    for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+        std::string supportedDrmCapability;
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(supportedDrmCapability), false,
+            "read supportedDrmCapability failed");
+        supportedDrmCapabilities.emplace_back(supportedDrmCapability);
     }
-    for (int i = 0; i < deviceInfoSize; i++) {
-        DeviceInfo deviceInfo;
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.supportedProtocols_), false,
-            "Read supportedProtocols failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
-            "Read authenticationStatus failed");
-        int32_t supportedDrmCapabilityLen = 0;
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
-            "read supportedDrmCapabilityLen failed");
-        int32_t maxSupportedDrmCapabilityLen = 10;
-        CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
-            (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
-        std::vector<std::string> supportedDrmCapabilities;
-        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
-            std::string supportedDrmCapability;
-            CHECK_AND_RETURN_RET_LOG(data.ReadString(supportedDrmCapability), false,
-                "read supportedDrmCapability failed");
-            supportedDrmCapabilities.emplace_back(supportedDrmCapability);
-        }
-        deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
-        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    }
+    deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }
 
@@ -528,11 +518,20 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
     sessionToken.uid = data.ReadInt32();
 
     OutputDeviceInfo outputDeviceInfo;
-    if (!CheckBeforeHandleStartCast(data, outputDeviceInfo)) {
-        SLOGE("check fail");
+    int32_t deviceInfoSize;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+
+    if (deviceInfoSize > RECEIVE_DEVICE_NUM_MAX) {
+        SLOGI("receive deviceNum over range");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
-
+    for (int i = 0; i < deviceInfoSize; i++) {
+        if (!CheckBeforeHandleStartCast(data, outputDeviceInfo)) {
+            SLOGE("check fail");
+            return ERR_NONE;
+        }
+    }
     int32_t ret = StartCast(sessionToken, outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGI("StartCast ret %{public}d", ret);
