@@ -603,7 +603,15 @@ void AVSessionService::checkEnableCast(bool enable)
         isInCast_ = true;
         AVRouter::GetInstance().Init(this);
     } else if (enable == false && isInCast_ == true) {
-        CHECK_AND_RETURN_RET_LOG(!(GetContainer().GetAllSessions().size() > 0 && is2in1_ != 0),
+        bool hasAncoAudio = false;
+        for (const auto& session : GetContainer().GetAllSessions()) {
+            if (session->GetBundleName() == "anco_audio") {
+                hasAncoAudio = true;
+                break;
+            }
+        }
+        CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
+            (GetContainer().GetAllSessions().size() == 1 && !hasAncoAudio)) && is2in1_ != 0),
             AVSESSION_SUCCESS, "can not release cast with session alive");
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
