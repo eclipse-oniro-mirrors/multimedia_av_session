@@ -219,8 +219,10 @@ bool AVMetaData::ReadDrmSchemes(Parcel& parcel, AVMetaData *metaData)
     int32_t drmSchemesLen = 0;
     CHECK_AND_RETURN_RET_LOG(parcel.ReadInt32(drmSchemesLen), false, "read drmSchemesLen failed");
     std::vector<std::string> drmSchemes;
-    int maxLen = 10;
-    for (int i = 0; (i < drmSchemesLen) && (i < maxLen); i++) {
+    int32_t maxDrmSchemesLen = 10;
+    CHECK_AND_RETURN_RET_LOG((drmSchemesLen >= 0) &&
+        (drmSchemesLen <= maxDrmSchemesLen), false, "drmSchemesLen is illegal");
+    for (int i = 0; i < drmSchemesLen; i++) {
         std::string drmScheme;
         CHECK_AND_RETURN_RET_LOG(parcel.ReadString(drmScheme), false, "read drmScheme failed");
         drmSchemes.emplace_back(drmScheme);
@@ -234,8 +236,10 @@ bool AVMetaData::ReadDrmSchemes(MessageParcel& parcel, AVMetaData& metaData)
     int32_t drmSchemesLen = 0;
     CHECK_AND_RETURN_RET_LOG(parcel.ReadInt32(drmSchemesLen), false, "read drmSchemesLen failed");
     std::vector<std::string> drmSchemes;
-    int maxLen = 10;
-    for (int i = 0; (i < drmSchemesLen) && (i < maxLen); i++) {
+    int32_t maxDrmSchemesLen = 10;
+    CHECK_AND_RETURN_RET_LOG((drmSchemesLen >= 0) &&
+        (drmSchemesLen <= maxDrmSchemesLen), false, "drmSchemesLen is illegal");
+    for (int i = 0; i < drmSchemesLen; i++) {
         std::string drmScheme;
         CHECK_AND_RETURN_RET_LOG(parcel.ReadString(drmScheme), false, "read drmScheme failed");
         drmSchemes.emplace_back(drmScheme);

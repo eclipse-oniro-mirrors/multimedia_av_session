@@ -477,6 +477,37 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::CheckBeforeHandleStartCast(MessageParcel& data, OutputDeviceInfo& outputDeviceInfo)
+{
+    DeviceInfo deviceInfo;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.supportedProtocols_), false,
+        "Read supportedProtocols failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
+        "Read authenticationStatus failed");
+    int32_t supportedDrmCapabilityLen = 0;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
+        "read supportedDrmCapabilityLen failed");
+    int32_t maxSupportedDrmCapabilityLen = 10;
+    CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
+        (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
+    std::vector<std::string> supportedDrmCapabilities;
+    for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+        std::string supportedDrmCapability;
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(supportedDrmCapability), false,
+            "read supportedDrmCapability failed");
+        supportedDrmCapabilities.emplace_back(supportedDrmCapability);
+    }
+    deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    return true;
+}
+
 int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel& reply)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -496,31 +527,11 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
         return ERR_NONE;
     }
     for (int i = 0; i < deviceInfoSize; i++) {
-        DeviceInfo deviceInfo;
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.supportedProtocols_), false,
-            "Read supportedProtocols failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
-            "Read authenticationStatus failed");
-        int32_t supportedDrmCapabilityLen = 0;
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
-            "read supportedDrmCapabilityLen failed");
-        std::vector<std::string> supportedDrmCapabilities;
-        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
-            std::string supportedDrmCapability;
-            CHECK_AND_RETURN_RET_LOG(data.ReadString(supportedDrmCapability), false,
-                "read supportedDrmCapability failed");
-            supportedDrmCapabilities.emplace_back(supportedDrmCapability);
+        if (!CheckBeforeHandleStartCast(data, outputDeviceInfo)) {
+            SLOGE("check fail");
+            return ERR_NONE;
         }
-        deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
-        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
-
     int32_t ret = StartCast(sessionToken, outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGI("StartCast ret %{public}d", ret);
