@@ -430,6 +430,7 @@ void AVSessionService::InitAMS()
     SLOGI("enter");
     AppManagerAdapter::GetInstance().Init();
     AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange([this] (int uid, int state) {
+        SLOGI("uid = %{public}d, state = %{public}d", uid, state);
         HandleAppStateChange(uid, state);
     });
 }
@@ -437,16 +438,19 @@ void AVSessionService::InitAMS()
 void AVSessionService::HandleAppStateChange(int uid, int state)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("uidForAppStateChange_ = %{public}d", uidForAppStateChange_);
     if (uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_FOREGROUND)) {
         //first creat session
         if (firstAppStateChangeFlag_) {
             firstAppStateChangeFlag_ = false;
+            SLOGI("when first creat session, counts = %{public}d", appStateChangeCounter_);
             appStateChangeCounter_ = foreGroundStateCountZero;
             return;
         }
         //APP_STATE_FOREGROUND To APP_STATE_BACKGROUND
         if (foreToBackFlag_) {
             foreToBackFlag_ = false;
+            SLOGI("when fore to back, counts = %{public}d", appStateChangeCounter_);
             appStateChangeCounter_ = foreGroundStateCountOne;
             return;
         }
@@ -454,7 +458,7 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
         //APP_STATE_BACKGROUND To APP_STATE_FOREGROUND
         if (appStateChangeCounter_ == foreGroundStateCountTwo) {
             appStateChangeCounter_ = foreGroundStateCountZero;
-            SLOGI("enter notifyMirrorToStreamCast by background to foreground state change");
+            SLOGI("enter notifyMirrorToStreamCast by background to foreground state change, and counts = 2");
             NotifyMirrorToStreamCast();
         }
     }

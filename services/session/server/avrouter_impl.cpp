@@ -299,7 +299,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         castHandle, "Can not find corresponding provider");
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "0";
@@ -320,8 +320,8 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
 
 int32_t AVRouterImpl::SetServiceAllConnectState(int64_t castHandle)
 {
-    int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
-    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "0";
@@ -342,7 +342,7 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
 {
     SLOGI("AVRouterImpl register IAVCastSessionStateListener callback to provider");
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t providerNumber = castHandle >> 32;
+    int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
@@ -359,9 +359,9 @@ int32_t AVRouterImpl::UnRegisterCallback(int64_t castHandle,
 {
     SLOGI("AVRouterImpl UnRegisterCallback IAVCastSessionStateListener callback to provider");
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t providerNumber = static_cast<uint64_t>(castHandle) >> 32;
+    int32_t providerNumber = static_cast<uint64_t>(static_cast<uint64_t>(castHandle)) >> 32;
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding provider");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr

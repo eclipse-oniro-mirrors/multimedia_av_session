@@ -510,6 +510,9 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
         int32_t supportedDrmCapabilityLen = 0;
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
             "read supportedDrmCapabilityLen failed");
+        int32_t maxSupportedDrmCapabilityLen = 10;
+        CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) && (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen),
+            false, "supportedDrmCapabilityLen is illegal");
         std::vector<std::string> supportedDrmCapabilities;
         for (int i = 0; i < supportedDrmCapabilityLen; i++) {
             std::string supportedDrmCapability;
