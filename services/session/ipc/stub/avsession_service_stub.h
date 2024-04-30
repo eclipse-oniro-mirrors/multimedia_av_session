@@ -43,6 +43,7 @@ private:
     int32_t HandleStartCastDiscovery(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStopCastDiscovery(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSetDiscoverable(MessageParcel& data, MessageParcel& reply);
+    int32_t CheckBeforeHandleStartCast(MessageParcel& data, OutputDeviceInfo& outputDeviceInfo);
     int32_t HandleStartCast(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStopCast(MessageParcel& data, MessageParcel& reply);
     int32_t HandleClose(MessageParcel& data, MessageParcel& reply);

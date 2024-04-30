@@ -477,16 +477,8 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
     return ERR_NONE;
 }
 
-int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel& reply)
+int32_t AVSessionServiceStub::CheckBeforeHandleStartCast(MessageParcel& data, OutputDeviceInfo& outputDeviceInfo)
 {
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCast");
-    SessionToken sessionToken {};
-    sessionToken.sessionId = data.ReadString();
-    sessionToken.pid = data.ReadInt32();
-    sessionToken.uid = data.ReadInt32();
-
-    OutputDeviceInfo outputDeviceInfo;
     int32_t deviceInfoSize;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
 
@@ -511,8 +503,8 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
             "read supportedDrmCapabilityLen failed");
         int32_t maxSupportedDrmCapabilityLen = 10;
-        CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) && (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen),
-            false, "supportedDrmCapabilityLen is illegal");
+        CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
+            (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
         std::vector<std::string> supportedDrmCapabilities;
         for (int i = 0; i < supportedDrmCapabilityLen; i++) {
             std::string supportedDrmCapability;
@@ -522,6 +514,23 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
         }
         deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    }
+    return true;
+}
+
+int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel& reply)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCast");
+    SessionToken sessionToken {};
+    sessionToken.sessionId = data.ReadString();
+    sessionToken.pid = data.ReadInt32();
+    sessionToken.uid = data.ReadInt32();
+
+    OutputDeviceInfo outputDeviceInfo;
+    if (!CheckBeforeHandleStartCast(data, outputDeviceInfo)) {
+        SLOGE("check fail");
+        return ERR_NONE;
     }
 
     int32_t ret = StartCast(sessionToken, outputDeviceInfo);
