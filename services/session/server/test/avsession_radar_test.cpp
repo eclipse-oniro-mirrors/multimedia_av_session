@@ -86,7 +86,6 @@ static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetRadarErrorCode001, TestSize
 */
 static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetPeerInfo001, TestSize.Level1)
 {
-    std::string deviceList;
     AVSessionRadarInfo info("AVSessionRadarGetPeerInfo001");
     AVSessionRadar::GetInstance().GetPeerInfo(outDeviceInfo_, info);
     EXPECT_EQ(info.peerBtMac_, "");

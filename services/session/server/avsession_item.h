@@ -198,7 +198,7 @@ public:
 
     int32_t SessionCommandToCastCommand(int32_t cmd);
 
-    int32_t RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState);
+    int32_t RegisterListenerStreamToCast(const std::map<std::string, int32_t>& serviceNameMapState);
 
     int32_t AddSupportCastCommand(int32_t cmd);
 
@@ -261,8 +261,8 @@ private:
     void HandleOnToggleFavorite(const AVControlCommand& cmd);
     void HandleOnPlayFromAssetId(const AVControlCommand& cmd);
 
-    void ReportConnectFinish(std::string func, const DeviceInfo &deviceInfo);
-    void ReportStopCastFinish(std::string func, const DeviceInfo &deviceInfo);
+    void ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo);
+    void ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo);
     void SaveLocalDeviceInfo();
 
     using HandlerFuncType = void(AVSessionItem::*)(const AVControlCommand&);

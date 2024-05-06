@@ -530,7 +530,7 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-int32_t AVSessionItem::RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState)
+int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, int32_t>& serviceNameMapState)
 {
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
@@ -1430,7 +1430,7 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 }
 #endif
 
-void AVSessionItem::ReportConnectFinish(std::string func, const DeviceInfo &deviceInfo)
+void AVSessionItem::ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSessionRadarInfo info(func);
@@ -1443,7 +1443,7 @@ void AVSessionItem::ReportConnectFinish(std::string func, const DeviceInfo &devi
 #endif
 }
 
-void AVSessionItem::ReportStopCastFinish(std::string func, const DeviceInfo &deviceInfo)
+void AVSessionItem::ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSessionRadarInfo info(func);

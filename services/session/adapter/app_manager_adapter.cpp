@@ -105,18 +105,13 @@ void AppManagerAdapter::SetServiceCallbackForAppStateChange(const std::function<
 
 void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessData)
 {
-    std::set<int32_t> backgroundUIDsForCast;
     {
         std::lock_guard lockGuard(uidLock_);
         if (appProcessData.appState == ApplicationState::APP_STATE_FOREGROUND ||
             appProcessData.appState == ApplicationState::APP_STATE_BACKGROUND) {
             for (const auto& appData : appProcessData.appDatas) {
-                SLOGI("bundleName=%{public}s uid=%{public}d state=%{public}d",
+                SLOGI("check foreground bundleName=%{public}s uid=%{public}d state=%{public}d",
                     appData.appName.c_str(), appData.uid, appProcessData.appState);
-                auto it = observedAppUIDs_.find(appData.uid);
-                if (it != observedAppUIDs_.end()) {
-                    backgroundUIDsForCast.insert(appData.uid);
-                }
                 serviceCallbackForAppStateChange_(appData.uid, static_cast<int>(appProcessData.appState));
             }
         }

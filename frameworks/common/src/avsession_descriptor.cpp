@@ -119,7 +119,7 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
     int32_t maxDeviceInfoSize = 1000;
     CHECK_AND_RETURN_RET_LOG((deviceInfoSize >= 0) && (deviceInfoSize < maxDeviceInfoSize),
         false, "deviceInfoSize is illegal");
-    for (int i = 0; i < deviceInfoSize; i++) {
+    for (int j = 0; j < deviceInfoSize; j++) {
         DeviceInfo deviceInfo;
         if (!CheckBeforReadFromParcel(in, deviceInfo)) {
             return false;
@@ -238,7 +238,7 @@ bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
         CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
             (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
         std::vector<std::string> supportedDrmCapabilities;
-        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+        for (int k = 0; k < supportedDrmCapabilityLen; k++) {
             std::string supportedDrmCapability;
             CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
                 "read supportedDrmCapability failed");
