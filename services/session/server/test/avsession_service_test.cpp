@@ -730,7 +730,8 @@ namespace {
         EXPECT_EQ(avsessionHere_ != nullptr, true);
         AVMetaData meta = avsessionHere_->GetMetaData();
         std::string oldContent;
-        if (!avservice_->LoadStringFromFileEx(avservice_->AVSESSION_FILE_DIR + avservice_->AVQUEUE_FILE_NAME, oldContent)) {
+        if (!avservice_->LoadStringFromFileEx(avservice_->AVSESSION_FILE_DIR +
+            avservice_->AVQUEUE_FILE_NAME, oldContent)) {
             SLOGE("SaveAvQueueInfo001 read avqueueinfo fail, Return!");
             return;
         }
