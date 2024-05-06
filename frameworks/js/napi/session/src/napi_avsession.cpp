@@ -458,7 +458,7 @@ int32_t CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, std::string 
     return AVSESSION_ERROR;
 }
 
-int32_t DoDownload(AVMetaData& meta, std::string uri)
+int32_t DoDownload(AVMetaData& meta, const std::string uri)
 {
     SLOGI("DoDownload with both uri %{public}s, title %{public}s, assetid %{public}s",
         uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
