@@ -15,7 +15,7 @@
 
 const TAG = 'avcastpickerparam_component ';
 
-export var AVCastPickerState;
+export let AVCastPickerState;
 !function(e) {
   e[e.STATE_APPEARING = 0] = 'STATE_APPEARING';
   e[e.STATE_DISAPPEARING = 1] = 'STATE_DISAPPEARING';
