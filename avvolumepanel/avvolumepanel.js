@@ -84,7 +84,7 @@ export class AVVolumePanel extends ViewPU {
         }
       });
       UIExtensionComponent.onReceive((h) => {
-        console.info(TAG, `onReceive : ${JSON.stringify(h['state'])}`);
+        console.info(TAG, `onReceive : ${JSON.stringify(h.state)}`);
       });
       UIExtensionComponent.onRemoteReady((g) => {
         console.info(TAG, `onRemoteReady callback : ${JSON.stringify(g)}`);
