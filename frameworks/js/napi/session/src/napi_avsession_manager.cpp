@@ -768,18 +768,23 @@ napi_status NapiAVSessionManager::ProcessCastDiscoveryParams(
         if (status != napi_ok) {
             ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
         }
-    } else if (argc == ARGC_TWO && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined) &&
-        !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null) &&
-        !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_undefined) &&
-        !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null)) {
+    } else if (argc == ARGC_TWO) {
         SLOGD("get in argc two process");
-        status = NapiUtils::GetValue(env, argv[ARGV_FIRST], castDeviceCapability);
-        if (status != napi_ok) {
-            ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
+        if (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined) &&
+            !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)) {
+            status = NapiUtils::GetValue(env, argv[ARGV_FIRST], castDeviceCapability);
+            if (status != napi_ok) {
+                ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
+            }
+        } else {
+            castDeviceCapability = ProtocolType::TYPE_CAST_PLUS_STREAM;
         }
-        status = NapiUtils::GetValue(env, argv[ARGV_SECOND], drmSchemes);
-        if (status != napi_ok) {
-            ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
+        if (!NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_undefined) &&
+            !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null)) {
+            status = NapiUtils::GetValue(env, argv[ARGV_SECOND], drmSchemes);
+            if (status != napi_ok) {
+                ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
+            }
         }
     } else {
         castDeviceCapability = ProtocolType::TYPE_CAST_PLUS_STREAM;
