@@ -43,6 +43,7 @@ using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 using namespace OHOS::AudioStandard;
 
+
 static AVMetaData g_metaData;
 static AVPlaybackState g_playbackState;
 static char g_testSessionTag[] = "test";
