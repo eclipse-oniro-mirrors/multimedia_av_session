@@ -19,19 +19,19 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 
 const TAG = 'avcastpicker_component ';
 
-export var AVCastPickerState;
+export let AVCastPickerState;
 (function(a3) {
     a3[a3.STATE_APPEARING = 0] = 'STATE_APPEARING';
     a3[a3.STATE_DISAPPEARING = 1] = 'STATE_DISAPPEARING';
 })(AVCastPickerState || (AVCastPickerState = {}));
 
-export var AVCastPickerStyle;
+export let AVCastPickerStyle;
 (function(z2) {
     z2[z2.STYLE_PANEL = 0] = 'STYLE_PANEL';
     z2[z2.STYLE_MENU = 1] = 'STYLE_MENU';
 })(AVCastPickerStyle || (AVCastPickerStyle = {}));
 
-export var DeviceSource;
+export let DeviceSource;
 (function(y2) {
     y2[y2.LOCAL = 0] = 'LOCAL';
     y2[y2.CAST = 1] = 'CAST';

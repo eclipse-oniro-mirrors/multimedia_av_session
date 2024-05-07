@@ -15,19 +15,19 @@
 
 const TAG = 'avcastpickerparam_component ';
 
-export var AVCastPickerState;
+export let AVCastPickerState;
 (function(c) {
   c[c.STATE_APPEARING = 0] = 'STATE_APPEARING';
   c[c.STATE_DISAPPEARING = 1] = 'STATE_DISAPPEARING';
 })(AVCastPickerState || (AVCastPickerState = {}));
 
-export var AVCastPickerStyle;
+export let AVCastPickerStyle;
 (function(b) {
   b[b.STYLE_PANEL = 0] = 'STYLE_PANEL';
   b[b.STYLE_MENU = 1] = 'STYLE_MENU';
 })(AVCastPickerStyle || (AVCastPickerStyle = {}));
 
-export var AVCastPickerColorMode;
+export let AVCastPickerColorMode;
 (function(a) {
   a[a.AUTO = 0] = 'AUTO';
   a[a.DARK = 1] = 'DARK';

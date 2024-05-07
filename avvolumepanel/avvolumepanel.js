@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {});
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
 const TAG = 'AVVolumePanel';
 class AVVolumePanelParameter {
@@ -21,14 +21,14 @@ class AVVolumePanelParameter {
 export class AVVolumePanel extends ViewPU {
   constructor(p, q, r, s = -1, t = undefined, u) {
     super(p, r, s, u);
-    if (typeof t === "function") {
+    if (typeof t === 'function') {
       this.paramsGenerator_ = t;
     }
-    this.__volumeLevel = new SynchedPropertySimpleOneWayPU(q.volumeLevel, this, "volumeLevel");
-    this.__volumeParameter = new SynchedPropertyObjectOneWayPU(q.volumeParameter, this, "volumeParameter");
+    this.__volumeLevel = new SynchedPropertySimpleOneWayPU(q.volumeLevel, this, 'volumeLevel');
+    this.__volumeParameter = new SynchedPropertyObjectOneWayPU(q.volumeParameter, this, 'volumeParameter');
     this.volumeCallback = undefined;
     this.setInitiallyProvidedValue(q);
-    this.declareWatch("volumeLevel", this.volumeChange);
+    this.declareWatch('volumeLevel', this.volumeChange);
     this.finalizeConstruction();
   }
   setInitiallyProvidedValue(o) {
@@ -84,7 +84,7 @@ export class AVVolumePanel extends ViewPU {
         }
       });
       UIExtensionComponent.onReceive((h) => {
-        console.info(TAG, `onReceive : ${JSON.stringify(h['state'])}`);
+        console.info(TAG, `onReceive : ${JSON.stringify(h.state)}`);
       });
       UIExtensionComponent.onRemoteReady((g) => {
         console.info(TAG, `onRemoteReady callback : ${JSON.stringify(g)}`);
