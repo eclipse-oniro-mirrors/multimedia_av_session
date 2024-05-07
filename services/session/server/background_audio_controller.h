@@ -43,10 +43,9 @@ public:
     void Init(AVSessionService *ptr);
 
     void HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos);
-    void HandleAppBackgroundState(int32_t uid);
+    void HandleAppBackgroundState(int32_t uid, int32_t pid);
 
 private:
-    void HandleVoIPAppBackgroundState(int32_t uid);
     bool HasAVSession(int32_t uid);
     bool IsBackgroundMode(int32_t creatorUid, BackgroundMode backgroundMode) const;
 

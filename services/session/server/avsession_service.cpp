@@ -812,7 +812,7 @@ void AVSessionService::NotifyMirrorToStreamCast()
         return;
     }
     if (topSession_->GetSessionType() == "video" &&
-        !AppManagerAdapter::GetInstance().IsAppBackground(topSession_->GetUid())) {
+        !AppManagerAdapter::GetInstance().IsAppBackground(topSession_->GetUid(), topSession_->GetPid())) {
         MirrorToStreamCast(topSession_);
     }
 }
@@ -929,11 +929,12 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
         return nullptr;
     }
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
-        AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()), type, true);
+        AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (type == AVSession::SESSION_TYPE_VIDEO && !AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid())) {
+    if (type == AVSession::SESSION_TYPE_VIDEO &&
+        !AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid())) {
         uidForAppStateChange_ = result->GetUid();
         firstAppStateChangeFlag_ = true;
         MirrorToStreamCast(result);
@@ -1780,7 +1781,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
         SLOGI("GetContainer has no this session");
     }
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(sessionItem->GetDescriptor().elementName_.GetBundleName(),
-        AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid()),
+        AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()),
         sessionItem->GetDescriptor().sessionType_, false);
     SLOGI("HandleSessionRelease, remove session: sessionId=%{public}s",
         AVSessionUtils::GetAnonySessionId(sessionId).c_str());
