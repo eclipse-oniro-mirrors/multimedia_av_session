@@ -547,18 +547,18 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
         int32_t ret = napiSession->session_->SetAVMetaData(context->metaData_);
         if (ret != AVSESSION_SUCCESS) {
             processErrMsg(context, ret);
-            return;
         } else if (context->metaData_.GetMediaImage() == nullptr) {
             ret = DoDownload(context->metaData_, uri);
-            SLOGI("DoDownload complete ret %{public}d", ret);
-            if (ret == AVSESSION_SUCCESS && context->metadataTs >= napiSession->latestMetadataTs_) {
+            SLOGI("DoDownload complete with ret %{public}d", ret);
+            if (ret != AVSESSION_SUCCESS) {
+                context->metaData_.SetMediaImageUri(uri);
+                napiSession->session_->SetAVMetaData(context->metaData_);
+            } else if (ret == AVSESSION_SUCCESS && context->metadataTs >= napiSession->latestMetadataTs_) {
                 napiSession->session_->SetAVMetaData(context->metaData_);
             }
         }
     };
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
 }
 
