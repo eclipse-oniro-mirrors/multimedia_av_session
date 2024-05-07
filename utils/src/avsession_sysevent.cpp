@@ -30,7 +30,11 @@ AVSessionSysEvent::AVSessionSysEvent() : optCounts_ {},
 
 void AVSessionSysEvent::AddOperationCount(Operation operation)
 {
-    optCounts_[operation]++;
+    auto it = optCounts_.find(operation);
+    if (it == optCounts_.end()) {
+        optCounts_.insert(std::make_pair(operation, 0));
+    }
+    it->second++;
 }
 
 void AVSessionSysEvent::Reset()

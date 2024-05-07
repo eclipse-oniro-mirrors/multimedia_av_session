@@ -530,7 +530,7 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, int32_t>& serviceNameMapState)
+int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState)
 {
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
