@@ -131,6 +131,7 @@ static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange002, 
     std::vector<std::unique_ptr<OHOS::AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfos;
     info->rendererState = OHOS::AudioStandard::RENDERER_RUNNING;
     info->clientUID = -1;
+    info->clientPid = -1;
     audioRendererChangeInfos.push_back(move(info));
     BackgroundAudioController backgroundaudiocontroller;
     backgroundaudiocontroller.HandleAudioStreamRendererStateChange(audioRendererChangeInfos);
@@ -147,8 +148,9 @@ static HWTEST(BkGrAudioControllerTest, HandleAppBackgroundState001, TestSize.Lev
 {
     SLOGI("HandleAppBackgroundState001 begin!");
     int32_t uid = -1;
+    int32_t pid = -1;
     BackgroundAudioController backgroundaudiocontroller;
-    backgroundaudiocontroller.HandleAppBackgroundState(uid);
+    backgroundaudiocontroller.HandleAppBackgroundState(uid, pid);
     EXPECT_EQ(uid, -1);
 }
 

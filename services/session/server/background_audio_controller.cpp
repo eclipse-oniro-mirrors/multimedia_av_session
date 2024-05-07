@@ -38,9 +38,9 @@ void BackgroundAudioController::Init(AVSessionService *ptr)
     AudioAdapter::GetInstance().AddStreamRendererStateListener([this](const auto& infos) {
         HandleAudioStreamRendererStateChange(infos);
     });
-    AppManagerAdapter::GetInstance().SetAppBackgroundStateObserver([this](int32_t uid) {
-        SLOGI("set background observe for uid %{public}d", uid);
-        HandleAppBackgroundState(uid);
+    AppManagerAdapter::GetInstance().SetAppBackgroundStateObserver([this](int32_t uid, int32_t pid) {
+        SLOGI("set background observe for uid=%{public}d pid=%{public}d", uid, pid);
+        HandleAppBackgroundState(uid, pid);
     });
 }
 
@@ -60,7 +60,7 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
     }
 
     if (descriptor.isThirdPartyApp_) {
-        if (!AppManagerAdapter::GetInstance().IsAppBackground(descriptor.uid_)) {
+        if (!AppManagerAdapter::GetInstance().IsAppBackground(descriptor.uid_, descriptor.pid_)) {
             AppManagerAdapter::GetInstance().AddObservedApp(descriptor.uid_);
             SLOGI("OnSessionRelease add observe for uid %{public}d", descriptor.uid_);
             return;
@@ -94,7 +94,7 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
         if (info->rendererState != AudioStandard::RENDERER_RUNNING) {
             continue;
         }
-        if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID)) {
+        if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
             AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
             SLOGD("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
             continue;
@@ -120,7 +120,7 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
     }
 }
 
-void BackgroundAudioController::HandleAppBackgroundState(int32_t uid)
+void BackgroundAudioController::HandleAppBackgroundState(int32_t uid, int32_t pid)
 {
     if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(uid)) {
         SLOGD("uid=%{public}d is system app", uid);
@@ -134,8 +134,10 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid)
         return;
     }
     for (const auto& info : infos) {
-        if (info->clientUID == uid and info->rendererState != AudioStandard::RENDERER_RUNNING) {
-            SLOGI("find uid=%{public}d renderer state is %{public}d, isn't running", uid, info->rendererState);
+        if (info->rendererState != AudioStandard::RENDERER_RUNNING and
+            (info->clientUID == uid and info->clientPid == pid)) {
+            SLOGI("find uid=%{public}d pid=%{public}d renderer state is %{public}d, isn't running",
+                uid, pid, info->rendererState);
             return;
         }
     }
