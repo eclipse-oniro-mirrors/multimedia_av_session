@@ -644,14 +644,13 @@ int32_t AVSessionItem::AddSupportCastCommand(int32_t cmd)
         supportedCastCmds_.push_back(cmd);
     }
     HandleCastValidCommandChange(supportedCastCmds_);
-    std::lock_guard controllerLockGuard(controllersLock_);
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
 {
-    CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
-    CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    CHECK_AND_RETURN_RET_LOG(cmd > AVCastControlCommand::CAST_CONTROL_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
+    CHECK_AND_RETURN_RET_LOG(cmd < AVCastControlCommand::CAST_CONTROL_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
 
     if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE) {
         auto iter = std::remove(
@@ -682,15 +681,16 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
     }
 
     HandleCastValidCommandChange(supportedCastCmds_);
-    std::lock_guard controllerLockGuard(controllersLock_);
     return AVSESSION_SUCCESS;
 }
 
 void AVSessionItem::HandleCastValidCommandChange(std::vector<int32_t> &cmds)
 {
     for (auto controller : castControllers_) {
-        SLOGI("HandleCastValidCommandChange size:%{public}zd", cmds.size());
-        controller->HandleCastValidCommandChange(cmds);
+        if (controller != nullptr) {
+            SLOGI("HandleCastValidCommandChange size:%{public}zd", cmds.size());
+            controller->HandleCastValidCommandChange(cmds);
+        }
     }
 }
 
