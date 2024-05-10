@@ -53,7 +53,8 @@
           "window_manager",
           "distributed_notification_service",
           "relational_store",
-          "background_task_mgr"
+          "background_task_mgr",
+          "bluetooth"
         ],
         "third_party": [
           "openssl",

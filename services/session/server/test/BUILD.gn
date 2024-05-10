@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
+import("../../../../bluetooth_part.gni")
 import("../../../../castplus_cast_engine_part.gni")
 import("../../../../config.gni")
 
@@ -74,6 +75,11 @@ ohos_unittest("MigrateAVSessionTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+
+  if (bluetooth_part_enable) {
+    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 ohos_unittest("SoftbusSessionManagerTest") {
@@ -159,6 +165,11 @@ ohos_unittest("AVSessionServiceTest") {
       "CollaborationFwk:collaborationfwk_client",
       "cast_engine:cast_engine_client",
     ]
+  }
+
+  if (bluetooth_part_enable) {
+    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
   }
 }
 
@@ -329,6 +340,11 @@ ohos_unittest("SessionStackTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (bluetooth_part_enable) {
+    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 ohos_unittest("AVRouterTest") {
