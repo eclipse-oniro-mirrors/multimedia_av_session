@@ -283,7 +283,7 @@ napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t even
 napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
-    SLOGI("remove callback for event %{public}d", event);
+    SLOGI("try remove callback for event %{public}d", event);
     if (callback == nullptr) {
         SLOGD("Remove callback, the callback is nullptr");
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
@@ -293,6 +293,10 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
         }
         callbacks_[event].clear();
         if (event == EVENT_CAST_PLAYBACK_STATE_CHANGE) {
+            if (isValid_ == nullptr) {
+                SLOGE("remove callback with never listen on");
+                return napi_ok;
+            }
             *isValid_ = false;
         }
         return napi_ok;
