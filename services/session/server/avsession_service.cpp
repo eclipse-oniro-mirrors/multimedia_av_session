@@ -84,6 +84,11 @@ static const std::string MIGRATE_STUB_SOURCE_LIBRARY_PATH = std::string(SYSTEM_L
     std::string("libavsession_migration.z.so");
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 
+#ifdef BLUETOOTH_ENABLE
+static std::shared_ptr<DetectBluetoothHostObserver> g_bluetoothObserver =
+    std::make_shared<DetectBluetoothHostObserver>();
+#endif
+
 class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
     void OnConnected() {}
     void OnDisconnected() {}
@@ -134,6 +139,7 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     AddSystemAbilityListener(CAST_ENGINE_SA_ID);
+    AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto deviceProp = system::GetParameter("const.product.devicetype", "default");
@@ -142,6 +148,7 @@ void AVSessionService::OnStart()
     if (is2in1_ == 0) {
         SLOGI("startup enable cast check 2in1");
         checkEnableCast(true);
+        AVRouter::GetInstance().SetDiscoverable(false);
         AVRouter::GetInstance().SetDiscoverable(true);
     }
 #endif
@@ -215,6 +222,9 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         case CAST_ENGINE_SA_ID:
             CheckInitCast();
             break;
+        case BLUETOOTH_HOST_SYS_ABILITY_ID:
+            CheckBrEnable();
+            break;
         default:
             SLOGE("undefined system ability %{public}d", systemAbilityId);
     }
@@ -242,6 +252,45 @@ void AVSessionService::CheckInitCast()
         SLOGI("check cast engine has been removed");
     } else {
         SLOGI("check cast engine has been started");
+    }
+#endif
+}
+
+#ifdef BLUETOOTH_ENABLE
+DetectBluetoothHostObserver::DetectBluetoothHostObserver()
+{
+    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
+    SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
+    is2in1_ = strcmp(deviceProp.c_str(), "2in1");
+}
+
+void DetectBluetoothHostObserver::OnStateChanged(const int transport, const int status)
+{
+    SLOGI("transport=%{public}d status=%{public}d", transport, status);
+    if (transport != OHOS::Bluetooth::BTTransport::ADAPTER_BREDR) {
+        return;
+    }
+    bool newStatus = (status == OHOS::Bluetooth::BTStateID::STATE_TURN_ON);
+    if (newStatus == lastEnabled_) {
+        return;
+    }
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    if (newStatus && is2in1_ == 0) {
+        AVRouter::GetInstance().SetDiscoverable(false);
+        AVRouter::GetInstance().SetDiscoverable(true);
+    }
+#endif
+    lastEnabled_ = newStatus;
+}
+#endif
+
+void AVSessionService::CheckBrEnable()
+{
+#ifdef BLUETOOTH_ENABLE
+    SLOGI("AVSessionService CheckBrEnable in");
+    bluetoothHost_ = &OHOS::Bluetooth::BluetoothHost::GetDefaultHost();
+    if (bluetoothHost_ != nullptr) {
+        bluetoothHost_->RegisterObserver(g_bluetoothObserver);
     }
 #endif
 }

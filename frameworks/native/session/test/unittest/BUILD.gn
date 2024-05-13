@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
+import("../../../../../bluetooth_part.gni")
 import("../../../../../castplus_cast_engine_part.gni")
 import("../../../../../config.gni")
 
@@ -203,6 +204,11 @@ ohos_unittest("AVDumperTest") {
   ]
 
   external_deps = common_external_deps
+
+  if (bluetooth_part_enable) {
+    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 if (castplus_cast_engine_enable) {

@@ -40,6 +40,10 @@
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
 
+#ifdef BLUETOOTH_ENABLE
+#include "bluetooth_host.h"
+#endif
+
 namespace OHOS::AVSession {
 class AVSessionDumper;
 
@@ -68,6 +72,54 @@ public:
         return left.networkId_ == right.networkId_;
     }
 };
+
+#ifdef BLUETOOTH_ENABLE
+class DetectBluetoothHostObserver : public OHOS::Bluetooth::BluetoothHostObserver {
+public:
+    DetectBluetoothHostObserver();
+    virtual ~DetectBluetoothHostObserver() = default;
+    void OnStateChanged(const int transport, const int status) override;
+    void OnDiscoveryStateChanged(int status) override
+    {
+        return;
+    }
+    
+    void OnDiscoveryResult(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int rssi,
+        const std::string deviceName, int deviceClass) override
+    {
+        return;
+    }
+
+    void OnPairRequested(const OHOS::Bluetooth::BluetoothRemoteDevice &device) override
+    {
+        return;
+    }
+
+    void OnPairConfirmed(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int reqType, int number) override
+    {
+        return;
+    }
+
+    void OnScanModeChanged(int mode) override
+    {
+        return;
+    }
+
+    void OnDeviceNameChanged(const std::string &deviceName) override
+    {
+        return;
+    }
+
+    void OnDeviceAddrChanged(const std::string &address) override
+    {
+        return;
+    }
+
+private:
+    bool is2in1_ = false;
+    bool lastEnabled_ = false;
+};
+#endif
 
 class AVSessionService : public SystemAbility, public AVSessionServiceStub, public IAVSessionServiceListener {
     DECLARE_SYSTEM_ABILITY(AVSessionService);
@@ -170,6 +222,8 @@ public:
 
 private:
     void CheckInitCast();
+
+    void CheckBrEnable();
 
     static SessionContainer& GetContainer();
 
@@ -362,6 +416,10 @@ private:
     std::mutex fileCheckLock_;
 
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
+
+#ifdef BLUETOOTH_ENABLE
+    OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
+#endif
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
