@@ -1604,12 +1604,6 @@ void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("RegisterClientDeathObserver: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice RegisterClientDeathObserver checksystempermission failed");
-        return ERR_NO_PERMISSION;
-    }
     SLOGI("enter ClientDeathObserver register");
     auto pid = GetCallingPid();
     auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
