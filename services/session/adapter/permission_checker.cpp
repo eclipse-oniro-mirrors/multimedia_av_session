@@ -43,7 +43,7 @@ bool PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessToken
     uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
     bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
     if (!isSystemApp) {
-        SLOGI("Not system app, permission reject tokenid=%{public}u", tokenId);
+        SLOGI("Not system app, permission reject");
         return false;
     }
 
@@ -69,8 +69,6 @@ bool PermissionChecker::CheckSystemPermissionByUid(int uid)
 
     AccessTokenIDEx accessTokenIdEx = AccessTokenKit::GetHapTokenIDEx(uid / UID_TRANSFORM_DIVISOR, bundleName, 0);
     auto tokenId = accessTokenIdEx.tokenIdExStruct.tokenID;
-    SLOGD("CheckSystemPermissionByUid get tokenId : %{public}u", tokenId);
-    SLOGD("CheckSystemPermissionByUid get full tokenId : %{public}llu", accessTokenIdEx.tokenIDEx);
     if (tokenId == INVALID_TOKENID) {
         SLOGE("get token id failed");
         return false;
@@ -84,7 +82,7 @@ bool PermissionChecker::CheckSystemPermissionByUid(int uid)
     }
     bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(accessTokenIdEx.tokenIDEx);
     if (!isSystemApp) {
-        SLOGI("CheckSystemPermissionByUid Not system app, fullTokenId=%{public}llu", accessTokenIdEx.tokenIDEx);
+        SLOGI("CheckSystemPermissionByUid Not system app");
         return false;
     }
     SLOGD("CheckSystemPermissionByUid is system app done");

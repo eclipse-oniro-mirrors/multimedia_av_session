@@ -105,7 +105,6 @@ void AVSessionPermissionTest::AddPermission(const HapInfoParams& info, const Hap
     AccessTokenKit::AllocHapToken(info, policy);
     AccessTokenIDEx tokenID = AccessTokenKit::GetHapTokenIDEx(info.userID, info.bundleName, info.instIndex);
     SetSelfTokenID(tokenID.tokenIDEx);
-    SLOGI("GetSelfTokenID:%{public}" PRId64, GetSelfTokenID());
 }
 
 void AVSessionPermissionTest::DeletePermission(const HapInfoParams& info)
