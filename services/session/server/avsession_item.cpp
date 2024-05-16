@@ -181,6 +181,27 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionItem::ProcessFrontSession(std::string source)
+{
+    bool isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
+        metaData_.GetMediaImageUri().empty();
+    sptr<AVSessionItem> session(this);
+    SLOGD("%{public}s bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
+        source.c_str(), GetBundleName().c_str(), isMetaEmpty, supportedCmd_.size(),
+        supportedCastCmds_.size(), isFirstAddToFront_);
+    if (isMetaEmpty || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
+        if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
+            serviceCallbackForUpdateSession_(session, false);
+            isFirstAddToFront_ = true;
+        }
+    } else {
+        if (isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
+            serviceCallbackForUpdateSession_(session, true);
+            isFirstAddToFront_ = false;
+        }
+    }
+}
+
 bool AVSessionItem::HasAvQueueInfo()
 {
     return !metaData_.GetAVQueueName().empty() && !metaData_.GetAVQueueId().empty() &&
@@ -192,6 +213,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     std::lock_guard lockGuard(metaDataLock_);
     CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
+    ProcessFrontSession("SetAVMetaData");
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     if (innerPixelMap != nullptr) {
         std::string sessionId = GetSessionId();
@@ -484,6 +506,7 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
     supportedCmd_.push_back(cmd);
+    ProcessFrontSession("AddSupportCommand");
     std::lock_guard controllerLockGuard(controllersLock_);
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);
@@ -501,6 +524,7 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     supportedCmd_.erase(iter, supportedCmd_.end());
+    ProcessFrontSession("DeleteSupportCommand");
     std::lock_guard controllerLockGuard(controllersLock_);
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);
@@ -1319,6 +1343,12 @@ void AVSessionItem::SetServiceCallbackForCallStart(const std::function<void(AVSe
 {
     SLOGI("SetServiceCallbackForCallStart in");
     callStartCallback_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(sptr<AVSessionItem>&, bool)>& callback)
+{
+    SLOGI("SetServiceCallbackForUpdateSession in");
+    serviceCallbackForUpdateSession_ = callback;
 }
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)

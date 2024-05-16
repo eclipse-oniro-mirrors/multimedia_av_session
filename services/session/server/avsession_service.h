@@ -377,6 +377,10 @@ private:
     
     void HandleAppStateChange(int uid, int state);
 
+    bool IsMediaStream(AudioStandard::StreamUsage usage);
+
+    void UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd);
+
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
         const AVSessionDescriptor* histroyDescriptor);
 
@@ -385,6 +389,8 @@ private:
     std::recursive_mutex sessionAndControllerLock_;
     sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
+    std::list<sptr<AVSessionItem>> sessionListForFront_;
+    std::recursive_mutex sessionFrontLock_;
 
     std::recursive_mutex clientDeathObserversLock_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
@@ -465,6 +471,7 @@ private:
     const int32_t maxFileLength = 32 * 1024 * 1024;
     const int32_t maxAVQueueInfoLen = 5;
     const int32_t allocSpace = 2;
+    const int32_t avSessionUid = 6700;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H
