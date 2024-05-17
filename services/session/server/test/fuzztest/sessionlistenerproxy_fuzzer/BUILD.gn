@@ -50,7 +50,6 @@ ohos_fuzztest("SessionListenerProxyFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "access_token:libtokensetproc_shared",
     "samgr:samgr_proxy",
   ]
 }
