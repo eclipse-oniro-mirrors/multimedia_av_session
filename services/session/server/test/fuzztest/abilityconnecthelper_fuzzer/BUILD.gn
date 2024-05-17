@@ -53,6 +53,7 @@ ohos_fuzztest("AbilityConnectHelperFuzzTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "access_token:libtokensetproc_shared",
   ]
 }
 ###############################################################################
