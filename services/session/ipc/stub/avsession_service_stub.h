@@ -18,6 +18,9 @@
 
 #include "iavsession_service.h"
 #include "iremote_stub.h"
+#include "ipc_skeleton.h"
+#include "accesstoken_kit.h"
+#include "token_setproc.h"
 
 namespace OHOS::AVSession {
 class AVSessionServiceStub : public IRemoteStub<IAVSessionService> {

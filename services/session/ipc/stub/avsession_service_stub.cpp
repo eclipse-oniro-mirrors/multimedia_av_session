@@ -532,6 +532,13 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
             return ERR_NONE;
         }
     }
+    Security::AccessToken::AccessTokenID callerToken = OHOS::IPCSkeleton::GetCallingTokenID();
+    SLOGI("service: AccessTokenID = %{public}d", callerToken);
+    int temp = SetFirstCallerTokenID(callerToken);
+    SLOGI("SetFirstCallerTokenID return %{public}d", temp);
+    if (temp < 0) {
+        SLOGE("SetFirstCallerTokenID fail");
+    }
     int32_t ret = StartCast(sessionToken, outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGI("StartCast ret %{public}d", ret);
