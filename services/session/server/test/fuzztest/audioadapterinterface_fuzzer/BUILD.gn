@@ -49,6 +49,7 @@ ohos_fuzztest("AudioAdapterInterfaceFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "access_token:libtokensetproc_shared",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
