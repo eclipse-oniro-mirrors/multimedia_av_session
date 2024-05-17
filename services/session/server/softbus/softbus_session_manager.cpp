@@ -148,7 +148,7 @@ void SoftbusSessionManager::OnBind(int32_t socket, PeerSocketInfo info)
     std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
         listener->OnBind(socket, info);
-        if (info == nullptr) {
+        if (info.networkId == nullptr) {
             SLOGE("PeerSocketInfo is nullptr");
         }
         mMap_.insert({socket, info.networkId});
