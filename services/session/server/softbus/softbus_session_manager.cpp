@@ -61,6 +61,10 @@ static ISocketListener iSessionListener = {
 
 int32_t SoftbusSessionManager::Socket(const std::string &pkgName)
 {
+    if (pkgName.c_str() == nullptr) {
+        SLOGE("pkg name is null");
+        return AVSESSION_ERROR;
+    }
     SocketInfo info = {
         .name = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG.c_str()),
         .pkgName = const_cast<char *>(pkgName.c_str()),
@@ -77,10 +81,10 @@ int32_t SoftbusSessionManager::Socket(const std::string &pkgName)
         SLOGI("service success ,socket[%{public}d]", socket);
         //建立服务成功
     } else {
-        SLOGI("service failed ,socket[%{public}d]", socket);
+        SLOGI("service failed ,ret[%{public}d]", ret);
         //建立服务失败，错误码
     }
-    return ret;
+    return socket;
 }
 
 void SoftbusSessionManager::Shutdown(int32_t socket)
@@ -96,6 +100,9 @@ int32_t SoftbusSessionManager::SendMessage(int32_t socket, const std::string &da
         return AVSESSION_ERROR;
     }
     int ret = ::SendMessage(socket, data.c_str(), data.length());
+    if (ret != 0) {
+        SLOGE("SendMessage error, ret = %{public}d", ret);
+    }
     return ret;
 }
 
@@ -106,6 +113,9 @@ int32_t SoftbusSessionManager::SendBytes(int32_t socket, const std::string &data
         return AVSESSION_ERROR;
     }
     int ret = ::SendBytes(socket, data.c_str(), data.length());
+    if (ret != 0) {
+        SLOGE("SendBytes error, ret = %{public}d", ret);
+    }
     return ret;
 }
 
@@ -138,6 +148,9 @@ void SoftbusSessionManager::OnBind(int32_t socket, PeerSocketInfo info)
     std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
         listener->OnBind(socket, info);
+        if (info.networkId == nullptr) {
+            SLOGE("PeerSocketInfo is nullptr");
+        }
         mMap_.insert({socket, info.networkId});
     }
 }
@@ -147,6 +160,7 @@ void SoftbusSessionManager::OnShutdown(int32_t socket, ShutdownReason reason)
     std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
         listener->OnShutdown(socket, reason);
+        SLOGI("ShutdownReason = %{public}d", reason);
         mMap_.erase(socket);
     }
 }
@@ -155,6 +169,9 @@ void SoftbusSessionManager::OnMessage(int32_t socket, const void *data, int32_t 
 {
     std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
+        if (data == nullptr) {
+            SLOGE("message data is nullptr");
+        }
         listener->OnMessage(socket, data, dataLen);
     }
 }
@@ -163,6 +180,9 @@ void SoftbusSessionManager::OnBytes(int32_t socket, const void *data, int32_t da
 {
     std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
+        if (data == nullptr) {
+            SLOGE("bytes data is nullptr");
+        }
         listener->OnBytes(socket, data, dataLen);
     }
 }
