@@ -192,11 +192,8 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
-    if (mediaDescription->GetIconUri() == "") {
-        mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
-    } else {
-        mediaInfo.albumCoverUrl = mediaDescription->GetIconUri();
-    }
+    mediaInfo.albumCoverUrl = mediaDescription->GetIconUri() == "" ?
+        mediaDescription->GetAlbumCoverUri() : mediaDescription->GetIconUri();
     mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
     mediaInfo.mediaArtist = mediaDescription->GetArtist();
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
@@ -219,6 +216,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         return AVSESSION_ERROR;
     }
     currentAVQueueItem_ = avQueueItem;
+    currentAlbumCoverUri_ = mediaInfo.albumCoverUrl;
     SLOGI("Set media info and start successfully");
     return AVSESSION_SUCCESS;
 }
@@ -261,6 +259,7 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     if (streamPlayer_ && streamPlayer_->Load(mediaInfo) == AVSESSION_SUCCESS) {
         SLOGI("Set media info and prepare successed");
         currentAVQueueItem_ = avQueueItem;
+        currentAlbumCoverUri_ = mediaInfo.albumCoverUrl;
         return AVSESSION_SUCCESS;
     }
     SLOGE("Set media info and prepare failed");
@@ -482,7 +481,11 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetStartPosition(static_cast<uint32_t>(mediaInfo.startPosition));
     mediaDescription->SetDuration(static_cast<uint32_t>(mediaInfo.duration));
     mediaDescription->SetCreditsPosition(static_cast<int32_t>(mediaInfo.closingCreditsPosition));
-    mediaDescription->SetAlbumCoverUri(mediaInfo.albumCoverUrl);
+    if (mediaInfo.albumCoverUrl == "") {
+        mediaDescription->SetAlbumCoverUri(currentAlbumCoverUri_);
+    } else {
+        mediaDescription->SetAlbumCoverUri(mediaInfo.albumCoverUrl);
+    }
     mediaDescription->SetAlbumTitle(mediaInfo.albumTitle);
     mediaDescription->SetArtist(mediaInfo.mediaArtist);
     mediaDescription->SetLyricUri(mediaInfo.lrcUrl);
