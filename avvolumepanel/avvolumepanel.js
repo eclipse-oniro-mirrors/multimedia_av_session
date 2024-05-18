@@ -98,4 +98,4 @@ export class AVVolumePanel extends ViewPU {
     this.updateDirtyElements();
   }
 }
-export default AVVolumePanel;
+export default {AVVolumePanel};
