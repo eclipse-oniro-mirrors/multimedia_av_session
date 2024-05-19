@@ -115,6 +115,7 @@ int32_t SoftbusSessionManager::SendBytes(int32_t socket, const std::string &data
     int ret = ::SendBytes(socket, data.c_str(), data.length());
     if (ret != 0) {
         SLOGE("SendBytes error, ret = %{public}d", ret);
+        return AVSESSION_ERROR;
     }
     return ret;
 }
@@ -145,44 +146,47 @@ void SoftbusSessionManager::AddSessionListener(std::shared_ptr<SoftbusSessionLis
 
 void SoftbusSessionManager::OnBind(int32_t socket, PeerSocketInfo info)
 {
+    if (info.networkId == nullptr) {
+        SLOGE("PeerSocketInfo is nullptr");
+        return;
+    }
     std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
         listener->OnBind(socket, info);
-        if (info.networkId == nullptr) {
-            SLOGE("PeerSocketInfo is nullptr");
-        }
         mMap_.insert({socket, info.networkId});
     }
 }
 
 void SoftbusSessionManager::OnShutdown(int32_t socket, ShutdownReason reason)
 {
+    SLOGI("ShutdownReason = %{public}d", reason);
     std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
         listener->OnShutdown(socket, reason);
-        SLOGI("ShutdownReason = %{public}d", reason);
         mMap_.erase(socket);
     }
 }
 
 void SoftbusSessionManager::OnMessage(int32_t socket, const void *data, int32_t dataLen)
 {
+    if (data == nullptr) {
+        SLOGE("message data is nullptr");
+        return;
+    }
     std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
-        if (data == nullptr) {
-            SLOGE("message data is nullptr");
-        }
         listener->OnMessage(socket, data, dataLen);
     }
 }
 
 void SoftbusSessionManager::OnBytes(int32_t socket, const void *data, int32_t dataLen)
 {
+    if (data == nullptr) {
+        SLOGE("bytes data is nullptr");
+        return;
+    }
     std::lock_guard lockGuard(socketLock_);
     for (auto listener : sessionListeners_) {
-        if (data == nullptr) {
-            SLOGE("bytes data is nullptr");
-        }
         listener->OnBytes(socket, data, dataLen);
     }
 }

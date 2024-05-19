@@ -18,12 +18,8 @@
 
 #include "iavsession_service.h"
 #include "iremote_stub.h"
-
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "ipc_skeleton.h"
-#include "accesstoken_kit.h"
 #include "token_setproc.h"
-#endif
 
 namespace OHOS::AVSession {
 class AVSessionServiceStub : public IRemoteStub<IAVSessionService> {

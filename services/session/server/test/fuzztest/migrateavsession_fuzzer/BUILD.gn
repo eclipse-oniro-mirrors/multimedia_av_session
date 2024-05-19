@@ -44,6 +44,7 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "access_token:libtoken_setproc",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",

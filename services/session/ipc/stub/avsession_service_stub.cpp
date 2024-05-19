@@ -532,7 +532,7 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
             return ERR_NONE;
         }
     }
-    Security::AccessToken::AccessTokenID callerToken = OHOS::IPCSkeleton::GetCallingTokenID();
+    uint32_t callerToken = static_cast<uint32_t>(OHOS::IPCSkeleton::GetCallingTokenID());
     SLOGI("service: AccessTokenID = %{public}d", callerToken);
     int temp = SetFirstCallerTokenID(callerToken);
     SLOGI("SetFirstCallerTokenID return %{public}d", temp);
