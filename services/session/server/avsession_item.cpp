@@ -187,8 +187,8 @@ void AVSessionItem::ProcessFrontSession(std::string source)
         metaData_.GetMediaImageUri().empty();
     sptr<AVSessionItem> session(this);
     SLOGD("%{public}s bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
-        source.c_str(), GetBundleName().c_str(), isMetaEmpty, supportedCmd_.size(),
-        supportedCastCmds_.size(), isFirstAddToFront_);
+        source.c_str(), GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
+        static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     if (isMetaEmpty || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(session, false);

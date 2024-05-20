@@ -459,8 +459,12 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         GetContainer().UpdateSessionSort(session);
         RefreshFocusSessionSort(session);
         std::lock_guard frontLockGuard(sessionFrontLock_);
-        sessionListForFront_.remove(session);
-        sessionListForFront_.push_front(session);
+        auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), session);
+        if (it != sessionListForFront_.end()) {
+            SLOGI(" front session exist, change order");
+            sessionListForFront_.remove(session);
+            sessionListForFront_.push_front(session);
+        }
         return true;
     }
     return false;
