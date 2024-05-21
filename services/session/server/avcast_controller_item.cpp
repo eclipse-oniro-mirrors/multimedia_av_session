@@ -207,6 +207,8 @@ int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 int32_t AVCastControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 {
     if (sessionTag_ == "RemoteCast") {
+        CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
+            "cast controller proxy is nullptr");
         castControllerProxy_->GetValidAbility(cmds);
         SLOGI("get available commands from cast with size %{public}zd", cmds.size());
         return AVSESSION_SUCCESS;
@@ -244,6 +246,8 @@ int32_t AVCastControllerItem::AddAvailableCommand(const int32_t cmd)
     if (cmds.empty()) {
         SLOGI("check is sink session with empty, not set");
     } else {
+        CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
+            "cast controller proxy is nullptr");
         castControllerProxy_->SetValidAbility(cmds);
     }
     return AVSESSION_SUCCESS;
@@ -258,6 +262,8 @@ int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
     if (cmds.empty()) {
         SLOGI("check is sink session with empty, not set");
     } else {
+        CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
+            "cast controller proxy is nullptr");
         castControllerProxy_->SetValidAbility(cmds);
     }
     return AVSESSION_SUCCESS;

@@ -15,6 +15,7 @@
 
 #include <thread>
 #include <chrono>
+#include <utility>
 
 #include "avsession_log.h"
 #include "app_mgr_constants.h"
@@ -62,7 +63,7 @@ void AppManagerAdapter::Init()
     }
 }
 
-bool AppManagerAdapter::IsAppBackground(int32_t uid)
+bool AppManagerAdapter::IsAppBackground(int32_t uid, int32_t pid)
 {
     std::vector<RunningProcessInfo> infos;
     if (appManager_.GetAllRunningProcesses(infos) != AppMgrResultCode::RESULT_OK) {
@@ -70,16 +71,16 @@ bool AppManagerAdapter::IsAppBackground(int32_t uid)
         return false;
     }
     for (const auto& info : infos) {
-        if (info.uid_ == uid && info.state_ == AppProcessState::APP_STATE_BACKGROUND) {
-            SLOGI("uid=%{public}d is background", uid);
+        if (info.uid_ == uid && info.pid_ == pid && info.state_ == AppProcessState::APP_STATE_BACKGROUND) {
+            SLOGI("uid=%{public}d pid=%{public}d is background", uid, pid);
             return true;
         }
     }
-    SLOGI("uid=%{public}d is not background", uid);
+    SLOGI("uid=%{public}d pid=%{public}d is not background", uid, pid);
     return false;
 }
 
-void AppManagerAdapter::SetAppBackgroundStateObserver(const std::function<void(int32_t)>& observer)
+void AppManagerAdapter::SetAppBackgroundStateObserver(const std::function<void(int32_t, int32_t)>& observer)
 {
     backgroundObserver_ = observer;
 }
@@ -105,18 +106,13 @@ void AppManagerAdapter::SetServiceCallbackForAppStateChange(const std::function<
 
 void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessData)
 {
-    std::set<int32_t> backgroundUIDsForCast;
     {
         std::lock_guard lockGuard(uidLock_);
         if (appProcessData.appState == ApplicationState::APP_STATE_FOREGROUND ||
             appProcessData.appState == ApplicationState::APP_STATE_BACKGROUND) {
             for (const auto& appData : appProcessData.appDatas) {
-                SLOGI("bundleName=%{public}s uid=%{public}d state=%{public}d",
+                SLOGI("check foreground bundleName=%{public}s uid=%{public}d state=%{public}d",
                     appData.appName.c_str(), appData.uid, appProcessData.appState);
-                auto it = observedAppUIDs_.find(appData.uid);
-                if (it != observedAppUIDs_.end()) {
-                    backgroundUIDsForCast.insert(appData.uid);
-                }
                 serviceCallbackForAppStateChange_(appData.uid, static_cast<int>(appProcessData.appState));
             }
         }
@@ -131,22 +127,22 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
         return;
     }
 
-    std::set<int32_t> backgroundUIDs;
+    std::set<std::pair<int32_t, int32_t>> backgroundUIDPIDs;
     {
         std::lock_guard lockGuard(uidLock_);
         for (const auto& appData : appProcessData.appDatas) {
-            SLOGI("bundleName=%{public}s uid=%{public}d state=%{public}d",
-                  appData.appName.c_str(), appData.uid, appProcessData.appState);
+            SLOGI("bundleName=%{public}s uid=%{public}d pid=%{public}d state=%{public}d",
+                appData.appName.c_str(), appData.uid, appProcessData.pid, appProcessData.appState);
             auto it = observedAppUIDs_.find(appData.uid);
             if (it != observedAppUIDs_.end()) {
-                backgroundUIDs.insert(appData.uid);
+                backgroundUIDPIDs.insert(std::make_pair(appData.uid, appProcessData.pid));
             }
         }
     }
 
     if (backgroundObserver_) {
-        for (const auto uid : backgroundUIDs) {
-            backgroundObserver_(uid);
+        for (const auto& pair : backgroundUIDPIDs) {
+            backgroundObserver_(pair.first, pair.second);
         }
     }
 }

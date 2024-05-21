@@ -427,7 +427,7 @@ size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<s
     return realsize;
 }
 
-int32_t CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, std::string uri)
+int32_t CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri)
 {
     CURL *easyHandle_ = curl_easy_init();
     if (easyHandle_) {
@@ -458,7 +458,7 @@ int32_t CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, std::string 
     return AVSESSION_ERROR;
 }
 
-int32_t DoDownload(AVMetaData& meta, std::string uri)
+int32_t DoDownload(AVMetaData& meta, const std::string uri)
 {
     SLOGI("DoDownload with both uri %{public}s, title %{public}s, assetid %{public}s",
         uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
@@ -516,12 +516,7 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
         std::chrono::system_clock::time_point metadataTs;
     };
     auto context = std::make_shared<ConcreteContext>();
-    if (context == nullptr) {
-        SLOGE("SetAVMetaData failed : no memory");
-        NapiUtils::ThrowError(env, "SetAVMetaData failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
-        return NapiUtils::GetUndefinedValue(env);
-    }
-
+    CHECK_AND_RETURN_RET_LOG(context != nullptr, NapiUtils::GetUndefinedValue(env), "SetAVMetaData failed: no memory");
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -533,13 +528,13 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
     context->metadataTs = std::chrono::system_clock::now();
     reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
-
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVMetaData failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            context->metaData_.Reset();
             return;
         }
         auto uri = context->metaData_.GetMediaImageUri();
@@ -547,18 +542,19 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
         int32_t ret = napiSession->session_->SetAVMetaData(context->metaData_);
         if (ret != AVSESSION_SUCCESS) {
             processErrMsg(context, ret);
-            return;
         } else if (context->metaData_.GetMediaImage() == nullptr) {
             ret = DoDownload(context->metaData_, uri);
-            SLOGI("DoDownload complete ret %{public}d", ret);
-            if (ret == AVSESSION_SUCCESS && context->metadataTs >= napiSession->latestMetadataTs_) {
+            SLOGI("DoDownload complete with ret %{public}d", ret);
+            if (ret != AVSESSION_SUCCESS) {
+                context->metaData_.SetMediaImageUri(uri);
+                napiSession->session_->SetAVMetaData(context->metaData_);
+            } else if (ret == AVSESSION_SUCCESS && context->metadataTs >= napiSession->latestMetadataTs_) {
                 napiSession->session_->SetAVMetaData(context->metaData_);
             }
         }
+        context->metaData_.Reset();
     };
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
 }
 

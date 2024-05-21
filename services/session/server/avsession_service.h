@@ -40,6 +40,10 @@
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
 
+#ifdef BLUETOOTH_ENABLE
+#include "bluetooth_host.h"
+#endif
+
 namespace OHOS::AVSession {
 class AVSessionDumper;
 
@@ -68,6 +72,54 @@ public:
         return left.networkId_ == right.networkId_;
     }
 };
+
+#ifdef BLUETOOTH_ENABLE
+class DetectBluetoothHostObserver : public OHOS::Bluetooth::BluetoothHostObserver {
+public:
+    DetectBluetoothHostObserver();
+    virtual ~DetectBluetoothHostObserver() = default;
+    void OnStateChanged(const int transport, const int status) override;
+    void OnDiscoveryStateChanged(int status) override
+    {
+        return;
+    }
+    
+    void OnDiscoveryResult(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int rssi,
+        const std::string deviceName, int deviceClass) override
+    {
+        return;
+    }
+
+    void OnPairRequested(const OHOS::Bluetooth::BluetoothRemoteDevice &device) override
+    {
+        return;
+    }
+
+    void OnPairConfirmed(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int reqType, int number) override
+    {
+        return;
+    }
+
+    void OnScanModeChanged(int mode) override
+    {
+        return;
+    }
+
+    void OnDeviceNameChanged(const std::string &deviceName) override
+    {
+        return;
+    }
+
+    void OnDeviceAddrChanged(const std::string &address) override
+    {
+        return;
+    }
+
+private:
+    bool is2in1_ = false;
+    bool lastEnabled_ = false;
+};
+#endif
 
 class AVSessionService : public SystemAbility, public AVSessionServiceStub, public IAVSessionServiceListener {
     DECLARE_SYSTEM_ABILITY(AVSessionService);
@@ -170,6 +222,8 @@ public:
 
 private:
     void CheckInitCast();
+
+    void CheckBrEnable();
 
     static SessionContainer& GetContainer();
 
@@ -323,6 +377,10 @@ private:
     
     void HandleAppStateChange(int uid, int state);
 
+    bool IsMediaStream(AudioStandard::StreamUsage usage);
+
+    void UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd);
+
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
         const AVSessionDescriptor* histroyDescriptor);
 
@@ -331,6 +389,8 @@ private:
     std::recursive_mutex sessionAndControllerLock_;
     sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
+    std::list<sptr<AVSessionItem>> sessionListForFront_;
+    std::recursive_mutex sessionFrontLock_;
 
     std::recursive_mutex clientDeathObserversLock_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
@@ -363,11 +423,21 @@ private:
 
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
 
+#ifdef BLUETOOTH_ENABLE
+    OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
+#endif
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
+    bool firstAppStateChangeFlag_ = false;
+    bool foreToBackFlag_ = false;
+    int32_t appStateChangeCounter_ = 0;
+    const int32_t foreGroundStateCountZero = 0;
+    const int32_t foreGroundStateCountOne = 1;
+    const int32_t foreGroundStateCountTwo = 2;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
@@ -401,6 +471,7 @@ private:
     const int32_t maxFileLength = 32 * 1024 * 1024;
     const int32_t maxAVQueueInfoLen = 5;
     const int32_t allocSpace = 2;
+    const int32_t avSessionUid = 6700;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

@@ -14,6 +14,7 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("../../../../../../bluetooth_part.gni")
 import("../../../../../../castplus_cast_engine_part.gni")
 module_output_path = "av_session/av_session"
 
@@ -42,6 +43,7 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "access_token:libtoken_setproc",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
@@ -63,6 +65,11 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
       "../../../../../../frameworks/native/session:avsession_cast_client",
       "../../../../../session:avsession_cast_item",
     ]
+  }
+
+  if (bluetooth_part_enable) {
+    cflags += [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
   }
 }
 ###############################################################################

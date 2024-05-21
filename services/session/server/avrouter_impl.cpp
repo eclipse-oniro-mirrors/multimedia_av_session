@@ -21,6 +21,7 @@
 #include "permission_checker.h"
 #include "avcast_provider_manager.h"
 #include "hw_cast_provider.h"
+#include "avsession_sysevent.h"
 
 static std::shared_ptr<OHOS::AVSession::HwCastProvider> hwProvider_;
 
@@ -91,8 +92,9 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("StartCastDiscovery: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice StartCastDiscovery checksystempermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
+                            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
+                            "avsessionservice StartCastDiscovery checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
     SLOGI("AVRouterImpl StartCastDiscovery");
@@ -111,8 +113,9 @@ int32_t AVRouterImpl::StopCastDiscovery()
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("StopCastDiscovery: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice StopCastDiscovery checksystempermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
+                            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
+                            "avsessionservice StopCastDiscovery checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
     SLOGI("AVRouterImpl StopCastDiscovery");
@@ -131,8 +134,9 @@ int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
         SLOGE("SetDiscoverable: CheckSystemPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice SetDiscoverable checksystempermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
+                            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
+                            "avsessionservice SetDiscoverable checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
     SLOGI("AVRouterImpl SetDiscoverable %{public}d", enable);
@@ -179,7 +183,7 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
     int64_t tempId = 1;
     // The first 32 bits are providerId, the last 32 bits are castId
     castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
-        static_cast(castId));
+        static_cast<const uint32_t>(castId));
     {
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_->CreateSessionByCast(castHandle);
@@ -295,7 +299,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         castHandle, "Can not find corresponding provider");
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "0";
@@ -316,8 +320,8 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
 
 int32_t AVRouterImpl::SetServiceAllConnectState(int64_t castHandle)
 {
-    int32_t providerNumber = static_cast<int32_t>(castHandle >> 32);
-    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "0";
@@ -338,7 +342,7 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
 {
     SLOGI("AVRouterImpl register IAVCastSessionStateListener callback to provider");
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t providerNumber = castHandle >> 32;
+    int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
@@ -355,9 +359,9 @@ int32_t AVRouterImpl::UnRegisterCallback(int64_t castHandle,
 {
     SLOGI("AVRouterImpl UnRegisterCallback IAVCastSessionStateListener callback to provider");
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t providerNumber = static_cast<uint64_t>(castHandle) >> 32;
+    int32_t providerNumber = static_cast<uint64_t>(static_cast<uint64_t>(castHandle)) >> 32;
     // The first 32 bits are providerId, the last 32 bits are castId
-    int32_t castId = static_cast<int32_t>((castHandle << 32) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding provider");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr

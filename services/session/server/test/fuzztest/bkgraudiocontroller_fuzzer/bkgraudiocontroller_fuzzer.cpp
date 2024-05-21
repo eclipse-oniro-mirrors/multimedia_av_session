@@ -30,9 +30,10 @@ void OHOS::AVSession::BackGroundAudioControllerTest(uint8_t *data, size_t size)
         return;
     }
     int32_t uid = *(reinterpret_cast<const int32_t*>(data));
+    int32_t pid = *(reinterpret_cast<const int32_t*>(data));
 
     BackgroundAudioController backGroundAudioController;
-    backGroundAudioController.HandleAppBackgroundState(uid);
+    backGroundAudioController.HandleAppBackgroundState(uid, pid);
 }
 
 /* Fuzzer entry point */

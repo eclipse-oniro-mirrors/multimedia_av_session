@@ -95,7 +95,10 @@ void AVSessionManagerTest::TearDownTestCase()
 }
 
 void AVSessionManagerTest::SetUp()
-{}
+{
+    system("killall -9 com.example.himusicdemo");
+    sleep(1);
+}
 
 void AVSessionManagerTest::TearDown()
 {}
@@ -180,6 +183,10 @@ HWTEST_F(AVSessionManagerTest, CreatSession002, TestSize.Level1)
     auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
                                                                  elementName);
     EXPECT_NE(session, nullptr);
+    if (session == nullptr) {
+        SLOGE("CreatSession002 with session get nullptr, return");
+        return;
+    }
     session->Destroy();
 
     SLOGI("CreatSession002 end");
@@ -258,7 +265,7 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
     auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
                                                                  elementName);
     EXPECT_NE(session, nullptr);
-
+    descriptors.clear();
     ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("GetAllSessionDescriptors001 recheck descriptors num %{public}d", static_cast<int>(descriptors.size()));
@@ -295,7 +302,7 @@ HWTEST_F(AVSessionManagerTest, GetActivatedSessionDescriptors001, TestSize.Level
                                                                  elementName);
     EXPECT_NE(session, nullptr);
     session->Activate();
-
+    descriptors.clear();
     ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(descriptors.size(), 1);
@@ -371,6 +378,7 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
                                                                  elementName);
     EXPECT_NE(session, nullptr);
     session->Activate();
+    descriptors.clear();
     auto sessionId = session->GetSessionId();
     ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(10, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);

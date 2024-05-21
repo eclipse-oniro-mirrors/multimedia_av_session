@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
+import("../../../../bluetooth_part.gni")
 import("../../../../castplus_cast_engine_part.gni")
 import("../../../../config.gni")
 
@@ -74,6 +75,11 @@ ohos_unittest("MigrateAVSessionTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+
+  if (bluetooth_part_enable) {
+    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 ohos_unittest("SoftbusSessionManagerTest") {
@@ -160,6 +166,11 @@ ohos_unittest("AVSessionServiceTest") {
       "cast_engine:cast_engine_client",
     ]
   }
+
+  if (bluetooth_part_enable) {
+    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 ohos_unittest("AppManagerAdapterTest") {
@@ -181,6 +192,7 @@ ohos_unittest("AppManagerAdapterTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtoken_setproc",
     "audio_framework:audio_client",
     "c_utils:utils",
     "hilog:libhilog",
@@ -212,6 +224,7 @@ ohos_unittest("AbilityConnectHelperTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtoken_setproc",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
@@ -244,6 +257,7 @@ ohos_unittest("BkGrAudioControllerTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtoken_setproc",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_core",
@@ -318,6 +332,7 @@ ohos_unittest("SessionStackTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtoken_setproc",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
@@ -329,6 +344,11 @@ ohos_unittest("SessionStackTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (bluetooth_part_enable) {
+    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 ohos_unittest("AVRouterTest") {
@@ -349,6 +369,7 @@ ohos_unittest("AVRouterTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtoken_setproc",
     "access_token:libtokenid_sdk",
     "audio_framework:audio_client",
     "bundle_framework:appexecfwk_base",
@@ -395,6 +416,7 @@ if (castplus_cast_engine_enable) {
       "ability_runtime:app_manager",
       "ability_runtime:wantagent_innerkits",
       "access_token:libaccesstoken_sdk",
+      "access_token:libtoken_setproc",
       "access_token:libtokenid_sdk",
       "audio_framework:audio_client",
       "bundle_framework:appexecfwk_base",

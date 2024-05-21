@@ -188,7 +188,7 @@ int32_t AVCastControllerStub::HandleProvideKeyResponse(MessageParcel& data, Mess
     CHECK_AND_RETURN_RET_LOG(responseSize < responseMaxLen, AVSESSION_ERROR,
         "The size of response is too large.");
     if (responseSize != 0) {
-        const uint8_t *responseBuf = static_cast<const uint8 *>(data.ReadBuffer(responseSize));
+        const uint8_t *responseBuf = static_cast<const uint8_t *>(data.ReadBuffer(responseSize));
         if (responseBuf == nullptr) {
             SLOGE("AVCastControllerStub::HandleProvideKeyResponse read response failed");
             return IPC_STUB_WRITE_PARCEL_ERR;

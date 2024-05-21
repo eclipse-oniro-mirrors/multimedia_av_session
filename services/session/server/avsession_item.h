@@ -189,6 +189,8 @@ public:
 
     void SetServiceCallbackForAVQueueInfo(const std::function<void(AVSessionItem&)>& callback);
 
+    void SetServiceCallbackForUpdateSession(const std::function<void(sptr<AVSessionItem>&, bool)>& callback);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void InitializeCastCommands();
 
@@ -198,7 +200,7 @@ public:
 
     int32_t SessionCommandToCastCommand(int32_t cmd);
 
-    int32_t RegisterListenerStreamToCast(std::map<std::string, int32_t>& serviceNameMapState);
+    int32_t RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState);
 
     int32_t AddSupportCastCommand(int32_t cmd);
 
@@ -261,9 +263,10 @@ private:
     void HandleOnToggleFavorite(const AVControlCommand& cmd);
     void HandleOnPlayFromAssetId(const AVControlCommand& cmd);
 
-    void ReportConnectFinish(std::string func, const DeviceInfo &deviceInfo);
-    void ReportStopCastFinish(std::string func, const DeviceInfo &deviceInfo);
+    void ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo);
+    void ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo);
     void SaveLocalDeviceInfo();
+    void ProcessFrontSession(std::string source);
 
     using HandlerFuncType = void(AVSessionItem::*)(const AVControlCommand&);
     static inline HandlerFuncType cmdHandlers[SESSION_CMD_MAX] = {
@@ -313,6 +316,8 @@ private:
     std::shared_ptr<RemoteSessionSink> remoteSink_;
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
+    std::function<void(sptr<AVSessionItem>&, bool)> serviceCallbackForUpdateSession_;
+    volatile bool isFirstAddToFront_ = true;
 
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;

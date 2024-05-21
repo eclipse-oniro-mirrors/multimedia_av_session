@@ -261,8 +261,7 @@ int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, co
 int32_t AVSessionServiceProxy::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {
-    std::lock_guard lockGuard(createControllerMutex_);
-    SLOGI("create controller in");
+    SLOGI("create controller in without lock");
     sptr<IRemoteObject> object;
     auto ret = AVSessionServiceProxy::CreateControllerInner(sessionId, object);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateControllerInner failed");
@@ -555,7 +554,7 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
 
     int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfoSize), ERR_MARSHALLING, "write deviceInfoSize failed");
-    for (const auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
+    for (const DeviceInfo& deviceInfo : outputDeviceInfo.deviceInfos_) {
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.castCategory_),
             ERR_MARSHALLING, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceId_), ERR_MARSHALLING, "write deviceId failed");

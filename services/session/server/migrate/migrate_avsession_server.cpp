@@ -409,15 +409,10 @@ Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &meta
 {
     Json::Value result;
     if (metadata.IsValid()) {
+        SLOGI("ConvertMetadataToJson without img");
         result[METADATA_TITLE] = metadata.GetTitle();
         result[METADATA_ARTIST] = metadata.GetArtist();
-        if (metadata.GetMediaImage()) {
-            std::string str(metadata.GetMediaImage()->GetInnerImgBuffer().begin(),
-                            metadata.GetMediaImage()->GetInnerImgBuffer().end());
-            result[METADATA_ART] = str;
-        } else {
-            SLOGW("GetMediaImage is null");
-        }
+        result[METADATA_ART] = "";
     } else {
         result[METADATA_TITLE] = "";
         result[METADATA_ARTIST] = "";

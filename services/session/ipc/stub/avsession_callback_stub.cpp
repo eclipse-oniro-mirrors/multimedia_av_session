@@ -194,7 +194,7 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
         int32_t maxSupportedDrmCapabilityLen = 10;
         CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
             (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
-        for (int i = 0; i < supportedDrmCapabilityLen; i++) {
+        for (int j = 0; j < supportedDrmCapabilityLen; j++) {
             std::string supportedDrmCapability;
             CHECK_AND_RETURN_RET_LOG(data.ReadString(supportedDrmCapability), false,
                 "read supportedDrmCapability failed");
