@@ -413,6 +413,11 @@ Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &meta
         result[METADATA_TITLE] = metadata.GetTitle();
         result[METADATA_ARTIST] = metadata.GetArtist();
         result[METADATA_ART] = "";
+    } else {
+        SLOGI("ConvertMetadataToJson with invalid");
+        result[METADATA_TITLE] = "";
+        result[METADATA_ARTIST] = "";
+        result[METADATA_ART] = "";
     }
     return result;
 }
