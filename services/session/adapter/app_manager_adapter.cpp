@@ -141,7 +141,7 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
     }
 
     if (backgroundObserver_) {
-        for (const auto pair : backgroundUIDPIDs) {
+        for (const auto& pair : backgroundUIDPIDs) {
             backgroundObserver_(pair.first, pair.second);
         }
     }
