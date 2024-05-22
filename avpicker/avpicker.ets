@@ -119,6 +119,21 @@ export struct AVCastPicker {
 
   private pickerClickTime: number = -1;
 
+  /**
+   * Custom builder from application
+   */
+  @BuilderParam customPicker: (() => void)
+
+  build() {
+    Column() {
+      if (this.customPicker === undefined) {
+        this.buildDefaultPicker(false);
+      } else {
+        this.buildCustomPicker();
+      }
+    }.size({width: '100%', height: '100%'})
+  }
+
   @Builder
   deviceMenu() {
     Column() {
@@ -196,62 +211,67 @@ export struct AVCastPicker {
     .width(216)
   }
 
-  build() {
-    Column() {
-      UIExtensionComponent(
-        {
-          abilityName: 'UIExtAbility',
-          bundleName: 'com.hmos.mediacontroller',
-          parameters: { 'normalColor': this.normalColor, 'avCastPickerStyle': this.pickerStyle }
-        })
-        .onRemoteReady((proxy: UIExtensionProxy) => {
+  @Builder
+  private buildDefaultPicker(isCustomPicker: boolean) {
+    UIExtensionComponent(
+      {
+        abilityName: 'UIExtAbility',
+        bundleName: 'com.hmos.mediacontroller',
+        parameters: {
+          'normalColor': this.normalColor,
+          'avCastPickerStyle': this.pickerStyle,
+          'ability.want.params.uiExtensionType': 'sys/commonUI',
+          'isCustomPicker': isCustomPicker,
+        }
+      })
+      .onRemoteReady((proxy: UIExtensionProxy) => {
           console.info(TAG, 'onRemoteReady');
           this.extensionProxy = proxy;
-        })
-        .onReceive((data) => {
-          if (JSON.stringify(data['state']) !== undefined) {
-            console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
-            if (this.onStateChange !== null) {
-              if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
-                this.onStateChange(AVCastPickerState.STATE_APPEARING);
-              } else {
-                this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
-              }
+      })
+      .onReceive((data) => {
+        if (JSON.stringify(data['state']) !== undefined) {
+          console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
+          if (this.onStateChange !== null) {
+            if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
+              this.onStateChange(AVCastPickerState.STATE_APPEARING);
+            } else {
+              this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
             }
           }
+        }
 
-          if (JSON.stringify(data['deviceList']) !== undefined) {
-            console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
-            this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
-            if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3
-              && (this.sessionType === 'voice_call' || this.sessionType === 'video_call'))
-              || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
-              this.isMenuShow = false;
-            }
+        if (JSON.stringify(data['deviceList']) !== undefined) {
+          console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
+          this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
+          if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3 &&
+            (this.sessionType === 'voice_call' || this.sessionType === 'video_call')) ||
+            this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+            this.isMenuShow = false;
           }
+        }
 
-          if (JSON.stringify(data['pickerStyle']) !== undefined) {
-            console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
-            this.pickerStyle = data['pickerStyle'] as AVCastPickerStyle;
-          }
+        if (JSON.stringify(data['pickerStyle']) !== undefined) {
+          console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
+          this.pickerStyle = data['pickerStyle'] as AVCastPickerStyle;
+        }
 
-          if (JSON.stringify(data['sessionType']) !== undefined) {
-            console.info(TAG, `session type : ${JSON.stringify(data['sessionType'])}`);
-            this.sessionType = data['sessionType'] as string;
-          }
+        if (JSON.stringify(data['sessionType']) !== undefined) {
+          console.info(TAG, `session type : ${JSON.stringify(data['sessionType'])}`);
+          this.sessionType = data['sessionType'] as string;
+        }
 
-         if (JSON.stringify(data['isShowMenu']) !== undefined) {
-            console.info(TAG, `isShowMenu : ${JSON.stringify(data['isShowMenu'])}`);
-            this.isMenuShow = data['isShowMenu'] as boolean;
-          }
-        })
+        if (JSON.stringify(data['isShowMenu']) !== undefined) {
+          console.info(TAG, `isShowMenu : ${JSON.stringify(data['isShowMenu'])}`);
+          this.isMenuShow = data['isShowMenu'] as boolean;
+        }
+      })
       .size({ width: '100%', height: '100%' })
       .bindMenu(this.isMenuShow, this.deviceMenu(), {
         placement: Placement.TopRight,
         onDisappear: () => {
           this.isMenuShow = false;
         },
-        onAppear: () {
+        onAppear: () => {
           if (this.extensionProxy != null && this.pickerClickTime !== -1) {
               this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime});
               this.pickerClickTime = -1;
@@ -259,9 +279,9 @@ export struct AVCastPicker {
         }
       })
       .onClick(() => {
-        if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3
-          && (this.sessionType === 'voice_call' || this.sessionType === 'video_call'))
-          || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+        if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3 &&
+          (this.sessionType === 'voice_call' || this.sessionType === 'video_call')) ||
+          this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
           this.isMenuShow = false;
         } else {
           this.isMenuShow = !this.isMenuShow;
@@ -270,6 +290,27 @@ export struct AVCastPicker {
           }
         }
       })
-    }.size({width: '100%', height: '100%'})
+  }
+
+  @Builder
+  private buildCustomPicker() {
+    Stack({ alignContent: Alignment.Center}) {
+      Column() {
+        this.customPicker();
+      }
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .size({ width: '100%', height: '100%' })
+      .zIndex(0)
+
+      Column() {
+        this.buildDefaultPicker(true);
+      }
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .size({ width: '100%', height: '100%' })
+      .zIndex(1)
+    }
+    .size({ width: '100%', height: '100%' })
   }
 }
