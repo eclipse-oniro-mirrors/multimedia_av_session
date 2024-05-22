@@ -430,7 +430,8 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
 {
     SLOGD("bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    if (isAdd) {
+    auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sessionItem);
+    if (isAdd && it == sessionListForFront_.end()) {
         sessionListForFront_.push_front(sessionItem);
     } else {
         if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
@@ -742,6 +743,15 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
         AVSessionUtils::GetAnonySessionId(sinkSession->GetSessionId()).c_str());
     sinkSession->SetCastHandle(castHandle);
     sinkSession->RegisterDeviceStateCallback();
+    
+    {
+        std::lock_guard frontLockGuard(sessionFrontLock_);
+        auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sinkSession);
+        if (it == sessionListForFront_.end()) {
+            SLOGI(" front session add cast session");
+            sessionListForFront_.push_front(sinkSession);
+        }
+    }
 
     HISYSEVENT_BEHAVIOR("SESSION_CAST",
         "BUNDLE_NAME", "castBundleName",
@@ -1037,6 +1047,15 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
         DEFAULT_BUNDLE_NAME == elementName.GetBundleName()) {
         SLOGI("bundleName=%{public}s support play intent, refreshSortFile", elementName.GetBundleName().c_str());
         refreshSortFileOnCreateSession(session->GetSessionId(), session->GetSessionType(), elementName);
+    }
+    
+    {
+        std::lock_guard frontLockGuard(sessionFrontLock_);
+        auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), session);
+        if (type == AVSession::SESSION_TYPE_VOICE_CALL && it == sessionListForFront_.end()) {
+            SLOGI(" front session add voice_call session=%{public}s", session->GetBundleName().c_str());
+            sessionListForFront_.push_front(session);
+        }
     }
 
     {
