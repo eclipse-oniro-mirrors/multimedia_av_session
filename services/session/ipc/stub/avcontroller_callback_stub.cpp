@@ -92,7 +92,7 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
 
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnMetaDataChange");
     int twoImageLength = data.ReadInt32();
-    SLOGD("read length from twoImage %{public}d", twoImageLength);
+    SLOGI("read length from twoImage %{public}d", twoImageLength);
     if (twoImageLength <= 0 || twoImageLength > MAX_IMAGE_SIZE) {
         sptr avMetaData = data.ReadParcelable<AVMetaData>();
         CHECK_AND_RETURN_RET_LOG(avMetaData != nullptr, ERR_NONE, "read MetaData failed");
@@ -105,14 +105,15 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
     AVMetaData::UnmarshallingExceptImg(data, meta);
     const char *buffer = nullptr;
     buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength));
-    if (buffer == nullptr) {
-        SLOGE("read raw data with null, length = %{public}d", twoImageLength);
+    int mediaImageLength = meta.GetMediaLength();
+    if (buffer == nullptr || mediaImageLength <= 0) {
+        SLOGE("read raw data with null %{public}d, or err media img length:%{public}d",
+            static_cast<int>(buffer == nullptr), mediaImageLength);
         OnMetaDataChange(meta);
         reply.WriteInt32(AVSESSION_SUCCESS);
         return ERR_NONE;
     }
 
-    int mediaImageLength = meta.GetMediaLength();
     auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
     std::vector<uint8_t> mediaImageBuffer;
     for (int i = 0; i < mediaImageLength; i++) {
