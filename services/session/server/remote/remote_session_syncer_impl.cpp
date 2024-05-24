@@ -223,6 +223,11 @@ int32_t RemoteSessionSyncerImpl::GetCommonCommand(std::string& commonCommand, AA
     std::string commandString = parcelData.ReadString();
     commonCommand = std::string(commandString);
     AAFwk::WantParams *argsData = parcelData.ReadParcelable<AAFwk::WantParams>();
+    if (argsData == nullptr) {
+        SLOGE("GetCommonCommand: read parcelable commonCommand failed");
+        delete argsData;
+        return AVSESSION_ERROR;
+    }
     commandArgs = AAFwk::WantParams(*argsData);
     delete argsData;
     return AVSESSION_SUCCESS;
@@ -262,6 +267,11 @@ int32_t RemoteSessionSyncerImpl::GetSessionEvent(std::string& event, AAFwk::Want
     std::string eventData = parcelData.ReadString();
     event = std::string(eventData);
     AAFwk::WantParams *argsData = parcelData.ReadParcelable<AAFwk::WantParams>();
+    if (argsData == nullptr) {
+        SLOGE("GetSessionEvent: read parcelable sessionEvent failed");
+        delete argsData;
+        return AVSESSION_ERROR;
+    }
     args = AAFwk::WantParams(*argsData);
 
     delete argsData;
@@ -384,6 +394,11 @@ int32_t RemoteSessionSyncerImpl::GetExtras(AAFwk::WantParams& extras)
     CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
         AVSESSION_ERROR, "parse parcel error");
     AAFwk::WantParams *extrasData = parcelData.ReadParcelable<AAFwk::WantParams>();
+    if (extrasData == nullptr) {
+        SLOGE("GetSessionEvent: read parcelable sessionEvent failed");
+        delete extrasData;
+        return AVSESSION_ERROR;
+    }
     extras = AAFwk::WantParams(*extrasData);
 
     delete extrasData;
