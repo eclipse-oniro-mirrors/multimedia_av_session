@@ -31,6 +31,7 @@
 #include "accesstoken_kit.h"
 #include "system_ability_definition.h"
 #include "audio_info.h"
+#include "avsession_callback_client.h"
 
 #define private public
 #define protected public
@@ -47,14 +48,13 @@ using namespace OHOS::AudioStandard;
 static AVMetaData g_metaData;
 static AVPlaybackState g_playbackState;
 static char g_testSessionTag[] = "test";
-static char g_testBundleName[] = "test.ohos.avsession";
-static char g_testAbilityName[] = "test.ability";
 static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
 static char g_testAnotherAbilityName[] = "testAnother.ability";
 static int32_t g_playOnCall = AVSESSION_ERROR;
 static int32_t g_pauseOnCall = AVSESSION_ERROR;
 static int32_t g_nextOnCall = AVSESSION_ERROR;
 static int32_t g_previousOnCall = AVSESSION_ERROR;
+static AVSessionService *avservice_;
 
 class AVSessionServiceTest : public testing::Test {
 public:
@@ -64,7 +64,6 @@ public:
     void TearDown() override;
 
     std::shared_ptr<AVSession> avsession_ = nullptr;
-    AVSessionService *avservice_ = nullptr;
 };
 
 void AVSessionServiceTest::SetUpTestCase()
@@ -72,6 +71,8 @@ void AVSessionServiceTest::SetUpTestCase()
     SLOGI("set up AVSessionServiceTest");
     system("killall -9 com.example.hiMusicDemo");
     sleep(1);
+    avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    avservice_->InitKeyEvent();
 }
 
 void AVSessionServiceTest::TearDownTestCase()
@@ -81,14 +82,6 @@ void AVSessionServiceTest::TearDownTestCase()
 void AVSessionServiceTest::SetUp()
 {
     SLOGI("set up test function in AVSessionServiceTest");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testBundleName);
-    elementName.SetAbilityName(g_testAbilityName);
-    avsession_ =
-        AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, elementName);
-    ASSERT_NE(avsession_, nullptr);
-    avsession_->Activate();
-    avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
 }
 
 void AVSessionServiceTest::TearDown()
@@ -165,6 +158,13 @@ AVSessionCallbackImpl::~AVSessionCallbackImpl()
 static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
 {
     SLOGI("SendSystemAVKeyEvent001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avsessionHere_->Activate();
+    avservice_->UpdateTopSession(avsessionHere_);
 
     g_metaData.Reset();
     g_metaData.SetAssetId("123");
@@ -179,7 +179,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("xxxxx");
-    avsession_->SetAVMetaData(g_metaData);
+    avsessionHere_->SetAVMetaData(g_metaData);
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
@@ -187,10 +187,11 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
-    avsession_->SetAVPlaybackState(g_playbackState);
+    avsessionHere_->SetAVPlaybackState(g_playbackState);
 
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
-    EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
+    OHOS::sptr<IAVSessionCallback> callbackClient = new(std::nothrow) AVSessionCallbackClient(callback);
+    EXPECT_EQ(avsessionHere_->RegisterCallbackInner(callbackClient), AVSESSION_SUCCESS);
 
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -205,6 +206,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(g_pauseOnCall, AVSESSION_SUCCESS);
     g_pauseOnCall = false;
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("SendSystemAVKeyEvent001 end!");
 }
 
@@ -218,6 +220,13 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
 {
     SLOGI("SendSystemAVKeyEvent002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avsessionHere_->Activate();
+    avservice_->UpdateTopSession(avsessionHere_);
 
     g_metaData.Reset();
     g_metaData.SetAssetId("123");
@@ -232,7 +241,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("xxxxx");
-    avsession_->SetAVMetaData(g_metaData);
+    avsessionHere_->SetAVMetaData(g_metaData);
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
     g_playbackState.SetSpeed(1.5);
@@ -240,10 +249,11 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
-    avsession_->SetAVPlaybackState(g_playbackState);
+    avsessionHere_->SetAVPlaybackState(g_playbackState);
 
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
-    EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
+    OHOS::sptr<IAVSessionCallback> callbackClient = new(std::nothrow) AVSessionCallbackClient(callback);
+    EXPECT_EQ(avsessionHere_->RegisterCallbackInner(callbackClient), AVSESSION_SUCCESS);
 
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -258,6 +268,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(g_playOnCall, AVSESSION_SUCCESS);
     g_playOnCall = false;
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("SendSystemAVKeyEvent002 end!");
 }
 
@@ -270,6 +281,13 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent003, TestSize.Level1)
 {
     SLOGI("SendSystemAVKeyEvent003 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avsessionHere_->Activate();
+    avservice_->UpdateTopSession(avsessionHere_);
 
     g_metaData.Reset();
     g_metaData.SetAssetId("123");
@@ -284,7 +302,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent003, TestSize.Level1)
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("xxxxx");
-    avsession_->SetAVMetaData(g_metaData);
+    avsessionHere_->SetAVMetaData(g_metaData);
 
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
@@ -292,10 +310,11 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent003, TestSize.Level1)
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
-    avsession_->SetAVPlaybackState(g_playbackState);
+    avsessionHere_->SetAVPlaybackState(g_playbackState);
 
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
-    EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
+    OHOS::sptr<IAVSessionCallback> callbackClient = new(std::nothrow) AVSessionCallbackClient(callback);
+    EXPECT_EQ(avsessionHere_->RegisterCallbackInner(callbackClient), AVSESSION_SUCCESS);
 
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -311,6 +330,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent003, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(g_nextOnCall, AVSESSION_SUCCESS);
     g_nextOnCall = false;
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("SendSystemAVKeyEvent003 end!");
 }
 
@@ -323,8 +343,13 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent003, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent004, TestSize.Level1)
 {
     SLOGI("SendSystemAVKeyEvent004 begin!");
-
-    g_metaData.Reset();
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avsessionHere_->Activate();
+    avservice_->UpdateTopSession(avsessionHere_);
     g_metaData.SetAssetId("123");
     g_metaData.SetTitle("Black Humor");
     g_metaData.SetArtist("zhoujielun");
@@ -333,23 +358,20 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent004, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("xxxxx");
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("xxxxx");
-    avsession_->SetAVMetaData(g_metaData);
-
+    avsessionHere_->SetAVMetaData(g_metaData);
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
-    avsession_->SetAVPlaybackState(g_playbackState);
-
+    avsessionHere_->SetAVPlaybackState(g_playbackState);
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
-    EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
-
+    OHOS::sptr<IAVSessionCallback> callbackClient = new(std::nothrow) AVSessionCallbackClient(callback);
+    EXPECT_EQ(avsessionHere_->RegisterCallbackInner(callbackClient), AVSESSION_SUCCESS);
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
     keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HEADSETHOOK);
@@ -365,6 +387,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent004, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(g_previousOnCall, AVSESSION_SUCCESS);
     g_previousOnCall = false;
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("SendSystemAVKeyEvent004 end!");
 }
 
@@ -377,8 +400,13 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent004, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent005, TestSize.Level1)
 {
     SLOGI("SendSystemAVKeyEvent005 begin!");
-
-    g_metaData.Reset();
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avsessionHere_->Activate();
+    avservice_->UpdateTopSession(avsessionHere_);
     g_metaData.SetAssetId("123");
     g_metaData.SetTitle("Black Humor");
     g_metaData.SetArtist("zhoujielun");
@@ -388,22 +416,18 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent005, TestSize.Level1)
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
     g_metaData.SetMediaImageUri("xxxxx");
-    g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("xxxxx");
-    avsession_->SetAVMetaData(g_metaData);
-
+    avsessionHere_->SetAVMetaData(g_metaData);
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
-    avsession_->SetAVPlaybackState(g_playbackState);
-
+    avsessionHere_->SetAVPlaybackState(g_playbackState);
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
-    EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
-
+    OHOS::sptr<IAVSessionCallback> callbackClient = new(std::nothrow) AVSessionCallbackClient(callback);
+    EXPECT_EQ(avsessionHere_->RegisterCallbackInner(callbackClient), AVSESSION_SUCCESS);
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
     keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HEADSETHOOK);
@@ -420,6 +444,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent005, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(g_previousOnCall, AVSESSION_SUCCESS);
     g_previousOnCall = false;
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("SendSystemAVKeyEvent005 end!");
 }
 
@@ -432,8 +457,13 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent005, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent006, TestSize.Level1)
 {
     SLOGI("SendSystemAVKeyEvent006 begin!");
-
-    g_metaData.Reset();
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avsessionHere_->Activate();
+    avservice_->UpdateTopSession(avsessionHere_);
     g_metaData.SetAssetId("123");
     g_metaData.SetTitle("Black Humor");
     g_metaData.SetArtist("zhoujielun");
@@ -442,23 +472,17 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent006, TestSize.Level1)
     g_metaData.SetWriter("zhoujielun");
     g_metaData.SetComposer("zhoujielun");
     g_metaData.SetDuration(40000);
-    g_metaData.SetMediaImageUri("xxxxx");
-    g_metaData.SetSubTitle("fac");
-    g_metaData.SetDescription("for friends");
-    g_metaData.SetLyric("xxxxx");
-    avsession_->SetAVMetaData(g_metaData);
-
+    avsessionHere_->SetAVMetaData(g_metaData);
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     g_playbackState.SetSpeed(1.5);
     g_playbackState.SetPosition({80000, 0});
     g_playbackState.SetBufferedTime(60000);
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
-    avsession_->SetAVPlaybackState(g_playbackState);
-
+    avsessionHere_->SetAVPlaybackState(g_playbackState);
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
-    EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
-
+    OHOS::sptr<IAVSessionCallback> callbackClient = new(std::nothrow) AVSessionCallbackClient(callback);
+    EXPECT_EQ(avsessionHere_->RegisterCallbackInner(callbackClient), AVSESSION_SUCCESS);
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
     keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HEADSETHOOK);
@@ -477,6 +501,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent006, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(g_pauseOnCall, AVSESSION_SUCCESS);
     g_pauseOnCall = false;
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("SendSystemAVKeyEvent006 end!");
 }
 
