@@ -152,6 +152,7 @@ export struct AVCastPicker {
               Image($r(item.deviceIconName))
                 .width(24)
                 .height(24)
+                .fillColor($r('sys.color.ohos_id_color_primary'))
               Text(item.deviceName)
                 .fontSize($r('sys.float.ohos_id_text_size_body1'))
                 .fontColor(item.isConnected ? $r('sys.color.ohos_id_color_text_primary_activated')
