@@ -252,6 +252,9 @@ export class AVCastPicker extends ViewPU {
                         'moduleName': '__harDefaultModuleName__' });
                     Image.width(24);
                     Image.height(24);
+                    Image.fillColor({ 'id': -1, 'type': 10001,
+                        params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultModuleName__',
+                        'moduleName': '__harDefaultModuleName__' });
                 }, Image);
                 this.observeComponentCreation2((w9, x9) => {
                     Text.create(x8.deviceName);
