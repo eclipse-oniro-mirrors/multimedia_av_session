@@ -19,19 +19,19 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 
 const TAG = 'avcastpicker_component ';
 
-export var AVCastPickerState;
+export let AVCastPickerState;
 (function(l11) {
     l11[l11.STATE_APPEARING = 0] = 'STATE_APPEARING';
     l11[l11.STATE_DISAPPEARING = 1] = 'STATE_DISAPPEARING';
 })(AVCastPickerState || (AVCastPickerState = {}));
 
-export var AVCastPickerStyle;
+export let AVCastPickerStyle;
 (function(k11) {
     k11[k11.STYLE_PANEL = 0] = 'STYLE_PANEL';
     k11[k11.STYLE_MENU = 1] = 'STYLE_MENU';
 })(AVCastPickerStyle || (AVCastPickerStyle = {}));
 
-export var DeviceSource;
+export let DeviceSource;
 (function(j11) {
     j11[j11.LOCAL = 0] = 'LOCAL';
     j11[j11.CAST = 1] = 'CAST';
@@ -348,7 +348,7 @@ export class AVCastPicker extends ViewPU {
                 this.extensionProxy = n8;
             });
             UIExtensionComponent.onReceive((l8) => {
-                var m8;
+                let m8;
                 if (JSON.stringify(l8.state) !== undefined) {
                     console.info(TAG, `picker state change : ${JSON.stringify(l8.state)}`);
                     if (this.onStateChange != null) {
