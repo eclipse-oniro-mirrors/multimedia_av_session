@@ -21,7 +21,7 @@ using namespace OHOS::Media;
 
 namespace OHOS::AVSession {
 namespace {
-    constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 4 * 1024 * 1024;
+    constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 1 * 1024 * 1024;
     constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 200 * 1024;
     constexpr uint8_t IMAGE_BYTE_SIZE = 2;
     constexpr uint8_t DATA_BYTE_SIZE = 4;
@@ -72,10 +72,6 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
     options.size.height = originalHeight_;
     options.editable = true;
     auto result = Media::PixelMap::Create(*pixelMap, options);
-    if (originalPixelMapBytes_ > MAX_PIXEL_BUFFER_SIZE) {
-        float scaleRatio = static_cast<float>(originalPixelMapBytes_) / static_cast<float>(MAX_PIXEL_BUFFER_SIZE);
-        pixelMap->scale(scaleRatio, scaleRatio);
-    }
     return std::move(result);
 }
 
@@ -123,11 +119,11 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     SLOGD("CopyPixMapToDst res with size: %{public}d, %{public}d", res, originalPixelMapBytes_);
     pixelMapTemp->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
     if (originalPixelMapBytes_ > MAX_PIXEL_BUFFER_SIZE) {
-        SLOGI("imgBufferSize greater than limited");
-        float scaleRatio = static_cast<float>(MAX_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_);
+        int32_t originSize = originalPixelMapBytes_;
+        float scaleRatio = sqrt(static_cast<float>(MAX_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_));
         pixelMapTemp->scale(scaleRatio, scaleRatio);
         originalPixelMapBytes_ = pixelMapTemp->GetByteCount();
-        SLOGD("size aft scale: %{public}d", originalPixelMapBytes_);
+        SLOGI("imgBufferSize exceeds limited: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
     }
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> imgBuffer;
