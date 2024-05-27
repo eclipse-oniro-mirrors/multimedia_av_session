@@ -904,7 +904,7 @@ void AVSessionService::NotifyMirrorToStreamCast()
         SLOGE("topsession null pointer");
         return;
     }
-    if (topSession_->GetSessionType() == "video" &&
+    if (topSession_->GetSessionType() == "video" && isSupportMirrorToStream_ &&
         !AppManagerAdapter::GetInstance().IsAppBackground(topSession_->GetUid(), topSession_->GetPid())) {
         MirrorToStreamCast(topSession_);
     }
@@ -1023,7 +1023,7 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
 
     NotifySessionCreate(result->GetDescriptor());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (type == AVSession::SESSION_TYPE_VIDEO &&
+    if (type == AVSession::SESSION_TYPE_VIDEO && isSupportMirrorToStream_ &&
         !AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid())) {
         uidForAppStateChange_ = result->GetUid();
         firstAppStateChangeFlag_ = true;

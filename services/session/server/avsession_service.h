@@ -434,8 +434,10 @@ private:
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
+    const std::string seperator = ",";
     bool firstAppStateChangeFlag_ = false;
     bool foreToBackFlag_ = false;
+    bool isSupportMirrorToStream_ = false;
     int32_t appStateChangeCounter_ = 0;
     const int32_t foreGroundStateCountZero = 0;
     const int32_t foreGroundStateCountOne = 1;
