@@ -21,8 +21,8 @@ namespace OHOS::AVSession {
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
     std::string extraInfo, const std::string& state)
 {
-    SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s",
-        serviceName.c_str(), state.c_str());
+    SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s, extraInfo: %{public}s",
+        serviceName.c_str(), state.c_str(), extraInfo.c_str());
 
     if (state == "IDLE") {
         MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
@@ -39,6 +39,25 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     castServiceNameMapState_[serviceName] = state;
+    isSupportMirrorToStream_ = false;
+    std::string info;
+    std::string::size_type beginPos = 0;
+    std::string::size_type endPos = extraInfo.find(seperator);
+    while (endPos != std::string::npos) {
+        info = extraInfo.substr(beginPos, endPos - beginPos);
+        beginPos = endPos + seperator.size();
+        endPos = extraInfo.find(seperator, beginPos);
+        if (info.find("SUPPORT_MIRROR_TO_STREAM") != std::string::npos && info.find("true") != std::string::npos) {
+            isSupportMirrorToStream_ = true;
+            break;
+        }
+    }
+    if (beginPos != extraInfo.length()) {
+        info = extraInfo.substr(beginPos);
+        if (info.find("SUPPORT_MIRROR_TO_STREAM") != std::string::npos && info.find("true") != std::string::npos) {
+            isSupportMirrorToStream_ = true;
+        }
+    }
     NotifyMirrorToStreamCast();
 #endif
 }
