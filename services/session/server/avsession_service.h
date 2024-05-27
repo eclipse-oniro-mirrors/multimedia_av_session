@@ -384,6 +384,8 @@ private:
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
         const AVSessionDescriptor* histroyDescriptor);
 
+    void DoMetadataImgClean(AVMetaData& data);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
