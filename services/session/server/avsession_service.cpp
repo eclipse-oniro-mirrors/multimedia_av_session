@@ -1330,19 +1330,36 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
     AVMetaData meta = session.GetMetaData();
     if (meta.GetAVQueueId().empty() || meta.GetAVQueueName().empty()) {
         SLOGI("AddAvQueueInfoToFile avqueueinfo empty, return");
+        DoMetadataImgClean(meta);
         return;
     }
     std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
     std::string oldContent;
     if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldContent)) {
         SLOGE("AddAvQueueInfoToFile read avqueueinfo fail, Return!");
+        DoMetadataImgClean(meta);
         return;
     }
     if (!SaveAvQueueInfo(oldContent, bundleName, meta)) {
         SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
+        DoMetadataImgClean(meta);
         return;
     }
+    DoMetadataImgClean(meta);
     SLOGD("add queueinfo to file done");
+}
+
+void AVSessionService::DoMetadataImgClean(AVMetaData& data)
+{
+    SLOGI("clear media img in DoMetadataImgClean");
+    std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
+    if (innerQueuePixelMap != nullptr) {
+        innerQueuePixelMap->Clear();
+    }
+    std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = data.GetMediaImage();
+    if (innerMediaPixelMap != nullptr) {
+        innerMediaPixelMap->Clear();
+    }
 }
 
 int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId)

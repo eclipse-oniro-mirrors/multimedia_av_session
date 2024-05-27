@@ -166,15 +166,29 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
     }
 
     if (!reply.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(reply, metaData)) {
-        SLOGE("fail to write image length & metadata except img");
+        SLOGE("fail to write image length & metadata except img with clean");
+        DoMetadataImgCleanInStub(metaData);
         delete[] buffer;
         return AVSESSION_ERROR;
     }
     int32_t retForWriteRawData = reply.WriteRawData(buffer, twoImageLength);
-    SLOGI("write img raw data ret %{public}d", retForWriteRawData);
-
+    SLOGI("write img raw data ret with clean %{public}d", retForWriteRawData);
+    DoMetadataImgCleanInStub(metaData);
     delete[] buffer;
     return ERR_NONE;
+}
+
+void AVSessionControllerStub::DoMetadataImgCleanInStub(AVMetaData& data)
+{
+    SLOGI("clear media img in DoMetadataImgCleanInStub");
+    std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
+    if (innerQueuePixelMap != nullptr) {
+        innerQueuePixelMap->Clear();
+    }
+    std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = data.GetMediaImage();
+    if (innerMediaPixelMap != nullptr) {
+        innerMediaPixelMap->Clear();
+    }
 }
 
 int32_t AVSessionControllerStub::HandleGetAVQueueItems(MessageParcel& data, MessageParcel& reply)

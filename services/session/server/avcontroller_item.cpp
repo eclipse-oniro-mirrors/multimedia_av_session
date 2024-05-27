@@ -355,6 +355,15 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
             innerCallback_->OnMetaDataChange(metaOut);
         }
     }
+    SLOGI("clear media img after handle change");
+    std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = metaOut.GetAVQueueImage();
+    if (innerQueuePixelMap != nullptr) {
+        innerQueuePixelMap->Clear();
+    }
+    std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = metaOut.GetMediaImage();
+    if (innerMediaPixelMap != nullptr) {
+        innerMediaPixelMap->Clear();
+    }
 }
 
 void AVControllerItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)

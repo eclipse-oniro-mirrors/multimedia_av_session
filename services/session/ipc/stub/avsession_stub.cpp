@@ -198,6 +198,15 @@ int32_t AVSessionStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& r
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");
     CHECK_AND_RETURN_RET_LOG(reply.WriteParcelable(&avMetaData), ERR_NONE, "write avMetaData failed");
+    SLOGI("clear media img after handle get metadata");
+    std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = avMetaData.GetAVQueueImage();
+    if (innerQueuePixelMap != nullptr) {
+        innerQueuePixelMap->Clear();
+    }
+    std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = avMetaData.GetMediaImage();
+    if (innerMediaPixelMap != nullptr) {
+        innerMediaPixelMap->Clear();
+    }
     return ERR_NONE;
 }
 
