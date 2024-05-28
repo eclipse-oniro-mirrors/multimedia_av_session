@@ -508,6 +508,30 @@ void processErrMsg(std::shared_ptr<ContextBase> context, int32_t ret)
     context->errCode = NapiAVSessionManager::errcode_[ret];
 }
 
+int32_t doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVSession> sessionPtr, AVMetaData& data,
+    bool timeAvailable)
+{
+    SLOGI("do metadata set with online download prepare");
+    auto uri = data.GetMediaImageUri();
+    data.SetMediaImageUri("");
+    int32_t ret = sessionPtr->SetAVMetaData(data);
+    if (ret != AVSESSION_SUCCESS) {
+        processErrMsg(context, ret);
+    } else if (data.GetMediaImage() == nullptr) {
+        ret = DoDownload(data, uri);
+        SLOGI("DoDownload complete with ret %{public}d", ret);
+        CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, AVSESSION_ERROR, "doMetaDataSet without session");
+        if (ret != AVSESSION_SUCCESS) {
+            data.SetMediaImageUri(uri);
+            sessionPtr->SetAVMetaData(data);
+        } else if (ret == AVSESSION_SUCCESS && timeAvailable) {
+            sessionPtr->SetAVMetaData(data);
+        }
+    }
+    data.Reset();
+    return ret;
+}
+
 napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVMetadata");
@@ -537,22 +561,9 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
             context->metaData_.Reset();
             return;
         }
-        auto uri = context->metaData_.GetMediaImageUri();
-        context->metaData_.SetMediaImageUri("");
-        int32_t ret = napiSession->session_->SetAVMetaData(context->metaData_);
-        if (ret != AVSESSION_SUCCESS) {
-            processErrMsg(context, ret);
-        } else if (context->metaData_.GetMediaImage() == nullptr) {
-            ret = DoDownload(context->metaData_, uri);
-            SLOGI("DoDownload complete with ret %{public}d", ret);
-            if (ret != AVSESSION_SUCCESS) {
-                context->metaData_.SetMediaImageUri(uri);
-                napiSession->session_->SetAVMetaData(context->metaData_);
-            } else if (ret == AVSESSION_SUCCESS && context->metadataTs >= napiSession->latestMetadataTs_) {
-                napiSession->session_->SetAVMetaData(context->metaData_);
-            }
-        }
-        context->metaData_.Reset();
+        bool timeAvailable = context->metadataTs >= napiSession->latestMetadataTs_;
+        int res = doMetaDataSetNapi(context, napiSession->session_, context->metaData_, timeAvailable);
+        SLOGI("get metadata set res with %{public}d", res);
     };
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
