@@ -156,12 +156,13 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
         if (insightName != PLAY_MUSICLIST) {
             continue;
         }
-        if (!value.contains("uiAbility") || abilityValue.is_discarded()) {
-            SLOGE("PLAY_MUSICLIST uiability discarded=%{public}d", abilityValue.is_discarded());
+        if (!value.contains("uiAbility") || abilityValue.is_discarded() || !abilityValue.contains("executeMode")) {
+            SLOGE("PLAY_MUSICLIST uiability discarded=%{public}d or notContain=%{public}d", abilityValue.is_discarded(),
+                static_cast<int>(abilityValue.contains("executeMode")));
             return false;
         }
         auto modeValues = abilityValue["executeMode"];
-        if (!abilityValue.contains("executeMode") || modeValues.is_discarded()) {
+        if (modeValues.is_discarded()) {
             SLOGE("PLAY_MUSICLIST executeMode discarded=%{public}d", modeValues.is_discarded());
             return false;
         }
