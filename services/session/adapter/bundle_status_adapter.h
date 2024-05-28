@@ -46,6 +46,8 @@ private:
 
     void NotifyBundleRemoved(const std::string bundleName);
 
+    bool CheckBundleSurpport(std::string& profile);
+
     sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy;
 
     std::map<std::string, std::function<void(const std::string)>> bundleStatusListeners_;
