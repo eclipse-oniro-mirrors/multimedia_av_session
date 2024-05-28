@@ -121,6 +121,40 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
     return bundleName;
 }
 
+bool BundleStatusAdapter::CheckBundleSurpport(std::string& profile)
+{
+    // check bundle support background mode & playmusiclist intent
+    nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
+    CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
+    for (const auto& value : profileValues["insightIntents"]) {
+        std::string insightName = value["intentName"];
+        if (!value.contains("uiAbility")) {
+            SLOGE("value contains is null");
+            return false;
+        }
+        nlohmann::json abilityValue = value["uiAbility"];
+        if (insightName != PLAY_MUSICLIST) {
+            continue;
+        }
+        if (abilityValue.is_discarded()) {
+            SLOGE("PLAY_MUSICLIST uiability discarded=%{public}d", abilityValue.is_discarded());
+            return false;
+        }
+        if (!abilityValue.contains("executeMode")) {
+            SLOGE("abilityValue contains is null");
+            return false;
+        }
+        auto modeValues = abilityValue["executeMode"];
+        if (modeValues.is_discarded()) {
+            SLOGE("PLAY_MUSICLIST executeMode discarded=%{public}d", modeValues.is_discarded());
+            return false;
+        }
+        auto mode = std::find(modeValues.begin(), modeValues.end(), "background");
+        return (mode != modeValues.end());
+    }
+    return false;
+}
+
 bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std::string& supportModule,
                                               std::string& profile)
 {
@@ -147,28 +181,7 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
         SLOGE("Bundle=%{public}s does not support insight", bundleName.c_str());
         return false;
     }
-    // check bundle support background mode & playmusiclist intent
-    nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
-    for (const auto& value : profileValues["insightIntents"]) {
-        std::string insightName = value["intentName"];
-        nlohmann::json abilityValue = value["uiAbility"];
-        if (insightName != PLAY_MUSICLIST) {
-            continue;
-        }
-        if (!value.contains("uiAbility") || abilityValue.is_discarded()) {
-            SLOGE("PLAY_MUSICLIST uiability discarded=%{public}d", abilityValue.is_discarded());
-            return false;
-        }
-        auto modeValues = abilityValue["executeMode"];
-        if (!abilityValue.contains("executeMode") || modeValues.is_discarded()) {
-            SLOGE("PLAY_MUSICLIST executeMode discarded=%{public}d", modeValues.is_discarded());
-            return false;
-        }
-        auto mode = std::find(modeValues.begin(), modeValues.end(), "background");
-        return (mode != modeValues.end());
-    }
-    return false;
+    reutrn CheckBundleSurpport(profile);
 }
 
 bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,

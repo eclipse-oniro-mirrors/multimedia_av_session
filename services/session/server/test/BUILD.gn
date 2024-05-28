@@ -153,8 +153,9 @@ ohos_unittest("AVSessionServiceTest") {
     "window_manager:libwm",
   ]
 
+  cflags = []
   if (castplus_cast_engine_enable) {
-    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
       "../../../../services/session:avsession_cast_item",
