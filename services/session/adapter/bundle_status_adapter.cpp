@@ -123,8 +123,8 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
 
 bool BundleStatusAdapter::CheckBundleSurpport(std::string& profile)
 {
-    // check bundle support background mode & playmusiclist intent
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
+    // check bundle support background mode & playmusiclist intent
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     for (const auto& value : profileValues["insightIntents"]) {
         std::string insightName = value["intentName"];
@@ -181,7 +181,7 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
         SLOGE("Bundle=%{public}s does not support insight", bundleName.c_str());
         return false;
     }
-    reutrn CheckBundleSurpport(profile);
+    return CheckBundleSurpport(profile);
 }
 
 bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
