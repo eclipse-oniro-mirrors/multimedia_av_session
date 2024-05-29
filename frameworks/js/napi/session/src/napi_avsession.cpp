@@ -508,8 +508,7 @@ void processErrMsg(std::shared_ptr<ContextBase> context, int32_t ret)
     context->errCode = NapiAVSessionManager::errcode_[ret];
 }
 
-int32_t doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVSession> sessionPtr, AVMetaData& data,
-    bool timeAvailable)
+bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVSession> sessionPtr, AVMetaData& data)
 {
     SLOGI("do metadata set with online download prepare");
     auto uri = data.GetMediaImageUri();
@@ -524,12 +523,11 @@ int32_t doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<
         if (ret != AVSESSION_SUCCESS) {
             data.SetMediaImageUri(uri);
             sessionPtr->SetAVMetaData(data);
-        } else if (ret == AVSESSION_SUCCESS && timeAvailable) {
-            sessionPtr->SetAVMetaData(data);
+        } else {
+            return true;
         }
     }
-    data.Reset();
-    return ret;
+    return false;
 }
 
 napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
@@ -561,9 +559,13 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
             context->metaData_.Reset();
             return;
         }
+        bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData_);
         bool timeAvailable = context->metadataTs >= napiSession->latestMetadataTs_;
-        int res = doMetaDataSetNapi(context, napiSession->session_, context->metaData_, timeAvailable);
-        SLOGI("get metadata set res with %{public}d", res);
+        SLOGI("doMetaDataSet res:%{public}d, time:%{public}d", static_cast<int>(res), static_cast<int>(timeAvailable));
+        if (res && timeAvailable) {
+            napiSession->session_->SetAVMetaData(context->metaData_);
+        }
+        context->metaData_.Reset();
     };
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
