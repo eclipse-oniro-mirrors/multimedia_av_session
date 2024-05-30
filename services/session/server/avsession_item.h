@@ -266,7 +266,8 @@ private:
     void ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo);
     void ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo);
     void SaveLocalDeviceInfo();
-    void ProcessFrontSession(std::string source);
+    int32_t ProcessFrontSession(std::string source);
+    void HandleFrontSession();
 
     using HandlerFuncType = void(AVSessionItem::*)(const AVControlCommand&);
     static inline HandlerFuncType cmdHandlers[SESSION_CMD_MAX] = {

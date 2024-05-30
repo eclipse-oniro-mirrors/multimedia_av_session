@@ -30,6 +30,7 @@
 #include "permission_checker.h"
 #include "avsession_item.h"
 #include "avsession_radar.h"
+#include "avsession_event_handler.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -181,13 +182,23 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionItem::ProcessFrontSession(std::string source)
+int32_t AVSessionItem::ProcessFrontSession(std::string source)
+{
+    SLOGI("%{public}s ", source.c_str());
+    auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+        HandleFrontSession();
+    }, "HandleFrontSession", 0);
+    CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
+    return ret;
+}
+
+void AVSessionItem::HandleFrontSession()
 {
     bool isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
         metaData_.GetMediaImageUri().empty();
     sptr<AVSessionItem> session(this);
-    SLOGD("%{public}s bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
-        source.c_str(), GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
+    SLOGD("bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
+        GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
         static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     if (isMetaEmpty || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {

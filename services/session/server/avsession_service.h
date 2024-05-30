@@ -239,7 +239,7 @@ private:
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
-    void NotifySystemUI(const AVSessionDescriptor* historyDescriptor);
+    void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
     void NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
@@ -424,6 +424,7 @@ private:
     std::mutex fileCheckLock_;
 
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
+    std::map<int32_t, bool> sessionPublishedMap_;
 
 #ifdef BLUETOOTH_ENABLE
     OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
@@ -476,6 +477,7 @@ private:
     const int32_t maxAVQueueInfoLen = 5;
     const int32_t allocSpace = 2;
     const int32_t avSessionUid = 6700;
+    const int32_t ancoUid = 1041;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H
