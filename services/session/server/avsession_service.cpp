@@ -357,11 +357,13 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
 void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
     SLOGD("uid=%{public}d", info.uid);
+    sessionPublishedMap_[info.uid] = false;
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("same session");
         if (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") {
-            AVSessionService::NotifySystemUI(nullptr);
+            AVSessionService::NotifySystemUI(nullptr, true);
+            sessionPublishedMap_[info.uid] = true;
         }
         return;
     }
@@ -370,7 +372,8 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         if (session->GetUid() == info.uid) {
             UpdateTopSession(session);
             if (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") {
-                AVSessionService::NotifySystemUI(nullptr);
+                AVSessionService::NotifySystemUI(nullptr, true);
+                sessionPublishedMap_[info.uid] = true;
             }
             return;
         }
@@ -428,11 +431,17 @@ bool AVSessionService::IsMediaStream(AudioStandard::StreamUsage usage)
 
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
 {
-    SLOGD("bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
+    SLOGI("bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
     std::lock_guard frontLockGuard(sessionFrontLock_);
     auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sessionItem);
     if (isAdd && it == sessionListForFront_.end()) {
         sessionListForFront_.push_front(sessionItem);
+        auto iter = sessionPublishedMap_.find(sessionItem->GetUid());
+        if (iter != sessionPublishedMap_.end() && !sessionPublishedMap_[sessionItem->GetUid()]) {
+            SLOGI("RepublishNotification for uid=%{public}d", sessionItem->GetUid());
+            AVSessionDescriptor selectSession = sessionItem->GetDescriptor();
+            NotifySystemUI(&selectSession, true);
+        }
     } else {
         if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
             SLOGD("top session is remove session");
@@ -1052,7 +1061,8 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
         auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), session);
-        if (type == AVSession::SESSION_TYPE_VOICE_CALL && it == sessionListForFront_.end()) {
+        if ((type == AVSession::SESSION_TYPE_VOICE_CALL || (tag == "anco_audio" && GetCallingUid() == ancoUid)) &&
+            it == sessionListForFront_.end()) {
             SLOGI(" front session add voice_call session=%{public}s", session->GetBundleName().c_str());
             sessionListForFront_.push_front(session);
         }
@@ -2648,7 +2658,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
 }
 
-void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor)
+void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession)
 {
     auto deviceProp = system::GetParameter("const.product.devicetype", "default");
     CHECK_AND_RETURN_LOG(strcmp(deviceProp.c_str(), "2in1") != 0, "2in1 not support");
@@ -2660,14 +2670,14 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         std::make_shared<Notification::NotificationLocalLiveViewContent>();
     CHECK_AND_RETURN_LOG(localLiveViewContent != nullptr, "avsession item local live view content nullptr error");
     localLiveViewContent->SetType(SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER);
-    localLiveViewContent->SetTitle(historyDescriptor ? "" : "AVSession NotifySystemUI");
-    localLiveViewContent->SetText(historyDescriptor ? "" : "AVSession NotifySystemUI");
+    localLiveViewContent->SetTitle(historyDescriptor && !isActiveSession ? "" : "AVSession NotifySystemUI");
+    localLiveViewContent->SetText(historyDescriptor && !isActiveSession ? "" : "AVSession NotifySystemUI");
 
     std::shared_ptr<Notification::NotificationContent> content =
         std::make_shared<Notification::NotificationContent>(localLiveViewContent);
     CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
 
-    auto uid = topSession_ ? topSession_->GetUid() : static_cast<int32_t>(getuid());
+    auto uid = topSession_ ? topSession_->GetUid() : historyDescriptor->uid_;
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetNotificationId(0);
     request.SetContent(content);
@@ -2705,7 +2715,7 @@ void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChange
     }
     if (deviceChangeAction.type == AudioStandard::CONNECT) {
         SLOGI("history bundle name %{public}s", selectSession.elementName_.GetBundleName().c_str());
-        NotifySystemUI(&selectSession);
+        NotifySystemUI(&selectSession, false);
     }
 }
 
