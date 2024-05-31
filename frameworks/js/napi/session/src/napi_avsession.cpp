@@ -562,7 +562,7 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
         bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData_);
         bool timeAvailable = context->metadataTs >= napiSession->latestMetadataTs_;
         SLOGI("doMetaDataSet res:%{public}d, time:%{public}d", static_cast<int>(res), static_cast<int>(timeAvailable));
-        if (res && timeAvailable) {
+        if (res && timeAvailable && napiSession->session_ != nullptr) {
             napiSession->session_->SetAVMetaData(context->metaData_);
         }
         context->metaData_.Reset();
