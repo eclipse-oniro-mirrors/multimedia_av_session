@@ -49,10 +49,6 @@
 #include "avsession_event_handler.h"
 #include "bundle_status_adapter.h"
 #include "params_config_operator.h"
-#include "notification_content.h"
-#include "notification_helper.h"
-#include "notification_request.h"
-#include "notification_constant.h"
 #include "insight_intent_execute_param.h"
 #include "ability_connect_helper.h"
 #include "if_system_ability_manager.h"
@@ -82,21 +78,11 @@ static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
     std::string("platformsdk/libsuspend_manager_client.z.so");
 static const std::string MIGRATE_STUB_SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
     std::string("libavsession_migration.z.so");
+static const std::string AVSESSION_DYNAMIC_BLUETOOTH_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
+    std::string("libavsession_dynamic_bluetooth.z.so");
+static const std::string AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
+    std::string("libavsession_dynamic_notification.z.so");
 static const int32_t CAST_ENGINE_SA_ID = 65546;
-
-#ifdef BLUETOOTH_ENABLE
-static std::shared_ptr<DetectBluetoothHostObserver> g_bluetoothObserver =
-    std::make_shared<DetectBluetoothHostObserver>();
-#endif
-
-class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
-    void OnConnected() {}
-    void OnDisconnected() {}
-    void OnResponse(int32_t notificationId, sptr<Notification::NotificationButtonOption> buttonOption) {}
-    void OnDied() {}
-};
-
-static const auto NOTIFICATION_SUBSCRIBER = NotificationSubscriber();
 
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
 
@@ -121,6 +107,7 @@ void AVSessionService::OnStart()
     dumpHelper_ = std::make_unique<AVSessionDumper>();
     CHECK_AND_RETURN_LOG(dumpHelper_ != nullptr, "no memory");
     CommandSendLimit::GetInstance().StartTimer();
+    dynamicLoader_ = std::make_unique<AVSessionDynamicLoader>();
 
     ParamsConfigOperator::GetInstance().InitConfig();
     auto ret = ParamsConfigOperator::GetInstance().GetValueIntByKey("historicalRecordMaxNum", &maxHistoryNums);
@@ -173,6 +160,9 @@ void AVSessionService::OnStop()
     }
     dlclose(migrateStubFuncHandle_);
     CommandSendLimit::GetInstance().StopTimer();
+
+    // for bluetooth, this may be a suitable release time
+    dynamicLoader_->CloseDynamicHandle(AVSESSION_DYNAMIC_BLUETOOTH_LIBRARY_PATH);
 }
 
 void AVSessionService::PullMigrateStub()
@@ -256,43 +246,24 @@ void AVSessionService::CheckInitCast()
 #endif
 }
 
-#ifdef BLUETOOTH_ENABLE
-DetectBluetoothHostObserver::DetectBluetoothHostObserver()
+void AVSessionService::CheckBrEnable()
 {
     auto deviceProp = system::GetParameter("const.product.devicetype", "default");
     SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
-    is2in1_ = strcmp(deviceProp.c_str(), "2in1");
-}
+    bool is2in1 = strcmp(deviceProp.c_str(), "2in1");
+    if (is2in1 == 0) {
+        SLOGI("startup bluetooth on 2in1");
 
-void DetectBluetoothHostObserver::OnStateChanged(const int transport, const int status)
-{
-    SLOGI("transport=%{public}d status=%{public}d", transport, status);
-    if (transport != OHOS::Bluetooth::BTTransport::ADAPTER_BREDR) {
-        return;
+        typedef void (*RegisterBluetoothObserver)();
+        RegisterBluetoothObserver registerBluetoothObserver =
+            reinterpret_cast<RegisterBluetoothObserver>(dynamicLoader_->GetFuntion(
+                AVSESSION_DYNAMIC_BLUETOOTH_LIBRARY_PATH,
+                "RegisterBluetoothObserver"));
+        if (registerBluetoothObserver != nullptr) {
+            registerBluetoothObserver();
+            SLOGI("RegisterBluetoothObserver done");
+        }
     }
-    bool newStatus = (status == OHOS::Bluetooth::BTStateID::STATE_TURN_ON);
-    if (newStatus == lastEnabled_) {
-        return;
-    }
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (newStatus && is2in1_ == 0) {
-        AVRouter::GetInstance().SetDiscoverable(false);
-        AVRouter::GetInstance().SetDiscoverable(true);
-    }
-#endif
-    lastEnabled_ = newStatus;
-}
-#endif
-
-void AVSessionService::CheckBrEnable()
-{
-#ifdef BLUETOOTH_ENABLE
-    SLOGI("AVSessionService CheckBrEnable in");
-    bluetoothHost_ = &OHOS::Bluetooth::BluetoothHost::GetDefaultHost();
-    if (bluetoothHost_ != nullptr) {
-        bluetoothHost_->RegisterObserver(g_bluetoothObserver);
-    }
-#endif
 }
 
 void AVSessionService::InitKeyEvent()
@@ -446,8 +417,18 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
             SLOGD("top session is remove session");
             UpdateTopSession(nullptr);
-            int32_t ret = Notification::NotificationHelper::CancelNotification(0);
-            SLOGI("CancelNotification ret=%{public}d", ret);
+
+            typedef int32_t (*CancelNotifiation)(int32_t notificationId);
+            CancelNotifiation cancelNotifiation =
+                reinterpret_cast<CancelNotifiation>(dynamicLoader_->GetFuntion(
+                    AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH,
+                    "CancelNotifiation"));
+            if (cancelNotifiation != nullptr) {
+                int32_t ret = cancelNotifiation(0);
+                SLOGI("CancelNotification ret=%{public}d", ret);
+            }
+            // we can release notification library as no further usage
+            dynamicLoader_->CloseDynamicHandle(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH);
         }
         sessionListForFront_.remove(sessionItem);
     }
@@ -2662,34 +2643,22 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
 {
     auto deviceProp = system::GetParameter("const.product.devicetype", "default");
     CHECK_AND_RETURN_LOG(strcmp(deviceProp.c_str(), "2in1") != 0, "2in1 not support");
-    int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
-    CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
 
-    Notification::NotificationRequest request;
-    std::shared_ptr<Notification::NotificationLocalLiveViewContent> localLiveViewContent =
-        std::make_shared<Notification::NotificationLocalLiveViewContent>();
-    CHECK_AND_RETURN_LOG(localLiveViewContent != nullptr, "avsession item local live view content nullptr error");
-    localLiveViewContent->SetType(SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER);
-    localLiveViewContent->SetTitle(historyDescriptor && !isActiveSession ? "" : "AVSession NotifySystemUI");
-    localLiveViewContent->SetText(historyDescriptor && !isActiveSession ? "" : "AVSession NotifySystemUI");
-
-    std::shared_ptr<Notification::NotificationContent> content =
-        std::make_shared<Notification::NotificationContent>(localLiveViewContent);
-    CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
-
-    auto uid = topSession_ ? topSession_->GetUid() : historyDescriptor->uid_;
-    request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
-    request.SetNotificationId(0);
-    request.SetContent(content);
-    request.SetCreatorUid(avSessionUid);
-    request.SetOwnerUid(uid);
-    request.SetUnremovable(true);
-    request.SetInProgress(true);
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
-    CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
-    request.SetWantAgent(wantAgent);
-    result = Notification::NotificationHelper::PublishNotification(request);
-    SLOGI("AVSession service PublishNotification uid %{public}d, result %{public}d", uid, result);
+    SLOGI("NotifySystemUI in");
+    typedef void (*NotifySystemUI)(const AVSessionDescriptor* historyDescriptor,
+        int32_t uid, bool isActiveSession,
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent);
+    NotifySystemUI notifySystemUI =
+        reinterpret_cast<NotifySystemUI>(dynamicLoader_->GetFuntion(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH,
+            "NotifySystemUI"));
+    if (notifySystemUI != nullptr) {
+        auto uid = topSession_ ? topSession_->GetUid() : historyDescriptor->uid_;
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
+        CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
+        notifySystemUI(historyDescriptor, uid, isActiveSession, wantAgent);
+    }
+    dynamicLoader_->CloseDynamicHandle(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH);
+    SLOGI("NotifySystemUI out");
 }
 
 void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction)

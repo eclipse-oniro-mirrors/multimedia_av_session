@@ -20,7 +20,7 @@
 #include "avsession_descriptor.h"
 #include "screen_manager.h"
 #include "screen.h"
-#include "avsession_callback_proxy.h"
+#include "iavsession_callback.h"
 
 namespace OHOS::AVSession {
 class HwCastDisplayListener : public Rosen::ScreenManager::IScreenListener {

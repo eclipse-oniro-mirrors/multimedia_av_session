@@ -21,6 +21,7 @@
 
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
+#include "avsession_dynamic_loader.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"
@@ -328,6 +329,10 @@ private:
     volatile bool isDestroyed_ = false;
 
     std::recursive_mutex metaDataLock_;
+
+    std::recursive_mutex displayListenerLock_;
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
@@ -350,8 +355,6 @@ private:
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
-    sptr<HwCastDisplayListener> displayListener_;
-    std::recursive_mutex displayListenerLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
 #endif

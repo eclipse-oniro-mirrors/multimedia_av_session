@@ -25,6 +25,7 @@
 #include "audio_info.h"
 #include "avsession_service_stub.h"
 #include "avsession_item.h"
+#include "avsession_dynamic_loader.h"
 #include "avcontroller_item.h"
 #include "session_container.h"
 #include "iclient_death.h"
@@ -39,10 +40,6 @@
 #include "i_avsession_service_listener.h"
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
-
-#ifdef BLUETOOTH_ENABLE
-#include "bluetooth_host.h"
-#endif
 
 namespace OHOS::AVSession {
 class AVSessionDumper;
@@ -72,54 +69,6 @@ public:
         return left.networkId_ == right.networkId_;
     }
 };
-
-#ifdef BLUETOOTH_ENABLE
-class DetectBluetoothHostObserver : public OHOS::Bluetooth::BluetoothHostObserver {
-public:
-    DetectBluetoothHostObserver();
-    virtual ~DetectBluetoothHostObserver() = default;
-    void OnStateChanged(const int transport, const int status) override;
-    void OnDiscoveryStateChanged(int status) override
-    {
-        return;
-    }
-    
-    void OnDiscoveryResult(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int rssi,
-        const std::string deviceName, int deviceClass) override
-    {
-        return;
-    }
-
-    void OnPairRequested(const OHOS::Bluetooth::BluetoothRemoteDevice &device) override
-    {
-        return;
-    }
-
-    void OnPairConfirmed(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int reqType, int number) override
-    {
-        return;
-    }
-
-    void OnScanModeChanged(int mode) override
-    {
-        return;
-    }
-
-    void OnDeviceNameChanged(const std::string &deviceName) override
-    {
-        return;
-    }
-
-    void OnDeviceAddrChanged(const std::string &address) override
-    {
-        return;
-    }
-
-private:
-    bool is2in1_ = false;
-    bool lastEnabled_ = false;
-};
-#endif
 
 class AVSessionService : public SystemAbility, public AVSessionServiceStub, public IAVSessionServiceListener {
     DECLARE_SYSTEM_ABILITY(AVSessionService);
@@ -426,10 +375,6 @@ private:
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
     std::map<int32_t, bool> sessionPublishedMap_;
 
-#ifdef BLUETOOTH_ENABLE
-    OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
-#endif
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castDeviceInfoMapLock_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
@@ -466,6 +411,8 @@ private:
     bool is2in1_ = false;
 
     void *migrateStubFuncHandle_ = nullptr;
+
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;
