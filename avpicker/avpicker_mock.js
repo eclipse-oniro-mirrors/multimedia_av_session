@@ -13,21 +13,33 @@
  * limitations under the License.
  */
 
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+}
+
 const TAG = 'avpicker_component_mock ';
 
 export class AVCastPicker extends ViewPU {
-  constructor(parent, params, __localStorage, elmtId = -1) {
-    super(parent, __localStorage, elmtId);
-    this.setInitiallyProvidedValue(params);
+  constructor(j2, k2, l2, m2 = -1, n2 = undefined, o2) {
+    super(j2, l2, m2, o2);
+    if (typeof n2 === 'function') {
+      this.paramsGenerator_ = n2;
+    }
+    this.customPicker = undefined;
+    this.setInitiallyProvidedValue(k2);
+    this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(params) {
+  setInitiallyProvidedValue(i2) {
+    if (i2.customPicker !== undefined) {
+      this.customPicker = i2.customPicker;
+    }
   }
 
-  updateStateVars(params) {
+  updateStateVars(h2) {
   }
 
-  purgeVariableDependenciesOnElmtId(rmElmtId) {
+  purgeVariableDependenciesOnElmtId(g2) {
   }
 
   aboutToBeDeleted() {
@@ -44,36 +56,59 @@ export class AVCastPicker extends ViewPU {
   }
 
   initialRender() {
-    this.observeComponentCreation((elmtId, isInitialRender) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+    this.observeComponentCreation2((e2, f2) => {
       Column.create();
-      Column.size({ width: '100%', height: '100%' })
-      isInitialRender || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((elmtId, isInitialRender) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      Column.size({ width: '100%', height: '100%' });
+    }, Column);
+    this.observeComponentCreation2((a2, b2) => {
+      If.create();
+      if (this.customPicker === undefined) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.buildDefaultPicker.bind(this)();
+        });
+      } else {
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.buildCustomPicker.bind(this)();
+        });       
+      }
+    }, If);
+    If.pop();
+    Column.pop();
+  }
+
+  buildDefaultPicker(o1 = null) {
+    this.observeComponentCreation2((w1, x1) => {
+      Column.create();
+      Column.size({ width: '100%', height: '100%' });
+    }, Column);
+    this.observeComponentCreation2((u1, v1) => {
       Button.createWithChild();
       Button.type(ButtonType.Circle);
       Button.backgroundColor('#00000000');
-      Button.width('100%');
-      Button.height('100%');
-      if (!isInitialRender) {
-        Button.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((elmtId, isInitialRender) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      Image.create({ "id": 125830232, "type": 20000, params: [] });
-      Image.width('100%');
-      Image.height('100%');
+      Button.size({ width: '100%', height: '100%' });
+    }, Button);
+    this.observeComponentCreation2((s1, t1) => {
+      Image.create({'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_cast_stream'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'});
+      Image.size({ width: '100%', height: '100%' });
       Image.draggable(false);
-      if (!isInitialRender) {
-        Image.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
+    }, Image);
+    Button.pop();
+    Column.pop();
+  }
+
+  buildCustomPicker(h1 = null) {
+    this.observeComponentCreation2((m1, n1) => {
+      Column.create();
+      Column.size({ width: '100%', height: '100%' });
+    }, Column);
+    this.observeComponentCreation2((k1, l1) => {
+      Button.createWithChild();
+      Button.type(ButtonType.Circle);
+      Button.backgroundColor('#00000000');
+      Button.size({ width: '100%', height: '100%' });
+    }, Button);
+    this.customPicker.bind(this)();
     Button.pop();
     Column.pop();
   }
