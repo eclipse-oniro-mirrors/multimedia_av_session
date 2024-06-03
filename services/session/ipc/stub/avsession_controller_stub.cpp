@@ -180,7 +180,7 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
 
 void AVSessionControllerStub::DoMetadataImgCleanInStub(AVMetaData& data)
 {
-    SLOGI("clear media img in DoMetadataImgCleanInStub");
+    SLOGI("still clear media img in DoMetadataImgCleanInStub");
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
     if (innerQueuePixelMap != nullptr) {
         innerQueuePixelMap->Clear();

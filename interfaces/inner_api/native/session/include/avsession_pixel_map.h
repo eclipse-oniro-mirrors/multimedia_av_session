@@ -38,12 +38,14 @@ public:
 
     void Clear()
     {
+        std::lock_guard lockGuard(bufferLock_);
         innerImgBuffer_.clear();
         std::vector<uint8_t>().swap(innerImgBuffer_);
     }
 
-    std::vector<uint8_t> GetInnerImgBuffer() const
+    std::vector<uint8_t> GetInnerImgBuffer()
     {
+        std::lock_guard lockGuard(bufferLock_);
         return innerImgBuffer_;
     }
 
