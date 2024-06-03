@@ -121,7 +121,7 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
     return bundleName;
 }
 
-bool BundleStatusAdapter::CheckBundleSurpport(std::string& profile)
+bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
 {
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
@@ -132,11 +132,11 @@ bool BundleStatusAdapter::CheckBundleSurpport(std::string& profile)
             return false;
         }
         nlohmann::json abilityValue = value["uiAbility"];
-        if (insightName != PLAY_MUSICLIST) {
+        if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
             continue;
         }
         if (abilityValue.is_discarded()) {
-            SLOGE("PLAY_MUSICLIST uiability discarded=%{public}d", abilityValue.is_discarded());
+            SLOGE("uiability discarded=%{public}d", abilityValue.is_discarded());
             return false;
         }
         if (!abilityValue.contains("executeMode")) {
@@ -145,7 +145,7 @@ bool BundleStatusAdapter::CheckBundleSurpport(std::string& profile)
         }
         auto modeValues = abilityValue["executeMode"];
         if (modeValues.is_discarded()) {
-            SLOGE("PLAY_MUSICLIST executeMode discarded=%{public}d", modeValues.is_discarded());
+            SLOGE("executeMode discarded=%{public}d", modeValues.is_discarded());
             return false;
         }
         auto mode = std::find(modeValues.begin(), modeValues.end(), "background");
@@ -180,7 +180,7 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
         SLOGE("Bundle=%{public}s does not support insight", bundleName.c_str());
         return false;
     }
-    return CheckBundleSurpport(profile);
+    return CheckBundleSupport(profile);
 }
 
 bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
@@ -202,7 +202,7 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
         std::string insightName = value["intentName"];
         nlohmann::json abilityValue = value["uiAbility"];
         SLOGD(" insightName=%{public}s", insightName.c_str());
-        if (insightName == PLAY_MUSICLIST) {
+        if (insightName == PLAY_MUSICLIST || insightName == PLAY_AUDIO) {
             if (!value.contains("uiAbility") || abilityValue.is_discarded()) {
                 SLOGE("PLAY_MUSICLIST uiability discarded=%{public}d", abilityValue.is_discarded());
                 return false;
