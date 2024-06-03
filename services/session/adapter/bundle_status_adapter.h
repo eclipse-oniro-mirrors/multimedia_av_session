@@ -46,7 +46,7 @@ private:
 
     void NotifyBundleRemoved(const std::string bundleName);
 
-    bool CheckBundleSurpport(std::string& profile);
+    bool CheckBundleSupport(std::string& profile);
 
     sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy;
 
@@ -60,7 +60,7 @@ private:
 
     const std::string PLAY_MUSICLIST = "PlayMusicList";
 
-    const std::string PLAY_MUSIC = "PlayMusic";
+    const std::string PLAY_AUDIO = "PlayAudio";
 };
 
 class BundleStatusCallbackImpl : public AppExecFwk::BundleStatusCallbackHost {
