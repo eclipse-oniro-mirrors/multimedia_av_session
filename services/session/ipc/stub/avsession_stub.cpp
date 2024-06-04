@@ -159,21 +159,21 @@ int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& r
     int mediaImageLength = meta.GetMediaLength();
     auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
     std::vector<uint8_t> mediaImageBuffer;
+    CHECK_AND_RETURN_RET_LOG(mediaImageLength <= twoImageLength, ERR_NONE, "Maybe cuase Out-of-bunds read");
     for (int i = 0; i < mediaImageLength; i++) {
         mediaImageBuffer.push_back((uint8_t)buffer[i]);
     }
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
     meta.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
     
-    if (twoImageLength > mediaImageLength) {
-        auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
-        std::vector<uint8_t> avQueueImageBuffer;
-        for (int i = mediaImageLength; i < twoImageLength; i++) {
-            avQueueImageBuffer.push_back((uint8_t)buffer[i]);
-        }
-        avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
-        meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
+    auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::vector<uint8_t> avQueueImageBuffer;
+    for (int i = mediaImageLength; i < twoImageLength; i++) {
+        avQueueImageBuffer.push_back((uint8_t)buffer[i]);
     }
+    avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
+    meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
+
     int32_t ret = SetAVMetaData(meta);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetAVMetaData failed");
