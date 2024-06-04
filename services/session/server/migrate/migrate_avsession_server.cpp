@@ -171,7 +171,7 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
         return;
     }
     if (!root.isMember(PLAYER_ID) || !root.isMember(MEDIA_COMMAND) ||
-        !root.isMember(COMMAND) || !root.isMember(EXTRAS)) {
+        !root.isMember(COMMAND)) {
         SLOGE("json parse with error member");
         return;
     }
@@ -190,7 +190,7 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
     }
     std::string command = root[COMMAND].isString() ? root[COMMAND].asString() : "ERROR_COMMAND";
     SLOGI("ProcContolCommand mediaCommand: %{public}d", mediaCommand);
-    std::string extras = root[EXTRAS].isString() ? root[EXTRAS].asString() : "ERROR_EXTRAS";
+    std::string extras = (root.isMember(EXTRAS) && root[EXTRAS].isString()) ? root[EXTRAS].asString() : "ERROR_EXTRAS";
     switch (mediaCommand) {
         case SYNC_MEDIASESSION_CALLBACK_ON_COMMAND:
             SendCommandProc(command, avcontroller);
@@ -241,8 +241,9 @@ void MigrateAVSessionServer::OnSessionCreate(const AVSessionDescriptor &descript
         SLOGW("no valid avsession");
         return;
     }
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     CreateController(sessionId);
-    SendRemoteControllerList(deviceId_);
+    IPCSkeleton::SetCallingIdentity(identity);
 }
 
 void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descriptor)
@@ -254,14 +255,19 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
     }
     SLOGI("OnSessionRelease : %{public}s", sessionId.c_str());
     ClearCacheBySessionId(sessionId);
-    SendRemoteControllerList(deviceId_);
 }
 
 void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descriptor)
 {
     SLOGI("OnTopSessionChange sessionId_: %{public}s", descriptor.sessionId_.c_str());
-    std::lock_guard lockGuard(topSessionLock_);
-    topSessionId_ = descriptor.sessionId_;
+    {
+        std::lock_guard lockGuard(topSessionLock_);
+        if (topSessionId_ == descriptor.sessionId_) {
+            return;
+        }
+        topSessionId_ = descriptor.sessionId_;
+    }
+    SendRemoteControllerList(deviceId_);
 }
 
 void MigrateAVSessionServer::SortControllers(std::list<sptr<AVControllerItem>> controllers)
