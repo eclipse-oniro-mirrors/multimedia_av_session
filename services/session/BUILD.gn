@@ -21,6 +21,9 @@ openssl_dir = "//third_party/openssl"
 
 group("avsession_server") {
   deps = [
+    ":avsession_dynamic_bluetooth",
+    ":avsession_dynamic_display",
+    ":avsession_dynamic_notification",
     ":avsession_item",
     ":avsession_service",
     "../../sa_profile:avsession_sa_profile",
@@ -143,7 +146,6 @@ ohos_shared_library("avsession_service") {
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
-    "distributed_notification_service:ans_innerkits",
     "dsoftbus:softbus_client",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -153,8 +155,6 @@ ohos_shared_library("avsession_service") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "window_manager:libdm",
-    "window_manager:libwm",
   ]
 
   if (castplus_cast_engine_enable) {
@@ -168,11 +168,6 @@ ohos_shared_library("avsession_service") {
       "./../session:avsession_cast_item",
       "./../session:avsession_router",
     ]
-  }
-
-  if (bluetooth_part_enable) {
-    cflags += [ "-DBLUETOOTH_ENABLE" ]
-    external_deps += [ "bluetooth:btframework" ]
   }
 
   if (efficiency_manager_enable_in_avsession) {
@@ -305,6 +300,191 @@ if (castplus_cast_engine_enable) {
   }
 }
 
+ohos_shared_library("avsession_dynamic_bluetooth") {
+  install_enable = true
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [
+    "adapter/avsession_dynamic_bluetooth.cpp",
+    "adapter/bluetooth_adapter.cpp",
+  ]
+
+  include_dirs = [
+    "./../../frameworks/native/session/include",
+    "./../../interfaces/inner_api/native/session/include",
+    "./adapter",
+  ]
+
+  cflags = [
+    "-fPIC",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
+    "-Os",
+  ]
+
+  if (!use_libfuzzer) {
+    cflags += [ "-flto" ]
+    ldflags = [
+      "-flto",
+      "-Wl,--gc-sections",
+    ]
+  }
+  cflags_cc = cflags
+  cflags_cc += [ "-fvisibility-inlines-hidden" ]
+
+  deps = [
+    "../../frameworks/common:avsession_common",
+    "../../utils:avsession_utils",
+  ]
+
+  external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+  ]
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [ "./../session:avsession_router" ]
+  }
+
+  if (bluetooth_part_enable) {
+    cflags += [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
+
+  subsystem_name = "multimedia"
+  part_name = "av_session"
+}
+
+ohos_shared_library("avsession_dynamic_display") {
+  install_enable = true
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [
+    "adapter/avsession_dynamic_display.cpp",
+    "adapter/hw_cast_display_listener.cpp",
+  ]
+
+  include_dirs = [
+    "./../../frameworks/native/session/include",
+    "./../../interfaces/inner_api/native/session/include",
+    "./adapter",
+    "ipc/base",
+  ]
+
+  cflags = [
+    "-fPIC",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
+  ]
+
+  if (!use_libfuzzer) {
+    cflags += [ "-flto" ]
+    ldflags = [
+      "-flto",
+      "-Wl,--gc-sections",
+    ]
+  }
+  cflags_cc = cflags
+  cflags_cc += [ "-fvisibility-inlines-hidden" ]
+
+  deps = [
+    "../../frameworks/common:avsession_common",
+    "../../utils:avsession_utils",
+  ]
+
+  external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
+    "graphic_surface:surface",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "window_manager:libdm",
+    "window_manager:libwm",
+  ]
+
+  subsystem_name = "multimedia"
+  part_name = "av_session"
+}
+
+ohos_shared_library("avsession_dynamic_notification") {
+  install_enable = true
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [ "adapter/avsession_dynamic_notification.cpp" ]
+
+  include_dirs = [
+    "./../../frameworks/native/session/include",
+    "./../../interfaces/inner_api/native/session/include",
+    "./adapter",
+    "ipc/base",
+  ]
+
+  cflags = [
+    "-fPIC",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
+    "-Os",
+  ]
+
+  if (!use_libfuzzer) {
+    cflags += [ "-flto" ]
+    ldflags = [
+      "-flto",
+      "-Wl,--gc-sections",
+    ]
+  }
+  cflags_cc = cflags
+  cflags_cc += [ "-fvisibility-inlines-hidden" ]
+
+  deps = [
+    "../../frameworks/common:avsession_common",
+    "../../utils:avsession_utils",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "distributed_notification_service:ans_innerkits",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ipc:ipc_single",
+    "relational_store:native_rdb",
+  ]
+
+  subsystem_name = "multimedia"
+  part_name = "av_session"
+}
+
 ohos_shared_library("avsession_item") {
   install_enable = true
   ipc_sources = [
@@ -317,7 +497,6 @@ ohos_shared_library("avsession_item") {
   service_sources = [
     "server/avcontroller_item.cpp",
     "server/avsession_item.cpp",
-    "server/hw_cast_display_listener.cpp",
     "server/remote/json_utils.cpp",
     "server/remote/remote_session_command_process.cpp",
     "server/remote/remote_session_sink_proxy.cpp",
@@ -401,8 +580,6 @@ ohos_shared_library("avsession_item") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "window_manager:libdm",
-    "window_manager:libwm",
   ]
 
   if (castplus_cast_engine_enable) {
