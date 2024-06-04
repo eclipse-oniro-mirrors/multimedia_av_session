@@ -300,14 +300,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
         castHandle, "Can not find corresponding provider");
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
-    OutputDeviceInfo outputDeviceInfo;
-    DeviceInfo deviceInfo;
-    deviceInfo.deviceId_ = "0";
-    deviceInfo.deviceName_ = "RemoteCast";
-    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
-    deviceInfo.providerId_ = 1;
-    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
+    castHandleToOutputDeviceMap_[castId] = castOutputDeviceInfo_;
     CHECK_AND_RETURN_RET_LOG(castHandleToOutputDeviceMap_.find(castId) != castHandleToOutputDeviceMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding castId");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
@@ -318,23 +311,17 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVRouterImpl::SetServiceAllConnectState(int64_t castHandle)
+int32_t AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, DeviceInfo deviceInfo)
 {
     int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
     int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
-    OutputDeviceInfo outputDeviceInfo;
-    DeviceInfo deviceInfo;
-    deviceInfo.deviceId_ = "0";
-    deviceInfo.deviceName_ = "RemoteCast";
-    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
-    deviceInfo.providerId_ = 1;
-    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
+    castOutputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
+    castHandleToOutputDeviceMap_[castId] = castOutputDeviceInfo_;
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding provider");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
-    providerManagerMap_[providerNumber]->provider_->SetStreamState(castId);
+    providerManagerMap_[providerNumber]->provider_->SetStreamState(castId, deviceInfo);
     return AVSESSION_SUCCESS;
 }
 

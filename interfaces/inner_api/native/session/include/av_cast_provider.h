@@ -166,10 +166,11 @@ public:
      * @brief set allconnect state.
      *
      * @param { int64_t } castHandle const - The ID corresponding to the castprovider.
+     * @param { DeviceInfo } cast deviceinfo - The deviceinfo to the castprovider.
      * @return { bool } Whether the operation was successful.
      * @since 11
     */
-    virtual bool SetStreamState(int32_t castId) = 0;
+    virtual bool SetStreamState(int32_t castId, DeviceInfo deviceInfo) = 0;
 
     /**
      * @brief get mirror castid.

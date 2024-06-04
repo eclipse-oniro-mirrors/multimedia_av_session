@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { audio } from '@kit.AudioKit'
 
 const TAG = 'avcastpicker_component ';
 
@@ -244,9 +245,9 @@ export struct AVCastPicker {
         if (JSON.stringify(data['deviceList']) !== undefined) {
           console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
           this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
-          if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3 &&
-            (this.sessionType === 'voice_call' || this.sessionType === 'video_call')) ||
-            this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+          if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length === 2 &&
+            !hasExtDevice(this.deviceList) && (this.sessionType === 'voice_call' ||
+            this.sessionType === 'video_call')) || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
             this.isMenuShow = false;
           }
         }
@@ -280,9 +281,9 @@ export struct AVCastPicker {
         }
       })
       .onClick(() => {
-        if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3 &&
-          (this.sessionType === 'voice_call' || this.sessionType === 'video_call')) ||
-          this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+        if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length === 2 &&
+          !hasExtDevice(this.deviceList) && (this.sessionType === 'voice_call' ||
+          this.sessionType === 'video_call')) || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
           this.isMenuShow = false;
         } else {
           this.isMenuShow = !this.isMenuShow;
@@ -291,6 +292,15 @@ export struct AVCastPicker {
           }
         }
       })
+  }
+
+  private hasExtDevice(allDevice: Array<AVCastPickerDeviceInfo>): boolean{
+      for (let i = 0; i < allDevice.length; i++) {
+          if (allDevice[i].deviceType !== audio.DeviceType.EARPIECE && allDevice[i].deviceType !== audio.DeviceType.SPEAKER) {
+              return true;
+          }
+      }
+      return false;
   }
 
   @Builder

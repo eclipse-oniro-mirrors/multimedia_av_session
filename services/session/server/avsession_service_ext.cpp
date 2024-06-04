@@ -40,6 +40,9 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     castServiceNameMapState_[serviceName] = state;
     isSupportMirrorToStream_ = false;
+    castDeviceId_ = "0";
+    castDeviceName_ = " ";
+    castDeviceType_ = 0;
     std::string info;
     std::string::size_type beginPos = 0;
     std::string::size_type endPos = extraInfo.find(seperator);
@@ -47,20 +50,37 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         info = extraInfo.substr(beginPos, endPos - beginPos);
         beginPos = endPos + seperator.size();
         endPos = extraInfo.find(seperator, beginPos);
-        if (info.find("SUPPORT_MIRROR_TO_STREAM") != std::string::npos && info.find("true") != std::string::npos) {
-            isSupportMirrorToStream_ = true;
-            break;
-        }
+        SplitExtraInfo(info);
     }
     if (beginPos != extraInfo.length()) {
         info = extraInfo.substr(beginPos);
-        if (info.find("SUPPORT_MIRROR_TO_STREAM") != std::string::npos && info.find("true") != std::string::npos) {
-            isSupportMirrorToStream_ = true;
-        }
+        SplitExtraInfo(info);
     }
     NotifyMirrorToStreamCast();
 #endif
 }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void AVSessionService::SplitExtraInfo(std::string info)
+{
+    if (info.find("SUPPORT_MIRROR_TO_STREAM") != std::string::npos && info.find("true") != std::string::npos) {
+        isSupportMirrorToStream_ = true;
+    }
+    if (info.find("deviceId") != std::string::npos && info.find(":") != std::string::npos) {
+        std::string::size_type idBeginPos = info.find(":");
+        castDeviceId_ = info.substr(idBeginPos + beginAddPos, info.length() -idBeginPos - endDecPos); // "deviceId" : "xxxx"
+    }
+    if (info.find("deviceName") != std::string::npos && info.find(":") != std::string::npos) {
+        std::string::size_type nameBeginPos = info.find(":");
+        castDeviceName_ = info.substr(nameBeginPos + beginAddPos, info.length() -nameBeginPos - endDecPos); // "deviceName" : "xxxx"
+    }
+    if (info.find("deviceType") != std::string::npos && info.find(":") != std::string::npos) {
+        std::string::size_type typeBeginPos = info.find(":");
+        std::string tmpType = info.substr(typeBeginPos + typeAddPos, info.length()); // "deviceType" : xxx
+        castDeviceType_ = atoi(tmpType.c_str());
+    }
+}
+#endif
 
 void AVSessionService::AddInnerSessionListener(SessionListener *listener)
 {

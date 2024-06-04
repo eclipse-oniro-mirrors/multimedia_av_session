@@ -532,32 +532,14 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("uidForAppStateChange_ = %{public}d", uidForAppStateChange_);
-    if (uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_FOREGROUND)) {
-        //first creat session
-        if (firstAppStateChangeFlag_) {
-            firstAppStateChangeFlag_ = false;
-            SLOGI("when first creat session, counts = %{public}d", appStateChangeCounter_);
-            appStateChangeCounter_ = foreGroundStateCountZero;
+    if (uidForAppStateChange_ == uid) {
+        if (state == appState) {
             return;
         }
-        //APP_STATE_FOREGROUND To APP_STATE_BACKGROUND
-        if (foreToBackFlag_) {
-            foreToBackFlag_ = false;
-            SLOGI("when fore to back, counts = %{public}d", appStateChangeCounter_);
-            appStateChangeCounter_ = foreGroundStateCountOne;
-            return;
-        }
-        appStateChangeCounter_++;
-        //APP_STATE_BACKGROUND To APP_STATE_FOREGROUND
-        if (appStateChangeCounter_ == foreGroundStateCountTwo) {
-            appStateChangeCounter_ = foreGroundStateCountZero;
+        if (state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_FOREGROUND)) {
             SLOGI("enter notifyMirrorToStreamCast by background to foreground state change, and counts = 2");
             NotifyMirrorToStreamCast();
         }
-    }
-    if (appStateChangeCounter_ == foreGroundStateCountOne &&
-        uidForAppStateChange_ == uid && state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_BACKGROUND)) {
-        foreToBackFlag_ = true;
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 }
@@ -909,13 +891,11 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 
 void AVSessionService::NotifyMirrorToStreamCast()
 {
-    if (topSession_ == nullptr) {
-        SLOGE("topsession null pointer");
-        return;
-    }
-    if (topSession_->GetSessionType() == "video" && isSupportMirrorToStream_ &&
-        !AppManagerAdapter::GetInstance().IsAppBackground(topSession_->GetUid(), topSession_->GetPid())) {
-        MirrorToStreamCast(topSession_);
+    for (auto& session : GetContainer().GetAllSessions()) {
+        if (session->GetSessionType() == "video" && isSupportMirrorToStream_ &&
+            !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
+            MirrorToStreamCast(session);
+        }
     }
 }
 
@@ -926,7 +906,13 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
         if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
             castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
             checkEnableCast(true);
-            return session->RegisterListenerStreamToCast(castServiceNameMapState_);
+            DeviceInfo deviceInfo;
+            deviceInfo.deviceId_ = castDeviceId_;
+            deviceInfo.deviceName_ = castDeviceName_;
+            deviceInfo.deviceType_ = castDeviceType_;
+            deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+            deviceInfo.providerId_ = 1;
+            return session->RegisterListenerStreamToCast(castServiceNameMapState_, deviceInfo);
         }
     }
     return AVSESSION_SUCCESS;
@@ -1032,11 +1018,12 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
 
     NotifySessionCreate(result->GetDescriptor());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (type == AVSession::SESSION_TYPE_VIDEO && isSupportMirrorToStream_ &&
-        !AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid())) {
+    if (type == AVSession::SESSION_TYPE_VIDEO) {
         uidForAppStateChange_ = result->GetUid();
-        firstAppStateChangeFlag_ = true;
-        MirrorToStreamCast(result);
+        if (isSupportMirrorToStream_ &&
+            !AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid())) {
+            MirrorToStreamCast(result);
+        }
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("success");
