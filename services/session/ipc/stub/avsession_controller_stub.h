@@ -85,6 +85,7 @@ private:
     static bool CheckInterfaceToken(MessageParcel& data);
 
     static void DoMetadataImgCleanInStub(AVMetaData& data);
+    static int32_t DoMetadataGetReplyInStub(AVMetaData& metaData, MessageParcel& reply);
 
     using HandlerFunc = int32_t (AVSessionControllerStub::*)(MessageParcel& data, MessageParcel& reply);
     static inline HandlerFunc handlers[] = {

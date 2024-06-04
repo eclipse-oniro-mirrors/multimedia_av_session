@@ -510,9 +510,8 @@ void processErrMsg(std::shared_ptr<ContextBase> context, int32_t ret)
 
 bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVSession> sessionPtr, AVMetaData& data)
 {
-    SLOGI("do metadata set with online download prepare");
+    SLOGI("do metadata set with online download prepare with uri alive");
     auto uri = data.GetMediaImageUri();
-    data.SetMediaImageUri("");
     int32_t ret = sessionPtr->SetAVMetaData(data);
     if (ret != AVSESSION_SUCCESS) {
         processErrMsg(context, ret);

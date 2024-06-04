@@ -103,6 +103,8 @@ public:
 
     int32_t RegisterAVControllerCallback(const std::shared_ptr<AVControllerCallback> &callback);
 
+    bool CheckIfFromSession();
+    bool isFromSession = false;
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 

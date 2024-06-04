@@ -123,9 +123,26 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
 {
     AVMetaData metaData;
     int32_t ret = GetAVMetaData(metaData);
+    std::string uri = metaData.GetMediaImageUri();
+    if (ret != ERR_INVALID_PARAM) {
+        SLOGI("ImgSetLoop get controller isFromSession true");
+    } else {
+        ret = AVSESSION_SUCCESS;
+        SLOGI("ImgSetLoop get controller isFromSession false, set empty");
+        metaData.SetMediaImageUri("");
+    }
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");
 
+    int res = DoMetadataGetReplyInStub(metaData, reply);
+    SLOGI("ImgSetLoop DoMetadataGetReplyInStub with res %{public}d", res);
+    metaData.SetMediaImageUri(uri);
+    DoMetadataImgCleanInStub(metaData);
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::DoMetadataGetReplyInStub(AVMetaData& metaData, MessageParcel& reply)
+{
     int mediaImageLength = 0;
     std::vector<uint8_t> mediaImageBuffer;
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
@@ -167,15 +184,13 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
 
     if (!reply.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(reply, metaData)) {
         SLOGE("fail to write image length & metadata except img with clean");
-        DoMetadataImgCleanInStub(metaData);
         delete[] buffer;
         return AVSESSION_ERROR;
     }
     int32_t retForWriteRawData = reply.WriteRawData(buffer, twoImageLength);
     SLOGI("write img raw data ret with clean %{public}d", retForWriteRawData);
-    DoMetadataImgCleanInStub(metaData);
     delete[] buffer;
-    return ERR_NONE;
+    return retForWriteRawData;
 }
 
 void AVSessionControllerStub::DoMetadataImgCleanInStub(AVMetaData& data)
