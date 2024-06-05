@@ -438,7 +438,7 @@ private:
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const std::string seperator = ",";
-    AppExecFwk::ApplicationState appState = AppExecFwk::ApplicationState:APP_STATE_CACHED;
+    int appState = -1;
     bool isSupportMirrorToStream_ = false;
     std::string castDeviceId_ = "0";
     std::string castDeviceName_ = " ";

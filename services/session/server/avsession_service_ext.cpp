@@ -68,11 +68,13 @@ void AVSessionService::SplitExtraInfo(std::string info)
     }
     if (info.find("deviceId") != std::string::npos && info.find(":") != std::string::npos) {
         std::string::size_type idBeginPos = info.find(":");
-        castDeviceId_ = info.substr(idBeginPos + beginAddPos, info.length() -idBeginPos - endDecPos); // "deviceId" : "xxxx"
+        castDeviceId_ = info.substr(idBeginPos + beginAddPos,
+            info.length() -idBeginPos - endDecPos); // "deviceId" : "xxxx"
     }
     if (info.find("deviceName") != std::string::npos && info.find(":") != std::string::npos) {
         std::string::size_type nameBeginPos = info.find(":");
-        castDeviceName_ = info.substr(nameBeginPos + beginAddPos, info.length() -nameBeginPos - endDecPos); // "deviceName" : "xxxx"
+        castDeviceName_ = info.substr(nameBeginPos + beginAddPos,
+            info.length() - nameBeginPos - endDecPos); // "deviceName" : "xxxx"
     }
     if (info.find("deviceType") != std::string::npos && info.find(":") != std::string::npos) {
         std::string::size_type typeBeginPos = info.find(":");

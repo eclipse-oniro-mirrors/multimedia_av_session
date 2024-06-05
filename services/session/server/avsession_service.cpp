@@ -531,7 +531,8 @@ void AVSessionService::InitAMS()
 void AVSessionService::HandleAppStateChange(int uid, int state)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    SLOGI("uidForAppStateChange_ = %{public}d", uidForAppStateChange_);
+    SLOGI("uidForAppStateChange_ = %{public}d, uid = %{public}d, state = %{public}d",
+        uidForAppStateChange_, uid, state);
     if (uidForAppStateChange_ == uid) {
         if (state == appState) {
             return;
@@ -540,6 +541,7 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
             SLOGI("enter notifyMirrorToStreamCast by background to foreground state change, and counts = 2");
             NotifyMirrorToStreamCast();
         }
+        appState = state;
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 }
@@ -911,6 +913,7 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
             deviceInfo.deviceName_ = castDeviceName_;
             deviceInfo.deviceType_ = castDeviceType_;
             deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+            deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
             deviceInfo.providerId_ = 1;
             return session->RegisterListenerStreamToCast(castServiceNameMapState_, deviceInfo);
         }

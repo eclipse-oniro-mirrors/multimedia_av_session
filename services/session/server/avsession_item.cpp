@@ -565,8 +565,8 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string,
-    std::string>& serviceNameMapState, DeviceInfo deviceInfo)
+int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
+    DeviceInfo deviceInfo)
 {
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
@@ -882,13 +882,17 @@ int32_t AVSessionItem::StopCast()
         removeTimes = 1;
     }
 
-    OutputDeviceInfo outputDeviceInfo;
-    DeviceInfo deviceInfo;
-    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-    deviceInfo.deviceId_ = "0";
-    deviceInfo.deviceName_ = "LocalDevice";
-    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    SetOutputDevice(outputDeviceInfo);
+    if (castServiceNameMapState_["HuaweiCast"] != deviceStateConnection &&
+        castServiceNameMapState_["HuaweiCast-Dual"] != deviceStateConnection) {
+        OutputDeviceInfo outputDeviceInfo;
+        DeviceInfo deviceInfo;
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        deviceInfo.deviceId_ = "0";
+        deviceInfo.deviceName_ = "LocalDevice";
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+        SetOutputDevice(outputDeviceInfo);
+    }
+
     return AVSESSION_SUCCESS;
 }
 
