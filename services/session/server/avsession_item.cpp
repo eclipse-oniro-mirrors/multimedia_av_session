@@ -393,6 +393,8 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     sptr<AVSessionItem> session(this);
     sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(GetPid(), session);
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "malloc controller failed");
+    result->isFromSession = true;
+    SLOGI("ImgSetLoop get controller set from session");
     controllers_.insert({GetPid(), result});
     return result;
 }

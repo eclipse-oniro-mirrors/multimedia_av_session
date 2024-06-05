@@ -87,6 +87,16 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     data = session_->GetMetaData();
+    if (CheckIfFromSession()) {
+        SLOGI("ImgSetLoop get controller isFromSession true");
+        if (data.GetMediaImage() != nullptr) {
+            SLOGI("ImgSetLoop do img clear");
+            data.GetMediaImage()->Clear();
+        }
+    } else {
+        SLOGE("ImgSetLoop get controller isFromSession false, return invalid param");
+        return ERR_INVALID_PARAM;
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -323,6 +333,11 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
     }
 }
 
+bool AVControllerItem::CheckIfFromSession()
+{
+    return isFromSession;
+}
+
 void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
@@ -345,17 +360,26 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
         if (!metaMask_.test(AVMetaData::META_KEY_ASSET_ID)) {
             metaOut.SetAssetId(data.GetAssetId());
         }
-        SLOGI("update meta data for pid %{public}d with title %{public}s", static_cast<int>(pid_),
-            metaOut.GetTitle().c_str());
+        SLOGI("update metaData pid %{public}d, title %{public}s", static_cast<int>(pid_), metaOut.GetTitle().c_str());
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
+        std::string uri = metaOut.GetMediaImageUri();
+        if (CheckIfFromSession()) {
+            if (data.GetMediaImage() != nullptr) {
+                SLOGI("ImgSetLoop get controller isFromSession true, ImgSetLoop do img clear");
+                data.GetMediaImage()->Clear();
+            }
+        } else {
+            SLOGE("ImgSetLoop get controller isFromSession false, set empty");
+            metaOut.SetMediaImageUri("");
+        }
         if (callback_ != nullptr) {
             callback_->OnMetaDataChange(metaOut);
         }
         if (innerCallback_ != nullptr) {
             innerCallback_->OnMetaDataChange(metaOut);
         }
+        metaOut.SetMediaImageUri(uri);
     }
-    SLOGI("clear media img after handle change");
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = metaOut.GetAVQueueImage();
     if (innerQueuePixelMap != nullptr) {
         innerQueuePixelMap->Clear();
