@@ -125,6 +125,7 @@ bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
 {
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
+    CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
     for (const auto& value : profileValues["insightIntents"]) {
         std::string insightName = value["intentName"];
         if (!value.contains("uiAbility")) {
@@ -198,6 +199,7 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
     SLOGD("GetJsonProfile profile=%{public}s", profile.c_str());
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
+    CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
     for (const auto& value : profileValues["insightIntents"]) {
         std::string insightName = value["intentName"];
         nlohmann::json abilityValue = value["uiAbility"];
