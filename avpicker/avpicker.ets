@@ -154,7 +154,7 @@ export struct AVCastPicker {
                 .height(24)
                 .fillColor($r('sys.color.ohos_id_color_primary'))
               Text(item.deviceName)
-                .fontSize($r('sys.float.ohos_id_text_size_body1'))
+                .fontSize($r('sys.float.ohos_id_text_size_body2'))
                 .fontColor(item.isConnected ? $r('sys.color.ohos_id_color_text_primary_activated')
                   : $r('sys.color.ohos_id_color_text_primary'))
                 .width(item.isConnected ? 144 : 168)
@@ -232,7 +232,7 @@ export struct AVCastPicker {
       .onReceive((data) => {
         if (JSON.stringify(data['state']) !== undefined) {
           console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
-          if (this.onStateChange !== null) {
+          if (this.onStateChange != null) {
             if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
               this.onStateChange(AVCastPickerState.STATE_APPEARING);
             } else {
@@ -244,9 +244,9 @@ export struct AVCastPicker {
         if (JSON.stringify(data['deviceList']) !== undefined) {
           console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
           this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
-          if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3 &&
-            (this.sessionType === 'voice_call' || this.sessionType === 'video_call')) ||
-            this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+          if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length === 2 &&
+            !this.hasExtDevice(this.deviceList) && (this.sessionType === 'voice_call' ||
+            this.sessionType === 'video_call')) || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
             this.isMenuShow = false;
           }
         }
@@ -280,9 +280,9 @@ export struct AVCastPicker {
         }
       })
       .onClick(() => {
-        if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length < 3 &&
-          (this.sessionType === 'voice_call' || this.sessionType === 'video_call')) ||
-          this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+        if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length === 2 &&
+          !this.hasExtDevice(this.deviceList) && (this.sessionType === 'voice_call' ||
+          this.sessionType === 'video_call')) || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
           this.isMenuShow = false;
         } else {
           this.isMenuShow = !this.isMenuShow;
@@ -291,6 +291,16 @@ export struct AVCastPicker {
           }
         }
       })
+  }
+
+  private hasExtDevice(allDevice: Array<AVCastPickerDeviceInfo>): boolean {
+    for (let i = 0; i < allDevice.length; i++) {
+      if (allDevice[i].deviceType !== 1 && // 1 is audio.DeviceType.EARPIECE
+        allDevice[i].deviceType !== 2) { // 2 is audio.DeviceType.SPEAKER
+        return true;
+      }
+    }
+    return false;
   }
 
   @Builder
