@@ -1405,6 +1405,10 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
     }
     result->SetServiceCallbackForRelease([this](AVControllerItem& controller) { HandleControllerRelease(controller); });
     session->AddController(pid, result);
+    if (AbilityHasSession(pid)) {
+        SLOGI("set isfromsession for pid %{public}d", static_cast<int>(pid));
+        result->isFromSession = true;
+    }
     return result;
 }
 
