@@ -61,10 +61,6 @@ static ISocketListener iSessionListener = {
 
 int32_t SoftbusSessionManager::Socket(const std::string &pkgName)
 {
-    if (pkgName.c_str() == nullptr) {
-        SLOGE("pkg name is null");
-        return AVSESSION_ERROR;
-    }
     SocketInfo info = {
         .name = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG.c_str()),
         .pkgName = const_cast<char *>(pkgName.c_str()),

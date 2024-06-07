@@ -62,9 +62,9 @@ AVSessionItem::~AVSessionItem()
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
         SLOGW("Session destroy at source, release cast");
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
-        ReleaseCast();
+        this->ReleaseCast();
     }
-    StopCastDisplayListener();
+    this->StopCastDisplayListener();
 #endif
 }
 
@@ -182,7 +182,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionItem::ProcessFrontSession(std::string source)
+int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 {
     SLOGI("%{public}s ", source.c_str());
     auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
