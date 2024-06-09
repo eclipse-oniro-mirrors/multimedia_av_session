@@ -989,7 +989,8 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
     std::vector<CastDisplayInfo> displays;
     for (auto &display : allDisplays) {
         SLOGI("GetAllCastDisplays name: %{public}s, id: %{public}lu", display->GetName().c_str(), display->GetId());
-        If (display->GetName() == "CastEngine") {
+        auto flag = Rosen::ScreenManager::GetInstance().GetVirtualScreenFlag(display->GetId());
+        if (flag == Rosen::VirtualScreenFlag::CAST) {
             SLOGI("ReportCastDisplay start in");
             CastDisplayInfo castDisplayInfo;
             castDisplayInfo.displayState = CastDisplayState::STATE_ON;
