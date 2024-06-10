@@ -58,6 +58,8 @@ private:
 
     const int32_t startUserId = 100;
 
+    const int32_t INTERFACE_TYPE = 9;
+
     const std::string PLAY_MUSICLIST = "PlayMusicList";
 
     const std::string PLAY_AUDIO = "PlayAudio";
