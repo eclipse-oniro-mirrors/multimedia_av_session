@@ -40,8 +40,10 @@ public:
             byte3[i++] = byte;
             if (i == kNumberThree) {
                 byte4[kNumberZero] = (byte3[kNumberZero] & 0xfc) >> kNumberTwo;
-                byte4[kNumberOne] = ((byte3[kNumberZero] & 0x03) << kNumberFour) | ((byte3[kNumberOne] & 0xf0) >> kNumberFour);
-                byte4[kNumberTwo] = ((byte3[kNumberOne] & 0x0f) << kNumberTwo) | ((byte3[kNumberTwo] & 0xc0) >> kNumberSix);
+                byte4[kNumberOne] = ((byte3[kNumberZero] & 0x03) << kNumberFour) | 
+                                    ((byte3[kNumberOne] & 0xf0) >> kNumberFour);
+                byte4[kNumberTwo] = ((byte3[kNumberOne] & 0x0f) << kNumberTwo) | 
+                                    ((byte3[kNumberTwo] & 0xc0) >> kNumberSix);
                 byte4[kNumberThree] = byte3[kNumberTwo] & 0x3f;
                 for (i = 0; i < kNumberFour; i++) {
                     encoded += kBase64Chars[byte4[i]];
@@ -54,8 +56,10 @@ public:
                 byte3[k] = kNumberZero;
             }
             byte4[kNumberZero] = (byte3[kNumberZero] & 0xfc) >> kNumberTwo;
-            byte4[kNumberOne] = ((byte3[kNumberZero] & 0x03) << kNumberFour) | ((byte3[kNumberOne] & 0xf0) >> kNumberFour);
-            byte4[kNumberTwo] = ((byte3[kNumberOne] & 0x0f) << kNumberTwo) | ((byte3[kNumberTwo] & 0xc0) >> kNumberSix);
+            byte4[kNumberOne] = ((byte3[kNumberZero] & 0x03) << kNumberFour) | 
+                                ((byte3[kNumberOne] & 0xf0) >> kNumberFour);
+            byte4[kNumberTwo] = ((byte3[kNumberOne] & 0x0f) << kNumberTwo) | 
+                                ((byte3[kNumberTwo] & 0xc0) >> kNumberSix);
             for (int k = 0; k < i + kNumberOne; k++) {
                 encoded += kBase64Chars[byte4[k]];
             }
