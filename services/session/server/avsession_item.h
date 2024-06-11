@@ -200,7 +200,8 @@ public:
 
     int32_t SessionCommandToCastCommand(int32_t cmd);
 
-    int32_t RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState);
+    int32_t RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
+        DeviceInfo deviceInfo);
 
     int32_t AddSupportCastCommand(int32_t cmd);
 

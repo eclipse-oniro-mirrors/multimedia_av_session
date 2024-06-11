@@ -52,7 +52,7 @@ public:
     void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void OnServiceDied() override;
-    bool SetStreamState(int32_t castId) override;
+    bool SetStreamState(int32_t castId, DeviceInfo deviceInfo) override;
     int GetMirrorCastId() override;
 
 private:

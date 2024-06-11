@@ -567,22 +567,18 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState)
+int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
+    DeviceInfo deviceInfo)
 {
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
-    DeviceInfo deviceInfo;
-    deviceInfo.deviceId_ = "0";
-    deviceInfo.deviceName_ = "RemoteCast";
-    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
-    deviceInfo.providerId_ = 1;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     castHandle_ = castHandle;
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     counter_ = firstStep;
     AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
-    AVRouter::GetInstance().SetServiceAllConnectState(castHandle);
+    AVRouter::GetInstance().SetServiceAllConnectState(castHandle, deviceInfo);
     deviceStateAddCommand_ = streamStateConnection;
     counter_ = secondStep;
     return AVSESSION_SUCCESS;
@@ -888,13 +884,17 @@ int32_t AVSessionItem::StopCast()
         removeTimes = 1;
     }
 
-    OutputDeviceInfo outputDeviceInfo;
-    DeviceInfo deviceInfo;
-    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-    deviceInfo.deviceId_ = "0";
-    deviceInfo.deviceName_ = "LocalDevice";
-    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    SetOutputDevice(outputDeviceInfo);
+    if (castServiceNameMapState_["HuaweiCast"] != deviceStateConnection &&
+        castServiceNameMapState_["HuaweiCast-Dual"] != deviceStateConnection) {
+        OutputDeviceInfo outputDeviceInfo;
+        DeviceInfo deviceInfo;
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        deviceInfo.deviceId_ = "0";
+        deviceInfo.deviceName_ = "LocalDevice";
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+        SetOutputDevice(outputDeviceInfo);
+    }
+
     return AVSESSION_SUCCESS;
 }
 

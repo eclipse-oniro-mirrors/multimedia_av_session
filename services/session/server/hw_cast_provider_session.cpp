@@ -84,14 +84,10 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
     return streamPlayerPtr;
 }
 
-bool HwCastProviderSession::SetStreamState()
+bool HwCastProviderSession::SetStreamState(DeviceInfo deviceInfo)
 {
     std::lock_guard lockGuard(mutex_);
     for (auto listener : castSessionStateListenerList_) {
-        DeviceInfo deviceInfo;
-        deviceInfo.deviceId_ = "0";
-        deviceInfo.deviceName_ = "RemoteCast";
-        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered listeners");
             listener->OnCastStateChange(deviceStateConnection, deviceInfo);

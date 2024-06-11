@@ -179,6 +179,8 @@ public:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     __attribute__((no_sanitize("cfi"))) int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
+
+    void SplitExtraInfo(std::string info);
 #endif
 
     void HandleControllerRelease(AVControllerItem& controller);
@@ -436,13 +438,14 @@ private:
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const std::string seperator = ",";
-    bool firstAppStateChangeFlag_ = false;
-    bool foreToBackFlag_ = false;
+    int appState = -1;
     bool isSupportMirrorToStream_ = false;
-    int32_t appStateChangeCounter_ = 0;
-    const int32_t foreGroundStateCountZero = 0;
-    const int32_t foreGroundStateCountOne = 1;
-    const int32_t foreGroundStateCountTwo = 2;
+    std::string castDeviceId_ = "0";
+    std::string castDeviceName_ = " ";
+    int32_t castDeviceType_ = 0;
+    const int32_t beginAddPos = 3;
+    const int32_t endDecPos = 4;
+    const int32_t typeAddPos = 2;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
