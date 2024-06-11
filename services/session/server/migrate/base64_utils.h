@@ -19,71 +19,52 @@
 #include <cstring>
 #include <string>
 #include <iostream>
+#include <vector>
 
 namespace OHOS::AVSession {
 class Base64Utils {
 public:
-    static std::string Base64Encode(const char *data)
+    static std::string base64_encode(const std::vector<uint8_t> &data)
     {
-        char out[MAX_LENGTH] = {0};
-        int dataLen = strlen(data);
-        if (dataLen == 0) {
-            out[0] = '\0';
-            return "";
-        }
-
-        int index = 0;
-        char c = '\0';
-        char lastC = '\0';
-
-        for (int i = 0; i < dataLen; i++) {
-            c = data[i];
-            switch (i % NUMBER_THREE) {
-                case 0:
-                    out[index++] = BASE64_EN[(c >> NUMBER_TWO) & 0x3f];
-                    break;
-                case 1:
-                    out[index++] = BASE64_EN[(lastC & 0x3) << NUMBER_FOUR | ((c >> NUMBER_FOUR) & 0xf)];
-                    break;
-                case NUMBER_TWO:
-                    out[index++] = BASE64_EN[(lastC & 0xf) << NUMBER_TWO | ((c >> NUMBER_SIX) & 0x3)];
-                    out[index++] = BASE64_EN[c & 0x3f];
-                    break;
-                default:
-                    break;
+        std::string encoded;
+        int i = 0;
+        uint8_t byte3[3] = {0};
+        uint8_t byte4[4] = {0};
+        for (uint8_t byte : data) {
+            byte3[i++] = byte;
+            if (i == 3) {
+                byte4[0] = (byte3[0] & 0xfc) >> 2;
+                byte4[1] = ((byte3[0] & 0x03) << 4) | ((byte3[1] & 0xf0) >> 4);
+                byte4[2] = ((byte3[1] & 0x0f) << 2) | ((byte3[2] & 0xc0) >> 6);
+                byte4[3] = byte3[2] & 0x3f;
+                for (i = 0; i < 4; i++) {
+                    encoded += base64_chars[byte4[i]];
+                }
+                i = 0;
             }
-            lastC = c;
         }
-
-        if (dataLen % NUMBER_THREE == NUMBER_ONE) {
-            out[index++] = BASE64_EN[(c & 0x3) << NUMBER_FOUR];
-            out[index++] = '=';
-            out[index++] = '=';
+        if (i != 0) {
+            for (int k = i; k < 3; k++) {
+                byte3[k] = 0;
+            }
+            byte4[0] = (byte3[0] & 0xfc) >> 2;
+            byte4[1] = ((byte3[0] & 0x03) << 4) | ((byte3[1] & 0xf0) >> 4);
+            byte4[2] = ((byte3[1] & 0x0f) << 2) | ((byte3[2] & 0xc0) >> 6);
+            for (int k = 0; k < i + 1; k++) {
+                encoded += base64_chars[byte4[k]];
+            }
+            while (i++ < 3) {
+                encoded += '=';
+            }
         }
-
-        if (dataLen % NUMBER_THREE == NUMBER_TWO) {
-            out[index++] = BASE64_EN[(c & 0xf) << NUMBER_TWO];
-            out[index++] = '=';
-        }
-        return std::string(out);
-}
-
+        return encoded;
+    }
 private:
-    static constexpr const int MAX_LENGTH = 1024;
-    static constexpr const int NUMBER_ONE = 1;
-    static constexpr const int NUMBER_TWO = 2;
-    static constexpr const int NUMBER_THREE = 3;
-    static constexpr const int NUMBER_FOUR = 4;
-    static constexpr const int NUMBER_SIX = 6;
-    static constexpr const char BASE64_EN[] = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
-        'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
-        'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-        'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-        's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2',
-        '3', '4', '5', '6', '7', '8', '9', '+', '/'
-    };
+    static const std::string base64_chars;
 };
+const std::string Base64::base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                         "abcdefghijklmnopqrstuvwxyz"
+                                         "0123456789+/";
 } // namespace OHOS::AVSession
 
 #endif // AVSESSION_BASE64_UTILS_H
