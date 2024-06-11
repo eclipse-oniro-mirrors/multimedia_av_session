@@ -34,9 +34,10 @@ public:
             byte3[i++] = byte;
             if (i == NUMBER_THREE) {
                 byte4[NUMBER_ZERO] = (byte3[NUMBER_ZERO] & 0xfc) >> NUMBER_TWO;
-                byte4[NUMBER_ONE] = ((byte3[NUMBER_ZERO] & 0x03) << NUMBER_FOUR) | 
-                    ((byte3[NUMBER_ONE] & 0xf0) >> NUMBER_FOUR);
-                byte4[NUMBER_TWO] = ((byte3[NUMBER_ONE] & 0x0f) << NUMBER_TWO) | ((byte3[NUMBER_TWO] & 0xc0) >> NUMBER_SIX);
+                byte4[NUMBER_ONE] =
+                    ((byte3[NUMBER_ZERO] & 0x03) << NUMBER_FOUR) | ((byte3[NUMBER_ONE] & 0xf0) >> NUMBER_FOUR);
+                byte4[NUMBER_TWO] =
+                    ((byte3[NUMBER_ONE] & 0x0f) << NUMBER_TWO) | ((byte3[NUMBER_TWO] & 0xc0) >> NUMBER_SIX);
                 byte4[NUMBER_THREE] = byte3[NUMBER_TWO] & 0x3f;
                 for (i = 0; i < NUMBER_FOUR; i++) {
                     encoded += base64_chars[byte4[i]];
@@ -49,7 +50,8 @@ public:
                 byte3[k] = 0;
             }
             byte4[NUMBER_ZERO] = (byte3[NUMBER_ZERO] & 0xfc) >> NUMBER_TWO;
-            byte4[NUMBER_ONE] = ((byte3[NUMBER_ZERO] & 0x03) << NUMBER_FOUR) | ((byte3[NUMBER_ONE] & 0xf0) >> NUMBER_FOUR);
+            byte4[NUMBER_ONE] =
+                ((byte3[NUMBER_ZERO] & 0x03) << NUMBER_FOUR) | ((byte3[NUMBER_ONE] & 0xf0) >> NUMBER_FOUR);
             byte4[NUMBER_TWO] = ((byte3[NUMBER_TWO] & 0x0f) << NUMBER_TWO) | ((byte3[NUMBER_TWO] & 0xc0) >> NUMBER_SIX);
             for (int k = 0; k < i + 1; k++) {
                 encoded += base64_chars[byte4[k]];
@@ -61,6 +63,12 @@ public:
         return encoded;
     }
 private:
+    static constexpr const int NUMBER_ZERO = 0;
+    static constexpr const int NUMBER_ONE = 1;
+    static constexpr const int NUMBER_TWO = 2;
+    static constexpr const int NUMBER_THREE = 3;
+    static constexpr const int NUMBER_FOUR = 4;
+    static constexpr const int NUMBER_SIX = 6;
     static const std::string base64_chars;
 };
 const std::string Base64Utils::base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
