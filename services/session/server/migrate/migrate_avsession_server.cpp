@@ -408,7 +408,7 @@ std::string MigrateAVSessionServer::RebuildPlayState(const AVPlaybackState &play
 
     uint8_t* pointer = reinterpret_cast<uint8_t*>(parcel.GetData());
     size_t len = parcel.GetDataSize();
-    std::vector<uint8_t> vec;
+    std::vector<uint8_t> vec(len);
     for (size_t i = 0; i < len; ++i) {
         vec[i] = pointer[i];
     }
