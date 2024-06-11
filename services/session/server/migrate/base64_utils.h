@@ -34,8 +34,9 @@ public:
             byte3[i++] = byte;
             if (i == NUMBER_THREE) {
                 byte4[NUMBER_ZERO] = (byte3[NUMBER_ZERO] & 0xfc) >> NUMBER_TWO;
-                byte4[NUMBER_ONE] = ((byte3[NUMBER_ZERO] & 0x03) << NUMBER_FOUR) | ((byte3[NUMBER_ONE] & 0xf0) >> NUMBER_FOUR);
-                byte4[NUMBER_TWO] = ((byte3[NUMBER_ONE] & 0x0f) << NUMBER_TWO) | ((byte3[2] & 0xc0) >> NUMBER_SIX);
+                byte4[NUMBER_ONE] = ((byte3[NUMBER_ZERO] & 0x03) << NUMBER_FOUR) | 
+                    ((byte3[NUMBER_ONE] & 0xf0) >> NUMBER_FOUR);
+                byte4[NUMBER_TWO] = ((byte3[NUMBER_ONE] & 0x0f) << NUMBER_TWO) | ((byte3[NUMBER_TWO] & 0xc0) >> NUMBER_SIX);
                 byte4[NUMBER_THREE] = byte3[NUMBER_TWO] & 0x3f;
                 for (i = 0; i < NUMBER_FOUR; i++) {
                     encoded += base64_chars[byte4[i]];
