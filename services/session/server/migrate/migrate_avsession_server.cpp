@@ -410,7 +410,7 @@ std::string MigrateAVSessionServer::RebuildPlayState(const AVPlaybackState &play
     size_t len = parcel.GetDataSize();
     std::vector<uint8_t> vec;
     for (size_t i = 0; i < len; ++i) {
-        vec.push_back(pointer[i]);
+        vec[i] = pointer[i];
     }
     std::string str = Base64Utils::base64_encode(vec);
     return str;
