@@ -28,32 +28,32 @@ public:
     {
         std::string encoded;
         int i = 0;
-        uint8_t byte3[3] = {0};
-        uint8_t byte4[4] = {0};
+        uint8_t byte3[NUMBER_THREE] = {0};
+        uint8_t byte4[NUMBER_FOUR] = {0};
         for (uint8_t byte : data) {
             byte3[i++] = byte;
-            if (i == 3) {
-                byte4[0] = (byte3[0] & 0xfc) >> 2;
-                byte4[1] = ((byte3[0] & 0x03) << 4) | ((byte3[1] & 0xf0) >> 4);
-                byte4[2] = ((byte3[1] & 0x0f) << 2) | ((byte3[2] & 0xc0) >> 6);
-                byte4[3] = byte3[2] & 0x3f;
-                for (i = 0; i < 4; i++) {
+            if (i == NUMBER_THREE) {
+                byte4[NUMBER_ZERO] = (byte3[NUMBER_ZERO] & 0xfc) >> NUMBER_TWO;
+                byte4[NUMBER_ONE] = ((byte3[NUMBER_ZERO] & 0x03) << NUMBER_FOUR) | ((byte3[NUMBER_ONE] & 0xf0) >> NUMBER_FOUR);
+                byte4[NUMBER_TWO] = ((byte3[NUMBER_ONE] & 0x0f) << NUMBER_TWO) | ((byte3[2] & 0xc0) >> NUMBER_SIX);
+                byte4[NUMBER_THREE] = byte3[NUMBER_TWO] & 0x3f;
+                for (i = 0; i < NUMBER_FOUR; i++) {
                     encoded += base64_chars[byte4[i]];
                 }
                 i = 0;
             }
         }
         if (i != 0) {
-            for (int k = i; k < 3; k++) {
+            for (int k = i; k < NUMBER_THREE; k++) {
                 byte3[k] = 0;
             }
-            byte4[0] = (byte3[0] & 0xfc) >> 2;
-            byte4[1] = ((byte3[0] & 0x03) << 4) | ((byte3[1] & 0xf0) >> 4);
-            byte4[2] = ((byte3[1] & 0x0f) << 2) | ((byte3[2] & 0xc0) >> 6);
+            byte4[NUMBER_ZERO] = (byte3[NUMBER_ZERO] & 0xfc) >> NUMBER_TWO;
+            byte4[NUMBER_ONE] = ((byte3[NUMBER_ZERO] & 0x03) << NUMBER_FOUR) | ((byte3[NUMBER_ONE] & 0xf0) >> NUMBER_FOUR);
+            byte4[NUMBER_TWO] = ((byte3[NUMBER_TWO] & 0x0f) << NUMBER_TWO) | ((byte3[NUMBER_TWO] & 0xc0) >> NUMBER_SIX);
             for (int k = 0; k < i + 1; k++) {
                 encoded += base64_chars[byte4[k]];
             }
-            while (i++ < 3) {
+            while (i++ < NUMBER_THREE) {
                 encoded += '=';
             }
         }
@@ -62,7 +62,7 @@ public:
 private:
     static const std::string base64_chars;
 };
-const std::string Base64::base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const std::string Base64Utils::base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                          "abcdefghijklmnopqrstuvwxyz"
                                          "0123456789+/";
 } // namespace OHOS::AVSession
