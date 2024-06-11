@@ -23,8 +23,15 @@
 
 namespace OHOS::AVSession {
 class Base64Utils {
+    static const int NUMBER_ZERO = 0;
+    static const int NUMBER_ONE = 1;
+    static const int NUMBER_TWO = 2;
+    static const int NUMBER_THREE = 3;
+    static const int NUMBER_FOUR = 4;
+    static const int NUMBER_SIX = 6;
+
 public:
-    static std::string base64_encode(const std::vector<uint8_t> &data)
+    static std::string Base64Encode(const std::vector<uint8_t> &data)
     {
         std::string encoded;
         int i = 0;
@@ -62,18 +69,13 @@ public:
         }
         return encoded;
     }
+
 private:
-    static constexpr const int NUMBER_ZERO = 0;
-    static constexpr const int NUMBER_ONE = 1;
-    static constexpr const int NUMBER_TWO = 2;
-    static constexpr const int NUMBER_THREE = 3;
-    static constexpr const int NUMBER_FOUR = 4;
-    static constexpr const int NUMBER_SIX = 6;
     static const std::string base64_chars;
 };
 const std::string Base64Utils::base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                         "abcdefghijklmnopqrstuvwxyz"
-                                         "0123456789+/";
+                                              "abcdefghijklmnopqrstuvwxyz"
+                                              "0123456789+/";
 } // namespace OHOS::AVSession
 
 #endif // AVSESSION_BASE64_UTILS_H
