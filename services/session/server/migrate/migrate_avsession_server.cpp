@@ -392,22 +392,27 @@ int32_t MigrateAVSessionServer::ConvertStateFromSingleToDouble(int32_t state)
 
 std::string MigrateAVSessionServer::RebuildPlayState(const AVPlaybackState &playbackState)
 {
+    int64_t actions = 1911;
     Parcel parcel;
     parcel.WriteInt32(ConvertStateFromSingleToDouble(playbackState.GetState()))
         && parcel.WriteInt64(playbackState.GetPosition().elapsedTime_)
         && parcel.WriteFloat(playbackState.GetSpeed())
         && parcel.WriteInt64(playbackState.GetPosition().updateTime_)
         && parcel.WriteInt64(playbackState.GetBufferedTime())
-        && parcel.WriteInt64(-1)
+        && parcel.WriteInt64(actions)
         && parcel.WriteInt32(-1)
         && parcel.WriteInt64(playbackState.GetActiveItemId())
         && parcel.WriteInt32(1)
         && parcel.WriteCString("")
         && parcel.WriteInt32(-1);
 
-    uintptr_t pointer = parcel.GetData();
-    std::string contentChar = reinterpret_cast<char *>(pointer);
-    std::string str = Base64Utils::Base64Encode(contentChar.c_str());
+    uint8_t* pointer = reinterpret_cast<uint8_t*>(parcel.GetData());
+    size_t len = parcel.GetDataSize();
+    std::vector<uint8_t> vec(len);
+    for (size_t i = 0; i < len; ++i) {
+        vec[i] = pointer[i];
+    }
+    std::string str = Base64Utils::Base64Encode(vec);
     return str;
 }
 
