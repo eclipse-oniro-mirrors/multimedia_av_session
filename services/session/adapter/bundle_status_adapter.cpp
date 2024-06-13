@@ -126,11 +126,11 @@ bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
-    CHECK_AND_RETURN_RET_LOG(nlohmann::json::is_string(profileValues), false, "json type error");
+    CHECK_AND_RETURN_RET_LOG(profileValues["insightIntents"].is_string(), false, "json type error");
     for (const auto& value : profileValues["insightIntents"]) {
         std::string insightName = value["intentName"];
         CHECK_AND_RETURN_RET_LOG(value.contains("uiAbility"), false, "json do not contains uiAbility");
-        CHECK_AND_RETURN_RET_LOG(nlohmann::json::is_string(value), false, "json type error");
+        CHECK_AND_RETURN_RET_LOG(value["uiAbility"].is_string(), false, "json type error");
         nlohmann::json abilityValue = value["uiAbility"];
         if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
             continue;
@@ -140,7 +140,7 @@ bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
             return false;
         }
         CHECK_AND_RETURN_RET_LOG(abilityValue.contains("executeMode"), false, "json do not contains executeMode");
-        CHECK_AND_RETURN_RET_LOG(nlohmann::json::is_string(abilityValue), false, "json type error");
+        CHECK_AND_RETURN_RET_LOG(abilityValue["executeMode"].is_string(), false, "json type error");
         auto modeValues = abilityValue["executeMode"];
         if (modeValues.is_discarded()) {
             SLOGE("executeMode discarded=%{public}d", modeValues.is_discarded());
