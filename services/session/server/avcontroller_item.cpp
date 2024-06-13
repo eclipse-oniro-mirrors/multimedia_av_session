@@ -89,7 +89,7 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     data = session_->GetMetaData();
     if (CheckIfFromSession()) {
         SLOGI("ImgSetLoop get controller isFromSession true");
-        if (data.GetMediaImage() != nullptr) {
+        if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
             SLOGI("ImgSetLoop do img clear");
             data.GetMediaImage()->Clear();
         }
@@ -364,7 +364,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         std::string uri = metaOut.GetMediaImageUri();
         if (CheckIfFromSession()) {
-            if (data.GetMediaImage() != nullptr) {
+            if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
                 SLOGI("ImgSetLoop get controller isFromSession true, ImgSetLoop do img clear");
                 data.GetMediaImage()->Clear();
             }
