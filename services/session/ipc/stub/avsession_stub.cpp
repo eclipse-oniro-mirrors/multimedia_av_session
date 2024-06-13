@@ -127,6 +127,33 @@ int32_t AVSessionStub::HandleSetAVPlaybackState(MessageParcel& data, MessageParc
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::SetImageData(AVMetaData& meta, const char *buffer, int twoImageLength)
+{
+    int mediaImageLength = meta.GetMediaLength();
+    auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::vector<uint8_t> mediaImageBuffer;
+    CHECK_AND_RETURN_RET_LOG(mediaImageLength <= twoImageLength, ERR_NONE, "Maybe cuase Out-of-bunds read");
+    for (int i = 0; i < mediaImageLength; i++) {
+        mediaImageBuffer.push_back((uint8_t)buffer[i]);
+    }
+    mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
+    meta.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
+    mediaPixelMap = nullptr;
+    delete mediaPixelMap;
+    
+    auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::vector<uint8_t> avQueueImageBuffer;
+    for (int i = mediaImageLength; i < twoImageLength; i++) {
+        avQueueImageBuffer.push_back((uint8_t)buffer[i]);
+    }
+    avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
+    meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
+    avQueuePixelMap = nullptr;
+    delete avQueuePixelMap;
+    
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionStub::SetAVMetaData");
@@ -155,24 +182,8 @@ int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& r
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetAVMetaData failed");
         return ERR_NONE;
     }
-    
-    int mediaImageLength = meta.GetMediaLength();
-    auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
-    std::vector<uint8_t> mediaImageBuffer;
-    CHECK_AND_RETURN_RET_LOG(mediaImageLength <= twoImageLength, ERR_NONE, "Maybe cuase Out-of-bunds read");
-    for (int i = 0; i < mediaImageLength; i++) {
-        mediaImageBuffer.push_back((uint8_t)buffer[i]);
-    }
-    mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
-    meta.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
-    
-    auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
-    std::vector<uint8_t> avQueueImageBuffer;
-    for (int i = mediaImageLength; i < twoImageLength; i++) {
-        avQueueImageBuffer.push_back((uint8_t)buffer[i]);
-    }
-    avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
-    meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
+
+    CHECK_AND_RETURN_RET_LOG(!SetImageData(meta, buffer, twoImageLength), ERR_NONE, "SetImageData fail");
 
     int32_t ret = SetAVMetaData(meta);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
