@@ -60,6 +60,8 @@ private:
 
     int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
+    int32_t SetImageData(AVMetaData& meta, const char *buffer, int twoImageLength);
+
     int32_t HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply);
