@@ -985,7 +985,8 @@ sptr <AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag
     SLOGI("CreateSessionInner enter");
     CHECK_AND_RETURN_RET_LOG(!tag.empty(), nullptr, "tag is empty");
     CHECK_AND_RETURN_RET_LOG(type == AVSession::SESSION_TYPE_AUDIO || type == AVSession::SESSION_TYPE_VIDEO
-        || type == AVSession::SESSION_TYPE_VOICE_CALL, nullptr, "type is invalid");
+        || type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL,
+        nullptr, "type is invalid");
     CHECK_AND_RETURN_RET_LOG(!elementName.GetBundleName().empty() && !elementName.GetAbilityName().empty(),
         nullptr, "element is invalid");
     std::regex nameRegex("[A-Za-z\\w\\.]*");
@@ -1051,8 +1052,8 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
         auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), session);
-        if ((type == AVSession::SESSION_TYPE_VOICE_CALL || (tag == "anco_audio" && GetCallingUid() == ancoUid)) &&
-            it == sessionListForFront_.end()) {
+        if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL ||
+            (tag == "anco_audio" && GetCallingUid() == ancoUid)) && it == sessionListForFront_.end()) {
             SLOGI(" front session add voice_call session=%{public}s", session->GetBundleName().c_str());
             sessionListForFront_.push_front(session);
         }

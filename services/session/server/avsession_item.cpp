@@ -81,6 +81,9 @@ std::string AVSessionItem::GetSessionType()
     if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
         return "voice_call";
     }
+    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO_CALL) {
+        return "video_call";
+    }
     return "audio";
 }
 
@@ -476,7 +479,8 @@ int32_t AVSessionItem::Activate()
         SLOGI("pid=%{public}d", pid);
         controller->HandleActiveStateChange(true);
     }
-    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
+    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL ||
+        descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO_CALL) {
         SLOGI("set audio scene for phone chat start");
         AudioSystemManager *audioManager = AudioSystemManager::GetInstance();
         AudioScene audioScene = AudioScene::AUDIO_SCENE_CALL_START;
@@ -495,7 +499,8 @@ int32_t AVSessionItem::Deactivate()
         SLOGI("pid=%{public}d", pid);
         controller->HandleActiveStateChange(false);
     }
-    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
+    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL ||
+        descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO_CALL) {
         SLOGI("set audio scene for phone chat end");
         AudioSystemManager *audioManager = AudioSystemManager::GetInstance();
         AudioScene audioScene = AudioScene::AUDIO_SCENE_CALL_END;

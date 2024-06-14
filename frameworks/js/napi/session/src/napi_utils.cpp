@@ -44,6 +44,8 @@ int32_t NapiUtils::ConvertSessionType(const std::string& typeString)
         return AVSession::SESSION_TYPE_VIDEO;
     } else if (typeString == "voice_call") {
         return AVSession::SESSION_TYPE_VOICE_CALL;
+    } else if (typeString == "video_call") {
+        return AVSession::SESSION_TYPE_VIDEO_CALL;
     } else {
         return AVSession::SESSION_TYPE_INVALID;
     }
@@ -57,6 +59,8 @@ std::string NapiUtils::ConvertSessionType(int32_t type)
         return "video";
     } else if (type == AVSession::SESSION_TYPE_VOICE_CALL) {
         return "voice_call";
+    } else if (type == AVSession::SESSION_TYPE_VIDEO_CALL) {
+        return "video_call";
     } else {
         return "";
     }
