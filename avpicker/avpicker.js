@@ -351,7 +351,6 @@ export class AVCastPicker extends ViewPU {
                 this.extensionProxy = n8;
             });
             UIExtensionComponent.onReceive((l8) => {
-                var p8;
                 if (JSON.stringify(l8.state) !== undefined) {
                     console.info(TAG, `picker state change : ${JSON.stringify(l8.state)}`);
                     if (this.onStateChange != null) {
@@ -367,10 +366,11 @@ export class AVCastPicker extends ViewPU {
                 if (JSON.stringify(l8.deviceList) !== undefined) {
                     console.info(TAG, `picker device list : ${JSON.stringify(l8.deviceList)}`);
                     this.deviceList = JSON.parse(JSON.stringify(l8.deviceList));
-                    if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && ((p8 = this.deviceList) === null || p8 === void 0 ?
-                        void 0 : p8.length) === 2 && !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList)) &&
-                        (this.sessionType === 'voice_call' || this.sessionType === 'video_call')) ||
-                        this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+                    let u = this.deviceList.length === 2 && !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
+                    let v = this.deviceList === null || this.deviceList.length === 0;
+                    let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
+                    let x = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && w && (v || u);
+                    if (x || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
                         this.isMenuShow = false;
                     }
                 }
@@ -404,11 +404,11 @@ export class AVCastPicker extends ViewPU {
                 }
             });
             UIExtensionComponent.onClick(() => {
-                var q8;
-                if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && ((q8 = this.deviceList) === null || q8 === void 0 ?
-                    void 0 : q8.length) === 2 && !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList)) &&
-                    (this.sessionType === 'voice_call' || this.sessionType === 'video_call')) ||
-                    this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+                let u = this.deviceList.length === 2 && !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
+                let v = this.deviceList === null || this.deviceList.length === 0;
+                let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
+                let x = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && w && (v || u);
+                if (x || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
                     this.isMenuShow = false;
                 } else {
                     this.isMenuShow = !this.isMenuShow;

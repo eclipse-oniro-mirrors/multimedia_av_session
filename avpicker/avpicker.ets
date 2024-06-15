@@ -244,9 +244,11 @@ export struct AVCastPicker {
         if (JSON.stringify(data['deviceList']) !== undefined) {
           console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
           this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
-          if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length === 2 &&
-            !this.hasExtDevice(this.deviceList) && (this.sessionType === 'voice_call' ||
-            this.sessionType === 'video_call')) || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+          let hasOnlySpeakerandEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
+          let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
+          let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
+          let isExtMenuScene = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && isCalling && (hasNoDevices || hasOnlySpeakerandEarpiece);
+          if (isExtMenuScene || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
             this.isMenuShow = false;
           }
         }
@@ -280,9 +282,11 @@ export struct AVCastPicker {
         }
       })
       .onClick(() => {
-        if ((this.pickerStyle === AVCastPickerStyle.STYLE_MENU && this.deviceList?.length === 2 &&
-          !this.hasExtDevice(this.deviceList) && (this.sessionType === 'voice_call' ||
-          this.sessionType === 'video_call')) || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+        let hasOnlySpeakerandEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
+        let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
+        let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
+        let isExtMenuScene = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && isCalling && (hasNoDevices || hasOnlySpeakerandEarpiece);
+        if (isExtMenuScene || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
           this.isMenuShow = false;
         } else {
           this.isMenuShow = !this.isMenuShow;
