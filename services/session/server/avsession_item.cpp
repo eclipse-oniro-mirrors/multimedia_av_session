@@ -580,6 +580,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     castHandle_ = castHandle;
+    SLOGI("RegisterListenerStreamToCast check handle set to %{public}ld", castHandle_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     counter_ = firstStep;
     AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
@@ -743,12 +744,17 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     SLOGI("Start cast process");
     std::lock_guard castHandleLockGuard(castHandleLock_);
 
+    // unregister pre castSession callback to avoid previous session timeout disconnect influence current session
+    if (castHandle_ > 0) {
+        SLOGI("cast check with pre cast alive %{public}ld, unregister callback", castHandle_);
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+    }
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
     std::lock_guard lockGuard(castHandleLock_);
     castHandle_ = castHandle;
-    SLOGI("start cast handle is %{public}ld", castHandle_);
+    SLOGI("start cast check handle set to %{public}ld", castHandle_);
 
     int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
 
