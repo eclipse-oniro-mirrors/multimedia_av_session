@@ -55,6 +55,7 @@ export class AVCastPicker extends ViewPU {
         this.pickerClickTime = -1;
         this.customPicker = undefined;
         this.setInitiallyProvidedValue(e11);
+        this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
     }
 
@@ -173,6 +174,12 @@ export class AVCastPicker extends ViewPU {
 
     set touchMenuItemIndex(t10) {
         this.__touchMenuItemIndex.set(t10);
+    }
+
+    MenuStateChange() {
+        if (this.extensionProxy != null) {
+            this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
+        }
     }
 
     initialRender() {
