@@ -100,7 +100,7 @@ export struct AVCastPicker {
   /**
    * Whether to display the menu.
    */
-  @State isMenuShow: boolean = false;
+  @State@Watch('MenuStateChange') isMenuShow: boolean = false;
 
   /**
    * Touch item index.
@@ -123,6 +123,12 @@ export struct AVCastPicker {
    * Custom builder from application
    */
   @BuilderParam customPicker: (() => void)
+
+  MenuStateChange() {
+    if (this.extensionProxy != null) {
+      this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
+    }
+  }
 
   build() {
     Column() {
