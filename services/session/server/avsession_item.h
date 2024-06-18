@@ -24,6 +24,7 @@
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"
+#include "session_xcollie.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"

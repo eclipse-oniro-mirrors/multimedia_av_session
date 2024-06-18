@@ -15,6 +15,11 @@ declare_args() {
   multimedia_av_session_enable_background_audio_control = true
   multimedia_av_session_enable_trace_control = true
   multimedia_av_session_enable_sysevent_control = true
+  multimedia_av_session_enable_hicollie = true
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.hiviewdfx_hicollie)) {
+    multimedia_av_session_enable_hicollie = false
+  }
 }
 
 commontype_dir = "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/common_type"
