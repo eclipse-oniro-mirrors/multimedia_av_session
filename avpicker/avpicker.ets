@@ -57,6 +57,23 @@ enum DeviceSource {
   CAST
 }
 
+enum ColorMode {
+  /**
+   * the color mode is not set.
+   */
+  COLOR_MODE_NOT_SET = -1,
+
+  /**
+   * Dark mode.
+   */
+  COLOR_MODE_DARK = 0,
+
+  /**
+   * Light mode.
+   */
+  COLOR_MODE_LIGHT = 1
+}
+
 /**
  * menuItem device info
  */
@@ -124,6 +141,11 @@ export struct AVCastPicker {
    */
   @BuilderParam customPicker: (() => void)
 
+  /**
+   * Color mode
+   */
+  @State colorMode: number = ColorMode.COLOR_MODE_NOT_SET;
+
   MenuStateChange() {
     if (this.extensionProxy != null) {
       this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
@@ -158,11 +180,11 @@ export struct AVCastPicker {
               Image($r(item.deviceIconName))
                 .width(24)
                 .height(24)
-                .fillColor($r('sys.color.ohos_id_color_primary'))
+                .fillColor(this.colorMode === ColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000')
               Text(item.deviceName)
                 .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                .fontColor(item.isConnected ? $r('sys.color.ohos_id_color_text_primary_activated')
-                  : $r('sys.color.ohos_id_color_text_primary'))
+                .fontColor(item.isConnected ? $r('sys.color.ohos_id_color_text_primary_activated') :
+                  (this.colorMode === ColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'))
                 .width(item.isConnected ? 144 : 168)
                 .padding({
                   left: 8,
@@ -203,7 +225,7 @@ export struct AVCastPicker {
             Divider()
               .height(1)
               .width(172)
-              .color($r('sys.color.ohos_id_color_list_separator'))
+              .color(this.colorMode === ColorMode.COLOR_MODE_DARK ? '#33FFFFFF' : '#33000000')
               .padding({ right: 12 })
           }
         }
@@ -272,6 +294,11 @@ export struct AVCastPicker {
         if (JSON.stringify(data['isShowMenu']) !== undefined) {
           console.info(TAG, `isShowMenu : ${JSON.stringify(data['isShowMenu'])}`);
           this.isMenuShow = data['isShowMenu'] as boolean;
+        }
+
+        if (JSON.stringify(data['colorMode']) !== undefined) {
+          console.info(TAG, `colorMode : ${JSON.stringify(data['colorMode'])}`);
+          this.colorMode = data['colorMode'] as number;
         }
       })
       .size({ width: '100%', height: '100%' })
