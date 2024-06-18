@@ -126,7 +126,6 @@ bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
-    CHECK_AND_RETURN_RET_LOG(profileValues["insightIntents"].is_string(), false, "json type error");
     for (const auto& value : profileValues["insightIntents"]) {
         std::string insightName = value["intentName"];
         CHECK_AND_RETURN_RET_LOG(value.contains("uiAbility"), false, "json do not contains uiAbility");
