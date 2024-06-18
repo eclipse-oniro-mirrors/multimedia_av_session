@@ -37,6 +37,13 @@ export let DeviceSource;
     j11[j11.CAST = 1] = 'CAST';
 })(DeviceSource || (DeviceSource = {}));
 
+let ColorMode;
+(function(u11) {
+    u11[u11.COLOR_MODE_NOT_SET = -1] = 'COLOR_MODE_NOT_SET';
+    u11[u11.COLOR_MODE_DARK = 0] = 'COLOR_MODE_DARK';
+    u11[u11.COLOR_MODE_LIGHT = 1] = 'COLOR_MODE_LIGHT';
+})(ColorMode || (ColorMode = {}));
+
 export class AVCastPicker extends ViewPU {
     constructor(d11, e11, f11, g11 = -1, h11 = undefined, i11) {
         super(d11, f11, g11, i11);
@@ -53,6 +60,7 @@ export class AVCastPicker extends ViewPU {
         this.onStateChange = undefined;
         this.extensionProxy = null;
         this.pickerClickTime = -1;
+        this.__colorMode = new ObservedPropertySimplePU(ColorMode.COLOR_MODE_NOT_SET, this, 'colorMode');
         this.customPicker = undefined;
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
@@ -93,6 +101,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.customPicker !== undefined) {
             this.customPicker = c11.customPicker;
         }
+        if (c11.colorMode !== undefined) {
+            this.colorMode = c11.colorMode;
+        }
     }
 
     updateStateVars(b11) {
@@ -106,6 +117,7 @@ export class AVCastPicker extends ViewPU {
         this.__pickerStyle.purgeDependencyOnElmtId(a11);
         this.__isMenuShow.purgeDependencyOnElmtId(a11);
         this.__touchMenuItemIndex.purgeDependencyOnElmtId(a11);
+        this.__colorMode.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -116,6 +128,7 @@ export class AVCastPicker extends ViewPU {
         this.__pickerStyle.aboutToBeDeleted();
         this.__isMenuShow.aboutToBeDeleted();
         this.__touchMenuItemIndex.aboutToBeDeleted();
+        this.__colorMode.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -174,6 +187,14 @@ export class AVCastPicker extends ViewPU {
 
     set touchMenuItemIndex(t10) {
         this.__touchMenuItemIndex.set(t10);
+    }
+
+    get colorMode() {
+        return this.__colorMode.get();
+    }
+
+    set colorMode(z10) {
+        this.__colorMode.set(z10);
     }
 
     MenuStateChange() {
@@ -259,9 +280,7 @@ export class AVCastPicker extends ViewPU {
                         'moduleName': '__harDefaultModuleName__' });
                     Image.width(24);
                     Image.height(24);
-                    Image.fillColor({ 'id': -1, 'type': 10001,
-                        params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultModuleName__',
-                        'moduleName': '__harDefaultModuleName__' });
+                    Image.fillColor(this.colorMode === ColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000');
                 }, Image);
                 this.observeComponentCreation2((w9, x9) => {
                     Text.create(x8.deviceName);
@@ -269,10 +288,9 @@ export class AVCastPicker extends ViewPU {
                         params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultModuleName__',
                         'moduleName': '__harDefaultModuleName__' });
                     Text.fontColor(x8.isConnected ? { 'id': -1, 'type': 10001,
-                        params: ['sys.color.ohos_id_color_text_primary_activated'], 'bundleName': '__harDefaultModuleName__',
-                        'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001,
-                        params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultModuleName__',
-                        'moduleName': '__harDefaultModuleName__' });
+                        params: ['sys.color.ohos_id_color_text_primary_activated'],
+                        'bundleName': '__harDefaultModuleName__', 'moduleName': '__harDefaultModuleName__' } :
+                        (this.colorMode === ColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'));
                     Text.width(x8.isConnected ? 144 : 168);
                     Text.padding({
                         left: 8,
@@ -320,9 +338,8 @@ export class AVCastPicker extends ViewPU {
                                 Divider.create();
                                 Divider.height(1);
                                 Divider.width(172);
-                                Divider.color({ 'id': -1, 'type': 10001,
-                                    params: ['sys.color.ohos_id_color_list_separator'], 'bundleName': '__harDefaultModuleName__',
-                                    'moduleName': '__harDefaultModuleName__' });
+                                Divider.color(this.colorMode === ColorMode.COLOR_MODE_DARK ?
+                                    '#33FFFFFF' : '#33000000');
                                 Divider.padding({ right: 12 });
                             }, Divider);
                         });
@@ -395,6 +412,11 @@ export class AVCastPicker extends ViewPU {
                 if (JSON.stringify(l8.isShowMenu) !== undefined) {
                     console.info(TAG, `isShowMenu : ${l8.isShowMenu}`);
                     this.isMenuShow = l8.isShowMenu;
+                }
+
+                if (JSON.stringify(l8.colorMode) !== undefined) {
+                    console.info(TAG, `colorMode : ${l8.colorMode}`);
+                    this.colorMode = l8.colorMode;
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
