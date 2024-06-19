@@ -23,7 +23,7 @@
 
 namespace OHOS::AVSession {
 SessionXCollie::SessionXCollie(const std::string& tag, uint32_t timeoutSeconds,
-    std::function<void(void )> func, void arg, uint32_t flag)
+    std::function<void(void *)> func, void *arg, uint32_t flag)
 {
     tag_ = tag;
     #ifdef HICOLLIE_ENABLE
@@ -32,8 +32,8 @@ SessionXCollie::SessionXCollie(const std::string& tag, uint32_t timeoutSeconds,
     id_ = -1;
     #endif
     isCanceled_ = false;
-    SLOGD("start SessionXCollie, tag:%{public}s,timeout:%{public}u,flag:%{public}u,id:%{public}d",
-    tag_.c_str(), timeoutSeconds, flag, id_);
+    SLOGD("start SessionXCollie, tag:%{public}s, timeout:%{public}u, flag:%{public}u, id:%{public}d",
+        tag_.c_str(), timeoutSeconds, flag, id_);
 }
 
 SessionXCollie::~SessionXCollie()

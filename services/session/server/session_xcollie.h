@@ -16,13 +16,13 @@
 #ifndef SESSION_XCOLLIE_H
 #define SESSION_XCOLLIE_H
 
-#include
+#include <string>
 
 namespace OHOS::AVSession {
 class SessionXCollie {
 public:
     SessionXCollie(const std::string& tag, uint32_t timeoutSeconds = 10,
-    std::function<void(void )> func = nullptr, void arg = nullptr, uint32_t flag = 1);
+        std::function<void(void *)> func = nullptr, void *arg = nullptr, uint32_t flag = 1);
     ~SessionXCollie();
 
     void CancelSessionXCollie();
