@@ -224,7 +224,7 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
             res = true;
         }
         if (insightName == PLAY_AUDIO) {
-            wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(INTERFACE_TYPE, assetId));
+            wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(interfaceType, assetId));
             res = true;
         }
         executeParam.insightIntentParam_ = wantParam;

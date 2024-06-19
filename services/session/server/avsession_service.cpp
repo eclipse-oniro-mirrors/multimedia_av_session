@@ -61,6 +61,7 @@
 #include "avsession_service.h"
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
+#include "os_account_manager.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -361,7 +362,8 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("same session");
-        if (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") {
+        if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
+            topSession_->GetUid() != ancoUid) {
             AVSessionService::NotifySystemUI(nullptr, true);
             sessionPublishedMap_[info.uid] = true;
         }
@@ -371,7 +373,8 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     for (const auto& session : sessionListForFront_) {
         if (session->GetUid() == info.uid) {
             UpdateTopSession(session);
-            if (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") {
+            if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
+                topSession_->GetUid() != ancoUid) {
                 AVSessionService::NotifySystemUI(nullptr, true);
                 sessionPublishedMap_[info.uid] = true;
             }
@@ -2677,14 +2680,16 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     request.SetNotificationId(0);
     request.SetContent(content);
     request.SetCreatorUid(avSessionUid);
-    request.SetOwnerUid(uid);
     request.SetUnremovable(true);
     request.SetInProgress(true);
+    int32_t userId;
+    auto res = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    request.SetCreatorUserId((res == 0) ? userId : 0);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
     request.SetWantAgent(wantAgent);
     result = Notification::NotificationHelper::PublishNotification(request);
-    SLOGI("AVSession service PublishNotification uid %{public}d, result %{public}d", uid, result);
+    SLOGI("PublishNotification uid %{public}d, userId %{public}d, result %{public}d", uid, userId, result);
 }
 
 void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction)
