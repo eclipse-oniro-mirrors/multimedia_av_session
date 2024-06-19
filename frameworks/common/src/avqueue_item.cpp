@@ -63,6 +63,10 @@ std::shared_ptr<AVMediaDescription> AVQueueItem::GetDescription() const
 
 bool AVQueueItem::IsValid() const
 {
+    if (description_ == nullptr) {
+        SLOGE("checkIsValid queueItem without description");
+        return false;
+    }
     return (*description_).IsValid();
 }
 
