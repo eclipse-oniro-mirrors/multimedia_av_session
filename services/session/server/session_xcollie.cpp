@@ -22,7 +22,7 @@
 #endif
 
 namespace OHOS::AVSession {
-SessionXCollie::SessionXCollie(const std::string& tag, uint32_t timeoutSeconds,
+explicit SessionXCollie::SessionXCollie(const std::string& tag, uint32_t timeoutSeconds,
     std::function<void(void *)> func, void *arg, uint32_t flag)
 {
     tag_ = tag;
