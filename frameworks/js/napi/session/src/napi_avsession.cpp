@@ -521,8 +521,7 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
         SLOGI("DoDownload complete with ret %{public}d", ret);
         CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, AVSESSION_ERROR, "doMetaDataSet without session");
         if (ret != AVSESSION_SUCCESS) {
-            data.SetMediaImageUri(uri);
-            sessionPtr->SetAVMetaData(data);
+            SLOGE("DoDownload failed but not repeat setmetadata again");
         } else {
             return true;
         }
