@@ -54,8 +54,7 @@
           "distributed_notification_service",
           "relational_store",
           "background_task_mgr",
-          "bluetooth",
-          "hicollie"
+          "bluetooth"
         ],
         "third_party": [
           "openssl",
