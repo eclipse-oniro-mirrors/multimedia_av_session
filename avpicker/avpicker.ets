@@ -258,9 +258,14 @@ export struct AVCastPicker {
           this.extensionProxy = proxy;
       })
       .onReceive((data) => {
+        if (JSON.stringify(data['pickerStyle']) !== undefined) {
+          console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
+          this.pickerStyle = data['pickerStyle'] as AVCastPickerStyle;
+        }
+
         if (JSON.stringify(data['state']) !== undefined) {
           console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
-          if (this.onStateChange != null) {
+          if (this.onStateChange != null && this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
             if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
               this.onStateChange(AVCastPickerState.STATE_APPEARING);
             } else {
@@ -279,11 +284,6 @@ export struct AVCastPicker {
           if (isExtMenuScene || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
             this.isMenuShow = false;
           }
-        }
-
-        if (JSON.stringify(data['pickerStyle']) !== undefined) {
-          console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
-          this.pickerStyle = data['pickerStyle'] as AVCastPickerStyle;
         }
 
         if (JSON.stringify(data['sessionType']) !== undefined) {
@@ -306,12 +306,14 @@ export struct AVCastPicker {
         placement: Placement.TopRight,
         onDisappear: () => {
           this.isMenuShow = false;
+          this.menuShowStateCallback(this.isMenuShow);
         },
         onAppear: () => {
           if (this.extensionProxy != null && this.pickerClickTime !== -1) {
               this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime});
               this.pickerClickTime = -1;
           }
+          this.menuShowStateCallback(this.isMenuShow);
         }
       })
       .onClick(() => {
@@ -338,6 +340,14 @@ export struct AVCastPicker {
       }
     }
     return false;
+  }
+
+  private menuShowStateCallback(isMenuShow: boolean) {
+    if (this.onStateChange != null && this.pickerStyle === AVCastPickerStyle.STYLE_MENU) {
+      let menuShowState: AVCastPickerState = isMenuShow ?
+        AVCastPickerState.STATE_APPEARING : AVCastPickerState.STATE_DISAPPEARING;
+      this.onStateChange(menuShowState);
+    }
   }
 
   @Builder

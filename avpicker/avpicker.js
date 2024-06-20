@@ -375,9 +375,14 @@ export class AVCastPicker extends ViewPU {
                 this.extensionProxy = n8;
             });
             UIExtensionComponent.onReceive((l8) => {
+                if (JSON.stringify(l8.pickerStyle) !== undefined) {
+                    console.info(TAG, `picker style : ${JSON.stringify(l8.pickerStyle)}`);
+                    this.pickerStyle = l8.pickerStyle;
+                }
+
                 if (JSON.stringify(l8.state) !== undefined) {
                     console.info(TAG, `picker state change : ${JSON.stringify(l8.state)}`);
-                    if (this.onStateChange != null) {
+                    if (this.onStateChange != null  && this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
                         if (parseInt(JSON.stringify(l8.state)) === AVCastPickerState.STATE_APPEARING) {
                             this.onStateChange(AVCastPickerState.STATE_APPEARING);
                         }
@@ -397,11 +402,6 @@ export class AVCastPicker extends ViewPU {
                     if (x || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
                         this.isMenuShow = false;
                     }
-                }
-
-                if (JSON.stringify(l8.pickerStyle) !== undefined) {
-                    console.info(TAG, `picker style : ${JSON.stringify(l8.pickerStyle)}`);
-                    this.pickerStyle = l8.pickerStyle;
                 }
 
                 if (JSON.stringify(l8.sessionType) !== undefined) {
@@ -424,12 +424,14 @@ export class AVCastPicker extends ViewPU {
                 placement: Placement.TopRight,
                 onDisappear: () => {
                   this.isMenuShow = false;
+                  this.menuShowStateCallback(this.isMenuShow);
                 },
                 onAppear: () => {
                     if (this.extensionProxy != null && this.pickerClickTime !== -1) {
                         this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
                         this.pickerClickTime = -1;
                     }
+                    this.menuShowStateCallback(this.isMenuShow);
                 }
             });
             UIExtensionComponent.onClick(() => {
@@ -457,6 +459,13 @@ export class AVCastPicker extends ViewPU {
             }
         }
         return false;
+    }
+
+    menuShowStateCallback(k) {
+        if (this.onStateChange != null && this.pickerStyle === AVCastPickerStyle.STYLE_MENU) {
+            let l = k ? AVCastPickerState.STATE_APPEARING : AVCastPickerState.STATE_DISAPPEARING;
+            this.onStateChange(l);
+        }
     }
 
     buildCustomPicker(s7 = null) {
