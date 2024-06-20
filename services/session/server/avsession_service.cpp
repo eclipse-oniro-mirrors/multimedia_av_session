@@ -83,7 +83,6 @@ static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
 static const std::string MIGRATE_STUB_SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
     std::string("libavsession_migration.z.so");
 static const int32_t CAST_ENGINE_SA_ID = 65546;
-const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
 #ifdef BLUETOOTH_ENABLE
 static std::shared_ptr<DetectBluetoothHostObserver> g_bluetoothObserver =
@@ -157,7 +156,6 @@ void AVSessionService::OnStart()
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
-    SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
 }
 
 void AVSessionService::OnDump()
