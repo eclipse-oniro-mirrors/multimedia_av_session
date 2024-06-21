@@ -442,6 +442,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         auto iter = sessionPublishedMap_.find(sessionItem->GetUid());
         if (iter != sessionPublishedMap_.end() && !sessionPublishedMap_[sessionItem->GetUid()]) {
             SLOGI("RepublishNotification for uid=%{public}d", sessionItem->GetUid());
+            UpdateTopSession(sessionItem);
             AVSessionDescriptor selectSession = sessionItem->GetDescriptor();
             NotifySystemUI(&selectSession, true);
         }
