@@ -55,7 +55,11 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
 
 AVSessionItem::~AVSessionItem()
 {
-    SLOGD("destroy id=%{public}s", AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str());
+    SLOGI("destroy with activeCheck id=%{public}s", AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str());
+    if (IsActive()) {
+        SLOGI("destroy with activate session, try deactivate it");
+        Deactivate();
+    }
     std::lock_guard lockGuard(destroyLock_);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
@@ -494,6 +498,7 @@ int32_t AVSessionItem::Activate()
 int32_t AVSessionItem::Deactivate()
 {
     descriptor_.isActive_ = false;
+    SLOGI("Deactivate in");
     std::lock_guard controllerLockGuard(controllersLock_);
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);
@@ -508,6 +513,7 @@ int32_t AVSessionItem::Deactivate()
             audioManager->SetAudioScene(audioScene);
         }
     }
+    SLOGI("Deactivate done");
     return AVSESSION_SUCCESS;
 }
 
