@@ -323,6 +323,7 @@ ohos_shared_library("avsession_item") {
     "server/remote/remote_session_command_process.cpp",
     "server/remote/remote_session_sink_proxy.cpp",
     "server/remote/remote_session_source_proxy.cpp",
+    "server/session_xcollie.cpp",
   ]
 
   adapter_sources = [
@@ -428,6 +429,11 @@ ohos_shared_library("avsession_item") {
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
     external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (multimedia_av_session_enable_hicollie) {
+    external_deps += [ "hicollie:libhicollie" ]
+    defines += [ "HICOLLIE_ENABLE" ]
   }
 
   subsystem_name = "multimedia"
