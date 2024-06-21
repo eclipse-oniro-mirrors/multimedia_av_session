@@ -58,7 +58,7 @@ private:
 
     const int32_t startUserId = 100;
 
-    const int32_t INTERFACE_TYPE = 9;
+    const int32_t interfaceType = 9;
 
     const std::string PLAY_MUSICLIST = "PlayMusicList";
 

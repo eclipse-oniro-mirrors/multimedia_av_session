@@ -54,7 +54,8 @@
           "distributed_notification_service",
           "relational_store",
           "background_task_mgr",
-          "bluetooth"
+          "bluetooth",
+          "os_account"
         ],
         "third_party": [
           "openssl",
