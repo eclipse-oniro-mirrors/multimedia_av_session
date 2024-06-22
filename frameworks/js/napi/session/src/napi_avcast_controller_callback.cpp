@@ -272,10 +272,14 @@ napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t even
             return napi_generic_failure;
         }
     }
-    SLOGI("add callback with ref %{public}d, %{public}p, %{public}p", event, &ref, *(&ref));
+    SLOGI("addCallback isValidSet to prevent off, with ref %{public}d, %{public}p, %{public}p", event, &ref, *(&ref));
     callbacks_[event].push_back(ref);
-    if (event == EVENT_CAST_PLAYBACK_STATE_CHANGE) {
+    if (isValid_ == nullptr) {
+        SLOGI("addCallback with no isValid_ init");
         isValid_ = std::make_shared<bool>(true);
+    } else {
+        SLOGI("addCallback with isValid_ set true");
+        *isValid_ = true;
     }
     return napi_ok;
 }
@@ -292,11 +296,14 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
             *callbackRef = nullptr;
         }
         callbacks_[event].clear();
+        // not remove this logic for play button will not valid when stopcast at media control second page
+        SLOGE("RemoveCallback with isvalid set false when playbackstatechange off");
         if (event == EVENT_CAST_PLAYBACK_STATE_CHANGE) {
             if (isValid_ == nullptr) {
-                SLOGE("remove callback with never listen on");
+                SLOGE("remove callback with no isValid_ init");
                 return napi_ok;
             }
+            SLOGI("removeCallback with isValid_ set false");
             *isValid_ = false;
         }
         return napi_ok;
