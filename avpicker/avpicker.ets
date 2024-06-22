@@ -57,7 +57,7 @@ enum DeviceSource {
   CAST
 }
 
-enum ColorMode {
+enum ConfigurationColorMode {
   /**
    * the color mode is not set.
    */
@@ -72,6 +72,23 @@ enum ColorMode {
    * Light mode.
    */
   COLOR_MODE_LIGHT = 1
+}
+
+enum AVCastPickerColorMode {
+  /**
+   * the color mode of picker is not set.
+   */
+  AUTO = 0,
+
+  /**
+   * Dark mode of picker.
+   */
+  DARK = 1,
+
+  /**
+   * Light mode of picker.
+   */
+  LIGHT = 2
 }
 
 /**
@@ -92,12 +109,17 @@ export struct AVCastPicker {
   /**
    * Assigns the color of picker component at normal state.
    */
-  @State normalColor: Color | number | string = '#000000';
+  @State normalColor: Color | number | string | undefined = undefined;
 
   /**
    * Assigns the color of picker component at active state.
    */
-  @State activeColor: Color | number | string = '#000000';
+  @State activeColor: Color | number | string | undefined= undefined;
+
+  /**
+   * Definition of color mode of picker.
+   */
+  @State colorMode: AVCastPickerColorMode = AVCastPickerColorMode.AUTO; 
 
   /**
    * The device that is displayed in the menu.
@@ -130,21 +152,21 @@ export struct AVCastPicker {
   private onStateChange?: (state: AVCastPickerState) => void;
 
   /**
-   * UIExtensionProxy
+   * UIExtensionProxy.
    */
   private extensionProxy: UIExtensionProxy | null = null;
 
   private pickerClickTime: number = -1;
 
   /**
-   * Custom builder from application
+   * Custom builder from application.
    */
   @BuilderParam customPicker: (() => void)
 
   /**
-   * Color mode
+   * Configuration color mode.
    */
-  @State colorMode: number = ColorMode.COLOR_MODE_NOT_SET;
+  @State configurationColorMode: number = ConfigurationColorMode.COLOR_MODE_NOT_SET;
 
   MenuStateChange() {
     if (this.extensionProxy != null) {
@@ -180,11 +202,12 @@ export struct AVCastPicker {
               Image($r(item.deviceIconName))
                 .width(24)
                 .height(24)
-                .fillColor(this.colorMode === ColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000')
+                .fillColor(this.configurationColorMode ===
+                  ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000')
               Text(item.deviceName)
                 .fontSize($r('sys.float.ohos_id_text_size_body2'))
                 .fontColor(item.isConnected ? $r('sys.color.ohos_id_color_text_primary_activated') :
-                  (this.colorMode === ColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'))
+                  (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'))
                 .width(item.isConnected ? 144 : 168)
                 .padding({
                   left: 8,
@@ -225,7 +248,8 @@ export struct AVCastPicker {
             Divider()
               .height(1)
               .width(172)
-              .color(this.colorMode === ColorMode.COLOR_MODE_DARK ? '#33FFFFFF' : '#33000000')
+              .color(this.configurationColorMode ===
+                ConfigurationColorMode.COLOR_MODE_DARK ? '#33FFFFFF' : '#33000000')
               .padding({ right: 12 })
           }
         }
@@ -248,6 +272,8 @@ export struct AVCastPicker {
         bundleName: 'com.hmos.mediacontroller',
         parameters: {
           'normalColor': this.normalColor,
+          'activeColor': this.activeColor,
+          'pickerColorMode': this.colorMode,
           'avCastPickerStyle': this.pickerStyle,
           'ability.want.params.uiExtensionType': 'sys/commonUI',
           'isCustomPicker': isCustomPicker,
@@ -280,7 +306,8 @@ export struct AVCastPicker {
           let hasOnlySpeakerandEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
           let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
           let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
-          let isExtMenuScene = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && isCalling && (hasNoDevices || hasOnlySpeakerandEarpiece);
+          let isExtMenuScene = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && isCalling &&
+            (hasNoDevices || hasOnlySpeakerandEarpiece);
           if (isExtMenuScene || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
             this.isMenuShow = false;
           }
@@ -296,9 +323,9 @@ export struct AVCastPicker {
           this.isMenuShow = data['isShowMenu'] as boolean;
         }
 
-        if (JSON.stringify(data['colorMode']) !== undefined) {
-          console.info(TAG, `colorMode : ${JSON.stringify(data['colorMode'])}`);
-          this.colorMode = data['colorMode'] as number;
+        if (JSON.stringify(data['configurationColorMode']) !== undefined) {
+          console.info(TAG, `configurationColorMode : ${JSON.stringify(data['configurationColorMode'])}`);
+          this.configurationColorMode = data['configurationColorMode'] as number;
         }
       })
       .size({ width: '100%', height: '100%' })
@@ -320,7 +347,8 @@ export struct AVCastPicker {
         let hasOnlySpeakerandEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
         let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
         let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
-        let isExtMenuScene = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && isCalling && (hasNoDevices || hasOnlySpeakerandEarpiece);
+        let isExtMenuScene = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && isCalling &&
+          (hasNoDevices || hasOnlySpeakerandEarpiece);
         if (isExtMenuScene || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
           this.isMenuShow = false;
         } else {
@@ -342,7 +370,7 @@ export struct AVCastPicker {
     return false;
   }
 
-  private menuShowStateCallback(isMenuShow: boolean) {
+  private menuShowStateCallback(isMenuShow: boolean): void {
     if (this.onStateChange != null && this.pickerStyle === AVCastPickerStyle.STYLE_MENU) {
       let menuShowState: AVCastPickerState = isMenuShow ?
         AVCastPickerState.STATE_APPEARING : AVCastPickerState.STATE_DISAPPEARING;
