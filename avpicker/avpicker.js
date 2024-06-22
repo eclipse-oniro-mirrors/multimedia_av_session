@@ -37,12 +37,19 @@ export let DeviceSource;
     j11[j11.CAST = 1] = 'CAST';
 })(DeviceSource || (DeviceSource = {}));
 
-let ColorMode;
+export let ConfigurationColorMode;
 (function(u11) {
     u11[u11.COLOR_MODE_NOT_SET = -1] = 'COLOR_MODE_NOT_SET';
     u11[u11.COLOR_MODE_DARK = 0] = 'COLOR_MODE_DARK';
     u11[u11.COLOR_MODE_LIGHT = 1] = 'COLOR_MODE_LIGHT';
-})(ColorMode || (ColorMode = {}));
+})(ConfigurationColorMode || (ConfigurationColorMode = {}));
+
+export let AVCastPickerColorMode;
+(function(v11) {
+    v11[v11.AUTO = 0] = 'AUTO';
+    v11[v11.DARK = 1] = 'DARK';
+    v11[v11.LIGHT = 2] = 'LIGHT';
+})(AVCastPickerColorMode || (AVCastPickerColorMode = {}));
 
 export class AVCastPicker extends ViewPU {
     constructor(d11, e11, f11, g11 = -1, h11 = undefined, i11) {
@@ -50,8 +57,9 @@ export class AVCastPicker extends ViewPU {
         if (typeof h11 === 'function') {
             this.paramsGenerator_ = h11;
         }
-        this.__normalColor = new ObservedPropertySimplePU('#000000', this, 'normalColor');
-        this.__activeColor = new ObservedPropertySimplePU('#000000', this, 'activeColor');
+        this.__normalColor = new ObservedPropertySimplePU(undefined, this, 'normalColor');
+        this.__activeColor = new ObservedPropertySimplePU(undefined, this, 'activeColor');
+        this.__colorMode = new ObservedPropertySimplePU(AVCastPickerColorMode.AUTO, this, 'colorMode');
         this.__deviceList = new ObservedPropertyObjectPU([], this, 'deviceList');
         this.__sessionType = new ObservedPropertySimplePU('audio', this, 'sessionType');
         this.__pickerStyle = new ObservedPropertySimplePU(AVCastPickerStyle.STYLE_PANEL, this, 'pickerStyle');
@@ -60,7 +68,7 @@ export class AVCastPicker extends ViewPU {
         this.onStateChange = undefined;
         this.extensionProxy = null;
         this.pickerClickTime = -1;
-        this.__colorMode = new ObservedPropertySimplePU(ColorMode.COLOR_MODE_NOT_SET, this, 'colorMode');
+        this.__configurationColorMode = new ObservedPropertySimplePU(ColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
         this.customPicker = undefined;
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
@@ -73,6 +81,9 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.activeColor !== undefined) {
             this.activeColor = c11.activeColor;
+        }
+        if (c11.colorMode !== undefined) {
+            this.colorMode = c11.colorMode;
         }
         if (c11.deviceList !== undefined) {
             this.deviceList = c11.deviceList;
@@ -101,8 +112,8 @@ export class AVCastPicker extends ViewPU {
         if (c11.customPicker !== undefined) {
             this.customPicker = c11.customPicker;
         }
-        if (c11.colorMode !== undefined) {
-            this.colorMode = c11.colorMode;
+        if (c11.configurationColorMode !== undefined) {
+            this.configurationColorMode = c11.configurationColorMode;
         }
     }
 
@@ -112,23 +123,25 @@ export class AVCastPicker extends ViewPU {
     purgeVariableDependenciesOnElmtId(a11) {
         this.__normalColor.purgeDependencyOnElmtId(a11);
         this.__activeColor.purgeDependencyOnElmtId(a11);
+        this.__colorMode.purgeDependencyOnElmtId(a11);
         this.__deviceList.purgeDependencyOnElmtId(a11);
         this.__sessionType.purgeDependencyOnElmtId(a11);
         this.__pickerStyle.purgeDependencyOnElmtId(a11);
         this.__isMenuShow.purgeDependencyOnElmtId(a11);
         this.__touchMenuItemIndex.purgeDependencyOnElmtId(a11);
-        this.__colorMode.purgeDependencyOnElmtId(a11);
+        this.__configurationColorMode.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
         this.__normalColor.aboutToBeDeleted();
         this.__activeColor.aboutToBeDeleted();
+        this.__colorMode.aboutToBeDeleted();
         this.__deviceList.aboutToBeDeleted();
         this.__sessionType.aboutToBeDeleted();
         this.__pickerStyle.aboutToBeDeleted();
         this.__isMenuShow.aboutToBeDeleted();
         this.__touchMenuItemIndex.aboutToBeDeleted();
-        this.__colorMode.aboutToBeDeleted();
+        this.__configurationColorMode.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -147,6 +160,14 @@ export class AVCastPicker extends ViewPU {
 
     set activeColor(y10) {
         this.__activeColor.set(y10);
+    }
+
+    get colorMode() {
+        return this.__colorMode.get();
+    }
+
+    set colorMode(b1) {
+        this.__colorMode.set(b1);
     }
 
     get deviceList() {
@@ -189,12 +210,12 @@ export class AVCastPicker extends ViewPU {
         this.__touchMenuItemIndex.set(t10);
     }
 
-    get colorMode() {
-        return this.__colorMode.get();
+    get configurationColorMode() {
+        return this.__configurationColorMode.get();
     }
 
-    set colorMode(z10) {
-        this.__colorMode.set(z10);
+    set configurationColorMode(a1) {
+        this.__configurationColorMode.set(a1);
     }
 
     MenuStateChange() {
@@ -364,7 +385,9 @@ export class AVCastPicker extends ViewPU {
                 abilityName: 'UIExtAbility',
                 bundleName: 'com.hmos.mediacontroller',
                 parameters: {
-                    'normalColor': this.normalColor, 
+                    'normalColor': this.normalColor,
+                    'activeColor': this.activeColor,
+                    'pickerColorMode': this.colorMode,
                     'avCastPickerStyle': this.pickerStyle,
                     'ability.want.params.uiExtensionType': 'sys/commonUI',
                     'isCustomPicker': c8,
@@ -414,9 +437,9 @@ export class AVCastPicker extends ViewPU {
                     this.isMenuShow = l8.isShowMenu;
                 }
 
-                if (JSON.stringify(l8.colorMode) !== undefined) {
-                    console.info(TAG, `colorMode : ${l8.colorMode}`);
-                    this.colorMode = l8.colorMode;
+                if (JSON.stringify(l8.configurationColorMode) !== undefined) {
+                    console.info(TAG, `configurationColorMode : ${l8.configurationColorMode}`);
+                    this.configurationColorMode = l8.configurationColorMode;
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
