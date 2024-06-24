@@ -25,6 +25,9 @@
 #include "softbus/softbus_session_utils.h"
 #include "migrate_avsession_constant.h"
 #include "base64_utils.h"
+#include "avsession_pixel_map_adapter.h"
+#include "pixel_map.h"
+#include "image_packer.h"
 
 namespace OHOS::AVSession {
 void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
@@ -268,6 +271,7 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
         topSessionId_ = descriptor.sessionId_;
     }
     SendRemoteControllerList(deviceId_);
+    SendByte(deviceId_, pendingMetadata_);
 }
 
 void MigrateAVSessionServer::SortControllers(std::list<sptr<AVControllerItem>> controllers)
@@ -423,13 +427,54 @@ Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &meta
         SLOGI("ConvertMetadataToJson without img");
         result[METADATA_TITLE] = metadata.GetTitle();
         result[METADATA_ARTIST] = metadata.GetArtist();
-        result[METADATA_ART] = "";
+        std::string mediaImage = "";
+        std::vector<uint8_t> outputData(BUFFER_MAX_SIZE);
+        int32_t ret = CompressToJPEG(metadata, outputData);
+        SLOGI("outputData size is: %{public}lu", outputData.size());
+        mediaImage = ((ret == true) && (!outputData.empty())) ? Base64Utils::Base64Encode(outputData) : "";
+        result[METADATA_IMAGE] = mediaImage;
     } else {
         result[METADATA_TITLE] = "";
         result[METADATA_ARTIST] = "";
-        result[METADATA_ART] = "";
+        result[METADATA_IMAGE] = "";
     }
     return result;
+}
+
+bool MigrateAVSessionServer::CompressToJPEG(const AVMetaData &metadata, std::vector<uint8_t> &outputData)
+{
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metadata.GetMediaImage();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    if (innerPixelMap == nullptr) {
+        return false;
+    } else {
+        pixelMap = AVSessionPixelMapAdapter::ConvertFromInner(innerPixelMap);
+    }
+    
+    Media::ImagePacker imagePacker;
+    Media::PackOption option;
+    option.format = "image/jpeg";
+    option.quality = DEFAULT_QUALITY;
+    uint32_t maxSize = outputData.size();
+    uint32_t ret = imagePacker.StartPacking(outputData.data(), maxSize, option);
+    if (ret != 0) {
+        SLOGI("Failed to start packing");
+        return false;
+    }
+    ret = imagePacker.AddImage(*pixelMap);
+    if (ret != 0) {
+        SLOGI("Failed to add image");
+        return false;
+    }
+    int64_t packedSize = 0;
+    ret = imagePacker.FinalizePacking(packedSize);
+    if (ret != 0) {
+        SLOGI("Failed to finalize packing");
+        return false;
+    }
+
+    outputData.resize(packedSize);
+    return true;
 }
 
 std::string MigrateAVSessionServer::ConvertMetadataInfoToStr(
@@ -533,6 +578,7 @@ void MigrateAVSessionServer::PlaybackCommandDataProc(int mediaCommand, const std
 void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, const AVMetaData &data)
 {
     std::string metaDataStr = ConvertMetadataInfoToStr(playerId, SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, data);
+    pendingMetadata_ = metaDataStr;
     SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s", metaDataStr.c_str());
 
     SendByte(deviceId_, metaDataStr);

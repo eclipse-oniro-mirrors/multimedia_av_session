@@ -28,6 +28,8 @@
 namespace OHOS::AVSession {
 class AVSessionService;
 class AVControllerObserver;
+constexpr size_t BUFFER_MAX_SIZE = 1024 * 1024;
+constexpr size_t DEFAULT_QUALITY = 100;
 
 class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServer,
     public std::enable_shared_from_this<MigrateAVSessionServer> {
@@ -86,11 +88,13 @@ private:
     void PlaybackCommandDataProc(int mediaCommand, const std::string &extrasCommand, sptr<AVControllerItem> controller);
     void SendSpecialKeepaliveData();
     std::string GetBundleName(std::string sessionId);
+    bool CompressToJPEG(const AVMetaData &metadata, std::vector<uint8_t> &outputData);
 
     AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
     std::string deviceId_;
     std::string topSessionId_;
+    std::string pendingMetadata_;
     std::recursive_mutex migrateControllerLock_;
     std::recursive_mutex topSessionLock_;
 };
