@@ -186,6 +186,95 @@ void NapiAVControllerCallback::HandleEventWithOrder(int32_t event, int state, co
     }
 }
 
+template<typename T>
+void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int state, const T& param)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callbacks_[event].empty()) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+    SLOGI("handle with thead safe for event: %{public}d with state: %{public}d", event, state);
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        lock_.unlock();
+        CallWithThreadSafe(*ref, isValid_, state, tsfn,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [param](napi_env env, int& argc, napi_value *argv) {
+                argc = NapiUtils::ARGC_ONE;
+                auto status = NapiUtils::SetValue(env, param, *argv);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            });
+        lock_.lock();
+    }
+}
+
+void NapiAVControllerCallback::CallWithThreadSafe(napi_ref& method, std::shared_ptr<bool> isValid, int state,
+    napi_threadsafe_function tsfn, const std::function<bool()>& checkCallbackValid, NapiArgsGetter getter)
+{
+    CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
+    SLOGI("do CallWithThreadSafe with state %{public}d", state);
+    DataContextForThreadSafe* data =
+        new DataContextForThreadSafe { method, state, isValid, std::move(getter), checkCallbackValid };
+    if (tsfn != nullptr) {
+        SLOGI("do CallWithThreadSafe check tsfn alive");
+        napi_call_threadsafe_function(tsfn, data, napi_tsfn_nonblocking);
+    }
+    SLOGI("do CallWithThreadSafe with state %{public}d done", state);
+}
+
+void NapiAVControllerCallback::threadSafeCallback(napi_env env, napi_value js_cb, void* context, void* data)
+{
+    SLOGI("do threadSafeCallback in");
+    AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::threadSafeCallback");
+    std::shared_ptr<DataContextForThreadSafe> appData(static_cast<DataContextForThreadSafe*>(data),
+        [](DataContextForThreadSafe* ptr) {
+        delete ptr;
+    });
+
+    int argc = 0;
+    napi_value argv[ARGC_MAX] = { nullptr };
+    if (appData->getter) {
+        argc = ARGC_MAX;
+        appData->getter(env, argc, argv);
+    }
+
+    SLOGI("queue uv_after_work_cb with state %{public}d", static_cast<int>(appData->state));
+    if (!*appData->isValid) {
+        SLOGE("AfterWorkCallbackWithOrder failed for appData is invalid.");
+        return;
+    }
+    napi_value global {};
+    napi_get_global(env, &global);
+    napi_value function {};
+    if (!appData->checkCallbackValid()) {
+        SLOGE("Get func reference failed for func has been deleted.");
+        return;
+    }
+    napi_get_reference_value(env, appData->method, &function);
+    napi_value result;
+    if (!appData->checkCallbackValid()) {
+        SLOGE("Call func failed for func has been deleted.");
+        return;
+    }
+    napi_status status = napi_call_function(env, global, function, argc, argv, &result);
+    if (status != napi_ok) {
+        SLOGE("call function failed status=%{public}d.", status);
+    }
+    SLOGI("do threadSafeCallback done with state %{public}d", static_cast<int>(appData->state));
+}
+
 void NapiAVControllerCallback::OnAVCallStateChange(const AVCallState& avCallState)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnAVCallStateChange");
@@ -213,14 +302,15 @@ void NapiAVControllerCallback::OnSessionDestroy()
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnPlaybackStateChange");
-    HandleEventWithOrder(EVENT_PLAYBACK_STATE_CHANGE, state.GetState(), state);
+    SLOGI("do playbackstate change notify with state %{public}d", state.GetState());
+    HandleEventWithThreadSafe(EVENT_PLAYBACK_STATE_CHANGE, state.GetState(), state);
 }
 
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnMetaDataChange");
     SLOGI("do metadata change notify with title %{public}s", data.GetTitle().c_str());
-    HandleEventWithOrder(EVENT_META_DATA_CHANGE, -1, data);
+    HandleEventWithThreadSafe(EVENT_META_DATA_CHANGE, -1, data);
 }
 
 void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
@@ -230,8 +320,9 @@ void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
 
 void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
+    SLOGI("do OnValidCommandChange in NapiCallback with size %{public}d", static_cast<int>(cmds.size()));
     std::vector<std::string> stringCmds = NapiControlCommand::ConvertCommands(cmds);
-    HandleEventWithOrder(EVENT_VALID_COMMAND_CHANGE, static_cast<int>(cmds.size()), stringCmds);
+    HandleEventWithThreadSafe(EVENT_VALID_COMMAND_CHANGE, static_cast<int>(cmds.size()), stringCmds);
 }
 
 void NapiAVControllerCallback::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info)
@@ -268,6 +359,13 @@ napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, n
     std::lock_guard<std::mutex> lockGuard(lock_);
     napi_ref ref = nullptr;
 
+    if (tsfn == nullptr) {
+        SLOGI("addcallback with thread safe init");
+        napi_value resourceName = nullptr;
+        napi_create_string_utf8(env, "ThreadSafeFunction in NapiAVControllerCallback", NAPI_AUTO_LENGTH, &resourceName);
+        napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
+            nullptr, threadSafeCallback, &tsfn);
+    }
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
                              napi_generic_failure, "get callback reference failed");
     CHECK_AND_RETURN_RET_LOG(ref == nullptr, napi_ok, "callback has been registered");
