@@ -82,7 +82,7 @@ const std::string METADATA_TITLE = "MetadataTitle";
 
 const std::string METADATA_ARTIST = "MetadataArtist";
 
-const std::string METADATA_IMAGE = "MetadataArt";
+const std::string METADATA_ART = "MetadataArt";
 
 const std::string PLAYBACK_STATE = "PlaybackState";
 

@@ -430,13 +430,12 @@ Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &meta
         std::string mediaImage = "";
         std::vector<uint8_t> outputData(BUFFER_MAX_SIZE);
         int32_t ret = CompressToJPEG(metadata, outputData);
-        SLOGI("outputData size is: %{public}lu", outputData.size());
         mediaImage = ((ret == true) && (!outputData.empty())) ? Base64Utils::Base64Encode(outputData) : "";
-        result[METADATA_IMAGE] = mediaImage;
+        result[METADATA_ART] = mediaImage;
     } else {
         result[METADATA_TITLE] = "";
         result[METADATA_ARTIST] = "";
-        result[METADATA_IMAGE] = "";
+        result[METADATA_ART] = "";
     }
     return result;
 }
