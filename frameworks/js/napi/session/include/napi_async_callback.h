@@ -43,18 +43,12 @@ public:
         const std::function<bool()>& checkCallbackValid,
         NapiArgsGetter getter = NapiArgsGetter());
 
-    void CallWithOrder(napi_ref& method, std::shared_ptr<bool> isValid, int state,
-        const std::function<bool()>& checkCallbackValid,
-        NapiArgsGetter getter = NapiArgsGetter());
-
 private:
     static void AfterWorkCallback(uv_work_t* work, int aStatus);
 
     static void AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus);
 
     static void AfterWorkCallbackWithFunc(uv_work_t* work, int aStatus);
-
-    static void AfterWorkCallbackWithOrder(uv_work_t* work, int aStatus);
 
     struct DataContext {
         napi_env env;
@@ -70,15 +64,6 @@ private:
     struct DataContextWithFunc {
         napi_env env;
         napi_ref& method;
-        std::shared_ptr<bool> isValid;
-        NapiArgsGetter getter;
-        std::function<bool()> checkCallbackValid;
-    };
-    struct DataContextWithOrder {
-        napi_env env;
-        napi_ref& method;
-        sem_t *semaphore;
-        int state;
         std::shared_ptr<bool> isValid;
         NapiArgsGetter getter;
         std::function<bool()> checkCallbackValid;
