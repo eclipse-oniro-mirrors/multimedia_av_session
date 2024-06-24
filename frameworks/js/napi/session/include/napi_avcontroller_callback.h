@@ -97,7 +97,7 @@ private:
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
     std::shared_ptr<bool> isValid_;
     std::function<void(void)> sessionDestroyCallback_;
-    napi_threadsafe_function threadSafeFunction = nullptr;
+    napi_threadsafe_function threadSafeFunction_ = nullptr;
     static constexpr size_t ARGC_MAX = 6;
 };
 } // namespace OHOS::AVSession

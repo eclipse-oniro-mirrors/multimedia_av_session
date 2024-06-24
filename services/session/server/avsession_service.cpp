@@ -434,8 +434,10 @@ bool AVSessionService::IsMediaStream(AudioStandard::StreamUsage usage)
 
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
 {
-    SLOGI("bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
+    SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
+    std::lock_guard lockGuard(sessionAndControllerLock_);
     std::lock_guard frontLockGuard(sessionFrontLock_);
+    SLOGI("UpdateFrontSession pass lock");
     auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sessionItem);
     if (isAdd && it == sessionListForFront_.end()) {
         sessionListForFront_.push_front(sessionItem);
@@ -1649,7 +1651,7 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
 
 void AVSessionService::HandleEventHandlerCallBack()
 {
-    SLOGI("handle eventHandler callback isFirstPress_=%{public}d", isFirstPress_);
+    SLOGI("handle eventHandler callback isFirstPress_=%{public}d, pressCount_:%{public}d", isFirstPress_, pressCount_);
     AVControlCommand cmd;
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (pressCount_ >= THREE_CLICK && topSession_) {
@@ -1689,7 +1691,7 @@ void AVSessionService::HandleEventHandlerCallBack()
             }
         }
     } else {
-        SLOGI("press invalid");
+        SLOGI("press invalid, topSession alive:%{public}d", static_cast<int>(topSession_ != nullptr));
     }
     pressCount_ = 0;
     isFirstPress_ = true;
@@ -1735,7 +1737,8 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
             "ERROR_MSG", "avsessionservice sendsystemcontrolcommand checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
-    SLOGI("cmd=%{public}d", command.GetCommand());
+    SLOGI("SendSystemControlCommand with cmd:%{public}d, topSession alive:%{public}d",
+        command.GetCommand(), static_cast<int>(topSession_ != nullptr));
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_) {
         CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
