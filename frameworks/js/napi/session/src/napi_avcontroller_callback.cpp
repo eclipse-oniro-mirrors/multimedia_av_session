@@ -163,7 +163,7 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
     SLOGI("handle with thead safe for event: %{public}d with state: %{public}d", event, state);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         lock_.unlock();
-        CallWithThreadSafe(*ref, isValid_, state, threadSafeFunction,
+        CallWithThreadSafe(*ref, isValid_, state, threadSafeFunction_,
             [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
@@ -325,12 +325,12 @@ napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, n
     std::lock_guard<std::mutex> lockGuard(lock_);
     napi_ref ref = nullptr;
 
-    if (threadSafeFunction == nullptr) {
+    if (threadSafeFunction_ == nullptr) {
         SLOGI("addcallback with thread safe init");
         napi_value resourceName = nullptr;
         napi_create_string_utf8(env, "ThreadSafeFunction in NapiAVControllerCallback", NAPI_AUTO_LENGTH, &resourceName);
         napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
-            nullptr, ThreadSafeCallback, &threadSafeFunction);
+            nullptr, ThreadSafeCallback, &threadSafeFunction_);
     }
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
                              napi_generic_failure, "get callback reference failed");
