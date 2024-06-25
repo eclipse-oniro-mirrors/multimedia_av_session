@@ -361,12 +361,16 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
 
 int32_t AVSessionItem::GetExtras(AAFwk::WantParams& extras)
 {
+    std::lock_guard lockGuard(wantParamLock_);
+    SLOGI("getextras lock pass");
     extras = extras_;
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
 {
+    std::lock_guard lockGuard(wantParamLock_);
+    SLOGI("set extras pass lock");
     extras_ = extras;
 
     {
@@ -1103,6 +1107,8 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
 
 AAFwk::WantParams AVSessionItem::GetExtras()
 {
+    std::lock_guard lockGuard(wantParamLock_);
+    SLOGI("GetExtras pass lock");
     return extras_;
 }
 
