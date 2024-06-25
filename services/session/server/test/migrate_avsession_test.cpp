@@ -432,7 +432,7 @@ HWTEST_F(MigrateAVSessionTest, ConvertMetadataInfoToStr001, TestSize.Level1)
     Json::Value result;
     result[PLAYER_ID] = playerId;
     result[MEDIA_INFO] = controlCommand;
-    result[METADATA_ART] = "";
+    result[METADATA_IMAGE] = "";
     result[METADATA_ARTIST] = "";
     result[METADATA_TITLE] = "";
     Json::FastWriter writer;

@@ -120,6 +120,7 @@ ohos_shared_library("avsession_service") {
   deps = [
     "$openssl_dir:libcrypto_shared",
     "./../../frameworks/common:avsession_common",
+    "./../../frameworks/native/session:avsession_client",
     "./../../utils:avsession_utils",
     "./../session:avsession_item",
     "//third_party/jsoncpp:jsoncpp",
@@ -147,6 +148,7 @@ ohos_shared_library("avsession_service") {
     "dsoftbus:softbus_client",
     "graphic_surface:surface",
     "hilog:libhilog",
+    "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
