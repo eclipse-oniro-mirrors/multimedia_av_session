@@ -316,6 +316,7 @@ private:
     std::shared_ptr<RemoteSessionSource> remoteSource_;
     std::recursive_mutex remoteSinkLock_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
+    std::recursive_mutex wantParamLock_;
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(sptr<AVSessionItem>&, bool)> serviceCallbackForUpdateSession_;
