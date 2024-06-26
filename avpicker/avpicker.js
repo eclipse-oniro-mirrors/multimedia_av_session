@@ -68,7 +68,7 @@ export class AVCastPicker extends ViewPU {
         this.onStateChange = undefined;
         this.extensionProxy = null;
         this.pickerClickTime = -1;
-        this.__configurationColorMode = new ObservedPropertySimplePU(ColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
+        this.__configurationColorMode = new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
         this.customPicker = undefined;
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
@@ -301,7 +301,7 @@ export class AVCastPicker extends ViewPU {
                         'moduleName': '__harDefaultModuleName__' });
                     Image.width(24);
                     Image.height(24);
-                    Image.fillColor(this.colorMode === ColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000');
+                    Image.fillColor(this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000');
                 }, Image);
                 this.observeComponentCreation2((w9, x9) => {
                     Text.create(x8.deviceName);
@@ -311,7 +311,7 @@ export class AVCastPicker extends ViewPU {
                     Text.fontColor(x8.isConnected ? { 'id': -1, 'type': 10001,
                         params: ['sys.color.ohos_id_color_text_primary_activated'],
                         'bundleName': '__harDefaultModuleName__', 'moduleName': '__harDefaultModuleName__' } :
-                        (this.colorMode === ColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'));
+                        (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'));
                     Text.width(x8.isConnected ? 144 : 168);
                     Text.padding({
                         left: 8,
@@ -359,7 +359,7 @@ export class AVCastPicker extends ViewPU {
                                 Divider.create();
                                 Divider.height(1);
                                 Divider.width(172);
-                                Divider.color(this.colorMode === ColorMode.COLOR_MODE_DARK ?
+                                Divider.color(this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
                                     '#33FFFFFF' : '#33000000');
                                 Divider.padding({ right: 12 });
                             }, Divider);
