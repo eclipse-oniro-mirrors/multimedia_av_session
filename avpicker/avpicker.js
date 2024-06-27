@@ -389,7 +389,7 @@ export class AVCastPicker extends ViewPU {
                     'activeColor': this.activeColor,
                     'pickerColorMode': this.colorMode,
                     'avCastPickerStyle': this.pickerStyle,
-                    'ability.want.params.uiExtensionType': 'sys/commonUI',
+                    'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
                     'isCustomPicker': c8,
                 }
             });
