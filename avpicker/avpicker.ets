@@ -275,7 +275,7 @@ export struct AVCastPicker {
           'activeColor': this.activeColor,
           'pickerColorMode': this.colorMode,
           'avCastPickerStyle': this.pickerStyle,
-          'ability.want.params.uiExtensionType': 'sys/commonUI',
+          'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
           'isCustomPicker': isCustomPicker,
         }
       })
