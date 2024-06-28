@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1144,7 +1144,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_SUCCESS_CTRL_COMMAND);
     HISYSEVENT_ADD_CONTROLLER_COMMAND_INFO(descriptor_.elementName_.GetBundleName(), GetPid(),
         cmd.GetCommand(), descriptor_.sessionType_);
-    return (this->*cmdHandlers[code])(cmd);
+    return cmdHandlers[code](cmd);
 
     HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", code,
         "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");

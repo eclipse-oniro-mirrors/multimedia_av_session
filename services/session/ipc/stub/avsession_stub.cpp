@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ int32_t AVSessionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
     }
     SLOGI("cmd code is %{public}d", code);
     if (code < SESSION_CMD_MAX) {
-        return (this->*handlers[code])(data, reply);
+        return handlers[code](data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }

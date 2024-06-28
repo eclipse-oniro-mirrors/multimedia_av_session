@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef OHOS_AVSESSION_SERVICE_STUB_H
 #define OHOS_AVSESSION_SERVICE_STUB_H
 
+#include <map>
 #include "iavsession_service.h"
 #include "iremote_stub.h"
 #include "ipc_skeleton.h"
@@ -54,29 +55,54 @@ private:
     void MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos);
     void AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQueueInfos, unsigned char *buffer);
 
-    using HandlerFunc = int32_t(AVSessionServiceStub::*)(MessageParcel&, MessageParcel&);
-    static inline HandlerFunc handlers[] = {
-        &AVSessionServiceStub::HandleCreateSessionInner,
-        &AVSessionServiceStub::HandleGetAllSessionDescriptors,
-        &AVSessionServiceStub::HandleGetSessionDescriptorsById,
-        &AVSessionServiceStub::HandleGetHistoricalSessionDescriptors,
-        &AVSessionServiceStub::HandleGetHistoricalAVQueueInfos,
-        &AVSessionServiceStub::HandleStartAVPlayback,
-        &AVSessionServiceStub::HandleCreateControllerInner,
-        &AVSessionServiceStub::HandleGetAVCastControllerInner,
-        &AVSessionServiceStub::HandleRegisterSessionListener,
-        &AVSessionServiceStub::HandleSendSystemAVKeyEvent,
-        &AVSessionServiceStub::HandleSendSystemControlCommand,
-        &AVSessionServiceStub::HandleRegisterClientDeathObserver,
-        &AVSessionServiceStub::HandleCastAudio,
-        &AVSessionServiceStub::HandleCastAudioForAll,
-        &AVSessionServiceStub::HandleRemoteCastAudio,
-        &AVSessionServiceStub::HandleStartCastDiscovery,
-        &AVSessionServiceStub::HandleStopCastDiscovery,
-        &AVSessionServiceStub::HandleSetDiscoverable,
-        &AVSessionServiceStub::HandleStartCast,
-        &AVSessionServiceStub::HandleStopCast,
-        &AVSessionServiceStub::HandleClose,
+    using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
+    std::map<uint32_t, HandlerFunc> handlers = {
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleCreateSessionInner(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAllSessionDescriptors(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID),
+            [this](MessageParcel& data, MessageParcel& reply)
+            { return HandleGetSessionDescriptorsById(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS),
+            [this](MessageParcel& data, MessageParcel& reply)
+            { return HandleGetHistoricalSessionDescriptors(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_HISTORY_AVQUEUE_INFOS),
+            [this](MessageParcel& data, MessageParcel& reply)
+            { return HandleGetHistoricalAVQueueInfos(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_AV_PLAYBACK),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStartAVPlayback(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_CONTROLLER),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleCreateControllerInner(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_AV_CAST_CONTROLLER),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCastControllerInner(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleRegisterSessionListener(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendSystemAVKeyEvent(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendSystemControlCommand(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_CLIENT_DEATH),
+            [this](MessageParcel& data, MessageParcel& reply)
+            { return HandleRegisterClientDeathObserver(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CAST_AUDIO),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleCastAudio(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CAST_AUDIO_FOR_ALL),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleCastAudioForAll(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_COMMAND_TO_REMOTE),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleRemoteCastAudio(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST_DISCOVERY),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStartCastDiscovery(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST_DISCOVERY),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStopCastDiscovery(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SET_DISCOVERYABLE),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetDiscoverable(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStartCast(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStopCast(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleClose(data, reply); }}
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef OHOS_SESSION_LISTENER_STUB_H
 #define OHOS_SESSION_LISTENER_STUB_H
 
+#include <map>
 #include "iremote_stub.h"
 #include "isession_listener.h"
 
@@ -39,14 +40,20 @@ private:
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HandlerFunc = int32_t(SessionListenerStub::*)(MessageParcel&, MessageParcel&);
-    static inline HandlerFunc handlers[] = {
-        &SessionListenerStub::HandleOnSessionCreate,
-        &SessionListenerStub::HandleOnSessionRelease,
-        &SessionListenerStub::HandleOnTopSessionChange,
-        &SessionListenerStub::HandleOnAudioSessionChecked,
-        &SessionListenerStub::HandleOnDeviceAvailable,
-        &SessionListenerStub::HandleOnDeviceOffline,
+    using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
+    std::map<uint32_t, HandlerFunc> handlers = {
+        {LISTENER_CMD_ON_CREATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnSessionCreate(data, reply); }},
+        {LISTENER_CMD_ON_RELEASE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnSessionRelease(data, reply); }},
+        {LISTENER_CMD_TOP_CHANGED,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnTopSessionChange(data, reply); }},
+        {LISTENER_CMD_AUDIO_CHECKED,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnAudioSessionChecked(data, reply); }},
+        {LISTENER_CMD_DEVICE_AVAILABLE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnDeviceAvailable(data, reply); }},
+        {LISTENER_CMD_DEVICE_OFFLINE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnDeviceOffline(data, reply); }}
     };
 };
 }

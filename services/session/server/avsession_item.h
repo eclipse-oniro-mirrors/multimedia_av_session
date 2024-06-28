@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -270,23 +270,38 @@ private:
     int32_t ProcessFrontSession(const std::string& source);
     void HandleFrontSession();
 
-    using HandlerFuncType = void(AVSessionItem::*)(const AVControlCommand&);
-    static inline HandlerFuncType cmdHandlers[SESSION_CMD_MAX] = {
-        &AVSessionItem::HandleOnPlay,
-        &AVSessionItem::HandleOnPause,
-        &AVSessionItem::HandleOnStop,
-        &AVSessionItem::HandleOnPlayNext,
-        &AVSessionItem::HandleOnPlayPrevious,
-        &AVSessionItem::HandleOnFastForward,
-        &AVSessionItem::HandleOnRewind,
-        &AVSessionItem::HandleOnSeek,
-        &AVSessionItem::HandleOnSetSpeed,
-        &AVSessionItem::HandleOnSetLoopMode,
-        &AVSessionItem::HandleOnToggleFavorite,
-        &AVSessionItem::HandleOnPlayFromAssetId,
-        &AVSessionItem::HandleOnAVCallAnswer,
-        &AVSessionItem::HandleOnAVCallHangUp,
-        &AVSessionItem::HandleOnAVCallToggleCallMute,
+    using HandlerFuncType = std::function<void(const AVControlCommand&)>;
+    std::map<uint32_t, HandlerFuncType> cmdHandlers = {
+        {AVControlCommand::SESSION_CMD_PLAY,
+            [this](const AVControlCommand& cmd) { HandleOnPlay(cmd); }},
+        {AVControlCommand::SESSION_CMD_PAUSE,
+            [this](const AVControlCommand& cmd) { HandleOnPause(cmd); }},
+        {AVControlCommand::SESSION_CMD_STOP,
+            [this](const AVControlCommand& cmd) { HandleOnStop(cmd); }},
+        {AVControlCommand::SESSION_CMD_PLAY_NEXT,
+            [this](const AVControlCommand& cmd) { HandleOnPlayNext(cmd); }},
+        {AVControlCommand::SESSION_CMD_PLAY_PREVIOUS,
+            [this](const AVControlCommand& cmd) { HandleOnPlayPrevious(cmd); }},
+        {AVControlCommand::SESSION_CMD_FAST_FORWARD,
+            [this](const AVControlCommand& cmd) { HandleOnFastForward(cmd); }},
+        {AVControlCommand::SESSION_CMD_REWIND,
+            [this](const AVControlCommand& cmd) { HandleOnRewind(cmd); }},
+        {AVControlCommand::SESSION_CMD_SEEK,
+            [this](const AVControlCommand& cmd) { HandleOnSeek(cmd); }},
+        {AVControlCommand::SESSION_CMD_SET_SPEED,
+            [this](const AVControlCommand& cmd) { HandleOnSetSpeed(cmd); }},
+        {AVControlCommand::SESSION_CMD_SET_LOOP_MODE,
+            [this](const AVControlCommand& cmd) { HandleOnSetLoopMode(cmd); }},
+        {AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE,
+            [this](const AVControlCommand& cmd) { HandleOnToggleFavorite(cmd); }},
+        {AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID,
+            [this](const AVControlCommand& cmd) { HandleOnPlayFromAssetId(cmd); }},
+        {AVControlCommand::SESSION_CMD_AVCALL_ANSWER,
+            [this](const AVControlCommand& cmd) { HandleOnAVCallAnswer(cmd); }},
+        {AVControlCommand::SESSION_CMD_AVCALL_HANG_UP,
+            [this](const AVControlCommand& cmd) { HandleOnAVCallHangUp(cmd); }},
+        {AVControlCommand::SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE,
+            [this](const AVControlCommand& cmd) { HandleOnAVCallToggleCallMute(cmd); }}
     };
 
     std::recursive_mutex controllersLock_;
