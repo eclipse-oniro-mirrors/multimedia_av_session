@@ -62,14 +62,12 @@ int32_t AVSessionServiceStub::HandleCreateSessionInner(MessageParcel& data, Mess
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
-    auto session = CreateSessionInner(sessionTag, sessionType, *elementName);
-    if (session == nullptr) {
-        SLOGI("session is nullptr");
-        reply.WriteInt32(ERR_UNMARSHALLING);
-        return ERR_NONE;
+    sptr<IRemoteObject> object;
+    auto ret = CreateSessionInner(sessionTag, sessionType, *elementName, object);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");
     }
-    reply.WriteInt32(AVSESSION_SUCCESS);
-    reply.WriteRemoteObject(session);
     return ERR_NONE;
 }
 

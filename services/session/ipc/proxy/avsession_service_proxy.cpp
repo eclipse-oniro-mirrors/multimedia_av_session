@@ -34,38 +34,66 @@ std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::strin
 {
     auto object = AVSessionServiceProxy::CreateSessionInner(tag, type, elementName);
     if (object == nullptr) {
-        SLOGI("object is nullptr");
+        SLOGE("object is nullptr");
         return nullptr;
     }
     auto session = iface_cast<AVSessionProxy>(object);
     if (session == nullptr) {
-        SLOGI("session is nullptr");
+        SLOGE("session is nullptr");
         return nullptr;
     }
     return std::shared_ptr<AVSession>(session.GetRefPtr(), [holder = session](const auto*) {});
 }
 
+int32_t AVSessionServiceProxy::CreateSession(const std::string& tag, int32_t type,
+                                             const AppExecFwk::ElementName& elementName,
+                                             std::shared_ptr<AVSession>& session)
+{
+    sptr<IRemoteObject> object;
+    auto ret = AVSessionServiceProxy::CreateSessionInner(tag, type, elementName, object);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateSession failed");
+
+    auto sessionObj = iface_cast<AVSessionProxy>(object);
+    CHECK_AND_RETURN_RET_LOG(sessionObj, AVSESSION_ERROR, "sessionObj is nullptr");
+
+    session = std::shared_ptr<AVSession>(sessionObj.GetRefPtr(), [holder = sessionObj](const auto*) {});
+    return ret;
+}
+
 sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string& tag, int32_t type,
                                                               const AppExecFwk::ElementName& elementName)
 {
+    sptr<IRemoteObject> object;
+    auto ret = AVSessionServiceProxy::CreateSessionInner(tag, type, elementName, object);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, nullptr, "CreateSessionInner failed");
+    return object;
+}
+
+int32_t AVSessionServiceProxy::CreateSessionInner(const std::string& tag, int32_t type,
+                                                  const AppExecFwk::ElementName& elementName,
+                                                  sptr<IRemoteObject>& object)
+{
     MessageParcel data;
-    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), nullptr, "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteString(tag), nullptr, "write tag failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(type), nullptr, "write type failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&elementName), nullptr, "write bundleName failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+                             ERR_UNMARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(tag), ERR_UNMARSHALLING, "write tag failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(type), ERR_UNMARSHALLING, "write type failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&elementName), ERR_UNMARSHALLING, "write bundleName failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, nullptr, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_UNMARSHALLING, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
         static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION), data, reply, option) == 0,
-        nullptr, "send request failed");
+        ERR_IPC_SEND_REQUEST, "send request failed");
 
     int32_t res = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(res), nullptr, "read res failed");
-
-    return res == AVSESSION_SUCCESS ? reply.ReadRemoteObject() : nullptr;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(res), ERR_UNMARSHALLING, "read res failed");
+    if (res == AVSESSION_SUCCESS) {
+        object = reply.ReadRemoteObject();
+    }
+    return res;
 }
 
 int32_t AVSessionServiceProxy::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
