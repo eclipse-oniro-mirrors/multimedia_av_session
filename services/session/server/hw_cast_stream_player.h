@@ -98,6 +98,8 @@ private:
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_25_X, 1.25},
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_75_X, 1.75},
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_2_00_X, 2.00},
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_0_50_X, 0.50},
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_50_X, 1.50}
     };
     std::map<CastEngine::LoopMode, int32_t> castPlusLoopModeToInt_ = {
         {CastEngine::LoopMode::LOOP_MODE_SEQUENCE, AVPlaybackState::LOOP_MODE_SEQUENCE},
