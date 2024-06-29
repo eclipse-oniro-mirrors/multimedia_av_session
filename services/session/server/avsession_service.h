@@ -227,6 +227,8 @@ private:
 
     void CheckBrEnable();
 
+    void NotifyProcessStatus(bool isStart);
+
     static SessionContainer& GetContainer();
 
     std::string AllocSessionId();
@@ -481,6 +483,7 @@ private:
     const int32_t allocSpace = 2;
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
+    const int32_t SA_TYPE = 1;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

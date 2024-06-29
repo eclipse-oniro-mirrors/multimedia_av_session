@@ -83,6 +83,8 @@ static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
     std::string("platformsdk/libsuspend_manager_client.z.so");
 static const std::string MIGRATE_STUB_SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
     std::string("libavsession_migration.z.so");
+static const std::string MEMMGR_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
+    std::string("libmemmgrclient.z.so");
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 
 #ifdef BLUETOOTH_ENABLE
@@ -141,6 +143,7 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     AddSystemAbilityListener(CAST_ENGINE_SA_ID);
     AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
+    AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto deviceProp = system::GetParameter("const.product.devicetype", "default");
@@ -174,6 +177,7 @@ void AVSessionService::OnStop()
     }
     dlclose(migrateStubFuncHandle_);
     CommandSendLimit::GetInstance().StopTimer();
+    NotifyProcessStatus(false);
 }
 
 void AVSessionService::PullMigrateStub()
@@ -225,6 +229,9 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             break;
         case BLUETOOTH_HOST_SYS_ABILITY_ID:
             CheckBrEnable();
+            break;
+        case MEMORY_MANAGER_SA_ID:
+            NotifyProcessStatus(true);
             break;
         default:
             SLOGE("undefined system ability %{public}d", systemAbilityId);
@@ -294,6 +301,36 @@ void AVSessionService::CheckBrEnable()
         bluetoothHost_->RegisterObserver(g_bluetoothObserver);
     }
 #endif
+}
+
+void AVSessionService::NotifyProcessStatus(bool isStart)
+{
+    int pid = getpid();
+    char memmgrPath[PATH_MAX] = { 0x00 };
+    if (realpath(MEMMGR_LIBRARY_PATH.c_str(), memmgrPath) == nullptr) {
+        SLOGE("check libmemmgrclient path failed %{public}s", MEMMGR_LIBRARY_PATH.c_str());
+        return;
+    }
+    void *libMemMgrClientHandle = dlopen(memmgrPath, RTLD_NOW);
+    if (!libMemMgrClientHandle) {
+        SLOGE("dlopen libmemmgrclient library failed");
+        return;
+    }
+    void *notifyProcessStatusFunc = dlsym(libMemMgrClientHandle, "notify_process_status");
+    if (!notifyProcessStatusFunc) {
+        SLOGE("dlsm notify_process_status failed");
+        dlclose(libMemMgrClientHandle);
+        return;
+    }
+    auto notifyProcessStatus = reinterpret_cast<int(*)(int, int, int, int)>(notifyProcessStatusFunc);
+    if (isStart) {
+        SLOGI("notify to memmgr when av_session is started");
+        notifyProcessStatus(pid, SA_TYPE, 1, AVSESSION_SERVICE_ID); // 1 indicates the service is started
+    } else {
+        SLOGI("notify to memmgr when av_session is stopped");
+        notifyProcessStatus(pid, SA_TYPE, 0, AVSESSION_SERVICE_ID); // 0 indicates the service is stopped
+    }
+    dlclose(libMemMgrClientHandle);
 }
 
 void AVSessionService::InitKeyEvent()
