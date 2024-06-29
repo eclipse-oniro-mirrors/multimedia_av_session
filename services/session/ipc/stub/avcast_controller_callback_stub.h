@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef OHOS_AVCAST_CONTROLLER_CALLBACK_STUB_H
 #define OHOS_AVCAST_CONTROLLER_CALLBACK_STUB_H
 
+#include <map>
 #include "iavcast_controller_callback.h"
 #include "iremote_stub.h"
 
@@ -50,19 +51,30 @@ private:
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HandlerFunc = int32_t (AVCastControllerCallbackStub::*)(MessageParcel& data, MessageParcel& reply);
-    static inline HandlerFunc handlers[] = {
-        &AVCastControllerCallbackStub::HandleOnStateChange,
-        &AVCastControllerCallbackStub::HandleOnMediaItemChange,
-        &AVCastControllerCallbackStub::HandleOnPlayNext,
-        &AVCastControllerCallbackStub::HandleOnPlayPrevious,
-        &AVCastControllerCallbackStub::HandleOnSeekDone,
-        &AVCastControllerCallbackStub::HandleOnVideoSizeChange,
-        &AVCastControllerCallbackStub::HandleOnPlayerError,
-        &AVCastControllerCallbackStub::HandleOnEndOfStream,
-        &AVCastControllerCallbackStub::HandleOnPlayRequest,
-        &AVCastControllerCallbackStub::HandleOnKeyRequest,
-        &AVCastControllerCallbackStub::HandleOnCastValidCommandChanged,
+    using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
+    std::map<uint32_t, HandlerFunc> handlers = {
+        {CAST_CONTROLLER_CMD_ON_CAST_PLAYBACK_STATE_CHANGE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnStateChange(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_MEDIA_ITEM_CHANGE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnMediaItemChange(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_PLAY_NEXT,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnPlayNext(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_PLAY_PREVIOUS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnPlayPrevious(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_SEEK_DONE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnSeekDone(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_VIDEO_SIZE_CHANGE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnVideoSizeChange(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_ERROR,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnPlayerError(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_END_OF_STREAM,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnEndOfStream(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_PLAY_REQUEST,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnPlayRequest(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_KEY_REQUEST,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnKeyRequest(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_VALID_COMMAND_CHANGED,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnCastValidCommandChanged(data, reply); }}
     };
 };
 }

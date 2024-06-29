@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef OHOS_AVSESSION_STUB_H
 #define OHOS_AVSESSION_STUB_H
 
+#include <map>
 #include "iav_session.h"
 #include "iremote_stub.h"
 #include "want_agent.h"
@@ -114,41 +115,70 @@ private:
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HandlerFunc = int32_t(AVSessionStub::*)(MessageParcel&, MessageParcel&);
-    static inline HandlerFunc handlers[] = {
-        &AVSessionStub::HandleGetSessionId,
-        &AVSessionStub::HandleGetSessionType,
-        &AVSessionStub::HandleGetAVMetaData,
-        &AVSessionStub::HandleSetAVMetaData,
-        &AVSessionStub::HandleGetAVPlaybackState,
-        &AVSessionStub::HandleSetAVPlaybackState,
-        &AVSessionStub::HandleGetAVQueueItems,
-        &AVSessionStub::HandleSetAVQueueItems,
-        &AVSessionStub::HandleGetAVQueueTitle,
-        &AVSessionStub::HandleSetAVQueueTitle,
-        &AVSessionStub::HandleGetExtras,
-        &AVSessionStub::HandleSetExtras,
-        &AVSessionStub::HandleSetLaunchAbility,
-        &AVSessionStub::HandleGetController,
+    using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
+    std::map<uint32_t, HandlerFunc> handlers = {
+        {SESSION_CMD_GET_SESSION_ID,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSessionId(data, reply); }},
+        {SESSION_CMD_GET_SESSION_TYPE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSessionType(data, reply); }},
+        {SESSION_CMD_GET_META_DATA,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVMetaData(data, reply); }},
+        {SESSION_CMD_SET_META_DATA,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVMetaData(data, reply); }},
+        {SESSION_CMD_GET_PLAYBACK_STATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVPlaybackState(data, reply); }},
+        {SESSION_CMD_SET_PLAYBACK_STATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVPlaybackState(data, reply); }},
+        {SESSION_CMD_GET_QUEUE_ITEMS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVQueueItems(data, reply); }},
+        {SESSION_CMD_SET_QUEUE_ITEMS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVQueueItems(data, reply); }},
+        {SESSION_CMD_GET_QUEUE_TITLE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVQueueTitle(data, reply); }},
+        {SESSION_CMD_SET_QUEUE_TITLE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVQueueTitle(data, reply); }},
+        {SESSION_CMD_GET_EXTRAS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetExtras(data, reply); }},
+        {SESSION_CMD_SET_EXTRAS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetExtras(data, reply); }},
+        {SESSION_CMD_SET_LAUNCH_ABILITY,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetLaunchAbility(data, reply); }},
+        {SESSION_CMD_GET_CONTROLLER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetController(data, reply); }},
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        &AVSessionStub::HandleGetAVCastController,
-        &AVSessionStub::HandleStartCastDisplayListener,
-        &AVSessionStub::HandleStopCastDisplayListener,
-        &AVSessionStub::HandleGetAllCastDisplays,
+        {SESSION_CMD_GET_AVCAST_CONTROLLER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCastController(data, reply); }},
+        {SESSION_CMD_START_CAST_DISPLAY_LISTENER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStartCastDisplayListener(data, reply); }},
+        {SESSION_CMD_STOP_CAST_DISPLAY_LISTENER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStopCastDisplayListener(data, reply); }},
+        {SESSION_CMD_GET_ALL_CAST_DISPLAYS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAllCastDisplays(data, reply); }},
 #endif
-        &AVSessionStub::HandleRegisterCallbackInner,
-        &AVSessionStub::HandleActivate,
-        &AVSessionStub::HandleDeactivate,
-        &AVSessionStub::HandleIsActive,
-        &AVSessionStub::HandleDestroy,
-        &AVSessionStub::HandleAddSupportCommand,
-        &AVSessionStub::HandleDeleteSupportCommand,
-        &AVSessionStub::HandleSetSessionEvent,
+        {SESSION_CMD_REGISTER_CALLBACK,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleRegisterCallbackInner(data, reply); }},
+        {SESSION_CMD_ACTIVATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleActivate(data, reply); }},
+        {SESSION_CMD_DEACTIVATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleDeactivate(data, reply); }},
+        {SESSION_CMD_ISACTIVE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleIsActive(data, reply); }},
+        {SESSION_CMD_DESTROY,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleDestroy(data, reply); }},
+        {SESSION_CMD_ADD_SUPPORT_COMMAND,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleAddSupportCommand(data, reply); }},
+        {SESSION_CMD_DELETE_SUPPORT_COMMAND,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleDeleteSupportCommand(data, reply); }},
+        {SESSION_CMD_SET_SESSION_EVENT,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetSessionEvent(data, reply); }},
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        &AVSessionStub::HandleReleaseCast,
+        {SESSION_CMD_RELEASE_CAST,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleReleaseCast(data, reply); }},
 #endif
-        &AVSessionStub::HandleSetAVCallMetaData,
-        &AVSessionStub::HandleSetAVCallState,
+        {SESSION_CMD_SET_AVCALL_META_DATA,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVCallMetaData(data, reply); }},
+        {SESSION_CMD_SET_AVCALL_STATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVCallState(data, reply); }}
     };
 
     int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
