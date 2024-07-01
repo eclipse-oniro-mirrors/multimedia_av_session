@@ -26,11 +26,13 @@ public:
 
     bool CheckSystemPermission();
 
-    static bool CheckSystemPermissionByUid(int uid);
+    bool CheckSystemPermissionByUid(int uid);
 
 private:
     static constexpr const char* MANAGE_MEDIA_RESOURCES = "ohos.permission.MANAGE_MEDIA_RESOURCES";
     static constexpr int UID_TRANSFORM_DIVISOR = 200000;
+
+    bool CheckPermission(uint32_t tokenId, const std::string &permissionName);
 };
 } // namespace OHOS::AVSession
 #endif // PERMISSION_CHECKER_H
