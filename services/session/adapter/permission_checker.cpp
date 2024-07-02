@@ -32,22 +32,27 @@ PermissionChecker& PermissionChecker::GetInstance()
 
 bool PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessTokenID tokenId)
 {
-    if (AccessTokenKit::GetTokenTypeFlag(tokenId) == TOKEN_NATIVE) {
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    const std::string &permissionName = std::string(MANAGE_MEDIA_RESOURCES);
+    if ((tokenType == TOKEN_NATIVE || tokenType == TOKEN_SHELL) && CheckPermission(tokenId, permissionName)) {
         return true;
     }
 
-    if (AccessTokenKit::GetTokenTypeFlag(tokenId) == TOKEN_SHELL) {
-        return true;
-    }
-
-    uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
-    bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
-    if (!isSystemApp) {
-        SLOGI("Not system app, permission reject");
+    if (!CheckPermission(tokenId, permissionName)) {
+        SLOGI("CheckSystemPermission permission reject for MANAGE_MEDIA_RESOURCES");
         return false;
     }
 
     SLOGI("Check system permission finished");
+    return true;
+}
+
+bool PermissionChecker::CheckPermission(uint32_t tokenId, const std::string &permissionName)
+{
+    int32_t ret = AccessTokenKit::VerifyAccessToken(tokenId, permissionName);
+    if (ret == PermissionState::PERMISSION_DENIED) {
+        return false;
+    }
     return true;
 }
 
@@ -73,18 +78,18 @@ bool PermissionChecker::CheckSystemPermissionByUid(int uid)
         SLOGE("get token id failed");
         return false;
     }
-    if (AccessTokenKit::GetTokenTypeFlag(tokenId) == TOKEN_NATIVE) {
+
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    const std::string &permissionName = std::string(MANAGE_MEDIA_RESOURCES);
+    if ((tokenType == TOKEN_NATIVE || tokenType == TOKEN_SHELL) && CheckPermission(tokenId, permissionName)) {
         return true;
     }
 
-    if (AccessTokenKit::GetTokenTypeFlag(tokenId) == TOKEN_SHELL) {
-        return true;
-    }
-    bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(accessTokenIdEx.tokenIDEx);
-    if (!isSystemApp) {
-        SLOGI("CheckSystemPermissionByUid Not system app");
+    if (!CheckPermission(tokenId, permissionName)) {
+        SLOGI("CheckSystemPermissionByUid permission reject for MANAGE_MEDIA_RESOURCES");
         return false;
     }
+
     SLOGD("CheckSystemPermissionByUid is system app done");
     return true;
 }
