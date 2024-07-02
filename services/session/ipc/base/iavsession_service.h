@@ -39,6 +39,9 @@ public:
 
     virtual sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                                    const AppExecFwk::ElementName& elementName) = 0;
+    
+    virtual int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
+                                       sptr<IRemoteObject>& session) = 0;
 
     virtual int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) = 0;
 

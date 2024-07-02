@@ -72,6 +72,7 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_COMMAND_SEND_EXCEED_MAX, 6600107},
     {ERR_DEVICE_CONNECTION_FAILED, 6600108},
     {ERR_REMOTE_CONNECTION_NOT_EXIST, 6600109},
+    {ERR_SESSION_IS_EXIST, 6600110},
     {ERR_NO_PERMISSION, 202},
     {ERR_INVALID_PARAM, 401},
 };
@@ -140,12 +141,16 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
     context->GetCbInfo(env, info, inputParser);
 
     auto executor = [context]() {
-        context->session_ = AVSessionManager::GetInstance().CreateSession(context->tag_, context->type_,
-                                                                          context->elementName_);
-        if (context->session_ == nullptr) {
+        int32_t ret = AVSessionManager::GetInstance().CreateSession(context->tag_, context->type_,
+                                                                    context->elementName_, context->session_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_IS_EXIST) {
+                context->errMessage = "CreateAVSession failed : session is existed";
+            } else {
+                context->errMessage = "CreateAVSession failed : native create session failed";
+            }
             context->status = napi_generic_failure;
-            context->errMessage = "CreateAVSession failed : native create session failed";
-            context->errCode = NapiAVSessionManager::errcode_[AVSESSION_ERROR];
+            context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
 

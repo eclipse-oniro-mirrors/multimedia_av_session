@@ -53,6 +53,19 @@ public:
     */
     virtual std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                                      const AppExecFwk::ElementName& elementName) = 0;
+
+    /**
+     * Create Session Object.
+     *
+     * @param tag Custom name of the session
+     * @param type Session type
+     * @param elementName element Name
+     * @param session Created session {@link AVSession}
+     * @return Returns result of creating session
+     * @since 12
+    */
+    virtual int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
+                                  std::shared_ptr<AVSession>& session) = 0;
     /**
      * Send the key command to get the descriptor of all sessions.
      *
