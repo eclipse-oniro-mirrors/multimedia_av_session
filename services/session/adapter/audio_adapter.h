@@ -50,7 +50,7 @@ public:
 
     void OnDeviceChange(const DeviceChangeAction& deviceChangeAction) override;
 
-    bool GetRendererState(int32_t uid, AudioStandard::RendererState& rendererState);
+    bool GetRendererRunning(int32_t uid);
 
 private:
     static std::shared_ptr<AudioAdapter> instance_;

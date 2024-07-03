@@ -116,9 +116,8 @@ void AudioAdapter::OnDeviceChange(const DeviceChangeAction& deviceChangeAction)
     }
 }
 
-bool AudioAdapter::GetRendererState(int32_t uid, AudioStandard::RendererState& rendererState)
+bool AudioAdapter::GetRendererRunning(int32_t uid)
 {
-    AudioStandard::RendererState tempState = AudioStandard::RENDERER_PAUSED;
     std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
     auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     if (ret != 0) {
@@ -126,12 +125,11 @@ bool AudioAdapter::GetRendererState(int32_t uid, AudioStandard::RendererState& r
         return false;
     }
     for (const auto& info : audioRendererChangeInfo) {
-        if (info->clientUID == uid) {
+        if (info->clientUID == uid && info->rendererState == AudioStandard::RENDERER_RUNNING) {
             SLOGI("find uid=%{public}d renderer state is %{public}d", uid, info->rendererState);
-            tempState = info->rendererState;
+            return true;
         }
     }
-    rendererState = tempState;
-    return tempState == AudioStandard::RENDERER_RUNNING;
+    return false;
 }
 }
