@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "session_stack.h"
 #include "avsession_log.h"
+#include "system_ability_definition.h"
 
 #define private public
 #include "avsession_service.h"
@@ -54,7 +55,7 @@ static HWTEST(SessionStackTest, RemoveSession001, TestSize.Level1)
 {
     SLOGI("RemoveSession001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
-    std::unique_ptr<AVSessionService> avSessionService_ = std::make_unique<AVSessionService>(1, true);
+    AVSessionService* avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     elementName.SetBundleName("test.ohos.avsession");
     elementName.SetAbilityName("test.ability");
     OHOS::sptr <AVSessionItem> item =

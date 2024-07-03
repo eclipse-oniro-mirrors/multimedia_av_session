@@ -18,14 +18,16 @@
 #define private public
 #include "avsession_dumper.h"
 #undef private
+#include "system_ability_definition.h"
 
 using namespace testing::ext;
+
+static OHOS::AVSession::AVSessionService* avSessionService_;
 
 namespace OHOS {
 namespace AVSession {
 class AVSessionDumperTest : public testing::Test {
 public:
-    std::unique_ptr<AVSessionService> avSessionService_ = nullptr;
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
@@ -41,7 +43,11 @@ void AVSessionDumperTest::TearDownTestCase()
 
 void AVSessionDumperTest::SetUp()
 {
-    avSessionService_ = std::make_unique<AVSessionService>(1, true);
+    SLOGI("AVSessionDumperTest do SetUp");
+    if (avSessionService_ == nullptr) {
+        SLOGI("AVSessionDumperTest do service newUp");
+        avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    }
 }
 
 void AVSessionDumperTest::TearDown()
@@ -344,12 +350,15 @@ public:
  */
 HWTEST_F(AVSessionDumperTest, NotifyAudioSessionCheck001, TestSize.Level1)
 {
+    SLOGI("NotifyAudioSessionCheck001 in");
     TestSessionListener listener;
     avSessionService_->AddInnerSessionListener(&listener);
     sptr<TestISessionListener> iListener = new TestISessionListener();
     avSessionService_->AddSessionListener(1, iListener);
     avSessionService_->NotifyAudioSessionCheck(1);
+    avSessionService_->RemoveInnerSessionListener(&listener);
     EXPECT_NE(avSessionService_, nullptr);
+    SLOGI("NotifyAudioSessionCheck001 out");
 }
 
 /**

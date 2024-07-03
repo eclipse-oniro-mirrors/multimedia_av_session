@@ -14,6 +14,7 @@ import("//build/test.gni")
 import("../../../../bluetooth_part.gni")
 import("../../../../castplus_cast_engine_part.gni")
 import("../../../../config.gni")
+import("../../../../efficiency_manager_part.gni")
 
 module_output_path = "multimedia_av_session/session"
 
@@ -76,9 +77,25 @@ ohos_unittest("MigrateAVSessionTest") {
     "samgr:samgr_proxy",
   ]
 
+  cflags = []
+
   if (bluetooth_part_enable) {
-    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
+  }
+
+  if (efficiency_manager_enable_in_avsession) {
+    cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
+  }
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 }
 
@@ -346,9 +363,25 @@ ohos_unittest("SessionStackTest") {
     "samgr:samgr_proxy",
   ]
 
+  cflags = []
+
   if (bluetooth_part_enable) {
-    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
+  }
+
+  if (efficiency_manager_enable_in_avsession) {
+    cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
+  }
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 }
 

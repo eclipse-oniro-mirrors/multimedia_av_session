@@ -44,6 +44,9 @@ static const int64_t TEST_DURATION = 40000;
 static const double TEST_SPEED = 1.5;
 static const int64_t TEST_BUFFERED_TIME = 60000;
 static const int32_t TEST_LOOG_MODE = 2;
+static std::shared_ptr<MigrateAVSessionServer> server_;
+static AVSessionService *avservice_;
+
 class MigrateAVSessionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -51,26 +54,31 @@ public:
     void SetUp();
     void TearDown();
     void NativeTokenGet(const char *perms[], int size);
-
-    std::shared_ptr<MigrateAVSessionServer> server_ = nullptr;
-    AVSessionService *avservice_ = nullptr;
 };
 
-void MigrateAVSessionTest::SetUpTestCase() {}
+void MigrateAVSessionTest::SetUpTestCase()
+{
+    SLOGI("MigrateAVSessionTest SetUpTestCase");
+    server_ = std::make_shared<MigrateAVSessionServer>();
+    avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+}
 
-void MigrateAVSessionTest::TearDownTestCase() {}
+void MigrateAVSessionTest::TearDownTestCase()
+{
+    SLOGI("MigrateAVSessionTest TearDownTestCase");
+    server_ = nullptr;
+    avservice_ = nullptr;
+}
 
 void MigrateAVSessionTest::SetUp()
 {
-    server_ = std::make_shared<MigrateAVSessionServer>();
-    avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    SLOGI("MigrateAVSessionTest SetUp");
     NativeTokenGet(g_perms, SIZE);
 }
 
 void MigrateAVSessionTest::TearDown()
 {
-    server_ = nullptr;
-    avservice_ = nullptr;
+    SLOGI("MigrateAVSessionTest TearDown");
     NativeTokenGet(nullptr, 0);
 }
 
