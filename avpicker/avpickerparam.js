@@ -31,7 +31,7 @@ export let AVCastPickerColorMode;
 (function(a) {
   a[a.AUTO = 0] = 'AUTO';
   a[a.DARK = 1] = 'DARK';
-  a[a.LIGHT = 1] = 'LIGHT';
+  a[a.LIGHT = 2] = 'LIGHT';
 })(AVCastPickerColorMode || (AVCastPickerColorMode = {}));
 
 export class AVCastPickerParam {
