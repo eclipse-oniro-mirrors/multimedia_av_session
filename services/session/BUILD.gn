@@ -25,6 +25,7 @@ group("avsession_server") {
     ":avsession_service",
     "../../sa_profile:avsession_sa_profile",
     "../etc:avsession_service.rc",
+    "../etc:ohos.para.dac",
   ]
 }
 
@@ -66,6 +67,7 @@ ohos_shared_library("avsession_service") {
     "adapter/key_event_adapter.cpp",
     "adapter/params_config_operator.cpp",
     "adapter/permission_checker.cpp",
+    "adapter/session_xcollie.cpp",
   ]
 
   sources = ipc_sources + adapter_sources + service_sources
@@ -190,6 +192,11 @@ ohos_shared_library("avsession_service") {
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
     external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (multimedia_av_session_enable_hicollie) {
+    external_deps += [ "hicollie:libhicollie" ]
+    defines += [ "HICOLLIE_ENABLE" ]
   }
 
   subsystem_name = "multimedia"
@@ -337,6 +344,7 @@ ohos_shared_library("avsession_item") {
   adapter_sources = [
     "adapter/command_send_limit.cpp",
     "adapter/permission_checker.cpp",
+    "adapter/session_xcollie.cpp",
   ]
 
   sources = ipc_sources + adapter_sources + service_sources
@@ -437,6 +445,11 @@ ohos_shared_library("avsession_item") {
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
     external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (multimedia_av_session_enable_hicollie) {
+    external_deps += [ "hicollie:libhicollie" ]
+    defines += [ "HICOLLIE_ENABLE" ]
   }
 
   if (multimedia_av_session_enable_hicollie) {

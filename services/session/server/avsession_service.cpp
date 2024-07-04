@@ -119,6 +119,7 @@ AVSessionService::~AVSessionService()
 
 void AVSessionService::OnStart()
 {
+    SessionXCollie sessionXCollie("avsession::OnStart");
     std::string cachePath(AVSessionUtils::GetCachePathName());
     AVSessionUtils::DeleteCacheFiles(cachePath);
     CHECK_AND_RETURN_LOG(Publish(this), "publish avsession service failed");
@@ -161,7 +162,10 @@ void AVSessionService::OnStart()
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
-    SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
+    if (!system::GetBoolParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), false)) {
+        system::SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
+        SLOGI("set boot avsession service started true");
+    }
 }
 
 void AVSessionService::OnDump()

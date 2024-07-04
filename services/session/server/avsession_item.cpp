@@ -28,6 +28,7 @@
 #include "remote_session_source_proxy.h"
 #include "remote_session_sink_proxy.h"
 #include "permission_checker.h"
+#include "session_xcollie.h"
 #include "avsession_item.h"
 #include "avsession_radar.h"
 #include "avsession_event_handler.h"
