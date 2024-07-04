@@ -160,12 +160,11 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
-    SLOGI("handle with thead safe for event: %{public}d with state: %{public}d", event, state);
+    SLOGI("handle with thead safe without lock for event: %{public}d with num: %{public}d with state: %{public}d",
+        event, static_cast<int>(callbacks_[event].size()), state);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        lock_.unlock();
         CallWithThreadSafe(*ref, isValid_, state, threadSafeFunction_,
             [this, ref, event]() {
-                std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
                     return false;
@@ -182,7 +181,6 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
                 auto status = NapiUtils::SetValue(env, param, *argv);
                 CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
             });
-        lock_.lock();
     }
 }
 

@@ -194,7 +194,7 @@ int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
     SLOGI("%{public}s ", source.c_str());
     auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
         HandleFrontSession();
-    }, "HandleFrontSession", 0);
+        }, "HandleFrontSession", 0);
     CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
     return ret;
 }
@@ -247,13 +247,17 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         serviceCallbackForAddAVQueueInfo_(*this);
     }
 
-    SLOGD("send metadata change event to controllers");
-    {
+    SLOGI("send metadata change event to controllers with title %{public}s", meta.GetTitle().c_str());
+
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta]() {
+        SLOGI("HandleMetaDataChange in postTask with title %{public}s", meta.GetTitle().c_str());
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
+            SLOGI("HandleMetaDataChange for controller pid=%{public}d", pid);
             controller->HandleMetaDataChange(meta);
         }
-    }
+        }, "HandleMetaDataChange", 0);
+
     SLOGI("send metadata change event to controllers done");
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
@@ -330,13 +334,16 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     }
 
     SLOGI("send playbackstate change event to controllers with state: %{public}d", state.GetState());
-    {
+
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, state]() {
+        SLOGI("HandlePlaybackStateChange in postTask with state %{public}d", state.GetState());
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            SLOGI("pid=%{public}d", pid);
+            SLOGI("HandlePlaybackStateChange for controller pid=%{public}d", pid);
             controller->HandlePlaybackStateChange(state);
         }
-    }
+        }, "HandlePlaybackStateChange", 0);
+
     SLOGI("send playbackstate change event to controllers done");
 
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
@@ -535,11 +542,17 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
     supportedCmd_.push_back(cmd);
     ProcessFrontSession("AddSupportCommand");
-    std::lock_guard controllerLockGuard(controllersLock_);
-    for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{public}d", pid);
-        controller->HandleValidCommandChange(supportedCmd_);
-    }
+
+    SLOGI("send validCommand change event to controllers with num %{public}d", static_cast<int>(supportedCmd_.size()));
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+        SLOGI("HandleValidCommandChange in add postTask with num %{public}d", static_cast<int>(supportedCmd_.size()));
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            SLOGI("HandleValidCommandChange for controller pid=%{public}d", pid);
+            controller->HandleValidCommandChange(supportedCmd_);
+        }
+        }, "HandleValidCommandChange", 0);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AddSessionCommandToCast(cmd);
 #endif
@@ -553,11 +566,17 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
     auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     supportedCmd_.erase(iter, supportedCmd_.end());
     ProcessFrontSession("DeleteSupportCommand");
-    std::lock_guard controllerLockGuard(controllersLock_);
-    for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{public}d", pid);
-        controller->HandleValidCommandChange(supportedCmd_);
-    }
+
+    SLOGI("send validCommand change event to controllers with num %{public}d", static_cast<int>(supportedCmd_.size()));
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+        SLOGI("HandleValidCommandChange in del postTask with num %{public}d", static_cast<int>(supportedCmd_.size()));
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            SLOGI("HandleValidCommandChange for controller pid=%{public}d", pid);
+            controller->HandleValidCommandChange(supportedCmd_);
+        }
+        }, "HandleValidCommandChange", 0);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     RemoveSessionCommandFromCast(cmd);
 #endif
