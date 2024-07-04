@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,11 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
 
 AVSessionItem::~AVSessionItem()
 {
-    SLOGD("destroy id=%{public}s", AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str());
+    SLOGI("destroy with activeCheck id=%{public}s", AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str());
+    if (IsActive()) {
+        SLOGI("destroy with activate session, try deactivate it");
+        Deactivate();
+    }
     std::lock_guard lockGuard(destroyLock_);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
@@ -191,7 +195,7 @@ int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
     SLOGI("%{public}s ", source.c_str());
     auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
         HandleFrontSession();
-    }, "HandleFrontSession", 0);
+        }, "HandleFrontSession", 0);
     CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
     return ret;
 }
@@ -245,13 +249,17 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         serviceCallbackForAddAVQueueInfo_(*this);
     }
 
-    SLOGD("send metadata change event to controllers");
-    {
+    SLOGI("send metadata change event to controllers with title %{public}s", meta.GetTitle().c_str());
+
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta]() {
+        SLOGI("HandleMetaDataChange in postTask with title %{public}s", meta.GetTitle().c_str());
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
+            SLOGI("HandleMetaDataChange for controller pid=%{public}d", pid);
             controller->HandleMetaDataChange(meta);
         }
-    }
+        }, "HandleMetaDataChange", 0);
+
     SLOGI("send metadata change event to controllers done");
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
@@ -328,13 +336,16 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     }
 
     SLOGI("send playbackstate change event to controllers with state: %{public}d", state.GetState());
-    {
+
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, state]() {
+        SLOGI("HandlePlaybackStateChange in postTask with state %{public}d", state.GetState());
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            SLOGI("pid=%{public}d", pid);
+            SLOGI("HandlePlaybackStateChange for controller pid=%{public}d", pid);
             controller->HandlePlaybackStateChange(state);
         }
-    }
+        }, "HandlePlaybackStateChange", 0);
+
     SLOGI("send playbackstate change event to controllers done");
 
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
@@ -359,12 +370,16 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
 
 int32_t AVSessionItem::GetExtras(AAFwk::WantParams& extras)
 {
+    std::lock_guard lockGuard(wantParamLock_);
+    SLOGI("getextras lock pass");
     extras = extras_;
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
 {
+    std::lock_guard lockGuard(wantParamLock_);
+    SLOGI("set extras pass lock");
     extras_ = extras;
 
     {
@@ -496,6 +511,7 @@ int32_t AVSessionItem::Activate()
 int32_t AVSessionItem::Deactivate()
 {
     descriptor_.isActive_ = false;
+    SLOGI("Deactivate in");
     std::lock_guard controllerLockGuard(controllersLock_);
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);
@@ -510,6 +526,7 @@ int32_t AVSessionItem::Deactivate()
             audioManager->SetAudioScene(audioScene);
         }
     }
+    SLOGI("Deactivate done");
     return AVSESSION_SUCCESS;
 }
 
@@ -527,11 +544,17 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
     supportedCmd_.push_back(cmd);
     ProcessFrontSession("AddSupportCommand");
-    std::lock_guard controllerLockGuard(controllersLock_);
-    for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{public}d", pid);
-        controller->HandleValidCommandChange(supportedCmd_);
-    }
+
+    SLOGI("send validCommand change event to controllers with num %{public}d", static_cast<int>(supportedCmd_.size()));
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+        SLOGI("HandleValidCommandChange in add postTask with num %{public}d", static_cast<int>(supportedCmd_.size()));
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            SLOGI("HandleValidCommandChange for controller pid=%{public}d", pid);
+            controller->HandleValidCommandChange(supportedCmd_);
+        }
+        }, "HandleValidCommandChange", 0);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AddSessionCommandToCast(cmd);
 #endif
@@ -545,11 +568,17 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
     auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     supportedCmd_.erase(iter, supportedCmd_.end());
     ProcessFrontSession("DeleteSupportCommand");
-    std::lock_guard controllerLockGuard(controllersLock_);
-    for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{public}d", pid);
-        controller->HandleValidCommandChange(supportedCmd_);
-    }
+
+    SLOGI("send validCommand change event to controllers with num %{public}d", static_cast<int>(supportedCmd_.size()));
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+        SLOGI("HandleValidCommandChange in del postTask with num %{public}d", static_cast<int>(supportedCmd_.size()));
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            SLOGI("HandleValidCommandChange for controller pid=%{public}d", pid);
+            controller->HandleValidCommandChange(supportedCmd_);
+        }
+        }, "HandleValidCommandChange", 0);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     RemoveSessionCommandFromCast(cmd);
 #endif
@@ -1099,6 +1128,8 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
 
 AAFwk::WantParams AVSessionItem::GetExtras()
 {
+    std::lock_guard lockGuard(wantParamLock_);
+    SLOGI("GetExtras pass lock");
     return extras_;
 }
 
@@ -1134,7 +1165,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_SUCCESS_CTRL_COMMAND);
     HISYSEVENT_ADD_CONTROLLER_COMMAND_INFO(descriptor_.elementName_.GetBundleName(), GetPid(),
         cmd.GetCommand(), descriptor_.sessionType_);
-    return (this->*cmdHandlers[code])(cmd);
+    return cmdHandlers[code](cmd);
 
     HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", code,
         "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");

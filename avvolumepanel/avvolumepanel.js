@@ -80,7 +80,7 @@ export class AVVolumePanel extends ViewPU {
         bundleName: 'com.hmos.mediacontroller',
         parameters: {
           'volumeParameter': this.volumeParameter,
-          'ability.want.params.uiExtensionType': 'sys/commonUI',
+          'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
         }
       });
       UIExtensionComponent.onReceive((h) => {

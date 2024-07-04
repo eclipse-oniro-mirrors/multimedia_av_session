@@ -42,7 +42,7 @@ ohos_fuzztest("AbilityConnectHelperFuzzTest") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
-    "access_token:libtoken_setproc",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",

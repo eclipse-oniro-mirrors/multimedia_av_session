@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ int32_t AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data
         return AVSESSION_ERROR;
     }
     if (code < static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX)) {
-        return (this->*handlers[code])(data, reply);
+        return handlers[code](data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
@@ -62,14 +62,12 @@ int32_t AVSessionServiceStub::HandleCreateSessionInner(MessageParcel& data, Mess
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
-    auto session = CreateSessionInner(sessionTag, sessionType, *elementName);
-    if (session == nullptr) {
-        SLOGI("session is nullptr");
-        reply.WriteInt32(ERR_UNMARSHALLING);
-        return ERR_NONE;
+    sptr<IRemoteObject> object;
+    auto ret = CreateSessionInner(sessionTag, sessionType, *elementName, object);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");
     }
-    reply.WriteInt32(AVSESSION_SUCCESS);
-    reply.WriteRemoteObject(session);
     return ERR_NONE;
 }
 

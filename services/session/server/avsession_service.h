@@ -146,6 +146,9 @@ public:
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                            const AppExecFwk::ElementName& elementName) override;
 
+    int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
+                               sptr<IRemoteObject>& object) override;
+
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
@@ -227,6 +230,8 @@ private:
 
     void CheckBrEnable();
 
+    void NotifyProcessStatus(bool isStart);
+
     static SessionContainer& GetContainer();
 
     std::string AllocSessionId();
@@ -259,6 +264,9 @@ private:
 
     sptr<AVSessionItem> CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                            const AppExecFwk::ElementName& elementName);
+
+    int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
+                               const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                          const AppExecFwk::ElementName& elementName);
@@ -481,6 +489,7 @@ private:
     const int32_t allocSpace = 2;
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
+    const int32_t SA_TYPE = 1;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

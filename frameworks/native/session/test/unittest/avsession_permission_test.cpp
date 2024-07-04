@@ -292,7 +292,7 @@ HWTEST_F(AVSessionPermissionTest, GetAllSessionDescriptorsWithPerm001, TestSize.
     std::vector<AVSessionDescriptor> descriptors;
     auto ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    SLOGE("check descriptors count for stricter check");
+    SLOGI("check descriptors count for stricter check");
     EXPECT_EQ(descriptors.size(), 0);
     if (session != nullptr) {
         session->Destroy();
@@ -319,7 +319,7 @@ HWTEST_F(AVSessionPermissionTest, GetActivatedSessionDescriptorsWithPerm001, Tes
     std::vector<AVSessionDescriptor> descriptors;
     auto ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    SLOGE("check descriptors count for stricter check");
+    SLOGI("check descriptors count for stricter check");
     EXPECT_EQ(descriptors.size(), 0);
 
     if (session != nullptr) {

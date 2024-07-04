@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef OHOS_AVSESSION_CONTROLLER_STUB_H
 #define OHOS_AVSESSION_CONTROLLER_STUB_H
 
+#include <map>
 #include "iavsession_controller.h"
 #include "iremote_stub.h"
 
@@ -87,29 +88,50 @@ private:
     static void DoMetadataImgCleanInStub(AVMetaData& data);
     static int32_t DoMetadataGetReplyInStub(AVMetaData& metaData, MessageParcel& reply);
 
-    using HandlerFunc = int32_t (AVSessionControllerStub::*)(MessageParcel& data, MessageParcel& reply);
-    static inline HandlerFunc handlers[] = {
-        &AVSessionControllerStub::HandleRegisterCallbackInner,
-        &AVSessionControllerStub::HandleDestroy,
-        &AVSessionControllerStub::HandleGetAVPlaybackState,
-        &AVSessionControllerStub::HandleGetAVMetaData,
-        &AVSessionControllerStub::HandleSendAVKeyEvent,
-        &AVSessionControllerStub::HandleGetLaunchAbility,
-        &AVSessionControllerStub::HandleGetValidCommands,
-        &AVSessionControllerStub::HandleSendControlCommand,
-        &AVSessionControllerStub::HandleSendCommonCommand,
-        &AVSessionControllerStub::HandleSetMetaFilter,
-        &AVSessionControllerStub::HandleSetPlaybackFilter,
-        &AVSessionControllerStub::HandleIsSessionActive,
-        &AVSessionControllerStub::HandleGetSessionId,
-        &AVSessionControllerStub::HandleGetAVQueueItems,
-        &AVSessionControllerStub::HandleGetAVQueueTitle,
-        &AVSessionControllerStub::HandleSkipToQueueItem,
-        &AVSessionControllerStub::HandleGetExtras,
-        &AVSessionControllerStub::HandleGetAVCallMetaData,
-        &AVSessionControllerStub::HandleSetAVCallMetaFilter,
-        &AVSessionControllerStub::HandleGetAVCallState,
-        &AVSessionControllerStub::HandleSetAVCallStateFilter,
+    using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
+    std::map<uint32_t, HandlerFunc> handlers = {
+        {CONTROLLER_CMD_REGISTER_CALLBACK,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleRegisterCallbackInner(data, reply); }},
+        {CONTROLLER_CMD_DESTROY,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleDestroy(data, reply); }},
+        {CONTROLLER_CMD_GET_AV_PLAYBACK_STATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVPlaybackState(data, reply); }},
+        {CONTROLLER_CMD_GET_AV_META_DATA,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVMetaData(data, reply); }},
+        {CONTROLLER_CMD_SEND_AV_KEYEVENT,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendAVKeyEvent(data, reply); }},
+        {CONTROLLER_CMD_GET_LAUNCH_ABILITY,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetLaunchAbility(data, reply); }},
+        {CONTROLLER_CMD_GET_VALID_COMMANDS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetValidCommands(data, reply); }},
+        {CONTROLLER_CMD_SEND_CONTROL_COMMAND,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendControlCommand(data, reply); }},
+        {CONTROLLER_CMD_SEND_COMMON_COMMAND,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendCommonCommand(data, reply); }},
+        {CONTROLLER_CMD_SET_META_FILTER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetMetaFilter(data, reply); }},
+        {CONTROLLER_CMD_SET_PLAYBACK_FILTER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetPlaybackFilter(data, reply); }},
+        {CONTROLLER_CMD_IS_SESSION_ACTIVE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleIsSessionActive(data, reply); }},
+        {CONTROLLER_CMD_GET_SESSION_ID,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSessionId(data, reply); }},
+        {CONTROLLER_CMD_GET_AV_QUEUE_ITEMS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVQueueItems(data, reply); }},
+        {CONTROLLER_CMD_GET_AV_QUEUE_TITLE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVQueueTitle(data, reply); }},
+        {CONTROLLER_CMD_SKIP_TO_QUEUE_ITEM,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSkipToQueueItem(data, reply); }},
+        {CONTROLLER_CMD_GET_EXTRAS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetExtras(data, reply); }},
+        {CONTROLLER_CMD_GET_AVCALL_META_DATA,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCallMetaData(data, reply); }},
+        {CONTROLLER_CMD_SET_AVCALL_META_FILTER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVCallMetaFilter(data, reply); }},
+        {CONTROLLER_CMD_GET_AVCALL_STATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCallState(data, reply); }},
+        {CONTROLLER_CMD_SET_AVCALL_STATE_FILTER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVCallStateFilter(data, reply); }}
     };
 };
 } // namespace OHOS::AVSession

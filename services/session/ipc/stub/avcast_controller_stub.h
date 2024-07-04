@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef OHOS_AVCAST_CONTROLLER_STUB_H
 #define OHOS_AVCAST_CONTROLLER_STUB_H
 
+#include <map>
 #include "iavcast_controller.h"
 #include "iremote_stub.h"
 
@@ -60,22 +61,36 @@ private:
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    using HandlerFunc = int32_t (AVCastControllerStub::*)(MessageParcel& data, MessageParcel& reply);
-    static inline HandlerFunc handlers[] = {
-        &AVCastControllerStub::HandleSendControlCommand,
-        &AVCastControllerStub::HandleStart,
-        &AVCastControllerStub::HandlePrepare,
-        &AVCastControllerStub::HandleGetDuration,
-        &AVCastControllerStub::HandleGetCastAVPlayBackState,
-        &AVCastControllerStub::HandleGetCurrentItem,
-        &AVCastControllerStub::HandleGetValidCommands,
-        &AVCastControllerStub::HandleSetDisplaySurface,
-        &AVCastControllerStub::HandleSetCastPlaybackFilter,
-        &AVCastControllerStub::HandleProvideKeyResponse,
-        &AVCastControllerStub::HandleRegisterCallbackInner,
-        &AVCastControllerStub::HandleDestroy,
-        &AVCastControllerStub::HandleAddAvailableCommand,
-        &AVCastControllerStub::HandleRemoveAvailableCommand,
+    using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
+    std::map<uint32_t, HandlerFunc> handlers = {
+        {CAST_CONTROLLER_CMD_SEND_CONTROL_COMMAND,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendControlCommand(data, reply); }},
+        {CAST_CONTROLLER_CMD_START,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStart(data, reply); }},
+        {CAST_CONTROLLER_CMD_PREPARE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandlePrepare(data, reply); }},
+        {CAST_CONTROLLER_CMD_GET_DURATION,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetDuration(data, reply); }},
+        {CAST_CONTROLLER_CMD_GET_CAST_AV_PLAYBACK_STATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetCastAVPlayBackState(data, reply); }},
+        {CAST_CONTROLLER_CMD_GET_CURRENT_ITEM,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetCurrentItem(data, reply); }},
+        {CAST_CONTROLLER_CMD_GET_VALID_COMMANDS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetValidCommands(data, reply); }},
+        {CAST_CONTROLLER_CMD_SET_DISPLAY_SURFACE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetDisplaySurface(data, reply); }},
+        {CAST_CONTROLLER_CMD_SET_CAST_PLAYBACK_FILTER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetCastPlaybackFilter(data, reply); }},
+        {CAST_CONTROLLER_CMD_PROVIDE_KEY_RESPONSE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleProvideKeyResponse(data, reply); }},
+        {CAST_CONTROLLER_CMD_REGISTER_CALLBACK,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleRegisterCallbackInner(data, reply); }},
+        {CAST_CONTROLLER_CMD_DESTROY,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleDestroy(data, reply); }},
+        {CAST_CONTROLLER_CMD_ADD_AVAILABLE_COMMAND,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleAddAvailableCommand(data, reply); }},
+        {CAST_CONTROLLER_CMD_REMOVE_AVAILABLE_COMMAND,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleRemoveAvailableCommand(data, reply); }}
     };
 };
 } // namespace OHOS::AVSession

@@ -36,7 +36,7 @@ ohos_fuzztest("AVControllerCallbackProxyFuzzTest") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
-    "access_token:libtoken_setproc",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "c_utils:utils",
     "hilog:libhilog",

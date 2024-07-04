@@ -50,6 +50,9 @@ void AppManagerAdapterTest::SetUpTestCase()
     OHOS::AVSession::AppManagerAdapter::GetInstance().SetAppBackgroundStateObserver([](int32_t uid, int32_t pid) {
         g_expectedUid = uid;
     });
+    OHOS::AVSession::AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange([](int uid, int state) {
+        SLOGI("serviceCallback For AppManagerAdapterTest uid = %{public}d, state = %{public}d", uid, state);
+    });
 }
 
 void AppManagerAdapterTest::TearDownTestCase()

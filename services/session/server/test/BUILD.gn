@@ -14,6 +14,7 @@ import("//build/test.gni")
 import("../../../../bluetooth_part.gni")
 import("../../../../castplus_cast_engine_part.gni")
 import("../../../../config.gni")
+import("../../../../efficiency_manager_part.gni")
 
 module_output_path = "multimedia_av_session/session"
 
@@ -63,8 +64,8 @@ ohos_unittest("MigrateAVSessionTest") {
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "access_token:libnativetoken",
-    "access_token:libtoken_setproc",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
@@ -76,9 +77,25 @@ ohos_unittest("MigrateAVSessionTest") {
     "samgr:samgr_proxy",
   ]
 
+  cflags = []
+
   if (bluetooth_part_enable) {
-    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
+  }
+
+  if (efficiency_manager_enable_in_avsession) {
+    cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
+  }
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 }
 
@@ -103,8 +120,8 @@ ohos_unittest("SoftbusSessionManagerTest") {
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "access_token:libnativetoken",
-    "access_token:libtoken_setproc",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "c_utils:utils",
     "device_manager:devicemanagersdk",
@@ -137,8 +154,8 @@ ohos_unittest("AVSessionServiceTest") {
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "access_token:libnativetoken",
-    "access_token:libtoken_setproc",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
@@ -193,7 +210,7 @@ ohos_unittest("AppManagerAdapterTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "access_token:libtoken_setproc",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "c_utils:utils",
     "hilog:libhilog",
@@ -225,7 +242,7 @@ ohos_unittest("AbilityConnectHelperTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "access_token:libtoken_setproc",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
@@ -258,7 +275,7 @@ ohos_unittest("BkGrAudioControllerTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "access_token:libtoken_setproc",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_core",
@@ -333,7 +350,7 @@ ohos_unittest("SessionStackTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "access_token:libtoken_setproc",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
@@ -346,9 +363,25 @@ ohos_unittest("SessionStackTest") {
     "samgr:samgr_proxy",
   ]
 
+  cflags = []
+
   if (bluetooth_part_enable) {
-    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
+  }
+
+  if (efficiency_manager_enable_in_avsession) {
+    cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
+  }
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 }
 
@@ -370,8 +403,8 @@ ohos_unittest("AVRouterTest") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "access_token:libtoken_setproc",
     "access_token:libtokenid_sdk",
+    "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -417,8 +450,8 @@ if (castplus_cast_engine_enable) {
       "ability_runtime:app_manager",
       "ability_runtime:wantagent_innerkits",
       "access_token:libaccesstoken_sdk",
-      "access_token:libtoken_setproc",
       "access_token:libtokenid_sdk",
+      "access_token:libtokensetproc_shared",
       "audio_framework:audio_client",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
@@ -458,8 +491,8 @@ if (castplus_cast_engine_enable) {
       "ability_runtime:app_manager",
       "ability_runtime:wantagent_innerkits",
       "access_token:libaccesstoken_sdk",
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
+      "access_token:libnativetoken_shared",
+      "access_token:libtokensetproc_shared",
       "audio_framework:audio_client",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
