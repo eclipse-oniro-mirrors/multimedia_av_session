@@ -325,10 +325,10 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
     auto notifyProcessStatus = reinterpret_cast<int(*)(int, int, int, int)>(notifyProcessStatusFunc);
     if (isStart) {
         SLOGI("notify to memmgr when av_session is started");
-        notifyProcessStatus(pid, SA_TYPE, 1, AVSESSION_SERVICE_ID); // 1 indicates the service is started
+        notifyProcessStatus(pid, saType, 1, AVSESSION_SERVICE_ID); // 1 indicates the service is started
     } else {
         SLOGI("notify to memmgr when av_session is stopped");
-        notifyProcessStatus(pid, SA_TYPE, 0, AVSESSION_SERVICE_ID); // 0 indicates the service is stopped
+        notifyProcessStatus(pid, saType, 0, AVSESSION_SERVICE_ID); // 0 indicates the service is stopped
     }
     dlclose(libMemMgrClientHandle);
 }
@@ -556,8 +556,8 @@ sptr <AVSessionItem> AVSessionService::SelectSessionByUid(const AudioRendererCha
 void AVSessionService::OutputDeviceChangeListener(const AudioRendererChangeInfos& infos)
 {
     for (const auto& info : infos) {
-        SLOGD("clientUID  is %{public}d, rendererState is %{public}d, deviceId is %{public}d", info->clientUID,
-              static_cast<int32_t>(info->rendererState), info->outputDeviceInfo.deviceId);
+        SLOGD("clientUID  is %{public}d, rendererState is %{public}d", info->clientUID,
+            static_cast<int32_t>(info->rendererState));
     }
 }
 
@@ -2129,7 +2129,6 @@ void AVSessionService::SetDeviceInfo(const std::vector<AudioStandard::AudioDevic
         deviceInfo.deviceId_ = std::to_string(audioDescriptor.deviceId_);
         deviceInfo.deviceName_ = audioDescriptor.deviceName_;
         SLOGI("deviceName is %{public}s", audioDescriptor.deviceName_.c_str());
-        SLOGI("deviceId is %{public}d", audioDescriptor.deviceId_);
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
     session->SetOutputDevice(outputDeviceInfo);
@@ -2142,8 +2141,7 @@ bool AVSessionService::GetAudioDescriptorByDeviceId(const std::vector<sptr<Audio
     for (const auto& descriptor : descriptors) {
         if (std::to_string(descriptor->deviceId_) == deviceId) {
             audioDescriptor = *descriptor;
-            SLOGI("deviceId is %{public}d, networkId is %{public}.6s", audioDescriptor.deviceId_,
-                  audioDescriptor.networkId_.c_str());
+            SLOGI("networkId is %{public}.6s", audioDescriptor.networkId_.c_str());
             return true;
         }
     }
@@ -2161,8 +2159,7 @@ void AVSessionService::GetDeviceInfo(const sptr <AVSessionItem>& session,
         return;
     }
     castSinkDescriptors.push_back(descriptors[0]);
-    SLOGI("cast to deviceId %{public}d, networkId_ is %{public}.6s", descriptors[0].deviceId_,
-          descriptors[0].networkId_.c_str());
+    SLOGI("cast to networkId_ is %{public}.6s", descriptors[0].networkId_.c_str());
 
     OutputDeviceInfo tempOutputDeviceInfo;
     session->GetOutputDevice(tempOutputDeviceInfo);
@@ -2189,9 +2186,8 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
     auto audioDeviceDescriptor = new(std::nothrow) AudioDeviceDescriptor(descriptor);
     CHECK_AND_RETURN_RET_LOG(audioDeviceDescriptor != nullptr, ERR_NO_MEMORY, "audioDeviceDescriptor is nullptr");
     audioDescriptor.push_back(audioDeviceDescriptor);
-    SLOGI("select the device %{public}s id %{public}d role is %{public}d, networkId is %{public}.6s",
-          descriptor.deviceName_.c_str(), descriptor.deviceId_, static_cast<int32_t>(descriptor.deviceRole_),
-          descriptor.networkId_.c_str());
+    SLOGI("select the device %{public}s role is %{public}d, networkId is %{public}.6s",
+        descriptor.deviceName_.c_str(), static_cast<int32_t>(descriptor.deviceRole_), descriptor.networkId_.c_str());
 
     AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
     CHECK_AND_RETURN_RET_LOG(audioSystemMgr != nullptr, AVSESSION_ERROR, "get AudioSystemManager instance failed");
@@ -2506,8 +2502,7 @@ int32_t AVSessionService::GetAudioDescriptor(const std::string deviceId,
     AudioDeviceDescriptor audioDescriptor;
     if (GetAudioDescriptorByDeviceId(audioDescriptors, deviceId, audioDescriptor)) {
         audioDeviceDescriptors.push_back(audioDescriptor);
-        SLOGI("get audio deviceId %{public}d, networkId_ is %{public}.6s", audioDescriptor.deviceId_,
-              audioDescriptor.networkId_.c_str());
+        SLOGI("get audio networkId_ is %{public}.6s", audioDescriptor.networkId_.c_str());
         return AVSESSION_SUCCESS;
     }
     SLOGI("can not get deviceId %{public}s info", deviceId.c_str());
