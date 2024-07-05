@@ -394,7 +394,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
 
 void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
-    SLOGD("uid=%{public}d", info.uid);
+    SLOGI("HandleFocusSession with uid=%{public}d", info.uid);
     sessionPublishedMap_[info.uid] = false;
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
