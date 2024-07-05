@@ -79,6 +79,7 @@ bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChan
 bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos& infos,
                                               FocusSessionChangeInfo& sessionInfo)
 {
+    bool isFocus = false;
     for (const auto& info : infos) {
         if (!IsFocusSession(*info)) {
             std::lock_guard lockGuard(stateLock_);
@@ -91,18 +92,21 @@ bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos& in
             HISYSEVENT_SET_AUDIO_STATUS(info->clientUID, info->rendererState);
             lastStates_[info->clientUID] = info->rendererState;
         }
-        SLOGI("uid=%{public}d state=%{public}d", info->clientUID, info->rendererState);
+        SLOGI("SelectFocusSession check uid=%{public}d state=%{public}d", info->clientUID, info->rendererState);
         sessionInfo.uid = info->clientUID;
         sessionInfo.streamUsage = info->rendererInfo.streamUsage;
         if (selector_ != nullptr && !selector_(sessionInfo)) {
             continue;
         }
-        SLOGI("uid=%{public}d is focus session", sessionInfo.uid);
+        SLOGI("SelectFocusSession check uid=%{public}d is focus session", sessionInfo.uid);
         HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", sessionInfo.uid, "AUDIO_INFO_CONTENT_TYPE",
             info->rendererInfo.contentType, "AUDIO_INFO_RENDERER_STATE", info->rendererState,
             "DETAILED_MSG", "focussessionstrategy selectfocussession, current focus session info");
-        return true;
+        if (!isFocus) {
+            isFocus = true;
+        }
     }
-    return false;
+    SLOGI("SelectFocusSession check isFocus %{public}d", static_cast<int>(isFocus));
+    return isFocus;
 }
 }
