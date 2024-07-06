@@ -81,7 +81,6 @@ int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel& dat
     CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read PlaybackState failed");
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnPlaybackStateChange");
     OnPlaybackStateChange(*state);
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
@@ -97,7 +96,6 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
         sptr avMetaData = data.ReadParcelable<AVMetaData>();
         CHECK_AND_RETURN_RET_LOG(avMetaData != nullptr, ERR_NONE, "read MetaData failed");
         OnMetaDataChange(*avMetaData);
-        reply.WriteInt32(AVSESSION_SUCCESS);
         return ERR_NONE;
     }
 
@@ -110,7 +108,6 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
         SLOGE("read raw data with null %{public}d, or err media img length:%{public}d",
             static_cast<int>(buffer == nullptr), mediaImageLength);
         OnMetaDataChange(meta);
-        reply.WriteInt32(AVSESSION_SUCCESS);
         return ERR_NONE;
     }
 
@@ -132,7 +129,6 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
         meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
     }
     OnMetaDataChange(meta);
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 
@@ -152,7 +148,6 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel& data
     SLOGI("do HandleOnValidCommandChange with cmd list size %{public}d", static_cast<int>(cmds.size()));
 
     OnValidCommandChange(cmds);
-    reply.WriteInt32(AVSESSION_SUCCESS);
     return ERR_NONE;
 }
 

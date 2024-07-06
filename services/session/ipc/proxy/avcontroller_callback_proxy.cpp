@@ -82,8 +82,7 @@ void AVControllerCallbackProxy::OnPlaybackStateChange(const AVPlaybackState& sta
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_PLAYBACK_STATE_CHANGE, parcel, reply, option) == 0,
         "send request failed");
-    int32_t ret = AVSESSION_ERROR;
-    reply.ReadInt32(ret);
+    SLOGI("do OnPlaybackStateChange without reply");
 }
 
 int32_t AVControllerCallbackProxy::GetPixelMapBuffer(AVMetaData& metaData, MessageParcel& parcel)
@@ -168,8 +167,7 @@ void AVControllerCallbackProxy::OnMetaDataChange(const AVMetaData& data)
 
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_METADATA_CHANGE, parcel, reply, option) == 0,
         "send request failed");
-    int32_t ret = AVSESSION_ERROR;
-    reply.ReadInt32(ret);
+    SLOGI("do OnMetaDataChange without reply");
 }
 
 void AVControllerCallbackProxy::OnActiveStateChange(bool isActive)
@@ -201,8 +199,7 @@ void AVControllerCallbackProxy::OnValidCommandChange(const std::vector<int32_t>&
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE, parcel, reply, option) == 0,
         "send request failed");
-    int32_t ret = AVSESSION_ERROR;
-    reply.ReadInt32(ret);
+    SLOGI("do OnValidCommandChange without reply");
 }
 
 void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
