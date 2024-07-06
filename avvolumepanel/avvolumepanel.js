@@ -66,8 +66,10 @@ export class AVVolumePanel extends ViewPU {
     this.__volumeParameter.set(k);
   }
   volumeChange() {
-    console.info(TAG, `volumechange volumeLevel = ` + this.volumeLevel);
-    this.volumeCallback.send({'volume': this.volumeLevel});
+    if (this.volumeCallback != null) {
+      console.info(TAG, `volumechange volumeLevel = ` + this.volumeLevel);
+      this.volumeCallback.send({'volume': this.volumeLevel});
+    }
   }
   initialRender() {
     this.observeComponentCreation2((i, j) => {
