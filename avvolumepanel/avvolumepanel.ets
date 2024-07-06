@@ -29,8 +29,10 @@ export struct AVVolumePanel {
   volumeCallback!: UIExtensionProxy;
 
   volumeChange() {
-    console.info(TAG, `volumeChange volumeLevel = ` + this.volumeLevel);
-    this.volumeCallback.send({'volume': this.volumeLevel});
+    if (this.volumeCallback != null) {
+      console.info(TAG, `volumeChange volumeLevel = ` + this.volumeLevel);
+      this.volumeCallback.send({'volume': this.volumeLevel});
+    }
   }
 
   build() {
