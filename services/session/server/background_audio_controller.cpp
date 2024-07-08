@@ -66,15 +66,9 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
             return;
         }
 
-        if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(descriptor.uid_)) {
-            SLOGD("uid=%{public}d is system app", descriptor.uid_);
-            return;
-        }
-
         int32_t uid = descriptor.uid_;
-        AudioStandard::RendererState rendererState = AudioStandard::RENDERER_PAUSED;
-        bool isSuccess = AudioAdapter::GetInstance().GetRendererState(uid, rendererState);
-        if (isSuccess && rendererState != AudioStandard::RENDERER_RUNNING) {
+        bool isRunning = AudioAdapter::GetInstance().GetRendererRunning(uid);
+        if (!isRunning) {
             SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");
             return;
         }
@@ -94,6 +88,12 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
         if (info->rendererState != AudioStandard::RENDERER_RUNNING) {
             continue;
         }
+
+        if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(info->clientUID)) {
+            SLOGD("uid=%{public}d is system app", info->clientUID);
+            continue;
+        }
+
         if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
             AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
             SLOGD("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
@@ -106,11 +106,6 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
         }
 
         if (HasAVSession(info->clientUID)) {
-            continue;
-        }
-
-        if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(info->clientUID)) {
-            SLOGD("uid=%{public}d is system app", info->clientUID);
             continue;
         }
 

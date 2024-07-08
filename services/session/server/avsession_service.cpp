@@ -476,7 +476,11 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     std::lock_guard frontLockGuard(sessionFrontLock_);
     SLOGI("UpdateFrontSession pass lock");
     auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sessionItem);
-    if (isAdd && it == sessionListForFront_.end()) {
+    if (isAdd) {
+        if (it != sessionListForFront_.end()) {
+            SLOGI("sessionListForFront has same session bundle=%{public}s", sessionItem->GetBundleName().c_str());
+            return;
+        }
         sessionListForFront_.push_front(sessionItem);
         auto iter = sessionPublishedMap_.find(sessionItem->GetUid());
         if (iter != sessionPublishedMap_.end() && !sessionPublishedMap_[sessionItem->GetUid()]) {

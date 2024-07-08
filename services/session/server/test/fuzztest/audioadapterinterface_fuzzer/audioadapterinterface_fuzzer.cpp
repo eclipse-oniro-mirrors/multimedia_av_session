@@ -37,11 +37,9 @@ void OHOS::AVSession::AudioAdapterTest(uint8_t *data, size_t size)
     }
     int32_t uid = *(reinterpret_cast<const int32_t *>(data));
 
-    AudioStandard::RendererState rendererState;
-
     AudioAdapter audioAdapter;
     audioAdapter.PauseAudioStream(uid);
-    audioAdapter.GetRendererState(uid, rendererState);
+    audioAdapter.GetRendererRunning(uid);
 }
 
 /* Fuzzer entry point */
