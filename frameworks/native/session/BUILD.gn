@@ -45,6 +45,12 @@ ohos_shared_library("avsession_client") {
     "src/session_listener_client.cpp",
   ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   sources = ipc_sources + client_sources
 
   public_configs = [ ":avsession_client_config" ]

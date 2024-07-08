@@ -50,6 +50,12 @@ gen_obj("avpicker_abc_preview") {
 ohos_shared_library("avcastpicker") {
   sources = [ "avpicker.cpp" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   if (use_mingw_win || use_mac || use_linux) {
     deps = [ ":gen_obj_src_avpicker_abc_preview" ]
   } else {
