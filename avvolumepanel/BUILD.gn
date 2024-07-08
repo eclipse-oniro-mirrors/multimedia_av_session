@@ -35,6 +35,12 @@ ohos_shared_library("avvolumepanel") {
 
   deps = [ ":avvolumepanel_abc" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   external_deps = [ "napi:ace_napi" ]
 
   relative_install_dir = "module/multimedia"
