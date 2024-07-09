@@ -670,10 +670,13 @@ sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const s
 
 void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor)
 {
-    std::lock_guard lockGuard(sessionListenersLock_);
-    for (const auto& listener : innerSessionListeners_) {
-        listener->OnSessionCreate(descriptor);
+    {
+        std::lock_guard lockGuard(migrateListenersLock_);
+        for (const auto& listener : innerSessionListeners_) {
+            listener->OnSessionCreate(descriptor);
+        }
     }
+    std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
         listener->OnSessionCreate(descriptor);
@@ -682,10 +685,13 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
 
 void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descriptor)
 {
-    std::lock_guard lockGuard(sessionListenersLock_);
-    for (const auto& listener : innerSessionListeners_) {
-        listener->OnSessionRelease(descriptor);
+    {
+        std::lock_guard lockGuard(migrateListenersLock_);
+        for (const auto& listener : innerSessionListeners_) {
+            listener->OnSessionRelease(descriptor);
+        }
     }
+    std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
         listener->OnSessionRelease(descriptor);
     }
@@ -693,10 +699,13 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
 
 void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descriptor)
 {
-    std::lock_guard lockGuard(sessionListenersLock_);
-    for (const auto& listener : innerSessionListeners_) {
-        listener->OnTopSessionChange(descriptor);
+    {
+        std::lock_guard lockGuard(migrateListenersLock_);
+        for (const auto& listener : innerSessionListeners_) {
+            listener->OnTopSessionChange(descriptor);
+        }
     }
+    std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
         listener->OnTopSessionChange(descriptor);
@@ -706,11 +715,13 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
 void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 {
     SLOGI("Start searching for the corresponding callback");
-    std::lock_guard lockGuard(sessionListenersLock_);
-    for (const auto& listener : innerSessionListeners_) {
-        SLOGI("Found inner session listener");
-        listener->OnAudioSessionChecked(uid);
+    {
+        std::lock_guard lockGuard(migrateListenersLock_);
+        for (const auto& listener : innerSessionListeners_) {
+            listener->OnAudioSessionChecked(uid);
+        }
     }
+    std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
         SLOGI("Found session listener with pid");
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnAudioSessionCheck");

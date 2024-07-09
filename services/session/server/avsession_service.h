@@ -433,6 +433,7 @@ private:
     std::recursive_mutex avQueueFileReadWriteLock_;
     std::mutex fileCheckLock_;
 
+    std::recursive_mutex migrateListenersLock_;
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
     std::map<int32_t, bool> sessionPublishedMap_;
 
