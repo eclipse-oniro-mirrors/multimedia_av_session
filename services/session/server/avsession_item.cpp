@@ -604,6 +604,9 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
     DeviceInfo deviceInfo)
 {
+    if (castHandle_ > 0) {
+        return AVSESSION_ERROR;
+    }
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
@@ -616,6 +619,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     AVRouter::GetInstance().SetServiceAllConnectState(castHandle, deviceInfo);
     deviceStateAddCommand_ = streamStateConnection;
     counter_ = secondStep;
+    UpdateCastDeviceMap(deviceInfo);
     return AVSESSION_SUCCESS;
 }
 
