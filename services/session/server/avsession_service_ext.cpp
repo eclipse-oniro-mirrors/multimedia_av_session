@@ -24,12 +24,12 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
     SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s, extraInfo: %{public}s",
         serviceName.c_str(), state.c_str(), extraInfo.c_str());
 
-    if (state == "IDLE") {
+    if (state == "IDLE" && serviceName == "SuperLauncher") {
         MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
         if (migrateAVSession_ != nullptr) {
             RemoveInnerSessionListener(migrateAVSession_.get());
         }
-    } else if (state == "CONNECTING") {
+    } else if (state == "CONNECTING" && serviceName == "SuperLauncher") {
         if (migrateAVSession_ == nullptr) {
             migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
         }
