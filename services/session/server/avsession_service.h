@@ -396,6 +396,8 @@ private:
 
     void DoMetadataImgClean(AVMetaData& data);
 
+    void HandleSystemKeyColdStart(const AVControlCommand &command);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
