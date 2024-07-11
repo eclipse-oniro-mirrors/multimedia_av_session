@@ -146,10 +146,9 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
-    SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
-    is2in1_ = strcmp(deviceProp.c_str(), "2in1");
-    if (is2in1_ == 0) {
+    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
+    SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
+    if (is2in1_) {
         SLOGI("startup enable cast check 2in1");
         checkEnableCast(true);
         AVRouter::GetInstance().SetDiscoverable(false);
@@ -267,9 +266,8 @@ void AVSessionService::CheckInitCast()
 #ifdef BLUETOOTH_ENABLE
 DetectBluetoothHostObserver::DetectBluetoothHostObserver()
 {
-    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
-    SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
-    is2in1_ = strcmp(deviceProp.c_str(), "2in1");
+    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
+    SLOGI("DetectBluetoothHostObserver, Prop=%{public}d", static_cast<int>(is2in1_));
 }
 
 void DetectBluetoothHostObserver::OnStateChanged(const int transport, const int status)
@@ -283,7 +281,7 @@ void DetectBluetoothHostObserver::OnStateChanged(const int transport, const int 
         return;
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (newStatus && is2in1_ == 0) {
+    if (newStatus && is2in1_) {
         AVRouter::GetInstance().SetDiscoverable(false);
         AVRouter::GetInstance().SetDiscoverable(true);
     }
@@ -750,7 +748,7 @@ void AVSessionService::checkEnableCast(bool enable)
             }
         }
         CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
-            (GetContainer().GetAllSessions().size() == 1 && !hasAncoAudio)) && is2in1_ != 0),
+            (GetContainer().GetAllSessions().size() == 1 && !hasAncoAudio)) && !is2in1_),
             AVSESSION_SUCCESS, "can not release cast with session alive");
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
@@ -2738,8 +2736,9 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
 
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession)
 {
-    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
-    CHECK_AND_RETURN_LOG(strcmp(deviceProp.c_str(), "2in1") != 0, "2in1 not support");
+    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
+    SLOGI("NotifySystemUI, Prop=%{public}d", static_cast<int>(is2in1_));
+    CHECK_AND_RETURN_LOG(!is2in1_, "2in1 not support");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
 
