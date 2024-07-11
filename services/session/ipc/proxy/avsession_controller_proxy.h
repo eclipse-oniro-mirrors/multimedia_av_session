@@ -79,6 +79,7 @@ protected:
 
 private:
     static inline BrokerDelegator<AVSessionControllerProxy> delegator_;
+    const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
     std::recursive_mutex currentStateLock_;
     AVPlaybackState currentState_;
     bool isDestroy_ = false;
