@@ -195,8 +195,6 @@ void NapiAVControllerCallback::CallWithThreadSafe(napi_ref& method, std::shared_
         SLOGI("do CallWithThreadSafe check threadSafeFunction alive");
         napi_call_threadsafe_function(threadSafeFunction, data, napi_tsfn_nonblocking);
     }
-    data = nullptr;
-    delete data;
     SLOGI("do CallWithThreadSafe with state %{public}d done", state);
 }
 
