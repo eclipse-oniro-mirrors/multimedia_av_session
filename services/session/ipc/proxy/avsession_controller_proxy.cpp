@@ -123,7 +123,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-
+    reply.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AV_META_DATA, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
