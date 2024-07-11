@@ -406,7 +406,8 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     }
     std::lock_guard frontLockGuard(sessionFrontLock_);
     for (const auto& session : sessionListForFront_) {
-        if (session->GetUid() == info.uid) {
+        if (session->GetUid() == info.uid &&
+            (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call")) {
             UpdateTopSession(session);
             if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
                 topSession_->GetUid() != ancoUid) {
@@ -1727,45 +1728,41 @@ void AVSessionService::HandleEventHandlerCallBack()
 {
     SLOGI("handle eventHandler callback isFirstPress_=%{public}d, pressCount_:%{public}d", isFirstPress_, pressCount_);
     AVControlCommand cmd;
-    std::lock_guard lockGuard(sessionAndControllerLock_);
-    if (pressCount_ >= THREE_CLICK && topSession_) {
-        cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
-        if (topSession_->GetDescriptor().sessionTag_ == "external_audio") {
-            SLOGI("HandleEventHandlerCallBack this is an external audio");
-        } else {
-            topSession_->ExecuteControllerCommand(cmd);
-        }
-    } else if (pressCount_ == DOUBLE_CLICK && topSession_) {
-        cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
-        if (topSession_->GetDescriptor().sessionTag_ == "external_audio") {
-            SLOGI("HandleEventHandlerCallBack this is an external audio");
-        } else {
-            topSession_->ExecuteControllerCommand(cmd);
-        }
-    } else if (pressCount_ == ONE_CLICK) {
-        SLOGI("HandleEventHandlerCallBack on ONE_CLICK ");
-        if (!topSession_) {
-            SLOGI("HandleEventHandlerCallBack ONE_CLICK without topSession_");
-            sptr<IRemoteObject> object;
-            int32_t ret = CreateControllerInner("default", object);
-            SLOGI("HandleEventHandlerCallBack ONE_CLICK !topSession_ ret : %{public}d", static_cast<int32_t>(ret));
-        }
-        if (topSession_) {
-            SLOGI("HandleEventHandlerCallBack ONE_CLICK with topSession_ ");
-            auto playbackState = topSession_->GetPlaybackState();
-            if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
-                cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
+    bool shouldColdPlay = false;
+    {
+        std::lock_guard lockGuard(sessionAndControllerLock_);
+        if (pressCount_ >= THREE_CLICK) {
+            cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+        } else if (pressCount_ == DOUBLE_CLICK) {
+            cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
+        } else if (pressCount_ == ONE_CLICK) {
+            if (topSession_) {
+                auto playbackState = topSession_->GetPlaybackState();
+                cmd.SetCommand(playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ?
+                    AVControlCommand::SESSION_CMD_PAUSE : AVControlCommand::SESSION_CMD_PLAY);
             } else {
                 cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
             }
+        } else {
+            pressCount_ = 0;
+            isFirstPress_ = true;
+            SLOGI("press invalid return, topSession alive:%{public}d", static_cast<int>(topSession_ != nullptr));
+            return;
+        }
+        SLOGI("HandleEventHandlerCallBack proc cmd=%{public}d", cmd.GetCommand());
+        if (!topSession_) {
+            shouldColdPlay = true;
+            SLOGI("HandleEventHandlerCallBack without topSession_ shouldColdStart=%{public}d", shouldColdPlay);
+        } else {
             if (topSession_->GetDescriptor().sessionTag_ == "external_audio") {
                 SLOGI("HandleEventHandlerCallBack this is an external audio");
             } else {
                 topSession_->ExecuteControllerCommand(cmd);
             }
         }
-    } else {
-        SLOGI("press invalid, topSession alive:%{public}d", static_cast<int>(topSession_ != nullptr));
+    }
+    if (shouldColdPlay) {
+        HandleSystemKeyColdStart(cmd);
     }
     pressCount_ = 0;
     isFirstPress_ = true;
@@ -1802,6 +1799,38 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
+{
+    SLOGI("HandleSystemKeyColdStart cmd=%{public}d without topsession", command.GetCommand());
+    // try proc command for first front session
+    {
+        std::lock_guard frontLockGuard(sessionFrontLock_);
+        for (const auto& session : sessionListForFront_) {
+            if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
+                session->ExecuteControllerCommand(command);
+                SLOGI("ExecuteCommand %{public}d for front session: %{public}s", command.GetCommand(),
+                      session->GetBundleName().c_str());
+                return;
+            }
+        }
+    }
+
+    std::vector<AVSessionDescriptor> hisDescriptors;
+    {
+        std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
+        GetHistoricalSessionDescriptorsFromFile(hisDescriptors);
+    }
+    // try start play for first history session
+    if (command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY && hisDescriptors.size() != 0) {
+        sptr<IRemoteObject> object;
+        int32_t ret = CreateControllerInner(hisDescriptors[0].sessionId_, object);
+        SLOGI("Cold play %{public}s, ret=%{public}d", hisDescriptors[0].elementName_.GetBundleName().c_str(), ret);
+    } else {
+        SLOGI("Cold start command=%{public}d, hisDescriptorsSize=%{public}d return", command.GetCommand(),
+              static_cast<int>(hisDescriptors.size()));
+    }
+}
+
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
     if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
@@ -1811,19 +1840,19 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
             "ERROR_MSG", "avsessionservice sendsystemcontrolcommand checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
-    SLOGI("SendSystemControlCommand with cmd:%{public}d, topSession alive:%{public}d",
-        command.GetCommand(), static_cast<int>(topSession_ != nullptr));
-    std::lock_guard lockGuard(sessionAndControllerLock_);
-    if (topSession_) {
-        CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
-            ERR_COMMAND_SEND_EXCEED_MAX, "command excuted number exceed max");
-        topSession_->ExecuteControllerCommand(command);
-    } else if (command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY) {
-        SLOGI("SendSystemControlCommand code start without topSession_");
-        sptr<IRemoteObject> object;
-        int32_t ret = CreateControllerInner("default", object);
-        SLOGI("SendSystemControlCommand code start ret : %{public}d", static_cast<int32_t>(ret));
+    {
+        std::lock_guard lockGuard(sessionAndControllerLock_);
+        SLOGI("SendSystemControlCommand with cmd:%{public}d, topSession alive:%{public}d",
+              command.GetCommand(), static_cast<int>(topSession_ != nullptr));
+        if (topSession_) {
+            CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
+                ERR_COMMAND_SEND_EXCEED_MAX, "command excuted number exceed max");
+            topSession_->ExecuteControllerCommand(command);
+            return AVSESSION_SUCCESS;
+        }
     }
+    SLOGI("SendSystemControlCommand cmd:%{public}d without topSession_", command.GetCommand());
+    HandleSystemKeyColdStart(command);
     return AVSESSION_SUCCESS;
 }
 
