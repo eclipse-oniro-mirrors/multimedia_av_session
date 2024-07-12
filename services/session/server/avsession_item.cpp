@@ -547,6 +547,10 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
         SLOGI("HandleValidCommandChange in add postTask with num %{public}d", static_cast<int>(supportedCmd_.size()));
         std::lock_guard controllerLockGuard(controllersLock_);
+        SLOGI("HandleValidCommandChange in postTask check number %{public}d", static_cast<int>(controllers_.size()));
+        if (controllers_.size() <= 0) {
+            return;
+        }
         for (const auto& [pid, controller] : controllers_) {
             SLOGI("HandleValidCommandChange for controller pid=%{public}d", pid);
             controller->HandleValidCommandChange(supportedCmd_);
@@ -568,14 +572,12 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
     ProcessFrontSession("DeleteSupportCommand");
 
     SLOGI("send validCommand change event to controllers with num %{public}d", static_cast<int>(supportedCmd_.size()));
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
-        SLOGI("HandleValidCommandChange in del postTask with num %{public}d", static_cast<int>(supportedCmd_.size()));
-        std::lock_guard controllerLockGuard(controllersLock_);
-        for (const auto& [pid, controller] : controllers_) {
-            SLOGI("HandleValidCommandChange for controller pid=%{public}d", pid);
-            controller->HandleValidCommandChange(supportedCmd_);
-        }
-        }, "HandleValidCommandChange", 0);
+    std::lock_guard controllerLockGuard(controllersLock_);
+    SLOGI("HandleValidCommandChange check number %{public}d", static_cast<int>(controllers_.size()));
+    for (const auto& [pid, controller] : controllers_) {
+        SLOGI("HandleValidCommandChange for controller pid=%{public}d", pid);
+        controller->HandleValidCommandChange(supportedCmd_);
+    }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     RemoveSessionCommandFromCast(cmd);

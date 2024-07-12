@@ -960,7 +960,7 @@ void AVSessionService::NotifyMirrorToStreamCast()
 __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
 {
     SLOGI("enter MirrorToStreamCast");
-    if (is2in1_ != 0) {
+    if (!is2in1_) {
         if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
             castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
             checkEnableCast(true);
@@ -1984,7 +1984,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
     GetContainer().RemoveSession(sessionItem->GetPid(), sessionItem->GetAbilityName());
     UpdateFrontSession(sessionItem, false);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (GetContainer().GetAllSessions().size() == 0 && is2in1_ != 0) {
+    if (GetContainer().GetAllSessions().size() == 0 && !is2in1_) {
         SLOGI("call disable cast for no session alive");
         checkEnableCast(false);
     }
