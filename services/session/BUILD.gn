@@ -469,9 +469,7 @@ ohos_shared_library("avsession_cast_item") {
 
   service_sources = [ "server/avcast_controller_item.cpp" ]
 
-  adapter_sources = [
-    "adapter/session_xcollie.cpp",
-  ]
+  adapter_sources = [ "adapter/session_xcollie.cpp" ]
 
   sources = ipc_sources + adapter_sources + service_sources
 
