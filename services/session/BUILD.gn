@@ -451,11 +451,6 @@ ohos_shared_library("avsession_item") {
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
-  if (multimedia_av_session_enable_hicollie) {
-    external_deps += [ "hicollie:libhicollie" ]
-    defines += [ "HICOLLIE_ENABLE" ]
-  }
-
   subsystem_name = "multimedia"
   part_name = "av_session"
 }
