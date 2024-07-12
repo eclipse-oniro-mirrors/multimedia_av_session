@@ -206,7 +206,8 @@ export struct AVCastPicker {
                   ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000')
               Text(item.deviceName)
                 .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                .fontColor(item.isConnected ? $r('sys.color.ohos_id_color_text_primary_activated') :
+                .fontColor(item.isConnected ? (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
+                  '#DBFFFFFF' : '#0A59F7') :
                   (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'))
                 .width(item.isConnected ? 144 : 168)
                 .padding({
@@ -224,7 +225,8 @@ export struct AVCastPicker {
                 Image($r(item.selectedIconName))
                   .width(24)
                   .height(24)
-                  .fillColor($r('sys.color.ohos_id_color_activated'))
+                  .fillColor((this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
+                    '#DBFFFFFF' : '#0A59F7')
               }
               .justifyContent(FlexAlign.Start)
               .alignItems(VerticalAlign.Center)

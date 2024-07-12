@@ -308,9 +308,8 @@ export class AVCastPicker extends ViewPU {
                     Text.fontSize({ 'id': -1, 'type': 10002,
                         params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultModuleName__',
                         'moduleName': '__harDefaultModuleName__' });
-                    Text.fontColor(x8.isConnected ? { 'id': -1, 'type': 10001,
-                        params: ['sys.color.ohos_id_color_text_primary_activated'],
-                        'bundleName': '__harDefaultModuleName__', 'moduleName': '__harDefaultModuleName__' } :
+                    Text.fontColor(x8.isConnected ? (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
+                        '#DBFFFFFF' : '#0A59F7') :
                         (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'));
                     Text.width(x8.isConnected ? 144 : 168);
                     Text.padding({
@@ -337,9 +336,8 @@ export class AVCastPicker extends ViewPU {
                                     'moduleName': '__harDefaultModuleName__' });
                                 Image.width(24);
                                 Image.height(24);
-                                Image.fillColor({ 'id': -1, 'type': 10001,
-                                    params: ['sys.color.ohos_id_color_activated'], 'bundleName': '__harDefaultModuleName__',
-                                    'moduleName': '__harDefaultModuleName__' });
+                                Image.fillColor(this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
+                                    '#DBFFFFFF' : '#0A59F7');
                             }, Image);
                             Row.pop();
                         });
