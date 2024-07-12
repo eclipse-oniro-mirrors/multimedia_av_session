@@ -293,7 +293,6 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, MMI::KeyEvent::KeyI
     int32_t deviceId {};
     status = GetNamedProperty(env, in, "deviceId", deviceId);
     CHECK_RETURN(status == napi_ok, "get deviceId property failed", status);
-    SLOGI("deviceId=%{public}d", deviceId);
     out.SetDeviceId(deviceId);
     out.SetPressed(true);
 
