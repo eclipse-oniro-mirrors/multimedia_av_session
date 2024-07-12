@@ -62,7 +62,6 @@
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
 #include "os_account_manager.h"
-#include "session_xcollie.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
