@@ -19,6 +19,7 @@
 #include "avsession_trace.h"
 #include "media_info_holder.h"
 #include "surface_utils.h"
+#include "session_xcollie.h"
 
 namespace OHOS::AVSession {
 bool AVCastControllerStub::CheckInterfaceToken(MessageParcel& data)
@@ -35,6 +36,7 @@ bool AVCastControllerStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVCastControllerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption &option)
 {
+    SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }

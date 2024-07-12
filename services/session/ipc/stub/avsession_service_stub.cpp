@@ -43,6 +43,7 @@ bool AVSessionServiceStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
                                               MessageOption& option)
 {
+    SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
@@ -74,7 +75,6 @@ int32_t AVSessionServiceStub::HandleCreateSessionInner(MessageParcel& data, Mess
 
 int32_t AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel& data, MessageParcel& reply)
 {
-    SessionXCollie sessionXCollie("avsession::HandleGetAllSessionDescriptors");
     std::vector<AVSessionDescriptor> descriptors;
     int32_t ret = GetAllSessionDescriptors(descriptors);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -101,7 +101,6 @@ int32_t AVSessionServiceStub::HandleGetSessionDescriptorsById(MessageParcel& dat
 
 int32_t AVSessionServiceStub::HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply)
 {
-    SessionXCollie sessionXCollie("avsession::HandleGetHistoricalSessionDescriptors");
     std::vector<AVSessionDescriptor> descriptors;
     int32_t ret = GetHistoricalSessionDescriptors(data.ReadInt32(), descriptors);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");

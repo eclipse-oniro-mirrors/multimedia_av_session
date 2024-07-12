@@ -92,6 +92,22 @@ private:
         {CAST_CONTROLLER_CMD_REMOVE_AVAILABLE_COMMAND,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleRemoveAvailableCommand(data, reply); }}
     };
+    std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
+        {CAST_CONTROLLER_CMD_SEND_CONTROL_COMMAND, "HandleSendControlCommand"},
+        {CAST_CONTROLLER_CMD_START, "HandleStart"},
+        {CAST_CONTROLLER_CMD_PREPARE, "HandlePrepare"},
+        {CAST_CONTROLLER_CMD_GET_DURATION, "HandleGetDuration"},
+        {CAST_CONTROLLER_CMD_GET_CAST_AV_PLAYBACK_STATE, "HandleGetCastAVPlayBackState"},
+        {CAST_CONTROLLER_CMD_GET_CURRENT_ITEM, "HandleGetCurrentItem"},
+        {CAST_CONTROLLER_CMD_GET_VALID_COMMANDS, "HandleGetValidCommands"},
+        {CAST_CONTROLLER_CMD_SET_DISPLAY_SURFACE, "HandleSetDisplaySurface"},
+        {CAST_CONTROLLER_CMD_SET_CAST_PLAYBACK_FILTER, "HandleSetCastPlaybackFilter"},
+        {CAST_CONTROLLER_CMD_PROVIDE_KEY_RESPONSE, "HandleProvideKeyResponse"},
+        {CAST_CONTROLLER_CMD_REGISTER_CALLBACK, "HandleRegisterCallbackInner"},
+        {CAST_CONTROLLER_CMD_DESTROY, "HandleDestroy"},
+        {CAST_CONTROLLER_CMD_ADD_AVAILABLE_COMMAND, "HandleAddAvailableCommand"},
+        {CAST_CONTROLLER_CMD_REMOVE_AVAILABLE_COMMAND, "HandleRemoveAvailableCommand"}
+    };
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_STUB_H
