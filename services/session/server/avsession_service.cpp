@@ -120,7 +120,6 @@ AVSessionService::~AVSessionService()
 
 void AVSessionService::OnStart()
 {
-    SessionXCollie sessionXCollie("avsession::OnStart");
     std::string cachePath(AVSessionUtils::GetCachePathName());
     AVSessionUtils::DeleteCacheFiles(cachePath);
     CHECK_AND_RETURN_LOG(Publish(this), "publish avsession service failed");
