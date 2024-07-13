@@ -341,6 +341,7 @@ ohos_shared_library("avsession_item") {
   ]
 
   adapter_sources = [
+    "adapter/bundle_status_adapter.cpp",
     "adapter/command_send_limit.cpp",
     "adapter/permission_checker.cpp",
     "adapter/session_xcollie.cpp",
@@ -399,6 +400,7 @@ ohos_shared_library("avsession_item") {
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -449,6 +451,10 @@ ohos_shared_library("avsession_item") {
   if (multimedia_av_session_enable_hicollie) {
     external_deps += [ "hicollie:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
+  }
+
+  if (efficiency_manager_enable_in_avsession) {
+    cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
   }
 
   subsystem_name = "multimedia"

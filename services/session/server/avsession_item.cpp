@@ -32,6 +32,7 @@
 #include "avsession_item.h"
 #include "avsession_radar.h"
 #include "avsession_event_handler.h"
+#include "bundle_status_adapter.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -45,6 +46,9 @@
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
+static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
+    std::string("platformsdk/libsuspend_manager_client.z.so");
+
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
     : descriptor_(descriptor)
 {
@@ -609,6 +613,7 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
     DeviceInfo deviceInfo)
 {
+    std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
     if (castHandle_ > 0) {
         return AVSESSION_ERROR;
     }
@@ -625,6 +630,31 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     deviceStateAddCommand_ = streamStateConnection;
     counter_ = secondStep;
     UpdateCastDeviceMap(deviceInfo);
+
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    int32_t uid = GetUid();
+    int32_t pid = GetPid();
+    std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
+
+    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
+    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
+        SLOGE("check libsuspend_manager_client path failed %{public}s", SOURCE_LIBRARY_PATH.c_str());
+        return AVSESSION_ERROR;
+    }
+    void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
+    if (handle_ == nullptr) {
+        SLOGE("failed to open library libsuspend_manager_client reaseon %{public}s", dlerror());
+        return AVSESSION_ERROR;
+    }
+    SLOGI("open library libsuspend_manager_client success");
+    typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
+        const std::string bundleName, int32_t taskState, int32_t serviceId);
+    handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
+    ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 1, AVSESSION_SERVICE_ID);
+    SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
+    dlclose(handle_);
+#endif
     return AVSESSION_SUCCESS;
 }
 
