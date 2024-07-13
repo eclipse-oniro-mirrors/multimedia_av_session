@@ -16,6 +16,7 @@
 #ifndef OHOS_AVSESSION_ITEM_H
 #define OHOS_AVSESSION_ITEM_H
 
+#include <dlfcn.h>
 #include <string>
 #include <map>
 
@@ -24,6 +25,7 @@
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"
+#include "system_ability_definition.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
@@ -369,6 +371,7 @@ private:
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
     sptr<HwCastDisplayListener> displayListener_;
     std::recursive_mutex displayListenerLock_;
+    std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
 #endif
