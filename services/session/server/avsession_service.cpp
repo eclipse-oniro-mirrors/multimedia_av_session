@@ -1559,7 +1559,9 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
             if (session == nullptr) {
                 bundleName = value["bundleName"];
                 abilityName = value["abilityName"];
-                break;
+            } else {
+                SLOGE("Default start alive %{public}s", AVSessionUtils::GetAnonySessionId(value["sessionId"]).c_str());
+                return AVSESSION_ERROR;
             }
         }
     }
