@@ -77,7 +77,7 @@ void AVControllerCallbackProxy::OnPlaybackStateChange(const AVPlaybackState& sta
     CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&state), "write PlaybackState failed");
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_PLAYBACK_STATE_CHANGE, parcel, reply, option) == 0,
@@ -145,7 +145,7 @@ void AVControllerCallbackProxy::OnMetaDataChange(const AVMetaData& data)
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
 
@@ -194,7 +194,7 @@ void AVControllerCallbackProxy::OnValidCommandChange(const std::vector<int32_t>&
     CHECK_AND_RETURN_LOG(parcel.WriteInt32Vector(cmds), "write int32 vector failed");
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_VALID_COMMAND_CHANGE, parcel, reply, option) == 0,
