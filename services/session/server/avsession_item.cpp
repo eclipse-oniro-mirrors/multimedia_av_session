@@ -231,22 +231,27 @@ bool AVSessionItem::HasAvQueueInfo()
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
-    std::lock_guard lockGuard(metaDataLock_);
-    SessionXCollie sessionXCollie("avsession::SetAVMetaData");
-    CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
-    ProcessFrontSession("SetAVMetaData");
-    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
-    if (innerPixelMap != nullptr) {
-        std::string sessionId = GetSessionId();
-        std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
-        AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
-        innerPixelMap->Clear();
-        metaData_.SetMediaImage(innerPixelMap);
+    bool hasAvQueueInfo = false;
+    {
+        SLOGD("limit metaDataLock range to split with sessionAndControllerLock");
+        std::lock_guard lockGuard(metaDataLock_);
+        SessionXCollie sessionXCollie("avsession::SetAVMetaData");
+        CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
+        ProcessFrontSession("SetAVMetaData");
+        std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+        if (innerPixelMap != nullptr) {
+            std::string sessionId = GetSessionId();
+            std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
+            AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
+            innerPixelMap->Clear();
+            metaData_.SetMediaImage(innerPixelMap);
+        }
+        hasAvQueueInfo = HasAvQueueInfo();
+        SLOGI(" SetAVMetaData AVQueueName: %{public}s AVQueueId: %{public}s hasAvQueueInfo: %{public}d",
+            metaData_.GetAVQueueName().c_str(), metaData_.GetAVQueueId().c_str(), static_cast<int>(hasAvQueueInfo));
     }
 
-    if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
-        SLOGD(" SetAVMetaData AVQueueName: %{public}s AVQueueId: %{public}s", metaData_.GetAVQueueName().c_str(),
-            metaData_.GetAVQueueId().c_str());
+    if (hasAvQueueInfo && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
 
@@ -331,8 +336,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         SLOGD(" SetAVPlaybackState AVQueueName: %{public}s AVQueueId: %{public}s", metaData_.GetAVQueueName().c_str(),
             metaData_.GetAVQueueId().c_str());
-        std::lock_guard lockGuard(metaDataLock_);
-        SLOGI("set metaDataLock for getmetadata in service");
+        SLOGD("reduce metaDataLock for split metaDataLock & sessionAndControllerLock");
         serviceCallbackForAddAVQueueInfo_(*this);
     }
 
