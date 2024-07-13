@@ -55,7 +55,8 @@
           "relational_store",
           "background_task_mgr",
           "bluetooth",
-          "os_account"
+          "os_account",
+          "hicollie"
         ],
         "third_party": [
           "openssl",

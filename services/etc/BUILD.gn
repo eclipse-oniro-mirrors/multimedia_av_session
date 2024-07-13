@@ -19,3 +19,10 @@ ohos_prebuilt_etc("avsession_service.rc") {
   part_name = "av_session"
   subsystem_name = "multimedia"
 }
+
+ohos_prebuilt_etc("ohos.para.dac") {
+  source = "avsession.para.dac"
+  module_install_dir = "etc/param"
+  part_name = "av_session"
+  subsystem_name = "multimedia"
+}

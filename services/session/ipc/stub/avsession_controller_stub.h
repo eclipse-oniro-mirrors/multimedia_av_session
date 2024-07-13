@@ -133,6 +133,29 @@ private:
         {CONTROLLER_CMD_SET_AVCALL_STATE_FILTER,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVCallStateFilter(data, reply); }}
     };
+    std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
+        {CONTROLLER_CMD_REGISTER_CALLBACK, "HandleRegisterCallbackInner"},
+        {CONTROLLER_CMD_DESTROY, "HandleDestroy"},
+        {CONTROLLER_CMD_GET_AV_PLAYBACK_STATE, "HandleGetAVPlaybackState"},
+        {CONTROLLER_CMD_GET_AV_META_DATA, "HandleGetAVMetaData"},
+        {CONTROLLER_CMD_SEND_AV_KEYEVENT, "HandleSendAVKeyEvent"},
+        {CONTROLLER_CMD_GET_LAUNCH_ABILITY, "HandleGetLaunchAbility"},
+        {CONTROLLER_CMD_GET_VALID_COMMANDS, "HandleGetValidCommands"},
+        {CONTROLLER_CMD_SEND_CONTROL_COMMAND, "HandleSendControlCommand"},
+        {CONTROLLER_CMD_SEND_COMMON_COMMAND, "HandleSendCommonCommand"},
+        {CONTROLLER_CMD_SET_META_FILTER, "HandleSetMetaFilter"},
+        {CONTROLLER_CMD_SET_PLAYBACK_FILTER, "HandleSetPlaybackFilter"},
+        {CONTROLLER_CMD_IS_SESSION_ACTIVE, "HandleIsSessionActive"},
+        {CONTROLLER_CMD_GET_SESSION_ID, "HandleGetSessionId"},
+        {CONTROLLER_CMD_GET_AV_QUEUE_ITEMS, "HandleGetAVQueueItems"},
+        {CONTROLLER_CMD_GET_AV_QUEUE_TITLE, "HandleGetAVQueueTitle"},
+        {CONTROLLER_CMD_SKIP_TO_QUEUE_ITEM, "HandleSkipToQueueItem"},
+        {CONTROLLER_CMD_GET_EXTRAS, "HandleGetExtras"},
+        {CONTROLLER_CMD_GET_AVCALL_META_DATA, "HandleGetAVCallMetaData"},
+        {CONTROLLER_CMD_SET_AVCALL_META_FILTER, "HandleSetAVCallMetaFilter"},
+        {CONTROLLER_CMD_GET_AVCALL_STATE, "HandleGetAVCallState"},
+        {CONTROLLER_CMD_SET_AVCALL_STATE_FILTER, "HandleSetAVCallStateFilter"}
+    };
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_CONTROLLER_STUB_H

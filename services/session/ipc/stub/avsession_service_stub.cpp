@@ -25,6 +25,7 @@
 #include "parameter.h"
 #include "parameters.h"
 #include "avsession_service_stub.h"
+#include "session_xcollie.h"
 
 using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
@@ -42,6 +43,7 @@ bool AVSessionServiceStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
                                               MessageOption& option)
 {
+    SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }

@@ -28,6 +28,7 @@
 #include "remote_session_source_proxy.h"
 #include "remote_session_sink_proxy.h"
 #include "permission_checker.h"
+#include "session_xcollie.h"
 #include "avsession_item.h"
 #include "avsession_radar.h"
 #include "avsession_event_handler.h"
@@ -175,6 +176,7 @@ int32_t AVSessionItem::SetAVCallState(const AVCallState& avCallState)
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
     std::lock_guard lockGuard(metaDataLock_);
+    SessionXCollie sessionXCollie("avsession::GetAVMetaData");
     std::string sessionId = GetSessionId();
     std::string fileName = AVSessionUtils::GetCachePathName() + sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
@@ -230,6 +232,7 @@ bool AVSessionItem::HasAvQueueInfo()
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     std::lock_guard lockGuard(metaDataLock_);
+    SessionXCollie sessionXCollie("avsession::SetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
     ProcessFrontSession("SetAVMetaData");
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();

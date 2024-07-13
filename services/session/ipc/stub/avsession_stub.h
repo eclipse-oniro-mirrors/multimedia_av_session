@@ -180,6 +180,41 @@ private:
         {SESSION_CMD_SET_AVCALL_STATE,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVCallState(data, reply); }}
     };
+    std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
+        {SESSION_CMD_GET_SESSION_ID, "HandleGetSessionId"},
+        {SESSION_CMD_GET_SESSION_TYPE, "HandleGetSessionType"},
+        {SESSION_CMD_GET_META_DATA, "HandleGetAVMetaData"},
+        {SESSION_CMD_SET_META_DATA, "HandleSetAVMetaData"},
+        {SESSION_CMD_GET_PLAYBACK_STATE, "HandleGetAVPlaybackState"},
+        {SESSION_CMD_SET_PLAYBACK_STATE, "HandleSetAVPlaybackState"},
+        {SESSION_CMD_GET_QUEUE_ITEMS, "HandleGetAVQueueItems"},
+        {SESSION_CMD_SET_QUEUE_ITEMS, "HandleSetAVQueueItems"},
+        {SESSION_CMD_GET_QUEUE_TITLE, "HandleGetAVQueueTitle"},
+        {SESSION_CMD_SET_QUEUE_TITLE, "HandleSetAVQueueTitle"},
+        {SESSION_CMD_GET_EXTRAS, "HandleGetExtras"},
+        {SESSION_CMD_SET_EXTRAS, "HandleSetExtras"},
+        {SESSION_CMD_SET_LAUNCH_ABILITY, "HandleSetLaunchAbility"},
+        {SESSION_CMD_GET_CONTROLLER, "HandleGetController"},
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        {SESSION_CMD_GET_AVCAST_CONTROLLER, "HandleGetAVCastController"},
+        {SESSION_CMD_START_CAST_DISPLAY_LISTENER, "HandleStartCastDisplayListener"},
+        {SESSION_CMD_STOP_CAST_DISPLAY_LISTENER, "HandleStopCastDisplayListener"},
+        {SESSION_CMD_GET_ALL_CAST_DISPLAYS, "HandleGetAllCastDisplays"},
+#endif
+        {SESSION_CMD_REGISTER_CALLBACK, "HandleRegisterCallbackInner"},
+        {SESSION_CMD_ACTIVATE, "HandleActivate"},
+        {SESSION_CMD_DEACTIVATE, "HandleDeactivate"},
+        {SESSION_CMD_ISACTIVE, "HandleIsActive"},
+        {SESSION_CMD_DESTROY, "HandleDestroy"},
+        {SESSION_CMD_ADD_SUPPORT_COMMAND, "HandleAddSupportCommand"},
+        {SESSION_CMD_DELETE_SUPPORT_COMMAND, "HandleDeleteSupportCommand"},
+        {SESSION_CMD_SET_SESSION_EVENT, "HandleSetSessionEvent"},
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        {SESSION_CMD_RELEASE_CAST, "HandleReleaseCast"},
+#endif
+        {SESSION_CMD_SET_AVCALL_META_DATA, "HandleSetAVCallMetaData"},
+        {SESSION_CMD_SET_AVCALL_STATE, "HandleSetAVCallState"}
+    };
 
     int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 };

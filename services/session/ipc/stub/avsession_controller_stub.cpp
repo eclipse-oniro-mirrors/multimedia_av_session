@@ -17,6 +17,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
+#include "session_xcollie.h"
 
 namespace OHOS::AVSession {
 bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel& data)
@@ -33,6 +34,7 @@ bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVSessionControllerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption &option)
 {
+    SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
