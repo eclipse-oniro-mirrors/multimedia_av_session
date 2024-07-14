@@ -873,30 +873,7 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     SLOGD("StartCast set isSourceInCast");
     isSourceInCast_ = true;
 
-#ifdef EFFICIENCY_MANAGER_ENABLE
-    int32_t uid = session->GetDescriptor().uid_;
-    int32_t pid = session->GetDescriptor().pid_;
-    std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
-    CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
-
-    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check libsuspend_manager_client path failed %{public}s", SOURCE_LIBRARY_PATH.c_str());
-        return AVSESSION_ERROR;
-    }
-    void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
-    if (handle_ == nullptr) {
-        SLOGE("failed to open library libsuspend_manager_client reaseon %{public}s", dlerror());
-        return AVSESSION_ERROR;
-    }
-    SLOGI("open library libsuspend_manager_client success");
-    typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
-        const std::string bundleName, int32_t taskState, int32_t serviceId);
-    handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
-    ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 1, AVSESSION_SERVICE_ID);
-    SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
-    dlclose(handle_);
-#endif
+    SLOGI("no set continuous task in service");
     HISYSEVENT_BEHAVIOR("SESSION_CAST",
         "BUNDLE_NAME", session->GetDescriptor().elementName_.GetBundleName(),
         "MODULE_NAME", session->GetDescriptor().elementName_.GetModuleName(),
@@ -925,31 +902,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
         return AVSESSION_SUCCESS;
     }
 
-#ifdef EFFICIENCY_MANAGER_ENABLE
-    SLOGI("Stop register continuous task");
-    int32_t uid = session->GetDescriptor().uid_;
-    int32_t pid = session->GetDescriptor().pid_;
-    std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
-    CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
-
-    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check libsuspend_manager_client path failed %{public}s when stop cast", SOURCE_LIBRARY_PATH.c_str());
-        return AVSESSION_ERROR;
-    }
-    void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
-    if (handle_ == nullptr) {
-        SLOGE("failed to open library libsuspend_manager_client when stop cast, reaseon %{public}s", dlerror());
-        return AVSESSION_ERROR;
-    }
-    SLOGI("open library libsuspend_manager_client success when stop cast");
-    typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
-        const std::string bundleName, int32_t taskState, int32_t serviceId);
-    handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
-    ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 2, AVSESSION_SERVICE_ID);
-    SLOGI("reportContinuousTaskEventEx done when stop cast, result: %{public}d", errCode);
-    dlclose(handle_);
-#endif
+    SLOGI("no set continuous task in service");
     return AVSESSION_SUCCESS;
 }
 
