@@ -76,7 +76,7 @@ int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel& dat
     }
 
     std::lock_guard lockGuard(onPlaybackChangeLock_);
-    SLOGI("do HandleOnPlaybackStateChange");
+    SLOGD("do HandleOnPlaybackStateChange");
 
     CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_NONE, "read PlaybackState failed");
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnPlaybackStateChange");
@@ -87,11 +87,11 @@ int32_t AVControllerCallbackStub::HandleOnPlaybackStateChange(MessageParcel& dat
 int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, MessageParcel& reply)
 {
     std::lock_guard lockGuard(onMetadataChangeLock_);
-    SLOGI("do HandleOnMetadataChange");
+    SLOGD("do HandleOnMetadataChange");
 
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnMetaDataChange");
     int twoImageLength = data.ReadInt32();
-    SLOGI("read length from twoImage %{public}d", twoImageLength);
+    SLOGD("HandleOnMetadataChange read length from twoImage %{public}d", twoImageLength);
     if (twoImageLength <= 0 || twoImageLength > MAX_IMAGE_SIZE) {
         sptr avMetaData = data.ReadParcelable<AVMetaData>();
         CHECK_AND_RETURN_RET_LOG(avMetaData != nullptr, ERR_NONE, "read MetaData failed");
@@ -145,7 +145,7 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel& data
     std::vector<int32_t> cmds;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32Vector(&cmds), ERR_NONE, "read int32 vector failed");
     std::lock_guard lockGuard(onCommandChangeLock_);
-    SLOGI("do HandleOnValidCommandChange with cmd list size %{public}d", static_cast<int>(cmds.size()));
+    SLOGD("do HandleOnValidCommandChange with cmd list size %{public}d", static_cast<int>(cmds.size()));
 
     OnValidCommandChange(cmds);
     return ERR_NONE;

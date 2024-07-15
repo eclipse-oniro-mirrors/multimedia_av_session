@@ -115,7 +115,7 @@ int32_t AVSessionServiceProxy::GetAllSessionDescriptors(std::vector<AVSessionDes
     if (ret == AVSESSION_SUCCESS) {
         uint32_t size {};
         CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
-        CHECK_AND_RETURN_RET_LOG(size, ret, "size=0");
+        CHECK_AND_RETURN_RET_LOG(size, ret, "get all session with true empty");
 
         std::vector<AVSessionDescriptor> result(size);
         for (auto& descriptor : result) {

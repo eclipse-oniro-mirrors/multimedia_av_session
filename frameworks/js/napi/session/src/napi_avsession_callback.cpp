@@ -50,7 +50,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event)
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             });
     }
@@ -76,7 +76,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const T& param)
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [param](napi_env env, int& argc, napi_value* argv) {
@@ -106,7 +106,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const std::string& firstP
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
@@ -139,7 +139,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const int32_t firstParam,
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {

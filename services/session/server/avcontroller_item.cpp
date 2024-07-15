@@ -322,7 +322,8 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
     AVPlaybackState stateOut;
     std::lock_guard playbackLockGuard(playbackMaskMutex_);
     if (state.CopyToByMask(playbackMask_, stateOut)) {
-        SLOGI("update playback state");
+        SLOGI("update playback pid %{public}d, state %{public}d",
+            static_cast<int>(pid_), static_cast<int>(stateOut.GetState()));
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnPlaybackStateChange");
         if (callback_ != nullptr) {
             callback_->OnPlaybackStateChange(stateOut);
@@ -409,6 +410,8 @@ void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds
 {
     std::lock_guard lockGuard(callbackMutex_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    SLOGD("do OnValidCommandChange with pid %{public}d cmd list size %{public}d",
+        static_cast<int>(pid_), static_cast<int>(cmds.size()));
     callback_->OnValidCommandChange(cmds);
 }
 

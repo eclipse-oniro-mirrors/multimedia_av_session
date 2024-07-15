@@ -76,7 +76,7 @@ bool AppManagerAdapter::IsAppBackground(int32_t uid, int32_t pid)
             return true;
         }
     }
-    SLOGI("uid=%{public}d pid=%{public}d is not background", uid, pid);
+    SLOGD("uid=%{public}d pid=%{public}d is not background", uid, pid);
     return false;
 }
 
@@ -89,14 +89,14 @@ void AppManagerAdapter::AddObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
     observedAppUIDs_.insert(uid);
-    SLOGI(" add for uid=%{public}d ", uid);
+    SLOGD(" add for uid=%{public}d ", uid);
 }
 
 void AppManagerAdapter::RemoveObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
     observedAppUIDs_.erase(uid);
-    SLOGI(" remove for uid=%{public}d ", uid);
+    SLOGD("RemoveObservedApp for uid=%{public}d ", uid);
 }
 
 void AppManagerAdapter::SetServiceCallbackForAppStateChange(const std::function<void(int uid, int state)>& callback)
@@ -120,6 +120,7 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
     if (appProcessData.appState == ApplicationState::APP_STATE_TERMINATED) {
         for (const auto& appData : appProcessData.appDatas) {
             RemoveObservedApp(appData.uid);
+            SLOGI("HandleAppStateChanged remove for uid=%{public}d", static_cast<int>(appData.uid));
         }
     }
 

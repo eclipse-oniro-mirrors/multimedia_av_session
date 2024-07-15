@@ -26,13 +26,13 @@ NapiAsyncCallback::NapiAsyncCallback(napi_env env) : env_(env)
         napi_get_uv_event_loop(env, &loop_);
         napi_get_uv_event_loop(env, &loopOrder_);
         int res = sem_init(&semaphore_, 0, 1);
-        SLOGI("loop to set sem with res %{public}d", res);
+        SLOGD("loop to set sem with res %{public}d", res);
     }
 }
 
 NapiAsyncCallback::~NapiAsyncCallback()
 {
-    SLOGD("no memory leak for queue-callback");
+    SLOGI("no memory leak for queue-callback");
     env_ = nullptr;
     sem_destroy(&semaphore_);
 }
@@ -60,7 +60,7 @@ void NapiAsyncCallback::AfterWorkCallback(uv_work_t* work, int aStatus)
         context->getter(context->env, argc, argv);
     }
 
-    SLOGI("queue uv_after_work_cb");
+    SLOGD("queue uv_after_work_cb");
     napi_value global {};
     napi_get_global(context->env, &global);
     napi_value function {};
@@ -92,17 +92,17 @@ void NapiAsyncCallback::AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus)
         context->getter(context->env, argc, argv);
     }
 
-    SLOGI("queue uv_after_work_cb");
+    SLOGD("queue uv_after_work_cb");
     napi_value global {};
     napi_get_global(context->env, &global);
     napi_value function {};
-    SLOGI("callback with flag");
+    SLOGD("callback with flag");
     if (!*context->isValid) {
         SLOGE("AfterWorkCallbackWithFlag callback when callback is invalid");
         napi_close_handle_scope(context->env, scope);
         return;
     }
-    SLOGI("callback with ref %{public}p, %{public}p", &(context->method), *(&(context->method)));
+    SLOGI("callback with flag ref %{public}p, %{public}p", &(context->method), *(&(context->method)));
     napi_get_reference_value(context->env, context->method, &function);
     napi_value result;
     napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
@@ -131,7 +131,7 @@ void NapiAsyncCallback::AfterWorkCallbackWithFunc(uv_work_t* work, int aStatus)
         context->getter(context->env, argc, argv);
     }
 
-    SLOGI("queue uv_after_work_cb");
+    SLOGD("queue uv_after_work_cb");
     if (!*context->isValid) {
         SLOGE("AfterWorkCallbackWithFunc failed for context is invalid.");
         napi_close_handle_scope(context->env, scope);

@@ -92,7 +92,7 @@ bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos& in
             HISYSEVENT_SET_AUDIO_STATUS(info->clientUID, info->rendererState);
             lastStates_[info->clientUID] = info->rendererState;
         }
-        SLOGI("SelectFocusSession check uid=%{public}d state=%{public}d", info->clientUID, info->rendererState);
+        SLOGD("SelectFocusSession check uid=%{public}d state=%{public}d", info->clientUID, info->rendererState);
         sessionInfo.uid = info->clientUID;
         sessionInfo.streamUsage = info->rendererInfo.streamUsage;
         if (selector_ != nullptr && !selector_(sessionInfo)) {
@@ -106,7 +106,7 @@ bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos& in
             isFocus = true;
         }
     }
-    SLOGI("SelectFocusSession check isFocus %{public}d", static_cast<int>(isFocus));
+    SLOGD("SelectFocusSession check isFocus %{public}d", static_cast<int>(isFocus));
     return isFocus;
 }
 }
