@@ -271,6 +271,8 @@ private:
     void SaveLocalDeviceInfo();
     int32_t ProcessFrontSession(const std::string& source);
     void HandleFrontSession();
+    int32_t doContinuousTaskRegister();
+    int32_t doContinuousTaskUnregister();
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
