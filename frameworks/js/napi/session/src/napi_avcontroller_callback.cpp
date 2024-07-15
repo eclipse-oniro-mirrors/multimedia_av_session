@@ -56,7 +56,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event)
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             });
     }
@@ -83,7 +83,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [param](napi_env env, int& argc, napi_value *argv) {
@@ -115,7 +115,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const std::string& fir
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [firstParam, secondParam](napi_env env, int& argc,
@@ -151,7 +151,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [firstParam, secondParam](napi_env env, int& argc,
@@ -186,7 +186,7 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [param](napi_env env, int& argc, napi_value *argv) {
@@ -201,19 +201,19 @@ void NapiAVControllerCallback::CallWithThreadSafe(napi_ref& method, std::shared_
     napi_threadsafe_function threadSafeFunction, const std::function<bool()>& checkCallbackValid, NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
-    SLOGI("do CallWithThreadSafe with state %{public}d", state);
+    SLOGD("do CallWithThreadSafe with state %{public}d", state);
     DataContextForThreadSafe* data =
         new DataContextForThreadSafe { method, state, isValid, std::move(getter), checkCallbackValid };
     if (threadSafeFunction != nullptr) {
-        SLOGI("do CallWithThreadSafe check threadSafeFunction alive");
+        SLOGD("do CallWithThreadSafe check threadSafeFunction alive");
         napi_call_threadsafe_function(threadSafeFunction, data, napi_tsfn_nonblocking);
     }
-    SLOGI("do CallWithThreadSafe with state %{public}d done", state);
+    SLOGD("do CallWithThreadSafe with state %{public}d done", state);
 }
 
 void NapiAVControllerCallback::ThreadSafeCallback(napi_env env, napi_value js_cb, void* context, void* data)
 {
-    SLOGI("do ThreadSafeCallback in");
+    SLOGD("do ThreadSafeCallback in");
     AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::ThreadSafeCallback");
     std::shared_ptr<DataContextForThreadSafe> appData(static_cast<DataContextForThreadSafe*>(data),
         [](DataContextForThreadSafe* ptr) {
@@ -249,7 +249,7 @@ void NapiAVControllerCallback::ThreadSafeCallback(napi_env env, napi_value js_cb
     if (status != napi_ok) {
         SLOGE("call function failed status=%{public}d.", status);
     }
-    SLOGI("do ThreadSafeCallback done with state %{public}d", static_cast<int>(appData->state));
+    SLOGD("do ThreadSafeCallback done with state %{public}d", static_cast<int>(appData->state));
 }
 
 void NapiAVControllerCallback::OnAVCallStateChange(const AVCallState& avCallState)

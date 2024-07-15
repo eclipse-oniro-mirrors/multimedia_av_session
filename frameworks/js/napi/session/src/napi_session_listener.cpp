@@ -55,7 +55,7 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param)
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [param](napi_env env, int& argc, napi_value* argv) {
@@ -86,7 +86,7 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param, bool checkV
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
             [param](napi_env env, int& argc, napi_value* argv) {

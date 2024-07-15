@@ -478,7 +478,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
     std::lock_guard lockGuard(sessionAndControllerLock_);
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    SLOGI("UpdateFrontSession pass lock");
+    SLOGD("UpdateFrontSession pass lock");
     auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sessionItem);
     if (isAdd) {
         if (it != sessionListForFront_.end()) {
@@ -574,7 +574,7 @@ void AVSessionService::InitAMS()
     SLOGI("enter");
     AppManagerAdapter::GetInstance().Init();
     AppManagerAdapter::GetInstance().SetServiceCallbackForAppStateChange([this] (int uid, int state) {
-        SLOGI("uid = %{public}d, state = %{public}d", uid, state);
+        SLOGD("uid = %{public}d, state = %{public}d", uid, state);
         HandleAppStateChange(uid, state);
     });
 }
@@ -582,7 +582,7 @@ void AVSessionService::InitAMS()
 void AVSessionService::HandleAppStateChange(int uid, int state)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    SLOGI("uidForAppStateChange_ = %{public}d, uid = %{public}d, state = %{public}d",
+    SLOGD("uidForAppStateChange_ = %{public}d, uid = %{public}d, state = %{public}d",
         uidForAppStateChange_, uid, state);
     if (uidForAppStateChange_ == uid) {
         if (state == appState) {
@@ -1180,7 +1180,7 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
     for (const auto& desc: descriptors) {
         SLOGD("desc=%{public}s", desc.elementName_.GetBundleName().c_str());
     }
-    SLOGI("size=%{public}d", static_cast<int32_t>(descriptors.size()));
+    SLOGI("GetAllSessionDescriptors with size=%{public}d", static_cast<int32_t>(descriptors.size()));
     return AVSESSION_SUCCESS;
 }
 
@@ -2554,7 +2554,7 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
-    SLOGI("file load in for path: %{public}s", filePath.c_str());
+    SLOGD("file load in for path: %{public}s", filePath.c_str());
     ifstream file(filePath.c_str());
     if (!file.is_open()) {
         SLOGD("file not open! try open first ! ");
@@ -2566,7 +2566,7 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
     }
     file.seekg(0, ios::end);
     const long fileLength = file.tellg();
-    SLOGI("get file length(%{public}ld)!", fileLength);
+    SLOGD("get file length(%{public}ld)!", fileLength);
     if (fileLength > maxFileLength) {
         SLOGE("invalid file length(%{public}ld)!", fileLength);
         return false;
@@ -2628,7 +2628,7 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 {
-    SLOGI("file check for path:%{public}s", filePath.c_str());
+    SLOGD("file check for path:%{public}s", filePath.c_str());
     string content {};
     ifstream fileRead(filePath.c_str());
     if (!fileRead.is_open()) {
@@ -2642,10 +2642,10 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
     content.clear();
     fileRead.seekg(0, ios::beg);
     copy(istreambuf_iterator<char>(fileRead), istreambuf_iterator<char>(), back_inserter(content));
-    SLOGI("check content pre clean it: %{public}s", content.c_str());
+    SLOGD("check content pre clean it: %{public}s", content.c_str());
     nlohmann::json checkValues = json::parse(content, nullptr, false);
     if (checkValues.is_discarded()) {
-        SLOGE("check content discarded!");
+        SLOGE("check content discarded! content %{public}s", content.c_str());
         ofstream fileWrite;
         fileWrite.open(filePath.c_str(), ios::out | ios::trunc);
         if (!fileWrite.is_open()) {
@@ -2658,7 +2658,7 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
         SLOGD("LoadStringFromFileEx::Dump json object finished");
         fileWrite.write(emptyContent.c_str(), emptyContent.length());
         if (fileWrite.fail()) {
-            SLOGE("file empty init json fail !");
+            SLOGE("file empty init json fail! content %{public}s", content.c_str());
             fileRead.close();
             fileWrite.close();
             return false;

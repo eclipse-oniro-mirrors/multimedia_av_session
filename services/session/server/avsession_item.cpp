@@ -347,15 +347,16 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     SLOGI("send playbackstate change event to controllers with state: %{public}d", state.GetState());
 
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this, state]() {
-        SLOGI("HandlePlaybackStateChange in postTask with state %{public}d", state.GetState());
+        SLOGI("HandlePlaybackStateChange in postTask with state %{public}d with controller size %{public}d",
+            state.GetState(), static_cast<int>(controllers_.size()));
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            SLOGI("HandlePlaybackStateChange for controller pid=%{public}d", pid);
+            SLOGD("HandlePlaybackStateChange for controller pid=%{public}d", pid);
             controller->HandlePlaybackStateChange(state);
         }
         }, "HandlePlaybackStateChange", 0);
 
-    SLOGI("send playbackstate change event to controllers done");
+    SLOGD("send playbackstate change event to controllers done");
 
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
@@ -548,22 +549,23 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 {
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
-    SLOGI("AddSupportCommand=%{public}d", cmd);
+    SLOGD("AddSupportCommand=%{public}d", cmd);
     auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
     supportedCmd_.push_back(cmd);
     ProcessFrontSession("AddSupportCommand");
 
-    SLOGI("send validCommand change event to controllers with num %{public}d", static_cast<int>(supportedCmd_.size()));
+    SLOGD("send validCommand change event to controllers with num %{public}d ADD %{public}d",
+        static_cast<int>(supportedCmd_.size()), cmd);
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
-        SLOGI("HandleValidCommandChange in add postTask with num %{public}d", static_cast<int>(supportedCmd_.size()));
         std::lock_guard controllerLockGuard(controllersLock_);
         SLOGI("HandleValidCommandChange in postTask check number %{public}d", static_cast<int>(controllers_.size()));
         if (controllers_.size() <= 0) {
             return;
         }
         for (const auto& [pid, controller] : controllers_) {
-            SLOGI("HandleValidCommandChange for controller pid=%{public}d", pid);
+            SLOGI("HandleValidCommandChange add for controller pid=%{public}d with num %{public}d",
+                pid, static_cast<int>(supportedCmd_.size()));
             controller->HandleValidCommandChange(supportedCmd_);
         }
         }, "HandleValidCommandChange", 0);
@@ -582,11 +584,12 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
     supportedCmd_.erase(iter, supportedCmd_.end());
     ProcessFrontSession("DeleteSupportCommand");
 
-    SLOGI("send validCommand change event to controllers with num %{public}d", static_cast<int>(supportedCmd_.size()));
+    SLOGD("send validCommand change event to controllers with num %{public}d DEL %{public}d",
+        static_cast<int>(supportedCmd_.size()), cmd);
     std::lock_guard controllerLockGuard(controllersLock_);
-    SLOGI("HandleValidCommandChange check number %{public}d", static_cast<int>(controllers_.size()));
     for (const auto& [pid, controller] : controllers_) {
-        SLOGI("HandleValidCommandChange for controller pid=%{public}d", pid);
+        SLOGI("HandleValidCommandChange del for controller pid=%{public}d with num %{public}d",
+            pid, static_cast<int>(supportedCmd_.size()));
         controller->HandleValidCommandChange(supportedCmd_);
     }
 
@@ -1583,7 +1586,7 @@ int32_t AVSessionItem::doContinuousTaskRegister()
     SLOGI("Start register continuous task");
     if (descriptor_.sessionTag_ == "RemoteCast") {
         SLOGI("sink session should not register ContinuousTask");
-        return;
+        return AVSESSION_SUCCESS;
     }
     int32_t uid = GetUid();
     int32_t pid = GetPid();
@@ -1617,7 +1620,7 @@ int32_t AVSessionItem::doContinuousTaskUnregister()
     SLOGI("Stop register continuous task");
     if (descriptor_.sessionTag_ == "RemoteCast") {
         SLOGI("sink session should not unregister ContinuousTask");
-        return;
+        return AVSESSION_SUCCESS;
     }
     int32_t uid = GetUid();
     int32_t pid = GetPid();

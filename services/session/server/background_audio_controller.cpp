@@ -96,7 +96,7 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
 
         if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
             AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
-            SLOGD("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
+            SLOGI("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
             continue;
         }
 

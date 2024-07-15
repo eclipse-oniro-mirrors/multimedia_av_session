@@ -140,7 +140,7 @@ bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData meta
         data.WriteInt32(metaIn.displayTags_) &&
         WriteDrmSchemes(data, metaIn) &&
         data.WriteParcelable(metaIn.mediaImageSmall_.get());
-    SLOGI("MarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
+    SLOGD("MarshallingExceptImg with small img ret %{public}d", static_cast<int>(ret));
     return ret;
 }
 
@@ -153,7 +153,7 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
         SLOGE("get err mask, return");
         return false;
     }
-    SLOGI("get mask with %{public}s", mask.c_str());
+    SLOGD("get mask with %{public}s", mask.c_str());
     for (int32_t i = 0; i < maskSize; ++i) {
         if (mask[i] == '1') {
             metaOut.metaMask_.flip(maskSize - i - 1);
@@ -190,7 +190,7 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
         return false;
     }
     metaOut.mediaImageSmall_ = metaOut.mediaImage_;
-    SLOGI("UnmarshallingExceptImg with drm and small img ret %{public}d", static_cast<int>(ret));
+    SLOGD("UnmarshallingExceptImg with drm and small img ret %{public}d", static_cast<int>(ret));
     return ret;
 }
 

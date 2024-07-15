@@ -190,14 +190,14 @@ int32_t AVSessionControllerStub::DoMetadataGetReplyInStub(AVMetaData& metaData, 
         return AVSESSION_ERROR;
     }
     int32_t retForWriteRawData = reply.WriteRawData(buffer, twoImageLength);
-    SLOGI("write img raw data ret with clean %{public}d", retForWriteRawData);
+    SLOGD("write img raw data ret with clean %{public}d", retForWriteRawData);
     delete[] buffer;
     return retForWriteRawData;
 }
 
 void AVSessionControllerStub::DoMetadataImgCleanInStub(AVMetaData& data)
 {
-    SLOGI("still clear media img in DoMetadataImgCleanInStub");
+    SLOGD("still clear media img in DoMetadataImgCleanInStub");
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
     if (innerQueuePixelMap != nullptr) {
         innerQueuePixelMap->Clear();

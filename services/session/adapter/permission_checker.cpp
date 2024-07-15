@@ -43,11 +43,11 @@ bool PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessToken
     uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
     bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
     if (!isSystemApp) {
-        SLOGI("Not system app, permission reject");
+        SLOGE("Not system app, permission reject");
         return false;
     }
 
-    SLOGI("Check system permission finished");
+    SLOGD("Check system permission finished");
     return true;
 }
 
