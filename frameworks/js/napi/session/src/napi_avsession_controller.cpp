@@ -1413,7 +1413,7 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env,
     }
     SLOGD("NapiAVSessionController RegisterCallback process check lock");
     std::lock_guard<std::mutex> lock(uvMutex_);
-    SLOGI("NapiAVSessionController RegisterCallback process");
+    SLOGD("NapiAVSessionController RegisterCallback process");
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
     if (napiController->controller_ == nullptr) {
         SLOGE("OnEvent failed : controller is nullptr");
@@ -1509,7 +1509,7 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
             callback = argv[ARGV_SECOND];
         }
     };
-    SLOGI("check offEvent eventName %{public}s", eventName.c_str());
+    SLOGD("check offEvent eventName %{public}s", eventName.c_str());
 
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
@@ -1536,7 +1536,7 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     if (it->second.second(env, napiController, callback) != napi_ok) {
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
-    SLOGI("check offEvent done");
+    SLOGD("check offEvent done");
     return NapiUtils::GetUndefinedValue(env);
 }
 
