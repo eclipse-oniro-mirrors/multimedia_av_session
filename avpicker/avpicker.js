@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,12 +63,15 @@ export class AVCastPicker extends ViewPU {
         this.__deviceList = new ObservedPropertyObjectPU([], this, 'deviceList');
         this.__sessionType = new ObservedPropertySimplePU('audio', this, 'sessionType');
         this.__pickerStyle = new ObservedPropertySimplePU(AVCastPickerStyle.STYLE_PANEL, this, 'pickerStyle');
+        this.__pickerStyleFromMediaController =
+            new ObservedPropertySimplePU(AVCastPickerStyle.STYLE_PANEL, this, 'pickerStyleFromMediaController');
         this.__isMenuShow = new ObservedPropertySimplePU(false, this, 'isMenuShow');
         this.__touchMenuItemIndex = new ObservedPropertySimplePU(-1, this, 'touchMenuItemIndex');
         this.onStateChange = undefined;
         this.extensionProxy = null;
         this.pickerClickTime = -1;
-        this.__configurationColorMode = new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
+        this.__configurationColorMode =
+            new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
         this.customPicker = undefined;
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
@@ -93,6 +96,9 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.pickerStyle !== undefined) {
             this.pickerStyle = c11.pickerStyle;
+        }
+        if (c11.pickerStyleFromMediaController !== undefined) {
+            this.pickerStyleFromMediaController = c11.pickerStyleFromMediaController;
         }
         if (c11.isMenuShow !== undefined) {
             this.isMenuShow = c11.isMenuShow;
@@ -127,6 +133,7 @@ export class AVCastPicker extends ViewPU {
         this.__deviceList.purgeDependencyOnElmtId(a11);
         this.__sessionType.purgeDependencyOnElmtId(a11);
         this.__pickerStyle.purgeDependencyOnElmtId(a11);
+        this.__pickerStyleFromMediaController.purgeDependencyOnElmtId(a11);
         this.__isMenuShow.purgeDependencyOnElmtId(a11);
         this.__touchMenuItemIndex.purgeDependencyOnElmtId(a11);
         this.__configurationColorMode.purgeDependencyOnElmtId(a11);
@@ -139,6 +146,7 @@ export class AVCastPicker extends ViewPU {
         this.__deviceList.aboutToBeDeleted();
         this.__sessionType.aboutToBeDeleted();
         this.__pickerStyle.aboutToBeDeleted();
+        this.__pickerStyleFromMediaController.aboutToBeDeleted();
         this.__isMenuShow.aboutToBeDeleted();
         this.__touchMenuItemIndex.aboutToBeDeleted();
         this.__configurationColorMode.aboutToBeDeleted();
@@ -192,6 +200,14 @@ export class AVCastPicker extends ViewPU {
 
     set pickerStyle(v10) {
         this.__pickerStyle.set(v10);
+    }
+
+    get pickerStyleFromMediaController() {
+        return this.__pickerStyleFromMediaController.get();
+    }
+
+    set pickerStyleFromMediaController(b1) {
+        this.__pickerStyleFromMediaController.set(b1);
     }
 
     get isMenuShow() {
@@ -398,19 +414,7 @@ export class AVCastPicker extends ViewPU {
             UIExtensionComponent.onReceive((l8) => {
                 if (JSON.stringify(l8.pickerStyle) !== undefined) {
                     console.info(TAG, `picker style : ${JSON.stringify(l8.pickerStyle)}`);
-                    this.pickerStyle = l8.pickerStyle;
-                }
-
-                if (JSON.stringify(l8.state) !== undefined) {
-                    console.info(TAG, `picker state change : ${JSON.stringify(l8.state)}`);
-                    if (this.onStateChange != null  && this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
-                        if (parseInt(JSON.stringify(l8.state)) === AVCastPickerState.STATE_APPEARING) {
-                            this.onStateChange(AVCastPickerState.STATE_APPEARING);
-                        }
-                        else {
-                            this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
-                        }
-                    }
+                    this.pickerStyleFromMediaController = l8.pickerStyle;
                 }
 
                 if (JSON.stringify(l8.deviceList) !== undefined) {
@@ -419,9 +423,26 @@ export class AVCastPicker extends ViewPU {
                     let u = this.deviceList.length === 2 && !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
                     let v = this.deviceList === null || this.deviceList.length === 0;
                     let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
-                    let x = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && w && (v || u);
-                    if (x || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+                    let x = w && (v || u);
+                    let b21 = !w && (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+                        this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
+                    if (x || b21) {
                         this.isMenuShow = false;
+                    }
+                }
+
+                if (JSON.stringify(l8.state) !== undefined) {
+                    console.info(TAG, `picker state change : ${JSON.stringify(l8.state)}`);
+                    let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
+                    let b21 = !w && (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+                        this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
+                    if (this.onStateChange != null  && b21) {
+                        if (parseInt(JSON.stringify(l8.state)) === AVCastPickerState.STATE_APPEARING) {
+                            this.onStateChange(AVCastPickerState.STATE_APPEARING);
+                        }
+                        else {
+                            this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
+                        }
                     }
                 }
 
@@ -456,11 +477,14 @@ export class AVCastPicker extends ViewPU {
                 }
             });
             UIExtensionComponent.onClick(() => {
-                let u = this.deviceList.length === 2 && !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
+                let u = this.deviceList.length === 2 &&
+                    !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
                 let v = this.deviceList === null || this.deviceList.length === 0;
                 let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
-                let x = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && w && (v || u);
-                if (x || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+                let x = w && (v || u);
+                let y = !w && (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+                    this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
+                if (x || y) {
                     this.isMenuShow = false;
                 } else {
                     this.isMenuShow = !this.isMenuShow;
@@ -483,7 +507,8 @@ export class AVCastPicker extends ViewPU {
     }
 
     menuShowStateCallback(k) {
-        if (this.onStateChange != null && this.pickerStyle === AVCastPickerStyle.STYLE_MENU) {
+        if (this.onStateChange != null && (this.pickerStyle === AVCastPickerStyle.STYLE_MENU ||
+            this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_MENU)) {
             let l = k ? AVCastPickerState.STATE_APPEARING : AVCastPickerState.STATE_DISAPPEARING;
             this.onStateChange(l);
         }
