@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,12 +114,12 @@ export struct AVCastPicker {
   /**
    * Assigns the color of picker component at active state.
    */
-  @State activeColor: Color | number | string | undefined= undefined;
+  @State activeColor: Color | number | string | undefined = undefined;
 
   /**
    * Definition of color mode of picker.
    */
-  @State colorMode: AVCastPickerColorMode = AVCastPickerColorMode.AUTO; 
+  @State colorMode: AVCastPickerColorMode = AVCastPickerColorMode.AUTO;
 
   /**
    * The device that is displayed in the menu.
@@ -135,6 +135,11 @@ export struct AVCastPicker {
    * Display form of application transfer.
    */
   @State pickerStyle: AVCastPickerStyle = AVCastPickerStyle.STYLE_PANEL;
+
+  /**
+   * Display form mediaController.
+   */
+  @State pickerStyleFromMediaController: AVCastPickerStyle = AVCastPickerStyle.STYLE_PANEL;
 
   /**
    * Whether to display the menu.
@@ -228,7 +233,7 @@ export struct AVCastPicker {
                 Image($r(item.selectedIconName))
                   .width(24)
                   .height(24)
-                  .fillColor((this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
+                  .fillColor(this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
                     '#DBFFFFFF' : '#0A59F7')
               }
               .justifyContent(FlexAlign.Start)
@@ -285,36 +290,42 @@ export struct AVCastPicker {
         }
       })
       .onRemoteReady((proxy: UIExtensionProxy) => {
-          console.info(TAG, 'onRemoteReady');
-          this.extensionProxy = proxy;
+        console.info(TAG, 'onRemoteReady');
+        this.extensionProxy = proxy;
       })
       .onReceive((data) => {
         if (JSON.stringify(data['pickerStyle']) !== undefined) {
           console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
-          this.pickerStyle = data['pickerStyle'] as AVCastPickerStyle;
-        }
-
-        if (JSON.stringify(data['state']) !== undefined) {
-          console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
-          if (this.onStateChange != null && this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
-            if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
-              this.onStateChange(AVCastPickerState.STATE_APPEARING);
-            } else {
-              this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
-            }
-          }
+          this.pickerStyleFromMediaController = data['pickerStyle'] as AVCastPickerStyle;
         }
 
         if (JSON.stringify(data['deviceList']) !== undefined) {
           console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
           this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
-          let hasOnlySpeakerandEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
+          let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
           let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
           let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
-          let isExtMenuScene = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && isCalling &&
-            (hasNoDevices || hasOnlySpeakerandEarpiece);
-          if (isExtMenuScene || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+          let isExtMenuScene = isCalling && (hasNoDevices || hasOnlySpeakerAndEarpiece);
+          let isPanelForMedia: boolean = !isCalling &&
+            (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+            this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
+          if (isExtMenuScene || isPanelForMedia) {
             this.isMenuShow = false;
+          }
+        }
+
+        if (JSON.stringify(data['state']) !== undefined) {
+          console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
+          let isCalling: boolean = (this.sessionType === 'voice_call' || this.sessionType === 'video_call');
+          let isPanelForMedia: boolean = !isCalling &&
+            (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+            this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
+          if (this.onStateChange != null && isPanelForMedia) {
+            if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
+              this.onStateChange(AVCastPickerState.STATE_APPEARING);
+            } else {
+              this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
+            }
           }
         }
 
@@ -349,12 +360,14 @@ export struct AVCastPicker {
         }
       })
       .onClick(() => {
-        let hasOnlySpeakerandEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
+        let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
         let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
         let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
-        let isExtMenuScene = this.pickerStyle === AVCastPickerStyle.STYLE_MENU && isCalling &&
-          (hasNoDevices || hasOnlySpeakerandEarpiece);
-        if (isExtMenuScene || this.pickerStyle === AVCastPickerStyle.STYLE_PANEL) {
+        let isExtMenuScene: boolean = isCalling && (hasNoDevices || hasOnlySpeakerAndEarpiece);
+        let isPanelForMedia: boolean = !isCalling &&
+            (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+            this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);        
+        if (isExtMenuScene || isPanelForMedia) {
           this.isMenuShow = false;
         } else {
           this.isMenuShow = !this.isMenuShow;
@@ -376,7 +389,9 @@ export struct AVCastPicker {
   }
 
   private menuShowStateCallback(isMenuShow: boolean): void {
-    if (this.onStateChange != null && this.pickerStyle === AVCastPickerStyle.STYLE_MENU) {
+    if (this.onStateChange != null &&
+      (this.pickerStyle === AVCastPickerStyle.STYLE_MENU ||
+      this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_MENU)) {
       let menuShowState: AVCastPickerState = isMenuShow ?
         AVCastPickerState.STATE_APPEARING : AVCastPickerState.STATE_DISAPPEARING;
       this.onStateChange(menuShowState);
