@@ -48,6 +48,7 @@ public:
 
 private:
     static inline BrokerDelegator<AVCastControllerCallbackProxy> delegator_;
+    const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_CALLBACK_PROXY_H
