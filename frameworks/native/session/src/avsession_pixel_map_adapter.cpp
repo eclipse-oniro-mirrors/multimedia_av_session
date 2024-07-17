@@ -22,7 +22,7 @@ using namespace OHOS::Media;
 namespace OHOS::AVSession {
 namespace {
     constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 1 * 1024 * 1024;
-    constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 200 * 1024;
+    constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 800 * 1024;
     constexpr uint8_t IMAGE_BYTE_SIZE = 2;
     constexpr uint8_t DATA_BYTE_SIZE = 4;
     constexpr uint8_t OFFSET_BYTE = 8;

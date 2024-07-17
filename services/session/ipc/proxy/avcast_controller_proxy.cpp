@@ -80,6 +80,7 @@ int32_t AVCastControllerProxy::Prepare(const AVQueueItem& avQueueItem)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
+    parcel.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
@@ -157,6 +158,7 @@ int32_t AVCastControllerProxy::GetCurrentItem(AVQueueItem& currentItem)
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
     MessageParcel reply;
+    reply.SetMaxCapacity(defaultIpcCapacity);
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_CURRENT_ITEM, parcel,
         reply, option) == 0, AVSESSION_ERROR, "send request failed");

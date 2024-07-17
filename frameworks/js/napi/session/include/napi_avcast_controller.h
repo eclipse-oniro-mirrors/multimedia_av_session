@@ -16,6 +16,8 @@
 #ifndef OHOS_NAPI_AVCAST_CONTROLLER_H
 #define OHOS_NAPI_AVCAST_CONTROLLER_H
 
+#include <chrono>
+
 #include "avcast_controller.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"
@@ -109,6 +111,7 @@ private:
     napi_ref wrapperRef_ {};
     std::shared_ptr<AVCastController> castController_;
     std::shared_ptr<NapiAVCastControllerCallback> callback_;
+    std::chrono::system_clock::time_point latestMetadataTs_;
 
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;

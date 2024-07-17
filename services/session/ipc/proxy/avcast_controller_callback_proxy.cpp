@@ -45,6 +45,7 @@ void AVCastControllerCallbackProxy::OnMediaItemChange(const AVQueueItem& avQueue
 {
     SLOGI("OnMediaItemChange in proxy");
     MessageParcel parcel;
+    parcel.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(parcel.WriteParcelable(&avQueueItem), "Write avQueueItem failed");
 
