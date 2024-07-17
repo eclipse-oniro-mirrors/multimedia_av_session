@@ -209,13 +209,16 @@ export struct AVCastPicker {
                 .fontColor(item.isConnected ? (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
                   '#DBFFFFFF' : '#0A59F7') :
                   (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'))
-                .width(item.isConnected ? 144 : 168)
+                .width(144)
                 .padding({
                   left: 8,
                   top: 12,
                   right: 8,
                   bottom: 12
                 })
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .maxLines(2)
+                .wordBreak(WordBreak.BREAK_ALL)
             }
             .justifyContent(FlexAlign.Start)
             .alignItems(VerticalAlign.Center)

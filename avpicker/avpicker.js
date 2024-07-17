@@ -311,13 +311,16 @@ export class AVCastPicker extends ViewPU {
                     Text.fontColor(x8.isConnected ? (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
                         '#DBFFFFFF' : '#0A59F7') :
                         (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'));
-                    Text.width(x8.isConnected ? 144 : 168);
+                    Text.width(144);
                     Text.padding({
                         left: 8,
                         top: 12,
                         right: 8,
                         bottom: 12
                     });
+                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                    Text.maxLines(2);
+                    Text.wordBreak(WordBreak.BREAK_ALL);
                 }, Text);
                 Text.pop();
                 Row.pop();
