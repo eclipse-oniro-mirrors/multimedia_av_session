@@ -127,10 +127,10 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
     int32_t ret = GetAVMetaData(metaData);
     std::string uri = metaData.GetMediaImageUri();
     if (ret != ERR_INVALID_PARAM) {
-        SLOGI("ImgSetLoop get controller isFromSession true");
+        SLOGD("ImgSetLoop get controller isFromSession true");
     } else {
         ret = AVSESSION_SUCCESS;
-        SLOGI("ImgSetLoop get controller isFromSession false, set empty");
+        SLOGD("ImgSetLoop get controller isFromSession false, set empty");
         metaData.SetMediaImageUri("");
     }
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");

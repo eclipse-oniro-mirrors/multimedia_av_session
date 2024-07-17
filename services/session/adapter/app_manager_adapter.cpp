@@ -111,7 +111,7 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
         if (appProcessData.appState == ApplicationState::APP_STATE_FOREGROUND ||
             appProcessData.appState == ApplicationState::APP_STATE_BACKGROUND) {
             for (const auto& appData : appProcessData.appDatas) {
-                SLOGI("check foreground bundleName=%{public}s uid=%{public}d state=%{public}d",
+                SLOGD("check foreground bundleName=%{public}s uid=%{public}d state=%{public}d",
                     appData.appName.c_str(), appData.uid, appProcessData.appState);
                 serviceCallbackForAppStateChange_(appData.uid, static_cast<int>(appProcessData.appState));
             }
