@@ -32,6 +32,7 @@ public:
 
 private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
+    std::mutex handlerLock_;
 };
 }
 #endif // AV_SESSION_AVSESSION_EVENT_HANDLER_H
