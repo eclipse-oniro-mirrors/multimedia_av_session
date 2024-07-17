@@ -36,8 +36,9 @@ AVSessionEventHandler::~AVSessionEventHandler()
 bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const std::string &name, int64_t delayTime)
 {
     SLOGI("AVSessionEventHandler ProxyPostTask: %{public}s", name.c_str());
-
+    std::lock_guard<std::mutex> lockGuard(handlerLock_);
     if (!handler_) {
+        SLOGI("AVSessionEventHandler create new: %{public}s", name.c_str());
         auto runner = AppExecFwk::EventRunner::Create("OS_AVSessionHdl");
         handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
@@ -47,7 +48,7 @@ bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const st
 void AVSessionEventHandler::AVSessionRemoveTask(const std::string &name)
 {
     SLOGI("AVSessionEventHandler ProxyRemoveTask");
-
+    std::lock_guard<std::mutex> lockGuard(handlerLock_);
     if (handler_) {
         handler_->RemoveTask(name);
     }
