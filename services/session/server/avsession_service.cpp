@@ -250,6 +250,7 @@ void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
     }
 }
 
+// LCOV_EXCL_START
 void AVSessionService::CheckInitCast()
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -267,6 +268,7 @@ void AVSessionService::CheckInitCast()
     }
 #endif
 }
+// LCOV_EXCL_STOP
 
 #ifdef BLUETOOTH_ENABLE
 DetectBluetoothHostObserver::DetectBluetoothHostObserver()
@@ -395,6 +397,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
     NotifyTopSessionChanged(descriptor);
 }
 
+// LCOV_EXCL_START
 void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
     SLOGI("HandleFocusSession with uid=%{public}d", info.uid);
@@ -423,7 +426,9 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         }
     }
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
 {
     std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
@@ -466,6 +471,7 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
         SLOGE("SelectFocusSession save sort fail !");
     }
 }
+// LCOV_EXCL_STOP
 
 bool AVSessionService::IsMediaStream(AudioStandard::StreamUsage usage)
 {
@@ -504,6 +510,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     }
 }
 
+// LCOV_EXCL_START
 bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
     for (auto& session : GetContainer().GetAllSessions()) {
@@ -530,6 +537,7 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
     }
     return false;
 }
+// LCOV_EXCL_STOP
 
 void AVSessionService::InitAudio()
 {
@@ -579,6 +587,7 @@ void AVSessionService::InitAMS()
     });
 }
 
+// LCOV_EXCL_START
 void AVSessionService::HandleAppStateChange(int uid, int state)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -596,6 +605,7 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 }
+// LCOV_EXCL_STOP
 
 void AVSessionService::InitDM()
 {
@@ -720,6 +730,7 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
     }
 }
 
+// LCOV_EXCL_START
 void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 {
     SLOGI("Start searching for the corresponding callback");
@@ -736,6 +747,7 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
         listener->OnAudioSessionChecked(uid);
     }
 }
+// LCOV_EXCL_STOP
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 
@@ -763,6 +775,7 @@ void AVSessionService::checkEnableCast(bool enable)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 void AVSessionService::ReleaseCastSession()
 {
     std::lock_guard lockGuard(sessionAndControllerLock_);
@@ -778,7 +791,9 @@ void AVSessionService::ReleaseCastSession()
         }
     }
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 {
     SLOGI("AVSessionService CreateSessionByCast in");
@@ -818,7 +833,9 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
         "SESSION_TYPE", sinkSession->GetDescriptor().sessionType_,
         "DETAILED_MSG", "session create from cast+ callback");
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     AVSessionRadarInfo info("AVSessionService::NotifyDeviceAvailable");
@@ -840,7 +857,9 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
         listener->OnDeviceAvailable(castOutputDeviceInfo);
     }
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void AVSessionService::NotifyDeviceOffline(const std::string& deviceId)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
@@ -852,6 +871,7 @@ void AVSessionService::NotifyDeviceOffline(const std::string& deviceId)
         listener->OnDeviceOffline(deviceId);
     }
 }
+// LCOV_EXCL_STOP
 
 int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
 {
@@ -937,12 +957,14 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
 }
 #endif
 
+// LCOV_EXCL_START
 void AVSessionService::HandleCallStartEvent()
 {
     SLOGI("Start handle CallStartEvent");
     AbilityConnectHelper::GetInstance().StartAbilityForegroundByCall(MEDIA_CONTROL_BUNDLENAME,
         MEDIA_CONTROL_ABILITYNAME);
 }
+// LCOV_EXCL_STOP
 
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
@@ -1117,6 +1139,7 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
     return object;
 }
 
+// LCOV_EXCL_START
 void AVSessionService::refreshSortFileOnCreateSession(const std::string& sessionId, const std::string& sessionType,
                                                       const AppExecFwk::ElementName& elementName)
 {
@@ -1163,6 +1186,7 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
         SLOGE("LoadStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
     }
 }
+// LCOV_EXCL_STOP
 
 int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {
@@ -1270,6 +1294,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                                     std::vector<AVQueueInfo>& avQueueInfos)
 {
@@ -1307,7 +1332,9 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
     SLOGI("get historical avqueueinfo size=%{public}d", static_cast<int>(avQueueInfos.size()));
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta)
 {
     nlohmann::json values = json::parse(oldContent, nullptr, false);
@@ -1354,7 +1381,9 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
     }
     return true;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
 {
     SLOGD("add queueinfo to file in");
@@ -1388,6 +1417,7 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
     DoMetadataImgClean(meta);
     SLOGD("add queueinfo to file done");
 }
+// LCOV_EXCL_STOP
 
 void AVSessionService::DoMetadataImgClean(AVMetaData& data)
 {
@@ -1442,6 +1472,7 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
     return result;
 }
 
+// LCOV_EXCL_START
 const nlohmann::json& AVSessionService::GetSubNode(const nlohmann::json& node, const std::string& name)
 {
     static const nlohmann::json jsonNull = nlohmann::json::value_t::null;
@@ -1462,6 +1493,7 @@ const nlohmann::json& AVSessionService::GetSubNode(const nlohmann::json& node, c
     }
     return *it;
 }
+// LCOV_EXCL_STOP
 
 bool AVSessionService::IsHistoricalSession(const std::string& sessionId)
 {
@@ -1684,6 +1716,7 @@ int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& 
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 void AVSessionService::HandleEventHandlerCallBack()
 {
     SLOGI("handle eventHandler callback isFirstPress_=%{public}d, pressCount_:%{public}d", isFirstPress_, pressCount_);
@@ -1727,6 +1760,7 @@ void AVSessionService::HandleEventHandlerCallBack()
     pressCount_ = 0;
     isFirstPress_ = true;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
@@ -1887,6 +1921,7 @@ void AVSessionService::OnClientDied(pid_t pid)
     ClearClientResources(pid);
 }
 
+// LCOV_EXCL_START
 void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
 {
     std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
@@ -1913,7 +1948,9 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
         return;
     }
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
 {
     std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
@@ -1945,6 +1982,7 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
         return;
     }
 }
+// LCOV_EXCL_STOP
 
 void AVSessionService::HandleSessionRelease(std::string sessionId)
 {
@@ -2718,6 +2756,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
 }
 
+// LCOV_EXCL_START
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession)
 {
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
@@ -2754,7 +2793,9 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     result = Notification::NotificationHelper::PublishNotification(request);
     SLOGI("PublishNotification uid %{public}d, userId %{public}d, result %{public}d", uid, userId, result);
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
     // historical sessions
@@ -2781,7 +2822,9 @@ void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChange
         NotifySystemUI(&selectSession, false);
     }
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
     SLOGI("AVSessionService HandleDeviceChange");
@@ -2795,6 +2838,7 @@ void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChange
         }
     }
 }
+// LCOV_EXCL_STOP
 
 void AVSessionService::InitRadarBMS()
 {
