@@ -199,7 +199,7 @@ int32_t CurlSetRequestOptionsForCast(std::vector<std::uint8_t>& imgBuffer, const
     if (easyHandle_) {
         // set request options
         curl_easy_setopt(easyHandle_, CURLOPT_URL, uri.c_str());
-        curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, NapiAVSession::TIME_OUT_SECOND);
+        curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, NapiAVCastController::TIME_OUT_SECOND);
         curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, "/etc/ssl/certs/" "cacert.pem");

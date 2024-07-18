@@ -257,7 +257,7 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     SLOGI("do CheckBeforePrepare with mediaId %{public}s | title %{public}s",
         mediaInfo.mediaId.c_str(), mediaInfo.mediaName.c_str());
     if (CheckBeforePrepare(mediaDescription) != AVSESSION_SUCCESS) {
-        return;
+        return AVSESSION_SUCCESS;
     }
     if (mediaDescription->GetMediaUri() == "") {
         if (mediaDescription->GetFdSrc().fd_ == 0) {

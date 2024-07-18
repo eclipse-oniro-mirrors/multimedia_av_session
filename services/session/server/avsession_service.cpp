@@ -2738,7 +2738,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         std::make_shared<Notification::NotificationContent>(localLiveViewContent);
     CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
 
-    auto uid = topSession_ ? topSession_->GetUid() : historyDescriptor->uid_;
+    auto uid = topSession_ ? topSession_->GetUid() : (historyDescriptor ? historyDescriptor->uid_ : -1);
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetNotificationId(0);
     request.SetContent(content);

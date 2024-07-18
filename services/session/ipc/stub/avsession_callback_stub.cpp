@@ -158,6 +158,10 @@ int32_t AVSessionCallbackStub::HandleOnMediaKeyEvent(MessageParcel& data, Messag
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnMediaKeyEvent");
     auto keyEvent = MMI::KeyEvent::Create();
+    if (keyEvent == nullptr) {
+        SLOGE("HandleOnMediaKeyEvent get key event null");
+        return ERR_NONE;
+    }
     CHECK_AND_RETURN_RET_LOG((*keyEvent).ReadFromParcel(data), ERR_NONE, "read keyEvent failed");
     OnMediaKeyEvent(*keyEvent);
     return ERR_NONE;

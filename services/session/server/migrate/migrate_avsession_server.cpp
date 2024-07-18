@@ -460,6 +460,10 @@ bool MigrateAVSessionServer::CompressToJPEG(const AVMetaData &metadata, std::vec
         SLOGI("Failed to start packing");
         return false;
     }
+    if (pixelMap == nullptr) {
+        SLOGE("CompressToJPEG with pixel get null");
+        return false;
+    }
     ret = imagePacker.AddImage(*pixelMap);
     if (ret != 0) {
         SLOGI("Failed to add image");
@@ -517,6 +521,10 @@ void MigrateAVSessionServer::SendCommandProc(const std::string &command, sptr<AV
 void MigrateAVSessionServer::MediaButtonEventProc(const std::string &command, sptr<AVControllerItem> controller)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    if (keyEvent == nullptr) {
+        SLOGE("MediaButtonEventProc with key event null");
+        return;
+    }
     keyEvent->SetKeyCode(atoi(command.c_str()));
     controller->SendAVKeyEvent(*keyEvent.get());
 }
