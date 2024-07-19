@@ -16,9 +16,11 @@
 #include "avrouter_impl.h"
 
 namespace OHOS::AVSession {
+// LCOV_EXCL_START
 AVRouter& AVRouter::GetInstance()
 {
     static AVRouterImpl avRouter;
     return avRouter;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

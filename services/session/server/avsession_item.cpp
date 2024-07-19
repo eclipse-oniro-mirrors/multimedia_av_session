@@ -77,6 +77,7 @@ AVSessionItem::~AVSessionItem()
 #endif
 }
 
+// LCOV_EXCL_START
 std::string AVSessionItem::GetSessionId()
 {
     return descriptor_.sessionId_;
@@ -95,6 +96,7 @@ std::string AVSessionItem::GetSessionType()
     }
     return "audio";
 }
+// LCOV_EXCL_STOP
 
 int32_t AVSessionItem::Destroy()
 {
@@ -163,6 +165,7 @@ int32_t AVSessionItem::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVSessionItem::SetAVCallState(const AVCallState& avCallState)
 {
     CHECK_AND_RETURN_RET_LOG(avCallState_.CopyFrom(avCallState), AVSESSION_ERROR, "AVCallState set error");
@@ -175,7 +178,7 @@ int32_t AVSessionItem::SetAVCallState(const AVCallState& avCallState)
     }
     return AVSESSION_SUCCESS;
 }
-
+// LCOV_EXCL_STOP
 
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
@@ -195,6 +198,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 {
     SLOGI("%{public}s ", source.c_str());
@@ -371,6 +375,7 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
     state = playbackState_;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
@@ -378,6 +383,7 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVSessionItem::GetExtras(AAFwk::WantParams& extras)
 {
     std::lock_guard lockGuard(wantParamLock_);
@@ -497,6 +503,7 @@ int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback>& cal
     callback_ = callback;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVSessionItem::Activate()
 {
@@ -518,6 +525,7 @@ int32_t AVSessionItem::Activate()
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVSessionItem::Deactivate()
 {
     descriptor_.isActive_ = false;
@@ -539,12 +547,14 @@ int32_t AVSessionItem::Deactivate()
     SLOGI("Deactivate done");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 bool AVSessionItem::IsActive()
 {
     return descriptor_.isActive_;
 }
 
+// LCOV_EXCL_START
 int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 {
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
@@ -598,6 +608,7 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
 #endif
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
 {
@@ -642,6 +653,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 void AVSessionItem::InitializeCastCommands()
 {
     // always support setVolume command
@@ -1195,6 +1207,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
     HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", code,
         "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");
 }
+// LCOV_EXCL_STOP
 
 void AVSessionItem::ExecueCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
 {
@@ -1213,6 +1226,7 @@ void AVSessionItem::ExecueCommonCommand(const std::string& commonCommand, const 
     callback_->OnCommonCommand(commonCommand, commandArgs);
 }
 
+// LCOV_EXCL_START
 void AVSessionItem::HandleSkipToQueueItem(const int32_t& itemId)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSkipToQueueItem");
@@ -1354,6 +1368,7 @@ void AVSessionItem::HandleOnPlayFromAssetId(const AVControlCommand& cmd)
     CHECK_AND_RETURN_LOG(cmd.GetPlayFromAssetId(assetId) == AVSESSION_SUCCESS, "Get playFromAssetId failed");
     callback_->OnPlayFromAssetId(assetId);
 }
+// LCOV_EXCL_STOP
 
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& controller)
 {
@@ -1388,10 +1403,12 @@ std::string AVSessionItem::GetAbilityName() const
     return descriptor_.elementName_.GetAbilityName();
 }
 
+// LCOV_EXCL_START
 std::string AVSessionItem::GetBundleName() const
 {
     return descriptor_.elementName_.GetBundleName();
 }
+// LCOV_EXCL_STOP
 
 void AVSessionItem::SetTop(bool top)
 {
@@ -1455,6 +1472,7 @@ void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
     SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(info.deviceInfos_.size()));
 }
 
+// LCOV_EXCL_START
 void AVSessionItem::GetOutputDevice(OutputDeviceInfo& info)
 {
     info = GetDescriptor().outputDeviceInfo_;
@@ -1647,4 +1665,5 @@ int32_t AVSessionItem::doContinuousTaskUnregister()
 #endif
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

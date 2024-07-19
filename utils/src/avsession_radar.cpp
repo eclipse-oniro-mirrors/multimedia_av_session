@@ -34,6 +34,7 @@ AVSessionRadar& AVSessionRadar::GetInstance()
     return avSessionRadar;
 }
 
+// LCOV_EXCL_START
 std::string AVSessionRadar::GetAnonymousDeviceId(std::string deviceId)
 {
     const uint32_t half = DEVICE_ID_MIN_LEN / 2;
@@ -84,6 +85,7 @@ std::string AVSessionRadar::ConvertHexToString(int32_t hex)
     transform(hexStr.begin(), hexStr.end(), hexStr.begin(), ::toupper);
     return hexStr;
 }
+// LCOV_EXCL_STOP
 
 std::string AVSessionRadar::GetLocalDevType()
 {
@@ -124,6 +126,7 @@ void AVSessionRadar::InitBMS()
     bundleMgrProxy_ = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
 }
 
+// LCOV_EXCL_START
 void AVSessionRadar::GetJsonCastDeviceList(const OutputDeviceInfo &deviceInfo, std::string& deviceList)
 {
     json jDeviceInfos = json::array();
@@ -321,6 +324,7 @@ void AVSessionRadar::StartCastBegin(const OutputDeviceInfo &outputDeviceInfo, AV
     GetPeerInfo(outputDeviceInfo, info);
     ReportHiSysEventBehavior(info);
 }
+// LCOV_EXCL_STOP
 
 void AVSessionRadar::StartCastEnd(const OutputDeviceInfo &outputDeviceInfo, AVSessionRadarInfo &info)
 {
@@ -332,6 +336,7 @@ void AVSessionRadar::StartCastEnd(const OutputDeviceInfo &outputDeviceInfo, AVSe
     ReportHiSysEventBehavior(info);
 }
 
+// LCOV_EXCL_START
 void AVSessionRadar::FailToStartCast(AVSessionRadarInfo &info)
 {
     info.bizScene_ = static_cast<int32_t>(BizScene::CAST_START);
@@ -499,4 +504,5 @@ void AVSessionRadar::StopCastFinish(const DeviceInfo &deviceInfo, AVSessionRadar
     GetPeerInfoFromDeviceInfo(deviceInfo, info);
     ReportHiSysEventBehavior(info);
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

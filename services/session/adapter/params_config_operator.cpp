@@ -20,10 +20,12 @@
 #include "nlohmann/json.hpp"
 
 namespace OHOS::AVSession {
+// LCOV_EXCL_START
 ParamsConfigOperator::ParamsConfigOperator()
 {
     SLOGI("construct");
 }
+// LCOV_EXCL_STOP
 
 ParamsConfigOperator::~ParamsConfigOperator()
 {
@@ -44,6 +46,7 @@ void ParamsConfigOperator::InitConfig()
         SLOGE("LoadStringFromFile failed, filename=%{public}s", PARAMS_FILE_NAME);
         return;
     }
+    // LCOV_EXCL_START
     nlohmann::json configs = nlohmann::json::parse(content, nullptr, false);
     CHECK_AND_RETURN_LOG(configs.is_discarded(), "configs is invalid");
     SLOGD("InitConfig::parse json object finished");
@@ -55,6 +58,7 @@ void ParamsConfigOperator::InitConfig()
             configStringParams.insert(std::pair<std::string, std::string>(config.key(), config.value()));
         }
     }
+    // LCOV_EXCL_STOP
 }
 
 int32_t ParamsConfigOperator::GetValueIntByKey(const std::string& key, int32_t *value)

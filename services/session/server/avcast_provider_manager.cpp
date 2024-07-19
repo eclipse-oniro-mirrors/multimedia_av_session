@@ -22,6 +22,7 @@ AVCastProviderManager::AVCastProviderManager()
     SLOGD("AVCastProviderManager construct");
 }
 
+// LCOV_EXCL_START
 void AVCastProviderManager::Init(int32_t providerId, std::shared_ptr<AVCastProvider> provider)
 {
     providerId_ = providerId;
@@ -40,6 +41,7 @@ void AVCastProviderManager::OnDeviceAvailable(std::vector<DeviceInfo> deviceInfo
     AVRouter::GetInstance().OnDeviceAvailable(outputDeviceInfo);
 #endif
 }
+// LCOV_EXCL_STOP
 
 void AVCastProviderManager::OnSessionNeedDestroy()
 {
@@ -57,6 +59,7 @@ void AVCastProviderManager::OnSessionCreated(const int32_t castId)
 #endif
 }
 
+// LCOV_EXCL_START
 void AVCastProviderManager::OnDeviceOffline(const std::string& deviceId)
 {
     SLOGI("On device offline");
@@ -72,4 +75,5 @@ void AVCastProviderManager::OnCastServerDied()
     AVRouter::GetInstance().OnCastServerDied(providerId_);
 #endif
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

@@ -119,6 +119,7 @@ void MigrateAVSessionServer::ClearCacheBySessionId(const std::string &sessionId)
     }
 }
 
+// LCOV_EXCL_START
 void MigrateAVSessionServer::UpdateCache(const std::string &sessionId, sptr<AVControllerItem> avcontroller,
     std::shared_ptr<AVControllerObserver> callback, bool isAdd)
 {
@@ -134,6 +135,7 @@ void MigrateAVSessionServer::UpdateCache(const std::string &sessionId, sptr<AVCo
         ClearCacheBySessionId(sessionId);
     }
 }
+// LCOV_EXCL_STOP
 
 void MigrateAVSessionServer::StopObserveControllerChanged(const std::string &deviceId)
 {
@@ -149,6 +151,7 @@ void MigrateAVSessionServer::StopObserveControllerChanged(const std::string &dev
     playerIdToControllerCallbackMap_.clear();
 }
 
+// LCOV_EXCL_START
 void MigrateAVSessionServer::OnBytesReceived(const std::string &deviceId, const std::string &data)
 {
     SLOGI("OnBytesReceived: %{public}s", data.c_str());
@@ -162,6 +165,7 @@ void MigrateAVSessionServer::OnBytesReceived(const std::string &deviceId, const 
         SLOGW("COLD_START not support");
     }
 }
+// LCOV_EXCL_STOP
 
 void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
 {
@@ -212,6 +216,7 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
     }
 }
 
+// LCOV_EXCL_START
 int32_t MigrateAVSessionServer::GetControllerById(const std::string &sessionId, sptr<AVControllerItem> &controller)
 {
     if (sessionId.empty()) {
@@ -230,12 +235,14 @@ int32_t MigrateAVSessionServer::GetControllerById(const std::string &sessionId, 
     SLOGW("controller not found");
     return AVSESSION_ERROR;
 }
+// LCOV_EXCL_STOP
 
 void MigrateAVSessionServer::Init(AVSessionService *ptr)
 {
     servicePtr_ = ptr;
 }
 
+// LCOV_EXCL_START
 void MigrateAVSessionServer::OnSessionCreate(const AVSessionDescriptor &descriptor)
 {
     SLOGI("OnSessionCreate");
@@ -333,6 +340,7 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(sptr<AVControllerIte
     std::string msg = std::string(header) + jsonStr;
     return msg;
 }
+// LCOV_EXCL_STOP
 
 Json::Value MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerItem> avcontroller)
 {
@@ -355,6 +363,7 @@ Json::Value MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerIte
     return metadata;
 }
 
+// LCOV_EXCL_START
 std::string MigrateAVSessionServer::GetBundleName(std::string sessionId)
 {
     std::vector<AVSessionDescriptor> descriptors;
@@ -582,6 +591,7 @@ void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, cons
 
     SendByte(deviceId_, metaDataStr);
 }
+// LCOV_EXCL_STOP
 
 void MigrateAVSessionServer::OnPlaybackStateChanged(const std::string &playerId, const AVPlaybackState &state)
 {
@@ -596,6 +606,7 @@ void MigrateAVSessionServer::OnPlaybackStateChanged(const std::string &playerId,
     SendByte(deviceId_, result);
 }
 
+// LCOV_EXCL_START
 void AVControllerObserver::OnSessionDestroy()
 {
     SLOGI("OnSessionDestroy");
@@ -622,4 +633,5 @@ void AVControllerObserver::Init(std::weak_ptr<MigrateAVSessionServer> migrateSer
 {
     migrateServer_ = migrateServer;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

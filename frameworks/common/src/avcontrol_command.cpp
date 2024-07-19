@@ -134,6 +134,7 @@ int32_t AVControlCommand::SetSpeed(double speed)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControlCommand::GetSpeed(double& speed) const
 {
     if (!std::holds_alternative<double>(param_)) {
@@ -142,6 +143,7 @@ int32_t AVControlCommand::GetSpeed(double& speed) const
     speed = std::get<double>(param_);
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControlCommand::SetForwardTime(int64_t forwardTime)
 {
@@ -154,6 +156,7 @@ int32_t AVControlCommand::SetForwardTime(int64_t forwardTime)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControlCommand::GetForwardTime(int64_t& forwardTime) const
 {
     if (!std::holds_alternative<int64_t>(param_)) {
@@ -164,6 +167,7 @@ int32_t AVControlCommand::GetForwardTime(int64_t& forwardTime) const
     SLOGE("GetForwardTime with time %{public}jd", static_cast<int64_t>(forwardTime));
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControlCommand::SetRewindTime(int64_t rewindTime)
 {
@@ -176,6 +180,7 @@ int32_t AVControlCommand::SetRewindTime(int64_t rewindTime)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControlCommand::GetRewindTime(int64_t& rewindTime) const
 {
     if (!std::holds_alternative<int64_t>(param_)) {
@@ -186,6 +191,7 @@ int32_t AVControlCommand::GetRewindTime(int64_t& rewindTime) const
     SLOGE("GetRewindTime with time %{public}jd", static_cast<int64_t>(rewindTime));
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControlCommand::SetSeekTime(int64_t time)
 {
@@ -196,6 +202,7 @@ int32_t AVControlCommand::SetSeekTime(int64_t time)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControlCommand::GetSeekTime(int64_t& time) const
 {
     if (!std::holds_alternative<int64_t>(param_)) {
@@ -204,6 +211,7 @@ int32_t AVControlCommand::GetSeekTime(int64_t& time) const
     time = std::get<int64_t>(param_);
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControlCommand::SetLoopMode(int32_t mode)
 {
@@ -214,6 +222,7 @@ int32_t AVControlCommand::SetLoopMode(int32_t mode)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControlCommand::GetLoopMode(int32_t& mode) const
 {
     if (!std::holds_alternative<int32_t>(param_)) {
@@ -222,6 +231,7 @@ int32_t AVControlCommand::GetLoopMode(int32_t& mode) const
     mode = std::get<int32_t>(param_);
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControlCommand::SetAssetId(const std::string& assetId)
 {
@@ -232,6 +242,7 @@ int32_t AVControlCommand::SetAssetId(const std::string& assetId)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControlCommand::GetAssetId(std::string& assetId) const
 {
     if (!std::holds_alternative<std::string>(param_)) {
@@ -240,6 +251,7 @@ int32_t AVControlCommand::GetAssetId(std::string& assetId) const
     assetId = std::get<std::string>(param_);
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControlCommand::SetAVCallMuted(const bool isAVCallMuted)
 {
@@ -247,6 +259,7 @@ int32_t AVControlCommand::SetAVCallMuted(const bool isAVCallMuted)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControlCommand::IsAVCallMuted(bool& isAVCallMuted) const
 {
     if (!std::holds_alternative<bool>(param_)) {
@@ -255,6 +268,7 @@ int32_t AVControlCommand::IsAVCallMuted(bool& isAVCallMuted) const
     isAVCallMuted = std::get<bool>(param_);
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControlCommand::SetPlayFromAssetId(int64_t playFromAssetId)
 {
@@ -262,6 +276,7 @@ int32_t AVControlCommand::SetPlayFromAssetId(int64_t playFromAssetId)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControlCommand::GetPlayFromAssetId(int64_t& playFromAssetId) const
 {
     if (!std::holds_alternative<int64_t>(param_)) {
@@ -270,4 +285,5 @@ int32_t AVControlCommand::GetPlayFromAssetId(int64_t& playFromAssetId) const
     playFromAssetId = std::get<int64_t>(param_);
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

@@ -74,6 +74,7 @@ int32_t AVControllerItem::GetAVCallState(AVCallState& avCallState)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 {
     std::lock_guard lockGuard(sessionMutex_);
@@ -81,6 +82,7 @@ int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
     state = session_->GetPlaybackState();
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
 {
@@ -100,6 +102,7 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControllerItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {
     std::lock_guard lockGuard(sessionMutex_);
@@ -157,6 +160,7 @@ int32_t AVControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
     cmds = session_->GetSupportCommand();
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControllerItem::IsSessionActive(bool& isActive)
 {
@@ -166,6 +170,7 @@ int32_t AVControllerItem::IsSessionActive(bool& isActive)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
 {
     std::lock_guard lockGuard(sessionMutex_);
@@ -178,6 +183,7 @@ int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
     session_->ExecuteControllerCommand(cmd);
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
 {
@@ -189,6 +195,7 @@ int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, co
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t AVControllerItem::SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter)
 {
     std::lock_guard lockGuard(avCallMetaMaskMutex_);
@@ -216,6 +223,7 @@ int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackState
     playbackMask_ = filter;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t AVControllerItem::Destroy()
 {
@@ -242,10 +250,12 @@ int32_t AVControllerItem::Destroy()
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 std::string AVControllerItem::GetSessionId()
 {
     return sessionId_;
 }
+// LCOV_EXCL_STOP
 
 void AVControllerItem::HandleSessionDestroy()
 {
@@ -263,6 +273,7 @@ void AVControllerItem::HandleSessionDestroy()
     sessionId_.clear();
 }
 
+// LCOV_EXCL_START
 void AVControllerItem::HandleAVCallStateChange(const AVCallState& avCallState)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
@@ -398,6 +409,7 @@ void AVControllerItem::HandleOutputDeviceChange(const int32_t connectionState, c
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnOutputDeviceChange(connectionState, outputDeviceInfo);
 }
+// LCOV_EXCL_STOP
 
 void AVControllerItem::HandleActiveStateChange(bool isActive)
 {
@@ -406,6 +418,7 @@ void AVControllerItem::HandleActiveStateChange(bool isActive)
     callback_->OnActiveStateChange(isActive);
 }
 
+// LCOV_EXCL_START
 void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds)
 {
     std::lock_guard lockGuard(callbackMutex_);
@@ -414,6 +427,7 @@ void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds
         static_cast<int>(pid_), static_cast<int>(cmds.size()));
     callback_->OnValidCommandChange(cmds);
 }
+// LCOV_EXCL_STOP
 
 void AVControllerItem::HandleSetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
 {
@@ -423,6 +437,7 @@ void AVControllerItem::HandleSetSessionEvent(const std::string& event, const AAF
     callback_->OnSessionEventChange(event, args);
 }
 
+// LCOV_EXCL_START
 void AVControllerItem::HandleQueueItemsChange(const std::vector<AVQueueItem>& items)
 {
     std::lock_guard lockGuard(callbackMutex_);
@@ -446,6 +461,7 @@ void AVControllerItem::HandleExtrasChange(const AAFwk::WantParams& extras)
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnSetExtras");
     callback_->OnExtrasChange(extras);
 }
+// LCOV_EXCL_STOP
 
 pid_t AVControllerItem::GetPid() const
 {

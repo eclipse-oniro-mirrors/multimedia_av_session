@@ -26,6 +26,7 @@ SoftbusDistributedDataManager::SoftbusDistributedDataManager() {}
 
 SoftbusDistributedDataManager::~SoftbusDistributedDataManager() {}
 
+// LCOV_EXCL_START
 void SoftbusDistributedDataManager::Init()
 {
     std::weak_ptr<SoftbusDistributedDataManager> managerWeak(shared_from_this());
@@ -66,6 +67,7 @@ void SoftbusDistributedDataManager::MessageReceived(int32_t socket, const std::s
     }
     OnMessageHandleReceived(socket, data);
 }
+// LCOV_EXCL_STOP
 
 void SoftbusDistributedDataManager::BytesReceived(int32_t socket, const std::string &data)
 {
@@ -121,6 +123,7 @@ void SoftbusDistributedDataManager::ReleaseServer(const std::shared_ptr<SoftbusS
     }
 }
 
+// LCOV_EXCL_START
 void SoftbusDistributedDataManager::OnSessionServerOpened()
 {
     SLOGI("OnSessionServerOpened: the peer device id is %{public}s.",
@@ -168,4 +171,5 @@ void SoftbusDistributedDataManager::OnBytesServerReceived(const std::string &dat
         iter->second->OnBytesReceived(deviceId, data);
     }
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

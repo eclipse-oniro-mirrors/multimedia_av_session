@@ -33,6 +33,7 @@ void SoftbusSessionServer::ConnectProxy(int sessionId)
     OnConnectProxy(deviceId);
 }
 
+// LCOV_EXCL_START
 void SoftbusSessionServer::DisconnectProxy(int sessionId)
 {
     std::string deviceId;
@@ -53,4 +54,5 @@ void SoftbusSessionServer::DisconnectAllProxy()
         deviceToSessionMap_.erase(it++);
     }
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

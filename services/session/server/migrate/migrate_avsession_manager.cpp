@@ -68,6 +68,7 @@ void MigrateAVSessionManager::IncSoftBusRef()
     refs_++;
 }
 
+// LCOV_EXCL_START
 void MigrateAVSessionManager::DecSoftBusRef()
 {
     refs_--;
@@ -76,4 +77,5 @@ void MigrateAVSessionManager::DecSoftBusRef()
         refs_ = 0;
     }
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

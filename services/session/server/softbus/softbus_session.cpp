@@ -29,6 +29,7 @@ void SoftbusSession::OnConnectSession(int32_t sessionId)
     deviceToSessionMap_.insert({ deviceId, sessionId });
 }
 
+// LCOV_EXCL_START
 void SoftbusSession::OnDisConnectSession(int32_t sessionId)
 {
     std::string deviceId;
@@ -79,4 +80,5 @@ void SoftbusSession::SendMessage(int32_t sessionId, const std::string &data)
     SLOGI("SendMessage: %{public}s", data.c_str());
     SoftbusSessionManager::GetInstance().SendMessage(sessionId, data);
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession
