@@ -68,6 +68,7 @@ private:
         NapiArgsGetter getter;
         std::function<bool()> checkCallbackValid;
     };
+
     napi_env env_ = nullptr;
     uv_loop_s* loop_ = nullptr;
     uv_loop_s* loopOrder_ = nullptr;
