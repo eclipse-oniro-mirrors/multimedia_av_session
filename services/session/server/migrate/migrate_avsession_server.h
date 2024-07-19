@@ -96,7 +96,6 @@ private:
     bool isSoftbusConnecting_ = false;
     std::string deviceId_;
     std::string topSessionId_;
-    std::string pendingMetadata_;
     std::recursive_mutex migrateControllerLock_;
     std::recursive_mutex topSessionLock_;
 };
