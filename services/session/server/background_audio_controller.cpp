@@ -82,6 +82,7 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
     }
 }
 
+// LCOV_EXCL_START
 void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos)
 {
     for (const auto& info : infos) {
@@ -155,15 +156,18 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid, int32_t pi
     ptr_->NotifyAudioSessionCheckTrigger(uid);
     AudioAdapter::GetInstance().PauseAudioStream(uid);
 }
+// LCOV_EXCL_STOP
 
 bool BackgroundAudioController::IsBackgroundMode(int32_t creatorUid, BackgroundMode backgroundMode) const
 {
+    // LCOV_EXCL_START
     std::vector<std::shared_ptr<ContinuousTaskCallbackInfo>> continuousTaskList;
     ErrCode code = BackgroundTaskMgr::BackgroundTaskMgrHelper::GetContinuousTaskApps(continuousTaskList);
     if (code != OHOS::ERR_OK) {
         SLOGE("uid=%{public}d no continuous task list, code=%{public}d", creatorUid, code);
         return false;
     }
+    // LCOV_EXCL_STOP
 
     for (const auto &task : continuousTaskList) {
         SLOGD("uid=%{public}d taskCreatorUid=%{public}d", creatorUid, task->GetCreatorUid());

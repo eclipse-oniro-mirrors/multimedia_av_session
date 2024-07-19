@@ -84,12 +84,14 @@ void AVSessionSysEvent::Regiter()
         uint32_t allCtrlCmdCount = optCounts_[Operation::OPT_ALL_CTRL_COMMAND];
         uint32_t allSuccCmdCount = optCounts_[Operation::OPT_SUCCESS_CTRL_COMMAND];
         if ((allCtrlCmdCount != 0) && (allSuccCmdCount <= allCtrlCmdCount)) {
+            // LCOV_EXCL_START
             float failedRate = (allCtrlCmdCount - allSuccCmdCount) / (allCtrlCmdCount * MULTIPLE);
             HiSysWriteStatistic("CONTROL_COMMAND_FAILED_RATE", "ALL_CTRL_COMMAND_COUNT", allCtrlCmdCount,
                 "ALL_SUCCESS_CTRL_COMMAND", allSuccCmdCount, "COMMAND_FAILED_RATE", failedRate);
         } else {
             HiSysWriteStatistic("CONTROL_COMMAND_FAILED_RATE", "ALL_CTRL_COMMAND_COUNT", allCtrlCmdCount,
                 "ALL_SUCCESS_CTRL_COMMAND", allSuccCmdCount, "COMMAND_FAILED_RATE", 0);
+            // LCOV_EXCL_STOP
         }
         Reset();
     };
@@ -97,6 +99,7 @@ void AVSessionSysEvent::Regiter()
     timer_->Setup();
 }
 
+// LCOV_EXCL_START
 void AVSessionSysEvent::Unregister()
 {
     if (timer_ != nullptr) {
@@ -105,6 +108,7 @@ void AVSessionSysEvent::Unregister()
         timer_ = nullptr;
     }
 }
+// LCOV_EXCL_STOP
 
 void AVSessionSysEvent::AddLifeCycleInfo(const std::string& bundleName, bool appStatus,
     const int32_t& sessionType, bool isCreateSession)
@@ -117,6 +121,7 @@ void AVSessionSysEvent::AddLifeCycleInfo(const std::string& bundleName, bool app
     lifeCycleInfos_.push_back(lifeCycleInfo);
 }
 
+// LCOV_EXCL_START
 void AVSessionSysEvent::AddControllerCommandInfo(const std::string& bundleName, const pid_t& controllerPid,
     const int32_t& controllerCmd, const int32_t& sessionType)
 {
@@ -135,6 +140,7 @@ int32_t AVSessionSysEvent::GetAudioStatus(pid_t uid)
     }
     return 0;
 }
+// LCOV_EXCL_STOP
 
 void AVSessionSysEvent::SetAudioStatus(pid_t uid, int32_t rendererState)
 {

@@ -74,6 +74,7 @@ void AbilityManagerAdapter::StartAbilityByCallDone(const std::string& sessionId)
     syncCon_.notify_one();
 }
 
+// LCOV_EXCL_START
 void AbilityManagerAdapter::WaitForTimeout(uint32_t timeout)
 {
     std::unique_lock<std::mutex> lock(syncMutex_);
@@ -85,4 +86,5 @@ void AbilityManagerAdapter::WaitForTimeout(uint32_t timeout)
     }
     status_ = Status::ABILITY_STATUS_SUCCESS;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

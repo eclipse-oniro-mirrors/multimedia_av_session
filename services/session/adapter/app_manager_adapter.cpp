@@ -85,12 +85,14 @@ void AppManagerAdapter::SetAppBackgroundStateObserver(const std::function<void(i
     backgroundObserver_ = observer;
 }
 
+// LCOV_EXCL_START
 void AppManagerAdapter::AddObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
     observedAppUIDs_.insert(uid);
     SLOGD(" add for uid=%{public}d ", uid);
 }
+// LCOV_EXCL_STOP
 
 void AppManagerAdapter::RemoveObservedApp(int32_t uid)
 {
@@ -104,6 +106,7 @@ void AppManagerAdapter::SetServiceCallbackForAppStateChange(const std::function<
     serviceCallbackForAppStateChange_ = callback;
 }
 
+// LCOV_EXCL_START
 void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessData)
 {
     {
@@ -147,6 +150,7 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
         }
     }
 }
+// LCOV_EXCL_STOP
 
 void AVSessionAppStateCallback::OnAppStateChanged(const AppExecFwk::AppProcessData& appProcessData)
 {

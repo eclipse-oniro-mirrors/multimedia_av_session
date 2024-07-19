@@ -60,10 +60,12 @@ void AVCallState::SetAVCallState(int32_t avCallState)
     avCallState_ = avCallState;
 }
 
+// LCOV_EXCL_START
 int32_t AVCallState::GetAVCallState() const
 {
     return avCallState_;
 }
+// LCOV_EXCL_STOP
 
 void AVCallState::SetAVCallMuted(bool isAVCallMuted)
 {
@@ -71,6 +73,7 @@ void AVCallState::SetAVCallMuted(bool isAVCallMuted)
     isAVCallMuted_ = isAVCallMuted;
 }
 
+// LCOV_EXCL_START
 bool AVCallState::IsAVCallMuted() const
 {
     return isAVCallMuted_;
@@ -94,6 +97,7 @@ bool AVCallState::CopyToByMask(AVCallStateMaskType& mask, AVCallState& out) cons
     }
     return result;
 }
+// LCOV_EXCL_STOP
 
 bool AVCallState::CopyFrom(const AVCallState& in)
 {

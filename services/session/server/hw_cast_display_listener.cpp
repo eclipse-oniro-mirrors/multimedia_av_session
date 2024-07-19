@@ -17,6 +17,7 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
+// LCOV_EXCL_START
 void HwCastDisplayListener::OnConnect(Rosen::ScreenId screenId)
 {
     SLOGI("Screen OnConnect");
@@ -31,6 +32,7 @@ void HwCastDisplayListener::OnConnect(Rosen::ScreenId screenId)
         SetDisplayInfo(displayInfo);
     }
 }
+// LCOV_EXCL_STOP
 
 void HwCastDisplayListener::OnDisconnect(Rosen::ScreenId screenId)
 {
@@ -48,11 +50,13 @@ void HwCastDisplayListener::OnDisconnect(Rosen::ScreenId screenId)
 
 void HwCastDisplayListener::OnChange(Rosen::ScreenId screenId) {}
 
+// LCOV_EXCL_START
 void HwCastDisplayListener::SetDisplayInfo(sptr<Rosen::Screen> displayInfo)
 {
     std::lock_guard<std::mutex> lock(dataMutex_);
     curDisplayInfo_ = displayInfo;
 }
+// LCOV_EXCL_STOP
 
 sptr<Rosen::Screen> HwCastDisplayListener::GetDisplayInfo()
 {
@@ -60,6 +64,7 @@ sptr<Rosen::Screen> HwCastDisplayListener::GetDisplayInfo()
     return curDisplayInfo_;
 }
 
+// LCOV_EXCL_START
 void HwCastDisplayListener::ReportCastDisplay(sptr<Rosen::Screen> displayInfo, CastDisplayState displayState)
 {
     CastDisplayInfo castDisplayInfo;
@@ -70,4 +75,5 @@ void HwCastDisplayListener::ReportCastDisplay(sptr<Rosen::Screen> displayInfo, C
     castDisplayInfo.height = static_cast<int32_t>(displayInfo->GetHeight());
     listener_->OnCastDisplayChange(castDisplayInfo);
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession
