@@ -205,8 +205,11 @@ void NapiAVControllerCallback::CallWithThreadSafe(napi_ref& method, std::shared_
     DataContextForThreadSafe* data =
         new DataContextForThreadSafe { method, state, isValid, std::move(getter), checkCallbackValid };
     if (threadSafeFunction != nullptr) {
-        SLOGD("do CallWithThreadSafe check threadSafeFunction alive");
+        SLOGD("do CallWithThreadSafe check threadSafeFunction alive and cache data");
         napi_call_threadsafe_function(threadSafeFunction, data, napi_tsfn_nonblocking);
+    } else {
+        SLOGE("do CallWithThreadSafe check threadSafeFunction with null");
+        delete data;
     }
     SLOGD("do CallWithThreadSafe with state %{public}d done", state);
 }

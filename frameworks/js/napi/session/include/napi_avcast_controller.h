@@ -38,6 +38,7 @@ public:
 
     using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVCastController*, napi_value, napi_value)>;
     using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVCastController*, napi_value)>;
+    static constexpr size_t TIME_OUT_SECOND = 5;
 
 private:
     static napi_value ConstructorCallback(napi_env env, napi_callback_info info);
