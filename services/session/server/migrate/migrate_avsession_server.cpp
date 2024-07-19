@@ -330,7 +330,6 @@ void MigrateAVSessionServer::DelaySendMetaData()
         AVMetaData resultMetaData;
         resultMetaData.Reset();
         avcontroller->GetAVMetaData(resultMetaData);
-        SLOGI("resultMetaData, title: %{public}s, errCode: %{public}d", resultMetaData.GetTitle().c_str());
         std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
             SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, resultMetaData);
         SendByte(deviceId_, metaDataStr);
