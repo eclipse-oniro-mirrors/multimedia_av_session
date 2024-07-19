@@ -22,7 +22,7 @@ using namespace OHOS::Media;
 namespace OHOS::AVSession {
 namespace {
     constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 1 * 1024 * 1024;
-    constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 800 * 1024;
+    constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 500 * 1024; // ipc max 1m at the same time
     constexpr uint8_t IMAGE_BYTE_SIZE = 2;
     constexpr uint8_t DATA_BYTE_SIZE = 4;
     constexpr uint8_t OFFSET_BYTE = 8;
@@ -146,7 +146,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     imgBuffer.insert(imgBuffer.begin() + imgBuffer.size(), pixelMapTemp->GetPixels(),
         pixelMapTemp->GetPixels() + pixelDataSize);
     innerPixelMap->SetInnerImgBuffer(imgBuffer);
-    SLOGI("ConvertToInner pixelmap out and clear buffer");
+    SLOGD("ConvertToInner pixelmap out and clear buffer");
     imgBuffer.clear();
     free(dataAddr);
     return innerPixelMap;
@@ -170,11 +170,12 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
     bool res = CopyPixMapToDst(*pixelMap, dataAddr, dataSize);
     pixelMapTemp->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
     if (originalPixelMapBytes_ > LIMITED_PIXEL_BUFFER_SIZE) {
-        SLOGI("imgBufferSize greater than limited");
+        int32_t originSize = originalPixelMapBytes_;
         float scaleRatio =
-            static_cast<float>(LIMITED_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_);
+            sqrt(static_cast<float>(LIMITED_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_));
         pixelMapTemp->scale(scaleRatio, scaleRatio);
         originalPixelMapBytes_ = pixelMapTemp->GetByteCount();
+        SLOGI("imgBufferSize exceeds limited: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
     }
     SLOGD("CopyPixMapToDst res with size: %{public}d, %{public}d", res, originalPixelMapBytes_);
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
@@ -198,7 +199,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
     imgBuffer.insert(imgBuffer.begin() + imgBuffer.size(), pixelMapTemp->GetPixels(),
         pixelMapTemp->GetPixels() + pixelDataSize);
     innerPixelMap->SetInnerImgBuffer(imgBuffer);
-    SLOGI("ConvertToInnerWithLimitedSize pixelmap out and clear buffer");
+    SLOGD("ConvertToInnerWithLimitedSize pixelmap out and clear buffer");
     imgBuffer.clear();
     free(dataAddr);
     return innerPixelMap;

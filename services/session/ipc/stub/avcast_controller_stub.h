@@ -108,6 +108,7 @@ private:
         {CAST_CONTROLLER_CMD_ADD_AVAILABLE_COMMAND, "HandleAddAvailableCommand"},
         {CAST_CONTROLLER_CMD_REMOVE_AVAILABLE_COMMAND, "HandleRemoveAvailableCommand"}
     };
+    const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_STUB_H

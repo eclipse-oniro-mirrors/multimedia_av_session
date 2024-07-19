@@ -217,6 +217,7 @@ private:
     };
 
     int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+    const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
 };
 }
 #endif // OHOS_AVSESSION_STUB_H

@@ -132,6 +132,7 @@ int32_t AVCastControllerStub::HandleGetCurrentItem(MessageParcel& data, MessageP
 {
     AVQueueItem currentItem;
     int32_t ret = GetCurrentItem(currentItem);
+    reply.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteParcelable(&currentItem), ERR_NONE, "Write currentItem failed");

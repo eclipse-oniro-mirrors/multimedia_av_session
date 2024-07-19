@@ -231,6 +231,7 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
+    data.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
@@ -283,6 +284,7 @@ int32_t AVSessionProxy::GetAVMetaData(AVMetaData& meta)
                              ERR_MARSHALLING, "write interface token failed");
     MessageParcel reply;
     MessageOption option;
+    reply.SetMaxCapacity(defaultIpcCapacity);
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_META_DATA, data, reply, option) == 0,
