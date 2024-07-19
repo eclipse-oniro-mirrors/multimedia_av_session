@@ -28,7 +28,7 @@
 #include "avsession_pixel_map_adapter.h"
 #include "pixel_map.h"
 #include "image_packer.h"
-#include "avsession_event_handler.h
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
 void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
@@ -272,7 +272,7 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
         topSessionId_ = descriptor.sessionId_;
         auto it = playerIdToControllerMap_.find(descriptor.sessionId_);
         if (it == playerIdToControllerMap_.end()) {
-            CreateController(descriptor.sessionId_)
+            CreateController(descriptor.sessionId_);
         }
     }
     SendRemoteControllerList(deviceId_);
