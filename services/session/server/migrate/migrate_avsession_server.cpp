@@ -28,6 +28,7 @@
 #include "avsession_pixel_map_adapter.h"
 #include "pixel_map.h"
 #include "image_packer.h"
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
 void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
@@ -269,9 +270,12 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
             return;
         }
         topSessionId_ = descriptor.sessionId_;
+        auto it = playerIdToControllerMap_.find(descriptor.sessionId_);
+        if (it == playerIdToControllerMap_.end()) {
+            CreateController(descriptor.sessionId_);
+        }
     }
     SendRemoteControllerList(deviceId_);
-    SendByte(deviceId_, pendingMetadata_);
 }
 
 void MigrateAVSessionServer::SortControllers(std::list<sptr<AVControllerItem>> controllers)
@@ -312,6 +316,23 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
         SendByte(deviceId, msg);
     } else {
         SendByteToAll(msg);
+    }
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+        DelaySendMetaData();
+        }, "DelaySendMetaData", DELAY_TIME);
+}
+
+void MigrateAVSessionServer::DelaySendMetaData()
+{
+    sptr<AVControllerItem> avcontroller{nullptr};
+    GetControllerById(topSessionId_, avcontroller);
+    if (avcontroller != nullptr) {
+        AVMetaData resultMetaData;
+        resultMetaData.Reset();
+        avcontroller->GetAVMetaData(resultMetaData);
+        std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
+            SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, resultMetaData);
+        SendByte(deviceId_, metaDataStr);
     }
 }
 
@@ -585,7 +606,6 @@ void MigrateAVSessionServer::PlaybackCommandDataProc(int mediaCommand, const std
 void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, const AVMetaData &data)
 {
     std::string metaDataStr = ConvertMetadataInfoToStr(playerId, SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, data);
-    pendingMetadata_ = metaDataStr;
     SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s", metaDataStr.c_str());
 
     SendByte(deviceId_, metaDataStr);
