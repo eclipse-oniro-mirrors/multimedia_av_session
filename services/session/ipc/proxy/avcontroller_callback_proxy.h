@@ -56,6 +56,7 @@ private:
     std::mutex onMetadataChangeLock_;
     std::mutex onPlaybackChangeLock_;
     std::mutex onValidCommandChangeLock_;
+    const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_CALLBACK_PROXY_H

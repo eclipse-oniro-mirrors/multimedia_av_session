@@ -41,10 +41,6 @@
 #endif
 namespace OHOS::AVSession {
 
-namespace {
-    constexpr int HTTP_ERROR_CODE = 400;
-}
-
 static __thread napi_ref AVSessionConstructorRef = nullptr;
 std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventHandlers_ = {
     { "play", OnPlay },
@@ -417,75 +413,16 @@ napi_value NapiAVSession::SetAVCallState(napi_env env, napi_callback_info info)
     return NapiAsyncWork::Enqueue(env, context, "SetAVCallState", executor, complete);
 }
 
-size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer)
-{
-    size_t realsize = size * nmemb;
-    imgBuffer->reserve(realsize + imgBuffer->capacity());
-    for (size_t i = 0; i < realsize; i++) {
-        imgBuffer->push_back(ptr[i]);
-    }
-    return realsize;
-}
-
-int32_t CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri)
-{
-    CURL *easyHandle_ = curl_easy_init();
-    if (easyHandle_) {
-        // set request options
-        curl_easy_setopt(easyHandle_, CURLOPT_URL, uri.c_str());
-        curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, NapiAVSession::TIME_OUT_SECOND);
-        curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
-        curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, "/etc/ssl/certs/" "cacert.pem");
-        curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
-        curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, &imgBuffer);
-        CURLcode res = curl_easy_perform(easyHandle_);
-        if (res != CURLE_OK) {
-            SLOGI("DoDownload curl easy_perform failure: %{public}s\n", curl_easy_strerror(res));
-            curl_easy_cleanup(easyHandle_);
-            return AVSESSION_ERROR;
-        } else {
-            int64_t httpCode = 0;
-            curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
-            SLOGI("DoDownload Http result " "%{public}" PRId64, httpCode);
-            CHECK_AND_RETURN_RET_LOG(httpCode < HTTP_ERROR_CODE, AVSESSION_ERROR, "recv Http ERROR for DoDownload");
-        }
-        curl_easy_cleanup(easyHandle_);
-        easyHandle_ = nullptr;
-        return AVSESSION_SUCCESS;
-    }
-    return AVSESSION_ERROR;
-}
-
 int32_t DoDownload(AVMetaData& meta, const std::string uri)
 {
-    SLOGI("DoDownload with both uri %{public}s, title %{public}s, assetid %{public}s",
+    SLOGI("DoDownload with uri %{public}s, title %{public}s, assetid %{public}s",
         uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
 
-    std::vector<std::uint8_t> imgBuffer(0);
-    if (CurlSetRequestOptions(imgBuffer, uri) == AVSESSION_SUCCESS) {
-        std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), sizeof(uint8_t));
-        if (buffer == nullptr) {
-            SLOGE("buffer malloc fail");
-            free(buffer);
-            return AVSESSION_ERROR;
-        }
-        std::copy(imgBuffer.begin(), imgBuffer.end(), buffer);
-        uint32_t errorCode = 0;
-        Media::SourceOptions opts;
-        auto imageSource = Media::ImageSource::CreateImageSource(buffer, imgBuffer.size(), opts, errorCode);
-        free(buffer);
-        if (errorCode || !imageSource) {
-            SLOGE("DoDownload create imageSource failed");
-            return AVSESSION_ERROR;
-        }
-        Media::DecodeOptions decodeOpts;
-        std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
-        if (errorCode || !pixelMap) {
-            SLOGE("DoDownload create pixelMap failed");
-            return AVSESSION_ERROR;
-        }
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);
+    SLOGI("DoDownload with ret %{public}d, %{public}d", static_cast<int>(ret), static_cast<int>(pixelMap == nullptr));
+    if (ret && pixelMap != nullptr) {
+        SLOGI("DoDownload success");
         meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
         meta.SetSmallMediaImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
         return AVSESSION_SUCCESS;

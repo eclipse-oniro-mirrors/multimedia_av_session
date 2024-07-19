@@ -16,6 +16,8 @@
 #ifndef NAPI_UTILS_H
 #define NAPI_UTILS_H
 
+#include <chrono>
+
 #include <cstdint>
 #include <map>
 #include <list>
@@ -262,6 +264,10 @@ public:
     static napi_status GetChannelMasks(napi_env env, napi_value in, int32_t& out);
     static napi_status SetOutPutDeviceIdValue(napi_env env, const std::vector<std::string>& in, napi_value& out);
 
+    static size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer);
+    static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri);
+    static bool DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri);
+
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
 
     static napi_status ThrowError(napi_env env, const char* napiMessage, int32_t napiCode);
@@ -273,6 +279,8 @@ public:
     static constexpr size_t ARGV_FIRST = 0;
     static constexpr size_t ARGV_SECOND = 1;
     static constexpr size_t ARGV_THIRD = 2;
+    static constexpr size_t TIME_OUT_SECOND = 5;
+    static constexpr int HTTP_ERROR_CODE = 400;
 };
 }
 #endif // NAPI_UTILS_H

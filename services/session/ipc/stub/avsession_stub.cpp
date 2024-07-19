@@ -208,6 +208,7 @@ int32_t AVSessionStub::HandleSetLaunchAbility(MessageParcel& data, MessageParcel
 int32_t AVSessionStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
     AVMetaData avMetaData;
+    reply.SetMaxCapacity(defaultIpcCapacity);
     int32_t ret = GetAVMetaData(avMetaData);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");

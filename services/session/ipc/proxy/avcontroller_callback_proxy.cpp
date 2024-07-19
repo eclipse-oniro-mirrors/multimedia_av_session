@@ -123,6 +123,7 @@ int32_t AVControllerCallbackProxy::GetPixelMapBuffer(AVMetaData& metaData, Messa
         buffer[j] = avQueueImageBuffer[k];
     }
 
+    parcel.SetMaxCapacity(defaultIpcCapacity);
     if (!parcel.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(parcel, metaData)) {
         SLOGE("fail to write image length & metadata except img");
         delete[] buffer;
@@ -164,6 +165,7 @@ void AVControllerCallbackProxy::OnMetaDataChange(const AVMetaData& data)
         return;
     }
 
+    parcel.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_LOG(remote->SendRequest(CONTROLLER_CMD_ON_METADATA_CHANGE, parcel, reply, option) == 0,
         "send request failed");
 }
