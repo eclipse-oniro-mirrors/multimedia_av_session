@@ -273,9 +273,10 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
         auto it = playerIdToControllerMap_.find(descriptor.sessionId_);
         if (it == playerIdToControllerMap_.end()) {
             CreateController(descriptor.sessionId_)
+        }
     }
     SendRemoteControllerList(deviceId_);
-    SendByte(deviceId_, pendingMetadata_);
+
 }
 
 void MigrateAVSessionServer::SortControllers(std::list<sptr<AVControllerItem>> controllers)
@@ -331,7 +332,8 @@ void MigrateAVSessionServer::DelaySendMetaData()
         resultMetaData.Reset();
         avcontroller->GetAVMetaData(resultMetaData);
         SLOGI("resultMetaData, title: %{public}s, errCode: %{public}d", resultMetaData.GetTitle().c_str());
-        std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_, SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, resultMetaData);
+        std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
+            SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, resultMetaData);
         SendByte(deviceId_, metaDataStr);
     }
 }
