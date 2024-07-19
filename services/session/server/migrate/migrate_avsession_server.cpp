@@ -600,7 +600,6 @@ void MigrateAVSessionServer::PlaybackCommandDataProc(int mediaCommand, const std
 void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, const AVMetaData &data)
 {
     std::string metaDataStr = ConvertMetadataInfoToStr(playerId, SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, data);
-    pendingMetadata_ = metaDataStr;
     SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s", metaDataStr.c_str());
 
     SendByte(deviceId_, metaDataStr);
