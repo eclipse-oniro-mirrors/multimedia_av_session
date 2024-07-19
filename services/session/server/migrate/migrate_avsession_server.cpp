@@ -276,7 +276,6 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
         }
     }
     SendRemoteControllerList(deviceId_);
-
 }
 
 void MigrateAVSessionServer::SortControllers(std::list<sptr<AVControllerItem>> controllers)
