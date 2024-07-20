@@ -24,6 +24,7 @@
 namespace OHOS::AVSession {
 using namespace Security::AccessToken;
 using AppExecFwk::BundleMgrClient;
+
 PermissionChecker& PermissionChecker::GetInstance()
 {
     static PermissionChecker permissionChecker;
@@ -36,14 +37,8 @@ bool PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessToken
         return true;
     }
 
-    if (AccessTokenKit::GetTokenTypeFlag(tokenId) == TOKEN_SHELL) {
-        return true;
-    }
-
-    uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
-    bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
-    if (!isSystemApp) {
-        SLOGE("Not system app, permission reject");
+    if (!IsSystemApp()) {
+        SLOGE("Check system permission failed, is not a system app");
         return false;
     }
 
@@ -51,10 +46,39 @@ bool PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessToken
     return true;
 }
 
-bool PermissionChecker::CheckSystemPermission()
+bool PermissionChecker::CheckPermission(int32_t checkPermissionType)
 {
-    AccessTokenID callerToken = OHOS::IPCSkeleton::GetCallingTokenID();
-    return CheckSystemPermission(callerToken);
+    Security::AccessToken::AccessTokenID callerToken = OHOS::IPCSkeleton::GetCallingTokenID();
+    if (AccessTokenKit::GetTokenTypeFlag(callerToken) == TOKEN_SHELL) {
+        return true;
+    }
+    switch (checkPermissionType) {
+        case CHECK_SYSTEM_PERMISSION:
+            return CheckSystemPermission(callerToken);
+        case CHECK_MEDIA_RESOURCES_PERMISSION:
+            return CheckMediaResourcePermission(callerToken, std::string(MANAGE_MEDIA_RESOURCES)) &&
+                CheckSystemPermission(callerToken);
+        default:
+            return false;
+    }
+}
+
+bool PermissionChecker::CheckMediaResourcePermission(
+    Security::AccessToken::AccessTokenID callerToken, std::string permissionName)
+{
+    const std::string &permission = permissionName;
+    int32_t ret = AccessTokenKit::VerifyAccessToken(callerToken, permission);
+    if (ret == PermissionState::PERMISSION_DENIED) {
+        SLOGE("Check media resources permission failed.");
+        return false;
+    }
+    return true;
+}
+
+bool PermissionChecker::IsSystemApp()
+{
+    uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    return TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
 }
 
 bool PermissionChecker::CheckSystemPermissionByUid(int uid)

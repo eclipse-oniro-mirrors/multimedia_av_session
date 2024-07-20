@@ -90,11 +90,11 @@ bool AVRouterImpl::Release()
 
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("StartCastDiscovery: CheckSystemPermission failed");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("StartCastDiscovery: CheckPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
                             "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
-                            "avsessionservice StartCastDiscovery checksystempermission failed");
+                            "avsessionservice StartCastDiscovery checkPermission failed");
         return ERR_NO_PERMISSION;
     }
     SLOGI("AVRouterImpl StartCastDiscovery");
@@ -111,11 +111,11 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
 
 int32_t AVRouterImpl::StopCastDiscovery()
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("StopCastDiscovery: CheckSystemPermission failed");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("StopCastDiscovery: CheckPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
                             "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
-                            "avsessionservice StopCastDiscovery checksystempermission failed");
+                            "avsessionservice StopCastDiscovery checkPermission failed");
         return ERR_NO_PERMISSION;
     }
     SLOGI("AVRouterImpl StopCastDiscovery");
@@ -132,11 +132,11 @@ int32_t AVRouterImpl::StopCastDiscovery()
 
 int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 {
-    if (!PermissionChecker::GetInstance().CheckSystemPermission()) {
-        SLOGE("SetDiscoverable: CheckSystemPermission failed");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("SetDiscoverable: CheckPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
                             "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
-                            "avsessionservice SetDiscoverable checksystempermission failed");
+                            "avsessionservice SetDiscoverable checkPermission failed");
         return ERR_NO_PERMISSION;
     }
     SLOGI("AVRouterImpl SetDiscoverable %{public}d", enable);
