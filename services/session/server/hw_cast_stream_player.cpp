@@ -175,7 +175,8 @@ int32_t HwCastStreamPlayer::RefreshCurrentAVQueueItem(const AVQueueItem& avQueue
 {
     std::shared_ptr<AVMediaDescription> originMediaDescription = currentAVQueueItem_.GetDescription();
     std::shared_ptr<AVMediaDescription> newMediaDescription = avQueueItem.GetDescription();
-    if (originMediaDescription->GetIcon() != nullptr && newMediaDescription->GetIcon() == nullptr) {
+    if (originMediaDescription != nullptr &&
+        originMediaDescription->GetIcon() != nullptr && newMediaDescription->GetIcon() == nullptr) {
         SLOGI("RefreshCurrentAVQueueItem with icon refresh");
         newMediaDescription->SetIcon(originMediaDescription->GetIcon());
     }
@@ -524,7 +525,8 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetIconUri(mediaInfo.appIconUrl);
     mediaDescription->SetAppName(mediaInfo.appName);
     std::shared_ptr<AVMediaDescription> originMediaDescription = currentAVQueueItem_.GetDescription();
-    if (originMediaDescription->GetIcon() != nullptr) {
+    if (originMediaDescription != nullptr && originMediaDescription->GetIcon() != nullptr
+        && mediaInfo.mediaId == originMediaDescription->GetMediaId()) {
         SLOGI("mediaItemChanged with origin icon set");
         mediaDescription->SetIcon(originMediaDescription->GetIcon());
     }
