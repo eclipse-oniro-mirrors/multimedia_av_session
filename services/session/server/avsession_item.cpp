@@ -550,6 +550,11 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     SLOGD("AddSupportCommand=%{public}d", cmd);
+    if (cmd == AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT) {
+        SLOGI("enable media key event listen");
+        isMediaKeySupport = true;
+        return AVSESSION_SUCCESS;
+    }
     auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
     supportedCmd_.push_back(cmd);
@@ -580,6 +585,12 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
 {
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    SLOGD("DeleteSupportCommand=%{public}d", cmd);
+    if (cmd == AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT) {
+        SLOGI("disable media key event listen");
+        isMediaKeySupport = false;
+        return AVSESSION_SUCCESS;
+    }
     auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     supportedCmd_.erase(iter, supportedCmd_.end());
     ProcessFrontSession("DeleteSupportCommand");
@@ -1164,6 +1175,11 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
+    if (!isMediaKeySupport) {
+        SLOGI("auto set controller command for %{public}d", static_cast<int>(keyEvent.GetKeyCode()));
+        AVControlCommand cmd;
+        keyEventCaller_[keyEvent.GetKeyCode()](cmd);
+    }
     callback_->OnMediaKeyEvent(keyEvent);
 }
 
@@ -1259,6 +1275,16 @@ void AVSessionItem::HandleOnPause(const AVControlCommand& cmd)
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPause();
+}
+
+void AVSessionItem::HandleOnPlayOrPause(const AVControlCommand& cmd)
+{
+    std::lock_guard lockGuard(metaDataLock_);
+    if (playbackState_.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+        HandleOnPause(cmd);
+    } else {
+        HandleOnPlay(cmd);
+    }
 }
 
 void AVSessionItem::HandleOnStop(const AVControlCommand& cmd)

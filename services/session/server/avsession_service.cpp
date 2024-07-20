@@ -1737,7 +1737,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
             "ERROR_MSG", "avsessionservice sendsystemavkeyevent checksystempermission failed");
         return ERR_NO_PERMISSION;
     }
-    SLOGI("key=%{public}d", keyEvent.GetKeyCode());
+    SLOGI("SendSystemAVKeyEvent get key=%{public}d", keyEvent.GetKeyCode());
     if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK) {
         pressCount_++;
         SLOGI("isFirstPress_=%{public}d", isFirstPress_);
