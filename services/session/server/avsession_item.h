@@ -255,6 +255,7 @@ private:
     void HandleOnAVCallToggleCallMute(const AVControlCommand& cmd);
     void HandleOnPlay(const AVControlCommand& cmd);
     void HandleOnPause(const AVControlCommand& cmd);
+    void HandleOnPlayOrPause(const AVControlCommand& cmd);
     void HandleOnStop(const AVControlCommand& cmd);
     void HandleOnPlayNext(const AVControlCommand& cmd);
     void HandleOnPlayPrevious(const AVControlCommand& cmd);
@@ -308,6 +309,15 @@ private:
             [this](const AVControlCommand& cmd) { HandleOnAVCallToggleCallMute(cmd); }}
     };
 
+    std::map<int32_t, HandlerFuncType> keyEventCaller_ = {
+        {MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE, [this](const AVControlCommand& cmd) { HandleOnPlayOrPause(cmd); }},
+        {MMI::KeyEvent::KEYCODE_MEDIA_STOP, [this](const AVControlCommand& cmd) { HandleOnPause(cmd); }},
+        {MMI::KeyEvent::KEYCODE_MEDIA_NEXT, [this](const AVControlCommand& cmd) { HandleOnPlayNext(cmd); }},
+        {MMI::KeyEvent::KEYCODE_MEDIA_PREVIOUS, [this](const AVControlCommand& cmd) { HandleOnPlayPrevious(cmd); }},
+        {MMI::KeyEvent::KEYCODE_MEDIA_REWIND, [this](const AVControlCommand& cmd) { HandleOnRewind(cmd); }},
+        {MMI::KeyEvent::KEYCODE_MEDIA_FAST_FORWARD, [this](const AVControlCommand& cmd) { HandleOnFastForward(cmd); }}
+    };
+
     std::recursive_mutex controllersLock_;
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
     AVCallMetaData avCallMetaData_;
@@ -340,6 +350,7 @@ private:
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(sptr<AVSessionItem>&, bool)> serviceCallbackForUpdateSession_;
     volatile bool isFirstAddToFront_ = true;
+    bool isMediaKeySupport = false;
 
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
