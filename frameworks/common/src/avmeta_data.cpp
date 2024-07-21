@@ -611,7 +611,7 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
     }
 
     if (metaIn.assetId_ != assetId_) {
-        SLOGD("assetId not equal");
+        SLOGE("assetId not equal here");
         *this = metaIn;
         return true;
     }

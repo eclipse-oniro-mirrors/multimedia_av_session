@@ -378,11 +378,14 @@ int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand& cmd
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&cmd), ERR_MARSHALLING, "write cmd failed");
 
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    SLOGI("check destroy bef get remote");
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    std::lock_guard lockGuard(controllerProxyLock_);
+
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_CONTROL_COMMAND, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -535,11 +538,13 @@ int32_t AVSessionControllerProxy::Destroy()
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
+    std::lock_guard lockGuard(controllerProxyLock_);
+    SLOGI("check lock bef destroy in");
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    std::lock_guard lockGuard(controllerProxyLock_);
+
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_DESTROY, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     isDestroy_ = true;

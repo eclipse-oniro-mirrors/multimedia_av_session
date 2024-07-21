@@ -232,9 +232,23 @@ void AVSessionItem::HandleFrontSession()
 
 bool AVSessionItem::HasAvQueueInfo()
 {
-    return !metaData_.GetAVQueueName().empty() && !metaData_.GetAVQueueId().empty() &&
-        (metaData_.GetAVQueueImage() != nullptr || !metaData_.GetAVQueueImageUri().empty()) &&
-        playbackState_.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY;
+    if (metaData_.GetAVQueueName().empty()) {
+        SLOGD("no avqueueinfo as avqueuename empty");
+        return false;
+    }
+    if (metaData_.GetAVQueueId().empty()) {
+        SLOGD("no avqueueinfo as avqueueid empty");
+        return false;
+    }
+    if (metaData_.GetAVQueueImage() == nullptr && metaData_.GetAVQueueImageUri().empty()) {
+        SLOGD("no avqueueinfo as avqueueimg empty");
+        return false;
+    }
+    if (playbackState_.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY) {
+        SLOGD("no avqueueinfo as not play");
+        return false;
+    }
+    return true;
 }
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
