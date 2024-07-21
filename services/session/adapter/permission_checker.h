@@ -18,19 +18,27 @@
 #include "access_token.h"
 
 namespace OHOS::AVSession {
+
 class PermissionChecker {
 public:
+    static const int32_t CHECK_SYSTEM_PERMISSION = 0;
+    static const int32_t CHECK_MEDIA_RESOURCES_PERMISSION = 1;
+
     static PermissionChecker& GetInstance();
 
     bool CheckSystemPermission(Security::AccessToken::AccessTokenID tokenId);
 
-    bool CheckSystemPermission();
+    bool CheckPermission(int32_t checkPermissionType);
 
     static bool CheckSystemPermissionByUid(int uid);
 
 private:
     static constexpr const char* MANAGE_MEDIA_RESOURCES = "ohos.permission.MANAGE_MEDIA_RESOURCES";
     static constexpr int UID_TRANSFORM_DIVISOR = 200000;
+
+    bool IsSystemApp();
+    bool CheckMediaResourcePermission(
+        Security::AccessToken::AccessTokenID callerToken, std::string permissionName);
 };
 } // namespace OHOS::AVSession
 #endif // PERMISSION_CHECKER_H

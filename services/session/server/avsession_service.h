@@ -398,6 +398,8 @@ private:
 
     void HandleSystemKeyColdStart(const AVControlCommand &command);
 
+    int32_t HandleSystemAVKeyEvent(const MMI::KeyEvent& keyEvent);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
