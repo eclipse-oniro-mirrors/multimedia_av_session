@@ -1334,6 +1334,8 @@ napi_status NapiAVSession::OnToggleFavorite(napi_env env, NapiAVSession* napiSes
 
 napi_status NapiAVSession::OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT);
+    SLOGI("add media key event listen ret %{public}d", static_cast<int>(ret));
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_MEDIA_KEY_EVENT, callback);
@@ -1558,7 +1560,13 @@ napi_status NapiAVSession::OffMediaKeyEvent(napi_env env, NapiAVSession* napiSes
 {
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
-    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_MEDIA_KEY_EVENT, callback);
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_MEDIA_KEY_EVENT, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+    if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_MEDIA_KEY_EVENT)) {
+        int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
+    }
+    return napi_ok;
 }
 
 napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
