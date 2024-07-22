@@ -124,7 +124,6 @@ ohos_shared_library("avcastpickerparam") {
   } else {
     deps = [ ":avpickerparam_abc" ]
   }
-
   defines = []
   if (use_mingw_win) {
     defines += [ "WINDOWS_PLATFORM" ]

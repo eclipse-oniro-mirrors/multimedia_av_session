@@ -75,6 +75,10 @@ private:
 
     static void ErrCodeToMessage(int32_t errCode, const std::string& tag, std::string& message);
 
+    static napi_status ProcessCastDiscoveryParams(
+        napi_env env, size_t argc, napi_value* argv,
+        int32_t& castDeviceCapability, std::vector<std::string>& drmSchemes);
+
     static void ReportStartCastDiscoveryFailInfo(std::string func, int32_t error);
 
     static void ReportStopCastDiscoveryFailInfo(std::string func, int32_t error);
@@ -90,10 +94,6 @@ private:
     static void CheckStartCastReportRadar(bool condition, int32_t error);
 
     static void CheckStopCastReportRadar(bool condition, int32_t error);
-
-    static napi_status ProcessCastDiscoveryParams(
-        napi_env env, size_t argc, napi_value* argv,
-        int32_t& castDeviceCapability, std::vector<std::string>& drmSchemes);
 
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> eventHandlers_;
 

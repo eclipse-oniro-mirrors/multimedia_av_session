@@ -439,7 +439,7 @@ export class AVCastPicker extends ViewPU {
                     let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
                     let b21 = !w && (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
                         this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
-                    if (this.onStateChange != null  && b21) {
+                    if (this.onStateChange != null && b21) {
                         if (parseInt(JSON.stringify(l8.state)) === AVCastPickerState.STATE_APPEARING) {
                             this.onStateChange(AVCastPickerState.STATE_APPEARING);
                         }

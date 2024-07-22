@@ -251,14 +251,14 @@ napi_value NapiAVSessionManager::GetHistoricalAVQueueInfos(napi_env env, napi_ca
     auto context = std::make_shared<ConcreteContext>();
 
     auto input = [env, context](size_t argc, napi_value* argv) {
-        if (argc == ARGC_TWO && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
+        if (argc == ARGC_TWO && (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
             && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)
             && !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_undefined)
-            && !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null)) {
+            && !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null))) {
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->maxSize_);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, " get avqueueinfo invalid maxSize",
                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-            
+
             context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->maxAppSize_);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, " get avqueueinfo invalid maxAppSize",
                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -294,15 +294,15 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
 {
     struct ConcreteContext : public ContextBase {
         std::string bundleName_ {};
-        std::string assetId_ ;
+        std::string assetId_ {};
     };
     auto context = std::make_shared<ConcreteContext>();
 
     auto input = [env, context](size_t argc, napi_value* argv) {
-        if (argc == ARGC_TWO && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
+        if (argc == ARGC_TWO && (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
             && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)
             && !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_undefined)
-            && !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null)) {
+            && !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null))) {
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->bundleName_);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->bundleName_.empty(),
               " StartAVPlayback invalid bundlename", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
