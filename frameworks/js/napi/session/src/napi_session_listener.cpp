@@ -155,7 +155,6 @@ napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_v
     }
     callbacks_[event].push_back(ref);
     SLOGI("add callback %{public}d", static_cast<int32_t>(event));
-
     return napi_ok;
 }
 

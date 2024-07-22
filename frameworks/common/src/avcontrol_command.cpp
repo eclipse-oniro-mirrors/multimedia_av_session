@@ -148,7 +148,7 @@ int32_t AVControlCommand::GetSpeed(double& speed) const
 int32_t AVControlCommand::SetForwardTime(int64_t forwardTime)
 {
     SLOGD("SetForwardTime with time %{public}jd", static_cast<int64_t>(forwardTime));
-    if (forwardTime < 0) {
+    if (forwardTime <= 0) {
         SLOGE("SetForwardTime error");
         return ERR_INVALID_PARAM;
     }

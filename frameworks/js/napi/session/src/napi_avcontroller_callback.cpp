@@ -129,7 +129,6 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const std::string& fir
     }
 }
 
-
 template<typename T>
 void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam)
 {

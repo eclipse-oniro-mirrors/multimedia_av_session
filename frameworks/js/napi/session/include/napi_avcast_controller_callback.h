@@ -17,12 +17,12 @@
 #define OHOS_NAPI_AVCAST_CONTROLLER_CALLBACK_H
 
 #include <list>
-#include "errors.h"
+#include "avsession_info.h"
+#include "avsession_log.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "napi_async_callback.h"
-#include "avsession_info.h"
-#include "avsession_log.h"
+#include "errors.h"
 
 namespace OHOS::AVSession {
 using MSErrCode = ErrCode;
