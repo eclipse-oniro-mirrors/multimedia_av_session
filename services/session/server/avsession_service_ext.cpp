@@ -38,25 +38,27 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         AddInnerSessionListener(migrateAVSession_.get());
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    castServiceNameMapState_[serviceName] = state;
-    isSupportMirrorToStream_ = false;
-    castDeviceId_ = "0";
-    castDeviceName_ = " ";
-    castDeviceType_ = 0;
-    std::string info;
-    std::string::size_type beginPos = 0;
-    std::string::size_type endPos = extraInfo.find(seperator);
-    while (endPos != std::string::npos) {
-        info = extraInfo.substr(beginPos, endPos - beginPos);
-        beginPos = endPos + seperator.size();
-        endPos = extraInfo.find(seperator, beginPos);
-        SplitExtraInfo(info);
+    if (serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") {
+        castServiceNameMapState_[serviceName] = state;
+        isSupportMirrorToStream_ = false;
+        castDeviceId_ = "0";
+        castDeviceName_ = " ";
+        castDeviceType_ = 0;
+        std::string info;
+        std::string::size_type beginPos = 0;
+        std::string::size_type endPos = extraInfo.find(seperator);
+        while (endPos != std::string::npos) {
+            info = extraInfo.substr(beginPos, endPos - beginPos);
+            beginPos = endPos + seperator.size();
+            endPos = extraInfo.find(seperator, beginPos);
+            SplitExtraInfo(info);
+        }
+        if (beginPos != extraInfo.length()) {
+            info = extraInfo.substr(beginPos);
+            SplitExtraInfo(info);
+        }
+        NotifyMirrorToStreamCast();
     }
-    if (beginPos != extraInfo.length()) {
-        info = extraInfo.substr(beginPos);
-        SplitExtraInfo(info);
-    }
-    NotifyMirrorToStreamCast();
 #endif
 }
 
