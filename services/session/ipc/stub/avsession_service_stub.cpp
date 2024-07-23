@@ -26,6 +26,7 @@
 #include "parameters.h"
 #include "avsession_service_stub.h"
 #include "session_xcollie.h"
+#include "permission_checker.h"
 
 using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
@@ -75,6 +76,12 @@ int32_t AVSessionServiceStub::HandleCreateSessionInner(MessageParcel& data, Mess
 
 int32_t AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel& data, MessageParcel& reply)
 {
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
+        SLOGE("GetAllSessionDescriptors: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice getallsessiondescriptors checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     std::vector<AVSessionDescriptor> descriptors;
     int32_t ret = GetAllSessionDescriptors(descriptors);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -101,6 +108,12 @@ int32_t AVSessionServiceStub::HandleGetSessionDescriptorsById(MessageParcel& dat
 
 int32_t AVSessionServiceStub::HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply)
 {
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
+        SLOGE("GetHistoricalSessionDescriptors: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice GetHistoricalSessionDescriptors checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     std::vector<AVSessionDescriptor> descriptors;
     int32_t ret = GetHistoricalSessionDescriptors(data.ReadInt32(), descriptors);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -159,6 +172,12 @@ void AVSessionServiceStub::AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQu
 
 int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& data, MessageParcel& reply)
 {
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
+        SLOGE("GetHistoricalAVQueueInfos: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice GetHistoricalAVQueueInfos checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     std::vector<AVQueueInfo> avQueueInfos;
     auto maxSize = data.ReadInt32();
     auto maxAppSize = data.ReadInt32();
@@ -198,6 +217,12 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
 
 int32_t AVSessionServiceStub::HandleStartAVPlayback(MessageParcel& data, MessageParcel& reply)
 {
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
+        SLOGE("StartAVPlayback: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice StartAVPlayback checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     std::string bundleName = data.ReadString();
     std::string asserId = data.ReadString();
     int32_t ret = StartAVPlayback(bundleName, asserId);
@@ -272,6 +297,13 @@ int32_t AVSessionServiceStub::HandleSendSystemAVKeyEvent(MessageParcel& data, Me
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
+        SLOGE("SendSystemAVKeyEvent: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "KEY_CODE", keyEvent->GetKeyCode(), "KEY_ACTION", keyEvent->GetKeyAction(),
+            "ERROR_MSG", "avsessionservice sendsystemavkeyevent checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     if (!reply.WriteInt32(SendSystemAVKeyEvent(*keyEvent))) {
         SLOGI("reply write int32 failed");
     }
@@ -288,6 +320,13 @@ int32_t AVSessionServiceStub::HandleSendSystemControlCommand(MessageParcel& data
         HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "READ_PARCELABLE_FAILED",
             "ERROR_INFO", "handle send system control command read command failed");
         return ERR_NONE;
+    }
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
+        SLOGE("SendSystemControlCommand: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", GetCallingPid(), "CMD", command->GetCommand(),
+            "ERROR_MSG", "avsessionservice sendsystemcontrolcommand checkpermission failed");
+        return ERR_NO_PERMISSION;
     }
     if (!reply.WriteInt32(SendSystemControlCommand(*command))) {
         SLOGI("reply write int32 failed");
@@ -325,6 +364,12 @@ int32_t AVSessionServiceStub::HandleClose(MessageParcel& data, MessageParcel& re
 
 int32_t AVSessionServiceStub::HandleCastAudio(MessageParcel& data, MessageParcel& reply)
 {
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
+        SLOGE("CastAudio: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+                            "ERROR_MSG", "avsessionservice CastAudio checkmission failed");
+        return ERR_NO_PERMISSION;
+    }
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CastAudio");
     SLOGI("start");
     SessionToken token {};

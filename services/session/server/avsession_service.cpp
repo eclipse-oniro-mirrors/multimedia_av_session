@@ -1191,13 +1191,6 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
 
 int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
-        SLOGE("GetAllSessionDescriptors: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice getallsessiondescriptors checkpermission failed");
-        return ERR_NO_PERMISSION;
-    }
-
     std::lock_guard frontLockGuard(sessionFrontLock_);
     for (const auto& session : sessionListForFront_) {
         descriptors.push_back(session->GetDescriptor());
@@ -1270,13 +1263,6 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
 int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
                                                           std::vector<AVSessionDescriptor>& descriptors)
 {
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
-        SLOGE("GetHistoricalSessionDescriptors: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice GetHistoricalSessionDescriptors checkpermission failed");
-        return ERR_NO_PERMISSION;
-    }
-
     std::lock_guard lockGuard(sessionAndControllerLock_);
     std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
 
@@ -1299,13 +1285,6 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
 int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                                     std::vector<AVQueueInfo>& avQueueInfos)
 {
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
-        SLOGE("GetHistoricalAVQueueInfos: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice GetHistoricalAVQueueInfos checkpermission failed");
-        return ERR_NO_PERMISSION;
-    }
-
     std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
     std::string oldAVQueueInfoContent;
     std::vector<AVQueueInfo> tempAVQueueInfos;
@@ -1435,12 +1414,6 @@ void AVSessionService::DoMetadataImgClean(AVMetaData& data)
 
 int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
 {
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
-        SLOGE("StartAVPlayback: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "ERROR_MSG", "avsessionservice StartAVPlayback checkpermission failed");
-        return ERR_NO_PERMISSION;
-    }
     // get execute param
     AppExecFwk::InsightIntentExecuteParam executeParam;
     bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName, assetId, executeParam);
@@ -1767,13 +1740,6 @@ void AVSessionService::HandleEventHandlerCallBack()
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
-        SLOGE("SendSystemAVKeyEvent: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-            "KEY_CODE", keyEvent.GetKeyCode(), "KEY_ACTION", keyEvent.GetKeyAction(),
-            "ERROR_MSG", "avsessionservice sendsystemavkeyevent checkpermission failed");
-        return ERR_NO_PERMISSION;
-    }
     return HandleSystemAVKeyEvent(keyEvent);
 }
 
@@ -1836,13 +1802,6 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
 
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
-        SLOGE("SendSystemControlCommand: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-            "CALLER_PID", GetCallingPid(), "CMD", command.GetCommand(),
-            "ERROR_MSG", "avsessionservice sendsystemcontrolcommand checkpermission failed");
-        return ERR_NO_PERMISSION;
-    }
     {
         std::lock_guard lockGuard(sessionAndControllerLock_);
         SLOGI("SendSystemControlCommand with cmd:%{public}d, topSession alive:%{public}d",
@@ -2250,12 +2209,6 @@ int32_t AVSessionService::CastAudio(const SessionToken& token,
                                     const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors)
 {
     SLOGI("sessionId is %{public}s", AVSessionUtils::GetAnonySessionId(token.sessionId).c_str());
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION)) {
-        SLOGE("CastAudio: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
-                            "ERROR_MSG", "avsessionservice CastAudio checkmission failed");
-        return ERR_NO_PERMISSION;
-    }
 
     std::string sourceSessionInfo;
     int32_t ret = SetBasicInfo(sourceSessionInfo);
