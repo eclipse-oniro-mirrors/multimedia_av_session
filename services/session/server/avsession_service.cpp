@@ -88,11 +88,6 @@ static const std::string MEMMGR_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
-#ifdef BLUETOOTH_ENABLE
-static std::shared_ptr<DetectBluetoothHostObserver> g_bluetoothObserver =
-    std::make_shared<DetectBluetoothHostObserver>();
-#endif
-
 class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
     void OnConnected() {}
     void OnDisconnected() {}
@@ -146,6 +141,8 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
 
+    SLOGI("SubscribeCommonEvent result=%{public}d", SubscribeCommonEvent());
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
@@ -182,6 +179,86 @@ void AVSessionService::OnStop()
     dlclose(migrateStubFuncHandle_);
     CommandSendLimit::GetInstance().StopTimer();
     NotifyProcessStatus(false);
+    SLOGI("UnSubscribeCommonEvent result=%{public}d", UnSubscribeCommonEvent());
+}
+
+EventSubscriber::EventSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo, AVSessionService *ptr)
+    : EventFwk::CommonEventSubscriber(subscriberInfo)
+{
+    servicePtr_ = ptr;
+}
+
+void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
+{
+    const AAFwk::Want &want = eventData.GetWant();
+    std::string action = want.GetAction();
+    SLOGI("OnReceiveEvent action:%{public}s.", action.c_str());
+    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
+    SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
+    bool is2in1 = strcmp(deviceProp.c_str(), "2in1");
+    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) == 0) {
+        SLOGI("recieve COMMON_EVENT_SCREEN_OFF event.");
+        if (servicePtr_ != nullptr) {
+            servicePtr_->SetScreenOn(false);
+        }
+        if (is2in1 == 0) {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+            SLOGI("disable cast check 2in1");
+            AVRouter::GetInstance().SetDiscoverable(false);
+#endif
+        }
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) == 0) {
+        SLOGI("recieve COMMON_EVENT_SCREEN_ON event.");
+        if (servicePtr_ != nullptr) {
+            servicePtr_->SetScreenOn(true);
+        }
+        if (is2in1 == 0) {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+            SLOGI("enable cast check 2in1");
+            AVRouter::GetInstance().SetDiscoverable(true);
+#endif
+        }
+    }
+}
+
+void AVSessionService::SetScreenOn(bool on)
+{
+    std::lock_guard lockGuard(screenStateLock_);
+    screenOn = on;
+}
+
+bool AVSessionService::GetScreenOn()
+{
+    std::lock_guard lockGuard(screenStateLock_);
+    return screenOn;
+}
+
+bool AVSessionService::SubscribeCommonEvent()
+{
+    const std::vector<std::string> events = {
+        EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF,
+        EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON,
+    };
+
+    EventFwk::MatchingSkills matchingSkills;
+    for (auto event : events) {
+        matchingSkills.AddEvent(event);
+    }
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+
+    subscriber_ = std::make_shared<EventSubscriber>(subscribeInfo, this);
+    return EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+}
+
+bool AVSessionService::UnSubscribeCommonEvent()
+{
+    bool subscribeResult = false;
+    if (subscriber_ != nullptr) {
+        subscribeResult = EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_);
+        subscriber_ = nullptr;
+        SLOGI("UnSubscribeCommonEvent subscribeResult = %{public}d", subscribeResult);
+    }
+    return subscribeResult;
 }
 
 void AVSessionService::PullMigrateStub()
@@ -271,10 +348,11 @@ void AVSessionService::CheckInitCast()
 // LCOV_EXCL_STOP
 
 #ifdef BLUETOOTH_ENABLE
-DetectBluetoothHostObserver::DetectBluetoothHostObserver()
+DetectBluetoothHostObserver::DetectBluetoothHostObserver(AVSessionService *ptr)
 {
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     SLOGI("DetectBluetoothHostObserver, Prop=%{public}d", static_cast<int>(is2in1_));
+    servicePtr_ = ptr;
 }
 
 void DetectBluetoothHostObserver::OnStateChanged(const int transport, const int status)
@@ -287,8 +365,13 @@ void DetectBluetoothHostObserver::OnStateChanged(const int transport, const int 
     if (newStatus == lastEnabled_) {
         return;
     }
+    bool screenOn = true;
+    if (servicePtr_ != nullptr) {
+        screenOn = servicePtr_->GetScreenOn();
+        SLOGI("screenOn=%{public}d", screenOn);
+    }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (newStatus && is2in1_) {
+    if (newStatus && is2in1_ && screenOn) {
         AVRouter::GetInstance().SetDiscoverable(false);
         AVRouter::GetInstance().SetDiscoverable(true);
     }
@@ -302,8 +385,9 @@ void AVSessionService::CheckBrEnable()
 #ifdef BLUETOOTH_ENABLE
     SLOGI("AVSessionService CheckBrEnable in");
     bluetoothHost_ = &OHOS::Bluetooth::BluetoothHost::GetDefaultHost();
+    bluetoothObserver = std::make_shared<DetectBluetoothHostObserver>(this);
     if (bluetoothHost_ != nullptr) {
-        bluetoothHost_->RegisterObserver(g_bluetoothObserver);
+        bluetoothHost_->RegisterObserver(bluetoothObserver);
     }
 #endif
 }
