@@ -40,6 +40,12 @@
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
 
+#include "common_event_manager.h"
+#include "common_event_subscribe_info.h"
+#include "common_event_subscriber.h"
+#include "common_event_support.h"
+#include "matching_skills.h"
+
 #ifdef BLUETOOTH_ENABLE
 #include "bluetooth_host.h"
 #endif
@@ -76,7 +82,7 @@ public:
 #ifdef BLUETOOTH_ENABLE
 class DetectBluetoothHostObserver : public OHOS::Bluetooth::BluetoothHostObserver {
 public:
-    DetectBluetoothHostObserver();
+    DetectBluetoothHostObserver(AVSessionService *ptr);
     virtual ~DetectBluetoothHostObserver() = default;
     void OnStateChanged(const int transport, const int status) override;
     void OnDiscoveryStateChanged(int status) override
@@ -118,8 +124,18 @@ public:
 private:
     bool is2in1_ = false;
     bool lastEnabled_ = false;
+    AVSessionService *servicePtr_ = nullptr;
 };
 #endif
+
+class EventSubscriber : public EventFwk::CommonEventSubscriber {
+public:
+    EventSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo, AVSessionService *ptr);
+    virtual ~EventSubscriber() = default;
+    void OnReceiveEvent(const EventFwk::CommonEventData &eventData) override;
+private:
+    AVSessionService *servicePtr_ = nullptr;
+};
 
 class AVSessionService : public SystemAbility, public AVSessionServiceStub, public IAVSessionServiceListener {
     DECLARE_SYSTEM_ABILITY(AVSessionService);
@@ -224,6 +240,10 @@ public:
     int32_t Close(void) override;
     
     void AddAvQueueInfoToFile(AVSessionItem& session);
+
+    void SetScreenOn(bool on);
+
+    bool GetScreenOn();
 
 private:
     void CheckInitCast();
@@ -400,6 +420,10 @@ private:
 
     int32_t HandleSystemAVKeyEvent(const MMI::KeyEvent& keyEvent);
 
+    bool SubscribeCommonEvent();
+
+    bool UnSubscribeCommonEvent();
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
@@ -441,8 +465,13 @@ private:
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
     std::map<int32_t, bool> sessionPublishedMap_;
 
+    std::shared_ptr<EventSubscriber> subscriber_;
+    std::recursive_mutex screenStateLock_;
+    bool screenOn = false;
+
 #ifdef BLUETOOTH_ENABLE
     OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
+    std::shared_ptr<DetectBluetoothHostObserver> bluetoothObserver;
 #endif
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
