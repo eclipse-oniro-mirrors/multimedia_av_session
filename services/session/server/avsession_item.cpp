@@ -1201,16 +1201,17 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
-    SLOGI("HandleMediaKeyEvent with isMediaKeySupport %{public}d for %{public}d",
+    SLOGI("HandleMediaKeyEvent check isMediaKeySupport %{public}d for %{public}d",
         static_cast<int>(isMediaKeySupport), static_cast<int>(keyEvent.GetKeyCode()));
-    if (!isMediaKeySupport) {
+    if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
         SLOGD("auto set controller command for %{public}d", static_cast<int>(keyEvent.GetKeyCode()));
         AVControlCommand cmd;
         cmd.SetRewindTime(metaData_.GetSkipIntervals());
         cmd.SetForwardTime(metaData_.GetSkipIntervals());
         keyEventCaller_[keyEvent.GetKeyCode()](cmd);
+    } else {
+        callback_->OnMediaKeyEvent(keyEvent);
     }
-    callback_->OnMediaKeyEvent(keyEvent);
 }
 
 void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
