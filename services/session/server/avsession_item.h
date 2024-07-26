@@ -191,7 +191,7 @@ public:
 
     void SetServiceCallbackForAVQueueInfo(const std::function<void(AVSessionItem&)>& callback);
 
-    void SetServiceCallbackForUpdateSession(const std::function<void(sptr<AVSessionItem>&, bool)>& callback);
+    void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void InitializeCastCommands();
@@ -348,7 +348,7 @@ private:
     std::recursive_mutex wantParamLock_;
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
-    std::function<void(sptr<AVSessionItem>&, bool)> serviceCallbackForUpdateSession_;
+    std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
 
