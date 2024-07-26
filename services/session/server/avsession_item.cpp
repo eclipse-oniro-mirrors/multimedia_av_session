@@ -201,7 +201,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 // LCOV_EXCL_START
 int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 {
-    SLOGI("%{public}s ", source.c_str());
+    SLOGI("ProcessFrontSession %{public}s ", source.c_str());
     auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
         HandleFrontSession();
         }, "HandleFrontSession", 0);
@@ -213,18 +213,17 @@ void AVSessionItem::HandleFrontSession()
 {
     bool isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
         metaData_.GetMediaImageUri().empty();
-    sptr<AVSessionItem> session(this);
-    SLOGD("bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
+    SLOGD("frontSession bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
         GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
         static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     if (isMetaEmpty || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
-            serviceCallbackForUpdateSession_(session, false);
+            serviceCallbackForUpdateSession_(GetSessionId(), false);
             isFirstAddToFront_ = true;
         }
     } else {
         if (isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
-            serviceCallbackForUpdateSession_(session, true);
+            serviceCallbackForUpdateSession_(GetSessionId(), true);
             isFirstAddToFront_ = false;
         }
     }
@@ -1490,7 +1489,7 @@ void AVSessionItem::SetServiceCallbackForCallStart(const std::function<void(AVSe
     callStartCallback_ = callback;
 }
 
-void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(sptr<AVSessionItem>&, bool)>& callback)
+void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback)
 {
     SLOGI("SetServiceCallbackForUpdateSession in");
     serviceCallbackForUpdateSession_ = callback;

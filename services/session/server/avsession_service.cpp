@@ -1070,7 +1070,9 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
             AVSessionUtils::GetAnonySessionId(session.GetDescriptor().sessionId_).c_str());
         HandleCallStartEvent();
     });
-    result->SetServiceCallbackForUpdateSession([this](sptr<AVSessionItem>& sessionItem, bool isAdd) {
+    result->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
+        SLOGI("servicecallback for update session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
         UpdateFrontSession(sessionItem, isAdd);
     });
     SLOGI("success sessionId=%{public}s",  AVSessionUtils::GetAnonySessionId(result->GetSessionId()).c_str());
