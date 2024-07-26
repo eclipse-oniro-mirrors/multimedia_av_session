@@ -828,6 +828,32 @@ int32_t AVSessionItem::ReleaseCast()
     return StopCast();
 }
 
+int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo)
+{
+    if(castDeviceInfoMap_.count(outputDeviceInfo.deviceInfos_[0].deviceId_ != 1)) {
+        SLOGE("deviceId map deviceinfo is not exit");
+        return AVSESSION_ERROR;
+    }
+    ListenCollaborationRejectToStopCast();
+    DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
+    collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
+    if (collaborationNeedNetworkId_.empty()) {
+        SLOGE("untrusted device, networkId is empty, then input deviceId");
+        collaborationNeedNetworkId_ = cacheDeviceInfo.deviceId_;
+    }
+    CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
+    //wait collaboration callback
+    std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
+    bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
+        [this]() {
+            return applyResultFlag_;
+    });
+    applyResultFlag_ = false;
+    CHECK_AND_RETURN_RET_LOG(flag, ERR_WAIT_ALLCONNECT_TIMEOUT, "collaboration callback timeout");
+    CHECK_AND_RETURN_RET_LOG(!collaborationRejectFlag_, ERR_ALLCONNECT_CAST_REJECT, "collaboration callback reject");
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("Start cast process");
@@ -838,9 +864,14 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
         SLOGI("cast check with pre cast alive %{public}ld, unregister callback", castHandle_);
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
     }
+    int32_t flag = CastAddToCollaboration(outputDeviceInfo);
+    CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS || flag == ERR_WAIT_ALLCONNECT_TIMEOUT, AVSESSION_ERROR,
+        "collaboration to start cast fail");
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
-
+    //get cast+ networkId
+    CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     std::lock_guard lockGuard(castHandleLock_);
     castHandle_ = castHandle;
     SLOGI("start cast check handle set to %{public}ld", castHandle_);
@@ -961,6 +992,30 @@ void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     }
 }
 
+void AVSessionItem::ListenCollaborationRejectToStopCast()
+{
+    CollaborationManager::GetInstance().SendRejectStateToStopCast([this](
+        const std::string callbackName, bool flag) {
+        std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
+        if (callbackName == "OnStop" && newCastState == castConnectStateForConnected_) {
+            SLOGI("onstop to stop cast");
+            StopCast();
+        }
+        if (callbackName == "ApplyResult" && !flag && newCastState != castConnectStateForConnected_) {
+            SLOGI("ApplyResult can cast");
+            collaborationRejectFlag_ = false;
+            applyResultFlag_ = true;
+            connectWaitCallbackCond_.notify_all();
+        }
+        if (callbackName == "ApplyResult" && flag && newCastState != castConnectStateForConnected_) {
+            SLOGI("ApplyResult can not cast");
+            collaborationRejectFlag_ = true;
+            applyResultFlag_ = true;
+            connectWaitCallbackCond_.notify_all();
+        }
+    });
+}
+
 int32_t AVSessionItem::StopCast()
 {
     if (descriptor_.sessionTag_ == "RemoteCast") {
@@ -984,6 +1039,8 @@ int32_t AVSessionItem::StopCast()
         AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
         SLOGI("StopCast with unchange castHandle is %{public}ld", castHandle_);
         CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         removeTimes = 1;
     }
 

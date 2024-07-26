@@ -28,8 +28,12 @@
 #include "system_ability_definition.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include <condition_variable>
+#include <chrono>
+
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
+#include "collaboration_manager.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -217,6 +221,10 @@ public:
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
 
+    void ListenCollaborationRejectToStopCast();
+
+    int32_t CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo);
+
     int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo);
 
     int32_t StopCast();
@@ -375,6 +383,13 @@ private:
     int32_t counter_ = -1;
     bool isUpdate = false;
     std::map<std::string, std::string> castServiceNameMapState_;
+
+    bool collaborationRejectFlag_ = false;
+    bool applyResultFlag_ = false;
+    std::string collaborationNeedNetworkId_;
+    std::mutex collaborationApplyResultMutex_;
+    std::condition_variable connectWaitCallbackCond_;
+    const int32_t collaborationCallbackTimeOut_ = 10;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
