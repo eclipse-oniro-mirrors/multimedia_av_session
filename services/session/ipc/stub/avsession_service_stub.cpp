@@ -97,6 +97,13 @@ int32_t AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel& data
 
 int32_t AVSessionServiceStub::HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply)
 {
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("GetSessionDescriptorsBySessionId: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", GetCallingUid(), "SESSION_ID", data.ReadString(),
+            "ERROR_MSG", "avsessionservice getsessiondescriptors by sessionid checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     AVSessionDescriptor descriptor;
     int32_t ret = GetSessionDescriptorsBySessionId(data.ReadString(), descriptor);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -233,6 +240,13 @@ int32_t AVSessionServiceStub::HandleStartAVPlayback(MessageParcel& data, Message
 int32_t AVSessionServiceStub::HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CreateControllerInner");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("CreateControllerInner: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", GetCallingPid(), "SESSION_ID", data.ReadString(),
+            "ERROR_MSG", "avsessionservice createcontrollerinner checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     sptr<IRemoteObject> object;
     int32_t ret = CreateControllerInner(data.ReadString(), object);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -246,6 +260,10 @@ int32_t AVSessionServiceStub::HandleGetAVCastControllerInner(MessageParcel& data
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleGetAVCastControllerInner");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("GetAVCastControllerInner: CheckPermission failed");
+        return ERR_NO_PERMISSION;
+    }
     sptr<IRemoteObject> object;
     int32_t ret = GetAVCastControllerInner(data.ReadString(), object);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -260,6 +278,12 @@ int32_t AVSessionServiceStub::HandleGetAVCastControllerInner(MessageParcel& data
 
 int32_t AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply)
 {
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("RegisterSessionListener: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice registersessionlistener checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     auto remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
         SLOGI("read remote object failed");
@@ -356,6 +380,12 @@ int32_t AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel& d
 
 int32_t AVSessionServiceStub::HandleClose(MessageParcel& data, MessageParcel& reply)
 {
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("Close: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+                            "ERROR_MSG", "avsessionservice Close checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     int32_t ret = Close();
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "Close failed");
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -406,6 +436,12 @@ int32_t AVSessionServiceStub::HandleCastAudio(MessageParcel& data, MessageParcel
 int32_t AVSessionServiceStub::HandleCastAudioForAll(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CastAudioForAll");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("CastAudioForAll: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+                            "ERROR_MSG", "avsessionservice CastAudioForAll checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SLOGI("start");
     int32_t deviceNum = data.ReadInt32();
     if (deviceNum > RECEIVE_DEVICE_NUM_MAX) {
@@ -437,6 +473,12 @@ int32_t AVSessionServiceStub::HandleRemoteCastAudio(MessageParcel& data, Message
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::RemoteCastAudio");
     SLOGI("start");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("ProcessCastAudioCommand: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice ProcessCastAudioCommand checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     auto command = static_cast<RemoteServiceCommand>(data.ReadInt32());
     std::string sessionInfo = data.ReadString();
     std::string output;
@@ -456,6 +498,13 @@ int32_t AVSessionServiceStub::HandleStartCastDiscovery(MessageParcel& data, Mess
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCastDiscovery");
     SLOGI("HandleStartCastDiscovery start");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("StartCastDiscovery: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
+                            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
+                            "avsessionservice StartCastDiscovery checkPermission failed");
+        return ERR_NO_PERMISSION;
+    }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto castDeviceCapability = data.ReadInt32();
     int32_t drmSchemesLen = data.ReadInt32();
@@ -480,6 +529,13 @@ int32_t AVSessionServiceStub::HandleStopCastDiscovery(MessageParcel& data, Messa
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStopCastDiscovery");
     SLOGI("HandleStopCastDiscovery start");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("StopCastDiscovery: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
+                            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
+                            "avsessionservice StopCastDiscovery checkPermission failed");
+        return ERR_NO_PERMISSION;
+    }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t ret = AVRouter::GetInstance().StopCastDiscovery();
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
@@ -494,6 +550,13 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleSetDiscoverable");
     SLOGI("HandleSetDiscoverable start");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("SetDiscoverable: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
+                            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
+                            "avsessionservice SetDiscoverable checkPermission failed");
+        return ERR_NO_PERMISSION;
+    }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool enable;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(enable), AVSESSION_ERROR, "write enable info failed");
@@ -556,6 +619,12 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCast");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("StartCast: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice StartCast checkPermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SessionToken sessionToken {};
     sessionToken.sessionId = data.ReadString();
     sessionToken.pid = data.ReadInt32();
@@ -598,6 +667,12 @@ int32_t AVSessionServiceStub::HandleStopCast(MessageParcel& data, MessageParcel&
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStopCast");
     SLOGI("HandleStopCast start");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("StopCast: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice StopCast checkpermission failed");
+        return ERR_NO_PERMISSION;
+    }
     SessionToken sessionToken {};
     sessionToken.sessionId = data.ReadString();
     sessionToken.pid = data.ReadInt32();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,15 +95,7 @@ bool AVRouterImpl::Release()
 
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
-        SLOGE("StartCastDiscovery: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
-                            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
-                            "avsessionservice StartCastDiscovery checkPermission failed");
-        return ERR_NO_PERMISSION;
-    }
     SLOGI("AVRouterImpl StartCastDiscovery");
-
     std::lock_guard lockGuard(providerManagerLock_);
 
     if (providerManagerMap_.empty()) {
@@ -123,15 +115,7 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
 
 int32_t AVRouterImpl::StopCastDiscovery()
 {
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
-        SLOGE("StopCastDiscovery: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
-                            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
-                            "avsessionservice StopCastDiscovery checkPermission failed");
-        return ERR_NO_PERMISSION;
-    }
     SLOGI("AVRouterImpl StopCastDiscovery");
-
     std::lock_guard lockGuard(providerManagerLock_);
 
     if (cacheStartDiscovery_) {
@@ -148,13 +132,6 @@ int32_t AVRouterImpl::StopCastDiscovery()
 
 int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 {
-    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
-        SLOGE("SetDiscoverable: CheckPermission failed");
-        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
-                            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
-                            "avsessionservice SetDiscoverable checkPermission failed");
-        return ERR_NO_PERMISSION;
-    }
     SLOGI("AVRouterImpl SetDiscoverable %{public}d", enable);
 
     std::lock_guard lockGuard(providerManagerLock_);

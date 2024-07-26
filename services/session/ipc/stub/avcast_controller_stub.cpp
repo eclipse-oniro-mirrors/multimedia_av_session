@@ -20,6 +20,7 @@
 #include "media_info_holder.h"
 #include "surface_utils.h"
 #include "session_xcollie.h"
+#include "permission_checker.h"
 
 namespace OHOS::AVSession {
 bool AVCastControllerStub::CheckInterfaceToken(MessageParcel& data)
@@ -143,6 +144,10 @@ int32_t AVCastControllerStub::HandleGetCurrentItem(MessageParcel& data, MessageP
 int32_t AVCastControllerStub::HandleSetDisplaySurface(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::HandleSetDisplaySurface");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("SetDisplaySurface: CheckPermission failed");
+        return ERR_NO_PERMISSION;
+    }
     sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
     if (remoteObj == nullptr) {
         SLOGE("BufferProducer is null");
