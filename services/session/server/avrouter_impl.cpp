@@ -59,6 +59,11 @@ void AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
         SLOGE("init with null pvd to registerlistener");
         return;
     }
+    if (cacheStartDiscovery_) {
+        SLOGI("cacheStartDiscovery check do discovery");
+        StartCastDiscovery(cacheCastDeviceCapability_, cacheDrmSchemes_);
+        cacheStartDiscovery_ = false;
+    }
     SLOGI("init AVRouter done");
 }
 
@@ -101,6 +106,13 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
 
     std::lock_guard lockGuard(providerManagerLock_);
 
+    if (providerManagerMap_.empty()) {
+        SLOGI("set cacheStartDiscovery with no element with cap %{public}d", static_cast<int>(castDeviceCapability));
+        cacheStartDiscovery_ = true;
+        cacheCastDeviceCapability_ = castDeviceCapability;
+        cacheDrmSchemes_ = drmSchemes;
+        return AVSESSION_SUCCESS;
+    }
     for (const auto& [number, providerManager] : providerManagerMap_) {
         CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
             AVSESSION_ERROR, "provider is nullptr");
@@ -122,6 +134,10 @@ int32_t AVRouterImpl::StopCastDiscovery()
 
     std::lock_guard lockGuard(providerManagerLock_);
 
+    if (cacheStartDiscovery_) {
+        SLOGI("clear cacheStartDiscovery when stop discovery");
+        cacheStartDiscovery_ = false;
+    }
     for (const auto& [number, providerManager] : providerManagerMap_) {
         CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
             AVSESSION_ERROR, "provider is nullptr");

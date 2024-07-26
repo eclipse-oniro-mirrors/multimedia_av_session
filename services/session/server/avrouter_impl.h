@@ -78,6 +78,9 @@ private:
     int32_t providerNumberEnableDefault_ = 1;
     int32_t providerNumberDisable_ = 0;
     OutputDeviceInfo castOutputDeviceInfo_;
+    bool cacheStartDiscovery_ = false;
+    int32_t cacheCastDeviceCapability_ = -1;
+    std::vector<std::string> cacheDrmSchemes_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H
