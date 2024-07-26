@@ -68,6 +68,7 @@ typedef void (*StopMigrateStubFunc)(void);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
+#include "collaboration_manager.h"
 #endif
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
@@ -152,6 +153,9 @@ void AVSessionService::OnStart()
         AVRouter::GetInstance().SetDiscoverable(false);
         AVRouter::GetInstance().SetDiscoverable(true);
     }
+    CollaborationManager::GetInstance().ReadCollaborationManagerSo();
+    CHECK_AND_RETURN_LOG(CollaborationManager::GetInstance().RegisterLifecycleCallback() == AVSESSION_SUCCESS,
+        "collaboratio RegisterLifecycleCallback failed");
 #endif
     PullMigrateStub();
     HISYSEVENT_REGITER;
@@ -177,6 +181,9 @@ void AVSessionService::OnStop()
         stopMigrateStub();
     }
     dlclose(migrateStubFuncHandle_);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
+#endif
     CommandSendLimit::GetInstance().StopTimer();
     NotifyProcessStatus(false);
     SLOGI("UnSubscribeCommonEvent result=%{public}d", UnSubscribeCommonEvent());
