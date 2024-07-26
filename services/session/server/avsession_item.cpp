@@ -37,6 +37,7 @@
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
+#include "collaboration_manager.h"
 #endif
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
@@ -830,7 +831,7 @@ int32_t AVSessionItem::ReleaseCast()
 
 int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo)
 {
-    if(castDeviceInfoMap_.count(outputDeviceInfo.deviceInfos_[0].deviceId_ != 1)) {
+    if (castDeviceInfoMap_.count(outputDeviceInfo.deviceInfos_[0].deviceId_) != 1) {
         SLOGE("deviceId map deviceinfo is not exit");
         return AVSESSION_ERROR;
     }
@@ -871,7 +872,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     //get cast+ networkId
     CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
-            ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
+        ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     std::lock_guard lockGuard(castHandleLock_);
     castHandle_ = castHandle;
     SLOGI("start cast check handle set to %{public}ld", castHandle_);

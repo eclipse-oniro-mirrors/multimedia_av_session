@@ -37,8 +37,9 @@ void CollaborationManager::SendRejectStateToStopCast(const std::function<
 
 static int32_t OnStop(const char* peerNetworkId)
 {
-    CollaborationManager::GetInstance().SendRejectStateToStopCast("OnStop", true);
-    return ERR_ALLCONNECT_PREEMPTED_BY_OTHERS;
+    SLOGE("Onstop to stop cast");
+    CollaborationManager::GetInstance().sendRejectStateToStopCast_("OnStop", true);
+    return AVSESSION_SUCCESS;
 }
 
 __attribute__((no_sanitize("cfi")))static int32_t ApplyResult(int32_t errorcode,
@@ -46,17 +47,15 @@ __attribute__((no_sanitize("cfi")))static int32_t ApplyResult(int32_t errorcode,
 {
     if (result == ServiceCollaborationManagerResultCode::PASS) {
         SLOGI("return can connect");
-        CollaborationManager::GetInstance().SendRejectStateToStopCast("ApplyResult", false);
-        return AVSESSION_SUCCESS;
+        CollaborationManager::GetInstance().sendRejectStateToStopCast_("ApplyResult", false);
     } else if (result == ServiceCollaborationManagerResultCode::REJECT) {
         SLOGE("return connect reject and reson:%{public}s", reason);
-        CollaborationManager::GetInstance().SendRejectStateToStopCast("ApplyResult", true);
-        return ERR_ALLCONNECT_CAST_REJECT;
+        CollaborationManager::GetInstance().sendRejectStateToStopCast_("ApplyResult", true);
     } else {
         SLOGE("unexpect return reslut value");
-        CollaborationManager::GetInstance().SendRejectStateToStopCast("ApplyResult", false);
-        return AVSESSION_SUCCESS;
+        CollaborationManager::GetInstance().sendRejectStateToStopCast_("ApplyResult", false);
     }
+    return AVSESSION_SUCCESS;
 }
 
 static ServiceCollaborationManager_Callback serviceCollaborationCallback {
@@ -113,7 +112,8 @@ int64_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
         SLOGE("PublishServiceState function sptr nullptr");
         return AVSESSION_ERROR;
     }
-    if (exportapi_.ServiceCollaborationManager_PublishServiceState(peerNetworkId, serviceName_.c_str(), "NULL", state)) {
+    if (exportapi_.ServiceCollaborationManager_PublishServiceState(peerNetworkId,
+        serviceName_.c_str(), "NULL", state)) {
         return AVSESSION_ERROR;
     }
     return AVSESSION_SUCCESS;
