@@ -79,12 +79,6 @@ using namespace nlohmann;
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
-static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
-    std::string("platformsdk/libsuspend_manager_client.z.so");
-static const std::string MIGRATE_STUB_SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
-    std::string("libavsession_migration.z.so");
-static const std::string MEMMGR_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
-    std::string("libmemmgrclient.z.so");
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
@@ -263,12 +257,7 @@ bool AVSessionService::UnSubscribeCommonEvent()
 
 void AVSessionService::PullMigrateStub()
 {
-    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(MIGRATE_STUB_SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check libmigrate_avsession_service path failed %{public}s", MIGRATE_STUB_SOURCE_LIBRARY_PATH.c_str());
-        return;
-    }
-    migrateStubFuncHandle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
+    migrateStubFuncHandle_ = dlopen("libsuspend_manager_client.z.so", RTLD_NOW);
     if (migrateStubFuncHandle_ == nullptr) {
         SLOGE("failed to dlopen library, reason: %{public}sn", dlerror());
         return;
@@ -395,12 +384,7 @@ void AVSessionService::CheckBrEnable()
 void AVSessionService::NotifyProcessStatus(bool isStart)
 {
     int pid = getpid();
-    char memmgrPath[PATH_MAX] = { 0x00 };
-    if (realpath(MEMMGR_LIBRARY_PATH.c_str(), memmgrPath) == nullptr) {
-        SLOGE("check libmemmgrclient path failed %{public}s", MEMMGR_LIBRARY_PATH.c_str());
-        return;
-    }
-    void *libMemMgrClientHandle = dlopen(memmgrPath, RTLD_NOW);
+    void *libMemMgrClientHandle = dlopen("libmemmgrclient.z.so", RTLD_NOW);
     if (!libMemMgrClientHandle) {
         SLOGE("dlopen libmemmgrclient library failed");
         return;
