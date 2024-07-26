@@ -112,8 +112,12 @@ int64_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
         SLOGE("PublishServiceState function sptr nullptr");
         return AVSESSION_ERROR;
     }
+<<<<<<< HEAD
     if (exportapi_.ServiceCollaborationManager_PublishServiceState(peerNetworkId,
         serviceName_.c_str(), "NULL", state)) {
+=======
+    if (exportapi_.ServiceCollaborationManager_PublishServiceState(peerNetworkId, serviceName_.c_str(), "NULL", state)) {
+>>>>>>> f6dbc1a0b648ddd6d6acd57e9fbd2480e52005bb
         return AVSESSION_ERROR;
     }
     return AVSESSION_SUCCESS;

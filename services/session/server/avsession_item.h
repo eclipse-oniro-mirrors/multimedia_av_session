@@ -33,6 +33,7 @@
 
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
+#include "collaboration_manager.h"
 #endif
 
 namespace OHOS::AVSession {
