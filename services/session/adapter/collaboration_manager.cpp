@@ -112,12 +112,8 @@ int64_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
         SLOGE("PublishServiceState function sptr nullptr");
         return AVSESSION_ERROR;
     }
-<<<<<<< HEAD
     if (exportapi_.ServiceCollaborationManager_PublishServiceState(peerNetworkId,
         serviceName_.c_str(), "NULL", state)) {
-=======
-    if (exportapi_.ServiceCollaborationManager_PublishServiceState(peerNetworkId, serviceName_.c_str(), "NULL", state)) {
->>>>>>> f6dbc1a0b648ddd6d6acd57e9fbd2480e52005bb
         return AVSESSION_ERROR;
     }
     return AVSESSION_SUCCESS;
@@ -126,36 +122,15 @@ int64_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
 int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId)
 {
     SLOGI("enter ApplyAdvancedResource");
-    ServiceCollaborationManager_HardwareRequestInfo localHardwareList = {
-    .hardWareType = ServiceCollaborationManagerHardwareType::SCM_UNKNOWN_TYPE,
-    .canShare = false
-    };
-    ServiceCollaborationManager_HardwareRequestInfo remoteHardwareList[2] = {
-    {
-        .hardWareType = ServiceCollaborationManagerHardwareType::SCM_DISPLAY,
-        .canShare = false
-    },
-    {
-        .hardWareType = ServiceCollaborationManagerHardwareType::SCM_SPEAKER,
-        .canShare = false
-    }
-    };
-    ServiceCollaborationManager_CommunicationRequestInfo communicationRequest = {
-        .minBandwidth = 80 * 1024 * 1024,
-        .maxLatency = 5000,
-        .minLatency = 500,
-        .maxWaitTime = 60000,
-        .dataType = dataType_.c_str()
-    };
-    resourceRequest_->localHardwareListSize = localHardwareListSize_;
-    resourceRequest_->localHardwareList = &localHardwareList;
-    resourceRequest_->remoteHardwareListSize = remoteHardwareListSize_;
-    resourceRequest_->remoteHardwareList = remoteHardwareList;
-    resourceRequest_->communicationRequest = &communicationRequest;
     if (exportapi_.ServiceCollaborationManager_ApplyAdvancedResource == nullptr) {
         SLOGE("ApplyAdvancedResource function sptr nullptr");
         return AVSESSION_ERROR;
     }
+    resourceRequest_->localHardwareListSize = localHardwareListSize_;
+    resourceRequest_->localHardwareList = &localHardwareList_;
+    resourceRequest_->remoteHardwareListSize = remoteHardwareListSize_;
+    resourceRequest_->remoteHardwareList = remoteHardwareList_;
+    resourceRequest_->communicationRequest = &communicationRequest_;
     if (exportapi_.ServiceCollaborationManager_ApplyAdvancedResource(peerNetworkId,
         serviceName_.c_str(), resourceRequest_, &serviceCollaborationCallback)) {
         return AVSESSION_ERROR;

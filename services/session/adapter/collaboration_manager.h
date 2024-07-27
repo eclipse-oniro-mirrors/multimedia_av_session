@@ -38,10 +38,31 @@ public:
     std::function<void(const std::string callbackName, bool flag)> sendRejectStateToStopCast_;
 
 private:
+    ServiceCollaborationManager_HardwareRequestInfo localHardwareList_ = {
+    .hardWareType = ServiceCollaborationManagerHardwareType::SCM_UNKNOWN_TYPE,
+    .canShare = false
+    };
+    ServiceCollaborationManager_HardwareRequestInfo remoteHardwareList_[2] = {
+    {
+        .hardWareType = ServiceCollaborationManagerHardwareType::SCM_DISPLAY,
+        .canShare = false
+    },
+    {
+        .hardWareType = ServiceCollaborationManagerHardwareType::SCM_SPEAKER,
+        .canShare = false
+    }
+    };
+    ServiceCollaborationManager_CommunicationRequestInfo communicationRequest_ = {
+        .minBandwidth = 80 * 1024 * 1024,
+        .maxLatency = 5000,
+        .minLatency = 500,
+        .maxWaitTime = 60000,
+        .dataType = dataType_.c_str()
+    };
     const int32_t remoteHardwareListSize_ = 2;
     const int32_t localHardwareListSize_ = 0;
     const std::string serviceName_ = "URLCasting";
-    const std::string dataType_ = "DATA_TYPE_BYTES";
+    constexpr std::string dataType_ = "DATA_TYPE_BYTES";
     PluginLib pluginLib_ {"/system/lib64/libcfwk_allconnect_client.z.so"};
     ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest_ =
         new ServiceCollaborationManager_ResourceRequestInfoSets();
