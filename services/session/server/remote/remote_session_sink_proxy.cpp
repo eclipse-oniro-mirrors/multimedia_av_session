@@ -32,7 +32,8 @@ int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("
 {
     handle_ = dlopen("libremote_session_sink.z.so", RTLD_NOW);
     if (handle_ == nullptr) {
-        SLOGE("Failed to open extension library, reason: %{public}sn", dlerror());
+        SLOGE("Failed to open extension library %{public}s, reason: %{public}sn",
+            "libremote_session_sink.z.so", dlerror());
         return AVSESSION_ERROR;
     }
     using SinkImpl = RemoteSessionSinkImpl* (*)();
@@ -42,7 +43,8 @@ int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("
         if (handle_ != nullptr) {
             dlclose(handle_);
         }
-        SLOGE("Failed to get extension symbol %{public}s", "RemoteSessionSinkImpl");
+        SLOGE("Failed to get extension symbol %{public}s in %{public}s",
+            "RemoteSessionSinkImpl", "libremote_session_sink.z.so");
         return AVSESSION_ERROR;
     }
 
@@ -59,7 +61,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
             dlclose(handle_);
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s", "DestroyRemoteSessionSinkImpl",
-              g_sinkLibraryPath.c_str());
+              "libremote_session_sink.z.so");
         return AVSESSION_ERROR;
     }
     destroyRemoteSessionSinkImpl(sinkImpl_);

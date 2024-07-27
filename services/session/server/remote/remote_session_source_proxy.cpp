@@ -32,7 +32,8 @@ int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_saniti
 {
     handle_ = dlopen("libremote_session_source.z.so", RTLD_NOW);
     if (handle_ == nullptr) {
-        SLOGE("Failed to open library, reason: %{public}sn", dlerror());
+        SLOGE("Failed to open library %{public}s, reason: %{public}sn",
+            "libremote_session_source.z.so", dlerror());
         return AVSESSION_ERROR;
     }
     using SourceImpl = RemoteSessionSourceImpl* (*)();
@@ -42,7 +43,8 @@ int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_saniti
         if (handle_ != nullptr) {
             dlclose(handle_);
         }
-        SLOGE("Failed to get extension symbol %{public}s", "RemoteSessionSourceImpl");
+        SLOGE("Failed to get extension symbol %{public}s in %{public}s",
+            "RemoteSessionSourceImpl", "libremote_session_source.z.so");
         return AVSESSION_ERROR;
     }
 
@@ -58,7 +60,8 @@ int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sani
         if (handle_ != nullptr) {
             dlclose(handle_);
         }
-        SLOGE("Failed to get extension symbol %{public}s", "DestroyRemoteSessionSourceImpl");
+        SLOGE("Failed to get extension symbol %{public}s in %{public}s",
+            "DestroyRemoteSessionSourceImpl", "libremote_session_source.z.so");
         return AVSESSION_ERROR;
     }
     destroyRemoteSessionSourceImpl(sourceImpl_);

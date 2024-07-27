@@ -257,7 +257,7 @@ bool AVSessionService::UnSubscribeCommonEvent()
 
 void AVSessionService::PullMigrateStub()
 {
-    migrateStubFuncHandle_ = dlopen("libsuspend_manager_client.z.so", RTLD_NOW);
+    migrateStubFuncHandle_ = dlopen("libavsession_migration.z.so", RTLD_NOW);
     if (migrateStubFuncHandle_ == nullptr) {
         SLOGE("failed to dlopen library, reason: %{public}sn", dlerror());
         return;
