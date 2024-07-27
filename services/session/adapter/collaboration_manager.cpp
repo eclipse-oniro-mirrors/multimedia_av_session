@@ -22,6 +22,29 @@ CollaborationManager& CollaborationManager::GetInstance()
     return collaborationManager;
 }
 
+CollaborationManager::CollaborationManager()
+{
+    localHardwareList_ = {
+        .hardWareType = ServiceCollaborationManagerHardwareType::SCM_UNKNOWN_TYPE,
+        .canShare = false
+    };
+    remoteHardwareList_[0] = {
+        .hardWareType = ServiceCollaborationManagerHardwareType::SCM_DISPLAY,
+        .canShare = false
+    };
+    remoteHardwareList_[1] = {
+        .hardWareType = ServiceCollaborationManagerHardwareType::SCM_SPEAKER,
+        .canShare = false
+    };
+    communicationRequest_ = {
+        .minBandwidth = 80 * 1024 * 1024,
+        .maxLatency = 5000,
+        .minLatency = 500,
+        .maxWaitTime = 60000,
+        .dataType = dataType_.c_str()
+    };
+}
+
 CollaborationManager::~CollaborationManager()
 {
     SLOGI("enter ~CollaborationManager");
@@ -125,6 +148,10 @@ int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId)
     if (exportapi_.ServiceCollaborationManager_ApplyAdvancedResource == nullptr) {
         SLOGE("ApplyAdvancedResource function sptr nullptr");
         return AVSESSION_ERROR;
+    }
+    if (resourceRequest_ == nullptr) {
+        SLOGE("resourceRequest_ is nullptr");
+        reutrn AVSESSION_ERROR;
     }
     resourceRequest_->localHardwareListSize = localHardwareListSize_;
     resourceRequest_->localHardwareList = &localHardwareList_;

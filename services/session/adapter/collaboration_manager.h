@@ -26,6 +26,7 @@ namespace OHOS::AVSession {
 class CollaborationManager {
 public:
     static CollaborationManager& GetInstance();
+    CollaborationManager();
     virtual ~CollaborationManager();
     void SendRejectStateToStopCast(const std::function<void(const std::string callbackName,
         bool flag)>& callback);
@@ -48,28 +49,10 @@ private:
     ServiceCollaborationManager_API exportapi_;
 
     using CollaborationManagerExportFunType = int32_t (*)(ServiceCollaborationManager_API *exportapi);
-    CollaborationManagerExportFunType collaborationManagerExportFun_;
-    ServiceCollaborationManager_HardwareRequestInfo localHardwareList_ = {
-    .hardWareType = ServiceCollaborationManagerHardwareType::SCM_UNKNOWN_TYPE,
-    .canShare = false
-    };
-    ServiceCollaborationManager_HardwareRequestInfo remoteHardwareList_[2] = {
-    {
-        .hardWareType = ServiceCollaborationManagerHardwareType::SCM_DISPLAY,
-        .canShare = false
-    },
-    {
-        .hardWareType = ServiceCollaborationManagerHardwareType::SCM_SPEAKER,
-        .canShare = false
-    }
-    };
-    ServiceCollaborationManager_CommunicationRequestInfo communicationRequest_ = {
-        .minBandwidth = 80 * 1024 * 1024,
-        .maxLatency = 5000,
-        .minLatency = 500,
-        .maxWaitTime = 60000,
-        .dataType = dataType_.c_str()
-    };
+    CollaborationManagerExportFunType remoteHardwareList_;
+    ServiceCollaborationManager_HardwareRequestInfo localHardwareList_;
+    ServiceCollaborationManager_HardwareRequestInfo remoteHardwareList_[2];
+    ServiceCollaborationManager_CommunicationRequestInfo communicationRequest_;
 };
 }   // namespace OHOS::AVSession
 #endif //COLLABORATION_MANAGER_H
