@@ -398,7 +398,7 @@ int32_t HwCastStreamPlayer::RegisterControllerListener(std::shared_ptr<IAVCastCo
     }
     SLOGI("RegisterControllerListener successed, and add it to streamPlayerListenerList_");
     streamPlayerListenerList_.emplace_back(listener);
-    SLOGI("RegisterControllerListener done");
+    SLOGI("RegisterControllerListener done with size %{public}d", static_cast<int>(streamPlayerListenerList_.size()));
     return AVSESSION_SUCCESS;
 }
 
