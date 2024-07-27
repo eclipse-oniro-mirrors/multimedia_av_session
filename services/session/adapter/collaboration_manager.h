@@ -38,6 +38,17 @@ public:
     std::function<void(const std::string callbackName, bool flag)> sendRejectStateToStopCast_;
 
 private:
+    const int32_t remoteHardwareListSize_ = 2;
+    const int32_t localHardwareListSize_ = 0;
+    const std::string serviceName_ = "URLCasting";
+    constexpr const std::string dataType_ = "DATA_TYPE_BYTES";
+    PluginLib pluginLib_ {"/system/lib64/libcfwk_allconnect_client.z.so"};
+    ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest_ =
+        new ServiceCollaborationManager_ResourceRequestInfoSets();
+    ServiceCollaborationManager_API exportapi_;
+
+    using CollaborationManagerExportFunType = int32_t (*)(ServiceCollaborationManager_API *exportapi);
+    CollaborationManagerExportFunType collaborationManagerExportFun_;
     ServiceCollaborationManager_HardwareRequestInfo localHardwareList_ = {
     .hardWareType = ServiceCollaborationManagerHardwareType::SCM_UNKNOWN_TYPE,
     .canShare = false
@@ -59,17 +70,6 @@ private:
         .maxWaitTime = 60000,
         .dataType = dataType_.c_str()
     };
-    const int32_t remoteHardwareListSize_ = 2;
-    const int32_t localHardwareListSize_ = 0;
-    const std::string serviceName_ = "URLCasting";
-    constexpr const std::string dataType_ = "DATA_TYPE_BYTES";
-    PluginLib pluginLib_ {"/system/lib64/libcfwk_allconnect_client.z.so"};
-    ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest_ =
-        new ServiceCollaborationManager_ResourceRequestInfoSets();
-    ServiceCollaborationManager_API exportapi_;
-
-    using CollaborationManagerExportFunType = int32_t (*)(ServiceCollaborationManager_API *exportapi);
-    CollaborationManagerExportFunType collaborationManagerExportFun_;
 };
 }   // namespace OHOS::AVSession
 #endif //COLLABORATION_MANAGER_H
