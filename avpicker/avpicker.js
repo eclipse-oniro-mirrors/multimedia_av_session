@@ -70,9 +70,10 @@ export class AVCastPicker extends ViewPU {
         this.onStateChange = undefined;
         this.extensionProxy = null;
         this.pickerClickTime = -1;
+        this.customPicker = undefined;
         this.__configurationColorMode =
             new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
-        this.customPicker = undefined;
+        this.__deviceInfoType = new ObservedPropertySimplePU('', this, 'deviceInfoType');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -121,6 +122,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.configurationColorMode !== undefined) {
             this.configurationColorMode = c11.configurationColorMode;
         }
+        if (c11.deviceInfoType !== undefined) {
+            this.deviceInfoType = c11.deviceInfoType;
+        }
     }
 
     updateStateVars(b11) {
@@ -137,6 +141,7 @@ export class AVCastPicker extends ViewPU {
         this.__isMenuShow.purgeDependencyOnElmtId(a11);
         this.__touchMenuItemIndex.purgeDependencyOnElmtId(a11);
         this.__configurationColorMode.purgeDependencyOnElmtId(a11);
+        this.__deviceInfoType.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -150,6 +155,7 @@ export class AVCastPicker extends ViewPU {
         this.__isMenuShow.aboutToBeDeleted();
         this.__touchMenuItemIndex.aboutToBeDeleted();
         this.__configurationColorMode.aboutToBeDeleted();
+        this.__deviceInfoType.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -234,6 +240,14 @@ export class AVCastPicker extends ViewPU {
         this.__configurationColorMode.set(a1);
     }
 
+    get deviceInfoType() {
+        return this.__deviceInfoType.get();
+    }
+
+    set deviceInfoType(b1) {
+        this.__deviceInfoType.set(b1);
+    }
+
     MenuStateChange() {
         if (this.extensionProxy != null) {
             this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
@@ -259,6 +273,43 @@ export class AVCastPicker extends ViewPU {
         }, If);
         If.pop();
         Column.pop();
+    }
+
+    buildIcon(b3, c3, d3 = null) {
+        this.observeComponentCreation2((f3, g3) => {
+            If.create();
+            if (this.deviceInfoType === 'true') {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((n3, o3) => {
+                        SymbolGlyph.create(!c3 ? { 'id': -1, 'type': -1, params: [b3.deviceIconName],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                            { 'id': -1, 'type': -1, params: [b3.selectedIconName],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        SymbolGlyph.fontSize(24);
+                        SymbolGlyph.fontColor((c3 && this.configurationColorMode !==
+                            ConfigurationColorMode.COLOR_MODE_DARK) ? ['#0A59F7'] :
+                            [{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                        SymbolGlyph.renderingStrategy(2);
+                    }, SymbolGlyph);
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((j3, k3) => {
+                        Image.create(!c3 ? { 'id': -1, 'type': -1,
+                            params: [b3.deviceIconName], 'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': -1, params: [b3.selectedIconName],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Image.width(24);
+                        Image.height(24);
+                        Image.fillColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? '#0A59F7' :
+                            { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                    }, Image);
+                });
+            }
+        }, If);
+        If.pop();
     }
 
     deviceMenu(o8 = null) {
@@ -311,14 +362,7 @@ export class AVCastPicker extends ViewPU {
                     Row.justifyContent(FlexAlign.Start);
                     Row.alignItems(VerticalAlign.Center);
                 }, Row);
-                this.observeComponentCreation2((y9, z9) => {
-                    Image.create({ 'id': -1, 'type': -1,
-                        params: [x8.deviceIconName], 'bundleName': '__harDefaultModuleName__',
-                        'moduleName': '__harDefaultModuleName__' });
-                    Image.width(24);
-                    Image.height(24);
-                    Image.fillColor(this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000');
-                }, Image);
+                this.buildIcon.bind(this)(x8, false);
                 this.observeComponentCreation2((w9, x9) => {
                     Text.create(x8.deviceName);
                     Text.fontSize({ 'id': -1, 'type': 10002,
@@ -349,19 +393,10 @@ export class AVCastPicker extends ViewPU {
                                 Row.justifyContent(FlexAlign.Start);
                                 Row.alignItems(VerticalAlign.Center);
                             }, Row);
-                            this.observeComponentCreation2((s9, t9) => {
-                                Image.create({ 'id': -1, 'type': -1,
-                                    params: [x8.selectedIconName], 'bundleName': '__harDefaultModuleName__',
-                                    'moduleName': '__harDefaultModuleName__' });
-                                Image.width(24);
-                                Image.height(24);
-                                Image.fillColor(this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
-                                    '#DBFFFFFF' : '#0A59F7');
-                            }, Image);
+                            this.buildIcon.bind(this)(x8, true);
                             Row.pop();
                         });
-                    }
-                    else {
+                    } else {
                         this.ifElseBranchUpdateFunction(1, () => {
                         });
                     }
@@ -415,6 +450,11 @@ export class AVCastPicker extends ViewPU {
                 this.extensionProxy = n8;
             });
             UIExtensionComponent.onReceive((l8) => {
+                if (JSON.stringify(l8.deviceInfoType) !== undefined) {
+                    console.info(TAG, `deviceInfoType : ${JSON.stringify(l8.deviceInfoType)}`);
+                    this.deviceInfoType = l8.deviceInfoType;
+                }
+
                 if (JSON.stringify(l8.pickerStyle) !== undefined) {
                     console.info(TAG, `picker style : ${JSON.stringify(l8.pickerStyle)}`);
                     this.pickerStyleFromMediaController = l8.pickerStyle;
