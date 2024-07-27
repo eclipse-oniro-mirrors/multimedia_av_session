@@ -41,7 +41,7 @@ private:
     const int32_t remoteHardwareListSize_ = 2;
     const int32_t localHardwareListSize_ = 0;
     const std::string serviceName_ = "URLCasting";
-    constexpr const std::string dataType_ = "DATA_TYPE_BYTES";
+    const std::string dataType_ = "DATA_TYPE_BYTES";
     PluginLib pluginLib_ {"/system/lib64/libcfwk_allconnect_client.z.so"};
     ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest_ =
         new ServiceCollaborationManager_ResourceRequestInfoSets();
