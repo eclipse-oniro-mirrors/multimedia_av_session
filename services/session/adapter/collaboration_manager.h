@@ -49,7 +49,7 @@ private:
     ServiceCollaborationManager_API exportapi_;
 
     using CollaborationManagerExportFunType = int32_t (*)(ServiceCollaborationManager_API *exportapi);
-    CollaborationManagerExportFunType remoteHardwareList_;
+    CollaborationManagerExportFunType collaborationManagerExportFun_;
     ServiceCollaborationManager_HardwareRequestInfo localHardwareList_;
     ServiceCollaborationManager_HardwareRequestInfo remoteHardwareList_[2];
     ServiceCollaborationManager_CommunicationRequestInfo communicationRequest_;
