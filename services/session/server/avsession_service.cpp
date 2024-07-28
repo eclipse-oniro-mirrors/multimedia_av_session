@@ -1715,7 +1715,7 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
-    SLOGI("Start get cast controller");
+    SLOGI("Start get cast controller with pid %{public}d", static_cast<int>(GetCallingPid()));
     auto session = GetContainer().GetSessionById(sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "StopCast: session is not exist");
     auto result = session->GetAVCastControllerInner();
