@@ -171,7 +171,7 @@ int32_t AVControlCommand::GetForwardTime(int64_t& forwardTime) const
 
 int32_t AVControlCommand::SetRewindTime(int64_t rewindTime)
 {
-    SLOGD("SetRewindTime with time %{public}jd", static_cast<int64_t>(rewindTime));
+    SLOGE("SetRewindTime with time %{public}jd", static_cast<int64_t>(rewindTime));
     if (rewindTime < 0) {
         SLOGE("SetRewindTime error");
         return ERR_INVALID_PARAM;

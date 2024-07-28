@@ -45,8 +45,9 @@ public:
             return;
         }
 
-        size_t imgBufferSize = innerPixelMap->GetInnerImgBuffer().size();
-        SLOGI("imgBufferSize=%{public}zu", imgBufferSize);
+        std::vector<uint8_t> tempBuffer = innerPixelMap->GetInnerImgBuffer();
+        size_t imgBufferSize = tempBuffer.size();
+        SLOGI("write img to file with imgBufferSize=%{public}zu", imgBufferSize);
         if (imgBufferSize > MAX_FILE_SIZE || imgBufferSize <= 0) {
             SLOGE("error, dataSize larger than %{public}d or invalid", MAX_FILE_SIZE);
             return;
@@ -59,7 +60,8 @@ public:
         }
 
         ofile.write((char*)&imgBufferSize, sizeof(size_t));
-        ofile.write((char*)(&(innerPixelMap->GetInnerImgBuffer()[0])), imgBufferSize);
+        SLOGI("write imgBuffer after write size %{public}zu", imgBufferSize);
+        ofile.write((char*)(&(tempBuffer[0])), imgBufferSize);
         ofile.close();
     }
 
@@ -94,7 +96,7 @@ public:
         }
         std::vector<std::uint8_t> imgBuffer(imgBufferSize);
         ifile.read((char*)&imgBuffer[0], imgBufferSize);
-        SLOGD("imgBuffer read done");
+        SLOGD("imgBuffer prepare set");
         innerPixelMap->SetInnerImgBuffer(imgBuffer);
         SLOGI("imgBuffer SetInnerImgBuffer done");
         ifile.close();
@@ -123,7 +125,7 @@ public:
     {
         return CACHE_PATH_NAME;
     }
-    
+
     static const char* GetFixedPathName()
     {
         return FIXED_PATH_NAME;

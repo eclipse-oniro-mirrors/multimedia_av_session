@@ -33,6 +33,7 @@ void AVSessionSysEvent::AddOperationCount(Operation operation)
     auto it = optCounts_.find(operation);
     if (it == optCounts_.end()) {
         optCounts_.insert(std::make_pair(operation, 0));
+        it = optCounts_.find(operation);
     }
     it->second++;
 }
