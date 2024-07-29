@@ -65,16 +65,6 @@ AVSessionItem::~AVSessionItem()
         SLOGI("destroy with activate session, try deactivate it");
         Deactivate();
     }
-    std::lock_guard lockGuard(destroyLock_);
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
-    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
-        SLOGW("Session destroy at source, release cast");
-        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
-        this->ReleaseCast();
-    }
-    this->StopCastDisplayListener();
-#endif
 }
 
 // LCOV_EXCL_START
@@ -140,6 +130,15 @@ int32_t AVSessionItem::DestroyTask()
     for (auto& controller : controllerList) {
         controller->HandleSessionDestroy();
     }
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
+    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+        SLOGW("Session destroy at source, release cast");
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+        ReleaseCast();
+    }
+    StopCastDisplayListener();
+#endif
     SLOGI("session destroy success");
     return AVSESSION_SUCCESS;
 }
