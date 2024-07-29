@@ -16,6 +16,9 @@
 #ifndef OHOS_AVSESSION_PIXEL_MAP_ADAPTER_H
 #define OHOS_AVSESSION_PIXEL_MAP_ADAPTER_H
 
+#include <cstdint>
+#include <map>
+#include <list>
 #include "avsession_pixel_map.h"
 #include "pixel_map.h"
 

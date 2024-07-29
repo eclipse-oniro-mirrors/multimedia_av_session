@@ -210,7 +210,7 @@ public:
     void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
     void OnEndOfStream(const int32_t isLooping) override;
     void OnPlayRequest(const AVQueueItem& avQueueItem) override;
-    void OnKeyRequest(const std::string &mediaId, const std::vector<uint8_t> &keyRequestData) override;
+    void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
     void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override;
 
     bool IsCallbacksEmpty(int32_t event);
