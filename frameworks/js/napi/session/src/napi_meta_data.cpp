@@ -688,6 +688,7 @@ napi_status NapiMetaData::GetDrmSchemes(napi_env env, napi_value in, AVMetaData&
     auto status = NapiUtils::GetNamedProperty(env, in, "drmSchemes", property);
     CHECK_RETURN(status == napi_ok, "get property drmSchemes failed", status);
     out.SetDrmSchemes(property);
+    SLOGI("property %{public}lu", property.size());
     return status;
 }
 
