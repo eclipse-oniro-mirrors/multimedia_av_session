@@ -67,6 +67,8 @@ public:
 
     virtual int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) = 0;
 
+    virtual int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) = 0;
+
     virtual int32_t ProvideKeyResponse(std::string& assetId, const std::vector<uint8_t>& response) = 0;
 
     virtual int32_t AddAvailableCommand(const int32_t cmd) = 0;
