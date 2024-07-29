@@ -212,7 +212,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
-    mediaInfo.drmType = mediaDescription->GetDrmScheme();  
+    mediaInfo.drmType = mediaDescription->GetDrmScheme();
     std::lock_guard lockGuard(streamPlayerLock_);
     SLOGI("mediaInfo media is %{public}s %{public}s", mediaInfo.albumCoverUrl.c_str(), mediaInfo.mediaUrl.c_str());
     if (!streamPlayer_) {
