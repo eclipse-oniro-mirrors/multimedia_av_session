@@ -50,7 +50,8 @@ public:
         MEDIA_DESCRIPTION_KEY_START_POSITION = 17,
         MEDIA_DESCRIPTION_KEY_CREDITS_POSITION = 18,
         MEDIA_DESCRIPTION_KEY_APP_NAME = 19,
-        MEDIA_DESCRIPTION_KEY_MAX = 20,
+        MEDIA_DESCRIPTION_KEY_DRM_SCHEME = 20,
+        MEDIA_DESCRIPTION_KEY_MAX = 21,
     };
 
     AVMediaDescription() = default;
@@ -119,7 +120,10 @@ public:
 
     void SetAppName(const std::string& appName);
     std::string GetAppName() const;
-    
+
+    void SetDrmScheme(const std::string& drmScheme);
+    std::string GetDrmScheme() const;
+
     bool IsValid() const;
 
     void Reset();
@@ -145,6 +149,7 @@ private:
     int32_t startPosition_ = 0;
     int32_t creditsPosition_ = 0;
     std::string appName_ = "";
+    std::string drmScheme_ = "";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVMEDIA_DESCRIPTION_H

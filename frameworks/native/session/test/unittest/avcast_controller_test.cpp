@@ -485,6 +485,19 @@ HWTEST_F(AVCastControllerTest, SetDisplaySurface001, TestSize.Level1)
 }
 
 /**
+* @tc.name: ProcessMediaKeyResponse001
+* @tc.desc: ProcessMediaKeyResponse
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, ProcessMediaKeyResponse001, TestSize.Level1)
+{
+    std::string assetId = "assetId";
+    std::vector<uint8_t> response;
+    EXPECT_EQ(castController_->ProcessMediaKeyResponse(assetId, response), AVSESSION_ERROR);
+}
+
+/**
 * @tc.name: SetCastPlaybackFilter001
 * @tc.desc: SetCastPlaybackFilter
 * @tc.type: FUNC

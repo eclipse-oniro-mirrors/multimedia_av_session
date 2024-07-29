@@ -72,6 +72,8 @@ public:
 
     int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
 
+    int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) override;
+
     int32_t ProvideKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response);
 
     bool RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);

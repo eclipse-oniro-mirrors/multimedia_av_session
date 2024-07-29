@@ -51,7 +51,7 @@ void AVRouterTest::TearDown()
 static HWTEST_F(AVRouterTest, StartCastDiscovery001, TestSize.Level1)
 {
     SLOGI("StartCastDiscovery001 begin");
-    auto ret = AVRouter::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL);
+    auto ret = AVRouter::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL, {});
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("StartCastDiscovery001 end");
 }
@@ -65,7 +65,7 @@ static HWTEST_F(AVRouterTest, StartCastDiscovery001, TestSize.Level1)
 static HWTEST_F(AVRouterTest, StartCastDiscovery002, TestSize.Level1)
 {
     SLOGI("StartCastDiscovery001 begin");
-    auto ret = AVRouter::GetInstance().StartCastDiscovery(-1);
+    auto ret = AVRouter::GetInstance().StartCastDiscovery(-1, {});
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("StartCastDiscovery001 end");
 }
@@ -79,7 +79,7 @@ static HWTEST_F(AVRouterTest, StartCastDiscovery002, TestSize.Level1)
 static HWTEST_F(AVRouterTest, StopCastDiscovery001, TestSize.Level1)
 {
     SLOGI("StopCastDiscovery001 begin");
-    auto ret = AVRouter::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL);
+    auto ret = AVRouter::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL, {});
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     ret = AVRouter::GetInstance().StopCastDiscovery();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);

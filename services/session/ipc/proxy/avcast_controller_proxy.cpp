@@ -235,6 +235,47 @@ int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
+int32_t AVCastControllerProxy::ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response)
+{
+    AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::ProcessMediaKeyResponse");
+    MessageParcel parcel;
+    MessageParcel reply;
+    MessageOption option;
+    auto len = response.size();
+    if (len > parcel.GetDataCapacity()) {
+        SLOGD("ProcessMediaKeyResponse SetDataCapacity totalSize: %lu", len);
+        parcel.SetMaxCapacity(len + len);
+        parcel.SetDataCapacity(len);
+    }
+ 
+    if (!parcel.WriteInterfaceToken(GetDescriptor())) {
+        SLOGE("Failed to write the interface token");
+        return AVSESSION_ERROR;
+    }
+    if (!parcel.WriteString(assetId)) {
+        SLOGE("Failed to write assetId");
+        return AVSESSION_ERROR;
+    }
+ 
+    if (!parcel.WriteInt32(response.size())) {
+        SLOGE("Failed to write response size");
+        return AVSESSION_ERROR;
+    }
+    if (len != 0) {
+        if (!parcel.WriteBuffer(response.data(), len)) {
+            SLOGE("AVCastControllerProxy ProcessMediaKeyResponse write response failed");
+            return IPC_PROXY_ERR;
+        }
+    }
+ 
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_PROVIDE_KEY_RESPONSE, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+ 
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
 int32_t AVCastControllerProxy::ProvideKeyResponse(std::string& assetId, const std::vector<uint8_t>& response)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::ProvideKeyResponse");
