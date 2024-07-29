@@ -196,10 +196,10 @@ static napi_value ExportCastDisplayState(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
- 
+
     (void)SetNamedProperty(env, result, "STATE_OFF", static_cast<int32_t>(CastDisplayState::STATE_OFF));
     (void)SetNamedProperty(env, result, "STATE_ON", static_cast<int32_t>(CastDisplayState::STATE_ON));
- 
+
     napi_object_freeze(env, result);
     return result;
 }
