@@ -160,7 +160,7 @@ public:
     void OnAVCallHangUp() override {};
     void OnAVCallToggleCallMute() override {};
     void OnPlayFromAssetId(int64_t assetId) override;
-    void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
+    void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
 
     ~AVSessionCallbackImpl() override;
 };
@@ -240,6 +240,12 @@ void AVSessionCallbackImpl::OnPlayFromAssetId(int64_t assetId)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlayFromAssetId %{public}d", g_onCall);
+}
+
+void AVSessionCallbackImpl::OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo)
+{
+    SLOGE("OnCastDisplayChange");
+    g_onCall = AVSESSION_SUCCESS;
 }
 
 AVSessionCallbackImpl::~AVSessionCallbackImpl()
@@ -996,5 +1002,21 @@ HWTEST_F(AvsessionTest, GetExtras001, TestSize.Level1)
     EXPECT_EQ(avsession_->GetExtras(wantParamsOut), AVSESSION_SUCCESS);
     SLOGD("GetExtras001 End");
 }
+ 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+/**
+* @tc.name: GetAllCastDisplays001
+* @tc.desc: get all cast displays
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, GetAllCastDisplays001, TestSize.Level1)
+{
+    SLOGD("GetAllCastDisplays001 Begin");
+    std::vector<CastDisplayInfo> castDisplays;
+    EXPECT_EQ(avsession_->GetAllCastDisplays(castDisplays), AVSESSION_SUCCESS);
+    SLOGD("GetAllCastDisplays001 End");
+}
+#endif
 } // namespace AVSession
 } // namespace OHOS
