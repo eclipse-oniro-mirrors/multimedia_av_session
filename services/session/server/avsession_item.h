@@ -22,6 +22,8 @@
 
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
+#include "avsession_display_interface.h"
+#include "avsession_dynamic_loader.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"
@@ -30,7 +32,6 @@
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
-#include "hw_cast_display_listener.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -275,6 +276,7 @@ private:
     void HandleFrontSession();
     int32_t doContinuousTaskRegister();
     int32_t doContinuousTaskUnregister();
+    AVSessionDisplayIntf* GetAVSessionDisplayIntf();
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -361,6 +363,11 @@ private:
     volatile bool isDestroyed_ = false;
 
     std::recursive_mutex metaDataLock_;
+
+    std::recursive_mutex displayListenerLock_;
+    AVSessionDisplayIntf *avsessionDisaplayIntf_;
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
@@ -383,8 +390,6 @@ private:
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
-    sptr<HwCastDisplayListener> displayListener_;
-    std::recursive_mutex displayListenerLock_;
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
