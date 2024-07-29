@@ -66,7 +66,6 @@ ohos_shared_library("avsession_service") {
     "adapter/bundle_status_adapter.cpp",
     "adapter/key_event_adapter.cpp",
     "adapter/params_config_operator.cpp",
-    "adapter/permission_checker.cpp",
     "adapter/session_xcollie.cpp",
   ]
 
@@ -222,7 +221,7 @@ if (castplus_cast_engine_enable) {
       "server/hw_cast_stream_player.cpp",
     ]
 
-    adapter_sources = [ "adapter/permission_checker.cpp" ]
+    adapter_sources = []
 
     sources = ipc_sources + adapter_sources + service_sources
 
@@ -343,7 +342,6 @@ ohos_shared_library("avsession_item") {
   adapter_sources = [
     "adapter/bundle_status_adapter.cpp",
     "adapter/command_send_limit.cpp",
-    "adapter/permission_checker.cpp",
     "adapter/session_xcollie.cpp",
   ]
 
