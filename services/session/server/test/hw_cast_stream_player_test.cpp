@@ -626,6 +626,24 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnKeyRequest001
+ * @tc.desc: OnKeyRequest
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest001, TestSize.Level1)
+{
+    SLOGI("OnKeyRequest001 begin!");
+    std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
+    ASSERT_EQ(hwCastStreamPlayer->RegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+    std::string assetId = "assetId";
+    std::vector<uint8_t> keyRequestData;
+    hwCastStreamPlayer->OnKeyRequest(assetId, keyRequestData);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+    SLOGI("OnKeyRequest001 end!");
+}
+
+/**
  * @tc.name: SetValidAbility001
  * @tc.desc: SetValidAbility to cast
  * @tc.type: FUNC

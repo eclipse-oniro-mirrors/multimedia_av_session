@@ -239,7 +239,7 @@ int32_t AVSessionCallbackStub::HandleOnPlayFromAssetId(MessageParcel& data, Mess
     OnPlayFromAssetId(assetId);
     return ERR_NONE;
 }
-
+ 
 int32_t AVSessionCallbackStub::HandleOnCastDisplayChange(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnCastDisplayChange");
@@ -250,7 +250,7 @@ int32_t AVSessionCallbackStub::HandleOnCastDisplayChange(MessageParcel& data, Me
     uint64_t displayId = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadUint64(displayId), ERR_NONE, "read displayId failed");
     castDisplayInfo.displayId = displayId;
-    std::string name = "";
+    std::string name{};
     CHECK_AND_RETURN_RET_LOG(data.ReadString(name), ERR_NONE, "read name failed");
     castDisplayInfo.name = name;
     int32_t width = -1;

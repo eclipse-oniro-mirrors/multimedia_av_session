@@ -30,6 +30,7 @@
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
+#include "hw_cast_display_listener.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -236,11 +237,11 @@ public:
     void StopCastSession();
 
     int32_t StartCastDisplayListener() override;
-
+ 
     int32_t StopCastDisplayListener() override;
-
+ 
     void GetDisplayListener(sptr<IAVSessionCallback> callback);
-
+ 
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
 #endif
 

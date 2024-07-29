@@ -164,24 +164,28 @@ void AVCastControllerCallbackProxy::OnKeyRequest(const std::string &assetId, con
 {
     SLOGI("OnKeyRequest in proxy");
     MessageParcel parcel;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    auto len = keyRequestData.size();
+    if (len > parcel.GetDataCapacity()) {
+        SLOGI("OnKeyRequest SetDataCapacity totalSize: %lu", len);
+        parcel.SetMaxCapacity(len + len);
+        parcel.SetDataCapacity(len);
+    }
     CHECK_AND_RETURN_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
     CHECK_AND_RETURN_LOG(parcel.WriteString(assetId), "write assetId failed");
-    CHECK_AND_RETURN_LOG(parcel.WriteInt32(keyRequestData.size()), "write keyRequestData failed");
-    uint32_t requestMaxLen = 8 * 1024 * 1024;
-    CHECK_AND_RETURN_LOG(keyRequestData.size() < requestMaxLen, "The size of keyRequestData is too large");
+    CHECK_AND_RETURN_LOG(parcel.WriteInt32(keyRequestData.size()), "Write keyRequestData failed");
     if (keyRequestData.size() != 0) {
         if (!parcel.WriteBuffer(keyRequestData.data(), keyRequestData.size())) {
             SLOGE("AVCastControllerCallbackProxy OnKeyRequest write keyRequestData failed");
             return;
         }
     }
-    MessageParcel reply;
-    MessageOption option = { MessageOption::TF_ASYNC };
     auto remote = Remote();
     CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
     SLOGI("OnKeyRequest in proxy to send request");
     CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_KEY_REQUEST, parcel, reply, option) == 0,
-                         "send request failed");
+        "send request failed");
     SLOGI("OnKeyRequest in proxy done");
 }
 

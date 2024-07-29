@@ -149,6 +149,16 @@ public:
      * @since 10
     */
     virtual int32_t SetDisplaySurface(std::string& surfaceId) = 0;
+ 
+    /**
+     * @brief Provide key response for drm request.
+     *
+     * @param { std::string& } assetId - AssetId required for drm response.
+     * @param { std::vector<uint8_t> } response - Response required for drm request.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 10
+    */
+    virtual int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) = 0;
 
     /**
      * @brief Provide key response for drm request.

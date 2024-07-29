@@ -107,7 +107,7 @@ public:
     void OnAVCallHangUp() override {};
     void OnAVCallToggleCallMute() override {};
     void OnPlayFromAssetId(int64_t assetId) override;
-    void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
+    void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
 
     ~AVSessionCallbackImpl() override;
 };
@@ -198,6 +198,12 @@ void AVSessionCallbackImpl::OnPlayFromAssetId(int64_t assetId)
     SLOGI("OnPlayFromAssetId %{public}d", g_onCall);
 }
 
+void AVSessionCallbackImpl::OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo)
+{
+    SLOGI("OnCastDisplayChange");
+    g_onCall = AVSESSION_SUCCESS;
+}
+ 
 AVSessionCallbackImpl::~AVSessionCallbackImpl()
 {
 }

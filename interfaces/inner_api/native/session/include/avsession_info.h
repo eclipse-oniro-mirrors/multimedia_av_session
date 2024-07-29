@@ -113,7 +113,7 @@ public:
 
     virtual void OnPlayRequest(const AVQueueItem& avQueueItem) = 0;
 
-    virtual void OnKeyRequest(std::string& assetId, const std::vector<uint8_t>& keyRequestData) = 0;
+    virtual void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) = 0;
 
     virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
@@ -406,7 +406,7 @@ public:
 
     virtual void OnPlayRequest(const AVQueueItem& avQueueItem) = 0;
 
-    virtual void OnKeyRequest(std::string& assetId, const std::vector<uint8_t>& keyRequestData) = 0;
+    virtual void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) = 0;
 
     virtual void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) = 0;
 

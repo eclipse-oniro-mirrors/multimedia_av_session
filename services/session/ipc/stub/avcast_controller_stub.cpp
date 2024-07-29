@@ -207,6 +207,21 @@ int32_t AVCastControllerStub::HandleProvideKeyResponse(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
+int32_t AVCastControllerStub::HandleProcessMediaKeyResponse(MessageParcel& data, MessageParcel& reply)
+{
+    std::string assetId = data.ReadString();
+    std::vector<uint8_t> response;
+    uint32_t responseSize = data.ReadInt32();
+    const uint8_t *responseBuf = data.ReadBuffer(static_cast<size_t>(responseSize));
+    if (responseSize == 0 || responseBuf == nullptr) {
+        SLOGE("invalid buffer, len = %{public}u", responseSize);
+        return ERR_NULL_OBJECT;
+    }
+    response.assign(responseBuf, responseBuf + responseSize);
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(ProcessMediaKeyResponse(assetId, response)), "write int32 failed");
+    return ERR_NONE;
+}
+
 int32_t AVCastControllerStub::HandleAddAvailableCommand(MessageParcel& data, MessageParcel& reply)
 {
     int32_t cmd = data.ReadInt32();
