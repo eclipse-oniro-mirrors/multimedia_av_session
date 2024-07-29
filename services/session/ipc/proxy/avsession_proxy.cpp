@@ -592,7 +592,7 @@ int32_t AVSessionProxy::StartCastDisplayListener()
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_START_CAST_DISPLAY_LISTENER, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-
+ 
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
@@ -609,7 +609,7 @@ int32_t AVSessionProxy::StopCastDisplayListener()
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_STOP_CAST_DISPLAY_LISTENER, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-
+ 
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
@@ -626,7 +626,7 @@ int32_t AVSessionProxy::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDis
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_ALL_CAST_DISPLAYS, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-
+ 
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_MARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
