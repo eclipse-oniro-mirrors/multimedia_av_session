@@ -161,10 +161,10 @@ int32_t AVSessionManagerImpl::GetHistoricalSessionDescriptors(int32_t maxSize,
 }
 
 int32_t AVSessionManagerImpl::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
-    std::vector<AVQueueInfo>& avQueueInfo)
+    std::vector<AVQueueInfo>& avQueueInfos)
 {
     auto service = GetService();
-    return service ? service->GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfo) : ERR_SERVICE_NOT_EXIST;
+    return service ? service->GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::StartAVPlayback(const std::string& bundleName, const std::string& assetId)

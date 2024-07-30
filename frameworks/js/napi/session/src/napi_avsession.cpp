@@ -449,14 +449,13 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
 {
     SLOGI("do metadata set with online download prepare with uri alive");
     auto uri = data.GetMediaImageUri();
-    CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, AVSESSION_ERROR, "doMetaDataSet with no session");
     int32_t ret = sessionPtr->SetAVMetaData(data);
     if (ret != AVSESSION_SUCCESS) {
         processErrMsg(context, ret);
     } else if (data.GetMediaImage() == nullptr) {
         ret = DoDownload(data, uri);
         SLOGI("DoDownload complete with ret %{public}d", ret);
-        CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, AVSESSION_ERROR, "doMetaDataSet without session");
+        CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, false, "doMetaDataSet without session");
         if (ret != AVSESSION_SUCCESS) {
             SLOGE("DoDownload failed but not repeat setmetadata again");
         } else {
