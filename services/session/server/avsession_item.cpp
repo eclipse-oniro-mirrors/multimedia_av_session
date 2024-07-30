@@ -46,9 +46,6 @@
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
-static const std::string SOURCE_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
-    std::string("platformsdk/libsuspend_manager_client.z.so");
-
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
     : descriptor_(descriptor)
 {
@@ -1655,12 +1652,7 @@ int32_t AVSessionItem::doContinuousTaskRegister()
     std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
     CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
 
-    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check libsuspend_manager_client path failed %{public}s", SOURCE_LIBRARY_PATH.c_str());
-        return AVSESSION_ERROR;
-    }
-    void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
+    void *handle_ = dlopen("libsuspend_manager_client.z.so", RTLD_NOW);
     if (handle_ == nullptr) {
         SLOGE("failed to open library libsuspend_manager_client reaseon %{public}s", dlerror());
         return AVSESSION_ERROR;
@@ -1689,12 +1681,7 @@ int32_t AVSessionItem::doContinuousTaskUnregister()
     std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
     CHECK_AND_RETURN_RET_LOG(bundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
 
-    char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(SOURCE_LIBRARY_PATH.c_str(), sourceLibraryRealPath) == nullptr) {
-        SLOGE("check libsuspend_manager_client path failed %{public}s when stop cast", SOURCE_LIBRARY_PATH.c_str());
-        return AVSESSION_ERROR;
-    }
-    void *handle_ = dlopen(sourceLibraryRealPath, RTLD_NOW);
+    void *handle_ = dlopen("libsuspend_manager_client.z.so", RTLD_NOW);
     if (handle_ == nullptr) {
         SLOGE("failed to open library libsuspend_manager_client when stop cast, reaseon %{public}s", dlerror());
         return AVSESSION_ERROR;
