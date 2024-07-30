@@ -61,6 +61,10 @@ static ISocketListener iSessionListener = {
 
 int32_t SoftbusSessionManager::Socket(const std::string &pkgName)
 {
+    if (pkgName.c_str() == nullptr) {
+        SLOGE("pkg name is null");
+        return AVSESSION_ERROR;
+    }
     SocketInfo info = {
         .name = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG.c_str()),
         .pkgName = const_cast<char *>(pkgName.c_str()),
@@ -98,6 +102,7 @@ int32_t SoftbusSessionManager::SendMessage(int32_t socket, const std::string &da
     int ret = ::SendMessage(socket, data.c_str(), data.length());
     if (ret != 0) {
         SLOGE("SendMessage error, ret = %{public}d", ret);
+        return AVSESSION_ERROR;
     }
     return ret;
 }

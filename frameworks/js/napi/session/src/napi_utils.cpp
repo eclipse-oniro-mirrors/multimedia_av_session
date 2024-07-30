@@ -342,9 +342,8 @@ napi_status NapiUtils::SetValue(napi_env env, const AVQueueInfo& in, napi_value&
         property = Media::PixelMapNapi::CreatePixelMap(env, AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
         status = napi_set_named_property(env, out, "avQueueImage", property);
         CHECK_RETURN(status == napi_ok, "set property failed", status);
-        return napi_ok;
     }
-    
+
     auto uri = in.GetAVQueueImageUri();
     if (!uri.empty()) {
         SLOGD(" napi setvalue has avqueueimageuri");

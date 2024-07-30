@@ -463,7 +463,8 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnVolumeChanged001, TestSize.Level1)
     EXPECT_EQ(streamplayer != nullptr, true);
     streamplayer->Init();
     int volume = 0;
-    streamplayer->OnVolumeChanged(volume);
+    int maxVolume = 0;
+    streamplayer->OnVolumeChanged(volume, maxVolume);
     SLOGI("HwCastStreamPlayerOnVolumeChanged001 end!");
 }
 
@@ -748,7 +749,7 @@ public:
         return 0;
     };
 
-    int GetVolume(int32_t &volume) override
+    int GetVolume(int32_t &volume, int32_t &maxVolume) override
     {
         return 0;
     };

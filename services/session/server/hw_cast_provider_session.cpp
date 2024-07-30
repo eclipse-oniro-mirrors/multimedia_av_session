@@ -41,8 +41,8 @@ void HwCastProviderSession::Release()
         SLOGE("castSession_ is not exist");
         return;
     }
-    self->castSession_->Release();
-    self->castSession_ = nullptr;
+    castSession_->Release();
+    castSession_ = nullptr;
 }
 
 bool HwCastProviderSession::AddDevice(const std::string deviceId)
@@ -163,7 +163,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         deviceInfo.deviceName_ = "RemoteCast";
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
         if (listener != nullptr) {
-            SLOGI("trigger the OnCastStateChange for registered listeners");
+            SLOGI("trigger the OnCastStateChange for registered listener");
             listener->OnCastStateChange(static_cast<int>(deviceState), deviceInfo);
         }
     }

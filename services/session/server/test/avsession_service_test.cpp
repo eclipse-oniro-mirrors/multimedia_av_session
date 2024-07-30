@@ -43,8 +43,6 @@ using namespace testing::ext;
 using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 using namespace OHOS::AudioStandard;
-
-
 static AVMetaData g_metaData;
 static AVPlaybackState g_playbackState;
 static char g_testSessionTag[] = "test";
@@ -689,8 +687,6 @@ static HWTEST_F(AVSessionServiceTest, MirrorToStreamCast002, TestSize.Level1)
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
     avservice_->is2in1_ = false;
-    avservice_->castServiceNameMapState_["TempCast"] == avservice_->deviceStateConnection;
-    avservice_->castServiceNameMapState_["TempCast-Dual"] == avservice_->deviceStateConnection;
     avservice_->MirrorToStreamCast(avsessionHere_);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
@@ -710,8 +706,6 @@ static HWTEST_F(AVSessionServiceTest, MirrorToStreamCast003, TestSize.Level1)
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
     avservice_->is2in1_ = true;
-    avservice_->castServiceNameMapState_["TempCast"] == avservice_->deviceStateConnection;
-    avservice_->castServiceNameMapState_["TempCast-Dual"] == avservice_->deviceStateConnection;
     avservice_->MirrorToStreamCast(avsessionHere_);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
