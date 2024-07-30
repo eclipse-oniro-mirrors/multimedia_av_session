@@ -318,7 +318,7 @@ int32_t AVSessionServiceProxy::CreateControllerInner(const std::string& sessionI
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
+    if (ret == AVSESSION_SUCCESS || ret == ERR_CONTROLLER_IS_EXIST) {
         object = reply.ReadRemoteObject();
     }
     return ret;
