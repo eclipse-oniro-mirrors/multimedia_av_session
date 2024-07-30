@@ -151,7 +151,7 @@ int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId)
     }
     if (resourceRequest_ == nullptr) {
         SLOGE("resourceRequest_ is nullptr");
-        reutrn AVSESSION_ERROR;
+        return AVSESSION_ERROR;
     }
     resourceRequest_->localHardwareListSize = localHardwareListSize_;
     resourceRequest_->localHardwareList = &localHardwareList_;
