@@ -33,7 +33,7 @@
 
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
-#include "collaboration_manager.h"
+#include "hw_cast_display_listener.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -195,7 +195,7 @@ public:
 
     void SetServiceCallbackForAVQueueInfo(const std::function<void(AVSessionItem&)>& callback);
 
-    void SetServiceCallbackForUpdateSession(const std::function<void(sptr<AVSessionItem>&, bool)>& callback);
+    void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void InitializeCastCommands();
@@ -244,11 +244,11 @@ public:
     void StopCastSession();
 
     int32_t StartCastDisplayListener() override;
-
+ 
     int32_t StopCastDisplayListener() override;
-
+ 
     void GetDisplayListener(sptr<IAVSessionCallback> callback);
-
+ 
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
 #endif
 
@@ -356,7 +356,7 @@ private:
     std::recursive_mutex wantParamLock_;
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
-    std::function<void(sptr<AVSessionItem>&, bool)> serviceCallbackForUpdateSession_;
+    std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
 

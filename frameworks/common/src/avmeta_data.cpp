@@ -101,12 +101,12 @@ bool AVMetaData::UnmarshallingCheckImageTask(Parcel& data, AVMetaData *result)
 {
     result->mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->metaMask_.test(META_KEY_MEDIA_IMAGE) && result->mediaImage_ == nullptr) {
-        SLOGE("read avqueue PixelMap failed");
+        SLOGE("read PixelMap failed");
         return false;
     }
     result->avQueueImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->metaMask_.test(META_KEY_AVQUEUE_IMAGE) && result->avQueueImage_ == nullptr) {
-        SLOGE("read PixelMap failed");
+        SLOGE("read avqueue PixelMap failed");
         return false;
     }
     return true;

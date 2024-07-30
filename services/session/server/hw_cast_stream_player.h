@@ -18,6 +18,8 @@
 
 #include <mutex>
 
+
+#include "pixel_map.h"
 #include "cast_engine_common.h"
 #include "i_stream_player.h"
 #include "i_avcast_controller_proxy.h"
@@ -39,6 +41,7 @@ public:
     int32_t GetDuration(int32_t &duration) override;
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
     int32_t SetDisplaySurface(std::string &surfaceId) override;
+    int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) override;
     int32_t ProvideKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response);
     int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
     int32_t UnRegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
@@ -60,8 +63,8 @@ public:
     void OnPlayRequest(const CastEngine::MediaInfo &mediaInfo) override;
     void OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
     void OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
-    void OnAvailableCapabilityChanged(const CastEngine::StreamCapability &mediaInfo) override;
-    void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData);
+    void OnAvailableCapabilityChanged(const CastEngine::StreamCapability &streamCapability) override;
+    void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
@@ -72,10 +75,12 @@ private:
     void checkAbilityFromCmds(
         const std::vector<int32_t>& supportedCastCmds, CastEngine::StreamCapability& streamCapability);
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem);
+    int32_t CheckBeforePrepare(std::shared_ptr<AVMediaDescription> mediaDescription);
 
     int32_t castMinTime = 1000;
     std::recursive_mutex streamPlayerLock_;
     std::shared_ptr<CastEngine::IStreamPlayer> streamPlayer_;
+    std::recursive_mutex streamPlayerListenerLock;
     std::recursive_mutex streamPlayerListenerListLock_;
     std::vector<std::shared_ptr<IAVCastControllerProxyListener>> streamPlayerListenerList_;
     AVQueueItem currentAVQueueItem_;

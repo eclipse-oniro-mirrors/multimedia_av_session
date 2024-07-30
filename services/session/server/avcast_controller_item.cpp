@@ -231,6 +231,12 @@ int32_t AVCastControllerItem::SetCastPlaybackFilter(const AVPlaybackState::Playb
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVCastControllerItem::ProcessMediaKeyResponse(const std::string &assetId, const std::vector<uint8_t> &response)
+{
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    return castControllerProxy_->ProcessMediaKeyResponse(assetId, response);
+}
+
 int32_t AVCastControllerItem::ProvideKeyResponse(const std::string &assetId, const std::vector<uint8_t> &response)
 {
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");

@@ -463,7 +463,8 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnVolumeChanged001, TestSize.Level1)
     EXPECT_EQ(streamplayer != nullptr, true);
     streamplayer->Init();
     int volume = 0;
-    streamplayer->OnVolumeChanged(volume);
+    int maxVolume = 0;
+    streamplayer->OnVolumeChanged(volume, maxVolume);
     SLOGI("HwCastStreamPlayerOnVolumeChanged001 end!");
 }
 
@@ -620,6 +621,24 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayRequest001, TestSize.Level1)
     SLOGI("HwCastStreamPlayerOnPlayRequest001 end!");
 }
 
+/**
+ * @tc.name: HwCastStreamPlayerOnKeyRequest001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastStreamPlayerOnKeyRequest001, TestSize.Level1)
+{
+    SLOGI("HwCastStreamPlayerOnKeyRequest001 begin!");
+    std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
+    EXPECT_EQ(streamplayer != nullptr, true);
+    streamplayer->Init();
+    std::string assetId = "assetId";
+    std::vector<uint8_t> keyRequestData;
+    streamplayer->OnKeyRequest(assetId, keyRequestData);
+    SLOGI("HwCastStreamPlayerOnKeyRequest001 end!");
+}
+
 class StreamPlayerImpl : public OHOS::CastEngine::IStreamPlayer {
 public:
     int GetPosition(int32_t& currentPosition) override
@@ -653,6 +672,11 @@ public:
     };
 
     int SetMute(bool mute) override
+    {
+        return 0;
+    };
+
+    int ProvideKeyResponse(const std::string &mediaId, const std::vector<uint8_t> &response) override
     {
         return 0;
     };
@@ -725,7 +749,7 @@ public:
         return 0;
     };
 
-    int GetVolume(int32_t &volume) override
+    int GetVolume(int32_t &volume, int32_t &maxVolume) override
     {
         return 0;
     };
@@ -965,7 +989,8 @@ static HWTEST(HwCastTest, HwCastProviderStartDiscovery001, TestSize.Level1)
     EXPECT_EQ(hwCastProvider != nullptr, true);
     hwCastProvider->Init();
     int castCapability = 0;
-    EXPECT_EQ(hwCastProvider->StartDiscovery(castCapability), true);
+    std::vector<std::string> drmSchemes;
+    EXPECT_EQ(hwCastProvider->StartDiscovery(castCapability, drmSchemes), true);
     SLOGI("HwCastProviderStartDiscovery001 end!");
 }
 

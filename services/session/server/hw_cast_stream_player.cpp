@@ -212,6 +212,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
+    mediaInfo.drmType = mediaDescription->GetDrmScheme();
     std::lock_guard lockGuard(streamPlayerLock_);
     SLOGI("mediaInfo media is %{public}s %{public}s", mediaInfo.albumCoverUrl.c_str(), mediaInfo.mediaUrl.c_str());
     if (!streamPlayer_) {
@@ -286,6 +287,7 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
+    mediaInfo.drmType = mediaDescription->GetDrmScheme();
     SLOGD("mediaInfo albumCoverUrl is %{public}s", mediaInfo.albumCoverUrl.c_str());
     std::lock_guard lockGuard(streamPlayerLock_);
     SLOGI("mediaInfo mediaUrl is %{public}s", mediaInfo.mediaUrl.c_str());
@@ -370,6 +372,19 @@ int32_t HwCastStreamPlayer::SetDisplaySurface(std::string &surfaceId)
     return AVSESSION_SUCCESS;
 }
 
+int32_t HwCastStreamPlayer::ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response)
+{
+    SLOGI("ProcessMediaKeyResponse begin");
+    std::lock_guard lockGuard(streamPlayerLock_);
+    if (!streamPlayer_) {
+        SLOGE("streamPlayer is nullptr");
+        return AVSESSION_ERROR;
+    }
+    streamPlayer_->ProvideKeyResponse(assetId, response);
+    SLOGI("ProcessMediaKeyResponse successed");
+    return AVSESSION_SUCCESS;
+}
+
 int32_t ProvideKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response)
 {
     SLOGI("ProvideKeyResponse begin");
@@ -398,7 +413,7 @@ int32_t HwCastStreamPlayer::RegisterControllerListener(std::shared_ptr<IAVCastCo
     }
     SLOGI("RegisterControllerListener successed, and add it to streamPlayerListenerList_");
     streamPlayerListenerList_.emplace_back(listener);
-    SLOGI("RegisterControllerListener done");
+    SLOGI("RegisterControllerListener done with size %{public}d", static_cast<int>(streamPlayerListenerList_.size()));
     return AVSESSION_SUCCESS;
 }
 
@@ -524,6 +539,7 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetLyricUri(mediaInfo.lrcUrl);
     mediaDescription->SetIconUri(mediaInfo.appIconUrl);
     mediaDescription->SetAppName(mediaInfo.appName);
+    mediaDescription->SetDrmScheme(mediaInfo.drmType);
     std::shared_ptr<AVMediaDescription> originMediaDescription = currentAVQueueItem_.GetDescription();
     if (originMediaDescription != nullptr && originMediaDescription->GetIcon() != nullptr
         && mediaInfo.mediaId == originMediaDescription->GetMediaId()) {
@@ -719,6 +735,7 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
     mediaDescription->SetLyricUri(mediaInfo.lrcUrl);
     mediaDescription->SetIconUri(mediaInfo.appIconUrl);
     mediaDescription->SetAppName(mediaInfo.appName);
+    mediaDescription->SetDrmScheme(mediaInfo.drmType);
     AVQueueItem queueItem;
     queueItem.SetDescription(mediaDescription);
     std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);

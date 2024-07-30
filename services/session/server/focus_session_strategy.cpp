@@ -97,13 +97,12 @@ bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos& in
         if (selector_ != nullptr && !selector_(sessionInfo)) {
             continue;
         }
-        SLOGI("SelectFocusSession check uid=%{public}d is focus session", sessionInfo.uid);
+        SLOGI("uid=%{public}d is focus session", sessionInfo.uid);
         HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", sessionInfo.uid, "AUDIO_INFO_CONTENT_TYPE",
             info->rendererInfo.contentType, "AUDIO_INFO_RENDERER_STATE", info->rendererState,
             "DETAILED_MSG", "focussessionstrategy selectfocussession, current focus session info");
         return true;
     }
-    SLOGD("SelectFocusSession check isFocus only with first one");
     return false;
 }
 }

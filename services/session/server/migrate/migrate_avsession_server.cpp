@@ -192,10 +192,6 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
         return;
     }
     int mediaCommand = root[MEDIA_COMMAND].isInt() ? root[MEDIA_COMMAND].asInt() : -1;
-    if (root["COMMAND"].empty()) {
-        SLOGE("ProcControlCommand: COMMAND is not exit.");
-        return;
-    }
     std::string command = root[COMMAND].isString() ? root[COMMAND].asString() : "ERROR_COMMAND";
     SLOGI("ProcContolCommand mediaCommand: %{public}d", mediaCommand);
     std::string extras = (root.isMember(EXTRAS) && root[EXTRAS].isString()) ? root[EXTRAS].asString() : "ERROR_EXTRAS";

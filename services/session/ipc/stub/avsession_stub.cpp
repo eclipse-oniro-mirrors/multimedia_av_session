@@ -393,7 +393,7 @@ int32_t AVSessionStub::HandleStartCastDisplayListener(MessageParcel& data, Messa
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "StartCastDisplayListener failed");
     return ERR_NONE;
 }
-
+ 
 int32_t AVSessionStub::HandleStopCastDisplayListener(MessageParcel& data, MessageParcel& reply)
 {
     int32_t ret = StopCastDisplayListener();
@@ -401,7 +401,7 @@ int32_t AVSessionStub::HandleStopCastDisplayListener(MessageParcel& data, Messag
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "StopCastDisplayListener failed");
     return ERR_NONE;
 }
-
+ 
 int32_t AVSessionStub::HandleGetAllCastDisplays(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<CastDisplayInfo> castDisplays;

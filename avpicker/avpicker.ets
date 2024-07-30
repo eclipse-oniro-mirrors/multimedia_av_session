@@ -173,6 +173,8 @@ export struct AVCastPicker {
    */
   @State configurationColorMode: number = ConfigurationColorMode.COLOR_MODE_NOT_SET;
 
+  @State deviceInfoType: string = '';
+
   MenuStateChange() {
     if (this.extensionProxy != null) {
       this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
@@ -190,6 +192,22 @@ export struct AVCastPicker {
   }
 
   @Builder
+  buildIcon(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
+    if (this.deviceType === 'true') {
+      SymbolGlyph(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
+        .fontSize(24)
+        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+        ['#0A59F7'] : [$r(sys.color.ohos_id_color_primary)])
+      .renderingStrategy(2)
+    } else {
+      Image(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
+        .fontSize(24)
+        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+          '#0A59F7' : $r(sys.color.ohos_id_color_primary))
+    }
+  }
+
+  @Builder
   deviceMenu() {
     Column() {
       ForEach(this.deviceList, (item: AVCastPickerDeviceInfo, index) => {
@@ -204,11 +222,8 @@ export struct AVCastPicker {
             alignItems: ItemAlign.Center
           }) {
             Row() {
-              Image($r(item.deviceIconName))
-                .width(24)
-                .height(24)
-                .fillColor(this.configurationColorMode ===
-                  ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000')
+              this.buildIcon(item. false)
+
               Text(item.deviceName)
                 .fontSize($r('sys.float.ohos_id_text_size_body2'))
                 .fontColor(item.isConnected ? (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
@@ -230,11 +245,7 @@ export struct AVCastPicker {
 
             if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined) {
               Row() {
-                Image($r(item.selectedIconName))
-                  .width(24)
-                  .height(24)
-                  .fillColor(this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
-                    '#DBFFFFFF' : '#0A59F7')
+                this.buildIcon(item. true)
               }
               .justifyContent(FlexAlign.Start)
               .alignItems(VerticalAlign.Center)
@@ -294,6 +305,11 @@ export struct AVCastPicker {
         this.extensionProxy = proxy;
       })
       .onReceive((data) => {
+        if (JSON.stringify(data['deviceInfoType']) !== undefined) {
+          console.info(TAG, `deviceInfoType : ${JSON.stringify(data['deviceInfoType'])}`);
+          this.deviceInfoType = data['deviceInfoType'] as string;
+        }
+
         if (JSON.stringify(data['pickerStyle']) !== undefined) {
           console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
           this.pickerStyleFromMediaController = data['pickerStyle'] as AVCastPickerStyle;

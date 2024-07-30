@@ -17,6 +17,7 @@
 
 #define private public
 #include "avsession_dumper.h"
+#include "avsession_item.h"
 #undef private
 #include "system_ability_definition.h"
 
@@ -45,7 +46,7 @@ void AVSessionDumperTest::SetUp()
 {
     SLOGI("AVSessionDumperTest do SetUp");
     if (avSessionService_ == nullptr) {
-        SLOGI("AVSessionDumperTest do service newUp");
+        SLOGE("AVSessionDumperTest do service newUp");
         avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     }
 }

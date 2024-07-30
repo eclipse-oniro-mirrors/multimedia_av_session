@@ -48,6 +48,8 @@ public:
 
     int32_t SetDisplaySurface(std::string& surfaceId) override;
 
+    int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) override;
+
     int32_t ProvideKeyResponse(std::string& assetId, const std::vector<uint8_t>& response) override;
 
     int32_t AddAvailableCommand(const int32_t cmd) override;

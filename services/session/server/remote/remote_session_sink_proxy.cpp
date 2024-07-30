@@ -18,8 +18,6 @@
 #include "remote_session_sink_proxy.h"
 
 namespace OHOS::AVSession {
-static std::string g_sinkLibraryPath = std::string(SYSTEM_LIB_PATH) + std::string("libremote_session_sink.z.so");
-
 RemoteSessionSinkProxy::RemoteSessionSinkProxy()
 {
     LoadSinkImplement();
@@ -32,14 +30,10 @@ RemoteSessionSinkProxy::~RemoteSessionSinkProxy()
 
 int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("cfi")))
 {
-    char sinkLibraryRealPath[PATH_MAX] = { 0x00 };
-    if (realpath(g_sinkLibraryPath.c_str(), sinkLibraryRealPath) == nullptr) {
-        SLOGE("check path failed %{public}s", g_sinkLibraryPath.c_str());
-        return AVSESSION_ERROR;
-    }
-    handle_ = dlopen(sinkLibraryRealPath, RTLD_NOW);
+    handle_ = dlopen("libremote_session_sink.z.so", RTLD_NOW);
     if (handle_ == nullptr) {
-        SLOGE("Failed to open extension library %{public}s, reason: %{public}sn", g_sinkLibraryPath.c_str(), dlerror());
+        SLOGE("Failed to open extension library %{public}s, reason: %{public}sn",
+            "libremote_session_sink.z.so", dlerror());
         return AVSESSION_ERROR;
     }
     using SinkImpl = RemoteSessionSinkImpl* (*)();
@@ -49,8 +43,8 @@ int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("
         if (handle_ != nullptr) {
             dlclose(handle_);
         }
-        SLOGE("Failed to get extension symbol %{public}s in %{public}s", "RemoteSessionSinkImpl",
-              g_sinkLibraryPath.c_str());
+        SLOGE("Failed to get extension symbol %{public}s in %{public}s",
+            "RemoteSessionSinkImpl", "libremote_session_sink.z.so");
         return AVSESSION_ERROR;
     }
 
@@ -67,7 +61,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
             dlclose(handle_);
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s", "DestroyRemoteSessionSinkImpl",
-              g_sinkLibraryPath.c_str());
+              "libremote_session_sink.z.so");
         return AVSESSION_ERROR;
     }
     destroyRemoteSessionSinkImpl(sinkImpl_);

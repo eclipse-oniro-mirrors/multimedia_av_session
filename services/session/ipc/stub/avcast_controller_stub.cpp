@@ -20,6 +20,7 @@
 #include "media_info_holder.h"
 #include "surface_utils.h"
 #include "session_xcollie.h"
+#include "permission_checker.h"
 
 namespace OHOS::AVSession {
 bool AVCastControllerStub::CheckInterfaceToken(MessageParcel& data)
@@ -143,6 +144,10 @@ int32_t AVCastControllerStub::HandleGetCurrentItem(MessageParcel& data, MessageP
 int32_t AVCastControllerStub::HandleSetDisplaySurface(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::HandleSetDisplaySurface");
+    if (!PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION)) {
+        SLOGE("SetDisplaySurface: CheckPermission failed");
+        return ERR_NO_PERMISSION;
+    }
     sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
     if (remoteObj == nullptr) {
         SLOGE("BufferProducer is null");
@@ -199,6 +204,21 @@ int32_t AVCastControllerStub::HandleProvideKeyResponse(MessageParcel& data, Mess
         response.assign(responseBuf, responseBuf + responseSize);
     }
     CHECK_AND_PRINT_LOG(reply.WriteInt32(ProvideKeyResponse(assetId, response)), "write int32 failed");
+    return ERR_NONE;
+}
+
+int32_t AVCastControllerStub::HandleProcessMediaKeyResponse(MessageParcel& data, MessageParcel& reply)
+{
+    std::string assetId = data.ReadString();
+    std::vector<uint8_t> response;
+    uint32_t responseSize = data.ReadInt32();
+    const uint8_t *responseBuf = data.ReadBuffer(static_cast<size_t>(responseSize));
+    if (responseSize == 0 || responseBuf == nullptr) {
+        SLOGE("invalid buffer, len = %{public}u", responseSize);
+        return ERR_NULL_OBJECT;
+    }
+    response.assign(responseBuf, responseBuf + responseSize);
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(ProcessMediaKeyResponse(assetId, response)), "write int32 failed");
     return ERR_NONE;
 }
 

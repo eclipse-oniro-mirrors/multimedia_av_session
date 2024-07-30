@@ -38,7 +38,8 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(creditsPosition_) &&
         parcel.WriteString(appName_) &&
         parcel.WriteParcelable(icon_.get()) &&
-        parcel.WriteParcelable(extras_.get());
+        parcel.WriteParcelable(extras_.get()) &&
+        parcel.WriteString(drmScheme_);
 }
 
 AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
@@ -71,6 +72,7 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
     if (result->extras_ == nullptr) {
         SLOGD("read AVMediaDescription - extras null");
     }
+    data.ReadString(result->drmScheme_);
     return result;
 }
 
@@ -273,6 +275,16 @@ std::string AVMediaDescription::GetAppName() const
     return appName_;
 }
 
+void AVMediaDescription::SetDrmScheme(const std::string& drmScheme)
+{
+    drmScheme_ = drmScheme;
+}
+ 
+std::string AVMediaDescription::GetDrmScheme() const
+{
+    return drmScheme_;
+}
+
 bool AVMediaDescription::IsValid() const
 {
     return !(mediaId_.empty());
@@ -301,5 +313,6 @@ void AVMediaDescription::Reset()
     startPosition_ = 0;
     creditsPosition_ = 0;
     appName_ = "";
+    drmScheme_ = "";
 }
 } // namespace OHOS::AVSession
