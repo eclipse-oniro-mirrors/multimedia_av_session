@@ -22,9 +22,16 @@
 #include "avsession_controller_stub.h"
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
+
+#define private public
+#define protected public
 #include "avsession_service.h"
+#undef protected
+#undef private
+
 #include "avsessionservice_fuzzer.h"
 #include "client_death_proxy.h"
+#include "audio_info.h"
 
 using namespace std;
 namespace OHOS {
