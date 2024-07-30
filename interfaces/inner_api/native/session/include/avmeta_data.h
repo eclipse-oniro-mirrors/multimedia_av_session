@@ -63,7 +63,7 @@ public:
     enum {
         SECONDS_10 = 10,
         SECONDS_15 = 15,
-        SECONDS_30 = 30,
+        SECONDS_30 = 30
     };
 
     enum {
@@ -154,7 +154,7 @@ public:
     void SetNextAssetId(const std::string& assetId);
     std::string GetNextAssetId() const;
 
-    void SetSkipIntervals(int32_t skipIntervals);
+    void SetSkipIntervals(int32_t assetId);
     int32_t GetSkipIntervals() const;
 
     void SetFilter(int32_t filter);

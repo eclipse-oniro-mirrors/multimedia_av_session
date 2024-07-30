@@ -770,9 +770,6 @@ napi_status NapiAVSessionManager::ProcessCastDiscoveryParams(
     if (argc == ARGC_ONE && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
         && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)) {
         status = NapiUtils::GetValue(env, argv[ARGV_FIRST], castDeviceCapability);
-        if (status != napi_ok) {
-            ReportStartCastDiscoveryFailInfo("NapiAVSessionManager::StartCastDiscovery", ERR_INVALID_PARAM);
-        }
     } else if (argc == ARGC_TWO) {
         SLOGD("get in argc two process");
         if (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined) &&
