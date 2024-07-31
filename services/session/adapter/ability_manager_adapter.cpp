@@ -38,7 +38,6 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
         return ERR_START_ABILITY_IS_RUNNING;
     }
     status_ = Status::ABILITY_STATUS_RUNNING;
-    // start executeIntent
     AppExecFwk::InsightIntentExecuteParam executeParam;
     bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName_, "", executeParam);
     int32_t ret = AVSESSION_ERROR;

@@ -15,11 +15,10 @@
 
 #ifndef OHOS_AVCONTROLLER_CALLBACK_PROXY_H
 #define OHOS_AVCONTROLLER_CALLBACK_PROXY_H
-
 #include <mutex>
-
 #include "iavcontroller_callback.h"
 #include "iremote_proxy.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS::AVSession {
 class AVControllerCallbackProxy : public IRemoteProxy<IAVControllerCallback> {
