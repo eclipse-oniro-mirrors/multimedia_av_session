@@ -180,7 +180,7 @@ HWTEST_F(AVSessionPermissionTest, GetSessionDescriptorsBySessionIdWithNoPerm001,
 
     // Using "1" as the test input parameter
     int32_t ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId("1", descriptor);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
     DeletePermission(g_infoA);
 }
 
