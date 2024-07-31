@@ -84,7 +84,7 @@ private:
         {CAST_CONTROLLER_CMD_SET_CAST_PLAYBACK_FILTER,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSetCastPlaybackFilter(data, reply); }},
         {CAST_CONTROLLER_CMD_PROVIDE_KEY_RESPONSE,
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleProvideKeyResponse(data, reply); }},
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleProcessMediaKeyResponse(data, reply); }},
         {CAST_CONTROLLER_CMD_REGISTER_CALLBACK,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleRegisterCallbackInner(data, reply); }},
         {CAST_CONTROLLER_CMD_DESTROY,

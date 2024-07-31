@@ -42,7 +42,6 @@ public:
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
     int32_t SetDisplaySurface(std::string &surfaceId) override;
     int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) override;
-    int32_t ProvideKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response);
     int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
     int32_t UnRegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
     int32_t SetValidAbility(const std::vector<int32_t>& validCmdList) override;

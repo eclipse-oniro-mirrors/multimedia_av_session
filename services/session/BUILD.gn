@@ -164,10 +164,7 @@ ohos_shared_library("avsession_service") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    external_deps += [
-      "cast_engine:cast_engine_client",
-      "graphic_surface:surface",
-    ]
+    external_deps += [ "cast_engine:cast_engine_client" ]
     deps += [
       "../../frameworks/native/session:avsession_cast_client",
       "./../session:avsession_cast_item",
@@ -295,10 +292,7 @@ if (castplus_cast_engine_enable) {
 
     if (castplus_cast_engine_enable) {
       cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-      external_deps += [
-        "cast_engine:cast_engine_client",
-        "graphic_surface:surface",
-      ]
+      external_deps += [ "cast_engine:cast_engine_client" ]
       service_sources += [ "" ]
     }
 
@@ -550,10 +544,7 @@ ohos_shared_library("avsession_cast_item") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    external_deps += [
-      "cast_engine:cast_engine_client",
-      "graphic_surface:surface",
-    ]
+    external_deps += [ "cast_engine:cast_engine_client" ]
     deps += [ "./../session:avsession_router" ]
   }
 
