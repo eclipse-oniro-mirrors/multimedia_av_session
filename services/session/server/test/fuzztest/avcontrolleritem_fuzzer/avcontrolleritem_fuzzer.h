@@ -21,9 +21,11 @@ namespace OHOS::AVSession {
 void AvControllerItemRemoteRequestTest(const uint8_t* data, size_t size);
 void AvControllerItemDataTest(const uint8_t* data, size_t size);
 void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem, const uint8_t* data, size_t size);
+void AvControllerItemDataTestThird(sptr<AVControllerItem> avControllerItem, const uint8_t* data, size_t size);
 
 void AvControllerItemTest(const uint8_t* data, size_t size);
 void AvControllerItemTestImpl(const uint8_t* data, size_t size, sptr<AVControllerItem> avControllerItem);
+void AvControllerItemTestImplSecond(const uint8_t* data, size_t size, sptr<AVControllerItem> avControllerItem);
 
 class AvControllerItemFuzzer {
 public:
