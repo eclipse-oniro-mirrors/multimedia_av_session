@@ -74,8 +74,6 @@ public:
 
     int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) override;
 
-    int32_t ProvideKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response);
-
     bool RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy);
 
     int32_t AddAvailableCommand(const int32_t cmd) override;
