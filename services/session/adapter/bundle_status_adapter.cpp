@@ -185,7 +185,6 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
         return false;
     }
     std::string supportModule;
-
     std::string profile;
     if (!IsSupportPlayIntent(bundleName, supportModule, profile)) {
         SLOGE("bundle=%{public}s does not support play insights", bundleName.c_str());
@@ -194,20 +193,19 @@ bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, cons
     SLOGD("GetJsonProfile profile=%{public}s", profile.c_str());
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
-    CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
     auto res = false;
+    CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
     for (const auto& value : profileValues["insightIntents"]) {
         std::string insightName = value["intentName"];
         nlohmann::json abilityValue = value["uiAbility"];
-        SLOGD(" insightName=%{public}s", insightName.c_str());
         if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
             continue;
         }
         if (!value.contains("uiAbility") || abilityValue.is_discarded()) {
-            SLOGE("uiability discarded=%{public}d", abilityValue.is_discarded());
+            SLOGE(" uiability discarded=%{public}d", abilityValue.is_discarded());
             continue;
         }
-        SLOGD("insightName=%{public}s", insightName.c_str());
+        SLOGD(" insightName=%{public}s", insightName.c_str());
         executeParam.bundleName_ = bundleName;
         executeParam.moduleName_ = supportModule;
         executeParam.abilityName_ = abilityValue["ability"];

@@ -35,11 +35,11 @@ public:
     bool IsAudioPlayback(const std::string& bundleName, const std::string& abilityName);
 
     std::string GetBundleNameFromUid(const int32_t uid);
-    
+
     bool IsSupportPlayIntent(const std::string& bundleName, std::string& supportModule, std::string& profile);
     
     bool GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
-                            AppExecFwk::InsightIntentExecuteParam &executeParam);
+        AppExecFwk::InsightIntentExecuteParam &executeParam);
 
 private:
     BundleStatusAdapter();

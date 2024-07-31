@@ -106,6 +106,7 @@ private:
     void UnMarshallingAVQueueInfos(MessageParcel &reply, std::vector<AVQueueInfo>& avQueueInfos);
     void BufferToAVQueueInfoImg(const char *buffer, std::vector<AVQueueInfo>& avQueueInfos);
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;
+    std::mutex createControllerMutex_;
 };
 } // namespace OHOS
 #endif // OHOS_AVSESSION_SERVICE_PROXY_H

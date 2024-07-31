@@ -136,6 +136,7 @@ public:
      * @brief Start cast process.
      *
      * @param { OutputDeviceInfo } outputDeviceInfo - Output device ready for use.
+     * @param { std::shared_ptr<IAVCastSessionStateListener > } callback - Callback function.
      * @return { int64_t } ID returned after successful start of cast.
      * @since 10
     */
@@ -192,7 +193,7 @@ public:
     */
     virtual int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
-    
+
     /**
      * @brief set allconnect state.
      *
