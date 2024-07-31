@@ -237,11 +237,11 @@ public:
     void StopCastSession();
 
     int32_t StartCastDisplayListener() override;
- 
+
     int32_t StopCastDisplayListener() override;
- 
+
     void GetDisplayListener(sptr<IAVSessionCallback> callback);
- 
+
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
 #endif
 
