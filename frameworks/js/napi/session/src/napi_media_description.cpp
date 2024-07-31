@@ -43,6 +43,7 @@ std::map<std::string, NapiMediaDescription::GetterType> NapiMediaDescription::ge
     { "startPosition", GetStartPosition },
     { "creditsPosition", GetCreditsPosition },
     { "appName", GetAppName },
+    { "drmScheme", GetDrmScheme },
 };
 
 std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setterMap_ = {
@@ -66,6 +67,7 @@ std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setter
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_START_POSITION, SetStartPosition },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_CREDITS_POSITION, SetCreditsPosition },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_APP_NAME, SetAppName },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_DRM_SCHEME, SetDrmScheme },
 };
 
 napi_status NapiMediaDescription::GetValue(napi_env env, napi_value in, AVMediaDescription& out)
@@ -605,6 +607,27 @@ napi_status NapiMediaDescription::SetAppName(napi_env env, const AVMediaDescript
     auto status = NapiUtils::SetValue(env, in.GetAppName(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "appName", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetDrmScheme(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    SLOGD("Start get drm type from napi_value");
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "drmScheme", property);
+    CheckAndSetDefaultString(status, property);
+    out.SetDrmScheme(property);
+    return napi_ok;
+}
+
+napi_status NapiMediaDescription::SetDrmScheme(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    SLOGD("Start set drm type from napi_value");
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetDrmScheme(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "drmScheme", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }
