@@ -385,19 +385,6 @@ int32_t HwCastStreamPlayer::ProcessMediaKeyResponse(const std::string& assetId, 
     return AVSESSION_SUCCESS;
 }
 
-int32_t ProvideKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response)
-{
-    SLOGI("ProvideKeyResponse begin");
-    std::lock_guard lockGuard(streamPlayerLock_);
-    if (!streamPlayer_) {
-        SLOGE("streamPlayer is nullptr");
-        return AVSESSION_ERROR;
-    }
-    streamPlayer_->ProvideKeyResponse(assetId, response);
-    SLOGI("ProvideKeyResponse successed");
-    return AVSESSION_SUCCESS;
-}
-
 int32_t HwCastStreamPlayer::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxyListener> listener)
 {
     SLOGI("RegisterControllerListener begin");
