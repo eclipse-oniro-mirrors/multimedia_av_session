@@ -30,8 +30,7 @@
 #undef private
 
 #include "avsessionservice_fuzzer.h"
-#include "client_death_proxy.h"
-#include "audio_info.h"
+#include "client_death_stub.h"
 
 using namespace std;
 namespace OHOS {
@@ -71,6 +70,24 @@ public:
     {
         return nullptr;
     };
+};
+
+template<typename T>
+class ResourceAutoDestroy {
+public:
+    explicit ResourceAutoDestroy(T ptr) : ptr_(ptr)
+    {
+    }
+
+    ~ResourceAutoDestroy()
+    {
+        if (ptr_) {
+            ptr_->Destroy();
+        }
+    }
+
+private:
+    T ptr_;
 };
 
 void AvSessionServiceExternalCallTest(const uint8_t* data, size_t size)
@@ -152,7 +169,7 @@ void AvSessionServiceControllerTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
     std::string tag(reinterpret_cast<const char*>(data), size);
-    int32_t type = *reinterpret_cast<const int32_t*>(data);
+    int32_t type = 0;
     std::string bundleName(reinterpret_cast<const char*>(data), size);
     std::string abilityName(reinterpret_cast<const char*>(data), size);
     AppExecFwk::ElementName elementName;
@@ -163,6 +180,7 @@ void AvSessionServiceControllerTest(const uint8_t* data, size_t size,
     if (!avSessionItem) {
         return;
     }
+    ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
     service->AddAvQueueInfoToFile(*avSessionItem);
     sptr<IRemoteObject> avControllerItemObj;
     std::string sessionId(reinterpret_cast<const char*>(data), size);
@@ -174,68 +192,15 @@ void AvSessionServiceControllerTest(const uint8_t* data, size_t size,
     if (!avControllerItem) {
         return;
     }
+    ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
     service->HandleControllerRelease(*avControllerItem);
-}
+    service->HandleSessionRelease(avSessionItem->GetSessionId());
 
-void AVSessionServiceSendSystemControlCommandTest(const uint8_t* data, size_t size,
-    sptr<AVSessionService> service)
-{
-    sptr<FuzzTestISessionListener> listener = new FuzzTestISessionListener();
-    if (!listener) {
-        return;
-    }
-    service->RegisterSessionListener(listener);
-    AVControlCommand command;
-    command.SetCommand(*reinterpret_cast<const int32_t*>(data));
-    service->SendSystemControlCommand(command);
-}
-
-void AvSessionServiceClientTest(const uint8_t* data, size_t size,
-    sptr<AVSessionService> service)
-{
-    int32_t pid = *reinterpret_cast<const int32_t*>(data);
-    service->OnClientDied(pid);
-  
-    MessageParcel dataMessageParcel;
-    size -= sizeof(uint32_t);
-    dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
-    dataMessageParcel.RewindRead(0);
-    auto remoteObject = dataMessageParcel.ReadRemoteObject();
-    if (remoteObject == nullptr) {
-        return;
-    }
-    auto clientDeathObserver = iface_cast<ClientDeathProxy>(remoteObject);
-    if (clientDeathObserver == nullptr) {
-        return;
-    }
-    service->RegisterClientDeathObserver(clientDeathObserver);
-}
-
-void AvSessionServiceHandleEventTest(const uint8_t* data, size_t size,
-    sptr<AVSessionService> service)
-{
-    std::string sessionId(reinterpret_cast<const char*>(data), size);
-    service->HandleSessionRelease(sessionId);
-    service->HandleCallStartEvent();
-
-    int32_t fd = *reinterpret_cast<const int32_t*>(data);
-    string strArg(reinterpret_cast<const char*>(data), size);
-    std::u16string u16strArg(strArg.begin(), strArg.end());
-    std::vector<std::u16string> args;
-    args.emplace_back(u16strArg);
-    service->Dump(fd, args);
-}
-
-void AvSessionServiceCastAudioTest(const uint8_t* data, size_t size,
-    sptr<AVSessionService> service)
-{
     SessionToken token;
-    std::string sessionId(reinterpret_cast<const char*>(data), size);
-    int32_t pid = *(reinterpret_cast<const int32_t *>(data));
+    token.sessionId = avSessionItem->GetSessionId();
+    token.pid = *(reinterpret_cast<const int32_t *>(data));
+    token.uid = *(reinterpret_cast<const int32_t *>(data));
     int32_t uid = *(reinterpret_cast<const int32_t *>(data));
-    token.sessionId = sessionId;
-    token.pid = pid;
-    token.uid = uid;
 
     std::vector<AudioStandard::AudioDeviceDescriptor> audioDeviceDescriptors;
     AudioStandard::AudioDeviceDescriptor descriptor;
@@ -244,6 +209,44 @@ void AvSessionServiceCastAudioTest(const uint8_t* data, size_t size,
     service->CastAudio(token, audioDeviceDescriptors);
     service->CastAudioForAll(audioDeviceDescriptors);
     service->NotifyAudioSessionCheckTrigger(uid);
+
+    service->CreateControllerInner("default", avControllerItemObj);
+}
+
+void AVSessionServiceSendSystemControlCommandTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    AVControlCommand command;
+    command.SetCommand(*reinterpret_cast<const int32_t*>(data));
+    service->SendSystemControlCommand(command);
+    sptr<FuzzTestISessionListener> listener = new FuzzTestISessionListener();
+    if (!listener) {
+        return;
+    }
+    service->RegisterSessionListener(listener);
+}
+
+void AvSessionServiceClientTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    int32_t pid = *reinterpret_cast<const int32_t*>(data);
+    service->OnClientDied(pid);
+    sptr<ClientDeathStub> clientDeath = new ClientDeathStub();
+    service->RegisterClientDeathObserver(clientDeath);
+}
+
+void AvSessionServiceHandleEventTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    service->HandleCallStartEvent();
+
+    int32_t fd = *reinterpret_cast<const int32_t*>(data);
+    string strArg(reinterpret_cast<const char*>(data), size);
+    std::u16string u16strArg(strArg.begin(), strArg.end());
+    std::vector<std::u16string> args;
+    args.emplace_back(u16strArg);
+    service->Dump(fd, args);
 }
 
 void AvSessionServiceSuperLauncherTest(const uint8_t* data, size_t size,
@@ -288,7 +291,6 @@ void AvSessionServiceTest(const uint8_t* data, size_t size)
     AVSessionServiceSendSystemControlCommandTest(data, size, service);
     AvSessionServiceClientTest(data, size, service);
     AvSessionServiceHandleEventTest(data, size, service);
-    AvSessionServiceCastAudioTest(data, size, service);
     AvSessionServiceSuperLauncherTest(data, size, service);
     service->Close();
 }
