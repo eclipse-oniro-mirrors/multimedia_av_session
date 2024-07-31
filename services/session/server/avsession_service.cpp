@@ -550,7 +550,6 @@ bool AVSessionService::IsMediaStream(AudioStandard::StreamUsage usage)
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
 {
     SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     std::lock_guard frontLockGuard(sessionFrontLock_);
     SLOGD("UpdateFrontSession pass lock");
     auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sessionItem);
@@ -588,9 +587,6 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         }
         if (session->GetUid() != info.uid) {
             continue;
-        }
-        if (!IsMediaStream(info.streamUsage)) {
-            UpdateFrontSession(session, false);
         }
         GetContainer().UpdateSessionSort(session);
         RefreshFocusSessionSort(session);
@@ -1056,6 +1052,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     });
     result->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
         SLOGI("servicecallback for update session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        std::lock_guard lockGuard(sessionAndControllerLock_);
         sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
         UpdateFrontSession(sessionItem, isAdd);
     });
@@ -1794,6 +1791,15 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
         topSession_->HandleMediaKeyEvent(keyEvent);
     } else {
         SLOGI("topSession is nullptr");
+        std::lock_guard frontLockGuard(sessionFrontLock_);
+        for (const auto& session : sessionListForFront_) {
+            if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
+                session->HandleMediaKeyEvent(keyEvent);
+                SLOGI("HandleMediaKeyEvent %{public}d for front session: %{public}s", keyEvent.GetKeyCode(),
+                      session->GetBundleName().c_str());
+                break;
+            }
+        }
     }
     return AVSESSION_SUCCESS;
 }
@@ -1980,7 +1986,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
 {
     SLOGI("HandleSessionRelease, sessionId=%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     std::lock_guard lockGuard(sessionAndControllerLock_);
-
+    std::lock_guard frontLockGuard(sessionFrontLock_);
     sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
     NotifySessionRelease(sessionItem->GetDescriptor());
