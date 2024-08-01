@@ -714,14 +714,14 @@ HWTEST_F(AVCastControllerTest, StopDiscovery001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     hwCastProvider.StopDiscovery();
-    EXPECT_EQ(true);
+    EXPECT_TRUE(true);
 }
 
 HWTEST_F(AVCastControllerTest, Release001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     hwCastProvider.Release();
-    EXPECT_EQ(true);
+    EXPECT_TRUE(true);
 }
 
 HWTEST_F(AVCastControllerTest, StartCastSession001, TestSize.Level1)
@@ -734,7 +734,7 @@ HWTEST_F(AVCastControllerTest, StopCastSession001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     hwCastProvider.StopCastSession(2);
-    EXPECT_EQ(true);
+    EXPECT_TRUE(true);
 }
 
 HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)
