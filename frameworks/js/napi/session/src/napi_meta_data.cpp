@@ -695,6 +695,7 @@ napi_status NapiMetaData::GetDrmSchemes(napi_env env, napi_value in, AVMetaData&
 napi_status NapiMetaData::SetDrmSchemes(napi_env env, const AVMetaData& in, napi_value& out)
 {
     napi_value property {};
+    SLOGD("SetDrmSchemes in, drmSchemes len: %{public}lu", in.GetDrmSchemes().size());
     auto status = NapiUtils::SetValue(env, in.GetDrmSchemes(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property drmSchemes failed", status);
     status = napi_set_named_property(env, out, "drmSchemes", property);

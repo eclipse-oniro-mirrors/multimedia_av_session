@@ -79,7 +79,6 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("setDisplaySurface", SetDisplaySurface),
         DECLARE_NAPI_FUNCTION("processMediaKeyResponse", ProcessMediaKeyResponse),
-        DECLARE_NAPI_FUNCTION("provideKeyResponse", ProvideKeyResponse),
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
