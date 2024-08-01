@@ -701,7 +701,7 @@ HWTEST_F(AVCastControllerTest, StopCast001, TestSize.Level1)
 {
     SessionToken sessionToken;
     sessionToken.sessionId = avsession_->GetSessionId();
-    EXPECT_EQ(AVSessionManager::GetInstance().StopCast(sessionToken), -1007);
+    EXPECT_EQ(AVSessionManager::GetInstance().StopCast(sessionToken), AVSESSION_SUCCESS);
 }
 
 HWTEST_F(AVCastControllerTest, StartDiscovery001, TestSize.Level1)
