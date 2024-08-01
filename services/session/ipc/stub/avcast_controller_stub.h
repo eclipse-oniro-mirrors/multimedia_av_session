@@ -51,8 +51,6 @@ private:
 
     int32_t HandleProcessMediaKeyResponse(MessageParcel& data, MessageParcel& reply);
 
-    int32_t HandleProvideKeyResponse(MessageParcel& data, MessageParcel& reply)
-
     int32_t HandleRegisterCallbackInner(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleAddAvailableCommand(MessageParcel& data, MessageParcel& reply);
