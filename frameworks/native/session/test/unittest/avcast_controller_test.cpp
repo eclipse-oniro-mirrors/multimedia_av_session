@@ -707,7 +707,8 @@ HWTEST_F(AVCastControllerTest, StopCast001, TestSize.Level1)
 HWTEST_F(AVCastControllerTest, StartDiscovery001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
-    EXPECT_EQ(hwCastProvider.StartDiscovery(2), true);
+    std::vector<std::string> drmSchemes;
+    EXPECT_EQ(hwCastProvider.StartDiscovery(2, drmSchemes), true);
 }
 
 HWTEST_F(AVCastControllerTest, StopDiscovery001, TestSize.Level1)
@@ -750,6 +751,9 @@ HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)
     deviceInfo1.providerId_ = 1;
     deviceInfo1.supportedProtocols_ = 3;
     deviceInfo1.authenticationStatus_ = 1;
+    std::vector<std::string> supportedDrmCapabilities;
+    supportedDrmCapabilities.emplace_back("");
+    deviceInfo1.supportedDrmCapabilities_ = supportedDrmCapabilities;
 
     EXPECT_EQ(hwCastProvider.AddCastDevice(1, deviceInfo1), false);
 }
@@ -767,6 +771,9 @@ HWTEST_F(AVCastControllerTest, RemoveCastDevice001, TestSize.Level1)
     deviceInfo1.providerId_ = 1;
     deviceInfo1.supportedProtocols_ = 1;
     deviceInfo1.authenticationStatus_ = 0;
+    std::vector<std::string> supportedDrmCapabilities;
+    supportedDrmCapabilities.emplace_back("");
+    deviceInfo1.supportedDrmCapabilities_ = supportedDrmCapabilities;
 
     EXPECT_EQ(hwCastProvider.RemoveCastDevice(1, deviceInfo1), false);
 }

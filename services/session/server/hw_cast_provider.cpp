@@ -45,7 +45,7 @@ bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string>
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
     AVSessionRadarInfo info("HwCastProvider::StartDiscovery");
     AVSessionRadar::GetInstance().StartCastDiscoveryBegin(info);
-    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability);
+    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability, drmSchemes);
     if (ret != 0) {
         info.errorCode_ = ret;
         AVSessionRadar::GetInstance().FailToStartCastDiscovery(info);
