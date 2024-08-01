@@ -215,6 +215,7 @@ int32_t DoPrepareSetNapi(std::shared_ptr<ContextBase> context,
         if (ret != AVSESSION_SUCCESS) {
             SLOGE("DoDownloadForCast failed but not repeat setmetadata again");
         } else {
+            description->SetIconUri("INVALID_URI_CACHE");
             data.SetDescription(description);
             ret = castControllerPtr->Prepare(data);
             SLOGI("do prepare set second with ret %{public}d", ret);
