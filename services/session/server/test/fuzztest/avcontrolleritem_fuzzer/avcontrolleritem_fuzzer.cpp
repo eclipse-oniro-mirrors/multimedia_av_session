@@ -65,7 +65,7 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
-    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type % MIN_SIZE_NUM, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
     CHECK_AND_RETURN_LOG(avSessionItem != nullptr, "avSessionItem is null");
     ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
@@ -111,7 +111,7 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
-    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type % MIN_SIZE_NUM, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
     CHECK_AND_RETURN_LOG(avSessionItem != nullptr, "avSessionItem is null");
     ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
@@ -129,10 +129,13 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     avControllerItem->GetAVMetaData(metaData);
     std::vector<int32_t> cmds;
     avControllerItem->GetValidCommands(cmds);
-
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
     AVPlaybackState::PlaybackStateMaskType playBackFilter;
-    playBackFilter.set(code % AVPlaybackState::PLAYBACK_KEY_MAX);
+    uint32_t playCode = *(reinterpret_cast<const uint32_t*>(data));
+    if (playCode <= AVPlaybackState::PLAYBACK_KEY_MAX) {
+        playBackFilter.set(playCode);
+    } else {
+        playBackFilter.set(AVPlaybackState::PLAYBACK_KEY_STATE);
+    }
     avControllerItem->SetPlaybackFilter(playBackFilter);
 
     AvControllerItemDataTestSecond(avControllerItem, data, size);
@@ -213,7 +216,7 @@ void AvControllerItemTest(const uint8_t* data, size_t size)
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
-    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type % MIN_SIZE_NUM, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
     if (!avSessionItem) {
         SLOGI("avSessionItem is null");
