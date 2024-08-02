@@ -365,8 +365,12 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     SLOGI("send playbackstate change event to controllers with state: %{public}d", state.GetState());
 
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this, state]() {
-        SLOGI("HandlePlaybackStateChange in postTask with state %{public}d with controller size %{public}d",
+        SLOGI("HandlePlaybackStateChange in postTask with state %{public}d and controller size %{public}d",
             state.GetState(), static_cast<int>(controllers_.size()));
+        if (controllers_.size() <= 0) {
+            SLOGE("handle with no controller, return");
+            return;
+        }
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
             SLOGD("HandlePlaybackStateChange for controller pid=%{public}d", pid);

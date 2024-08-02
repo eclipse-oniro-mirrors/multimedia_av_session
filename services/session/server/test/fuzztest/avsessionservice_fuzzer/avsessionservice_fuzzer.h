@@ -16,4 +16,13 @@
 #ifndef OHOS_AVSESSIONSERVICE_FUZZER_H
 #define OHOS_AVSESSIONSERVICE_FUZZER_H
 
+namespace OHOS::AVSession {
+    class AVSessionServiceStubFuzzer {
+    public:
+        AVSessionServiceStubFuzzer() = default;
+        ~AVSessionServiceStubFuzzer() = default;
+        int32_t OnRemoteRequest(uint8_t* data, size_t size);
+    };
+}
+
 #endif
