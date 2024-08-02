@@ -1271,6 +1271,14 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
         descriptor = session->GetDescriptor();
         return AVSESSION_SUCCESS;
     }
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("GetSessionDescriptorsBySessionId: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", GetCallingUid(), "SESSION_ID", sessionId,
+            "ERROR_MSG", "avsessionservice getsessiondescriptors by sessionid checkpermission failed");
+        return err;
+    }
     descriptor = session->GetDescriptor();
     return AVSESSION_SUCCESS;
 }
