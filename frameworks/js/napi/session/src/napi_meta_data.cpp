@@ -326,6 +326,7 @@ napi_status NapiMetaData::GetAVQueueImage(napi_env env, napi_value in, AVMetaDat
             return napi_invalid_arg;
         }
         out.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        SLOGD(" napi get avqueueimage");
     } else {
         SLOGE("avqueueimage property value type invalid");
         return napi_invalid_arg;
