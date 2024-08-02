@@ -86,7 +86,7 @@ static ServiceCollaborationManager_Callback serviceCollaborationCallback {
     .ApplyResult = ApplyResult
 };
 
-__attribute__((no_sanitize("cfi"))) int64_t CollaborationManager::ReadCollaborationManagerSo()
+__attribute__((no_sanitize("cfi"))) int32_t CollaborationManager::ReadCollaborationManagerSo()
 {
     SLOGI("enter ReadCollaborationManagerSo");
     void *collaborationManagerExport = pluginLib_.LoadSymbol("ServiceCollaborationManager_Export");
@@ -100,7 +100,7 @@ __attribute__((no_sanitize("cfi"))) int64_t CollaborationManager::ReadCollaborat
     return AVSESSION_SUCCESS;
 }
 
-int64_t CollaborationManager::RegisterLifecycleCallback()
+int32_t CollaborationManager::RegisterLifecycleCallback()
 {
     SLOGI("enter RegisterLifecycleCallback");
     if (exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback == nullptr) {
@@ -114,7 +114,7 @@ int64_t CollaborationManager::RegisterLifecycleCallback()
     return AVSESSION_SUCCESS;
 }
 
-int64_t CollaborationManager::UnRegisterLifecycleCallback()
+int32_t CollaborationManager::UnRegisterLifecycleCallback()
 {
     SLOGI("enter UnRegisterLifecycleCallback");
     if (exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback == nullptr) {
@@ -127,7 +127,7 @@ int64_t CollaborationManager::UnRegisterLifecycleCallback()
     return AVSESSION_SUCCESS;
 }
 
-int64_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
+int32_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
     ServiceCollaborationManagerBussinessStatus state)
 {
     SLOGI("enter PublishServiceState");

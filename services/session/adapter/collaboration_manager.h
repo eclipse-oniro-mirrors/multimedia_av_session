@@ -30,10 +30,10 @@ public:
     virtual ~CollaborationManager();
     void SendRejectStateToStopCast(const std::function<void(const std::string callbackName,
         bool flag)>& callback);
-    int64_t ReadCollaborationManagerSo();
-    int64_t RegisterLifecycleCallback();
-    int64_t UnRegisterLifecycleCallback();
-    int64_t PublishServiceState(const char* peerNetworkId, ServiceCollaborationManagerBussinessStatus state);
+    int32_t ReadCollaborationManagerSo();
+    int32_t RegisterLifecycleCallback();
+    int32_t UnRegisterLifecycleCallback();
+    int32_t PublishServiceState(const char* peerNetworkId, ServiceCollaborationManagerBussinessStatus state);
     int32_t ApplyAdvancedResource(const char* peerNetworkId);
 
     std::function<void(const std::string callbackName, bool flag)> sendRejectStateToStopCast_;
