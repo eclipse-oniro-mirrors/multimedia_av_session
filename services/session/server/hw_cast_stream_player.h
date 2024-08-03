@@ -78,6 +78,7 @@ private:
 
     int32_t castMinTime = 1000;
     std::recursive_mutex streamPlayerLock_;
+    std::recursive_mutex curItemLock_;
     std::shared_ptr<CastEngine::IStreamPlayer> streamPlayer_;
     std::recursive_mutex streamPlayerListenerLock;
     std::recursive_mutex streamPlayerListenerListLock_;
