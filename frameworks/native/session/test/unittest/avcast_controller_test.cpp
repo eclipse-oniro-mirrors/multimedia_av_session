@@ -91,7 +91,7 @@ public:
     std::shared_ptr<AVSession> avsession_ = nullptr;
     std::shared_ptr<AVSessionController> controller_ = nullptr;
     std::shared_ptr<AVCastControllerItem> castController_ = std::make_shared<AVCastControllerItem>();
-    std::vector<int32_t> supportedCastCmds_;
+    std::vector<int32_t> supportedCastCmd_;
 
     static constexpr int SESSION_LEN = 64;
 };
@@ -127,7 +127,7 @@ void AVCastControllerTest::SetUp()
     std::shared_ptr<HwCastStreamPlayer> HwCastStreamPlayer_ = std::make_shared<HwCastStreamPlayer>(nullptr);
     auto callback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
-        supportedCastCmds = supportedCastCmds_;
+        supportedCastCmds = supportedCastCmd_;
         return;
     };
     castController_->Init(HwCastStreamPlayer_, callback);
