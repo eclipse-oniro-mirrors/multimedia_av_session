@@ -29,7 +29,7 @@ using namespace OHOS::CastEngine;
 namespace OHOS::AVSession {
 HwCastStreamPlayer::~HwCastStreamPlayer()
 {
-    SLOGI("destruct the HwCastStreamPlayer with release");
+    SLOGI("destruct the HwCastStreamPlayer without release");
 }
 
 void HwCastStreamPlayer::Init()
@@ -45,12 +45,14 @@ void HwCastStreamPlayer::Init()
 void HwCastStreamPlayer::Release()
 {
     SLOGI("Release the HwCastStreamPlayer");
+
     std::lock_guard lockGuard(streamPlayerLock_);
     if (streamPlayer_) {
         streamPlayer_->UnregisterListener();
         streamPlayer_->Release();
         streamPlayer_ = nullptr;
     }
+
     std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     streamPlayerListenerList_.clear();
     SLOGI("Release the HwCastStreamPlayer done");
@@ -134,6 +136,7 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
             int32_t loopMode;
             castControlCommand.GetLoopMode(loopMode);
             if (intLoopModeToCastPlus_.count(loopMode) != 0) {
+                SLOGD("SetLoopMode int: %{public}d", loopMode);
                 streamPlayer_->SetLoopMode(intLoopModeToCastPlus_[loopMode]);
             } else {
                 SLOGE("invalid LoopMode: %{public}d", loopMode);
@@ -239,7 +242,8 @@ int32_t HwCastStreamPlayer::CheckBeforePrepare(std::shared_ptr<AVMediaDescriptio
 {
     std::shared_ptr<AVMediaDescription> originMediaDescription = currentAVQueueItem_.GetDescription();
 
-    if (originMediaDescription != nullptr && originMediaDescription->GetMediaId() == mediaDescription->GetMediaId()) {
+    if (originMediaDescription != nullptr && originMediaDescription->GetMediaId() == mediaDescription->GetMediaId() &&
+        mediaDescription->GetIconUri() == "INVALID_URI_CACHE") {
         SLOGW("prepare with repeat mediaId %{public}s", mediaDescription->GetMediaId().c_str());
         if (mediaDescription->GetIcon() != nullptr && originMediaDescription->GetIcon() == nullptr) {
             SLOGI("prepare with repeat but set icon");
@@ -385,19 +389,6 @@ int32_t HwCastStreamPlayer::ProcessMediaKeyResponse(const std::string& assetId, 
     return AVSESSION_SUCCESS;
 }
 
-int32_t ProvideKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response)
-{
-    SLOGI("ProvideKeyResponse begin");
-    std::lock_guard lockGuard(streamPlayerLock_);
-    if (!streamPlayer_) {
-        SLOGE("streamPlayer is nullptr");
-        return AVSESSION_ERROR;
-    }
-    streamPlayer_->ProvideKeyResponse(assetId, response);
-    SLOGI("ProvideKeyResponse successed");
-    return AVSESSION_SUCCESS;
-}
-
 int32_t HwCastStreamPlayer::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxyListener> listener)
 {
     SLOGI("RegisterControllerListener begin");
@@ -405,6 +396,7 @@ int32_t HwCastStreamPlayer::RegisterControllerListener(std::shared_ptr<IAVCastCo
         SLOGE("RegisterControllerListener failed for the listener is nullptr");
         return AVSESSION_ERROR;
     }
+
     std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     if (find(streamPlayerListenerList_.begin(), streamPlayerListenerList_.end(), listener)
         != streamPlayerListenerList_.end()) {
@@ -423,6 +415,7 @@ int32_t HwCastStreamPlayer::UnRegisterControllerListener(std::shared_ptr<IAVCast
         SLOGE("UnRegisterCastSessionStateListener failed for the listener is nullptr");
         return AVSESSION_ERROR;
     }
+
     std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto iter = streamPlayerListenerList_.begin(); iter != streamPlayerListenerList_.end();) {
         if (*iter == listener) {
@@ -481,6 +474,7 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
+    SLOGI("on cast state change done");
 }
 
 void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int duration)
@@ -529,11 +523,7 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetStartPosition(static_cast<uint32_t>(mediaInfo.startPosition));
     mediaDescription->SetDuration(static_cast<uint32_t>(mediaInfo.duration));
     mediaDescription->SetCreditsPosition(static_cast<int32_t>(mediaInfo.closingCreditsPosition));
-    if (mediaInfo.albumCoverUrl == "") {
-        mediaDescription->SetAlbumCoverUri(currentAlbumCoverUri_);
-    } else {
-        mediaDescription->SetAlbumCoverUri(mediaInfo.albumCoverUrl);
-    }
+    mediaDescription->SetAlbumCoverUri(currentAlbumCoverUri_);
     mediaDescription->SetAlbumTitle(mediaInfo.albumTitle);
     mediaDescription->SetArtist(mediaInfo.mediaArtist);
     mediaDescription->SetLyricUri(mediaInfo.lrcUrl);
@@ -548,16 +538,21 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     }
     AVQueueItem queueItem;
     queueItem.SetDescription(mediaDescription);
-    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
-    for (auto listener : streamPlayerListenerList_) {
-        if (listener != nullptr) {
-            SLOGI("trigger the OnMediaItemChange for registered listeners");
-            listener->OnMediaItemChange(queueItem);
+    {
+        std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
+        for (auto listener : streamPlayerListenerList_) {
+            if (listener != nullptr) {
+                SLOGI("trigger the OnMediaItemChange for registered listeners");
+                listener->OnMediaItemChange(queueItem);
+            }
         }
     }
-    std::lock_guard lockGuard(streamPlayerLock_);
-    currentAVQueueItem_ = queueItem;
-    SLOGI("Stream player received mediaItemChanged event done");
+    {
+        std::lock_guard lockGuard(streamPlayerLock_);
+        currentAVQueueItem_ = queueItem;
+    }
+
+    SLOGI("StreamPlayer received mediaItemChanged event done");
 }
 
 void HwCastStreamPlayer::OnNextRequest()
@@ -626,7 +621,7 @@ void HwCastStreamPlayer::OnLoopModeChanged(const CastEngine::LoopMode loopMode)
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
-    SLOGD("loop mode changed event done: %{public}d", castPlusLoopModeToInt_[loopMode]);
+    SLOGI("loop mode changed event done: %{public}d", castPlusLoopModeToInt_[loopMode]);
 }
 
 void HwCastStreamPlayer::OnPlaySpeedChanged(const CastEngine::PlaybackSpeed speed)
@@ -645,7 +640,7 @@ void HwCastStreamPlayer::OnPlaySpeedChanged(const CastEngine::PlaybackSpeed spee
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
-    SLOGD("play speed changed event done: %{public}f", castPlusSpeedToDouble_[speed]);
+    SLOGI("play speed changed event done: %{public}f", castPlusSpeedToDouble_[speed]);
 }
 
 void HwCastStreamPlayer::OnPlayerError(int errorCode, const std::string &errorMsg)
@@ -719,7 +714,7 @@ void HwCastStreamPlayer::OnEndOfStream(int isLooping)
 
 void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
 {
-    SLOGD("Stream player received PlayRequest event");
+    SLOGI("Stream player received PlayRequest event");
     std::shared_ptr<AVMediaDescription> mediaDescription = std::make_shared<AVMediaDescription>();
     mediaDescription->SetMediaId(mediaInfo.mediaId);
     mediaDescription->SetTitle(mediaInfo.mediaName);

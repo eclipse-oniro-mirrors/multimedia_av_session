@@ -160,7 +160,7 @@ public:
      * @brief Fast forward.
      *
      * @param time fastforward skip intervals
-     * @since 9
+     * @since 11
     */
     virtual void OnFastForward(int64_t time) = 0;
 
@@ -168,7 +168,7 @@ public:
      * @brief Fast rewind.
      *
      * @param time rewind skip intervals
-     * @since 9
+     * @since 11
     */
     virtual void OnRewind(int64_t time) = 0;
 
@@ -558,7 +558,7 @@ enum DeviceType {
      * @since 10
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      */
-    DEVICE_TYPE_SMART_SPEAKER = 3,
+    DEVICE_TYPE_SPEAKER = 3,
     /**
      * A device type indicating the route is on a bluetooth device.
      * @since 10

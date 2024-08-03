@@ -148,7 +148,7 @@ HWTEST_F(AVSessionPermissionTest, GetAllSessionDescriptorsWithNoPerm001, TestSiz
     AddPermission(g_infoA, g_policyA);
     std::vector<AVSessionDescriptor> descriptors;
     auto ret = AVSessionManager::GetInstance().GetAllSessionDescriptors(descriptors);
-    EXPECT_EQ(ret, ERR_NO_PERMISSION);
+    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
     DeletePermission(g_infoA);
 }
 
@@ -163,7 +163,7 @@ HWTEST_F(AVSessionPermissionTest, GetActivatedSessionDescriptorsWithNoPerm001, T
     AddPermission(g_infoA, g_policyA);
     std::vector<AVSessionDescriptor> descriptors;
     auto ret = AVSessionManager::GetInstance().GetActivatedSessionDescriptors(descriptors);
-    EXPECT_EQ(ret, ERR_NO_PERMISSION);
+    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
     DeletePermission(g_infoA);
 }
 
@@ -180,7 +180,7 @@ HWTEST_F(AVSessionPermissionTest, GetSessionDescriptorsBySessionIdWithNoPerm001,
 
     // Using "1" as the test input parameter
     int32_t ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId("1", descriptor);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
     DeletePermission(g_infoA);
 }
 
@@ -197,7 +197,7 @@ HWTEST_F(AVSessionPermissionTest, GetHistoricalSessionDescriptorsWithNoPerm001, 
 
     // Using "1" as the test input parameter
     int32_t ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(0, descriptors);
-    EXPECT_EQ(ret, ERR_NO_PERMISSION);
+    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
     DeletePermission(g_infoA);
 }
 
@@ -214,7 +214,7 @@ HWTEST_F(AVSessionPermissionTest, CreateControllerWithNoPerm001, TestSize.Level1
 
     // Using "1" as the test input parameter
     auto ret = AVSessionManager::GetInstance().CreateController("1", controller);
-    EXPECT_EQ(ret, ERR_NO_PERMISSION);
+    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
     DeletePermission(g_infoA);
 }
 
@@ -229,7 +229,7 @@ HWTEST_F(AVSessionPermissionTest, RegisterSessionListenerWithNoPerm001, TestSize
     AddPermission(g_infoA, g_policyA);
     std::shared_ptr<TestSessionListener> listener = std::make_shared<TestSessionListener>();
     auto result = AVSessionManager::GetInstance().RegisterSessionListener(listener);
-    EXPECT_EQ(result, ERR_NO_PERMISSION);
+    EXPECT_EQ(result, ERR_IPC_SEND_REQUEST);
     DeletePermission(g_infoA);
 }
 
@@ -254,7 +254,7 @@ HWTEST_F(AVSessionPermissionTest, SendSystemMediaKeyEventWithNoPerm001, TestSize
     keyEvent->AddKeyItem(keyItem);
 
     auto result = AVSessionManager::GetInstance().SendSystemAVKeyEvent(*keyEvent);
-    EXPECT_EQ(result, ERR_NO_PERMISSION);
+    EXPECT_EQ(result, ERR_IPC_SEND_REQUEST);
     DeletePermission(g_infoA);
 }
 
@@ -270,7 +270,7 @@ HWTEST_F(AVSessionPermissionTest, SendSystemControlCommandWithNoPerm001, TestSiz
     AVControlCommand command;
     command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
     auto result = AVSessionManager::GetInstance().SendSystemControlCommand(command);
-    EXPECT_EQ(result, ERR_NO_PERMISSION);
+    EXPECT_EQ(result, ERR_IPC_SEND_REQUEST);
     DeletePermission(g_infoA);
 }
 

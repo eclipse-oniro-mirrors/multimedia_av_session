@@ -226,6 +226,7 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVMetaData");
     CHECK_AND_RETURN_RET_LOG(meta.IsValid(), ERR_INVALID_PARAM, "invalid meta data");
+
     std::lock_guard lockGuard(setMetadataLock_);
     SLOGI("SetAVMetaData in proxy");
 
@@ -737,7 +738,7 @@ int32_t AVSessionProxy::AddSupportCommand(const int32_t cmd)
 int32_t AVSessionProxy::DeleteSupportCommand(const int32_t cmd)
 {
     std::lock_guard lockGuard(setCommandLock_);
-    SLOGI("delete support command for %{public}d", cmd);
+    SLOGI("del support command for %{public}d", cmd);
 
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");

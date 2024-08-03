@@ -811,7 +811,8 @@ static HWTEST_F(AVSessionServiceTest, DeleteHistoricalRecord001, TestSize.Level1
 
 static HWTEST_F(AVSessionServiceTest, Dump001, TestSize.Level1)
 {
-    SLOGI("Dump001 begin!");std::vector<std::u16string> argsList;
+    SLOGI("Dump001 begin!");
+    std::vector<std::u16string> argsList;
     avservice_->Dump(1, argsList);
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("Dump001 end!");

@@ -24,6 +24,7 @@
 #include "accesstoken_kit.h"
 #include "app_manager_adapter.h"
 #include "audio_adapter.h"
+#include "avsession_dynamic_loader.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_info.h"
@@ -53,7 +54,6 @@
 #include "notification_helper.h"
 #include "notification_request.h"
 #include "notification_constant.h"
-#include "insight_intent_execute_param.h"
 #include "ability_connect_helper.h"
 #include "if_system_ability_manager.h"
 #include "parameter.h"
@@ -80,6 +80,9 @@ using namespace nlohmann;
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
+
+static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
+
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
@@ -557,7 +560,6 @@ bool AVSessionService::IsMediaStream(AudioStandard::StreamUsage usage)
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
 {
     SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
-    std::lock_guard lockGuard(sessionAndControllerLock_);
     std::lock_guard frontLockGuard(sessionFrontLock_);
     SLOGD("UpdateFrontSession pass lock");
     auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sessionItem);
@@ -595,9 +597,6 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         }
         if (session->GetUid() != info.uid) {
             continue;
-        }
-        if (!IsMediaStream(info.streamUsage)) {
-            UpdateFrontSession(session, false);
         }
         GetContainer().UpdateSessionSort(session);
         RefreshFocusSessionSort(session);
@@ -1063,6 +1062,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     });
     result->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
         SLOGI("servicecallback for update session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        std::lock_guard lockGuard(sessionAndControllerLock_);
         sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
         UpdateFrontSession(sessionItem, isAdd);
     });
@@ -1278,6 +1278,14 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
         descriptor = session->GetDescriptor();
         return AVSESSION_SUCCESS;
     }
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("GetSessionDescriptorsBySessionId: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", GetCallingUid(), "SESSION_ID", sessionId,
+            "ERROR_MSG", "avsessionservice getsessiondescriptors by sessionid checkpermission failed");
+        return err;
+    }
     descriptor = session->GetDescriptor();
     return AVSESSION_SUCCESS;
 }
@@ -1470,18 +1478,18 @@ void AVSessionService::DoMetadataImgClean(AVMetaData& data)
 
 int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
 {
-    // get execute param
-    AppExecFwk::InsightIntentExecuteParam executeParam;
-    bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName, assetId, executeParam);
-    if (!isSupport || executeParam.insightIntentName_.empty()) {
-        SLOGE("StartAVPlayback GetPlayIntentParam fail, Return!");
-        return AVSESSION_ERROR;
+    SLOGE("StartAVPlayback in!");
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+
+    typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId);
+    StartAVPlaybackFunc startAVPlayback =
+        reinterpret_cast<StartAVPlaybackFunc>(dynamicLoader->GetFuntion(
+            AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlayback"));
+    if (startAVPlayback) {
+        return (*startAVPlayback)(bundleName, assetId);
     }
-    int32_t ret = AbilityConnectHelper::GetInstance().StartAVPlayback(executeParam);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("StartAVPlayback fail: %{public}d", ret);
-    }
-    return ret;
+    SLOGE("StartAVPlayback fail");
+    return AVSESSION_ERROR;
 }
 
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session)
@@ -1801,6 +1809,15 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
         topSession_->HandleMediaKeyEvent(keyEvent);
     } else {
         SLOGI("topSession is nullptr");
+        std::lock_guard frontLockGuard(sessionFrontLock_);
+        for (const auto& session : sessionListForFront_) {
+            if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
+                session->HandleMediaKeyEvent(keyEvent);
+                SLOGI("HandleMediaKeyEvent %{public}d for front session: %{public}s", keyEvent.GetKeyCode(),
+                      session->GetBundleName().c_str());
+                break;
+            }
+        }
     }
     return AVSESSION_SUCCESS;
 }
@@ -1987,7 +2004,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
 {
     SLOGI("HandleSessionRelease, sessionId=%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     std::lock_guard lockGuard(sessionAndControllerLock_);
-
+    std::lock_guard frontLockGuard(sessionFrontLock_);
     sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
     NotifySessionRelease(sessionItem->GetDescriptor());

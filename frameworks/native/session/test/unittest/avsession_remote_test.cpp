@@ -186,8 +186,7 @@ public:
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
-    void OnOutputDeviceChange(const int32_t connectionState,
-        const OutputDeviceInfo& outputDeviceInfo) override;
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
     void OnAVCallAnswer() override {};
@@ -262,8 +261,7 @@ void AVSessionCastAudioCallbackImpl::OnMediaKeyEvent(const OHOS::MMI::KeyEvent& 
     SLOGE("OnMediaKeyEvent");
     g_onCall = AVSESSION_SUCCESS;
 }
-void AVSessionCastAudioCallbackImpl::OnOutputDeviceChange(const int32_t connectionState,
-    const OutputDeviceInfo& info)
+void AVSessionCastAudioCallbackImpl::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info)
 {
     SLOGE("OnOutputDeviceChange");
     g_onCall = AVSESSION_SUCCESS;
@@ -653,7 +651,7 @@ HWTEST_F(AVSessionRemoteTest, GetOutputDevice005, TestSize.Level1)
 HWTEST_F(AVSessionRemoteTest, StartCastDiscovery001, TestSize.Level1)
 {
     SLOGI("StartCastDiscovery001 begin");
-    auto ret = AVSessionManager::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL);
+    auto ret = AVSessionManager::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL, {});
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("StartCastDiscovery001 end");
 }
@@ -667,7 +665,7 @@ HWTEST_F(AVSessionRemoteTest, StartCastDiscovery001, TestSize.Level1)
 HWTEST_F(AVSessionRemoteTest, StartCastDiscovery002, TestSize.Level1)
 {
     SLOGI("StartCastDiscovery002 begin");
-    auto ret = AVSessionManager::GetInstance().StartCastDiscovery(-1);
+    auto ret = AVSessionManager::GetInstance().StartCastDiscovery(-1, {});
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("StartCastDiscovery002 end");
 }
@@ -681,7 +679,7 @@ HWTEST_F(AVSessionRemoteTest, StartCastDiscovery002, TestSize.Level1)
 HWTEST_F(AVSessionRemoteTest, StopCastDiscovery001, TestSize.Level1)
 {
     SLOGI("StopCastDiscovery001 begin");
-    auto ret = AVSessionManager::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL);
+    auto ret = AVSessionManager::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL, {});
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     ret = AVSessionManager::GetInstance().StopCastDiscovery();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);

@@ -45,7 +45,7 @@ bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string>
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
     AVSessionRadarInfo info("HwCastProvider::StartDiscovery");
     AVSessionRadar::GetInstance().StartCastDiscoveryBegin(info);
-    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability);
+    auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability, drmSchemes);
     if (ret != 0) {
         info.errorCode_ = ret;
         AVSessionRadar::GetInstance().FailToStartCastDiscovery(info);
@@ -355,6 +355,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.supportedProtocols_ = castPlusTypeToAVSessionType_ [castRemoteDevice.capability];
         deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType) == 0 ?
             TRUSTED_DEVICE : UNTRUSTED_DEVICE;
+        deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {

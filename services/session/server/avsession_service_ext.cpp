@@ -38,7 +38,8 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         AddInnerSessionListener(migrateAVSession_.get());
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") {
+    if ((serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") &&
+        (state == "IDLE" || state == "CONNECT_SUCC")) {
         castServiceNameMapState_[serviceName] = state;
         isSupportMirrorToStream_ = false;
         castDeviceId_ = "0";

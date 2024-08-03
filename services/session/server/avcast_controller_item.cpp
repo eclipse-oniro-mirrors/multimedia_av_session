@@ -237,12 +237,6 @@ int32_t AVCastControllerItem::ProcessMediaKeyResponse(const std::string &assetId
     return castControllerProxy_->ProcessMediaKeyResponse(assetId, response);
 }
 
-int32_t AVCastControllerItem::ProvideKeyResponse(const std::string &assetId, const std::vector<uint8_t> &response)
-{
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
-    return castControllerProxy_->ProvideKeyResponse(assetId, response);
-}
-
 int32_t AVCastControllerItem::AddAvailableCommand(const int32_t cmd)
 {
     SLOGI("add available command %{public}d", cmd);
