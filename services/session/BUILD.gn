@@ -451,7 +451,6 @@ ohos_shared_library("avsession_item") {
     "adapter/bundle_status_adapter.cpp",
     "adapter/collaboration_manager.cpp",
     "adapter/command_send_limit.cpp",
-    "adapter/permission_checker.cpp",
     "adapter/plugin_lib.cpp",
     "adapter/session_xcollie.cpp",
   ]
