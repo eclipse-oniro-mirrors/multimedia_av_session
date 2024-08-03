@@ -158,10 +158,11 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
 
 AVQueueItem HwCastStreamPlayer::GetCurrentItem()
 {
-    std::lock_guard lockGuard(streamPlayerLock_);
     SLOGI("Received GetCurrentItem request");
     int32_t duration;
     GetDuration(duration);
+    // do not place streamPlayerLock_ in side of curItemLock_
+    std::lock_guard lockGuard(curItemLock_);
     std::shared_ptr<AVMediaDescription> mediaDescription = currentAVQueueItem_.GetDescription();
     if (mediaDescription == nullptr) {
         SLOGE("GetCurrentItem with nullptr, return with default");
@@ -176,6 +177,7 @@ AVQueueItem HwCastStreamPlayer::GetCurrentItem()
 
 int32_t HwCastStreamPlayer::RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem)
 {
+    std::lock_guard lockGuard(curItemLock_);
     std::shared_ptr<AVMediaDescription> originMediaDescription = currentAVQueueItem_.GetDescription();
     std::shared_ptr<AVMediaDescription> newMediaDescription = avQueueItem.GetDescription();
     if (originMediaDescription != nullptr &&
@@ -193,6 +195,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
     mediaInfo.mediaId = mediaDescription->GetMediaId();
     mediaInfo.mediaName = mediaDescription->GetTitle();
+    mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
     if (mediaDescription->GetMediaUri() == "") {
         if (mediaDescription->GetFdSrc().fd_ == 0) {
             SLOGW("No media id and fd src");
@@ -200,8 +203,6 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         } else {
             mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
         }
-    } else {
-        mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
     }
     mediaInfo.mediaType = mediaDescription->GetMediaType();
     mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
@@ -222,12 +223,14 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         SLOGE("Set media info and start failed");
         return AVSESSION_ERROR;
     }
-    if (currentAVQueueItem_.GetDescription() && currentAVQueueItem_.GetDescription()->GetMediaUri() != "http:" &&
-        currentAVQueueItem_.GetDescription()->GetMediaId() == mediaInfo.mediaId) {
-        if (streamPlayer_->Play() != AVSESSION_SUCCESS) {
-            SLOGE("Set media info and start failed");
-            return AVSESSION_ERROR;
-        }
+    std::shared_ptr<AVMediaDescription> originMediaDescription = nullptr;
+    {
+        std::lock_guard lockGuard(curItemLock_);
+        originMediaDescription = currentAVQueueItem_.GetDescription();
+    }
+    if (originMediaDescription && originMediaDescription->GetMediaUri() != "http:" &&
+        originMediaDescription->GetMediaId() == mediaInfo.mediaId) {
+        CHECK_AND_RETURN_RET_LOG(streamPlayer_->Play() != AVSESSION_SUCCESS, AVSESSION_ERROR, "Set play failed");
     } else if (streamPlayer_->Play(mediaInfo) != AVSESSION_SUCCESS) {
         SLOGE("Set media info and start failed");
         return AVSESSION_ERROR;
@@ -240,6 +243,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
 
 int32_t HwCastStreamPlayer::CheckBeforePrepare(std::shared_ptr<AVMediaDescription> mediaDescription)
 {
+    std::lock_guard lockGuard(curItemLock_);
     std::shared_ptr<AVMediaDescription> originMediaDescription = currentAVQueueItem_.GetDescription();
 
     if (originMediaDescription != nullptr && originMediaDescription->GetMediaId() == mediaDescription->GetMediaId() &&
@@ -294,9 +298,10 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
     SLOGD("mediaInfo albumCoverUrl is %{public}s", mediaInfo.albumCoverUrl.c_str());
     std::lock_guard lockGuard(streamPlayerLock_);
-    SLOGI("mediaInfo mediaUrl is %{public}s", mediaInfo.mediaUrl.c_str());
+    SLOGI("pass playerlock, check item lock, mediaInfo mediaUrl is %{public}s", mediaInfo.mediaUrl.c_str());
     if (streamPlayer_ && streamPlayer_->Load(mediaInfo) == AVSESSION_SUCCESS) {
-        SLOGI("Set media info and prepare successed");
+        std::lock_guard lockGuard(curItemLock_);
+        SLOGI("Set media info and prepare with curItemLock successed");
         currentAVQueueItem_ = avQueueItem;
         currentAlbumCoverUri_ = mediaInfo.albumCoverUrl;
         return AVSESSION_SUCCESS;
@@ -530,7 +535,11 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetIconUri(mediaInfo.appIconUrl);
     mediaDescription->SetAppName(mediaInfo.appName);
     mediaDescription->SetDrmScheme(mediaInfo.drmType);
-    std::shared_ptr<AVMediaDescription> originMediaDescription = currentAVQueueItem_.GetDescription();
+    std::shared_ptr<AVMediaDescription> originMediaDescription = nullptr;
+    {
+        std::lock_guard lockGuard(curItemLock_);
+        originMediaDescription = currentAVQueueItem_.GetDescription();
+    }
     if (originMediaDescription != nullptr && originMediaDescription->GetIcon() != nullptr
         && mediaInfo.mediaId == originMediaDescription->GetMediaId()) {
         SLOGI("mediaItemChanged with origin icon set");
@@ -548,7 +557,7 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
         }
     }
     {
-        std::lock_guard lockGuard(streamPlayerLock_);
+        std::lock_guard lockGuard(curItemLock_);
         currentAVQueueItem_ = queueItem;
     }
 
@@ -763,7 +772,11 @@ void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pi
         return;
     }
 
-    std::shared_ptr<AVMediaDescription> mediaDescription = currentAVQueueItem_.GetDescription();
+    std::shared_ptr<AVMediaDescription> mediaDescription = nullptr;
+    {
+        std::lock_guard lockGuard(curItemLock_);
+        mediaDescription = currentAVQueueItem_.GetDescription();
+    }
     if (mediaDescription == nullptr) {
         SLOGE("OnAlbumCoverChanged with nullptr mediaDescription, return with default");
         return;
@@ -778,9 +791,10 @@ void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pi
             listener->OnMediaItemChange(queueItem);
         }
     }
-
-    std::lock_guard lockGuard(streamPlayerLock_);
-    currentAVQueueItem_ = queueItem;
+    {
+        std::lock_guard lockGuard(curItemLock_);
+        currentAVQueueItem_ = queueItem;
+    }
     SLOGI("Received AlbumCoverChanged callback done");
 }
 
