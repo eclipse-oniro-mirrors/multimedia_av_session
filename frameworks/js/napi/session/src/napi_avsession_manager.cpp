@@ -541,9 +541,6 @@ napi_status NapiAVSessionManager::RegisterNativeSessionListener(napi_env env)
         } else if (ret == ERR_NO_PERMISSION) {
             NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
                 NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-        } else if (ret == ERR_PERMISSION_DENIED) {
-            NapiUtils::ThrowError(env, "OnEvent failed : native permission denied",
-                NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
         } else {
             NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
                 NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -567,11 +564,9 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     napi_value callback = nullptr;
     auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
         int32_t err = PermissionChecker::GetInstance().CheckPermission(
-            PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+            PermissionChecker::CHECK_SYSTEM_PERMISSION);
         CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
             NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check permission denied",
-            NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
         /* require 2 arguments <event, callback> */
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -621,11 +616,9 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
     napi_value callback = nullptr;
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
         int32_t err = PermissionChecker::GetInstance().CheckPermission(
-            PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+            PermissionChecker::CHECK_SYSTEM_PERMISSION);
         CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
             NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check permission denied",
-            NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);

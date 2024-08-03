@@ -290,7 +290,7 @@ int32_t AVSessionServiceStub::HandleGetAVCastControllerInner(MessageParcel& data
 int32_t AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply)
 {
     int32_t err = PermissionChecker::GetInstance().CheckPermission(
-        PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+        PermissionChecker::CHECK_SYSTEM_PERMISSION);
     if (err != ERR_NONE) {
         SLOGE("RegisterSessionListener: CheckPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
