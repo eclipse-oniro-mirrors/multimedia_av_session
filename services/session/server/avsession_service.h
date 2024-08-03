@@ -422,6 +422,8 @@ private:
 
     bool UnSubscribeCommonEvent();
 
+    void ReportSessionInfo(const sptr <AVSessionItem>& session, int res);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;

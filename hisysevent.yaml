@@ -150,3 +150,28 @@ REMOTE_CONTROL_FAILED:
   AUDIO_STATUS: {type: INT32, desc: audio status}
   ERROR_TYPE: {type: STRING, desc: error type}
   ERROR_INFO: {type: STRING, desc: error info}
+
+SESSION_API_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: session API behavior}
+  API_NAME: {type: STRING, desc: api name}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  SESSION_ID: {type: STRING, desc: session id}
+  SESSION_TAG: {type: STRING, desc: session tag}
+  SESSION_TYPE: {type: STRING, desc: session type}
+  API_PARAM: {type: STRING, desc: api parameter}
+  ERROR_CODE: {type: INT32, desc: error code}
+  ERROR_MSG: {type: STRING, desc: error msg}
+  APP_VERSION_NAME: {type: STRING, desc: app version name}
+  COST_TIME: {type: STRING, desc: cost time}
+  OS_VERSION: {type: STRING, desc: os version}
+  SDK_VERSION: {type: STRING, desc: sdk version}
+
+SESSION_CAST_CONTROL:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: session register listener}
+  CONTROL_TYPE: {type: STRING, desc: control type}
+  PEER_DEVICE_ID: {type: STRING, desc: peer device id}
+  PEER_DEVICE_NAME: {type: STRING, desc: device name}
+  PEER_DEVICE_TYPE: {type: STRING, desc: device type}
+  PEER_NETWORK_ID: {type: STRING, desc: peer network id}
+  PEER_SUPPORTED_PROTOCOL: {type: INT32, desc: supported protocol}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}

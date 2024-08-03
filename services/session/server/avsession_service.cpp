@@ -1137,6 +1137,33 @@ sptr<AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag,
     return sessionItem;
 }
 
+void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, int32_t res)
+{
+    std::string sessionId = "";
+    std::string sessionTag = "";
+    std::string SessionType = "";
+    std::string bundleName = "";
+    std::string API_PARAM_STRING = "";
+    if (session != nullptr) {
+        sessionId = AVSessionUtils::GetAnonySessionId(session->GetDescriptor().sessionId_);
+        sessionTag = session->GetDescriptor().sessionTag_;
+        SessionType = session->GetSessionType();
+        bundleName = session->GetDescriptor().elementName_.GetBundleName();
+        std::string API_PARAM_STRING = "abilityName: " +
+            session->GetDescriptor().elementName_.GetAbilityName() + ","
+            + "moduleName: " + session->GetDescriptor().elementName_.GetModuleName();
+    }
+    std::string errMsg = (res == AVSESSION_SUCCESS) ? "SUCCESS" : "create session failed";
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "CreateSession",
+        "BUNDLE_NAME", bundleName,
+        "SESSION_ID",  sessionId,
+        "SESSION_TAG", sessionTag,
+        "SESSION_TYPE", SessionType,
+        "ERROR_CODE", res,
+        "ERROR_MSG", errMsg);
+}
+
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
                                              const AppExecFwk::ElementName& elementName,
                                              sptr<IRemoteObject>& object)
@@ -1176,6 +1203,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     }
 
     object = session;
+    ReportSessionInfo(session, static_cast<int32_t>(res));
 
     {
         std::lock_guard lockGuard(isAllSessionCastLock_);

@@ -577,7 +577,10 @@ ohos_shared_library("avsession_cast_item") {
 
   service_sources = [ "server/avcast_controller_item.cpp" ]
 
-  adapter_sources = [ "adapter/session_xcollie.cpp" ]
+  adapter_sources = [
+    "adapter/bundle_status_adapter.cpp",
+    "adapter/session_xcollie.cpp",
+  ]
 
   sources = ipc_sources + adapter_sources + service_sources
 
@@ -631,6 +634,7 @@ ohos_shared_library("avsession_cast_item") {
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",

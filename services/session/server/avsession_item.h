@@ -277,6 +277,10 @@ private:
     int32_t doContinuousTaskRegister();
     int32_t doContinuousTaskUnregister();
     AVSessionDisplayIntf* GetAVSessionDisplayIntf();
+    void ReportSetAVMetaDataInfo(const AVMetaData& meta);
+    std::string GetAnonymousDeviceId(std::string deviceId);
+    void ReportAVCastControllerInfo();
+    void GetAVCastControllerProxy();
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
