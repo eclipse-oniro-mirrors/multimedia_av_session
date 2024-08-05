@@ -73,8 +73,8 @@ bool InsightAdapter::CheckBundleSupport(std::string& profile)
     return false;
 }
 
-bool InsightAdapter::IsSupportPlayIntent(const std::string& bundleName, std::string& supportModule,
-    std::string& profile)
+__attribute__((no_sanitize("cfi"))) bool InsightAdapter::IsSupportPlayIntent(const std::string& bundleName,
+    std::string& supportModule, std::string& profile)
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {

@@ -25,7 +25,8 @@ public:
 
     ~InsightAdapter();
 
-    bool IsSupportPlayIntent(const std::string& bundleName, std::string& supportModule, std::string& profile);
+    __attribute__((no_sanitize("cfi"))) bool IsSupportPlayIntent(const std::string& bundleName,
+        std::string& supportModule, std::string& profile);
     
     bool GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
                             AppExecFwk::InsightIntentExecuteParam &executeParam);

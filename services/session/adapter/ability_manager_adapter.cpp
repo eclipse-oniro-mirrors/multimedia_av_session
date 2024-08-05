@@ -34,7 +34,7 @@ AbilityManagerAdapter::AbilityManagerAdapter(const std::string& bundleName, cons
 AbilityManagerAdapter::~AbilityManagerAdapter()
 {}
 
-int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
+__attribute__((no_sanitize("cfi"))) int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
 {
     if (status_ != Status::ABILITY_STATUS_INIT) {
         SLOGE("Start Ability is running");
@@ -45,7 +45,7 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
     bool isSupport = false;
 
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
-    typedef int32_t (*IsSupportPlayIntentFunc)(const std::string& bundleName, const std::string& assetId);
+    typedef bool (*IsSupportPlayIntentFunc)(const std::string& bundleName, const std::string& assetId);
     IsSupportPlayIntentFunc isSupportPlayIntent =
         reinterpret_cast<IsSupportPlayIntentFunc>(dynamicLoader->GetFuntion(
             AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "IsSupportPlayIntent"));

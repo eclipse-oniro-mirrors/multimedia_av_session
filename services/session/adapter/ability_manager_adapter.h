@@ -34,7 +34,7 @@ public:
     AbilityManagerAdapter(const std::string& bundleName, const std::string& abilityName);
     ~AbilityManagerAdapter();
 
-    int32_t StartAbilityByCall(std::string& sessionId);
+    __attribute__((no_sanitize("cfi"))) int32_t StartAbilityByCall(std::string& sessionId);
 
     void StartAbilityByCallDone(const std::string& sessionId);
 
