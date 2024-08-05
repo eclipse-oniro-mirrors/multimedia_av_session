@@ -603,6 +603,7 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
     if (enable) {
         checkEnableCast(enable);
         if (is2in1) {
+            AVRouter::GetInstance().SetDiscoverable(false);
             ret = AVRouter::GetInstance().SetDiscoverable(enable);
         } else {
             SLOGI("setdiscoverable not 2in1");
