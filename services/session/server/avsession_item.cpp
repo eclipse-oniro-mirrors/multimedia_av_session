@@ -1215,7 +1215,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
         SLOGE("controlCommand invalid");
         return;
     }
-
+    SLOGI("ExecuteControllerCommand code %{public}d for pid %{public}d", code, static_cast<int>(GetCallingPid()));
     {
         std::lock_guard remoteSinkLockGuard(remoteSinkLock_);
         if (remoteSink_ != nullptr) {
