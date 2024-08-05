@@ -424,7 +424,6 @@ int32_t DoDownload(AVMetaData& meta, const std::string uri)
     if (ret && pixelMap != nullptr) {
         SLOGI("DoDownload success");
         meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
-        meta.SetSmallMediaImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
         return AVSESSION_SUCCESS;
     }
     return AVSESSION_ERROR;
