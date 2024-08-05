@@ -1149,7 +1149,7 @@ void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, in
         sessionTag = session->GetDescriptor().sessionTag_;
         SessionType = session->GetSessionType();
         bundleName = session->GetDescriptor().elementName_.GetBundleName();
-        std::string API_PARAM_STRING = "abilityName: " +
+        API_PARAM_STRING = "abilityName: " +
             session->GetDescriptor().elementName_.GetAbilityName() + ","
             + "moduleName: " + session->GetDescriptor().elementName_.GetModuleName();
     }

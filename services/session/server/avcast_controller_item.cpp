@@ -222,7 +222,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
 {
     SLOGI("Call prepare of cast controller proxy");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
-    castControllerProxy_->Prepare(avQueueItem);
+    auto ret = castControllerProxy_->Prepare(avQueueItem);
     std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "prepare failed";
     std::string mediaIcon = "false";
     std::string API_PARAM_STRING = "";
@@ -319,7 +319,8 @@ int32_t AVCastControllerItem::ProcessMediaKeyResponse(const std::string &assetId
 {
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     auto ret =  castControllerProxy_->ProcessMediaKeyResponse(assetId, response);
-    std::string API_PARAM_STRING = assertId;
+    std::string API_PARAM_STRING = "assetId: " + assetId;
+    std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "ProcessMediaKeyResponse failed";
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "ProcessMediaKeyResponse",
         "BUNDLE_NAME",  BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),
