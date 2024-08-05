@@ -124,6 +124,10 @@ void AVSessionService::OnStart()
     if (ret == AVSESSION_ERROR) {
         maxHistoryNums = defMaxHistoryNum;
     }
+    if (!system::GetBoolParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), false)) {
+        system::SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
+        SLOGI("set boot avsession service started true");
+    }
 
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
     backgroundAudioController_.Init(this);
@@ -151,17 +155,12 @@ void AVSessionService::OnStart()
         AVRouter::GetInstance().SetDiscoverable(true);
     }
     CollaborationManager::GetInstance().ReadCollaborationManagerSo();
-    CHECK_AND_RETURN_LOG(CollaborationManager::GetInstance().RegisterLifecycleCallback() == AVSESSION_SUCCESS,
-        "collaboratio RegisterLifecycleCallback failed");
+    CollaborationManager::GetInstance().RegisterLifecycleCallback();
 #endif
     PullMigrateStub();
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
-    if (!system::GetBoolParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), false)) {
-        system::SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
-        SLOGI("set boot avsession service started true");
-    }
 }
 
 void AVSessionService::OnDump()
