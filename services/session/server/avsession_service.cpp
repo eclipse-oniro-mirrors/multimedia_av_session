@@ -219,6 +219,7 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         if (is2in1 == 0) {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
             SLOGI("enable cast check 2in1");
+            AVRouter::GetInstance().SetDiscoverable(false);
             AVRouter::GetInstance().SetDiscoverable(true);
 #endif
         }
