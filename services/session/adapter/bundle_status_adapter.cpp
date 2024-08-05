@@ -149,8 +149,8 @@ bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
     return false;
 }
 
-bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std::string& supportModule,
-                                              std::string& profile)
+__attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName,
+    std::string& supportModule, std::string& profile)
 {
     if (bundleMgrProxy == nullptr) {
         return false;
