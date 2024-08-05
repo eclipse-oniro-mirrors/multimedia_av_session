@@ -155,8 +155,7 @@ void AVSessionService::OnStart()
         AVRouter::GetInstance().SetDiscoverable(true);
     }
     CollaborationManager::GetInstance().ReadCollaborationManagerSo();
-    SLOGI("collaboration RegisterLifecycleCallback failed",
-        CollaborationManager::GetInstance().RegisterLifecycleCallback());
+    CollaborationManager::GetInstance().RegisterLifecycleCallback();
 #endif
     PullMigrateStub();
     HISYSEVENT_REGITER;
