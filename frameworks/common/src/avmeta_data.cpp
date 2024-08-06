@@ -610,6 +610,38 @@ bool AVMetaData::CopyFrom(const AVMetaData& metaIn)
     return result;
 }
 
+bool AVMetaData::EqualWithUri(const AVMetaData& metaData)
+{
+    if (metaData.mediaImage_ != nullptr) {
+        SLOGI("Current fun cannot determine whether mediaImage_ is equal,\
+            not perform subsequent judgments when mediaImage_ is not null.");
+        return false;
+    }
+
+    return (assetId_ == metaData.assetId_)
+        && (title_ == metaData.title_)
+        && (artist_ == metaData.artist_)
+        && (author_ == metaData.author_)
+        && (avQueueName_ == metaData.avQueueName_)
+        && (avQueueId_ == metaData.avQueueId_)
+        && (avQueueImageUri_ == metaData.avQueueImageUri_)
+        && (album_ == metaData.album_)
+        && (writer_ == metaData.writer_)
+        && (composer_ == metaData.composer_)
+        && (duration_ == metaData.duration_)
+        && (mediaImageUri_ == metaData.mediaImageUri_)
+        && (publishDate_ == metaData.publishDate_)
+        && (subTitle_ == metaData.subTitle_)
+        && (description_ == metaData.description_)
+        && (lyric_ == metaData.lyric_)
+        && (previousAssetId_ == metaData.previousAssetId_)
+        && (nextAssetId_ == metaData.nextAssetId_)
+        && (skipIntervals_ == metaData.skipIntervals_)
+        && (filter_ == metaData.filter_)
+        && (displayTags_ == metaData.displayTags_)
+        && (drmSchemes_ == metaData.drmSchemes_);
+}
+
 bool AVMetaData::IsValid() const
 {
     return duration_ >= AVMetaData::DURATION_ALWAYS_PLAY && publishDate_ >= 0

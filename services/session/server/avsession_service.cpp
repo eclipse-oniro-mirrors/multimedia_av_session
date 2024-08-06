@@ -916,8 +916,6 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     AVSessionRadar::GetInstance().CastDeviceAvailable(castOutputDeviceInfo, info);
 
     for (DeviceInfo deviceInfo : castOutputDeviceInfo.deviceInfos_) {
-        std::lock_guard lockGuard(castDeviceInfoMapLock_);
-        castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
         for (const auto& session : GetContainer().GetAllSessions()) {
             session->UpdateCastDeviceMap(deviceInfo);
         }

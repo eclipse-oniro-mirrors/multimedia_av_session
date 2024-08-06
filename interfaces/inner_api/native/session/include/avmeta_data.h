@@ -176,6 +176,8 @@ public:
     bool CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const;
     bool CopyFrom(const AVMetaData& metaIn);
 
+    bool EqualWithUri(const AVMetaData& metaData);
+
     bool IsValid() const;
 
     const static inline std::vector<int32_t> localCapability {
