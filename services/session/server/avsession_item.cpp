@@ -34,6 +34,8 @@
 #include "avsession_event_handler.h"
 #include "bundle_status_adapter.h"
 #include "want_agent_helper.h"
+#include "array_wrapper.h"
+#include "string_wrapper.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -492,6 +494,16 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
     std::lock_guard lockGuard(wantParamLock_);
     SLOGI("set extras pass lock");
     extras_ = extras;
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    if (extras.HasParam("requireAbilityList")) {
+        auto value = extras.GetParam("requireAbilityList");
+        AAFwk::IArray* list = AAFwk::IArray::Query(value);
+        if (list != nullptr && AAFwk::Array::IsStringArray(list)) {
+            SetExtrasInner(list);
+        }
+    }
+#endif
 
     {
         std::lock_guard controllerLockGuard(controllersLock_);
@@ -1333,6 +1345,27 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
     }
     // if closed here, may cause failure in GetDisplayListener for callback
     return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
+{
+    auto func = [&](AAFwk::IInterface* object) {
+        if (object != nullptr) {
+            AAFwk::IString* stringValue = AAFwk::IString::Query(object);
+            if (stringValue != nullptr && AAFwk::String::Unbox(stringValue) == "url-cast" &&
+                descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO && serviceCallbackForStream_) {
+                SLOGI("AVSessionItem send mirrortostream event to service");
+                serviceCallbackForStream_(GetSessionId());
+            }
+        }
+    };
+    AAFwk::Array::ForEach(list, func);
+}
+
+void AVSessionItem::SetServiceCallbackForStream(const std::function<void(std::string)>& callback)
+{
+    SLOGI("SetServiceCallbackForStream in");
+    serviceCallbackForStream_ = callback;
 }
 #endif
 

@@ -989,7 +989,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 void AVSessionService::NotifyMirrorToStreamCast()
 {
     for (auto& session : GetContainer().GetAllSessions()) {
-        if (session->GetSessionType() == "video" && isSupportMirrorToStream_ &&
+        if (session->GetUid() == uidForAppStateChange_ && isSupportMirrorToStream_ &&
             !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
             MirrorToStreamCast(session);
         }
@@ -1026,6 +1026,39 @@ void AVSessionService::HandleCallStartEvent()
 }
 // LCOV_EXCL_STOP
 
+void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
+{
+    sessionItem->SetServiceCallbackForRelease([this](AVSessionItem& session) {
+        SLOGI("Start handle session release event");
+        HandleSessionRelease(session.GetDescriptor().sessionId_);
+    });
+    sessionItem->SetServiceCallbackForAVQueueInfo([this](AVSessionItem& session) {
+        AddAvQueueInfoToFile(session);
+    });
+    sessionItem->SetServiceCallbackForCallStart([this](AVSessionItem& session) {
+        SLOGI("Start handle call start event for %{public}s",
+            AVSessionUtils::GetAnonySessionId(session.GetDescriptor().sessionId_).c_str());
+        HandleCallStartEvent();
+    });
+    sessionItem->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
+        SLOGI("servicecallback for update session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        std::lock_guard lockGuard(sessionAndControllerLock_);
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        UpdateFrontSession(session, isAdd);
+    });
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        uidForAppStateChange_ = session->GetUid();
+        if (isSupportMirrorToStream_ &&
+            !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
+            MirrorToStreamCast(session);
+        }
+    });
+#endif // CASTPLUS_CAST_ENGINE_ENABLE
+}
+
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
 {
@@ -1048,24 +1081,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     }
     result->SetPid(GetCallingPid());
     result->SetUid(GetCallingUid());
-    result->SetServiceCallbackForRelease([this](AVSessionItem& session) {
-        SLOGI("Start handle session release event");
-        HandleSessionRelease(session.GetDescriptor().sessionId_);
-    });
-    result->SetServiceCallbackForAVQueueInfo([this](AVSessionItem& session) {
-        AddAvQueueInfoToFile(session);
-    });
-    result->SetServiceCallbackForCallStart([this](AVSessionItem& session) {
-        SLOGI("Start handle call start event for %{public}s",
-            AVSessionUtils::GetAnonySessionId(session.GetDescriptor().sessionId_).c_str());
-        HandleCallStartEvent();
-    });
-    result->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
-        SLOGI("servicecallback for update session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-        std::lock_guard lockGuard(sessionAndControllerLock_);
-        sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
-        UpdateFrontSession(sessionItem, isAdd);
-    });
+    ServiceCallback(result);
     SLOGI("success sessionId=%{public}s",  AVSessionUtils::GetAnonySessionId(result->GetSessionId()).c_str());
 
     OutputDeviceInfo outputDeviceInfo;
@@ -1122,15 +1138,6 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (type == AVSession::SESSION_TYPE_VIDEO) {
-        uidForAppStateChange_ = result->GetUid();
-        if (isSupportMirrorToStream_ &&
-            !AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid())) {
-            MirrorToStreamCast(result);
-        }
-    }
-#endif //CASTPLUS_CAST_ENGINE_ENABLE
     sessionItem = result;
     return AVSESSION_SUCCESS;
 }

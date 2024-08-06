@@ -251,6 +251,10 @@ public:
     void GetDisplayListener(sptr<IAVSessionCallback> callback);
 
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
+
+    void SetExtrasInner(AAFwk::IArray* list);
+
+    void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
 #endif
 
 protected:
@@ -411,6 +415,7 @@ private:
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+    std::function<void(std::string)> serviceCallbackForStream_;
 #endif
 };
 } // namespace OHOS::AVSession
