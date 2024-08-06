@@ -813,7 +813,6 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     counter_ = firstStep;
     AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
     AVRouter::GetInstance().SetServiceAllConnectState(castHandle, deviceInfo);
-    deviceStateAddCommand_ = streamStateConnection;
     counter_ = secondStep;
     UpdateCastDeviceMap(deviceInfo);
 

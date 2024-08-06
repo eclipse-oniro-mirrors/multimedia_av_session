@@ -123,6 +123,7 @@ private:
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
     std::chrono::system_clock::time_point latestMetadataTs_;
+    AVMetaData metaData_;
 
     static std::map<std::string, OnEventHandlerType> onEventHandlers_;
     static std::map<std::string, OffEventHandlerType> offEventHandlers_;
