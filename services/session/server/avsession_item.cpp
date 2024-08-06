@@ -211,7 +211,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 }
 
 // LCOV_EXCL_START
-int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
+__attribute__((no_sanitize("cfi"))) int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 {
     SLOGI("ProcessFrontSession %{public}s ", source.c_str());
     auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
@@ -221,7 +221,7 @@ int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
     return ret;
 }
 
-void AVSessionItem::HandleFrontSession()
+__attribute__((no_sanitize("cfi"))) void AVSessionItem::HandleFrontSession()
 {
     bool isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
         metaData_.GetMediaImageUri().empty();
