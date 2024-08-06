@@ -1061,7 +1061,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         HandleCallStartEvent();
     });
     result->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
-        SLOGI("servicecallback for update session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        SLOGI("serviceCallback for sessionUpdate %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
         std::lock_guard lockGuard(sessionAndControllerLock_);
         sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
         UpdateFrontSession(sessionItem, isAdd);
