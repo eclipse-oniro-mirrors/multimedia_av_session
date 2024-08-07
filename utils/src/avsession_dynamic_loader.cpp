@@ -16,10 +16,12 @@
 #undef LOG_TAG
 #define LOG_TAG "AVSessionDynamicLoader"
 
+#
 #include <dlfcn.h>
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_dynamic_loader.h"
+#include "directory_ex.h"
  
 namespace OHOS {
 namespace AVSession {
@@ -47,6 +49,11 @@ void* AVSessionDynamicLoader::OpenDynamicHandle(std::string dynamicLibrary)
     // further optimization:
     // 1. split all dependencies to separate libraries
     // 2. just close each library not all
+    char realCachePath[PATH_MAX] = { 0X00 };
+    char *realPathRes = realpath(dynamicLibrary.c_str(), realCachePath);
+    if (realPathRes == nullptr || dynamicLibrary.find(".so") == std::string::npos) {
+        SLOGD("OpenDynamicHandle get dynamicLibrary %{public}s", dynamicLibrary.c_str());
+    }
     if (dynamicLibHandle_[dynamicLibrary] == nullptr) {
         char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
         if (realpath(dynamicLibrary.c_str(), sourceLibraryRealPath) == nullptr) {
