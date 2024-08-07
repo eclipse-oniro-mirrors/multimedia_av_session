@@ -996,10 +996,10 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
     collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
     if (collaborationNeedNetworkId_.empty()) {
-        SLOGE("untrusted device, networkId is empty, then input deviceId");
-        collaborationNeedNetworkId_ = cacheDeviceInfo.deviceId_;
+        SLOGE("untrusted device, networkId is empty, then get remote networkId");
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cacheDeviceInfo.deviceId_, collaborationNeedNetworkId_);
     }
-    CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
+    CollaborationManager::GetInstance().GetRemoteNetWorkId(cast);
     //wait collaboration callback
     std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
     bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
@@ -1027,7 +1027,6 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
         "collaboration to start cast fail");
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
-    //get cast+ networkId
     CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
         ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     std::lock_guard lockGuard(castHandleLock_);
@@ -1121,6 +1120,8 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
         DealDisconnect(deviceInfo);
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
     }
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     {

@@ -203,6 +203,17 @@ public:
      * @since 11
     */
     virtual int32_t SetServiceAllConnectState(int64_t castHandle, DeviceInfo deviceInfo) = 0;
+
+    /**
+     * @brief get remote networkId.
+     *
+     * @param { int64_t } castHandle const - The ID corresponding to the castprovider.
+     * @param { string } cast deviceId - The deviceId to get remote networkId.
+     * @param { string } cast networkId - The networkId to transmit remote networkId.
+     * @return { bool } Whether the operation was successful.
+     * @since 11
+    */
+    virtual int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) = 0;
 #endif
 };
 } // namespace OHOS::AVSession

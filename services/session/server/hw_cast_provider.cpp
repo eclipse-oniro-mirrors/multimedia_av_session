@@ -284,6 +284,21 @@ bool HwCastProvider::SetStreamState(int32_t castId, DeviceInfo deviceInfo)
     return hwCastProviderSession->SetStreamState(deviceInfo);
 }
 
+bool HwCastProvider::GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId)
+{
+    SLOGI("enter GetRemoteNetWorkId");
+    if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
+        SLOGE("GetRemoteNetWorkId failed for the castSession corresponding to castId is not exit");
+        return false;
+    }
+    auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
+    if (hwCastProviderSession == nullptr) {
+        SLOGE("GetRemoteNetWorkId failed for the hwCastProviderSession is nullptr");
+        return false;
+    }
+    return hwCastProviderSession->GetRemoteNetWorkId(deviceId, networkId);
+}
+
 int HwCastProvider::GetMirrorCastId()
 {
     return mirrorCastId;
