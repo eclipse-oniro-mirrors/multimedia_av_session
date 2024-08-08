@@ -468,7 +468,7 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVMetadata");
     struct ConcreteContext : public ContextBase {
-        AVMetaData metaData_;
+        AVMetaData metaData;
         std::chrono::system_clock::time_point metadataTs;
     };
     auto context = std::make_shared<ConcreteContext>();
@@ -476,11 +476,20 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiMetaData::GetValue(env, argv[ARGV_FIRST], context->metaData_);
+        context->status = NapiMetaData::GetValue(env, argv[ARGV_FIRST], context->metaData);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get metaData failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, inputParser);
+
+    auto* napiAvSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiAvSession != nullptr && napiAvSession->metaData_.EqualWithUri((context->metaData))) {
+        SLOGI("metadata with uri is the same as last time");
+        auto executor = []() {};
+        auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+        return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
+    }
+    napiAvSession->metaData_ = context->metaData;
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
     context->metadataTs = std::chrono::system_clock::now();
     reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
@@ -490,16 +499,16 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
             context->status = napi_generic_failure;
             context->errMessage = "SetAVMetaData failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
-            context->metaData_.Reset();
+            context->metaData.Reset();
             return;
         }
-        bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData_);
+        bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData);
         bool timeAvailable = context->metadataTs >= napiSession->latestMetadataTs_;
         SLOGI("doMetaDataSet res:%{public}d, time:%{public}d", static_cast<int>(res), static_cast<int>(timeAvailable));
         if (res && timeAvailable && napiSession->session_ != nullptr) {
-            napiSession->session_->SetAVMetaData(context->metaData_);
+            napiSession->session_->SetAVMetaData(context->metaData);
         }
-        context->metaData_.Reset();
+        context->metaData.Reset();
     };
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);

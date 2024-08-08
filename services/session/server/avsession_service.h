@@ -70,15 +70,6 @@ public:
     void OnRemoteDied() override {};
 };
 
-class AudioDeviceDescriptorComp {
-public:
-    bool operator()(const AudioStandard::AudioDeviceDescriptor& left,
-                    const AudioStandard::AudioDeviceDescriptor& right) const
-    {
-        return left.networkId_ == right.networkId_;
-    }
-};
-
 #ifdef BLUETOOTH_ENABLE
 class DetectBluetoothHostObserver : public OHOS::Bluetooth::BluetoothHostObserver {
 public:
@@ -257,8 +248,6 @@ private:
     std::string AllocSessionId();
 
     bool AbilityHasSession(pid_t pid);
-
-    bool FilePathIsValid(const std::string& filePath, const std::string& functionName);
 
     sptr<AVControllerItem> GetPresentController(pid_t pid, const std::string& sessionId);
 
@@ -477,8 +466,6 @@ private:
 #endif
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::recursive_mutex castDeviceInfoMapLock_;
-    std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const std::string seperator = ",";
@@ -493,7 +480,6 @@ private:
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
-    static constexpr const char *ABILITY_FILE_NAME = "abilityinfo";
     static constexpr const char *DEFAULT_SESSION_ID = "default";
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";

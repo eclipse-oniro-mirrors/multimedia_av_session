@@ -916,8 +916,6 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     AVSessionRadar::GetInstance().CastDeviceAvailable(castOutputDeviceInfo, info);
 
     for (DeviceInfo deviceInfo : castOutputDeviceInfo.deviceInfos_) {
-        std::lock_guard lockGuard(castDeviceInfoMapLock_);
-        castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
         for (const auto& session : GetContainer().GetAllSessions()) {
             session->UpdateCastDeviceMap(deviceInfo);
         }
@@ -1041,12 +1039,12 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         HandleCallStartEvent();
     });
     sessionItem->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
-        SLOGI("servicecallback for update session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        SLOGI("serviceCallback for session update %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
         std::lock_guard lockGuard(sessionAndControllerLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
         UpdateFrontSession(session, isAdd);
     });
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
