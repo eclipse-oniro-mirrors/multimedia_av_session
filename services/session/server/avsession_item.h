@@ -395,6 +395,7 @@ private:
 
     bool collaborationRejectFlag_ = false;
     bool applyResultFlag_ = false;
+    bool networkIdIsEmpty = false;
     std::string collaborationNeedNetworkId_;
     std::mutex collaborationApplyResultMutex_;
     std::condition_variable connectWaitCallbackCond_;

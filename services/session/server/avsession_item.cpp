@@ -994,13 +994,15 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     }
     ListenCollaborationRejectToStopCast();
     DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
-    collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
-    if (collaborationNeedNetworkId_.empty()) {
-        SLOGE("untrusted device, networkId is empty, then get remote networkId");
-        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cacheDeviceInfo.deviceId_, collaborationNeedNetworkId_);
+    if (cacheDeviceInfo.networkId_.empty()) {
+        SLOGE("untrusted device, networkId is empty, then input deviceId to ApplyAdvancedResource");
+        collaborationNeedNetworkId_ = cacheDeviceInfo.deviceId_;
+        networkIdIsEmpty = true;
+    } else {
+        collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
     }
-    CollaborationManager::GetInstance().GetRemoteNetWorkId(cast);
-    //wait collaboration callback
+    CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
+    //wait collaboration callback 10s
     std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
     bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
         [this]() {
@@ -1027,8 +1029,6 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
         "collaboration to start cast fail");
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
-    CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
-        ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     std::lock_guard lockGuard(castHandleLock_);
     castHandle_ = castHandle;
     SLOGI("start cast check handle set to %{public}ld", castHandle_);
@@ -1092,10 +1092,29 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
 
+void AVSessionItem::DealCollaborationPublishState(int32_t castState)
+{
+    if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
+        if (networkIdIsEmpty) {
+            //collaborationNeedNetworkId_ value equal to deviceId value when networkId is empty
+            AVRouter::GetInstance().GetRemoteNetWorkId(
+                castHandle_, collaborationNeedNetworkId_, collaborationNeedNetworkId_);
+            networkIdIsEmpty = false;
+        }
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
+    }
+    if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+    }
+}
+
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceid_.c_str());
+    DealCollaborationPublishState(castState);
     DealCastState(castState);
     if (castState == streamStateConnection && counter_ == secondStep) {
         SLOGI("interception of one devicestate=6 transmission");

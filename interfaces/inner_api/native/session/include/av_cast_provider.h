@@ -184,7 +184,7 @@ public:
      * @brief get remote networkId.
      *
      * @param { int32_t } castHandle const - The ID corresponding to the castprovider.
-     * @param { string } cast deviceId - The deviceId to get remote networkId.
+     * @param { string } cast deviceId - The deviceId give cast+ to get remote networkId.
      * @param { string } cast networkId - The networkId to transmit remote networkId.
      * @return { bool } Whether the operation was successful.
      * @since 11
