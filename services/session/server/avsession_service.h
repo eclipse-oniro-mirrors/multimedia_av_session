@@ -277,6 +277,8 @@ private:
     int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
 
+    void ServiceCallback(sptr<AVSessionItem>& sessionItem);
+
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                          const AppExecFwk::ElementName& elementName);
 
