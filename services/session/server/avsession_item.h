@@ -75,6 +75,8 @@ public:
 
     void DealDisconnect(DeviceInfo deviceInfo);
 
+    void DealCollaborationPublishState(int32_t castState);
+
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);

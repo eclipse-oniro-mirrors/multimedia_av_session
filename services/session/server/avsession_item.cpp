@@ -1139,8 +1139,6 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
         DealDisconnect(deviceInfo);
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
-            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
     }
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
@@ -1217,8 +1215,6 @@ int32_t AVSessionItem::StopCast()
         AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
         SLOGI("StopCast with unchange castHandle is %{public}ld", castHandle_);
         CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
-            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         removeTimes = 1;
     }
 
