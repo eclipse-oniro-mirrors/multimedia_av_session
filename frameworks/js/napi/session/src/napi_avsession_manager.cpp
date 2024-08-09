@@ -527,6 +527,10 @@ napi_status NapiAVSessionManager::RegisterNativeSessionListener(napi_env env)
     }
 
     listener_ = std::make_shared<NapiSessionListener>();
+    if (AVSessionManager::GetInstance().RegisterServiceDeathCallback(HandleServiceDied) != AVSESSION_SUCCESS) {
+        SLOGE("register service death callback fail!");
+        return napi_generic_failure;
+    }
     if (listener_ == nullptr) {
         SLOGE("OnEvent failed : no memory");
         NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
@@ -1071,9 +1075,7 @@ napi_status NapiAVSessionManager::OnServiceDie(napi_env env, napi_value callback
         }
     }
     serviceDiedCallbacks_.push_back(ref);
-    if (AVSessionManager::GetInstance().RegisterServiceDeathCallback(HandleServiceDied) != AVSESSION_SUCCESS) {
-        return napi_generic_failure;
-    }
+    SLOGI("do service die register when listener setup");
     return napi_ok;
 }
 
@@ -1084,6 +1086,10 @@ void NapiAVSessionManager::HandleServiceDied()
              ++callbackRef) {
             asyncCallback_->Call(*callbackRef);
         }
+    }
+    if (listener_ != nullptr) {
+        SLOGI("clear listener for service die");
+        listener_ = nullptr;
     }
 }
 
