@@ -771,6 +771,7 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
+        SLOGI("notify session create for pid %{public}d", static_cast<int>(pid));
         listener->OnSessionCreate(descriptor);
     }
 }

@@ -27,7 +27,10 @@ void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor& descripto
 {
     auto copiedListener = listener_;
     if (copiedListener) {
+        SLOGI("on session create for bundle %{public}s", descriptor.elementName_.GetBundleName().c_str());
         copiedListener->OnSessionCreate(descriptor);
+    } else {
+        SLOGE("on session create with out listener");
     }
 }
 
