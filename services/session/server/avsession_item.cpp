@@ -245,6 +245,8 @@ __attribute__((no_sanitize("cfi"))) void AVSessionItem::HandleFrontSession()
 
 bool AVSessionItem::HasAvQueueInfo()
 {
+    std::lock_guard lockGuard(metaDataLock_);
+    SLOGD("check HasAvQueueInfo in");
     if (metaData_.GetAVQueueName().empty()) {
         SLOGD("no avqueueinfo as avqueuename empty");
         return false;
@@ -261,6 +263,7 @@ bool AVSessionItem::HasAvQueueInfo()
         SLOGD("no avqueueinfo as not play");
         return false;
     }
+    SLOGI("check HasAvQueueInfo %{public}s", metaData_.GetAVQueueName().c_str());
     return true;
 }
 
@@ -976,6 +979,8 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
 
 void AVSessionItem::HandleCastValidCommandChange(std::vector<int32_t> &cmds)
 {
+    std::lock_guard lockGuard(castControllersLock_);
+    SLOGI("HandleCastValidCommandChange with castControllerNum %{public}d", static_cast<int>(castControllers_.size()));
     for (auto controller : castControllers_) {
         if (controller != nullptr) {
             SLOGI("HandleCastValidCommandChange size:%{public}zd", cmds.size());
