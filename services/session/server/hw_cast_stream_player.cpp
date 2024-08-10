@@ -264,7 +264,6 @@ int32_t HwCastStreamPlayer::CheckBeforePrepare(std::shared_ptr<AVMediaDescriptio
                 }
             }
         }
-        return AVSESSION_ERROR;
     }
     return AVSESSION_ERROR;
 }

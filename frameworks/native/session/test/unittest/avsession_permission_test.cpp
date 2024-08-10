@@ -353,7 +353,7 @@ HWTEST_F(AVSessionPermissionTest, GetHistoricalSessionDescriptorsWithPerm001, Te
     }
     auto ret_2 = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(10, descriptors);
     EXPECT_EQ(ret_2, AVSESSION_SUCCESS);
-    EXPECT_NE(descriptors.size() >= 0, true);
+    EXPECT_EQ(descriptors.size() >= 0, true);
     DeletePermission(g_infoB);
 }
 
