@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,9 +37,9 @@ static constexpr int32_t MIN_SIZE_NUM  = 4;
 class TestAVControllerCallback : public AVControllerCallback {
     void OnSessionDestroy() override;
 
-    void OnAVCallStateChange(const AVCallState& avCallState) override {};
+    void OnAVCallStateChange(const AVCallState& avCallState) override;
 
-    void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) override {};
+    void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) override;
 
     void OnPlaybackStateChange(const AVPlaybackState& state) override;
 
@@ -49,7 +49,7 @@ class TestAVControllerCallback : public AVControllerCallback {
 
     void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override {};
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
 
     void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
 
@@ -63,6 +63,16 @@ class TestAVControllerCallback : public AVControllerCallback {
 void TestAVControllerCallback::OnSessionDestroy()
 {
     SLOGI("Enter into TestAVControllerCallback::OnSessionDestroy.");
+}
+
+void TestAVControllerCallback::OnAVCallStateChange(const AVCallState& avCallState)
+{
+    SLOGI("Enter into TestAVControllerCallback::OnAVCallStateChange.");
+}
+
+void TestAVControllerCallback::OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData)
+{
+    SLOGI("Enter into TestAVControllerCallback::OnAVCallMetaDataChange.");
 }
 
 void TestAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
@@ -83,6 +93,12 @@ void TestAVControllerCallback::OnActiveStateChange(bool isActive)
 void TestAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
     SLOGI("Enter into TestAVControllerCallback::OnValidCommandChange.");
+}
+
+void TestAVControllerCallback::OnOutputDeviceChange(const int32_t connectionState,
+    const OutputDeviceInfo &outputDeviceInfo)
+{
+    SLOGI("Enter into TestAVControllerCallback::OnOutputDeviceChange.");
 }
 
 void TestAVControllerCallback::OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args)
@@ -145,6 +161,13 @@ void AvControllerCallbackClientFuzzer::FuzzTests(const uint8_t* data, size_t siz
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
+    
+    FuzzTestInner1(data, size);
+    FuzzTestInner2(data, size);
+}
+
+void AvControllerCallbackClientFuzzer::FuzzTestInner1(const uint8_t* data, size_t size)
+{
     std::shared_ptr<TestAVControllerCallback> testAVControllerCallback = std::make_shared<TestAVControllerCallback>();
     if (!testAVControllerCallback) {
         SLOGI("testAVControllerCallback is null");
@@ -159,6 +182,21 @@ void AvControllerCallbackClientFuzzer::FuzzTests(const uint8_t* data, size_t siz
         aVControllerCallbackClient.OnPlaybackStateChange(playbackState);
     }
 
+    AVCallMetaData avCallMetaData;
+    int32_t numberDate = *(reinterpret_cast<const int32_t*>(data));
+    std::string dataToS(std::to_string(numberDate));
+    std::string strCallMetaData(dataToS);
+    avCallMetaData.SetName(strCallMetaData);
+    avCallMetaData.SetPhoneNumber(strCallMetaData);
+    aVControllerCallbackClient.OnAVCallMetaDataChange(avCallMetaData);
+
+    AVCallState avCallState;
+    int32_t callState = std::stoi(dataToS);
+    avCallState.SetAVCallState(callState);
+    bool mute = std::stoi(dataToS);
+    avCallState.SetAVCallMuted(mute);
+    aVControllerCallbackClient.OnAVCallStateChange(avCallState);
+
     AVMetaData metaData;
     std::string assetId(reinterpret_cast<const char*>(data), size);
     metaData.SetAssetId(assetId);
@@ -169,9 +207,33 @@ void AvControllerCallbackClientFuzzer::FuzzTests(const uint8_t* data, size_t siz
     cmds.push_back(*(reinterpret_cast<const int32_t*>(data)));
     aVControllerCallbackClient.OnValidCommandChange(cmds);
 
+    int32_t connectionState = *(reinterpret_cast<const int32_t*>(data));
+    OutputDeviceInfo outputDeviceInfo;
+    aVControllerCallbackClient.OnOutputDeviceChange(connectionState, outputDeviceInfo);
+
     AAFwk::WantParams wantParams;
     std::string eventName(reinterpret_cast<const char*>(data), size);
     aVControllerCallbackClient.OnSessionEventChange(eventName, wantParams);
+    aVControllerCallbackClient.OnExtrasChange(wantParams);
+}
+
+void AvControllerCallbackClientFuzzer::FuzzTestInner2(const uint8_t* data, size_t size)
+{
+    std::shared_ptr<TestAVControllerCallback> testAVControllerCallback = std::make_shared<TestAVControllerCallback>();
+    if (!testAVControllerCallback) {
+        SLOGI("testAVControllerCallback is null");
+        return;
+    }
+    AVControllerCallbackClient aVControllerCallbackClient(testAVControllerCallback);
+
+    std::vector<AVQueueItem> avQueueItems;
+    AVQueueItem avQueueItem;
+    avQueueItem.SetItemId(*(reinterpret_cast<const int32_t *>(data)));
+    avQueueItems.push_back(avQueueItem);
+    aVControllerCallbackClient.OnQueueItemsChange(avQueueItems);
+
+    std::string title(reinterpret_cast<const char *>(data), size);
+    aVControllerCallbackClient.OnQueueTitleChange(title);
 }
 
 void OHOS::AVSession::AvControllerCallbackOnRemoteRequest(const uint8_t* data, size_t size)

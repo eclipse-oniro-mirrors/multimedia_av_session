@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AVCONTROLLER_CALLBACKCLIENT_FUZZER_H
-#define OHOS_AVCONTROLLER_CALLBACKCLIENT_FUZZER_H
+#ifndef OHOS_AVSESSION_CALLBACKCLIENT_FUZZER_H
+#define OHOS_AVSESSION_CALLBACKCLIENT_FUZZER_H
 #include <cstdint>
 #include <cstddef>
 namespace OHOS::AVSession {
-void AvControllerCallbackOnRemoteRequest(const uint8_t* data, size_t size);
-void AvControllerCallbackClientTests(const uint8_t* data, size_t size);
+void AvSessionCallbackOnRemoteRequest(const uint8_t* data, size_t size);
+void AvSessionCallbackClientTests(const uint8_t* data, size_t size);
 
-class AvControllerCallbackClientFuzzer {
+class AvSessionCallbackClientFuzzer {
 public:
-    AvControllerCallbackClientFuzzer() = default;
-    ~AvControllerCallbackClientFuzzer() = default;
+    AvSessionCallbackClientFuzzer() = default;
+    ~AvSessionCallbackClientFuzzer() = default;
     void FuzzOnRemoteRequest(const uint8_t* data, size_t size);
     void FuzzTests(const uint8_t* data, size_t size);
     void FuzzTestInner1(const uint8_t* data, size_t size);

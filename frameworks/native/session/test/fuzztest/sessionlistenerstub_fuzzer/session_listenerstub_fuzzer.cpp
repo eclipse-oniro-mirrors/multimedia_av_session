@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,31 @@ int32_t SessionListenerStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
     return ret;
 }
 
+void SessionListenerStubFuzzer::FuzzTests(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
+    std::shared_ptr<TestSessionListener> testSessionListener = std::make_shared<TestSessionListener>();
+    if (!testSessionListener) {
+        SLOGI("testSessionListener is null");
+        return;
+    }
+    sptr<SessionListenerClient> sessionListenerStubClient = new SessionListenerClient(testSessionListener);
+    int32_t uid = *(reinterpret_cast<const int32_t*>(data));
+    sessionListenerStubClient->OnAudioSessionChecked(uid);
+
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "deviceId";
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    sessionListenerStubClient->OnDeviceAvailable(outputDeviceInfo);
+
+    std::string deviceId(reinterpret_cast<const char *>(data), size);
+    sessionListenerStubClient->OnDeviceOffline(deviceId);
+}
+
 int32_t OHOS::AVSession::SessionListenerStubRemoteRequestTest(uint8_t* data, size_t size)
 {
     auto sessionListenerStub = std::make_unique<SessionListenerStubFuzzer>();
@@ -62,10 +87,21 @@ int32_t OHOS::AVSession::SessionListenerStubRemoteRequestTest(uint8_t* data, siz
     return sessionListenerStub->OnRemoteRequest(data, size);
 }
 
+void OHOS::AVSession::SessionListenerStubRemoteRequestTests(const uint8_t* data, size_t size)
+{
+    auto sessionListenerStubFuzzer = std::make_unique<SessionListenerStubFuzzer>();
+    if (sessionListenerStubFuzzer == nullptr) {
+        SLOGI("sessionListenerStubFuzzer is null");
+        return;
+    }
+    sessionListenerStubFuzzer->FuzzTests(data, size);
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::AVSession::SessionListenerStubRemoteRequestTest(data, size);
+    OHOS::AVSession::SessionListenerStubRemoteRequestTests(data, size);
     return 0;
 }
