@@ -42,7 +42,7 @@ int32_t PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessTo
         return ERR_NONE;
     }
 
-    SLOGD("Check system permission faild");
+    SLOGE("Check system permission faild");
     return ERR_NO_PERMISSION;
 }
 

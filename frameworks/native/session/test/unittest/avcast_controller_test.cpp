@@ -62,6 +62,7 @@ static HapPolicyParams g_policy = {
     .domain = "test.domain",
     .permList = {
         {
+            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
             .bundleName = "ohos.permission_test.demo",
             .grantMode = 1,
             .availableLevel = APL_NORMAL,
@@ -73,6 +74,7 @@ static HapPolicyParams g_policy = {
     },
     .permStateList = {
         {
+            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
             .isGeneral = true,
             .resDeviceID = { "local" },
             .grantStatus = { PermissionState::PERMISSION_GRANTED },
