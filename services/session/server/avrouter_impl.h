@@ -63,6 +63,8 @@ public:
 
     int32_t SetServiceAllConnectState(int64_t castHandle, DeviceInfo deviceInfo) override;
 
+    int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) override;
+
 protected:
 
 private:

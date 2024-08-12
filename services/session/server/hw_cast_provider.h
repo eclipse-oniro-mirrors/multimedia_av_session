@@ -54,6 +54,7 @@ public:
     void OnServiceDied() override;
     bool SetStreamState(int32_t castId, DeviceInfo deviceInfo) override;
     int GetMirrorCastId() override;
+    bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) override;
 
 private:
     void WaitSessionRelease();
