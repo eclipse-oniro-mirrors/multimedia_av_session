@@ -1054,9 +1054,10 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         HandleCallStartEvent();
     });
     result->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
-        SLOGI("servicecallback for update session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        SLOGI("serviceCallback for session update %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
         std::lock_guard lockGuard(sessionAndControllerLock_);
         sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(sessionItem != nullptr, "session not exist for UpdateFrontSession");
         UpdateFrontSession(sessionItem, isAdd);
     });
     SLOGI("success sessionId=%{public}s",  AVSessionUtils::GetAnonySessionId(result->GetSessionId()).c_str());

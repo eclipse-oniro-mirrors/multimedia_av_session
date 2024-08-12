@@ -272,7 +272,7 @@ private:
     void ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo);
     void ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo);
     void SaveLocalDeviceInfo();
-    int32_t ProcessFrontSession(const std::string& source);
+    __attribute__((no_sanitize("cfi"))) int32_t ProcessFrontSession(const std::string& source);
     void HandleFrontSession();
     int32_t doContinuousTaskRegister();
     int32_t doContinuousTaskUnregister();

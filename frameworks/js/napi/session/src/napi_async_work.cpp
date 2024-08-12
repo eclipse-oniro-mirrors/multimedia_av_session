@@ -97,7 +97,6 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
         [](napi_env env, void* data) {
             CHECK_RETURN_VOID(data != nullptr, "napi_async_execute_callback nullptr");
             auto ctxt = reinterpret_cast<ContextBase*>(data);
-            SLOGD("napi_async_execute_callback ctxt->status=%{public}d", ctxt->status);
             if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
                 AVSESSION_TRACE_ASYNC_START("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
             }
@@ -108,7 +107,6 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
         [](napi_env env, napi_status status, void* data) {
             CHECK_RETURN_VOID(data != nullptr, "napi_async_complete_callback nullptr");
             auto ctxt = reinterpret_cast<ContextBase*>(data);
-            SLOGD("napi_async_complete_callback status=%{public}d, ctxt->status=%{public}d", status, ctxt->status);
             if ((status != napi_ok) && (ctxt->status == napi_ok)) {
                 ctxt->status = status;
             }
@@ -119,6 +117,11 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
                 AVSESSION_TRACE_ASYNC_END("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
             }
             GenerateOutput(ctxt);
+            if (ctxt->callbackRef != nullptr) {
+                SLOGI("do clear callback here for leak");
+                napi_delete_reference(env, ctxt->callbackRef);
+                ctxt->callbackRef = nullptr;
+            }
         },
         reinterpret_cast<void*>(ctxt.get()), &ctxt->work);
     napi_queue_async_work_with_qos(ctxt->env, ctxt->work, napi_qos_user_initiated);

@@ -200,7 +200,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 }
 
 // LCOV_EXCL_START
-int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
+__attribute__((no_sanitize("cfi"))) int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 {
     SLOGI("ProcessFrontSession %{public}s ", source.c_str());
     auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
@@ -280,8 +280,13 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     SLOGI("send metadata change event to controllers with title %{public}s", meta.GetTitle().c_str());
 
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta]() {
-        SLOGI("HandleMetaDataChange in postTask with title %{public}s", meta.GetTitle().c_str());
+        SLOGI("HandleMetaDataChange in postTask with title %{public}s and size %{public}d",
+            meta.GetTitle().c_str(), static_cast<int>(controllers_.size()));
         std::lock_guard controllerLockGuard(controllersLock_);
+        if (controllers_.size() <= 0) {
+            SLOGE("handle with no controller, return");
+            return;
+        }
         for (const auto& [pid, controller] : controllers_) {
             SLOGI("HandleMetaDataChange for controller pid=%{public}d", pid);
             controller->HandleMetaDataChange(meta);
@@ -372,6 +377,10 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
             return;
         }
         std::lock_guard controllerLockGuard(controllersLock_);
+        if (controllers_.size() <= 0) {
+            SLOGE("handle with no controller, return");
+            return;
+        }
         for (const auto& [pid, controller] : controllers_) {
             SLOGD("HandlePlaybackStateChange for controller pid=%{public}d", pid);
             controller->HandlePlaybackStateChange(state);
