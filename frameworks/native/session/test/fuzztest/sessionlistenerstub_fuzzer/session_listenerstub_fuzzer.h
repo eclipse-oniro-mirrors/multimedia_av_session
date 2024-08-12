@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,14 +39,26 @@ class TestSessionListener : public SessionListener {
     {
         SLOGI("Enter into TestSessionListener::OnAudioSessionChecked.");
     }
+
+    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override
+    {
+        SLOGI("Enter into TestISessionListener::OnDeviceAvailable.");
+    }
+
+    void OnDeviceOffline(const std::string& deviceId) override
+    {
+        SLOGI("Enter into TestISessionListener::OnDeviceOffline.");
+    }
 };
 int32_t SessionListenerStubRemoteRequestTest(uint8_t* data, size_t size);
+void SessionListenerStubRemoteRequestTests(const uint8_t* data, size_t size);
 
 class SessionListenerStubFuzzer {
 public:
     SessionListenerStubFuzzer() = default;
     ~SessionListenerStubFuzzer() = default;
     int32_t OnRemoteRequest(uint8_t* data, size_t size);
+    void FuzzTests(const uint8_t* data, size_t size);
 };
 }
 #endif
