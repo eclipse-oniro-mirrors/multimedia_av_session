@@ -104,7 +104,7 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
     const char *buffer = nullptr;
     buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength));
     int mediaImageLength = meta.GetMediaLength();
-    if (buffer == nullptr || mediaImageLength <= 0) {
+    if (buffer == nullptr || mediaImageLength <= 0 || mediaImageLength > twoImageLength) {
         SLOGE("read raw data with null %{public}d, or err media img length:%{public}d",
             static_cast<int>(buffer == nullptr), mediaImageLength);
         OnMetaDataChange(meta);
