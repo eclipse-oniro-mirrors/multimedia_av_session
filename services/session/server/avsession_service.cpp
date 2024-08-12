@@ -1906,10 +1906,12 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer)
+void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
+    const sptr<ClientDeathRecipient> recipient)
 {
     std::lock_guard lockGuard(clientDeathObserversLock_);
     clientDeathObservers_[pid] = observer;
+    clientDeathRecipients_[pid] = recipient;
 }
 
 void AVSessionService::RemoveClientDeathObserver(pid_t pid)
@@ -1917,16 +1919,24 @@ void AVSessionService::RemoveClientDeathObserver(pid_t pid)
     std::lock_guard lockGuard(clientDeathObserversLock_);
     if (clientDeathObservers_.empty()) {
         SLOGE("try remove observer with empty list");
-        return;
+    } else {
+        clientDeathObservers_.erase(pid);
     }
-    clientDeathObservers_.erase(pid);
+
+    if (clientDeathRecipients_.empty()) {
+        SLOGE("try remove recipient with empty list");
+    } else {
+        clientDeathRecipients_.erase(pid);
+    }
+    SLOGI("do RemoveClientDeathObserver for pid %{public}d done", static_cast<int>(pid));
 }
 
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
-    SLOGI("enter ClientDeathObserver register");
+    SLOGI("enter ClientDeathObserver register with recipient point");
     auto pid = GetCallingPid();
-    auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
+    sptr<ClientDeathRecipient> recipient =
+        new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
         SLOGE("malloc failed");
         HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "RGS_CLIENT_DEATH_OBSERVER_FAILED",
@@ -1941,7 +1951,7 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
         return AVSESSION_ERROR;
     }
 
-    AddClientDeathObserver(pid, observer);
+    AddClientDeathObserver(pid, observer, recipient);
     return AVSESSION_SUCCESS;
 }
 

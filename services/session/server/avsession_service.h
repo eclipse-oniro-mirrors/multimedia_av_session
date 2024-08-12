@@ -258,7 +258,8 @@ private:
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
     void NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction);
 
-    void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
+    void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
+        const sptr<ClientDeathRecipient> recipient);
     void RemoveClientDeathObserver(pid_t pid);
 
     void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener);
@@ -425,6 +426,7 @@ private:
 
     std::recursive_mutex clientDeathObserversLock_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
+    std::map<pid_t, sptr<ClientDeathRecipient>> clientDeathRecipients_;
 
     std::recursive_mutex sessionListenersLock_;
     std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
