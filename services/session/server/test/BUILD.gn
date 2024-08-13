@@ -65,6 +65,24 @@ common_external_deps = [
   "samgr:samgr_proxy",
 ]
 
+ohos_unittest("AVSessionServiceStubPermissionTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_service_stub_permission_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
 ohos_unittest("AVSessionServiceStubTest") {
   module_out_path = module_output_path
 
@@ -99,6 +117,38 @@ ohos_unittest("AVSessionControllerStubTest") {
   external_deps = common_external_deps
 
   external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("AVControllerCallbackProxyTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcontroller_callback_proxy_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVSessionControllerProxyTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_controller_proxy_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
 }
 
 ohos_unittest("MigrateAVSessionTest") {
@@ -607,8 +657,11 @@ group("av_session_server_unittest") {
   testonly = true
 
   deps = [
+    ":AVControllerCallbackProxyTest",
     ":AVRouterTest",
+    ":AVSessionControllerProxyTest",
     ":AVSessionControllerStubTest",
+    ":AVSessionServiceStubPermissionTest",
     ":AVSessionServiceStubTest",
     ":AVSessionServiceTest",
     ":AbilityConnectHelperTest",
