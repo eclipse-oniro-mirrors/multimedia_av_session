@@ -65,6 +65,22 @@ common_external_deps = [
   "samgr:samgr_proxy",
 ]
 
+ohos_unittest("AVSessionServiceProxyTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_service_proxy_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
 ohos_unittest("AVSessionServiceStubPermissionTest") {
   module_out_path = module_output_path
 
@@ -101,6 +117,56 @@ ohos_unittest("AVSessionServiceStubTest") {
   external_deps += [ "ability_base:base" ]
 }
 
+ohos_unittest("AVSessionProxyTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_proxy_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AbilityManagerAdapterDemoTest") {
+  module_out_path = module_output_path
+
+  sources = [ "ability_manager_adapter_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVControllerCallbackStubTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcontroller_callback_stub_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
 ohos_unittest("AVSessionControllerStubTest") {
   module_out_path = module_output_path
 
@@ -119,10 +185,44 @@ ohos_unittest("AVSessionControllerStubTest") {
   external_deps += [ "ability_base:base" ]
 }
 
+ohos_unittest("AVSessionCallbackStubTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_callback_stub_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
 ohos_unittest("AVControllerCallbackProxyTest") {
   module_out_path = module_output_path
 
   sources = [ "avcontroller_callback_proxy_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVSessionCallbackProxyTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_callback_proxy_test.cpp" ]
 
   configs = [ ":module_private_config" ]
 
@@ -658,14 +758,20 @@ group("av_session_server_unittest") {
 
   deps = [
     ":AVControllerCallbackProxyTest",
+    ":AVControllerCallbackStubTest",
     ":AVRouterTest",
+    ":AVSessionCallbackProxyTest",
+    ":AVSessionCallbackStubTest",
     ":AVSessionControllerProxyTest",
     ":AVSessionControllerStubTest",
+    ":AVSessionProxyTest",
+    ":AVSessionServiceProxyTest",
     ":AVSessionServiceStubPermissionTest",
     ":AVSessionServiceStubTest",
     ":AVSessionServiceTest",
     ":AbilityConnectHelperTest",
     ":AbilityConnectHelperTest",
+    ":AbilityManagerAdapterDemoTest",
     ":AppManagerAdapterTest",
     ":AudioAdapterTest",
     ":BkGrAudioControllerTest",
