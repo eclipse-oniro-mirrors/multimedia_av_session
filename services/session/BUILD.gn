@@ -429,6 +429,7 @@ ohos_shared_library("avsession_item") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   ipc_sources = [
     "ipc/proxy/avcontroller_callback_proxy.cpp",
