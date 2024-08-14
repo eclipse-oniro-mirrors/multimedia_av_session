@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "ipc_types.h"
 #include "iremote_object.h"
 #include "ability_connect_helper.h"
+#include "insight_intent_execute_param.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -166,4 +167,61 @@ static HWTEST(AbilityConnectHelperTest, OnRemoteRequest005, TestSize.Level1)
     data.WriteParcelable(&want);
     int ret = abilityconnectcallback.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+/**
+ * @tc.name: StartAbilityForegroundByCall001
+ * @tc.desc: Test StartAbilityForegroundByCall
+ * @tc.type: FUNC
+ */
+static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall001, TestSize.Level1)
+{
+    SLOGI("StartAbilityForegroundByCall001 begin!");
+    std::string bundleName;
+    std::string abilityName;
+    int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityForegroundByCall(bundleName, abilityName);
+    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+}
+
+/**
+ * @tc.name: StartAbilityForegroundByCall002
+ * @tc.desc: Test StartAbilityForegroundByCall
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall002, TestSize.Level1)
+{
+    SLOGI("StartAbilityForegroundByCall002 begin!");
+    std::string bundleName = "com.ohos.camera";
+    std::string abilityName = "test.ability";
+    int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityForegroundByCall(bundleName, abilityName);
+    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+}
+
+/**
+ * @tc.name: StartAbilityByCall001
+ * @tc.desc: Test StartAbilityByCall
+ * @tc.type: FUNC
+ */
+static HWTEST(AbilityConnectHelperTest, StartAbilityByCall001, TestSize.Level1)
+{
+    SLOGI("StartAbilityByCall001 begin!");
+    std::string bundleName;
+    std::string abilityName;
+    int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName, abilityName);
+    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+}
+
+/**
+ * @tc.name: StartAbilityByCall002
+ * @tc.desc: Test StartAbilityByCall
+ * @tc.type: FUNC
+ */
+static HWTEST(AbilityConnectHelperTest, StartAbilityByCall002, TestSize.Level1)
+{
+    SLOGI("StartAbilityByCall002 begin!");
+    std::string bundleName = "com.ohos.camera";
+    std::string abilityName = "test.ability";
+    int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName, abilityName);
+    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
 }
