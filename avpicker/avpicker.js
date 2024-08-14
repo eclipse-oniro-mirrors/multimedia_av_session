@@ -372,11 +372,17 @@ export class AVCastPicker extends ViewPU {
                     Text.fontSize({ 'id': -1, 'type': 10002,
                         params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultModuleName__',
                         'moduleName': '__harDefaultModuleName__' });
-                    Text.fontColor(x8.isConnected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+                    Text.fontColor(x8.isConnected ?
+                        (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
                         { 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
                         'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
                         { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
-                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
+                        (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
+                        { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
+                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                        { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
                     Text.width(144);
                     Text.padding({
                         left: 8,
