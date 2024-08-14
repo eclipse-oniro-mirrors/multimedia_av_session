@@ -165,6 +165,8 @@ public:
     int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                sptr<IRemoteObject>& object) override;
 
+    void ServiceCallback(sptr<AVSessionItem>& sessionItem);
+
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
