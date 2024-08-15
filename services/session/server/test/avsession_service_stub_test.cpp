@@ -528,6 +528,7 @@ static HWTEST_F(AVSessionServiceStubPerTest, OnRemoteRequest019, TestSize.Level1
     SLOGI("OnRemoteRequest019 end!");
 }
 
+#ifndef CASTPLUS_CAST_ENGINE_ENABLE
 /**
  * @tc.name: OnRemoteRequest020
  * @tc.desc: Test OnRemoteRequest
@@ -541,6 +542,7 @@ static HWTEST_F(AVSessionServiceStubPerTest, OnRemoteRequest020, TestSize.Level1
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionService::GetDescriptor());
     data.WriteString("test");
+    data.WriteBool(true);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
@@ -561,6 +563,7 @@ static HWTEST_F(AVSessionServiceStubPerTest, OnRemoteRequest021, TestSize.Level1
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionService::GetDescriptor());
     data.WriteString("test");
+    data.WriteBool(true);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
@@ -581,13 +584,14 @@ static HWTEST_F(AVSessionServiceStubPerTest, OnRemoteRequest022, TestSize.Level1
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionService::GetDescriptor());
     data.WriteString("test");
+    data.WriteBool(true);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("OnRemoteRequest022 end!");
 }
-
+#endif
 /**
  * @tc.name: OnRemoteRequest023
  * @tc.desc: Test OnRemoteRequest
