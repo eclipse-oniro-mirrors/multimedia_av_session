@@ -56,12 +56,10 @@
           "background_task_mgr",
           "bluetooth",
           "os_account",
-          "hicollie"
-        ],
-        "third_party": [
-          "openssl",
+          "hicollie",
           "jsoncpp"
-        ]
+        ],
+        "third_party": [ "openssl" ]
       },
       "build": {
         "group_type": {

@@ -54,6 +54,7 @@ common_external_deps = [
   "image_framework:image_native",
   "input:libmmi-client",
   "ipc:ipc_single",
+  "jsoncpp:jsoncpp",
   "samgr:samgr_proxy",
 ]
 

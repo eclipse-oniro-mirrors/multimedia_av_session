@@ -127,7 +127,6 @@ ohos_shared_library("avsession_service") {
     "./../../frameworks/native/session:avsession_client",
     "./../../utils:avsession_utils",
     "./../session:avsession_item",
-    "//third_party/jsoncpp:jsoncpp",
     "//third_party/openssl:libcrypto_shared",
   ]
 
@@ -155,6 +154,7 @@ ohos_shared_library("avsession_service") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
@@ -526,6 +526,7 @@ ohos_shared_library("avsession_item") {
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
