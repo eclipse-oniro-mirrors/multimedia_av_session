@@ -266,7 +266,7 @@ export struct AVCastPicker {
           .backgroundColor(this.touchMenuItemIndex === index
             ? $r('sys.color.interactive_click') : '#00FFFFFF')
           .borderRadius(this.touchMenuItemIndex === index
-            ? $r('sys.float.ohos_id_corner_radius_default_m') : 0)
+            ? $r('sys.float.corner_radius_level8') : 0)
 
           if (index != this.deviceList.length - 1) {
             Divider()

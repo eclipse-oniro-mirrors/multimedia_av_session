@@ -358,7 +358,7 @@ export class AVCastPicker extends ViewPU {
                         params: ['sys.color.interactive_click'], 'bundleName': '__harDefaultModuleName__',
                         'moduleName': '__harDefaultModuleName__' } : '#00FFFFFF');
                     Flex.borderRadius(this.touchMenuItemIndex === w8 ? { 'id': -1, 'type': 10002,
-                        params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultModuleName__',
+                        params: ['sys.float.corner_radius_level8'], 'bundleName': '__harDefaultModuleName__',
                         'moduleName': '__harDefaultModuleName__' } : 0);
                 }, Flex);
                 this.observeComponentCreation2((a10, b10) => {
