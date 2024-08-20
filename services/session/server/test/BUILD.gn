@@ -457,6 +457,7 @@ ohos_unittest("SoftbusSessionManagerTest") {
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
   ]
 }
@@ -493,6 +494,7 @@ ohos_unittest("AVSessionServiceTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
@@ -579,6 +581,7 @@ ohos_unittest("AbilityConnectHelperTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
@@ -687,6 +690,7 @@ ohos_unittest("SessionStackTest") {
     "hitrace:hitrace_meter",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
