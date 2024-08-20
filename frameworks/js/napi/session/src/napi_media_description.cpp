@@ -153,7 +153,7 @@ napi_status NapiMediaDescription::GetAssetId(napi_env env, napi_value in, AVMedi
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "assetId", property);
     if (status == napi_ok) {
-        SLOGI("MediaDescription has assetId, use assetId: %{public}s", property.c_str());
+        SLOGI("MediaDescription has assetId, use assetId: %{private}s", property.c_str());
         out.SetMediaId(property);
     }
     return status;
@@ -256,7 +256,7 @@ napi_status NapiMediaDescription::GetIconUri(napi_env env, napi_value in, AVMedi
     std::string property;
     auto status = NapiUtils::GetNamedProperty(env, in, "iconUri", property);
     if (status == napi_ok) {
-        SLOGD("Get icon uri %{public}s", property.c_str());
+        SLOGD("Get icon uri %{private}s", property.c_str());
         out.SetIconUri(property);
     } else {
         out.SetIconUri("");
@@ -303,7 +303,7 @@ napi_status NapiMediaDescription::GetMediaImage(napi_env env, napi_value in, AVM
             out.SetIconUri("");
             return napi_ok;
         }
-        SLOGD("Get media image, set icon uri %{public}s", uri.c_str());
+        SLOGD("Get media image, set icon uri %{private}s", uri.c_str());
         out.SetIconUri(uri);
     } else if (type == napi_object) {
         auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, property);
