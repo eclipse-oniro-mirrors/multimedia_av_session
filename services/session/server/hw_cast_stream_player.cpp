@@ -218,7 +218,6 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
     std::lock_guard lockGuard(streamPlayerLock_);
-    SLOGI("mediaInfo media is %{private}s %{private}s", mediaInfo.albumCoverUrl.c_str(), mediaInfo.mediaUrl.c_str());
     if (!streamPlayer_) {
         SLOGE("Set media info and start failed");
         return AVSESSION_ERROR;
@@ -247,7 +246,7 @@ int32_t HwCastStreamPlayer::CheckBeforePrepare(std::shared_ptr<AVMediaDescriptio
     std::shared_ptr<AVMediaDescription> originMediaDescription = currentAVQueueItem_.GetDescription();
 
     if (mediaDescription->GetIconUri() != "INVALID_URI_CACHE") {
-        SLOGI("prepare but not repeat, IconUri %{private}s", mediaDescription->GetIconUri().c_str());
+        SLOGI("prepare but not repeat");
         return AVSESSION_SUCCESS;
     } else if (originMediaDescription != nullptr &&
         originMediaDescription->GetMediaId() == mediaDescription->GetMediaId() &&
@@ -306,9 +305,8 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
-    SLOGD("mediaInfo albumCoverUrl is %{private}s", mediaInfo.albumCoverUrl.c_str());
     std::lock_guard lockGuard(streamPlayerLock_);
-    SLOGI("pass playerlock, check item lock, mediaInfo mediaUrl is %{private}s", mediaInfo.mediaUrl.c_str());
+    SLOGI("pass playerlock, check item lock, mediaInfo mediaUrl and albumCoverUrl");
     if (streamPlayer_ && streamPlayer_->Load(mediaInfo) == AVSESSION_SUCCESS) {
         std::lock_guard lockGuard(curItemLock_);
         SLOGI("Set media info and prepare with curItemLock successed");
