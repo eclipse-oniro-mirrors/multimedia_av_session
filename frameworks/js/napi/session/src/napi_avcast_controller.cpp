@@ -181,8 +181,7 @@ napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_
 
 int32_t DoDownloadForCast(std::shared_ptr<AVMediaDescription> meta, const std::string& uri)
 {
-    SLOGI("DoDownloadForCast with both uri %{private}s, title %{public}s, mediaId %{public}s",
-        uri.c_str(), meta->GetTitle().c_str(), meta->GetMediaId().c_str());
+    SLOGI("DoDownloadForCast with title %{public}s", meta->GetTitle().c_str());
 
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);

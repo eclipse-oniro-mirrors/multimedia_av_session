@@ -415,8 +415,7 @@ napi_value NapiAVSession::SetAVCallState(napi_env env, napi_callback_info info)
 
 int32_t DoDownload(AVMetaData& meta, const std::string uri)
 {
-    SLOGI("DoDownload with uri %{private}s, title %{public}s, assetid %{private}s",
-        uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
+    SLOGI("DoDownload with title %{public}s", meta.GetTitle().c_str());
 
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);
