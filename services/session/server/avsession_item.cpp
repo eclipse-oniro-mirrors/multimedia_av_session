@@ -147,6 +147,7 @@ int32_t AVSessionItem::DestroyTask()
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
+    ReleaseAVCastControllerInner();
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
         SLOGW("Session destroy at source, release cast");
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
