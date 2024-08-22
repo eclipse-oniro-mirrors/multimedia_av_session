@@ -1049,7 +1049,8 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
     }
 
     context->GetCbInfo(env, info);
-
+    
+    SLOGI("Destroy session begin");
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
