@@ -1350,13 +1350,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
         descriptors.push_back(descriptor);
     }
     if (descriptors.size() == 0 && GetContainer().GetAllSessions().size() == 0) {
-        SLOGE("GetHistoricalSessionDescriptorsFromFile read empty, return default!");
-        AVSessionDescriptor descriptor;
-        descriptor.sessionId_ = DEFAULT_SESSION_ID;
-        descriptor.elementName_.SetBundleName(DEFAULT_BUNDLE_NAME);
-        descriptor.elementName_.SetAbilityName(DEFAULT_ABILITY_NAME);
-        descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
-        descriptors.push_back(descriptor);
+        SLOGE("GetHistoricalSessionDescriptorsFromFile read empty, return!");
     }
     return AVSESSION_SUCCESS;
 }
