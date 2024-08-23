@@ -35,6 +35,7 @@
 
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
+#include "hw_cast_display_listener.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -413,6 +414,8 @@ private:
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
+    sptr<HwCastDisplayListener> displayListener_;
+    std::recursive_mutex displayListenerLock_;
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
