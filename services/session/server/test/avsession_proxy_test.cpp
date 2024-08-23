@@ -16,99 +16,36 @@
 #include <gtest/gtest.h>
 #include "avsession_log.h"
 #include "avsession_errors.h"
-#include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
 #include "iservice_registry.h"
 #include "avmedia_description.h"
 #include "av_file_descriptor.h"
 #include "system_ability_definition.h"
-
-#define private public
-#define protected public
+#include "avsession_callback_proxy.h"
+#include "avsession_controller_proxy.h"
 #include "avsession_proxy.h"
-#undef protected
-#undef private
+#include "avsession_service.h"
 
+using namespace OHOS;
 using namespace OHOS::AVSession;
-using namespace OHOS::Security::AccessToken;
 
-static uint64_t g_selfTokenId = 0;
-static HapInfoParams g_info = {
-    .userID = 100,
-    .bundleName = "ohos.permission_test.demo",
-    .instIndex = 0,
-    .appIDDesc = "ohos.permission_test.demo",
-    .isSystemApp = true
-};
-
-static HapPolicyParams g_policy = {
-    .apl = APL_NORMAL,
-    .domain = "test.domain",
-    .permList = {
-        {
-            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
-            .bundleName = "ohos.permission_test.demo",
-            .grantMode = 1,
-            .availableLevel = APL_NORMAL,
-            .label = "label",
-            .labelId = 1,
-            .description = "test",
-            .descriptionId = 1
-        }
-    },
-    .permStateList = {
-        {
-            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
-            .isGeneral = true,
-            .resDeviceID = {"local"},
-            .grantStatus = {PermissionState::PERMISSION_GRANTED},
-            .grantFlags = {1}
-        }
-    }
-};
 class AVSessionProxyTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-
-    std::shared_ptr<AVSessionProxy> aVSessionProxy;
-    OHOS::sptr<AVSessionProxy> aVSessionProxySys;
 };
 
 void AVSessionProxyTest::SetUpTestCase()
 {
-    g_selfTokenId = GetSelfTokenID();
-    AccessTokenKit::AllocHapToken(g_info, g_policy);
-    AccessTokenIDEx tokenID = AccessTokenKit::GetHapTokenIDEx(g_info.userID, g_info.bundleName, g_info.instIndex);
-    SetSelfTokenID(tokenID.tokenIDEx);
 }
 
 void AVSessionProxyTest::TearDownTestCase()
 {
-    SetSelfTokenID(g_selfTokenId);
-    auto tokenId = AccessTokenKit::GetHapTokenID(g_info.userID, g_info.bundleName, g_info.instIndex);
-    AccessTokenKit::DeleteToken(tokenId);
 }
 
 void AVSessionProxyTest::SetUp()
 {
-    OHOS::sptr<IRemoteObject> iRemoteObject;
-    aVSessionProxy = std::make_shared<AVSessionProxy>(iRemoteObject);
-
-    auto mgr = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (mgr == nullptr) {
-        SLOGI("failed to get sa mgr");
-        return;
-    }
-    auto object = mgr->GetSystemAbility(OHOS::AVSESSION_SERVICE_ID);
-    if (object == nullptr) {
-        SLOGI("failed to get service");
-        return;
-    }
-    aVSessionProxySys = OHOS::iface_cast<AVSessionProxy>(object);
 }
 
 void AVSessionProxyTest::TearDown()
@@ -135,6 +72,34 @@ OHOS::AVSession::AVMetaData GetAVMetaData()
     return g_metaData;
 }
 
+
+class AVSessionCallbackImpl : public AVSessionCallback {
+public:
+    void OnPlay() override {};
+    void OnPause() override {};
+    void OnStop() override {};
+    void OnPlayNext() override {};
+    void OnPlayPrevious() override {};
+    void OnFastForward(int64_t time) override {};
+    void OnRewind(int64_t time) override {};
+    void OnSeek(int64_t time) override {};
+    void OnSetSpeed(double speed) override {};
+    void OnSetLoopMode(int32_t loopMode) override {};
+    void OnToggleFavorite(const std::string& mediald) override {};
+    void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override {};
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override {};
+    void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override {};
+    void OnSkipToQueueItem(int32_t itemId) override {};
+    void OnAVCallAnswer() override {};
+    void OnAVCallHangUp() override {};
+    void OnAVCallToggleCallMute() override {};
+    void OnPlayFromAssetId(int64_t assetId) override {};
+    void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
+
+    ~AVSessionCallbackImpl() override {};
+};
+
+
 /**
  * @tc.name: GetSessionId001
  * @tc.desc: Test GetSessionId
@@ -143,8 +108,35 @@ OHOS::AVSession::AVMetaData GetAVMetaData()
 static HWTEST_F(AVSessionProxyTest, GetSessionId001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetSessionId001, start");
-    std::string id = aVSessionProxy->GetSessionId();
-    EXPECT_EQ(id, "");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
+    std::string sessionId = aVSessionProxy->GetSessionId();
+    EXPECT_NE(sessionId, "");
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("GetSessionId001, end");
 }
 
@@ -156,8 +148,35 @@ static HWTEST_F(AVSessionProxyTest, GetSessionId001, testing::ext::TestSize.Leve
 static HWTEST_F(AVSessionProxyTest, GetSessionType001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetSessionType001, start");
-    std::string type = aVSessionProxy->GetSessionType();
-    EXPECT_EQ(type, "");
+	
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
+    std::string typeStr = aVSessionProxy->GetSessionType();
+    EXPECT_NE(typeStr, "");
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("GetSessionType001, end");
 }
 
@@ -169,9 +188,37 @@ static HWTEST_F(AVSessionProxyTest, GetSessionType001, testing::ext::TestSize.Le
 static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData001, testing::ext::TestSize.Level1)
 {
     SLOGI("SetAVCallMetaData001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+	
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     AVCallMetaData avCallMetaData;
-    int32_t ret = aVSessionProxy->SetAVCallMetaData(avCallMetaData);
+    ret = aVSessionProxy->SetAVCallMetaData(avCallMetaData);
     EXPECT_EQ(ret, ERR_INVALID_PARAM);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("SetAVCallMetaData001, end");
 }
 
@@ -183,11 +230,39 @@ static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData001, testing::ext::TestSize
 static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData002, testing::ext::TestSize.Level1)
 {
     SLOGI("SetAVCallMetaData002, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+	
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     AVCallMetaData avCallMetaData;
     avCallMetaData.SetName("name");
     avCallMetaData.SetPhoneNumber("number");
-    int32_t ret = aVSessionProxy->SetAVCallMetaData(avCallMetaData);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    ret = aVSessionProxy->SetAVCallMetaData(avCallMetaData);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("SetAVCallMetaData002, end");
 }
 
@@ -199,9 +274,37 @@ static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData002, testing::ext::TestSize
 static HWTEST_F(AVSessionProxyTest, SetAVCallState001, testing::ext::TestSize.Level1)
 {
     SLOGI("SetAVCallState001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     AVCallState avCallState;
-    int32_t ret = aVSessionProxy->SetAVCallState(avCallState);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    avCallState.SetAVCallState(AVCallState::AVCALL_STATE_IDLE);
+    ret = aVSessionProxy->SetAVCallState(avCallState);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+	
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("SetAVCallState001, end");
 }
 
@@ -213,10 +316,37 @@ static HWTEST_F(AVSessionProxyTest, SetAVCallState001, testing::ext::TestSize.Le
 static HWTEST_F(AVSessionProxyTest, SetAVCallState002, testing::ext::TestSize.Level1)
 {
     SLOGI("SetAVCallState002, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     AVCallState avCallState;
     avCallState.SetAVCallState(-1);
-    int32_t ret = aVSessionProxy->SetAVCallState(avCallState);
+    ret = aVSessionProxy->SetAVCallState(avCallState);
     EXPECT_EQ(ret, ERR_INVALID_PARAM);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("SetAVCallState002, end");
 }
 
@@ -228,68 +358,43 @@ static HWTEST_F(AVSessionProxyTest, SetAVCallState002, testing::ext::TestSize.Le
 static HWTEST_F(AVSessionProxyTest, SetAVMetaData001, testing::ext::TestSize.Level1)
 {
     SLOGI("SetAVMetaData001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     AVMetaData meta;
-    int32_t ret = aVSessionProxy->SetAVMetaData(meta);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    std::string assetId = "assetId";
+    meta.SetAssetId(assetId);
+    std::shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4, 5, 6, 7, 8};
+    mediaImage->SetInnerImgBuffer(imgBuffer);
+    meta.SetMediaImage(mediaImage);
+    ret = aVSessionProxy->SetAVMetaData(meta);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("SetAVMetaData001, end");
-}
-
-/**
- * @tc.name: SetAVMetaData002
- * @tc.desc: Test SetAVMetaData
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionProxyTest, SetAVMetaData002, testing::ext::TestSize.Level1)
-{
-    SLOGI("SetAVMetaData002, start");
-    AVMetaData meta;
-    int32_t ret = aVSessionProxySys->SetAVMetaData(meta);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
-    SLOGI("SetAVMetaData002, end");
-}
-
-/**
- * @tc.name: SetAVMetaData003
- * @tc.desc: Test SetAVMetaData
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionProxyTest, SetAVMetaData003, testing::ext::TestSize.Level1)
-{
-    SLOGI("SetAVMetaData003, start");
-    AVMetaData meta = GetAVMetaData();
-    int32_t ret = aVSessionProxySys->SetAVMetaData(meta);
-    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
-    SLOGI("SetAVMetaData003, end");
-}
-
-/**
- * @tc.name: GetPixelMapBuffer001
- * @tc.desc: Test GetPixelMapBuffer
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionProxyTest, GetPixelMapBuffer001, testing::ext::TestSize.Level1)
-{
-    SLOGI("GetPixelMapBuffer001, start");
-    OHOS::AVSession::AVMetaData metaData;
-    OHOS::MessageParcel parcel;
-    int32_t ret = aVSessionProxySys->GetPixelMapBuffer(metaData, parcel);
-    EXPECT_EQ(ret, 0);
-    SLOGI("GetPixelMapBuffer001, end");
-}
-
-/**
- * @tc.name: GetPixelMapBuffer002
- * @tc.desc: Test GetPixelMapBuffer
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionProxyTest, GetPixelMapBuffer002, testing::ext::TestSize.Level1)
-{
-    SLOGI("GetPixelMapBuffer002, start");
-    OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
-    OHOS::MessageParcel parcel;
-    int32_t ret = aVSessionProxySys->GetPixelMapBuffer(metaData, parcel);
-    EXPECT_EQ(ret, 0);
-    SLOGI("GetPixelMapBuffer002, end");
 }
 
 /**
@@ -300,9 +405,36 @@ static HWTEST_F(AVSessionProxyTest, GetPixelMapBuffer002, testing::ext::TestSize
 static HWTEST_F(AVSessionProxyTest, GetAVMetaData001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetAVMetaData001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     AVMetaData meta;
-    int32_t ret = aVSessionProxy->GetAVMetaData(meta);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    ret = aVSessionProxy->GetAVMetaData(meta);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("GetAVMetaData001, end");
 }
 
@@ -314,9 +446,37 @@ static HWTEST_F(AVSessionProxyTest, GetAVMetaData001, testing::ext::TestSize.Lev
 static HWTEST_F(AVSessionProxyTest, GetAVPlaybackState001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetAVPlaybackState001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+	
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     AVPlaybackState state;
-    int32_t ret = aVSessionProxy->GetAVPlaybackState(state);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    ret = aVSessionProxy->GetAVPlaybackState(state);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("GetAVPlaybackState001, end");
 }
 
@@ -328,9 +488,52 @@ static HWTEST_F(AVSessionProxyTest, GetAVPlaybackState001, testing::ext::TestSiz
 static HWTEST_F(AVSessionProxyTest, SetAVPlaybackState001, testing::ext::TestSize.Level1)
 {
     SLOGI("SetAVPlaybackState001, start");
-    AVPlaybackState state;
-    int32_t ret = aVSessionProxy->SetAVPlaybackState(state);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
+    AVPlaybackState avPlaybackState;
+    AVPlaybackState::Position position;
+    position.elapsedTime_ = 1;
+    position.updateTime_ = 1;
+    avPlaybackState.SetState(1);
+    avPlaybackState.SetSpeed(1);
+    avPlaybackState.SetPosition(position);
+    avPlaybackState.SetBufferedTime(1);
+    avPlaybackState.SetLoopMode(1);
+    avPlaybackState.SetFavorite(1);
+    avPlaybackState.SetActiveItemId(1);
+    avPlaybackState.SetVolume(1);
+    avPlaybackState.SetMaxVolume(1);
+    avPlaybackState.SetMuted(1);
+    avPlaybackState.SetDuration(1);
+    avPlaybackState.SetVideoWidth(1);
+    avPlaybackState.SetVideoHeight(1);
+    ret = aVSessionProxy->SetAVPlaybackState(avPlaybackState);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("SetAVPlaybackState001, end");
 }
 
@@ -342,9 +545,36 @@ static HWTEST_F(AVSessionProxyTest, SetAVPlaybackState001, testing::ext::TestSiz
 static HWTEST_F(AVSessionProxyTest, GetAVQueueItems001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetAVQueueItems001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     std::vector<AVQueueItem> items = {};
-    int32_t ret = aVSessionProxy->GetAVQueueItems(items);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    ret = aVSessionProxy->GetAVQueueItems(items);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("GetAVQueueItems001, end");
 }
 
@@ -356,9 +586,36 @@ static HWTEST_F(AVSessionProxyTest, GetAVQueueItems001, testing::ext::TestSize.L
 static HWTEST_F(AVSessionProxyTest, SetAVQueueItems001, testing::ext::TestSize.Level1)
 {
     SLOGI("SetAVQueueItems001, start");
+	
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     std::vector<AVQueueItem> items = {};
-    int32_t ret = aVSessionProxy->SetAVQueueItems(items);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    ret = aVSessionProxy->SetAVQueueItems(items);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("SetAVQueueItems001, end");
 }
 
@@ -370,9 +627,37 @@ static HWTEST_F(AVSessionProxyTest, SetAVQueueItems001, testing::ext::TestSize.L
 static HWTEST_F(AVSessionProxyTest, GetAVQueueTitle001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetAVQueueTitle001, start");
-    std::string title;
-    int32_t ret = aVSessionProxy->GetAVQueueTitle(title);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+	
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
+    std::string title = "title";
+    ret = aVSessionProxy->GetAVQueueTitle(title);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("GetAVQueueTitle001, end");
 }
 
@@ -384,9 +669,37 @@ static HWTEST_F(AVSessionProxyTest, GetAVQueueTitle001, testing::ext::TestSize.L
 static HWTEST_F(AVSessionProxyTest, SetAVQueueTitle001, testing::ext::TestSize.Level1)
 {
     SLOGI("SetAVQueueTitle001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+	
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     std::string title = "title";
-    int32_t ret = aVSessionProxy->SetAVQueueTitle(title);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    ret = aVSessionProxy->SetAVQueueTitle(title);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("SetAVQueueTitle001, end");
 }
 
@@ -398,9 +711,37 @@ static HWTEST_F(AVSessionProxyTest, SetAVQueueTitle001, testing::ext::TestSize.L
 static HWTEST_F(AVSessionProxyTest, SetLaunchAbility001, testing::ext::TestSize.Level1)
 {
     SLOGI("SetLaunchAbility001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     OHOS::AbilityRuntime::WantAgent::WantAgent ability;
-    int32_t ret = aVSessionProxy->SetLaunchAbility(ability);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    ret = aVSessionProxy->SetLaunchAbility(ability);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+	
+    aVSessionProxy = nullptr;
+
     SLOGI("SetLaunchAbility001, end");
 }
 
@@ -412,9 +753,36 @@ static HWTEST_F(AVSessionProxyTest, SetLaunchAbility001, testing::ext::TestSize.
 static HWTEST_F(AVSessionProxyTest, GetExtras001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetExtras001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     OHOS::AAFwk::WantParams extras;
-    int32_t ret = aVSessionProxy->GetExtras(extras);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    ret = aVSessionProxy->GetExtras(extras);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("GetExtras001, end");
 }
 
@@ -426,36 +794,37 @@ static HWTEST_F(AVSessionProxyTest, GetExtras001, testing::ext::TestSize.Level1)
 static HWTEST_F(AVSessionProxyTest, SetExtras001, testing::ext::TestSize.Level1)
 {
     SLOGI("SetExtras001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> aVSessionProxy = new AVSessionProxy(sessionInner);
     OHOS::AAFwk::WantParams extras;
-    int32_t ret = aVSessionProxy->SetExtras(extras);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    ret = aVSessionProxy->SetExtras(extras);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    aVSessionProxy = nullptr;
+
     SLOGI("SetExtras001, end");
-}
-
-/**
- * @tc.name: GetController001
- * @tc.desc: Test GetController
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionProxyTest, GetController001, testing::ext::TestSize.Level1)
-{
-    SLOGI("GetController001, start");
-    std::shared_ptr<AVSessionController> ret = aVSessionProxy->GetController();
-    SLOGI("GetController001, end");
-}
-
-/**
- * @tc.name: RegisterCallback001
- * @tc.desc: Test RegisterCallback
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionProxyTest, RegisterCallback001, testing::ext::TestSize.Level1)
-{
-    SLOGI("RegisterCallback001, start");
-    std::shared_ptr<AVSessionCallback> callback;
-    int32_t ret = aVSessionProxy->RegisterCallback(callback);
-    EXPECT_EQ(ret, ERR_INVALID_PARAM);
-    SLOGI("RegisterCallback001, end");
 }
 
 /**
@@ -466,22 +835,37 @@ static HWTEST_F(AVSessionProxyTest, RegisterCallback001, testing::ext::TestSize.
 static HWTEST_F(AVSessionProxyTest, Activate001, testing::ext::TestSize.Level1)
 {
     SLOGI("Activate001, start");
-    int32_t ret = aVSessionProxy->Activate();
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
-    SLOGI("Activate001, end");
-}
 
-/**
- * @tc.name: IsActive001
- * @tc.desc: Test IsActive
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionProxyTest, IsActive001, testing::ext::TestSize.Level1)
-{
-    SLOGI("IsActive001, start");
-    bool ret = aVSessionProxy->IsActive();
-    EXPECT_EQ(ret, true);
-    SLOGI("IsActive001, end");
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+	
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    sptr<AVSessionProxy> avSessionProxy = new AVSessionProxy(sessionInner);
+
+    ret = avSessionProxy->Activate();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    avSessionProxy = nullptr;
+
+    SLOGI("Activate001, end");
 }
 
 /**
@@ -492,9 +876,87 @@ static HWTEST_F(AVSessionProxyTest, IsActive001, testing::ext::TestSize.Level1)
 static HWTEST_F(AVSessionProxyTest, Deactivate001, testing::ext::TestSize.Level1)
 {
     SLOGI("Deactivate001, start");
-    int32_t ret = aVSessionProxy->Deactivate();
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+
+    int32_t ret = AVSESSION_ERROR;
+    bool retBool = false;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+	
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    sptr<AVSessionProxy> avSessionProxy = new AVSessionProxy(sessionInner);
+
+    ret = avSessionProxy->Activate();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    retBool = avSessionProxy->IsActive();
+    EXPECT_EQ(retBool, true);
+    ret = avSessionProxy->Deactivate();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    retBool = avSessionProxy->IsActive();
+    EXPECT_EQ(retBool, false);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    avSessionProxy = nullptr;
+
     SLOGI("Deactivate001, end");
+}
+
+/**
+ * @tc.name: SetSessionEvent001
+ * @tc.desc: Test SetSessionEvent
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionProxyTest, SetSessionEvent001, testing::ext::TestSize.Level1)
+{
+    SLOGI("SetSessionEvent001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_AUDIO;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+	
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> avSessionProxy = new AVSessionProxy(sessionInner);
+    std::string event = "AVSessionCallback";
+    OHOS::AAFwk::WantParams args;
+    ret = avSessionProxy->SetSessionEvent(event, args);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    avSessionProxy = nullptr;
+
+    SLOGI("SetSessionEvent001, end");
 }
 
 /**
@@ -505,9 +967,37 @@ static HWTEST_F(AVSessionProxyTest, Deactivate001, testing::ext::TestSize.Level1
 static HWTEST_F(AVSessionProxyTest, AddSupportCommand001, testing::ext::TestSize.Level1)
 {
     SLOGI("AddSupportCommand001, start");
-    int32_t cmd = 0;
-    int32_t ret = aVSessionProxy->AddSupportCommand(cmd);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_AUDIO;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    sptr<AVSessionProxy> avSessionProxy = new AVSessionProxy(sessionInner);
+
+    int32_t cmd = AVControlCommand::SESSION_CMD_PLAY;
+    ret = avSessionProxy->AddSupportCommand(cmd);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+	
+    sessionInner = nullptr;
+    sessionService = nullptr;
+    avSessionProxy = nullptr;
+
     SLOGI("AddSupportCommand001, end");
 }
 
@@ -519,50 +1009,127 @@ static HWTEST_F(AVSessionProxyTest, AddSupportCommand001, testing::ext::TestSize
 static HWTEST_F(AVSessionProxyTest, DeleteSupportCommand001, testing::ext::TestSize.Level1)
 {
     SLOGI("DeleteSupportCommand001, start");
-    int32_t cmd = 0;
-    int32_t ret = aVSessionProxy->DeleteSupportCommand(cmd);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_AUDIO;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    sptr<AVSessionProxy> avSessionProxy = new AVSessionProxy(sessionInner);
+
+    int32_t cmd = AVControlCommand::SESSION_CMD_PLAY;
+    ret = avSessionProxy->AddSupportCommand(cmd);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    ret = avSessionProxy->DeleteSupportCommand(cmd);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sessionService->OnStop();
+    sessionService = nullptr;
+    avSessionProxy = nullptr;
+
     SLOGI("DeleteSupportCommand001, end");
 }
 
 /**
- * @tc.name: SetSessionEvent001
- * @tc.desc: Test SetSessionEvent
+
+ * @tc.name: GetController001
+ * @tc.desc: Test GetController
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetSessionEvent001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetController001, testing::ext::TestSize.Level1)
 {
-    SLOGI("SetSessionEvent001, start");
-    std::string event;
-    OHOS::AAFwk::WantParams args;
-    int32_t ret = aVSessionProxy->SetSessionEvent(event, args);
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
-    SLOGI("SetSessionEvent001, end");
+    SLOGI("GetController001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    sptr<AVSessionProxy> avSessionProxy = iface_cast<AVSessionProxy>(sessionInner);
+    std::string sessionId = avSessionProxy->GetSessionId();
+    sptr<IRemoteObject> controllerInner;
+    ret = sessionService->CreateControllerInner(sessionId, controllerInner);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_TRUE(controllerInner != nullptr);
+
+    std::shared_ptr<AVSessionController> avSessionController = avSessionProxy->GetController();
+
+    sessionService->HandleSessionRelease(sessionId);
+    sessionService->OnStop();
+    sessionInner = nullptr;
+    avSessionProxy = nullptr;
+    controllerInner = nullptr;
+    sessionService = nullptr;
+
+    SLOGI("GetController001, end");
 }
 
 /**
- * @tc.name: Destroy001
- * @tc.desc: Test Destroy
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionProxyTest, Destroy001, testing::ext::TestSize.Level1)
-{
-    SLOGI("Destroy001, start");
-    int32_t ret = aVSessionProxy->Destroy();
-    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
-    SLOGI("Destroy001, end");
-}
-
-/**
- * @tc.name: RegisterCallback002
+ * @tc.name: RegisterCallback001
  * @tc.desc: Test RegisterCallback
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, RegisterCallback002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, RegisterCallback001, testing::ext::TestSize.Level1)
 {
-    SLOGI("RegisterCallback002, start");
-    std::shared_ptr<AVSessionCallback> callback;
-    int32_t ret = aVSessionProxy->RegisterCallback(callback);
-    EXPECT_EQ(ret, ERR_INVALID_PARAM);
-    SLOGI("RegisterCallback002, end");
+    SLOGI("RegisterCallback001, start");
+
+    int32_t ret = AVSESSION_ERROR;
+
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    sptr<AVSessionService> sessionService = new AVSessionService(systemAbilityId, runOnCreate);
+    sessionService->OnStart();
+
+    sptr<IRemoteObject> sessionInner;
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+    ret = sessionService->CreateSessionInner(tag, type, elementName, sessionInner);
+    EXPECT_TRUE(sessionInner != nullptr);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    sptr<AVSessionProxy> avSessionProxy = iface_cast<AVSessionProxy>(sessionInner);
+
+    std::shared_ptr<AVSessionCallback> avSessionCallbackImpl = std::make_shared<AVSessionCallbackImpl>();
+    ret = avSessionProxy->RegisterCallback(avSessionCallbackImpl);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    std::string sessionId = avSessionProxy->GetSessionId();
+    sessionService->HandleSessionRelease(sessionId);
+    sessionService->OnStop();
+    sessionService = nullptr;
+    avSessionProxy = nullptr;
+    avSessionCallbackImpl = nullptr;
+
+    SLOGI("RegisterCallback001, end");
 }

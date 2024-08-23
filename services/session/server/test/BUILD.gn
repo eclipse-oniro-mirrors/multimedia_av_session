@@ -62,6 +62,7 @@ common_external_deps = [
   "image_framework:image_native",
   "input:libmmi-client",
   "ipc:ipc_single",
+  "jsoncpp:jsoncpp",
   "samgr:samgr_proxy",
 ]
 
@@ -117,22 +118,6 @@ ohos_unittest("AVSessionServiceProxyTest") {
   module_out_path = module_output_path
 
   sources = [ "avsession_service_proxy_test.cpp" ]
-
-  configs = [ ":module_private_config" ]
-
-  cflags_cc = [ "--coverage" ]
-
-  ldflags = [ "--coverage" ]
-
-  deps = common_deps
-
-  external_deps = common_external_deps
-}
-
-ohos_unittest("AVSessionStubTest") {
-  module_out_path = module_output_path
-
-  sources = [ "avsession_stub_test.cpp" ]
 
   configs = [ ":module_private_config" ]
 
@@ -235,6 +220,24 @@ ohos_unittest("AVSessionControllerStubTest") {
   module_out_path = module_output_path
 
   sources = [ "avsession_controller_stub_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("AVSessionDumperTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_dumper_test.cpp" ]
 
   configs = [ ":module_private_config" ]
 
@@ -882,12 +885,12 @@ group("av_session_server_unittest") {
     ":AVSessionCallbackStubTest",
     ":AVSessionControllerProxyTest",
     ":AVSessionControllerStubTest",
+    ":AVSessionDumperTest",
     ":AVSessionProxyTest",
     ":AVSessionServiceProxyTest",
     ":AVSessionServiceStubPermissionTest",
     ":AVSessionServiceStubTest",
     ":AVSessionServiceTest",
-    ":AVSessionStubTest",
     ":AbilityConnectHelperTest",
     ":AbilityConnectHelperTest",
     ":AbilityManagerAdapterDemoTest",

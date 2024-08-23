@@ -23,50 +23,12 @@
 #include "avmedia_description.h"
 #include "av_file_descriptor.h"
 #include "system_ability_definition.h"
+#include "avsession_service.h"
 #include "avsession_service_proxy.h"
 
+using namespace OHOS;
 using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
-
-static char g_testSessionTag[] = "test";
-static char g_testBundleName[] = "test.ohos.avsession";
-static char g_testAbilityName[] = "test.ability";
-
-static uint64_t g_selfTokenId = 0;
-
-static HapInfoParams g_info = {
-    .userID = 100,
-    .bundleName = "ohos.permission_test.demo",
-    .instIndex = 0,
-    .appIDDesc = "ohos.permission_test.demo",
-    .isSystemApp = true
-};
-
-static HapPolicyParams g_policy = {
-    .apl = APL_NORMAL,
-    .domain = "test.domain",
-    .permList = {
-        {
-            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
-            .bundleName = "ohos.permission_test.demo",
-            .grantMode = 1,
-            .availableLevel = APL_NORMAL,
-            .label = "label",
-            .labelId = 1,
-            .description = "test",
-            .descriptionId = 1
-        }
-    },
-    .permStateList = {
-        {
-            .permissionName = "ohos.permission.MANAGE_MEDIA_RESOURCES",
-            .isGeneral = true,
-            .resDeviceID = {"local"},
-            .grantStatus = {PermissionState::PERMISSION_GRANTED},
-            .grantFlags = {1}
-        }
-    }
-};
 
 class AVSessionServiceProxyTest : public testing::Test {
 public:
@@ -74,61 +36,22 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-
-    OHOS::sptr<AVSessionServiceProxy> aVSessionServiceProxy;
-    std::shared_ptr<AVSession> aVSession;
 };
 
 void AVSessionServiceProxyTest::SetUpTestCase()
 {
-    g_selfTokenId = GetSelfTokenID();
-    AccessTokenKit::AllocHapToken(g_info, g_policy);
-    AccessTokenIDEx tokenID = AccessTokenKit::GetHapTokenIDEx(g_info.userID, g_info.bundleName, g_info.instIndex);
-    SetSelfTokenID(tokenID.tokenIDEx);
 }
 
 void AVSessionServiceProxyTest::TearDownTestCase()
 {
-    SetSelfTokenID(g_selfTokenId);
-    auto tokenId = AccessTokenKit::GetHapTokenID(g_info.userID, g_info.bundleName, g_info.instIndex);
-    AccessTokenKit::DeleteToken(tokenId);
 }
 
 void AVSessionServiceProxyTest::SetUp()
 {
-    auto mgr = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (mgr == nullptr) {
-        SLOGI("failed to get sa mgr");
-        return;
-    }
-    auto object = mgr->GetSystemAbility(OHOS::AVSESSION_SERVICE_ID);
-    if (object == nullptr) {
-        SLOGI("failed to get service");
-        return;
-    }
-    aVSessionServiceProxy = OHOS::iface_cast<AVSessionServiceProxy>(object);
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testBundleName);
-    elementName.SetAbilityName(g_testAbilityName);
 }
 
 void AVSessionServiceProxyTest::TearDown()
 {
-}
-
-/**
- * @tc.name: CreateSession001
- * @tc.desc: Test CreateSession
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceProxyTest, CreateSession001, testing::ext::TestSize.Level1)
-{
-    SLOGI("CreateSession001, start");
-    OHOS::AppExecFwk::ElementName elementName;
-    auto ret = aVSessionServiceProxy->CreateSession(g_testSessionTag,
-        AVSession::SESSION_TYPE_AUDIO, elementName, aVSession);
-    EXPECT_EQ(ret, ERR_INVALID_PARAM);
-    SLOGI("CreateSession001, end");
 }
 
 /**
@@ -139,8 +62,41 @@ static HWTEST_F(AVSessionServiceProxyTest, CreateSession001, testing::ext::TestS
 static HWTEST_F(AVSessionServiceProxyTest, GetAllSessionDescriptors001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetAllSessionDescriptors001, start");
-    std::vector<AVSessionDescriptor> descriptors;
-    int32_t ret = aVSessionServiceProxy->GetAllSessionDescriptors(descriptors);
+
+    int32_t ret = AVSESSION_ERROR;
+
+    sptr<ISystemAbilityManager> mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (mgr == nullptr) {
+        SLOGE("failed to get sa mgr");
+    }
+    sptr<IRemoteObject> sessionService = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
+    if (sessionService == nullptr) {
+        SLOGE("failed to get service");
+    }
+
+    std::string tag = "tag";
+    int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string moduleName = "moduleName";
+    AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
+
+    std::shared_ptr<AVSessionServiceProxy> avSessionServiceProxy =
+        std::make_shared<AVSessionServiceProxy>(sessionService);
+
+    std::shared_ptr<OHOS::AVSession::AVSession> session;
+    ret = avSessionServiceProxy->CreateSession(tag, type, elementName, session);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_TRUE(session != nullptr);
+
+    std::vector<AVSessionDescriptor> descriptors;
+    ret = avSessionServiceProxy->GetAllSessionDescriptors(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_TRUE(descriptors[0].sessionId_ != "");
+
+    session = nullptr;
+    sessionService = nullptr;
+    avSessionServiceProxy = nullptr;
     SLOGI("GetAllSessionDescriptors001, end");
 }
