@@ -34,13 +34,13 @@ bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVSessionControllerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption &option)
 {
-    if (code < CONTROLLER_CMD_MAX) {
+    if (code >= CONTROLLER_CMD_REGISTER_CALLBACK && code < CONTROLLER_CMD_MAX) {
         SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
     }
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code < CONTROLLER_CMD_MAX) {
+    if (code >= CONTROLLER_CMD_REGISTER_CALLBACK && code < CONTROLLER_CMD_MAX) {
         return handlers[code](data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

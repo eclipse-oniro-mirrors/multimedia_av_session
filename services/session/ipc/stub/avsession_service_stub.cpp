@@ -44,13 +44,15 @@ bool AVSessionServiceStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
                                               MessageOption& option)
 {
-    if (code < static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX)) {
+    if (code >= static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION) &&
+        code < static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX)) {
         SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
     }
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code < static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX)) {
+    if (code >= static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION) &&
+        code < static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX)) {
         return handlers[code](data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
