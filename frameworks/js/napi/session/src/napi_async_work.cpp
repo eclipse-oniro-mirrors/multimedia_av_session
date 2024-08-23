@@ -117,11 +117,6 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
                 AVSESSION_TRACE_ASYNC_END("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
             }
             GenerateOutput(ctxt);
-            if (ctxt->callbackRef != nullptr) {
-                SLOGI("do clear callback here for leak");
-                napi_delete_reference(env, ctxt->callbackRef);
-                ctxt->callbackRef = nullptr;
-            }
         },
         reinterpret_cast<void*>(ctxt.get()), &ctxt->work);
     napi_queue_async_work_with_qos(ctxt->env, ctxt->work, napi_qos_user_initiated);
@@ -161,6 +156,11 @@ void NapiAsyncWork::GenerateOutput(ContextBase* ctxt)
         napi_value callbackResult = nullptr;
         SLOGD("call callback function");
         napi_call_function(ctxt->env, nullptr, callback, RESULT_ALL, result, &callbackResult);
+    }
+    if (ctxt->callbackRef != nullptr) {
+        SLOGI("do clear callback here for leak bef reset");
+        napi_delete_reference(ctxt->env, ctxt->callbackRef);
+        ctxt->callbackRef = nullptr;
     }
     ctxt->hold.reset(); // release ctxt.
 }
