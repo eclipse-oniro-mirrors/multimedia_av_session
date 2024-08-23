@@ -68,13 +68,13 @@ The structure of the repository directory is as follows:
 
 ## Constraints
 
-For detailed constraints, please refer to [Constraints](https://gitee.com/openharmony/docs/blob/master/en/application-dev/media/avsession-overview.md)
+For detailed constraints, please refer to [Constraints](https://gitee.com/openharmony/docs/blob/OpenHarmony-4.1-Release/en/application-dev/media/avsession/avsession-overview.md)
 
 ## API Reference
 
-For detailed interface reference, please refer to [Reference](https://gitee.com/openharmony/docs/blob/master/en/application-dev/reference/apis/js-apis-avsession.md)
+For detailed interface reference, please refer to [Reference](https://gitee.com/openharmony/docs/blob/OpenHarmony-4.1-Release/en/application-dev/reference/apis-avsession-kit/js-apis-avsession.md)
 
-For instructions on using AVSession, please refer to [AVSession Overview](https://gitee.com/openharmony/docs/blob/master/en/application-dev/media/avsession-overview.md)
+For instructions on using AVSession, please refer to [AVSession Overview](https://gitee.com/openharmony/docs/blob/OpenHarmony-4.1-Release/en/application-dev/media/avsession/avsession-overview.md)
 
 ## Repositories Involved
 
