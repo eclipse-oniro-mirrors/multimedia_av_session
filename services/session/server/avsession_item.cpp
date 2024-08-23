@@ -1383,7 +1383,6 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
     SLOGI("GetAllCastDisplays out");
     return AVSESSION_SUCCESS;
 }
-#endif
 
 void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
 {
