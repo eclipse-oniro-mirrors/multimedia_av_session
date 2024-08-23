@@ -34,7 +34,9 @@ bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVSessionControllerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption &option)
 {
-    SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
+    if (code < CONTROLLER_CMD_MAX) {
+        SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
+    }
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
