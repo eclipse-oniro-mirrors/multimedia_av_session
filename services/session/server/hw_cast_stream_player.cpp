@@ -229,7 +229,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     }
     if (originMediaDescription && originMediaDescription->GetMediaUri() != "http:" &&
         originMediaDescription->GetMediaId() == mediaInfo.mediaId) {
-        CHECK_AND_RETURN_RET_LOG(streamPlayer_->Play() != AVSESSION_SUCCESS, AVSESSION_ERROR, "Set play failed");
+        CHECK_AND_RETURN_RET_LOG(streamPlayer_->Play() == AVSESSION_SUCCESS, AVSESSION_ERROR, "Set play failed");
     } else if (streamPlayer_->Play(mediaInfo) != AVSESSION_SUCCESS) {
         SLOGE("Set media info and start failed");
         return AVSESSION_ERROR;
