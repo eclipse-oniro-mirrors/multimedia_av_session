@@ -488,7 +488,7 @@ private:
     static constexpr const int32_t SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER = 2;
     static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
 
-    const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
+    const std::string AVSESSION_FILE_DIR = "/data/service/el2/public/av_session/";
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";
 
