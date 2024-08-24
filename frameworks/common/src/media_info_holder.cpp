@@ -55,7 +55,6 @@ MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
     }
     for (int i = 0; i < playInfosSize; i++) {
         AVQueueItem* queueItem = AVQueueItem::Unmarshalling(data);
-        CHECK_AND_RETURN_RET_LOG(queueItem != nullptr, nullptr, "new AVQueueItem failed");
         result->playInfos_.emplace_back(*queueItem);
     }
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new MediaInfoHolder failed");
