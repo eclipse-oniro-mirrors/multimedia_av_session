@@ -242,16 +242,27 @@ int32_t HwCastStreamPlayer::CheckBeforePrepare(std::shared_ptr<AVMediaDescriptio
 {
     std::shared_ptr<AVMediaDescription> originMediaDescription = currentAVQueueItem_.GetDescription();
 
-    if (originMediaDescription != nullptr && originMediaDescription->GetMediaId() == mediaDescription->GetMediaId() &&
-        mediaDescription->GetIconUri() == "INVALID_URI_CACHE") {
-        SLOGW("prepare with repeat mediaId %{public}s", mediaDescription->GetMediaId().c_str());
-        if (mediaDescription->GetIcon() != nullptr && originMediaDescription->GetIcon() == nullptr) {
-            SLOGI("prepare with repeat but set icon");
-            originMediaDescription->SetIcon(mediaDescription->GetIcon());
+    if (mediaDescription->GetIconUri() != "INVALID_URI_CACHE") {
+        SLOGI("prepare but not repeat, IconUri %{public}s", mediaDescription->GetIconUri().c_str());
+        return AVSESSION_SUCCESS;
+    } else if (originMediaDescription != nullptr &&
+        originMediaDescription->GetMediaId() == mediaDescription->GetMediaId() &&
+        mediaDescription->GetIcon() != nullptr && originMediaDescription->GetIcon() == nullptr) {
+        SLOGW("prepare with repeatMediaId %{public}s", mediaDescription->GetMediaId().c_str());
+        originMediaDescription->SetIcon(mediaDescription->GetIcon());
+
+        {
+            std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
+            for (auto listener : streamPlayerListenerList_) {
+                if (listener != nullptr) {
+                    SLOGI("trigger the OnMediaItemChange for registered listeners");
+                    listener->OnMediaItemChange(currentAVQueueItem_);
+                }
+            }
         }
         return AVSESSION_ERROR;
     }
-    return AVSESSION_SUCCESS;
+    return AVSESSION_ERROR;
 }
 
 int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
@@ -740,7 +751,6 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
             listener->OnPlayRequest(queueItem);
         }
     }
-    std::lock_guard lockGuard(streamPlayerLock_);
     SLOGI("Stream player received PlayRequest event done");
 }
 
@@ -771,11 +781,13 @@ void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pi
     mediaDescription->SetIcon(innerPixelMap);
     AVQueueItem queueItem;
     queueItem.SetDescription(mediaDescription);
-    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
-    for (auto listener : streamPlayerListenerList_) {
-        if (listener != nullptr) {
-            SLOGI("trigger the OnMediaItemChange for registered listeners on Album change");
-            listener->OnMediaItemChange(queueItem);
+    {
+        std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
+        for (auto listener : streamPlayerListenerList_) {
+            if (listener != nullptr) {
+                SLOGI("trigger the OnMediaItemChange for registered listeners on Album change");
+                listener->OnMediaItemChange(queueItem);
+            }
         }
     }
 

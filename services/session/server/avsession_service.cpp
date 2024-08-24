@@ -794,6 +794,7 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
+        SLOGI("notify top session change to pid %{public}d", static_cast<int>(pid));
         listener->OnTopSessionChange(descriptor);
     }
 }
@@ -1262,7 +1263,9 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
     for (const auto& desc: descriptors) {
         SLOGD("desc=%{public}s", desc.elementName_.GetBundleName().c_str());
     }
-    SLOGI("GetAllSessionDescriptors with size=%{public}d", static_cast<int32_t>(descriptors.size()));
+    SLOGI("GetAllSessionDescriptors with size=%{public}d, topSession:%{public}s",
+        static_cast<int32_t>(descriptors.size()),
+        (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
     return AVSESSION_SUCCESS;
 }
 
