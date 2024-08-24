@@ -482,9 +482,8 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info, inputParser);
 
     auto* napiAvSession = reinterpret_cast<NapiAVSession*>(context->native);
-    CHECK_AND_RETURN_RET_LOG(napiAvSession != nullptr, NapiUtils::GetUndefinedValue(env), "napiAvSession is nullptr");
-    if (napiAvSession->metaData_.EqualWithUri((context->metaData))) {
-        SLOGI("metadata with uri is the same as last time");
+    if (napiAvSession == nullptr || napiAvSession->metaData_.EqualWithUri((context->metaData))) {
+        SLOGI("napiAvSession is nullptr or metadata with uri is the same as last time");
         auto executor = []() {};
         auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
         return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
