@@ -217,7 +217,6 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
     std::lock_guard lockGuard(streamPlayerLock_);
-    SLOGI("mediaInfo media is %{public}s %{public}s", mediaInfo.albumCoverUrl.c_str(), mediaInfo.mediaUrl.c_str());
     if (!streamPlayer_) {
         SLOGE("Set media info and start failed");
         return AVSESSION_ERROR;
@@ -303,9 +302,8 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
-    SLOGD("mediaInfo albumCoverUrl is %{public}s", mediaInfo.albumCoverUrl.c_str());
     std::lock_guard lockGuard(streamPlayerLock_);
-    SLOGI("mediaInfo mediaUrl is %{public}s", mediaInfo.mediaUrl.c_str());
+    SLOGI("pass playerlock, check item lock, mediaInfo mediaUrl and albumCoverUrl");
     if (streamPlayer_ && streamPlayer_->Load(mediaInfo) == AVSESSION_SUCCESS) {
         SLOGI("Set media info and prepare successed");
         currentAVQueueItem_ = avQueueItem;
