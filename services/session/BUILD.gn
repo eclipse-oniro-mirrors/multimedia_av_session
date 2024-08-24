@@ -195,6 +195,10 @@ ohos_shared_library("avsession_service") {
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
+  if (use_libfuzzer || use_clang_coverage) {
+    defines += [ "TEST_COVERAGE" ]
+  }
+
   subsystem_name = "multimedia"
   part_name = "av_session"
 }
@@ -561,6 +565,10 @@ ohos_shared_library("avsession_item") {
 
   if (efficiency_manager_enable_in_avsession) {
     cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
+  }
+
+  if (use_libfuzzer || use_clang_coverage) {
+    defines += [ "TEST_COVERAGE" ]
   }
 
   subsystem_name = "multimedia"

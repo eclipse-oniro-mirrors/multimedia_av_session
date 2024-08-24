@@ -41,7 +41,9 @@ int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_saniti
     auto createRemoteSessionSourceImpl = (SourceImpl)(dlsym(handle_, "CreateRemoteSessionSourceImpl"));
     if (createRemoteSessionSourceImpl == nullptr) {
         if (handle_ != nullptr) {
+#ifndef TEST_COVERAGE
             dlclose(handle_);
+#endif
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s",
             "RemoteSessionSourceImpl", "libremote_session_source.z.so");
@@ -58,7 +60,9 @@ int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sani
     auto destroyRemoteSessionSourceImpl = (SourceImpl)(dlsym(handle_, "DestroyRemoteSessionSourceImpl"));
     if (destroyRemoteSessionSourceImpl == nullptr) {
         if (handle_ != nullptr) {
+#ifndef TEST_COVERAGE
             dlclose(handle_);
+#endif
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s",
             "DestroyRemoteSessionSourceImpl", "libremote_session_source.z.so");
@@ -66,7 +70,9 @@ int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sani
     }
     destroyRemoteSessionSourceImpl(sourceImpl_);
     if (handle_ != nullptr) {
+#ifndef TEST_COVERAGE
         dlclose(handle_);
+#endif
     }
     return AVSESSION_SUCCESS;
 }

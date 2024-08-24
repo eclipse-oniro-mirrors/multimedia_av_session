@@ -1958,7 +1958,9 @@ int32_t AVSessionItem::doContinuousTaskRegister()
     handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 1, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
+#ifndef TEST_COVERAGE
     dlclose(handle_);
+#endif
 #endif
     return AVSESSION_SUCCESS;
 }
@@ -1987,7 +1989,9 @@ int32_t AVSessionItem::doContinuousTaskUnregister()
     handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 2, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done when stop cast, result: %{public}d", errCode);
+#ifndef TEST_COVERAGE
     dlclose(handle_);
+#endif
 #endif
     return AVSESSION_SUCCESS;
 }
