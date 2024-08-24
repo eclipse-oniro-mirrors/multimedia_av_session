@@ -32,14 +32,16 @@ bool AVSessionStub::CheckInterfaceToken(MessageParcel& data)
 
 int32_t AVSessionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    if (code >= SESSION_CMD_GET_SESSION_ID && code < SESSION_CMD_MAX) {
+    if (code >= static_cast<uint32_t>(IAVSession::SESSION_CMD_GET_SESSION_ID)
+        && code < static_cast<uint32_t>(IAVSession::SESSION_CMD_MAX)) {
         SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
     }
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
     SLOGI("cmd code is %{public}d", code);
-    if (code >= SESSION_CMD_GET_SESSION_ID && code < SESSION_CMD_MAX) {
+    if (code >= static_cast<uint32_t>(IAVSession::SESSION_CMD_GET_SESSION_ID)
+        && code < static_cast<uint32_t>(IAVSession::SESSION_CMD_MAX)) {
         return handlers[code](data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
