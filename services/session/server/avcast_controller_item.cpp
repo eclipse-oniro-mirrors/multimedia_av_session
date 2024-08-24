@@ -42,6 +42,10 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
     castControllerProxy_ = castControllerProxy;
     castControllerProxy_->RegisterControllerListener(shared_from_this());
     validCommandsChangecallback_ = validCommandsChangecallback;
+    {
+        std::lock_guard<std::mutex> lock(callbackToSessionLock_);
+        isSessionCallbackAvailable_ = true;
+    }
 }
 
 void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
