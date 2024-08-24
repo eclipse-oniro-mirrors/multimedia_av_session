@@ -37,11 +37,15 @@ bool AVCastControllerStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVCastControllerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption &option)
 {
-    SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
+    if (code >= static_cast<uint32_t>(IAVCastController::CAST_CONTROLLER_CMD_SEND_CONTROL_COMMAND)
+        && code < static_cast<uint32_t>(IAVCastController::CAST_CONTROLLER_CMD_MAX)) {
+        SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
+    }
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code < CAST_CONTROLLER_CMD_MAX) {
+    if (code >= static_cast<uint32_t>(IAVCastController::CAST_CONTROLLER_CMD_SEND_CONTROL_COMMAND)
+        && code < static_cast<uint32_t>(IAVCastController::CAST_CONTROLLER_CMD_MAX)) {
         return handlers[code](data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

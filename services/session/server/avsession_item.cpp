@@ -997,6 +997,7 @@ int32_t AVSessionItem::ReleaseCast()
 
 int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo)
 {
+    SLOGI("enter CastAddToCollaboration");
     if (castDeviceInfoMap_.count(outputDeviceInfo.deviceInfos_[0].deviceId_) != 1) {
         SLOGE("deviceId map deviceinfo is not exit");
         return AVSESSION_ERROR;
@@ -1103,6 +1104,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
 
 void AVSessionItem::DealCollaborationPublishState(int32_t castState)
 {
+    SLOGI("enter DealCollaborationPublishState");
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
         if (networkIdIsEmpty) {
             //collaborationNeedNetworkId_ value equal to deviceId value when networkId is empty
@@ -1122,7 +1124,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState)
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
-        deviceInfo.deviceid_.c_str());
+        deviceInfo.deviceId_.c_str());
     DealCollaborationPublishState(castState);
     DealCastState(castState);
     if (castState == streamStateConnection && counter_ == secondStep) {
