@@ -158,8 +158,8 @@ public:
     }
 
 private:
-    static constexpr const char* CACHE_PATH_NAME = "/data/service/el1/public/av_session/cache/";
-    static constexpr const char* FIXED_PATH_NAME = "/data/service/el1/public/av_session/";
+    static constexpr const char* CACHE_PATH_NAME = "/data/service/el2/public/av_session/cache/";
+    static constexpr const char* FIXED_PATH_NAME = "/data/service/el2/public/av_session/";
     static constexpr const char* FILE_SUFFIX = ".image.dat";
 };
 } // namespace OHOS::AVSession
