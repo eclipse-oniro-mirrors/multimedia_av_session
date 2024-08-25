@@ -176,7 +176,9 @@ void AVSessionService::OnStop()
     } else {
         stopMigrateStub();
     }
+#ifndef TEST_COVERAGE
     dlclose(migrateStubFuncHandle_);
+#endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
 #endif
@@ -402,7 +404,9 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
     void *notifyProcessStatusFunc = dlsym(libMemMgrClientHandle, "notify_process_status");
     if (!notifyProcessStatusFunc) {
         SLOGE("dlsm notify_process_status failed");
+#ifndef TEST_COVERAGE
         dlclose(libMemMgrClientHandle);
+#endif
         return;
     }
     auto notifyProcessStatus = reinterpret_cast<int(*)(int, int, int, int)>(notifyProcessStatusFunc);
@@ -413,7 +417,9 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
         SLOGI("notify to memmgr when av_session is stopped");
         notifyProcessStatus(pid, saType, 0, AVSESSION_SERVICE_ID); // 0 indicates the service is stopped
     }
+#ifndef TEST_COVERAGE
     dlclose(libMemMgrClientHandle);
+#endif
 }
 
 void AVSessionService::InitKeyEvent()

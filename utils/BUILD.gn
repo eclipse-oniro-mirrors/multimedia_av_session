@@ -73,4 +73,7 @@ ohos_shared_library("avsession_utils") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "av_session"
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+  if (use_libfuzzer || use_clang_coverage) {
+    defines += [ "TEST_COVERAGE" ]
+  }
 }

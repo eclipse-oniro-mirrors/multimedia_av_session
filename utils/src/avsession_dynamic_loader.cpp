@@ -36,7 +36,9 @@ AVSessionDynamicLoader::~AVSessionDynamicLoader()
 {
     SLOGI("AVSessionDynamicLoader dtor");
     for (auto iterator = dynamicLibHandle_.begin(); iterator != dynamicLibHandle_.end(); ++iterator) {
+#ifndef TEST_COVERAGE
         dlclose(iterator->second);
+#endif
         SLOGI("close library avsession_dynamic success: %{public}s", iterator->first.c_str());
     }
 }
@@ -60,6 +62,8 @@ void* AVSessionDynamicLoader::OpenDynamicHandle(std::string dynamicLibrary)
             SLOGE("check avsession_dynamic path failed %{public}s", dynamicLibrary.c_str());
             return nullptr;
         }
+
+#ifndef TEST_COVERAGE
         void* dynamicLibHandle = dlopen(sourceLibraryRealPath, RTLD_NOW);
         if (dynamicLibHandle == nullptr) {
             SLOGE("Failed to open library avsession_dynamic, reason: %{public}sn", dlerror());
@@ -67,6 +71,9 @@ void* AVSessionDynamicLoader::OpenDynamicHandle(std::string dynamicLibrary)
         }
         SLOGI("open library %{public}s success", dynamicLibrary.c_str());
         dynamicLibHandle_[dynamicLibrary] = dynamicLibHandle;
+#else
+        SLOGI("in test coverage state, dlclose/dlopen may conflict with llvm");
+#endif
     }
     return dynamicLibHandle_[dynamicLibrary];
 }
@@ -96,7 +103,9 @@ void AVSessionDynamicLoader::CloseDynamicHandle(std::string dynamicLibrary)
     std::lock_guard loaderLock(libLock_);
     // if already opened, then close all
     if (dynamicLibHandle_[dynamicLibrary] != nullptr) {
+#ifndef TEST_COVERAGE
         dlclose(dynamicLibHandle_[dynamicLibrary]);
+#endif
         dynamicLibHandle_[dynamicLibrary] = nullptr;
         SLOGI("close library avsession_dynamic success: %{public}s", dynamicLibrary.c_str());
     }
