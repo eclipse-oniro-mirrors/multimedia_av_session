@@ -389,6 +389,7 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
+    std::string castHandleDeviceId_ = "-100";
     const int32_t streamStateConnection = 6;
     const int32_t virtualDeviceStateConnection = -6;
     const std::string deviceStateConnection = "CONNECT_SUCC";
