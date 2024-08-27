@@ -32,7 +32,7 @@ using namespace OHOS::AVSession;
 
 static constexpr int32_t MAX_CODE_TEST = 5;
 static constexpr int32_t MAX_CODE_LEN  = 512;
-static constexpr int32_t MIN_SIZE_NUM  = 4;
+static constexpr int32_t MIN_SIZE_NUM  = 8;
 
 class TestAVSessionCallback : public AVSessionCallback {
     void OnAVCallAnswer() override;
