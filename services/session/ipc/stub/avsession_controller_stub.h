@@ -157,6 +157,7 @@ private:
         {CONTROLLER_CMD_SET_AVCALL_STATE_FILTER, "HandleSetAVCallStateFilter"}
     };
     const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
+    std::recursive_mutex getMetadataLock_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_CONTROLLER_STUB_H
