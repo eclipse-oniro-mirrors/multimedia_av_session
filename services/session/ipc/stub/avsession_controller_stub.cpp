@@ -127,6 +127,7 @@ int32_t AVSessionControllerStub::HandleSendCommonCommand(MessageParcel& data, Me
 
 int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
+    std::lock_guard lockGuard(getMetadataLock_);
     AVMetaData metaData;
     int32_t ret = GetAVMetaData(metaData);
     std::string uri = metaData.GetMediaImageUri();
@@ -142,7 +143,7 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");
 
     int res = DoMetadataGetReplyInStub(metaData, reply);
-    SLOGI("ImgSetLoop DoMetadataGetReplyInStub with res %{public}d", res);
+    SLOGI("HandleGetAVMetaData DoMetadataGetReplyInStub with res %{public}d", res);
     metaData.SetMediaImageUri(uri);
     DoMetadataImgCleanInStub(metaData);
     return ERR_NONE;
