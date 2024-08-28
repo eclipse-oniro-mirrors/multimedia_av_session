@@ -65,6 +65,44 @@ common_external_deps = [
   "samgr:samgr_proxy",
 ]
 
+ohos_unittest("FocusSessionStrategyTest") {
+  module_out_path = module_output_path
+
+  sources = [ "focus_session_strategy_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("CollaborationManagerTest") {
+  module_out_path = module_output_path
+
+  sources = [ "collaboration_manager_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
 ohos_unittest("ParamsConfigOperatorTest") {
   module_out_path = module_output_path
 
@@ -895,7 +933,9 @@ group("av_session_server_unittest") {
     ":AudioAdapterTest",
     ":BkGrAudioControllerTest",
     ":BundleStatusAdapterTest",
+    ":CollaborationManagerTest",
     ":CommandSendLimitTest",
+    ":FocusSessionStrategyTest",
     ":MigrateAVSessionTest",
     ":ParamsConfigOperatorTest",
     ":PermissionCheckerTest",
