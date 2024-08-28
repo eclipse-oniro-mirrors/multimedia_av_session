@@ -386,6 +386,9 @@ export struct AVCastPicker {
           (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
           this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);        
         if (isExtMenuScene || isPanelForMedia) {
+          if (this.extensionProxy != null) {
+            this.extensionProxy.send({'clickEvent': ture});
+          }
           this.isMenuShow = false;
         } else {
           this.isMenuShow = !this.isMenuShow;
