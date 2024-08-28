@@ -326,6 +326,15 @@ void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
         SLOGE("on cast engine remove ability");
         isInCast_ = false;
     }
+    if (systemAbilityId == BLUETOOTH_HOST_SYS_ABILITY_ID) {
+#ifdef BLUETOOTH_ENABLE
+        SLOGI("on bluetooth remove ability");
+        bluetoothHost_ = &OHOS::Bluetooth::BluetoothHost::GetDefaultHost();
+        if (bluetoothHost_ != nullptr && bluetoothObserver != nullptr) {
+            bluetoothHost_->DeregisterObserver(bluetoothObserver);
+        }
+#endif
+    }
 }
 
 // LCOV_EXCL_START
