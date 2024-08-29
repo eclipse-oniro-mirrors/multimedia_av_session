@@ -207,40 +207,52 @@ void NapiAVCastControllerCallback::OnVideoSizeChange(const int32_t width, const 
     HandleEvent(EVENT_CAST_VIDEO_SIZE_CHANGE, width, height);
 }
 
-void NapiAVCastControllerCallback::HandlePlayerErrorAPI12(const int32_t errorCode, const std::string& errorMsg)
+void NapiAVCastControllerCallback::HandlePlayerErrorAPI13(const int32_t errorCode, const std::string& errorMsg)
 {
     CastExtErrCodeAPI12 jsErr;
     if (CAST_GENERIC_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI12.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // Generic error
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI12.at(static_cast<CastErrCode>(errorCode));
+        SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
+        HandleErrorEvent(EVENT_CAST_GENERIC_ERR, static_cast<int32_t>(jsErr), errorMsg);
     } else if (CAST_IO_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI12.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // Input/Output errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI12.at(static_cast<CastErrCode>(errorCode));
+        SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
+        HandleErrorEvent(EVENT_CAST_IO_ERR, static_cast<int32_t>(jsErr), errorMsg);
     } else if (CAST_PARSING_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI12.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // Content parsing errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI12.at(static_cast<CastErrCode>(errorCode));
+        SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
+        HandleErrorEvent(EVENT_CAST_PARSING_ERR, static_cast<int32_t>(jsErr), errorMsg);
     } else if (CAST_DECODE_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI12.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // Decoding errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI12.at(static_cast<CastErrCode>(errorCode));
+        SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
+        HandleErrorEvent(EVENT_CAST_DECOD_EERR, static_cast<int32_t>(jsErr), errorMsg);
     } else if (CAST_RENDER_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI12.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // AudioRender errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI12.at(static_cast<CastErrCode>(errorCode));
+        SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
+        HandleErrorEvent(EVENT_CAST_RENDER_ERR, static_cast<int32_t>(jsErr), errorMsg);
     } else if (CAST_DRM_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI12.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // DRM errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI12.at(static_cast<CastErrCode>(errorCode));
+        SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
+        HandleErrorEvent(EVENT_CAST_DRM_ERR, static_cast<int32_t>(jsErr), errorMsg);
     } else {
         SLOGW("Can not match error code, use default");
         // If error not in map, need add error and should not return default ERROR_CODE_UNSPECIFIED.
         jsErr = ERROR_CODE_UNSPECIFIED;
+        SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
+        HandleErrorEvent(EVENT_CAST_GENERIC_ERR, static_cast<int32_t>(jsErr), errorMsg);
     }
-    SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
-    HandleErrorEvent(EVENT_CAST_ERROR, static_cast<int32_t>(jsErr), errorMsg);
 }
 
 void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
@@ -261,7 +273,7 @@ void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const 
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
         HandleErrorEvent(EVENT_CAST_ERROR, static_cast<int32_t>(jsErr), errorMsg);
     } else {
-        HandlePlayerErrorAPI12(errorCode, errorMsg);
+        HandlePlayerErrorAPI13(errorCode, errorMsg);
     }
 }
 
