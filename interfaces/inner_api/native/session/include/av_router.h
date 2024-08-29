@@ -55,6 +55,24 @@ public:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
+     * Transmission fd
+     *
+     * @param fd file descriptor
+     * @param maxSize file max size
+     * @return Returns whether the fd was transport successfully
+     * @since 13
+    */
+    virtual int32_t StartDeviceLoggig(int32_t fd, uint32_t maxSize) = 0;
+
+    /**
+     * Stop transmission fd
+     *
+     * @return Returns whether stop transport successfully
+     * @since 13
+    */
+    virtual int32_t StopDeviceLoggig() = 0;
+
+    /**
      * @brief Starting to discover devices.
      *
      * @param { int32_t } castDeviceCapability - The type of device want to discover.

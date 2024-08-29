@@ -329,6 +329,20 @@ int32_t AVSessionManagerImpl::SetDiscoverable(const bool enable)
     return service ? service->SetDiscoverable(enable) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::StartDeviceLoggig(int32_t fd, uint32_t maxSize)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartDeviceLoggig");
+    auto service = GetService();
+    return service ? service->StartDeviceLoggig(fd, maxSize) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::StopDeviceLoggig()
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StopDeviceLoggig");
+    auto service = GetService();
+    return service ? service->StopDeviceLoggig() : ERR_SERVICE_NOT_EXIST;
+}
+
 int32_t AVSessionManagerImpl::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartCast");

@@ -47,6 +47,8 @@ private:
     static napi_value StartCastDiscovery(napi_env env, napi_callback_info info);
     static napi_value StopCastDiscovery(napi_env env, napi_callback_info info);
     static napi_value SetDiscoverable(napi_env env, napi_callback_info info);
+    static napi_value StartDeviceLoggig(napi_env env, napi_callback_info info);
+    static napi_value StopDeviceLoggig(napi_env env, napi_callback_info info);
     static napi_value StartCast(napi_env env, napi_callback_info info);
     static napi_value StopCast(napi_env env, napi_callback_info info);
 

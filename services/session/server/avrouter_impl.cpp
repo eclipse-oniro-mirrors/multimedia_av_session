@@ -93,6 +93,40 @@ bool AVRouterImpl::Release()
     return false;
 }
 
+int32_t AVRouterImpl::StartDeviceLoggig(int32_t fd, uint32_t maxSize)
+{
+    SLOGI("AVRouterImpl StartDeviceLoggig");
+    std::lock_guard lockGuard(providerManagerLock_);
+
+    if (providerManagerMap_.empty()) {
+        cacheStartDeviceLogging_ = true;
+        return AVSESSION_SUCCESS;
+    }
+    for (const auto& [number, providerManager] : providerManagerMap_) {
+        CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
+            AVSESSION_ERROR, "provider is nullptr");
+        providerManager->provider_->StartDeviceLoggig(fd, maxSize);
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVRouterImpl::StopDeviceLoggig()
+{
+    SLOGI("AVRouterImpl StopDeviceLoggig");
+    std::lock_guard lockGuard(providerManagerLock_);
+
+    if (cacheStartDeviceLogging_) {
+        SLOGI("clear cacheStartDeviceLogging_ when stop discovery");
+        cacheStartDeviceLogging_ = false;
+    }
+    for (const auto& [number, providerManager] : providerManagerMap_) {
+        CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
+            AVSESSION_ERROR, "provider is nullptr");
+        providerManager->provider_->StopDeviceLoggig();
+    }
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("AVRouterImpl StartCastDiscovery");

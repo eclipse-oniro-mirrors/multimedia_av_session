@@ -45,6 +45,8 @@ private:
     int32_t HandleRemoteCastAudio(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStartCastDiscovery(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStopCastDiscovery(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStartDeviceLoggig(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStopDeviceLoggig(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSetDiscoverable(MessageParcel& data, MessageParcel& reply);
     int32_t CheckBeforeHandleStartCast(MessageParcel& data, OutputDeviceInfo& outputDeviceInfo);
     int32_t HandleStartCast(MessageParcel& data, MessageParcel& reply);
@@ -91,6 +93,10 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleCastAudioForAll(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_COMMAND_TO_REMOTE),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleRemoteCastAudio(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_DEVICE_LOGGING),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStartDeviceLoggig(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_DEVICE_LOGGING),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStopDeviceLoggig(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST_DISCOVERY),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleStartCastDiscovery(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST_DISCOVERY),
@@ -135,6 +141,10 @@ private:
             "HandleCastAudioForAll"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_COMMAND_TO_REMOTE),
             "HandleRemoteCastAudio"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_DEVICE_LOGGING),
+            "HandleStartDeviceLoggig"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_DEVICE_LOGGING),
+            "HandleStopDeviceLoggig"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST_DISCOVERY),
             "HandleStartCastDiscovery"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST_DISCOVERY),
@@ -148,8 +158,6 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
             "HandleClose"}
     };
-
-    static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_STUB_H

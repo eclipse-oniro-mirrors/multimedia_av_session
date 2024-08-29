@@ -40,6 +40,18 @@ void HwCastProvider::Init()
     CastSessionManager::GetInstance().RegisterListener(shared_from_this());
 }
 
+bool HwCastProvider::StartDeviceLoggig(int32_t fd, uint32_t maxSize)
+{
+    SLOGI("start StartDeviceLoggig, fd is %{public}d and maxSize is %{public}d", fd, maxSize);
+    return CastSessionManager::GetInstance().StartDeviceLoggig(fd, maxSize);
+}
+
+bool HwCastProvider::StopDeviceLoggig()
+{
+    SLOGI("StopDeviceLoggig");
+    return CastSessionManager::GetInstance().StartDeviceLoggig(-1, 0);
+}
+
 bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
