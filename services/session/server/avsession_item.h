@@ -35,6 +35,7 @@
 
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
+#include "hw_cast_display_listener.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -74,6 +75,8 @@ public:
     void DealCastState(int32_t castState);
 
     void DealDisconnect(DeviceInfo deviceInfo);
+
+    void DealCollaborationPublishState(int32_t castState);
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
@@ -283,8 +286,8 @@ private:
     void ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo);
     void ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo);
     void SaveLocalDeviceInfo();
-    __attribute__((no_sanitize("cfi"))) int32_t ProcessFrontSession(const std::string& source);
-    __attribute__((no_sanitize("cfi"))) void HandleFrontSession();
+    int32_t ProcessFrontSession(const std::string& source);
+    void HandleFrontSession();
     int32_t doContinuousTaskRegister();
     int32_t doContinuousTaskUnregister();
     AVSessionDisplayIntf* GetAVSessionDisplayIntf();
@@ -386,6 +389,7 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
+    std::string castHandleDeviceId_ = "-100";
     const int32_t streamStateConnection = 6;
     const int32_t virtualDeviceStateConnection = -6;
     const std::string deviceStateConnection = "CONNECT_SUCC";
@@ -399,10 +403,11 @@ private:
 
     bool collaborationRejectFlag_ = false;
     bool applyResultFlag_ = false;
+    bool networkIdIsEmpty = false;
     std::string collaborationNeedNetworkId_;
     std::mutex collaborationApplyResultMutex_;
     std::condition_variable connectWaitCallbackCond_;
-    const int32_t collaborationCallbackTimeOut_ = 10;
+    const int32_t collaborationCallbackTimeOut_ = 30;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
@@ -410,6 +415,8 @@ private:
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
+    sptr<HwCastDisplayListener> displayListener_;
+    std::recursive_mutex displayListenerLock_;
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;

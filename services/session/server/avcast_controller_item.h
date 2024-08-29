@@ -100,6 +100,8 @@ private:
     int32_t removeCmdStep_ = 1000;
     int32_t currentState_ = AVPlaybackState::PLAYBACK_STATE_INITIAL;
     std::string sessionTag_;
+    bool isSessionCallbackAvailable_;
+    std::mutex callbackToSessionLock_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_ITEM_H

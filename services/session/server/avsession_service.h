@@ -258,7 +258,8 @@ private:
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
     void NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction);
 
-    void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
+    void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
+        const sptr<ClientDeathRecipient> recipient);
     void RemoveClientDeathObserver(pid_t pid);
 
     void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener);
@@ -425,6 +426,7 @@ private:
 
     std::recursive_mutex clientDeathObserversLock_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
+    std::map<pid_t, sptr<ClientDeathRecipient>> clientDeathRecipients_;
 
     std::recursive_mutex sessionListenersLock_;
     std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
@@ -486,7 +488,7 @@ private:
     static constexpr const int32_t SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER = 2;
     static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
 
-    const std::string AVSESSION_FILE_DIR = "/data/service/el1/public/av_session/";
+    const std::string AVSESSION_FILE_DIR = "/data/service/el2/public/av_session/";
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";
 
@@ -507,7 +509,7 @@ private:
     const int32_t CLICK_TIMEOUT = 500;
     const int32_t defMaxHistoryNum = 10;
     const int32_t maxFileLength = 32 * 1024 * 1024;
-    const int32_t maxAVQueueInfoLen = 5;
+    const int32_t maxAVQueueInfoLen = 99;
     const int32_t allocSpace = 2;
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;

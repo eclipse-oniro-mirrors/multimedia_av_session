@@ -415,8 +415,7 @@ napi_value NapiAVSession::SetAVCallState(napi_env env, napi_callback_info info)
 
 int32_t DoDownload(AVMetaData& meta, const std::string uri)
 {
-    SLOGI("DoDownload with uri %{public}s, title %{public}s, assetid %{public}s",
-        uri.c_str(), meta.GetTitle().c_str(), meta.GetAssetId().c_str());
+    SLOGI("DoDownload with title %{public}s", meta.GetTitle().c_str());
 
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);
@@ -483,8 +482,8 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info, inputParser);
 
     auto* napiAvSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiAvSession != nullptr && napiAvSession->metaData_.EqualWithUri((context->metaData))) {
-        SLOGI("metadata with uri is the same as last time");
+    if (napiAvSession == nullptr || napiAvSession->metaData_.EqualWithUri((context->metaData))) {
+        SLOGI("napiAvSession is nullptr or metadata with uri is the same as last time");
         auto executor = []() {};
         auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
         return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
@@ -1050,7 +1049,8 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
     }
 
     context->GetCbInfo(env, info);
-
+    
+    SLOGI("Destroy session begin");
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {

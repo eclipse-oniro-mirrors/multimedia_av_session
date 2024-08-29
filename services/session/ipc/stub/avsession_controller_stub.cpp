@@ -34,11 +34,15 @@ bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVSessionControllerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption &option)
 {
-    SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
+    if (code >= static_cast<uint32_t>(IAVSessionController::CONTROLLER_CMD_REGISTER_CALLBACK)
+        && code < static_cast<uint32_t>(IAVSessionController::CONTROLLER_CMD_MAX)) {
+        SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
+    }
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    if (code < CONTROLLER_CMD_MAX) {
+    if (code >= static_cast<uint32_t>(IAVSessionController::CONTROLLER_CMD_REGISTER_CALLBACK)
+        && code < static_cast<uint32_t>(IAVSessionController::CONTROLLER_CMD_MAX)) {
         return handlers[code](data, reply);
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -123,6 +127,7 @@ int32_t AVSessionControllerStub::HandleSendCommonCommand(MessageParcel& data, Me
 
 int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
+    std::lock_guard lockGuard(getMetadataLock_);
     AVMetaData metaData;
     int32_t ret = GetAVMetaData(metaData);
     std::string uri = metaData.GetMediaImageUri();
@@ -138,7 +143,7 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");
 
     int res = DoMetadataGetReplyInStub(metaData, reply);
-    SLOGI("ImgSetLoop DoMetadataGetReplyInStub with res %{public}d", res);
+    SLOGI("HandleGetAVMetaData DoMetadataGetReplyInStub with res %{public}d", res);
     metaData.SetMediaImageUri(uri);
     DoMetadataImgCleanInStub(metaData);
     return ERR_NONE;

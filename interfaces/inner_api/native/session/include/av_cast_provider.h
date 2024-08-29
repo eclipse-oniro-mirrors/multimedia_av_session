@@ -179,6 +179,17 @@ public:
      * @since 11
     */
     virtual int GetMirrorCastId() = 0;
+
+    /**
+     * @brief get remote networkId.
+     *
+     * @param { int32_t } castHandle const - The ID corresponding to the castprovider.
+     * @param { string } cast deviceId - The deviceId give cast+ to get remote networkId.
+     * @param { string } cast networkId - The networkId to transmit remote networkId.
+     * @return { bool } Whether the operation was successful.
+     * @since 11
+    */
+    virtual bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) = 0;
 };
 } // namespace OHOS::AVSession
 #endif

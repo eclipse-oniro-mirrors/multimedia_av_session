@@ -27,6 +27,8 @@ public:
     ~AvControllerCallbackClientFuzzer() = default;
     void FuzzOnRemoteRequest(const uint8_t* data, size_t size);
     void FuzzTests(const uint8_t* data, size_t size);
+    void FuzzTestInner1(const uint8_t* data, size_t size);
+    void FuzzTestInner2(const uint8_t* data, size_t size);
 };
 }
 #endif

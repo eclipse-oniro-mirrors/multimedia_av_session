@@ -41,7 +41,9 @@ int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("
     auto createRemoteSessionSinkImpl = (SinkImpl)(dlsym(handle_, "CreateRemoteSessionSinkImpl"));
     if (createRemoteSessionSinkImpl == nullptr) {
         if (handle_ != nullptr) {
+#ifndef TEST_COVERAGE
             dlclose(handle_);
+#endif
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s",
             "RemoteSessionSinkImpl", "libremote_session_sink.z.so");
@@ -58,7 +60,9 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
     auto destroyRemoteSessionSinkImpl = (SinkImpl)(dlsym(handle_, "DestroyRemoteSessionSinkImpl"));
     if (destroyRemoteSessionSinkImpl == nullptr) {
         if (handle_ != nullptr) {
+#ifndef TEST_COVERAGE
             dlclose(handle_);
+#endif
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s", "DestroyRemoteSessionSinkImpl",
               "libremote_session_sink.z.so");
@@ -67,7 +71,9 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
     destroyRemoteSessionSinkImpl(sinkImpl_);
 
     if (handle_ != nullptr) {
+#ifndef TEST_COVERAGE
         dlclose(handle_);
+#endif
     }
     return AVSESSION_SUCCESS;
 }

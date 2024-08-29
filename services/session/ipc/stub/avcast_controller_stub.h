@@ -102,7 +102,7 @@ private:
         {CAST_CONTROLLER_CMD_GET_VALID_COMMANDS, "HandleGetValidCommands"},
         {CAST_CONTROLLER_CMD_SET_DISPLAY_SURFACE, "HandleSetDisplaySurface"},
         {CAST_CONTROLLER_CMD_SET_CAST_PLAYBACK_FILTER, "HandleSetCastPlaybackFilter"},
-        {CAST_CONTROLLER_CMD_PROVIDE_KEY_RESPONSE, "HandleProvideKeyResponse"},
+        {CAST_CONTROLLER_CMD_PROVIDE_KEY_RESPONSE, "HandleProcessMediaKeyResponse"},
         {CAST_CONTROLLER_CMD_REGISTER_CALLBACK, "HandleRegisterCallbackInner"},
         {CAST_CONTROLLER_CMD_DESTROY, "HandleDestroy"},
         {CAST_CONTROLLER_CMD_ADD_AVAILABLE_COMMAND, "HandleAddAvailableCommand"},

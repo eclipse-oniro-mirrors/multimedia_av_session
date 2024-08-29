@@ -87,7 +87,7 @@ bool NapiUtils::CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, cons
 
 bool NapiUtils::DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri)
 {
-    SLOGI("DoDownloadInCommon with uri %{public}s", uri.c_str());
+    SLOGI("DoDownloadInCommon with uri");
 
     std::vector<std::uint8_t> imgBuffer(0);
     if (CurlSetRequestOptions(imgBuffer, uri) == true) {

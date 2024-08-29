@@ -42,6 +42,10 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
     castControllerProxy_ = castControllerProxy;
     castControllerProxy_->RegisterControllerListener(shared_from_this());
     validCommandsChangecallback_ = validCommandsChangecallback;
+    {
+        std::lock_guard<std::mutex> lock(callbackToSessionLock_);
+        isSessionCallbackAvailable_ = true;
+    }
 }
 
 void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
@@ -297,7 +301,10 @@ int32_t AVCastControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
         SLOGI("get available commands from cast with size %{public}zd", cmds.size());
         return AVSESSION_SUCCESS;
     }
-
+    {
+        std::lock_guard<std::mutex> lock(callbackToSessionLock_);
+        CHECK_AND_RETURN_RET_LOG(isSessionCallbackAvailable_, AVSESSION_ERROR, "sessionCallback not available");
+    }
     validCommandsChangecallback_(AVCastControlCommand::CAST_CONTROL_CMD_MAX, cmds);
     SLOGI("get available command with size %{public}zd", cmds.size());
     return AVSESSION_SUCCESS;
@@ -332,8 +339,13 @@ int32_t AVCastControllerItem::ProcessMediaKeyResponse(const std::string &assetId
 
 int32_t AVCastControllerItem::AddAvailableCommand(const int32_t cmd)
 {
-    SLOGI("add available command %{public}d", cmd);
+    SLOGI("add available command %{public}d with isSessionCallbackAvailable check %{public}d",
+        cmd, static_cast<int>(isSessionCallbackAvailable_));
     std::vector<int32_t> cmds(AVCastControlCommand::CAST_CONTROL_CMD_MAX);
+    {
+        std::lock_guard<std::mutex> lock(callbackToSessionLock_);
+        CHECK_AND_RETURN_RET_LOG(isSessionCallbackAvailable_, AVSESSION_ERROR, "sessionCallback not available");
+    }
     validCommandsChangecallback_(cmd, cmds);
     SLOGI("add available command with size %{public}d", static_cast<int32_t>(cmds.size()));
     if (cmds.empty()) {
@@ -358,6 +370,10 @@ int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
 {
     SLOGI("remove available command %{public}d", cmd);
     std::vector<int32_t> cmds(AVCastControlCommand::CAST_CONTROL_CMD_MAX);
+    {
+        std::lock_guard<std::mutex> lock(callbackToSessionLock_);
+        CHECK_AND_RETURN_RET_LOG(isSessionCallbackAvailable_, AVSESSION_ERROR, "sessionCallback not available");
+    }
     validCommandsChangecallback_(cmd + removeCmdStep_, cmds);
     SLOGI("remove available command with size %{public}d", static_cast<int32_t>(cmds.size()));
     if (cmds.empty()) {
@@ -410,13 +426,19 @@ int32_t AVCastControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& c
 
 int32_t AVCastControllerItem::Destroy()
 {
-    SLOGI("Start cast controller destroy process");
+    SLOGI("Start cast controller destroy process with sessionCallback available set");
     if (castControllerProxy_) {
         castControllerProxy_ = nullptr;
     }
-    std::lock_guard lockGuard(itemCallbackLock_);
-    if (callback_) {
-        callback_ = nullptr;
+    {
+        std::lock_guard lockGuard(itemCallbackLock_);
+        if (callback_) {
+            callback_ = nullptr;
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(callbackToSessionLock_);
+        isSessionCallbackAvailable_ = false;
     }
     return AVSESSION_SUCCESS;
 }

@@ -124,10 +124,6 @@ void AVSessionService::OnStart()
     if (ret == AVSESSION_ERROR) {
         maxHistoryNums = defMaxHistoryNum;
     }
-    if (!system::GetBoolParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), false)) {
-        system::SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
-        SLOGI("set boot avsession service started true");
-    }
 
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
     backgroundAudioController_.Init(this);
@@ -161,6 +157,10 @@ void AVSessionService::OnStart()
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
+    if (!system::GetBoolParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), false)) {
+        system::SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
+        SLOGI("set boot avsession service started true");
+    }
 }
 
 void AVSessionService::OnDump()
@@ -176,7 +176,9 @@ void AVSessionService::OnStop()
     } else {
         stopMigrateStub();
     }
+#ifndef TEST_COVERAGE
     dlclose(migrateStubFuncHandle_);
+#endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
 #endif
@@ -324,6 +326,15 @@ void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
         SLOGE("on cast engine remove ability");
         isInCast_ = false;
     }
+    if (systemAbilityId == BLUETOOTH_HOST_SYS_ABILITY_ID) {
+#ifdef BLUETOOTH_ENABLE
+        SLOGI("on bluetooth remove ability");
+        bluetoothHost_ = &OHOS::Bluetooth::BluetoothHost::GetDefaultHost();
+        if (bluetoothHost_ != nullptr && bluetoothObserver != nullptr) {
+            bluetoothHost_->DeregisterObserver(bluetoothObserver);
+        }
+#endif
+    }
 }
 
 // LCOV_EXCL_START
@@ -402,7 +413,9 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
     void *notifyProcessStatusFunc = dlsym(libMemMgrClientHandle, "notify_process_status");
     if (!notifyProcessStatusFunc) {
         SLOGE("dlsm notify_process_status failed");
+#ifndef TEST_COVERAGE
         dlclose(libMemMgrClientHandle);
+#endif
         return;
     }
     auto notifyProcessStatus = reinterpret_cast<int(*)(int, int, int, int)>(notifyProcessStatusFunc);
@@ -413,7 +426,9 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
         SLOGI("notify to memmgr when av_session is stopped");
         notifyProcessStatus(pid, saType, 0, AVSESSION_SERVICE_ID); // 0 indicates the service is stopped
     }
+#ifndef TEST_COVERAGE
     dlclose(libMemMgrClientHandle);
+#endif
 }
 
 void AVSessionService::InitKeyEvent()
@@ -801,6 +816,7 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
+        SLOGI("notify top session change to pid %{public}d", static_cast<int>(pid));
         listener->OnTopSessionChange(descriptor);
     }
 }
@@ -1295,7 +1311,9 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
     for (const auto& desc: descriptors) {
         SLOGD("desc=%{public}s", desc.elementName_.GetBundleName().c_str());
     }
-    SLOGI("GetAllSessionDescriptors with size=%{public}d", static_cast<int32_t>(descriptors.size()));
+    SLOGI("GetAllSessionDescriptors with size=%{public}d, topSession:%{public}s",
+        static_cast<int32_t>(descriptors.size()),
+        (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
     return AVSESSION_SUCCESS;
 }
 
@@ -1347,13 +1365,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
         descriptors.push_back(descriptor);
     }
     if (descriptors.size() == 0 && GetContainer().GetAllSessions().size() == 0) {
-        SLOGE("GetHistoricalSessionDescriptorsFromFile read empty, return default!");
-        AVSessionDescriptor descriptor;
-        descriptor.sessionId_ = DEFAULT_SESSION_ID;
-        descriptor.elementName_.SetBundleName(DEFAULT_BUNDLE_NAME);
-        descriptor.elementName_.SetAbilityName(DEFAULT_ABILITY_NAME);
-        descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
-        descriptors.push_back(descriptor);
+        SLOGE("GetHistoricalSessionDescriptorsFromFile read empty, return!");
     }
     return AVSESSION_SUCCESS;
 }
@@ -1906,10 +1918,12 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer)
+void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
+    const sptr<ClientDeathRecipient> recipient)
 {
     std::lock_guard lockGuard(clientDeathObserversLock_);
     clientDeathObservers_[pid] = observer;
+    clientDeathRecipients_[pid] = recipient;
 }
 
 void AVSessionService::RemoveClientDeathObserver(pid_t pid)
@@ -1917,16 +1931,24 @@ void AVSessionService::RemoveClientDeathObserver(pid_t pid)
     std::lock_guard lockGuard(clientDeathObserversLock_);
     if (clientDeathObservers_.empty()) {
         SLOGE("try remove observer with empty list");
-        return;
+    } else {
+        clientDeathObservers_.erase(pid);
     }
-    clientDeathObservers_.erase(pid);
+
+    if (clientDeathRecipients_.empty()) {
+        SLOGE("try remove recipient with empty list");
+    } else {
+        clientDeathRecipients_.erase(pid);
+    }
+    SLOGI("do RemoveClientDeathObserver for pid %{public}d done", static_cast<int>(pid));
 }
 
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
-    SLOGI("enter ClientDeathObserver register");
+    SLOGI("enter ClientDeathObserver register with recipient point");
     auto pid = GetCallingPid();
-    auto* recipient = new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
+    sptr<ClientDeathRecipient> recipient =
+        new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
         SLOGE("malloc failed");
         HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "RGS_CLIENT_DEATH_OBSERVER_FAILED",
@@ -1941,7 +1963,7 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
         return AVSESSION_ERROR;
     }
 
-    AddClientDeathObserver(pid, observer);
+    AddClientDeathObserver(pid, observer, recipient);
     return AVSESSION_SUCCESS;
 }
 
