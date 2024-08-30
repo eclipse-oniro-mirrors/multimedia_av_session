@@ -1618,6 +1618,7 @@ void AVSessionItem::HandleOnPause(const AVControlCommand& cmd)
 void AVSessionItem::HandleOnPlayOrPause(const AVControlCommand& cmd)
 {
     std::lock_guard lockGuard(metaDataLock_);
+    SLOGI("check current playstate : %{public}d", playbackState_.GetState());
     if (playbackState_.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         HandleOnPause(cmd);
     } else {

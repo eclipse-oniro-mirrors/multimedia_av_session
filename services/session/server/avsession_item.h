@@ -331,6 +331,8 @@ private:
     };
 
     std::map<int32_t, HandlerFuncType> keyEventCaller_ = {
+        {MMI::KeyEvent::KEYCODE_MEDIA_PLAY, [this](const AVControlCommand& cmd) { HandleOnPlay(cmd); }},
+        {MMI::KeyEvent::KEYCODE_MEDIA_PAUSE, [this](const AVControlCommand& cmd) { HandleOnPause(cmd); }},
         {MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE, [this](const AVControlCommand& cmd) { HandleOnPlayOrPause(cmd); }},
         {MMI::KeyEvent::KEYCODE_MEDIA_STOP, [this](const AVControlCommand& cmd) { HandleOnPause(cmd); }},
         {MMI::KeyEvent::KEYCODE_MEDIA_NEXT, [this](const AVControlCommand& cmd) { HandleOnPlayNext(cmd); }},
