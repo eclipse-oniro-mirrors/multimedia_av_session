@@ -52,11 +52,16 @@
             "pages/index/index"
           ],
           "name": "default",
-            "window": {
-              "designWidth": 720,
-              "autoDesignWidth": false
-            }
+          "window": {
+            "designWidth": 720,
+            "autoDesignWidth": false
           }
-        ]
-      }
+        }
+      ],
+      "reqPermissions": [
+        {
+          "name": "ohos.permission.MANAGE_MEDIA_RESOURCES"
+        }
+      ]
     }
+}
