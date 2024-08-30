@@ -435,6 +435,8 @@ void AVSessionService::InitKeyEvent()
 {
     SLOGI("enter");
     std::vector<int32_t> keyCodes = {
+        MMI::KeyEvent::KEYCODE_MEDIA_PLAY,
+        MMI::KeyEvent::KEYCODE_MEDIA_PAUSE,
         MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE,
         MMI::KeyEvent::KEYCODE_MEDIA_STOP,
         MMI::KeyEvent::KEYCODE_MEDIA_NEXT,
