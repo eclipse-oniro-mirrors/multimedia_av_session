@@ -639,7 +639,7 @@ void AVControllerObserver::OnSessionDestroy()
 void AVControllerObserver::OnPlaybackStateChange(const AVPlaybackState &state)
 {
     std::shared_ptr<MigrateAVSessionServer> server = migrateServer_.lock();
-    if (server != nullptr) {
+    if (server != nullptr && state.GetState() != AVPlaybackState::PLAYBACK_STATE_INITIAL) {
         server->OnPlaybackStateChanged(playerId_, state);
     }
 }
