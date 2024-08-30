@@ -86,14 +86,14 @@ static HWTEST(AudioAdapterTest, OnRendererStateChange001, TestSize.Level1)
 }
 
 /**
-* @tc.name: PauseAudioStream002
-* @tc.desc: pause audio stream for valid uid TEST_CLIENT_UID
+* @tc.name: MuteAudioStream001
+* @tc.desc: mute audio stream for valid uid TEST_CLIENT_UID
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level1)
 {
-    SLOGI("PauseAudioStream001 begin!");
+    SLOGI("MuteAudioStream001 begin!");
     std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
     info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
     info->sessionId = AudioAdapterTest::TEST_SESSION_ID;
@@ -112,7 +112,37 @@ static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level1)
         }
         SLOGI("AddStreamRendererStateListener end!");
     });
-    auto ret = AudioAdapter::GetInstance().PauseAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    auto ret = AudioAdapter::GetInstance().MuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
     EXPECT_NE(ret, AVSESSION_ERROR_BASE);
-    SLOGI("PauseAudioStream001 end!");
+}
+
+/**
+* @tc.name: UnMuteAudioStream001
+* @tc.desc: unmute audio stream for valid uid TEST_CLIENT_UID
+* @tc.type: FUNC
+* @tc.require: AR000H31KJ
+*/
+static HWTEST(AudioAdapterTest, UnMuteAudioStream001, TestSize.Level1)
+{
+    SLOGI("UnMuteAudioStream001 begin!");
+    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->sessionId = AudioAdapterTest::TEST_SESSION_ID;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    AudioRendererChangeInfos infosExpected;
+    infosExpected.push_back(std::move(info));
+    AudioRendererChangeInfos infosActual;
+
+    AudioAdapter::GetInstance().Init();
+    AudioAdapter::GetInstance().AddStreamRendererStateListener([&infosActual](const AudioRendererChangeInfos& infos) {
+        SLOGI("AddStreamRendererStateListener start!");
+        for (const auto& info : infos) {
+            std::unique_ptr<AudioRendererChangeInfo> infoActual = std::make_unique<AudioRendererChangeInfo>();
+            *infoActual = *info;
+            infosActual.push_back(std::move(infoActual));
+        }
+        SLOGI("AddStreamRendererStateListener end!");
+    });
+    auto ret = AudioAdapter::GetInstance().UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    EXPECT_NE(ret, AVSESSION_ERROR_BASE);
 }

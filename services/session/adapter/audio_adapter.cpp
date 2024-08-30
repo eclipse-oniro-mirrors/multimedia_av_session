@@ -64,7 +64,7 @@ void AudioAdapter::AddDeviceChangeListener(const DeviceChangeListener& listener)
     deviceChangeListeners_.push_back(listener);
 }
 
-int32_t AudioAdapter::PauseAudioStream(int32_t uid)
+int32_t AudioAdapter::MuteAudioStream(int32_t uid)
 {
     std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
     auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
@@ -73,13 +73,36 @@ int32_t AudioAdapter::PauseAudioStream(int32_t uid)
         return AVSESSION_ERROR;
     }
     for (const auto& info : audioRendererChangeInfo) {
-        if (info->clientUID == uid and info->rendererState == AudioStandard::RENDERER_RUNNING) {
+        if (info->clientUID == uid) {
             SLOGI("find uid=%{public}d stream usage %{public}d renderer state is %{public}d",
                 uid, info->rendererInfo.streamUsage, info->rendererState);
             auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
-                uid, AudioStandard::StreamSetState::STREAM_PAUSE, info->rendererInfo.streamUsage);
+                uid, AudioStandard::StreamSetState::STREAM_MUTE, info->rendererInfo.streamUsage);
             if (ret != 0) {
-                SLOGE("pause uid=%{public}d failed", uid);
+                SLOGE("mute uid=%{public}d failed", uid);
+                return AVSESSION_ERROR;
+            }
+        }
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
+{
+    std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    if (ret != 0) {
+        SLOGE("get renderer state failed");
+        return AVSESSION_ERROR;
+    }
+    for (const auto& info : audioRendererChangeInfo) {
+        if (info->clientUID == uid) {
+            SLOGI("find uid=%{public}d stream usage %{public}d renderer state is %{public}d",
+                uid, info->rendererInfo.streamUsage, info->rendererState);
+            auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
+                uid, AudioStandard::StreamSetState::STREAM_UNMUTE, info->rendererInfo.streamUsage);
+            if (ret != 0) {
+                SLOGE("mute uid=%{public}d failed", uid);
                 return AVSESSION_ERROR;
             }
         }

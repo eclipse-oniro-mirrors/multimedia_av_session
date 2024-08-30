@@ -43,7 +43,7 @@ public:
     void Init(AVSessionService *ptr);
 
     void HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos);
-    void HandleAppBackgroundState(int32_t uid, int32_t pid);
+    void HandleAppMuteState(int32_t uid, int32_t pid, bool isBackground);
 
 private:
     bool HasAVSession(int32_t uid);

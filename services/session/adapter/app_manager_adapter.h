@@ -33,7 +33,7 @@ public:
 
     bool IsAppBackground(int32_t uid, int32_t pid);
 
-    void SetAppBackgroundStateObserver(const std::function<void(int32_t, int32_t)>& observer);
+    void SetAppStateChangeObserver(const std::function<void(int32_t, int32_t, bool)>& observer);
 
     void AddObservedApp(int32_t uid);
 
@@ -48,7 +48,7 @@ private:
 
     AppExecFwk::AppMgrClient appManager_;
     sptr<AppExecFwk::IAppStateCallback> appStateCallback_;
-    std::function<void(int32_t, int32_t)> backgroundObserver_;
+    std::function<void(int32_t, int32_t, bool)> appStateChangeObserver_;
     std::recursive_mutex uidLock_;
     std::set<int32_t> observedAppUIDs_;
     std::function<void(int uid, int state)> serviceCallbackForAppStateChange_;
