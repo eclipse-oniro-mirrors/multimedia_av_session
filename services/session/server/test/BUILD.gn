@@ -186,7 +186,7 @@ ohos_unittest("AVSessionServiceTest") {
   }
 
   if (bluetooth_part_enable) {
-    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
   }
 }

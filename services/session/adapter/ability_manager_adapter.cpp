@@ -53,7 +53,7 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
         isSupport = (*isSupportPlayIntent)(bundleName_, "");
     }
 
-    if (bundleName_ != defaultBundleName && isSupport) {
+    if (bundleName_ != DEFAULT_BUNDLE_NAME && isSupport) {
         SLOGI("Start Ability mediaintent");
         typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId);
         StartAVPlaybackFunc startAVPlayback =
