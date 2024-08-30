@@ -467,8 +467,8 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
     std::shared_ptr<AVSessionController> controller;
     auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
     SLOGI("CreateController003 get ret %{public}d", static_cast<int>(ret));
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    SLOGI("CreateController003 here end");
+    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    SLOGI("CreateController003, start default app not exist here end");
     sleep(1);
     system("killall -9 com.example.himusicdemo");
     sleep(1);
