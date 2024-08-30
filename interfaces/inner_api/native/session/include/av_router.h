@@ -106,6 +106,15 @@ public:
      * @since 10
     */
     virtual int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) = 0;
+    
+    /**
+     * @brief Listen for the event of device logging.
+     *
+     * @param { int32_t } eventId - Event ID.
+     * @param { int64_t } int64_t - Param.
+     * @since 13
+    */
+    virtual void OnDeviceLogEvent(const int32_t eventId, const int64_t int64_t) = 0;
 
     /**
      * @brief Notify Router that the device is offline.

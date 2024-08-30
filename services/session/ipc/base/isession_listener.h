@@ -30,6 +30,7 @@ public:
         LISTENER_CMD_TOP_CHANGED,
         LISTENER_CMD_AUDIO_CHECKED,
         LISTENER_CMD_DEVICE_AVAILABLE,
+        LISTENER_CMD_DEVICE_LOG_EVENT,
         LISTENER_CMD_DEVICE_OFFLINE,
         LISTENER_CMD_MAX
     };
@@ -43,6 +44,8 @@ public:
     virtual void OnAudioSessionChecked(const int32_t uid) = 0;
 
     virtual void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) = 0;
+
+    virtual void OnDeviceLogEvent(const int32_t eventId, const int64_t param) = 0;
 
     virtual void OnDeviceOffline(const std::string& deviceId) = 0;
 };

@@ -217,6 +217,8 @@ public:
 
     void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
 
+    void NotifyDeviceLogEvent(const int32_t eventId, const int64_t param) override;
+
     void NotifyDeviceOffline(const std::string& deviceId) override;
 
     void NotifyMirrorToStreamCast();

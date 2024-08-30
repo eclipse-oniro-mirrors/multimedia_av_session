@@ -45,6 +45,7 @@ std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAV
     { "topSessionChange", { OnTopSessionChange, OffTopSessionChange } },
     { "sessionServiceDie", { OnServiceDie, OffServiceDie } },
     { "deviceAvailable", { OnDeviceAvailable, OffDeviceAvailable } },
+    { "deviceLogEvent", { OnDeviceLogEvent, OffDeviceLogEvent } },
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
 };
 
@@ -1126,6 +1127,11 @@ napi_status NapiAVSessionManager::OnDeviceAvailable(napi_env env, napi_value cal
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_AVAILABLE, callback);
 }
 
+napi_status NapiAVSessionManager::OnDeviceLogEvent(napi_env env, napi_value callback)
+{
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_LOG_EVENT, callback);
+}
+
 napi_status NapiAVSessionManager::OnDeviceOffline(napi_env env, napi_value callback)
 {
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_OFFLINE, callback);
@@ -1196,6 +1202,12 @@ napi_status NapiAVSessionManager::OffDeviceAvailable(napi_env env, napi_value ca
 {
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_AVAILABLE, callback);
+}
+
+napi_status NapiAVSessionManager::OffDeviceLogEvent(napi_env env, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_LOG_EVENT, callback);
 }
 
 napi_status NapiAVSessionManager::OffDeviceOffline(napi_env env, napi_value callback)

@@ -393,6 +393,17 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     }
 }
 
+void HwCastProvider::OnDeviceLogEvent(const int32_t eventId, const int64_t param)
+{
+    SLOGI("eventId is %{public}d, param is %{public}ld", eventId, param);
+    for (auto listener : castStateListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnDeviceLogEvent for registered listeners");
+            listener->OnDeviceLogEvent(eventId, param);
+        }
+    }
+}
+
 void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
 {
     SLOGI("Received on device offline event");

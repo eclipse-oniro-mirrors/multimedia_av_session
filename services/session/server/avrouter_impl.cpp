@@ -191,6 +191,18 @@ int32_t AVRouterImpl::OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVRouterImpl::OnDeviceLogEvent(const int32_t eventId, const int64_t param)
+{
+    SLOGI("AVRouterImpl received OnDeviceLogEvent event");
+
+    std::lock_guard lockGuard(servicePtrLock_);
+    if (servicePtr_ == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+    servicePtr_->NotifyDeviceLogEvent(eventId, param);
+    return AVSESSION_SUCCESS;
+}
+
 void AVRouterImpl::ReleaseCurrentCastSession()
 {
     SLOGI("Start ReleaseCurrentCastSession");

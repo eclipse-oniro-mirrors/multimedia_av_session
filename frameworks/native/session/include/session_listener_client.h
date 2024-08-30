@@ -36,6 +36,8 @@ public:
 
     void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
 
+    void OnDeviceLogEvent(const int32_t eventId, const int64_t param) override;
+
     void OnDeviceOffline(const std::string& deviceId) override;
     
 private:

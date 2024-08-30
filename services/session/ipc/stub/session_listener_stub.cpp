@@ -86,6 +86,15 @@ int32_t SessionListenerStub::HandleOnDeviceAvailable(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
+int32_t SessionListenerStub::HandleOnDeviceLogEvent(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("SessionListenerStub::HandleOnDeviceLogEvent");
+    int32_t eventId = data.ReadInt32();
+    int64_t param = data.ReadInt64();
+    OnDeviceLogEvent(eventId, param);
+    return ERR_NONE;
+}
+
 int32_t SessionListenerStub::HandleOnDeviceOffline(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("SessionListenerStub::HandleOnDeviceOffline");
