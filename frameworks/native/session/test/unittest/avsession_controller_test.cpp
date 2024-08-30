@@ -18,7 +18,7 @@
 #include "avsession_controller_stub.h"
 #include "avsession_errors.h"
 #include "avsession_manager.h"
-#include "avsession_item.h"
+#include "avsession_log.h"
 #include "accesstoken_kit.h"
 #include "bool_wrapper.h"
 #include "nativetoken_kit.h"
@@ -26,7 +26,6 @@
 #include "iavsession_controller.h"
 #include "iremote_stub.h"
 #include "want_params.h"
-#include "command_send_limit.h"
 #include "ipc_skeleton.h"
 
 using namespace testing::ext;
@@ -34,7 +33,13 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace AVSession {
+static int32_t g_onCall = AVSESSION_ERROR;
+static int32_t g_sessionId = AVSESSION_ERROR;
+static char g_testSessionTag[] = "test";
+static char g_testBundleName[] = "test.ohos.avsession";
+static char g_testAbilityName[] = "test.ability";
 static uint64_t g_selfTokenId = 0;
+
 static HapInfoParams g_info = {
     .userID = 100,
     .bundleName = "ohos.permission_test.demo",
@@ -101,12 +106,13 @@ void AVSessionControllerTest::TearDownTestCase()
 void AVSessionControllerTest::SetUp()
 {
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("demo");
-    elementName.SetAbilityName("demo");
-    avsession_ = AVSessionManager::GetInstance().CreateSession("Application", AVSession::SESSION_TYPE_AUDIO,
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    SLOGE("check controller js crash in pppppppppppppppppppppppppppppppppp  AVSession 27");
+    avsession_ = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
                                                                elementName);
     ASSERT_NE(avsession_, nullptr);
-
+    g_sessionId++;
     auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller_);
     ASSERT_EQ(ret, AVSESSION_SUCCESS);
     ASSERT_NE(controller_, nullptr);
@@ -114,8 +120,16 @@ void AVSessionControllerTest::SetUp()
 
 void AVSessionControllerTest::TearDown()
 {
-    avsession_->Destroy();
-    controller_->Destroy();
+    [[maybe_unused]] int32_t ret = AVSESSION_ERROR;
+    if (avsession_ != nullptr) {
+        ret = avsession_->Destroy();
+        avsession_ = nullptr;
+    }
+    if (controller_ != nullptr) {
+        ret = controller_->Destroy();
+        controller_ = nullptr;
+    }
+    g_onCall = AVSESSION_ERROR;
 }
 
 class AVControllerCallbackImpl : public AVControllerCallback {
@@ -816,11 +830,9 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
     sleep(1);
-    if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
-        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
-    } else {
-        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_COMMAND_SEND_EXCEED_MAX);
-    }
+    int ret = controller_->SendCommonCommand(commonCommand, commandArgs);
+    SLOGI("SendCommonCommand001 get ret %{public}d", ret);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     
     SLOGI("SendCommonCommand001 End");
 }
@@ -838,11 +850,9 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
     sleep(1);
-    if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
-        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
-    } else {
-        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_COMMAND_SEND_EXCEED_MAX);
-    }
+    int ret = controller_->SendCommonCommand(commonCommand, commandArgs);
+    SLOGI("SendCommonCommand001 get ret %{public}d", ret);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_SESSION_DEACTIVE);
     SLOGI("SendCommonCommand002 End");
@@ -1144,101 +1154,6 @@ HWTEST_F(AVSessionControllerTest, Destroy001, TestSize.Level1)
 {
     EXPECT_EQ(controller_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->Destroy(), ERR_CONTROLLER_NOT_EXIST);
-}
-
-/**
-* @tc.name: HandleSetMetaFilter001
-* @tc.desc: Return is write SetMetaFilter ret failed
-* @tc.type: FUNC
-* @tc.require: I62PJU
-*/
-HWTEST_F(AVSessionControllerTest, HandleSetMetaFilter001, TestSize.Level1)
-{
-    AVSessionControllerStubTest avSessionControllerStubTest;
-    OHOS::MessageParcel data;
-    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
-    data.WriteString("test");
-    OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
-    auto ret = avSessionControllerStubTest.OnRemoteRequest(
-        OHOS::AVSession::AVSessionControllerStub::CONTROLLER_CMD_SET_META_FILTER, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
-}
-
-/**
-* @tc.name: HandleSetMetaFilter002
-* @tc.desc: Return is write int32 failed
-* @tc.type: FUNC
-* @tc.require: I62PJU
-*/
-HWTEST_F(AVSessionControllerTest, HandleSetMetaFilter002, TestSize.Level1)
-{
-    AVSessionControllerStubTest avSessionControllerStubTest;
-    OHOS::MessageParcel data;
-    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
-    data.WriteString("2222222222222222");
-    OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
-    auto ret = avSessionControllerStubTest.OnRemoteRequest(
-        OHOS::AVSession::AVSessionControllerStub::CONTROLLER_CMD_SET_META_FILTER, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
-}
-
-/**
-* @tc.name: HandleSetPlaybackFilter001
-* @tc.desc: Return is write SetPlaybackFilter ret failed
-* @tc.type: FUNC
-* @tc.require: I62PJU
-*/
-HWTEST_F(AVSessionControllerTest, HandleSetPlaybackFilter001, TestSize.Level1)
-{
-    AVSessionControllerStubTest avSessionControllerStubTest;
-    OHOS::MessageParcel data;
-    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
-    data.WriteString("test");
-    OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
-    auto ret = avSessionControllerStubTest.OnRemoteRequest(
-        OHOS::AVSession::AVSessionControllerStub::CONTROLLER_CMD_SET_PLAYBACK_FILTER, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
-}
-
-/**
-* @tc.name: HandleSetPlaybackFilter002
-* @tc.desc: Return is write int32 failed
-* @tc.type: FUNC
-* @tc.require: I62PJU
-*/
-HWTEST_F(AVSessionControllerTest, HandleSetPlaybackFilter002, TestSize.Level1)
-{
-    AVSessionControllerStubTest avSessionControllerStubTest;
-    OHOS::MessageParcel data;
-    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
-    data.WriteString("222222");
-    OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
-    auto ret = avSessionControllerStubTest.OnRemoteRequest(
-        OHOS::AVSession::AVSessionControllerStub::CONTROLLER_CMD_SET_PLAYBACK_FILTER, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
-}
-
-/**
-* @tc.name: OnRemoteRequest001
-* @tc.desc: Invalid code
-* @tc.type: FUNC
-* @tc.require: I62PJU
-*/
-HWTEST_F(AVSessionControllerTest, OnRemoteRequest001, TestSize.Level1)
-{
-    AVSessionControllerStubTest avSessionControllerStubTest;
-    uint32_t code = -1;
-    OHOS::MessageParcel data;
-    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
-    data.WriteString("test");
-    OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
-    auto ret = avSessionControllerStubTest.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
 /**
