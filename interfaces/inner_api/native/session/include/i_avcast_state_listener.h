@@ -35,6 +35,15 @@ public:
     virtual void OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos) = 0;
 
     /**
+     * @brief Listen for the event of device logging.
+     *
+     * @param { int32_t } eventId - Event ID.
+     * @param { int64_t } int64_t - Param.
+     * @since 13
+    */
+    virtual int32_t OnDeviceLogEvent(const int32_t eventId, const int64_t param) {};
+
+    /**
      * Listen for the event of device offline.
      *
      * @param { std::string& } deviceId - Offlined device ID.

@@ -96,8 +96,8 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemControlCommand", SendSystemControlCommand),
         DECLARE_NAPI_STATIC_FUNCTION("startCastDeviceDiscovery", StartCastDiscovery),
         DECLARE_NAPI_STATIC_FUNCTION("stopCastDeviceDiscovery", StopCastDiscovery),
-        DECLARE_NAPI_STATIC_FUNCTION("startDeviceLoggig", StartDeviceLoggig),
-        DECLARE_NAPI_STATIC_FUNCTION("stopDeviceLoggig", StopDeviceLoggig),
+        DECLARE_NAPI_STATIC_FUNCTION("startDeviceLogging", StartDeviceLogging),
+        DECLARE_NAPI_STATIC_FUNCTION("stopDeviceLogging", StopDeviceLogging),
         DECLARE_NAPI_STATIC_FUNCTION("setDiscoverable", SetDiscoverable),
         DECLARE_NAPI_STATIC_FUNCTION("startCasting", StartCast),
         DECLARE_NAPI_STATIC_FUNCTION("stopCasting", StopCast),
@@ -923,10 +923,10 @@ std::string NapiAVSessionManager::GetStartCastErrMsg(int32_t error)
     return err;
 }
 
-napi_value NapiAVSessionManager::StartDeviceLoggig(napi_env env, napi_callback_info info)
+napi_value NapiAVSessionManager::StartDeviceLogging(napi_env env, napi_callback_info info)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StartDeviceLoggig");
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StartDeviceLogging");
     struct ConcreteContext : public ContextBase {
         int32_t fd_;
         uint32_t maxSize_;
@@ -952,20 +952,20 @@ napi_value NapiAVSessionManager::StartDeviceLoggig(napi_env env, napi_callback_i
     context->taskId = NAPI_START_DEVICE_LOGGING_TASK_ID;
 
     auto executor = [context]() {
-        int32_t ret = AVSessionManager::GetInstance().StartDeviceLoggig(context->fd_, context->maxSize_);
+        int32_t ret = AVSessionManager::GetInstance().StartDeviceLogging(context->fd_, context->maxSize_);
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
-            SLOGE("StartDeviceLoggig return error code = %{public}d", ret);
+            SLOGE("StartDeviceLogging return error code = %{public}d", ret);
         }
     };
-    return NapiAsyncWork::Enqueue(env, context, "StartDeviceLoggig", executor);
+    return NapiAsyncWork::Enqueue(env, context, "StartDeviceLogging", executor);
 #else
     return nullptr;
 #endif
 }
 
-napi_value NapiAVSessionManager::StopDeviceLoggig(napi_env env, napi_callback_info info)
+napi_value NapiAVSessionManager::StopDeviceLogging(napi_env env, napi_callback_info info)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StopCast");
@@ -980,17 +980,17 @@ napi_value NapiAVSessionManager::StopDeviceLoggig(napi_env env, napi_callback_in
 
     auto executor = [context]() {
         int32_t ret = AVSESSION_ERROR;
-        ret = AVSessionManager::GetInstance().StopDeviceLoggig();
+        ret = AVSessionManager::GetInstance().StopDeviceLogging();
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
-            SLOGE("StopDeviceLoggig return error code = %{public}d", ret);
+            SLOGE("StopDeviceLogging return error code = %{public}d", ret);
         }
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
     };
-    return NapiAsyncWork::Enqueue(env, context, "StopDeviceLoggig", executor, complete);
+    return NapiAsyncWork::Enqueue(env, context, "StopDeviceLogging", executor, complete);
 #else
     return nullptr;
 #endif

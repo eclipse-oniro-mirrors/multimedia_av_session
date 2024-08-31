@@ -60,7 +60,7 @@ private:
     template<typename T>
     void HandleEvent(int32_t event, const T& param, bool checkValid);
 
-    template<typename T, typname N>
+    template<typename T, typename N>
     void HandleEvent(int32_t event, const T& firstParam, const N& secondParam);
 
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;

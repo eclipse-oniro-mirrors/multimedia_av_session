@@ -93,9 +93,9 @@ bool AVRouterImpl::Release()
     return false;
 }
 
-int32_t AVRouterImpl::StartDeviceLoggig(int32_t fd, uint32_t maxSize)
+int32_t AVRouterImpl::StartDeviceLogging(int32_t fd, uint32_t maxSize)
 {
-    SLOGI("AVRouterImpl StartDeviceLoggig");
+    SLOGI("AVRouterImpl StartDeviceLogging");
     std::lock_guard lockGuard(providerManagerLock_);
 
     if (providerManagerMap_.empty()) {
@@ -105,14 +105,14 @@ int32_t AVRouterImpl::StartDeviceLoggig(int32_t fd, uint32_t maxSize)
     for (const auto& [number, providerManager] : providerManagerMap_) {
         CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
             AVSESSION_ERROR, "provider is nullptr");
-        providerManager->provider_->StartDeviceLoggig(fd, maxSize);
+        providerManager->provider_->StartDeviceLogging(fd, maxSize);
     }
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVRouterImpl::StopDeviceLoggig()
+int32_t AVRouterImpl::StopDeviceLogging()
 {
-    SLOGI("AVRouterImpl StopDeviceLoggig");
+    SLOGI("AVRouterImpl StopDeviceLogging");
     std::lock_guard lockGuard(providerManagerLock_);
 
     if (cacheStartDeviceLogging_) {
@@ -122,7 +122,7 @@ int32_t AVRouterImpl::StopDeviceLoggig()
     for (const auto& [number, providerManager] : providerManagerMap_) {
         CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
             AVSESSION_ERROR, "provider is nullptr");
-        providerManager->provider_->StopDeviceLoggig();
+        providerManager->provider_->StopDeviceLogging();
     }
     return AVSESSION_SUCCESS;
 }

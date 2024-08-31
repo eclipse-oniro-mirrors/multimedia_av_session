@@ -582,7 +582,7 @@ int32_t AVSessionServiceProxy::SetDiscoverable(const bool enable)
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
-int32_t AVSessionServiceProxy::StartDeviceLoggig(int32_t fd, uint32_t maxSize)
+int32_t AVSessionServiceProxy::StartDeviceLogging(int32_t fd, uint32_t maxSize)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -601,7 +601,7 @@ int32_t AVSessionServiceProxy::StartDeviceLoggig(int32_t fd, uint32_t maxSize)
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
-int32_t AVSessionServiceProxy::StopDeviceLoggig()
+int32_t AVSessionServiceProxy::StopDeviceLogging()
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,

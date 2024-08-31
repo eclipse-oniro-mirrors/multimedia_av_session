@@ -97,7 +97,7 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param, bool checkV
     SLOGI("handle event %{public}d", static_cast<int32_t>(event));
 }
 
-template<typename T, typname N>
+template<typename T, typename N>
 void NapiSessionListener::HandleEvent(int32_t event, const T& firstParam, const N& secondParam)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
@@ -171,7 +171,7 @@ void NapiSessionListener::OnDeviceLogEvent(const int32_t eventId, const int64_t 
 {
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceLogEvent");
     SLOGI("Start device log event");
-    HandleEvent(EVENT_DEVICE_LOG_EVENT, evenId, param);
+    HandleEvent(EVENT_DEVICE_LOG_EVENT, eventId, param);
 }
 
 void NapiSessionListener::OnDeviceOffline(const std::string& deviceId)

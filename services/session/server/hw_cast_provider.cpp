@@ -40,16 +40,16 @@ void HwCastProvider::Init()
     CastSessionManager::GetInstance().RegisterListener(shared_from_this());
 }
 
-bool HwCastProvider::StartDeviceLoggig(int32_t fd, uint32_t maxSize)
+int32_t HwCastProvider::StartDeviceLogging(int32_t fd, uint32_t maxSize)
 {
-    SLOGI("start StartDeviceLoggig, fd is %{public}d and maxSize is %{public}d", fd, maxSize);
-    return CastSessionManager::GetInstance().StartDeviceLoggig(fd, maxSize);
+    SLOGI("start StartDeviceLogging, fd is %{public}d and maxSize is %{public}d", fd, maxSize);
+    return CastSessionManager::GetInstance().StartDeviceLogging(fd, maxSize);
 }
 
-bool HwCastProvider::StopDeviceLoggig()
+int32_t HwCastProvider::StopDeviceLogging()
 {
-    SLOGI("StopDeviceLoggig");
-    return CastSessionManager::GetInstance().StartDeviceLoggig(-1, 0);
+    SLOGI("StopDeviceLogging");
+    return CastSessionManager::GetInstance().StartDeviceLogging(-1, 0);
 }
 
 bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string> drmSchemes)
@@ -393,7 +393,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     }
 }
 
-void HwCastProvider::OnDeviceLogEvent(const int32_t eventId, const int64_t param)
+void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
 {
     SLOGI("eventId is %{public}d, param is %{public}ld", eventId, param);
     for (auto listener : castStateListenerList_) {

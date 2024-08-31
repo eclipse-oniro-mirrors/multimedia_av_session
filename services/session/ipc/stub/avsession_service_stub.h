@@ -45,8 +45,8 @@ private:
     int32_t HandleRemoteCastAudio(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStartCastDiscovery(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStopCastDiscovery(MessageParcel& data, MessageParcel& reply);
-    int32_t HandleStartDeviceLoggig(MessageParcel& data, MessageParcel& reply);
-    int32_t HandleStopDeviceLoggig(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStartDeviceLogging(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStopDeviceLogging(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSetDiscoverable(MessageParcel& data, MessageParcel& reply);
     int32_t CheckBeforeHandleStartCast(MessageParcel& data, OutputDeviceInfo& outputDeviceInfo);
     int32_t HandleStartCast(MessageParcel& data, MessageParcel& reply);
@@ -94,9 +94,9 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_COMMAND_TO_REMOTE),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleRemoteCastAudio(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_DEVICE_LOGGING),
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleStartDeviceLoggig(data, reply); }},
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStartDeviceLogging(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_DEVICE_LOGGING),
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleStopDeviceLoggig(data, reply); }},
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStopDeviceLogging(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST_DISCOVERY),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleStartCastDiscovery(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST_DISCOVERY),
@@ -142,9 +142,9 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_COMMAND_TO_REMOTE),
             "HandleRemoteCastAudio"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_DEVICE_LOGGING),
-            "HandleStartDeviceLoggig"},
+            "HandleStartDeviceLogging"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_DEVICE_LOGGING),
-            "HandleStopDeviceLoggig"},
+            "HandleStopDeviceLogging"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST_DISCOVERY),
             "HandleStartCastDiscovery"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST_DISCOVERY),

@@ -62,7 +62,7 @@ public:
      * @return Returns whether the fd was transport successfully
      * @since 13
     */
-    virtual int32_t StartDeviceLoggig(int32_t fd, uint32_t maxSize) = 0;
+    virtual int32_t StartDeviceLogging(int32_t fd, uint32_t maxSize) = 0;
 
     /**
      * Stop transmission fd
@@ -70,7 +70,7 @@ public:
      * @return Returns whether stop transport successfully
      * @since 13
     */
-    virtual int32_t StopDeviceLoggig() = 0;
+    virtual int32_t StopDeviceLogging() = 0;
 
     /**
      * @brief Starting to discover devices.
@@ -114,7 +114,7 @@ public:
      * @param { int64_t } int64_t - Param.
      * @since 13
     */
-    virtual void OnDeviceLogEvent(const int32_t eventId, const int64_t int64_t) = 0;
+    virtual int32_t OnDeviceLogEvent(const int32_t eventId, const int64_t param) = 0;
 
     /**
      * @brief Notify Router that the device is offline.
