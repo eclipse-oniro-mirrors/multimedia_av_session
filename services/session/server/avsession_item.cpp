@@ -1006,11 +1006,12 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
     if (cacheDeviceInfo.networkId_.empty()) {
         SLOGE("untrusted device, networkId is empty, then input deviceId to ApplyAdvancedResource");
+        CollaborationManager::GetInstance().ApplyAdvancedResource(cacheDeviceInfo.deviceId_.c_str());
     } else {
         collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
+        CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
     }
-    CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
-    //wait collaboration callback 10s
+    //wait collaboration callback 25s
     std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
     bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
         [this]() {
