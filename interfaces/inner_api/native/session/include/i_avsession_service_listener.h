@@ -58,7 +58,7 @@ public:
      * @param { int64_t } int64_t - Param.
      * @since 13
     */
-    virtual int32_t NotifyDeviceLogEvent(const int32_t eventId, const int64_t param) {};
+    virtual void NotifyDeviceLogEvent(const int32_t eventId, const int64_t param) {};
 
     /**
      * Notify Router that the device has been offlined.
