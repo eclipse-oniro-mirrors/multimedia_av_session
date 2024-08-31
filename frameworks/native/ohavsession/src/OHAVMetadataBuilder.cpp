@@ -146,6 +146,7 @@ AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMeta
         default:
             SLOGE("Failed to generate avMetadata: Unsupported skip intervals: %d", intervals_);
             delete metaData;
+            *avMetadata = nullptr;
             return AVMETADATA_ERROR_INVALID_PARAM;
     }
 
