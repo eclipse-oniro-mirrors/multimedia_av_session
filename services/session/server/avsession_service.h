@@ -456,7 +456,6 @@ private:
 
     std::recursive_mutex migrateListenersLock_;
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
-    std::map<int32_t, bool> sessionPublishedMap_;
 
     std::shared_ptr<EventSubscriber> subscriber_;
     std::recursive_mutex screenStateLock_;
