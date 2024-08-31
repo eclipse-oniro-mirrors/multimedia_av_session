@@ -249,7 +249,7 @@ void NapiAVCastControllerCallback::HandlePlayerErrorAPI13(const int32_t errorCod
     } else {
         SLOGW("Can not match error code, use default");
         // If error not in map, need add error and should not return default ERROR_CODE_UNSPECIFIED.
-        jsErr = ERROR_CODE_UNSPECIFIED;
+        jsErr = CAST_GENERICERR_EXT_API13_UNSPECIFIED;
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
         HandleErrorEvent(EVENT_CAST_GENERIC_ERR, static_cast<int32_t>(jsErr), errorMsg);
     }

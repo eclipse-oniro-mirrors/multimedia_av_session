@@ -50,11 +50,11 @@ std::map<std::string, std::pair<NapiAVCastController::OnEventHandlerType,
     { "videoSizeChange", { OnVideoSizeChange, OffVideoSizeChange } }, // timeUpdate -> videoSizeChange
     { "error", { OnPlayerError, OffPlayerError } },
     { "castControlGenericError", { OnCastControlGenericError, OffCastControlGenericError } },
-    { "castControlIOError", { OnCastControlIOError, OffCastControlIOError } },
+    { "castControlIoError", { OnCastControlIoError, OffCastControlIoError } },
     { "castControlParsingError", { OnCastControlParsingError, OffCastControlParsingError } },
     { "castControlDecodingError", { OnCastControlDecodingError, OffCastControlDecodingError } },
     { "castControlAudioRenderError", { OnCastControlAudioRenderError, OffCastControlAudioRenderError } },
-    { "castControlDRMError", { OnCastControlDRMError, OffCastControlDRMError } },
+    { "castControlDrmError", { OnCastControlDrmError, OffCastControlDrmError } },
     { "endOfStream", { OnEndOfStream, OffEndOfStream } },
     { "requestPlay", { OnPlayRequest, OffPlayRequest } },
     { "keyRequest", { OnKeyRequest, OffKeyRequest } },
@@ -924,7 +924,7 @@ napi_status NapiAVCastController::OnCastControlGenericError(napi_env env, NapiAV
         NapiAVCastControllerCallback::EVENT_CAST_GENERIC_ERR, callback);
 }
 
-napi_status NapiAVCastController::OnCastControlIOError(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnCastControlIoError(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
     return napiCastController->callback_->AddCallback(env,
@@ -952,7 +952,7 @@ napi_status NapiAVCastController::OnCastControlAudioRenderError(napi_env env, Na
         NapiAVCastControllerCallback::EVENT_CAST_RENDER_ERR, callback);
 }
 
-napi_status NapiAVCastController::OnCastControlDRMError(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OnCastControlDrmError(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
     return napiCastController->callback_->AddCallback(env,
@@ -1101,7 +1101,7 @@ napi_status NapiAVCastController::OffCastControlGenericError(napi_env env, NapiA
         NapiAVCastControllerCallback::VENT_CAST_GENERIC_ERR, callback);
 }
 
-napi_status NapiAVCastController::OffCastControlIOError(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OffCastControlIoError(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
     CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
@@ -1137,7 +1137,7 @@ napi_status NapiAVCastController::OffCastControlAudioRenderError(napi_env env, N
         NapiAVCastControllerCallback::EVENT_CAST_RENDER_ERR, callback);
 }
 
-napi_status NapiAVCastController::OffCastControlDRMError(napi_env env, NapiAVCastController* napiCastController,
+napi_status NapiAVCastController::OffCastControlDrmError(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
     CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,

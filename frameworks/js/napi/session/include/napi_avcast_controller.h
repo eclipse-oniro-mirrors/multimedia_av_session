@@ -79,7 +79,7 @@ private:
         napi_value param, napi_value callback);
     static napi_status OnCastControlGenericError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnCastControlIOError(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnCastControlIoError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
     static napi_status OnCastControlParsingError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
@@ -87,7 +87,7 @@ private:
         napi_value param, napi_value callback);
     static napi_status OnCastControlAudioRenderError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnCastControlDRMError(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnCastControlDrmError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
     static napi_status OnEndOfStream(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
@@ -110,7 +110,7 @@ private:
     static napi_status OffPlayerError(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffCastControlGenericError(napi_env env,
         NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffCastControlIOError(napi_env env,
+    static napi_status OffCastControlIoError(napi_env env,
         NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffCastControlParsingError(napi_env env,
         NapiAVCastController* napiCastController, napi_value callback);
@@ -118,7 +118,7 @@ private:
         NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffCastControlAudioRenderError(napi_env env,
         NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffCastControlDRMError(napi_env env,
+    static napi_status OffCastControlDrmError(napi_env env,
         NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffEndOfStream(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffPlayRequest(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
