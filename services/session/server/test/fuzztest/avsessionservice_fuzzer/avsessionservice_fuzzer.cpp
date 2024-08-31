@@ -22,30 +22,30 @@
 #include "avsession_controller_stub.h"
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
-
-#define private public
-#define protected public
+#include "audio_info.h"
 #include "avsession_service.h"
-#undef protected
-#undef private
-
 #include "avsessionservice_fuzzer.h"
 #include "client_death_proxy.h"
 #include "client_death_stub.h"
 #include "audio_info.h"
+#include "audio_adapter.h"
 
 using namespace std;
 using namespace OHOS::AudioStandard;
 namespace OHOS {
 namespace AVSession {
 
-static constexpr int32_t MAX_CODE_LEN  = 512;
+static constexpr int32_t MAX_CODE_LEN = 512;
 static constexpr int32_t MIN_SIZE_NUM = 4;
 static constexpr int32_t CAST_ENGINE_SA_ID = 65546;
+static constexpr int32_t SESSION_ID = 2;
+static constexpr int32_t CLIENT_UID = 1;
 static char g_testSessionTag[] = "test";
 static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
 static char g_testAnotherAbilityName[] = "testAnother.ability";
 static sptr<AVSessionService> avsessionService_;
+AppExecFwk::ElementName elementName;
+sptr<AVSessionItem> avsessionHere_ = nullptr;
 
 class FuzzTestISessionListener : public ISessionListener {
 public:
@@ -124,6 +124,7 @@ void AvSessionServiceCloseTest(const uint8_t* data, size_t size)
         return;
     }
     avsessionService_->Close();
+    avsessionService_ = nullptr;
 }
 
 void AvSessionServiceSystemAbilityTest(const uint8_t* data, size_t size,
@@ -170,6 +171,16 @@ void AvSessionServiceGetDescriptorsTest(const uint8_t* data, size_t size,
     service->GetHistoricalSessionDescriptors(maxSize, descriptors);
 }
 
+void GetSessionDescriptorsBySessionId001(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    std::string systemAbilityId = "sessionId";
+    std::vector<AVSessionDescriptor> descriptors;
+    AVSessionDescriptor descriptor;
+
+    service->GetSessionDescriptorsBySessionId(systemAbilityId, descriptor);
+}
+
 void AvSessionServiceAVPlaybackTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
@@ -179,6 +190,22 @@ void AvSessionServiceAVPlaybackTest(const uint8_t* data, size_t size,
     service->StartAVPlayback(bundleName, assetId);
 }
 
+void DoMetadataImgCleanTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    AVMetaData meta = avsessionHere_->GetMetaData();
+
+    service->DoMetadataImgClean(meta);
+}
+
+void CreateNewControllerForSessionTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    int32_t pid = *(reinterpret_cast<const int32_t*>(data));
+    
+    service->CreateNewControllerForSession(pid, avsessionHere_);
+}
+
 void AvSessionServiceControllerTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
@@ -186,9 +213,6 @@ void AvSessionServiceControllerTest(const uint8_t* data, size_t size,
     int32_t type = 0;
     std::string bundleName(reinterpret_cast<const char*>(data), size);
     std::string abilityName(reinterpret_cast<const char*>(data), size);
-    AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(bundleName);
-    elementName.SetAbilityName(abilityName);
     sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
     if (!avSessionItem) {
@@ -234,9 +258,6 @@ void AVSessionServiceSendSystemControlCommandTest(const uint8_t* data, size_t si
     command.SetCommand(*reinterpret_cast<const int32_t*>(data));
     service->SendSystemControlCommand(command);
     sptr<FuzzTestISessionListener> listener = new FuzzTestISessionListener();
-    if (!listener) {
-        return;
-    }
     service->RegisterSessionListener(listener);
 }
 
@@ -245,7 +266,11 @@ void AvSessionServiceClientTest(const uint8_t* data, size_t size,
 {
     int32_t pid = *reinterpret_cast<const int32_t*>(data);
     service->OnClientDied(pid);
-    sptr<ClientDeathStub> clientDeath = new ClientDeathStub();
+
+    sptr<IClientDeath> clientDeath = new ClientDeathStub();
+    auto func = []() {};
+    sptr<ClientDeathRecipient> recipient = new ClientDeathRecipient(func);
+    service->AddClientDeathObserver(pid, clientDeath, recipient);
     service->RegisterClientDeathObserver(clientDeath);
 }
 
@@ -253,6 +278,7 @@ void AvSessionServiceHandleEventTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
     std::string sessionId(reinterpret_cast<const char*>(data), size);
+    service->HandleSessionRelease(sessionId);
     service->HandleCallStartEvent();
 
     int32_t fd = *reinterpret_cast<const int32_t*>(data);
@@ -263,7 +289,31 @@ void AvSessionServiceHandleEventTest(const uint8_t* data, size_t size,
     service->Dump(fd, args);
 }
 
-void AvSessionServiceSuperLauncherTest(const uint8_t* data, size_t size,
+void AvSessionServiceSuperLauncherTest001(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    vector<string> states {
+        "UNKNOWN",
+        "IDLE",
+        "CONNECTING",
+    };
+    vector<string> serviceNames {
+        "Unknown",
+        "SuperLauncher",
+        "HuaweiCast",
+    };
+    int32_t randomNumber = 1;
+    std::string serviceName = serviceNames[randomNumber % serviceNames.size()];
+    std::string state = states[randomNumber % states.size()];
+    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    std::string extraInfo(reinterpret_cast<const char*>(data), size);
+    service->SuperLauncher(deviceId, serviceName, extraInfo, state);
+    bool on = *(reinterpret_cast<const int32_t *>(data));
+    service->SetScreenOn(on);
+    service->GetScreenOn();
+}
+
+void AvSessionServiceSuperLauncherTest002(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
     vector<string> states {
@@ -282,6 +332,7 @@ void AvSessionServiceSuperLauncherTest(const uint8_t* data, size_t size,
     std::string deviceId(reinterpret_cast<const char*>(data), size);
     std::string extraInfo(reinterpret_cast<const char*>(data), size);
     service->SuperLauncher(deviceId, serviceName, extraInfo, state);
+    service->SuperLauncher(deviceId, "SuperLauncher", extraInfo, "CONNECTING");
     bool on = *(reinterpret_cast<const int32_t *>(data));
     service->SetScreenOn(on);
     service->GetScreenOn();
@@ -317,11 +368,6 @@ void NotifyMirrorToStreamCast002(const uint8_t* data, size_t size)
     SLOGI("NotifyMirrorToStreamCast002 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("NotifyMirrorToStreamCast002 in!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avsessionService_->UpdateTopSession(avsessionHere_);
     avsessionService_->NotifyMirrorToStreamCast();
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -334,11 +380,6 @@ void NotifyMirrorToStreamCast003(const uint8_t* data, size_t size)
     SLOGI("NotifyMirrorToStreamCast003 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("NotifyMirrorToStreamCast002 in!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
     avsessionService_->UpdateTopSession(avsessionHere_);
     avsessionService_->NotifyMirrorToStreamCast();
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -349,11 +390,6 @@ void NotifyMirrorToStreamCast003(const uint8_t* data, size_t size)
 void RefreshFocusSessionSort001(const uint8_t* data, size_t size)
 {
     SLOGI("RefreshFocusSessionSort001 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avsessionService_->RefreshFocusSessionSort(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("RefreshFocusSessionSort001 end!");
@@ -362,11 +398,6 @@ void RefreshFocusSessionSort001(const uint8_t* data, size_t size)
 void SelectSessionByUid001(const uint8_t* data, size_t size)
 {
     SLOGI("SelectSessionByUid001 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     AudioRendererChangeInfo info = {};
     info.clientUID = 0;
     avsessionService_->SelectSessionByUid(info);
@@ -377,14 +408,17 @@ void SelectSessionByUid001(const uint8_t* data, size_t size)
 void SelectSessionByUid002(const uint8_t* data, size_t size)
 {
     SLOGI("SelectSessionByUid002 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     AudioRendererChangeInfo info = {};
     info.clientUID = avsessionHere_->GetUid();
+
+    std::unique_ptr<AudioRendererChangeInfo> info_ = std::make_unique<AudioRendererChangeInfo>();
+    info_->clientUID = CLIENT_UID;
+    info_->sessionId = SESSION_ID;
+    info_->rendererState = RendererState::RENDERER_RELEASED;
+    AudioRendererChangeInfos infos;
+    infos.push_back(std::move(info_));
     avsessionService_->SelectSessionByUid(info);
+    avsessionService_->OutputDeviceChangeListener(infos);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("SelectSessionByUid002 end!");
 }
@@ -399,11 +433,6 @@ void InitBMS001(const uint8_t* data, size_t size)
 void ReleaseCastSession001(const uint8_t* data, size_t size)
 {
     SLOGI("ReleaseCastSession001 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("ReleaseCastSession001 in!");
     avsessionService_->ReleaseCastSession();
@@ -428,11 +457,6 @@ void MirrorToStreamCast001(const uint8_t* data, size_t size)
     SLOGI("MirrorToStreamCast001 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("MirrorToStreamCast001 in!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avsessionService_->is2in1_ = true;
     avsessionService_->MirrorToStreamCast(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -445,11 +469,6 @@ void MirrorToStreamCast002(const uint8_t* data, size_t size)
     SLOGI("MirrorToStreamCast002 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("MirrorToStreamCast002 in!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avsessionService_->is2in1_ = false;
     avsessionService_->MirrorToStreamCast(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -462,11 +481,6 @@ void MirrorToStreamCast003(const uint8_t* data, size_t size)
     SLOGI("MirrorToStreamCast003 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("MirrorToStreamCast003 in!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avsessionService_->is2in1_ = true;
     avsessionService_->MirrorToStreamCast(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -477,15 +491,20 @@ void MirrorToStreamCast003(const uint8_t* data, size_t size)
 void RefreshSortFileOnCreateSession001(const uint8_t* data, size_t size)
 {
     SLOGI("RefreshSortFileOnCreateSession001 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avsessionService_->refreshSortFileOnCreateSession(avsessionHere_->GetSessionId(),
         "audio", elementName);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("RefreshSortFileOnCreateSession001 end!");
+}
+
+void StartDefaultAbilityByCall001(const uint8_t* data, size_t size)
+{
+    SLOGI("StartDefaultAbilityByCall001 begin!");
+    std::string sessionId(reinterpret_cast<const char *>(data), size);
+    avsessionService_->refreshSortFileOnCreateSession(avsessionHere_->GetSessionId(),
+        "audio", elementName);
+    avsessionService_->StartDefaultAbilityByCall(sessionId);
+    SLOGI("StartDefaultAbilityByCall001 end!");
 }
 
 void GetHistoricalAVQueueInfos001(const uint8_t* data, size_t size)
@@ -499,11 +518,6 @@ void GetHistoricalAVQueueInfos001(const uint8_t* data, size_t size)
 void SaveAvQueueInfo001(const uint8_t* data, size_t size)
 {
     SLOGI("SaveAvQueueInfo001 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     AVMetaData meta = avsessionHere_->GetMetaData();
     std::string oldContent;
     if (!avsessionService_->LoadStringFromFileEx(avsessionService_->AVSESSION_FILE_DIR +
@@ -519,11 +533,6 @@ void SaveAvQueueInfo001(const uint8_t* data, size_t size)
 void AddAvQueueInfoToFile001(const uint8_t* data, size_t size)
 {
     SLOGI("AddAvQueueInfoToFile001 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avsessionService_->AddAvQueueInfoToFile(*avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("AddAvQueueInfoToFile001 end!");
@@ -582,6 +591,38 @@ void ProcessCastAudioCommand002(const uint8_t* data, size_t size)
     SLOGI("ProcessCastAudioCommand002 end!");
 }
 
+void ReportStartCastBegin001(const uint8_t* data, size_t size)
+{
+    SLOGI("ReportStartCastBegin001 begin!");
+    OutputDeviceInfo outputDeviceInfo;
+    std::string func(reinterpret_cast<const char*>(data), size);
+    auto uid = *(reinterpret_cast<const int32_t *>(data));
+    avsessionService_->ReportStartCastBegin(func, outputDeviceInfo, uid);
+    SLOGI("ReportStartCastBegin001 end!");
+}
+
+void ReportStartCastEnd001(const uint8_t* data, size_t size)
+{
+    SLOGI("ReportStartCastEnd001 begin!");
+    OutputDeviceInfo outputDeviceInfo;
+    int32_t ret = AVSESSION_SUCCESS;
+    std::string func(reinterpret_cast<const char*>(data), size);
+    auto uid = *(reinterpret_cast<const int32_t *>(data));
+    avsessionService_->ReportStartCastEnd(func, outputDeviceInfo, uid, ret);
+    SLOGI("ReportStartCastEnd001 end!");
+}
+
+void ReportStartCastEnd002(const uint8_t* data, size_t size)
+{
+    SLOGI("ReportStartCastEnd002 begin!");
+    OutputDeviceInfo outputDeviceInfo;
+    int32_t ret = AVSESSION_ERROR;
+    std::string func(reinterpret_cast<const char*>(data), size);
+    auto uid = *(reinterpret_cast<const int32_t *>(data));
+    avsessionService_->ReportStartCastEnd(func, outputDeviceInfo, uid, ret);
+    SLOGI("ReportStartCastEnd002 end!");
+}
+
 void HandleDeviceChange001(const uint8_t* data, size_t size)
 {
     SLOGI("HandleDeviceChange001 begin!");
@@ -608,29 +649,80 @@ void HandleDeviceChange002(const uint8_t* data, size_t size)
     SLOGI("HandleDeviceChange002 end!");
 }
 
-void AvSessionServiceTest(const uint8_t* data, size_t size)
+void SendSystemAVKeyEvent001(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
+    SLOGI("SendSystemAVKeyEvent001 begin!");
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HEADSETHOOK);
+    keyEvent->SetActionTime(1);
+    keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_CANCEL);
+    avsessionService_->SendSystemAVKeyEvent(*(keyEvent.get()));
+    SLOGI("SendSystemAVKeyEvent001 end!");
+}
+
+void SendSystemAVKeyEvent002(const uint8_t* data, size_t size)
+{
+    SLOGI("SendSystemAVKeyEvent001 begin!");
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HOME);
+    keyEvent->SetActionTime(1);
+    keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_CANCEL);
+    avsessionService_->SendSystemAVKeyEvent(*(keyEvent.get()));
+    SLOGI("SendSystemAVKeyEvent002 end!");
+}
+
+void GetTrustedDeviceName001(const uint8_t* data, size_t size)
+{
+    SLOGI("GetTrustedDeviceName001 begin!");
+    std::string networkId = "networkId";
+    std::string deviceName = "LocalDevice";
+    avsessionService_->GetTrustedDeviceName(networkId, deviceName);
+    SLOGI("GetTrustedDeviceName001 end!");
+}
+
+void GetTrustedDeviceName002(const uint8_t* data, size_t size)
+{
+    SLOGI("GetTrustedDeviceName002 begin!");
+    std::string networkId = "networkId";
+    std::string deviceName(reinterpret_cast<const char*>(data), size);
+    avsessionService_->GetTrustedDeviceName(networkId, deviceName);
+    SLOGI("GetTrustedDeviceName002 end!");
+}
+
+class FuzzSessionListener : public SessionListener {
+public:
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s created", descriptor.sessionId_.c_str());
     }
-    if (avsessionService_ == nullptr) {
-        SLOGI("check service null, try create");
-        avsessionService_ = new AVSessionService(AVSESSION_SERVICE_ID);
+    
+    void OnSessionRelease(const AVSessionDescriptor& descripter) override
+    {
+        SLOGI("sessionId=%{public}s released", descripter.sessionId_.c_str());
     }
-    if (avsessionService_ == nullptr) {
-        SLOGE("service is null, return");
-        return;
+
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s be top session", descriptor.sessionId_.c_str());
     }
-    AvSessionServiceSystemAbilityTest(data, size, avsessionService_);
-    AvSessionServiceGetAVQueueInfosTest(data, size, avsessionService_);
-    AvSessionServiceGetDescriptorsTest(data, size, avsessionService_);
-    AvSessionServiceAVPlaybackTest(data, size, avsessionService_);
-    AvSessionServiceControllerTest(data, size, avsessionService_);
-    AVSessionServiceSendSystemControlCommandTest(data, size, avsessionService_);
-    AvSessionServiceClientTest(data, size, avsessionService_);
-    AvSessionServiceHandleEventTest(data, size, avsessionService_);
-    AvSessionServiceSuperLauncherTest(data, size, avsessionService_);
-    NotifyDeviceAvailable001(data, size);
+
+    void OnAudioSessionChecked(const int32_t uid) override
+    {
+        SLOGI("uid=%{public}d checked", uid);
+    }
+};
+
+void RemoveInnerSessionListener001(const uint8_t* data, size_t size)
+{
+    SLOGI("RemoveInnerSessionListener001 begin!");
+    FuzzSessionListener listener;
+    avsessionService_->AddInnerSessionListener(&listener);
+    avsessionService_->RemoveInnerSessionListener(&listener);
+    SLOGI("RemoveInnerSessionListener001 end!");
+}
+
+void AvSessionServiceTest001(const uint8_t* data, size_t size)
+{
     NotifyMirrorToStreamCast001(data, size);
     NotifyMirrorToStreamCast002(data, size);
     NotifyMirrorToStreamCast003(data, size);
@@ -644,6 +736,7 @@ void AvSessionServiceTest(const uint8_t* data, size_t size)
     MirrorToStreamCast002(data, size);
     MirrorToStreamCast003(data, size);
     RefreshSortFileOnCreateSession001(data, size);
+    StartDefaultAbilityByCall001(data, size);
     GetHistoricalAVQueueInfos001(data, size);
     SaveAvQueueInfo001(data, size);
     AddAvQueueInfoToFile001(data, size);
@@ -653,11 +746,100 @@ void AvSessionServiceTest(const uint8_t* data, size_t size)
     Dump001(data, size);
     ProcessCastAudioCommand001(data, size);
     ProcessCastAudioCommand002(data, size);
+    ReportStartCastBegin001(data, size);
+    ReportStartCastEnd001(data, size);
+    ReportStartCastEnd002(data, size);
     HandleDeviceChange001(data, size);
     HandleDeviceChange002(data, size);
+    SendSystemAVKeyEvent001(data, size);
+    SendSystemAVKeyEvent002(data, size);
+    GetTrustedDeviceName001(data, size);
+    GetTrustedDeviceName002(data, size);
+    RemoveInnerSessionListener001(data, size);
 }
 
-int32_t AVSessionServiceStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
+void AvSessionServiceTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
+    if (avsessionService_ == nullptr) {
+        SLOGI("check service null, try create");
+        avsessionService_ = new AVSessionService(AVSESSION_SERVICE_ID);
+    }
+    if (avsessionService_ == nullptr) {
+        SLOGE("service is null, return");
+        return;
+    }
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    avsessionHere_ = avsessionService_->CreateSessionInner(
+        g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    AvSessionServiceSystemAbilityTest(data, size, avsessionService_);
+    AvSessionServiceGetAVQueueInfosTest(data, size, avsessionService_);
+    AvSessionServiceGetDescriptorsTest(data, size, avsessionService_);
+    GetSessionDescriptorsBySessionId001(data, size, avsessionService_);
+    AvSessionServiceAVPlaybackTest(data, size, avsessionService_);
+    DoMetadataImgCleanTest(data, size, avsessionService_);
+    CreateNewControllerForSessionTest(data, size, avsessionService_);
+    AvSessionServiceControllerTest(data, size, avsessionService_);
+    AVSessionServiceSendSystemControlCommandTest(data, size, avsessionService_);
+    AvSessionServiceClientTest(data, size, avsessionService_);
+    AvSessionServiceHandleEventTest(data, size, avsessionService_);
+    AvSessionServiceSuperLauncherTest001(data, size, avsessionService_);
+    AvSessionServiceSuperLauncherTest002(data, size, avsessionService_);
+    NotifyDeviceAvailable001(data, size);
+    
+    AvSessionServiceTest001(data, size);
+}
+
+int32_t AVSessionServiceStubFuzzer::OnRemoteRequestForSessionStub(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return AVSESSION_ERROR;
+    }
+    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+    code %= static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX);
+
+    size -= sizeof(uint32_t);
+    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    std::string tag(reinterpret_cast<const char*>(data), size);
+    int32_t type = *(reinterpret_cast<const int32_t*>(data));
+    std::string bundleName(reinterpret_cast<const char*>(data), size);
+    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    bool isThirdPartyApp = *(reinterpret_cast<const int32_t *>(data));
+    AVSessionDescriptor descriptor;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(bundleName);
+    elementName.SetAbilityName(abilityName);
+    descriptor.sessionId_ = sessionId;
+    descriptor.sessionTag_ = tag;
+    descriptor.sessionType_ = type;
+    descriptor.elementName_ = elementName;
+    descriptor.isThirdPartyApp_ = isThirdPartyApp;
+    sptr<AVSessionItem> avSessionItem = new(std::nothrow) AVSessionItem(descriptor);
+    if (!avSessionItem) {
+        SLOGI("testAVSession item is null");
+        return AVSESSION_ERROR;
+    }
+    sptr<IRemoteObject> remoteObject = nullptr;
+    std::shared_ptr<AVSessionProxyTestOnServiceFuzzer> avSessionProxy =
+        std::make_shared<AVSessionProxyTestOnServiceFuzzer>(remoteObject);
+    MessageParcel dataMessageParcelForSession;
+    if (!dataMessageParcelForSession.WriteInterfaceToken(avSessionProxy->GetDescriptor())) {
+        SLOGE("testAVSession item write interface token error");
+        return AVSESSION_ERROR;
+    }
+    dataMessageParcelForSession.WriteBuffer(data + sizeof(uint32_t), size);
+    dataMessageParcelForSession.RewindRead(0);
+    MessageParcel replyForSession;
+    MessageOption optionForSession;
+    int32_t ret = avsessionService_->OnRemoteRequest(code, dataMessageParcelForSession,
+        replyForSession, optionForSession);
+    return ret;
+}
+
+int32_t AVSessionServiceStubFuzzer::OnRemoteRequest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return AVSESSION_ERROR;
@@ -686,13 +868,15 @@ int32_t AVSessionServiceStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
     return ret;
 }
 
-int32_t SessionListenerStubRemoteRequestTest(uint8_t* data, size_t size)
+int32_t AVSessionServiceStubRemoteRequestTest(const uint8_t* data, size_t size)
 {
-    auto sessionListenerStub = std::make_unique<AVSessionServiceStubFuzzer>();
-    if (sessionListenerStub == nullptr) {
+    auto serviceStub = std::make_unique<AVSessionServiceStubFuzzer>();
+    if (serviceStub == nullptr) {
         return 0;
     }
-    return sessionListenerStub->OnRemoteRequest(data, size);
+    serviceStub->OnRemoteRequest(data, size);
+    serviceStub->OnRemoteRequestForSessionStub(data, size);
+    return 0;
 }
 
 /* Fuzzer entry point */
@@ -702,6 +886,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     AvSessionServiceCloseTest(data, size);
     AvSessionServiceExternalCallTest(data, size);
     AvSessionServiceTest(data, size);
+    AVSessionServiceStubRemoteRequestTest(data, size);
     return 0;
 }
 } // namespace AVSession

@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AVSESSION_SERVICE_FUZZER_H
-#define OHOS_AVSESSION_SERVICE_FUZZER_H
-#include <cstdint>
-#include <cstddef>
-namespace OHOS::AVSession {
-void AvSessionServiceOnRemoteRequest(int32_t code, const uint8_t* data, size_t size);
-void AvSessionServiceTests(const uint8_t* data, size_t size);
+#ifndef OHOS_FOCUSSESSION_STRATEGY_FUZZER_H
+#define OHOS_FOCUSSESSION_STRATEGY_FUZZER_H
 
-class AvSessionServiceFuzzer {
+namespace OHOS::AVSession {
+void FocusSessionStrategyRemoteRequest(uint8_t* data, size_t size);
+
+class FocusSessionStrategyFuzzer {
 public:
-    AvSessionServiceFuzzer() = default;
-    ~AvSessionServiceFuzzer() = default;
-    void FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size);
-    void FuzzTests(const uint8_t* data, size_t size);
+    FocusSessionStrategyFuzzer() = default;
+    ~FocusSessionStrategyFuzzer() = default;
+    void FocusSessionStrategyFuzzTest(uint8_t* data, size_t size);
 };
 }
+
 #endif

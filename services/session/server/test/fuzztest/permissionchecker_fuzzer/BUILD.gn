@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,20 +14,18 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("../../../../../../bluetooth_part.gni")
-import("../../../../../../castplus_cast_engine_part.gni")
 module_output_path = "av_session/av_session"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("AVSessionServiceFuzzTest") {
+ohos_fuzztest("PermissionCheckerFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "../avsessionservice_fuzzer"
+  fuzz_config_file = "../permissionchecker_fuzzer"
   include_dirs = [
     "../",
     "../../../remote",
     "../../../../adapter",
     "../../../../server",
-    "//third_party/json/single_include",
+    "../../../../../../interfaces/inner_api/native/session/include",
   ]
   cflags = [
     "-g",
@@ -36,7 +34,7 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
     "-fno-omit-frame-pointer",
     "-fno-access-control",
   ]
-  sources = [ "avsessionservice_fuzzer.cpp" ]
+  sources = [ "permissionchecker_fuzzer.cpp" ]
   deps = [
     "./../../../../../../frameworks/native/session:avsession_client",
     "./../../../../../session:avsession_item",
@@ -45,6 +43,9 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
     "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
@@ -54,25 +55,10 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "ipc:ipc_core",
     "ipc:ipc_single",
-    "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "window_manager:libdm",
-    "window_manager:libwm",
   ]
-
-  if (castplus_cast_engine_enable) {
-    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    deps += [
-      "../../../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../../session:avsession_cast_item",
-    ]
-  }
-
-  if (bluetooth_part_enable) {
-    cflags += [ "-DBLUETOOTH_ENABLE" ]
-    external_deps += [ "bluetooth:btframework" ]
-  }
 }
 ###############################################################################

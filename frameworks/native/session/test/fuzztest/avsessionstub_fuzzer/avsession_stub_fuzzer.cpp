@@ -32,33 +32,25 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-static constexpr int32_t MAX_CODE_TEST = 5;
+static constexpr int32_t MAX_CODE_TEST = 28;
 static constexpr int32_t MAX_CODE_LEN  = 512;
 static constexpr int32_t MIN_SIZE_NUM  = 4;
 
-void AvSessionFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)
+void AvSessionFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
     if (code >= MAX_CODE_TEST) {
         return;
     }
     AVSessionDescriptor descriptor;
     sptr<AVSessionItem> avSessionItem = new(std::nothrow) AVSessionItem(descriptor);
-    
-    if (!avSessionItem) {
-        SLOGI("testAVSession is null");
-        return;
-    }
 
     MessageParcel dataMessageParcel;
     MessageParcel reply;
     MessageOption option;
-    if (!dataMessageParcel.WriteInterfaceToken(IAVSession::GetDescriptor())) {
-        return;
-    }
+    dataMessageParcel.WriteInterfaceToken(IAVSession::GetDescriptor());
     size -= sizeof(uint32_t);
     dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
     dataMessageParcel.RewindRead(0);
@@ -70,9 +62,6 @@ void AvSessionFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)
 
 void AvSessionFuzzer::FuzzTests(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
     AVSessionDescriptor descriptor;
     sptr<AVSessionItem> avSessionItem = new(std::nothrow) AVSessionItem(descriptor);
     if (!avSessionItem) {
@@ -81,14 +70,14 @@ void AvSessionFuzzer::FuzzTests(const uint8_t* data, size_t size)
     }
 }
 
-void OHOS::AVSession::AvSessionOnRemoteRequest(const uint8_t* data, size_t size)
+void OHOS::AVSession::AvSessionOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
 {
     auto aVSession = std::make_unique<AvSessionFuzzer>();
     if (aVSession == nullptr) {
         SLOGI("aVSession is null");
         return;
     }
-    aVSession->FuzzOnRemoteRequest(data, size);
+    aVSession->FuzzOnRemoteRequest(code, data, size);
 }
 
 void OHOS::AVSession::AvSessionTests(const uint8_t* data, size_t size)
@@ -105,7 +94,9 @@ void OHOS::AVSession::AvSessionTests(const uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AvSessionOnRemoteRequest(data, size);
+    for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
+        OHOS::AVSession::AvSessionOnRemoteRequest(i, data, size);
+    }
     OHOS::AVSession::AvSessionTests(data, size);
     return 0;
 }

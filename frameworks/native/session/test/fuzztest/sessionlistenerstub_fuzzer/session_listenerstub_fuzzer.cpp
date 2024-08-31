@@ -24,16 +24,15 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-static constexpr int32_t MAX_CODE_LEN  = 512;
-static constexpr int32_t MAX_CODE_NUM = 3;
+static constexpr int32_t MAX_CODE_NUM = 6;
+static constexpr int32_t MAX_CODE_LEN = 512;
 static constexpr int32_t MIN_SIZE_NUM = 4;
 
-int32_t SessionListenerStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
+int32_t SessionListenerStubFuzzer::OnRemoteRequest(int32_t code, uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
     if (code >= MAX_CODE_NUM) {
         return 0;
     }
@@ -42,9 +41,7 @@ int32_t SessionListenerStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
     std::shared_ptr<TestSessionListener> testSessionListener = std::make_shared<TestSessionListener>();
     sptr<SessionListenerClient> sessionListenerStubClient = new SessionListenerClient(testSessionListener);
     MessageParcel dataMessageParcel;
-    if (!dataMessageParcel.WriteInterfaceToken(sessionListenerStubClient->GetDescriptor())) {
-        return AVSESSION_ERROR;
-    }
+    dataMessageParcel.WriteInterfaceToken(sessionListenerStubClient->GetDescriptor());
     dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
     dataMessageParcel.RewindRead(0);
     MessageParcel reply;
@@ -55,14 +52,8 @@ int32_t SessionListenerStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
 
 void SessionListenerStubFuzzer::FuzzTests(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
     std::shared_ptr<TestSessionListener> testSessionListener = std::make_shared<TestSessionListener>();
-    if (!testSessionListener) {
-        SLOGI("testSessionListener is null");
-        return;
-    }
+    
     sptr<SessionListenerClient> sessionListenerStubClient = new SessionListenerClient(testSessionListener);
     int32_t uid = *(reinterpret_cast<const int32_t*>(data));
     sessionListenerStubClient->OnAudioSessionChecked(uid);
@@ -78,13 +69,13 @@ void SessionListenerStubFuzzer::FuzzTests(const uint8_t* data, size_t size)
     sessionListenerStubClient->OnDeviceOffline(deviceId);
 }
 
-int32_t OHOS::AVSession::SessionListenerStubRemoteRequestTest(uint8_t* data, size_t size)
+int32_t OHOS::AVSession::SessionListenerStubRemoteRequestTest(int32_t code, uint8_t* data, size_t size)
 {
     auto sessionListenerStub = std::make_unique<SessionListenerStubFuzzer>();
     if (sessionListenerStub == nullptr) {
         return false;
     }
-    return sessionListenerStub->OnRemoteRequest(data, size);
+    return sessionListenerStub->OnRemoteRequest(code, data, size);
 }
 
 void OHOS::AVSession::SessionListenerStubRemoteRequestTests(const uint8_t* data, size_t size)
@@ -101,7 +92,9 @@ void OHOS::AVSession::SessionListenerStubRemoteRequestTests(const uint8_t* data,
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::SessionListenerStubRemoteRequestTest(data, size);
+    for (uint32_t i = 0; i <= MAX_CODE_NUM; i++) {
+        OHOS::AVSession::SessionListenerStubRemoteRequestTest(i, data, size);
+    }
     OHOS::AVSession::SessionListenerStubRemoteRequestTests(data, size);
     return 0;
 }
