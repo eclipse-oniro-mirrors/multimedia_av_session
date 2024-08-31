@@ -116,7 +116,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayCallback(OH_AVSession* avsessi
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
-    if (it != playCallbacks_.end()) {
+    if (it == playCallbacks_.end()) {
         playCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -132,7 +132,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetPauseCallback(OH_AVSession* avsess
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
-    if (it != pauseCallbacks_.end()) {
+    if (it== pauseCallbacks_.end()) {
         pauseCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -148,7 +148,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetStopCallback(OH_AVSession* avsessi
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
-    if (it != stopCallbacks_.end()) {
+    if (it == stopCallbacks_.end()) {
         stopCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -164,7 +164,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayNextCallback(OH_AVSession* avs
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
-    if (it != playNextCallbacks_.end()) {
+    if (it == playNextCallbacks_.end()) {
         playNextCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -180,7 +180,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayPreviousCallback(OH_AVSession*
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
-    if (it != playPreviousCallbacks_.end()) {
+    if (it == playPreviousCallbacks_.end()) {
         playPreviousCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -246,7 +246,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterForwardCallback(OH_AVSession*
         [callback](const std::pair<OH_AVSessionCallback_OnFastForward, void*> &element) {
             return element.first == callback;
         });
-    if (it != forwardCallbacks_.end()) {
+    if (it == forwardCallbacks_.end()) {
         forwardCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -272,7 +272,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterRewindCallback(OH_AVSession* 
         [callback](const std::pair<OH_AVSessionCallback_OnFastForward, void*> &element) {
             return element.first == callback;
         });
-    if (it != rewindCallbacks_.end()) {
+    if (it == rewindCallbacks_.end()) {
         rewindCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -298,7 +298,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSeekCallback(OH_AVSession* av
         [callback](const std::pair<OH_AVSessionCallback_OnSeek, void*> &element) {
             return element.first == callback;
         });
-    if (it != seekCallbacks_.end()) {
+    if (it == seekCallbacks_.end()) {
         seekCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -324,7 +324,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSpeedCallback(OH_AVSession* a
         [callback](const std::pair<OH_AVSessionCallback_OnSetSpeed, void*> &element) {
             return element.first == callback;
         });
-    if (it != setSpeedCallbacks_.end()) {
+    if (it == setSpeedCallbacks_.end()) {
         setSpeedCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -350,7 +350,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSetLoopModeCallback(OH_AVSess
         [callback](const std::pair<OH_AVSessionCallback_OnSetLoopMode, void*> &element) {
             return element.first == callback;
         });
-    if (it != setLoopModeCallbacks_.end()) {
+    if (it == setLoopModeCallbacks_.end()) {
         setLoopModeCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -376,7 +376,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterToggleFavoriteCallback(OH_AVS
         [callback](const std::pair<OH_AVSessionCallback_OnToggleFavorite, void*> &element) {
             return element.first == callback;
         });
-    if (it != toggleFavoriteCallbacks_.end()) {
+    if (it == toggleFavoriteCallbacks_.end()) {
         toggleFavoriteCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -402,7 +402,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterPlayFromAssetIdCallback(OH_AV
         [callback](const std::pair<OH_AVSessionCallback_OnPlayFromAssetId, void*> &element) {
             return element.first == callback;
         });
-    if (it != playFromAssetIdCallbacks_.end()) {
+    if (it == playFromAssetIdCallbacks_.end()) {
         playFromAssetIdCallbacks_.emplace_back(std::make_pair(callback, userData));
     }
     return AV_SESSION_ERR_SUCCESS;
