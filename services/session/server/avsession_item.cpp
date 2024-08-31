@@ -1014,14 +1014,14 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     ListenCollaborationRejectToStopCast();
     DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
     if (cacheDeviceInfo.networkId_.empty()) {
-        SLOGE("untrusted device, networkId is empty, then input deviceId to ApplyAdvancedResource");
+        SLOGI("untrusted device, networkId is empty, then input deviceId to ApplyAdvancedResource");
         collaborationNeedNetworkId_ = cacheDeviceInfo.deviceId_;
         networkIdIsEmpty = true;
     } else {
         collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
     }
     CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
-    //wait collaboration callback 10s
+    //wait collaboration callback 25s
     std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
     bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
         [this]() {
@@ -1120,15 +1120,20 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
 
-void AVSessionItem::DealCollaborationPublishState(int32_t castState)
+void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
         if (networkIdIsEmpty) {
-            //collaborationNeedNetworkId_ value equal to deviceId value when networkId is empty
+            SLOGI("untrusted device, networkId is empty, get netwokId from castplus");
             AVRouter::GetInstance().GetRemoteNetWorkId(
-                castHandle_, collaborationNeedNetworkId_, collaborationNeedNetworkId_);
+                castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
             networkIdIsEmpty = false;
+        }
+        if (collaborationNeedNetworkId_.empty()) {
+            SLOGI("cast add to collaboration in peer, get netwokId from castplus");
+            AVRouter::GetInstance().GetRemoteNetWorkId(
+                castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         }
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
@@ -1143,7 +1148,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
-    DealCollaborationPublishState(castState);
+    DealCollaborationPublishState(castState, deviceInfo);
     DealCastState(castState);
     if (castState == streamStateConnection && counter_ == secondStep) {
         SLOGI("interception of one devicestate=6 transmission");

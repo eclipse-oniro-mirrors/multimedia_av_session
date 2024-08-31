@@ -76,7 +76,7 @@ public:
 
     void DealDisconnect(DeviceInfo deviceInfo);
 
-    void DealCollaborationPublishState(int32_t castState);
+    void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
@@ -405,11 +405,10 @@ private:
 
     bool collaborationRejectFlag_ = false;
     bool applyResultFlag_ = false;
-    bool networkIdIsEmpty = false;
     std::string collaborationNeedNetworkId_;
     std::mutex collaborationApplyResultMutex_;
     std::condition_variable connectWaitCallbackCond_;
-    const int32_t collaborationCallbackTimeOut_ = 30;
+    const int32_t collaborationCallbackTimeOut_ = 25;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
