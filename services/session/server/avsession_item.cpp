@@ -98,10 +98,6 @@ std::string AVSessionItem::GetSessionType()
 int32_t AVSessionItem::Destroy()
 {
     SLOGI("AVSessionItem send service destroy event to service, check serviceCallback exist");
-    if (serviceCallback_) {
-        SLOGI("AVSessionItem send service destroy event to service");
-        serviceCallback_(*this);
-    }
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "Destroy",
         "BUNDLE_NAME", GetBundleName(),
@@ -110,6 +106,10 @@ int32_t AVSessionItem::Destroy()
         "SESSION_TYPE", GetSessionType(),
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
+    if (serviceCallback_) {
+        SLOGI("AVSessionItem send service destroy event to service");
+        serviceCallback_(*this);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -849,6 +849,14 @@ void AVSessionItem::InitializeCastCommands()
         AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED);
     if (iter == supportedCastCmds_.end()) {
         supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED);
+    }
+
+    iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(),
+        AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+    if (iter == supportedCastCmds_.end()) {
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD);
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_REWIND);
     }
 
     iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
