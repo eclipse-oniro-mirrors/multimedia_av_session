@@ -22,6 +22,7 @@
 #include "avsession_controller_stub.h"
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
+#include "audio_info.h"
 
 #define private public
 #define protected public
@@ -124,6 +125,7 @@ void AvSessionServiceCloseTest(const uint8_t* data, size_t size)
         return;
     }
     avsessionService_->Close();
+    avsessionService_ = nullptr;
 }
 
 void AvSessionServiceSystemAbilityTest(const uint8_t* data, size_t size,
@@ -245,6 +247,7 @@ void AvSessionServiceClientTest(const uint8_t* data, size_t size,
 {
     int32_t pid = *reinterpret_cast<const int32_t*>(data);
     service->OnClientDied(pid);
+
     sptr<ClientDeathStub> clientDeath = new ClientDeathStub();
     service->RegisterClientDeathObserver(clientDeath);
 }
@@ -253,6 +256,7 @@ void AvSessionServiceHandleEventTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
     std::string sessionId(reinterpret_cast<const char*>(data), size);
+    service->HandleSessionRelease(sessionId);
     service->HandleCallStartEvent();
 
     int32_t fd = *reinterpret_cast<const int32_t*>(data);
@@ -657,7 +661,53 @@ void AvSessionServiceTest(const uint8_t* data, size_t size)
     HandleDeviceChange002(data, size);
 }
 
-int32_t AVSessionServiceStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
+int32_t AVSessionServiceStubFuzzer::OnRemoteRequestForSessionStub(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return AVSESSION_ERROR;
+    }
+    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+    code %= static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX);
+
+    size -= sizeof(uint32_t);
+    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    std::string tag(reinterpret_cast<const char*>(data), size);
+    int32_t type = *(reinterpret_cast<const int32_t*>(data));
+    std::string bundleName(reinterpret_cast<const char*>(data), size);
+    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    bool isThirdPartyApp = *(reinterpret_cast<const int32_t *>(data));
+    AVSessionDescriptor descriptor;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(bundleName);
+    elementName.SetAbilityName(abilityName);
+    descriptor.sessionId_ = sessionId;
+    descriptor.sessionTag_ = tag;
+    descriptor.sessionType_ = type;
+    descriptor.elementName_ = elementName;
+    descriptor.isThirdPartyApp_ = isThirdPartyApp;
+    sptr<AVSessionItem> avSessionItem = new(std::nothrow) AVSessionItem(descriptor);
+    if (!avSessionItem) {
+        SLOGI("testAVSession item is null");
+        return AVSESSION_ERROR;
+    }
+    sptr<IRemoteObject> remoteObject = nullptr;
+    std::shared_ptr<AVSessionProxyTestOnServiceFuzzer> avSessionProxy =
+        std::make_shared<AVSessionProxyTestOnServiceFuzzer>(remoteObject);
+    MessageParcel dataMessageParcelForSession;
+    if (!dataMessageParcelForSession.WriteInterfaceToken(avSessionProxy->GetDescriptor())) {
+        SLOGE("testAVSession item write interface token error");
+        return AVSESSION_ERROR;
+    }
+    dataMessageParcelForSession.WriteBuffer(data + sizeof(uint32_t), size);
+    dataMessageParcelForSession.RewindRead(0);
+    MessageParcel replyForSession;
+    MessageOption optionForSession;
+    int32_t ret = avsessionService_->OnRemoteRequest(code, dataMessageParcelForSession,
+        replyForSession, optionForSession);
+    return ret;
+}
+
+int32_t AVSessionServiceStubFuzzer::OnRemoteRequest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return AVSESSION_ERROR;
@@ -686,13 +736,15 @@ int32_t AVSessionServiceStubFuzzer::OnRemoteRequest(uint8_t* data, size_t size)
     return ret;
 }
 
-int32_t SessionListenerStubRemoteRequestTest(uint8_t* data, size_t size)
+int32_t AVSessionServiceStubRemoteRequestTest(const uint8_t* data, size_t size)
 {
-    auto sessionListenerStub = std::make_unique<AVSessionServiceStubFuzzer>();
-    if (sessionListenerStub == nullptr) {
+    auto serviceStub = std::make_unique<AVSessionServiceStubFuzzer>();
+    if (serviceStub == nullptr) {
         return 0;
     }
-    return sessionListenerStub->OnRemoteRequest(data, size);
+    serviceStub->OnRemoteRequest(data, size);
+    serviceStub->OnRemoteRequestForSessionStub(data, size);
+    return 0;
 }
 
 /* Fuzzer entry point */
@@ -702,6 +754,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     AvSessionServiceCloseTest(data, size);
     AvSessionServiceExternalCallTest(data, size);
     AvSessionServiceTest(data, size);
+    AVSessionServiceStubRemoteRequestTest(data, size);
     return 0;
 }
 } // namespace AVSession
