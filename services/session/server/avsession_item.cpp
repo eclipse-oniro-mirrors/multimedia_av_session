@@ -1006,8 +1006,6 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
     if (cacheDeviceInfo.networkId_.empty()) {
         SLOGE("untrusted device, networkId is empty, then input deviceId to ApplyAdvancedResource");
-        collaborationNeedNetworkId_ = cacheDeviceInfo.deviceId_;
-        networkIdIsEmpty = true;
     } else {
         collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
     }
@@ -1102,15 +1100,17 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
 
-void AVSessionItem::DealCollaborationPublishState(int32_t castState)
+void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
-        if (networkIdIsEmpty) {
-            //collaborationNeedNetworkId_ value equal to deviceId value when networkId is empty
-            AVRouter::GetInstance().GetRemoteNetWorkId(
-                castHandle_, collaborationNeedNetworkId_, collaborationNeedNetworkId_);
-            networkIdIsEmpty = false;
+        if (deviceInfo.deviceId_.empty()) {
+            if (collaborationNeedNetworkId_.empty()) {
+                AVRouter::GetInstance().GetRemoteNetWorkId(
+                    castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
+            }
+        } else {
+            collaborationNeedNetworkId_ = deviceInfo.deviceId_;
         }
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
@@ -1125,7 +1125,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
-    DealCollaborationPublishState(castState);
+    DealCollaborationPublishState(castState, deviceInfo);
     DealCastState(castState);
     if (castState == streamStateConnection && counter_ == secondStep) {
         SLOGI("interception of one devicestate=6 transmission");

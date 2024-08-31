@@ -75,7 +75,7 @@ public:
 
     void DealDisconnect(DeviceInfo deviceInfo);
 
-    void DealCollaborationPublishState(int32_t castState);
+    void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
