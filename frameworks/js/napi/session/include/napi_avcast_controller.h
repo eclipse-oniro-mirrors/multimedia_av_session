@@ -85,7 +85,7 @@ private:
         napi_value param, napi_value callback);
     static napi_status OnCastControlDecodingError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
-    static napi_status OnCastControlAudioRenderError(napi_env env, NapiAVCastController* napiCastController,
+    static napi_status OnCastControlAudioRendererError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
     static napi_status OnCastControlDrmError(napi_env env, NapiAVCastController* napiCastController,
         napi_value param, napi_value callback);
@@ -116,7 +116,7 @@ private:
         NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffCastControlDecodingError(napi_env env,
         NapiAVCastController* napiCastController, napi_value callback);
-    static napi_status OffCastControlAudioRenderError(napi_env env,
+    static napi_status OffCastControlAudioRendererError(napi_env env,
         NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffCastControlDrmError(napi_env env,
         NapiAVCastController* napiCastController, napi_value callback);
