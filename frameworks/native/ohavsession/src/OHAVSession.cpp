@@ -35,6 +35,11 @@ OHAVSession::OHAVSession(AVSession_Type sessionType, const char* sessionTag,
     avSession_ = AVSessionManager::GetInstance().CreateSession(sessionTag, sessionType, elementName);
 }
 
+bool OHAVSession::IsAVSessionNull()
+{
+    return avSession_ == nullptr;
+}
+
 AVSession_ErrCode OHAVSession::GetEncodeErrcode(int32_t ret)
 {
     auto it = errcodes.find(ret);
@@ -422,12 +427,20 @@ AVSession_ErrCode OH_AVSession_Create(AVSession_Type sessionType, const char* se
 {
     OHOS::AVSession::OHAVSession *oh_avsession = new OHOS::AVSession::OHAVSession(sessionType, sessionTag,
         bundleName, abilityName);
+    if (oh_avsession->IsAVSessionNull()) {
+        delete oh_avsession;
+        oh_avsession = nullptr;
+        return AV_SESSION_ERR_INVALID_PARAMETER;
+    }
     *avsession = (OH_AVSession*)oh_avsession;
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OH_AVSession_Destroy(OH_AVSession* avsession)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     if (nullptr != oh_avsession) {
         delete oh_avsession;
@@ -438,18 +451,27 @@ AVSession_ErrCode OH_AVSession_Destroy(OH_AVSession* avsession)
 
 AVSession_ErrCode OH_AVSession_Activate(OH_AVSession* avsession)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->Activate();
 }
 
 AVSession_ErrCode OH_AVSession_Deactivate(OH_AVSession* avsession)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->Deactivate();
 }
 
 AVSession_ErrCode OH_AVSession_GetSessionType(OH_AVSession* avsession, AVSession_Type* sessionType)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     std::string str = oh_avsession->GetSessionType();
     auto it = oh_avsession->avsessionTypes.find(str);
@@ -463,6 +485,9 @@ AVSession_ErrCode OH_AVSession_GetSessionType(OH_AVSession* avsession, AVSession
 
 AVSession_ErrCode OH_AVSession_GetSessionId(OH_AVSession* avsession, const char** sessionId)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     *sessionId = oh_avsession->GetSessionId().c_str();
     return AV_SESSION_ERR_SUCCESS;
@@ -470,51 +495,73 @@ AVSession_ErrCode OH_AVSession_GetSessionId(OH_AVSession* avsession, const char*
 
 AVSession_ErrCode OH_AVSession_SetAVMetadata(OH_AVSession* avsession, OH_AVMetadata* metadata)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->SetAVMetaData(metadata);
 }
 
 AVSession_ErrCode OH_AVSession_SetPlaybackState(OH_AVSession* avsession, AVSession_PlaybackState playbackState)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-
     return oh_avsession->SetPlaybackState(playbackState);
 }
 
 AVSession_ErrCode OH_AVSession_SetPlaybackPosition(OH_AVSession* avsession,
     AVSession_PlaybackPosition* playbackPosition)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-
     return oh_avsession->SetPlaybackPosition(playbackPosition);
 }
 
 AVSession_ErrCode OH_AVSession_SetBufferedTime(OH_AVSession* avsession, uint64_t bufferedTime)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->SetBufferedTime(bufferedTime);
 }
 
 AVSession_ErrCode OH_AVSession_SetActiveItemId(OH_AVSession* avsession, uint64_t activeItemId)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->SetActiveItemId(activeItemId);
 }
 
 AVSession_ErrCode OH_AVSession_SetSpeed(OH_AVSession* avsession, uint32_t speed)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->SetSpeed(speed);
 }
 
 AVSession_ErrCode OH_AVSession_SetFavorite(OH_AVSession* avsession, bool favorite)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->SetFavorite(favorite);
 }
 
 AVSession_ErrCode OH_AVSession_SetLoopMode(OH_AVSession* avsession, AVSession_LoopMode loopMode)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->SetLoopMode(loopMode);
 }
@@ -522,6 +569,9 @@ AVSession_ErrCode OH_AVSession_SetLoopMode(OH_AVSession* avsession, AVSession_Lo
 AVSession_ErrCode OH_AVSession_RegisterCommandCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void* userData)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return  oh_avsession->RegisterCommandCallback(command, callback, userData);
 }
@@ -529,6 +579,9 @@ AVSession_ErrCode OH_AVSession_RegisterCommandCallback(OH_AVSession* avsession,
 AVSession_ErrCode OH_AVSession_UnRegisterCommandCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnRegisterCommandCallback(command, callback);
 }
@@ -536,6 +589,9 @@ AVSession_ErrCode OH_AVSession_UnRegisterCommandCallback(OH_AVSession* avsession
 AVSession_ErrCode OH_AVSession_RegisterForwardCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnFastForward callback, void* userData)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterForwardCallback(callback, userData);
 }
@@ -543,6 +599,9 @@ AVSession_ErrCode OH_AVSession_RegisterForwardCallback(OH_AVSession* avsession,
 AVSession_ErrCode OH_AVSession_UnRegisterForwardCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnFastForward callback)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnRegisterForwardCallback(callback);
 }
@@ -550,6 +609,9 @@ AVSession_ErrCode OH_AVSession_UnRegisterForwardCallback(OH_AVSession* avsession
 AVSession_ErrCode OH_AVSession_RegisterRewindCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnRewind callback, void* userData)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterRewindCallback(callback, userData);
 }
@@ -557,6 +619,9 @@ AVSession_ErrCode OH_AVSession_RegisterRewindCallback(OH_AVSession* avsession,
 AVSession_ErrCode OH_AVSession_UnRegisterRewindCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnRewind callback)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnRegisterRewindCallback(callback);
 }
@@ -564,6 +629,9 @@ AVSession_ErrCode OH_AVSession_UnRegisterRewindCallback(OH_AVSession* avsession,
 AVSession_ErrCode OH_AVSession_RegisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback, void* userData)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterSeekCallback(callback, userData);
 }
@@ -571,6 +639,9 @@ AVSession_ErrCode OH_AVSession_RegisterSeekCallback(OH_AVSession* avsession,
 AVSession_ErrCode OH_AVSession_UnRegisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnRegisterSeekCallback(callback);
 }
@@ -578,6 +649,9 @@ AVSession_ErrCode OH_AVSession_UnRegisterSeekCallback(OH_AVSession* avsession,
 AVSession_ErrCode OH_AVSession_RegisterSpeedCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetSpeed callback, void* userData)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterSpeedCallback(callback, userData);
 }
@@ -585,6 +659,9 @@ AVSession_ErrCode OH_AVSession_RegisterSpeedCallback(OH_AVSession* avsession,
 AVSession_ErrCode OH_AVSession_UnRegisterSpeedCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetSpeed callback)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnRegisterSpeedCallback(callback);
 }
@@ -592,6 +669,9 @@ AVSession_ErrCode OH_AVSession_UnRegisterSpeedCallback(OH_AVSession* avsession,
 AVSession_ErrCode OH_AVSession_RegisterSetLoopModeCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetLoopMode callback, void* userData)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterSetLoopModeCallback(callback, userData);
 }
@@ -599,6 +679,9 @@ AVSession_ErrCode OH_AVSession_RegisterSetLoopModeCallback(OH_AVSession* avsessi
 AVSession_ErrCode OH_AVSession_UnRegisterSetLoopModeCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetLoopMode callback)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnRegisterSetLoopModeCallback(callback);
 }
@@ -606,6 +689,9 @@ AVSession_ErrCode OH_AVSession_UnRegisterSetLoopModeCallback(OH_AVSession* avses
 AVSession_ErrCode OH_AVSession_RegisterToggleFavoriteCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnToggleFavorite callback, void* userData)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterToggleFavoriteCallback(callback, userData);
 }
@@ -613,6 +699,9 @@ AVSession_ErrCode OH_AVSession_RegisterToggleFavoriteCallback(OH_AVSession* avse
 AVSession_ErrCode OH_AVSession_UnRegisterToggleFavoriteCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnToggleFavorite callback)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnRegisterToggleFavoriteCallback(callback);
 }
@@ -620,6 +709,9 @@ AVSession_ErrCode OH_AVSession_UnRegisterToggleFavoriteCallback(OH_AVSession* av
 AVSession_ErrCode OH_AVSession_RegisterPlayFromAssetIdCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnPlayFromAssetId callback, void* userData)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterPlayFromAssetIdCallback(callback, userData);
 }
@@ -627,6 +719,9 @@ AVSession_ErrCode OH_AVSession_RegisterPlayFromAssetIdCallback(OH_AVSession* avs
 AVSession_ErrCode OH_AVSession_UnRegisterPlayFromAssetIdCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnPlayFromAssetId callback)
 {
+    if (avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnRegisterPlayFromAssetIdCallback(callback);
 }

@@ -32,6 +32,7 @@ public:
     OHAVSession();
     OHAVSession(AVSession_Type sessionType, const char* sessionTag,
         const char* bundleName, const char* abilityName);
+    bool IsAVSessionNull();
     AVSession_ErrCode Activate();
     AVSession_ErrCode Deactivate();
     std::string GetSessionType();
