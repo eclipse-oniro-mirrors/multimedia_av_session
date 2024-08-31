@@ -1113,8 +1113,9 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
             networkIdIsEmpty = false;
         }
         if (collaborationNeedNetworkId_.empty()) {
-            SLOGI("cast add to collaboration in peer");
-            collaborationNeedNetworkId_ = deviceInfo.networkId_;
+            SLOGI("cast add to collaboration in peer, get netwokId from castplus");
+            AVRouter::GetInstance().GetRemoteNetWorkId(
+                castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         }
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
