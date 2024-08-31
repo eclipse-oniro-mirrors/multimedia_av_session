@@ -1216,10 +1216,11 @@ void AVSessionItem::ListenCollaborationRejectToStopCast()
 int32_t AVSessionItem::StopCast()
 {
     if (descriptor_.sessionTag_ == "RemoteCast") {
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         int32_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
         castHandle_ = -1;
         castHandleDeviceId_ = "-100";
-        SLOGI("Stop cast process for sink with ret %{public}d", ret);
+        SLOGI("Unregister and Stop cast process for sink with ret %{public}d", ret);
         return ret;
     }
     SLOGI("Stop cast process");
