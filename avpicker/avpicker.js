@@ -542,7 +542,7 @@ export class AVCastPicker extends ViewPU {
                 if (x || y) {
                     this.isMenuShow = false;
                     if (this.extensionProxy != null) {
-                        this.extensionProxy.send({'clickEvent': ture});
+                        this.extensionProxy.send({'clickEvent': true});
                     }
                 } else {
                     this.isMenuShow = !this.isMenuShow;
