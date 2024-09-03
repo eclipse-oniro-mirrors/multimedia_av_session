@@ -945,8 +945,8 @@ napi_status NapiAVCastController::OnCastControlDecodingError(napi_env env, NapiA
         NapiAVCastControllerCallback::EVENT_CAST_DECOD_EERR, callback);
 }
 
-napi_status NapiAVCastController::OnCastControlAudioRendererError(napi_env env, NapiAVCastController* napiCastController,
-    napi_value param, napi_value callback)
+napi_status NapiAVCastController::OnCastControlAudioRendererError(napi_env env,
+    NapiAVCastController* napiCastController, napi_value param, napi_value callback)
 {
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_RENDER_ERR, callback);
@@ -1128,8 +1128,8 @@ napi_status NapiAVCastController::OffCastControlDecodingError(napi_env env, Napi
         NapiAVCastControllerCallback::EVENT_CAST_DECOD_EERR, callback);
 }
 
-napi_status NapiAVCastController::OffCastControlAudioRendererError(napi_env env, NapiAVCastController* napiCastController,
-    napi_value callback)
+napi_status NapiAVCastController::OffCastControlAudioRendererError(napi_env env,
+    NapiAVCastController* napiCastController, napi_value callback)
 {
     CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
         napi_generic_failure, "callback has not been registered");
