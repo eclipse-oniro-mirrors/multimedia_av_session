@@ -483,6 +483,7 @@ export class AVCastPicker extends ViewPU {
                         this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
                     if (x || b21) {
                         this.isMenuShow = false;
+                        this.touchMenuItemIndex = -1;
                     }
                 }
 
@@ -509,6 +510,9 @@ export class AVCastPicker extends ViewPU {
                 if (JSON.stringify(l8.isShowMenu) !== undefined) {
                     console.info(TAG, `isShowMenu : ${l8.isShowMenu}`);
                     this.isMenuShow = l8.isShowMenu;
+                    if (!this.isMenuShow) {
+                        this.touchMenuItemIndex = -1;
+                    }
                 }
 
                 if (JSON.stringify(l8.configurationColorMode) !== undefined) {
@@ -521,6 +525,7 @@ export class AVCastPicker extends ViewPU {
                 placement: Placement.TopRight,
                 onDisappear: () => {
                   this.isMenuShow = false;
+                  this.touchMenuItemIndex = -1;
                   this.menuShowStateCallback(this.isMenuShow);
                 },
                 onAppear: () => {
@@ -541,6 +546,7 @@ export class AVCastPicker extends ViewPU {
                     this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
                 if (x || y) {
                     this.isMenuShow = false;
+                    this.touchMenuItemIndex = -1;
                     if (this.extensionProxy != null) {
                         this.extensionProxy.send({'clickEvent': true});
                     }
@@ -548,6 +554,8 @@ export class AVCastPicker extends ViewPU {
                     this.isMenuShow = !this.isMenuShow;
                     if (this.isMenuShow) {
                         this.pickerClickTime = new Date().getTime();
+                    } else {
+                        this.touchMenuItemIndex = -1;
                     }
                 }
             });
