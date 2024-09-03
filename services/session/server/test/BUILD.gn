@@ -37,6 +37,13 @@ config("module_private_config") {
   ]
 }
 
+config("common_config") {
+  visibility = [ ":*" ]
+  if (castplus_cast_engine_enable) {
+    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+  }
+}
+
 common_deps = [
   "../../../../frameworks/common:avsession_common",
   "../../../../frameworks/native/session:avsession_client",
@@ -191,7 +198,10 @@ ohos_unittest("AVSessionServiceStubTest") {
 
   sources = [ "avsession_service_stub_test.cpp" ]
 
-  configs = [ ":module_private_config" ]
+  configs = [
+    ":common_config",
+    ":module_private_config",
+  ]
 
   cflags_cc = [ "--coverage" ]
 
