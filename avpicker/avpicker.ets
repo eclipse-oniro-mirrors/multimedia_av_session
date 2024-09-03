@@ -329,6 +329,7 @@ export struct AVCastPicker {
             this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
           if (isExtMenuScene || isPanelForMedia) {
             this.isMenuShow = false;
+            this.touchMenuItemIndex = -1;
           }
         }
 
@@ -355,6 +356,9 @@ export struct AVCastPicker {
         if (JSON.stringify(data['isShowMenu']) !== undefined) {
           console.info(TAG, `isShowMenu : ${JSON.stringify(data['isShowMenu'])}`);
           this.isMenuShow = data['isShowMenu'] as boolean;
+          if (!this.isMenuShow) {
+            this.touchMenuItemIndex = -1;
+          }
         }
 
         if (JSON.stringify(data['configurationColorMode']) !== undefined) {
@@ -367,6 +371,7 @@ export struct AVCastPicker {
         placement: Placement.TopRight,
         onDisappear: () => {
           this.isMenuShow = false;
+          this.touchMenuItemIndex = -1;
           this.menuShowStateCallback(this.isMenuShow);
         },
         onAppear: () => {
@@ -390,10 +395,13 @@ export struct AVCastPicker {
             this.extensionProxy.send({'clickEvent': true});
           }
           this.isMenuShow = false;
+          this.touchMenuItemIndex = -1;
         } else {
           this.isMenuShow = !this.isMenuShow;
           if (this.isMenuShow) {
             this.pickerClickTime = new Date().getTime();
+          } else {
+            this.touchMenuItemIndex = -1;
           }
         }
       })
