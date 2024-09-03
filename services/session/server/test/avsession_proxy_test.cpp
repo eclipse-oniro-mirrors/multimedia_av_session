@@ -53,7 +53,7 @@ void AVSessionProxyTest::TearDown()
 }
 
 static const int32_t DURATION_TIME = 40000;
-OHOS::AVSession::AVMetaData GetAVMetaData()
+static OHOS::AVSession::AVMetaData GetAVMetaData()
 {
     OHOS::AVSession::AVMetaData g_metaData;
     g_metaData.Reset();
