@@ -89,7 +89,7 @@ int32_t SessionListenerStub::HandleOnDeviceAvailable(MessageParcel& data, Messag
 int32_t SessionListenerStub::HandleOnDeviceLogEvent(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("SessionListenerStub::HandleOnDeviceLogEvent");
-    int32_t eventId = data.ReadInt32();
+    DeviceLogEventCode eventId = static_cast<DeviceLogEventCode>(data.ReadInt32());
     int64_t param = data.ReadInt64();
     OnDeviceLogEvent(eventId, param);
     return ERR_NONE;

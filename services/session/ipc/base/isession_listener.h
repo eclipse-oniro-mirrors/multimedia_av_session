@@ -45,7 +45,7 @@ public:
 
     virtual void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) = 0;
 
-    virtual void OnDeviceLogEvent(const int32_t eventId, const int64_t param) = 0;
+    virtual void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) = 0;
 
     virtual void OnDeviceOffline(const std::string& deviceId) = 0;
 };

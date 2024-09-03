@@ -191,7 +191,7 @@ int32_t AVRouterImpl::OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo)
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVRouterImpl::OnDeviceLogEvent(const int32_t eventId, const int64_t param)
+int32_t AVRouterImpl::OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
 {
     SLOGI("AVRouterImpl received OnDeviceLogEvent event");
 

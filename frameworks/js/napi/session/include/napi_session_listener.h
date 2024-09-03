@@ -47,7 +47,7 @@ public:
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
     void OnAudioSessionChecked(const int32_t uid) override;
     void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
-    void OnDeviceLogEvent(const int32_t eventId, const int64_t param) override;
+    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override;
     void OnDeviceOffline(const std::string& deviceId) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);

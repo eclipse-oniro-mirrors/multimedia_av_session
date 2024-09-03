@@ -66,7 +66,7 @@ void SessionListenerClient::OnDeviceAvailable(const OutputDeviceInfo& castOutput
     }
 }
 
-void SessionListenerClient::OnDeviceLogEvent(const int32_t eventId, const int64_t param)
+void SessionListenerClient::OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
 {
     auto copiedListener = listener_;
     if (copiedListener) {

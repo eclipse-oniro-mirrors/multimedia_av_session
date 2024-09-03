@@ -40,7 +40,7 @@ public:
 
     int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) override;
 
-    int32_t OnDeviceLogEvent(const int32_t eventId, const int64_t param) override;
+    int32_t OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override;
 
     int32_t OnDeviceOffline(const std::string& deviceId) override;
 

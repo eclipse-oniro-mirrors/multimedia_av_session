@@ -948,7 +948,7 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
 }
 // LCOV_EXCL_STOP
 
-void AVSessionService::NotifyDeviceLogEvent(const int32_t eventId, const int64_t param)
+void AVSessionService::NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& [pid, listener] : sessionListeners_) {

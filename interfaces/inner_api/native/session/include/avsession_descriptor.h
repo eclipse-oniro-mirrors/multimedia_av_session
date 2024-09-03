@@ -92,6 +92,11 @@ enum CastDisplayState {
     STATE_ON,
 };
 
+enum DeviceLogEventCode {
+    DEVICE_LOG_FULL = 1,
+    DEVICE_LOG_EXCEPTION = 2,
+};
+
 struct CastDisplayInfo {
     CastDisplayState displayState;
     uint64_t displayId;

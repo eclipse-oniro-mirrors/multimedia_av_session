@@ -399,7 +399,11 @@ void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
     for (auto listener : castStateListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnDeviceLogEvent for registered listeners");
-            listener->OnDeviceLogEvent(eventId, param);
+            if (eventId == DeviceLogEventCode::DEVICE_LOG_FULL) {
+                listener->OnDeviceLogEvent(DeviceLogEventCode::DEVICE_LOG_FULL, param);
+            } else {
+                listener->OnDeviceLogEvent(DeviceLogEventCode::DEVICE_LOG_EXCEPTION, param);
+            }
         }
     }
 }

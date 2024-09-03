@@ -167,7 +167,7 @@ void NapiSessionListener::OnDeviceAvailable(const OutputDeviceInfo& castOutputDe
     HandleEvent(EVENT_DEVICE_AVAILABLE, castOutputDeviceInfo, true);
 }
 
-void NapiSessionListener::OnDeviceLogEvent(const int32_t eventId, const int64_t param)
+void NapiSessionListener::OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
 {
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceLogEvent");
     SLOGI("Start device log event");
