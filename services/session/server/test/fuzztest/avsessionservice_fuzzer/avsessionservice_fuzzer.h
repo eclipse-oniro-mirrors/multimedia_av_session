@@ -15,13 +15,26 @@
 
 #ifndef OHOS_AVSESSIONSERVICE_FUZZER_H
 #define OHOS_AVSESSIONSERVICE_FUZZER_H
+#include "avsession_proxy.h"
 
 namespace OHOS::AVSession {
+    class AVSessionProxyTestOnServiceFuzzer : public AVSessionProxy {
+    public:
+        explicit AVSessionProxyTestOnServiceFuzzer(const sptr<IRemoteObject> &impl)
+            : AVSessionProxy(impl)
+        {}
+        sptr<IRemoteObject> GetRemote()
+        {
+            return Remote();
+        }
+    };
+
     class AVSessionServiceStubFuzzer {
     public:
         AVSessionServiceStubFuzzer() = default;
         ~AVSessionServiceStubFuzzer() = default;
-        int32_t OnRemoteRequest(uint8_t* data, size_t size);
+        int32_t OnRemoteRequest(const uint8_t* data, size_t size);
+        int32_t OnRemoteRequestForSessionStub(const uint8_t* data, size_t size);
     };
 }
 

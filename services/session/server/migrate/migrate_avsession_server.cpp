@@ -353,7 +353,7 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(sptr<AVControllerIte
 
     Json::FastWriter writer;
     std::string jsonStr = writer.write(jsonData);
-    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER_LIST};
+    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER_LIST, '\0'};
     std::string msg = std::string(header) + jsonStr;
     return msg;
 }
@@ -524,7 +524,7 @@ void MigrateAVSessionServer::SendSpecialKeepaliveData()
     std::thread([this]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(HEART_BEAT_TIME));
         if (this->isSoftbusConnecting_) {
-            char header[] = {MSG_HEAD_MODE, SYNC_HEARTBEAT};
+            char header[] = {MSG_HEAD_MODE, SYNC_HEARTBEAT, '\0'};
             std::string data = std::string(header);
             SendByteToAll(data);
             SendSpecialKeepaliveData();
@@ -623,7 +623,7 @@ void MigrateAVSessionServer::OnPlaybackStateChanged(const std::string &playerId,
     value[PLAYER_ID] = playerId;
     value[MEDIA_INFO] = SYNC_CONTROLLER_CALLBACK_ON_PLAYBACKSTATE_CHANGED;
     value[CALLBACK_INFO] = RebuildPlayState(state);
-    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER};
+    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER, '\0'};
     Json::FastWriter writer;
     std::string msg = writer.write(value);
     std::string result = std::string(header) + msg;
@@ -639,7 +639,7 @@ void AVControllerObserver::OnSessionDestroy()
 void AVControllerObserver::OnPlaybackStateChange(const AVPlaybackState &state)
 {
     std::shared_ptr<MigrateAVSessionServer> server = migrateServer_.lock();
-    if (server != nullptr) {
+    if (server != nullptr && state.GetState() != AVPlaybackState::PLAYBACK_STATE_INITIAL) {
         server->OnPlaybackStateChanged(playerId_, state);
     }
 }

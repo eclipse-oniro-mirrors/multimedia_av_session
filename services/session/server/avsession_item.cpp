@@ -98,10 +98,6 @@ std::string AVSessionItem::GetSessionType()
 int32_t AVSessionItem::Destroy()
 {
     SLOGI("AVSessionItem send service destroy event to service, check serviceCallback exist");
-    if (serviceCallback_) {
-        SLOGI("AVSessionItem send service destroy event to service");
-        serviceCallback_(*this);
-    }
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "Destroy",
         "BUNDLE_NAME", GetBundleName(),
@@ -110,6 +106,10 @@ int32_t AVSessionItem::Destroy()
         "SESSION_TYPE", GetSessionType(),
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
+    if (serviceCallback_) {
+        SLOGI("AVSessionItem send service destroy event to service");
+        serviceCallback_(*this);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -851,6 +851,14 @@ void AVSessionItem::InitializeCastCommands()
         supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED);
     }
 
+    iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(),
+        AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+    if (iter == supportedCastCmds_.end()) {
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD);
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_REWIND);
+    }
+
     iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
     if (iter != supportedCmd_.end()) {
         AddSessionCommandToCast(AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
@@ -1006,14 +1014,14 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     ListenCollaborationRejectToStopCast();
     DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
     if (cacheDeviceInfo.networkId_.empty()) {
-        SLOGE("untrusted device, networkId is empty, then input deviceId to ApplyAdvancedResource");
+        SLOGI("untrusted device, networkId is empty, then input deviceId to ApplyAdvancedResource");
         collaborationNeedNetworkId_ = cacheDeviceInfo.deviceId_;
         networkIdIsEmpty = true;
     } else {
         collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
     }
     CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
-    //wait collaboration callback 10s
+    //wait collaboration callback 25s
     std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
     bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
         [this]() {
@@ -1112,15 +1120,20 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
 
-void AVSessionItem::DealCollaborationPublishState(int32_t castState)
+void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
         if (networkIdIsEmpty) {
-            //collaborationNeedNetworkId_ value equal to deviceId value when networkId is empty
+            SLOGI("untrusted device, networkId is empty, get netwokId from castplus");
             AVRouter::GetInstance().GetRemoteNetWorkId(
-                castHandle_, collaborationNeedNetworkId_, collaborationNeedNetworkId_);
+                castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
             networkIdIsEmpty = false;
+        }
+        if (collaborationNeedNetworkId_.empty()) {
+            SLOGI("cast add to collaboration in peer, get netwokId from castplus");
+            AVRouter::GetInstance().GetRemoteNetWorkId(
+                castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         }
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
@@ -1135,7 +1148,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
-    DealCollaborationPublishState(castState);
+    DealCollaborationPublishState(castState, deviceInfo);
     DealCastState(castState);
     if (castState == streamStateConnection && counter_ == secondStep) {
         SLOGI("interception of one devicestate=6 transmission");
@@ -1216,10 +1229,11 @@ void AVSessionItem::ListenCollaborationRejectToStopCast()
 int32_t AVSessionItem::StopCast()
 {
     if (descriptor_.sessionTag_ == "RemoteCast") {
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         int32_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
         castHandle_ = -1;
         castHandleDeviceId_ = "-100";
-        SLOGI("Stop cast process for sink with ret %{public}d", ret);
+        SLOGI("Unregister and Stop cast process for sink with ret %{public}d", ret);
         return ret;
     }
     SLOGI("Stop cast process");
@@ -1618,6 +1632,7 @@ void AVSessionItem::HandleOnPause(const AVControlCommand& cmd)
 void AVSessionItem::HandleOnPlayOrPause(const AVControlCommand& cmd)
 {
     std::lock_guard lockGuard(metaDataLock_);
+    SLOGI("check current playstate : %{public}d", playbackState_.GetState());
     if (playbackState_.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         HandleOnPause(cmd);
     } else {

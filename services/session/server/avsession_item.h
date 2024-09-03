@@ -76,7 +76,7 @@ public:
 
     void DealDisconnect(DeviceInfo deviceInfo);
 
-    void DealCollaborationPublishState(int32_t castState);
+    void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
@@ -331,6 +331,8 @@ private:
     };
 
     std::map<int32_t, HandlerFuncType> keyEventCaller_ = {
+        {MMI::KeyEvent::KEYCODE_MEDIA_PLAY, [this](const AVControlCommand& cmd) { HandleOnPlay(cmd); }},
+        {MMI::KeyEvent::KEYCODE_MEDIA_PAUSE, [this](const AVControlCommand& cmd) { HandleOnPause(cmd); }},
         {MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE, [this](const AVControlCommand& cmd) { HandleOnPlayOrPause(cmd); }},
         {MMI::KeyEvent::KEYCODE_MEDIA_STOP, [this](const AVControlCommand& cmd) { HandleOnPause(cmd); }},
         {MMI::KeyEvent::KEYCODE_MEDIA_NEXT, [this](const AVControlCommand& cmd) { HandleOnPlayNext(cmd); }},
@@ -403,11 +405,10 @@ private:
 
     bool collaborationRejectFlag_ = false;
     bool applyResultFlag_ = false;
-    bool networkIdIsEmpty = false;
     std::string collaborationNeedNetworkId_;
     std::mutex collaborationApplyResultMutex_;
     std::condition_variable connectWaitCallbackCond_;
-    const int32_t collaborationCallbackTimeOut_ = 30;
+    const int32_t collaborationCallbackTimeOut_ = 25;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;

@@ -435,6 +435,8 @@ void AVSessionService::InitKeyEvent()
 {
     SLOGI("enter");
     std::vector<int32_t> keyCodes = {
+        MMI::KeyEvent::KEYCODE_MEDIA_PLAY,
+        MMI::KeyEvent::KEYCODE_MEDIA_PAUSE,
         MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE,
         MMI::KeyEvent::KEYCODE_MEDIA_STOP,
         MMI::KeyEvent::KEYCODE_MEDIA_NEXT,
@@ -494,14 +496,12 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
 void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
     SLOGI("HandleFocusSession with uid=%{public}d", info.uid);
-    sessionPublishedMap_[info.uid] = false;
     std::lock_guard lockGuard(sessionAndControllerLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("same session");
         if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
             topSession_->GetUid() != ancoUid) {
             AVSessionService::NotifySystemUI(nullptr, true);
-            sessionPublishedMap_[info.uid] = true;
         }
         return;
     }
@@ -513,7 +513,6 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
             if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
                 topSession_->GetUid() != ancoUid) {
                 AVSessionService::NotifySystemUI(nullptr, true);
-                sessionPublishedMap_[info.uid] = true;
             }
             return;
         }
@@ -584,9 +583,8 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             return;
         }
         sessionListForFront_.push_front(sessionItem);
-        auto iter = sessionPublishedMap_.find(sessionItem->GetUid());
-        if (iter != sessionPublishedMap_.end() && !sessionPublishedMap_[sessionItem->GetUid()]) {
-            SLOGI("RepublishNotification for uid=%{public}d", sessionItem->GetUid());
+        if (AudioAdapter::GetInstance().GetRendererRunning(sessionItem->GetUid())) {
+            SLOGI("Renderer Running, RepublishNotification for uid=%{public}d", sessionItem->GetUid());
             UpdateTopSession(sessionItem);
             AVSessionDescriptor selectSession = sessionItem->GetDescriptor();
             NotifySystemUI(&selectSession, true);
@@ -2873,15 +2871,20 @@ void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChange
     if (activeDescriptors.size() != 0 || hisDescriptors.size() == 0 || avQueueInfos.size() == 0) {
         return;
     }
-    for (AVSessionDescriptor session : hisDescriptors) {
-        if (session.elementName_.GetBundleName() == avQueueInfos[0].GetBundleName()) {
-            selectSession = session;
+    bool isHisMatch = false;
+    for (AVQueueInfo avqueue : avQueueInfos) {
+        if (avqueue.GetBundleName() == hisDescriptors[0].elementName_.GetBundleName()) {
+            isHisMatch = true;
             break;
         }
     }
+    if (!isHisMatch) {
+        SLOGI("no match hisAvqueue for %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
+        return;
+    }
     if (deviceChangeAction.type == AudioStandard::CONNECT) {
-        SLOGI("history bundle name %{public}s", selectSession.elementName_.GetBundleName().c_str());
-        NotifySystemUI(&selectSession, false);
+        SLOGI("history bundle name %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
+        NotifySystemUI(&(hisDescriptors[0]), false);
     }
 }
 // LCOV_EXCL_STOP
