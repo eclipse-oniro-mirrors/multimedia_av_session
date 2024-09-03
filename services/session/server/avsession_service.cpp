@@ -1107,7 +1107,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
 
     return result;
 }
-
+                                        
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                              const AppExecFwk::ElementName& elementName,
                                              sptr<AVSessionItem>& sessionItem)
@@ -1147,11 +1147,20 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         SLOGE("session num exceed max");
         return ERR_SESSION_EXCEED_MAX;
     }
+
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
     sessionItem = result;
+    
+    std::lock_guard frontLockGuard(sessionFrontLock_);
+    auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sessionItem);
+    if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL ||
+        (tag == "anco_audio" && GetCallingUid() == ancoUid)) && it == sessionListForFront_.end()) {
+        SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
+        sessionListForFront_.push_front(sessionItem);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -1207,16 +1216,6 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         DEFAULT_BUNDLE_NAME == elementName.GetBundleName()) {
         SLOGI("bundleName=%{public}s support play intent, refreshSortFile", elementName.GetBundleName().c_str());
         refreshSortFileOnCreateSession(session->GetSessionId(), session->GetSessionType(), elementName);
-    }
-
-    {
-        std::lock_guard frontLockGuard(sessionFrontLock_);
-        auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), session);
-        if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL ||
-            (tag == "anco_audio" && GetCallingUid() == ancoUid)) && it == sessionListForFront_.end()) {
-            SLOGI(" front session add voice_call session=%{public}s", session->GetBundleName().c_str());
-            sessionListForFront_.push_front(session);
-        }
     }
 
     {
