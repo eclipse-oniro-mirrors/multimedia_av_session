@@ -223,8 +223,12 @@ int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 
 void AVSessionItem::HandleFrontSession()
 {
-    bool isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
-        metaData_.GetMediaImageUri().empty();
+    bool isMetaEmpty;
+    {
+        std::lock_guard lockGuard(metaDataLock_);
+        isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
+            metaData_.GetMediaImageUri().empty();
+    }
     SLOGI("frontSession bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
         GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
         static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
@@ -299,7 +303,6 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         SessionXCollie sessionXCollie("avsession::SetAVMetaData");
         ReportSetAVMetaDataInfo(meta);
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
-        ProcessFrontSession("SetAVMetaData");
         std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
         if (innerPixelMap != nullptr) {
             std::string sessionId = GetSessionId();
@@ -312,6 +315,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         SLOGI(" SetAVMetaData AVQueueName: %{public}s AVQueueId: %{public}s hasAvQueueInfo: %{public}d",
             metaData_.GetAVQueueName().c_str(), metaData_.GetAVQueueId().c_str(), static_cast<int>(hasAvQueueInfo));
     }
+    ProcessFrontSession("SetAVMetaData");
     if (hasAvQueueInfo && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
