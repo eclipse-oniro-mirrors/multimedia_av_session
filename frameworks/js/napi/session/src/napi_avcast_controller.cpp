@@ -920,6 +920,10 @@ napi_status NapiAVCastController::OnPlayerError(napi_env env, NapiAVCastControll
 napi_status NapiAVCastController::OnCastControlGenericError(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController != nullptr, napi_generic_failure, "napiCastController is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "napiCastController->callback_ is nullptr");
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_GENERIC_ERR, callback);
 }
@@ -927,6 +931,10 @@ napi_status NapiAVCastController::OnCastControlGenericError(napi_env env, NapiAV
 napi_status NapiAVCastController::OnCastControlIoError(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController != nullptr, napi_generic_failure, "napiCastController is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "napiCastController->callback_ is nullptr");
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_IO_ERR, callback);
 }
@@ -934,6 +942,10 @@ napi_status NapiAVCastController::OnCastControlIoError(napi_env env, NapiAVCastC
 napi_status NapiAVCastController::OnCastControlParsingError(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController != nullptr, napi_generic_failure, "napiCastController is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "napiCastController->callback_ is nullptr");
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_PARSING_ERR, callback);
 }
@@ -941,6 +953,10 @@ napi_status NapiAVCastController::OnCastControlParsingError(napi_env env, NapiAV
 napi_status NapiAVCastController::OnCastControlDecodingError(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController != nullptr, napi_generic_failure, "napiCastController is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "napiCastController->callback_ is nullptr");
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_DECOD_EERR, callback);
 }
@@ -948,6 +964,10 @@ napi_status NapiAVCastController::OnCastControlDecodingError(napi_env env, NapiA
 napi_status NapiAVCastController::OnCastControlAudioRendererError(napi_env env,
     NapiAVCastController* napiCastController, napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController != nullptr, napi_generic_failure, "napiCastController is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "napiCastController->callback_ is nullptr");
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_RENDER_ERR, callback);
 }
@@ -955,6 +975,10 @@ napi_status NapiAVCastController::OnCastControlAudioRendererError(napi_env env,
 napi_status NapiAVCastController::OnCastControlDrmError(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController != nullptr, napi_generic_failure, "napiCastController is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "napiCastController->callback_ is nullptr");
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_DRM_ERR, callback);
 }
