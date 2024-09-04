@@ -38,7 +38,8 @@ void OHOS::AVSession::AudioAdapterTest(uint8_t *data, size_t size)
     int32_t uid = *(reinterpret_cast<const int32_t *>(data));
 
     AudioAdapter audioAdapter;
-    audioAdapter.PauseAudioStream(uid);
+    audioAdapter.MuteAudioStream(uid);
+    audioAdapter.UnMuteAudioStream(uid);
     audioAdapter.GetRendererRunning(uid);
 }
 

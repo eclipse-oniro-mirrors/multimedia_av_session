@@ -139,18 +139,34 @@ static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange002, 
 }
 
 /**
-* @tc.name: HandleAppBackgroundState001
+* @tc.name: HandleAppMuteState001
 * @tc.desc: int32_t uid = -1;
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, HandleAppBackgroundState001, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, HandleAppMuteState001, TestSize.Level1)
 {
-    SLOGI("HandleAppBackgroundState001 begin!");
+    SLOGI("HandleAppMuteState001 begin!");
     int32_t uid = -1;
     int32_t pid = -1;
     BackgroundAudioController backgroundaudiocontroller;
-    backgroundaudiocontroller.HandleAppBackgroundState(uid, pid);
+    backgroundaudiocontroller.HandleAppMuteState(uid, pid, true);
+    EXPECT_EQ(uid, -1);
+}
+
+/**
+* @tc.name: HandleAppMuteState002
+* @tc.desc: int32_t uid = -1;
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, HandleAppMuteState002, TestSize.Level1)
+{
+    SLOGI("HandleAppMuteState001 begin!");
+    int32_t uid = -1;
+    int32_t pid = -1;
+    BackgroundAudioController backgroundaudiocontroller;
+    backgroundaudiocontroller.HandleAppMuteState(uid, pid, false);
     EXPECT_EQ(uid, -1);
 }
 

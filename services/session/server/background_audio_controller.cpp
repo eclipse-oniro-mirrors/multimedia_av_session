@@ -38,9 +38,10 @@ void BackgroundAudioController::Init(AVSessionService *ptr)
     AudioAdapter::GetInstance().AddStreamRendererStateListener([this](const auto& infos) {
         HandleAudioStreamRendererStateChange(infos);
     });
-    AppManagerAdapter::GetInstance().SetAppBackgroundStateObserver([this](int32_t uid, int32_t pid) {
-        SLOGI("set background observe for uid=%{public}d pid=%{public}d", uid, pid);
-        HandleAppBackgroundState(uid, pid);
+    AppManagerAdapter::GetInstance().SetAppStateChangeObserver([this](int32_t uid, int32_t pid, bool isBackground) {
+        SLOGI("set background observe for uid=%{public}d, pid=%{public}d, isBackground=%{public}d",
+            uid, pid, isBackground);
+        HandleAppMuteState(uid, pid, isBackground);
     });
 }
 
@@ -48,8 +49,8 @@ void BackgroundAudioController::OnSessionCreate(const AVSessionDescriptor& descr
 {
     std::lock_guard lockGuard(lock_);
     sessionUIDs_.insert(descriptor.uid_);
-    AppManagerAdapter::GetInstance().RemoveObservedApp(descriptor.uid_);
     SLOGI("OnSessionCreate remove observe for uid %{public}d", descriptor.uid_);
+    AppManagerAdapter::GetInstance().RemoveObservedApp(descriptor.uid_);
 }
 
 void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& descriptor)
@@ -60,25 +61,20 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
     }
 
     if (descriptor.isThirdPartyApp_) {
-        if (!AppManagerAdapter::GetInstance().IsAppBackground(descriptor.uid_, descriptor.pid_)) {
-            AppManagerAdapter::GetInstance().AddObservedApp(descriptor.uid_);
-            SLOGI("OnSessionRelease add observe for uid %{public}d", descriptor.uid_);
-            return;
-        }
-
+        SLOGI("OnSessionRelease add observe for uid %{public}d", descriptor.uid_);
+        AppManagerAdapter::GetInstance().AddObservedApp(descriptor.uid_);
         int32_t uid = descriptor.uid_;
         bool isRunning = AudioAdapter::GetInstance().GetRendererRunning(uid);
         if (!isRunning) {
             SLOGI("renderer state is not AudioStandard::RENDERER_RUNNING");
             return;
         }
-        if (!IsBackgroundMode(descriptor.uid_, BackgroundMode::AUDIO_PLAYBACK)) {
-            SLOGI("uid=%{public}d hasn't AUDIO_PLAYBACK task", descriptor.uid_);
-            return;
+        if (AppManagerAdapter::GetInstance().IsAppBackground(descriptor.uid_, descriptor.pid_)) {
+            AudioAdapter::GetInstance().MuteAudioStream(descriptor.uid_);
+            if (ptr_ != nullptr) {
+                ptr_->NotifyAudioSessionCheckTrigger(descriptor.uid_);
+            }
         }
-        SLOGI("pause uid=%{public}d", descriptor.uid_);
-        ptr_->NotifyAudioSessionCheckTrigger(descriptor.uid_);
-        AudioAdapter::GetInstance().PauseAudioStream(descriptor.uid_);
     }
 }
 
@@ -89,34 +85,30 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
         if (info->rendererState != AudioStandard::RENDERER_RUNNING) {
             continue;
         }
-
         if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(info->clientUID)) {
             SLOGD("uid=%{public}d is system app", info->clientUID);
             continue;
         }
-
-        if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
-            AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
-            SLOGI("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
-            continue;
-        }
-
-        if (!IsBackgroundMode(info->clientUID, BackgroundMode::AUDIO_PLAYBACK)) {
-            SLOGI("uid=%{public}d hasn't AUDIO_PLAYBACK task", info->clientUID);
-            continue;
-        }
-
+        SLOGI("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
+        AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
+        
         if (HasAVSession(info->clientUID)) {
             continue;
         }
 
-        SLOGI("pause uid=%{public}d", info->clientUID);
-        ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
-        AudioAdapter::GetInstance().PauseAudioStream(info->clientUID);
+        if (AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
+            AudioAdapter::GetInstance().MuteAudioStream(info->clientUID);
+        } else {
+            AudioAdapter::GetInstance().UnMuteAudioStream(info->clientUID);
+        }
+
+        if (ptr_ != nullptr) {
+            ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
+        }
     }
 }
 
-void BackgroundAudioController::HandleAppBackgroundState(int32_t uid, int32_t pid)
+void BackgroundAudioController::HandleAppMuteState(int32_t uid, int32_t pid, bool isBackground)
 {
     if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(uid)) {
         SLOGD("uid=%{public}d is system app", uid);
@@ -129,32 +121,19 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid, int32_t pi
         SLOGE("get renderer state failed");
         return;
     }
-    bool isRunning = false;
-    for (const auto& info : infos) {
-        if (info->rendererState == AudioStandard::RENDERER_RUNNING and
-            (info->clientUID == uid and info->clientPid == pid)) {
-            SLOGI("find uid=%{public}d pid=%{public}d renderer state is %{public}d, is running",
-                uid, pid, info->rendererState);
-            isRunning = true;
-            break;
-        }
-    }
-    if (!isRunning) {
-        SLOGI("find uid=%{public}d pid=%{public}d isn't running, return", uid, pid);
-        return;
-    }
-    if (!IsBackgroundMode(uid, BackgroundMode::AUDIO_PLAYBACK)) {
-        SLOGI("uid=%{public}d hasn't AUDIO_PLAYBACK task", uid);
-        return;
-    }
 
     if (HasAVSession(uid)) {
         return;
     }
+    if (isBackground) {
+        SLOGI("mute uid=%{public}d", uid);
+        AudioAdapter::GetInstance().MuteAudioStream(uid);
+    } else {
+        SLOGI("unmute uid=%{public}d", uid);
+        AudioAdapter::GetInstance().UnMuteAudioStream(uid);
+    }
 
-    SLOGI("pause uid=%{public}d", uid);
     ptr_->NotifyAudioSessionCheckTrigger(uid);
-    AudioAdapter::GetInstance().PauseAudioStream(uid);
 }
 // LCOV_EXCL_STOP
 
@@ -195,7 +174,7 @@ bool BackgroundAudioController::HasAVSession(int32_t uid)
     bool hasSession = false;
     auto it = sessionUIDs_.find(uid);
     if (it != sessionUIDs_.end()) {
-        SLOGD("uid=%{public}d has session", uid);
+        SLOGD("uid=%{public}d has av_session, no need to handle mute or unmute strategy.", uid);
         hasSession = true;
     }
     return hasSession;

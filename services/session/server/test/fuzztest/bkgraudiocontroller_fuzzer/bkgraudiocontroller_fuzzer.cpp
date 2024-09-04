@@ -24,7 +24,7 @@ using namespace OHOS::AVSession;
 static const int32_t MAX_CODE_LEN  = 512;
 static const int32_t MIN_SIZE_NUM = 4;
 
-void OHOS::AVSession::BackGroundAudioControllerTest(uint8_t *data, size_t size)
+void OHOS::AVSession::BackGroundAudioControllerTest_01(uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
@@ -33,13 +33,26 @@ void OHOS::AVSession::BackGroundAudioControllerTest(uint8_t *data, size_t size)
     int32_t pid = *(reinterpret_cast<const int32_t*>(data));
 
     BackgroundAudioController backGroundAudioController;
-    backGroundAudioController.HandleAppBackgroundState(uid, pid);
+    backGroundAudioController.HandleAppMuteState(uid, pid, true);
+}
+
+void OHOS::AVSession::BackGroundAudioControllerTest_02(uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
+    int32_t uid = *(reinterpret_cast<const int32_t*>(data));
+    int32_t pid = *(reinterpret_cast<const int32_t*>(data));
+
+    BackgroundAudioController backGroundAudioController;
+    backGroundAudioController.HandleAppMuteState(uid, pid, false);
 }
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::BackGroundAudioControllerTest(data, size);
+    OHOS::AVSession::BackGroundAudioControllerTest_01(data, size);
+    OHOS::AVSession::BackGroundAudioControllerTest_02(data, size);
     return 0;
 }

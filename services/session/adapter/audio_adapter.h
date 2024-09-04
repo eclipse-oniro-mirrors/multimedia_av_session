@@ -42,7 +42,9 @@ public:
 
     void AddDeviceChangeListener(const DeviceChangeListener& listener);
 
-    int32_t PauseAudioStream(int32_t uid);
+    int32_t MuteAudioStream(int32_t uid);
+
+    int32_t UnMuteAudioStream(int32_t uid);
 
     int32_t PauseAudioStream(int32_t uid, AudioStandard::StreamUsage usage);
 

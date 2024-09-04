@@ -80,25 +80,25 @@ bool AppManagerAdapter::IsAppBackground(int32_t uid, int32_t pid)
     return false;
 }
 
-void AppManagerAdapter::SetAppBackgroundStateObserver(const std::function<void(int32_t, int32_t)>& observer)
+void AppManagerAdapter::SetAppStateChangeObserver(const std::function<void(int32_t, int32_t, bool)>& observer)
 {
-    backgroundObserver_ = observer;
+    appStateChangeObserver_ = observer;
 }
 
 // LCOV_EXCL_START
 void AppManagerAdapter::AddObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
+    SLOGD("add for uid=%{public}d", uid);
     observedAppUIDs_.insert(uid);
-    SLOGD(" add for uid=%{public}d ", uid);
 }
 // LCOV_EXCL_STOP
 
 void AppManagerAdapter::RemoveObservedApp(int32_t uid)
 {
     std::lock_guard lockGuard(uidLock_);
+    SLOGD("RemoveObservedApp for uid=%{public}d", uid);
     observedAppUIDs_.erase(uid);
-    SLOGD("RemoveObservedApp for uid=%{public}d ", uid);
 }
 
 void AppManagerAdapter::SetServiceCallbackForAppStateChange(const std::function<void(int uid, int state)>& callback)
@@ -114,39 +114,42 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
         if (appProcessData.appState == ApplicationState::APP_STATE_FOREGROUND ||
             appProcessData.appState == ApplicationState::APP_STATE_BACKGROUND) {
             for (const auto& appData : appProcessData.appDatas) {
-                SLOGD("check foreground bundleName=%{public}s uid=%{public}d state=%{public}d",
-                    appData.appName.c_str(), appData.uid, appProcessData.appState);
                 serviceCallbackForAppStateChange_(appData.uid, static_cast<int>(appProcessData.appState));
             }
         }
     }
     if (appProcessData.appState == ApplicationState::APP_STATE_TERMINATED) {
         for (const auto& appData : appProcessData.appDatas) {
-            RemoveObservedApp(appData.uid);
             SLOGI("HandleAppStateChanged remove for uid=%{public}d", static_cast<int>(appData.uid));
+            RemoveObservedApp(appData.uid);
         }
     }
 
-    if (appProcessData.appState != ApplicationState::APP_STATE_BACKGROUND) {
-        return;
-    }
-
-    std::set<std::pair<int32_t, int32_t>> backgroundUIDPIDs;
+    std::set<std::pair<int32_t, int32_t>> appNeedHandleMap;
     {
         std::lock_guard lockGuard(uidLock_);
         for (const auto& appData : appProcessData.appDatas) {
             SLOGI("bundleName=%{public}s uid=%{public}d pid=%{public}d state=%{public}d",
                 appData.appName.c_str(), appData.uid, appProcessData.pid, appProcessData.appState);
             auto it = observedAppUIDs_.find(appData.uid);
-            if (it != observedAppUIDs_.end()) {
-                backgroundUIDPIDs.insert(std::make_pair(appData.uid, appProcessData.pid));
+            if (it == observedAppUIDs_.end()) {
+                continue;
             }
+            appNeedHandleMap.insert(std::make_pair(appData.uid, appProcessData.pid));
         }
     }
 
-    if (backgroundObserver_) {
-        for (const auto& pair : backgroundUIDPIDs) {
-            backgroundObserver_(pair.first, pair.second);
+    if (appProcessData.appState == ApplicationState::APP_STATE_BACKGROUND) {
+        if (appStateChangeObserver_) {
+            for (const auto& pair : appNeedHandleMap) {
+                appStateChangeObserver_(pair.first, pair.second, true);
+            }
+        }
+    } else {
+        if (appStateChangeObserver_) {
+            for (const auto& pair : appNeedHandleMap) {
+                appStateChangeObserver_(pair.first, pair.second, false);
+            }
         }
     }
 }
