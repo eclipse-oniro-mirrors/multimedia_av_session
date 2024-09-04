@@ -81,5 +81,5 @@ extern "C" int32_t CancelNotification(int32_t notificationId)
     return ret;
 }
  
-}  // namespace AVSession
-}  // namespace OHOS	
+}
+} // namespace OHOS::AVSession

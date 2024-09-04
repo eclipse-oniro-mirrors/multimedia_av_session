@@ -21,9 +21,9 @@ openssl_dir = "//third_party/openssl"
 
 group("avsession_server") {
   deps = [
-    ":avsession_dynamic_notification",
     ":avsession_dynamic_display",
     ":avsession_dynamic_insight",
+    ":avsession_dynamic_notification",
     ":avsession_item",
     ":avsession_service",
     "../../sa_profile:avsession_sa_profile",
@@ -480,8 +480,8 @@ ohos_shared_library("avsession_dynamic_notification") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
-    "relational_store:native_rdb",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
   ]
 
   subsystem_name = "multimedia"
