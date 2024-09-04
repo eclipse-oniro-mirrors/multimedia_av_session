@@ -38,7 +38,7 @@
 #include "pixel_map.h"
 
 namespace OHOS::AVSession {
-static constexpr int32_t STR_MAX_LENGTH = 4096;
+static constexpr int32_t STR_MAX_LENGTH = 40960;
 static constexpr size_t STR_TAIL_LENGTH = 1;
 
 size_t NapiUtils::WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer)
@@ -212,7 +212,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::string& out)
 
     size_t maxLen = STR_MAX_LENGTH;
     status = napi_get_value_string_utf8(env, in, nullptr, 0, &maxLen);
-    if (maxLen <= 0 || maxLen >= STR_MAX_LENGTH) {
+    if (maxLen >= STR_MAX_LENGTH) {
         return napi_invalid_arg;
     }
 
@@ -634,7 +634,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVCastPlayerState& 
 
     size_t maxLen = STR_MAX_LENGTH;
     status = napi_get_value_string_utf8(env, in, nullptr, 0, &maxLen);
-    if (maxLen <= 0 || maxLen >= STR_MAX_LENGTH) {
+    if (maxLen >= STR_MAX_LENGTH) {
         return napi_invalid_arg;
     }
 

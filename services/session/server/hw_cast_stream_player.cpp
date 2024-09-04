@@ -228,7 +228,6 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         return AVSESSION_ERROR;
     }
     RefreshCurrentAVQueueItem(avQueueItem);
-    currentAVQueueItem_ = avQueueItem;
     currentAlbumCoverUri_ = mediaInfo.albumCoverUrl;
     SLOGI("Set media info and start successfully");
     return AVSESSION_SUCCESS;
