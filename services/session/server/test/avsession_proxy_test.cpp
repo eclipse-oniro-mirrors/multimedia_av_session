@@ -405,7 +405,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVMetaData001, testing::ext::TestSize.Lev
 static HWTEST_F(AVSessionProxyTest, GetAVMetaData001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetAVMetaData001, start");
-
+    GetAVMetaData();
     int32_t ret = AVSESSION_ERROR;
 
     int32_t systemAbilityId = 1;
