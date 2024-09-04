@@ -416,6 +416,8 @@ private:
 
     void ReportSessionInfo(const sptr <AVSessionItem>& session, int res);
 
+    bool CheckAncoAudio();
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
