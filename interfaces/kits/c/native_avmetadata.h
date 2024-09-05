@@ -129,6 +129,8 @@ typedef struct OH_AVMetadataStruct OH_AVMetadata;
  * @param builder The builder reference to the created result.
  * @return Function result code:
  *         {@link AVMETADATA_SUCCESS} If the execution is successful.
+ *         {@link AVMETADATA_ERROR_INVALID_PARAM} The param of builder is nullptr.
+ *         {@link AVMETADATA_ERROR_NO_MEMORY} No memory to allocate a new instance.
  * @since 13
  */
 AVMetadata_Result OH_AVMetadataBuilder_Create(OH_AVMetadataBuilder** builder);
@@ -311,34 +313,6 @@ AVMetadata_Result OH_AVMetadataBuilder_SetDescription(OH_AVMetadataBuilder* buil
 AVMetadata_Result OH_AVMetadataBuilder_SetLyric(OH_AVMetadataBuilder* builder, const char* lyric);
 
 /**
- * @brief Set the previous id of the play queue
- *
- * @param builder The metadata builder instance pointer
- * @param assetId The previous assetId of resource.
- * @return Function result code:
- *         {@link AVMETADATA_SUCCESS} If the execution is successful.
- *         {@link AVMETADATA_ERROR_INVALID_PARAM}:
- *                                                 1.The param of builder is nullptr;
- *                                                 2.The param of assetId invalid.
- * @since 13
- */
-AVMetadata_Result OH_AVMetadataBuilder_SetPreviousAssetId(OH_AVMetadataBuilder* builder, const char* assetId);
-
-/**
- * @brief Set the next id of the play queue
- *
- * @param builder The metadata builder instance pointer
- * @param assetId The next assetId of resource.
- * @return Function result code:
- *         {@link AVMETADATA_SUCCESS} If the execution is successful.
- *         {@link AVMETADATA_ERROR_INVALID_PARAM}:
- *                                                 1.The param of builder is nullptr;
- *                                                 2.The param of assetId is nullptr.
- * @since 13
- */
-AVMetadata_Result OH_AVMetadataBuilder_SetNextAssetId(OH_AVMetadataBuilder* builder, const char* assetId);
-
-/**
  * @brief Set the skip intervals of the resource
  *
  * @param builder The metadata builder instance pointer
@@ -357,13 +331,13 @@ AVMetadata_Result OH_AVMetadataBuilder_SetSkipIntervals(OH_AVMetadataBuilder* bu
  * @brief Set the display tags of the resource
  *
  * @param builder The metadata builder instance pointer
- * @param tags The tags of resource, supported by this app to be displayed on the media center
+ * @param tags The display tags of resource which are supported by this app to be displayed on the media center
  * @return Function result code:
  *         {@link AVMETADATA_SUCCESS} If the execution is successful.
  *         {@link AVMETADATA_ERROR_INVALID_PARAM} The param of builder is nullptr.
  * @since 13
  */
-AVMetadata_Result OH_AVMetadataBuilder_SetDisplayTags(OH_AVMetadataBuilder* builder, uint32_t tags);
+AVMetadata_Result OH_AVMetadataBuilder_SetDisplayTags(OH_AVMetadataBuilder* builder, int32_t tags);
 
 /**
  * @brief Create the avmetadta.
@@ -388,7 +362,7 @@ AVMetadata_Result OH_AVMetadataBuilder_GenerateAVMetadata(OH_AVMetadataBuilder* 
  *         {@link AVMETADATA_SUCCESS} If the execution is successful.
  * @since 13
  */
-AVMetadata_Result OH_AVMetadata_Destory(OH_AVMetadata* avMetadata);
+AVMetadata_Result OH_AVMetadata_Destroy(OH_AVMetadata* avMetadata);
 
 #ifdef __cplusplus
 }

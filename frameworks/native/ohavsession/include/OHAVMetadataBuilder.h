@@ -34,8 +34,6 @@ public:
     AVMetadata_Result SetDescription(const std::string &description);
     AVMetadata_Result SetLyric(const std::string &lyric);
     AVMetadata_Result SetAssetId(const std::string &assetId);
-    AVMetadata_Result SetPreviousAssetId(const std::string &assetId);
-    AVMetadata_Result SetNextAssetId(const std::string &assetId);
     AVMetadata_Result SetSkipIntervals(AVMetadata_SkipIntervals intervals);
     AVMetadata_Result SetDisplayTags(int32_t tags);
     AVMetadata_Result GenerateAVMetadata(OH_AVMetadata** avMetadata);
@@ -53,8 +51,6 @@ private:
     std::string description_ = "";
     std::string lyric_ = "";
     std::string assetId_ = "";
-    std::string previousAssetId_ = "";
-    std::string nextAssetId_ = "";
     AVMetadata_SkipIntervals intervals_ = SECONDS_15;
     int32_t tags_ = 0;
 };

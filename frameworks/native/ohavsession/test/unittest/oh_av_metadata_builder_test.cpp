@@ -72,8 +72,6 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData001, TestSize.Level1)
     g_ohAVMetaDataBuilder.SetDescription("For somebody");
     g_ohAVMetaDataBuilder.SetLyric("balabala");
     g_ohAVMetaDataBuilder.SetAssetId("000");
-    g_ohAVMetaDataBuilder.SetPreviousAssetId("123");
-    g_ohAVMetaDataBuilder.SetNextAssetId("456");
     g_ohAVMetaDataBuilder.SetSkipIntervals(SECONDS_30);
     g_ohAVMetaDataBuilder.SetDisplayTags(TAGS);
 
@@ -92,8 +90,6 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData001, TestSize.Level1)
     EXPECT_EQ(metadata->GetDescription(), "For somebody");
     EXPECT_EQ(metadata->GetLyric(), "balabala");
     EXPECT_EQ(metadata->GetAssetId(), "000");
-    EXPECT_EQ(metadata->GetPreviousAssetId(), "123");
-    EXPECT_EQ(metadata->GetNextAssetId(), "456");
     EXPECT_EQ(metadata->GetSkipIntervals(), SECONDS_30);
     EXPECT_EQ(metadata->GetDisplayTags(), TAGS);
 
@@ -142,8 +138,6 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level1)
     OH_AVMetadataBuilder_SetDescription(builder, "For somebody");
     OH_AVMetadataBuilder_SetLyric(builder, "balabala");
     OH_AVMetadataBuilder_SetAssetId(builder, "000");
-    OH_AVMetadataBuilder_SetPreviousAssetId(builder, "123");
-    OH_AVMetadataBuilder_SetNextAssetId(builder, "456");
     OH_AVMetadataBuilder_SetSkipIntervals(builder, SECONDS_30);
     OH_AVMetadataBuilder_SetDisplayTags(builder, TAGS);
     OH_AVMetadataBuilder_GenerateAVMetadata(builder, &ohMetadata);
@@ -162,13 +156,11 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level1)
     EXPECT_EQ(metadata->GetDescription(), "For somebody");
     EXPECT_EQ(metadata->GetLyric(), "balabala");
     EXPECT_EQ(metadata->GetAssetId(), "000");
-    EXPECT_EQ(metadata->GetPreviousAssetId(), "123");
-    EXPECT_EQ(metadata->GetNextAssetId(), "456");
     EXPECT_EQ(metadata->GetSkipIntervals(), SECONDS_30);
     EXPECT_EQ(metadata->GetDisplayTags(), TAGS);
 
     OH_AVMetadataBuilder_Destroy(builder);
-    OH_AVMetadata_Destory(ohMetadata);
+    OH_AVMetadata_Destroy(ohMetadata);
     SLOGI("SetAVMetaData001 End");
 }
 }  // namespace OHOS::AVSession
