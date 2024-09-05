@@ -56,11 +56,6 @@ extern "C" {
  */
 typedef enum {
     /**
-     * @brief Invalid session type.
-     */
-    SESSION_TYPE_INVALID = -1,
-
-    /**
      * @brief audio session type.
      */
     SESSION_TYPE_AUDIO = 0,
@@ -96,32 +91,32 @@ typedef enum {
     /**
      * @brief Preparing state. Indicates that the media file is not ready to play.
      */
-    PLAYBACK_STATE_PREPARE = 1,
+    PLAYBACK_STATE_PREPARING = 1,
 
     /**
      * @brief Playing state.
      */
-    PLAYBACK_STATE_PLAY = 2,
+    PLAYBACK_STATE_PLAYING = 2,
 
     /**
      * @brief Pause state.
      */
-    PLAYBACK_STATE_PAUSE = 3,
+    PLAYBACK_STATE_PAUSED = 3,
 
     /**
      * @brief Fast forward state.
      */
-    PLAYBACK_STATE_FAST_FORWARD = 4,
+    PLAYBACK_STATE_FAST_FORWARDING = 4,
 
     /**
      * @brief Rewind state.
      */
-    PLAYBACK_STATE_REWIND = 5,
+    PLAYBACK_STATE_REWINDED = 5,
 
     /**
-     * @brief Stop state.
+     * @brief Stopped state.
      */
-    PLAYBACK_STATE_STOP = 6,
+    PLAYBACK_STATE_STOPPED = 6,
 
     /**
      * @brief Complete state.
@@ -253,9 +248,9 @@ typedef enum {
     AVSESSION_CALLBACK_RESULT_SUCCESS = 0,
 
     /**
-     * @brief Result of avsession callabck is success.
+     * @brief Result of avsession callabck failed.
      */
-    AVSESSION_CALLBACK_RESULT_FAILED = -1,
+    AVSESSION_CALLBACK_RESULT_FAILURE = -1,
 } AVSessionCallback_Result;
 
 /**
@@ -467,18 +462,6 @@ AVSession_ErrCode OH_AVSession_SetPlaybackPosition(OH_AVSession* avsession,
 AVSession_ErrCode OH_AVSession_SetBufferedTime(OH_AVSession* avsession, uint64_t bufferedTime);
 
 /**
- * @brief Request to set active item id.
- *
- * @param avsession The avsession instance pointer
- * @param activeItemId The activeItemId to set
- * @return Function result code：
- *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
- * @since 13
- */
-AVSession_ErrCode OH_AVSession_SetActiveItemId(OH_AVSession* avsession, uint64_t activeItemId);
-
-/**
  * @brief Request to set speed.
  *
  * @param avsession The avsession instance pointer
@@ -542,7 +525,7 @@ AVSession_ErrCode OH_AVSession_RegisterCommandCallback(OH_AVSession* avsession,
  *         {@link AV_SESSION_ERR_CODE_COMMAND_INVALID} The command is not invalid.
  * @since 13
  */
-AVSession_ErrCode OH_AVSession_UnRegisterCommandCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterCommandCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback);
 
 /**
@@ -569,7 +552,7 @@ AVSession_ErrCode OH_AVSession_RegisterForwardCallback(OH_AVSession* avsession,
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
  * @since 13
  */
-AVSession_ErrCode OH_AVSession_UnRegisterForwardCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterForwardCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnFastForward callback);
 
 /**
@@ -596,7 +579,7 @@ AVSession_ErrCode OH_AVSession_RegisterRewindCallback(OH_AVSession* avsession,
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
  * @since 13
  */
-AVSession_ErrCode OH_AVSession_UnRegisterRewindCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterRewindCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnRewind callback);
 
 /**
@@ -623,7 +606,7 @@ AVSession_ErrCode OH_AVSession_RegisterSeekCallback(OH_AVSession* avsession,
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
  * @since 13
  */
-AVSession_ErrCode OH_AVSession_UnRegisterSeekCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback);
 
 /**
@@ -650,7 +633,7 @@ AVSession_ErrCode OH_AVSession_RegisterSpeedCallback(OH_AVSession* avsession,
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
  * @since 13
  */
-AVSession_ErrCode OH_AVSession_UnRegisterSpeedCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterSpeedCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetSpeed callback);
 
 /**
@@ -677,7 +660,7 @@ AVSession_ErrCode OH_AVSession_RegisterSetLoopModeCallback(OH_AVSession* avsessi
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
  * @since 13
  */
-AVSession_ErrCode OH_AVSession_UnRegisterSetLoopModeCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterSetLoopModeCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetLoopMode callback);
 
 /**
@@ -704,7 +687,7 @@ AVSession_ErrCode OH_AVSession_RegisterToggleFavoriteCallback(OH_AVSession* avse
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
  * @since 13
  */
-AVSession_ErrCode OH_AVSession_UnRegisterToggleFavoriteCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterToggleFavoriteCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnToggleFavorite callback);
 
 /**
@@ -731,7 +714,7 @@ AVSession_ErrCode OH_AVSession_RegisterPlayFromAssetIdCallback(OH_AVSession* avs
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
  * @since 13
  */
-AVSession_ErrCode OH_AVSession_UnRegisterPlayFromAssetIdCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterPlayFromAssetIdCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnPlayFromAssetId callback);
 
 #ifdef __cplusplus
