@@ -274,6 +274,9 @@ AVMetadata_Result OH_AVMetadataBuilder_SetSkipIntervals(OH_AVMetadataBuilder* bu
 AVMetadata_Result OH_AVMetadataBuilder_SetDisplayTags(OH_AVMetadataBuilder* builder, int32_t tags)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    if (tags != AVSESSION_DISPLAYTAG_AUDIO_VIVID) {
+        return AVMETADATA_ERROR_INVALID_PARAM;
+    }
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetDisplayTags(tags);
 }

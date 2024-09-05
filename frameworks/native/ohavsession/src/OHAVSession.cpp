@@ -417,6 +417,16 @@ AVSession_ErrCode OHAVSession::UnRegisterPlayFromAssetIdCallback(OH_AVSessionCal
 AVSession_ErrCode OH_AVSession_Create(AVSession_Type sessionType, const char* sessionTag,
     const char* bundleName, const char* abilityName, OH_AVSession** avsession)
 {
+    switch (sessionType) {
+        case SESSION_TYPE_AUDIO:
+        case SESSION_TYPE_VIDEO:
+        case SESSION_TYPE_VOICE_CALL:
+        case SESSION_TYPE_VIDEO_CALL:
+            break;
+        default:
+            return AV_SESSION_ERR_INVALID_PARAMETER;
+    }
+
     OHOS::AVSession::OHAVSession *oh_avsession = new OHOS::AVSession::OHAVSession(sessionType, sessionTag,
         bundleName, abilityName);
     if (oh_avsession->IsAVSessionNull()) {
@@ -498,6 +508,24 @@ AVSession_ErrCode OH_AVSession_SetPlaybackState(OH_AVSession* avsession, AVSessi
     if (avsession == nullptr) {
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
+    switch (playbackState) {
+        case PLAYBACK_STATE_INITIAL:
+        case PLAYBACK_STATE_PREPARING:
+        case PLAYBACK_STATE_PLAYING:
+        case PLAYBACK_STATE_PAUSED:
+        case PLAYBACK_STATE_FAST_FORWARDING:
+        case PLAYBACK_STATE_REWINDED:
+        case PLAYBACK_STATE_STOPPED:
+        case PLAYBACK_STATE_COMPLETED:
+        case PLAYBACK_STATE_RELEASED:
+        case PLAYBACK_STATE_ERROR:
+        case PLAYBACK_STATE_IDLE:
+        case PLAYBACK_STATE_BUFFERING:
+            break;
+        default:
+            return AV_SESSION_ERR_INVALID_PARAMETER;
+    }
+
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->SetPlaybackState(playbackState);
 }
@@ -544,6 +572,17 @@ AVSession_ErrCode OH_AVSession_SetLoopMode(OH_AVSession* avsession, AVSession_Lo
     if (avsession == nullptr) {
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
+    switch (loopMode) {
+        case LOOP_MODE_SEQUENCE:
+        case LOOP_MODE_SINGLE:
+        case LOOP_MODE_LIST:
+        case LOOP_MODE_SHUFFLE:
+        case LOOP_MODE_CUSTOM:
+            break;
+        default:
+            return AV_SESSION_ERR_INVALID_PARAMETER;
+    }
+
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->SetLoopMode(loopMode);
 }
@@ -554,6 +593,17 @@ AVSession_ErrCode OH_AVSession_RegisterCommandCallback(OH_AVSession* avsession,
     if (avsession == nullptr) {
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
+    switch (command) {
+        case CONTROL_CMD_PLAY:
+        case CONTROL_CMD_PAUSE:
+        case CONTROL_CMD_STOP:
+        case CONTROL_CMD_PLAY_NEXT:
+        case CONTROL_CMD_PLAY_PREVIOUS:
+            break;
+        default:
+            return AV_SESSION_ERR_INVALID_PARAMETER;
+    }
+
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return  oh_avsession->RegisterCommandCallback(command, callback, userData);
 }
@@ -564,6 +614,17 @@ AVSession_ErrCode OH_AVSession_UnregisterCommandCallback(OH_AVSession* avsession
     if (avsession == nullptr) {
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
+    switch (command) {
+        case CONTROL_CMD_PLAY:
+        case CONTROL_CMD_PAUSE:
+        case CONTROL_CMD_STOP:
+        case CONTROL_CMD_PLAY_NEXT:
+        case CONTROL_CMD_PLAY_PREVIOUS:
+            break;
+        default:
+            return AV_SESSION_ERR_INVALID_PARAMETER;
+    }
+
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnRegisterCommandCallback(command, callback);
 }
