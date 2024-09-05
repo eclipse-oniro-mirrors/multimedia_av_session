@@ -287,8 +287,10 @@ export class AVCastPicker extends ViewPU {
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         SymbolGlyph.fontSize(24);
                         SymbolGlyph.fontColor((c3 && this.configurationColorMode !==
-                            ConfigurationColorMode.COLOR_MODE_DARK) ? ['#0A59F7'] :
-                            [{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'],
+                            ConfigurationColorMode.COLOR_MODE_DARK) ?
+                            [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
+                            [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                         SymbolGlyph.renderingStrategy(2);
                     }, SymbolGlyph);
@@ -302,8 +304,10 @@ export class AVCastPicker extends ViewPU {
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Image.width(24);
                         Image.height(24);
-                        Image.fillColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? '#0A59F7' :
-                            { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'],
+                        Image.fillColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+                            { 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                            { 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Image);
                 });
@@ -351,10 +355,10 @@ export class AVCastPicker extends ViewPU {
                         }
                     });
                     Flex.backgroundColor(this.touchMenuItemIndex === w8 ? { 'id': -1, 'type': 10001,
-                        params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultModuleName__',
+                        params: ['sys.color.interactive_click'], 'bundleName': '__harDefaultModuleName__',
                         'moduleName': '__harDefaultModuleName__' } : '#00FFFFFF');
                     Flex.borderRadius(this.touchMenuItemIndex === w8 ? { 'id': -1, 'type': 10002,
-                        params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultModuleName__',
+                        params: ['sys.float.corner_radius_level8'], 'bundleName': '__harDefaultModuleName__',
                         'moduleName': '__harDefaultModuleName__' } : 0);
                 }, Flex);
                 this.observeComponentCreation2((a10, b10) => {
@@ -368,9 +372,17 @@ export class AVCastPicker extends ViewPU {
                     Text.fontSize({ 'id': -1, 'type': 10002,
                         params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultModuleName__',
                         'moduleName': '__harDefaultModuleName__' });
-                    Text.fontColor(x8.isConnected ? (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
-                        '#DBFFFFFF' : '#0A59F7') :
-                        (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'));
+                    Text.fontColor(x8.isConnected ?
+                        (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
+                        { 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
+                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                        { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
+                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
+                        (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
+                        { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
+                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                        { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
                     Text.width(144);
                     Text.padding({
                         left: 8,
@@ -411,8 +423,8 @@ export class AVCastPicker extends ViewPU {
                                 Divider.create();
                                 Divider.height(1);
                                 Divider.width(172);
-                                Divider.color(this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
-                                    '#33FFFFFF' : '#33000000');
+                                Divider.color({ 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'],
+                                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                 Divider.padding({ right: 12 });
                             }, Divider);
                         });
