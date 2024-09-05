@@ -77,7 +77,7 @@ using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
 
 static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
-static const std::string AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH = 
+static const std::string AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH =
     std::string("libavsession_dynamic_notification.z.so");
     
 static const int32_t CAST_ENGINE_SA_ID = 65546;
@@ -1513,7 +1513,7 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
     if (dynamicLoader == nullptr) {
         SLOGI("dynamicLoader is null");
-        return;
+        return AVSESSION_ERROR;
     }
 
     typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId);
