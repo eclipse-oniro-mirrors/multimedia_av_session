@@ -77,7 +77,7 @@ using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
 
 static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
-static const std::string AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH = std::string(SYSTEM_LIB_PATH) +
+static const std::string AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH = 
     std::string("libavsession_dynamic_notification.z.so");
     
 static const int32_t CAST_ENGINE_SA_ID = 65546;
@@ -1511,6 +1511,10 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
 {
     SLOGE("StartAVPlayback in!");
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+    if (dynamicLoader == nullptr) {
+        SLOGI("dynamicLoader is null");
+        return;
+    }
 
     typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId);
     StartAVPlaybackFunc startAVPlayback =
@@ -2803,6 +2807,10 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     
     SLOGI("NotifySystemUI in");
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+    if (dynamicLoader == nullptr) {
+        SLOGI("dynamicLoader is null");
+        return;
+    }
 
     typedef void (*NotifySystemUI)(const AVSessionDescriptor* historyDescriptor,
         int32_t uid, bool isActiveSession,
@@ -2813,10 +2821,15 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     if (notifySystemUI != nullptr) {
         auto uid = topSession_ ? topSession_->GetUid() : historyDescriptor->uid_;
         std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
-        CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
-        notifySystemUI(historyDescriptor, uid, isActiveSession, wantAgent);
+        if (wantAgent != nullptr) {
+            notifySystemUI(historyDescriptor, uid, isActiveSession, wantAgent);
+            dynamicLoader->CloseDynamicHandle(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH);
+        } else {
+            SLOGE("wantAgent nullptr error");
+            dynamicLoader->CloseDynamicHandle(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH);
+            return;
+        }
     }
-    dynamicLoader->CloseDynamicHandle(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH);
     SLOGI("NotifySystemUI out");
 }
 // LCOV_EXCL_STOP
@@ -2826,6 +2839,10 @@ void AVSessionService::CancelNotification()
 {
     SLOGI("CancelNotification in");
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+    if (dynamicLoader == nullptr) {
+        SLOGI("dynamicLoader is null");
+        return;
+    }
 
     typedef int32_t (*CancelNotification)(int32_t notificationId);
     CancelNotification cancelNotification =
