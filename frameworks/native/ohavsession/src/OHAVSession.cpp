@@ -106,14 +106,6 @@ AVSession_ErrCode OHAVSession::SetBufferedTime(uint64_t bufferedTime)
     return GetEncodeErrcode(ret);
 }
 
-AVSession_ErrCode OHAVSession::SetActiveItemId(uint64_t activeItemId)
-{
-    AVPlaybackState avPlaybackState;
-    avPlaybackState.SetActiveItemId(activeItemId);
-    int32_t ret = avSession_->SetAVPlaybackState(avPlaybackState);
-    return GetEncodeErrcode(ret);
-}
-
 AVSession_ErrCode OHAVSession::SetSpeed(uint32_t speed)
 {
     AVPlaybackState avPlaybackState;
@@ -475,11 +467,10 @@ AVSession_ErrCode OH_AVSession_GetSessionType(OH_AVSession* avsession, AVSession
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     std::string str = oh_avsession->GetSessionType();
     auto it = oh_avsession->avsessionTypes.find(str);
-    if (it != oh_avsession->avsessionTypes.end()) {
-        *sessionType = it->second;
-    } else {
-        *sessionType = SESSION_TYPE_INVALID;
+    if (it == oh_avsession->avsessionTypes.end()) {
+        return AV_SESSION_ERR_SERVICE_EXCEPTION;
     }
+    *sessionType = it->second;
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -530,15 +521,6 @@ AVSession_ErrCode OH_AVSession_SetBufferedTime(OH_AVSession* avsession, uint64_t
     return oh_avsession->SetBufferedTime(bufferedTime);
 }
 
-AVSession_ErrCode OH_AVSession_SetActiveItemId(OH_AVSession* avsession, uint64_t activeItemId)
-{
-    if (avsession == nullptr) {
-        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
-    }
-    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    return oh_avsession->SetActiveItemId(activeItemId);
-}
-
 AVSession_ErrCode OH_AVSession_SetSpeed(OH_AVSession* avsession, uint32_t speed)
 {
     if (avsession == nullptr) {
@@ -576,7 +558,7 @@ AVSession_ErrCode OH_AVSession_RegisterCommandCallback(OH_AVSession* avsession,
     return  oh_avsession->RegisterCommandCallback(command, callback, userData);
 }
 
-AVSession_ErrCode OH_AVSession_UnRegisterCommandCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterCommandCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback)
 {
     if (avsession == nullptr) {
@@ -596,7 +578,7 @@ AVSession_ErrCode OH_AVSession_RegisterForwardCallback(OH_AVSession* avsession,
     return oh_avsession->RegisterForwardCallback(callback, userData);
 }
 
-AVSession_ErrCode OH_AVSession_UnRegisterForwardCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterForwardCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnFastForward callback)
 {
     if (avsession == nullptr) {
@@ -616,7 +598,7 @@ AVSession_ErrCode OH_AVSession_RegisterRewindCallback(OH_AVSession* avsession,
     return oh_avsession->RegisterRewindCallback(callback, userData);
 }
 
-AVSession_ErrCode OH_AVSession_UnRegisterRewindCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterRewindCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnRewind callback)
 {
     if (avsession == nullptr) {
@@ -636,7 +618,7 @@ AVSession_ErrCode OH_AVSession_RegisterSeekCallback(OH_AVSession* avsession,
     return oh_avsession->RegisterSeekCallback(callback, userData);
 }
 
-AVSession_ErrCode OH_AVSession_UnRegisterSeekCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback)
 {
     if (avsession == nullptr) {
@@ -656,7 +638,7 @@ AVSession_ErrCode OH_AVSession_RegisterSpeedCallback(OH_AVSession* avsession,
     return oh_avsession->RegisterSpeedCallback(callback, userData);
 }
 
-AVSession_ErrCode OH_AVSession_UnRegisterSpeedCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterSpeedCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetSpeed callback)
 {
     if (avsession == nullptr) {
@@ -676,7 +658,7 @@ AVSession_ErrCode OH_AVSession_RegisterSetLoopModeCallback(OH_AVSession* avsessi
     return oh_avsession->RegisterSetLoopModeCallback(callback, userData);
 }
 
-AVSession_ErrCode OH_AVSession_UnRegisterSetLoopModeCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterSetLoopModeCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetLoopMode callback)
 {
     if (avsession == nullptr) {
@@ -696,7 +678,7 @@ AVSession_ErrCode OH_AVSession_RegisterToggleFavoriteCallback(OH_AVSession* avse
     return oh_avsession->RegisterToggleFavoriteCallback(callback, userData);
 }
 
-AVSession_ErrCode OH_AVSession_UnRegisterToggleFavoriteCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterToggleFavoriteCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnToggleFavorite callback)
 {
     if (avsession == nullptr) {
@@ -716,7 +698,7 @@ AVSession_ErrCode OH_AVSession_RegisterPlayFromAssetIdCallback(OH_AVSession* avs
     return oh_avsession->RegisterPlayFromAssetIdCallback(callback, userData);
 }
 
-AVSession_ErrCode OH_AVSession_UnRegisterPlayFromAssetIdCallback(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterPlayFromAssetIdCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnPlayFromAssetId callback)
 {
     if (avsession == nullptr) {

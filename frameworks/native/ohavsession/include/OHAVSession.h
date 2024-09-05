@@ -42,7 +42,6 @@ public:
     AVSession_ErrCode SetPlaybackState(AVSession_PlaybackState playbackState);
     AVSession_ErrCode SetPlaybackPosition(AVSession_PlaybackPosition* playbackPosition);
     AVSession_ErrCode SetBufferedTime(uint64_t bufferedTime);
-    AVSession_ErrCode SetActiveItemId(uint64_t activeItemId);
     AVSession_ErrCode SetSpeed(uint32_t speed);
     AVSession_ErrCode SetFavorite(bool favorite);
     AVSession_ErrCode SetLoopMode(AVSession_LoopMode loopMode);
@@ -77,7 +76,6 @@ public:
         {6600107, AV_SESSION_ERR_CODE_MESSAGE_OVERLOAD},
     };
     std::unordered_map<std::string, AVSession_Type> avsessionTypes = {
-        {"invalid", SESSION_TYPE_INVALID},
         {"audio", SESSION_TYPE_AUDIO},
         {"video", SESSION_TYPE_VIDEO},
         {"voice_call", SESSION_TYPE_VOICE_CALL},

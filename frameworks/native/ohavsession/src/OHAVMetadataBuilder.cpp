@@ -90,18 +90,6 @@ AVMetadata_Result OHAVMetadataBuilder::SetAssetId(const std::string &assetId)
     return AVMETADATA_SUCCESS;
 }
 
-AVMetadata_Result OHAVMetadataBuilder::SetPreviousAssetId(const std::string &assetId)
-{
-    previousAssetId_ = assetId;
-    return AVMETADATA_SUCCESS;
-}
-
-AVMetadata_Result OHAVMetadataBuilder::SetNextAssetId(const std::string &assetId)
-{
-    nextAssetId_ = assetId;
-    return AVMETADATA_SUCCESS;
-}
-
 AVMetadata_Result OHAVMetadataBuilder::SetSkipIntervals(AVMetadata_SkipIntervals intervals)
 {
     switch (intervals) {
@@ -162,8 +150,6 @@ AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMeta
     metaData->SetDescription(description_);
     metaData->SetLyric(lyric_);
     metaData->SetAssetId(assetId_);
-    metaData->SetPreviousAssetId(previousAssetId_);
-    metaData->SetNextAssetId(nextAssetId_);
     metaData->SetDisplayTags(tags_);
 
     *avMetadata = reinterpret_cast<OH_AVMetadata*>(metaData);
@@ -277,20 +263,6 @@ AVMetadata_Result OH_AVMetadataBuilder_SetAssetId(OH_AVMetadataBuilder* builder,
     return metadata->SetAssetId(assetId);
 }
 
-AVMetadata_Result OH_AVMetadataBuilder_SetPreviousAssetId(OH_AVMetadataBuilder* builder, const char* assetId)
-{
-    CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
-    OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
-    return metadata->SetPreviousAssetId(assetId);
-}
-
-AVMetadata_Result OH_AVMetadataBuilder_SetNextAssetId(OH_AVMetadataBuilder* builder, const char* assetId)
-{
-    CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
-    OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
-    return metadata->SetNextAssetId(assetId);
-}
-
 AVMetadata_Result OH_AVMetadataBuilder_SetSkipIntervals(OH_AVMetadataBuilder* builder,
                                                         AVMetadata_SkipIntervals intervals)
 {
@@ -299,7 +271,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetSkipIntervals(OH_AVMetadataBuilder* bu
     return metadata->SetSkipIntervals(intervals);
 }
 
-AVMetadata_Result OH_AVMetadataBuilder_SetDisplayTags(OH_AVMetadataBuilder* builder, uint32_t tags)
+AVMetadata_Result OH_AVMetadataBuilder_SetDisplayTags(OH_AVMetadataBuilder* builder, int32_t tags)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
@@ -315,7 +287,7 @@ AVMetadata_Result OH_AVMetadataBuilder_GenerateAVMetadata(OH_AVMetadataBuilder* 
     return metadata->GenerateAVMetadata(avMetadata);
 }
 
-AVMetadata_Result OH_AVMetadata_Destory(OH_AVMetadata* avMetadata)
+AVMetadata_Result OH_AVMetadata_Destroy(OH_AVMetadata* avMetadata)
 {
     CHECK_AND_RETURN_RET_LOG(avMetadata != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "avMetadata is null");
     AVMetaData* metadata = reinterpret_cast<AVMetaData*>(avMetadata);
