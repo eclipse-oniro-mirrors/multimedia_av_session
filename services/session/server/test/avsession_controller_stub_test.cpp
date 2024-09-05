@@ -67,7 +67,7 @@ static HapPolicyParams g_policy = {
     }
 };
 
-std::shared_ptr<PixelMap> CreatePixelMap()
+static std::shared_ptr<PixelMap> CreatePixelMap()
 {
     int32_t pixelMapWidth = 4;
     int32_t pixelMapHeight = 3;
@@ -91,7 +91,7 @@ std::shared_ptr<PixelMap> CreatePixelMap()
 }
 
 static const int32_t DURATION_TIME = 40000;
-AVMetaData GetAVMetaData()
+static AVMetaData GetAVMetaData()
 {
     AVMetaData g_metaData;
     g_metaData.Reset();

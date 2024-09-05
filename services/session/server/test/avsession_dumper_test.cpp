@@ -23,13 +23,13 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-const std::string ARGS_HELP = "-h";
-const std::string ILLEGAL_INFORMATION = "AVSession service, enter '-h' for usage.\n";
-const std::string ARGS_SHOW_METADATA = "-show_metadata";
-const std::string ARGS_SHOW_SESSION_INFO = "-show_session_info";
-const std::string ARGS_SHOW_CONTROLLER_INFO = "-show_controller_info";
-const std::string ARGS_SHOW_ERROR_INFO = "-show_error_info";
-const std::string ARGS_TRUSTED_DEVICES_INFO = "-show_trusted_devices_Info";
+static const std::string ARGS_HELP = "-h";
+static const std::string ILLEGAL_INFORMATION = "AVSession service, enter '-h' for usage.\n";
+static const std::string ARGS_SHOW_METADATA = "-show_metadata";
+static const std::string ARGS_SHOW_SESSION_INFO = "-show_session_info";
+static const std::string ARGS_SHOW_CONTROLLER_INFO = "-show_controller_info";
+static const std::string ARGS_SHOW_ERROR_INFO = "-show_error_info";
+static const std::string ARGS_TRUSTED_DEVICES_INFO = "-show_trusted_devices_Info";
 
 class AVSessionDumperAnotherTest : public testing::Test {
 public:
@@ -56,7 +56,7 @@ void AVSessionDumperAnotherTest::TearDown()
 {
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowHelp, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowHelp, TestSize.Level1)
 {
     SLOGI("Dump__ShowHelp begin!");
 
@@ -111,7 +111,7 @@ HWTEST(AVSessionDumperAnotherTest, Dump__ShowHelp, TestSize.Level1)
     SLOGI("Dump__ShowHelp end!");
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowMetaData, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowMetaData, TestSize.Level1)
 {
     SLOGI("Dump__ShowMetaData begin!");
 
@@ -157,7 +157,7 @@ HWTEST(AVSessionDumperAnotherTest, Dump__ShowMetaData, TestSize.Level1)
     SLOGI("Dump__ShowMetaData end!");
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_AUDIO, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_AUDIO, TestSize.Level1)
 {
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_AUDIO begin!");
 
@@ -205,7 +205,7 @@ HWTEST(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_AUDIO, Te
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_AUDIO end!");
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VIDEO, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VIDEO, TestSize.Level1)
 {
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VIDEO begin!");
 
@@ -251,7 +251,7 @@ HWTEST(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VIDEO, Te
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VIDEO end!");
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VOICE_CALL, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VOICE_CALL, TestSize.Level1)
 {
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VOICE_CALL begin!");
 
@@ -297,7 +297,7 @@ HWTEST(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VOICE_CAL
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VOICE_CALL end!");
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VIDEO_CALL, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VIDEO_CALL, TestSize.Level1)
 {
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VIDEO_CALL begin!");
 	
@@ -343,7 +343,7 @@ HWTEST(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VIDEO_CAL
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VIDEO_CALL end!");
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowControllerInfo, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowControllerInfo, TestSize.Level1)
 {
     SLOGI("Dump__ShowControllerInfo begin!");
 
@@ -390,7 +390,7 @@ HWTEST(AVSessionDumperAnotherTest, Dump__ShowControllerInfo, TestSize.Level1)
     SLOGI("Dump__ShowControllerInfo end!");
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowErrorInfo, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowErrorInfo, TestSize.Level1)
 {
     SLOGI("Dump__ShowErrorInfo begin!");
 
@@ -443,7 +443,7 @@ HWTEST(AVSessionDumperAnotherTest, Dump__ShowErrorInfo, TestSize.Level1)
     SLOGI("Dump__ShowErrorInfo end!");
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowTrustedDevicesInfo, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowTrustedDevicesInfo, TestSize.Level1)
 {
     SLOGI("Dump__ShowTrustedDevicesInfo begin!");
 
@@ -489,7 +489,7 @@ HWTEST(AVSessionDumperAnotherTest, Dump__ShowTrustedDevicesInfo, TestSize.Level1
     SLOGI("Dump__ShowTrustedDevicesInfo end!");
 }
 
-HWTEST(AVSessionDumperAnotherTest, Dump__ShowIllegalInfo, TestSize.Level1)
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowIllegalInfo, TestSize.Level1)
 {
     SLOGI("Dump__ShowIllegalInfo begin!");
 

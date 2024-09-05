@@ -53,7 +53,7 @@ void AVSessionProxyTest::TearDown()
 }
 
 static const int32_t DURATION_TIME = 40000;
-OHOS::AVSession::AVMetaData GetAVMetaData()
+static OHOS::AVSession::AVMetaData GetAVMetaData()
 {
     OHOS::AVSession::AVMetaData g_metaData;
     g_metaData.Reset();
@@ -405,7 +405,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVMetaData001, testing::ext::TestSize.Lev
 static HWTEST_F(AVSessionProxyTest, GetAVMetaData001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetAVMetaData001, start");
-
+    GetAVMetaData();
     int32_t ret = AVSESSION_ERROR;
 
     int32_t systemAbilityId = 1;

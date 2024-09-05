@@ -115,7 +115,7 @@ void AVControllerCallbackProxyTest::TearDown()
 {
 }
 
-std::shared_ptr<PixelMap> CreatePixelMap()
+static std::shared_ptr<PixelMap> CreatePixelMap()
 {
     int32_t pixelMapWidth = 4;
     int32_t pixelMapHeight = 3;
@@ -139,7 +139,7 @@ std::shared_ptr<PixelMap> CreatePixelMap()
 }
 
 static const int32_t DURATION_TIME = 40000;
-OHOS::AVSession::AVMetaData GetAVMetaData()
+static OHOS::AVSession::AVMetaData GetAVMetaData()
 {
     OHOS::AVSession::AVMetaData g_metaData;
     g_metaData.Reset();
