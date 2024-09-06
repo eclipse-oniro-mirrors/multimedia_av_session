@@ -340,14 +340,14 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_001, TestSize.Level
 
 /**
  * @tc.name: OH_AVSession_UnregisterCommandCallback_001
- * @tc.desc: UnRegisterCommandCallback from the class of ohavsession
+ * @tc.desc: UnregisterCommandCallback from the class of ohavsession
  * @tc.type: FUNC
  * @tc.require: none
 */
 HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_001, TestSize.Level1)
 {
     OH_AVSession* avsession = nullptr;
-    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "UnRegisterCommandCallback_001",
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "UnregisterCommandCallback_001",
         "com.xxx.hmxx", "ndkxx", &avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     AVSession_ControlCommand command = CONTROL_CMD_PLAY;
@@ -388,7 +388,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterForwardCallback_001, TestSize.Level
 
 /**
  * @tc.name: OH_AVSession_UnregisterForwardCallback_001
- * @tc.desc: UnRegisterForwardCallback from the class of ohavsession
+ * @tc.desc: UnregisterForwardCallback from the class of ohavsession
  * @tc.type: FUNC
  * @tc.require: none
 */
@@ -438,7 +438,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterRewindCallback_001, TestSize.Level1
 
 /**
  * @tc.name: OH_AVSession_UnregisterRewindCallback_001
- * @tc.desc: UnRegisterRewindCallback from the class of ohavsession
+ * @tc.desc: UnregisterRewindCallback from the class of ohavsession
  * @tc.type: FUNC
  * @tc.require: none
 */
@@ -488,7 +488,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterSeekCallback_001, TestSize.Level1)
 
 /**
  * @tc.name: OH_AVSession_UnregisterSeekCallback_001
- * @tc.desc: UnRegisterSeekCallback from the class of ohavsession
+ * @tc.desc: UnregisterSeekCallback from the class of ohavsession
  * @tc.type: FUNC
  * @tc.require: none
 */
@@ -538,7 +538,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterSpeedCallback_001, TestSize.Level1)
 
 /**
  * @tc.name: OH_AVSession_UnregisterSpeedCallback_001
- * @tc.desc: UnRegisterSpeedCallback from the class of ohavsession
+ * @tc.desc: UnregisterSpeedCallback from the class of ohavsession
  * @tc.type: FUNC
  * @tc.require: none
 */
@@ -588,7 +588,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterSetLoopModeCallback_001, TestSize.L
 
 /**
  * @tc.name: OH_AVSession_UnregisterSetLoopModeCallback_001
- * @tc.desc: UnRegisterSetLoopModeCallback from the class of ohavsession
+ * @tc.desc: UnregisterSetLoopModeCallback from the class of ohavsession
  * @tc.type: FUNC
  * @tc.require: none
 */
@@ -638,7 +638,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterToggleFavoriteCallback_001, TestSiz
 
 /**
  * @tc.name: OH_AVSession_UnregisterToggleFavoriteCallback_001
- * @tc.desc: UnRegister Toggle Favorite Callback from the class of ohavsession
+ * @tc.desc: Unregister Toggle Favorite Callback from the class of ohavsession
  * @tc.type: FUNC
  * @tc.require: none
 */
@@ -688,7 +688,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterPlayFromAssetIdCallback_001, TestSi
 
 /**
  * @tc.name: OH_AVSession_UnregisterPlayFromAssetIdCallback_001
- * @tc.desc: UnRegisterPlayFromAssetIdCallback from the class of ohavsession
+ * @tc.desc: UnregisterPlayFromAssetIdCallback from the class of ohavsession
  * @tc.type: FUNC
  * @tc.require: none
 */

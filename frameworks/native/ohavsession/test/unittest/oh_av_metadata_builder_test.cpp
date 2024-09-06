@@ -161,6 +161,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level1)
 
     OH_AVMetadataBuilder_Destroy(builder);
     OH_AVMetadata_Destroy(ohMetadata);
+
     SLOGI("SetAVMetaData001 End");
 }
 }  // namespace OHOS::AVSession

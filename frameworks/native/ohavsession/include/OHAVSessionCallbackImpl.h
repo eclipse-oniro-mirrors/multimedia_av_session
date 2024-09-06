@@ -70,31 +70,31 @@ public:
 
     AVSession_ErrCode RegisterForwardCallback(OH_AVSession* avsession,
         OH_AVSessionCallback_OnFastForward callback, void* userData);
-    AVSession_ErrCode UnRegisterForwardCallback(OH_AVSession* avsession,
+    AVSession_ErrCode UnregisterForwardCallback(OH_AVSession* avsession,
         OH_AVSessionCallback_OnFastForward callback);
     AVSession_ErrCode RegisterRewindCallback(OH_AVSession* avsession,
         OH_AVSessionCallback_OnRewind callback, void* userData);
-    AVSession_ErrCode UnRegisterRewindCallback(OH_AVSession* avsession,
+    AVSession_ErrCode UnregisterRewindCallback(OH_AVSession* avsession,
         OH_AVSessionCallback_OnRewind callback);
     AVSession_ErrCode RegisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback, void* userData);
-        AVSession_ErrCode UnRegisterSeekCallback(OH_AVSession* avsession,
+        AVSession_ErrCode UnregisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback);
     AVSession_ErrCode RegisterSpeedCallback(OH_AVSession* avsession,
         OH_AVSessionCallback_OnSetSpeed callback, void* userData);
-    AVSession_ErrCode UnRegisterSpeedCallback(OH_AVSession* avsession,
+    AVSession_ErrCode UnregisterSpeedCallback(OH_AVSession* avsession,
         OH_AVSessionCallback_OnSetSpeed callback);
     AVSession_ErrCode RegisterSetLoopModeCallback(OH_AVSession* avsession,
         OH_AVSessionCallback_OnSetLoopMode callback, void* userData);
-    AVSession_ErrCode UnRegisterSetLoopModeCallback(OH_AVSession* avsession,
+    AVSession_ErrCode UnregisterSetLoopModeCallback(OH_AVSession* avsession,
         OH_AVSessionCallback_OnSetLoopMode callback);
     AVSession_ErrCode RegisterToggleFavoriteCallback(OH_AVSession* session,
         OH_AVSessionCallback_OnToggleFavorite callback, void* userData);
-    AVSession_ErrCode UnRegisterToggleFavoriteCallback(OH_AVSession* session,
+    AVSession_ErrCode UnregisterToggleFavoriteCallback(OH_AVSession* session,
         OH_AVSessionCallback_OnToggleFavorite callback);
     AVSession_ErrCode RegisterPlayFromAssetIdCallback(OH_AVSession* session,
         OH_AVSessionCallback_OnPlayFromAssetId callback, void* userData);
-    AVSession_ErrCode UnRegisterPlayFromAssetIdCallback(OH_AVSession* session,
+    AVSession_ErrCode UnregisterPlayFromAssetIdCallback(OH_AVSession* session,
         OH_AVSessionCallback_OnPlayFromAssetId callback);
 
 private:

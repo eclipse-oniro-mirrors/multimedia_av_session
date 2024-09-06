@@ -252,7 +252,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterForwardCallback(OH_AVSession*
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSessionCallbackImpl::UnRegisterForwardCallback(OH_AVSession* avsession,
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterForwardCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnFastForward callback)
 {
     std::remove_if (forwardCallbacks_.begin(), forwardCallbacks_.end(),
@@ -278,7 +278,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterRewindCallback(OH_AVSession* 
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSessionCallbackImpl::UnRegisterRewindCallback(OH_AVSession* avsession,
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterRewindCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnFastForward callback)
 {
     std::remove_if (rewindCallbacks_.begin(), rewindCallbacks_.end(),
@@ -304,7 +304,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSeekCallback(OH_AVSession* av
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSessionCallbackImpl::UnRegisterSeekCallback(OH_AVSession* avsession,
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback)
 {
     std::remove_if (seekCallbacks_.begin(), seekCallbacks_.end(),
@@ -330,7 +330,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSpeedCallback(OH_AVSession* a
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSessionCallbackImpl::UnRegisterSpeedCallback(OH_AVSession* avsession,
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterSpeedCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetSpeed callback)
 {
     std::remove_if (setSpeedCallbacks_.begin(), setSpeedCallbacks_.end(),
@@ -356,7 +356,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSetLoopModeCallback(OH_AVSess
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSessionCallbackImpl::UnRegisterSetLoopModeCallback(OH_AVSession* avsession,
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterSetLoopModeCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetLoopMode callback)
 {
     std::remove_if (setLoopModeCallbacks_.begin(), setLoopModeCallbacks_.end(),
@@ -382,7 +382,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterToggleFavoriteCallback(OH_AVS
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSessionCallbackImpl::UnRegisterToggleFavoriteCallback(OH_AVSession* avsession,
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterToggleFavoriteCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnToggleFavorite callback)
 {
     std::remove_if (toggleFavoriteCallbacks_.begin(), toggleFavoriteCallbacks_.end(),
@@ -408,7 +408,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterPlayFromAssetIdCallback(OH_AV
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSessionCallbackImpl::UnRegisterPlayFromAssetIdCallback(OH_AVSession* avsession,
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterPlayFromAssetIdCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnPlayFromAssetId callback)
 {
     std::remove_if (playFromAssetIdCallbacks_.begin(), playFromAssetIdCallbacks_.end(),
