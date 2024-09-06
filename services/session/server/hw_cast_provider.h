@@ -34,6 +34,8 @@ public:
     ~HwCastProvider() override;
 
     void Init() override;
+    int32_t StartDeviceLogging(int32_t fd, uint32_t maxSize) override;
+    int32_t StopDeviceLogging() override;
     bool StartDiscovery(int castCapability, std::vector<std::string> drmSchemes) override;
     void StopDiscovery() override;
     int32_t SetDiscoverable(const bool enable) override;
@@ -49,6 +51,7 @@ public:
     bool UnRegisterCastSessionStateListener(int castId, std::shared_ptr<IAVCastSessionStateListener> listener) override;
 
     void OnDeviceFound(const std::vector<CastEngine::CastRemoteDevice> &deviceList) override;
+    void OnLogEvent(const int32_t eventId, const int64_t param) override;
     void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void OnServiceDied() override;

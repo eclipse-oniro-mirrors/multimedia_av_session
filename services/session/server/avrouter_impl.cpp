@@ -93,6 +93,40 @@ bool AVRouterImpl::Release()
     return false;
 }
 
+int32_t AVRouterImpl::StartDeviceLogging(int32_t fd, uint32_t maxSize)
+{
+    SLOGI("AVRouterImpl StartDeviceLogging");
+    std::lock_guard lockGuard(providerManagerLock_);
+
+    if (providerManagerMap_.empty()) {
+        cacheStartDeviceLogging_ = true;
+        return AVSESSION_SUCCESS;
+    }
+    for (const auto& [number, providerManager] : providerManagerMap_) {
+        CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
+            AVSESSION_ERROR, "provider is nullptr");
+        providerManager->provider_->StartDeviceLogging(fd, maxSize);
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVRouterImpl::StopDeviceLogging()
+{
+    SLOGI("AVRouterImpl StopDeviceLogging");
+    std::lock_guard lockGuard(providerManagerLock_);
+
+    if (cacheStartDeviceLogging_) {
+        SLOGI("clear cacheStartDeviceLogging_ when stop discovery");
+        cacheStartDeviceLogging_ = false;
+    }
+    for (const auto& [number, providerManager] : providerManagerMap_) {
+        CHECK_AND_RETURN_RET_LOG(providerManager != nullptr && providerManager->provider_ != nullptr,
+            AVSESSION_ERROR, "provider is nullptr");
+        providerManager->provider_->StopDeviceLogging();
+    }
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("AVRouterImpl StartCastDiscovery");
@@ -154,6 +188,18 @@ int32_t AVRouterImpl::OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo)
         return ERR_SERVICE_NOT_EXIST;
     }
     servicePtr_->NotifyDeviceAvailable(castOutputDeviceInfo);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVRouterImpl::OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
+{
+    SLOGI("AVRouterImpl received OnDeviceLogEvent event");
+
+    std::lock_guard lockGuard(servicePtrLock_);
+    if (servicePtr_ == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+    servicePtr_->NotifyDeviceLogEvent(eventId, param);
     return AVSESSION_SUCCESS;
 }
 

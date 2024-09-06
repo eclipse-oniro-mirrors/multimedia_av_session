@@ -30,6 +30,8 @@ public:
 
     void OnDeviceAvailable(std::vector<DeviceInfo> deviceInfos) override;
 
+    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override;
+
     void OnDeviceOffline(const std::string& deviceId) override;
 
     void OnSessionNeedDestroy() override;

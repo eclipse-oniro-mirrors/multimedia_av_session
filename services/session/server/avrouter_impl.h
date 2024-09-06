@@ -27,6 +27,10 @@ public:
     void Init(IAVSessionServiceListener *servicePtr) override;
 
     bool Release() override;
+    
+    int32_t StartDeviceLogging(int32_t fd, uint32_t maxSize) override;
+
+    int32_t StopDeviceLogging() override;
 
     int32_t StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes) override;
 
@@ -35,6 +39,8 @@ public:
     int32_t SetDiscoverable(const bool enable) override;
 
     int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) override;
+
+    int32_t OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override;
 
     int32_t OnDeviceOffline(const std::string& deviceId) override;
 
@@ -81,6 +87,7 @@ private:
     int32_t providerNumberDisable_ = 0;
     OutputDeviceInfo castOutputDeviceInfo_;
     bool cacheStartDiscovery_ = false;
+    bool cacheStartDeviceLogging_ = false;
     int32_t cacheCastDeviceCapability_ = -1;
     std::vector<std::string> cacheDrmSchemes_;
 };

@@ -43,6 +43,14 @@ void AVCastProviderManager::OnDeviceAvailable(std::vector<DeviceInfo> deviceInfo
 }
 // LCOV_EXCL_STOP
 
+void AVCastProviderManager::OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
+{
+    SLOGI("On device log event");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVRouter::GetInstance().OnDeviceLogEvent(eventId, param);
+#endif
+}
+
 void AVCastProviderManager::OnSessionNeedDestroy()
 {
     SLOGI("On cast session need destroy");

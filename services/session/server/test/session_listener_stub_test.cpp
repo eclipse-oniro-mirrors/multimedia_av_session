@@ -97,6 +97,7 @@ class SessionListenerStubDemo : public SessionListenerStub {
     void OnTopSessionChange(const AVSessionDescriptor &descriptor) override {};
     void OnAudioSessionChecked(const int32_t uid) override {};
     void OnDeviceAvailable(const OutputDeviceInfo &castOutputDeviceInfo) override {};
+    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
     void OnDeviceOffline(const std::string &deviceId) override {};
 };
 

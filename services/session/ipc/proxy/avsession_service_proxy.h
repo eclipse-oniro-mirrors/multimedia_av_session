@@ -90,6 +90,10 @@ public:
 
     int32_t SetDiscoverable(const bool enable);
 
+    int32_t StartDeviceLogging(int32_t fd, uint32_t maxSize);
+
+    int32_t StopDeviceLogging();
+
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
     int32_t StopCast(const SessionToken& sessionToken) override;
