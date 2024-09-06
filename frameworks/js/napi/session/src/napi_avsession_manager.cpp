@@ -52,6 +52,7 @@ std::shared_ptr<NapiSessionListener> NapiAVSessionManager::listener_;
 std::shared_ptr<NapiAsyncCallback> NapiAVSessionManager::asyncCallback_;
 std::list<napi_ref> NapiAVSessionManager::serviceDiedCallbacks_;
 std::mutex createControllerMutex_;
+std::mutex registerNativeSessionListenerMutex_;
 
 std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {AVSESSION_ERROR, 6600101},
@@ -522,6 +523,7 @@ void NapiAVSessionManager::ErrCodeToMessage(int32_t errCode, const std::string& 
 
 napi_status NapiAVSessionManager::RegisterNativeSessionListener(napi_env env)
 {
+    std::lock_guard lockGuard(registerNativeSessionListenerMutex_);
     if (listener_ != nullptr) {
         return napi_ok;
     }
@@ -1028,31 +1030,37 @@ napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
 
 napi_status NapiAVSessionManager::OnSessionCreate(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_SESSION_CREATED, callback);
 }
 
 napi_status NapiAVSessionManager::OnSessionDestroy(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_SESSION_DESTROYED, callback);
 }
 
 napi_status NapiAVSessionManager::OnTopSessionChange(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_TOP_SESSION_CHANGED, callback);
 }
 
 napi_status NapiAVSessionManager::OnAudioSessionChecked(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_AUDIO_SESSION_CHECKED, callback);
 }
 
 napi_status NapiAVSessionManager::OnDeviceAvailable(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_AVAILABLE, callback);
 }
 
 napi_status NapiAVSessionManager::OnDeviceOffline(napi_env env, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_OFFLINE, callback);
 }
 
