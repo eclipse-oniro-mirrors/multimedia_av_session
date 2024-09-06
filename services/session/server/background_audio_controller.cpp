@@ -98,12 +98,11 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
 
         if (AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
             AudioAdapter::GetInstance().MuteAudioStream(info->clientUID);
+            if (ptr_ != nullptr) {
+                ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
+            }
         } else {
             AudioAdapter::GetInstance().UnMuteAudioStream(info->clientUID);
-        }
-
-        if (ptr_ != nullptr) {
-            ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
         }
     }
 }
@@ -128,12 +127,13 @@ void BackgroundAudioController::HandleAppMuteState(int32_t uid, int32_t pid, boo
     if (isBackground) {
         SLOGI("mute uid=%{public}d", uid);
         AudioAdapter::GetInstance().MuteAudioStream(uid);
+        if (ptr_ != nullptr) {
+            ptr_->NotifyAudioSessionCheckTrigger(uid);
+        }
     } else {
         SLOGI("unmute uid=%{public}d", uid);
         AudioAdapter::GetInstance().UnMuteAudioStream(uid);
     }
-
-    ptr_->NotifyAudioSessionCheckTrigger(uid);
 }
 // LCOV_EXCL_STOP
 
