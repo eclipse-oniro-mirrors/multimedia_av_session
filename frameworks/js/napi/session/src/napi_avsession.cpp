@@ -1416,9 +1416,7 @@ napi_status NapiAVSession::OnCastDisplayChange(napi_env env, NapiAVSession* napi
     napiSession->session_->StartCastDisplayListener();
 #else
     SLOGE("OnCastDisplayChange CASTPLUS_CAST_ENGINE_ENABLE is not support");
-    NapiUtils::ThrowError(env, "OnCastDisplayChange failed : no memory",
-        NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
-    return NapiUtils::GetUndefinedValue(env);
+    return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
 #endif
     return napi_ok;
 }
