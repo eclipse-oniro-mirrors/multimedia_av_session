@@ -1221,7 +1221,6 @@ napi_value NapiAVSession::GetAllCastDisplays(napi_env env, napi_callback_info in
     SLOGE("GetAllCastDisplays CASTPLUS_CAST_ENGINE_ENABLE is not support");
     return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
 #endif
-    return napi_ok;
 }
 
 void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)
