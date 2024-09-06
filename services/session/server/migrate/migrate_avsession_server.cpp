@@ -191,6 +191,7 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
         SLOGW("GetControllerById fail");
         return;
     }
+
     int mediaCommand = root[MEDIA_COMMAND].isInt() ? root[MEDIA_COMMAND].asInt() : -1;
     std::string command = root[COMMAND].isString() ? root[COMMAND].asString() : "ERROR_COMMAND";
     SLOGI("ProcContolCommand mediaCommand: %{public}d", mediaCommand);
@@ -353,7 +354,7 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(sptr<AVControllerIte
 
     Json::FastWriter writer;
     std::string jsonStr = writer.write(jsonData);
-    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER_LIST};
+    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER_LIST, '\0'};
     std::string msg = std::string(header) + jsonStr;
     return msg;
 }
@@ -450,7 +451,7 @@ Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &meta
 {
     Json::Value result;
     if (metadata.IsValid()) {
-        SLOGI("ConvertMetadataToJson without img");
+        SLOGI("ConvertMetadataToJson without METADATA_ART");
         result[METADATA_TITLE] = metadata.GetTitle();
         result[METADATA_ARTIST] = metadata.GetArtist();
         std::string mediaImage = "";
@@ -515,7 +516,7 @@ std::string MigrateAVSessionServer::ConvertMetadataInfoToStr(
     metaDataJson[MEDIA_INFO] = controlCommand;
     Json::FastWriter writer;
     std::string msg = writer.write(metaDataJson);
-    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER};
+    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER, '\0'};
     return std::string(header) + msg;
 }
 
@@ -524,7 +525,7 @@ void MigrateAVSessionServer::SendSpecialKeepaliveData()
     std::thread([this]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(HEART_BEAT_TIME));
         if (this->isSoftbusConnecting_) {
-            char header[] = {MSG_HEAD_MODE, SYNC_HEARTBEAT};
+            char header[] = {MSG_HEAD_MODE, SYNC_HEARTBEAT, '\0'};
             std::string data = std::string(header);
             SendByteToAll(data);
             SendSpecialKeepaliveData();
@@ -623,7 +624,7 @@ void MigrateAVSessionServer::OnPlaybackStateChanged(const std::string &playerId,
     value[PLAYER_ID] = playerId;
     value[MEDIA_INFO] = SYNC_CONTROLLER_CALLBACK_ON_PLAYBACKSTATE_CHANGED;
     value[CALLBACK_INFO] = RebuildPlayState(state);
-    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER};
+    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER, '\0'};
     Json::FastWriter writer;
     std::string msg = writer.write(value);
     std::string result = std::string(header) + msg;

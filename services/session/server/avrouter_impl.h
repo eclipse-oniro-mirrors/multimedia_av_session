@@ -19,6 +19,7 @@
 #include "av_router.h"
 #include "avcast_provider_manager.h"
 #include "hw_cast_provider.h"
+#include "hw_cast_provider.h"
 
 namespace OHOS::AVSession {
 class AVRouterImpl : public AVRouter {

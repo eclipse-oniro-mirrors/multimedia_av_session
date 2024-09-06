@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,9 +26,9 @@ public:
 
     static PermissionChecker& GetInstance();
 
-    int32_t CheckSystemPermission(Security::AccessToken::AccessTokenID tokenId);
+    bool CheckSystemPermission(Security::AccessToken::AccessTokenID tokenId);
 
-    int32_t CheckPermission(int32_t checkPermissionType);
+    bool CheckPermission(int32_t checkPermissionType);
 
     static bool CheckSystemPermissionByUid(int uid);
 
@@ -37,7 +37,7 @@ private:
     static constexpr int UID_TRANSFORM_DIVISOR = 200000;
 
     bool IsSystemApp();
-    int32_t CheckMediaResourcePermission(
+    bool CheckMediaResourcePermission(
         Security::AccessToken::AccessTokenID callerToken, std::string permissionName);
 };
 } // namespace OHOS::AVSession

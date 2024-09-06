@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,6 @@
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "avsession_radar.h"
-#include "permission_checker.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "napi_avcast_controller.h"
@@ -74,7 +73,6 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_DEVICE_CONNECTION_FAILED, 6600108},
     {ERR_REMOTE_CONNECTION_NOT_EXIST, 6600109},
     {ERR_SESSION_IS_EXIST, 6600101},
-    {ERR_PERMISSION_DENIED, 201},
     {ERR_NO_PERMISSION, 202},
     {ERR_INVALID_PARAM, 401},
 };
@@ -178,8 +176,6 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetAllSessionDescriptors failed : native no permission";
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "GetAllSessionDescriptors failed : native permission denied";
             } else {
                 context->errMessage = "GetAllSessionDescriptors failed : native server exception";
             }
@@ -228,8 +224,6 @@ napi_value NapiAVSessionManager::GetHistoricalSessionDescriptors(napi_env env, n
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetHistoricalSessionDescriptors failed : native no permission";
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "GetHistoricalSessionDescriptors failed : native permission denied";
             } else {
                 context->errMessage = "GetHistoricalSessionDescriptors failed : native server exception";
             }
@@ -279,8 +273,6 @@ napi_value NapiAVSessionManager::GetHistoricalAVQueueInfos(napi_env env, napi_ca
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetHistoricalAVQueueInfos failed : native no permission";
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "GetHistoricalAVQueueInfos failed : native permission denied";
             } else {
                 context->errMessage = "GetHistoricalAVQueueInfos failed : native server exception";
             }
@@ -328,8 +320,6 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "StartAVPlayback failed : native no permission";
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "StartAVPlayback failed : native permission denied";
             } else {
                 context->errMessage = "StartAVPlayback failed : native server exception";
             }
@@ -363,8 +353,6 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "CreateController failed : native no permission";
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "CreateController failed : native permission denied";
             } else if (ret == ERR_INVALID_PARAM) {
                 context->errMessage = "CreateController failed : native invalid parameters";
             } else if (ret == ERR_SESSION_NOT_EXIST) {
@@ -420,8 +408,6 @@ napi_value NapiAVSessionManager::GetAVCastController(napi_env env, napi_callback
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetAVCastController failed : native no permission";
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "GetAVCastController failed : native permission denied";
             } else if (ret == ERR_INVALID_PARAM) {
                 context->errMessage = "GetAVCastController failed : native invalid parameters";
             } else if (ret == ERR_SESSION_NOT_EXIST) {
@@ -511,9 +497,6 @@ void NapiAVSessionManager::ErrCodeToMessage(int32_t errCode, const std::string& 
         case ERR_NO_PERMISSION:
             message.append(" failed : native no permission");
             break;
-        case ERR_PERMISSION_DENIED:
-            message.append(" failed : native permission denied");
-            break;
         default:
             message.append(" failed : native server exception");
             break;
@@ -545,9 +528,6 @@ napi_status NapiAVSessionManager::RegisterNativeSessionListener(napi_env env)
         } else if (ret == ERR_NO_PERMISSION) {
             NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
                 NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-        } else if (ret == ERR_PERMISSION_DENIED) {
-            NapiUtils::ThrowError(env, "OnEvent failed : native permission denied",
-                NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
         } else {
             NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
                 NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
@@ -570,12 +550,11 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     std::string eventName;
     napi_value callback = nullptr;
     auto input = [&eventName, &callback, env, &context](size_t argc, napi_value* argv) {
-        int32_t err = PermissionChecker::GetInstance().CheckPermission(
-            PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
-        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+        uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+        bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+        CHECK_ARGS_RETURN_VOID(context, isSystemApp, "Check system permission error",
             NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check permission denied",
-            NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
+
         /* require 2 arguments <event, callback> */
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -624,12 +603,11 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
     std::string eventName;
     napi_value callback = nullptr;
     auto input = [&eventName, env, &context, &callback](size_t argc, napi_value* argv) {
-        int32_t err = PermissionChecker::GetInstance().CheckPermission(
-            PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
-        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+        uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+        bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+        CHECK_ARGS_RETURN_VOID(context, isSystemApp, "Check system permission error",
             NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check permission denied",
-            NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
+
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
@@ -684,8 +662,6 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
                 context->errMessage = "SendSystemAVKeyEvent failed : native invalid keyEvent";
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SendSystemAVKeyEvent failed : native no permission";
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "SendSystemAVKeyEvent failed : native permission denied";
             } else {
                 context->errMessage = "SendSystemAVKeyEvent failed : native server exception";
             }
@@ -736,8 +712,6 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
                 context->errMessage = "SendSystemControlCommand failed : native send control command no permission";
                 HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "ERROR_CODE", ret,
                                     "ERROR_INFO", "SendSystemControlCommand failed : native no permission");
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "SendSystemControlCommand failed : native send control command permission denied";
             } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
                 context->errMessage = "SendSystemControlCommand failed : native send command overload";
             } else {
@@ -775,8 +749,6 @@ napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "StartCastDiscovery failed : native no permission";
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "StartCastDiscovery failed : native permission denied";
             } else if (ret == ERR_INVALID_PARAM) {
                 context->errMessage = "StartCastDiscovery failed : native invalid parameters";
             } else if (ret == ERR_SESSION_NOT_EXIST) {
@@ -847,8 +819,6 @@ napi_value NapiAVSessionManager::StopCastDiscovery(napi_env env, napi_callback_i
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "StopCastDiscovery failed : native no permission";
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "StopCastDiscovery failed : native permission denied";
             } else if (ret == ERR_INVALID_PARAM) {
                 context->errMessage = "StopCastDiscovery failed : native invalid parameters";
             } else if (ret == ERR_SESSION_NOT_EXIST) {
@@ -915,8 +885,6 @@ std::string NapiAVSessionManager::GetStartCastErrMsg(int32_t error)
     std::string err;
     if (error == ERR_NO_PERMISSION) {
         err = "StartCast failed : native no permission";
-    } else if (error == ERR_PERMISSION_DENIED) {
-        err = "StartCast failed : native permission denied";
     } else if (error == ERR_INVALID_PARAM) {
         err = "StartCast failed : native invalid parameters";
     } else if (error == ERR_SESSION_NOT_EXIST) {

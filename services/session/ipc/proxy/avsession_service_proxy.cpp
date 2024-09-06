@@ -112,8 +112,6 @@ int32_t AVSessionServiceProxy::GetAllSessionDescriptors(std::vector<AVSessionDes
 
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
     if (ret == AVSESSION_SUCCESS) {
         uint32_t size {};
         CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
@@ -144,9 +142,9 @@ int32_t AVSessionServiceProxy::GetSessionDescriptorsBySessionId(const std::strin
         static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID),\
         data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
+
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_RETURN_RET_LOG(descriptor.ReadFromParcel(reply), ERR_UNMARSHALLING, "read descriptor failed");
     }
@@ -172,8 +170,6 @@ int32_t AVSessionServiceProxy::GetHistoricalSessionDescriptors(int32_t maxSize,
 
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
     if (ret == AVSESSION_SUCCESS) {
         uint32_t size {};
         CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
@@ -240,8 +236,6 @@ int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_
 
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
     if (ret != AVSESSION_SUCCESS) {
         return ret;
     }
@@ -301,8 +295,6 @@ int32_t AVSessionServiceProxy::CreateController(const std::string& sessionId,
     auto ret = AVSessionServiceProxy::CreateControllerInner(sessionId, object);
     CHECK_AND_RETURN_RET_LOG((ret == AVSESSION_SUCCESS || ret == ERR_CONTROLLER_IS_EXIST),
         ret, "CreateControllerInner failed");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
     auto controllerObject = iface_cast<AVSessionControllerProxy>(object);
     CHECK_AND_RETURN_RET_LOG(controllerObject, AVSESSION_ERROR, "controllerObject is nullptr");
 
@@ -339,8 +331,6 @@ int32_t AVSessionServiceProxy::GetAVCastController(const std::string& sessionId,
 {
     sptr<IRemoteObject> object;
     auto ret = AVSessionServiceProxy::GetAVCastControllerInner(sessionId, object);
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateControllerInner failed");
 
     auto castControllerObject = iface_cast<AVCastControllerProxy>(object);
@@ -368,8 +358,6 @@ int32_t AVSessionServiceProxy::GetAVCastControllerInner(const std::string& sessi
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
     if (ret == AVSESSION_SUCCESS) {
         object = reply.ReadRemoteObject();
     }

@@ -30,14 +30,14 @@ const uint32_t TRUSTED_DEVICE = 1;
 
 HwCastProvider::HwCastProvider()
 {
-    SLOGD("pre construct ths HwCastProvider");
+    SLOGD("pre construct the HwCastProvider");
     std::lock_guard lockGuard(mutexLock_);
-    SLOGI("construct ths HwCastProvider");
+    SLOGI("construct the HwCastProvider");
 }
 
 HwCastProvider::~HwCastProvider()
 {
-    SLOGD("pre destruct ths HwCastProvider");
+    SLOGD("pre destruct the HwCastProvider");
     std::lock_guard lockGuard(mutexLock_);
     SLOGI("destruct the HwCastProvider");
     Release();
@@ -45,7 +45,7 @@ HwCastProvider::~HwCastProvider()
 
 void HwCastProvider::Init()
 {
-    SLOGD("pre init ths HwCastProvider");
+    SLOGD("pre init the HwCastProvider");
     std::lock_guard lockGuard(mutexLock_);
     SLOGI("Init the HwCastProvider");
     CastSessionManager::GetInstance().RegisterListener(shared_from_this());
@@ -65,7 +65,6 @@ bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string>
     }
     return ret;
 }
-
 void HwCastProvider::StopDiscovery()
 {
     SLOGI("stop discovery");
@@ -183,7 +182,6 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
         return false;
     }
 
-    lastCastId_ = castId;
     return hwCastProviderSession->AddDevice(deviceInfo.deviceId_);
 }
 

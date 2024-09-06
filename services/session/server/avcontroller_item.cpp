@@ -250,6 +250,25 @@ int32_t AVControllerItem::Destroy()
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::DestroyWithoutReply()
+{
+    SLOGI("do controller DestroyWithoutReply for pid %{public}d", static_cast<int>(pid_));
+    {
+        std::lock_guard callbackLockGuard(callbackMutex_);
+        innerCallback_ = nullptr;
+        callback_ = nullptr;
+    }
+    {
+        std::lock_guard sessionLockGuard(sessionMutex_);
+        if (session_ != nullptr) {
+            session_->HandleControllerRelease(pid_);
+            sessionId_.clear();
+            session_ = nullptr;
+        }
+    }
+    return AVSESSION_SUCCESS;
+}
+
 // LCOV_EXCL_START
 std::string AVControllerItem::GetSessionId()
 {

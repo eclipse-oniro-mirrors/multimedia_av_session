@@ -1513,7 +1513,6 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
         }
     };
     SLOGD("check offEvent eventName %{public}s", eventName.c_str());
-
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
         SLOGE("check offEvent with status err");
