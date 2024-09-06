@@ -18,6 +18,11 @@
 #include <string>
 #include "native_avmetadata.h"
 #include "native_avsession_errors.h"
+#include "avsession_pixel_map_adapter.h"
+#include "avmeta_data.h"
+#include "curl/curl.h"
+#include "image_source.h"
+#include "pixel_map.h"
 
 namespace OHOS::AVSession {
 class OHAVMetadataBuilder {
@@ -39,6 +44,10 @@ public:
     AVMetadata_Result GenerateAVMetadata(OH_AVMetadata** avMetadata);
 
 private:
+    static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri);
+    static bool DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri);
+    static int32_t DoDownload(AVMetaData& meta, const std::string uri);
+    static size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer);
     std::string title_ = "";
     std::string artist_ = "";
     std::string author_ = "";
@@ -53,6 +62,8 @@ private:
     std::string assetId_ = "";
     AVMetadata_SkipIntervals intervals_ = SECONDS_15;
     int32_t tags_ = 0;
+    static constexpr size_t TIME_OUT_SECOND = 5;
+    static constexpr int HTTP_ERROR_CODE = 400;
 };
 }
 

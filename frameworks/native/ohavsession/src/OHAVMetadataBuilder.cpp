@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "OHAVMetadataBuilder.h"
-#include "avmeta_data.h"
 #include "avsession_log.h"
 
 using namespace OHOS::AVSession;
@@ -110,12 +109,101 @@ AVMetadata_Result OHAVMetadataBuilder::SetDisplayTags(int32_t tags)
     return AVMETADATA_SUCCESS;
 }
 
+size_t OHAVMetadataBuilder::WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb,
+                                          std::vector<std::uint8_t> *imgBuffer)
+{
+    size_t realsize = size * nmemb;
+    imgBuffer->reserve(realsize + imgBuffer->capacity());
+    for (size_t i = 0; i < realsize; i++) {
+        imgBuffer->push_back(ptr[i]);
+    }
+    return realsize;
+}
+
+bool OHAVMetadataBuilder::CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri)
+{
+    CURL *easyHandle_ = curl_easy_init();
+    if (easyHandle_) {
+        // set request options
+        curl_easy_setopt(easyHandle_, CURLOPT_URL, uri.c_str());
+        curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, OHAVMetadataBuilder::TIME_OUT_SECOND);
+        curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, "/etc/ssl/certs/" "cacert.pem");
+        curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
+        curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, OHAVMetadataBuilder::WriteCallback);
+        curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, &imgBuffer);
+
+        // perform request
+        CURLcode res = curl_easy_perform(easyHandle_);
+        if (res != CURLE_OK) {
+            SLOGI("DoDownload curl easy_perform failure: %{public}s\n", curl_easy_strerror(res));
+            curl_easy_cleanup(easyHandle_);
+            easyHandle_ = nullptr;
+            return false;
+        } else {
+            int64_t httpCode = 0;
+            curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
+            SLOGI("DoDownload Http result " "%{public}" PRId64, httpCode);
+            CHECK_AND_RETURN_RET_LOG(httpCode < OHAVMetadataBuilder::HTTP_ERROR_CODE, false, "recv Http ERROR");
+            curl_easy_cleanup(easyHandle_);
+            easyHandle_ = nullptr;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool OHAVMetadataBuilder::DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri)
+{
+    std::vector<std::uint8_t> imgBuffer(0);
+    if (CurlSetRequestOptions(imgBuffer, uri) == true) {
+        std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), sizeof(uint8_t));
+        if (buffer == nullptr) {
+            SLOGE("buffer malloc fail");
+            free(buffer);
+            return false;
+        }
+        std::copy(imgBuffer.begin(), imgBuffer.end(), buffer);
+        uint32_t errorCode = 0;
+        Media::SourceOptions opts;
+        SLOGD("DoDownload get size %{public}d", static_cast<int>(imgBuffer.size()));
+        auto imageSource = Media::ImageSource::CreateImageSource(buffer, imgBuffer.size(), opts, errorCode);
+        free(buffer);
+        if (errorCode || !imageSource) {
+            SLOGE("DoDownload create imageSource fail: %{public}u", errorCode);
+            return false;
+        }
+        Media::DecodeOptions decodeOpts;
+        pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
+        if (errorCode || pixelMap == nullptr) {
+            SLOGE("DoDownload creatPix fail: %{public}u, %{public}d", errorCode, static_cast<int>(pixelMap != nullptr));
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+int32_t OHAVMetadataBuilder::DoDownload(AVMetaData& metadata, const std::string uri)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    bool ret = OHAVMetadataBuilder::DoDownloadInCommon(pixelMap, uri);
+    if (ret && pixelMap != nullptr) {
+        SLOGI("DoDownload success");
+        metadata.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        return AV_SESSION_ERR_SUCCESS;
+    }
+
+    return AV_SESSION_ERR_SERVICE_EXCEPTION;
+}
+
 AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMetadata)
 {
     CHECK_AND_RETURN_RET_LOG(avMetadata != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "avMetadata is null");
 
-    AVMetaData* metaData = new AVMetaData();
-    if (metaData == nullptr) {
+    AVMetaData* metadata = new AVMetaData();
+    if (metadata == nullptr) {
         SLOGE("Failed to allocate memory for AVMetaData");
         *avMetadata = nullptr;
         return AVMETADATA_ERROR_NO_MEMORY;
@@ -123,36 +211,38 @@ AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMeta
 
     switch (intervals_) {
         case SECONDS_10:
-            metaData->SetSkipIntervals(AVMetaData::SECONDS_10);
+            metadata->SetSkipIntervals(AVMetaData::SECONDS_10);
             break;
         case SECONDS_15:
-            metaData->SetSkipIntervals(AVMetaData::SECONDS_15);
+            metadata->SetSkipIntervals(AVMetaData::SECONDS_15);
             break;
         case SECONDS_30:
-            metaData->SetSkipIntervals(AVMetaData::SECONDS_30);
+            metadata->SetSkipIntervals(AVMetaData::SECONDS_30);
             break;
         default:
             SLOGE("Failed to generate avMetadata: Unsupported skip intervals: %d", intervals_);
-            delete metaData;
+            delete metadata;
             *avMetadata = nullptr;
             return AVMETADATA_ERROR_INVALID_PARAM;
     }
 
-    metaData->SetTitle(title_);
-    metaData->SetArtist(artist_);
-    metaData->SetAuthor(author_);
-    metaData->SetAlbum(album_);
-    metaData->SetWriter(writer_);
-    metaData->SetComposer(composer_);
-    metaData->SetDuration(duration_);
-    metaData->SetMediaImageUri(mediaImageUri_);
-    metaData->SetSubTitle(subtitle_);
-    metaData->SetDescription(description_);
-    metaData->SetLyric(lyric_);
-    metaData->SetAssetId(assetId_);
-    metaData->SetDisplayTags(tags_);
+    metadata->SetTitle(title_);
+    metadata->SetArtist(artist_);
+    metadata->SetAuthor(author_);
+    metadata->SetAlbum(album_);
+    metadata->SetWriter(writer_);
+    metadata->SetComposer(composer_);
+    metadata->SetDuration(duration_);
+    metadata->SetMediaImageUri(mediaImageUri_);
+    metadata->SetSubTitle(subtitle_);
+    metadata->SetDescription(description_);
+    metadata->SetLyric(lyric_);
+    metadata->SetAssetId(assetId_);
+    metadata->SetDisplayTags(tags_);
 
-    *avMetadata = reinterpret_cast<OH_AVMetadata*>(metaData);
+    DoDownload(*metadata, mediaImageUri_);
+
+    *avMetadata = reinterpret_cast<OH_AVMetadata*>(metadata);
 
     return AVMETADATA_SUCCESS;
 }
