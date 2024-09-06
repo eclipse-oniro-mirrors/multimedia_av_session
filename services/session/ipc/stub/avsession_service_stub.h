@@ -158,7 +158,7 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
             "HandleClose"}
     };
- 
+
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;
 };
 } // namespace OHOS::AVSession

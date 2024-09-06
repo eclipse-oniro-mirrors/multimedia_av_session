@@ -932,6 +932,11 @@ napi_value NapiAVSessionManager::StartDeviceLogging(napi_env env, napi_callback_
         uint32_t maxSize_;
     };
     auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("Activate failed : no memory");
+        NapiUtils::ThrowError(env, "Activate failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
     auto input = [env, context](size_t argc, napi_value* argv) {
         int32_t napiInvalidParamErr = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments", napiInvalidParamErr);
