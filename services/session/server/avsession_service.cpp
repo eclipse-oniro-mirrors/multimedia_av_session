@@ -1851,15 +1851,12 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
     if (topSession_) {
         topSession_->HandleMediaKeyEvent(keyEvent);
     } else {
-        SLOGI("topSession is nullptr");
-        std::lock_guard frontLockGuard(sessionFrontLock_);
-        for (const auto& session : sessionListForFront_) {
-            if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
-                session->HandleMediaKeyEvent(keyEvent);
-                SLOGI("HandleMediaKeyEvent %{public}d for front session: %{public}s", keyEvent.GetKeyCode(),
-                      session->GetBundleName().c_str());
-                break;
-            }
+        SLOGI("topSession is nullptr, check if cold start");
+        if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE ||
+            keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY) {
+            AVControlCommand cmd;
+            cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+            HandleSystemKeyColdStart(cmd);
         }
     }
     return AVSESSION_SUCCESS;
