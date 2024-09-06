@@ -242,7 +242,7 @@ void NapiAVCastControllerCallback::OnKeyRequest(const std::string &assetId, cons
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnKeyRequest");
     SLOGI("Start handle OnKeyRequest event");
-    HandleEvent(EVENT_KEY_REQUEST, assetId, keyRequestData);
+    HandleEvent(EVENT_CAST_KEY_REQUEST, assetId, keyRequestData);
 }
 
 void NapiAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<int32_t>& cmds)
