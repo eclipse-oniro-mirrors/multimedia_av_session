@@ -50,14 +50,14 @@ class TestSessionListener : public SessionListener {
         SLOGI("Enter into TestISessionListener::OnDeviceOffline.");
     }
 };
-int32_t SessionListenerStubRemoteRequestTest(uint8_t* data, size_t size);
+int32_t SessionListenerStubRemoteRequestTest(int32_t code, uint8_t* data, size_t size);
 void SessionListenerStubRemoteRequestTests(const uint8_t* data, size_t size);
 
 class SessionListenerStubFuzzer {
 public:
     SessionListenerStubFuzzer() = default;
     ~SessionListenerStubFuzzer() = default;
-    int32_t OnRemoteRequest(uint8_t* data, size_t size);
+    int32_t OnRemoteRequest(int32_t code, uint8_t* data, size_t size);
     void FuzzTests(const uint8_t* data, size_t size);
 };
 }

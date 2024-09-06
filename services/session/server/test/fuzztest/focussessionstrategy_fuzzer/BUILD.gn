@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,15 +19,14 @@ import("../../../../../../castplus_cast_engine_part.gni")
 module_output_path = "av_session/av_session"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("AVSessionServiceFuzzTest") {
+ohos_fuzztest("FocusSessionStrategyFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "../avsessionservice_fuzzer"
+  fuzz_config_file = "../focussessionstrategy_fuzzer"
   include_dirs = [
     "../",
     "../../../remote",
     "../../../../adapter",
     "../../../../server",
-    "//third_party/json/single_include",
   ]
   cflags = [
     "-g",
@@ -36,7 +35,7 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
     "-fno-omit-frame-pointer",
     "-fno-access-control",
   ]
-  sources = [ "avsessionservice_fuzzer.cpp" ]
+  sources = [ "focussessionstrategy_fuzzer.cpp" ]
   deps = [
     "./../../../../../../frameworks/native/session:avsession_client",
     "./../../../../../session:avsession_item",
@@ -55,7 +54,6 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm",

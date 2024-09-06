@@ -32,32 +32,24 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-static constexpr int32_t MAX_CODE_TEST = 5;
+static constexpr int32_t MAX_CODE_TEST = 21;
 static constexpr int32_t MAX_CODE_LEN  = 512;
 static constexpr int32_t MIN_SIZE_NUM  = 4;
 
-void AvSessionServiceFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)
+void AvSessionServiceFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
     if (code >= MAX_CODE_TEST) {
         return;
     }
     sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
-    
-    if (!avSessionService) {
-        SLOGI("avSessionService is null");
-        return;
-    }
 
     MessageParcel dataMessageParcel;
     MessageParcel reply;
     MessageOption option;
-    if (!dataMessageParcel.WriteInterfaceToken(avSessionService->GetDescriptor())) {
-        return;
-    }
+    dataMessageParcel.WriteInterfaceToken(avSessionService->GetDescriptor());
     size -= sizeof(uint32_t);
     dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
     dataMessageParcel.RewindRead(0);
@@ -69,34 +61,49 @@ void AvSessionServiceFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
 
 void AvSessionServiceFuzzer::FuzzTests(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
     sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
-    if (!avSessionService) {
-        SLOGI("avSessionService is null");
-        return;
-    }
+    
+    MessageParcel dataMessageParcel;
+    OutputDeviceInfo outputDeviceInfo;
+    avSessionService->CheckBeforeHandleStartCast(dataMessageParcel, outputDeviceInfo);
+
+    OHOS::MessageParcel reply;
+    AVQueueInfo aVQueueInfo;
+    std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
+    avSessionService->MarshallingAVQueueInfos(reply, avQueueInfos);
+
+    unsigned char *buffer = new unsigned char[255];
+    avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 2, 3};
+    mediaPixelMap->SetInnerImgBuffer(imgBuffer);
+    aVQueueInfo.SetAVQueueImage(mediaPixelMap);
+    avQueueInfos = {aVQueueInfo};
+    avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
+
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceid";
+    deviceInfo.deviceName_ = "devicename";
+    deviceInfo.deviceName_ = 1;
+    deviceInfo.ipAddress_ = "ipaddress";
+    deviceInfo.providerId_ = 1;
+    deviceInfo.supportedProtocols_ = 1;
+    deviceInfo.authenticationStatus_ = 1;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    avSessionService->CheckBeforeHandleStartCast(dataMessageParcel, outputDeviceInfo);
 }
 
-
-void OHOS::AVSession::AvSessionServiceOnRemoteRequest(const uint8_t* data, size_t size)
+void OHOS::AVSession::AvSessionServiceOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
 {
     auto aVSessionService = std::make_unique<AvSessionServiceFuzzer>();
-    if (aVSessionService == nullptr) {
-        SLOGI("aVSessionService is null");
-        return;
-    }
-    aVSessionService->FuzzOnRemoteRequest(data, size);
+    
+    aVSessionService->FuzzOnRemoteRequest(code, data, size);
 }
 
 void OHOS::AVSession::AvSessionServiceTests(const uint8_t* data, size_t size)
 {
     auto aVSessionService = std::make_unique<AvSessionServiceFuzzer>();
-    if (aVSessionService == nullptr) {
-        SLOGI("aVSessionService is null");
-        return;
-    }
+    
     aVSessionService->FuzzTests(data, size);
 }
 
@@ -104,7 +111,9 @@ void OHOS::AVSession::AvSessionServiceTests(const uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AvSessionServiceOnRemoteRequest(data, size);
+    for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
+        OHOS::AVSession::AvSessionServiceOnRemoteRequest(i, data, size);
+    }
     OHOS::AVSession::AvSessionServiceTests(data, size);
     return 0;
 }

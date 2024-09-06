@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AVSESSION_SERVICE_FUZZER_H
-#define OHOS_AVSESSION_SERVICE_FUZZER_H
-#include <cstdint>
-#include <cstddef>
-namespace OHOS::AVSession {
-void AvSessionServiceOnRemoteRequest(int32_t code, const uint8_t* data, size_t size);
-void AvSessionServiceTests(const uint8_t* data, size_t size);
+#ifndef OHOS_AVSESSIONSERVICE_EXT_FUZZER_H
+#define OHOS_AVSESSIONSERVICE_EXT_FUZZER_H
 
-class AvSessionServiceFuzzer {
-public:
-    AvSessionServiceFuzzer() = default;
-    ~AvSessionServiceFuzzer() = default;
-    void FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size);
-    void FuzzTests(const uint8_t* data, size_t size);
-};
+namespace OHOS::AVSession {
+    void AVSessionServiceExtRemoteRequest(uint8_t* data, size_t size);
+
+    class AVSessionServiceExtFuzzer {
+    public:
+        AVSessionServiceExtFuzzer() = default;
+        ~AVSessionServiceExtFuzzer() = default;
+        void AVSessionServiceExtFuzzTest(uint8_t* data, size_t size);
+    };
 }
+
 #endif

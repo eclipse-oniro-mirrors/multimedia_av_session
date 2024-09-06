@@ -35,6 +35,7 @@ namespace OHOS::AVSession {
         ~AVSessionServiceStubFuzzer() = default;
         int32_t OnRemoteRequest(const uint8_t* data, size_t size);
         int32_t OnRemoteRequestForSessionStub(const uint8_t* data, size_t size);
+        void AvSessionServiceTest001(uint8_t* data, size_t size);
     };
 }
 

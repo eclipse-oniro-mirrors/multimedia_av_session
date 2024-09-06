@@ -30,12 +30,14 @@ ohos_fuzztest("AVSessionServiceStubFuzzTest") {
     "../../../../../../services/session/server/remote",
     "../../../../../../services/session/server",
     "../../../../../../services/session/adapter",
+    "//third_party/json/single_include",
   ]
   cflags = [
     "-g",
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fno-access-control",
   ]
   sources = [ "avsession_servicestub_fuzzer.cpp" ]
   deps = [
