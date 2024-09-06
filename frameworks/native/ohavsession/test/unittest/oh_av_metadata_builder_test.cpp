@@ -23,7 +23,7 @@ using namespace testing::ext;
 namespace OHOS::AVSession {
 static OHAVMetadataBuilder g_ohAVMetaDataBuilder;
 constexpr int DURATION = 40000;
-constexpr int TAGS = 10000;
+constexpr int TAGS = 1;
 
 class OHAVMetadataBuilderTest : public testing::Test {
 public:
