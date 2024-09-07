@@ -74,6 +74,7 @@ export class AVCastPicker extends ViewPU {
         this.__configurationColorMode =
             new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
         this.__deviceInfoType = new ObservedPropertySimplePU('', this, 'deviceInfoType');
+        this.maxFontSizeScale = 2;
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -124,6 +125,9 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.deviceInfoType !== undefined) {
             this.deviceInfoType = c11.deviceInfoType;
+        }
+        if (c11.maxFontSizeScale !== undefined) {
+            this.maxFontSizeScale = c11.maxFontSizeScale;
         }
     }
 
@@ -285,7 +289,7 @@ export class AVCastPicker extends ViewPU {
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
                             { 'id': -1, 'type': -1, params: [b3.selectedIconName],
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                        SymbolGlyph.fontSize(24);
+                        SymbolGlyph.fontSize('24vp');
                         SymbolGlyph.fontColor((c3 && this.configurationColorMode !==
                             ConfigurationColorMode.COLOR_MODE_DARK) ?
                             [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
@@ -393,6 +397,7 @@ export class AVCastPicker extends ViewPU {
                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                     Text.maxLines(2);
                     Text.wordBreak(WordBreak.BREAK_ALL);
+                    Text.maxFontScale(this.maxFontSizeScale);
                 }, Text);
                 Text.pop();
                 Row.pop();
