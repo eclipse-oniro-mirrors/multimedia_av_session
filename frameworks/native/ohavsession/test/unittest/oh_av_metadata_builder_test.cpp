@@ -23,7 +23,7 @@ using namespace testing::ext;
 namespace OHOS::AVSession {
 static OHAVMetadataBuilder g_ohAVMetaDataBuilder;
 constexpr int DURATION = 40000;
-constexpr int TAGS = 10000;
+constexpr int TAGS = 1;
 
 class OHAVMetadataBuilderTest : public testing::Test {
 public:
@@ -161,6 +161,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level1)
 
     OH_AVMetadataBuilder_Destroy(builder);
     OH_AVMetadata_Destroy(ohMetadata);
+
     SLOGI("SetAVMetaData001 End");
 }
 }  // namespace OHOS::AVSession

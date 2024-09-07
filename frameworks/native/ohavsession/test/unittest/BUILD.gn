@@ -23,11 +23,14 @@ common_deps = [
 
 common_external_deps = [
   "ability_base:want",
+  "ability_base:zuri",
   "ability_runtime:wantagent_innerkits",
   "audio_framework:audio_client",
   "c_utils:utils",
+  "curl:curl_shared",
   "googletest:gtest",
   "hilog:libhilog",
+  "image_framework:image",
   "image_framework:image_native",
   "input:libmmi-client",
   "ipc:ipc_single",

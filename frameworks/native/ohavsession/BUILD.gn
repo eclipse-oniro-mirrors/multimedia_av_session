@@ -45,10 +45,13 @@ ohos_shared_library("ohavsession") {
 
   external_deps = [
     "ability_base:want",
+    "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "audio_framework:audio_client",
     "c_utils:utils",
+    "curl:curl_shared",
     "hilog:libhilog",
+    "image_framework:image",
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
