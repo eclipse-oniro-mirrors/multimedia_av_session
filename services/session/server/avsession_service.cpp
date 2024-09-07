@@ -317,7 +317,7 @@ void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
     }
     if (systemAbilityId == BLUETOOTH_HOST_SYS_ABILITY_ID) {
 #ifdef BLUETOOTH_ENABLE
-        SLOGD("on bluetooth remove ability");
+        SLOGI("on bluetooth remove ability");
         bluetoothHost_ = &OHOS::Bluetooth::BluetoothHost::GetDefaultHost();
         if (bluetoothHost_ != nullptr && bluetoothObserver != nullptr) {
             bluetoothHost_->DeregisterObserver(bluetoothObserver);
