@@ -534,7 +534,7 @@ AVSession_ErrCode OH_AVSession_SetPlaybackState(OH_AVSession* avsession, AVSessi
 AVSession_ErrCode OH_AVSession_SetPlaybackPosition(OH_AVSession* avsession,
     AVSession_PlaybackPosition* playbackPosition)
 {
-    if (avsession == nullptr) {
+    if (avsession == nullptr || playbackPosition == nullptr) {
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
