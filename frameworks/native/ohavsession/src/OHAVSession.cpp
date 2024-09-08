@@ -74,9 +74,9 @@ std::string OHAVSession::GetSessionId()
     return session_id;
 }
 
-AVSession_ErrCode OHAVSession::SetAVMetaData(OH_AVMetadata *metadata)
+__attribute__((no_sanitize("cfi"))) AVSession_ErrCode OHAVSession::SetAVMetaData(OH_AVMetadata *metadata)
 {
-    AVMetaData* avMetaData = (AVMetaData*) metadata;
+    AVMetaData* avMetaData = reinterpret_cast<AVMetaData*>(metadata);
     int32_t ret = avSession_->SetAVMetaData(*avMetaData);
     return GetEncodeErrcode(ret);
 }
@@ -114,7 +114,7 @@ AVSession_ErrCode OHAVSession::SetSpeed(uint32_t speed)
     return GetEncodeErrcode(ret);
 }
 
-AVSession_ErrCode OHAVSession::SetFavorite(bool favorite)
+__attribute__((no_sanitize("cfi"))) AVSession_ErrCode OHAVSession::SetFavorite(bool favorite)
 {
     AVPlaybackState avPlaybackState;
     avPlaybackState.SetFavorite(favorite);
@@ -494,7 +494,8 @@ AVSession_ErrCode OH_AVSession_GetSessionId(OH_AVSession* avsession, const char*
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OH_AVSession_SetAVMetadata(OH_AVSession* avsession, OH_AVMetadata* metadata)
+__attribute__((no_sanitize("cfi"))) AVSession_ErrCode OH_AVSession_SetAVMetadata(OH_AVSession* avsession,
+                                                                                 OH_AVMetadata* metadata)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
     CHECK_AND_RETURN_RET_LOG(metadata != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVMetadata is null");
@@ -558,7 +559,8 @@ AVSession_ErrCode OH_AVSession_SetSpeed(OH_AVSession* avsession, uint32_t speed)
     return oh_avsession->SetSpeed(speed);
 }
 
-AVSession_ErrCode OH_AVSession_SetFavorite(OH_AVSession* avsession, bool favorite)
+__attribute__((no_sanitize("cfi"))) AVSession_ErrCode OH_AVSession_SetFavorite(OH_AVSession* avsession,
+                                                                               bool favorite)
 {
     if (avsession == nullptr) {
         return AV_SESSION_ERR_INVALID_PARAMETER;
