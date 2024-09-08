@@ -278,7 +278,7 @@ int32_t AVCastControllerItem::HandleCastValidCommandChange(const std::vector<int
     return AVSESSION_SUCCESS;
 }
 
-void AVCastControllerItem::SetSessionTag(const std::string tag)
+void AVCastControllerItem::SetSessionTag(const std::string& tag)
 {
     sessionTag_ = tag;
 }

@@ -13,28 +13,6 @@
 
 domain: AV_SESSION
 
-AVSESSION_CAST_BEHAVIOR:
-  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: avsession cast radar behavior, preserve: false}
-  ORG_PKG: {type: STRING, desc: The package name of current module}
-  HOST_PKG: {type: STRING, desc: host package}
-  TO_CALL_PKG: {type: STRING, desc: The package to be called}
-  TRIGGER_MODE: {type: INT32, desc: trigger mode}
-  FUNC: {type: STRING, desc: function name}
-  BIZ_SCENE: {type: INT32, desc: business scene}
-  BIZ_STAGE: {type: INT32, desc: business stage}
-  STAGE_RES: {type: INT32, desc: current stage result}
-  BIZ_STATE: {type: INT32, desc: business scene state of beginning or ending}
-  ERROR_CODE: {type: INT32, desc: error code}
-  DISCOVERY_DEVICE_LIST: {type: STRING, arrsize: 10, desc: device found list}
-  LOCAL_UDID: {type: STRING, desc: local device udid}
-  LOCAL_NET_ID: {type: STRING, desc: local networkid}
-  LOCAL_DEVICE_TYPE: {type: STRING, desc: local device type}
-  PEER_UDID: {type: STRING, desc: peer device udid}
-  PEER_BT_MAC: {type: STRING, desc: peer device bluetooth mac address}
-  PEER_NET_ID: {type: STRING, desc: peer networkid}
-  PEER_DEVICE_TYPE: {type: STRING, desc: peer device type}
-  IS_TRUST: {type: BOOL, desc: trusted device or not}
-
 SESSION_SERVICE_START:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: start avsession service}
   SERVICE_NAME: {type: STRING, desc: avsession service name}

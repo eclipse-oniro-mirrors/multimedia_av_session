@@ -191,6 +191,7 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
         SLOGW("GetControllerById fail");
         return;
     }
+
     int mediaCommand = root[MEDIA_COMMAND].isInt() ? root[MEDIA_COMMAND].asInt() : -1;
     std::string command = root[COMMAND].isString() ? root[COMMAND].asString() : "ERROR_COMMAND";
     SLOGI("ProcContolCommand mediaCommand: %{public}d", mediaCommand);
@@ -450,7 +451,7 @@ Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &meta
 {
     Json::Value result;
     if (metadata.IsValid()) {
-        SLOGI("ConvertMetadataToJson without img");
+        SLOGI("ConvertMetadataToJson without METADATA_ART");
         result[METADATA_TITLE] = metadata.GetTitle();
         result[METADATA_ARTIST] = metadata.GetArtist();
         std::string mediaImage = "";

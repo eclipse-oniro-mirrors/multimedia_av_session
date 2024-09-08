@@ -139,6 +139,7 @@ int32_t AVSessionStub::SetImageData(AVMetaData& meta, const char *buffer, int tw
     CHECK_AND_RETURN_RET_LOG(mediaImageLength <= twoImageLength, ERR_NONE, "Maybe cuase Out-of-bunds read");
     
     auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
+    CHECK_AND_RETURN_RET_LOG(mediaPixelMap != nullptr, ERR_NONE, "mediaPixelMap malloc fail");
     std::vector<uint8_t> mediaImageBuffer;
     for (int i = 0; i < mediaImageLength; i++) {
         mediaImageBuffer.push_back((uint8_t)buffer[i]);
@@ -149,6 +150,7 @@ int32_t AVSessionStub::SetImageData(AVMetaData& meta, const char *buffer, int tw
     delete mediaPixelMap;
     
     auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+    CHECK_AND_RETURN_RET_LOG(avQueuePixelMap != nullptr, ERR_NONE, "avQueuePixelMap malloc fail");
     std::vector<uint8_t> avQueueImageBuffer;
     for (int i = mediaImageLength; i < twoImageLength; i++) {
         avQueueImageBuffer.push_back((uint8_t)buffer[i]);

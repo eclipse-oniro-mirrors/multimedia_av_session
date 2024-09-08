@@ -82,7 +82,7 @@ public:
 
     int32_t HandleCastValidCommandChange(const std::vector<int32_t> &cmds);
 
-    void SetSessionTag(const std::string tag);
+    void SetSessionTag(const std::string& tag);
 
     int32_t Destroy() override;
 

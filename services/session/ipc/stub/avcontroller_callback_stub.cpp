@@ -145,7 +145,7 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel& data
 {
     std::vector<int32_t> cmds;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32Vector(&cmds), ERR_NONE, "read int32 vector failed");
-    std::lock_guard lockGuard(onCommandChangeLock_);
+    std::lock_guard lockGuard(onValidCommandChangeLock_);
     SLOGD("do HandleOnValidCommandChange with cmd list size %{public}d", static_cast<int>(cmds.size()));
 
     OnValidCommandChange(cmds);
