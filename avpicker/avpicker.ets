@@ -175,6 +175,11 @@ export struct AVCastPicker {
 
   @State deviceInfoType: string = '';
 
+  /**
+   * Max Font and graphic magnification. 
+   */
+  private maxFonSizeScale: number = 2; 
+
   MenuStateChange() {
     if (this.extensionProxy != null) {
       this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
@@ -195,7 +200,7 @@ export struct AVCastPicker {
   buildIcon(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
     if (this.deviceInfoType === 'true') {
       SymbolGlyph(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
-        .fontSize(24)
+        .fontSize('24vp')
         .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
           [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
         .renderingStrategy(2)
@@ -242,6 +247,7 @@ export struct AVCastPicker {
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .maxLines(2)
                 .wordBreak(WordBreak.BREAK_ALL)
+                .maxFontScale(this.maxFonSizeScale)
             }
             .justifyContent(FlexAlign.Start)
             .alignItems(VerticalAlign.Center)
