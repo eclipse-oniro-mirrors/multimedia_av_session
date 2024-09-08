@@ -74,9 +74,9 @@ std::string OHAVSession::GetSessionId()
     return session_id;
 }
 
-AVSession_ErrCode OHAVSession::SetAVMetaData(OH_AVMetadata *metadata)
+__attribute__((no_sanitize("cfi"))) AVSession_ErrCode OHAVSession::SetAVMetaData(OH_AVMetadata *metadata)
 {
-    AVMetaData* avMetaData = (AVMetaData*) metadata;
+    AVMetaData* avMetaData = reinterpret_cast<AVMetaData*>(metadata);
     int32_t ret = avSession_->SetAVMetaData(*avMetaData);
     return GetEncodeErrcode(ret);
 }
@@ -114,7 +114,7 @@ AVSession_ErrCode OHAVSession::SetSpeed(uint32_t speed)
     return GetEncodeErrcode(ret);
 }
 
-AVSession_ErrCode OHAVSession::SetFavorite(bool favorite)
+__attribute__((no_sanitize("cfi"))) AVSession_ErrCode OHAVSession::SetFavorite(bool favorite)
 {
     AVPlaybackState avPlaybackState;
     avPlaybackState.SetFavorite(favorite);
@@ -134,7 +134,7 @@ AVSession_ErrCode OHAVSession::RegisterCommandCallback(AVSession_ControlCommand 
     OH_AVSessionCallback_OnCommand callback, void* userData)
 {
     int32_t ret = 0;
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (ohAVSessionCallbackImpl_ == nullptr) {
         ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
         ret = avSession_->RegisterCallback(ohAVSessionCallbackImpl_);
@@ -163,7 +163,6 @@ AVSession_ErrCode OHAVSession::RegisterCommandCallback(AVSession_ControlCommand 
         default:
             break;
     }
-    lock_.unlock();
     return GetEncodeErrcode(ret);
 }
 
@@ -173,7 +172,7 @@ AVSession_ErrCode OHAVSession::UnregisterCommandCallback(AVSession_ControlComman
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(command));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
@@ -198,7 +197,6 @@ AVSession_ErrCode OHAVSession::UnregisterCommandCallback(AVSession_ControlComman
         default:
             break;
     }
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -216,14 +214,13 @@ AVSession_ErrCode OHAVSession::CheckAndRegister()
 
 AVSession_ErrCode OHAVSession::RegisterForwardCallback(OH_AVSessionCallback_OnFastForward callback, void* userData)
 {
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_FAST_FORWARD));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->RegisterForwardCallback((OH_AVSession*)this, callback, userData);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -232,26 +229,24 @@ AVSession_ErrCode OHAVSession::UnregisterForwardCallback(OH_AVSessionCallback_On
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_FAST_FORWARD));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->UnregisterForwardCallback((OH_AVSession*)this, callback);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSession::RegisterRewindCallback(OH_AVSessionCallback_OnRewind callback, void* userData)
 {
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_REWIND));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->RegisterRewindCallback((OH_AVSession*)this, callback, userData);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -260,26 +255,24 @@ AVSession_ErrCode OHAVSession::UnregisterRewindCallback(OH_AVSessionCallback_OnR
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_REWIND));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->UnregisterRewindCallback((OH_AVSession*)this, callback);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSession::RegisterSeekCallback(OH_AVSessionCallback_OnSeek callback, void* userData)
 {
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SEEK));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->RegisterSeekCallback((OH_AVSession*)this, callback, userData);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -288,26 +281,24 @@ AVSession_ErrCode OHAVSession::UnregisterSeekCallback(OH_AVSessionCallback_OnSee
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SEEK));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->UnregisterSeekCallback((OH_AVSession*)this, callback);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSession::RegisterSpeedCallback(OH_AVSessionCallback_OnSetSpeed callback, void* userData)
 {
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SET_SPEED));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->RegisterSpeedCallback((OH_AVSession*)this, callback, userData);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -316,26 +307,24 @@ AVSession_ErrCode OHAVSession::UnregisterSpeedCallback(OH_AVSessionCallback_OnSe
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SET_SPEED));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->UnregisterSpeedCallback((OH_AVSession*)this, callback);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSession::RegisterSetLoopModeCallback(OH_AVSessionCallback_OnSetLoopMode callback, void* userData)
 {
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SET_LOOP_MODE));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->RegisterSetLoopModeCallback((OH_AVSession*)this, callback, userData);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -344,27 +333,25 @@ AVSession_ErrCode OHAVSession::UnregisterSetLoopModeCallback(OH_AVSessionCallbac
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SET_LOOP_MODE));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->UnregisterSetLoopModeCallback((OH_AVSession*)this, callback);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSession::RegisterToggleFavoriteCallback(OH_AVSessionCallback_OnToggleFavorite callback,
     void* userData)
 {
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->RegisterToggleFavoriteCallback((OH_AVSession*)this, callback, userData);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -373,27 +360,25 @@ AVSession_ErrCode OHAVSession::UnregisterToggleFavoriteCallback(OH_AVSessionCall
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->UnregisterToggleFavoriteCallback((OH_AVSession*)this, callback);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSession::RegisterPlayFromAssetIdCallback(OH_AVSessionCallback_OnPlayFromAssetId callback,
     void* userData)
 {
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->RegisterPlayFromAssetIdCallback((OH_AVSession*)this, callback, userData);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -402,14 +387,13 @@ AVSession_ErrCode OHAVSession::UnregisterPlayFromAssetIdCallback(OH_AVSessionCal
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    lock_.lock();
+    std::lock_guard<std::mutex> lockGuard(lock_);
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(
         AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->UnregisterPlayFromAssetIdCallback((OH_AVSession*)this, callback);
-    lock_.unlock();
     return AV_SESSION_ERR_SUCCESS;
 }
 }
@@ -494,7 +478,8 @@ AVSession_ErrCode OH_AVSession_GetSessionId(OH_AVSession* avsession, const char*
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OH_AVSession_SetAVMetadata(OH_AVSession* avsession, OH_AVMetadata* metadata)
+__attribute__((no_sanitize("cfi"))) AVSession_ErrCode OH_AVSession_SetAVMetadata(OH_AVSession* avsession,
+                                                                                 OH_AVMetadata* metadata)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
     CHECK_AND_RETURN_RET_LOG(metadata != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVMetadata is null");
@@ -533,7 +518,7 @@ AVSession_ErrCode OH_AVSession_SetPlaybackState(OH_AVSession* avsession, AVSessi
 AVSession_ErrCode OH_AVSession_SetPlaybackPosition(OH_AVSession* avsession,
     AVSession_PlaybackPosition* playbackPosition)
 {
-    if (avsession == nullptr) {
+    if (avsession == nullptr || playbackPosition == nullptr) {
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
@@ -558,7 +543,8 @@ AVSession_ErrCode OH_AVSession_SetSpeed(OH_AVSession* avsession, uint32_t speed)
     return oh_avsession->SetSpeed(speed);
 }
 
-AVSession_ErrCode OH_AVSession_SetFavorite(OH_AVSession* avsession, bool favorite)
+__attribute__((no_sanitize("cfi"))) AVSession_ErrCode OH_AVSession_SetFavorite(OH_AVSession* avsession,
+                                                                               bool favorite)
 {
     if (avsession == nullptr) {
         return AV_SESSION_ERR_INVALID_PARAMETER;
