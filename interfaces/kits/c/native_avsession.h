@@ -300,15 +300,6 @@ typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnSeek)(OH_AVSession* se
     uint64_t seekTime, void* userData);
 
 /**
- * @brief Declaring the callback struct for set speed command
- *
- * @since 13
- * @version 1.0
- */
-typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnSetSpeed)(OH_AVSession* session,
-    uint32_t speed, void* userData);
-
-/**
  * @brief Declaring the callback struct for set loop mode command
  *
  * @since 13
@@ -324,15 +315,6 @@ typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnSetLoopMode)(OH_AVSess
  * @version 1.0
  */
 typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnToggleFavorite)(OH_AVSession* session,
-    const char* assetId, void* userData);
-
-/**
- * @brief Declaring the callback struct for play from assetid command
- *
- * @since 13
- * @version 1.0
- */
-typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnPlayFromAssetId)(OH_AVSession* session,
     const char* assetId, void* userData);
 
 /**
@@ -448,30 +430,6 @@ AVSession_ErrCode OH_AVSession_SetPlaybackState(OH_AVSession* avsession,
  */
 AVSession_ErrCode OH_AVSession_SetPlaybackPosition(OH_AVSession* avsession,
     AVSession_PlaybackPosition* playbackPosition);
-
-/**
- * @brief Request to set buffered time.
- *
- * @param avsession The avsession instance pointer
- * @param bufferedTime The bufferedTime to set
- * @return Function result code：
- *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
- * @since 13
- */
-AVSession_ErrCode OH_AVSession_SetBufferedTime(OH_AVSession* avsession, uint64_t bufferedTime);
-
-/**
- * @brief Request to set speed.
- *
- * @param avsession The avsession instance pointer
- * @param speed The speed to set
- * @return Function result code：
- *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
- * @since 13
- */
-AVSession_ErrCode OH_AVSession_SetSpeed(OH_AVSession* avsession, uint32_t speed);
 
 /**
  * @brief Request to set favorite state.
@@ -610,33 +568,6 @@ AVSession_ErrCode OH_AVSession_UnregisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback);
 
 /**
- * @brief Request to register set speed callback.
- *
- * @param avsession The avsession instance pointer
- * @param callback the {@link OH_AVSessionCallback_OnSetSpeed} to be registered.
- * @param userData User data which is passed by user.
- * @return Function result code：
- *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
- * @since 13
- */
-AVSession_ErrCode OH_AVSession_RegisterSpeedCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnSetSpeed callback, void* userData);
-
-/**
- * @brief Request to unregister set speed callback.
- *
- * @param avsession The avsession instance pointer
- * @param callback the {@link OH_AVSessionCallback_OnSetSpeed} to be unregistered.
- * @return Function result code：
- *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
- * @since 13
- */
-AVSession_ErrCode OH_AVSession_UnregisterSpeedCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnSetSpeed callback);
-
-/**
  * @brief Request to register set loopmode callback.
  *
  * @param avsession The avsession instance pointer
@@ -689,33 +620,6 @@ AVSession_ErrCode OH_AVSession_RegisterToggleFavoriteCallback(OH_AVSession* avse
  */
 AVSession_ErrCode OH_AVSession_UnregisterToggleFavoriteCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnToggleFavorite callback);
-
-/**
- * @brief Request to register play from aseetid callback.
- *
- * @param avsession The avsession instance pointer
- * @param callback the {@link OH_AVSessionCallback_OnPlayFromAssetId} to be registered.
- * @param userData User data which is passed by user.
- * @return Function result code：
- *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
- * @since 13
- */
-AVSession_ErrCode OH_AVSession_RegisterPlayFromAssetIdCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnPlayFromAssetId callback, void* userData);
-
-/**
- * @brief Request to unregister play from aseetid callback.
- *
- * @param avsession The avsession instance pointer
- * @param callback the {@link OH_AVSessionCallback_OnPlayFromAssetId} to be unregistered.
- * @return Function result code：
- *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
- * @since 13
- */
-AVSession_ErrCode OH_AVSession_UnregisterPlayFromAssetIdCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnPlayFromAssetId callback);
 
 #ifdef __cplusplus
 }
