@@ -45,7 +45,6 @@ int32_t RemoteSessionCommandProcess::ProcessCastAudioCommand(const RemoteService
     // LCOV_EXCL_STOP
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_MARSHALLING, "read reply failed");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "ProcessCastAudioCommand faild: no permission");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "send remote request failed");
     CHECK_AND_RETURN_RET_LOG(reply.ReadString(output), ERR_MARSHALLING, "read output failed");
     return AVSESSION_SUCCESS;

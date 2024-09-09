@@ -1218,8 +1218,7 @@ napi_value NapiAVSession::GetAllCastDisplays(napi_env env, napi_callback_info in
     };
     return NapiAsyncWork::Enqueue(env, context, "GetAllCastDisplays", executor, complete);
 #else
-    SLOGE("GetAllCastDisplays CASTPLUS_CAST_ENGINE_ENABLE is not support");
-    return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
+    return nullptr;
 #endif
 }
 

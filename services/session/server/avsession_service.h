@@ -285,13 +285,13 @@ private:
     sptr<AVSessionItem> CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                            const AppExecFwk::ElementName& elementName);
 
+    void ServiceCallback(sptr<AVSessionItem>& sessionItem);
+
     int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                          const AppExecFwk::ElementName& elementName);
-
-    void ServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     sptr<AVControllerItem> CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session);
 
@@ -386,7 +386,7 @@ private:
 
     void DeleteAVQueueInfoRecord(const std::string& bundleName);
 
-    void SaveAvQueueInfo(std::string& oldContent, const std:: string &bundleName, AVSessionItem& session);    
+    bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, AVSessionItem& session);
 
     const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
 
@@ -400,7 +400,7 @@ private:
     bool CheckStringAndCleanFile(const std::string& filePath);
 
     void ClearClientResources(pid_t pid);
-    
+
     bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta);
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
