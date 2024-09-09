@@ -272,6 +272,7 @@ AVMetadata_Result OH_AVMetadataBuilder_Destroy(OH_AVMetadataBuilder* builder)
 AVMetadata_Result OH_AVMetadataBuilder_SetTitle(OH_AVMetadataBuilder* builder, const char* title)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(title != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "title is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetTitle(title);
 }
@@ -279,6 +280,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetTitle(OH_AVMetadataBuilder* builder, c
 AVMetadata_Result OH_AVMetadataBuilder_SetArtist(OH_AVMetadataBuilder* builder, const char* artist)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(artist != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "artist is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetArtist(artist);
 }
@@ -286,6 +288,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetArtist(OH_AVMetadataBuilder* builder, 
 AVMetadata_Result OH_AVMetadataBuilder_SetAuthor(OH_AVMetadataBuilder* builder, const char* author)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(author != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "author is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetAuthor(author);
 }
@@ -293,6 +296,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetAuthor(OH_AVMetadataBuilder* builder, 
 AVMetadata_Result OH_AVMetadataBuilder_SetAlbum(OH_AVMetadataBuilder* builder, const char* album)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(album != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "album is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetAlbum(album);
 }
@@ -300,6 +304,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetAlbum(OH_AVMetadataBuilder* builder, c
 AVMetadata_Result OH_AVMetadataBuilder_SetWriter(OH_AVMetadataBuilder* builder, const char* writer)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(writer != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "writer is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetWriter(writer);
 }
@@ -307,6 +312,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetWriter(OH_AVMetadataBuilder* builder, 
 AVMetadata_Result OH_AVMetadataBuilder_SetComposer(OH_AVMetadataBuilder* builder, const char* composer)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(composer != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "composer is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetComposer(composer);
 }
@@ -321,6 +327,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetDuration(OH_AVMetadataBuilder* builder
 AVMetadata_Result OH_AVMetadataBuilder_SetMediaImageUri(OH_AVMetadataBuilder* builder, const char* mediaImageUri)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(mediaImageUri != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "mediaImageUri is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetMediaImageUri(mediaImageUri);
 }
@@ -328,6 +335,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetMediaImageUri(OH_AVMetadataBuilder* bu
 AVMetadata_Result OH_AVMetadataBuilder_SetSubtitle(OH_AVMetadataBuilder* builder, const char* subtitle)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(subtitle != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "subtitle is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetSubtitle(subtitle);
 }
@@ -335,6 +343,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetSubtitle(OH_AVMetadataBuilder* builder
 AVMetadata_Result OH_AVMetadataBuilder_SetDescription(OH_AVMetadataBuilder* builder, const char* description)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(description != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "description is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetDescription(description);
 }
@@ -342,6 +351,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetDescription(OH_AVMetadataBuilder* buil
 AVMetadata_Result OH_AVMetadataBuilder_SetLyric(OH_AVMetadataBuilder* builder, const char* lyric)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(lyric != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "lyric is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetLyric(lyric);
 }
@@ -349,6 +359,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetLyric(OH_AVMetadataBuilder* builder, c
 AVMetadata_Result OH_AVMetadataBuilder_SetAssetId(OH_AVMetadataBuilder* builder, const char* assetId)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    CHECK_AND_RETURN_RET_LOG(assetId != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "assetId is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetAssetId(assetId);
 }
