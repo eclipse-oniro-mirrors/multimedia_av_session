@@ -34,6 +34,10 @@ config("module_private_config") {
     "../../../../frameworks/native/session/include",
     "../../adapter/",
     "../../../../utils/include/",
+    "../",
+    "../remote",
+    "//third_party/json/single_include",
+    "$commontype_dir/include",
   ]
 }
 
@@ -72,6 +76,67 @@ common_external_deps = [
   "jsoncpp:jsoncpp",
   "samgr:samgr_proxy",
 ]
+
+ohos_unittest("RemoteSessionSinkTest") {
+  module_out_path = module_output_path
+
+  sources = [ "remote_session_sink_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "data_object:distributeddataobject_impl" ]
+}
+
+ohos_unittest("RemoteSessionSourceTest") {
+  module_out_path = module_output_path
+
+  sources = [ "remote_session_source_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "data_object:distributeddataobject_impl" ]
+}
+
+ohos_unittest("JsonUtilsTest") {
+  module_out_path = module_output_path
+
+  sources = [ "json_utils_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
 
 ohos_unittest("FocusSessionStrategyTest") {
   module_out_path = module_output_path
@@ -949,9 +1014,12 @@ group("av_session_server_unittest") {
     ":CollaborationManagerTest",
     ":CommandSendLimitTest",
     ":FocusSessionStrategyTest",
+    ":JsonUtilsTest",
     ":MigrateAVSessionTest",
     ":ParamsConfigOperatorTest",
     ":PermissionCheckerTest",
+    ":RemoteSessionSinkTest",
+    ":RemoteSessionSourceTest",
     ":RemoteUtilsTest",
     ":SessionListenerProxyTest",
     ":SessionListenerStubTest",
