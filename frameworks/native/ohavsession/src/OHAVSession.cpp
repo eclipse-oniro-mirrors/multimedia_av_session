@@ -68,10 +68,12 @@ std::string OHAVSession::GetSessionType()
     return sessionType;
 }
 
-std::string OHAVSession::GetSessionId()
+const std::string& OHAVSession::GetSessionId()
 {
-    std::string session_id = avSession_->GetSessionId();
-    return session_id;
+    if (sessionId_.empty()) {
+        sessionId_ = avSession_->GetSessionId();
+    }
+    return sessionId_;
 }
 
 AVSession_ErrCode OHAVSession::SetAVMetaData(OH_AVMetadata* metadata)

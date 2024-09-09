@@ -36,7 +36,7 @@ public:
     AVSession_ErrCode Activate();
     AVSession_ErrCode Deactivate();
     std::string GetSessionType();
-    std::string GetSessionId();
+    const std::string& GetSessionId();
 
     AVSession_ErrCode SetAVMetaData(OH_AVMetadata *metadata);
     AVSession_ErrCode SetPlaybackState(AVSession_PlaybackState playbackState);
@@ -80,6 +80,7 @@ private:
     std::mutex lock_;
     std::shared_ptr<AVSession> avSession_;
     std::shared_ptr<OHAVSessionCallbackImpl> ohAVSessionCallbackImpl_;
+    std::string sessionId_;
 };
 }
 #endif // OHOS_OHAVSESSION_H
