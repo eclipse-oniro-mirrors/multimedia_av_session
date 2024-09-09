@@ -248,13 +248,13 @@ AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterForwardCallback(OH_AVSessio
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::RegisterRewindCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnFastForward callback, void*userData)
+    OH_AVSessionCallback_OnRewind callback, void*userData)
 {
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
     auto it = std::find_if (rewindCallbacks_.begin(), rewindCallbacks_.end(),
-        [callback](const std::pair<OH_AVSessionCallback_OnFastForward, void*> &element) {
+        [callback](const std::pair<OH_AVSessionCallback_OnRewind, void*> &element) {
             return element.first == callback;
         });
     if (it == rewindCallbacks_.end()) {
@@ -264,10 +264,10 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterRewindCallback(OH_AVSession* 
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterRewindCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnFastForward callback)
+    OH_AVSessionCallback_OnRewind callback)
 {
     std::remove_if (rewindCallbacks_.begin(), rewindCallbacks_.end(),
-        [callback](const std::pair<OH_AVSessionCallback_OnFastForward, void*> &element) {
+        [callback](const std::pair<OH_AVSessionCallback_OnRewind, void*> &element) {
             return element.first == callback;
         });
     return AV_SESSION_ERR_SUCCESS;
