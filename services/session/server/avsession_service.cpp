@@ -50,10 +50,6 @@
 #include "avsession_event_handler.h"
 #include "bundle_status_adapter.h"
 #include "params_config_operator.h"
-#include "notification_content.h"
-#include "notification_helper.h"
-#include "notification_request.h"
-#include "notification_constant.h"
 #include "ability_connect_helper.h"
 #include "if_system_ability_manager.h"
 #include "parameter.h"
@@ -61,7 +57,6 @@
 #include "avsession_service.h"
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
-#include "os_account_manager.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -82,18 +77,11 @@ using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
 
 static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
-
+static const std::string AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH =
+    std::string("libavsession_dynamic_notification.z.so");
+    
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
-
-class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
-    void OnConnected() {}
-    void OnDisconnected() {}
-    void OnResponse(int32_t notificationId, sptr<Notification::NotificationButtonOption> buttonOption) {}
-    void OnDied() {}
-};
-
-static const auto NOTIFICATION_SUBSCRIBER = NotificationSubscriber();
 
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
 
@@ -591,8 +579,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
             SLOGD("top session is remove session");
             UpdateTopSession(nullptr);
-            int32_t ret = Notification::NotificationHelper::CancelNotification(0);
-            SLOGI("CancelNotification ret=%{public}d", ret);
+            CancelNotification();
         }
         sessionListForFront_.remove(sessionItem);
     }
@@ -1532,6 +1519,10 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
 {
     SLOGE("StartAVPlayback in!");
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+    if (dynamicLoader == nullptr) {
+        SLOGI("dynamicLoader is null");
+        return AVSESSION_ERROR;
+    }
 
     typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId);
     StartAVPlaybackFunc startAVPlayback =
@@ -2819,36 +2810,58 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     SLOGI("NotifySystemUI, Prop=%{public}d", static_cast<int>(is2in1_));
     CHECK_AND_RETURN_LOG(!is2in1_, "2in1 not support");
-    int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
-    CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
+    
+    SLOGI("NotifySystemUI in");
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+    if (dynamicLoader == nullptr) {
+        SLOGI("dynamicLoader is null");
+        return;
+    }
 
-    Notification::NotificationRequest request;
-    std::shared_ptr<Notification::NotificationLocalLiveViewContent> localLiveViewContent =
-        std::make_shared<Notification::NotificationLocalLiveViewContent>();
-    CHECK_AND_RETURN_LOG(localLiveViewContent != nullptr, "avsession item local live view content nullptr error");
-    localLiveViewContent->SetType(SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER);
-    localLiveViewContent->SetTitle(historyDescriptor && !isActiveSession ? "" : "AVSession NotifySystemUI");
-    localLiveViewContent->SetText(historyDescriptor && !isActiveSession ? "" : "AVSession NotifySystemUI");
+    typedef void (*NotifySystemUI)(const AVSessionDescriptor* historyDescriptor,
+        int32_t uid, bool isActiveSession,
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent);
+    NotifySystemUI notifySystemUI =
+        reinterpret_cast<NotifySystemUI>(dynamicLoader->GetFuntion(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH,
+            "NotifySystemUI"));
+    if (notifySystemUI != nullptr) {
+        auto uid = topSession_ ? topSession_->GetUid() : historyDescriptor->uid_;
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
+        if (wantAgent != nullptr) {
+            notifySystemUI(historyDescriptor, uid, isActiveSession, wantAgent);
+            dynamicLoader->CloseDynamicHandle(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH);
+        } else {
+            SLOGE("wantAgent nullptr error");
+            dynamicLoader->CloseDynamicHandle(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH);
+            return;
+        }
+    }
+    SLOGI("NotifySystemUI out");
+}
+// LCOV_EXCL_STOP
 
-    std::shared_ptr<Notification::NotificationContent> content =
-        std::make_shared<Notification::NotificationContent>(localLiveViewContent);
-    CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
+// LCOV_EXCL_START
+void AVSessionService::CancelNotification()
+{
+    SLOGI("CancelNotification in");
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+    if (dynamicLoader == nullptr) {
+        SLOGI("dynamicLoader is null");
+        return;
+    }
 
-    auto uid = topSession_ ? topSession_->GetUid() : (historyDescriptor ? historyDescriptor->uid_ : -1);
-    request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
-    request.SetNotificationId(0);
-    request.SetContent(content);
-    request.SetCreatorUid(avSessionUid);
-    request.SetUnremovable(true);
-    request.SetInProgress(true);
-    int32_t userId;
-    auto res = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
-    request.SetCreatorUserId((res == 0) ? userId : 0);
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
-    CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
-    request.SetWantAgent(wantAgent);
-    result = Notification::NotificationHelper::PublishNotification(request);
-    SLOGI("PublishNotification uid %{public}d, userId %{public}d, result %{public}d", uid, userId, result);
+    typedef int32_t (*CancelNotification)(int32_t notificationId);
+    CancelNotification cancelNotification =
+        reinterpret_cast<CancelNotification>(dynamicLoader->GetFuntion(
+            AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH,
+            "CancelNotification"));
+    if (cancelNotification != nullptr) {
+        int32_t ret = cancelNotification(0);
+        SLOGI("CancelNotification ret=%{public}d", ret);
+    }
+    // we can release notification library as no further usage
+    dynamicLoader->CloseDynamicHandle(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH);
+    SLOGI("CancelNotification out");
 }
 // LCOV_EXCL_STOP
 
