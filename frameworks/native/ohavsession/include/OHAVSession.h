@@ -41,8 +41,6 @@ public:
     AVSession_ErrCode SetAVMetaData(OH_AVMetadata *metadata);
     AVSession_ErrCode SetPlaybackState(AVSession_PlaybackState playbackState);
     AVSession_ErrCode SetPlaybackPosition(AVSession_PlaybackPosition* playbackPosition);
-    AVSession_ErrCode SetBufferedTime(uint64_t bufferedTime);
-    AVSession_ErrCode SetSpeed(uint32_t speed);
     AVSession_ErrCode SetFavorite(bool favorite);
     AVSession_ErrCode SetLoopMode(AVSession_LoopMode loopMode);
 
@@ -56,14 +54,10 @@ public:
     AVSession_ErrCode UnregisterRewindCallback(OH_AVSessionCallback_OnRewind callback);
     AVSession_ErrCode RegisterSeekCallback(OH_AVSessionCallback_OnSeek callback, void* userData);
     AVSession_ErrCode UnregisterSeekCallback(OH_AVSessionCallback_OnSeek callback);
-    AVSession_ErrCode RegisterSpeedCallback(OH_AVSessionCallback_OnSetSpeed callback, void* userData);
-    AVSession_ErrCode UnregisterSpeedCallback(OH_AVSessionCallback_OnSetSpeed callback);
     AVSession_ErrCode RegisterSetLoopModeCallback(OH_AVSessionCallback_OnSetLoopMode callback, void* userData);
     AVSession_ErrCode UnregisterSetLoopModeCallback(OH_AVSessionCallback_OnSetLoopMode callback);
     AVSession_ErrCode RegisterToggleFavoriteCallback(OH_AVSessionCallback_OnToggleFavorite callback, void* userData);
     AVSession_ErrCode UnregisterToggleFavoriteCallback(OH_AVSessionCallback_OnToggleFavorite callback);
-    AVSession_ErrCode RegisterPlayFromAssetIdCallback(OH_AVSessionCallback_OnPlayFromAssetId callback, void* userData);
-    AVSession_ErrCode UnregisterPlayFromAssetIdCallback(OH_AVSessionCallback_OnPlayFromAssetId callback);
     AVSession_ErrCode CheckAndRegister();
 
     AVSession_ErrCode GetEncodeErrcode(int32_t ret);

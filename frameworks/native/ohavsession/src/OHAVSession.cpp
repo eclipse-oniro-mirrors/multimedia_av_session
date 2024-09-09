@@ -98,22 +98,6 @@ AVSession_ErrCode OHAVSession::SetPlaybackPosition(AVSession_PlaybackPosition* p
     return GetEncodeErrcode(ret);
 }
 
-AVSession_ErrCode OHAVSession::SetBufferedTime(uint64_t bufferedTime)
-{
-    AVPlaybackState avPlaybackState;
-    avPlaybackState.SetBufferedTime(bufferedTime);
-    int32_t ret = avSession_->SetAVPlaybackState(avPlaybackState);
-    return GetEncodeErrcode(ret);
-}
-
-AVSession_ErrCode OHAVSession::SetSpeed(uint32_t speed)
-{
-    AVPlaybackState avPlaybackState;
-    avPlaybackState.SetSpeed(speed);
-    int32_t ret = avSession_->SetAVPlaybackState(avPlaybackState);
-    return GetEncodeErrcode(ret);
-}
-
 __attribute__((no_sanitize("cfi"))) AVSession_ErrCode OHAVSession::SetFavorite(bool favorite)
 {
     AVPlaybackState avPlaybackState;
@@ -290,32 +274,6 @@ AVSession_ErrCode OHAVSession::UnregisterSeekCallback(OH_AVSessionCallback_OnSee
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSession::RegisterSpeedCallback(OH_AVSessionCallback_OnSetSpeed callback, void* userData)
-{
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    CheckAndRegister();
-    int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SET_SPEED));
-    if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
-        return GetEncodeErrcode(ret);
-    }
-    ohAVSessionCallbackImpl_->RegisterSpeedCallback((OH_AVSession*)this, callback, userData);
-    return AV_SESSION_ERR_SUCCESS;
-}
-
-AVSession_ErrCode OHAVSession::UnregisterSpeedCallback(OH_AVSessionCallback_OnSetSpeed callback)
-{
-    if (ohAVSessionCallbackImpl_ == nullptr) {
-        return AV_SESSION_ERR_SUCCESS;
-    }
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SET_SPEED));
-    if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
-        return GetEncodeErrcode(ret);
-    }
-    ohAVSessionCallbackImpl_->UnregisterSpeedCallback((OH_AVSession*)this, callback);
-    return AV_SESSION_ERR_SUCCESS;
-}
-
 AVSession_ErrCode OHAVSession::RegisterSetLoopModeCallback(OH_AVSessionCallback_OnSetLoopMode callback, void* userData)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
@@ -366,34 +324,6 @@ AVSession_ErrCode OHAVSession::UnregisterToggleFavoriteCallback(OH_AVSessionCall
         return GetEncodeErrcode(ret);
     }
     ohAVSessionCallbackImpl_->UnregisterToggleFavoriteCallback((OH_AVSession*)this, callback);
-    return AV_SESSION_ERR_SUCCESS;
-}
-
-AVSession_ErrCode OHAVSession::RegisterPlayFromAssetIdCallback(OH_AVSessionCallback_OnPlayFromAssetId callback,
-    void* userData)
-{
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    CheckAndRegister();
-    int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID));
-    if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
-        return GetEncodeErrcode(ret);
-    }
-    ohAVSessionCallbackImpl_->RegisterPlayFromAssetIdCallback((OH_AVSession*)this, callback, userData);
-    return AV_SESSION_ERR_SUCCESS;
-}
-
-AVSession_ErrCode OHAVSession::UnregisterPlayFromAssetIdCallback(OH_AVSessionCallback_OnPlayFromAssetId callback)
-{
-    if (ohAVSessionCallbackImpl_ == nullptr) {
-        return AV_SESSION_ERR_SUCCESS;
-    }
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(
-        AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID));
-    if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
-        return GetEncodeErrcode(ret);
-    }
-    ohAVSessionCallbackImpl_->UnregisterPlayFromAssetIdCallback((OH_AVSession*)this, callback);
     return AV_SESSION_ERR_SUCCESS;
 }
 }
@@ -523,24 +453,6 @@ AVSession_ErrCode OH_AVSession_SetPlaybackPosition(OH_AVSession* avsession,
     }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->SetPlaybackPosition(playbackPosition);
-}
-
-AVSession_ErrCode OH_AVSession_SetBufferedTime(OH_AVSession* avsession, uint64_t bufferedTime)
-{
-    if (avsession == nullptr) {
-        return AV_SESSION_ERR_INVALID_PARAMETER;
-    }
-    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    return oh_avsession->SetBufferedTime(bufferedTime);
-}
-
-AVSession_ErrCode OH_AVSession_SetSpeed(OH_AVSession* avsession, uint32_t speed)
-{
-    if (avsession == nullptr) {
-        return AV_SESSION_ERR_INVALID_PARAMETER;
-    }
-    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    return oh_avsession->SetSpeed(speed);
 }
 
 __attribute__((no_sanitize("cfi"))) AVSession_ErrCode OH_AVSession_SetFavorite(OH_AVSession* avsession,
@@ -675,26 +587,6 @@ AVSession_ErrCode OH_AVSession_UnregisterSeekCallback(OH_AVSession* avsession,
     return oh_avsession->UnregisterSeekCallback(callback);
 }
 
-AVSession_ErrCode OH_AVSession_RegisterSpeedCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnSetSpeed callback, void* userData)
-{
-    if (avsession == nullptr) {
-        return AV_SESSION_ERR_INVALID_PARAMETER;
-    }
-    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    return oh_avsession->RegisterSpeedCallback(callback, userData);
-}
-
-AVSession_ErrCode OH_AVSession_UnregisterSpeedCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnSetSpeed callback)
-{
-    if (avsession == nullptr) {
-        return AV_SESSION_ERR_INVALID_PARAMETER;
-    }
-    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    return oh_avsession->UnregisterSpeedCallback(callback);
-}
-
 AVSession_ErrCode OH_AVSession_RegisterSetLoopModeCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetLoopMode callback, void* userData)
 {
@@ -733,24 +625,4 @@ AVSession_ErrCode OH_AVSession_UnregisterToggleFavoriteCallback(OH_AVSession* av
     }
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnregisterToggleFavoriteCallback(callback);
-}
-
-AVSession_ErrCode OH_AVSession_RegisterPlayFromAssetIdCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnPlayFromAssetId callback, void* userData)
-{
-    if (avsession == nullptr) {
-        return AV_SESSION_ERR_INVALID_PARAMETER;
-    }
-    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    return oh_avsession->RegisterPlayFromAssetIdCallback(callback, userData);
-}
-
-AVSession_ErrCode OH_AVSession_UnregisterPlayFromAssetIdCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnPlayFromAssetId callback)
-{
-    if (avsession == nullptr) {
-        return AV_SESSION_ERR_INVALID_PARAMETER;
-    }
-    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    return oh_avsession->UnregisterPlayFromAssetIdCallback(callback);
 }
