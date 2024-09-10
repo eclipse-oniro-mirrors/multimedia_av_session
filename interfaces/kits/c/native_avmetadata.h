@@ -346,6 +346,7 @@ AVMetadata_Result OH_AVMetadataBuilder_SetDisplayTags(OH_AVMetadataBuilder* buil
  * @param avMetadata Pointer to a viriable to receive the avMetadata object.
  * @return Function result code:
  *         {@link AVMETADATA_SUCCESS} If the execution is successful.
+ *         {@link AVMETADATA_ERROR_NO_MEMORY} No memory to allocate a new instance.
  *         {@link AVMETADATA_ERROR_INVALID_PARAM}:
  *                                                 1.The param of builder is nullptr;
  *                                                 2.The param of avMetadata is nullptr.
@@ -360,6 +361,7 @@ AVMetadata_Result OH_AVMetadataBuilder_GenerateAVMetadata(OH_AVMetadataBuilder* 
  * @param avMetadata Pointer to a viriable to receive the avMetadata object.
  * @return Function result code:
  *         {@link AVMETADATA_SUCCESS} If the execution is successful.
+ *         {@link AVMETADATA_ERROR_INVALID_PARAM} The param of avMetadata is nullptr.
  * @since 13
  */
 AVMetadata_Result OH_AVMetadata_Destroy(OH_AVMetadata* avMetadata);
