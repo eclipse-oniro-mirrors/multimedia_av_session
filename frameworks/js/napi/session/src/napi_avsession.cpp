@@ -1420,8 +1420,7 @@ napi_status NapiAVSession::OnCastDisplayChange(napi_env env, NapiAVSession* napi
 
 napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY, callback);
@@ -1435,8 +1434,7 @@ napi_status NapiAVSession::OffPlay(napi_env env, NapiAVSession* napiSession, nap
 
 napi_status NapiAVSession::OffPause(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PAUSE, callback);
@@ -1450,8 +1448,7 @@ napi_status NapiAVSession::OffPause(napi_env env, NapiAVSession* napiSession, na
 
 napi_status NapiAVSession::OffStop(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_STOP, callback);
@@ -1465,8 +1462,7 @@ napi_status NapiAVSession::OffStop(napi_env env, NapiAVSession* napiSession, nap
 
 napi_status NapiAVSession::OffPlayNext(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_NEXT, callback);
@@ -1480,8 +1476,7 @@ napi_status NapiAVSession::OffPlayNext(napi_env env, NapiAVSession* napiSession,
 
 napi_status NapiAVSession::OffPlayPrevious(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_PREVIOUS, callback);
@@ -1496,8 +1491,7 @@ napi_status NapiAVSession::OffPlayPrevious(napi_env env, NapiAVSession* napiSess
 
 napi_status NapiAVSession::OffFastForward(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_FAST_FORWARD, callback);
@@ -1511,8 +1505,7 @@ napi_status NapiAVSession::OffFastForward(napi_env env, NapiAVSession* napiSessi
 
 napi_status NapiAVSession::OffRewind(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_REWIND, callback);
@@ -1526,8 +1519,7 @@ napi_status NapiAVSession::OffRewind(napi_env env, NapiAVSession* napiSession, n
 
 napi_status NapiAVSession::OffSeek(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SEEK, callback);
@@ -1541,8 +1533,7 @@ napi_status NapiAVSession::OffSeek(napi_env env, NapiAVSession* napiSession, nap
 
 napi_status NapiAVSession::OffSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SET_SPEED, callback);
@@ -1558,8 +1549,7 @@ napi_status NapiAVSession::OffSetSpeed(napi_env env, NapiAVSession* napiSession,
 
 napi_status NapiAVSession::OffSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SET_LOOP_MODE, callback);
@@ -1573,8 +1563,7 @@ napi_status NapiAVSession::OffSetLoopMode(napi_env env, NapiAVSession* napiSessi
 
 napi_status NapiAVSession::OffToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE, callback);
@@ -1588,8 +1577,7 @@ napi_status NapiAVSession::OffToggleFavorite(napi_env env, NapiAVSession* napiSe
 
 napi_status NapiAVSession::OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_MEDIA_KEY_EVENT, callback);
@@ -1603,8 +1591,7 @@ napi_status NapiAVSession::OffMediaKeyEvent(napi_env env, NapiAVSession* napiSes
 
 napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
@@ -1612,14 +1599,12 @@ napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* na
 
 napi_status NapiAVSession::OffCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "input param is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SEND_COMMON_COMMAND, callback);
 }
 
 napi_status NapiAVSession::OffSkipToQueueItem(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, callback);
@@ -1627,8 +1612,7 @@ napi_status NapiAVSession::OffSkipToQueueItem(napi_env env, NapiAVSession* napiS
 
 napi_status NapiAVSession::OffAVCallAnswer(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_AVCALL_ANSWER, callback);
@@ -1636,8 +1620,7 @@ napi_status NapiAVSession::OffAVCallAnswer(napi_env env, NapiAVSession* napiSess
 
 napi_status NapiAVSession::OffAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_AVCALL_HANG_UP, callback);
@@ -1645,8 +1628,7 @@ napi_status NapiAVSession::OffAVCallHangUp(napi_env env, NapiAVSession* napiSess
 
 napi_status NapiAVSession::OffAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE, callback);
@@ -1654,8 +1636,7 @@ napi_status NapiAVSession::OffAVCallToggleCallMute(napi_env env, NapiAVSession* 
 
 napi_status NapiAVSession::OffPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_FROM_ASSETID, callback);
@@ -1671,8 +1652,7 @@ napi_status NapiAVSession::OffPlayFromAssetId(napi_env env, NapiAVSession* napiS
 napi_status NapiAVSession::OffCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr || callback != nullptr, napi_generic_failure,
-        "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
                              "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_DISPLAY_CHANGE, callback);

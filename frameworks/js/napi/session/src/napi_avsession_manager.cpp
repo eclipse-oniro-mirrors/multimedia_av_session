@@ -943,11 +943,6 @@ napi_value NapiAVSessionManager::StartDeviceLogging(napi_env env, napi_callback_
         int32_t napiInvalidParamErr = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments", napiInvalidParamErr);
 
-        napi_valuetype type = napi_undefined;
-        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
-        bool condition = (context->status == napi_ok) && (type == napi_object);
-        CHECK_ARGS_RETURN_VOID(context, condition, "invalid type invalid", napiInvalidParamErr);
-
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->fd_);
         condition = (context->status == napi_ok);
         CHECK_ARGS_RETURN_VOID(context, condition, "fd getvalue fail", napiInvalidParamErr);
