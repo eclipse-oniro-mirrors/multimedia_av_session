@@ -30,6 +30,7 @@
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
+#include "hw_cast_display_listener.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -364,7 +365,6 @@ private:
     volatile bool isDestroyed_ = false;
 
     std::recursive_mutex metaDataLock_;
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;

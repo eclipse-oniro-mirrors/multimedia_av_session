@@ -1363,10 +1363,9 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
     std::string oldAVQueueInfoContent;
     std::vector<AVQueueInfo> tempAVQueueinfos;
     if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldAVQueueInfoContent)) {
-        SLOGE("lq GetHistoricalAVQueueInfos read sort fail, Return!");
+        SLOGE(" lq GetHistoricalAVQueueInfos read sort fail, Return!");
         return AVSESSION_ERROR;
     }
-
     nlohmann::json avQueueValues = json::parse(oldAVQueueInfoContent, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!avQueueValues.is_discarded(), AVSESSION_ERROR, "json object is null");
     for (const auto& value : avQueueValues) {
@@ -1490,7 +1489,7 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     AppExecFwk::InsightIntentExecuteParam executeParam;
     bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName, assetId, executeParam);
     if (!isSupport || executeParam.insightIntentName_.empty()) {
-        SLOGE("StartAVPlayBack GetPlayIntentParam fail, Return!");
+        SLOGE("StartAVPlayback GetPlayIntentParam fail, Return!");
         return AVSESSION_ERROR;
     }
     int32_t ret = AbilityConnectHelper::GetInstance().StartAVPlayback(executeParam);
@@ -1845,7 +1844,7 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
             }
         }
     }
-
+ 
     std::vector<AVSessionDescriptor> hisDescriptors;
     {
         std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
@@ -2265,7 +2264,6 @@ int32_t AVSessionService::CastAudio(const SessionToken& token,
                                     const std::vector<AudioStandard::AudioDeviceDescriptor>& sinkAudioDescriptors)
 {
     SLOGI("sessionId is %{public}s", AVSessionUtils::GetAnonySessionId(token.sessionId).c_str());
-
     std::string sourceSessionInfo;
     int32_t ret = SetBasicInfo(sourceSessionInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetBasicInfo failed");
