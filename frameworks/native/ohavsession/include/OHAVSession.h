@@ -58,6 +58,7 @@ public:
     AVSession_ErrCode UnregisterSetLoopModeCallback(OH_AVSessionCallback_OnSetLoopMode callback);
     AVSession_ErrCode RegisterToggleFavoriteCallback(OH_AVSessionCallback_OnToggleFavorite callback, void* userData);
     AVSession_ErrCode UnregisterToggleFavoriteCallback(OH_AVSessionCallback_OnToggleFavorite callback);
+    AVSession_ErrCode Destroy();
     AVSession_ErrCode CheckAndRegister();
 
     AVSession_ErrCode GetEncodeErrcode(int32_t ret);

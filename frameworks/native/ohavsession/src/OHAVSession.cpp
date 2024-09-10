@@ -326,11 +326,22 @@ AVSession_ErrCode OHAVSession::UnregisterToggleFavoriteCallback(OH_AVSessionCall
     ohAVSessionCallbackImpl_->UnregisterToggleFavoriteCallback((OH_AVSession*)this, callback);
     return AV_SESSION_ERR_SUCCESS;
 }
+
+AVSession_ErrCode OHAVSession::Destroy()
+{
+    avSession_->Destroy();
+    return AV_SESSION_ERR_SUCCESS;
+}
 }
 
 AVSession_ErrCode OH_AVSession_Create(AVSession_Type sessionType, const char* sessionTag,
     const char* bundleName, const char* abilityName, OH_AVSession** avsession)
 {
+    CHECK_AND_RETURN_RET_LOG(sessionTag != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "sessionTag is null");
+    CHECK_AND_RETURN_RET_LOG(bundleName != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "bundleName is null");
+    CHECK_AND_RETURN_RET_LOG(abilityName != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "abilityName is null");
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "avsession is null");
+
     switch (sessionType) {
         case SESSION_TYPE_AUDIO:
         case SESSION_TYPE_VIDEO:
@@ -346,8 +357,7 @@ AVSession_ErrCode OH_AVSession_Create(AVSession_Type sessionType, const char* se
         bundleName, abilityName);
     if (oh_avsession->IsAVSessionNull()) {
         delete oh_avsession;
-        oh_avsession = nullptr;
-        return AV_SESSION_ERR_INVALID_PARAMETER;
+        return AV_SESSION_ERR_SERVICE_EXCEPTION;
     }
     *avsession = (OH_AVSession*)oh_avsession;
     return AV_SESSION_ERR_SUCCESS;
@@ -358,9 +368,9 @@ AVSession_ErrCode OH_AVSession_Destroy(OH_AVSession* avsession)
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    if (nullptr != oh_avsession) {
+    oh_avsession->Destroy();
+    if (oh_avsession != nullptr) {
         delete oh_avsession;
-        oh_avsession = nullptr;
     }
     return AV_SESSION_ERR_SUCCESS;
 }
@@ -384,6 +394,7 @@ AVSession_ErrCode OH_AVSession_Deactivate(OH_AVSession* avsession)
 AVSession_ErrCode OH_AVSession_GetSessionType(OH_AVSession* avsession, AVSession_Type* sessionType)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(sessionType != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "sessionType is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     std::string str = oh_avsession->GetSessionType();
@@ -398,6 +409,7 @@ AVSession_ErrCode OH_AVSession_GetSessionType(OH_AVSession* avsession, AVSession
 AVSession_ErrCode OH_AVSession_GetSessionId(OH_AVSession* avsession, const char** sessionId)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(sessionId != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "sessionId is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     *sessionId = oh_avsession->GetSessionId().c_str();
@@ -483,6 +495,7 @@ AVSession_ErrCode OH_AVSession_RegisterCommandCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void* userData)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     switch (command) {
         case CONTROL_CMD_PLAY:
@@ -493,7 +506,7 @@ AVSession_ErrCode OH_AVSession_RegisterCommandCallback(OH_AVSession* avsession,
             break;
         default:
             SLOGE("Invalid command: %{public}d", command);
-            return AV_SESSION_ERR_INVALID_PARAMETER;
+            return AV_SESSION_ERR_CODE_COMMAND_INVALID;
     }
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
@@ -504,6 +517,7 @@ AVSession_ErrCode OH_AVSession_UnregisterCommandCallback(OH_AVSession* avsession
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     switch (command) {
         case CONTROL_CMD_PLAY:
@@ -514,7 +528,7 @@ AVSession_ErrCode OH_AVSession_UnregisterCommandCallback(OH_AVSession* avsession
             break;
         default:
             SLOGE("Invalid command: %{public}d", command);
-            return AV_SESSION_ERR_INVALID_PARAMETER;
+            return AV_SESSION_ERR_CODE_COMMAND_INVALID;
     }
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
@@ -525,6 +539,7 @@ AVSession_ErrCode OH_AVSession_RegisterForwardCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnFastForward callback, void* userData)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterForwardCallback(callback, userData);
@@ -534,6 +549,7 @@ AVSession_ErrCode OH_AVSession_UnregisterForwardCallback(OH_AVSession* avsession
     OH_AVSessionCallback_OnFastForward callback)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnregisterForwardCallback(callback);
@@ -543,6 +559,7 @@ AVSession_ErrCode OH_AVSession_RegisterRewindCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnRewind callback, void* userData)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterRewindCallback(callback, userData);
@@ -552,6 +569,7 @@ AVSession_ErrCode OH_AVSession_UnregisterRewindCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnRewind callback)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnregisterRewindCallback(callback);
@@ -561,6 +579,7 @@ AVSession_ErrCode OH_AVSession_RegisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback, void* userData)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterSeekCallback(callback, userData);
@@ -570,6 +589,7 @@ AVSession_ErrCode OH_AVSession_UnregisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnregisterSeekCallback(callback);
@@ -579,6 +599,7 @@ AVSession_ErrCode OH_AVSession_RegisterSetLoopModeCallback(OH_AVSession* avsessi
     OH_AVSessionCallback_OnSetLoopMode callback, void* userData)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterSetLoopModeCallback(callback, userData);
@@ -588,6 +609,7 @@ AVSession_ErrCode OH_AVSession_UnregisterSetLoopModeCallback(OH_AVSession* avses
     OH_AVSessionCallback_OnSetLoopMode callback)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnregisterSetLoopModeCallback(callback);
@@ -597,6 +619,7 @@ AVSession_ErrCode OH_AVSession_RegisterToggleFavoriteCallback(OH_AVSession* avse
     OH_AVSessionCallback_OnToggleFavorite callback, void* userData)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->RegisterToggleFavoriteCallback(callback, userData);
@@ -606,6 +629,7 @@ AVSession_ErrCode OH_AVSession_UnregisterToggleFavoriteCallback(OH_AVSession* av
     OH_AVSessionCallback_OnToggleFavorite callback)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnregisterToggleFavoriteCallback(callback);
