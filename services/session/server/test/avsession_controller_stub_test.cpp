@@ -1230,5 +1230,196 @@ static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgCleanInStub002, TestSi
     AVSessionControllerStubDemo avSessionControllerStub;
     AVMetaData data = GetAVMetaData();
     avSessionControllerStub.DoMetadataImgCleanInStub(data);
-    SLOGI("DoMetadataImgCleanInStub002 end!");
+}
+
+/**
+ * @tc.name: HandleSetAVCallMetaFilter001
+ * @tc.desc: Test HandleSetAVCallMetaFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter001, TestSize.Level1)
+{
+    SLOGI("HandleSetAVCallMetaFilter001 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("1111111");
+    avSessionControllerStub.HandleSetAVCallMetaFilter(data, reply);
+    SLOGI("HandleSetAVCallMetaFilter001 end!");
+}
+
+/**
+ * @tc.name: HandleSetAVCallMetaFilter002
+ * @tc.desc: Test HandleSetAVCallMetaFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter002, TestSize.Level1)
+{
+    SLOGI("HandleSetAVCallMetaFilter002 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("2222");
+    avSessionControllerStub.HandleSetAVCallMetaFilter(data, reply);
+    SLOGI("HandleSetAVCallMetaFilter002 end!");
+}
+
+/**
+ * @tc.name: HandleSetAVCallMetaFilter003
+ * @tc.desc: Test HandleSetAVCallMetaFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter003, TestSize.Level1)
+{
+    SLOGI("HandleSetAVCallMetaFilter003 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("1010");
+    avSessionControllerStub.HandleSetAVCallMetaFilter(data, reply);
+    SLOGI("HandleSetAVCallMetaFilter003 end!");
+}
+
+/**
+ * @tc.name: HandleSetAVCallStateFilter001
+ * @tc.desc: Test HandleSetAVCallStateFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter001, TestSize.Level1)
+{
+    SLOGI("HandleSetAVCallStateFilter001 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("1111111");
+    avSessionControllerStub.HandleSetAVCallStateFilter(data, reply);
+    SLOGI("HandleSetAVCallStateFilter001 end!");
+}
+
+/**
+ * @tc.name: HandleSetAVCallStateFilter002
+ * @tc.desc: Test HandleSetAVCallStateFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter002, TestSize.Level1)
+{
+    SLOGI("HandleSetAVCallStateFilter002 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("2222");
+    avSessionControllerStub.HandleSetAVCallStateFilter(data, reply);
+    SLOGI("HandleSetAVCallStateFilter002 end!");
+}
+
+/**
+ * @tc.name: HandleSetAVCallStateFilter003
+ * @tc.desc: Test HandleSetAVCallStateFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter003, TestSize.Level1)
+{
+    SLOGI("HandleSetAVCallStateFilter003 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("1010");
+    avSessionControllerStub.HandleSetAVCallStateFilter(data, reply);
+    SLOGI("HandleSetAVCallStateFilter003 end!");
+}
+
+/**
+ * @tc.name: HandleSetMetaFilter001
+ * @tc.desc: Test HandleSetMetaFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter001, TestSize.Level1)
+{
+    SLOGI("HandleSetMetaFilter001 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("1111111");
+    avSessionControllerStub.HandleSetMetaFilter(data, reply);
+    SLOGI("HandleSetMetaFilter001 end!");
+}
+
+/**
+ * @tc.name: HandleSetMetaFilter002
+ * @tc.desc: Test HandleSetMetaFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter002, TestSize.Level1)
+{
+    SLOGI("HandleSetMetaFilter002 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("2222");
+    avSessionControllerStub.HandleSetMetaFilter(data, reply);
+    SLOGI("HandleSetMetaFilter002 end!");
+}
+
+/**
+ * @tc.name: HandleSetMetaFilter003
+ * @tc.desc: Test HandleSetMetaFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter003, TestSize.Level1)
+{
+    SLOGI("HandleSetMetaFilter003 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("1010");
+    avSessionControllerStub.HandleSetMetaFilter(data, reply);
+    SLOGI("HandleSetMetaFilter003 end!");
+}
+
+/**
+ * @tc.name: HandleSetPlaybackFilter001
+ * @tc.desc: Test HandleSetPlaybackFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter001, TestSize.Level1)
+{
+    SLOGI("HandleSetPlaybackFilter001 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("1111111");
+    avSessionControllerStub.HandleSetPlaybackFilter(data, reply);
+    SLOGI("HandleSetPlaybackFilter001 end!");
+}
+
+/**
+ * @tc.name: HandleSetPlaybackFilter002
+ * @tc.desc: Test HandleSetPlaybackFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter002, TestSize.Level1)
+{
+    SLOGI("HandleSetPlaybackFilter002 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("2222");
+    avSessionControllerStub.HandleSetPlaybackFilter(data, reply);
+    SLOGI("HandleSetPlaybackFilter002 end!");
+}
+
+/**
+ * @tc.name: HandleSetPlaybackFilter003
+ * @tc.desc: Test HandleSetPlaybackFilter
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter003, TestSize.Level1)
+{
+    SLOGI("HandleSetPlaybackFilter003 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("1010");
+    avSessionControllerStub.HandleSetPlaybackFilter(data, reply);
+    SLOGI("HandleSetPlaybackFilter003 end!");
 }

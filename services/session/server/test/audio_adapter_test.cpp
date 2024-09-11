@@ -33,6 +33,7 @@ public:
 
     static constexpr int32_t TEST_CLIENT_UID = 1;
     static constexpr int32_t TEST_SESSION_ID = 2;
+    static constexpr int32_t TEST_SESSION_FAIL_ID = -1;
 };
 
 void AudioAdapterTest::SetUpTestCase()
@@ -145,4 +146,32 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream001, TestSize.Level1)
     });
     auto ret = AudioAdapter::GetInstance().UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
     EXPECT_NE(ret, AVSESSION_ERROR_BASE);
+}
+
+/**
+* @tc.name: GetRendererRunning001
+* @tc.desc: Test GetRendererRunning
+* @tc.type: FUNC
+* @tc.require: AR000H31KJ
+*/
+static HWTEST(AudioAdapterTest, GetRendererRunning001, TestSize.Level1)
+{
+    SLOGI("GetRendererRunning001 begin!");
+    AudioAdapter::GetInstance().Init();
+    AudioAdapter::GetInstance().GetRendererRunning(AudioAdapterTest::TEST_CLIENT_UID);
+    SLOGI("GetRendererRunning001 end!");
+}
+
+/**
+* @tc.name: GetRendererRunning002
+* @tc.desc: Test GetRendererRunning
+* @tc.type: FUNC
+* @tc.require: AR000H31KJ
+*/
+static HWTEST(AudioAdapterTest, GetRendererRunning002, TestSize.Level1)
+{
+    SLOGI("GetRendererRunning002 begin!");
+    AudioAdapter::GetInstance().Init();
+    AudioAdapter::GetInstance().GetRendererRunning(AudioAdapterTest::TEST_SESSION_FAIL_ID);
+    SLOGI("GetRendererRunning002 end!");
 }

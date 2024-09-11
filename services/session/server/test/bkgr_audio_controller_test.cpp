@@ -170,3 +170,49 @@ static HWTEST(BkGrAudioControllerTest, HandleAppMuteState002, TestSize.Level1)
     EXPECT_EQ(uid, -1);
 }
 
+/**
+* @tc.name: IsBackgroundMode001
+* @tc.desc: test IsBackgroundMode
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, IsBackgroundMode001, TestSize.Level1)
+{
+    SLOGI("IsBackgroundMode001 begin!");
+    int32_t creatorUid = 1;
+    OHOS::AppExecFwk::BackgroundMode backgroundMode = OHOS::AppExecFwk::BackgroundMode::DATA_TRANSFER;
+    BackgroundAudioController backgroundaudiocontroller;
+    bool ret = backgroundaudiocontroller.IsBackgroundMode(creatorUid, backgroundMode);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+* @tc.name: HasAVSession001
+* @tc.desc: test HasAVSession
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, HasAVSession001, TestSize.Level1)
+{
+    SLOGI("HasAVSession001 begin!");
+    int32_t uid = 1000;
+    BackgroundAudioController backgroundaudiocontroller;
+    bool ret = backgroundaudiocontroller.HasAVSession(uid);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+* @tc.name: HasAVSession002
+* @tc.desc: test HasAVSession
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, HasAVSession002, TestSize.Level1)
+{
+    SLOGI("HasAVSession002 begin!");
+    int32_t uid = 1000;
+    BackgroundAudioController backgroundaudiocontroller;
+    backgroundaudiocontroller.sessionUIDs_.insert(uid);
+    bool ret = backgroundaudiocontroller.HasAVSession(uid);
+    EXPECT_EQ(ret, true);
+}

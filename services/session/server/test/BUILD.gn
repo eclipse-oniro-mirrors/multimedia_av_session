@@ -645,6 +645,13 @@ ohos_unittest("BkGrAudioControllerTest") {
 
   configs = [ ":module_private_config" ]
 
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
   deps = [
     "./../../../session:avsession_item",
     "./../../../session:avsession_service",
