@@ -420,6 +420,8 @@ void AVSessionService::InitKeyEvent()
 {
     SLOGI("enter");
     std::vector<int32_t> keyCodes = {
+        MMI::KeyEvent::KEYCODE_MEDIA_PLAY,
+        MMI::KeyEvent::KEYCODE_MEDIA_PAUSE,
         MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE,
         MMI::KeyEvent::KEYCODE_MEDIA_STOP,
         MMI::KeyEvent::KEYCODE_MEDIA_NEXT,
@@ -1815,18 +1817,35 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
     if (topSession_) {
         topSession_->HandleMediaKeyEvent(keyEvent);
     } else {
-        SLOGI("topSession is nullptr");
-        std::lock_guard frontLockGuard(sessionFrontLock_);
-        for (const auto& session : sessionListForFront_) {
-            if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
-                session->HandleMediaKeyEvent(keyEvent);
-                SLOGI("HandleMediaKeyEvent %{public}d for front session: %{public}s", keyEvent.GetKeyCode(),
-                      session->GetBundleName().c_str());
-                break;
-            }
-        }
+        int cmd = ConvertKeyCodeToCommand(keyEvent.GetKeyCode());
+        AVControlCommand controlCommand;
+        controlCommand.SetCommand(cmd);
+        SLOGI("topSession is nullptr, check if cold start for cmd %{public}d", cmd);
+        HandleSystemKeyColdStart(controlCommand);
     }
     return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::ConvertKeyCodeToCommand(int keyCode)
+{
+    if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
+        return AVControlCommand::SESSION_CMD_PLAY;
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_PLAY) {
+        return AVControlCommand::SESSION_CMD_PLAY;
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_PAUSE) {
+        return AVControlCommand::SESSION_CMD_PAUSE;
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_STOP) {
+        return AVControlCommand::SESSION_CMD_STOP;
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_NEXT) {
+        return AVControlCommand::SESSION_CMD_PLAY_NEXT;
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_PREVIOUS) {
+        return AVControlCommand::SESSION_CMD_PLAY_PREVIOUS;
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_REWIND) {
+        return AVControlCommand::SESSION_CMD_REWIND;
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_FAST_FORWARD) {
+        return AVControlCommand::SESSION_CMD_FAST_FORWARD;
+    }
+    return AVControlCommand::SESSION_CMD_PLAY;
 }
 
 void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
