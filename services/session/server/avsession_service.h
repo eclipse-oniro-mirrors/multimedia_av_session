@@ -426,6 +426,8 @@ private:
 
     bool UnSubscribeCommonEvent();
 
+    int32_t ConvertKeyCodeToCommand(int keyCode);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
