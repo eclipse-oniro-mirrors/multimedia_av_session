@@ -428,6 +428,8 @@ private:
 
     int32_t ConvertKeyCodeToCommand(int keyCode);
 
+    bool CheckAncoAudio();
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;

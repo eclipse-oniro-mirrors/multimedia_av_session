@@ -827,6 +827,16 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 }
 // LCOV_EXCL_STOP
 
+bool AVSessionService::CheckAncoAudio()
+{
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session->GetBundleName() == "anco_audio") {
+            return true;
+        }
+    }
+    return false;
+}
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 
 int32_t AVSessionService::checkEnableCast(bool enable)
@@ -836,15 +846,8 @@ int32_t AVSessionService::checkEnableCast(bool enable)
         isInCast_ = true;
         AVRouter::GetInstance().Init(this);
     } else if (enable == false && isInCast_ == true) {
-        bool hasAncoAudio = false;
-        for (const auto& session : GetContainer().GetAllSessions()) {
-            if (session->GetBundleName() == "anco_audio") {
-                hasAncoAudio = true;
-                break;
-            }
-        }
         CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
-            (GetContainer().GetAllSessions().size() == 1 && !hasAncoAudio)) && !is2in1_),
+            (GetContainer().GetAllSessions().size() == 1 && !CheckAncoAudio())) && !is2in1_),
             AVSESSION_SUCCESS, "can not release cast with session alive");
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
@@ -2053,7 +2056,8 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
     GetContainer().RemoveSession(sessionItem->GetPid(), sessionItem->GetAbilityName());
     UpdateFrontSession(sessionItem, false);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (GetContainer().GetAllSessions().size() == 0 && !is2in1_) {
+    if ((GetContainer().GetAllSessions().size() == 0 || (GetContainer().GetAllSessions().size() == 1 &&
+        CheckAncoAudio())) && !is2in1_) {
         SLOGI("call disable cast for no session alive");
         checkEnableCast(false);
     }
