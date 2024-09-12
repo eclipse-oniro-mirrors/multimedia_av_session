@@ -165,17 +165,15 @@ public:
     int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                sptr<IRemoteObject>& object) override;
 
-    void ServiceCallback(sptr<AVSessionItem>& sessionItem);
-
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
-    
+
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                       std::vector<AVQueueInfo>& avQueueInfos) override;
-    
+
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
@@ -240,7 +238,7 @@ public:
 #endif
 
     int32_t Close(void) override;
-    
+
     void AddAvQueueInfoToFile(AVSessionItem& session);
 
     void SetScreenOn(bool on);
@@ -286,6 +284,8 @@ private:
 
     sptr<AVSessionItem> CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                            const AppExecFwk::ElementName& elementName);
+
+    void ServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
@@ -383,8 +383,10 @@ private:
     bool IsHistoricalSession(const std::string& sessionId);
 
     void DeleteHistoricalRecord(const std::string& bundleName);
-    
+
     void DeleteAVQueueInfoRecord(const std::string& bundleName);
+
+    bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, AVSessionItem& session);
 
     const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
 
@@ -398,7 +400,7 @@ private:
     bool CheckStringAndCleanFile(const std::string& filePath);
 
     void ClearClientResources(pid_t pid);
-    
+
     bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta);
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
@@ -423,6 +425,8 @@ private:
     bool SubscribeCommonEvent();
 
     bool UnSubscribeCommonEvent();
+
+    int32_t ConvertKeyCodeToCommand(int keyCode);
 
     bool CheckAncoAudio();
 
@@ -502,7 +506,8 @@ private:
 
     const std::string AVSESSION_FILE_DIR = "/data/service/el2/public/av_session/";
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
-    const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";
+    const std::string MEDIA_CONTROL_ABILITYNAME =
+        "com.ohos.mediacontroller.avplayer.mainability";
 
     int32_t pressCount_ {};
     int32_t maxHistoryNums = 10;

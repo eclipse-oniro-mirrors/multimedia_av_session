@@ -22,8 +22,6 @@
 
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
-#include "avsession_display_interface.h"
-#include "avsession_dynamic_loader.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"
@@ -32,6 +30,7 @@
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
+#include "hw_cast_display_listener.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -196,6 +195,9 @@ public:
     void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
+        DeviceInfo deviceInfo);
+
     void InitializeCastCommands();
 
     void AddSessionCommandToCast(int32_t cmd);
@@ -204,16 +206,13 @@ public:
 
     int32_t SessionCommandToCastCommand(int32_t cmd);
 
-    int32_t RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
-        DeviceInfo deviceInfo);
-
     int32_t AddSupportCastCommand(int32_t cmd);
 
     bool IsCastRelevancyCommand(int32_t cmd);
 
     int32_t DeleteSupportCastCommand(int32_t cmd);
 
-    void HandleCastValidCommandChange(std::vector<int32_t> &cmds);
+    void HandleCastValidCommandChange(const std::vector<int32_t>& cmds);
 
     int32_t ReleaseCast() override;
 
@@ -280,7 +279,6 @@ private:
     void HandleFrontSession();
     int32_t doContinuousTaskRegister();
     int32_t doContinuousTaskUnregister();
-    AVSessionDisplayIntf* GetAVSessionDisplayIntf();
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -317,6 +315,8 @@ private:
     };
 
     std::map<int32_t, HandlerFuncType> keyEventCaller_ = {
+        {MMI::KeyEvent::KEYCODE_MEDIA_PLAY, [this](const AVControlCommand& cmd) { HandleOnPlay(cmd); }},
+        {MMI::KeyEvent::KEYCODE_MEDIA_PAUSE, [this](const AVControlCommand& cmd) { HandleOnPause(cmd); }},
         {MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE, [this](const AVControlCommand& cmd) { HandleOnPlayOrPause(cmd); }},
         {MMI::KeyEvent::KEYCODE_MEDIA_STOP, [this](const AVControlCommand& cmd) { HandleOnPause(cmd); }},
         {MMI::KeyEvent::KEYCODE_MEDIA_NEXT, [this](const AVControlCommand& cmd) { HandleOnPlayNext(cmd); }},
@@ -367,11 +367,6 @@ private:
     volatile bool isDestroyed_ = false;
 
     std::recursive_mutex metaDataLock_;
-
-    std::recursive_mutex displayListenerLock_;
-    AVSessionDisplayIntf *avsessionDisaplayIntf_;
-    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
@@ -394,6 +389,8 @@ private:
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
+    sptr<HwCastDisplayListener> displayListener_;
+    std::recursive_mutex displayListenerLock_;
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;

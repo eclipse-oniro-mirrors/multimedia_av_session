@@ -30,7 +30,7 @@ namespace OHOS::AVSession {
 class HwCastProvider : public AVCastProvider, public CastEngine::ICastSessionManagerListener,
     public std::enable_shared_from_this<HwCastProvider> {
 public:
-    HwCastProvider() = default;
+    HwCastProvider();
     ~HwCastProvider() override;
 
     void Init() override;
@@ -67,8 +67,6 @@ private:
     int lastCastId_ = -1;
     int mirrorCastId = -1;
     std::shared_ptr<HwCastProviderSession> lastCastSession;
-
-    const int32_t deviceStateConnection = 4;
     std::map<CastEngine::CapabilityType, int32_t> castPlusTypeToAVSessionType_ = {
         {CastEngine::CapabilityType::CAST_PLUS, ProtocolType::TYPE_CAST_PLUS_STREAM},
         {CastEngine::CapabilityType::DLNA, ProtocolType::TYPE_DLNA},

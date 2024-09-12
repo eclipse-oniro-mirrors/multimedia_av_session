@@ -20,7 +20,6 @@
 #include "avsession_trace.h"
 #include "permission_checker.h"
 #include "avcast_provider_manager.h"
-#include "hw_cast_provider.h"
 #include "avsession_sysevent.h"
 
 static std::shared_ptr<OHOS::AVSession::HwCastProvider> hwProvider_;
@@ -78,7 +77,7 @@ bool AVRouterImpl::Release()
         SLOGE("Start Release AVRouter err for no provider");
         return false;
     }
-    std::lock_ground lockGuard(providerManagerLock_);
+    std::lock_guard lockGuard(providerManagerLock_);
 
     if (hwProvider_ == nullptr) {
         SLOGE("repeat check for no pvd");
@@ -133,7 +132,6 @@ int32_t AVRouterImpl::StopCastDiscovery()
 int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 {
     SLOGI("AVRouterImpl SetDiscoverable %{public}d", enable);
-
     std::lock_guard lockGuard(providerManagerLock_);
 
     for (const auto& [number, providerManager] : providerManagerMap_) {
@@ -167,12 +165,11 @@ void AVRouterImpl::ReleaseCurrentCastSession()
 int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
 {
     SLOGI("AVRouterImpl On cast session created, cast id is %{public}d", castId);
-
     int64_t castHandle = -1;
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumberEnableDefault_) !=
         providerManagerMap_.end(), castHandle, "Can not find corresponding provider");
-    CHECK_AND_RETURN_RET_LOG(providerManagerMap_[1] != nullptr &&
-        providerManagerMap_[1]->provider_ ! = nullptr, AVSESSION_ERROR, "provider is nullptr");
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_[1] != nullptr
+        && providerManagerMap_[1]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
     int64_t tempId = 1;
     // The first 32 bits are providerId, the last 32 bits are castId
     castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
@@ -238,8 +235,7 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_] != nullptr
         && providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_ != nullptr,
         AVSESSION_ERROR, "provider is nullptr");
-    int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].
-        providerId_]->provider_->StartCastSession();
+    int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->StartCastSession();
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     // The first 32 bits are providerId, the last 32 bits are castId
     castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) | static_cast<uint32_t>(castId));

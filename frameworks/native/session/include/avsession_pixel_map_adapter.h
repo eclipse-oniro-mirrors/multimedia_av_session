@@ -33,6 +33,7 @@ public:
     static int32_t originalPixelMapBytes_;
     static int32_t originalWidth_;
     static int32_t originalHeight_;
+    static std::mutex pixelMapLock_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_PIXEL_MAP_ADAPTER_H

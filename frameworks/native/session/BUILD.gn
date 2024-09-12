@@ -121,6 +121,7 @@ ohos_shared_library("avsession_cast_client") {
     "ability_runtime:wantagent_innerkits",
     "audio_framework:audio_client",
     "c_utils:utils",
+    "graphic_surface:surface",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -129,10 +130,6 @@ ohos_shared_library("avsession_cast_client") {
   ]
 
   cflags = []
-
-  if (castplus_cast_engine_enable) {
-    external_deps += [ "graphic_surface:surface" ]
-  }
 
   if (multimedia_av_session_enable_trace_control) {
     cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]

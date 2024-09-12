@@ -28,14 +28,25 @@ namespace OHOS::AVSession {
 const uint32_t UNTRUSTED_DEVICE = 0;
 const uint32_t TRUSTED_DEVICE = 1;
 
+HwCastProvider::HwCastProvider()
+{
+    SLOGD("pre construct the HwCastProvider");
+    std::lock_guard lockGuard(mutexLock_);
+    SLOGI("construct the HwCastProvider");
+}
+
 HwCastProvider::~HwCastProvider()
 {
+    SLOGD("pre destruct the HwCastProvider");
+    std::lock_guard lockGuard(mutexLock_);
     SLOGI("destruct the HwCastProvider");
     Release();
 }
 
 void HwCastProvider::Init()
 {
+    SLOGD("pre init the HwCastProvider");
+    std::lock_guard lockGuard(mutexLock_);
     SLOGI("Init the HwCastProvider");
     CastSessionManager::GetInstance().RegisterListener(shared_from_this());
 }
@@ -54,7 +65,6 @@ bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string>
     }
     return ret;
 }
-
 void HwCastProvider::StopDiscovery()
 {
     SLOGI("stop discovery");
@@ -77,7 +87,7 @@ int32_t HwCastProvider::SetDiscoverable(const bool enable)
 
 void HwCastProvider::Release()
 {
-    SLOGI("Release the HwCastProvider");
+    SLOGI("cast provider release");
     {
         std::lock_guard lockGuard(mutexLock_);
         hwCastProviderSessionMap_.clear();
@@ -93,8 +103,7 @@ void HwCastProvider::Release()
         return;
     }
     CastSessionManager::GetInstance().UnregisterListener();
-    CastSessionManager::GetInstance().Release();
-    SLOGD("Release done");
+    SLOGD("provider release done");
 }
 
 int HwCastProvider::StartCastSession()
@@ -130,11 +139,10 @@ int HwCastProvider::StartCastSession()
 
     return castId;
 }
-}
 
 void HwCastProvider::StopCastSession(int castId)
 {
-    SLOGI("StopCastSession begin with %{public}d", castId);
+    SLOGI("StopCastSession begin");
     std::lock_guard lockGuard(mutexLock_);
     SLOGI("StopCastSession check lock");
 
@@ -174,7 +182,6 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
         return false;
     }
 
-    lastCastId_ = castId;
     return hwCastProviderSession->AddDevice(deviceInfo.deviceId_);
 }
 
@@ -383,7 +390,6 @@ void HwCastProvider::WaitSessionRelease()
     std::lock_guard lockGuard(mutexLock_);
     if (hwCastProviderSessionMap_.find(lastCastId_) == hwCastProviderSessionMap_.end()) {
         SLOGI("waitSessionRelease for the castId is not exit, check cache session");
-        return;
     }
     auto hwCastProviderSession = lastCastSession;
     if (hwCastProviderSession == nullptr) {

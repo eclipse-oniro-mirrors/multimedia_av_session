@@ -197,6 +197,7 @@ napi_status NapiControlCommand::SetForwardTime(napi_env env, AVControlCommand& i
     return status;
 }
 
+
 napi_status NapiControlCommand::GetRewindTime(napi_env env, napi_value in, AVControlCommand& out)
 {
     int64_t time {};

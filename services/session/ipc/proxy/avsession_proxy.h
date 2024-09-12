@@ -29,6 +29,7 @@
 #include "avplayback_state.h"
 #include "avmedia_description.h"
 #include "avqueue_item.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS::AVSession {
 class AVSessionProxy : public IRemoteProxy<IAVSession> {
@@ -114,9 +115,9 @@ private:
     bool isDestroyed_ = {};
     std::shared_ptr<AVSessionController> controller_;
     const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
-    std::recursive_mutex setMetadataLock_;
-    std::recursive_mutex setPlaybackLock_;
-    std::recursive_mutex setCommandLock_;
+    std::mutex setMetadataLock_;
+    std::mutex setPlaybackLock_;
+    std::mutex setCommandLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> castController_;

@@ -49,8 +49,6 @@ using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
 
-static const std::string AVSESSION_DYNAMIC_DISPLAY_LIBRARY_PATH = std::string("libavsession_dynamic_display.z.so");
-
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
     : descriptor_(descriptor)
 {
@@ -58,8 +56,6 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     cssListener_ = std::make_shared<CssListener>(this);
 #endif
-    dynamicLoader_ = std::make_unique<AVSessionDynamicLoader>();
-    avsessionDisaplayIntf_ = nullptr;
 }
 
 AVSessionItem::~AVSessionItem()
@@ -94,7 +90,7 @@ std::string AVSessionItem::GetSessionType()
 
 int32_t AVSessionItem::Destroy()
 {
-    SLOGI("AVSessionItem send service destroy event to service, check serviceCallback exist");
+    SLOGI("AVSessionItem check service destroy event with service, check serviceCallback exist");
     if (serviceCallback_) {
         SLOGI("AVSessionItem send service destroy event to service");
         serviceCallback_(*this);
@@ -136,6 +132,7 @@ int32_t AVSessionItem::DestroyTask()
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
+    ReleaseAVCastControllerInner();
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
         SLOGW("Session destroy at source, release cast");
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
@@ -500,7 +497,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
         }
         supportedCastCmds = supportedCastCmds_;
         return;
-    }
+    };
 
     sharedPtr->Init(castControllerProxy_, callback);
     {
@@ -821,7 +818,7 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionItem::HandleCastValidCommandChange(std::vector<int32_t> &cmds)
+void AVSessionItem::HandleCastValidCommandChange(const std::vector<int32_t>& cmds)
 {
     std::lock_guard lockGuard(castControllersLock_);
     SLOGI("HandleCastValidCommandChange with castControllerNum %{public}d", static_cast<int>(castControllers_.size()));
@@ -918,7 +915,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
-        deviceInfo.deviceid_.c_str());
+        deviceInfo.deviceId_.c_str());
     DealCastState(castState);
     if (castState == streamStateConnection && counter_ == secondStep) {
         SLOGI("interception of one devicestate=6 transmission");
@@ -947,10 +944,10 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
         std::lock_guard controllersLockGuard(controllersLock_);
-        SLOGD("AVCastController map size is %{public}zu", controllers_.size());
+        SLOGI("AVCastController map size is %{public}zu", controllers_.size());
         for (const auto& controller : controllers_) {
             if (controllers_.size() <= 0) {
-                SLOGE("lopp in empty controllers, break");
+                SLOGE("loop in empty controllers, break");
                 break;
             }
             CHECK_AND_RETURN_LOG(controller.second != nullptr, "Controller is nullptr, return");
@@ -1034,7 +1031,7 @@ void AVSessionItem::RegisterDeviceStateCallback()
 
 void AVSessionItem::UnRegisterDeviceStateCallback()
 {
-    SLOGI("Stop unregister callback for device state change");
+    SLOGI("Start unregister callback for device state change");
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
 }
 
@@ -1048,20 +1045,6 @@ void AVSessionItem::StopCastSession()
     } else {
         SLOGE("Stop cast session process error");
     }
-}
-
-AVSessionDisplayIntf* AVSessionItem::GetAVSessionDisplayIntf()
-{
-    if (avsessionDisaplayIntf_ == nullptr) {
-        typedef AVSessionDisplayIntf *(*CreateAVSessionDisplayIntfFunc)();
-        CreateAVSessionDisplayIntfFunc createAVSessionDisplayIntf =
-            reinterpret_cast<CreateAVSessionDisplayIntfFunc>(dynamicLoader_->GetFuntion(
-                AVSESSION_DYNAMIC_DISPLAY_LIBRARY_PATH, "createAVSessionDisplayIntf"));
-        if (createAVSessionDisplayIntf) {
-            avsessionDisaplayIntf_ = (*createAVSessionDisplayIntf)();
-        }
-    }
-    return avsessionDisaplayIntf_;
 }
 
 int32_t AVSessionItem::StartCastDisplayListener()
@@ -1081,11 +1064,12 @@ int32_t AVSessionItem::StopCastDisplayListener()
 {
     SLOGI("StopCastDisplayListener in");
     std::lock_guard displayListenerLockGuard(displayListenerLock_);
-
-    if (avsessionDisaplayIntf_ != nullptr) {
-        avsessionDisaplayIntf_->StopCastDisplayListener();
+    CHECK_AND_RETURN_RET_LOG(displayListener_ != nullptr, AVSESSION_ERROR, "displayListener_ is nullptr");
+    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().UnregisterScreenListener(displayListener_);
+    if (ret != Rosen::DMError::DM_OK) {
+        SLOGE("UnregisterScreenListener failed, ret: %{public}d.", ret);
     }
-    // close here is unsafe
+    displayListener_ = nullptr;
     return AVSESSION_SUCCESS;
 }
 
@@ -1093,24 +1077,48 @@ void AVSessionItem::GetDisplayListener(sptr<IAVSessionCallback> callback)
 {
     SLOGI("GetDisplayListener in");
     std::lock_guard displayListenerLockGuard(displayListenerLock_);
-
-    if (GetAVSessionDisplayIntf() != nullptr) {
-        avsessionDisaplayIntf_->StartCastDisplayListener(callback);
+    if (displayListener_ == nullptr) {
+        SLOGI("displayListener_ is null, try to create new listener");
+        displayListener_ = new HwCastDisplayListener(callback);
+        if (displayListener_ == nullptr) {
+            SLOGI("Create displayListener failed");
+            return;
+        }
+        SLOGI("Start to register display listener");
+        Rosen::DMError ret = Rosen::ScreenManager::GetInstance().RegisterScreenListener(displayListener_);
+        if (ret != Rosen::DMError::DM_OK) {
+            SLOGE("UnregisterScreenListener failed, ret: %{public}d.", ret);
+        }
     }
-    // if closed here, may cause failure in GetDisplayListener for callback
     return;
 }
 
 int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays)
 {
     SLOGI("GetAllCastDisplays in");
-    std::lock_guard displayListenerLockGuard(displayListenerLock_);
-
-    if (GetAVSessionDisplayIntf() != nullptr) {
-        avsessionDisaplayIntf_->GetAllCastDisplays(castDisplays);
-        SLOGI("GetAllCastDisplays length = %{public}zu", castDisplays.size());
+    std::vector<sptr<Rosen::Screen>> allDisplays;
+    Rosen::ScreenManager::GetInstance().GetAllScreens(allDisplays);
+    std::vector<CastDisplayInfo> displays;
+    for (auto &display : allDisplays) {
+        SLOGI("GetAllCastDisplays name: %{public}s, id: %{public}lu", display->GetName().c_str(), display->GetId());
+        auto flag = Rosen::ScreenManager::GetInstance().GetVirtualScreenFlag(display->GetId());
+        if (flag == Rosen::VirtualScreenFlag::CAST) {
+            SLOGI("ReportCastDisplay start in");
+            CastDisplayInfo castDisplayInfo;
+            castDisplayInfo.displayState = CastDisplayState::STATE_ON;
+            castDisplayInfo.displayId = display->GetId();
+            castDisplayInfo.name = display->GetName();
+            castDisplayInfo.width = static_cast<int32_t>(display->GetWidth());
+            castDisplayInfo.height = static_cast<int32_t>(display->GetHeight());
+            displays.push_back(castDisplayInfo);
+            std::lock_guard displayListenerLockGuard(displayListenerLock_);
+            if (displayListener_ != nullptr) {
+                displayListener_->SetDisplayInfo(display);
+            }
+        }
     }
-    // if closed here, may cause failure in GetDisplayListener for callback
+    castDisplays = displays;
+    SLOGI("GetAllCastDisplays out");
     return AVSESSION_SUCCESS;
 }
 
@@ -1154,7 +1162,6 @@ AVCallMetaData AVSessionItem::GetAVCallMetaData()
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
     return avCallMetaData_;
 }
-
 
 AVPlaybackState AVSessionItem::GetPlaybackState()
 {
@@ -1225,7 +1232,7 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     SLOGI("HandleMediaKeyEvent check isMediaKeySupport %{public}d for %{public}d",
         static_cast<int>(isMediaKeySupport), static_cast<int>(keyEvent.GetKeyCode()));
     if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
-        SLOGD("auto set controller command for %{public}d", static_cast<int>(keyEvent.GetKeyCode()));
+        SLOGI("auto set controller command for %{public}d", static_cast<int>(keyEvent.GetKeyCode()));
         AVControlCommand cmd;
         cmd.SetRewindTime(metaData_.GetSkipIntervals());
         cmd.SetForwardTime(metaData_.GetSkipIntervals());
@@ -1334,6 +1341,7 @@ void AVSessionItem::HandleOnPause(const AVControlCommand& cmd)
 void AVSessionItem::HandleOnPlayOrPause(const AVControlCommand& cmd)
 {
     std::lock_guard lockGuard(metaDataLock_);
+    SLOGI("check current playstate : %{public}d", playbackState_.GetState());
     if (playbackState_.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         HandleOnPause(cmd);
     } else {
@@ -1381,7 +1389,7 @@ void AVSessionItem::HandleOnRewind(const AVControlCommand& cmd)
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int64_t time = 0;
-    CHECK_AND_RETURN_LOG(cmd.GetRewindTime(time) == AVSESSION_SUCCESS, "GetForwardTime failed");
+    CHECK_AND_RETURN_LOG(cmd.GetRewindTime(time) == AVSESSION_SUCCESS, "GetRewindTime failed");
     callback_->OnRewind(time);
 }
 
@@ -1622,7 +1630,7 @@ int32_t AVSessionItem::SinkCancelCastAudio()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 {
-    SLOGI("UpdateCastDeviceMap with id: %{public}s", deviceInfo.deviceid_.c_str());
+    SLOGI("UpdateCastDeviceMap with id: %{public}s", deviceInfo.deviceId_.c_str());
     castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
 }
 #endif

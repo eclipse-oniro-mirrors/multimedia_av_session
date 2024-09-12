@@ -69,6 +69,8 @@ public:
 
     int32_t Destroy() override;
 
+    int32_t DestroyWithoutReply();
+
     std::string GetSessionId() override;
 
     void HandleSessionDestroy();

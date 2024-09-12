@@ -193,17 +193,18 @@ export struct AVCastPicker {
 
   @Builder
   buildIcon(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
-    if (this.deviceType === 'true') {
+    if (this.deviceInfoType === 'true') {
       SymbolGlyph(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
         .fontSize(24)
         .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-        ['#0A59F7'] : [$r(sys.color.ohos_id_color_primary)])
-      .renderingStrategy(2)
+          [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+        .renderingStrategy(2)
     } else {
       Image(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
-        .fontSize(24)
-        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-          '#0A59F7' : $r(sys.color.ohos_id_color_primary))
+        .width(24)
+        .height(24)
+        .fillColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+          $r('sys.color.comp_background_emphasize') : $r('sys.color.icon_primary'))
     }
   }
 
@@ -222,13 +223,15 @@ export struct AVCastPicker {
             alignItems: ItemAlign.Center
           }) {
             Row() {
-              this.buildIcon(item. false)
+              this.buildIcon(item, false)
 
               Text(item.deviceName)
                 .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                .fontColor(item.isConnected ? (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ?
-                  '#DBFFFFFF' : '#0A59F7') :
-                  (this.configurationColorMode === ConfigurationColorMode.COLOR_MODE_DARK ? '#DBFFFFFF' : '#E5000000'))
+                .fontColor(item.isConnected ?
+                  (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+                  $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
+                  (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+                  $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
                 .width(144)
                 .padding({
                   left: 8,
@@ -245,7 +248,7 @@ export struct AVCastPicker {
 
             if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined) {
               Row() {
-                this.buildIcon(item. true)
+                this.buildIcon(item, true)
               }
               .justifyContent(FlexAlign.Start)
               .alignItems(VerticalAlign.Center)
@@ -261,16 +264,15 @@ export struct AVCastPicker {
             }
           })
           .backgroundColor(this.touchMenuItemIndex === index
-            ? $r('sys.color.ohos_id_color_click_effect') : '#00FFFFFF')
+            ? $r('sys.color.interactive_click') : '#00FFFFFF')
           .borderRadius(this.touchMenuItemIndex === index
-            ? $r('sys.float.ohos_id_corner_radius_default_m') : 0)
+            ? $r('sys.float.corner_radius_level8') : 0)
 
           if (index != this.deviceList.length - 1) {
             Divider()
               .height(1)
               .width(172)
-              .color(this.configurationColorMode ===
-                ConfigurationColorMode.COLOR_MODE_DARK ? '#33FFFFFF' : '#33000000')
+              .color($r('sys.color.comp_divider'))
               .padding({ right: 12 })
           }
         }
@@ -381,14 +383,14 @@ export struct AVCastPicker {
         let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
         let isExtMenuScene: boolean = isCalling && (hasNoDevices || hasOnlySpeakerAndEarpiece);
         let isPanelForMedia: boolean = !isCalling &&
-            (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
-            this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);        
+          (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+          this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);        
         if (isExtMenuScene || isPanelForMedia) {
           this.isMenuShow = false;
         } else {
           this.isMenuShow = !this.isMenuShow;
           if (this.isMenuShow) {
-              this.pickerClickTime = new Date().getTime();
+            this.pickerClickTime = new Date().getTime();
           }
         }
       })
