@@ -424,6 +424,8 @@ private:
 
     bool UnSubscribeCommonEvent();
 
+    bool CheckAncoAudio();
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
