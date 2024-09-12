@@ -210,7 +210,7 @@ void AVSessionItem::HandleFrontSession()
 {
     bool isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
         metaData_.GetMediaImageUri().empty();
-    SLOGD("frontSession bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
+    SLOGI("frontSession bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
         GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
         static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     if (isMetaEmpty || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
@@ -777,6 +777,7 @@ int32_t AVSessionItem::AddSupportCastCommand(int32_t cmd)
         CHECK_AND_RETURN_RET_LOG(iter == supportedCastCmds_.end(), AVSESSION_SUCCESS, "cmd already been added");
         supportedCastCmds_.push_back(cmd);
     }
+    ProcessFrontSession("AddSupportCastCommand");
     HandleCastValidCommandChange(supportedCastCmds_);
     return AVSESSION_SUCCESS;
 }
@@ -813,7 +814,7 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
         auto iter = std::remove(supportedCastCmds_.begin(), supportedCastCmds_.end(), cmd);
         supportedCastCmds_.erase(iter, supportedCastCmds_.end());
     }
-
+    ProcessFrontSession("DeleteSupportCastCommand");
     HandleCastValidCommandChange(supportedCastCmds_);
     return AVSESSION_SUCCESS;
 }

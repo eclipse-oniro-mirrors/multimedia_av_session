@@ -1170,8 +1170,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
 
     std::string supportModule;
     std::string profile;
-    if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile) ||
-        DEFAULT_BUNDLE_NAME == elementName.GetBundleName()) {
+    if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
         SLOGI("bundleName=%{public}s support play intent, refreshSortFile", elementName.GetBundleName().c_str());
         refreshSortFileOnCreateSession(session->GetSessionId(), session->GetSessionType(), elementName);
     }

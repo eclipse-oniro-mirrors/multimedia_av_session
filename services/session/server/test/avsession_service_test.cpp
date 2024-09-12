@@ -214,7 +214,6 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-
 static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
 {
     SLOGI("SendSystemAVKeyEvent002 begin!");
@@ -620,7 +619,8 @@ static HWTEST_F(AVSessionServiceTest, SelectSessionByUid002, TestSize.Level1)
 
 static HWTEST_F(AVSessionServiceTest, InitBMS001, TestSize.Level1)
 {
-    SLOGI("InitBMS001 stop to prevent crash in SubscribeBundleStatusEvent");
+    SLOGI("InitBMS001 begin!");
+    avservice_->InitBMS();
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("InitBMS001 end!");
 }
@@ -721,7 +721,8 @@ static HWTEST_F(AVSessionServiceTest, RefreshSortFileOnCreateSession001, TestSiz
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
-    SLOGI("prevent RefreshSortFileOnCreateSession crash in SubscribeBundleStatusEvent");
+    avservice_->refreshSortFileOnCreateSession(avsessionHere_->GetSessionId(),
+        "audio", elementName);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("RefreshSortFileOnCreateSession001 end!");
@@ -750,7 +751,6 @@ static HWTEST_F(AVSessionServiceTest, SaveAvQueueInfo001, TestSize.Level1)
     if (!avservice_->LoadStringFromFileEx(avservice_->AVSESSION_FILE_DIR +
         avservice_->AVQUEUE_FILE_NAME, oldContent)) {
         SLOGE("SaveAvQueueInfo001 read avqueueinfo fail, Return!");
-        avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
         return;
     }
     avservice_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta);
