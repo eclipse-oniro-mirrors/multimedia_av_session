@@ -187,15 +187,13 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     const AAFwk::Want &want = eventData.GetWant();
     std::string action = want.GetAction();
     SLOGI("OnReceiveEvent action:%{public}s.", action.c_str());
-    auto deviceProp = system::GetParameter("const.product.devicetype", "default");
-    SLOGI("GetDeviceType, deviceProp=%{public}s", deviceProp.c_str());
-    bool is2in1 = strcmp(deviceProp.c_str(), "2in1");
+    bool is2in1 = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) == 0) {
         SLOGI("recieve COMMON_EVENT_SCREEN_OFF event.");
         if (servicePtr_ != nullptr) {
             servicePtr_->SetScreenOn(false);
         }
-        if (is2in1 == 0) {
+        if (is2in1) {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
             SLOGI("disable cast check 2in1");
             AVRouter::GetInstance().SetDiscoverable(false);
@@ -206,7 +204,7 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         if (servicePtr_ != nullptr) {
             servicePtr_->SetScreenOn(true);
         }
-        if (is2in1 == 0) {
+        if (is2in1) {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
             SLOGI("enable cast check 2in1");
             AVRouter::GetInstance().SetDiscoverable(false);
@@ -2850,11 +2848,11 @@ void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChange
 void AVSessionService::HandleDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
     for (auto &audioDeviceDescriptor : deviceChangeAction.deviceDescriptors) {
-        SLOGI("AVSessionService HandleDeviceChange device type %{public}d", audioDeviceDescriptor->deviceType_);
         if (audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADSET ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADPHONES ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_USB_HEADSET ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_BLUETOOTH_A2DP) {
+            SLOGI("AVSessionService handle pre notify device type %{public}d", audioDeviceDescriptor->deviceType_);
             NotifyDeviceChange(deviceChangeAction);
         }
     }
