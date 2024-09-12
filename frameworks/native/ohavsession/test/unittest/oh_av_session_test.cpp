@@ -238,44 +238,6 @@ HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackPosition_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OH_AVSession_SetBufferedTime_001
- * @tc.desc: SetBufferedTime from the class of ohavsession
- * @tc.type: FUNC
- * @tc.require: none
-*/
-HWTEST(OHAVSessionTest, OH_AVSession_SetBufferedTime_001, TestSize.Level1)
-{
-    OH_AVSession* avsession = nullptr;
-    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_SetBufferedTime_001",
-        "com.xxx.hmxx", "ndkxx", &avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    uint64_t bufferedTime = 1;
-    ret = OH_AVSession_SetBufferedTime(avsession, bufferedTime);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_Destroy(avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-}
-
-/**
- * @tc.name: OH_AVSession_SetSpeed_001
- * @tc.desc: SetSpeed from the class of ohavsession
- * @tc.type: FUNC
- * @tc.require: none
-*/
-HWTEST(OHAVSessionTest, OH_AVSession_SetSpeed_001, TestSize.Level1)
-{
-    OH_AVSession* avsession = nullptr;
-    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_SetSpeed_001",
-        "com.xxx.hmxx", "ndkxx", &avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    uint64_t speed = 1;
-    ret = OH_AVSession_SetSpeed(avsession, speed);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_Destroy(avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-}
-
-/**
  * @tc.name: OH_AVSession_SetFavorite_001
  * @tc.desc: SetFavorite from the class of ohavsession
  * @tc.type: FUNC
@@ -513,56 +475,6 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterSeekCallback_001, TestSize.Level1
 }
 
 /**
- * @tc.name: OH_AVSession_RegisterSpeedCallback_001
- * @tc.desc: RegisterSpeedCallback from the class of ohavsession
- * @tc.type: FUNC
- * @tc.require: none
-*/
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterSpeedCallback_001, TestSize.Level1)
-{
-    OH_AVSession* avsession = nullptr;
-    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
-        "com.xxx.hmxx", "ndkxx", &avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    OH_AVSessionCallback_OnSetSpeed callback = [](OH_AVSession* session, uint32_t speed,
-        void* userData) -> AVSessionCallback_Result
-    {
-        return AVSESSION_CALLBACK_RESULT_SUCCESS;
-    };
-    int userData = 1;
-    ret = OH_AVSession_RegisterSpeedCallback(avsession, callback, (void *)(&userData));
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_Destroy(avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-}
-
-/**
- * @tc.name: OH_AVSession_UnregisterSpeedCallback_001
- * @tc.desc: UnregisterSpeedCallback from the class of ohavsession
- * @tc.type: FUNC
- * @tc.require: none
-*/
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterSpeedCallback_001, TestSize.Level1)
-{
-    OH_AVSession* avsession = nullptr;
-    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
-        "com.xxx.hmxx", "ndkxx", &avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    OH_AVSessionCallback_OnSetSpeed callback = [](OH_AVSession* session, uint32_t speed,
-        void* userData) -> AVSessionCallback_Result
-    {
-        return AVSESSION_CALLBACK_RESULT_SUCCESS;
-    };
-    int userData = 1;
-    ret = OH_AVSession_RegisterSpeedCallback(avsession, callback, (void *)(&userData));
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_UnregisterSpeedCallback(avsession, callback);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_Destroy(avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-}
-
-/**
  * @tc.name: OH_AVSession_RegisterSetLoopModeCallback_001
  * @tc.desc: RegisterSetLoopModeCallback from the class of ohavsession
  * @tc.type: FUNC
@@ -657,56 +569,6 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterToggleFavoriteCallback_001, TestS
     ret = OH_AVSession_RegisterToggleFavoriteCallback(avsession, callback, (void *)(&userData));
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_UnregisterToggleFavoriteCallback(avsession, callback);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_Destroy(avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-}
-
-/**
- * @tc.name: OH_AVSession_RegisterPlayFromAssetIdCallback_001
- * @tc.desc: RegisterPlayFromAssetIdCallback from the class of ohavsession
- * @tc.type: FUNC
- * @tc.require: none
-*/
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterPlayFromAssetIdCallback_001, TestSize.Level1)
-{
-    OH_AVSession* avsession = nullptr;
-    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
-        "com.xxx.hmxx", "ndkxx", &avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    OH_AVSessionCallback_OnPlayFromAssetId callback = [](OH_AVSession* session, const char* assetId,
-        void* userData) -> AVSessionCallback_Result
-    {
-        return AVSESSION_CALLBACK_RESULT_SUCCESS;
-    };
-    int userData = 1;
-    ret = OH_AVSession_RegisterPlayFromAssetIdCallback(avsession, callback, (void *)(&userData));
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_Destroy(avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-}
-
-/**
- * @tc.name: OH_AVSession_UnregisterPlayFromAssetIdCallback_001
- * @tc.desc: UnregisterPlayFromAssetIdCallback from the class of ohavsession
- * @tc.type: FUNC
- * @tc.require: none
-*/
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterPlayFromAssetIdCallback_001, TestSize.Level1)
-{
-    OH_AVSession* avsession = nullptr;
-    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
-        "com.xxx.hmxx", "ndkxx", &avsession);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    OH_AVSessionCallback_OnPlayFromAssetId callback = [](OH_AVSession* session, const char* assetId,
-        void* userData) -> AVSessionCallback_Result
-    {
-        return AVSESSION_CALLBACK_RESULT_SUCCESS;
-    };
-    int userData = 1;
-    ret = OH_AVSession_RegisterPlayFromAssetIdCallback(avsession, callback, (void *)(&userData));
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_UnregisterPlayFromAssetIdCallback(avsession, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_Destroy(avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);

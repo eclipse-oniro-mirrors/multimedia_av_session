@@ -33,7 +33,7 @@ public:
     void OnFastForward(int64_t time) override;
     void OnRewind(int64_t time) override;
     void OnSeek(int64_t time) override;
-    void OnSetSpeed(double speed) override;
+    void OnSetSpeed(double speed) override {};
     void OnSetLoopMode(int32_t loopMode) override;
     void OnToggleFavorite(const std::string& mediald) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override {};
@@ -44,7 +44,7 @@ public:
     void OnAVCallAnswer() override {};
     void OnAVCallHangUp() override {};
     void OnAVCallToggleCallMute() override {};
-    void OnPlayFromAssetId(int64_t assetId) override;
+    void OnPlayFromAssetId(int64_t assetId) override {};
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
 
     AVSession_ErrCode SetPlayCallback(OH_AVSession* avsession, AVSession_ControlCommand command,
@@ -80,10 +80,6 @@ public:
     OH_AVSessionCallback_OnSeek callback, void* userData);
         AVSession_ErrCode UnregisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback);
-    AVSession_ErrCode RegisterSpeedCallback(OH_AVSession* avsession,
-        OH_AVSessionCallback_OnSetSpeed callback, void* userData);
-    AVSession_ErrCode UnregisterSpeedCallback(OH_AVSession* avsession,
-        OH_AVSessionCallback_OnSetSpeed callback);
     AVSession_ErrCode RegisterSetLoopModeCallback(OH_AVSession* avsession,
         OH_AVSessionCallback_OnSetLoopMode callback, void* userData);
     AVSession_ErrCode UnregisterSetLoopModeCallback(OH_AVSession* avsession,
@@ -92,10 +88,6 @@ public:
         OH_AVSessionCallback_OnToggleFavorite callback, void* userData);
     AVSession_ErrCode UnregisterToggleFavoriteCallback(OH_AVSession* session,
         OH_AVSessionCallback_OnToggleFavorite callback);
-    AVSession_ErrCode RegisterPlayFromAssetIdCallback(OH_AVSession* session,
-        OH_AVSessionCallback_OnPlayFromAssetId callback, void* userData);
-    AVSession_ErrCode UnregisterPlayFromAssetIdCallback(OH_AVSession* session,
-        OH_AVSessionCallback_OnPlayFromAssetId callback);
 
 private:
     OH_AVSession* avsession_ = {nullptr};
@@ -107,10 +99,8 @@ private:
     std::vector<std::pair<OH_AVSessionCallback_OnFastForward, void*>> forwardCallbacks_;
     std::vector<std::pair<OH_AVSessionCallback_OnRewind, void*>> rewindCallbacks_;
     std::vector<std::pair<OH_AVSessionCallback_OnSeek, void*>> seekCallbacks_;
-    std::vector<std::pair<OH_AVSessionCallback_OnSetSpeed, void*>> setSpeedCallbacks_;
     std::vector<std::pair<OH_AVSessionCallback_OnSetLoopMode, void*>> setLoopModeCallbacks_;
     std::vector<std::pair<OH_AVSessionCallback_OnToggleFavorite, void*>> toggleFavoriteCallbacks_;
-    std::vector<std::pair<OH_AVSessionCallback_OnPlayFromAssetId, void*>> playFromAssetIdCallbacks_;
 };
 }
 #endif // OHOS_OHAVSESSION_CALLBACKIMPL_H
