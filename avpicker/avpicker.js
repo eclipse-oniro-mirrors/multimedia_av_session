@@ -541,6 +541,9 @@ export class AVCastPicker extends ViewPU {
                     this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
                 if (x || y) {
                     this.isMenuShow = false;
+                    if (this.extensionProxy != null) {
+                        this.extensionProxy.send({'clickEvent': true});
+                    }
                 } else {
                     this.isMenuShow = !this.isMenuShow;
                     if (this.isMenuShow) {
