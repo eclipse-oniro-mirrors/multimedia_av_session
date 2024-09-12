@@ -35,12 +35,6 @@ class AVSessionServiceProxyFuzzer {
 public:
     AVSessionServiceProxyFuzzer() = default;
     ~AVSessionServiceProxyFuzzer() = default;
-    void FuzzDoProxyTaskOne(std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy,
-        uint8_t* data, size_t size, sptr<IRemoteObject> object);
-    void FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy,
-        uint8_t* data, size_t size);
-    void FuzzDoProxyTask(std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy,
-        uint8_t* data, size_t size, sptr<IRemoteObject> object);
     bool FuzzSendRequest(uint8_t* data, size_t size);
 };
 }
