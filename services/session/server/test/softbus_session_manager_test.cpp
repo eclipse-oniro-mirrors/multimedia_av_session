@@ -229,3 +229,246 @@ HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level1)
     manager_->OnBind(sessionId, info);
     SLOGI("OnSessionOpened001 end");
 }
+
+
+/**
+* @tc.name: SendMessage002
+* @tc.desc: test SendMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, SendMessage002, TestSize.Level1)
+{
+    SLOGI("SendMessage002 begin");
+    int32_t sessionId = -1;
+    std::string data = "";
+    int32_t ret = manager_->SendMessage(sessionId, data);
+    EXPECT_EQ(ret, -1);
+    SLOGI("SendMessage002 end");
+}
+
+/**
+* @tc.name: SendMessage003
+* @tc.desc: test SendMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, SendMessage003, TestSize.Level1)
+{
+    SLOGI("SendMessage003 begin");
+    int32_t sessionId = -1;
+    std::string data = "123";
+    int32_t ret = manager_->SendMessage(sessionId, data);
+    EXPECT_EQ(ret, -1);
+    SLOGI("SendMessage003 end");
+}
+
+/**
+* @tc.name: SendMessage004
+* @tc.desc: test SendMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, SendMessage004, TestSize.Level1)
+{
+    SLOGI("SendMessage004 begin");
+    int32_t sessionId = 100;
+    std::string data = "123";
+    int32_t ret = manager_->SendMessage(sessionId, data);
+    EXPECT_EQ(ret, -1);
+    SLOGI("SendMessage004 end");
+}
+
+/**
+* @tc.name: SendByte002
+* @tc.desc: test SendBytes
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, SendByte002, TestSize.Level1)
+{
+    SLOGI("SendByte002 begin");
+    int32_t sessionId = -1;
+    std::string data = "";
+    int32_t ret = manager_->SendBytes(sessionId, data);
+    EXPECT_EQ(ret, -1);
+    SLOGI("SendByte002 end");
+}
+
+/**
+* @tc.name: SendByte003
+* @tc.desc: test SendBytes
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, SendByte003, TestSize.Level1)
+{
+    SLOGI("SendByte003 begin");
+    int32_t sessionId = -1;
+    std::string data = "123";
+    int32_t ret = manager_->SendBytes(sessionId, data);
+    EXPECT_EQ(ret, -1);
+    SLOGI("SendByte003 end");
+}
+
+/**
+* @tc.name: SendByte004
+* @tc.desc: test SendBytes
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, SendByte004, TestSize.Level1)
+{
+    SLOGI("SendByte004 begin");
+    int32_t sessionId = 100;
+    std::string data = "123";
+    int32_t ret = manager_->SendBytes(sessionId, data);
+    EXPECT_EQ(ret, -1);
+    SLOGI("SendByte004 end");
+}
+
+/**
+* @tc.name: ObtainPeerDeviceId002
+* @tc.desc: test ObtainPeerDeviceId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, ObtainPeerDeviceId002, TestSize.Level1)
+{
+    SLOGI("ObtainPeerDeviceId002 begin");
+    int32_t sessionId = 1230;
+    std::string deviceId;
+    int32_t ret = manager_->ObtainPeerDeviceId(sessionId, deviceId);
+    EXPECT_EQ(ret, -1);
+    SLOGI("ObtainPeerDeviceId002 end");
+}
+
+/**
+* @tc.name: AddSessionListener001
+* @tc.desc: test AddSessionListener
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, AddSessionListener001, TestSize.Level1)
+{
+    SLOGI("AddSessionListener001 begin");
+    std::shared_ptr<SoftbusSessionListener> softbusSessionListener;
+    manager_->AddSessionListener(softbusSessionListener);
+    SLOGI("AddSessionListener001 end");
+}
+
+/**
+* @tc.name: OnBind001
+* @tc.desc: test OnBind
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, OnBind001, TestSize.Level1)
+{
+    SLOGI("OnBind001 begin");
+    int32_t socket = 1231;
+    PeerSocketInfo info;
+    manager_->OnBind(socket, info);
+    SLOGI("OnBind001 end");
+}
+
+/**
+* @tc.name: OnMessage001
+* @tc.desc: test OnMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, OnMessage001, TestSize.Level1)
+{
+    SLOGI("OnMessage001 begin");
+    int32_t socket = 1231;
+    void *data = nullptr;
+    int32_t dataLen = 10;
+    manager_->OnMessage(socket, data, dataLen);
+    SLOGI("OnMessage001 end");
+}
+
+/**
+* @tc.name: OnMessage002
+* @tc.desc: test OnMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, OnMessage002, TestSize.Level1)
+{
+    SLOGI("OnMessage002 begin");
+    int32_t socket = 1231;
+    int *ptr = &socket;
+    void *data = static_cast<void*>(ptr);
+    int32_t dataLen = 10;
+    manager_->OnMessage(socket, data, dataLen);
+    SLOGI("OnMessage002 end");
+}
+
+/**
+* @tc.name: OnBytes001
+* @tc.desc: test OnMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, OnBytes001, TestSize.Level1)
+{
+    SLOGI("OnBytes001 begin");
+    int32_t socket = 1231;
+    void *data = nullptr;
+    int32_t dataLen = 10;
+    manager_->OnMessage(socket, data, dataLen);
+    SLOGI("OnBytes001 end");
+}
+
+/**
+* @tc.name: OnMessage002
+* @tc.desc: test OnMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, OnBytes002, TestSize.Level1)
+{
+    SLOGI("OnBytes002 begin");
+    int32_t socket = 1231;
+    int *ptr = &socket;
+    void *data = static_cast<void*>(ptr);
+    int32_t dataLen = 10;
+    manager_->OnMessage(socket, data, dataLen);
+    SLOGI("OnBytes002 end");
+}
+
+/**
+* @tc.name: CreateServer001
+* @tc.desc: test CreateServer
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, CreateServer001, TestSize.Level1)
+{
+    SLOGI("CreateServer001 begin");
+    distributed_->Init();
+    std::string pkg = "AVSESSION";
+    distributed_->InitSessionServer(pkg);
+
+    std::shared_ptr<MigrateAVSessionServer> server;
+    distributed_->CreateServer(server);
+    SLOGI("CreateServer001 end");
+}
+
+/**
+* @tc.name: ReleaseServer001
+* @tc.desc: test ReleaseServer
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusSessionManagerTest, ReleaseServer001, TestSize.Level1)
+{
+    SLOGI("ReleaseServer001 begin");
+    distributed_->Init();
+    std::string pkg = "AVSESSION";
+    distributed_->InitSessionServer(pkg);
+    std::shared_ptr<MigrateAVSessionServer> server = std::make_shared<MigrateAVSessionServer>();
+    distributed_->ReleaseServer(server);
+    SLOGI("ReleaseServer001 end");
+}
