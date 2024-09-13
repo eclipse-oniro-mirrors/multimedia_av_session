@@ -100,9 +100,8 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "CreateControllerInner fail");
     avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
     CHECK_AND_RETURN_LOG(avControllerItem != nullptr, "avControllerItem is null");
-    auto avControllerItemFuzzer = std::make_shared<AvControllerItemFuzzer>();
+    auto avControllerItemFuzzer = std::make_unique<AvControllerItemFuzzer>();
     CHECK_AND_RETURN_LOG(avControllerItemFuzzer != nullptr, "avControllerItemFuzzer is null");
-
     AVPlaybackState playbackstate;
     avControllerItem->GetAVPlaybackState(playbackstate);
     AVMetaData metaData;
@@ -132,7 +131,6 @@ void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem, con
     avControllerItem->SendAVKeyEvent(*(keyEvent.get()));
     AbilityRuntime::WantAgent::WantAgent ability;
     avControllerItem->GetLaunchAbility(ability);
-
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
     if (code <= AVMetaData::META_KEY_MAX) {
         AVMetaData::MetaMaskType metaFilter;
@@ -140,9 +138,9 @@ void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem, con
         avControllerItem->SetMetaFilter(metaFilter);
     }
     if (code <= AVControlCommand::SESSION_CMD_MAX) {
-        AVControlCommand commond;
-        commond.SetCommand(code);
-        avControllerItem->SendControlCommand(commond);
+        AVControlCommand command;
+        command.SetCommand(code);
+        avControllerItem->SendControlCommand(command);
     }
     avControllerItem->Destroy();
 }
@@ -211,6 +209,7 @@ void AvControllerItemTestImpl(const uint8_t* data, size_t size,
     avControllerItem->HandleSessionDestroy();
     avControllerItem->Destroy();
 }
+
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
