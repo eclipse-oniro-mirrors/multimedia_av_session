@@ -43,6 +43,10 @@ public:
 
     void UpdateSessionSort(sptr<AVSessionItem>& item) override;
 
+    bool IsEmpty() override;
+
+    int32_t getAllSessionNum() override;
+
 private:
     std::map<std::pair<pid_t, std::string>, sptr<AVSessionItem>> sessions_;
     std::list<sptr<AVSessionItem>> stack_;

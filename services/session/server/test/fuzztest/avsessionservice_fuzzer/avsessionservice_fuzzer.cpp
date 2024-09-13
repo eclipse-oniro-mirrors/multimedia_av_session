@@ -524,12 +524,12 @@ void SaveAvQueueInfo001(const uint8_t* data, size_t size)
     SLOGI("SaveAvQueueInfo001 begin!");
     AVMetaData meta = avsessionHere_->GetMetaData();
     std::string oldContent;
-    if (!avsessionService_->LoadStringFromFileEx(avsessionService_->AVSESSION_FILE_DIR +
-        avsessionService_->AVQUEUE_FILE_NAME, oldContent)) {
+    if (!avsessionService_->LoadStringFromFileEx(avsessionService_->GetAVQueueDir(), oldContent)) {
         SLOGE("SaveAvQueueInfo001 read avqueueinfo fail, Return!");
         return;
     }
-    avsessionService_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta);
+    avsessionService_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta,
+        avsessionService_->GetUsersManager().GetCurrentUserId());
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("SaveAvQueueInfo001 end!");
 }
