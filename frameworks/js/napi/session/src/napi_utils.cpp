@@ -348,7 +348,7 @@ napi_status NapiUtils::SetValue(napi_env env, const AVQueueInfo& in, napi_value&
     if (!uri.empty()) {
         SLOGD(" napi setvalue has avqueueimageuri");
         status = NapiUtils::SetValue(env, uri, property);
-        CHECK_RETURN(status == napi_ok, "create property failed", status);
+        CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
         status = napi_set_named_property(env, out, "avQueueImage", property);
         CHECK_RETURN(status == napi_ok, "set property failed", status);
     }
@@ -387,19 +387,19 @@ napi_status NapiUtils::SetValue(napi_env env, const std::optional<MMI::KeyEvent:
 
     napi_value code {};
     status = SetValue(env, in->GetKeyCode(), code);
-    CHECK_RETURN(status == napi_ok, "create property failed", status);
+    CHECK_RETURN((status == napi_ok) && (code != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "code", code);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
 
     napi_value pressedTime {};
     status = SetValue(env, in->GetDownTime(), pressedTime);
-    CHECK_RETURN(status == napi_ok, "create property failed", status);
+    CHECK_RETURN((status == napi_ok) && (pressedTime != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "pressedTime", pressedTime);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
 
     napi_value deviceId {};
     status = SetValue(env, in->GetDeviceId(), deviceId);
-    CHECK_RETURN(status == napi_ok, "create property failed", status);
+    CHECK_RETURN((status == napi_ok) && (deviceId != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "deviceId", deviceId);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
 
@@ -461,14 +461,14 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEven
 
     napi_value action {};
     status = SetValue(env, in->GetKeyAction() - KEYEVENT_ACTION_JS_NATIVE_DELTA, action);
-    CHECK_RETURN(status == napi_ok, "create action property failed", status);
+    CHECK_RETURN((status == napi_ok) && (action != nullptr), "create action property failed", status);
     status = napi_set_named_property(env, out, "action", action);
     CHECK_RETURN(status == napi_ok, "set action property failed", status);
 
     napi_value key {};
     CHECK_RETURN(in->GetKeyItem(), "get key item failed", napi_generic_failure);
     status = SetValue(env, in->GetKeyItem(), key);
-    CHECK_RETURN(status == napi_ok, "create key property failed", status);
+    CHECK_RETURN((status == napi_ok) && (key != nullptr), "create key property failed", status);
     status = napi_set_named_property(env, out, "key", key);
     CHECK_RETURN(status == napi_ok, "set key property failed", status);
 
@@ -481,7 +481,7 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEven
     for (const auto& keyItem : keyItems) {
         napi_value item {};
         status = SetValue(env, keyItem, item);
-        CHECK_RETURN(status == napi_ok, "create keyItem failed", status);
+        CHECK_RETURN((status == napi_ok) && (item != nullptr), "create keyItem failed", status);
 
         status = napi_set_element(env, keys, idx, item);
         CHECK_RETURN(status == napi_ok, "set element failed", status);
@@ -1084,7 +1084,7 @@ napi_status NapiUtils::SetValue(napi_env env, const OutputDeviceInfo& in, napi_v
     for (const auto& item : in.deviceInfos_) {
         napi_value entry = nullptr;
         status = SetValue(env, item, entry);
-        CHECK_RETURN((status == napi_ok), "create array failed!", status);
+        CHECK_RETURN((status == napi_ok) && (entry != nullptr), "create array failed!", status);
         napi_set_element(env, temp, index++, entry);
     }
     status = napi_set_named_property(env, out, "devices", temp);
