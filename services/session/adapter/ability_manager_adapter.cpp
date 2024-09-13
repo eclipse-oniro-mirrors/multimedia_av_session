@@ -21,7 +21,6 @@
 #include "ability_connect_helper.h"
 
 namespace OHOS::AVSession {
-
 AbilityManagerAdapter::AbilityManagerAdapter(const std::string& bundleName, const std::string& abilityName)
 {
     SLOGI("construct bundleName=%{public}s abilityName=%{public}s", bundleName.c_str(), abilityName.c_str());
@@ -42,8 +41,7 @@ int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
     AppExecFwk::InsightIntentExecuteParam executeParam;
     bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName_, "", executeParam);
     int32_t ret = AVSESSION_ERROR;
-
-    if (bundleName_ != DEFAULT_BUNDLE_NAME && isSupport && !executeParam.insightIntentName_.empty()) {
+    if (isSupport && !executeParam.insightIntentName_.empty()) {
         SLOGI("Start Ability mediaintent");
         ret = AbilityConnectHelper::GetInstance().StartAVPlayback(executeParam);
     } else {
