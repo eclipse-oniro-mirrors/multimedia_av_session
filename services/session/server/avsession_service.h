@@ -46,6 +46,8 @@
 #include "common_event_support.h"
 #include "matching_skills.h"
 
+#include "avsession_users_manager.h"
+
 #ifdef BLUETOOTH_ENABLE
 #include "bluetooth_host.h"
 #endif
@@ -238,6 +240,14 @@ public:
 
     bool GetScreenOn();
 
+    std::string GetAVQueueDir();
+
+    std::string GetAVSortDir();
+
+    void HandleUserEvent(const std::string &type, const int &userId);
+
+    void RegisterBundleDeleteEventForHistory();
+
 private:
     void CheckInitCast();
 
@@ -246,6 +256,7 @@ private:
     void NotifyProcessStatus(bool isStart);
 
     static SessionContainer& GetContainer();
+    static AVSessionUsersManager& GetUsersManager();
 
     std::string AllocSessionId();
 
@@ -306,6 +317,10 @@ private:
     void InitBMS();
 
     void InitRadarBMS();
+
+    void InitAccountMgr();
+
+    void InitCommonEventService();
 
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
     
@@ -385,6 +400,10 @@ private:
     void refreshSortFileOnCreateSession(const std::string& sessionId, const std::string& sessionType,
         const AppExecFwk::ElementName& elementName);
 
+    bool CheckAndCreateDir(const string& filePath);
+
+    bool CheckUserDirValid();
+
     bool LoadStringFromFileEx(const std::string& filePath, std::string& content);
 
     bool SaveStringToFileEx(const std::string& filePath, const std::string& content);
@@ -393,7 +412,8 @@ private:
 
     void ClearClientResources(pid_t pid);
     
-    bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta);
+    bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName,
+        const AVMetaData& meta, const int32_t userId);
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 
@@ -424,12 +444,13 @@ private:
 
     int32_t ConvertKeyCodeToCommand(int keyCode);
 
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
     sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
-    std::list<sptr<AVSessionItem>> sessionListForFront_;
     std::recursive_mutex sessionFrontLock_;
 
     std::recursive_mutex clientDeathObserversLock_;
@@ -437,7 +458,6 @@ private:
     std::map<pid_t, sptr<ClientDeathRecipient>> clientDeathRecipients_;
 
     std::recursive_mutex sessionListenersLock_;
-    std::map<pid_t, sptr<ISessionListener>> sessionListeners_;
     std::list<SessionListener*> innerSessionListeners_;
 
     std::recursive_mutex abilityManagerLock_;
@@ -460,7 +480,7 @@ private:
 
     std::recursive_mutex sortFileReadWriteLock_;
     std::recursive_mutex avQueueFileReadWriteLock_;
-    std::mutex fileCheckLock_;
+    std::recursive_mutex fileCheckLock_;
 
     std::recursive_mutex migrateListenersLock_;
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
@@ -495,7 +515,6 @@ private:
     static constexpr const int32_t SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER = 2;
     static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
 
-    const std::string AVSESSION_FILE_DIR = "/data/service/el2/public/av_session/";
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";
 

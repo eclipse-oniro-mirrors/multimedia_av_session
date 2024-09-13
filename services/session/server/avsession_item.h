@@ -65,7 +65,7 @@ public:
 };
 #endif
 public:
-    explicit AVSessionItem(const AVSessionDescriptor& descriptor);
+    explicit AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId = DEFAULT_USER_ID);
 
     ~AVSessionItem() override;
 
@@ -166,6 +166,8 @@ public:
     pid_t GetPid() const;
 
     pid_t GetUid() const;
+
+    int32_t GetUserId() const;
 
     std::string GetAbilityName() const;
 
@@ -347,6 +349,7 @@ private:
     AVCallState avCallState_;
 
     AVSessionDescriptor descriptor_;
+    int32_t userId_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
     std::recursive_mutex queueItemsLock_;
@@ -387,6 +390,8 @@ private:
     std::recursive_mutex displayListenerLock_;
     AVSessionDisplayIntf *avsessionDisaplayIntf_;
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
+
+    static const int32_t DEFAULT_USER_ID = 100;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;

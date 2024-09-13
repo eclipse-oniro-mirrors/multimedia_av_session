@@ -27,9 +27,11 @@
 namespace OHOS::AVSession {
 class AVControllerItem : public AVSessionControllerStub {
 public:
-    AVControllerItem(pid_t pid, const sptr<AVSessionItem>& session);
+    AVControllerItem(pid_t pid, const sptr<AVSessionItem>& session, int32_t userId = DEFAULT_USER_ID);
 
     ~AVControllerItem() override;
+
+    int32_t GetUserId() const;
 
     int32_t GetAVCallState(AVCallState& avCallState) override;
 
@@ -103,16 +105,16 @@ public:
 
     int32_t RegisterAVControllerCallback(const std::shared_ptr<AVControllerCallback> &callback);
 
-    bool CheckIfFromSession();
-    bool isFromSession = false;
+    bool isFromSession_ = false;
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 
 private:
     pid_t pid_;
-    std::string sessionId_;
-    std::recursive_mutex sessionMutex_;
     sptr<AVSessionItem> session_;
+    std::string sessionId_;
+    int32_t userId_;
+    std::recursive_mutex sessionMutex_;
     std::recursive_mutex callbackMutex_;
     sptr<IAVControllerCallback> callback_;
     std::shared_ptr<AVControllerCallback> innerCallback_;
@@ -126,6 +128,8 @@ private:
     AVPlaybackState::PlaybackStateMaskType playbackMask_;
     std::recursive_mutex serviceCallbackMutex_;
     std::function<void(AVControllerItem&)> serviceCallback_;
+
+    static const int32_t DEFAULT_USER_ID = 100;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_ITEM_H

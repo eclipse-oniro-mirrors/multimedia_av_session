@@ -44,6 +44,10 @@ public:
     
     virtual void UpdateSessionSort(sptr<AVSessionItem>& item);
 
+    virtual bool IsEmpty();
+
+    virtual int32_t getAllSessionNum();
+
     virtual ~SessionContainer() = default;
 
     static constexpr int32_t SESSION_NUM_MAX = 50;

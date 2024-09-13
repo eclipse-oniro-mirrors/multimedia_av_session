@@ -751,13 +751,13 @@ static HWTEST_F(AVSessionServiceTest, SaveAvQueueInfo001, TestSize.Level1)
     EXPECT_EQ(avsessionHere_ != nullptr, true);
     AVMetaData meta = avsessionHere_->GetMetaData();
     std::string oldContent;
-    if (!avservice_->LoadStringFromFileEx(avservice_->AVSESSION_FILE_DIR +
-        avservice_->AVQUEUE_FILE_NAME, oldContent)) {
+    if (!avservice_->LoadStringFromFileEx(avservice_->GetAVQueueDir(), oldContent)) {
         SLOGE("SaveAvQueueInfo001 read avqueueinfo fail, Return!");
         avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
         return;
     }
-    avservice_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta);
+    avservice_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta,
+        avservice_->GetUsersManager().GetCurrentUserId());
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("SaveAvQueueInfo001 end!");
@@ -1439,7 +1439,7 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx001, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
 
-    std::string filePath = avservice_->AVSESSION_FILE_DIR + "test1.txt";
+    std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "test1.txt";
     std::string content;
     bool ret = avservice_->LoadStringFromFileEx(filePath, content);
     EXPECT_EQ(ret, true);
@@ -1458,7 +1458,7 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx002, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
     int32_t maxFileLength = 32 * 1024 * 1024;
-    std::string filePath = avservice_->AVSESSION_FILE_DIR + "test2.txt";
+    std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "test2.txt";
     ofstream ofs;
     ofs.open(filePath, ios::out);
     for (int32_t i = 0; i <= maxFileLength; i++) {
@@ -1504,7 +1504,7 @@ static HWTEST_F(AVSessionServiceTest, SaveStringToFileEx001, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
 
-    std::string filePath = avservice_->AVSESSION_FILE_DIR + "test4.txt";
+    std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "test4.txt";
     std::string content;
     bool ret = avservice_->LoadStringFromFileEx(filePath, content);
     EXPECT_EQ(ret, true);
@@ -1544,7 +1544,7 @@ static HWTEST_F(AVSessionServiceTest, CheckStringAndCleanFile001, TestSize.Level
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
 
-    std::string filePath = avservice_->AVSESSION_FILE_DIR + "test6.txt";
+    std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "test6.txt";
     bool ret = avservice_->CheckStringAndCleanFile(filePath);
     EXPECT_EQ(ret, true);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
