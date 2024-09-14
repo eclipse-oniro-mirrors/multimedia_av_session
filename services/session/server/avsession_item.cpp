@@ -671,6 +671,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     castHandle_ = castHandle;
+    castHandleDeviceId_ = deviceInfo.deviceId_;
     SLOGI("RegisterListenerStreamToCast check handle set to %{public}ld", castHandle_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     counter_ = firstStep;
@@ -843,8 +844,13 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 
     // unregister pre castSession callback to avoid previous session timeout disconnect influence current session
     if (castHandle_ > 0) {
-        SLOGI("cast check with pre cast alive %{public}ld, unregister callback", castHandle_);
-        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+        if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
+            SLOGI("repeat startcast %{public}ld", castHandle_);
+            return AVSESSION_ERROR;
+        } else {
+            SLOGI("cast check with pre cast alive %{public}ld, unregister callback", castHandle_);
+            AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+        }
     }
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
@@ -854,6 +860,9 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     SLOGI("start cast check handle set to %{public}ld", castHandle_);
 
     int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
+    if (ret == AVSESSION_SUCCESS) {
+        castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
+    }
 
     doContinuousTaskRegister();
     return ret;
@@ -904,8 +913,9 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
     SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}ld", castHandle_);
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
     AVRouter::GetInstance().StopCastSession(castHandle_);
-    doContinuousTaskUnregister();
     castHandle_ = -1;
+    castHandleDeviceId_ = "-100";
+    doContinuousTaskUnregister();
     castControllerProxy_ = nullptr;
     supportedCastCmds_.clear();
     SaveLocalDeviceInfo();
@@ -974,6 +984,7 @@ int32_t AVSessionItem::StopCast()
     if (descriptor_.sessionTag_ == "RemoteCast") {
         int32_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
         castHandle_ = -1;
+        castHandleDeviceId_ = "-100";
         SLOGI("Stop cast process for sink with ret %{public}d", ret);
         return ret;
     }
@@ -1042,6 +1053,7 @@ void AVSessionItem::StopCastSession()
     doContinuousTaskUnregister();
     if (ret != AVSESSION_ERROR) {
         castHandle_ = -1;
+        castHandleDeviceId_ = "-100";
     } else {
         SLOGE("Stop cast session process error");
     }
