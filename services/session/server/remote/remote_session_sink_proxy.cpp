@@ -14,6 +14,7 @@
  */
 
 #include <dlfcn.h>
+#include <openssl/crypto.h>
 #include "avsession_trace.h"
 #include "remote_session_sink_proxy.h"
 
@@ -42,6 +43,7 @@ int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("
     if (createRemoteSessionSinkImpl == nullptr) {
         if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
+            OPENSSL_thread_stop();
             dlclose(handle_);
 #endif
         }
@@ -61,6 +63,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
     if (destroyRemoteSessionSinkImpl == nullptr) {
         if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
+            OPENSSL_thread_stop();
             dlclose(handle_);
 #endif
         }
@@ -72,6 +75,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
 
     if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
+        OPENSSL_thread_stop();
         dlclose(handle_);
 #endif
     }

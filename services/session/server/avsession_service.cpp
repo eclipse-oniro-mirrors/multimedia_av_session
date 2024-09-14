@@ -21,6 +21,7 @@
 #include <thread>
 #include <chrono>
 #include <filesystem>
+#include <openssl/crypto.h>
 
 #include "accesstoken_kit.h"
 #include "account_manager_adapter.h"
@@ -165,6 +166,7 @@ void AVSessionService::OnStop()
         stopMigrateStub();
     }
 #ifndef TEST_COVERAGE
+    OPENSSL_thread_stop();
     dlclose(migrateStubFuncHandle_);
 #endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -445,6 +447,7 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
     if (!notifyProcessStatusFunc) {
         SLOGE("dlsm notify_process_status failed");
 #ifndef TEST_COVERAGE
+        OPENSSL_thread_stop();
         dlclose(libMemMgrClientHandle);
 #endif
         return;
@@ -458,6 +461,7 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
         notifyProcessStatus(pid, saType, 0, AVSESSION_SERVICE_ID); // 0 indicates the service is stopped
     }
 #ifndef TEST_COVERAGE
+    OPENSSL_thread_stop();
     dlclose(libMemMgrClientHandle);
 #endif
 }

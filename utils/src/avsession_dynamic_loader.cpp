@@ -17,6 +17,7 @@
 #define LOG_TAG "AVSessionDynamicLoader"
 
 #include <dlfcn.h>
+#include <openssl/crypto.h>
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_dynamic_loader.h"
@@ -36,6 +37,7 @@ AVSessionDynamicLoader::~AVSessionDynamicLoader()
     SLOGI("AVSessionDynamicLoader dtor");
     for (auto iterator = dynamicLibHandle_.begin(); iterator != dynamicLibHandle_.end(); ++iterator) {
 #ifndef TEST_COVERAGE
+        OPENSSL_thread_stop();
         dlclose(iterator->second);
 #endif
         SLOGI("close library avsession_dynamic success: %{public}s", iterator->first.c_str());
@@ -103,6 +105,7 @@ void AVSessionDynamicLoader::CloseDynamicHandle(std::string dynamicLibrary)
     // if already opened, then close all
     if (dynamicLibHandle_[dynamicLibrary] != nullptr) {
 #ifndef TEST_COVERAGE
+        OPENSSL_thread_stop();
         dlclose(dynamicLibHandle_[dynamicLibrary]);
 #endif
         dynamicLibHandle_[dynamicLibrary] = nullptr;
