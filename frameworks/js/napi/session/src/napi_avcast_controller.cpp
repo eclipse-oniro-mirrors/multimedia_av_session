@@ -30,10 +30,6 @@
 #include "tokenid_kit.h"
 #include "napi_avcast_controller.h"
 #include "avsession_radar.h"
-#include "curl/curl.h"
-#include "image_source.h"
-#include "pixel_map.h"
-#include "avsession_pixel_map_adapter.h"
 
 namespace OHOS::AVSession {
 
@@ -179,49 +175,6 @@ napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_
     return NapiAsyncWork::Enqueue(env, context, "SendControlCommand", executor);
 }
 
-int32_t DoDownloadForCast(std::shared_ptr<AVMediaDescription> meta, const std::string& uri)
-{
-    SLOGI("DoDownloadForCast with title %{public}s", meta->GetTitle().c_str());
-
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);
-    SLOGI("DoDownloadForCast with ret %{public}d, %{public}d",
-        static_cast<int>(ret), static_cast<int>(pixelMap == nullptr));
-    if (ret && pixelMap != nullptr) {
-        SLOGI("DoDownloadForCast success");
-        meta->SetIcon(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
-        return AVSESSION_SUCCESS;
-    }
-    return AVSESSION_ERROR;
-}
-
-int32_t DoPrepareSetNapi(std::shared_ptr<ContextBase> context,
-    std::shared_ptr<AVCastController> castControllerPtr, AVQueueItem& data)
-{
-    SLOGI("do prepare set with online download prepare with uri alive");
-    std::shared_ptr<AVMediaDescription> description = data.GetDescription();
-    auto uri = description->GetIconUri() == "" ?
-        description->GetAlbumCoverUri() : description->GetIconUri();
-    CHECK_AND_RETURN_RET_LOG(castControllerPtr != nullptr, AVSESSION_ERROR, "DoPrepareSetNapi with no session");
-    int32_t ret = castControllerPtr->Prepare(data);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGI("do prepare set but get first fail %{public}d", static_cast<int>(ret));
-    } else if (description->GetIcon() == nullptr && !uri.empty()) {
-        ret = DoDownloadForCast(description, uri);
-        SLOGI("DoDownloadForCast complete with ret %{public}d", ret);
-        CHECK_AND_RETURN_RET_LOG(castControllerPtr != nullptr, AVSESSION_ERROR, "DoPrepareSetNapi without session");
-        if (ret != AVSESSION_SUCCESS) {
-            SLOGE("DoDownloadForCast failed but not repeat setmetadata again");
-        } else {
-            description->SetIconUri("INVALID_URI_CACHE");
-            data.SetDescription(description);
-            ret = castControllerPtr->Prepare(data);
-            SLOGI("do prepare set second with ret %{public}d", ret);
-        }
-    }
-    return ret;
-}
-
 napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastController::Start");
@@ -307,7 +260,7 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
             return;
         }
-        int32_t ret = DoPrepareSetNapi(context, napiCastController->castController_, context->avQueueItem_);
+        int32_t ret = napiCastController->castController_->Prepare(context->avQueueItem_);
         if (ret != AVSESSION_SUCCESS) {
             ErrCodeToMessage(ret, context->errMessage);
             SLOGE("CastController UpdateMediaInfo failed:%{public}d", ret);
