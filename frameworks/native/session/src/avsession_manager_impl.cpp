@@ -213,6 +213,7 @@ int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<Sess
         return ERR_SERVICE_NOT_EXIST;
     }
 
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (listener_ != nullptr) {
         return ERR_SESSION_LISTENER_EXIST;
     }
@@ -223,7 +224,6 @@ int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<Sess
     }
     auto ret = service->RegisterSessionListener(listener_);
     if (ret != AVSESSION_SUCCESS) {
-        std::lock_guard<std::mutex> lockGuard(lock_);
         listener_.clear();
         return ret;
     }
