@@ -28,6 +28,7 @@
 #include "audio_info.h"
 #include "avcast_control_command.h"
 #include "system_ability_definition.h"
+#include "collaboration_manager_utils.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include <condition_variable>
@@ -409,11 +410,15 @@ private:
     std::map<std::string, std::string> castServiceNameMapState_;
 
     bool collaborationRejectFlag_ = false;
+    bool applyUserResultFlag_ = false;
     bool applyResultFlag_ = false;
+    bool networkIdIsEmpty_ = false;
+    bool waitUserDecisionFlag_ = false;
     std::string collaborationNeedNetworkId_;
     std::mutex collaborationApplyResultMutex_;
     std::condition_variable connectWaitCallbackCond_;
-    const int32_t collaborationCallbackTimeOut_ = 25;
+    const int32_t collaborationCallbackTimeOut_ = 10;
+    const int32_t collaborationUserCallbackTimeOut_ = 60;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
