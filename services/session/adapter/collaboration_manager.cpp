@@ -53,31 +53,26 @@ CollaborationManager::~CollaborationManager()
 }
 
 void CollaborationManager::SendRejectStateToStopCast(const std::function<
-    void(const std::string callbackName, bool flag)>& callback)
+    void(const int32_t code)>& callback)
 {
     sendRejectStateToStopCast_ = callback;
 }
 
-static int32_t OnStop(const char* peerNetworkId)
+__attribute__((no_sanitize("cfi")))static int32_t OnStop(const char* peerNetworkId)
 {
     SLOGE("Onstop to stop cast");
-    CollaborationManager::GetInstance().sendRejectStateToStopCast_("OnStop", true);
+    CollaborationManager::GetInstance().sendRejectStateToStopCast_(
+        ServiceCollaborationManagerResultCode::ONSTOP);
     return AVSESSION_SUCCESS;
 }
 
 __attribute__((no_sanitize("cfi")))static int32_t ApplyResult(int32_t errorcode,
     int32_t result, const char* reason)
 {
-    if (result == ServiceCollaborationManagerResultCode::PASS) {
-        SLOGI("return can connect");
-        CollaborationManager::GetInstance().sendRejectStateToStopCast_("ApplyResult", false);
-    } else if (result == ServiceCollaborationManagerResultCode::REJECT) {
+    if (result == ServiceCollaborationManagerResultCode::REJECT) {
         SLOGE("return connect reject and reson:%{public}s", reason);
-        CollaborationManager::GetInstance().sendRejectStateToStopCast_("ApplyResult", true);
-    } else {
-        SLOGE("unexpect return reslut value");
-        CollaborationManager::GetInstance().sendRejectStateToStopCast_("ApplyResult", false);
     }
+    CollaborationManager::GetInstance().sendRejectStateToStopCast_(result);
     return AVSESSION_SUCCESS;
 }
 

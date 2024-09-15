@@ -39,8 +39,11 @@ typedef enum ServiceCollaborationManagerBussinessStatus {
 } ServiceCollaborationManagerBussinessStatus;
 
 typedef enum ServiceCollaborationManagerResultCode {
+    ONSTOP = 1004720000,
     PASS = 1004720001,
-    REJECT = 1004720002
+    REJECT = 1004720002,
+    USERTIP = 1004720003,
+    USERAGREE = 1004720004
 } ServiceCollaborationManagerResultCode;
 
 typedef struct ServiceCollaborationManager_HardwareRequestInfo {
