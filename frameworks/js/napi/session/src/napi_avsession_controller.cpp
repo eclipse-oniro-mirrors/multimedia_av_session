@@ -1545,8 +1545,13 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
 napi_status NapiAVSessionController::OnAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
     napi_status status = SetAVCallMetaFilter(env, napiController, param);
-    CHECK_RETURN(status == napi_ok, "Invalid AVCallMetaDataChange.", status);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "SetAVCallMetaFilter failed");
+
     return napiController->callback_->AddCallback(env,
         NapiAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE, callback);
 }
@@ -1554,9 +1559,13 @@ napi_status NapiAVSessionController::OnAVCallMetaDataChange(napi_env env, NapiAV
 napi_status NapiAVSessionController::OnAVCallStateChange(napi_env env, NapiAVSessionController* napiController,
     napi_value param, napi_value callback)
 {
-    if (SetAVCallStateFilter(env, napiController, param) != napi_ok) {
-        return napi_generic_failure;
-    }
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    napi_status status = SetAVCallStateFilter(env, napiController, param);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "SetAVCallStateFilter failed");
+
     return napiController->callback_->AddCallback(env,
         NapiAVControllerCallback::EVENT_AVCALL_STATE_CHANGE, callback);
 }
@@ -1564,15 +1573,22 @@ napi_status NapiAVSessionController::OnAVCallStateChange(napi_env env, NapiAVSes
 napi_status NapiAVSessionController::OnSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                                       napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_SESSION_DESTROY, callback);
 }
 
 napi_status NapiAVSessionController::OnPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
                                                            napi_value param, napi_value callback)
 {
-    if (SetPlaybackStateFilter(env, napiController, param) != napi_ok) {
-        return napi_generic_failure;
-    }
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    napi_status status = SetPlaybackStateFilter(env, napiController, param);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "SetPlaybackStateFilter failed");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE,
                                                   callback);
 }
@@ -1580,21 +1596,32 @@ napi_status NapiAVSessionController::OnPlaybackStateChange(napi_env env, NapiAVS
 napi_status NapiAVSessionController::OnMetaDataChange(napi_env env, NapiAVSessionController* napiController,
                                                       napi_value param, napi_value callback)
 {
-    if (SetMetaFilter(env, napiController, param) != napi_ok) {
-        return napi_generic_failure;
-    }
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    napi_status status = SetMetaFilter(env, napiController, param);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "SetMetaFilter failed");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_META_DATA_CHANGE, callback);
 }
 
 napi_status NapiAVSessionController::OnActiveStateChange(napi_env env, NapiAVSessionController* napiController,
                                                          napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_ACTIVE_STATE_CHANGE, callback);
 }
 
 napi_status NapiAVSessionController::OnValidCommandChange(napi_env env, NapiAVSessionController* napiController,
                                                           napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_VALID_COMMAND_CHANGE,
                                                   callback);
 }
@@ -1602,6 +1629,10 @@ napi_status NapiAVSessionController::OnValidCommandChange(napi_env env, NapiAVSe
 napi_status NapiAVSessionController::OnOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
                                                           napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_OUTPUT_DEVICE_CHANGE,
                                                   callback);
 }
@@ -1609,6 +1640,10 @@ napi_status NapiAVSessionController::OnOutputDeviceChange(napi_env env, NapiAVSe
 napi_status NapiAVSessionController::OnSessionEventChange(napi_env env, NapiAVSessionController* napiController,
                                                           napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_SESSION_EVENT_CHANGE,
                                                   callback);
 }
@@ -1616,6 +1651,10 @@ napi_status NapiAVSessionController::OnSessionEventChange(napi_env env, NapiAVSe
 napi_status NapiAVSessionController::OnQueueItemsChange(napi_env env, NapiAVSessionController* napiController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_QUEUE_ITEMS_CHANGE,
         callback);
 }
@@ -1623,6 +1662,10 @@ napi_status NapiAVSessionController::OnQueueItemsChange(napi_env env, NapiAVSess
 napi_status NapiAVSessionController::OnQueueTitleChange(napi_env env, NapiAVSessionController* napiController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_QUEUE_TITLE_CHANGE,
         callback);
 }
@@ -1630,6 +1673,10 @@ napi_status NapiAVSessionController::OnQueueTitleChange(napi_env env, NapiAVSess
 napi_status NapiAVSessionController::OnExtrasChange(napi_env env, NapiAVSessionController* napiController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr || param != nullptr || callback != nullptr,
+        napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_EXTRAS_CHANGE,
         callback);
 }
@@ -1637,6 +1684,7 @@ napi_status NapiAVSessionController::OnExtrasChange(napi_env env, NapiAVSessionC
 napi_status NapiAVSessionController::OffAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE,
@@ -1646,6 +1694,7 @@ napi_status NapiAVSessionController::OffAVCallMetaDataChange(napi_env env, NapiA
 napi_status NapiAVSessionController::OffAVCallStateChange(napi_env env, NapiAVSessionController* napiController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_AVCALL_STATE_CHANGE,
@@ -1655,6 +1704,7 @@ napi_status NapiAVSessionController::OffAVCallStateChange(napi_env env, NapiAVSe
 napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessionController* napiController,
                                                        napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_SESSION_DESTROY, callback);
@@ -1663,6 +1713,7 @@ napi_status NapiAVSessionController::OffSessionDestroy(napi_env env, NapiAVSessi
 napi_status NapiAVSessionController::OffPlaybackStateChange(napi_env env, NapiAVSessionController* napiController,
                                                             napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE,
@@ -1672,6 +1723,7 @@ napi_status NapiAVSessionController::OffPlaybackStateChange(napi_env env, NapiAV
 napi_status NapiAVSessionController::OffMetaDataChange(napi_env env, NapiAVSessionController* napiController,
                                                        napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_META_DATA_CHANGE, callback);
@@ -1680,6 +1732,7 @@ napi_status NapiAVSessionController::OffMetaDataChange(napi_env env, NapiAVSessi
 napi_status NapiAVSessionController::OffActiveStateChange(napi_env env, NapiAVSessionController* napiController,
                                                           napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_ACTIVE_STATE_CHANGE,
@@ -1689,6 +1742,7 @@ napi_status NapiAVSessionController::OffActiveStateChange(napi_env env, NapiAVSe
 napi_status NapiAVSessionController::OffValidCommandChange(napi_env env, NapiAVSessionController* napiController,
                                                            napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_VALID_COMMAND_CHANGE,
@@ -1698,6 +1752,7 @@ napi_status NapiAVSessionController::OffValidCommandChange(napi_env env, NapiAVS
 napi_status NapiAVSessionController::OffOutputDeviceChange(napi_env env, NapiAVSessionController* napiController,
                                                            napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_OUTPUT_DEVICE_CHANGE,
@@ -1707,6 +1762,7 @@ napi_status NapiAVSessionController::OffOutputDeviceChange(napi_env env, NapiAVS
 napi_status NapiAVSessionController::OffSessionEventChange(napi_env env, NapiAVSessionController* napiController,
                                                            napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_SESSION_EVENT_CHANGE,
@@ -1716,6 +1772,7 @@ napi_status NapiAVSessionController::OffSessionEventChange(napi_env env, NapiAVS
 napi_status NapiAVSessionController::OffQueueItemsChange(napi_env env, NapiAVSessionController* napiController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_QUEUE_ITEMS_CHANGE,
@@ -1725,6 +1782,7 @@ napi_status NapiAVSessionController::OffQueueItemsChange(napi_env env, NapiAVSes
 napi_status NapiAVSessionController::OffQueueTitleChange(napi_env env, NapiAVSessionController* napiController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_QUEUE_TITLE_CHANGE,
@@ -1734,6 +1792,7 @@ napi_status NapiAVSessionController::OffQueueTitleChange(napi_env env, NapiAVSes
 napi_status NapiAVSessionController::OffExtrasChange(napi_env env, NapiAVSessionController* napiController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_EXTRAS_CHANGE,
