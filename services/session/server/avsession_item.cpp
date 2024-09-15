@@ -1029,12 +1029,13 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
         collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
     }
     CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
-    //wait collaboration callback 25s
+    //wait collaboration callback 10s
     std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
     bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
         [this]() {
             return applyResultFlag_;
     });
+    //wait user decision collaboration callback 60s
     if (waitUserDecisionFlag_) {
         flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationUserCallbackTimeOut_),
         [this]() {
@@ -1229,26 +1230,26 @@ void AVSessionItem::ListenCollaborationRejectToStopCast()
             SLOGI("onstop to stop cast");
             StopCast();
         }
-        if (code == ServiceCollaborationManagerResultCode::PASS && !flag && newCastState != castConnectStateForConnected_) {
+        if (code == ServiceCollaborationManagerResultCode::PASS && newCastState != castConnectStateForConnected_) {
             SLOGI("ApplyResult can cast");
             applyResultFlag_ = true;
             applyUserResultFlag_ = true;
             connectWaitCallbackCond_.notify_one();
         }
-        if (code == ServiceCollaborationManagerResultCode::REJECT && flag && newCastState != castConnectStateForConnected_) {
+        if (code == ServiceCollaborationManagerResultCode::REJECT && newCastState != castConnectStateForConnected_) {
             SLOGI("ApplyResult can not cast");
             collaborationRejectFlag_ = true;
             applyResultFlag_ = true;
             applyUserResultFlag_ = true;
             connectWaitCallbackCond_.notify_one();
         }
-        if (code == ServiceCollaborationManagerResultCode::USERTIP && flag && newCastState != castConnectStateForConnected_) {
+        if (code == ServiceCollaborationManagerResultCode::USERTIP && newCastState != castConnectStateForConnected_) {
             SLOGI("ApplyResult user tip");
             applyResultFlag_ = true;
             waitUserDecisionFlag_ = true;
             connectWaitCallbackCond_.notify_one();
         }
-        if (code == ServiceCollaborationManagerResultCode::USERAGREE && flag && newCastState != castConnectStateForConnected_) {
+        if (code == ServiceCollaborationManagerResultCode::USERAGREE && newCastState != castConnectStateForConnected_) {
             SLOGI("ApplyResult user agree cast");
         }
     });
