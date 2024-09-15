@@ -153,6 +153,8 @@ int32_t AVSessionItem::DestroyTask()
     ReleaseAVCastControllerInner();
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
         SLOGW("Session destroy at source, release cast");
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         ReleaseCast();
     }
@@ -1220,6 +1222,17 @@ void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     for (auto controller : castControllers_) {
         SLOGI("pass error to cast controller with code %{public}d", errorCode);
         controller->OnPlayerError(errorCode, errorMsg);
+    }
+}
+
+void AVSessionItem::OnRemoveCastEngine()
+{
+    SLOGI("enter OnRemoveCastEngine");
+    if (!collaborationNeedNetworkId_.empty()) {
+        if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+        }
     }
 }
 

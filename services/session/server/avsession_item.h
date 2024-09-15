@@ -82,6 +82,10 @@ public:
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
+
+    void OnRemoveCastEngine();
+
+    void ListenCollaborationRejectToStopCast();
 #endif
 
     std::string GetSessionId() override;
@@ -227,8 +231,6 @@ public:
     int32_t ReleaseCast() override;
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
-
-    void ListenCollaborationRejectToStopCast();
 
     int32_t CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo);
 

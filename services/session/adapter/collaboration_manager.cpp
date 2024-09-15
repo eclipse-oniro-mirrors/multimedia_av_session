@@ -58,7 +58,7 @@ void CollaborationManager::SendRejectStateToStopCast(const std::function<
     sendRejectStateToStopCast_ = callback;
 }
 
-static int32_t OnStop(const char* peerNetworkId)
+__attribute__((no_sanitize("cfi")))static int32_t OnStop(const char* peerNetworkId)
 {
     SLOGE("Onstop to stop cast");
     CollaborationManager::GetInstance().sendRejectStateToStopCast_(
