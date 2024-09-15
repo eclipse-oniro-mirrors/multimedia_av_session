@@ -357,9 +357,11 @@ void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
 {
     if (systemAbilityId == CAST_ENGINE_SA_ID) {
         SLOGE("on cast engine remove ability");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
         for (auto& session : GetContainer().GetAllSessions()) {
             session->OnRemoveCastEngine();
         }
+#endif
         isInCast_ = false;
     }
     if (systemAbilityId == BLUETOOTH_HOST_SYS_ABILITY_ID) {
