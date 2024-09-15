@@ -1037,7 +1037,8 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     });
     //wait user decision collaboration callback 60s
     if (waitUserDecisionFlag_) {
-        flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationUserCallbackTimeOut_),
+        flag = connectWaitCallbackCond_.wait_for(applyResultLock,
+            std::chrono::seconds(collaborationUserCallbackTimeOut_),
         [this]() {
             return applyUserResultFlag_;
         });
