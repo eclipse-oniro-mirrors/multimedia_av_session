@@ -2840,9 +2840,13 @@ void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChange
             break;
         }
     }
-    if (deviceChangeAction.type == AudioStandard::CONNECT) {
-        SLOGI("history bundle name %{public}s", selectSession.elementName_.GetBundleName().c_str());
-        NotifySystemUI(&selectSession, false);
+    if (!isHisMatch) {
+        SLOGI("no match hisAvqueue for %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
+        return;
+    }
+    if (deviceChangeAction.type == AudioStandard::CONNECT && hisDescriptors.size() >= 5) {
+        SLOGI("history bundle name %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
+        NotifySystemUI(&(hisDescriptors[0]), false);
     }
 }
 // LCOV_EXCL_STOP
