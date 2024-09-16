@@ -3057,7 +3057,7 @@ void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChange
         SLOGI("no match hisAvqueue for %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
         return;
     }
-    if (deviceChangeAction.type == AudioStandard::CONNECT) {
+    if (deviceChangeAction.type == AudioStandard::CONNECT && avQueueInfos.size() >= 5) {
         SLOGI("history bundle name %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
         NotifySystemUI(&(hisDescriptors[0]), false);
     }
