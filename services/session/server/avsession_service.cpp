@@ -84,6 +84,7 @@ static const std::string AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH =
     std::string("libavsession_dynamic_notification.z.so");
     
 static const int32_t CAST_ENGINE_SA_ID = 65546;
+static const int32_t MINNUM_FOR_NOTIFICATION = 5;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
@@ -3057,7 +3058,7 @@ void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChange
         SLOGI("no match hisAvqueue for %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
         return;
     }
-    if (deviceChangeAction.type == AudioStandard::CONNECT && avQueueInfos.size() >= 5) {
+    if (deviceChangeAction.type == AudioStandard::CONNECT && avQueueInfos.size() >= MINNUM_FOR_NOTIFICATION) {
         SLOGI("history bundle name %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
         NotifySystemUI(&(hisDescriptors[0]), false);
     }
