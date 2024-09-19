@@ -396,7 +396,6 @@ void HwCastProvider::WaitSessionRelease()
         SLOGI("waitSessionRelease failed for the hwCastProviderSession is nullptr");
         return;
     }
-    hwCastProviderSession->CheckProcessDone();
     SLOGI("waitSessionRelease get done");
 }
 
