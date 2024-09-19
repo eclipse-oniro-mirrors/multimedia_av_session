@@ -169,13 +169,6 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     }
 }
 
-void HwCastProviderSession::CheckProcessDone()
-{
-    SLOGI("CheckProcessDone wait lock");
-    std::lock_guard lockGuard(mutex_);
-    SLOGI("CheckProcessDone wait lock done");
-}
-
 void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const std::string &jsonParam)
 {
     SLOGI("OnEvent from cast with eventId %{public}d, %{public}s", eventId, jsonParam.c_str());
