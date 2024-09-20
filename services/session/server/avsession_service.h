@@ -426,9 +426,9 @@ private:
 
     bool UnSubscribeCommonEvent();
 
-    int32_t ConvertKeyCodeToCommand(int keyCode);
-
     bool CheckAncoAudio();
+
+    int32_t ConvertKeyCodeToCommand(int keyCode);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
