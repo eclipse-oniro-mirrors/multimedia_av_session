@@ -245,7 +245,10 @@ ohos_unittest("AVSessionServiceStubPermissionTest") {
 
   sources = [ "avsession_service_stub_permission_test.cpp" ]
 
-  configs = [ ":module_private_config" ]
+  configs = [
+    ":common_config",
+    ":module_private_config",
+  ]
 
   cflags_cc = [ "--coverage" ]
 

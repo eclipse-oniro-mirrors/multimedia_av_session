@@ -52,7 +52,7 @@ void FocusSessionStrategyTest::TearDown()
  */
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, testing::ext::TestSize.Level1)
 {
-    SLOGI("HandleAudioRenderStateChangeEvent001 begin!");
+    SLOGD("HandleAudioRenderStateChangeEvent001 begin!");
     FocusSessionStrategy focusSessionStrategy;
     std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
     info->clientUID = 1;
@@ -62,7 +62,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, 
     infos.push_back(std::move(info));
     
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
-    SLOGI("HandleAudioRenderStateChangeEvent001 end!");
+    SLOGD("HandleAudioRenderStateChangeEvent001 end!");
 }
 
 /**
@@ -72,7 +72,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, 
  */
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, testing::ext::TestSize.Level1)
 {
-    SLOGI("HandleAudioRenderStateChangeEvent002 begin!");
+    SLOGD("HandleAudioRenderStateChangeEvent002 begin!");
     FocusSessionStrategy focusSessionStrategy;
     std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
     info->clientUID = 1;
@@ -84,7 +84,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, 
     auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
-    SLOGI("HandleAudioRenderStateChangeEvent002 end!");
+    SLOGD("HandleAudioRenderStateChangeEvent002 end!");
 }
 
 /**
@@ -94,7 +94,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, 
  */
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, testing::ext::TestSize.Level1)
 {
-    SLOGI("HandleAudioRenderStateChangeEvent003 begin!");
+    SLOGD("HandleAudioRenderStateChangeEvent003 begin!");
     FocusSessionStrategy focusSessionStrategy;
     std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
     info->clientUID = 1;
@@ -104,7 +104,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, 
     infos.push_back(std::move(info));
     
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
-    SLOGI("HandleAudioRenderStateChangeEvent003 end!");
+    SLOGD("HandleAudioRenderStateChangeEvent003 end!");
 }
 
 /**
@@ -114,7 +114,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, 
  */
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, testing::ext::TestSize.Level1)
 {
-    SLOGI("HandleAudioRenderStateChangeEvent004 begin!");
+    SLOGD("HandleAudioRenderStateChangeEvent004 begin!");
     FocusSessionStrategy focusSessionStrategy;
     std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
     info->clientUID = 1;
@@ -126,7 +126,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, 
     auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
-    SLOGI("HandleAudioRenderStateChangeEvent004 end!");
+    SLOGD("HandleAudioRenderStateChangeEvent004 end!");
 }
 
 /**
@@ -136,7 +136,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, 
  */
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, testing::ext::TestSize.Level1)
 {
-    SLOGI("HandleAudioRenderStateChangeEvent005 begin!");
+    SLOGD("HandleAudioRenderStateChangeEvent005 begin!");
     FocusSessionStrategy focusSessionStrategy;
     std::unique_ptr<AudioRendererChangeInfo> info1 = std::make_unique<AudioRendererChangeInfo>();
     info1->clientUID = 1;
@@ -155,5 +155,68 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, 
     auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
-    SLOGI("HandleAudioRenderStateChangeEvent005 end!");
+    SLOGD("HandleAudioRenderStateChangeEvent005 end!");
+}
+
+/**
+ * @tc.name: IsFocusSession001
+ * @tc.desc: Test IsFocusSession
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, IsFocusSession001, testing::ext::TestSize.Level1)
+{
+    SLOGD("IsFocusSession001 begin!");
+    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    info->clientUID = 1;
+    info->sessionId = 2;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    AudioRendererChangeInfos infos;
+    infos.push_back(std::move(info));
+    FocusSessionStrategy focusSessionStrategy;
+    auto func = [](const OHOS::AVSession::FocusSessionStrategy::FocusSessionChangeInfo&) {
+        return false;
+    };
+    focusSessionStrategy.RegisterFocusSessionSelector(func);
+    FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
+    bool ret = focusSessionStrategy.SelectFocusSession(infos, sessionInfo);
+    EXPECT_EQ(ret, false);
+    AudioRendererChangeInfo audioRendererChangeInfo;
+    audioRendererChangeInfo.clientUID = 1;
+    audioRendererChangeInfo.sessionId = 2;
+    audioRendererChangeInfo.rendererState = RendererState::RENDERER_RELEASED;
+    ret = focusSessionStrategy.IsFocusSession(audioRendererChangeInfo);
+    EXPECT_EQ(ret, false);
+    SLOGD("IsFocusSession001 end!");
+}
+
+/**
+ * @tc.name: IsFocusSession002
+ * @tc.desc: Test IsFocusSession
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, IsFocusSession002, testing::ext::TestSize.Level1)
+{
+    SLOGD("IsFocusSession002 begin!");
+    
+    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    info->clientUID = 1;
+    info->sessionId = 2;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    AudioRendererChangeInfos infos;
+    infos.push_back(std::move(info));
+    FocusSessionStrategy focusSessionStrategy;
+    auto func = [](const OHOS::AVSession::FocusSessionStrategy::FocusSessionChangeInfo&) {
+        return true;
+    };
+    focusSessionStrategy.RegisterFocusSessionSelector(func);
+    FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
+    bool ret = focusSessionStrategy.SelectFocusSession(infos, sessionInfo);
+    EXPECT_EQ(ret, false);
+    AudioRendererChangeInfo audioRendererChangeInfo;
+    audioRendererChangeInfo.clientUID = 1;
+    audioRendererChangeInfo.sessionId = 2;
+    audioRendererChangeInfo.rendererState = RendererState::RENDERER_RUNNING;
+    ret = focusSessionStrategy.IsFocusSession(audioRendererChangeInfo);
+    EXPECT_EQ(ret, true);
+    SLOGD("IsFocusSession002 end!");
 }
