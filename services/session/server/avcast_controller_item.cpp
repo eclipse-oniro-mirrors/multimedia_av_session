@@ -288,6 +288,8 @@ int32_t AVCastControllerItem::GetCastAVPlaybackState(AVPlaybackState& avPlayback
 
 int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 {
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
+        "cast controller proxy is nullptr");
     currentItem =  castControllerProxy_->GetCurrentItem();
     return AVSESSION_SUCCESS;
 }
