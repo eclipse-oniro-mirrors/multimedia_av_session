@@ -62,6 +62,8 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
             CHECK_AND_RETURN_RET_LOG(out.WriteString(supportedDrmCapability), false,
                 "write supportedDrmCapability failed");
         }
+        CHECK_AND_RETURN_RET_LOG(out.WriteBool(deviceInfo.isLegacy_), false, "write isLegacy failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.mediumTypes_), false, "write mediumTypes failed");
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -105,6 +107,8 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
         supportedDrmCapabilities.emplace_back(supportedDrmCapability);
     }
     deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
+    CHECK_AND_RETURN_RET_LOG(in.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.mediumTypes_), false, "Read mediumTypes failed");
     outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }
@@ -153,7 +157,8 @@ bool DeviceInfo::WriteToParcel(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteString(supportedDrmCapability), false,
             "write supportedDrmCapability failed");
     }
-
+    CHECK_AND_RETURN_RET_LOG(out.WriteBool(isLegacy_), false, "write isLegacy failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(mediumTypes_), false, "write mediumTypes failed");
     return true;
 }
 
@@ -183,7 +188,8 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
         supportedDrmCapabilities.emplace_back(supportedDrmCapability);
     }
     supportedDrmCapabilities_ = supportedDrmCapabilities;
-
+    CHECK_AND_RETURN_RET_LOG(in.ReadBool(isLegacy_), false, "Read isLegacy failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(mediumTypes_), false, "Read mediumTypes failed");
     return true;
 }
 
@@ -208,6 +214,8 @@ bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
             CHECK_AND_RETURN_RET_LOG(out.WriteString(supportedDrmCapability), false,
                 "write supportedDrmCapability failed");
         }
+        CHECK_AND_RETURN_RET_LOG(out.WriteBool(deviceInfo.isLegacy_), false, "write isLegacy failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.mediumTypes_), false, "write mediumTypes failed");
     }
     return true;
 }
@@ -245,6 +253,8 @@ bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
             supportedDrmCapabilities.emplace_back(supportedDrmCapability);
         }
         deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
+        CHECK_AND_RETURN_RET_LOG(in.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.mediumTypes_), false, "Read mediumTypes failed");
         deviceInfos_.emplace_back(deviceInfo);
     }
     return true;

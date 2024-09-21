@@ -363,6 +363,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType) == 0 ?
             TRUSTED_DEVICE : UNTRUSTED_DEVICE;
         deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
+        deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
+        deviceInfo.mediumTypes_ = castRemoteDevice.mediumTypes;
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {

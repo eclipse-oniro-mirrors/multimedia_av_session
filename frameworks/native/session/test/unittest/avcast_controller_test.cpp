@@ -754,6 +754,8 @@ HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)
     std::vector<std::string> supportedDrmCapabilities;
     supportedDrmCapabilities.emplace_back("");
     deviceInfo1.supportedDrmCapabilities_ = supportedDrmCapabilities;
+    deviceInfo1.isLegacy_ = false;
+    deviceInfo1.mediumTypes_ = 2;
 
     EXPECT_EQ(hwCastProvider.AddCastDevice(1, deviceInfo1), false);
 }
@@ -774,6 +776,8 @@ HWTEST_F(AVCastControllerTest, RemoveCastDevice001, TestSize.Level1)
     std::vector<std::string> supportedDrmCapabilities;
     supportedDrmCapabilities.emplace_back("");
     deviceInfo1.supportedDrmCapabilities_ = supportedDrmCapabilities;
+    deviceInfo1.isLegacy_ = false;
+    deviceInfo1.mediumTypes_ = 2;
 
     EXPECT_EQ(hwCastProvider.RemoveCastDevice(1, deviceInfo1), false);
 }

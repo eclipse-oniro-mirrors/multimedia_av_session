@@ -1067,6 +1067,16 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "supportedDrmCapabilities", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.isLegacy_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "isLegacy", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.mediumTypes_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "mediumTypes", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
     return napi_ok;
 }
 
@@ -1478,6 +1488,18 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     status = GetValue(env, value, out.deviceType_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ value failed", status);
     CHECK_RETURN(GetOptionalString(env, in, out) == napi_ok, "get DeviceInfo ip address value failed", status);
+ 
+    bool hasKey = false;
+    napi_has_named_property(env, in, "providerId", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "providerId", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId failed", status);
+        status = GetValue(env, value, out.providerId_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId value failed", status);
+    } else {
+        out.providerId_ = 0;
+    }
+
     status = ProcessDeviceInfoParams(env, in, out);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo ProcessDeviceInfoParams failed", status);
 
@@ -1489,15 +1511,6 @@ napi_status NapiUtils::ProcessDeviceInfoParams(napi_env env, napi_value in, Devi
     napi_value value {};
     bool hasKey = false;
     napi_status status = napi_ok;
-    napi_has_named_property(env, in, "providerId", &hasKey);
-    if (hasKey) {
-        status = napi_get_named_property(env, in, "providerId", &value);
-        CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId failed", status);
-        status = GetValue(env, value, out.providerId_);
-        CHECK_RETURN(status == napi_ok, "get DeviceInfo providerId value failed", status);
-    } else {
-        out.providerId_ = 0;
-    }
     napi_has_named_property(env, in, "supportedProtocols", &hasKey);
     if (hasKey) {
         status = napi_get_named_property(env, in, "supportedProtocols", &value);
@@ -1522,6 +1535,24 @@ napi_status NapiUtils::ProcessDeviceInfoParams(napi_env env, napi_value in, Devi
         CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedDrmCapabilities failed", status);
         status = GetValue(env, value, out.supportedDrmCapabilities_);
         CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedDrmCapabilities value failed", status);
+    }
+    napi_has_named_property(env, in, "isLegacy", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "isLegacy", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo isLegacy failed", status);
+        status = GetValue(env, value, out.isLegacy_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo isLegacy value failed", status);
+    } else {
+        out.isLegacy_ = false;
+    }
+    napi_has_named_property(env, in, "mediumTypes", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "mediumTypes", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo mediumTypes failed", status);
+        status = GetValue(env, value, out.mediumTypes_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo mediumTypes value failed", status);
+    } else {
+        out.mediumTypes_ = COAP;
     }
     return napi_ok;
 }
