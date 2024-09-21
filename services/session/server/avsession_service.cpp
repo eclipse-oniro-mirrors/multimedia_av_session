@@ -80,6 +80,7 @@ using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
 static const int32_t CAST_ENGINE_SA_ID = 65546;
+static const int32_t MINNUM_FOR_NOTIFICATION  = 5;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
 class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
@@ -2840,7 +2841,7 @@ void AVSessionService::NotifyDeviceChange(const DeviceChangeAction& deviceChange
             break;
         }
     }
-    if (deviceChangeAction.type == AudioStandard::CONNECT) {
+    if (deviceChangeAction.type == AudioStandard::CONNECT && avQueueInfos.size() >= MINNUM_FOR_NOTIFICATION) {
         SLOGI("history bundle name %{public}s", selectSession.elementName_.GetBundleName().c_str());
         NotifySystemUI(&selectSession, false);
     }
