@@ -647,6 +647,9 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
             CHECK_AND_RETURN_RET_LOG(data.WriteString(supportedDrmCapability), ERR_MARSHALLING,
                 "write supportedDrmCapability failed");
         }
+        CHECK_AND_RETURN_RET_LOG(data.WriteBool(deviceInfo.isLegacy_), ERR_MARSHALLING, "write isLegacy failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.mediumTypes_), ERR_MARSHALLING,
+            "write mediumTypes failed");
     }
 
     auto remote = Remote();

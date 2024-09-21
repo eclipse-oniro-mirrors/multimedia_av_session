@@ -206,6 +206,8 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
             supportedDrmCapabilities.emplace_back(supportedDrmCapability);
         }
         deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
+        CHECK_AND_RETURN_RET_LOG(data.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.mediumTypes_), false, "Read mediumTypes failed");
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
     

@@ -34,6 +34,8 @@ struct DeviceInfo {
     int32_t supportedProtocols_ = 3;
     int32_t authenticationStatus_ = 0;
     std::vector<std::string> supportedDrmCapabilities_;
+    bool isLegacy_ = false;
+    int32_t mediumTypes_ = 2;
 };
 
 struct OutputDeviceInfo {
