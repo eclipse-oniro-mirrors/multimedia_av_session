@@ -82,6 +82,11 @@ public:
         return AVSESSION_SUCCESS;
     }
 
+    int32_t RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override
     {
         return AVSESSION_SUCCESS;

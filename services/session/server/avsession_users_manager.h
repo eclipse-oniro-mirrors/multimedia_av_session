@@ -53,11 +53,15 @@ public:
 
     void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener);
 
+    void AddSessionListenerForAllUsers(pid_t pid, const sptr<ISessionListener>& listener);
+
     void RemoveSessionListener(pid_t pid);
 
     std::map<pid_t, sptr<ISessionListener>>& GetSessionListener();
 
     std::map<pid_t, sptr<ISessionListener>>& GetSessionListenerForCurUser();
+
+    std::map<pid_t, sptr<ISessionListener>>& GetSessionListenerForAllUsers();
 
     void NotifyAccountsEvent(const std::string &type, const int &userId);
 

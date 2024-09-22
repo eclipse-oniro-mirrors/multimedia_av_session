@@ -37,6 +37,7 @@ private:
     int32_t HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetAVCastControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleRegisterSessionListenerForAllUsers(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemAVKeyEvent(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemControlCommand(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterClientDeathObserver(MessageParcel& data, MessageParcel& reply);
@@ -80,6 +81,9 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCastControllerInner(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleRegisterSessionListener(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER_FOR_ALL_USERS),
+            [this](MessageParcel& data, MessageParcel& reply)
+            { return HandleRegisterSessionListenerForAllUsers(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSendSystemAVKeyEvent(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND),
@@ -129,6 +133,8 @@ private:
             "HandleGetAVCastControllerInner"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER),
             "HandleRegisterSessionListener"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER_FOR_ALL_USERS),
+            "HandleRegisterSessionListenerForAllUsers"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT),
             "HandleSendSystemAVKeyEvent"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND),

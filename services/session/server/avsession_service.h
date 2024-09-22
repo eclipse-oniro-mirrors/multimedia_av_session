@@ -177,6 +177,8 @@ public:
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
+    int32_t RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener) override;
+
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
@@ -278,6 +280,7 @@ private:
     void RemoveClientDeathObserver(pid_t pid);
 
     void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener);
+    void AddSessionListenerForAllUsers(pid_t pid, const sptr<ISessionListener>& listener);
     void RemoveSessionListener(pid_t pid);
 
     void AddInnerSessionListener(SessionListener* listener);

@@ -61,6 +61,8 @@ public:
 
     int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) override;
 
+    int32_t RegisterSessionListenerForAllUsers(const std::shared_ptr<SessionListener>& listener) override;
+
     int32_t RegisterServiceDeathCallback(const DeathCallback& callback) override;
 
     int32_t UnregisterServiceDeathCallback() override;
@@ -101,12 +103,15 @@ private:
 
     void RegisterClientDeathObserver();
 
+    sptr<ISessionListener> GetSessionListenerClient(const std::shared_ptr<SessionListener>& listener);
+
     std::mutex lock_;
     sptr<AVSessionServiceProxy> service_;
     sptr<ServiceDeathRecipient> serviceDeathRecipient_;
-    sptr<ISessionListener> listener_;
+    std::map<int32_t, sptr<ISessionListener>> listenerMapByUserId_;
     sptr<ClientDeathStub> clientDeath_;
     DeathCallback deathCallback_;
+    static constexpr int userIdForAllUsers_ = -1;
 };
 
 class ServiceDeathRecipient : public IRemoteObject::DeathRecipient {
