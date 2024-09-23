@@ -1636,3 +1636,135 @@ static HWTEST_F(AVSessionServiceTest, OnStateChanged004, TestSize.Level1)
     SLOGI("OnStateChanged004 end!");
 }
 #endif
+
+static HWTEST_F(AVSessionServiceTest, OnReceiveEvent003, TestSize.Level1)
+{
+    SLOGD("OnReceiveEvent003 begin!");
+    OHOS::EventFwk::CommonEventData eventData;
+    string action = OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED;
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avservice_);
+    eventSubscriber.OnReceiveEvent(eventData);
+    int32_t ret = action.compare(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
+    EXPECT_EQ(ret, 0);
+    SLOGD("OnReceiveEvent003 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, UpdateFrontSession004, TestSize.Level1)
+{
+    SLOGD("UpdateFrontSession004 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    EXPECT_EQ(avsessionHere != nullptr, true);
+    avservice_->UpdateTopSession(avsessionHere);
+    avservice_->UpdateFrontSession(avsessionHere, false);
+    avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+    SLOGD("UpdateFrontSession004 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, CheckAncoAudio001, TestSize.Level1)
+{
+    SLOGD("CheckAncoAudio001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    bool ret = avservice_->CheckAncoAudio();
+    EXPECT_EQ(ret, false);
+    avsessionHere->Destroy();
+    SLOGD("CheckAncoAudio001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, SendSystemControlCommand002, TestSize.Level1)
+{
+    SLOGD("SendSystemControlCommand002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avservice_->UpdateTopSession(avsessionHere);
+    AVControlCommand command;
+    command.SetCommand(1000);
+    int32_t ret = avservice_->SendSystemControlCommand(command);
+    avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("SendSystemControlCommand002 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, CreateWantAgent001, TestSize.Level1)
+{
+    SLOGD("CreateWantAgent001 begin!");
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor(nullptr);
+    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get());
+    EXPECT_EQ(ret, nullptr);
+    SLOGD("CreateWantAgent001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, CreateWantAgent002, TestSize.Level1)
+{
+    SLOGD("CreateWantAgent001 begin!");
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
+    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get());
+    EXPECT_EQ(ret, nullptr);
+    SLOGD("CreateWantAgent001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, CreateWantAgent003, TestSize.Level1)
+{
+    SLOGD("CreateWantAgent003 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avservice_->UpdateTopSession(avsessionHere);
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor(nullptr);
+    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get());
+    avsessionHere->Destroy();
+    EXPECT_EQ(ret, nullptr);
+    SLOGD("CreateWantAgent003 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, CreateWantAgent004, TestSize.Level1)
+{
+    SLOGD("CreateWantAgent004 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avservice_->UpdateTopSession(avsessionHere);
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
+    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get());
+    avsessionHere->Destroy();
+    EXPECT_EQ(ret, nullptr);
+    SLOGD("CreateWantAgent004 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Level1)
+{
+    SLOGD("HandleSystemKeyColdStart002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere != nullptr, true);
+    AVControlCommand command;
+    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    avservice_->HandleSystemKeyColdStart(command);
+    avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+    SLOGD("HandleSystemKeyColdStart002 end!");
+}
