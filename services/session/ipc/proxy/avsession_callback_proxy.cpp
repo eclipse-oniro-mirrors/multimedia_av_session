@@ -251,6 +251,8 @@ void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
             CHECK_AND_RETURN_LOG(data.WriteString(supportedDrmCapability),
                 "write supportedDrmCapability failed");
         }
+        CHECK_AND_RETURN_LOG(data.WriteBool(deviceInfo.isLegacy_), "write isLegacy failed");
+        CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.mediumTypes_), "write mediumTypes failed");
     }
 
     auto remote = Remote();

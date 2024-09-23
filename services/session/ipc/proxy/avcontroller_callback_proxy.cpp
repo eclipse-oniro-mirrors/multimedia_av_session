@@ -227,6 +227,8 @@ void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionSta
             CHECK_AND_RETURN_LOG(parcel.WriteString(supportedDrmCapability),
                 "write supportedDrmCapability failed");
         }
+        CHECK_AND_RETURN_LOG(parcel.WriteBool(deviceInfo.isLegacy_), "write isLegacy failed");
+        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.mediumTypes_), "write mediumTypes failed");
     }
 
     MessageParcel reply;
