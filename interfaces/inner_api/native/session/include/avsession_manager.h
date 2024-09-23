@@ -128,13 +128,22 @@ public:
         std::shared_ptr<AVSessionController>& controller) = 0;
 
     /**
-     * @brief Listen for sessionListener callback event.
+     * @brief Listen for sessionListener callback event for current user.
      *
      * @param listener Listen for sessionListener Callback event{@link SessionListener}.
      * @return Whether to return successful Listener.
      * @since 9
     */
     virtual int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) = 0;
+
+    /**
+     * @brief Listen for sessionListener callback event for all users.
+     *
+     * @param listener Listen for sessionListener Callback event{@link SessionListener}.
+     * @return Whether to return successful Listener.
+     * @since 9
+    */
+    virtual int32_t RegisterSessionListenerForAllUsers(const std::shared_ptr<SessionListener>& listener) = 0;
 
     /**
      * @brief Listen for service death callback event.

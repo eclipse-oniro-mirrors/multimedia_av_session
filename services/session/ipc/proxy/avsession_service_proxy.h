@@ -66,6 +66,8 @@ public:
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
 
+    int32_t RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener) override;
+
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;

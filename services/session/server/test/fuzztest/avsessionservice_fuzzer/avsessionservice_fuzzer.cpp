@@ -263,6 +263,7 @@ void AVSessionServiceSendSystemControlCommandTest(const uint8_t* data, size_t si
     service->SendSystemControlCommand(command);
     sptr<FuzzTestISessionListener> listener = new FuzzTestISessionListener();
     service->RegisterSessionListener(listener);
+    service->RegisterSessionListenerForAllUsers(listener);
 }
 
 void AvSessionServiceClientTest(const uint8_t* data, size_t size,

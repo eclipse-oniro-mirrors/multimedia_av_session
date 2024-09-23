@@ -871,6 +871,12 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
         SLOGI("notify session create for pid %{public}d", static_cast<int>(pid));
         listener->OnSessionCreate(descriptor);
     }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
+        SLOGI("notify session create for pid %{public}d across users", static_cast<int>(pid));
+        listener->OnSessionCreate(descriptor);
+    }
 }
 
 void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descriptor)
@@ -885,6 +891,11 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
         SLOGI("notify session release for pid %{public}d", static_cast<int>(pid));
+        listener->OnSessionRelease(descriptor);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        SLOGI("notify session release for pid %{public}d across users", static_cast<int>(pid));
         listener->OnSessionRelease(descriptor);
     }
 }
@@ -904,6 +915,12 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
         SLOGI("notify top session change to pid %{public}d", static_cast<int>(pid));
         listener->OnTopSessionChange(descriptor);
     }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
+        SLOGI("notify top session change to pid %{public}d across users", static_cast<int>(pid));
+        listener->OnTopSessionChange(descriptor);
+    }
 }
 
 // LCOV_EXCL_START
@@ -919,7 +936,13 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
-        SLOGI("Found session listener with pid");
+        SLOGI("Found session listener with pid %{public}d", static_cast<int>(pid));
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnAudioSessionCheck");
+        listener->OnAudioSessionChecked(uid);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        SLOGI("Found session listener with pid %{public}d across users", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnAudioSessionCheck");
         listener->OnAudioSessionChecked(uid);
     }
@@ -1037,6 +1060,11 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
         listener->OnDeviceAvailable(castOutputDeviceInfo);
     }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
+        listener->OnDeviceAvailable(castOutputDeviceInfo);
+    }
 }
 // LCOV_EXCL_STOP
 
@@ -1045,6 +1073,11 @@ void AVSessionService::NotifyDeviceLogEvent(const DeviceLogEventCode eventId, co
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
+        listener->OnDeviceLogEvent(eventId, param);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
         listener->OnDeviceLogEvent(eventId, param);
     }
@@ -1059,6 +1092,13 @@ void AVSessionService::NotifyDeviceOffline(const std::string& deviceId)
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
+        SLOGI("notify device offline with pid %{public}d", static_cast<int>(pid));
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceOffline");
+        listener->OnDeviceOffline(deviceId);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        SLOGI("notify device offline with pid %{public}d across users", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceOffline");
         listener->OnDeviceOffline(deviceId);
     }
@@ -1888,6 +1928,12 @@ void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener
     GetUsersManager().AddSessionListener(pid, listener);
 }
 
+void AVSessionService::AddSessionListenerForAllUsers(pid_t pid, const sptr<ISessionListener>& listener)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    GetUsersManager().AddSessionListenerForAllUsers(pid, listener);
+}
+
 void AVSessionService::RemoveSessionListener(pid_t pid)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
@@ -1896,8 +1942,15 @@ void AVSessionService::RemoveSessionListener(pid_t pid)
 
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    SLOGI("Enter RegisterSessionListener process");
+    SLOGI("Enter RegisterSessionListener process and return current userId");
     AddSessionListener(GetCallingPid(), listener);
+    return GetUsersManager().GetCurrentUserId();
+}
+
+int32_t AVSessionService::RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener)
+{
+    SLOGI("Enter RegisterSessionListenerForAllUsers process");
+    AddSessionListenerForAllUsers(GetCallingPid(), listener);
     return AVSESSION_SUCCESS;
 }
 

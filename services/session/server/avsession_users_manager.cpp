@@ -209,6 +209,12 @@ void AVSessionUsersManager::AddSessionListener(pid_t pid, const sptr<ISessionLis
         listenerMap[pid] = listener;
         sessionListenersMapByUserId_[curUserId_] = listenerMap;
     }
+}
+
+void AVSessionUsersManager::AddSessionListenerForAllUsers(pid_t pid, const sptr<ISessionListener>& listener)
+{
+    std::lock_guard lockGuard(userLock_);
+    SLOGI("add sessionListener for pid %{public}d, for all users", static_cast<int>(pid));
     sessionListenersMap_[pid] = listener;
 }
 
@@ -239,6 +245,11 @@ std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListen
         sessionListenersMapByUserId_[curUserId_] = listenerMap;
         return listenerMap;
     }
+}
+
+std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListenerForAllUsers()
+{
+    return sessionListenersMap_;
 }
 
 void AVSessionUsersManager::NotifyAccountsEvent(const std::string &type, const int &userId)

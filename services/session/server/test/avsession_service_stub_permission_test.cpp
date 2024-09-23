@@ -118,6 +118,7 @@ public:
         return isSuccess ? AVSESSION_SUCCESS : 0;
     };
     int32_t RegisterSessionListener(const OHOS::sptr<ISessionListener> &listener) override { return 0; };
+    int32_t RegisterSessionListenerForAllUsers(const OHOS::sptr<ISessionListener> &listener) override { return 0; };
     int32_t SendSystemAVKeyEvent(const OHOS::MMI::KeyEvent &keyEvent) override { return 0; };
     int32_t SendSystemControlCommand(const AVControlCommand &command) override { return 0; };
     int32_t RegisterClientDeathObserver(const OHOS::sptr<IClientDeath> &observer) override { return 0; };
