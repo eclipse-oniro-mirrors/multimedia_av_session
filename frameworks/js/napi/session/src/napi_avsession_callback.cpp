@@ -38,6 +38,8 @@ void NapiAVSessionCallback::HandleEvent(int32_t event)
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
+    SLOGI("send control command %{public}d to session with callback size %{public}d",
+        event, static_cast<int>(callbacks_[event].size()));
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
             [this, ref, event]() {
