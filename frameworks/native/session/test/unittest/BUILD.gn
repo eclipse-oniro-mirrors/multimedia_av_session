@@ -70,6 +70,86 @@ ohos_unittest("AVSessionManagerTest") {
   external_deps = common_external_deps
 }
 
+ohos_unittest("MediaInfoHolderTest") {
+  module_out_path = module_output_path
+
+  sources = [ "media_info_holder_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVQueueInfoTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avqueue_info_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVControllerCallbackClientTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcontroller_callback_client_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("SessionListenerClientTest") {
+  module_out_path = module_output_path
+
+  sources = [ "session_listener_client_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("AVSessionPixelMapAdapterTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_pixel_map_adapter_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("AVSessionManagerImplTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_manager_impl_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
 ohos_unittest("AVSessionControllerTest") {
   module_out_path = module_output_path
 
@@ -287,15 +367,21 @@ group("av_session_unittest") {
   deps = [
     ":AVCallMetaDataTest",
     ":AVCallStateTest",
+    ":AVControllerCallbackClientTest",
     ":AVDumperTest",
     ":AVMediaDescriptionTest",
     ":AVMetaDataTest",
     ":AVPlaybackStateTest",
+    ":AVQueueInfoTest",
     ":AVSessionControllerTest",
+    ":AVSessionManagerImplTest",
     ":AVSessionManagerTest",
     ":AVSessionPermissionTest",
+    ":AVSessionPixelMapAdapterTest",
     ":AVSessionRemoteTest",
     ":AVSessionTest",
+    ":MediaInfoHolderTest",
+    ":SessionListenerClientTest",
   ]
 
   if (castplus_cast_engine_enable) {
