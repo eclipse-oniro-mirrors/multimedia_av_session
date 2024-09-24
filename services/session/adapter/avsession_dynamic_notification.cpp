@@ -20,8 +20,6 @@
 #include "notification_helper.h"
 #include "notification_request.h"
 #include "notification_constant.h"
-#include "parameter.h"
-#include "parameters.h"
 #include "want_agent_helper.h"
 #include "os_account_manager.h"
 

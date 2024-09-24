@@ -473,17 +473,13 @@ ohos_shared_library("avsession_dynamic_notification") {
     "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
-    "ability_runtime:ability_manager",
-    "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "distributed_notification_service:ans_innerkits",
     "hilog:libhilog",
-    "init:libbegetutil",
     "ipc:ipc_single",
     "os_account:os_account_innerkits",
-    "relational_store:native_rdb",
   ]
 
   subsystem_name = "multimedia"
