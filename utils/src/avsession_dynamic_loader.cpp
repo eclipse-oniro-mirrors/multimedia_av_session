@@ -37,7 +37,9 @@ AVSessionDynamicLoader::~AVSessionDynamicLoader()
     SLOGI("AVSessionDynamicLoader dtor");
     for (auto iterator = dynamicLibHandle_.begin(); iterator != dynamicLibHandle_.end(); ++iterator) {
 #ifndef TEST_COVERAGE
-        OPENSSL_thread_stop();
+        if (iterator->second != nullptr) {
+            OPENSSL_thread_stop();
+        }
         dlclose(iterator->second);
 #endif
         SLOGI("close library avsession_dynamic success: %{public}s", iterator->first.c_str());
@@ -105,7 +107,9 @@ void AVSessionDynamicLoader::CloseDynamicHandle(std::string dynamicLibrary)
     // if already opened, then close all
     if (dynamicLibHandle_[dynamicLibrary] != nullptr) {
 #ifndef TEST_COVERAGE
-        OPENSSL_thread_stop();
+        if (dynamicLibHandle_[dynamicLibrary] != nullptr) {
+            OPENSSL_thread_stop();
+        }
         dlclose(dynamicLibHandle_[dynamicLibrary]);
 #endif
         dynamicLibHandle_[dynamicLibrary] = nullptr;

@@ -2040,7 +2040,9 @@ int32_t AVSessionItem::doContinuousTaskRegister()
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 1, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
 #ifndef TEST_COVERAGE
-    OPENSSL_thread_stop();
+    if (handle_ != nullptr) {
+        OPENSSL_thread_stop();
+    }
     dlclose(handle_);
 #endif
 #endif
@@ -2072,7 +2074,9 @@ int32_t AVSessionItem::doContinuousTaskUnregister()
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 2, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done when stop cast, result: %{public}d", errCode);
 #ifndef TEST_COVERAGE
-    OPENSSL_thread_stop();
+    if (handle_ != nullptr) {
+        OPENSSL_thread_stop();
+    }
     dlclose(handle_);
 #endif
 #endif

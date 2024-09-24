@@ -43,7 +43,9 @@ int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_saniti
     if (createRemoteSessionSourceImpl == nullptr) {
         if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
-            OPENSSL_thread_stop();
+            if (handle_ != nullptr) {
+                OPENSSL_thread_stop();
+            }
             dlclose(handle_);
 #endif
         }
@@ -63,7 +65,9 @@ int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sani
     if (destroyRemoteSessionSourceImpl == nullptr) {
         if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
-            OPENSSL_thread_stop();
+            if (handle_ != nullptr) {
+                OPENSSL_thread_stop();
+            }
             dlclose(handle_);
 #endif
         }
@@ -74,7 +78,9 @@ int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sani
     destroyRemoteSessionSourceImpl(sourceImpl_);
     if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
-        OPENSSL_thread_stop();
+        if (handle_ != nullptr) {
+            OPENSSL_thread_stop();
+        }
         dlclose(handle_);
 #endif
     }

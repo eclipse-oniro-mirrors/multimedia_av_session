@@ -42,7 +42,9 @@ SLOGI("%{public}s open succ", libName_.c_str());
 PluginLib::~PluginLib()
 {
 #ifndef TEST_COVERAGE
-    OPENSSL_thread_stop();
+    if (handle_ != nullptr) {
+        OPENSSL_thread_stop();
+    }
     if (handle_ == nullptr || dlclose(handle_) != 0) {
         LogDlfcnErr("close lib failed");
     }
