@@ -243,7 +243,8 @@ std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListen
     } else {
         std::map<pid_t, sptr<ISessionListener>> listenerMap;
         sessionListenersMapByUserId_[curUserId_] = listenerMap;
-        return listenerMap;
+        SLOGI("get session listener map with null, create new map and return for user %{public}d", curUserId_);
+        return sessionListenersMapByUserId_[curUserId_];
     }
 }
 
