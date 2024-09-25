@@ -1038,6 +1038,16 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     status = napi_set_named_property(env, out, "deviceName", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
+    status = SetValue(env, in.manufacturer_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "manufacturer", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.modelName, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "modelName", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
     status = SetValue(env, in.deviceType_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "deviceType", property);
@@ -1483,6 +1493,12 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceName_ failed", status);
     status = GetValue(env, value, out.deviceName_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceName_ value failed", status);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo manufacturer_ failed", status);
+    status = GetValue(env, value, out.manufacturer_);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo manufacturer_ value failed", status);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo modelName_ failed", status);
+    status = GetValue(env, value, out.modelName_);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo modelName_ value failed", status);
     status = napi_get_named_property(env, in, "deviceType", &value);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ failed", status);
     status = GetValue(env, value, out.deviceType_);

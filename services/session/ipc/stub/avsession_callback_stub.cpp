@@ -185,6 +185,8 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.manufacturer_), false, "Read manufacturer failed");
+        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.modelName_), false, "Read modelName failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
