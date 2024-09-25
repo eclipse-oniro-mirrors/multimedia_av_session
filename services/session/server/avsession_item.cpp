@@ -1148,6 +1148,11 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
 void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
+    if (stringValue_ != nullptr && AAFwk::String::Unbox(stringValue_) == "url-cast" &&
+        descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
+        SLOGI("cast not add to collaboration when mirror to stream cast");
+        return;
+    }
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
         if (networkIdIsEmpty_) {
             SLOGI("untrusted device, networkId is empty, get netwokId from castplus");
@@ -1461,8 +1466,8 @@ void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
 {
     auto func = [&](AAFwk::IInterface* object) {
         if (object != nullptr) {
-            AAFwk::IString* stringValue = AAFwk::IString::Query(object);
-            if (stringValue != nullptr && AAFwk::String::Unbox(stringValue) == "url-cast" &&
+            stringValue_ = AAFwk::IString::Query(object);
+            if (stringValue_ != nullptr && AAFwk::String::Unbox(stringValue_) == "url-cast" &&
                 descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO && serviceCallbackForStream_) {
                 SLOGI("AVSessionItem send mirrortostream event to service");
                 serviceCallbackForStream_(GetSessionId());
