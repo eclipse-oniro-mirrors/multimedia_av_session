@@ -32,7 +32,7 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-static constexpr int32_t MAX_CODE_TEST = 21;
+static constexpr int32_t MAX_CODE_TEST = 24;
 static constexpr int32_t MAX_CODE_LEN  = 512;
 static constexpr int32_t MIN_SIZE_NUM  = 4;
 
@@ -45,6 +45,9 @@ void AvSessionServiceFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* da
         return;
     }
     sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    if (avSessionService == nullptr) {
+        return;
+    }
 
     MessageParcel dataMessageParcel;
     MessageParcel reply;
@@ -62,7 +65,7 @@ void AvSessionServiceFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* da
 void AvSessionServiceFuzzer::FuzzTests(const uint8_t* data, size_t size)
 {
     sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
-    
+
     MessageParcel dataMessageParcel;
     OutputDeviceInfo outputDeviceInfo;
     avSessionService->CheckBeforeHandleStartCast(dataMessageParcel, outputDeviceInfo);
@@ -73,18 +76,26 @@ void AvSessionServiceFuzzer::FuzzTests(const uint8_t* data, size_t size)
     avSessionService->MarshallingAVQueueInfos(reply, avQueueInfos);
 
     unsigned char *buffer = new unsigned char[255];
+    if (buffer != nullptr) {
+        avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
+        delete[] buffer;
+    }
     avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> imgBuffer = {1, 2, 3};
     mediaPixelMap->SetInnerImgBuffer(imgBuffer);
     aVQueueInfo.SetAVQueueImage(mediaPixelMap);
     avQueueInfos = {aVQueueInfo};
-    avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
+    buffer = new unsigned char[255];
+    if (buffer != nullptr) {
+        avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
+        delete[] buffer;
+    }
 
     OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
     deviceInfo.deviceId_ = "deviceid";
     deviceInfo.deviceName_ = "devicename";
-    deviceInfo.deviceName_ = 1;
     deviceInfo.ipAddress_ = "ipaddress";
     deviceInfo.providerId_ = 1;
     deviceInfo.supportedProtocols_ = 1;
@@ -96,14 +107,14 @@ void AvSessionServiceFuzzer::FuzzTests(const uint8_t* data, size_t size)
 void OHOS::AVSession::AvSessionServiceOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
 {
     auto aVSessionService = std::make_unique<AvSessionServiceFuzzer>();
-    
+
     aVSessionService->FuzzOnRemoteRequest(code, data, size);
 }
 
 void OHOS::AVSession::AvSessionServiceTests(const uint8_t* data, size_t size)
 {
     auto aVSessionService = std::make_unique<AvSessionServiceFuzzer>();
-    
+
     aVSessionService->FuzzTests(data, size);
 }
 
@@ -111,6 +122,9 @@ void OHOS::AVSession::AvSessionServiceTests(const uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return 0;
+    }
     for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
         OHOS::AVSession::AvSessionServiceOnRemoteRequest(i, data, size);
     }

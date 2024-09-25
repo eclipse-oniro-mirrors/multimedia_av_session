@@ -46,6 +46,7 @@ static char g_testAnotherAbilityName[] = "testAnother.ability";
 static sptr<AVSessionService> avsessionService_;
 AppExecFwk::ElementName elementName;
 sptr<AVSessionItem> avsessionHere_ = nullptr;
+std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList;
 
 class FuzzTestISessionListener : public ISessionListener {
 public:
@@ -100,6 +101,40 @@ public:
 private:
     T ptr_;
 };
+
+void MockGetTrustedDeviceList(std::vector<OHOS::DistributedHardware::DmDeviceInfo> &deviceList)
+{
+    OHOS::DistributedHardware::DmDeviceInfo localeDevice;
+    memset_s(&localeDevice, sizeof(localeDevice), 0, sizeof(localeDevice));
+    strcpy_s(localeDevice.deviceId, sizeof(localeDevice.deviceId) - 1, "<localeDeviceId>");
+    strcpy_s(localeDevice.deviceName, sizeof(localeDevice.deviceName) - 1, "<localeDeviceName>");
+
+    OHOS::DistributedHardware::DmDeviceInfo remoteDevice;
+    memset_s(&remoteDevice, sizeof(remoteDevice), 0, sizeof(remoteDevice));
+    strcpy_s(remoteDevice.deviceId, sizeof(remoteDevice.deviceId) - 1, "<remoteDeviceId>");
+    strcpy_s(remoteDevice.deviceName, sizeof(remoteDevice.deviceName) - 1, "<remoteDeviceName>");
+
+    deviceList.clear();
+    deviceList.push_back(localeDevice);
+    deviceList.push_back(remoteDevice);
+}
+
+void GetDeviceInfoTest(const uint8_t* data, size_t size)
+{
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    auto uid = *(reinterpret_cast<const int32_t *>(data));
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avsessionService_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors;
+    avsessionService_->GetDeviceInfo(avsessionHere_, descriptors, descriptors, descriptors);
+    avsessionService_->GetTrustedDevicesInfo(deviceList);
+    AudioStandard::AudioDeviceDescriptor des;
+    avsessionService_->SelectOutputDevice(uid, des);
+    avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+}
 
 void AvSessionServiceExternalCallTest(const uint8_t* data, size_t size)
 {
@@ -208,6 +243,7 @@ void CreateNewControllerForSessionTest(const uint8_t* data, size_t size,
     int32_t pid = *(reinterpret_cast<const int32_t*>(data));
     
     service->CreateNewControllerForSession(pid, avsessionHere_);
+    service->CancelCastAudioForClientExit(pid, avsessionHere_);
 }
 
 void AvSessionServiceControllerTest(const uint8_t* data, size_t size,
@@ -237,23 +273,53 @@ void AvSessionServiceControllerTest(const uint8_t* data, size_t size,
     ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
     service->HandleControllerRelease(*avControllerItem);
     service->HandleSessionRelease(avSessionItem->GetSessionId());
+    int32_t uid = *(reinterpret_cast<const int32_t *>(data));
 
+    service->NotifyAudioSessionCheckTrigger(uid);
+    service->CreateControllerInner("default", avControllerItemObj);
+}
+
+void AvSessionServiceCastTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    std::string tag(reinterpret_cast<const char*>(data), size);
+    int32_t type = 0;
+    std::string bundleName(reinterpret_cast<const char*>(data), size);
+    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+    sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
+    if (!avSessionItem) {
+        return;
+    }
     SessionToken token;
     token.sessionId = avSessionItem->GetSessionId();
     token.pid = *(reinterpret_cast<const int32_t *>(data));
     token.uid = *(reinterpret_cast<const int32_t *>(data));
-    int32_t uid = *(reinterpret_cast<const int32_t *>(data));
 
     std::vector<AudioStandard::AudioDeviceDescriptor> audioDeviceDescriptors;
     AudioStandard::AudioDeviceDescriptor descriptor;
     descriptor.deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
     audioDeviceDescriptors.push_back(descriptor);
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "deviceId";
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     service->CastAudio(token, audioDeviceDescriptors);
+    if (audioDeviceDescriptors.empty()) {
+        audioDeviceDescriptors.emplace_back();
+    }
+    std::string sourceSessionInfo = "SOURCE";
     service->CastAudioForAll(audioDeviceDescriptors);
-    service->NotifyAudioSessionCheckTrigger(uid);
-
-    service->CreateControllerInner("default", avControllerItemObj);
+    service->CastAudioProcess(audioDeviceDescriptors, sourceSessionInfo, avsessionHere_);
+    service->CastAudioInner(audioDeviceDescriptors, sourceSessionInfo, avsessionHere_);
+    service->CancelCastAudioInner(audioDeviceDescriptors, sourceSessionInfo, avsessionHere_);
+    #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    service->StartCast(token, outputDeviceInfo);
+    service->StopCast(token);
+    #endif
 }
+
 
 void AVSessionServiceSendSystemControlCommandTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
@@ -263,7 +329,6 @@ void AVSessionServiceSendSystemControlCommandTest(const uint8_t* data, size_t si
     service->SendSystemControlCommand(command);
     sptr<FuzzTestISessionListener> listener = new FuzzTestISessionListener();
     service->RegisterSessionListener(listener);
-    service->RegisterSessionListenerForAllUsers(listener);
 }
 
 void AvSessionServiceClientTest(const uint8_t* data, size_t size,
@@ -277,6 +342,15 @@ void AvSessionServiceClientTest(const uint8_t* data, size_t size,
     sptr<ClientDeathRecipient> recipient = new ClientDeathRecipient(func);
     service->AddClientDeathObserver(pid, clientDeath, recipient);
     service->RegisterClientDeathObserver(clientDeath);
+}
+
+void NotifyTopSessionChangedTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    std::vector<AVSessionDescriptor> descriptors;
+    AVSessionDescriptor descriptor;
+
+    service->NotifyTopSessionChanged(descriptor);
 }
 
 void AvSessionServiceHandleEventTest(const uint8_t* data, size_t size,
@@ -628,6 +702,12 @@ void ReportStartCastEnd002(const uint8_t* data, size_t size)
     SLOGI("ReportStartCastEnd002 end!");
 }
 
+void ConvertKeyCodeToCommand001(const uint8_t* data, size_t size)
+{
+    auto keyCode = *(reinterpret_cast<const int32_t *>(data));
+    avsessionService_->ConvertKeyCodeToCommand(keyCode);
+}
+
 void HandleDeviceChange001(const uint8_t* data, size_t size)
 {
     SLOGI("HandleDeviceChange001 begin!");
@@ -694,6 +774,49 @@ void GetTrustedDeviceName002(const uint8_t* data, size_t size)
     SLOGI("GetTrustedDeviceName002 end!");
 }
 
+void GetService001(const uint8_t* data, size_t size)
+{
+    SLOGD("GetService001 begin!");
+    std::string deviceId = "deviceId";
+    avsessionService_->GetService(deviceId);
+    SLOGD("GetService001 end!");
+}
+
+void SetDeviceInfo001(const uint8_t* data, size_t size)
+{
+    SLOGD("SetDeviceInfo001 begin!");
+    std::vector<AudioStandard::AudioDeviceDescriptor> castAudioDescriptors;
+    AudioStandard::AudioDeviceDescriptor des;
+    castAudioDescriptors.push_back(des);
+    avsessionService_->SetDeviceInfo(castAudioDescriptors, avsessionHere_);
+    avsessionService_->CastAudioForNewSession(avsessionHere_);
+    SLOGD("SetDeviceInfo001 end!");
+}
+
+void OnStateChangedTest(const uint8_t* data, size_t size)
+{
+    SLOGD("OnStateChangedTest begin!");
+    DetectBluetoothHostObserver detectBluetoothHostObserver(avsessionService_);
+    int transport = OHOS::Bluetooth::BTTransport::ADAPTER_BREDR;
+    int status = OHOS::Bluetooth::BTStateID::STATE_TURN_ON;
+    detectBluetoothHostObserver.OnStateChanged(transport, status);
+
+    transport = OHOS::Bluetooth::BTTransport::ADAPTER_BLE;
+    status = OHOS::Bluetooth::BTStateID::STATE_TURN_ON;
+    detectBluetoothHostObserver.OnStateChanged(transport, status);
+
+    transport = OHOS::Bluetooth::BTTransport::ADAPTER_BLE;
+    status = OHOS::Bluetooth::BTStateID::STATE_TURN_OFF;
+    detectBluetoothHostObserver.OnStateChanged(transport, status);
+
+    OHOS::AVSession::AVSessionService* avSessionService = nullptr;
+    DetectBluetoothHostObserver detectBluetoothHostObserver_(avSessionService);
+    transport = OHOS::Bluetooth::BTTransport::ADAPTER_BREDR;
+    status = OHOS::Bluetooth::BTStateID::STATE_TURN_ON;
+    detectBluetoothHostObserver_.OnStateChanged(transport, status);
+    SLOGD("OnStateChangedTest end!");
+}
+
 class FuzzSessionListener : public SessionListener {
 public:
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override
@@ -728,6 +851,7 @@ void RemoveInnerSessionListener001(const uint8_t* data, size_t size)
 
 void AvSessionServiceTest001(const uint8_t* data, size_t size)
 {
+    GetDeviceInfoTest(data, size);
     NotifyMirrorToStreamCast001(data, size);
     NotifyMirrorToStreamCast002(data, size);
     NotifyMirrorToStreamCast003(data, size);
@@ -743,7 +867,6 @@ void AvSessionServiceTest001(const uint8_t* data, size_t size)
     RefreshSortFileOnCreateSession001(data, size);
     StartDefaultAbilityByCall001(data, size);
     GetHistoricalAVQueueInfos001(data, size);
-    SaveAvQueueInfo001(data, size);
     AddAvQueueInfoToFile001(data, size);
     StartAVPlayback001(data, size);
     GetSubNode001(data, size);
@@ -788,12 +911,16 @@ void AvSessionServiceTest(const uint8_t* data, size_t size)
     DoMetadataImgCleanTest(data, size, avsessionService_);
     CreateNewControllerForSessionTest(data, size, avsessionService_);
     AvSessionServiceControllerTest(data, size, avsessionService_);
+    AvSessionServiceCastTest(data, size, avsessionService_);
     AVSessionServiceSendSystemControlCommandTest(data, size, avsessionService_);
     AvSessionServiceClientTest(data, size, avsessionService_);
     AvSessionServiceHandleEventTest(data, size, avsessionService_);
-    AvSessionServiceSuperLauncherTest001(data, size, avsessionService_);
-    AvSessionServiceSuperLauncherTest002(data, size, avsessionService_);
     NotifyDeviceAvailable001(data, size);
+    OnStateChangedTest(data, size);
+    NotifyTopSessionChangedTest(data, size, avsessionService_);
+    GetService001(data, size);
+    SetDeviceInfo001(data, size);
+    ConvertKeyCodeToCommand001(data, size);
     
     AvSessionServiceTest001(data, size);
 }
@@ -807,26 +934,6 @@ int32_t AVSessionServiceStubFuzzer::OnRemoteRequestForSessionStub(const uint8_t*
     code %= static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX);
 
     size -= sizeof(uint32_t);
-    std::string sessionId(reinterpret_cast<const char*>(data), size);
-    std::string tag(reinterpret_cast<const char*>(data), size);
-    int32_t type = *(reinterpret_cast<const int32_t*>(data));
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    std::string abilityName(reinterpret_cast<const char*>(data), size);
-    bool isThirdPartyApp = *(reinterpret_cast<const int32_t *>(data));
-    AVSessionDescriptor descriptor;
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(bundleName);
-    elementName.SetAbilityName(abilityName);
-    descriptor.sessionId_ = sessionId;
-    descriptor.sessionTag_ = tag;
-    descriptor.sessionType_ = type;
-    descriptor.elementName_ = elementName;
-    descriptor.isThirdPartyApp_ = isThirdPartyApp;
-    sptr<AVSessionItem> avSessionItem = new(std::nothrow) AVSessionItem(descriptor);
-    if (!avSessionItem) {
-        SLOGI("testAVSession item is null");
-        return AVSESSION_ERROR;
-    }
     sptr<IRemoteObject> remoteObject = nullptr;
     std::shared_ptr<AVSessionProxyTestOnServiceFuzzer> avSessionProxy =
         std::make_shared<AVSessionProxyTestOnServiceFuzzer>(remoteObject);
@@ -888,10 +995,11 @@ int32_t AVSessionServiceStubRemoteRequestTest(const uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    AvSessionServiceCloseTest(data, size);
+    MockGetTrustedDeviceList(deviceList);
     AvSessionServiceExternalCallTest(data, size);
     AvSessionServiceTest(data, size);
     AVSessionServiceStubRemoteRequestTest(data, size);
+    AvSessionServiceCloseTest(data, size);
     return 0;
 }
 } // namespace AVSession

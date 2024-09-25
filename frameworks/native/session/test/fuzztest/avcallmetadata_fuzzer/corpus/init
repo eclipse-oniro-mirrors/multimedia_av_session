@@ -13,18 +13,4 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AVSESSION_FUZZER_H
-#define OHOS_AVSESSION_FUZZER_H
-#include <cstdint>
-#include <cstddef>
-namespace OHOS::AVSession {
-void AvSessionOnRemoteRequest(int32_t code, const uint8_t* data, size_t size);
-
-class AvSessionFuzzer {
-public:
-    AvSessionFuzzer() = default;
-    ~AvSessionFuzzer() = default;
-    void FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size);
-};
-}
-#endif
+FUZZ
