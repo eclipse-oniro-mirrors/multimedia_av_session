@@ -653,11 +653,11 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
             ERR_MARSHALLING, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceId_), ERR_MARSHALLING, "write deviceId failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceName_), ERR_MARSHALLING, "write deviceName failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.deviceType_), ERR_MARSHALLING, "write deviceType failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.ipAddress_), ERR_MARSHALLING, "write ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.manufacturer_),
             ERR_MARSHALLING, "write manufacturer failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.modelName_), ERR_MARSHALLING, "write modelName failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.deviceType_), ERR_MARSHALLING, "write deviceType failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.ipAddress_), ERR_MARSHALLING, "write ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.providerId_), ERR_MARSHALLING, "write providerId failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedProtocols_), ERR_MARSHALLING,
             "write supportedProtocols failed");

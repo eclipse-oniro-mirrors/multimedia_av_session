@@ -49,10 +49,10 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceId_), false, "write deviceId failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.manufacturer_), false, "write manufacturer failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.modelName_), false, "write modelName failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.ipAddress_), false, "write ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.manufacturer_), false, "write manufacturer failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.modelName_), false, "write modelName failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.providerId_), false, "write providerId failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedProtocols_), false,
             "write supportedProtocols failed");
@@ -88,10 +88,10 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.manufacturer_), false, "Read manufacturer failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.modelName_), false, "Read modelName failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.manufacturer_), false, "Read manufacturer failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.modelName_), false, "Read modelName failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.supportedProtocols_), false,
         "Read supportedProtocols failed");
@@ -148,10 +148,10 @@ bool DeviceInfo::WriteToParcel(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castCategory_), false, "write castCategory failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceId_), false, "write deviceId failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceName_), false, "write deviceName failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteString(manufacturer_), false, "write manufacturer failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteString(modelName_), false, "write modelName failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceType_), false, "write deviceType failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(ipAddress_), false, "write ipAddress failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(manufacturer_), false, "write manufacturer failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(modelName_), false, "write modelName failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(providerId_), false, "write providerId failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportedProtocols_), false,
         "write supportedProtocols failed");
@@ -173,10 +173,10 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(castCategory_), false, "Read castCategory failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceId_), false, "Read deviceId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceName_), false, "Read deviceName failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadString(manufacturer_), false, "Read manufacturer failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadString(modelName_), false, "Read modelName failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceType_), false, "Read deviceType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(ipAddress_), false, "Read ipAddress failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(manufacturer_), false, "Read manufacturer failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(modelName_), false, "Read modelName failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(providerId_), false, "Read providerId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedProtocols_), false,
         "Read supportedProtocols failed");
@@ -208,11 +208,11 @@ bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
     for (DeviceInfo deviceInfo : deviceInfos_) {
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceId_), false, "write deviceId failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.manufacturer_), false, "write manufacturer failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.modelName_), false, "write modelName failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed"); 
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.ipAddress_), false, "write ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.manufacturer_), false, "write manufacturer failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.modelName_), false, "write modelName failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.providerId_), false, "write providerId failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedProtocols_), false,
             "Read supportedProtocols failed");
@@ -242,10 +242,10 @@ bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.manufacturer_), false, "Read manufacturer failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.modelName_), false, "Read modelName failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.manufacturer_), false, "Read manufacturer failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.modelName_), false, "Read modelName failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
         CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.supportedProtocols_), false,
             "Read supportedProtocols failed");
