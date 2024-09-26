@@ -242,11 +242,17 @@ public:
 
     bool GetScreenOn();
 
+    void SetScreenLocked(bool isLocked);
+
+    bool GetScreenLocked();
+
     std::string GetAVQueueDir();
 
     std::string GetAVSortDir();
 
     void HandleUserEvent(const std::string &type, const int &userId);
+
+    void HandleScreenStatusChange(std::string event);
 
     void RegisterBundleDeleteEventForHistory();
 
@@ -491,6 +497,7 @@ private:
     std::shared_ptr<EventSubscriber> subscriber_;
     std::recursive_mutex screenStateLock_;
     bool screenOn = false;
+    bool screenLocked = true;
 
 #ifdef BLUETOOTH_ENABLE
     OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;

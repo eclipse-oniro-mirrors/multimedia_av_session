@@ -191,29 +191,15 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     const AAFwk::Want &want = eventData.GetWant();
     std::string action = want.GetAction();
     SLOGI("OnReceiveEvent action:%{public}s.", action.c_str());
-    bool is2in1 = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
-    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) == 0) {
-        SLOGI("recieve COMMON_EVENT_SCREEN_OFF event.");
+
+    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) == 0 ||
+        action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) == 0 ||
+        action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) == 0 ||
+        action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) == 0) {
         if (servicePtr_ != nullptr) {
-            servicePtr_->SetScreenOn(false);
-        }
-        if (is2in1) {
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-            SLOGI("disable cast check 2in1");
-            AVRouter::GetInstance().SetDiscoverable(false);
-#endif
-        }
-    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) == 0) {
-        SLOGI("recieve COMMON_EVENT_SCREEN_ON event.");
-        if (servicePtr_ != nullptr) {
-            servicePtr_->SetScreenOn(true);
-        }
-        if (is2in1) {
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-            SLOGI("enable cast check 2in1");
-            AVRouter::GetInstance().SetDiscoverable(false);
-            AVRouter::GetInstance().SetDiscoverable(true);
-#endif
+            servicePtr_->HandleScreenStatusChange(action);
+        } else {
+            SLOGE("get screenEvent with servicePtr_ null");
         }
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) == 0) {
         int32_t userId = eventData.GetCode();
@@ -227,7 +213,7 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         if (servicePtr_ != nullptr) {
             servicePtr_->HandleUserEvent(AVSessionUsersManager::accountEventRemoved, userId);
         } else {
-            SLOGE("get COMMON_EVENT_USER_SWITCHED with servicePtr_ null");
+            SLOGE("get accountEventRemoved with servicePtr_ null");
         }
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
         if (servicePtr_ != nullptr) {
@@ -254,6 +240,39 @@ void AVSessionService::HandleUserEvent(const std::string &type, const int &userI
     UpdateTopSession(GetUsersManager().GetTopSession());
 }
 
+void AVSessionService::HandleScreenStatusChange(std::string event)
+{
+    std::lock_guard lockGuard(screenStateLock_);
+
+    if (event.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) == 0) {
+        SetScreenOn(false);
+    } else if (event.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) == 0) {
+        SetScreenOn(true);
+    } else if (event.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) == 0) {
+        SetScreenLocked(true);
+    } else if (event.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) == 0) {
+        SetScreenLocked(false);
+    }
+    SLOGI("check screen status with screenOn %{public}d and screenLocked %{public}d",
+        static_cast<int>(GetScreenOn()), static_cast<int>(GetScreenLocked()));
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    bool is2in1 = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
+    if (!is2in1) {
+        return;
+    }
+    if (GetScreenOn() && !GetScreenLocked()) {
+        SLOGI("enable cast check 2in1");
+        AVRouter::GetInstance().SetDiscoverable(false);
+        AVRouter::GetInstance().SetDiscoverable(true);
+    } else {
+        SLOGI("disable cast check 2in1");
+        AVRouter::GetInstance().SetDiscoverable(false);
+    }
+
+#endif
+}
+
 void AVSessionService::SetScreenOn(bool on)
 {
     std::lock_guard lockGuard(screenStateLock_);
@@ -266,11 +285,25 @@ bool AVSessionService::GetScreenOn()
     return screenOn;
 }
 
+void AVSessionService::SetScreenLocked(bool isLocked)
+{
+    std::lock_guard lockGuard(screenStateLock_);
+    screenLocked = isLocked;
+}
+
+bool AVSessionService::GetScreenLocked()
+{
+    std::lock_guard lockGuard(screenStateLock_);
+    return screenLocked;
+}
+
 bool AVSessionService::SubscribeCommonEvent()
 {
     const std::vector<std::string> events = {
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF,
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON,
+        EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED,
