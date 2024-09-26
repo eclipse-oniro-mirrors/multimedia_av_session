@@ -54,6 +54,7 @@ void BundleStatusAdapter::Init()
         return;
     }
 
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
     SLOGI("get bundle manager proxy success");
     bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
 }
@@ -76,6 +77,7 @@ bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleNam
         SLOGE("no memory");
         return false;
     }
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
     if (bundleMgrProxy == nullptr) {
         SLOGE("SubscribeBundleStatusEvent with proxy null!");
         Init();

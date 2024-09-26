@@ -60,6 +60,8 @@ private:
     const std::string PLAY_MUSICLIST = "PlayMusicList";
 
     const std::string PLAY_AUDIO = "PlayAudio";
+
+    std::recursive_mutex bundleMgrProxyLock_;
 };
 
 class BundleStatusCallbackImpl : public AppExecFwk::BundleStatusCallbackHost {
