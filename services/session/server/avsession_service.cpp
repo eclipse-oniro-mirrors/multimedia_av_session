@@ -2021,14 +2021,18 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
         }
         return AVSESSION_SUCCESS;
     }
-    std::lock_guard lockGuard(sessionAndControllerLock_);
-    if (topSession_) {
-        topSession_->HandleMediaKeyEvent(keyEvent);
-    } else {
+    {
+        std::lock_guard lockGuard(sessionAndControllerLock_);
+        if (topSession_) {
+            topSession_->HandleMediaKeyEvent(keyEvent);
+            return AVSESSION_SUCCESS;
+        }
+    }
+    {
         int cmd = ConvertKeyCodeToCommand(keyEvent.GetKeyCode());
         AVControlCommand controlCommand;
         controlCommand.SetCommand(cmd);
-        SLOGI("topSession is nullptr, check if cold start for cmd %{public}d", cmd);
+        SLOGI("topSession get nullptr, check if cold start for cmd %{public}d", cmd);
         HandleSystemKeyColdStart(controlCommand);
     }
     return AVSESSION_SUCCESS;
