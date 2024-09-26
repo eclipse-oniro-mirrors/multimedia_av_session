@@ -281,6 +281,7 @@ public:
     static constexpr size_t ARGV_THIRD = 2;
     static constexpr size_t TIME_OUT_SECOND = 5;
     static constexpr int HTTP_ERROR_CODE = 400;
+    static constexpr int COAP = 2;
 };
 }
 #endif // NAPI_UTILS_H
