@@ -417,6 +417,7 @@ private:
     bool networkIdIsEmpty_ = false;
     bool waitUserDecisionFlag_ = false;
     std::string collaborationNeedNetworkId_;
+    AAFwk::IString* stringValue_;
     std::mutex collaborationApplyResultMutex_;
     std::condition_variable connectWaitCallbackCond_;
     const int32_t collaborationCallbackTimeOut_ = 10;
