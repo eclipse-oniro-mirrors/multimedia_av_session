@@ -208,7 +208,7 @@ bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
     for (DeviceInfo deviceInfo : deviceInfos_) {
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceId_), false, "write deviceId failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed"); 
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.ipAddress_), false, "write ipAddress failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.manufacturer_), false, "write manufacturer failed");
