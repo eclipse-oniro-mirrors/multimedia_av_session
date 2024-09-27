@@ -628,8 +628,8 @@ int32_t AVSessionServiceStub::HandleStartDeviceLogging(MessageParcel& data, Mess
         return ERR_NONE;
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    uint32_t fd = data.ReadFileDescriptor();
-    int32_t maxSize = data.ReadUint32();
+    int32_t fd = data.ReadFileDescriptor();
+    uint32_t maxSize = data.ReadUint32();
     int32_t ret = AVRouter::GetInstance().StartDeviceLogging(fd, maxSize);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStartDeviceLogging failed");
