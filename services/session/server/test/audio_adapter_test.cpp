@@ -175,3 +175,20 @@ static HWTEST(AudioAdapterTest, GetRendererRunning002, TestSize.Level1)
     AudioAdapter::GetInstance().GetRendererRunning(AudioAdapterTest::TEST_SESSION_FAIL_ID);
     SLOGI("GetRendererRunning002 end!");
 }
+
+/**
+* @tc.name: PauseAudioStream001
+* @tc.desc: Test GetRendererRunning
+* @tc.type: FUNC
+* @tc.require: AR000H31KJ
+*/
+static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level1)
+{
+    SLOGD("PauseAudioStream001 begin!");
+    AudioAdapter::GetInstance().Init();
+    int32_t uid = 10001;
+    OHOS::AudioStandard::StreamUsage streamUsage {};
+    int32_t ret = AudioAdapter::GetInstance().PauseAudioStream(uid, streamUsage);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("PauseAudioStream001 end!");
+}
