@@ -3081,16 +3081,16 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     }
 
     typedef void (*NotifySystemUI)(const AVSessionDescriptor* historyDescriptor,
-        int32_t uid, bool isActiveSession,
+        int32_t userId, bool isActiveSession,
         std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent);
     NotifySystemUI notifySystemUI =
         reinterpret_cast<NotifySystemUI>(dynamicLoader->GetFuntion(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH,
             "NotifySystemUI"));
     if (notifySystemUI != nullptr) {
-        auto uid = topSession_ ? topSession_->GetUid() : historyDescriptor->uid_;
+        int32_t userId = GetUsersManager().GetCurrentUserId();
         std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
         if (wantAgent != nullptr) {
-            notifySystemUI(historyDescriptor, uid, isActiveSession, wantAgent);
+            notifySystemUI(historyDescriptor, userId, isActiveSession, wantAgent);
             dynamicLoader->CloseDynamicHandle(AVSESSION_DYNAMIC_NOTIFICATION_LIBRARY_PATH);
         } else {
             SLOGE("wantAgent nullptr error");
