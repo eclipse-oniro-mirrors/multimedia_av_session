@@ -22,48 +22,33 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-static const int32_t MAX_CODE_LEN  = 512;
-static const int32_t MIN_SIZE_NUM = 4;
-
-void OHOS::AVSession::CheckPermissionTest001(uint8_t *data, size_t size)
+void OHOS::AVSession::CheckPermissionTest001()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
-
     PermissionChecker permissionChecker;
     permissionChecker.CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION);
 }
 
-void OHOS::AVSession::CheckPermissionTest002(uint8_t *data, size_t size)
+void OHOS::AVSession::CheckPermissionTest002()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
-
     PermissionChecker permissionChecker;
     permissionChecker.CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
 }
 
-void OHOS::AVSession::CheckPermissionTest003(uint8_t *data, size_t size)
+void OHOS::AVSession::CheckPermissionTest003()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
-
     int32_t CHECK_PERMISSION = 6;
     PermissionChecker permissionChecker;
     permissionChecker.CheckPermission(CHECK_PERMISSION);
 }
 
-void OHOS::AVSession::CheckSystemPermissionTest001(uint8_t *data, size_t size)
+void OHOS::AVSession::CheckSystemPermissionTest001()
 {
     PermissionChecker permissionChecker;
     Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     permissionChecker.CheckSystemPermission(tokenId);
 }
 
-void OHOS::AVSession::CheckMediaResourcePermissionTest001(uint8_t *data, size_t size)
+void OHOS::AVSession::CheckMediaResourcePermissionTest001()
 {
     PermissionChecker permissionChecker;
     Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
@@ -72,22 +57,28 @@ void OHOS::AVSession::CheckMediaResourcePermissionTest001(uint8_t *data, size_t 
     permissionChecker.CheckMediaResourcePermission(tokenId, permissionName);
 }
 
-void OHOS::AVSession::CheckSystemPermissionByUidTest001(uint8_t *data, size_t size)
+void OHOS::AVSession::CheckSystemPermissionByUidTest001(uint8_t *data)
 {
+    if (data == nullptr) {
+        return;
+    }
     PermissionChecker permissionChecker;
     int uid = *(reinterpret_cast<const int*>(data));
     permissionChecker.CheckSystemPermissionByUid(uid);
 }
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(uint8_t* data)
 {
     /* Run your code on data */
-    OHOS::AVSession::CheckPermissionTest001(data, size);
-    OHOS::AVSession::CheckPermissionTest002(data, size);
-    OHOS::AVSession::CheckPermissionTest003(data, size);
-    OHOS::AVSession::CheckSystemPermissionTest001(data, size);
-    OHOS::AVSession::CheckMediaResourcePermissionTest001(data, size);
-    CheckSystemPermissionByUidTest001(data, size);
+    if (data == nullptr) {
+        return 0;
+    }
+    OHOS::AVSession::CheckPermissionTest001();
+    OHOS::AVSession::CheckPermissionTest002();
+    OHOS::AVSession::CheckPermissionTest003();
+    OHOS::AVSession::CheckSystemPermissionTest001();
+    OHOS::AVSession::CheckMediaResourcePermissionTest001();
+    OHOS::AVSession::CheckSystemPermissionByUidTest001(data);
     return 0;
 }

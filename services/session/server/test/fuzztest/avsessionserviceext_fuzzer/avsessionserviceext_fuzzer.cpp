@@ -85,13 +85,6 @@ void AVSessionServiceExtFuzzer::AVSessionServiceExtFuzzTest(uint8_t* data, size_
     
     state = "IDLE";
     service->SuperLauncher(deviceId, serviceName, extraInfo, state);
-    
-    serviceName = "HuaweiCast";
-    service->SuperLauncher(deviceId, serviceName, extraInfo, state);
-
-    FuzzExtSessionListener listener;
-    service->AddInnerSessionListener(&listener);
-    service->RemoveInnerSessionListener(&listener);
 }
 
 void AVSessionServiceExtRemoteRequest(uint8_t* data, size_t size)

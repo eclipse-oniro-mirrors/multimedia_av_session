@@ -92,6 +92,9 @@ void OHOS::AVSession::SessionListenerStubRemoteRequestTests(const uint8_t* data,
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return 0;
+    }
     for (uint32_t i = 0; i <= MAX_CODE_NUM; i++) {
         OHOS::AVSession::SessionListenerStubRemoteRequestTest(i, data, size);
     }

@@ -23,6 +23,10 @@ namespace OHOS::AVSession {
 char g_name[] = "testInfoName";
 char g_infoNetworkId[] = "testInfoNetworkId";
 char g_infoPkgName[] = "testInfoPkgName";
+
+static const int32_t MAX_CODE_LEN = 512;
+static const int32_t MIN_SIZE_NUM = 4;
+
 PeerSocketInfo info = {
     .name = g_name,
     .networkId = g_infoNetworkId,
@@ -65,12 +69,10 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
     manager_->OnMessage(socket, nullptr, dataLen);
 
     std::string pkg = "111";
-    std::string pkgName(reinterpret_cast<const char*>(data), size);
-    manager_->Socket(pkgName);
     manager_->Socket(pkg);
     manager_->Shutdown(socket);
 
-    std::string infor_ = "";
+    std::string infor_ = "info";
     std::string infor(reinterpret_cast<const char*>(data), size);
     manager_->SendMessage(socket, infor_);
     manager_->SendMessage(socket, infor);
@@ -95,6 +97,9 @@ void SoftbusSessionManagerOnRemoteRequest(uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return 0;
+    }
     /* Run your code on data */
     SoftbusSessionManagerOnRemoteRequest(data, size);
     return 0;

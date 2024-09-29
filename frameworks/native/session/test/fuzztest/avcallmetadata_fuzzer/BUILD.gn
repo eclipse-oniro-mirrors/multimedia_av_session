@@ -19,10 +19,10 @@ import("../../../../../../castplus_cast_engine_part.gni")
 module_output_path = "av_session/av_session"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("AVSessionStubFuzzTest") {
+ohos_fuzztest("AVCallMetaDataFuzzTest") {
   module_out_path = module_output_path
 
-  fuzz_config_file = "../avsessionstub_fuzzer"
+  fuzz_config_file = "../avcallmetadata_fuzzer"
 
   include_dirs = [
     "../",
@@ -39,7 +39,7 @@ ohos_fuzztest("AVSessionStubFuzzTest") {
     "-fno-omit-frame-pointer",
     "-fno-access-control",
   ]
-  sources = [ "avsession_stub_fuzzer.cpp" ]
+  sources = [ "avcallmetadata_fuzzer.cpp" ]
   deps = [
     "./../../../../../../services/session:avsession_item",
     "./../../../../../../services/session:avsession_service",
@@ -58,7 +58,6 @@ ohos_fuzztest("AVSessionStubFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm",
