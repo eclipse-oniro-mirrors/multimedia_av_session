@@ -29,6 +29,8 @@ struct DeviceInfo {
     std::string deviceName_;
     std::string networkId_;
     std::string ipAddress_;
+    std::string manufacturer_;
+    std::string modelName_;
     int32_t deviceType_;
     int32_t providerId_;
     int32_t supportedProtocols_ = 3;

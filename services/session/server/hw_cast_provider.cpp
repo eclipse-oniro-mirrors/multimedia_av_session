@@ -379,6 +379,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
         deviceInfo.networkId_ = castRemoteDevice.networkId;
+        deviceInfo.manufacturer_ = castRemoteDevice.dlnaDeviceManufacturerStr;
+        deviceInfo.modelName_ = castRemoteDevice.dlnaDeviceModelNameStr;
         deviceInfo.supportedProtocols_ = castPlusTypeToAVSessionType_ [castRemoteDevice.capability];
         deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType) == 0 ?
             TRUSTED_DEVICE : UNTRUSTED_DEVICE;
