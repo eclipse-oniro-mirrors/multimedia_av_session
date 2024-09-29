@@ -107,9 +107,7 @@ void AVSessionDynamicLoader::CloseDynamicHandle(std::string dynamicLibrary)
     // if already opened, then close all
     if (dynamicLibHandle_[dynamicLibrary] != nullptr) {
 #ifndef TEST_COVERAGE
-        if (dynamicLibHandle_[dynamicLibrary] != nullptr) {
-            OPENSSL_thread_stop();
-        }
+        OPENSSL_thread_stop();
         dlclose(dynamicLibHandle_[dynamicLibrary]);
 #endif
         dynamicLibHandle_[dynamicLibrary] = nullptr;

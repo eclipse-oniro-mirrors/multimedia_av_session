@@ -21,7 +21,6 @@
 #include "notification_request.h"
 #include "notification_constant.h"
 #include "want_agent_helper.h"
-#include "os_account_manager.h"
 
 namespace OHOS {
 namespace AVSession {
@@ -41,7 +40,7 @@ static const auto NOTIFICATION_SUBSCRIBER = NotificationSubscriber();
  
 // Notification Interface
 extern "C" void NotifySystemUI(const AVSessionDescriptor* historyDescriptor,
-    int32_t uid, bool isActiveSession,
+    int32_t userId, bool isActiveSession,
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent)
 {
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
@@ -65,12 +64,10 @@ extern "C" void NotifySystemUI(const AVSessionDescriptor* historyDescriptor,
     request.SetCreatorUid(AVSESSION_UID);
     request.SetUnremovable(true);
     request.SetInProgress(true);
-    int32_t userId;
-    auto res = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
-    request.SetCreatorUserId((res == 0) ? userId : 0);
+    request.SetCreatorUserId(userId);
     request.SetWantAgent(wantAgent);
     result = Notification::NotificationHelper::PublishNotification(request);
-    SLOGI("PublishNotification uid %{public}d, userId %{public}d, result %{public}d", uid, userId, result);
+    SLOGI("PublishNotification userId %{public}d, result %{public}d", userId, result);
 }
  
 extern "C" int32_t CancelNotification(int32_t notificationId)
