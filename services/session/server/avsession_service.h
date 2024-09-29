@@ -499,6 +499,8 @@ private:
     bool screenOn = false;
     bool screenLocked = true;
 
+    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
+
 #ifdef BLUETOOTH_ENABLE
     OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
     std::shared_ptr<DetectBluetoothHostObserver> bluetoothObserver;
@@ -550,6 +552,8 @@ private:
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
     const int32_t saType = 1;
+    const int32_t MAX_NOTIFICATION_NUM = 3;
+    const int32_t NOTIFICATION_CONTROL_TIME = 1000;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H
