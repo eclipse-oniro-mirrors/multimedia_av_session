@@ -1468,6 +1468,8 @@ napi_status NapiAVSession::OffPlayNext(napi_env env, NapiAVSession* napiSession,
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_NEXT, callback);
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_PLAY_NEXT)) {
+        CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
+                                 "NapiAVSession object is nullptr");
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     }
