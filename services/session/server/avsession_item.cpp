@@ -587,7 +587,7 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 {
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
-    SLOGD("AddSupportCommand=%{public}d", cmd);
+    SLOGI("AddSupportCommand=%{public}d", cmd);
     if (cmd == AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT) {
         SLOGI("enable media key event listen");
         isMediaKeySupport = true;
@@ -595,7 +595,10 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     }
     auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
-    supportedCmd_.push_back(cmd);
+    {
+        std::lock_guard lockGuard(cmdsLock_);
+        supportedCmd_.push_back(cmd);
+    }
     ProcessFrontSession("AddSupportCommand");
 
     {
@@ -618,14 +621,17 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
 {
     CHECK_AND_RETURN_RET_LOG(cmd > AVControlCommand::SESSION_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVControlCommand::SESSION_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
-    SLOGD("DeleteSupportCommand=%{public}d", cmd);
+    SLOGI("DeleteSupportCommand=%{public}d", cmd);
     if (cmd == AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT) {
         SLOGI("disable media key event listen");
         isMediaKeySupport = false;
         return AVSESSION_SUCCESS;
     }
     auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
-    supportedCmd_.erase(iter, supportedCmd_.end());
+    {
+        std::lock_guard lockGuard(cmdsLock_);
+        supportedCmd_.erase(iter, supportedCmd_.end());
+    }
     ProcessFrontSession("DeleteSupportCommand");
 
     SLOGD("send validCommand change event to controllers with num %{public}d DEL %{public}d",
@@ -1211,6 +1217,7 @@ std::string AVSessionItem::GetQueueTitle()
 
 std::vector<int32_t> AVSessionItem::GetSupportCommand()
 {
+    std::lock_guard lockGuard(cmdsLock_);
     if (descriptor_.elementName_.GetBundleName() == "castBundleName"
         && descriptor_.elementName_.GetAbilityName() == "castAbilityName") {
         SLOGI("GetSupportCommand when cast session");
@@ -1224,6 +1231,7 @@ std::vector<int32_t> AVSessionItem::GetSupportCommand()
         };
         return supportedCmdForCastSession;
     }
+    SLOGI("GetSupportCommand with cmds size %{public}d", static_cast<int>(supportedCmd_.size()));
     return supportedCmd_;
 }
 
