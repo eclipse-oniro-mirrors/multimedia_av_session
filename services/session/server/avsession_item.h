@@ -367,6 +367,7 @@ private:
     volatile bool isDestroyed_ = false;
 
     std::recursive_mutex metaDataLock_;
+    std::recursive_mutex cmdsLock_;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
