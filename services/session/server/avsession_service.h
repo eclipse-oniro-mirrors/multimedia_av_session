@@ -245,6 +245,12 @@ public:
 
     bool GetScreenOn();
 
+    void SetScreenLocked(bool isLocked);
+
+    bool GetScreenLocked();
+
+    void HandleScreenStatusChange(std::string event);
+
 private:
     void CheckInitCast();
 
@@ -474,6 +480,7 @@ private:
     std::shared_ptr<EventSubscriber> subscriber_;
     std::recursive_mutex screenStateLock_;
     bool screenOn = false;
+    bool screenLocked = true;
 
 #ifdef BLUETOOTH_ENABLE
     OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
