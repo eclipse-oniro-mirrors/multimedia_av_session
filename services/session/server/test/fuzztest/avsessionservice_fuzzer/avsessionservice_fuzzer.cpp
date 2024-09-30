@@ -125,8 +125,6 @@ void GetDeviceInfoTest(const uint8_t* data, size_t size)
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
     auto uid = *(reinterpret_cast<const int32_t *>(data));
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avsessionService_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
     std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors;
     avsessionService_->GetDeviceInfo(avsessionHere_, descriptors, descriptors, descriptors);
     avsessionService_->GetTrustedDevicesInfo(deviceList);
