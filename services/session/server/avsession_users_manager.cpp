@@ -160,6 +160,7 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(pid_t pid, co
     sptr<AVSessionItem> result;
     SLOGI("remove session for pid %{public}d,abilityName %{public}s", static_cast<int>(pid), abilityName.c_str());
     result = GetContainerFromAll().RemoveSession(pid, abilityName);
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, result, "remove session from all get nullptr");
     std::string sessionId = result->GetSessionId();
     int32_t userId = result->GetUserId();
     GetContainerFromUser(userId).RemoveSession(pid, abilityName);
@@ -174,6 +175,7 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(const std::st
     sptr<AVSessionItem> result;
     SLOGI("remove session for sessionId %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     result = GetContainerFromAll().RemoveSession(sessionId);
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, result, "remove session from all get nullptr");
     int32_t userId = result->GetUserId();
     GetContainerFromUser(userId).RemoveSession(sessionId);
     std::string fileName = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
