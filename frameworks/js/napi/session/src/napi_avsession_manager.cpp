@@ -616,8 +616,8 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
     if (context == nullptr) {
-        SLOGE("OnEvent failed : no memory");
-        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        SLOGE("OffEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OffEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
@@ -943,9 +943,17 @@ napi_value NapiAVSessionManager::StartDeviceLogging(napi_env env, napi_callback_
         int32_t napiInvalidParamErr = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments", napiInvalidParamErr);
 
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        bool condition = (context->status == napi_ok) && (type == napi_string);
+        CHECK_ARGS_RETURN_VOID(context, condition, "invalid type invalid", napiInvalidParamErr);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->fd_);
         condition = (context->status == napi_ok);
         CHECK_ARGS_RETURN_VOID(context, condition, "fd getvalue fail", napiInvalidParamErr);
+
+        context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
+        condition = (context->status == napi_ok) && (type == napi_number);
+        CHECK_ARGS_RETURN_VOID(context, condition, "invalid type invalid", napiInvalidParamErr);
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->maxSize_);
         condition = (context->status == napi_ok);
         CHECK_ARGS_RETURN_VOID(context, condition, "maxSize getvalue fail", napiInvalidParamErr);
