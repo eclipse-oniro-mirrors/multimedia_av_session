@@ -164,4 +164,89 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level1)
 
     SLOGI("SetAVMetaData001 End");
 }
+
+/**
+ * @tc.name: GenerateAVMetadata001
+ * @tc.desc: test GenerateAVMetadata
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata001, TestSize.Level1)
+{
+    SLOGI("GenerateAVMetadata001 Begin");
+    AVMetadata_SkipIntervals intervals = SECONDS_10;
+    AVMetadata_Result ret = g_ohAVMetaDataBuilder.SetSkipIntervals(intervals);
+    EXPECT_EQ(ret, AVMETADATA_SUCCESS);
+
+    std::shared_ptr<AVMetaData> metadata = std::make_shared<AVMetaData>();
+    OH_AVMetadata* avMetadata = reinterpret_cast<OH_AVMetadata*>(metadata.get());
+    OH_AVMetadata** ptr = &avMetadata;
+    ret = g_ohAVMetaDataBuilder.GenerateAVMetadata(ptr);
+    EXPECT_EQ(ret, AVMETADATA_SUCCESS);
+    SLOGI("GenerateAVMetadata001 End");
+}
+
+/**
+ * @tc.name: GenerateAVMetadata002
+ * @tc.desc: test GenerateAVMetadata
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata002, TestSize.Level1)
+{
+    SLOGI("GenerateAVMetadata002 Begin");
+    AVMetadata_SkipIntervals intervals = SECONDS_15;
+    AVMetadata_Result ret = g_ohAVMetaDataBuilder.SetSkipIntervals(intervals);
+    EXPECT_EQ(ret, AVMETADATA_SUCCESS);
+
+    std::shared_ptr<AVMetaData> metadata = std::make_shared<AVMetaData>();
+    OH_AVMetadata* avMetadata = reinterpret_cast<OH_AVMetadata*>(metadata.get());
+    OH_AVMetadata** ptr = &avMetadata;
+    ret = g_ohAVMetaDataBuilder.GenerateAVMetadata(ptr);
+    EXPECT_EQ(ret, AVMETADATA_SUCCESS);
+    SLOGI("GenerateAVMetadata002 End");
+}
+
+/**
+ * @tc.name: GenerateAVMetadata003
+ * @tc.desc: test GenerateAVMetadata
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata003, TestSize.Level1)
+{
+    SLOGI("GenerateAVMetadata003 Begin");
+    AVMetadata_SkipIntervals intervals = SECONDS_30;
+    AVMetadata_Result ret = g_ohAVMetaDataBuilder.SetSkipIntervals(intervals);
+    EXPECT_EQ(ret, AVMETADATA_SUCCESS);
+
+    std::shared_ptr<AVMetaData> metadata = std::make_shared<AVMetaData>();
+    OH_AVMetadata* avMetadata = reinterpret_cast<OH_AVMetadata*>(metadata.get());
+    OH_AVMetadata** ptr = &avMetadata;
+    ret = g_ohAVMetaDataBuilder.GenerateAVMetadata(ptr);
+    EXPECT_EQ(ret, AVMETADATA_SUCCESS);
+    SLOGI("GenerateAVMetadata003 End");
+}
+
+/**
+ * @tc.name: GenerateAVMetadata004
+ * @tc.desc: test GenerateAVMetadata
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata004, TestSize.Level1)
+{
+    SLOGI("GenerateAVMetadata004 Begin");
+    AVMetadata_SkipIntervals intervals = static_cast<AVMetadata_SkipIntervals>(100);
+    AVMetadata_Result ret = g_ohAVMetaDataBuilder.SetSkipIntervals(intervals);
+    EXPECT_EQ(ret, AVMETADATA_ERROR_INVALID_PARAM);
+
+    std::shared_ptr<AVMetaData> metadata = std::make_shared<AVMetaData>();
+    OH_AVMetadata* avMetadata = reinterpret_cast<OH_AVMetadata*>(metadata.get());
+    OH_AVMetadata** ptr = &avMetadata;
+    ret = g_ohAVMetaDataBuilder.GenerateAVMetadata(ptr);
+    EXPECT_EQ(ret, AVMETADATA_SUCCESS);
+    SLOGI("GenerateAVMetadata004 End");
+}
+
 }  // namespace OHOS::AVSession

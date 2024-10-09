@@ -447,4 +447,97 @@ static HWTEST_F(AVSessionProxyTest, RegisterCallback001, testing::ext::TestSize.
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("RegisterCallback001, end");
 }
+
+
+/**
+ * @tc.name: SetAVMetaData002
+ * @tc.desc: Test SetAVMetaData
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionProxyTest, SetAVMetaData002, testing::ext::TestSize.Level1)
+{
+    SLOGI("SetAVMetaData002, start");
+    AVMetaData meta;
+    std::string assetId = "assetId";
+    meta.SetAssetId(assetId);
+    
+    std::shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4};
+    mediaImage->SetInnerImgBuffer(imgBuffer);
+    meta.SetMediaImage(mediaImage);
+
+    std::shared_ptr<AVSessionPixelMap> avQueuePixel = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> pixelBuffer = {1, 2, 3, 4};
+    avQueuePixel->SetInnerImgBuffer(pixelBuffer);
+    meta.SetAVQueueImage(avQueuePixel);
+
+    int32_t ret = g_AVSessionProxy->SetAVMetaData(meta);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("SetAVMetaData002, end");
+}
+
+/**
+ * @tc.name: SetAVMetaData003
+ * @tc.desc: Test SetAVMetaData
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionProxyTest, SetAVMetaData003, testing::ext::TestSize.Level1)
+{
+    SLOGI("SetAVMetaData003, start");
+    AVMetaData meta;
+    std::string assetId = "assetId";
+    meta.SetAssetId(assetId);
+    int32_t ret = g_AVSessionProxy->SetAVMetaData(meta);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("SetAVMetaData003, end");
+}
+
+/**
+ * @tc.name: GetAVQueueItems002
+ * @tc.desc: Test GetAVQueueItems
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionProxyTest, GetAVQueueItems002, testing::ext::TestSize.Level1)
+{
+    SLOGI("GetAVQueueItems002, start");
+    std::vector<AVQueueItem> setItems;
+    AVQueueItem item;
+    setItems.push_back(item);
+    g_AVSessionProxy->SetAVQueueItems(setItems);
+    
+    std::vector<AVQueueItem> getItems;
+    int32_t ret = g_AVSessionProxy->GetAVQueueItems(getItems);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("GetAVQueueItems002, end");
+}
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+/**
+ * @tc.name: GetAVCastController001
+ * @tc.desc: Test GetAVCastController
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionProxyTest, GetAVCastController001, testing::ext::TestSize.Level1)
+{
+    SLOGI("GetAVCastController001, start");
+    auto ret = g_AVSessionProxy->GetAVCastController();
+    EXPECT_EQ(ret, nullptr);
+    SLOGI("GetAVCastController001, end");
+}
+
+/**
+ * @tc.name: GetAllCastDisplays001
+ * @tc.desc: Test GetAllCastDisplays
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionProxyTest, GetAllCastDisplays001, testing::ext::TestSize.Level1)
+{
+    SLOGI("GetAllCastDisplays001, start");
+    std::vector<CastDisplayInfo> castDisplays;
+    auto ret = g_AVSessionProxy->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("GetAllCastDisplays001, end");
+}
+#endif
+
 } //OHOS::AVSESSION
