@@ -17,10 +17,14 @@
 #include "av_router.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_service.h"
 
 using namespace testing::ext;
 namespace OHOS {
 namespace AVSession {
+
+static std::shared_ptr<AVSessionService> g_AVSessionService;
+
 class AVRouterTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -30,7 +34,11 @@ public:
 };
 
 void AVRouterTest::SetUpTestCase()
-{}
+{
+    SLOGI("set up AVSessionServiceTest");
+    system("killall -9 com.example.hiMusicDemo");
+    g_AVSessionService = std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID);
+}
 
 void AVRouterTest::TearDownTestCase()
 {}
@@ -42,6 +50,7 @@ void AVRouterTest::TearDown()
 {}
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+
 /**
 * @tc.name: StartCastDiscovery001
 * @tc.desc: start cast discovery for default cast type "local"
@@ -127,6 +136,107 @@ static HWTEST_F(AVRouterTest, OnCastServerDied001, TestSize.Level1)
     auto ret = AVRouter::GetInstance().OnCastServerDied(-1);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("OnCastServerDied001 end");
+}
+
+/**
+* @tc.name: StartDeviceLogging001
+* @tc.desc: test StartDeviceLogging
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterTest, StartDeviceLogging001, TestSize.Level1)
+{
+    SLOGI("StartDeviceLogging001 begin");
+    int32_t fd = 1;
+    uint32_t maxSize = 10;
+    auto ret = AVRouter::GetInstance().StartDeviceLogging(fd, maxSize);
+    AVRouter::GetInstance().StopDeviceLogging();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("StartDeviceLogging001 end");
+}
+
+/**
+* @tc.name: StartDeviceLogging002
+* @tc.desc: test StartDeviceLogging
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterTest, StartDeviceLogging002, TestSize.Level1)
+{
+    SLOGI("StartDeviceLogging002 begin");
+    int32_t fd = 1;
+    uint32_t maxSize = 10;
+    AVRouter::GetInstance().Init(g_AVSessionService.get());
+    auto ret = AVRouter::GetInstance().StartDeviceLogging(fd, maxSize);
+    AVRouter::GetInstance().StopDeviceLogging();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("StartDeviceLogging002 end");
+}
+
+/**
+* @tc.name: OnDeviceLogEvent001
+* @tc.desc: test OnDeviceLogEvent
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterTest, OnDeviceLogEvent001, TestSize.Level1)
+{
+    SLOGI("OnDeviceLogEvent001 begin");
+    DeviceLogEventCode eventId = DEVICE_LOG_FULL;
+    int64_t param = 0;
+    AVRouter::GetInstance().Init(nullptr);
+    auto ret = AVRouter::GetInstance().OnDeviceLogEvent(eventId, param);
+    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    SLOGI("OnDeviceLogEvent001 end");
+}
+
+/**
+* @tc.name: OnDeviceLogEvent002
+* @tc.desc: test OnDeviceLogEvent
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterTest, OnDeviceLogEvent002, TestSize.Level1)
+{
+    SLOGI("OnDeviceLogEvent002 begin");
+    DeviceLogEventCode eventId = DEVICE_LOG_FULL;
+    int64_t param = 0;
+    AVRouter::GetInstance().Init(g_AVSessionService.get());
+    auto ret = AVRouter::GetInstance().OnDeviceLogEvent(eventId, param);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("OnDeviceLogEvent002 end");
+}
+
+/**
+* @tc.name: OnDeviceOffline001
+* @tc.desc: test OnDeviceOffline
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterTest, OnDeviceOffline001, TestSize.Level1)
+{
+    SLOGI("OnDeviceOffline001 begin");
+    std::string deviceId = "***";
+    AVRouter::GetInstance().Init(nullptr);
+    auto ret = AVRouter::GetInstance().OnDeviceOffline(deviceId);
+    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
+    SLOGI("OnDeviceOffline001 end");
+}
+
+/**
+* @tc.name: OnDeviceOffline002
+* @tc.desc: test OnDeviceOffline
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterTest, OnDeviceOffline002, TestSize.Level1)
+{
+    SLOGI("OnDeviceOffline002 begin");
+    AVRouter::GetInstance().Init(g_AVSessionService.get());
+    std::string deviceId = "***";
+    auto ret = AVRouter::GetInstance().OnDeviceOffline(deviceId);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("OnDeviceOffline002 end");
 }
 #endif
 }
