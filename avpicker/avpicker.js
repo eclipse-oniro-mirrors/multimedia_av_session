@@ -75,6 +75,8 @@ export class AVCastPicker extends ViewPU {
             new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
         this.__deviceInfoType = new ObservedPropertySimplePU('', this, 'deviceInfoType');
         this.maxFontSizeScale = 2;
+        this.__accessibilityConnectedStr = new ObservedPropertySimplePU('已连接', this, 'accessibilityConnectedStr');
+        this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('音视频投播', this, 'accessibilityAudioControlStr');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -129,6 +131,12 @@ export class AVCastPicker extends ViewPU {
         if (c11.maxFontSizeScale !== undefined) {
             this.maxFontSizeScale = c11.maxFontSizeScale;
         }
+        if (c11.accessibilityConnectedStr !== undefined) {
+            this.accessibilityConnectedStr = c11.accessibilityConnectedStr;
+        }
+        if (c11.__accessibilityAudioControlStr !== undefined) {
+            this.accessibilityAudioControlStr = c11.accessibilityAudioControlStr;
+        }
     }
 
     updateStateVars(b11) {
@@ -146,6 +154,8 @@ export class AVCastPicker extends ViewPU {
         this.__touchMenuItemIndex.purgeDependencyOnElmtId(a11);
         this.__configurationColorMode.purgeDependencyOnElmtId(a11);
         this.__deviceInfoType.purgeDependencyOnElmtId(a11);
+        this.__accessibilityConnectedStr.purgeDependencyOnElmtId(a11);
+        this.__accessibilityAudioControlStr.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -160,6 +170,8 @@ export class AVCastPicker extends ViewPU {
         this.__touchMenuItemIndex.aboutToBeDeleted();
         this.__configurationColorMode.aboutToBeDeleted();
         this.__deviceInfoType.aboutToBeDeleted();
+        this.__accessibilityConnectedStr.aboutToBeDeleted();
+        this.__accessibilityAudioControlStr.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -250,6 +262,22 @@ export class AVCastPicker extends ViewPU {
 
     set deviceInfoType(b1) {
         this.__deviceInfoType.set(b1);
+    }
+
+    get accessibilityConnectedStr() {
+        return this.__accessibilityConnectedStr.get();
+    }
+
+    set accessibilityConnectedStr(c1) {
+        this.__accessibilityConnectedStr.set(c1);
+    }
+
+    get accessibilityAudioControlStr() {
+        return this.__accessibilityAudioControlStr.get();
+    }
+
+    set accessibilityAudioControlStr(d1) {
+        this.__accessibilityAudioControlStr.set(d1);
     }
 
     MenuStateChange() {
@@ -409,6 +437,8 @@ export class AVCastPicker extends ViewPU {
                                 Row.create();
                                 Row.justifyContent(FlexAlign.Start);
                                 Row.alignItems(VerticalAlign.Center);
+                                Row.accessibilityLevel('yes');
+                                Row.accessibilityText(this.accessibilityConnectedStr);
                             }, Row);
                             this.buildIcon.bind(this)(x8, true);
                             Row.pop();
@@ -524,6 +554,17 @@ export class AVCastPicker extends ViewPU {
                     console.info(TAG, `configurationColorMode : ${l8.configurationColorMode}`);
                     this.configurationColorMode = l8.configurationColorMode;
                 }
+
+                if (JSON.stringify(l8.accessConnected) !== undefined) {
+                    console.info(TAG, `accessibilityConnectedStr : ${l8.accessConnected}`);
+                    this.accessibilityConnectedStr = l8.accessConnected;
+                }
+
+                
+                if (JSON.stringify(l8.accessAudioControl) !== undefined) {
+                    console.info(TAG, `accessibilityAudioControlStr : ${l8.accessAudioControl}`);
+                    this.accessibilityAudioControlStr = l8.accessAudioControl;
+                }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
             UIExtensionComponent.bindMenu(this.isMenuShow, { builder: () => { this.deviceMenu.call(this); }}, {
@@ -564,6 +605,8 @@ export class AVCastPicker extends ViewPU {
                     }
                 }
             });
+            UIExtensionComponent.accessibilityLevel('yes');
+            UIExtensionComponent.accessibilityText(this.__accessibilityAudioControlStr);
         }, UIExtensionComponent);
     }
 

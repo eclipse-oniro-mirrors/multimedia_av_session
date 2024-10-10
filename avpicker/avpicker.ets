@@ -178,7 +178,13 @@ export struct AVCastPicker {
   /**
    * Max Font and graphic magnification. 
    */
-  private maxFonSizeScale: number = 2; 
+  private maxFonSizeScale: number = 2;
+
+  /**
+   * Accessibility Strings
+   */
+  @State accessibilityConnectedStr: string = '已连接';
+  @State accessibilityAudioControlStr: string = '音视频投播';
 
   MenuStateChange() {
     if (this.extensionProxy != null) {
@@ -258,6 +264,8 @@ export struct AVCastPicker {
               }
               .justifyContent(FlexAlign.Start)
               .alignItems(VerticalAlign.Center)
+              .accessibilityLevel('yes')
+              .accessibilityText(this.accessibilityConnectedStr)
             }
           }
           .constraintSize({ minHeight: 48 })
@@ -371,6 +379,16 @@ export struct AVCastPicker {
           console.info(TAG, `configurationColorMode : ${JSON.stringify(data['configurationColorMode'])}`);
           this.configurationColorMode = data['configurationColorMode'] as number;
         }
+
+        if (JSON.stringify(data['accessConnected']) !== undefined) {
+          console.info(TAG, `accessConnected : ${JSON.stringify(data['accessConnected'])}`);
+          this.accessibilityConnectedStr = data['accessConnected'] as string;
+        }
+
+        if (JSON.stringify(data['accessAudioControl']) !== undefined) {
+          console.info(TAG, `accessAudioControl : ${JSON.stringify(data['accessAudioControl'])}`);
+          this.accessibilityAudioControlStr = data['accessAudioControl'] as string;
+        }
       })
       .size({ width: '100%', height: '100%' })
       .bindMenu(this.isMenuShow, this.deviceMenu(), {
@@ -411,6 +429,8 @@ export struct AVCastPicker {
           }
         }
       })
+      .accessibilityLevel('yes')
+      .accessibilityText(this.accessibilityAudioControlStr)
   }
 
   private hasExtDevice(allDevice: Array<AVCastPickerDeviceInfo>): boolean {
