@@ -1167,6 +1167,124 @@ if (castplus_cast_engine_enable) {
   }
 }
 
+if (castplus_cast_engine_enable) {
+  ohos_unittest("AVCastControllerStubTest") {
+    module_out_path = module_output_path
+
+    sources = [ "avcast_controller_stub_test.cpp" ]
+
+    configs = [ ":module_private_config" ]
+
+    cflags_cc = [
+      "-fno-access-control",
+      "-DCASTPLUS_CAST_ENGINE_ENABLE",
+    ]
+
+    deps = common_deps
+
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item",
+      "../../../../services/session:avsession_router",
+    ]
+
+    external_deps = common_external_deps
+
+    external_deps += [
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationfwk_client",
+      "cast_engine:cast_engine_client",
+    ]
+  }
+
+  ohos_unittest("AVCastControllerCallbackStubTest") {
+    module_out_path = module_output_path
+
+    sources = [ "avcast_controller_callback_stub_test.cpp" ]
+
+    configs = [ ":module_private_config" ]
+
+    cflags_cc = [
+      "-fno-access-control",
+      "-DCASTPLUS_CAST_ENGINE_ENABLE",
+    ]
+
+    deps = common_deps
+
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item",
+      "../../../../services/session:avsession_router",
+    ]
+
+    external_deps = common_external_deps
+
+    external_deps += [
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationfwk_client",
+      "cast_engine:cast_engine_client",
+    ]
+  }
+
+  ohos_unittest("AVCastControllerProxyTest") {
+    module_out_path = module_output_path
+
+    sources = [ "avcast_controller_proxy_test.cpp" ]
+
+    configs = [ ":module_private_config" ]
+
+    cflags_cc = [
+      "-fno-access-control",
+      "-DCASTPLUS_CAST_ENGINE_ENABLE",
+    ]
+
+    deps = common_deps
+
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item",
+      "../../../../services/session:avsession_router",
+    ]
+
+    external_deps = common_external_deps
+
+    external_deps += [
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationfwk_client",
+      "cast_engine:cast_engine_client",
+    ]
+  }
+
+  ohos_unittest("AVCastControllerCallbackProxyTest") {
+    module_out_path = module_output_path
+
+    sources = [ "avcast_controller_callback_proxy_test.cpp" ]
+
+    configs = [ ":module_private_config" ]
+
+    cflags_cc = [
+      "-fno-access-control",
+      "-DCASTPLUS_CAST_ENGINE_ENABLE",
+    ]
+
+    deps = common_deps
+
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item",
+      "../../../../services/session:avsession_router",
+    ]
+
+    external_deps = common_external_deps
+
+    external_deps += [
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationfwk_client",
+      "cast_engine:cast_engine_client",
+    ]
+  }
+}
+
 ###############################################################################
 group("av_session_server_unittest") {
   testonly = true
@@ -1215,6 +1333,10 @@ group("av_session_server_unittest") {
 
   if (castplus_cast_engine_enable) {
     deps += [
+      ":AVCastControllerCallbackProxyTest",
+      ":AVCastControllerCallbackStubTest",
+      ":AVCastControllerProxyTest",
+      ":AVCastControllerStubTest",
       ":AVSessionRadarTest",
       ":HwCastStreamPlayerTest",
       ":HwCastSupplementTest",
