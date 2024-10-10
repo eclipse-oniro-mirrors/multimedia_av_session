@@ -402,6 +402,20 @@ ohos_unittest("AVSessionProxyTest") {
   deps = common_deps
 
   external_deps = common_external_deps
+
+  if (castplus_cast_engine_enable) {
+    cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item",
+      "../../../../services/session:avsession_router",
+    ]
+    external_deps += [
+      "CollaborationFwk:cfwk_allconnect_client",
+      "CollaborationFwk:collaborationfwk_client",
+      "cast_engine:cast_engine_client",
+    ]
+  }
 }
 
 ohos_unittest("AbilityManagerAdapterDemoTest") {
