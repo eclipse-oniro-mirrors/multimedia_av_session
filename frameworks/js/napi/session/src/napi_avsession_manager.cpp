@@ -945,7 +945,7 @@ napi_value NapiAVSessionManager::StartDeviceLogging(napi_env env, napi_callback_
 
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
-        bool condition = (context->status == napi_ok) && (type == napi_string);
+        bool condition = (context->status == napi_ok) && (type == napi_number);
         CHECK_ARGS_RETURN_VOID(context, condition, "invalid type invalid", napiInvalidParamErr);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->fd_);
         condition = (context->status == napi_ok);
