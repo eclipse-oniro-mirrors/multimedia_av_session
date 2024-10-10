@@ -105,14 +105,17 @@ bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAV
         SLOGE("RegisterCastSessionStateListener failed for the listener is nullptr");
         return false;
     }
-    std::lock_guard lockGuard(mutex_);
-    if (find(castSessionStateListenerList_.begin(), castSessionStateListenerList_.end(), listener)
-        != castSessionStateListenerList_.end()) {
-        SLOGE("listener is already in castSessionStateListenerList_");
-        return false;
+    {
+        std::lock_guard lockGuard(mutex_);
+        if (find(castSessionStateListenerList_.begin(), castSessionStateListenerList_.end(), listener)
+            != castSessionStateListenerList_.end()) {
+            SLOGE("listener is already in castSessionStateListenerList_");
+            return false;
+        }
+        castSessionStateListenerList_.emplace_back(listener);
+        SLOGI("register listener finished with size %{public}d and check stash state %{public}d",
+            static_cast<int>(castSessionStateListenerList_.size()), static_cast<int32_t>(stashDeviceState_));
     }
-    castSessionStateListenerList_.emplace_back(listener);
-    SLOGI("register listener finished and check stash state %{public}d", static_cast<int32_t>(stashDeviceState_));
     if (stashDeviceState_ > 0) {
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = stashDeviceId_;
@@ -136,6 +139,7 @@ bool HwCastProviderSession::UnRegisterCastSessionStateListener(std::shared_ptr<I
     for (auto iter = castSessionStateListenerList_.begin(); iter != castSessionStateListenerList_.end();) {
         if (*iter == listener) {
             castSessionStateListenerList_.erase(iter);
+            SLOGI("unRegister finished with size %{public}d", static_cast<int>(castSessionStateListenerList_.size()));
             return true;
         } else {
             ++iter;
@@ -148,22 +152,26 @@ bool HwCastProviderSession::UnRegisterCastSessionStateListener(std::shared_ptr<I
 void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &stateInfo)
 {
     int32_t deviceState = static_cast<int32_t>(stateInfo.deviceState);
+    std::vector<std::shared_ptr<IAVCastSessionStateListener>> tempListenerList;
     SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(deviceState));
-    if (castSessionStateListenerList_.size() == 0) {
-        SLOGI("current has not registered listener, stash state: %{public}d", static_cast<int32_t>(deviceState));
-        stashDeviceState_ = deviceState;
-        stashDeviceId_ = stateInfo.deviceId;
-        return;
+    {
+        std::lock_guard lockGuard(mutex_);
+        if (castSessionStateListenerList_.size() == 0) {
+            SLOGI("current has not registered listener, stash state: %{public}d", deviceState);
+            stashDeviceState_ = deviceState;
+            stashDeviceId_ = stateInfo.deviceId;
+            return;
+        }
+        stashDeviceState_ = -1;
+        tempListenerList = castSessionStateListenerList_;
     }
-    stashDeviceState_ = -1;
-    std::lock_guard lockGuard(mutex_);
-    for (auto listener : castSessionStateListenerList_) {
+    for (auto listener : tempListenerList) {
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = stateInfo.deviceId;
         deviceInfo.deviceName_ = "RemoteCast";
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
         if (listener != nullptr) {
-            SLOGI("trigger the OnCastStateChange for registered listener");
+            SLOGI("trigger the OnCastStateChange for ListSize %{public}d", static_cast<int>(tempListenerList.size()));
             listener->OnCastStateChange(static_cast<int>(deviceState), deviceInfo);
         }
     }
@@ -173,9 +181,11 @@ void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const st
 {
     SLOGI("OnEvent from cast with eventId %{public}d, %{public}s", eventId, jsonParam.c_str());
     std::string jsonStr = jsonParam;
+    std::lock_guard lockGuard(mutex_);
     for (auto listener : castSessionStateListenerList_) {
         if (listener != nullptr) {
-            SLOGI("trigger the OnCastEventRecv for registered listeners");
+            SLOGI("trigger the OnCastEventRecv for ListSize %{public}d",
+                static_cast<int>(castSessionStateListenerList_.size()));
             listener->OnCastEventRecv(static_cast<int>(eventId), jsonStr);
         }
     }
