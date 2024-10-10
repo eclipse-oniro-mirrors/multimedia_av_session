@@ -1155,7 +1155,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
 void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
-    std::lock_guard lockGuard(wantParamLock_);
+    std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
     if (mirrorToStreamFlag_) {
         mirrorToStreamFlag_ = false;
         SLOGI("cast not add to collaboration when mirror to stream cast");
