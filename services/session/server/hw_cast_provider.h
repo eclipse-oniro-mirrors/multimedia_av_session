@@ -60,7 +60,6 @@ public:
     bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) override;
 
 private:
-    void WaitSessionRelease();
     static const int maxCastSessionSize = 256;
     std::vector<bool> castFlag_ = std::vector<bool>(maxCastSessionSize, false);
     std::map<int, std::shared_ptr<HwCastProviderSession>> hwCastProviderSessionMap_;
@@ -68,9 +67,7 @@ private:
     std::vector<std::shared_ptr<IAVCastStateListener>> castStateListenerList_;
     std::recursive_mutex mutexLock_;
     bool isRelease_ = false;
-    int lastCastId_ = -1;
     int mirrorCastId = -1;
-    std::shared_ptr<HwCastProviderSession> lastCastSession;
 
     const int32_t deviceStateConnection = 4;
     std::map<CastEngine::CapabilityType, int32_t> castPlusTypeToAVSessionType_ = {
