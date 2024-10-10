@@ -827,6 +827,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     if (castHandle_ > 0) {
         return AVSESSION_ERROR;
     }
+    mirrorToStreamFlag_ = true;
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
@@ -1156,6 +1157,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     SLOGI("enter DealCollaborationPublishState");
     std::lock_guard lockGuard(wantParamLock_);
     if (mirrorToStreamFlag_) {
+        mirrorToStreamFlag_ = false;
         SLOGI("cast not add to collaboration when mirror to stream cast");
         return;
     }
@@ -1473,9 +1475,8 @@ void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
     auto func = [&](AAFwk::IInterface* object) {
         if (object != nullptr) {
             AAFwk::IString* stringValue = AAFwk::IString::Query(object);
-            mirrorToStreamFlag_ = stringValue != nullptr && AAFwk::String::Unbox(stringValue) == "url-cast" &&
-                descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO && serviceCallbackForStream_;
-            if (mirrorToStreamFlag_) {
+            if (stringValue != nullptr && AAFwk::String::Unbox(stringValue) == "url-cast" &&
+                descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO && serviceCallbackForStream_) {
                 SLOGI("AVSessionItem send mirrortostream event to service");
                 serviceCallbackForStream_(GetSessionId());
             }
