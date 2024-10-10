@@ -110,26 +110,33 @@ protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 
 private:
+    static const int32_t DEFAULT_USER_ID = 100;
     pid_t pid_;
     sptr<AVSessionItem> session_;
     std::string sessionId_;
     int32_t userId_;
-    std::recursive_mutex sessionMutex_;
-    std::recursive_mutex callbackMutex_;
     sptr<IAVControllerCallback> callback_;
     std::shared_ptr<AVControllerCallback> innerCallback_;
-    std::recursive_mutex avCallMetaMaskMutex_;
     AVCallMetaData::AVCallMetaMaskType avCallMetaMask_;
-    std::recursive_mutex avCallStateMaskMutex_;
     AVCallState::AVCallStateMaskType avCallStateMask_;
-    std::recursive_mutex metaMaskMutex_;
     AVMetaData::MetaMaskType metaMask_;
-    std::recursive_mutex playbackMaskMutex_;
     AVPlaybackState::PlaybackStateMaskType playbackMask_;
-    std::recursive_mutex serviceCallbackMutex_;
     std::function<void(AVControllerItem&)> serviceCallback_;
 
-    static const int32_t DEFAULT_USER_ID = 100;
+    // The following locks are used in the defined order of priority
+    std::recursive_mutex callbackMutex_;
+
+    std::recursive_mutex serviceCallbackMutex_;
+
+    std::recursive_mutex avCallMetaMaskMutex_;
+
+    std::recursive_mutex avCallStateMaskMutex_;
+
+    std::recursive_mutex metaMaskMutex_;
+
+    std::recursive_mutex playbackMaskMutex_;
+
+    std::recursive_mutex sessionMutex_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_ITEM_H

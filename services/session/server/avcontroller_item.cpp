@@ -32,15 +32,14 @@ namespace OHOS::AVSession {
 AVControllerItem::AVControllerItem(pid_t pid, const sptr<AVSessionItem>& session, int32_t userId)
     : pid_(pid), session_(session), userId_(userId)
 {
-    sessionId_ = session_->GetSessionId();
-    SLOGI("construct sessionId=%{public}s, pid=%{public}d, userId=%{public}d",
-        AVSessionUtils::GetAnonySessionId(sessionId_).c_str(), static_cast<int>(pid_), userId_);
+    std::lock_guard sessionLockGuard(sessionMutex_);
+    if (session_ != nullptr) {
+        sessionId_ = session_->GetSessionId();
+    }
 }
 
 AVControllerItem::~AVControllerItem()
 {
-    SLOGI("destroy sessionId=%{public}s, pid=%{public}d, userId=%{public}d",
-        AVSessionUtils::GetAnonySessionId(sessionId_).c_str(), static_cast<int>(pid_), userId_);
 }
 
 int32_t AVControllerItem::GetUserId() const
@@ -181,8 +180,10 @@ int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     std::vector<int32_t> cmds = session_->GetSupportCommand();
-    CHECK_AND_RETURN_RET_LOG(std::find(cmds.begin(), cmds.end(), cmd.GetCommand()) != cmds.end(),
-                             ERR_COMMAND_NOT_SUPPORT, "command not support");
+    if (std::find(cmds.begin(), cmds.end(), cmd.GetCommand()) == cmds.end()) {
+        SLOGE("The command that needs to be sent is not supported.");
+        return ERR_COMMAND_NOT_SUPPORT;
+    }
     CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),
         ERR_COMMAND_SEND_EXCEED_MAX, "command send number exceed max");
     session_->ExecuteControllerCommand(cmd);
@@ -232,12 +233,20 @@ int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackState
 
 int32_t AVControllerItem::Destroy()
 {
-    SLOGI("do controller destroyfor pid %{public}d", static_cast<int>(pid_));
+    SLOGI("controller destroyed for pid %{public}d", static_cast<int>(pid_));
     {
         std::lock_guard callbackLockGuard(callbackMutex_);
         callback_ = nullptr;
         innerCallback_ = nullptr;
     }
+
+    {
+        std::lock_guard serviceCallbacklockGuard(serviceCallbackMutex_);
+        if (serviceCallback_) {
+            serviceCallback_(*this);
+        }
+    }
+
     {
         std::lock_guard sessionLockGuard(sessionMutex_);
         if (session_ != nullptr) {
@@ -246,18 +255,14 @@ int32_t AVControllerItem::Destroy()
             sessionId_.clear();
         }
     }
-    {
-        std::lock_guard serviceCallbacklockGuard(serviceCallbackMutex_);
-        if (serviceCallback_) {
-            serviceCallback_(*this);
-        }
-    }
+
     return AVSESSION_SUCCESS;
 }
 
 // LCOV_EXCL_START
 std::string AVControllerItem::GetSessionId()
 {
+    std::lock_guard sessionLockGuard(sessionMutex_);
     return sessionId_;
 }
 // LCOV_EXCL_STOP
@@ -338,8 +343,6 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
     AVPlaybackState stateOut;
     std::lock_guard playbackLockGuard(playbackMaskMutex_);
     if (state.CopyToByMask(playbackMask_, stateOut)) {
-        SLOGI("update playback pid %{public}d, state %{public}d",
-            static_cast<int>(pid_), static_cast<int>(stateOut.GetState()));
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnPlaybackStateChange");
         if (callback_ != nullptr) {
             callback_->OnPlaybackStateChange(stateOut);
@@ -402,62 +405,67 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
 
 void AVControllerItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
 {
-    SLOGD("Connection state %{public}d", connectionState);
     std::lock_guard lockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnOutputDeviceChange(connectionState, outputDeviceInfo);
+    if (callback_ != nullptr) {
+        callback_->OnOutputDeviceChange(connectionState, outputDeviceInfo);
+    }
 }
 // LCOV_EXCL_STOP
 
 void AVControllerItem::HandleActiveStateChange(bool isActive)
 {
     std::lock_guard lockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnActiveStateChange(isActive);
+    if (callback_ != nullptr) {
+        callback_->OnActiveStateChange(isActive);
+    }
 }
 
 // LCOV_EXCL_START
 void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds)
 {
     std::lock_guard lockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     SLOGD("do OnValidCommandChange with pid %{public}d cmd list size %{public}d",
         static_cast<int>(pid_), static_cast<int>(cmds.size()));
-    callback_->OnValidCommandChange(cmds);
+    if (callback_ != nullptr) {
+        callback_->OnValidCommandChange(cmds);
+    }
 }
 // LCOV_EXCL_STOP
 
 void AVControllerItem::HandleSetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
 {
     std::lock_guard lockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    AVSESSION_TRACE_SYNC_START("AVControllerItem::OnSessionEventChange");
-    callback_->OnSessionEventChange(event, args);
+    if (callback_ != nullptr) {
+        callback_->OnSessionEventChange(event, args);
+    }
 }
 
 // LCOV_EXCL_START
 void AVControllerItem::HandleQueueItemsChange(const std::vector<AVQueueItem>& items)
 {
     std::lock_guard lockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnQueueItemsChange");
-    callback_->OnQueueItemsChange(items);
+    if (callback_ != nullptr) {
+        callback_->OnQueueItemsChange(items);
+    }
 }
 
 void AVControllerItem::HandleQueueTitleChange(const std::string& title)
 {
     std::lock_guard lockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnQueueTitleChange");
-    callback_->OnQueueTitleChange(title);
+    if (callback_ != nullptr) {
+        callback_->OnQueueTitleChange(title);
+    }
 }
 
 void AVControllerItem::HandleExtrasChange(const AAFwk::WantParams& extras)
 {
     std::lock_guard lockGuard(callbackMutex_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnSetExtras");
-    callback_->OnExtrasChange(extras);
+    if (callback_ != nullptr) {
+        callback_->OnExtrasChange(extras);
+    }
 }
 // LCOV_EXCL_STOP
 
@@ -468,6 +476,7 @@ pid_t AVControllerItem::GetPid() const
 
 bool AVControllerItem::HasSession(const std::string& sessionId)
 {
+    std::lock_guard sessionLockGuard(sessionMutex_);
     return sessionId_ == sessionId;
 }
 

@@ -105,4 +105,241 @@ void AVSessionService::RemoveInnerSessionListener(SessionListener *listener)
         }
     }
 }
+
+// LCOV_EXCL_START
+void AVSessionService::HandleAppStateChange(int uid, int state)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGD("uidForAppStateChange_ = %{public}d, uid = %{public}d, state = %{public}d",
+        uidForAppStateChange_, uid, state);
+    if (uidForAppStateChange_ == uid) {
+        if (state == appState) {
+            return;
+        }
+        if (state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_FOREGROUND)) {
+            SLOGI("enter notifyMirrorToStreamCast by background to foreground state change, and counts = 2");
+            NotifyMirrorToStreamCast();
+        }
+        appState = state;
+    }
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
+}
+// LCOV_EXCL_STOP
+
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+
+int32_t AVSessionService::checkEnableCast(bool enable)
+{
+    SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
+    if (enable == true && isInCast_ == false) {
+        isInCast_ = true;
+        AVRouter::GetInstance().Init(this);
+    } else if (enable == false && isInCast_ == true) {
+        CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
+            (GetContainer().GetAllSessions().size() == 1 && !CheckAncoAudio())) && !is2in1_),
+            AVSESSION_SUCCESS, "can not release cast with session alive");
+        isInCast_ = AVRouter::GetInstance().Release();
+    } else {
+        SLOGD("AVRouter Init in nothing change");
+    }
+    return AVSESSION_SUCCESS;
+}
+
+// LCOV_EXCL_START
+void AVSessionService::ReleaseCastSession()
+{
+    std::lock_guard lockGuard(sessionServiceLock_);
+    SLOGI("Start release cast session");
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session != nullptr && session->GetDescriptor().sessionTag_ == "RemoteCast") {
+            std::string sessionId = session->GetDescriptor().sessionId_;
+            SLOGI("Already has a cast session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+            session->UnRegisterDeviceStateCallback();
+            session->StopCastSession();
+            session->ReleaseAVCastControllerInner();
+            HandleSessionRelease(sessionId);
+        }
+    }
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+void AVSessionService::CreateSessionByCast(const int64_t castHandle)
+{
+    SLOGI("AVSessionService CreateSessionByCast in");
+    if (isSourceInCast_) {
+        AVSessionRadarInfo info("AVSessionService::CreateSessionByCast");
+        AVSessionRadar::GetInstance().StartConnect(info);
+        SLOGI("Create Cast in source, return");
+        return;
+    }
+    AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("castBundleName");
+    elementName.SetAbilityName("castAbilityName");
+    sptr<AVSessionItem> sinkSession;
+    auto res = CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName, sinkSession);
+    CHECK_AND_RETURN_LOG(res == AVSESSION_SUCCESS, "CreateSession at sink failed");
+    SLOGI("Create Cast sink sessionId %{public}s",
+        AVSessionUtils::GetAnonySessionId(sinkSession->GetSessionId()).c_str());
+    sinkSession->SetCastHandle(castHandle);
+    sinkSession->RegisterDeviceStateCallback();
+    
+    {
+        std::lock_guard frontLockGuard(sessionFrontLock_);
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+        CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+        auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sinkSession);
+        if (it == sessionListForFront->end()) {
+            SLOGI(" front session add cast session");
+            sessionListForFront->push_front(sinkSession);
+        }
+    }
+
+    HISYSEVENT_BEHAVIOR("SESSION_CAST",
+        "BUNDLE_NAME", "castBundleName",
+        "ABILITY_NAME", "castAbilityName",
+        "SESSION_PID", sinkSession->GetDescriptor().pid_,
+        "SESSION_UID", sinkSession->GetDescriptor().uid_,
+        "SESSION_ID", sinkSession->GetDescriptor().sessionId_,
+        "SESSION_TAG", sinkSession->GetDescriptor().sessionTag_,
+        "SESSION_TYPE", sinkSession->GetDescriptor().sessionType_,
+        "DETAILED_MSG", "session create from cast+ callback");
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
+{
+    AVSessionRadarInfo info("AVSessionService::NotifyDeviceAvailable");
+    AVSessionRadar::GetInstance().CastDeviceAvailable(castOutputDeviceInfo, info);
+
+    for (DeviceInfo deviceInfo : castOutputDeviceInfo.deviceInfos_) {
+        for (const auto& session : GetContainer().GetAllSessions()) {
+            session->UpdateCastDeviceMap(deviceInfo);
+        }
+    }
+    std::lock_guard lockGuard(sessionListenersLock_);
+    for (const auto& listener : innerSessionListeners_) {
+        listener->OnDeviceAvailable(castOutputDeviceInfo);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
+        listener->OnDeviceAvailable(castOutputDeviceInfo);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
+        listener->OnDeviceAvailable(castOutputDeviceInfo);
+    }
+}
+// LCOV_EXCL_STOP
+
+void AVSessionService::NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
+        listener->OnDeviceLogEvent(eventId, param);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
+        listener->OnDeviceLogEvent(eventId, param);
+    }
+}
+
+// LCOV_EXCL_START
+void AVSessionService::NotifyDeviceOffline(const std::string& deviceId)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    for (const auto& listener : innerSessionListeners_) {
+        listener->OnDeviceOffline(deviceId);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        SLOGI("notify device offline with pid %{public}d", static_cast<int>(pid));
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceOffline");
+        listener->OnDeviceOffline(deviceId);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        SLOGI("notify device offline with pid %{public}d across users", static_cast<int>(pid));
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceOffline");
+        listener->OnDeviceOffline(deviceId);
+    }
+}
+// LCOV_EXCL_STOP
+
+int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
+{
+    SLOGI("SessionId is %{public}s", AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
+    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
+        AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
+    ReportStartCastBegin("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_);
+    int32_t ret = session->StartCast(outputDeviceInfo);
+    ReportStartCastEnd("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_, ret);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
+    SLOGD("StartCast set isSourceInCast");
+    isSourceInCast_ = true;
+
+    SLOGI("no set continuous task in service");
+    HISYSEVENT_BEHAVIOR("SESSION_CAST",
+        "BUNDLE_NAME", session->GetDescriptor().elementName_.GetBundleName(),
+        "MODULE_NAME", session->GetDescriptor().elementName_.GetModuleName(),
+        "ABILITY_NAME", session->GetDescriptor().elementName_.GetAbilityName(),
+        "SESSION_PID", session->GetDescriptor().pid_, "SESSION_UID", session->GetDescriptor().uid_,
+        "SESSION_ID", session->GetDescriptor().sessionId_, "SESSION_TAG", session->GetDescriptor().sessionTag_,
+        "SESSION_TYPE", session->GetDescriptor().sessionType_, "DETAILED_MSG", "start cast session");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
+{
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionToken.sessionId);
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_SUCCESS, "StopCast: session is not exist");
+    CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
+    if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
+        SLOGI("Stop cast at sink, start destroy sink avsession task");
+        HandleSessionRelease(sessionToken.sessionId);
+        return AVSESSION_SUCCESS;
+    }
+
+    SLOGI("no set continuous task in service");
+    return AVSESSION_SUCCESS;
+}
+
+void AVSessionService::NotifyMirrorToStreamCast()
+{
+    for (auto& session : GetContainer().GetAllSessions()) {
+        if (session != nullptr && session->GetUid() == uidForAppStateChange_ && isSupportMirrorToStream_ &&
+            !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
+            MirrorToStreamCast(session);
+        }
+    }
+}
+
+__attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
+{
+    SLOGI("enter MirrorToStreamCast");
+    if (!is2in1_) {
+        if (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+            castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) {
+            checkEnableCast(true);
+            DeviceInfo deviceInfo;
+            deviceInfo.deviceId_ = castDeviceId_;
+            deviceInfo.deviceName_ = castDeviceName_;
+            deviceInfo.deviceType_ = castDeviceType_;
+            deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+            deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
+            deviceInfo.providerId_ = 1;
+            return session->RegisterListenerStreamToCast(castServiceNameMapState_, deviceInfo);
+        }
+    }
+    return AVSESSION_SUCCESS;
+}
+#endif
 }

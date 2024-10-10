@@ -716,19 +716,19 @@ static HWTEST_F(AVSessionServiceTest, MirrorToStreamCast003, TestSize.Level1)
     SLOGI("MirrorToStreamCast003 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, RefreshSortFileOnCreateSession001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, SaveSessionInfoInFile001, TestSize.Level1)
 {
-    SLOGI("RefreshSortFileOnCreateSession001 begin!");
+    SLOGI("SaveSessionInfoInFile001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
-    SLOGI("prevent RefreshSortFileOnCreateSession crash in SubscribeBundleStatusEvent");
+    SLOGI("prevent SaveSessionInfoInFile crash in SubscribeBundleStatusEvent");
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
-    SLOGI("RefreshSortFileOnCreateSession001 end!");
+    SLOGI("SaveSessionInfoInFile001 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, GetHistoricalAVQueueInfos001, TestSize.Level1)
