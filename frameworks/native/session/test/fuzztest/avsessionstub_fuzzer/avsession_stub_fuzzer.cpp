@@ -38,8 +38,6 @@ static constexpr int32_t MAX_CODE_LEN  = 512;
 static constexpr int32_t MIN_SIZE_NUM  = 4;
 
 static char g_testSessionTag[] = "test";
-static char g_testAnotherBundleName[] = "testItem.ohos.avsession";
-static char g_testAnotherAbilityName[] = "testItem.ability";
 static std::shared_ptr<AVSessionService> g_AVSessionService;
 
 void AvSessionFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
@@ -52,8 +50,10 @@ void AvSessionFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, siz
     }
     g_AVSessionService = std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID);
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
+    std::string bundleName(reinterpret_cast<const char*>(data), size);
+    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    elementName.SetBundleName(bundleName);
+    elementName.SetAbilityName(abilityName);
     OHOS::sptr<AVSessionItem> avSessionItem = g_AVSessionService->CreateSessionInner(
         g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     if (avSessionItem == nullptr) {
