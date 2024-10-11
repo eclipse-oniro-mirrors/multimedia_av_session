@@ -138,20 +138,16 @@ int32_t AVSessionStub::SetImageData(AVMetaData& meta, const char *buffer, int tw
     int mediaImageLength = meta.GetMediaLength();
     CHECK_AND_RETURN_RET_LOG(mediaImageLength <= twoImageLength, ERR_NONE, "Maybe cuase Out-of-bunds read");
     
-    auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
     SLOGI("change for-loop to vector init");
     std::vector<uint8_t> mediaImageBuffer(buffer, buffer + mediaImageLength);
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
-    meta.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
-    mediaPixelMap = nullptr;
-    delete mediaPixelMap;
+    meta.SetMediaImage(mediaPixelMap);
     
-    auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> avQueueImageBuffer(buffer + mediaImageLength, buffer + twoImageLength);
     avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
-    meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
-    avQueuePixelMap = nullptr;
-    delete avQueuePixelMap;
+    meta.SetAVQueueImage(avQueuePixelMap);
     
     return AVSESSION_SUCCESS;
 }
@@ -251,10 +247,12 @@ int32_t AVSessionStub::HandleSetAVQueueItems(MessageParcel& data, MessageParcel&
         if (item == nullptr) {
             SLOGE("HandleSetAVQueueItems: read parcelable AVQueueItem failed");
             delete item;
+            item = nullptr;
             return ERR_UNMARSHALLING;
         }
         items_.emplace_back(*item);
         delete item;
+        item = nullptr;
     }
     int32_t ret = SetAVQueueItems(items_);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");

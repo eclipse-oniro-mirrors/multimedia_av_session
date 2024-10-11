@@ -45,9 +45,11 @@ napi_env NapiAsyncCallback::GetEnv() const
 void NapiAsyncCallback::AfterWorkCallback(uv_work_t* work, int aStatus)
 {
     AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::AfterWorkCallback");
-    std::shared_ptr<DataContext> context(static_cast<DataContext*>(work->data), [work](DataContext* ptr) {
+    std::shared_ptr<DataContext> context(static_cast<DataContext*>(work->data), [&work](DataContext* ptr) {
         delete ptr;
+        ptr = nullptr;
         delete work;
+        work = nullptr;
     });
 
     napi_handle_scope scope = nullptr;
@@ -77,9 +79,11 @@ void NapiAsyncCallback::AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus)
 {
     AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::AfterWorkCallbackWithFlag");
     std::shared_ptr<DataContextWithFlag> context(static_cast<DataContextWithFlag*>(work->data),
-        [work](DataContextWithFlag* ptr) {
+        [&work](DataContextWithFlag* ptr) {
         delete ptr;
+        ptr = nullptr;
         delete work;
+        work = nullptr;
     });
 
     napi_handle_scope scope = nullptr;
@@ -116,9 +120,11 @@ void NapiAsyncCallback::AfterWorkCallbackWithFunc(uv_work_t* work, int aStatus)
 {
     AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::AfterWorkCallbackWithFunc");
     std::shared_ptr<DataContextWithFunc> context(static_cast<DataContextWithFunc*>(work->data),
-        [work](DataContextWithFunc* ptr) {
+        [&work](DataContextWithFunc* ptr) {
         delete ptr;
+        ptr = nullptr;
         delete work;
+        work = nullptr;
     });
 
     napi_handle_scope scope = nullptr;

@@ -43,6 +43,7 @@ AVCallState *AVCallState::Unmarshalling(Parcel& parcel)
         !parcel.ReadBool(result->isAVCallMuted_)) {
         SLOGE("Read AVCallState failed");
         delete result;
+        result = nullptr;
         return nullptr;
     }
     return result;

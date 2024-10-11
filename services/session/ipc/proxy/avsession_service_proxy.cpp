@@ -209,14 +209,14 @@ void AVSessionServiceProxy::BufferToAVQueueInfoImg(const char *buffer, std::vect
 {
     int k = 0;
     for (auto& avQueueInfo : avQueueInfos) {
-        auto pixelMap = new (std::nothrow) AVSessionPixelMap();
+        std::shared_ptr<AVSessionPixelMap> pixelMap = std::make_shared<AVSessionPixelMap>();
         std::vector<uint8_t> imgBuffer;
         int avQueueLength = avQueueInfo.GetAVQueueLength();
         for (int i = 0; i < avQueueLength; i++, k++) {
             imgBuffer.push_back((uint8_t)buffer[k]);
         }
         pixelMap->SetInnerImgBuffer(imgBuffer);
-        avQueueInfo.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(pixelMap));
+        avQueueInfo.SetAVQueueImage(pixelMap);
     }
 }
 

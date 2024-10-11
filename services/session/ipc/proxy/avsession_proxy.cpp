@@ -339,10 +339,12 @@ int32_t AVSessionProxy::GetAVQueueItems(std::vector<AVQueueItem>& items)
             if (item == nullptr) {
                 SLOGE("GetAVQueueItems: read parcelable AVQueueItem failed");
                 delete item;
+                item = nullptr;
                 return ERR_UNMARSHALLING;
             }
             items_.emplace_back(*item);
             delete item;
+            item = nullptr;
         }
         items = items_;
     }

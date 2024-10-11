@@ -259,6 +259,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand002, TestSize.Level1)
     EXPECT_EQ(ret->GetLoopMode(mode), AVSESSION_SUCCESS);
     EXPECT_EQ(mode, AVPlaybackState::LOOP_MODE_SEQUENCE);
     delete ret;
+    ret = nullptr;
 }
 
 /**
@@ -281,6 +282,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand003, TestSize.Level1)
     EXPECT_EQ(ret->GetSpeed(speed), AVSESSION_SUCCESS);
     EXPECT_EQ(speed, 1);
     delete ret;
+    ret = nullptr;
 }
 
 /**
@@ -303,6 +305,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand004, TestSize.Level1)
     EXPECT_EQ(ret->GetVolume(volumn), AVSESSION_SUCCESS);
     EXPECT_EQ(volumn, 1);
     delete ret;
+    ret = nullptr;
 }
 
 /**
@@ -325,6 +328,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand005, TestSize.Level1)
     EXPECT_EQ(ret->GetSeekTime(seek), AVSESSION_SUCCESS);
     EXPECT_EQ(seek, 1);
     delete ret;
+    ret = nullptr;
 }
 
 /**
@@ -347,6 +351,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand006, TestSize.Level1)
     EXPECT_EQ(ret->GetRewindTime(rewind), AVSESSION_SUCCESS);
     EXPECT_EQ(rewind, 1);
     delete ret;
+    ret = nullptr;
 }
 
 /**
@@ -369,6 +374,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand007, TestSize.Level1)
     EXPECT_EQ(ret->GetForwardTime(forward), AVSESSION_SUCCESS);
     EXPECT_EQ(forward, 1);
     delete ret;
+    ret = nullptr;
 }
 
 /**

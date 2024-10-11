@@ -173,20 +173,24 @@ int AbilityConnectionStub::OnRemoteRequest(
         if (remoteObject == nullptr) {
             SLOGE("callback stub receive remoteObject is nullptr");
             delete element;
+            element = nullptr;
             return AVSESSION_ERROR;
         }
         auto resultCode = data.ReadInt32();
         OnAbilityConnectDone(*element, remoteObject, resultCode);
         delete element;
+        element = nullptr;
         return ERR_NONE;
     }
     if (code == AAFwk::IAbilityConnection::ON_ABILITY_DISCONNECT_DONE) {
         auto resultCode = data.ReadInt32();
         OnAbilityDisconnectDone(*element, resultCode);
         delete element;
+        element = nullptr;
         return ERR_NONE;
     }
     delete element;
+    element = nullptr;
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 

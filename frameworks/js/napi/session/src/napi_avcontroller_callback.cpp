@@ -209,6 +209,7 @@ void NapiAVControllerCallback::CallWithThreadSafe(napi_ref& method, std::shared_
     } else {
         SLOGE("do CallWithThreadSafe check threadSafeFunction with null");
         delete data;
+        data = nullptr;
     }
     SLOGD("do CallWithThreadSafe with state %{public}d done", state);
 }
@@ -220,6 +221,7 @@ void NapiAVControllerCallback::ThreadSafeCallback(napi_env env, napi_value js_cb
     std::shared_ptr<DataContextForThreadSafe> appData(static_cast<DataContextForThreadSafe*>(data),
         [](DataContextForThreadSafe* ptr) {
         delete ptr;
+        ptr = nullptr;
     });
 
     int argc = 0;

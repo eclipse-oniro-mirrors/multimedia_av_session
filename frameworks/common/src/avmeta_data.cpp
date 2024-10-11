@@ -57,10 +57,12 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
 
     if (!UnmarshallingCheckParamTask(data, result)) {
         delete result;
+        result = nullptr;
         return nullptr;
     }
     if (!UnmarshallingCheckImageTask(data, result)) {
         delete result;
+        result = nullptr;
         return nullptr;
     }
     return result;
