@@ -292,6 +292,27 @@ int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, co
     return ret;
 }
 
+bool AVSessionServiceProxy::IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(uid), ERR_MARSHALLING, "write uid failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(pid), ERR_MARSHALLING, "write uid failed");
+    
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CHECK_BACKGROUND_ALLOWED),\
+        data, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    bool ret = false;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadBool(ret), ERR_UNMARSHALLING, "read bool failed");
+    return ret;
+}
+
 int32_t AVSessionServiceProxy::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {

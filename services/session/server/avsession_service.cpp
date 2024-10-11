@@ -1741,6 +1741,13 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     return AVSESSION_ERROR;
 }
 
+bool AVSessionService::IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid)
+{
+    bool hasSession = GetContainer().UidHasSession(uid);
+    bool isBack = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
+    return hasSession || !isBack;
+}
+
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session)
 {
     SLOGI("pid=%{public}d sessionId=%{public}s", pid,

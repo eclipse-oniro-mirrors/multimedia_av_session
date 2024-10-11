@@ -247,6 +247,24 @@ int32_t AVSessionServiceStub::HandleStartAVPlayback(MessageParcel& data, Message
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleIsAudioPlaybackAllowed(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(
+        PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("IsAudioPlaybackAllowed: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice IsAudioPlaybackAllowed checkpermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteBool(err), ERR_NONE, "write bool failed");
+        return ERR_NONE;
+    }
+    int32_t uid = data.ReadInt32();
+    int32_t pid = data.ReadInt32();
+    bool ret = IsAudioPlaybackAllowed(uid, pid);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteBool(ret), ERR_NONE, "write bool failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CreateControllerInner");

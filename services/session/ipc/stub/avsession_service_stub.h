@@ -57,6 +57,7 @@ private:
     int32_t GetAVQueueInfosImgLength(std::vector<AVQueueInfo>& avQueueInfos);
     void MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos);
     void AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQueueInfos, unsigned char *buffer);
+    int32_t HandleIsAudioPlaybackAllowed(MessageParcel& data, MessageParcel& reply);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
     std::map<uint32_t, HandlerFunc> handlers = {
