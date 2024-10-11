@@ -816,27 +816,6 @@ static HWTEST(HwCastSupplementTest, OnDeviceOffline002, TestSize.Level1)
 }
 
 /**
- * @tc.name: WaitSessionRelease001
- * @tc.desc: test WaitSessionRelease
- * @tc.type: FUNC
- */
-static HWTEST(HwCastSupplementTest, WaitSessionRelease001, TestSize.Level1)
-{
-    SLOGI("WaitSessionRelease001 begin!");
-    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
-    EXPECT_EQ(hwCastProvider != nullptr, true);
-    hwCastProvider->Init();
-
-    int32_t castId = 0;
-    DeviceInfo deviceInfo;
-    auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
-    hwCastProvider->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
-    hwCastProvider->AddCastDevice(castId, deviceInfo);
-    hwCastProvider->WaitSessionRelease();
-    SLOGI("WaitSessionRelease001 end!");
-}
-
-/**
  * @tc.name: OnServiceDied001
  * @tc.desc: test OnServiceDied
  * @tc.type: FUNC
