@@ -158,12 +158,11 @@ void TestAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDispl
     SLOGI("Enter into TestAVSessionCallback::OnCastDisplayChange.");
 }
 
-void AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)
+void AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
     if (code >= MAX_CODE_TEST) {
         return;
     }
@@ -269,14 +268,14 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner2(const uint8_t* data, size_t s
     aVSessionCallbackClient.OnCastDisplayChange(castDisplayInfo);
 }
 
-void OHOS::AVSession::AvSessionCallbackOnRemoteRequest(const uint8_t* data, size_t size)
+void OHOS::AVSession::AvSessionCallbackOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
 {
     auto avSessionCallbackClient = std::make_unique<AvSessionCallbackClientFuzzer>();
     if (avSessionCallbackClient == nullptr) {
         SLOGI("avSessionCallbackClient is null");
         return;
     }
-    avSessionCallbackClient->FuzzOnRemoteRequest(data, size);
+    avSessionCallbackClient->FuzzOnRemoteRequest(code, data, size);
 }
 
 void OHOS::AVSession::AvSessionCallbackClientTests(const uint8_t* data, size_t size)
@@ -293,7 +292,12 @@ void OHOS::AVSession::AvSessionCallbackClientTests(const uint8_t* data, size_t s
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AvSessionCallbackOnRemoteRequest(data, size);
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return 0;
+    }
+    for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
+        OHOS::AVSession::AvSessionCallbackOnRemoteRequest(i, data, size);
+    }
     OHOS::AVSession::AvSessionCallbackClientTests(data, size);
     return 0;
 }
