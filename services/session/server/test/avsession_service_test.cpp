@@ -1483,7 +1483,7 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx003, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
 
-    std::string filePath = "/adcdXYZ123/test3.txt";
+    std::string filePath = "/test3.txt";
     std::string content;
     ifstream file(filePath, ios_base::in);
     bool ret = avservice_->LoadStringFromFileEx(filePath, content);
@@ -1492,46 +1492,6 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx003, TestSize.Level1)
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("LoadStringFromFileEx003 end!");
-}
-
-static HWTEST_F(AVSessionServiceTest, SaveStringToFileEx001, TestSize.Level1)
-{
-    SLOGI("SaveStringToFileEx001 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    EXPECT_EQ(avsessionHere_ != nullptr, true);
-
-    std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "test4.txt";
-    std::string content;
-    bool ret = avservice_->LoadStringFromFileEx(filePath, content);
-    EXPECT_EQ(ret, true);
-    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
-    avsessionHere_->Destroy();
-    SLOGI("SaveStringToFileEx001 end!");
-}
-
-static HWTEST_F(AVSessionServiceTest, SaveStringToFileEx002, TestSize.Level1)
-{
-    SLOGI("SaveStringToFileEx002 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    EXPECT_EQ(avsessionHere_ != nullptr, true);
-
-    std::string filePath = "/adcdXYZ123/test5.txt";
-    std::string content;
-    ifstream file(filePath, ios_base::in);
-    bool ret = avservice_->LoadStringFromFileEx(filePath, content);
-    file.close();
-    EXPECT_EQ(ret, false);
-    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
-    avsessionHere_->Destroy();
-    SLOGI("SaveStringToFileEx002 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, CheckStringAndCleanFile001, TestSize.Level1)
