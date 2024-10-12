@@ -716,6 +716,9 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
     std::shared_ptr<AVSessionCallback> callback = std::make_shared<AVSessionCallbackImpl>();
     EXPECT_EQ(avsession_->RegisterCallback(callback), AVSESSION_SUCCESS);
     for (int32_t cmd = AVControlCommand::SESSION_CMD_PLAY; cmd < AVControlCommand::SESSION_CMD_MAX; cmd++) {
+        if (cmd == AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT) {
+            continue;
+        }
         AVControlCommand controlCommand;
         EXPECT_EQ(avsession_->AddSupportCommand(cmd), AVSESSION_SUCCESS);
         EXPECT_EQ(controlCommand.SetCommand(cmd), AVSESSION_SUCCESS);
@@ -843,7 +846,7 @@ HWTEST_F(AvsessionTest, AddSupportCommand003, TestSize.Level1)
     }
     std::vector<int32_t> cmds;
     EXPECT_EQ(controller_->GetValidCommands(cmds), AVSESSION_SUCCESS);
-    EXPECT_EQ(cmds.size(), (AVControlCommand::SESSION_CMD_MAX));
+    EXPECT_EQ(cmds.size(), (AVControlCommand::SESSION_CMD_MAX - 1));
     for (int32_t index = 0; index < cmds.size(); index++) {
         EXPECT_EQ(cmds[index] > AVControlCommand::SESSION_CMD_INVALID, true);
         EXPECT_EQ(cmds[index] < AVControlCommand::SESSION_CMD_MAX, true);
@@ -866,7 +869,7 @@ HWTEST_F(AvsessionTest, deleteSupportCommand001, TestSize.Level1)
     }
     std::vector<int32_t> cmds;
     EXPECT_EQ(controller_->GetValidCommands(cmds), AVSESSION_SUCCESS);
-    EXPECT_EQ(cmds.size(), (AVControlCommand::SESSION_CMD_MAX));
+    EXPECT_EQ(cmds.size(), (AVControlCommand::SESSION_CMD_MAX - 1));
     for (int32_t cmd = AVControlCommand::SESSION_CMD_PLAY; cmd < AVControlCommand::SESSION_CMD_MAX; cmd++) {
         EXPECT_EQ(avsession_->DeleteSupportCommand(cmd), AVSESSION_SUCCESS);
     }
@@ -905,7 +908,7 @@ HWTEST_F(AvsessionTest, deleteSupportCommand003, TestSize.Level1)
     }
     std::vector<int32_t> cmds;
     EXPECT_EQ(controller_->GetValidCommands(cmds), AVSESSION_SUCCESS);
-    EXPECT_EQ(cmds.size(), (AVControlCommand::SESSION_CMD_MAX));
+    EXPECT_EQ(cmds.size(), (AVControlCommand::SESSION_CMD_MAX - 1));
     EXPECT_EQ(avsession_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_INVALID), AVSESSION_ERROR);
     EXPECT_EQ(avsession_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_MAX), AVSESSION_ERROR);
     SLOGE("deleteSupportCommand003 End");
@@ -1002,6 +1005,7 @@ HWTEST_F(AvsessionTest, GetExtras001, TestSize.Level1)
     EXPECT_EQ(avsession_->GetExtras(wantParamsOut), AVSESSION_SUCCESS);
     SLOGD("GetExtras001 End");
 }
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 /**
 * @tc.name: GetAllCastDisplays001

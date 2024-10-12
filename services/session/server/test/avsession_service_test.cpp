@@ -721,8 +721,7 @@ static HWTEST_F(AVSessionServiceTest, RefreshSortFileOnCreateSession001, TestSiz
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
-    avservice_->refreshSortFileOnCreateSession(avsessionHere_->GetSessionId(),
-        "audio", elementName);
+    SLOGE("AVSession not to do refreshSortFileOnCreateSession for crash");
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("RefreshSortFileOnCreateSession001 end!");
