@@ -333,6 +333,10 @@ public:
     {
     };
 
+    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override
+    {
+    };
+
     void OnDeviceOffline(const std::string& deviceId) override
     {
     };

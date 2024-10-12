@@ -97,6 +97,42 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param, bool checkV
     SLOGI("handle event %{public}d", static_cast<int32_t>(event));
 }
 
+template<typename T, typename N>
+void NapiSessionListener::HandleEvent(int32_t event, const T& firstParam, const N& secondParam)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callbacks_[event].empty()) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        SLOGI("call with flag for event %{public}d", event);
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            },
+            [firstParam, secondParam](napi_env env, int& argc, napi_value* argv) {
+                argc = NapiUtils::ARGC_TWO;
+                auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
+                CHECK_RETURN_VOID(status == napi_ok, "set firstParam invalid");
+                status = NapiUtils::SetValue(env, secondParam, argv[1]);
+                CHECK_RETURN_VOID(status == napi_ok, "set secondParam invalid");
+            });
+    }
+    SLOGI("handle event %{public}d", static_cast<int32_t>(event));
+}
+
 void NapiSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnSessionCreate");
@@ -129,6 +165,13 @@ void NapiSessionListener::OnDeviceAvailable(const OutputDeviceInfo& castOutputDe
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceAvailable");
     SLOGI("Start handle device found event");
     HandleEvent(EVENT_DEVICE_AVAILABLE, castOutputDeviceInfo, true);
+}
+
+void NapiSessionListener::OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
+{
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceLogEvent");
+    SLOGI("Start device log event");
+    HandleEvent(EVENT_DEVICE_LOG_EVENT, eventId, param);
 }
 
 void NapiSessionListener::OnDeviceOffline(const std::string& deviceId)

@@ -36,6 +36,8 @@ private:
 
     int32_t HandleOnDeviceAvailable(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnDeviceLogEvent(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleOnDeviceOffline(MessageParcel& data, MessageParcel& reply);
 
     static bool CheckInterfaceToken(MessageParcel& data);
@@ -52,6 +54,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleOnAudioSessionChecked(data, reply); }},
         {LISTENER_CMD_DEVICE_AVAILABLE,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleOnDeviceAvailable(data, reply); }},
+        {LISTENER_CMD_DEVICE_LOG_EVENT,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnDeviceLogEvent(data, reply); }},
         {LISTENER_CMD_DEVICE_OFFLINE,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleOnDeviceOffline(data, reply); }}
     };
