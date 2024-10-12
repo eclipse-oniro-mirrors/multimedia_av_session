@@ -55,6 +55,12 @@ namespace OHOS::AVSession {
 
 static const std::string AVSESSION_DYNAMIC_DISPLAY_LIBRARY_PATH = std::string("libavsession_dynamic_display.z.so");
 
+const std::map<int32_t, string> sessionTypeMap_ = {
+    {AVSession::SESSION_TYPE_VIDEO, "video"},
+    {AVSession::SESSION_TYPE_VOICE_CALL, "voice_call"},
+    {AVSession::SESSION_TYPE_VIDEO_CALL, "video_call"},
+};
+
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId)
     : descriptor_(descriptor), userId_(userId)
 {
@@ -72,7 +78,6 @@ AVSessionItem::~AVSessionItem()
     SLOGI("destroy with activeCheck session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
     if (IsActive()) {
-        SLOGI("destroy with activate session, try deactivate it");
         Deactivate();
     }
     if (avsessionDisaplayIntf_) {
@@ -89,16 +94,12 @@ std::string AVSessionItem::GetSessionId()
 
 std::string AVSessionItem::GetSessionType()
 {
-    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
-        return "video";
+    auto iter = sessionTypeMap_.find(descriptor_.sessionType_);
+    if (iter != sessionTypeMap_.end()) {
+        return iter->second;
+    } else {
+        return "audio";
     }
-    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
-        return "voice_call";
-    }
-    if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO_CALL) {
-        return "video_call";
-    }
-    return "audio";
 }
 // LCOV_EXCL_STOP
 
@@ -123,40 +124,37 @@ int32_t AVSessionItem::Destroy()
 int32_t AVSessionItem::DestroyTask()
 {
     {
+        std::lock_guard lockGuard(destroyLock_);
+        if (isDestroyed_) {
+            SLOGI("session is already destroyed");
+            return AVSESSION_SUCCESS;
+        }
+        isDestroyed_ = true;
+    }
+
+    std::string sessionId = descriptor_.sessionId_;
+    std::string fileName = AVSessionUtils::GetCachePathName(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
+    AVSessionUtils::DeleteFile(fileName);
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (auto it = controllers_.begin(); it != controllers_.end();) {
+            if (it->second) {
+                (it->second)->HandleSessionDestroy();
+            }
+            it = controllers_.erase(it);
+        }
+    }
+    {
         std::lock_guard lockGuard(callbackLock_);
         if (callback_) {
             callback_.clear();
         }
     }
-    std::lock_guard lockGuard(destroyLock_);
-    if (isDestroyed_) {
-        SLOGE("return for already in destroy");
-        return AVSESSION_SUCCESS;
-    }
-    isDestroyed_ = true;
-    std::string sessionId = descriptor_.sessionId_;
-    SLOGI("session destroy for:%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-    std::string fileName = AVSessionUtils::GetCachePathName(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
-    AVSessionUtils::DeleteFile(fileName);
-    std::list<sptr<AVControllerItem>> controllerList;
-    {
-        std::lock_guard controllerLockGuard(controllersLock_);
-        SLOGI("to release controller list size: %{public}d", static_cast<int>(controllers_.size()));
-        for (auto it = controllers_.begin(); it != controllers_.end();) {
-            SLOGI("controller for pid: %{public}d", it->first);
-            controllerList.push_back(it->second);
-            controllers_.erase(it++);
-        }
-    }
-    SLOGD("Send session destroy event to controller");
-    for (auto& controller : controllerList) {
-        controller->HandleSessionDestroy();
-    }
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
     ReleaseAVCastControllerInner();
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
-        SLOGW("Session destroy at source, release cast");
         if (!collaborationNeedNetworkId_.empty()) {
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
@@ -166,12 +164,12 @@ int32_t AVSessionItem::DestroyTask()
     }
     StopCastDisplayListener();
 #endif
-    SLOGI("session destroy success");
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
 {
+    std::lock_guard lockGuard(avsessionItemLock_);
     CHECK_AND_RETURN_RET_LOG(avCallMetaData_.CopyFrom(avCallMetaData), AVSESSION_ERROR, "AVCallMetaData set error");
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = avCallMetaData_.GetMediaImage();
     if (innerPixelMap != nullptr) {
@@ -185,7 +183,9 @@ int32_t AVSessionItem::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            controller->HandleAVCallMetaDataChange(avCallMetaData);
+            if (controller != nullptr) {
+                controller->HandleAVCallMetaDataChange(avCallMetaData);
+            }
         }
     }
     return AVSESSION_SUCCESS;
@@ -194,12 +194,17 @@ int32_t AVSessionItem::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
 // LCOV_EXCL_START
 int32_t AVSessionItem::SetAVCallState(const AVCallState& avCallState)
 {
-    CHECK_AND_RETURN_RET_LOG(avCallState_.CopyFrom(avCallState), AVSESSION_ERROR, "AVCallState set error");
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        CHECK_AND_RETURN_RET_LOG(avCallState_.CopyFrom(avCallState), AVSESSION_ERROR, "AVCallState set error");
+    }
+
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            SLOGI("pid=%{public}d", pid);
-            controller->HandleAVCallStateChange(avCallState);
+            if (controller != nullptr) {
+                controller->HandleAVCallStateChange(avCallState);
+            }
         }
     }
     return AVSESSION_SUCCESS;
@@ -208,7 +213,7 @@ int32_t AVSessionItem::SetAVCallState(const AVCallState& avCallState)
 
 int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
-    std::lock_guard lockGuard(metaDataLock_);
+    std::lock_guard lockGuard(avsessionItemLock_);
     SessionXCollie sessionXCollie("avsession::GetAVMetaData");
     std::string sessionId = GetSessionId();
     std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
@@ -237,7 +242,7 @@ void AVSessionItem::HandleFrontSession()
 {
     bool isMetaEmpty;
     {
-        std::lock_guard lockGuard(metaDataLock_);
+        std::lock_guard lockGuard(avsessionItemLock_);
         isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
             metaData_.GetMediaImageUri().empty();
     }
@@ -259,25 +264,20 @@ void AVSessionItem::HandleFrontSession()
 
 bool AVSessionItem::HasAvQueueInfo()
 {
-    std::lock_guard lockGuard(metaDataLock_);
-    SLOGD("check HasAvQueueInfo in");
-    if (metaData_.GetAVQueueName().empty()) {
-        SLOGD("no avqueueinfo as avqueuename empty");
-        return false;
-    }
-    if (metaData_.GetAVQueueId().empty()) {
-        SLOGD("no avqueueinfo as avqueueid empty");
+    std::lock_guard lockGuard(avsessionItemLock_);
+    if (metaData_.GetAVQueueName().empty() || metaData_.GetAVQueueId().empty()) {
+        SLOGD("avqueuename or avqueueid is empty");
         return false;
     }
     if (metaData_.GetAVQueueImage() == nullptr && metaData_.GetAVQueueImageUri().empty()) {
-        SLOGD("no avqueueinfo as avqueueimg empty");
+        SLOGD("avqueue img is empty");
         return false;
     }
     if (playbackState_.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY) {
-        SLOGD("no avqueueinfo as not play");
+        SLOGD("current avqueueinfo is not playing");
         return false;
     }
-    SLOGI("check HasAvQueueInfo %{public}s", metaData_.GetAVQueueName().c_str());
+
     return true;
 }
 
@@ -308,10 +308,8 @@ void AVSessionItem::ReportSetAVMetaDataInfo(const AVMetaData& meta)
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
-    bool hasAvQueueInfo = false;
     {
-        SLOGD("limit metaDataLock range to split with sessionAndControllerLock");
-        std::lock_guard lockGuard(metaDataLock_);
+        std::lock_guard lockGuard(avsessionItemLock_);
         SessionXCollie sessionXCollie("avsession::SetAVMetaData");
         ReportSetAVMetaDataInfo(meta);
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
@@ -323,12 +321,9 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
             innerPixelMap->Clear();
             metaData_.SetMediaImage(innerPixelMap);
         }
-        hasAvQueueInfo = HasAvQueueInfo();
-        SLOGI(" SetAVMetaData AVQueueName: %{public}s AVQueueId: %{public}s hasAvQueueInfo: %{public}d",
-            metaData_.GetAVQueueName().c_str(), metaData_.GetAVQueueId().c_str(), static_cast<int>(hasAvQueueInfo));
     }
     ProcessFrontSession("SetAVMetaData");
-    if (hasAvQueueInfo && serviceCallbackForAddAVQueueInfo_) {
+    if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
     SLOGI("send metadata change event to controllers with title %{public}s", meta.GetTitle().c_str());
@@ -338,12 +333,12 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         std::lock_guard controllerLockGuard(controllersLock_);
         CHECK_AND_RETURN_LOG(controllers_.size() > 0, "handle with no controller, return");
         for (const auto& [pid, controller] : controllers_) {
-            SLOGI("HandleMetaDataChange for controller pid=%{public}d", pid);
-            controller->HandleMetaDataChange(meta);
+            if (controller != nullptr) {
+                controller->HandleMetaDataChange(meta);
+            }
         }
         }, "HandleMetaDataChange", 0);
 
-    SLOGI("send metadata change event to controllers done");
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
         SLOGI("set remote AVMetaData");
@@ -355,7 +350,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 
 int32_t AVSessionItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {
-    std::lock_guard queueItemsLockGuard(queueItemsLock_);
+    std::lock_guard lock_guard(avsessionItemLock_);
     items = queueItems_;
     return AVSESSION_SUCCESS;
 }
@@ -363,18 +358,21 @@ int32_t AVSessionItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
 int32_t AVSessionItem::SetAVQueueItems(const std::vector<AVQueueItem>& items)
 {
     {
-        std::lock_guard queueItemsLockGuard(queueItemsLock_);
+        std::lock_guard lock_guard(avsessionItemLock_);
         queueItems_ = items;
     }
+
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            controller->HandleQueueItemsChange(items);
+            if (controller != nullptr) {
+                controller->HandleQueueItemsChange(items);
+            }
         }
     }
+
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
-        SLOGI("set remote AVQueueItems");
         auto ret = remoteSource_->SetAVQueueItems(items);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVQueueItems failed");
     }
@@ -383,23 +381,28 @@ int32_t AVSessionItem::SetAVQueueItems(const std::vector<AVQueueItem>& items)
 
 int32_t AVSessionItem::GetAVQueueTitle(std::string& title)
 {
+    std::lock_guard lockGuard(avsessionItemLock_);
     title = queueTitle_;
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::SetAVQueueTitle(const std::string& title)
 {
-    queueTitle_ = title;
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        queueTitle_ = title;
+    }
 
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            controller->HandleQueueTitleChange(title);
+            if (controller != nullptr) {
+                controller->HandleQueueTitleChange(title);
+            }
         }
     }
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
-        SLOGI("set remote AVQueueTitle");
         auto ret = remoteSource_->SetAVQueueTitle(title);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVQueueTitle failed");
     }
@@ -408,28 +411,22 @@ int32_t AVSessionItem::SetAVQueueTitle(const std::string& title)
 
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
-    CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
-
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
+    }
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
-        SLOGD(" SetAVPlaybackState AVQueueName: %{public}s AVQueueId: %{public}s", metaData_.GetAVQueueName().c_str(),
-            metaData_.GetAVQueueId().c_str());
-        SLOGD("reduce metaDataLock for split metaDataLock & sessionAndControllerLock");
         serviceCallbackForAddAVQueueInfo_(*this);
     }
-
     {
         std::lock_guard controllerLockGuard(controllersLock_);
-        SLOGI("send HandlePlaybackStateChange in postTask with state %{public}d and controller size %{public}d",
-            state.GetState(), static_cast<int>(controllers_.size()));
-        if (controllers_.size() > 0) {
-            for (const auto& [pid, controller] : controllers_) {
-                SLOGD("HandlePlaybackStateChange for controller pid=%{public}d", pid);
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
                 controller->HandlePlaybackStateChange(state);
             }
         }
     }
 
-    SLOGD("send playbackstate change event to controllers done");
     std::string isFavor = state.GetFavorite()? "true" : "false";
     std::string API_PARAM_STRING = "state: " + std::to_string(state.GetState()) + ", "
                                     + "elapsedTime: " + std::to_string(state.GetPosition().elapsedTime_) + ", "
@@ -447,7 +444,6 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
         "ERROR_MSG", "SUCCESS");
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
-        SLOGI("set remote AVPlaybackState");
         remoteSource_->SetAVPlaybackState(state);
     }
     return AVSESSION_SUCCESS;
@@ -455,6 +451,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 
 int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 {
+    std::lock_guard lockGuard(avsessionItemLock_);
     state = playbackState_;
     return AVSESSION_SUCCESS;
 }
@@ -498,17 +495,17 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
 // LCOV_EXCL_START
 int32_t AVSessionItem::GetExtras(AAFwk::WantParams& extras)
 {
-    std::lock_guard lockGuard(wantParamLock_);
-    SLOGI("getextras lock pass");
+    std::lock_guard lockGuard(avsessionItemLock_);
     extras = extras_;
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
 {
-    std::lock_guard lockGuard(wantParamLock_);
-    SLOGI("set extras pass lock");
-    extras_ = extras;
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        extras_ = extras;
+    }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (extras.HasParam("requireAbilityList")) {
@@ -519,16 +516,17 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
         }
     }
 #endif
-
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            controller->HandleExtrasChange(extras);
+            if (controller != nullptr) {
+                controller->HandleExtrasChange(extras);
+            }
         }
     }
+
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
-        SLOGI("Set remote session extras");
         auto ret = remoteSource_->SetExtrasRemote(extras);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetRemoteExtras failed");
     }
@@ -547,13 +545,13 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(GetPid(), session, userId_);
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "malloc controller failed");
     result->isFromSession_ = true;
-    SLOGI("ImgSetLoop get controller set from session");
+    SLOGI("New controller from sessionItem when get controller.");
     controllers_.insert({GetPid(), result});
     return result;
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-void AVSessionItem::GetAVCastControllerProxy()
+void AVSessionItem::InitAVCastControllerProxy()
 {
     if (castControllerProxy_ == nullptr) {
         SLOGI("CastControllerProxy is null, start get new proxy");
@@ -578,17 +576,18 @@ void AVSessionItem::ReportAVCastControllerInfo()
 
 sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
 {
-    SLOGI("Start get avcast controller inner");
-    GetAVCastControllerProxy();
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, nullptr, "Get castController proxy failed");
-
+    InitAVCastControllerProxy();
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, nullptr,
+        "castControllerProxy_ is null when get avCastController");
     sptr<AVCastControllerItem> castController = new (std::nothrow) AVCastControllerItem();
-    CHECK_AND_RETURN_RET_LOG(castController != nullptr, nullptr, "malloc AVCastController failed");
+    CHECK_AND_RETURN_RET_LOG(castController != nullptr, nullptr, "malloc avCastController failed");
     std::shared_ptr<AVCastControllerItem> sharedPtr = std::shared_ptr<AVCastControllerItem>(castController.GetRefPtr(),
         [holder = castController](const auto*) {});
+    CHECK_AND_RETURN_RET_LOG(sharedPtr != nullptr, nullptr, "malloc AVCastControllerItem failed");
     ReportAVCastControllerInfo();
+
     auto callback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
-        SLOGI("add cast valid command %{public}d", cmd);
+        SLOGI("process cast valid cmd: %{public}d", cmd);
         if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_INVALID) {
             supportedCastCmds_.clear();
             supportedCastCmds = supportedCastCmds_;
@@ -600,7 +599,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
             return;
         }
         if (descriptor_.sessionTag_ == "RemoteCast") {
-            SLOGE("sink session should not modify valid cmds");
+            SLOGI("sink session should not modify valid cmds");
             supportedCastCmds = {};
             return;
         }
@@ -630,7 +629,9 @@ void AVSessionItem::ReleaseAVCastControllerInner()
     SLOGI("Release AVCastControllerInner");
     std::lock_guard lockGuard(castControllersLock_);
     for (auto controller : castControllers_) {
-        controller->Destroy();
+        if (controller != nullptr) {
+            controller->Destroy();
+        }
     }
     castControllerProxy_ = nullptr;
 }
@@ -657,18 +658,20 @@ int32_t AVSessionItem::Activate()
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
     for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{public}d", pid);
-        controller->HandleActiveStateChange(true);
+        if (controller != nullptr) {
+            controller->HandleActiveStateChange(true);
+        }
     }
     if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL ||
         descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO_CALL) {
-        SLOGI("set audio scene for phone chat start");
+        SLOGI("set audio scene for voip start");
         AudioSystemManager *audioManager = AudioSystemManager::GetInstance();
         AudioScene audioScene = AudioScene::AUDIO_SCENE_CALL_START;
         if (audioManager != nullptr) {
             audioManager->SetAudioScene(audioScene);
         }
     }
+
     return AVSESSION_SUCCESS;
 }
 
@@ -676,7 +679,6 @@ int32_t AVSessionItem::Activate()
 int32_t AVSessionItem::Deactivate()
 {
     descriptor_.isActive_ = false;
-    SLOGI("Deactivate in");
     std::lock_guard controllerLockGuard(controllersLock_);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "Deactivate",
@@ -687,19 +689,20 @@ int32_t AVSessionItem::Deactivate()
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
     for (const auto& [pid, controller] : controllers_) {
-        SLOGI("pid=%{public}d", pid);
-        controller->HandleActiveStateChange(false);
+        if (controller != nullptr) {
+            controller->HandleActiveStateChange(false);
+        }
     }
     if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL ||
         descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO_CALL) {
-        SLOGI("set audio scene for phone chat end");
+        SLOGI("set audio scene for voip end");
         AudioSystemManager *audioManager = AudioSystemManager::GetInstance();
         AudioScene audioScene = AudioScene::AUDIO_SCENE_CALL_END;
         if (audioManager != nullptr) {
             audioManager->SetAudioScene(audioScene);
         }
     }
-    SLOGI("Deactivate done");
+
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
@@ -723,7 +726,7 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
     {
-        std::lock_guard lockGuard(cmdsLock_);
+        std::lock_guard lockGuard(avsessionItemLock_);
         supportedCmd_.push_back(cmd);
     }
     std::string API_PARAM_STRING = "cmd :" + std::to_string(cmd);
@@ -740,11 +743,11 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 
     {
         std::lock_guard controllerLockGuard(controllersLock_);
-        SLOGI("send HandleValidCommandChange check number %{public}d", static_cast<int>(controllers_.size()));
+        SLOGI("send add command event to controller, size:%{public}d", static_cast<int>(controllers_.size()));
         for (const auto& [pid, controller] : controllers_) {
-            SLOGI("HandleValidCommandChange add for controller pid=%{public}d with num %{public}d",
-                pid, static_cast<int>(supportedCmd_.size()));
-            controller->HandleValidCommandChange(supportedCmd_);
+            if (controller != nullptr) {
+                controller->HandleValidCommandChange(supportedCmd_);
+            }
         }
     }
 
@@ -766,7 +769,7 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
     }
     auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     {
-        std::lock_guard lockGuard(cmdsLock_);
+        std::lock_guard lockGuard(avsessionItemLock_);
         supportedCmd_.erase(iter, supportedCmd_.end());
     }
     std::string API_PARAM_STRING = "cmd :" + std::to_string(cmd);
@@ -781,13 +784,14 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
         "ERROR_MSG", "SUCCESS");
     ProcessFrontSession("DeleteSupportCommand");
 
-    SLOGD("send validCommand change event to controllers with num %{public}d DEL %{public}d",
-        static_cast<int>(supportedCmd_.size()), cmd);
-    std::lock_guard controllerLockGuard(controllersLock_);
-    for (const auto& [pid, controller] : controllers_) {
-        SLOGI("HandleValidCommandChange del for controller pid=%{public}d with num %{public}d",
-            pid, static_cast<int>(supportedCmd_.size()));
-        controller->HandleValidCommandChange(supportedCmd_);
+    {
+        SLOGI("send delete command event to controller, size:%{public}d", static_cast<int>(controllers_.size()));
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                controller->HandleValidCommandChange(supportedCmd_);
+            }
+        }
     }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -802,12 +806,13 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            controller->HandleSetSessionEvent(event, args);
+            if (controller != nullptr) {
+                controller->HandleSetSessionEvent(event, args);
+            }
         }
     }
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
-        SLOGI("Set remote session event");
         auto ret = remoteSource_->SetSessionEventRemote(event, args);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetSessionEvent failed");
     }
@@ -827,7 +832,6 @@ std::string AVSessionItem::GetAnonymousDeviceId(std::string deviceId)
 int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
     DeviceInfo deviceInfo)
 {
-    std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
     if (castHandle_ > 0) {
         return AVSESSION_ERROR;
     }
@@ -846,7 +850,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     counter_ = secondStep;
     UpdateCastDeviceMap(deviceInfo);
 
-    doContinuousTaskRegister();
+    DoContinuousTaskRegister();
     HISYSEVENT_BEHAVIOR("SESSION_CAST_CONTROL",
         "CONTROL_TYPE", "MirrorTostreamCast",
         "PEER_DEVICE_ID", GetAnonymousDeviceId(deviceInfo.deviceId_),
@@ -888,14 +892,6 @@ void AVSessionItem::InitializeCastCommands()
     }
 }
 
-bool AVSessionItem::IsCastRelevancyCommand(int32_t cmd)
-{
-    if (cmd == AVControlCommand::SESSION_CMD_SET_LOOP_MODE) {
-        return true;
-    }
-    return false;
-}
-
 int32_t AVSessionItem::SessionCommandToCastCommand(int32_t cmd)
 {
     if (cmd == AVControlCommand::SESSION_CMD_SET_LOOP_MODE) {
@@ -906,7 +902,7 @@ int32_t AVSessionItem::SessionCommandToCastCommand(int32_t cmd)
 
 void AVSessionItem::AddSessionCommandToCast(int32_t cmd)
 {
-    if (!IsCastRelevancyCommand(cmd)) {
+    if (cmd != AVControlCommand::SESSION_CMD_SET_LOOP_MODE) {
         return;
     }
 
@@ -914,7 +910,7 @@ void AVSessionItem::AddSessionCommandToCast(int32_t cmd)
         int32_t castCmd = SessionCommandToCastCommand(cmd);
         auto iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(), castCmd);
         if (iter != supportedCastCmds_.end()) {
-            SLOGI("castCmd have already been added. cmd:%{public}d", castCmd);
+            SLOGI("castCmd have already been added, cmd:%{public}d", castCmd);
             return;
         }
         supportedCastCmds_.push_back(castCmd);
@@ -924,7 +920,7 @@ void AVSessionItem::AddSessionCommandToCast(int32_t cmd)
 
 void AVSessionItem::RemoveSessionCommandFromCast(int32_t cmd)
 {
-    if (!IsCastRelevancyCommand(cmd)) {
+    if (cmd != AVControlCommand::SESSION_CMD_SET_LOOP_MODE) {
         return;
     }
 
@@ -939,8 +935,12 @@ void AVSessionItem::RemoveSessionCommandFromCast(int32_t cmd)
 
 int32_t AVSessionItem::AddSupportCastCommand(int32_t cmd)
 {
-    CHECK_AND_RETURN_RET_LOG(cmd > AVCastControlCommand::CAST_CONTROL_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
-    CHECK_AND_RETURN_RET_LOG(cmd < AVCastControlCommand::CAST_CONTROL_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    if (cmd <= AVCastControlCommand::CAST_CONTROL_CMD_INVALID ||
+        cmd >= AVCastControlCommand::CAST_CONTROL_CMD_MAX) {
+        SLOGI("add invalid cmd: %{public}d", cmd);
+        return AVSESSION_ERROR;
+    }
+
     if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE) {
         auto iter = std::find(
             supportedCastCmds_.begin(), supportedCastCmds_.end(), AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
@@ -966,8 +966,11 @@ int32_t AVSessionItem::AddSupportCastCommand(int32_t cmd)
 
 int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
 {
-    CHECK_AND_RETURN_RET_LOG(cmd > AVCastControlCommand::CAST_CONTROL_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
-    CHECK_AND_RETURN_RET_LOG(cmd < AVCastControlCommand::CAST_CONTROL_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
+    if (cmd <= AVCastControlCommand::CAST_CONTROL_CMD_INVALID ||
+        cmd >= AVCastControlCommand::CAST_CONTROL_CMD_MAX) {
+        SLOGI("delete invalid cmd: %{public}d", cmd);
+        return AVSESSION_ERROR;
+    }
 
     if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE) {
         auto iter = std::remove(
@@ -1004,10 +1007,10 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
 void AVSessionItem::HandleCastValidCommandChange(std::vector<int32_t> &cmds)
 {
     std::lock_guard lockGuard(castControllersLock_);
-    SLOGI("HandleCastValidCommandChange with castControllerNum %{public}d", static_cast<int>(castControllers_.size()));
+    SLOGI("send command change event to controller, controller size: %{public}d, cmds size is: %{public}d,",
+        static_cast<int>(castControllers_.size()), cmds.size());
     for (auto controller : castControllers_) {
         if (controller != nullptr) {
-            SLOGI("HandleCastValidCommandChange size:%{public}zd", cmds.size());
             controller->HandleCastValidCommandChange(cmds);
         }
     }
@@ -1015,7 +1018,6 @@ void AVSessionItem::HandleCastValidCommandChange(std::vector<int32_t> &cmds)
 
 int32_t AVSessionItem::ReleaseCast()
 {
-    SLOGI("Release cast process");
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "StopCasting",
         "BUNDLE_NAME", GetBundleName(),
@@ -1072,8 +1074,7 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
 
 int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
-    SLOGI("Start cast process");
-    std::lock_guard castHandleLockGuard(castHandleLock_);
+    std::lock_guard lockGuard(castHandleLock_);
 
     // unregister pre castSession callback to avoid previous session timeout disconnect influence current session
     if (castHandle_ > 0) {
@@ -1089,16 +1090,14 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, AVSESSION_ERROR, "collaboration to start cast fail");
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
-    std::lock_guard lockGuard(castHandleLock_);
+
     castHandle_ = castHandle;
     SLOGI("start cast check handle set to %{public}ld", castHandle_);
-
     int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
     if (ret == AVSESSION_SUCCESS) {
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
     }
-
-    doContinuousTaskRegister();
+    DoContinuousTaskRegister();
     return ret;
 }
 
@@ -1111,21 +1110,6 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
     int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo);
     SLOGI("Add device process with ret %{public}d", ret);
     return ret;
-}
-
-bool AVSessionItem::IsCastSinkSession(int32_t castState)
-{
-    SLOGI("IsCastSinkSession for castState %{public}d, sessionTag is %{public}s", castState,
-        descriptor_.sessionTag_.c_str());
-    if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
-        SLOGI("A cast sink session is being disconnected, call destroy with service");
-        if (isDestroyed_) {
-            SLOGE("return for already in destroy");
-            return true;
-        }
-        return Destroy() == true;
-    }
-    return false;
 }
 
 void AVSessionItem::DealCastState(int32_t castState)
@@ -1149,7 +1133,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
     AVRouter::GetInstance().StopCastSession(castHandle_);
     castHandle_ = -1;
     castHandleDeviceId_ = "-100";
-    doContinuousTaskUnregister();
+    DoContinuousTaskUnregister();
     castControllerProxy_ = nullptr;
     supportedCastCmds_.clear();
     SaveLocalDeviceInfo();
@@ -1219,27 +1203,27 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
         std::lock_guard controllersLockGuard(controllersLock_);
-        SLOGD("AVCastController map size is %{public}zu", controllers_.size());
         for (const auto& controller : controllers_) {
-            if (controllers_.size() <= 0) {
-                SLOGE("lopp in empty controllers, break");
-                break;
+            if (controller.second != nullptr) {
+                controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
             }
-            CHECK_AND_RETURN_LOG(controller.second != nullptr, "Controller is nullptr, return");
-            controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
         }
     }
-    if (IsCastSinkSession(castState)) {
-        SLOGE("Cast sink session start to disconnect");
-        return;
+    {
+        std::lock_guard lockGuard(destroyLock_);
+        if (castState == ConnectionState::STATE_DISCONNECTED &&
+            descriptor_.sessionTag_ == "RemoteCast" && !isDestroyed_) {
+            SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
+            Destroy();
+        }
     }
 }
 
 void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
 {
     SLOGI("OnCastEventRecv in with code and msg %{public}dm %{public}s", errorCode, errorMsg.c_str());
+    std::lock_guard lockGuard(castControllersLock_);
     for (auto controller : castControllers_) {
-        SLOGI("pass error to cast controller with code %{public}d", errorCode);
         controller->OnPlayerError(errorCode, errorMsg);
     }
 }
@@ -1333,12 +1317,10 @@ int32_t AVSessionItem::StopCast()
 void AVSessionItem::SetCastHandle(const int64_t castHandle)
 {
     castHandle_ = castHandle;
-    SLOGI("set cast handle is %{public}ld", castHandle_);
 }
 
 void AVSessionItem::RegisterDeviceStateCallback()
 {
-    SLOGI("Start register callback for device state change");
     OutputDeviceInfo localDevice;
     DeviceInfo localInfo;
     localInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
@@ -1352,7 +1334,6 @@ void AVSessionItem::RegisterDeviceStateCallback()
 
 void AVSessionItem::UnRegisterDeviceStateCallback()
 {
-    SLOGI("Stop unregister callback for device state change");
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
 }
 
@@ -1360,7 +1341,7 @@ void AVSessionItem::StopCastSession()
 {
     SLOGI("Stop cast session process with castHandle: %{public}ld", castHandle_);
     int64_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
-    doContinuousTaskUnregister();
+    DoContinuousTaskUnregister();
     if (ret != AVSESSION_ERROR) {
         castHandle_ = -1;
         castHandleDeviceId_ = "-100";
@@ -1470,7 +1451,6 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
         }
     }
     castDisplays = displays;
-    SLOGI("GetAllCastDisplays out");
     return AVSESSION_SUCCESS;
 }
 
@@ -1503,11 +1483,13 @@ AVSessionDescriptor AVSessionItem::GetDescriptor()
 
 AVCallState AVSessionItem::GetAVCallState()
 {
+    std::lock_guard lockGuard(avsessionItemLock_);
     return avCallState_;
 }
 
 AVCallMetaData AVSessionItem::GetAVCallMetaData()
 {
+    std::lock_guard lockGuard(avsessionItemLock_);
     std::string sessionId = GetSessionId();
     std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
     std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
@@ -1519,12 +1501,13 @@ AVCallMetaData AVSessionItem::GetAVCallMetaData()
 
 AVPlaybackState AVSessionItem::GetPlaybackState()
 {
+    std::lock_guard lockGuard(avsessionItemLock_);
     return playbackState_;
 }
 
 AVMetaData AVSessionItem::GetMetaData()
 {
-    std::lock_guard lockGuard(metaDataLock_);
+    std::lock_guard lockGuard(avsessionItemLock_);
     std::string sessionId = GetSessionId();
     std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
     std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
@@ -1540,20 +1523,21 @@ AVMetaData AVSessionItem::GetMetaData()
 
 std::vector<AVQueueItem> AVSessionItem::GetQueueItems()
 {
+    std::lock_guard lock_guard(avsessionItemLock_);
     return queueItems_;
 }
 
 std::string AVSessionItem::GetQueueTitle()
 {
+    std::lock_guard lockGuard(avsessionItemLock_);
     return queueTitle_;
 }
 
 std::vector<int32_t> AVSessionItem::GetSupportCommand()
 {
-    std::lock_guard lockGuard(cmdsLock_);
+    std::lock_guard lockGuard(avsessionItemLock_);
     if (descriptor_.elementName_.GetBundleName() == "castBundleName"
         && descriptor_.elementName_.GetAbilityName() == "castAbilityName") {
-        SLOGI("GetSupportCommand when cast session");
         std::vector<int32_t> supportedCmdForCastSession {
             AVControlCommand::SESSION_CMD_PLAY,
             AVControlCommand::SESSION_CMD_PAUSE,
@@ -1564,7 +1548,6 @@ std::vector<int32_t> AVSessionItem::GetSupportCommand()
         };
         return supportedCmdForCastSession;
     }
-    SLOGI("GetSupportCommand with cmds size %{public}d", static_cast<int>(supportedCmd_.size()));
     return supportedCmd_;
 }
 
@@ -1575,27 +1558,26 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
 
 AAFwk::WantParams AVSessionItem::GetExtras()
 {
-    std::lock_guard lockGuard(wantParamLock_);
-    SLOGI("GetExtras pass lock");
+    std::lock_guard lockGuard(avsessionItemLock_);
     return extras_;
 }
 
 void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnMediaKeyEvent");
-    std::lock_guard callbackLockGuard(callbackLock_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
     SLOGI("HandleMediaKeyEvent check isMediaKeySupport %{public}d for %{public}d",
         static_cast<int>(isMediaKeySupport), static_cast<int>(keyEvent.GetKeyCode()));
     if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
-        SLOGD("auto set controller command for %{public}d", static_cast<int>(keyEvent.GetKeyCode()));
         AVControlCommand cmd;
         cmd.SetRewindTime(metaData_.GetSkipIntervals());
         cmd.SetForwardTime(metaData_.GetSkipIntervals());
         keyEventCaller_[keyEvent.GetKeyCode()](cmd);
     } else {
-        callback_->OnMediaKeyEvent(keyEvent);
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callback_ != nullptr) {
+            callback_->OnMediaKeyEvent(keyEvent);
+        }
     }
 }
 
@@ -1633,18 +1615,17 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
 void AVSessionItem::ExecueCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::ExecueCommonCommand");
-
     {
-        std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
-        if (remoteSink_ != nullptr) {
-            SLOGI("Send remote CommonCommand");
-            CHECK_AND_RETURN_LOG(remoteSink_->SetCommonCommand(commonCommand, commandArgs) == AVSESSION_SUCCESS,
-                "SetCommonCommand failed");
-        }
+        std::lock_guard callbackLockGuard(callbackLock_);
+        CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+        callback_->OnCommonCommand(commonCommand, commandArgs);
     }
-    std::lock_guard callbackLockGuard(callbackLock_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnCommonCommand(commonCommand, commandArgs);
+
+    std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
+    if (remoteSink_ != nullptr) {
+        CHECK_AND_RETURN_LOG(remoteSink_->SetCommonCommand(commonCommand, commandArgs) == AVSESSION_SUCCESS,
+            "SetCommonCommand failed");
+    }
 }
 
 // LCOV_EXCL_START
@@ -1698,7 +1679,7 @@ void AVSessionItem::HandleOnPause(const AVControlCommand& cmd)
 
 void AVSessionItem::HandleOnPlayOrPause(const AVControlCommand& cmd)
 {
-    std::lock_guard lockGuard(metaDataLock_);
+    std::lock_guard lockGuard(avsessionItemLock_);
     SLOGI("check current playstate : %{public}d", playbackState_.GetState());
     if (playbackState_.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         HandleOnPause(cmd);
@@ -1890,7 +1871,7 @@ void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
 {
-    SLOGI("Connection state %{public}d", connectionState);
+    SLOGI("output device change, connection state is %{public}d", connectionState);
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnOutputDeviceChange");
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
@@ -1904,7 +1885,9 @@ void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
     HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
     std::lock_guard controllersLockGuard(controllersLock_);
     for (const auto& controller : controllers_) {
-        controller.second->HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
+        if (controller.second != nullptr) {
+            (controller.second)->HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
+        }
     }
     SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(info.deviceInfos_.size()));
 }
@@ -1928,7 +1911,6 @@ int32_t AVSessionItem::CastAudioToRemote(const std::string& sourceDevice, const 
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVMetaData failed");
     ret = remoteSource_->SetAVPlaybackState(GetPlaybackState());
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVPlaybackState failed");
-    SLOGI("success");
     return AVSESSION_SUCCESS;
 }
 
@@ -1939,7 +1921,6 @@ int32_t AVSessionItem::SourceCancelCastAudio(const std::string& sinkDevice)
     CHECK_AND_RETURN_RET_LOG(remoteSource_ != nullptr, AVSESSION_ERROR, "remoteSource_ is nullptr");
     int32_t ret = remoteSource_->CancelCastAudio(sinkDevice);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudioToLocal failed");
-    SLOGI("success");
     return AVSESSION_SUCCESS;
 }
 
@@ -1947,7 +1928,6 @@ int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, c
                                            const std::string& sinkDevice, const std::string& sourceCapability)
 {
     SLOGI("start cast audio from remote");
-
     std::lock_guard remoteSinkLockGuard(remoteSinkLock_);
     remoteSink_ = std::make_shared<RemoteSessionSinkProxy>();
     CHECK_AND_RETURN_RET_LOG(remoteSink_ != nullptr, AVSESSION_ERROR, "remoteSink_ is nullptr");
@@ -1969,11 +1949,9 @@ int32_t AVSessionItem::CastAudioFromRemote(const std::string& sourceSessionId, c
     ret = JsonUtils::GetVectorCapability(sourceCapability, value);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetVectorCapability error");
     for (auto cmd : value[SESSION_DATA_CONTROL_COMMAND]) {
-        SLOGI("add support cmd : %{public}d", cmd);
         ret = AddSupportCommand(cmd);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddSupportCommand failed");
     }
-    SLOGI("success");
     return AVSESSION_SUCCESS;
 }
 
@@ -2035,12 +2013,11 @@ void AVSessionItem::SaveLocalDeviceInfo()
     descriptor_.outputDeviceInfo_ = localDevice;
 }
 
-int32_t AVSessionItem::doContinuousTaskRegister()
+int32_t AVSessionItem::DoContinuousTaskRegister()
 {
 #ifdef EFFICIENCY_MANAGER_ENABLE
-    SLOGI("Start register continuous task");
     if (descriptor_.sessionTag_ == "RemoteCast") {
-        SLOGI("sink session should not register ContinuousTask");
+        SLOGI("sink session no need to register continuousTask");
         return AVSESSION_SUCCESS;
     }
     int32_t uid = GetUid();
@@ -2053,7 +2030,6 @@ int32_t AVSessionItem::doContinuousTaskRegister()
         SLOGE("failed to open library libsuspend_manager_client reaseon %{public}s", dlerror());
         return AVSESSION_ERROR;
     }
-    SLOGI("open library libsuspend_manager_client success");
     typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
         const std::string bundleName, int32_t taskState, int32_t serviceId);
     handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
@@ -2069,10 +2045,9 @@ int32_t AVSessionItem::doContinuousTaskRegister()
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionItem::doContinuousTaskUnregister()
+int32_t AVSessionItem::DoContinuousTaskUnregister()
 {
 #ifdef EFFICIENCY_MANAGER_ENABLE
-    SLOGI("Stop register continuous task");
     if (descriptor_.sessionTag_ == "RemoteCast") {
         SLOGI("sink session should not unregister ContinuousTask");
         return AVSESSION_SUCCESS;
@@ -2087,7 +2062,6 @@ int32_t AVSessionItem::doContinuousTaskUnregister()
         SLOGE("failed to open library libsuspend_manager_client when stop cast, reaseon %{public}s", dlerror());
         return AVSESSION_ERROR;
     }
-    SLOGI("open library libsuspend_manager_client success when stop cast");
     typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
         const std::string bundleName, int32_t taskState, int32_t serviceId);
     handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));

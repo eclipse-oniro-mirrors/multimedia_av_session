@@ -71,8 +71,6 @@ public:
     ~AVSessionItem() override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    bool IsCastSinkSession(int32_t castState);
-
     void DealCastState(int32_t castState);
 
     void DealDisconnect(DeviceInfo deviceInfo);
@@ -222,8 +220,6 @@ public:
 
     int32_t AddSupportCastCommand(int32_t cmd);
 
-    bool IsCastRelevancyCommand(int32_t cmd);
-
     int32_t DeleteSupportCastCommand(int32_t cmd);
 
     void HandleCastValidCommandChange(std::vector<int32_t> &cmds);
@@ -293,13 +289,13 @@ private:
     void SaveLocalDeviceInfo();
     int32_t ProcessFrontSession(const std::string& source);
     void HandleFrontSession();
-    int32_t doContinuousTaskRegister();
-    int32_t doContinuousTaskUnregister();
+    int32_t DoContinuousTaskRegister();
+    int32_t DoContinuousTaskUnregister();
     AVSessionDisplayIntf* GetAVSessionDisplayIntf();
     void ReportSetAVMetaDataInfo(const AVMetaData& meta);
     std::string GetAnonymousDeviceId(std::string deviceId);
     void ReportAVCastControllerInfo();
-    void GetAVCastControllerProxy();
+    void InitAVCastControllerProxy();
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -346,7 +342,6 @@ private:
         {MMI::KeyEvent::KEYCODE_MEDIA_FAST_FORWARD, [this](const AVControlCommand& cmd) { HandleOnFastForward(cmd); }}
     };
 
-    std::recursive_mutex controllersLock_;
     std::map<pid_t, sptr<AVControllerItem>> controllers_;
     AVCallMetaData avCallMetaData_;
     AVCallState avCallState_;
@@ -355,26 +350,20 @@ private:
     int32_t userId_;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
-    std::recursive_mutex queueItemsLock_;
     std::vector<AVQueueItem> queueItems_;
     std::string queueTitle_;
     AbilityRuntime::WantAgent::WantAgent launchAbility_;
     AAFwk::WantParams extras_;
     std::vector<int32_t> supportedCmd_;
     std::vector<int32_t> supportedCastCmds_;
-    std::recursive_mutex callbackLock_;
     sptr<IAVSessionCallback> callback_;
-    std::recursive_mutex remoteCallbackLock_;
     std::shared_ptr<AVSessionCallback> remoteCallback_;
     std::function<void(AVSessionItem&)> serviceCallback_;
     std::function<void(AVSessionItem&)> callStartCallback_;
     friend class AVSessionDumper;
 
-    std::recursive_mutex remoteSourceLock_;
     std::shared_ptr<RemoteSessionSource> remoteSource_;
-    std::recursive_mutex remoteSinkLock_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
-    std::recursive_mutex wantParamLock_;
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
@@ -384,18 +373,31 @@ private:
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
     int32_t removeCmdStep_ = 1000;
-    
-    std::recursive_mutex destroyLock_;
+
     volatile bool isDestroyed_ = false;
 
-    std::recursive_mutex metaDataLock_;
-
-    std::recursive_mutex displayListenerLock_;
     AVSessionDisplayIntf *avsessionDisaplayIntf_;
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
 
     static const int32_t DEFAULT_USER_ID = 100;
-    std::recursive_mutex cmdsLock_;
+
+    // The following locks are used in the defined order of priority
+    std::recursive_mutex avsessionItemLock_;
+
+    std::recursive_mutex controllersLock_;
+
+    std::recursive_mutex callbackLock_;
+
+    std::recursive_mutex destroyLock_;
+
+    std::recursive_mutex displayListenerLock_;
+
+    std::recursive_mutex remoteCallbackLock_;
+
+    std::recursive_mutex remoteSourceLock_;
+
+    std::recursive_mutex remoteSinkLock_;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
@@ -431,7 +433,6 @@ private:
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
     sptr<HwCastDisplayListener> displayListener_;
     std::recursive_mutex displayListenerLock_;
-    std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::function<void(std::string)> serviceCallbackForStream_;

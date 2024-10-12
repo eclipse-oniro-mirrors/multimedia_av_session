@@ -259,8 +259,6 @@ public:
     void RegisterBundleDeleteEventForHistory();
 
 private:
-    void CheckInitCast();
-
     void CheckBrEnable();
 
     void NotifyProcessStatus(bool isStart);
@@ -301,6 +299,8 @@ private:
 
     int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
+
+    bool IsParamInvalid(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName);
 
     void ServiceCallback(sptr<AVSessionItem>& sessionItem);
 
@@ -406,7 +406,7 @@ private:
 
     const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
 
-    void refreshSortFileOnCreateSession(const std::string& sessionId, const std::string& sessionType,
+    void SaveSessionInfoInFile(const std::string& sessionId, const std::string& sessionType,
         const AppExecFwk::ElementName& elementName);
 
     bool CheckAndCreateDir(const string& filePath);
@@ -432,8 +432,6 @@ private:
     
     void HandleAppStateChange(int uid, int state);
 
-    bool IsMediaStream(AudioStandard::StreamUsage usage);
-
     void UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd);
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
@@ -457,49 +455,50 @@ private:
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
-    std::recursive_mutex sessionAndControllerLock_;
     sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
-    std::recursive_mutex sessionFrontLock_;
-
-    std::recursive_mutex clientDeathObserversLock_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
     std::map<pid_t, sptr<ClientDeathRecipient>> clientDeathRecipients_;
-
-    std::recursive_mutex sessionListenersLock_;
     std::list<SessionListener*> innerSessionListeners_;
-
-    std::recursive_mutex abilityManagerLock_;
     std::map<std::string, std::shared_ptr<AbilityManagerAdapter>> abilityManager_;
-
     FocusSessionStrategy focusSessionStrategy_;
     BackgroundAudioController backgroundAudioController_;
-
-    std::recursive_mutex castAudioSessionMapLock_;
     std::map<std::string, std::string> castAudioSessionMap_;
-
-    std::recursive_mutex isAllSessionCastLock_;
     bool isAllSessionCast_ {};
-
-    std::recursive_mutex outputDeviceIdLock_;
     std::string outputDeviceId_;
-
     std::unique_ptr<AVSessionDumper> dumpHelper_ {};
     friend class AVSessionDumper;
+    std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
+    std::shared_ptr<EventSubscriber> subscriber_;
+    bool isScreenOn_ = false;
+    bool isScreenLocked_ = true;
+    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
 
-    std::recursive_mutex sortFileReadWriteLock_;
-    std::recursive_mutex avQueueFileReadWriteLock_;
-    std::recursive_mutex fileCheckLock_;
+    // The following locks are used in the defined order of priority
+    std::recursive_mutex sessionServiceLock_;
+
+    std::recursive_mutex sessionFrontLock_;
+
+    std::recursive_mutex sessionListenersLock_;
 
     std::recursive_mutex migrateListenersLock_;
-    std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
 
-    std::shared_ptr<EventSubscriber> subscriber_;
+    std::recursive_mutex sessionFileLock_;
+
+    std::recursive_mutex avQueueFileLock_;
+
+    std::recursive_mutex abilityManagerLock_;
+
     std::recursive_mutex screenStateLock_;
-    bool screenOn = false;
-    bool screenLocked = true;
 
-    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
+    std::recursive_mutex clientDeathLock_;
+
+    // DMSDP related locks
+    std::recursive_mutex isAllSessionCastLock_;
+
+    std::recursive_mutex outputDeviceIdLock_;
+
+    std::recursive_mutex castAudioSessionMapLock_;
 
 #ifdef BLUETOOTH_ENABLE
     OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
@@ -531,7 +530,7 @@ private:
     const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";
 
     int32_t pressCount_ {};
-    int32_t maxHistoryNums = 10;
+    int32_t maxHistoryNums_ = 10;
     int uidForAppStateChange_ = 0;
     bool isFirstPress_ = true;
     bool isSourceInCast_ = false;

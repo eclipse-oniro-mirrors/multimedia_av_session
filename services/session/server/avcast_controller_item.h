@@ -92,15 +92,14 @@ protected:
 private:
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
     sptr<IAVCastControllerCallback> callback_;
-    std::recursive_mutex itemCallbackLock_;
     AVPlaybackState::PlaybackStateMaskType castPlaybackMask_;
-    AVQueueItem currentAVQueueItem_;
-    std::vector<int32_t> supportedCastCmds_;
     std::function<void(int32_t, std::vector<int32_t>&)> validCommandsChangecallback_;
     int32_t removeCmdStep_ = 1000;
     int32_t currentState_ = AVPlaybackState::PLAYBACK_STATE_INITIAL;
     std::string sessionTag_;
     bool isSessionCallbackAvailable_ = true;
+    std::recursive_mutex castControllerLock_;
+    std::recursive_mutex castControllerCallbackLock_;
     std::mutex callbackToSessionLock_;
 };
 } // namespace OHOS::AVSession

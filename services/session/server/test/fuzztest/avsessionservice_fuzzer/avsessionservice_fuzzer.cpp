@@ -565,20 +565,20 @@ void MirrorToStreamCast003(const uint8_t* data, size_t size)
     SLOGI("MirrorToStreamCast003 end!");
 }
 
-void RefreshSortFileOnCreateSession001(const uint8_t* data, size_t size)
+void SaveSessionInfoInFile001(const uint8_t* data, size_t size)
 {
-    SLOGI("RefreshSortFileOnCreateSession001 begin!");
-    avsessionService_->refreshSortFileOnCreateSession(avsessionHere_->GetSessionId(),
+    SLOGI("SaveSessionInfoInFile001 begin!");
+    avsessionService_->SaveSessionInfoInFile(avsessionHere_->GetSessionId(),
         "audio", elementName);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
-    SLOGI("RefreshSortFileOnCreateSession001 end!");
+    SLOGI("SaveSessionInfoInFile001 end!");
 }
 
 void StartDefaultAbilityByCall001(const uint8_t* data, size_t size)
 {
     SLOGI("StartDefaultAbilityByCall001 begin!");
     std::string sessionId(reinterpret_cast<const char *>(data), size);
-    avsessionService_->refreshSortFileOnCreateSession(avsessionHere_->GetSessionId(),
+    avsessionService_->SaveSessionInfoInFile(avsessionHere_->GetSessionId(),
         "audio", elementName);
     avsessionService_->StartDefaultAbilityByCall(sessionId);
     SLOGI("StartDefaultAbilityByCall001 end!");
@@ -862,7 +862,7 @@ void AvSessionServiceTest001(const uint8_t* data, size_t size)
     MirrorToStreamCast001(data, size);
     MirrorToStreamCast002(data, size);
     MirrorToStreamCast003(data, size);
-    RefreshSortFileOnCreateSession001(data, size);
+    SaveSessionInfoInFile001(data, size);
     StartDefaultAbilityByCall001(data, size);
     GetHistoricalAVQueueInfos001(data, size);
     AddAvQueueInfoToFile001(data, size);
