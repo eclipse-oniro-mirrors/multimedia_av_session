@@ -543,6 +543,54 @@ int32_t AVSessionServiceStub::HandleStopCastDiscovery(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleStartDeviceLogging(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartDeviceLogging");
+    SLOGI("HandleStartDeviceLogging start");
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("HandleStartDeviceLogging: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
+            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
+            "avsessionservice StartDeviceLogging checkPermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    uint32_t fd = data.ReadFileDescriptor();
+    int32_t maxSize = data.ReadUint32();
+    int32_t ret = AVRouter::GetInstance().StartDeviceLogging(fd, maxSize);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStartDeviceLogging failed");
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStopDeviceLogging(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStopDeviceLogging");
+    SLOGI("HandleStopDeviceLogging start");
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("StopDeviceLogging: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", IPCSkeleton::GetCallingUid(),
+            "CALLER_PID", IPCSkeleton::GetCallingPid(), "ERROR_MSG",
+            "avsessionservice StopDeviceLogging checkPermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t ret = AVRouter::GetInstance().StopDeviceLogging();
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStopDeviceLogging failed");
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleSetDiscoverable");

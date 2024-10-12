@@ -52,6 +52,15 @@ public:
     virtual void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) = 0;
 
     /**
+     * @brief Listen for the event of device logging.
+     *
+     * @param { DeviceLogEventCode } eventId - Event ID.
+     * @param { int64_t } int64_t - Param.
+     * @since 13
+    */
+    virtual void NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) {};
+
+    /**
      * Notify Router that the device has been offlined.
      *
      * @param { std::string& } deviceId - Offlined device ID.
