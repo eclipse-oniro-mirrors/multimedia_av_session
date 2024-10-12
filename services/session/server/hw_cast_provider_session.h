@@ -41,6 +41,7 @@ public:
     bool UnRegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener);
     void CheckProcessDone();
     bool SetStreamState(DeviceInfo deviceInfo);
+    bool GetRemoteNetWorkId(std::string deviceId, std::string &networkId);
 
 private:
     std::shared_ptr<CastEngine::ICastSession> castSession_;

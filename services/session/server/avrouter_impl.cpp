@@ -314,6 +314,18 @@ int32_t AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, DeviceInfo d
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVRouterImpl::GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId)
+{
+    int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
+        AVSESSION_ERROR, "Can not find corresponding provider");
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
+        && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
+    providerManagerMap_[providerNumber]->provider_->GetRemoteNetWorkId(castId, deviceId, networkId);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr<IAVCastSessionStateListener> callback)
 {
     SLOGI("AVRouterImpl register IAVCastSessionStateListener callback to provider");

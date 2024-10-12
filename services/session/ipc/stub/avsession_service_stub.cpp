@@ -45,7 +45,8 @@ int32_t AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data
                                               MessageOption& option)
 {
     if (code >= static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION) &&
-        code < static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX)) {
+        code < static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX) &&
+        code != static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST)) {
         SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
     }
     if (!CheckInterfaceToken(data)) {

@@ -64,6 +64,7 @@ ohos_shared_library("avsession_service") {
     "adapter/app_manager_adapter.cpp",
     "adapter/audio_adapter.cpp",
     "adapter/bundle_status_adapter.cpp",
+    "adapter/collaboration_manager.cpp",
     "adapter/key_event_adapter.cpp",
     "adapter/params_config_operator.cpp",
     "adapter/permission_checker.cpp",
@@ -335,8 +336,10 @@ ohos_shared_library("avsession_item") {
 
   adapter_sources = [
     "adapter/bundle_status_adapter.cpp",
+    "adapter/collaboration_manager.cpp",
     "adapter/command_send_limit.cpp",
     "adapter/permission_checker.cpp",
+    "adapter/plugin_lib.cpp",
     "adapter/session_xcollie.cpp",
   ]
 
