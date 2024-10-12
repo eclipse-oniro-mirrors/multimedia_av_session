@@ -74,6 +74,8 @@ private:
     static napi_status OffServiceDie(napi_env env, napi_value callback);
 
     static void HandleServiceDied();
+    
+    static bool JudgeNumString(std::string str);
 
     static napi_status RegisterNativeSessionListener(napi_env env);
 
