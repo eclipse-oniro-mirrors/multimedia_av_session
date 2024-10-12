@@ -49,7 +49,9 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskOne(std::shared_ptr<AVSessionSe
     std::shared_ptr<AVSessionController> controller = nullptr;
     std::vector<AVSessionDescriptor> descriptors;
     std::vector<AVQueueInfo> avQueueInfos;
+    MessageParcel reply;
     AVSessionDescriptor descriptor;
+    const char* buffer = reinterpret_cast<const char*>(data);
     avServiceProxy->CreateSession(tag, type, elementName);
     avServiceProxy->CreateSession(tag, type, elementName, session);
     avServiceProxy->CreateSessionInner(tag, type, elementName);
@@ -58,9 +60,12 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskOne(std::shared_ptr<AVSessionSe
     avServiceProxy->GetSessionDescriptorsBySessionId(sessionId, descriptor);
     avServiceProxy->GetHistoricalSessionDescriptors(maxSize, descriptors);
     avServiceProxy->GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos);
+    avServiceProxy->UnMarshallingAVQueueInfos(reply, avQueueInfos);
+    avServiceProxy->BufferToAVQueueInfoImg(buffer, avQueueInfos);
     avServiceProxy->StartAVPlayback(testBundleName, assetId);
     avServiceProxy->CreateController(assetId, controller);
     avServiceProxy->CreateControllerInner(assetId, object);
+    avServiceProxy->Close();
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> castController = nullptr;
     avServiceProxy->GetAVCastController(sessionId, castController);
@@ -105,10 +110,14 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionSe
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool enable = *(reinterpret_cast<const bool*>(data));
     int32_t castDeviceCapability = *(reinterpret_cast<const int32_t*>(data));
+    int32_t fd = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t maxSize = *(reinterpret_cast<const uint32_t*>(data));
     std::vector<std::string> drmSchemes;
     avServiceProxy->StartCastDiscovery(castDeviceCapability, drmSchemes);
     avServiceProxy->StopCastDiscovery();
     avServiceProxy->SetDiscoverable(enable);
+    avServiceProxy->StartDeviceLogging(fd, maxSize);
+    avServiceProxy->StopDeviceLogging();
     avServiceProxy->StartCast(sessionToken, outputDeviceInfo);
     avServiceProxy->StopCast(sessionToken);
     avServiceProxy->checkEnableCast(enable);
