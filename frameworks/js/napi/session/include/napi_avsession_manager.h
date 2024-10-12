@@ -75,6 +75,8 @@ private:
 
     static void HandleServiceDied();
 
+    static bool JudgeNumString(std::string str);
+
     static napi_status RegisterNativeSessionListener(napi_env env);
 
     static void ErrCodeToMessage(int32_t errCode, const std::string& tag, std::string& message);

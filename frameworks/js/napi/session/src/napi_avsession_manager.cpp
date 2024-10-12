@@ -598,8 +598,8 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
     if (context == nullptr) {
-        SLOGE("OnEvent failed : no memory");
-        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        SLOGE("OffEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OffEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
@@ -898,12 +898,25 @@ std::string NapiAVSessionManager::GetStartCastErrMsg(int32_t error)
     return err;
 }
 
+bool NapiAVSessionManager::JudgeNumString(std::string str)
+{
+    SLOGI("enter JudgeNumString");
+    int minNumChar = 48;
+    int maxNumChar = 57;
+    for (int i = 0; i < static_cast<int>(str.size()); i++) {
+        if (str[i] < minNumChar || str[i] > maxNumChar) {
+            return false;
+        }
+    }
+    return true;
+}
+
 napi_value NapiAVSessionManager::StartDeviceLogging(napi_env env, napi_callback_info info)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StartDeviceLogging");
     struct ConcreteContext : public ContextBase {
-        int32_t fd_;
+        std::string fd_;
         uint32_t maxSize_;
     };
     auto context = std::make_shared<ConcreteContext>();
@@ -916,14 +929,19 @@ napi_value NapiAVSessionManager::StartDeviceLogging(napi_env env, napi_callback_
         int32_t napiInvalidParamErr = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments", napiInvalidParamErr);
 
-        napi_valuetype type = napi_undefined;
+         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
-        bool condition = (context->status == napi_ok) && (type == napi_object);
+        bool condition = (context->status == napi_ok) && (type == napi_string);
         CHECK_ARGS_RETURN_VOID(context, condition, "invalid type invalid", napiInvalidParamErr);
-
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->fd_);
         condition = (context->status == napi_ok);
         CHECK_ARGS_RETURN_VOID(context, condition, "fd getvalue fail", napiInvalidParamErr);
+        CHECK_ARGS_RETURN_VOID(context, JudgeNumString(context->fd_),
+            "fd is not a num string", napiInvalidParamErr);
+
+        context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
+        condition = (context->status == napi_ok) && (type == napi_number);
+        CHECK_ARGS_RETURN_VOID(context, condition, "invalid type invalid", napiInvalidParamErr);
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->maxSize_);
         condition = (context->status == napi_ok);
         CHECK_ARGS_RETURN_VOID(context, condition, "maxSize getvalue fail", napiInvalidParamErr);
@@ -932,7 +950,8 @@ napi_value NapiAVSessionManager::StartDeviceLogging(napi_env env, napi_callback_
     context->taskId = NAPI_START_DEVICE_LOGGING_TASK_ID;
 
     auto executor = [context]() {
-        int32_t ret = AVSessionManager::GetInstance().StartDeviceLogging(context->fd_, context->maxSize_);
+        int32_t ret = AVSessionManager::GetInstance().StartDeviceLogging(
+            std::stoi(context->fd_), context->maxSize_);
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
