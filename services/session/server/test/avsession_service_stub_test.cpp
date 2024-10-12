@@ -110,6 +110,7 @@ public:
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
         std::vector<AVQueueInfo> &avQueueInfos) override { return 0; };
     int32_t StartAVPlayback(const std::string &bundleName, const std::string &assetId) override { return 0; };
+    bool IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid) override { return 0; };
     int32_t CreateControllerInner(const std::string &sessionId, OHOS::sptr<IRemoteObject> &object) override
     {
         return isSuccess ? AVSESSION_SUCCESS : 0;

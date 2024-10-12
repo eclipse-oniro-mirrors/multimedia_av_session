@@ -128,6 +128,17 @@ bool SessionStack::PidHasSession(pid_t pid)
     return false;
 }
 
+bool SessionStack::UidHasSession(int32_t uid)
+{
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
+    for (const auto& session : stack_) {
+        if (session->GetUid() == uid) {
+            return true;
+        }
+    }
+    return false;
+}
+
 sptr<AVSessionItem> SessionStack::GetSessionById(const std::string& sessionId)
 {
     std::lock_guard sessionStackLockGuard(sessionStackLock_);

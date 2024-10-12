@@ -38,6 +38,8 @@ public:
 
     virtual bool PidHasSession(pid_t pid) = 0;
 
+    virtual bool UidHasSession(int32_t uid) = 0;
+
     virtual sptr<AVSessionItem> GetSessionById(const std::string& sessionId) = 0;
 
     virtual std::vector<sptr<AVSessionItem>> GetAllSessions() = 0;

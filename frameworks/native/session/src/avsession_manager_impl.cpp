@@ -173,6 +173,12 @@ int32_t AVSessionManagerImpl::StartAVPlayback(const std::string& bundleName, con
     return service ? service->StartAVPlayback(bundleName, assetId) : ERR_SERVICE_NOT_EXIST;
 }
 
+bool AVSessionManagerImpl::IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid)
+{
+    auto service = GetService();
+    return service ? service->IsAudioPlaybackAllowed(uid, pid) : ERR_SERVICE_NOT_EXIST;
+}
+
 int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {
