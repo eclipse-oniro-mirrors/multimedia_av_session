@@ -112,22 +112,22 @@ int32_t AVControllerCallbackStub::HandleOnMetadataChange(MessageParcel& data, Me
         return ERR_NONE;
     }
 
-    auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> mediaImageBuffer;
     for (int i = 0; i < mediaImageLength; i++) {
         mediaImageBuffer.push_back((uint8_t)buffer[i]);
     }
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
-    meta.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
+    meta.SetMediaImage(mediaPixelMap);
 
     if (twoImageLength > mediaImageLength) {
-        auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+        std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
         std::vector<uint8_t> avQueueImageBuffer;
         for (int j = mediaImageLength; j < twoImageLength; j++) {
             avQueueImageBuffer.push_back((uint8_t)buffer[j]);
         }
         avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
-        meta.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
+        meta.SetAVQueueImage(avQueuePixelMap);
     }
     OnMetaDataChange(meta);
     return ERR_NONE;
@@ -221,10 +221,12 @@ int32_t AVControllerCallbackStub::HandleOnQueueItemsChange(MessageParcel& data, 
         if (item == nullptr) {
             SLOGE("GetAVQueueItems: read parcelable AVQueueItem failed");
             delete item;
+            item = nullptr;
             return ERR_UNMARSHALLING;
         }
         items_.emplace_back(*item);
         delete item;
+        item = nullptr;
     }
     AVSESSION_TRACE_SYNC_START("AVControllerCallbackStub::OnQueueItemsChange");
     OnQueueItemsChange(items_);

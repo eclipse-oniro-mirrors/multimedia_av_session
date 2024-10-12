@@ -66,6 +66,7 @@ AVPlaybackState *AVPlaybackState::Unmarshalling(Parcel& parcel)
         !parcel.ReadInt32(result->videoHeight_)) {
         SLOGE("Read AVPlaybackState failed");
         delete result;
+        result = nullptr;
         return nullptr;
     }
     result->extras_ = std::shared_ptr<AAFwk::WantParams>(parcel.ReadParcelable<AAFwk::WantParams>());

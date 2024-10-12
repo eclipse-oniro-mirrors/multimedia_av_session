@@ -117,6 +117,7 @@ int32_t RemoteSessionSyncerImpl::GetAVMetaData(AVMetaData& metaData)
     CHECK_AND_RETURN_RET_LOG(data != nullptr, AVSESSION_ERROR, "Unmarshalling error");
     metaData = *data;
     delete data;
+    data = nullptr;
     return AVSESSION_SUCCESS;
 }
 
@@ -151,6 +152,7 @@ int32_t RemoteSessionSyncerImpl::GetAVPlaybackState(AVPlaybackState& state)
     CHECK_AND_RETURN_RET_LOG(data != nullptr, AVSESSION_ERROR, "Unmarshalling error");
     state = *data;
     delete data;
+    data = nullptr;
     return AVSESSION_SUCCESS;
 }
 
@@ -185,6 +187,7 @@ int32_t RemoteSessionSyncerImpl::GetControlCommand(AVControlCommand& command)
     CHECK_AND_RETURN_RET_LOG(data != nullptr, AVSESSION_ERROR, "Unmarshalling error");
     command = *data;
     delete data;
+    data = nullptr;
     return AVSESSION_SUCCESS;
 }
 
@@ -226,10 +229,12 @@ int32_t RemoteSessionSyncerImpl::GetCommonCommand(std::string& commonCommand, AA
     if (argsData == nullptr) {
         SLOGE("GetCommonCommand: read parcelable commonCommand failed");
         delete argsData;
+        argsData = nullptr;
         return AVSESSION_ERROR;
     }
     commandArgs = AAFwk::WantParams(*argsData);
     delete argsData;
+    argsData = nullptr;
     return AVSESSION_SUCCESS;
 }
 
@@ -270,11 +275,13 @@ int32_t RemoteSessionSyncerImpl::GetSessionEvent(std::string& event, AAFwk::Want
     if (argsData == nullptr) {
         SLOGE("GetSessionEvent: read parcelable sessionEvent failed");
         delete argsData;
+        argsData = nullptr;
         return AVSESSION_ERROR;
     }
     args = AAFwk::WantParams(*argsData);
 
     delete argsData;
+    argsData = nullptr;
     return AVSESSION_SUCCESS;
 }
 
@@ -321,10 +328,12 @@ int32_t RemoteSessionSyncerImpl::GetAVQueueItems(std::vector<AVQueueItem>& items
         if (item == nullptr) {
             SLOGE("GetAVQueueItems: read parcelable AVQueueItem failed");
             delete item;
+            item = nullptr;
             return ERR_UNMARSHALLING;
         }
         items_.emplace_back(*item);
         delete item;
+        item = nullptr;
     }
     items = items_;
     return AVSESSION_SUCCESS;
@@ -398,11 +407,13 @@ int32_t RemoteSessionSyncerImpl::GetExtras(AAFwk::WantParams& extras)
     if (extrasData == nullptr) {
         SLOGE("GetSessionEvent: read parcelable sessionEvent failed");
         delete extrasData;
+        extrasData = nullptr;
         return AVSESSION_ERROR;
     }
     extras = AAFwk::WantParams(*extrasData);
 
     delete extrasData;
+    extrasData = nullptr;
     return AVSESSION_SUCCESS;
 }
 

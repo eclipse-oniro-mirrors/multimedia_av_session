@@ -29,6 +29,7 @@ public:
     virtual void GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays);
     virtual void StartCastDisplayListener(sptr<IAVSessionCallback> callback);
     virtual int32_t StopCastDisplayListener();
+    virtual ~AVSessionDisplayIntf() {}
 };
 } // namespace OHOS::AVSession
 #endif

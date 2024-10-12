@@ -101,6 +101,7 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
         if (statePtr == nullptr) {
             SLOGE("GetAVPlaybackState: read AVPlaybackState failed");
             delete statePtr;
+            statePtr = nullptr;
             return ERR_UNMARSHALLING;
         }
         state = *statePtr;
@@ -108,6 +109,7 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
         std::lock_guard lockGuard(currentStateLock_);
         currentState_ = *statePtr;
         delete statePtr;
+        statePtr = nullptr;
     }
     return ret;
 }
@@ -147,18 +149,18 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     }
 
     int mediaImageLength = data.GetMediaLength();
-    auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
     CHECK_AND_RETURN_RET_LOG(mediaPixelMap != nullptr, AVSESSION_ERROR, "mediaPixelMap new fail");
     SLOGI("change for-loop to vector init");
     std::vector<uint8_t> mediaImageBuffer(buffer, buffer + mediaImageLength);
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
-    data.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
+    data.SetMediaImage(mediaPixelMap);
     if (twoImageLength > mediaImageLength) {
-        auto avQueuePixelMap = new (std::nothrow) AVSessionPixelMap();
+        std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
         CHECK_AND_RETURN_RET_LOG(avQueuePixelMap != nullptr, AVSESSION_ERROR, "avQueuePixelMap new fail");
         std::vector<uint8_t> avQueueImageBuffer(buffer + mediaImageLength, buffer + twoImageLength);
         avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
-        data.SetAVQueueImage(std::shared_ptr<AVSessionPixelMap>(avQueuePixelMap));
+        data.SetAVQueueImage(avQueuePixelMap);
     }
     return AVSESSION_SUCCESS;
 }
@@ -188,10 +190,12 @@ int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& item
             if (item == nullptr) {
                 SLOGE("GetAVQueueItems: read parcelable AVQueueItem failed");
                 delete item;
+                item = nullptr;
                 return ERR_UNMARSHALLING;
             }
             items_.emplace_back(*item);
             delete item;
+            item = nullptr;
         }
         items = items_;
     }

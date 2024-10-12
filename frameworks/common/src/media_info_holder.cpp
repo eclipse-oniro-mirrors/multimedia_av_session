@@ -37,6 +37,7 @@ MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
     if (!data.ReadInt32(currentIndex)) {
         SLOGE("write currentIndex failed");
         delete result;
+        result = nullptr;
         return nullptr;
     }
     
@@ -45,12 +46,14 @@ MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
     if (!data.ReadInt32(playInfosSize)) {
         SLOGE("write playInfosSize failed");
         delete result;
+        result = nullptr;
         return nullptr;
     }
     int32_t maxPlayInfosSize = 1000;
     if ((playInfosSize < 0) || (playInfosSize >= maxPlayInfosSize)) {
         SLOGI("playInfosSize is illegal");
         delete result;
+        result = nullptr;
         return nullptr;
     }
     for (int i = 0; i < playInfosSize; i++) {

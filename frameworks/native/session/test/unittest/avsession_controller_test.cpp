@@ -718,6 +718,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand007, TestSize.Level1)
     EXPECT_EQ(ret->GetLoopMode(mode), AVSESSION_SUCCESS);
     EXPECT_EQ(mode, AVPlaybackState::LOOP_MODE_SEQUENCE);
     delete ret;
+    ret = nullptr;
 }
 
 /**

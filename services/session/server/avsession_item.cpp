@@ -75,6 +75,10 @@ AVSessionItem::~AVSessionItem()
         SLOGI("destroy with activate session, try deactivate it");
         Deactivate();
     }
+    if (avsessionDisaplayIntf_) {
+        delete avsessionDisaplayIntf_;
+        avsessionDisaplayIntf_ = nullptr;
+    }
 }
 
 // LCOV_EXCL_START

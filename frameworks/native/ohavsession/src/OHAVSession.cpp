@@ -357,6 +357,7 @@ AVSession_ErrCode OH_AVSession_Create(AVSession_Type sessionType, const char* se
         bundleName, abilityName);
     if (oh_avsession->IsAVSessionNull()) {
         delete oh_avsession;
+        oh_avsession = nullptr;
         return AV_SESSION_ERR_SERVICE_EXCEPTION;
     }
     *avsession = (OH_AVSession*)oh_avsession;
@@ -371,6 +372,7 @@ AVSession_ErrCode OH_AVSession_Destroy(OH_AVSession* avsession)
     oh_avsession->Destroy();
     if (oh_avsession != nullptr) {
         delete oh_avsession;
+        oh_avsession = nullptr;
     }
     return AV_SESSION_ERR_SUCCESS;
 }

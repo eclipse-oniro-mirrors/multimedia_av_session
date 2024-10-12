@@ -94,6 +94,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData001, TestSize.Level1)
     EXPECT_EQ(metadata->GetDisplayTags(), TAGS);
 
     delete metadata;
+    metadata = nullptr;
     SLOGI("SetAVMetaData001 End");
 }
 

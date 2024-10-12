@@ -30,12 +30,14 @@ AVQueueItem *AVQueueItem::Unmarshalling(Parcel& data)
     if (!data.ReadInt32(result->itemId_)) {
         SLOGE("read AVQueueItem failed");
         delete result;
+        result = nullptr;
         return nullptr;
     }
     result->description_ = std::shared_ptr<AVMediaDescription>(data.ReadParcelable<AVMediaDescription>());
     if (result->description_ == nullptr) {
         SLOGE("read AVQueueItem - description failed");
         delete result;
+        result = nullptr;
         return nullptr;
     }
     return result;
