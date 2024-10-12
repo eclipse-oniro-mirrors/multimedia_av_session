@@ -57,6 +57,11 @@
             "autoDesignWidth": false
           }
         }
+      ],
+      "reqPermissions": [
+        {
+          "name": "ohos.permission.MANAGE_MEDIA_RESOURCES"
+        }
       ]
     }
 }
