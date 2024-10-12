@@ -90,6 +90,21 @@ void SessionListenerProxy::OnDeviceAvailable(const OutputDeviceInfo& castOutputD
         "send request fail");
 }
 
+void SessionListenerProxy::OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(static_cast<int32_t>(eventId)), "write eventId failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt64(param), "write param failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_DEVICE_LOG_EVENT, data, reply, option) == 0,
+        "send request fail");
+}
+
 void SessionListenerProxy::OnDeviceOffline(const std::string& deviceId)
 {
     MessageParcel data;

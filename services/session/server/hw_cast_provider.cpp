@@ -51,6 +51,18 @@ void HwCastProvider::Init()
     CastSessionManager::GetInstance().RegisterListener(shared_from_this());
 }
 
+int32_t HwCastProvider::StartDeviceLogging(int32_t fd, uint32_t maxSize)
+{
+    SLOGI("start StartDeviceLogging, fd is %{public}d and maxSize is %{public}d", fd, maxSize);
+    return CastSessionManager::GetInstance().StartDeviceLogging(fd, maxSize);
+}
+
+int32_t HwCastProvider::StopDeviceLogging()
+{
+    SLOGI("StopDeviceLogging");
+    return CastSessionManager::GetInstance().StartDeviceLogging(-1, 0);
+}
+
 bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
@@ -359,18 +371,36 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
         deviceInfo.networkId_ = castRemoteDevice.networkId;
+        deviceInfo.manufacturer_ = castRemoteDevice.dlnaDeviceManufacturerStr;
+        deviceInfo.modelName_ = castRemoteDevice.dlnaDeviceModelNameStr;
         deviceInfo.supportedProtocols_ = castPlusTypeToAVSessionType_ [castRemoteDevice.capability];
         deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType) == 0 ?
             TRUSTED_DEVICE : UNTRUSTED_DEVICE;
         deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
         deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
-        deviceInfo.mediumTypes_ = castRemoteDevice.mediumTypes;
+        deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnDeviceAvailable for registered listeners");
             listener->OnDeviceAvailable(deviceInfoList);
+        }
+    }
+}
+
+void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
+{
+    SLOGI("eventId is %{public}d, param is %{public}ld", eventId, param);
+    std::lock_guard lockGuard(mutexLock_);
+    for (auto listener : castStateListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnDeviceLogEvent for registered listeners");
+            if (eventId == DeviceLogEventCode::DEVICE_LOG_FULL) {
+                listener->OnDeviceLogEvent(DeviceLogEventCode::DEVICE_LOG_FULL, param);
+            } else {
+                listener->OnDeviceLogEvent(DeviceLogEventCode::DEVICE_LOG_EXCEPTION, param);
+            }
         }
     }
 }

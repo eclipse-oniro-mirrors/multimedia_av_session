@@ -55,6 +55,24 @@ public:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
+     * Transmission fd
+     *
+     * @param fd file descriptor
+     * @param maxSize file max size
+     * @return Returns whether the fd was transport successfully
+     * @since 13
+    */
+    virtual int32_t StartDeviceLogging(int32_t fd, uint32_t maxSize) = 0;
+
+    /**
+     * Stop transmission fd
+     *
+     * @return Returns whether stop transport successfully
+     * @since 13
+    */
+    virtual int32_t StopDeviceLogging() = 0;
+
+    /**
      * @brief Starting to discover devices.
      *
      * @param { int32_t } castDeviceCapability - The type of device want to discover.
@@ -88,6 +106,15 @@ public:
      * @since 10
     */
     virtual int32_t OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo) = 0;
+
+    /**
+     * @brief Listen for the event of device logging.
+     *
+     * @param { DeviceLogEventCode } eventId - Event ID.
+     * @param { int64_t } int64_t - Param.
+     * @since 13
+    */
+    virtual int32_t OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) = 0;
 
     /**
      * @brief Notify Router that the device is offline.

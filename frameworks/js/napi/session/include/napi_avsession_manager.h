@@ -47,6 +47,8 @@ private:
     static napi_value StartCastDiscovery(napi_env env, napi_callback_info info);
     static napi_value StopCastDiscovery(napi_env env, napi_callback_info info);
     static napi_value SetDiscoverable(napi_env env, napi_callback_info info);
+    static napi_value StartDeviceLogging(napi_env env, napi_callback_info info);
+    static napi_value StopDeviceLogging(napi_env env, napi_callback_info info);
     static napi_value StartCast(napi_env env, napi_callback_info info);
     static napi_value StopCast(napi_env env, napi_callback_info info);
 
@@ -58,6 +60,7 @@ private:
     static napi_status OnTopSessionChange(napi_env env, napi_value callback);
     static napi_status OnAudioSessionChecked(napi_env env, napi_value callback);
     static napi_status OnDeviceAvailable(napi_env env, napi_value callback);
+    static napi_status OnDeviceLogEvent(napi_env env, napi_value callback);
     static napi_status OnDeviceOffline(napi_env env, napi_value callback);
     static napi_status OnServiceDie(napi_env env, napi_value callback);
 
@@ -66,10 +69,13 @@ private:
     static napi_status OffTopSessionChange(napi_env env, napi_value callback);
     static napi_status OffAudioSessionChecked(napi_env env, napi_value callback);
     static napi_status OffDeviceAvailable(napi_env env, napi_value callback);
+    static napi_status OffDeviceLogEvent(napi_env env, napi_value callback);
     static napi_status OffDeviceOffline(napi_env env, napi_value callback);
     static napi_status OffServiceDie(napi_env env, napi_value callback);
 
     static void HandleServiceDied();
+
+    static bool JudgeNumString(std::string str);
 
     static napi_status RegisterNativeSessionListener(napi_env env);
 

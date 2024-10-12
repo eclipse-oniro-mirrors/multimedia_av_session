@@ -204,6 +204,20 @@ static napi_value ExportCastDisplayState(napi_env env)
     return result;
 }
 
+static napi_value ExportDeviceLogEventCode(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "DEVICE_LOG_FULL",
+        static_cast<int32_t>(DeviceLogEventCode::DEVICE_LOG_FULL));
+    (void)SetNamedProperty(env, result, "DEVICE_LOG_EXCEPTION",
+        static_cast<int32_t>(DeviceLogEventCode::DEVICE_LOG_EXCEPTION));
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -218,6 +232,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
         DECLARE_NAPI_PROPERTY("DisplayTag", ExportDisplayTag(env)),
         DECLARE_NAPI_PROPERTY("CastDisplayState", ExportCastDisplayState(env)),
+        DECLARE_NAPI_PROPERTY("DeviceLogEventCode ", ExportDeviceLogEventCode(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
