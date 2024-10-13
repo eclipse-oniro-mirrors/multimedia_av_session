@@ -68,6 +68,7 @@ typedef void (*StopMigrateStubFunc)(void);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
+#include "collaboration_manager.h"
 #endif
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
@@ -121,6 +122,10 @@ void AVSessionService::OnStart()
     if (ret == AVSESSION_ERROR) {
         maxHistoryNums = defMaxHistoryNum;
     }
+    if (!system::GetBoolParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), false)) {
+        system::SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
+        SLOGI("set boot avsession service started true");
+    }
 
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
     backgroundAudioController_.Init(this);
@@ -147,15 +152,13 @@ void AVSessionService::OnStart()
         AVRouter::GetInstance().SetDiscoverable(false);
         AVRouter::GetInstance().SetDiscoverable(true);
     }
+    CollaborationManager::GetInstance().ReadCollaborationManagerSo();
+    CollaborationManager::GetInstance().RegisterLifecycleCallback();
 #endif
     PullMigrateStub();
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
-    if (!system::GetBoolParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), false)) {
-        system::SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
-        SLOGI("set boot avsession service started true");
-    }
 }
 
 void AVSessionService::OnDump()
@@ -172,6 +175,9 @@ void AVSessionService::OnStop()
         stopMigrateStub();
     }
     dlclose(migrateStubFuncHandle_);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
+#endif
     CommandSendLimit::GetInstance().StopTimer();
     NotifyProcessStatus(false);
     SLOGI("UnSubscribeCommonEvent result=%{public}d", UnSubscribeCommonEvent());
@@ -345,6 +351,11 @@ void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
 {
     if (systemAbilityId == CAST_ENGINE_SA_ID) {
         SLOGE("on cast engine remove ability");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        for (auto& session : GetContainer().GetAllSessions()) {
+            session->OnRemoveCastEngine();
+        }
+#endif
         isInCast_ = false;
     }
     if (systemAbilityId == BLUETOOTH_HOST_SYS_ABILITY_ID) {

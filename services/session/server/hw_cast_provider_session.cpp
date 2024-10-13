@@ -84,6 +84,19 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
     return streamPlayerPtr;
 }
 
+bool HwCastProviderSession::GetRemoteNetWorkId(std::string deviceId, std::string &networkId)
+{
+    SLOGI("enter GetRemoteNetWorkId");
+    if (!castSession_) {
+        SLOGE("castSession_ is not exist");
+        return false;
+    }
+    CastRemoteDevice castRemoteDevice = {};
+    castSession_->GetRemoteDeviceInfo(deviceId, castRemoteDevice);
+    networkId = castRemoteDevice.networkId;
+    return true;
+}
+
 bool HwCastProviderSession::SetStreamState(DeviceInfo deviceInfo)
 {
     std::lock_guard lockGuard(mutex_);

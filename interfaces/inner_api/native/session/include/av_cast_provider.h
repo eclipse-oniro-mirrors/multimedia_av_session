@@ -46,24 +46,6 @@ public:
     virtual void Init() = 0;
 
     /**
-     * Transmission fd
-     *
-     * @param fd file descriptor
-     * @param maxSize file max size
-     * @return Returns whether the fd was transport successfully
-     * @since 13
-    */
-    virtual int32_t StartDeviceLogging(int32_t fd, uint32_t maxSize) = 0;
-
-    /**
-     * Stop transmission fd
-     *
-     * @return Returns whether stop transport successfully
-     * @since 13
-    */
-    virtual int32_t StopDeviceLogging() = 0;
-
-    /**
      * @brief Start searching for sink end devices.
      *
      * @param { int } castCapability - The type of device want to discover.
@@ -197,6 +179,17 @@ public:
      * @since 11
     */
     virtual int GetMirrorCastId() = 0;
+
+    /**
+     * @brief get remote networkId.
+     *
+     * @param { int32_t } castHandle const - The ID corresponding to the castprovider.
+     * @param { string } cast deviceId - The deviceId give cast+ to get remote networkId.
+     * @param { string } cast networkId - The networkId to transmit remote networkId.
+     * @return { bool } Whether the operation was successful.
+     * @since 11
+    */
+    virtual bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) = 0;
 };
 } // namespace OHOS::AVSession
 #endif
