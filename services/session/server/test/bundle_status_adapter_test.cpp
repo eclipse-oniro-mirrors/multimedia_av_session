@@ -61,6 +61,7 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleNameFromUid001, testing::ext::
     SLOGI("GetBundleNameFromUid001, start");
     const int32_t uid = 0;
     BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    EXPECT_EQ(uid, 0);
     SLOGI("GetBundleNameFromUid001, end");
 }
 
@@ -230,6 +231,7 @@ static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved001, testing::ext::T
     };
     BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
     BundleStatusAdapter::GetInstance().NotifyBundleRemoved(bundleName);
+    EXPECT_EQ(bundleName, "com.ohos.screenshot");
     SLOGI("NotifyBundleRemoved001, end");
 }
 
@@ -244,6 +246,7 @@ static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved002, testing::ext::T
     std::string bundleName = "com.ohos.test";
     std::string abilityName = "MainAbility";
     BundleStatusAdapter::GetInstance().NotifyBundleRemoved(bundleName);
+    EXPECT_EQ(bundleName, "com.ohos.test");
     SLOGI("NotifyBundleRemoved002, end");
 }
 

@@ -156,6 +156,7 @@ static HWTEST_F(SoftbusSessionManagerTest, RemoveSessionServer001, TestSize.Leve
     SLOGI("RemoveSessionServer001 begin");
     int32_t sessionId = 123;
     manager_->Shutdown(sessionId);
+    EXPECT_EQ(sessionId, 123);
     SLOGI("RemoveSessionServer001 end");
 }
 
@@ -226,6 +227,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level1)
         .pkgName = infoPkgName,
         .dataType = DATA_TYPE_BYTES,
     };
+    EXPECT_TRUE(manager_ != nullptr);
     manager_->OnBind(sessionId, info);
     SLOGI("OnSessionOpened001 end");
 }
@@ -354,6 +356,7 @@ static HWTEST_F(SoftbusSessionManagerTest, AddSessionListener001, TestSize.Level
     SLOGI("AddSessionListener001 begin");
     std::shared_ptr<SoftbusSessionListener> softbusSessionListener;
     manager_->AddSessionListener(softbusSessionListener);
+    EXPECT_EQ(softbusSessionListener, nullptr);
     SLOGI("AddSessionListener001 end");
 }
 
@@ -368,6 +371,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnBind001, TestSize.Level1)
     SLOGI("OnBind001 begin");
     int32_t socket = 1231;
     PeerSocketInfo info;
+    EXPECT_TRUE(manager_ != nullptr);
     manager_->OnBind(socket, info);
     SLOGI("OnBind001 end");
 }
@@ -384,6 +388,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnMessage001, TestSize.Level1)
     int32_t socket = 1231;
     void *data = nullptr;
     int32_t dataLen = 10;
+    EXPECT_TRUE(manager_ != nullptr);
     manager_->OnMessage(socket, data, dataLen);
     SLOGI("OnMessage001 end");
 }
@@ -401,6 +406,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnMessage002, TestSize.Level1)
     int *ptr = &socket;
     void *data = static_cast<void*>(ptr);
     int32_t dataLen = 10;
+    EXPECT_TRUE(manager_ != nullptr);
     manager_->OnMessage(socket, data, dataLen);
     SLOGI("OnMessage002 end");
 }
@@ -417,6 +423,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnBytes001, TestSize.Level1)
     int32_t socket = 1231;
     void *data = nullptr;
     int32_t dataLen = 10;
+    EXPECT_TRUE(manager_ != nullptr);
     manager_->OnMessage(socket, data, dataLen);
     SLOGI("OnBytes001 end");
 }
@@ -434,6 +441,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnBytes002, TestSize.Level1)
     int *ptr = &socket;
     void *data = static_cast<void*>(ptr);
     int32_t dataLen = 10;
+    EXPECT_TRUE(manager_ != nullptr);
     manager_->OnMessage(socket, data, dataLen);
     SLOGI("OnBytes002 end");
 }
@@ -447,12 +455,14 @@ static HWTEST_F(SoftbusSessionManagerTest, OnBytes002, TestSize.Level1)
 static HWTEST_F(SoftbusSessionManagerTest, CreateServer001, TestSize.Level1)
 {
     SLOGI("CreateServer001 begin");
+    EXPECT_TRUE(distributed_ != nullptr);
     distributed_->Init();
     std::string pkg = "AVSESSION";
     distributed_->InitSessionServer(pkg);
 
     std::shared_ptr<MigrateAVSessionServer> server;
     distributed_->CreateServer(server);
+    EXPECT_EQ(server, nullptr);
     SLOGI("CreateServer001 end");
 }
 
@@ -465,10 +475,12 @@ static HWTEST_F(SoftbusSessionManagerTest, CreateServer001, TestSize.Level1)
 static HWTEST_F(SoftbusSessionManagerTest, ReleaseServer001, TestSize.Level1)
 {
     SLOGI("ReleaseServer001 begin");
+    EXPECT_TRUE(distributed_ != nullptr);
     distributed_->Init();
     std::string pkg = "AVSESSION";
     distributed_->InitSessionServer(pkg);
     std::shared_ptr<MigrateAVSessionServer> server = std::make_shared<MigrateAVSessionServer>();
     distributed_->ReleaseServer(server);
+    EXPECT_TRUE(server != nullptr);
     SLOGI("ReleaseServer001 end");
 }

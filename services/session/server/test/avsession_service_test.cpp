@@ -725,7 +725,8 @@ static HWTEST_F(AVSessionServiceTest, SaveSessionInfoInFile001, TestSize.Level1)
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
-    SLOGE("AVSession not to do refreshSortFileOnCreateSession for crash");
+    avservice_->SaveSessionInfoInFile(avsessionHere_->GetSessionId(),
+        "audio", elementName);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("SaveSessionInfoInFile001 end!");
@@ -885,6 +886,7 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEvent001, TestSize.Level1)
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     EventSubscriber eventSubscriber(subscriberInfo, avservice_);
     eventSubscriber.OnReceiveEvent(eventData);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("OnReceiveEvent001 end!");
 }
 
@@ -900,12 +902,14 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEvent002, TestSize.Level1)
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     EventSubscriber eventSubscriber(subscriberInfo, avservice_);
     eventSubscriber.OnReceiveEvent(eventData);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("OnReceiveEvent002 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, UnSubscribeCommonEvent001, TestSize.Level1)
 {
     SLOGI("SubscribeCommonEvent001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     avservice_->SubscribeCommonEvent();
     avservice_->UnSubscribeCommonEvent();
     SLOGI("SubscribeCommonEvent001 end!");
@@ -914,6 +918,7 @@ static HWTEST_F(AVSessionServiceTest, UnSubscribeCommonEvent001, TestSize.Level1
 static HWTEST_F(AVSessionServiceTest, UnSubscribeCommonEvent002, TestSize.Level1)
 {
     SLOGI("SubscribeCommonEvent002 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     avservice_->UnSubscribeCommonEvent();
     SLOGI("SubscribeCommonEvent002 end!");
 }
@@ -921,6 +926,7 @@ static HWTEST_F(AVSessionServiceTest, UnSubscribeCommonEvent002, TestSize.Level1
 static HWTEST_F(AVSessionServiceTest, OnRemoveSystemAbility001, TestSize.Level1)
 {
     SLOGI("OnRemoveSystemAbility001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     int32_t systemAbilityId = 65546;
     std::string deviceId = "";
     avservice_->OnRemoveSystemAbility(systemAbilityId, deviceId);
@@ -930,6 +936,7 @@ static HWTEST_F(AVSessionServiceTest, OnRemoveSystemAbility001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, OnRemoveSystemAbility002, TestSize.Level1)
 {
     SLOGI("OnRemoveSystemAbility002 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     int32_t systemAbilityId = 111222;
     std::string deviceId = "";
     avservice_->OnRemoveSystemAbility(systemAbilityId, deviceId);
@@ -982,6 +989,7 @@ static HWTEST_F(AVSessionServiceTest, GetHistoricalSessionDescriptors003, TestSi
 static HWTEST_F(AVSessionServiceTest, DoMetadataImgClean001, TestSize.Level1)
 {
     SLOGI("DoMetadataImgClean001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     OHOS::AVSession::AVMetaData metaData;
 
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
@@ -1029,6 +1037,7 @@ static HWTEST_F(AVSessionServiceTest, GetTrustedDeviceName001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, HandleFocusSession001, TestSize.Level1)
 {
     SLOGI("HandleFocusSession001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     int32_t pid = 201;
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -1048,6 +1057,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFocusSession001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, HandleFocusSession002, TestSize.Level1)
 {
     SLOGI("HandleFocusSession002 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     int32_t pid = 202;
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -1067,6 +1077,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFocusSession002, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, UpdateFrontSession001, TestSize.Level1)
 {
     SLOGI("HandleFocusSession001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     int32_t pid = 203;
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -1086,6 +1097,7 @@ static HWTEST_F(AVSessionServiceTest, UpdateFrontSession001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, UpdateFrontSession002, TestSize.Level1)
 {
     SLOGI("UpdateFrontSession002 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     int32_t pid = 204;
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -1218,6 +1230,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent008, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, PullMigrateStub001, TestSize.Level1)
 {
     SLOGI("PullMigrateStub001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     avservice_->PullMigrateStub();
     SLOGI("PullMigrateStub001 end!");
 }
@@ -1225,6 +1238,7 @@ static HWTEST_F(AVSessionServiceTest, PullMigrateStub001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, UpdateFrontSession003, TestSize.Level1)
 {
     SLOGI("UpdateFrontSession003 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     int32_t pid = 304;
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -1267,6 +1281,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSessionInner002, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, ReportSessionInfo001, TestSize.Level1)
 {
     SLOGI("ReportSessionInfo001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     OHOS::sptr<AVSessionItem> avsessionHere_ = nullptr;
     avservice_->ReportSessionInfo(avsessionHere_, true);
     SLOGI("ReportSessionInfo001 end!");
@@ -1340,6 +1355,7 @@ static HWTEST_F(AVSessionServiceTest, StartAbilityByCall001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart001, TestSize.Level1)
 {
     SLOGI("HandleSystemKeyColdStart001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -1373,6 +1389,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemControlCommand001, TestSize.Leve
 static HWTEST_F(AVSessionServiceTest, HandleControllerRelease001, TestSize.Level1)
 {
     SLOGI("HandleControllerRelease001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -1389,6 +1406,7 @@ static HWTEST_F(AVSessionServiceTest, HandleControllerRelease001, TestSize.Level
 static HWTEST_F(AVSessionServiceTest, GetDeviceInfo001, TestSize.Level1)
 {
     SLOGI("GetDeviceInfo001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -1414,6 +1432,7 @@ static HWTEST_F(AVSessionServiceTest, CreateControllerInner001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, ClearControllerForClientDiedNoLock001, TestSize.Level1)
 {
     SLOGI("ClearControllerForClientDiedNoLock001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
