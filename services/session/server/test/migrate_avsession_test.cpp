@@ -461,6 +461,7 @@ HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub001, TestSize.Level1)
     SLOGI("CreateLocalSessionStub001 begin");
     std::string scene = "test";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
+    EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->CreateLocalSessionStub(scene, server_);
     SLOGI("CreateLocalSessionStub001 end");
 }
@@ -476,6 +477,7 @@ HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub002, TestSize.Level1)
     SLOGI("CreateLocalSessionStub002 begin");
     std::string scene = "SuperLauncher";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
+    EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->CreateLocalSessionStub(scene, server_);
     migrateManager_->CreateLocalSessionStub(scene, server_);
     SLOGI("CreateLocalSessionStub002 end");
@@ -492,6 +494,7 @@ HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub001, TestSize.Level1)
     SLOGI("ReleaseLocalSessionStub001 begin");
     std::string scene = "test";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
+    EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->ReleaseLocalSessionStub(scene);
     SLOGI("ReleaseLocalSessionStub001 end");
 }
@@ -507,6 +510,7 @@ HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub002, TestSize.Level1)
     SLOGI("ReleaseLocalSessionStub002 begin");
     std::string scene = "SuperLauncher";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
+    EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->CreateLocalSessionStub(scene, server_);
     migrateManager_->ReleaseLocalSessionStub(scene);
     SLOGI("ReleaseLocalSessionStub002 end");
@@ -523,6 +527,7 @@ HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub003, TestSize.Level1)
     SLOGI("ReleaseLocalSessionStub003 begin");
     std::string scene = "SuperLauncher";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
+    EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->ReleaseLocalSessionStub(scene);
     SLOGI("ReleaseLocalSessionStub003 end");
 }
@@ -537,6 +542,7 @@ HWTEST_F(MigrateAVSessionTest, IncSoftBusRef001, TestSize.Level1)
 {
     SLOGI("IncSoftBusRef001 begin");
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
+    EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->refs_ = 1;
     migrateManager_->IncSoftBusRef();
     SLOGI("IncSoftBusRef001 end");
@@ -552,6 +558,7 @@ HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId002, TestSize.Level1)
 {
     SLOGI("ClearCacheBySessionId002 begin");
     std::string sessionId = "#####";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ClearCacheBySessionId(sessionId);
     SLOGI("ClearCacheBySessionId002 end");
 }
@@ -568,6 +575,7 @@ HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId003, TestSize.Level1)
     std::string sessionId = "12345";
     OHOS::sptr<AVControllerItem> item = nullptr;
     std::shared_ptr<AVControllerObserver> observer(nullptr);
+    EXPECT_TRUE(server_ != nullptr);
     server_->playerIdToControllerMap_[sessionId] = item;
     server_->playerIdToControllerCallbackMap_[sessionId] = observer;
     server_->ClearCacheBySessionId(sessionId);
@@ -584,6 +592,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand001, TestSize.Level1)
 {
     SLOGI("ProcControlCommand001 begin");
     std::string data = R"(##{"PlayerId":"1","MediaCommand":"1"})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand001 end");
 }
@@ -598,6 +607,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand002, TestSize.Level1)
 {
     SLOGI("ProcControlCommand002 begin");
     std::string data = R"(##{"PlayerId":"1","command":"1"})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand002 end");
 }
@@ -612,6 +622,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand003, TestSize.Level1)
 {
     SLOGI("ProcControlCommand003 begin");
     std::string data = R"(##{"MediaCommand":"1","command":"1"})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand003 end");
 }
@@ -626,6 +637,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand004, TestSize.Level1)
 {
     SLOGI("ProcControlCommand004 begin");
     std::string data = R"(##{"MediaCommand":"1"})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand004 end");
 }
@@ -640,6 +652,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand005, TestSize.Level1)
 {
     SLOGI("ProcControlCommand005 begin");
     std::string data = R"(##{"command":"1"})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand005 end");
 }
@@ -654,6 +667,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand006, TestSize.Level1)
 {
     SLOGI("ProcControlCommand006 begin");
     std::string data = R"(##{"PlayerId":"1"})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand006 end");
 }
@@ -668,6 +682,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand007, TestSize.Level1)
 {
     SLOGI("ProcControlCommand007 begin");
     std::string data = R"(##{"PlayerId":"","MediaCommand":1,"command":"1"})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand007 end");
 }
@@ -683,6 +698,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand008, TestSize.Level1)
     SLOGI("ProcControlCommand008 begin");
     server_->CreateController("111");
     std::string data = R"(##{"PlayerId":"111","MediaCommand":30,"command":"1"})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand008 end");
 }
@@ -698,6 +714,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand009, TestSize.Level1)
     SLOGI("ProcControlCommand009 begin");
     server_->CreateController("111");
     std::string data = R"(##{"PlayerId":"111","MediaCommand":31,"command":"1","extras":11})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand009 end");
 }
@@ -713,6 +730,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand010, TestSize.Level1)
     SLOGI("ProcControlCommand007 begin");
     server_->CreateController("111");
     std::string data = R"(##{"PlayerId":"111","MediaCommand":50,"command":"1","extras":"124"})";
+    EXPECT_TRUE(server_ != nullptr);
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand007 end");
 }
