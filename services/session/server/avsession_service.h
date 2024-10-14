@@ -452,6 +452,9 @@ private:
     bool CheckAncoAudio();
 
     int32_t ConvertKeyCodeToCommand(int keyCode);
+    
+    void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
+        const std::chrono::system_clock::time_point &now, int32_t time = 1);
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
 

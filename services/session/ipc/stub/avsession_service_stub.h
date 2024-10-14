@@ -113,7 +113,9 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleStopCast(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleClose(data, reply); }}
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleClose(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CHECK_BACKGROUND_ALLOWED),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleIsAudioPlaybackAllowed(data, reply); }}
     };
     std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION),
@@ -163,7 +165,9 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST),
             "HandleStopCast"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
-            "HandleClose"}
+            "HandleClose"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CHECK_BACKGROUND_ALLOWED),
+            "HandleIsAudioPlaybackAllowed"}
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;
