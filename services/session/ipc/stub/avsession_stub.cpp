@@ -136,6 +136,7 @@ int32_t AVSessionStub::HandleSetAVPlaybackState(MessageParcel& data, MessageParc
 int32_t AVSessionStub::SetImageData(AVMetaData& meta, const char *buffer, int twoImageLength)
 {
     int mediaImageLength = meta.GetMediaLength();
+    CHECK_AND_RETURN_RET_LOG(mediaImageLength >= 0, ERR_NONE, "mediaImageLength is negative number");
     CHECK_AND_RETURN_RET_LOG(mediaImageLength <= twoImageLength, ERR_NONE, "Maybe cuase Out-of-bunds read");
     
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
