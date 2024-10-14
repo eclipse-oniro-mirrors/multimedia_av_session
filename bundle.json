@@ -69,6 +69,7 @@
           ],
           "fwk_group": [
             "//foundation/multimedia/av_session/frameworks/common:avsession_common",
+            "//foundation/multimedia/av_session/frameworks/native/ohavsession:ohavsession",
             "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
             "//foundation/multimedia/av_session/frameworks/js/napi/session:avsession_napi",
             "//foundation/multimedia/av_session/utils:avsession_utils",
@@ -99,6 +100,7 @@
           }
         ],
         "test": [
+          "//foundation/multimedia/av_session/frameworks/native/ohavsession/test/unittest:oh_av_session_unittest",
           "//foundation/multimedia/av_session/frameworks/native/session/test/unittest:av_session_unittest",
           "//foundation/multimedia/av_session/frameworks/native/session/test/unittest/napi/avsession_jsunittest:jsunittest",
           "//foundation/multimedia/av_session/frameworks/native/session/test/unittest/napi/avsession_controller_jsunittest:jsunittest",
