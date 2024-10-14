@@ -260,18 +260,8 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
     }
 
     if (remote->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) != 0) {
-        SLOGI("send request fail with raw img, try except raw");
-        MessageParcel anotherData;
-        CHECK_AND_RETURN_RET_LOG(anotherData.WriteInterfaceToken(GetDescriptor()),
-            ERR_MARSHALLING, "write interface token failed");
-        if (!anotherData.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(anotherData, metaData)) {
-            SLOGE("anotherData without raw img write fail");
-            return ERR_IPC_SEND_REQUEST;
-        }
-        if (remote->SendRequest(SESSION_CMD_SET_META_DATA, anotherData, reply, option) != 0) {
-            SLOGE("send request fail with anotherData except raw img");
-            return ERR_IPC_SEND_REQUEST;
-        }
+        SLOGE("send request fail with raw img");
+        return ERR_IPC_SEND_REQUEST;
     }
     SLOGI("set avmetadata done");
     int32_t ret = AVSESSION_ERROR;

@@ -103,6 +103,8 @@ void AvSessionItemTest(uint8_t *data, size_t size)
     }
     AvSessionItemTestImpl(avSessionItem, data, size);
     AvSessionCallItemTest(avSessionItem, data, size);
+    AvSessionItemTestImplExtension(avSessionItem, data, size);
+    AvSessionCallItemTestExtension(avSessionItem, data, size);
 }
 
 void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
@@ -123,9 +125,6 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* dat
 
     AVControlCommand controlCommand;
     int32_t cmd = *(reinterpret_cast<const int32_t *>(data));
-    if ((cmd < AVControlCommand::SESSION_CMD_INVALID) || (cmd > AVControlCommand::SESSION_CMD_MAX)) {
-        return;
-    }
     controlCommand.SetCommand(cmd);
 
     OutputDeviceInfo info;
@@ -161,6 +160,62 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* dat
     avSessionItem->GetRemoteSource();
 }
 
+void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
+{
+    int32_t state = *(reinterpret_cast<const int32_t *>(data));
+    int32_t itemId = *(reinterpret_cast<const int32_t *>(data));
+    int32_t pid = *(reinterpret_cast<const int32_t *>(data));
+    int32_t uid = *(reinterpret_cast<const int32_t *>(data));
+
+    OutputDeviceInfo info;
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 0;
+    std::string deviceId(reinterpret_cast<const char *>(data), size);
+    deviceInfo.deviceId_= deviceId;
+    std::string deviceName(reinterpret_cast<const char *>(data), size);
+    deviceInfo.deviceName_ = deviceName;
+    info.deviceInfos_.push_back(deviceInfo);
+
+    std::vector<AVQueueItem> avQueueItems;
+    AVQueueItem avQueueItem;
+    avQueueItem.SetItemId(*(reinterpret_cast<const int32_t *>(data)));
+    avQueueItems.push_back(avQueueItem);
+
+    std::string title(reinterpret_cast<const char *>(data), size);
+    std::string commonCommand(reinterpret_cast<const char *>(data), size);
+
+    auto wantAgentPtr = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+
+    AAFwk::WantParams wantParams;
+
+    auto keyEvent = MMI::KeyEvent::Create();
+    keyEvent->SetKeyCode(*(reinterpret_cast<const int32_t*>(data)));
+    MMI::KeyEvent::KeyItem keyItem;
+    keyItem.SetKeyCode(*(reinterpret_cast<const int32_t*>(data)));
+    keyEvent->AddKeyItem(keyItem);
+
+    sptr<AVControllerItem> avControllerItem = new(std::nothrow) AVControllerItem(pid, avSessionItem);
+    if (avControllerItem == nullptr) {
+        return;
+    }
+
+    avSessionItem->SetAVQueueItems(avQueueItems);
+    avSessionItem->GetAVQueueItems(avQueueItems);
+    avSessionItem->SetAVQueueTitle(title);
+    avSessionItem->GetAVQueueTitle(title);
+    avSessionItem->SetLaunchAbility(*wantAgentPtr);
+    avSessionItem->SetExtras(wantParams);
+    avSessionItem->GetExtras(wantParams);
+    avSessionItem->HandleMediaKeyEvent(*keyEvent);
+    avSessionItem->HandleOutputDeviceChange(state, info);
+    avSessionItem->HandleSkipToQueueItem(itemId);
+    avSessionItem->ExecueCommonCommand(commonCommand, wantParams);
+    avSessionItem->AddController(pid, avControllerItem);
+    avSessionItem->SetPid(pid);
+    avSessionItem->SetUid(uid);
+    avSessionItem->HandleControllerRelease(pid);
+}
+
 void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
 {
     AVCallMetaData callMetaData;
@@ -178,6 +233,35 @@ void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem, const uint8_t* dat
 
     avSessionItem->SetAVCallMetaData(callMetaData);
     avSessionItem->SetAVCallState(avCallState);
+}
+
+void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
+{
+    string sinkDevice(reinterpret_cast<const char *>(data), size);
+    string event(reinterpret_cast<const char *>(data), size);
+
+    auto releaseAndStartCallback = [](AVSessionItem& item) {};
+    auto updateSessionCallback = [](string str, bool flag) {};
+
+    AAFwk::WantParams wantParams;
+
+    avSessionItem->GetSessionType();
+    avSessionItem->DestroyTask();
+    avSessionItem->GetDescriptor();
+    avSessionItem->GetAVCallState();
+    avSessionItem->GetAVCallMetaData();
+    avSessionItem->GetQueueItems();
+    avSessionItem->GetQueueTitle();
+    avSessionItem->GetExtras();
+    avSessionItem->GetLaunchAbility();
+    avSessionItem->GetBundleName();
+    avSessionItem->SetServiceCallbackForRelease(releaseAndStartCallback);
+    avSessionItem->SetServiceCallbackForCallStart(releaseAndStartCallback);
+    avSessionItem->SourceCancelCastAudio(sinkDevice);
+    avSessionItem->SinkCancelCastAudio();
+    avSessionItem->SetSessionEvent(event, wantParams);
+    avSessionItem->SetServiceCallbackForAVQueueInfo(releaseAndStartCallback);
+    avSessionItem->SetServiceCallbackForUpdateSession(updateSessionCallback);
 }
 
 void AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)

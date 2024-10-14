@@ -129,6 +129,7 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid, int32_t pi
         SLOGE("get renderer state failed");
         return;
     }
+
     bool isRunning = false;
     for (const auto& info : infos) {
         if (info->rendererState == AudioStandard::RENDERER_RUNNING and
@@ -143,6 +144,7 @@ void BackgroundAudioController::HandleAppBackgroundState(int32_t uid, int32_t pi
         SLOGI("find uid=%{public}d pid=%{public}d isn't running, return", uid, pid);
         return;
     }
+
     if (!IsBackgroundMode(uid, BackgroundMode::AUDIO_PLAYBACK)) {
         SLOGI("uid=%{public}d hasn't AUDIO_PLAYBACK task", uid);
         return;

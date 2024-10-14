@@ -64,11 +64,11 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
     }
     void* dataAddr = static_cast<void*>(innerImgBuffer.data() + IMAGE_BYTE_SIZE + imgBufferSize + DATA_BYTE_SIZE);
     pixelMap->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
-
+    SLOGI("ConvertFromInner without scalemode srcSize: [%{public}d, %{public}d], dstSize: [%{public}d, %{public}d]",
+        pixelMap->GetWidth(), pixelMap->GetHeight(), originalWidth_, originalHeight_);
     Media::InitializationOptions options;
     options.alphaType = imageInfo.alphaType;
     options.pixelFormat = imageInfo.pixelFormat;
-    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
     options.size.width = originalWidth_;
     options.size.height = originalHeight_;
     options.editable = true;

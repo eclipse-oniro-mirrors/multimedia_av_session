@@ -129,6 +129,7 @@ int32_t AVRouterImpl::StopDeviceLogging()
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("AVRouterImpl StartCastDiscovery");
+
     std::lock_guard lockGuard(providerManagerLock_);
 
     if (providerManagerMap_.empty()) {
@@ -149,6 +150,7 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
 int32_t AVRouterImpl::StopCastDiscovery()
 {
     SLOGI("AVRouterImpl StopCastDiscovery");
+
     std::lock_guard lockGuard(providerManagerLock_);
 
     if (cacheStartDiscovery_) {
@@ -224,6 +226,7 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_->CreateSessionByCast(castHandle);
     }
+
     OutputDeviceInfo outputDeviceInfo;
     castHandleToOutputDeviceMap_[castId] = outputDeviceInfo;
     return AVSESSION_SUCCESS;

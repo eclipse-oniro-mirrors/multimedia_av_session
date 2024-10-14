@@ -34,6 +34,8 @@ public:
     ~HwCastProvider() override;
 
     void Init() override;
+    int32_t StartDeviceLogging(int32_t fd, uint32_t maxSize) override;
+    int32_t StopDeviceLogging() override;
     bool StartDiscovery(int castCapability, std::vector<std::string> drmSchemes) override;
     void StopDiscovery() override;
     int32_t SetDiscoverable(const bool enable) override;
@@ -49,6 +51,7 @@ public:
     bool UnRegisterCastSessionStateListener(int castId, std::shared_ptr<IAVCastSessionStateListener> listener) override;
 
     void OnDeviceFound(const std::vector<CastEngine::CastRemoteDevice> &deviceList) override;
+    void OnLogEvent(const int32_t eventId, const int64_t param) override;
     void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void OnServiceDied() override;
@@ -57,7 +60,6 @@ public:
     bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) override;
 
 private:
-    void WaitSessionRelease();
     static const int maxCastSessionSize = 256;
     std::vector<bool> castFlag_ = std::vector<bool>(maxCastSessionSize, false);
     std::map<int, std::shared_ptr<HwCastProviderSession>> hwCastProviderSessionMap_;
@@ -65,9 +67,8 @@ private:
     std::vector<std::shared_ptr<IAVCastStateListener>> castStateListenerList_;
     std::recursive_mutex mutexLock_;
     bool isRelease_ = false;
-    int lastCastId_ = -1;
     int mirrorCastId = -1;
-    std::shared_ptr<HwCastProviderSession> lastCastSession;
+
     std::map<CastEngine::CapabilityType, int32_t> castPlusTypeToAVSessionType_ = {
         {CastEngine::CapabilityType::CAST_PLUS, ProtocolType::TYPE_CAST_PLUS_STREAM},
         {CastEngine::CapabilityType::DLNA, ProtocolType::TYPE_DLNA},

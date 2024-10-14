@@ -35,6 +35,7 @@
 #include "bundle_status_adapter.h"
 #include "array_wrapper.h"
 #include "string_wrapper.h"
+#include "want_agent_helper.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -44,19 +45,24 @@
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
+#include <string>
 #endif
 
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
 
-AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor)
-    : descriptor_(descriptor)
+static const std::string AVSESSION_DYNAMIC_DISPLAY_LIBRARY_PATH = std::string("libavsession_dynamic_display.z.so");
+
+AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId)
+    : descriptor_(descriptor), userId_(userId)
 {
     SLOGD("constructor id=%{public}s", AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     cssListener_ = std::make_shared<CssListener>(this);
 #endif
+    dynamicLoader_ = std::make_unique<AVSessionDynamicLoader>();
+    avsessionDisaplayIntf_ = nullptr;
 }
 
 AVSessionItem::~AVSessionItem()
@@ -92,6 +98,14 @@ std::string AVSessionItem::GetSessionType()
 int32_t AVSessionItem::Destroy()
 {
     SLOGI("AVSessionItem check service destroy event with service, check serviceCallback exist");
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "Destroy",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
     if (serviceCallback_) {
         SLOGI("AVSessionItem send service destroy event to service");
         serviceCallback_(*this);
@@ -204,7 +218,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 }
 
 // LCOV_EXCL_START
-__attribute__((no_sanitize("cfi"))) int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
+int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 {
     SLOGI("ProcessFrontSession with directly handle %{public}s ", source.c_str());
     HandleFrontSession();
@@ -259,6 +273,31 @@ bool AVSessionItem::HasAvQueueInfo()
     return true;
 }
 
+void AVSessionItem::ReportSetAVMetaDataInfo(const AVMetaData& meta)
+{
+    std::string mediaImage = "false";
+    std::string avQueueImage = "false";
+    if (meta.GetMediaImage() != nullptr || !(meta.GetMediaImageUri().empty())) {
+        mediaImage = "true";
+    }
+    if (meta.GetAVQueueImage() != nullptr || !(meta.GetAVQueueImageUri().empty())) {
+        avQueueImage = "true";
+    }
+    std::string API_PARAM_STRING = "assetId: " + meta.GetAssetId() + ", "
+                                    + "artist: " + meta.GetArtist() + ", "
+                                    + "title: " + meta.GetTitle() + ", "
+                                    + "subtitle: " + meta.GetSubTitle() + ", "
+                                    + "avQueueId: " + meta.GetAVQueueId() + ", "
+                                    + "duration: " + std::to_string(meta.GetDuration()) + ", "
+                                    + "avQueueName: " + meta.GetAVQueueName() + ", "
+                                    + "mediaImage: " + mediaImage + ", "
+                                    + "avqueueImage: " + avQueueImage;
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR", "API_NAME", "SetAVMetaData",
+        "BUNDLE_NAME", GetBundleName(), "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_, "SESSION_TYPE", GetSessionType(), "API_PARAM", API_PARAM_STRING,
+        "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
+}
+
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     bool hasAvQueueInfo = false;
@@ -266,6 +305,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         SLOGD("limit metaDataLock range to split with sessionAndControllerLock");
         std::lock_guard lockGuard(metaDataLock_);
         SessionXCollie sessionXCollie("avsession::SetAVMetaData");
+        ReportSetAVMetaDataInfo(meta);
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
         std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
         if (innerPixelMap != nullptr) {
@@ -283,9 +323,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     if (hasAvQueueInfo && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
-
     SLOGI("send metadata change event to controllers with title %{public}s", meta.GetTitle().c_str());
-
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta]() {
         SLOGI("HandleMetaDataChange in postTask with title %{public}s and size %{public}d",
             meta.GetTitle().c_str(), static_cast<int>(controllers_.size()));
@@ -384,7 +422,21 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     }
 
     SLOGD("send playbackstate change event to controllers done");
-
+    std::string isFavor = state.GetFavorite()? "true" : "false";
+    std::string API_PARAM_STRING = "state: " + std::to_string(state.GetState()) + ", "
+                                    + "elapsedTime: " + std::to_string(state.GetPosition().elapsedTime_) + ", "
+                                    + "updateTime: " + std::to_string(state.GetPosition().updateTime_) + ", "
+                                    + "loopMode: " + std::to_string(state.GetLoopMode()) + ", "
+                                    + "isFavorite: " + isFavor;
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "SetAVPlaybackState",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "API_PARAM", API_PARAM_STRING,
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
         SLOGI("set remote AVPlaybackState");
@@ -403,6 +455,35 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
     launchAbility_ = ability;
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> launWantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(ability);
+    int res = AVSESSION_SUCCESS;
+    if (want != nullptr && launWantAgent != nullptr) {
+        res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launWantAgent, want);
+    }
+    std::string errMsg = "Get want failed.";
+    std::string bundleName = "";
+    std::string abilityName = "";
+    std::string moduleName = "";
+    if (res == AVSESSION_SUCCESS) {
+        bundleName = want->GetElement().GetBundleName().c_str();
+        abilityName = want->GetElement().GetAbilityName().c_str();
+        moduleName = want->GetElement().GetModuleName().c_str();
+        errMsg = "SUCCESS";
+    }
+    std::string API_PARAM_STRING = "bundleName: " + bundleName + ", "
+                                    + "moduleName: " + moduleName + ", "
+                                    + "abilityName: " + abilityName;
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "SetLaunchAbility",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "API_PARAM", API_PARAM_STRING,
+        "ERROR_CODE", res,
+        "ERROR_MSG", errMsg);
     return AVSESSION_SUCCESS;
 }
 
@@ -457,16 +538,15 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     sptr<AVSessionItem> session(this);
     sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(GetPid(), session);
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "malloc controller failed");
-    result->isFromSession = true;
+    result->isFromSession_ = true;
     SLOGI("ImgSetLoop get controller set from session");
     controllers_.insert({GetPid(), result});
     return result;
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
+void AVSessionItem::GetAVCastControllerProxy()
 {
-    SLOGI("Start get avcast controller inner");
     if (castControllerProxy_ == nullptr) {
         SLOGI("CastControllerProxy is null, start get new proxy");
         {
@@ -474,13 +554,31 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
             castControllerProxy_ = AVRouter::GetInstance().GetRemoteController(castHandle_);
         }
     }
+}
+
+void AVSessionItem::ReportAVCastControllerInfo()
+{
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "getAVCastController",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
+}
+
+sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
+{
+    SLOGI("Start get avcast controller inner");
+    GetAVCastControllerProxy();
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, nullptr, "Get castController proxy failed");
 
     sptr<AVCastControllerItem> castController = new (std::nothrow) AVCastControllerItem();
     CHECK_AND_RETURN_RET_LOG(castController != nullptr, nullptr, "malloc AVCastController failed");
     std::shared_ptr<AVCastControllerItem> sharedPtr = std::shared_ptr<AVCastControllerItem>(castController.GetRefPtr(),
         [holder = castController](const auto*) {});
-
+    ReportAVCastControllerInfo();
     auto callback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
         if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_INVALID) {
@@ -542,6 +640,14 @@ int32_t AVSessionItem::Activate()
 {
     descriptor_.isActive_ = true;
     std::lock_guard controllerLockGuard(controllersLock_);
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "Activate",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);
         controller->HandleActiveStateChange(true);
@@ -564,6 +670,14 @@ int32_t AVSessionItem::Deactivate()
     descriptor_.isActive_ = false;
     SLOGI("Deactivate in");
     std::lock_guard controllerLockGuard(controllersLock_);
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "Deactivate",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
     for (const auto& [pid, controller] : controllers_) {
         SLOGI("pid=%{public}d", pid);
         controller->HandleActiveStateChange(false);
@@ -604,6 +718,16 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
         std::lock_guard lockGuard(cmdsLock_);
         supportedCmd_.push_back(cmd);
     }
+    std::string API_PARAM_STRING = "cmd :" + std::to_string(cmd);
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "OnEvent",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "API_PARAM", API_PARAM_STRING,
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
     ProcessFrontSession("AddSupportCommand");
 
     {
@@ -637,6 +761,16 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
         std::lock_guard lockGuard(cmdsLock_);
         supportedCmd_.erase(iter, supportedCmd_.end());
     }
+    std::string API_PARAM_STRING = "cmd :" + std::to_string(cmd);
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "OffEvent",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "API_PARAM", API_PARAM_STRING,
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
     ProcessFrontSession("DeleteSupportCommand");
 
     SLOGD("send validCommand change event to controllers with num %{public}d DEL %{public}d",
@@ -672,6 +806,15 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
     return AVSESSION_SUCCESS;
 }
 
+std::string AVSessionItem::GetAnonymousDeviceId(std::string deviceId)
+{
+    if (deviceId.empty() || deviceId.length() < DEVICE_ID_MIN_LEN) {
+        return "unknown";
+    }
+    const uint32_t half = DEVICE_ID_MIN_LEN / 2;
+    return deviceId.substr(0, half) + "**" + deviceId.substr(deviceId.length() - half);
+}
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
     DeviceInfo deviceInfo)
@@ -686,16 +829,24 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
     castHandle_ = castHandle;
+    castHandleDeviceId_ = deviceInfo.deviceId_;
     SLOGI("RegisterListenerStreamToCast check handle set to %{public}ld", castHandle_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     counter_ = firstStep;
     AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
     AVRouter::GetInstance().SetServiceAllConnectState(castHandle, deviceInfo);
-    deviceStateAddCommand_ = streamStateConnection;
     counter_ = secondStep;
     UpdateCastDeviceMap(deviceInfo);
 
     doContinuousTaskRegister();
+    HISYSEVENT_BEHAVIOR("SESSION_CAST_CONTROL",
+        "CONTROL_TYPE", "MirrorTostreamCast",
+        "PEER_DEVICE_ID", GetAnonymousDeviceId(deviceInfo.deviceId_),
+        "PEER_DEVICE_NAME", deviceInfo.deviceName_,
+        "PEER_DEVICE_TYPE", deviceInfo.deviceType_,
+        "PEER_NETWORK_ID", GetAnonymousDeviceId(deviceInfo.networkId_),
+        "PEER_SUPPORTED_PROTOCOL", deviceInfo.supportedProtocols_,
+        "BUNDLE_NAME", GetBundleName());
     return AVSESSION_SUCCESS;
 }
 
@@ -713,6 +864,14 @@ void AVSessionItem::InitializeCastCommands()
         AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED);
     if (iter == supportedCastCmds_.end()) {
         supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED);
+    }
+
+    iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(),
+        AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+    if (iter == supportedCastCmds_.end()) {
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD);
+        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_REWIND);
     }
 
     iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
@@ -849,6 +1008,14 @@ void AVSessionItem::HandleCastValidCommandChange(const std::vector<int32_t>& cmd
 int32_t AVSessionItem::ReleaseCast()
 {
     SLOGI("Release cast process");
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "StopCasting",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
     return StopCast();
 }
 
@@ -902,8 +1069,13 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 
     // unregister pre castSession callback to avoid previous session timeout disconnect influence current session
     if (castHandle_ > 0) {
-        SLOGI("cast check with pre cast alive %{public}ld, unregister callback", castHandle_);
-        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+        if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
+            SLOGI("repeat startcast %{public}ld", castHandle_);
+            return AVSESSION_ERROR;
+        } else {
+            SLOGI("cast check with pre cast alive %{public}ld, unregister callback", castHandle_);
+            AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+        }
     }
     int32_t flag = CastAddToCollaboration(outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, AVSESSION_ERROR, "collaboration to start cast fail");
@@ -914,6 +1086,9 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     SLOGI("start cast check handle set to %{public}ld", castHandle_);
 
     int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
+    if (ret == AVSESSION_SUCCESS) {
+        castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
+    }
 
     doContinuousTaskRegister();
     return ret;
@@ -964,8 +1139,9 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
     SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}ld", castHandle_);
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
     AVRouter::GetInstance().StopCastSession(castHandle_);
-    doContinuousTaskUnregister();
     castHandle_ = -1;
+    castHandleDeviceId_ = "-100";
+    doContinuousTaskUnregister();
     castControllerProxy_ = nullptr;
     supportedCastCmds_.clear();
     SaveLocalDeviceInfo();
@@ -1004,8 +1180,10 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
-    SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
-        deviceInfo.deviceId_.c_str());
+    SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s",
+        static_cast<int32_t>(castState), deviceInfo.deviceId_.c_str());
+    SLOGI("deviceInfo.modelName_ is %{public}s", deviceInfo.modelName_.c_str());
+    SLOGI("deviceInfo.manufacturer_ is %{public}s", deviceInfo.manufacturer_.c_str());
     DealCollaborationPublishState(castState, deviceInfo);
     DealCastState(castState);
     if (castState == streamStateConnection && counter_ == secondStep) {
@@ -1107,9 +1285,11 @@ void AVSessionItem::ListenCollaborationRejectToStopCast()
 int32_t AVSessionItem::StopCast()
 {
     if (descriptor_.sessionTag_ == "RemoteCast") {
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         int32_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
         castHandle_ = -1;
-        SLOGI("Stop cast process for sink with ret %{public}d", ret);
+        castHandleDeviceId_ = "-100";
+        SLOGI("Unregister and Stop cast process for sink with ret %{public}d", ret);
         return ret;
     }
     SLOGI("Stop cast process");
@@ -1177,14 +1357,37 @@ void AVSessionItem::StopCastSession()
     doContinuousTaskUnregister();
     if (ret != AVSESSION_ERROR) {
         castHandle_ = -1;
+        castHandleDeviceId_ = "-100";
     } else {
         SLOGE("Stop cast session process error");
     }
 }
 
+AVSessionDisplayIntf* AVSessionItem::GetAVSessionDisplayIntf()
+{
+    if (avsessionDisaplayIntf_ == nullptr) {
+        typedef AVSessionDisplayIntf *(*CreateAVSessionDisplayIntfFunc)();
+        CreateAVSessionDisplayIntfFunc createAVSessionDisplayIntf =
+            reinterpret_cast<CreateAVSessionDisplayIntfFunc>(dynamicLoader_->GetFuntion(
+                AVSESSION_DYNAMIC_DISPLAY_LIBRARY_PATH, "createAVSessionDisplayIntf"));
+        if (createAVSessionDisplayIntf) {
+            avsessionDisaplayIntf_ = (*createAVSessionDisplayIntf)();
+        }
+    }
+    return avsessionDisaplayIntf_;
+}
+
 int32_t AVSessionItem::StartCastDisplayListener()
 {
     SLOGI("StartCastDisplayListener in");
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "onCastDisplayChange",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
     sptr<IAVSessionCallback> callback;
     {
         std::lock_guard callbackLockGuard(callbackLock_);
@@ -1198,13 +1401,20 @@ int32_t AVSessionItem::StartCastDisplayListener()
 int32_t AVSessionItem::StopCastDisplayListener()
 {
     SLOGI("StopCastDisplayListener in");
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "offCastDisplayChange",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
     std::lock_guard displayListenerLockGuard(displayListenerLock_);
-    CHECK_AND_RETURN_RET_LOG(displayListener_ != nullptr, AVSESSION_ERROR, "displayListener_ is nullptr");
-    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().UnregisterScreenListener(displayListener_);
-    if (ret != Rosen::DMError::DM_OK) {
-        SLOGE("UnregisterScreenListener failed, ret: %{public}d.", ret);
+
+    if (avsessionDisaplayIntf_ != nullptr) {
+        avsessionDisaplayIntf_->StopCastDisplayListener();
     }
-    displayListener_ = nullptr;
+    // close here is unsafe
     return AVSESSION_SUCCESS;
 }
 
@@ -1212,48 +1422,24 @@ void AVSessionItem::GetDisplayListener(sptr<IAVSessionCallback> callback)
 {
     SLOGI("GetDisplayListener in");
     std::lock_guard displayListenerLockGuard(displayListenerLock_);
-    if (displayListener_ == nullptr) {
-        SLOGI("displayListener_ is null, try to create new listener");
-        displayListener_ = new HwCastDisplayListener(callback);
-        if (displayListener_ == nullptr) {
-            SLOGI("Create displayListener failed");
-            return;
-        }
-        SLOGI("Start to register display listener");
-        Rosen::DMError ret = Rosen::ScreenManager::GetInstance().RegisterScreenListener(displayListener_);
-        if (ret != Rosen::DMError::DM_OK) {
-            SLOGE("UnregisterScreenListener failed, ret: %{public}d.", ret);
-        }
+
+    if (GetAVSessionDisplayIntf() != nullptr) {
+        avsessionDisaplayIntf_->StartCastDisplayListener(callback);
     }
+    // if closed here, may cause failure in GetDisplayListener for callback
     return;
 }
 
 int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays)
 {
     SLOGI("GetAllCastDisplays in");
-    std::vector<sptr<Rosen::Screen>> allDisplays;
-    Rosen::ScreenManager::GetInstance().GetAllScreens(allDisplays);
-    std::vector<CastDisplayInfo> displays;
-    for (auto &display : allDisplays) {
-        SLOGI("GetAllCastDisplays name: %{public}s, id: %{public}lu", display->GetName().c_str(), display->GetId());
-        auto flag = Rosen::ScreenManager::GetInstance().GetVirtualScreenFlag(display->GetId());
-        if (flag == Rosen::VirtualScreenFlag::CAST) {
-            SLOGI("ReportCastDisplay start in");
-            CastDisplayInfo castDisplayInfo;
-            castDisplayInfo.displayState = CastDisplayState::STATE_ON;
-            castDisplayInfo.displayId = display->GetId();
-            castDisplayInfo.name = display->GetName();
-            castDisplayInfo.width = static_cast<int32_t>(display->GetWidth());
-            castDisplayInfo.height = static_cast<int32_t>(display->GetHeight());
-            displays.push_back(castDisplayInfo);
-            std::lock_guard displayListenerLockGuard(displayListenerLock_);
-            if (displayListener_ != nullptr) {
-                displayListener_->SetDisplayInfo(display);
-            }
-        }
+    std::lock_guard displayListenerLockGuard(displayListenerLock_);
+
+    if (GetAVSessionDisplayIntf() != nullptr) {
+        avsessionDisaplayIntf_->GetAllCastDisplays(castDisplays);
+        SLOGI("GetAllCastDisplays length = %{public}zu", castDisplays.size());
     }
-    castDisplays = displays;
-    SLOGI("GetAllCastDisplays out");
+    // if closed here, may cause failure in GetDisplayListener for callback
     return AVSESSION_SUCCESS;
 }
 
@@ -1387,7 +1573,6 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
         SLOGE("controlCommand invalid");
         return;
     }
-
     SLOGI("ExecuteControllerCommand code %{public}d from pid %{public}d to pid %{public}d",
         code, static_cast<int>(GetCallingPid()), static_cast<int>(GetPid()));
     {
@@ -1835,7 +2020,9 @@ int32_t AVSessionItem::doContinuousTaskRegister()
     handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 1, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
+#ifndef TEST_COVERAGE
     dlclose(handle_);
+#endif
 #endif
     return AVSESSION_SUCCESS;
 }
@@ -1864,7 +2051,9 @@ int32_t AVSessionItem::doContinuousTaskUnregister()
     handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 2, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done when stop cast, result: %{public}d", errCode);
+#ifndef TEST_COVERAGE
     dlclose(handle_);
+#endif
 #endif
     return AVSESSION_SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 #include "bundle_mgr_client.h"
 #include "tokenid_kit.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 using namespace Security::AccessToken;
@@ -31,48 +32,51 @@ PermissionChecker& PermissionChecker::GetInstance()
     return permissionChecker;
 }
 
-bool PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessTokenID tokenId)
+int32_t PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessTokenID tokenId)
 {
     if (AccessTokenKit::GetTokenTypeFlag(tokenId) == TOKEN_NATIVE) {
-        return true;
+        return ERR_NONE;
     }
 
-    if (!IsSystemApp()) {
-        SLOGE("Check system permission failed, is not a system app");
-        return false;
+    if (IsSystemApp()) {
+        return ERR_NONE;
     }
 
-    SLOGD("Check system permission finished");
-    return true;
+    SLOGE("Check system permission faild");
+    return ERR_NO_PERMISSION;
 }
 
-bool PermissionChecker::CheckPermission(int32_t checkPermissionType)
+int32_t PermissionChecker::CheckPermission(int32_t checkPermissionType)
 {
     Security::AccessToken::AccessTokenID callerToken = OHOS::IPCSkeleton::GetCallingTokenID();
     if (AccessTokenKit::GetTokenTypeFlag(callerToken) == TOKEN_SHELL) {
-        return true;
+        return ERR_NONE;
     }
     switch (checkPermissionType) {
         case CHECK_SYSTEM_PERMISSION:
             return CheckSystemPermission(callerToken);
-        case CHECK_MEDIA_RESOURCES_PERMISSION:
-            return CheckMediaResourcePermission(callerToken, std::string(MANAGE_MEDIA_RESOURCES)) &&
-                CheckSystemPermission(callerToken);
+        case CHECK_MEDIA_RESOURCES_PERMISSION: {
+            int32_t ret = CheckSystemPermission(callerToken);
+            if (ret == ERR_NO_PERMISSION) {
+                return ret;
+            }
+            return CheckMediaResourcePermission(callerToken, std::string(MANAGE_MEDIA_RESOURCES));
+        }
         default:
-            return false;
+            return ERR_NO_PERMISSION;
     }
 }
 
-bool PermissionChecker::CheckMediaResourcePermission(
+int32_t PermissionChecker::CheckMediaResourcePermission(
     Security::AccessToken::AccessTokenID callerToken, std::string permissionName)
 {
     const std::string &permission = permissionName;
     int32_t ret = AccessTokenKit::VerifyAccessToken(callerToken, permission);
     if (ret == PermissionState::PERMISSION_DENIED) {
         SLOGE("Check media resources permission failed.");
-        return false;
+        return ERR_PERMISSION_DENIED;
     }
-    return true;
+    return ERR_NONE;
 }
 
 bool PermissionChecker::IsSystemApp()

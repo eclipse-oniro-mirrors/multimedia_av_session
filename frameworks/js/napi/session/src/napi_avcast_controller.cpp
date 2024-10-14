@@ -839,10 +839,6 @@ napi_status NapiAVCastController::OnSeekDone(napi_env env, NapiAVCastController*
     auto status = napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_SEEK_DONE, callback);
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "AddCallback failed");
-
-    int32_t ret = napiCastController->castController_
-        ->AddAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add cmd failed");
     return napi_ok;
 }
 
@@ -1033,12 +1029,6 @@ napi_status NapiAVCastController::OffSeekDone(napi_env env, NapiAVCastController
     auto status = napiCastController->callback_->RemoveCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_SEEK_DONE, callback);
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
-
-    if (napiCastController->callback_->IsCallbacksEmpty(NapiAVCastControllerCallback::EVENT_CAST_SEEK_DONE)) {
-        int32_t ret = napiCastController->castController_
-            ->RemoveAvailableCommand(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
-        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "remove cmd failed");
-    }
     return napi_ok;
 }
 

@@ -15,12 +15,14 @@
 
 #include "ability_manager_adapter.h"
 
+#include "avsession_dynamic_loader.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "bundle_status_adapter.h"
 #include "ability_connect_helper.h"
 
 namespace OHOS::AVSession {
+static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
 
 AbilityManagerAdapter::AbilityManagerAdapter(const std::string& bundleName, const std::string& abilityName)
 {
@@ -32,20 +34,34 @@ AbilityManagerAdapter::AbilityManagerAdapter(const std::string& bundleName, cons
 AbilityManagerAdapter::~AbilityManagerAdapter()
 {}
 
-int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
+__attribute__((no_sanitize("cfi"))) int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
 {
     if (status_ != Status::ABILITY_STATUS_INIT) {
         SLOGE("Start Ability is running");
         return ERR_START_ABILITY_IS_RUNNING;
     }
     status_ = Status::ABILITY_STATUS_RUNNING;
-    AppExecFwk::InsightIntentExecuteParam executeParam;
-    bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName_, "", executeParam);
     int32_t ret = AVSESSION_ERROR;
+    bool isSupport = false;
 
-    if (bundleName_ != DEFAULT_BUNDLE_NAME && isSupport && !executeParam.insightIntentName_.empty()) {
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+    typedef bool (*IsSupportPlayIntentFunc)(const std::string& bundleName, const std::string& assetId);
+    IsSupportPlayIntentFunc isSupportPlayIntent =
+        reinterpret_cast<IsSupportPlayIntentFunc>(dynamicLoader->GetFuntion(
+            AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "IsSupportPlayIntent"));
+    if (isSupportPlayIntent) {
+        isSupport = (*isSupportPlayIntent)(bundleName_, "");
+    }
+
+    if (isSupport) {
         SLOGI("Start Ability mediaintent");
-        ret = AbilityConnectHelper::GetInstance().StartAVPlayback(executeParam);
+        typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId);
+        StartAVPlaybackFunc startAVPlayback =
+            reinterpret_cast<StartAVPlaybackFunc>(dynamicLoader->GetFuntion(
+                AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlayback"));
+        if (startAVPlayback) {
+            ret = (*startAVPlayback)(bundleName_, "");
+        }
     } else {
         ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName_, abilityName_);
     }

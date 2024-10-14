@@ -203,7 +203,8 @@ void AVSessionCallbackImpl::OnCastDisplayChange(const CastDisplayInfo& castDispl
     SLOGI("OnCastDisplayChange");
     g_onCall = AVSESSION_SUCCESS;
 }
- 
+
+
 AVSessionCallbackImpl::~AVSessionCallbackImpl()
 {
 }

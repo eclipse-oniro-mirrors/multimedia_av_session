@@ -423,7 +423,6 @@ int32_t DoDownload(AVMetaData& meta, const std::string uri)
     if (ret && pixelMap != nullptr) {
         SLOGI("DoDownload success");
         meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
-        meta.SetSmallMediaImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
         return AVSESSION_SUCCESS;
     }
     return AVSESSION_ERROR;
@@ -1051,6 +1050,7 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
 
     context->GetCbInfo(env, info);
 
+    SLOGI("Destroy session begin");
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
@@ -1218,7 +1218,8 @@ napi_value NapiAVSession::GetAllCastDisplays(napi_env env, napi_callback_info in
     };
     return NapiAsyncWork::Enqueue(env, context, "GetAllCastDisplays", executor, complete);
 #else
-    return nullptr;
+    SLOGE("GetAllCastDisplays CASTPLUS_CAST_ENGINE_ENABLE is not support");
+    return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
 #endif
 }
 
@@ -1439,6 +1440,8 @@ napi_status NapiAVSession::OffPause(napi_env env, NapiAVSession* napiSession, na
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PAUSE, callback);
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
     if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_PAUSE)) {
+        CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
+                                 "NapiAVSession object is nullptr");
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PAUSE);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     }

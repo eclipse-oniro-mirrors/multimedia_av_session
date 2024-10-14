@@ -27,8 +27,7 @@ void HwCastDisplayListener::OnConnect(Rosen::ScreenId screenId)
     }
     auto displayName = displayInfo->GetName();
     SLOGI("ScreenId OnConnect: %{public}s", displayName.c_str());
-    auto flag = Rosen::ScreenManager::GetInstance().GetVirtualScreenFlag(screenId);
-    if (flag == Rosen::VirtualScreenFlag::CAST) {
+    if (displayName == "CastEngine") {
         ReportCastDisplay(displayInfo, CastDisplayState::STATE_ON);
         SetDisplayInfo(displayInfo);
     }
@@ -37,7 +36,7 @@ void HwCastDisplayListener::OnConnect(Rosen::ScreenId screenId)
 
 void HwCastDisplayListener::OnDisconnect(Rosen::ScreenId screenId)
 {
-    SLOGI("OnDisconnect in");
+    SLOGI("ScreenId OnDisconnect");
     auto curDisplayInfo = GetDisplayInfo();
     if (!curDisplayInfo || curDisplayInfo->GetId() != screenId) {
         SLOGE("curDisplayInfo_ is null");
@@ -68,7 +67,6 @@ sptr<Rosen::Screen> HwCastDisplayListener::GetDisplayInfo()
 // LCOV_EXCL_START
 void HwCastDisplayListener::ReportCastDisplay(sptr<Rosen::Screen> displayInfo, CastDisplayState displayState)
 {
-    SLOGI("Screen ReportCastDisplay");
     CastDisplayInfo castDisplayInfo;
     castDisplayInfo.displayState = displayState;
     castDisplayInfo.displayId = displayInfo->GetId();

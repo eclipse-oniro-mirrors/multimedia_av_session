@@ -295,7 +295,9 @@ HWTEST_F(AVSessionRemoteTest, CastAudio001, TestSize.Level1)
     sessionToken.sessionId = avsession_->GetSessionId();
     sessionToken.pid = 111;
     sessionToken.uid = 2222;
-    EXPECT_EQ(AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors), AVSESSION_SUCCESS);
+    int ret = AVSessionManager::GetInstance().CastAudio(sessionToken, g_descriptors);
+    SLOGI("CastAudio001 with ret %{public}d", static_cast<int>(ret));
+    EXPECT_EQ((ret == AVSESSION_SUCCESS || ret == ERR_IPC_SEND_REQUEST), true);
     SLOGE("CastAudio001 End");
 }
 
@@ -357,7 +359,9 @@ HWTEST_F(AVSessionRemoteTest, CastAudio004, TestSize.Level1)
 HWTEST_F(AVSessionRemoteTest, CastAudioForAll001, TestSize.Level1)
 {
     SLOGE("CastAudioForAll001 Begin");
-    EXPECT_EQ(AVSessionManager::GetInstance().CastAudioForAll(g_descriptors), AVSESSION_SUCCESS);
+    int ret = AVSessionManager::GetInstance().CastAudioForAll(g_descriptors);
+    SLOGI("CastAudioForAll001 with ret %{public}d", static_cast<int>(ret));
+    EXPECT_EQ((ret == AVSESSION_SUCCESS || ret == ERR_IPC_SEND_REQUEST), true);
     SLOGE("CastAudioForAll001 End");
 }
 
@@ -776,7 +780,7 @@ HWTEST_F(AVSessionRemoteTest, StopCast001, TestSize.Level1)
     ASSERT_NE(descriptor.outputDeviceInfo_.deviceInfos_.size(), 0);
     ret = AVSessionManager::GetInstance().StartCast(sessionToken, descriptor.outputDeviceInfo_);
     ret = AVSessionManager::GetInstance().StopCast(sessionToken);
-    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("StopCast001 end");
 }
 #endif

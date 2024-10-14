@@ -130,9 +130,6 @@ public:
     void SetMediaImage(const std::shared_ptr<AVSessionPixelMap>& mediaImage);
     std::shared_ptr<AVSessionPixelMap> GetMediaImage() const;
 
-    void SetSmallMediaImage(const std::shared_ptr<AVSessionPixelMap>& mediaImage);
-    std::shared_ptr<AVSessionPixelMap> GetSmallMediaImage() const;
-
     void SetMediaImageUri(const std::string& mediaImageUri);
     std::string GetMediaImageUri() const;
 
@@ -226,7 +223,6 @@ private:
     std::string composer_ = "";
     int64_t duration_ = 0;
     std::shared_ptr<AVSessionPixelMap> mediaImage_ = nullptr;
-    std::shared_ptr<AVSessionPixelMap> mediaImageSmall_ = nullptr;
     std::string mediaImageUri_ = "";
     double publishDate_ = 0;
     std::string subTitle_ = "";

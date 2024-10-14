@@ -163,7 +163,7 @@ public:
      * @brief Start cast process.
      *
      * @param { OutputDeviceInfo } outputDeviceInfo - Output device ready for use.
-     * @param { std::shared_ptr<IAVCastSessionStateListener > } callback - Callback function.
+     * @param { std::shared_ptr<IAVCastSessionStateListener> } callback - Callback function.
      * @return { int64_t } ID returned after successful start of cast.
      * @since 10
     */

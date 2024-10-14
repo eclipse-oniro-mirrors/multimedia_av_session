@@ -153,4 +153,3 @@ static HWTEST(BkGrAudioControllerTest, HandleAppBackgroundState001, TestSize.Lev
     backgroundaudiocontroller.HandleAppBackgroundState(uid, pid);
     EXPECT_EQ(uid, -1);
 }
-

@@ -32,6 +32,24 @@ static const int32_t MAX_CODE_TEST = 17;
 static const int32_t MAX_CODE_LEN = 512;
 static const int32_t MIN_SIZE_NUM = 4;
 
+template<typename T>
+class ResourceAutoDestroy {
+public:
+    explicit ResourceAutoDestroy(T ptr) : ptr_(ptr)
+    {
+    }
+
+    ~ResourceAutoDestroy()
+    {
+        if (ptr_) {
+            ptr_->Destroy();
+        }
+    }
+
+private:
+    T ptr_;
+};
+
 void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
@@ -47,9 +65,10 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
-    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type % MIN_SIZE_NUM, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
     CHECK_AND_RETURN_LOG(avSessionItem != nullptr, "avSessionItem is null");
+    ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
     CHECK_AND_RETURN_LOG(code < MAX_CODE_TEST, "Unsupport code");
     sptr<IRemoteObject> avControllerItemObj;
@@ -57,6 +76,7 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
     CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "CreateControllerInner failed");
     avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
     CHECK_AND_RETURN_LOG(avControllerItem != nullptr, "avControllerItem is null");
+    ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
     MessageParcel dataMessageParcel;
     MessageParcel reply;
     MessageOption option;
@@ -67,7 +87,6 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
     dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
     dataMessageParcel.RewindRead(0);
     avControllerItem->OnRemoteRequest(code, dataMessageParcel, reply, option);
-    avControllerItem->Destroy();
 }
 
 void AvControllerItemRemoteRequestTest(const uint8_t* data, size_t size)
@@ -76,6 +95,7 @@ void AvControllerItemRemoteRequestTest(const uint8_t* data, size_t size)
     if (avControllerItemFuzzer == nullptr) {
         return;
     }
+    SLOGE("checkcontroller in");
     avControllerItemFuzzer->FuzzOnRemoteRequest(data, size);
 }
 
@@ -91,7 +111,7 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
-    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type % MIN_SIZE_NUM, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
     CHECK_AND_RETURN_LOG(avSessionItem != nullptr, "avSessionItem is null");
     sptr<AVControllerItem> avControllerItem;
@@ -100,9 +120,7 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "CreateControllerInner fail");
     avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
     CHECK_AND_RETURN_LOG(avControllerItem != nullptr, "avControllerItem is null");
-    auto avControllerItemFuzzer = std::make_shared<AvControllerItemFuzzer>();
-    CHECK_AND_RETURN_LOG(avControllerItemFuzzer != nullptr, "avControllerItemFuzzer is null");
-
+    ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
     AVPlaybackState playbackstate;
     avControllerItem->GetAVPlaybackState(playbackstate);
     AVMetaData metaData;
@@ -110,10 +128,15 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     std::vector<int32_t> cmds;
     avControllerItem->GetValidCommands(cmds);
     AVPlaybackState::PlaybackStateMaskType playBackFilter;
-    playBackFilter.set(*(reinterpret_cast<const int32_t*>(data)));
+    uint32_t playCode = *(reinterpret_cast<const uint32_t*>(data));
+    if (playCode <= AVPlaybackState::PLAYBACK_KEY_MAX) {
+        playBackFilter.set(playCode);
+    } else {
+        playBackFilter.set(AVPlaybackState::PLAYBACK_KEY_STATE);
+    }
     avControllerItem->SetPlaybackFilter(playBackFilter);
-
     AvControllerItemDataTestSecond(avControllerItem, data, size);
+    AvControllerItemDataTestThird(avControllerItem, data, size);
 }
 
 void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem, const uint8_t* data, size_t size)
@@ -134,17 +157,43 @@ void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem, con
     avControllerItem->GetLaunchAbility(ability);
 
     uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-    if (code <= AVMetaData::META_KEY_MAX) {
-        AVMetaData::MetaMaskType metaFilter;
-        metaFilter.set(code);
-        avControllerItem->SetMetaFilter(metaFilter);
-    }
-    if (code <= AVControlCommand::SESSION_CMD_MAX) {
-        AVControlCommand commond;
-        commond.SetCommand(code);
-        avControllerItem->SendControlCommand(commond);
-    }
-    avControllerItem->Destroy();
+    AVMetaData::MetaMaskType metaFilter;
+    metaFilter.set(code % AVMetaData::META_KEY_MAX);
+    avControllerItem->SetMetaFilter(metaFilter);
+    AVControlCommand command;
+    command.SetCommand(code % AVControlCommand::SESSION_CMD_MAX);
+    avControllerItem->SendControlCommand(command);
+
+    AVCallState avCallState;
+    avControllerItem->GetAVCallState(avCallState);
+    AVCallMetaData callMetaData;
+    avControllerItem->GetAVCallMetaData(callMetaData);
+}
+
+void AvControllerItemDataTestThird(sptr<AVControllerItem> avControllerItem, const uint8_t* data, size_t size)
+{
+    std::vector<AVQueueItem> items;
+    avControllerItem->GetAVQueueItems(items);
+
+    std::string title;
+    avControllerItem->GetAVQueueTitle(title);
+
+    int32_t itemId = *(reinterpret_cast<const int32_t*>(data));
+    avControllerItem->SkipToQueueItem(itemId);
+
+    AAFwk::WantParams extras;
+    avControllerItem->GetExtras(extras);
+
+    std::string commonCommand(reinterpret_cast<const char*>(data), size);
+    avControllerItem->SendCommonCommand(commonCommand, extras);
+
+    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+    AVCallMetaData::AVCallMetaMaskType avCallMetaMaskType;
+    avCallMetaMaskType.set(code % AVCallMetaData::AVCALL_META_KEY_MAX);
+    avControllerItem->SetAVCallMetaFilter(avCallMetaMaskType);
+    AVCallState::AVCallStateMaskType avCallStateMaskType;
+    avCallStateMaskType.set(code % AVCallState::AVCALL_STATE_KEY_MAX);
+    avControllerItem->SetAVCallStateFilter(avCallStateMaskType);
 }
 
 void AvControllerItemTest(const uint8_t* data, size_t size)
@@ -164,12 +213,13 @@ void AvControllerItemTest(const uint8_t* data, size_t size)
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
-    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type % MIN_SIZE_NUM, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
     if (!avSessionItem) {
         SLOGI("avSessionItem is null");
         return;
     }
+    ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
     sptr<AVControllerItem> avControllerItem;
     sptr<IRemoteObject> avControllerItemObj;
     std::string sessionId(reinterpret_cast<const char*>(data), size);
@@ -183,7 +233,9 @@ void AvControllerItemTest(const uint8_t* data, size_t size)
         SLOGI("avControllerItem is null");
         return;
     }
+    ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
     AvControllerItemTestImpl(data, size, avControllerItem);
+    AvControllerItemTestImplSecond(data, size, avControllerItem);
 }
 
 void AvControllerItemTestImpl(const uint8_t* data, size_t size,
@@ -209,7 +261,41 @@ void AvControllerItemTestImpl(const uint8_t* data, size_t size,
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     avControllerItem->HandleOutputDeviceChange(connectionState, outputDeviceInfo);
     avControllerItem->HandleSessionDestroy();
-    avControllerItem->Destroy();
+}
+
+void AvControllerItemTestImplSecond(const uint8_t* data, size_t size,
+    sptr<AVControllerItem> avControllerItem)
+{
+    AVCallMetaData callMetaData;
+    int32_t numberDate = *(reinterpret_cast<const int32_t*>(data));
+    std::string dataToS(std::to_string(numberDate));
+    std::string strCallMetaData(dataToS);
+    callMetaData.SetName(strCallMetaData);
+    callMetaData.SetPhoneNumber(strCallMetaData);
+    avControllerItem->HandleAVCallMetaDataChange(callMetaData);
+
+    AVCallState avCallState;
+    int32_t callState = std::stoi(dataToS);
+    avCallState.SetAVCallState(callState);
+    bool mute = std::stoi(dataToS);
+    avCallState.SetAVCallMuted(mute);
+    avControllerItem->HandleAVCallStateChange(avCallState);
+
+    const std::string event(reinterpret_cast<const char*>(data), size);
+    const std::string title(reinterpret_cast<const char*>(data), size);
+    AAFwk::WantParams wantParams;
+    vector<AVQueueItem> items;
+    avControllerItem->HandleSetSessionEvent(event, wantParams);
+    avControllerItem->HandleQueueItemsChange(items);
+    avControllerItem->HandleQueueTitleChange(title);
+    avControllerItem->HandleExtrasChange(wantParams);
+
+    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    auto releaseCallback = [](AVControllerItem& item) {};
+    auto avControllerCallback = std::make_shared<AVControllerObserver>(sessionId);
+    avControllerItem->SetServiceCallbackForRelease(releaseCallback);
+    avControllerItem->RegisterAVControllerCallback(avControllerCallback);
+    avControllerItem->CheckIfFromSession();
 }
 
 /* Fuzzer entry point */

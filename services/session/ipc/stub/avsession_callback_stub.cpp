@@ -173,7 +173,6 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnOutputDeviceChange");
     int32_t connectionState;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(connectionState), false, "write deviceInfoSize failed");
-
     OutputDeviceInfo outputDeviceInfo;
     int32_t deviceInfoSize;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
@@ -244,7 +243,7 @@ int32_t AVSessionCallbackStub::HandleOnPlayFromAssetId(MessageParcel& data, Mess
     OnPlayFromAssetId(assetId);
     return ERR_NONE;
 }
- 
+
 int32_t AVSessionCallbackStub::HandleOnCastDisplayChange(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnCastDisplayChange");
