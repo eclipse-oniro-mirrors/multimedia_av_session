@@ -2770,11 +2770,33 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
 }
 
+void AVSessionService::RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
+    const std::chrono::system_clock::time_point &now, int32_t time)
+{
+    auto iter = list.begin();
+    while (iter != list.end()) {
+        if (abs(now - static_cast<std::chrono::system_clock::time_point>(*iter)) >
+            std::chrono::seconds(static_cast<int>(time))) {
+            iter = list.erase(iter);
+        } else {
+            break;
+        }
+    }
+}
+
 // LCOV_EXCL_START
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession)
 {
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     CHECK_AND_RETURN_LOG(!is2in1_, "2in1 not support");
+    // flow control
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    RemoveExpired(flowControlPublishTimestampList_, now);
+    if (flowControlPublishTimestampList_.size() >= MAX_NOTIFICATION_NUM) {
+        SLOGE("PublishNotification Exeed MAX_NOTIFICATION_NUM");
+        return;
+    }
+    flowControlPublishTimestampList_.push_back(now);
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
 
