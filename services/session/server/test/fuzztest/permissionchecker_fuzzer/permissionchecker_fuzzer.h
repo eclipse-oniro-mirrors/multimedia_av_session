@@ -30,7 +30,7 @@ namespace OHOS::AVSession {
     void CheckPermissionTest002();
     void CheckPermissionTest003();
     void CheckSystemPermissionTest001();
-    void CheckMediaResourcePermissionTest001();
-    void CheckSystemPermissionByUidTest001(uint8_t* data);
+    void CheckMediaResourcePermissionTest001(uint8_t* data, size_t size);
+    void CheckSystemPermissionByUidTest001();
 }
 #endif
