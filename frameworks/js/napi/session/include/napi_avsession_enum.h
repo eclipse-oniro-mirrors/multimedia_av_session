@@ -20,6 +20,12 @@
 
 namespace OHOS::AVSession {
 napi_status InitEnums(napi_env env, napi_value exports);
+static void AVSessionControlErrorCode(napi_env env, napi_value result);
+static void AVSessionIOErrorCode(napi_env env, napi_value result);
+static void AVSessionParsingErrorCode(napi_env env, napi_value result);
+static void AVSessionDecodingErrorCode(napi_env env, napi_value result);
+static void AVSessionAudioRenderErrorCode(napi_env env, napi_value result);
+static void AVSessionDRMErrorCode(napi_env env, napi_value result);
 }
 
 #endif
