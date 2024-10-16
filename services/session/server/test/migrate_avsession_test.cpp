@@ -107,7 +107,7 @@ void MigrateAVSessionTest::NativeTokenGet(const char *perms[], int size)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, GetCharacteristic001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, GetCharacteristic001, TestSize.Level1)
 {
     SLOGI("GetCharacteristic001 begin");
     int32_t ret = server_->GetCharacteristic();
@@ -212,7 +212,7 @@ void TestMigrateSendByte(OHOS::sptr<AVSessionItem> avsession_, std::shared_ptr<M
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, MigrateTest001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, MigrateTest001, TestSize.Level1)
 {
     SLOGI("MigrateTest001 begin");
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
@@ -253,7 +253,7 @@ HWTEST_F(MigrateAVSessionTest, MigrateTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, CreateController001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, CreateController001, TestSize.Level1)
 {
     SLOGI("CreateController001 begin");
     const std::string sessionId = "1111";
@@ -270,7 +270,7 @@ HWTEST_F(MigrateAVSessionTest, CreateController001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId001, TestSize.Level1)
 {
     SLOGI("ClearCacheBySessionId001 begin");
     const std::string sessionId = "1111";
@@ -287,7 +287,7 @@ HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, StopObserveControllerChanged001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, StopObserveControllerChanged001, TestSize.Level1)
 {
     SLOGI("StopObserveControllerChanged001 begin");
     const std::string deviceId = "1111";
@@ -304,7 +304,7 @@ HWTEST_F(MigrateAVSessionTest, StopObserveControllerChanged001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, GetControllerById001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, GetControllerById001, TestSize.Level1)
 {
     SLOGI("GetControllerById001 begin");
     const std::string sessionId = "123";
@@ -320,7 +320,7 @@ HWTEST_F(MigrateAVSessionTest, GetControllerById001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, GetControllerById002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, GetControllerById002, TestSize.Level1)
 {
     SLOGI("GetControllerById002 begin");
     const std::string sessionId = "123";
@@ -337,7 +337,7 @@ HWTEST_F(MigrateAVSessionTest, GetControllerById002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble001, TestSize.Level1)
 {
     SLOGI("ConvertStateFromSingleToDouble001 begin");
     int32_t state = AVPlaybackState::PLAYBACK_STATE_PLAY;
@@ -352,7 +352,7 @@ HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble002, TestSize.Level1)
 {
     SLOGI("ConvertStateFromSingleToDouble002 begin");
     int32_t state = AVPlaybackState::PLAYBACK_STATE_PAUSE;
@@ -367,7 +367,7 @@ HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble002, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble003, TestSize.Level1)
 {
     SLOGI("ConvertStateFromSingleToDouble003 begin");
     int32_t state = AVPlaybackState::PLAYBACK_STATE_STOP;
@@ -382,7 +382,7 @@ HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble003, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble004, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble004, TestSize.Level1)
 {
     SLOGI("ConvertStateFromSingleToDouble004 begin");
     int32_t state = AVPlaybackState::PLAYBACK_STATE_ERROR;
@@ -397,7 +397,7 @@ HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble004, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble005, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble005, TestSize.Level1)
 {
     SLOGI("ConvertStateFromSingleToDouble005 begin");
     int32_t state = 13;
@@ -412,7 +412,7 @@ HWTEST_F(MigrateAVSessionTest, ConvertStateFromSingleToDouble005, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ConvertMetadataToJson001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ConvertMetadataToJson001, TestSize.Level1)
 {
     SLOGI("ConvertMetadataToJson001 begin");
     AVMetaData metadata;
@@ -430,7 +430,7 @@ HWTEST_F(MigrateAVSessionTest, ConvertMetadataToJson001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ConvertMetadataInfoToStr001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ConvertMetadataInfoToStr001, TestSize.Level1)
 {
     SLOGI("ConvertMetadataInfoToStr001 begin");
     const std::string playerId = "123";
@@ -456,7 +456,7 @@ HWTEST_F(MigrateAVSessionTest, ConvertMetadataInfoToStr001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub001, TestSize.Level1)
 {
     SLOGI("CreateLocalSessionStub001 begin");
     std::string scene = "test";
@@ -472,7 +472,7 @@ HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub002, TestSize.Level1)
 {
     SLOGI("CreateLocalSessionStub002 begin");
     std::string scene = "SuperLauncher";
@@ -489,7 +489,7 @@ HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub001, TestSize.Level1)
 {
     SLOGI("ReleaseLocalSessionStub001 begin");
     std::string scene = "test";
@@ -505,7 +505,7 @@ HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub002, TestSize.Level1)
 {
     SLOGI("ReleaseLocalSessionStub002 begin");
     std::string scene = "SuperLauncher";
@@ -522,7 +522,7 @@ HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub003, TestSize.Level1)
 {
     SLOGI("ReleaseLocalSessionStub003 begin");
     std::string scene = "SuperLauncher";
@@ -538,7 +538,7 @@ HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, IncSoftBusRef001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, IncSoftBusRef001, TestSize.Level1)
 {
     SLOGI("IncSoftBusRef001 begin");
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
@@ -554,7 +554,7 @@ HWTEST_F(MigrateAVSessionTest, IncSoftBusRef001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId002, TestSize.Level1)
 {
     SLOGI("ClearCacheBySessionId002 begin");
     std::string sessionId = "#####";
@@ -569,7 +569,7 @@ HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId003, TestSize.Level1)
 {
     SLOGI("ClearCacheBySessionId003 begin");
     std::string sessionId = "12345";
@@ -588,7 +588,7 @@ HWTEST_F(MigrateAVSessionTest, ClearCacheBySessionId003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand001, TestSize.Level1)
 {
     SLOGI("ProcControlCommand001 begin");
     std::string data = R"(##{"PlayerId":"1","MediaCommand":"1"})";
@@ -603,7 +603,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand002, TestSize.Level1)
 {
     SLOGI("ProcControlCommand002 begin");
     std::string data = R"(##{"PlayerId":"1","command":"1"})";
@@ -618,7 +618,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand003, TestSize.Level1)
 {
     SLOGI("ProcControlCommand003 begin");
     std::string data = R"(##{"MediaCommand":"1","command":"1"})";
@@ -633,7 +633,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand004, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand004, TestSize.Level1)
 {
     SLOGI("ProcControlCommand004 begin");
     std::string data = R"(##{"MediaCommand":"1"})";
@@ -648,7 +648,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand005, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand005, TestSize.Level1)
 {
     SLOGI("ProcControlCommand005 begin");
     std::string data = R"(##{"command":"1"})";
@@ -663,7 +663,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand006, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand006, TestSize.Level1)
 {
     SLOGI("ProcControlCommand006 begin");
     std::string data = R"(##{"PlayerId":"1"})";
@@ -678,7 +678,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand007, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand007, TestSize.Level1)
 {
     SLOGI("ProcControlCommand007 begin");
     std::string data = R"(##{"PlayerId":"","MediaCommand":1,"command":"1"})";
@@ -693,7 +693,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand008, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand008, TestSize.Level1)
 {
     SLOGI("ProcControlCommand008 begin");
     server_->CreateController("111");
@@ -709,7 +709,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand008, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand009, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand009, TestSize.Level1)
 {
     SLOGI("ProcControlCommand009 begin");
     server_->CreateController("111");
@@ -725,7 +725,7 @@ HWTEST_F(MigrateAVSessionTest, ProcControlCommand009, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MigrateAVSessionTest, ProcControlCommand010, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, ProcControlCommand010, TestSize.Level1)
 {
     SLOGI("ProcControlCommand007 begin");
     server_->CreateController("111");
