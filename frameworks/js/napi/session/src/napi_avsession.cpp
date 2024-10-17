@@ -449,7 +449,10 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
     auto uri = data.GetMediaImageUri();
     int32_t ret = sessionPtr->SetAVMetaData(data);
     if (ret != AVSESSION_SUCCESS) {
+        SLOGE("do metadata set fail, ret:%{public}d", ret);
         processErrMsg(context, ret);
+    } else if (data.GetMediaImageUri().empty()) {
+        SLOGE("do metadata set with img uri empty");
     } else if (data.GetMediaImage() == nullptr) {
         ret = DoDownload(data, uri);
         SLOGI("DoDownload complete with ret %{public}d", ret);
@@ -490,8 +493,10 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     }
     napiAvSession->metaData_ = context->metaData;
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
-    context->metadataTs = std::chrono::system_clock::now();
-    reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
+    if (!context->metaData.GetMediaImageUri().empty()) {
+        context->metadataTs = std::chrono::system_clock::now();
+        reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
+    }
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {

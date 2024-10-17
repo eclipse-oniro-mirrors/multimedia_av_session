@@ -71,14 +71,16 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const T& param)
             [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
-                    SLOGI("checkCallbackValid with empty list for event %{public}d", event);
+                    SLOGE("checkCallbackValid with empty list for event=%{public}d", event);
                     return false;
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                if (!hasFunc) {
+                    SLOGE("checkCallbackValid res false for event=%{public}d", event);
+                }
                 return hasFunc;
             },
             [param](napi_env env, int& argc, napi_value* argv) {
@@ -234,6 +236,7 @@ void NapiAVSessionCallback::OnOutputDeviceChange(const int32_t connectionState,
     const OutputDeviceInfo& outputDeviceInfo)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
+    SLOGI("OnOutputDeviceChange with connectionState %{public}d", connectionState);
     HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, connectionState, outputDeviceInfo);
 }
 

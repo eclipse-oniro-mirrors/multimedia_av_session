@@ -587,6 +587,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     ReportAVCastControllerInfo();
 
     auto callback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
+        std::lock_guard lockGuard(avsessionItemLock_);
         SLOGI("process cast valid cmd: %{public}d", cmd);
         if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_INVALID) {
             supportedCastCmds_.clear();
@@ -865,6 +866,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
 // LCOV_EXCL_START
 void AVSessionItem::InitializeCastCommands()
 {
+    std::lock_guard lockGuard(avsessionItemLock_);
     // always support setVolume command
     auto iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(),
         AVCastControlCommand::CAST_CONTROL_CMD_SET_VOLUME);
@@ -908,6 +910,7 @@ void AVSessionItem::AddSessionCommandToCast(int32_t cmd)
 
     if (castControllerProxy_ != nullptr) {
         int32_t castCmd = SessionCommandToCastCommand(cmd);
+        std::lock_guard lockGuard(avsessionItemLock_);
         auto iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(), castCmd);
         if (iter != supportedCastCmds_.end()) {
             SLOGI("castCmd have already been added, cmd:%{public}d", castCmd);
@@ -926,6 +929,7 @@ void AVSessionItem::RemoveSessionCommandFromCast(int32_t cmd)
 
     if (castControllerProxy_ != nullptr) {
         int32_t castCmd = SessionCommandToCastCommand(cmd);
+        std::lock_guard lockGuard(avsessionItemLock_);
         SLOGI("remove castcmd:%{public}d", castCmd);
         auto iter = std::remove(supportedCastCmds_.begin(), supportedCastCmds_.end(), castCmd);
         supportedCastCmds_.erase(iter, supportedCastCmds_.end());
@@ -940,7 +944,7 @@ int32_t AVSessionItem::AddSupportCastCommand(int32_t cmd)
         SLOGI("add invalid cmd: %{public}d", cmd);
         return AVSESSION_ERROR;
     }
-
+    std::lock_guard lockGuard(avsessionItemLock_);
     if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE) {
         auto iter = std::find(
             supportedCastCmds_.begin(), supportedCastCmds_.end(), AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
@@ -971,7 +975,7 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
         SLOGI("delete invalid cmd: %{public}d", cmd);
         return AVSESSION_ERROR;
     }
-
+    std::lock_guard lockGuard(avsessionItemLock_);
     if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE) {
         auto iter = std::remove(
             supportedCastCmds_.begin(), supportedCastCmds_.end(), AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
@@ -1135,7 +1139,10 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
     castHandleDeviceId_ = "-100";
     DoContinuousTaskUnregister();
     castControllerProxy_ = nullptr;
-    supportedCastCmds_.clear();
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        supportedCastCmds_.clear();
+    }
     SaveLocalDeviceInfo();
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
