@@ -72,7 +72,6 @@ void AVSessionManagerImpl::OnServiceDie()
         std::lock_guard<std::mutex> lockGuard(lock_);
         service_.clear();
         listener_.clear();
-        clientDeath_.clear();
         deathCallback_ = nullptr;
     }
     if (callback) {
