@@ -29,16 +29,23 @@
 #endif
 
 namespace OHOS::AVSession {
-AVControllerItem::AVControllerItem(pid_t pid, const sptr<AVSessionItem>& session)
-    : pid_(pid), session_(session)
+AVControllerItem::AVControllerItem(pid_t pid, const sptr<AVSessionItem>& session, int32_t userId)
+    : pid_(pid), session_(session), userId_(userId)
 {
     sessionId_ = session_->GetSessionId();
-    SLOGD("construct sessionId=%{public}s", sessionId_.c_str());
+    SLOGI("construct sessionId=%{public}s, pid=%{public}d, userId=%{public}d",
+        AVSessionUtils::GetAnonySessionId(sessionId_).c_str(), static_cast<int>(pid_), userId_);
 }
 
 AVControllerItem::~AVControllerItem()
 {
-    SLOGI("destroy sessionId=%{public}s", sessionId_.c_str());
+    SLOGI("destroy sessionId=%{public}s, pid=%{public}d, userId=%{public}d",
+        AVSessionUtils::GetAnonySessionId(sessionId_).c_str(), static_cast<int>(pid_), userId_);
+}
+
+int32_t AVControllerItem::GetUserId() const
+{
+    return userId_;
 }
 
 int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
@@ -89,15 +96,13 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     data = session_->GetMetaData();
-    if (CheckIfFromSession()) {
-        SLOGI("ImgSetLoop get controller isFromSession true");
-        if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
-            SLOGI("ImgSetLoop do img clear");
+    if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
+        SLOGI("check isFromSession %{public}d when have two image resources", isFromSession_);
+        if (isFromSession_) {
             data.GetMediaImage()->Clear();
+        } else {
+            return ERR_INVALID_PARAM;
         }
-    } else {
-        SLOGE("ImgSetLoop get controller isFromSession false, return invalid param");
-        return ERR_INVALID_PARAM;
     }
     return AVSESSION_SUCCESS;
 }
@@ -319,10 +324,10 @@ void AVControllerItem::HandleAVCallMetaDataChange(const AVCallMetaData& avCallMe
         if (avCallMetaMask_.test(AVCallMetaData::AVCALL_META_KEY_MEDIA_IMAGE)) {
             std::shared_ptr<AVSessionPixelMap> innerPixelMap = nullptr;
             if (metaOut.GetMediaImage() != nullptr) {
-                std::string fileName =
-                    AVSessionUtils::GetCachePathName() + sessionId_ + AVSessionUtils::GetFileSuffix();
+                std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+                std::string fileName = sessionId_ + AVSessionUtils::GetFileSuffix();
                 innerPixelMap = metaOut.GetMediaImage();
-                AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
+                AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
             }
             metaOut.SetMediaImage(innerPixelMap);
         }
@@ -364,11 +369,6 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
     }
 }
 
-bool AVControllerItem::CheckIfFromSession()
-{
-    return isFromSession;
-}
-
 void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
@@ -376,16 +376,17 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
     std::lock_guard metaMaskLockGuard(metaMaskMutex_);
     if (data.CopyToByMask(metaMask_, metaOut)) {
         if ((metaMask_.test(AVMetaData::META_KEY_MEDIA_IMAGE)) && (metaOut.GetMediaImage() != nullptr)) {
-            std::string fileName = AVSessionUtils::GetCachePathName() + sessionId_ + AVSessionUtils::GetFileSuffix();
+            std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
             std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaOut.GetMediaImage();
-            AVSessionUtils::ReadImageFromFile(innerPixelMap, fileName);
+            AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, sessionId_ + AVSessionUtils::GetFileSuffix());
             metaOut.SetMediaImage(innerPixelMap);
         }
         if ((metaMask_.test(AVMetaData::META_KEY_AVQUEUE_IMAGE)) && (metaOut.GetAVQueueImage() != nullptr)) {
-            std::string avQueueFile = AVSessionUtils::GetFixedPathName() + session_->GetBundleName() + "_" +
-                metaOut.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+            std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
+            std::string avQueueFileName =
+                session_->GetBundleName() + "_" + metaOut.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
             std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaOut.GetAVQueueImage();
-            AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFile);
+            AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
             metaOut.SetAVQueueImage(avQueuePixelMap);
         }
         if (!metaMask_.test(AVMetaData::META_KEY_ASSET_ID)) {
@@ -393,15 +394,13 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
         }
         SLOGI("update metaData pid %{public}d, title %{public}s", static_cast<int>(pid_), metaOut.GetTitle().c_str());
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
-        std::string uri = metaOut.GetMediaImageUri();
-        if (CheckIfFromSession()) {
-            if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
-                SLOGI("ImgSetLoop get controller isFromSession true, ImgSetLoop do img clear");
-                data.GetMediaImage()->Clear();
+        if (metaOut.GetMediaImage() != nullptr && !metaOut.GetMediaImageUri().empty()) {
+            SLOGI("check isFromSession %{public}d when have two image resources", isFromSession_);
+            if (isFromSession_) {
+                metaOut.GetMediaImage()->Clear();
+            } else {
+                metaOut.SetMediaImageUri("");
             }
-        } else {
-            SLOGE("ImgSetLoop get controller isFromSession false, set empty");
-            metaOut.SetMediaImageUri("");
         }
         if (callback_ != nullptr) {
             callback_->OnMetaDataChange(metaOut);
@@ -409,7 +408,6 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
         if (innerCallback_ != nullptr) {
             innerCallback_->OnMetaDataChange(metaOut);
         }
-        metaOut.SetMediaImageUri(uri);
     }
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = metaOut.GetAVQueueImage();
     if (innerQueuePixelMap != nullptr) {

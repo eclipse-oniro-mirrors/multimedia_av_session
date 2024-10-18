@@ -209,7 +209,40 @@ void AvControllerItemTestImpl(const uint8_t* data, size_t size,
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     avControllerItem->HandleOutputDeviceChange(connectionState, outputDeviceInfo);
     avControllerItem->HandleSessionDestroy();
-    avControllerItem->Destroy();
+}
+
+void AvControllerItemTestImplSecond(const uint8_t* data, size_t size,
+    sptr<AVControllerItem> avControllerItem)
+{
+    AVCallMetaData callMetaData;
+    int32_t numberDate = *(reinterpret_cast<const int32_t*>(data));
+    std::string dataToS(std::to_string(numberDate));
+    std::string strCallMetaData(dataToS);
+    callMetaData.SetName(strCallMetaData);
+    callMetaData.SetPhoneNumber(strCallMetaData);
+    avControllerItem->HandleAVCallMetaDataChange(callMetaData);
+
+    AVCallState avCallState;
+    int32_t callState = std::stoi(dataToS);
+    avCallState.SetAVCallState(callState);
+    bool mute = std::stoi(dataToS);
+    avCallState.SetAVCallMuted(mute);
+    avControllerItem->HandleAVCallStateChange(avCallState);
+
+    const std::string event(reinterpret_cast<const char*>(data), size);
+    const std::string title(reinterpret_cast<const char*>(data), size);
+    AAFwk::WantParams wantParams;
+    vector<AVQueueItem> items;
+    avControllerItem->HandleSetSessionEvent(event, wantParams);
+    avControllerItem->HandleQueueItemsChange(items);
+    avControllerItem->HandleQueueTitleChange(title);
+    avControllerItem->HandleExtrasChange(wantParams);
+
+    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    auto releaseCallback = [](AVControllerItem& item) {};
+    auto avControllerCallback = std::make_shared<AVControllerObserver>(sessionId);
+    avControllerItem->SetServiceCallbackForRelease(releaseCallback);
+    avControllerItem->RegisterAVControllerCallback(avControllerCallback);
 }
 
 /* Fuzzer entry point */
