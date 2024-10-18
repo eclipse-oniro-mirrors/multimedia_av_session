@@ -836,7 +836,11 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     if (castHandle_ > 0) {
         return AVSESSION_ERROR;
     }
-    mirrorToStreamFlag_ = true;
+    {
+        std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
+        mirrorToStreamFlag_ = true;
+    }
+    std::lock_guard lockGuard(castHandleLock_);
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
@@ -1281,6 +1285,7 @@ void AVSessionItem::ListenCollaborationRejectToStopCast()
 
 int32_t AVSessionItem::StopCast()
 {
+    std::lock_guard lockGuard(castHandleLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
         int32_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -1296,7 +1301,6 @@ int32_t AVSessionItem::StopCast()
         removeTimes = 0;
     }
     {
-        std::lock_guard lockGuard(castHandleLock_);
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
         AVSessionRadarInfo info("AVSessionItem::StopCast");
         AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
