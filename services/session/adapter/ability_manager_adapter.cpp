@@ -34,6 +34,7 @@ AbilityManagerAdapter::~AbilityManagerAdapter()
 
 int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
 {
+    std::unique_lock<std::mutex> lock(syncMutex_);
     if (status_ != Status::ABILITY_STATUS_INIT) {
         SLOGE("Start Ability is running");
         return ERR_START_ABILITY_IS_RUNNING;
