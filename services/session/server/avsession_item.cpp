@@ -836,8 +836,11 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     if (castHandle_ > 0) {
         return AVSESSION_ERROR;
     }
+    {
+        std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
+        mirrorToStreamFlag_ = true;
+    }
     std::lock_guard lockGuard(castHandleLock_);
-    mirrorToStreamFlag_ = true;
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
