@@ -60,19 +60,20 @@ void BundleStatusAdapter::Init()
 }
 
 bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleName,
-    const std::function<void(const std::string)>& callback)
+    const std::function<void(const std::string, const int32_t userId)>& callback, int32_t userId)
 {
-    SLOGI("Bundle status adapter subscribe bundle status event, bundleName=%{public}s", bundleName.c_str());
-    auto bundleStatusListener = bundleStatusListeners_.find(bundleName);
+    SLOGI("Bundle status adapter subscribe bundle status event, bundleName=%{public}s, userId=%{public}d",
+        bundleName.c_str(), userId);
+    auto bundleStatusListener = bundleStatusListeners_.find(std::make_pair(bundleName, userId));
     if (bundleStatusListener != bundleStatusListeners_.end()) {
         SLOGE("bundle status has already register");
         return false;
     }
-    auto bundleStatusCallback = [this](std::string bundleName) {
-        NotifyBundleRemoved(bundleName);
+    auto bundleStatusCallback = [this](std::string bundleName, int32_t userId) {
+        NotifyBundleRemoved(bundleName, userId);
     };
     sptr<BundleStatusCallbackImpl> bundleStatusCallbackImpl =
-            new(std::nothrow) BundleStatusCallbackImpl(bundleStatusCallback);
+            new(std::nothrow) BundleStatusCallbackImpl(bundleStatusCallback, userId);
     if (bundleStatusCallbackImpl == nullptr) {
         SLOGE("no memory");
         return false;
@@ -87,9 +88,9 @@ bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleNam
         }
     }
     bundleStatusCallbackImpl->SetBundleName(bundleName);
+    bundleStatusCallbackImpl->SetUserId(userId);
     if (bundleMgrProxy->RegisterBundleStatusCallback(bundleStatusCallbackImpl)) {
-        bundleStatusListeners_.insert(std::pair<std::string, std::function<void(const std::string)>>(bundleName,
-            callback));
+        bundleStatusListeners_.insert(std::make_pair(std::make_pair(bundleName, userId), callback));
         return true;
     } else {
         SLOGE("Register bundle status callback failed, bundleName=%{public}s", bundleName.c_str());
@@ -108,15 +109,15 @@ bool BundleStatusAdapter::IsAudioPlayback(const std::string& bundleName, const s
     return flag;
 }
 
-void BundleStatusAdapter::NotifyBundleRemoved(const std::string bundleName)
+void BundleStatusAdapter::NotifyBundleRemoved(const std::string bundleName, const int32_t userId)
 {
-    auto bundleStatusListener = bundleStatusListeners_.find(bundleName);
+    auto bundleStatusListener = bundleStatusListeners_.find(std::make_pair(bundleName, userId));
     if (bundleStatusListener == bundleStatusListeners_.end()) {
         return;
     }
-    bundleStatusListener->second(bundleName);
-    SLOGI("erase bundle status callback, bundleName=%{public}s", bundleName.c_str());
-    bundleStatusListeners_.erase(bundleName);
+    bundleStatusListener->second(bundleName, userId);
+    SLOGI("erase bundle status callback, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
+    bundleStatusListeners_.erase(bundleStatusListener);
 }
 
 std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
@@ -185,10 +186,12 @@ __attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayInten
     return CheckBundleSupport(profile);
 }
 
-BundleStatusCallbackImpl::BundleStatusCallbackImpl(const std::function<void(const std::string)>& callback)
+BundleStatusCallbackImpl::BundleStatusCallbackImpl(
+    const std::function<void(const std::string, const int32_t userId)>& callback, int32_t userId)
 {
-    SLOGI("Create bundle status instance");
+    SLOGI("Create bundle status instance with userId %{public}d", userId);
     callback_ = callback;
+    userId_ = userId;
 }
 
 BundleStatusCallbackImpl::~BundleStatusCallbackImpl()
@@ -200,7 +203,7 @@ void BundleStatusCallbackImpl::OnBundleStateChanged(const uint8_t installType, c
     const std::string &resultMsg, const std::string &bundleName)
 {
     if (installType == static_cast<uint8_t>(AppExecFwk::InstallType::UNINSTALL_CALLBACK)) {
-        callback_(bundleName);
+        callback_(bundleName, userId_);
     }
 }
 }

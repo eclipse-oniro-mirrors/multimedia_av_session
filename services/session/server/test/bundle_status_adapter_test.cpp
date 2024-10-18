@@ -157,8 +157,9 @@ static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent001, testing:
 {
     SLOGI("SubscribeBundleStatusEvent001, start");
     std::string bundleName = "";
-    auto callback = [bundleName](const std::string& capturedBundleName) {
-        SLOGI("SubscribeBundleStatusEvent001: get bundle name: %{public}s", capturedBundleName.c_str());
+    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("SubscribeBundleStatusEvent001: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
     };
     bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
     EXPECT_EQ(ret, false);
@@ -174,8 +175,9 @@ static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent002, testing:
 {
     SLOGI("SubscribeBundleStatusEvent002, start");
     std::string bundleName = "com.ohos.camera";
-    auto callback = [bundleName](const std::string& capturedBundleName) {
-        SLOGI("SubscribeBundleStatusEvent002: get bundle name: %{public}s", capturedBundleName.c_str());
+    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("SubscribeBundleStatusEvent002: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
     };
     bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
     EXPECT_EQ(ret, true);
@@ -207,8 +209,9 @@ static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback002, testing::ext::TestS
     SLOGI("IsAudioPlayback002, start");
     std::string bundleName = "com.ohos.screenshot";
     std::string abilityName = "MainAbility";
-    auto callback = [bundleName](const std::string& capturedBundleName) {
-        SLOGI("SubscribeBundleStatusEvent003: get bundle name: %{public}s", capturedBundleName.c_str());
+    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("SubscribeBundleStatusEvent003: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
     };
     BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
     bool ret = BundleStatusAdapter::GetInstance().IsAudioPlayback(bundleName, abilityName);
@@ -226,11 +229,12 @@ static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved001, testing::ext::T
     SLOGI("NotifyBundleRemoved001, start");
     std::string bundleName = "com.ohos.screenshot";
     std::string abilityName = "MainAbility";
-    auto callback = [bundleName](const std::string& capturedBundleName) {
-        SLOGI("SubscribeBundleStatusEvent004: get bundle name: %{public}s", capturedBundleName.c_str());
+    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("SubscribeBundleStatusEvent004: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
     };
     BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
-    BundleStatusAdapter::GetInstance().NotifyBundleRemoved(bundleName);
+    BundleStatusAdapter::GetInstance().NotifyBundleRemoved(bundleName, 100);
     EXPECT_EQ(bundleName, "com.ohos.screenshot");
     SLOGI("NotifyBundleRemoved001, end");
 }
@@ -245,7 +249,7 @@ static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved002, testing::ext::T
     SLOGI("NotifyBundleRemoved002, start");
     std::string bundleName = "com.ohos.test";
     std::string abilityName = "MainAbility";
-    BundleStatusAdapter::GetInstance().NotifyBundleRemoved(bundleName);
+    BundleStatusAdapter::GetInstance().NotifyBundleRemoved(bundleName, 100);
     EXPECT_EQ(bundleName, "com.ohos.test");
     SLOGI("NotifyBundleRemoved002, end");
 }
@@ -277,8 +281,9 @@ static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent002, testing::ext::T
     std::string bundleName = "com.IsSupportPlayIntent.test";
     std::string supportModule = "";
     std::string profile = "";
-    auto callback = [bundleName](const std::string& capturedBundleName) {
-        SLOGI("SubscribeBundleStatusEvent005: get bundle name: %{public}s", capturedBundleName.c_str());
+    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("SubscribeBundleStatusEvent005: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
     };
     BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
     bool ret = BundleStatusAdapter::GetInstance().IsSupportPlayIntent(bundleName, supportModule, profile);

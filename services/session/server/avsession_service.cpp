@@ -235,22 +235,23 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
             SLOGE("get accountEventRemoved with servicePtr_ null");
         }
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
+        int32_t userId = eventData.GetCode();
         if (servicePtr_ != nullptr) {
-            servicePtr_->RegisterBundleDeleteEventForHistory();
+            servicePtr_->RegisterBundleDeleteEventForHistory(userId);
         } else {
             SLOGE("get user unlock with servicePtr_ null");
         }
     }
 }
 
-std::string AVSessionService::GetAVQueueDir()
+std::string AVSessionService::GetAVQueueDir(int32_t userId)
 {
-    return GetUsersManager().GetDirForCurrentUser() + AVQUEUE_FILE_NAME;
+    return GetUsersManager().GetDirForCurrentUser(userId) + AVQUEUE_FILE_NAME;
 }
 
-std::string AVSessionService::GetAVSortDir()
+std::string AVSessionService::GetAVSortDir(int32_t userId)
 {
-    return GetUsersManager().GetDirForCurrentUser() + SORT_FILE_NAME;
+    return GetUsersManager().GetDirForCurrentUser(userId) + SORT_FILE_NAME;
 }
 
 void AVSessionService::HandleUserEvent(const std::string &type, const int &userId)
@@ -760,7 +761,7 @@ void AVSessionService::InitBMS()
         SLOGE("InitBMS with userId: %{public}d, not valid, return and wait for InitAccountMgr", userId);
         return;
     }
-    RegisterBundleDeleteEventForHistory();
+    RegisterBundleDeleteEventForHistory(userId);
 }
 
 void AVSessionService::InitAccountMgr()
@@ -777,18 +778,26 @@ void AVSessionService::InitCommonEventService()
     CHECK_AND_RETURN_LOG(ret, "SubscribeCommonEvent error!");
 }
 
-void AVSessionService::RegisterBundleDeleteEventForHistory()
+void AVSessionService::RegisterBundleDeleteEventForHistory(int32_t userId)
 {
+    if (userId <= 0) {
+        userId = GetUsersManager().GetCurrentUserId();
+        SLOGI("do RegisterBundleDeleteEventForHistory with cur userId:%{public}d", userId);
+    } else {
+        SLOGI("do RegisterBundleDeleteEventForHistory with recv userId:%{public}d", userId);
+    }
+
     std::string oldSortContent;
-    if (LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
+    if (LoadStringFromFileEx(GetAVSortDir(userId), oldSortContent)) {
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
         CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
-        auto callback = [this](std::string bundleName) {
-            DeleteAVQueueInfoRecord(bundleName);
-            DeleteHistoricalRecord(bundleName);
+        auto callback = [this](std::string bundleName, int32_t userId) {
+            SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
+            DeleteAVQueueInfoRecord(bundleName, userId);
+            DeleteHistoricalRecord(bundleName, userId);
         };
         for (auto value : values) {
-            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(value["bundleName"], callback)) {
+            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(value["bundleName"], callback, userId)) {
                 std::string bundleName = value["bundleName"];
                 SLOGE("SubscribeBundleStatusEvent failed for bundle:%{public}s", bundleName.c_str());
             }
@@ -1221,11 +1230,13 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& sessionId, const
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
         CHECK_AND_RETURN_LOG(!values.is_discarded(), "sort json object is null");
         if (oldSortContent.find(elementName.GetBundleName()) == string::npos) {
-            auto callback = [this](std::string bundleName) {
-                DeleteAVQueueInfoRecord(bundleName);
-                DeleteHistoricalRecord(bundleName);
+            auto callback = [this](std::string bundleName, int32_t userId) {
+                SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
+                DeleteAVQueueInfoRecord(bundleName, userId);
+                DeleteHistoricalRecord(bundleName, userId);
             };
-            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(elementName.GetBundleName(), callback)) {
+            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(elementName.GetBundleName(),
+                callback, GetUsersManager().GetCurrentUserId())) {
                 SLOGE("SubscribeBundleStatusEvent failed");
             }
         }
@@ -1957,14 +1968,17 @@ void AVSessionService::OnClientDied(pid_t pid)
 }
 
 // LCOV_EXCL_START
-void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
+void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName, int32_t userId)
 {
     std::lock_guard sortFileLockGuard(sessionFileLock_);
-    SLOGI("delete historical record, bundleName=%{public}s", bundleName.c_str());
+    if (userId <= 0) {
+        userId = GetUsersManager().GetCurrentUserId();
+    }
+    SLOGI("delete historical record, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
     std::string oldContent;
     std::string newContent;
     nlohmann::json values;
-    if (!LoadStringFromFileEx(GetAVSortDir(), oldContent)) {
+    if (!LoadStringFromFileEx(GetAVSortDir(userId), oldContent)) {
         SLOGE("LoadStringFromFile failed, filename=%{public}s", SORT_FILE_NAME);
         return;
     }
@@ -1978,7 +1992,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
     }
     newContent = values.dump();
     SLOGD("DeleteHistoricalRecord::Dump json object finished");
-    if (!SaveStringToFileEx(GetAVSortDir(), newContent)) {
+    if (!SaveStringToFileEx(GetAVSortDir(userId), newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
         return;
     }
@@ -1986,14 +2000,14 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
-void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
+void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName, int32_t userId)
 {
     std::lock_guard avQueueFileLockGuard(avQueueFileLock_);
-    SLOGI("DeleteAVQueueInfoRecord, bundleName=%{public}s", bundleName.c_str());
+    SLOGI("DeleteAVQueueInfoRecord, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
     std::string oldContent;
     std::string newContent;
     nlohmann::json values;
-    if (!LoadStringFromFileEx(GetAVQueueDir(), oldContent)) {
+    if (!LoadStringFromFileEx(GetAVQueueDir(userId), oldContent)) {
         SLOGE("LoadStringFromFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return;
     }
@@ -2002,7 +2016,6 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
     for (auto it = values.begin(); it != values.end();) {
         if (it->at("bundleName") == bundleName) {
             std::string avQueueId = it->at("avQueueId");
-            int32_t userId = GetUsersManager().GetCurrentUserId();
             std::string fileName = AVSessionUtils::GetFixedPathName(userId) + bundleName + "_" +
                 avQueueId + AVSessionUtils::GetFileSuffix();
             AVSessionUtils::DeleteFile(fileName);
@@ -2013,7 +2026,7 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
     }
     newContent = values.dump();
     SLOGD("DeleteAVQueueInfoRecord::Dump json object finished");
-    if (!SaveStringToFileEx(GetAVQueueDir(), newContent)) {
+    if (!SaveStringToFileEx(GetAVQueueDir(userId), newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return;
     }
