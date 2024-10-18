@@ -159,8 +159,9 @@ int32_t AVSessionItem::DestroyTask()
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         }
-        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         ReleaseCast();
+        StopCastSession();
     }
     StopCastDisplayListener();
 #endif
@@ -840,15 +841,13 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
+    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_, GetSessionId());
     castHandle_ = castHandle;
     castHandleDeviceId_ = deviceInfo.deviceId_;
     SLOGI("RegisterListenerStreamToCast check handle set to %{public}ld", castHandle_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
-    counter_ = firstStep;
     AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
     AVRouter::GetInstance().SetServiceAllConnectState(castHandle, deviceInfo);
-    counter_ = secondStep;
     UpdateCastDeviceMap(deviceInfo);
 
     DoContinuousTaskRegister();
@@ -1087,12 +1086,12 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             return AVSESSION_ERROR;
         } else {
             SLOGI("cast check with pre cast alive %{public}ld, unregister callback", castHandle_);
-            AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+            AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         }
     }
     int32_t flag = CastAddToCollaboration(outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, AVSESSION_ERROR, "collaboration to start cast fail");
-    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_);
+    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_, GetSessionId());
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
     castHandle_ = castHandle;
@@ -1116,28 +1115,16 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
     return ret;
 }
 
-void AVSessionItem::DealCastState(int32_t castState)
-{
-    if (newCastState == castState) {
-        isUpdate = false;
-    } else {
-        if (counter_ == firstStep) {
-            newCastState = virtualDeviceStateConnection;
-        } else {
-            newCastState = castState;
-        }
-        isUpdate = true;
-    }
-}
-
-void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
+void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 {
     SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}ld", castHandle_);
-    AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
-    AVRouter::GetInstance().StopCastSession(castHandle_);
+    if (isNeedRemove) {
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
+        AVRouter::GetInstance().StopCastSession(castHandle_);
+        DoContinuousTaskUnregister();
+    }
     castHandle_ = -1;
     castHandleDeviceId_ = "-100";
-    DoContinuousTaskUnregister();
     castControllerProxy_ = nullptr;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
@@ -1177,17 +1164,12 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     }
 }
 
-void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
     DealCollaborationPublishState(castState, deviceInfo);
-    DealCastState(castState);
-    if (castState == streamStateConnection && counter_ == secondStep) {
-        SLOGI("interception of one devicestate=6 transmission");
-        counter_ = 0;
-        return;
-    }
+    newCastState = castState;
     OutputDeviceInfo outputDeviceInfo;
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
         outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);
@@ -1198,14 +1180,14 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         ReportConnectFinish("AVSessionItem::OnCastStateChange", deviceInfo);
-        if (callStartCallback_) {
+        if (callStartCallback_ && isNeedRemove) {
             SLOGI("AVSessionItem send callStart event to service for connected");
             callStartCallback_(*this);
         }
     }
     if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
-        DealDisconnect(deviceInfo);
+        DealDisconnect(deviceInfo, isNeedRemove);
     }
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
@@ -1282,7 +1264,7 @@ void AVSessionItem::ListenCollaborationRejectToStopCast()
 int32_t AVSessionItem::StopCast()
 {
     if (descriptor_.sessionTag_ == "RemoteCast") {
-        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         int32_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
         castHandle_ = -1;
         castHandleDeviceId_ = "-100";
@@ -1290,21 +1272,15 @@ int32_t AVSessionItem::StopCast()
         return ret;
     }
     SLOGI("Stop cast process");
-    removeTimes = 1;
-    if (isUpdate && newCastState == streamStateConnection) {
-        SLOGE("removeTimes = 0");
-        removeTimes = 0;
-    }
     {
         std::lock_guard lockGuard(castHandleLock_);
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
         AVSessionRadarInfo info("AVSessionItem::StopCast");
         AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
-        int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, removeTimes);
+        int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
         AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
         SLOGI("StopCast with unchange castHandle is %{public}ld", castHandle_);
         CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
-        removeTimes = 1;
     }
 
     if (castServiceNameMapState_["HuaweiCast"] != deviceStateConnection &&
@@ -1341,7 +1317,7 @@ void AVSessionItem::RegisterDeviceStateCallback()
 
 void AVSessionItem::UnRegisterDeviceStateCallback()
 {
-    AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_);
+    AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
 }
 
 void AVSessionItem::StopCastSession()

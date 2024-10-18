@@ -33,7 +33,7 @@ public:
     HwCastProvider() = default;
     ~HwCastProvider() override;
 
-    void Init() override;
+    int32_t Init() override;
     int32_t StartDeviceLogging(int32_t fd, uint32_t maxSize) override;
     int32_t StopDeviceLogging() override;
     bool StartDiscovery(int castCapability, std::vector<std::string> drmSchemes) override;
@@ -56,8 +56,8 @@ public:
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void OnServiceDied() override;
     bool SetStreamState(int32_t castId, DeviceInfo deviceInfo) override;
-    int GetMirrorCastId() override;
     bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) override;
+    int32_t GetProtocolType(uint32_t castProtocolType) override;
 
 private:
     static const int maxCastSessionSize = 256;
@@ -68,13 +68,6 @@ private:
     std::recursive_mutex mutexLock_;
     bool isRelease_ = false;
     int mirrorCastId = -1;
-
-    const int32_t deviceStateConnection = 4;
-    std::map<CastEngine::CapabilityType, int32_t> castPlusTypeToAVSessionType_ = {
-        {CastEngine::CapabilityType::CAST_PLUS, ProtocolType::TYPE_CAST_PLUS_STREAM},
-        {CastEngine::CapabilityType::DLNA, ProtocolType::TYPE_DLNA},
-        {CastEngine::CapabilityType::CAST_AND_DLNA, ProtocolType::TYPE_CAST_PLUS_STREAM | ProtocolType::TYPE_DLNA}
-    };
 };
 } // namespace OHOS::AVSession
 

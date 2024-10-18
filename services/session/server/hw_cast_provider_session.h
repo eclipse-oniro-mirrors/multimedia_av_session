@@ -32,7 +32,7 @@ public:
     void OnDeviceState(const CastEngine::DeviceStateInfo &stateInfo) override;
     void OnEvent(const CastEngine::EventId &eventId, const std::string &jsonParam) override;
 
-    void Init();
+    int32_t Init();
     void Release();
     bool AddDevice(const std::string deviceId);
     bool RemoveDevice(std::string deviceId);

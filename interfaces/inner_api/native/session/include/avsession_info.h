@@ -431,7 +431,8 @@ public:
     /**
      * @brief Listen to the change of cast state change.
      *
-     * @param castHandle The combination of providerId and castId.
+     * @param castState The cast state of device info.
+     * @param deviceInfo The device info.
      * @since 9
     */
     virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) = 0;
@@ -439,7 +440,8 @@ public:
     /**
      * @brief Listen to the change of cast event.
      *
-     * @param castHandle The combination of providerId and castId.
+     * @param errorCode The error code of cast event.
+     * @param errorMsg The error message of cast event.
      * @since 9
     */
     virtual void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) = 0;
@@ -451,6 +453,33 @@ public:
     virtual ~IAVCastSessionStateListener() = default;
 };
 
+class IAVRouterListener {
+public:
+    /**
+     * @brief Listen to the change of cast state change.
+     *
+     * @param castState The cast state of device info.
+     * @param deviceInfo The device info.
+     * @param isNeedRemove is need remove cast device
+     * @since 13
+    */
+    virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove) = 0;
+
+    /**
+     * @brief Listen to the change of cast event.
+     *
+     * @param errorCode The error code of cast event.
+     * @param errorMsg The error message of cast event.
+     * @since 13
+    */
+    virtual void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) = 0;
+
+    /**
+     * @brief Deconstruct IAVRouterListener.
+     * @since 13
+    */
+    virtual ~IAVRouterListener() = default;
+};
 
 struct SessionToken {
     std::string sessionId;
