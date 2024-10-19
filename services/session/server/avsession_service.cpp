@@ -1598,16 +1598,18 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
     }
 
     std::shared_ptr<AbilityManagerAdapter> ability = nullptr;
-    std::lock_guard lockGuard(abilityManagerLock_);
-    auto it = abilityManager_.find(bundleName + abilityName);
-    if (it != abilityManager_.end()) {
-        ability = it->second;
-    } else {
-        ability = std::make_shared<AbilityManagerAdapter>(bundleName, abilityName);
-        if (ability == nullptr) {
-            return ERR_NO_MEMORY;
+    {
+        std::lock_guard lockGuard(abilityManagerLock_);
+        auto it = abilityManager_.find(bundleName + abilityName);
+        if (it != abilityManager_.end()) {
+            ability = it->second;
+        } else {
+            ability = std::make_shared<AbilityManagerAdapter>(bundleName, abilityName);
+            if (ability == nullptr) {
+                return ERR_NO_MEMORY;
+            }
+            abilityManager_[bundleName + abilityName] = ability;
         }
-        abilityManager_[bundleName + abilityName] = ability;
     }
     if (ability == nullptr) {
         return AVSESSION_ERROR;
@@ -1649,16 +1651,18 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
     }
 
     std::shared_ptr<AbilityManagerAdapter> ability = nullptr;
-    std::lock_guard lockGuard(abilityManagerLock_);
-    auto it = abilityManager_.find(bundleName + abilityName);
-    if (it != abilityManager_.end()) {
-        ability = it->second;
-    } else {
-        ability = std::make_shared<AbilityManagerAdapter>(bundleName, abilityName);
-        if (ability == nullptr) {
-            return ERR_NO_MEMORY;
+    {
+        std::lock_guard lockGuard(abilityManagerLock_);
+        auto it = abilityManager_.find(bundleName + abilityName);
+        if (it != abilityManager_.end()) {
+            ability = it->second;
+        } else {
+            ability = std::make_shared<AbilityManagerAdapter>(bundleName, abilityName);
+            if (ability == nullptr) {
+                return ERR_NO_MEMORY;
+            }
+            abilityManager_[bundleName + abilityName] = ability;
         }
-        abilityManager_[bundleName + abilityName] = ability;
     }
     if (ability == nullptr) {
         return AVSESSION_ERROR;
