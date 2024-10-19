@@ -1329,7 +1329,8 @@ static HWTEST_F(AVSessionServiceTest, StartDefaultAbilityByCall001, TestSize.Lev
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     std::string sessionId = avsessionHere_->GetSessionId();
     int32_t ret = avservice_->StartDefaultAbilityByCall(sessionId);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    // startability may go with mediaintent, will return AVSESSION_ERROR
+    EXPECT_TRUE(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_ERROR);
     avservice_->HandleSessionRelease(sessionId);
     avsessionHere_->Destroy();
     SLOGI("StartDefaultAbilityByCall001 end!");
@@ -1425,7 +1426,8 @@ static HWTEST_F(AVSessionServiceTest, CreateControllerInner001, TestSize.Level1)
     std::string sessionId = "default";
     OHOS::sptr<IRemoteObject> object = nullptr;
     int32_t ret = avservice_->CreateControllerInner(sessionId, object);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    // startability may go with mediaintent, will return AVSESSION_ERROR
+    EXPECT_TRUE(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_ERROR);
     SLOGI("CreateControllerInner001 end!");
 }
 
