@@ -47,7 +47,7 @@ void FocusSessionStrategyFuzzer::FocusSessionStrategyFuzzTest(uint8_t* data, siz
 
     FocusSessionStrategy focusSessionStrategy;
 
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = *(reinterpret_cast<const int32_t*>(data));
     info->sessionId = *(reinterpret_cast<const int32_t*>(data));
     info->rendererState = RendererState::RENDERER_RELEASED;

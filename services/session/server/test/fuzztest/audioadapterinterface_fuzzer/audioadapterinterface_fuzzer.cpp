@@ -39,7 +39,7 @@ void OHOS::AVSession::AudioAdapterTest(uint8_t *data, size_t size)
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = TEST_CLIENT_UID;
     info->sessionId = TEST_SESSION_ID;
     info->rendererState = AudioStandard::RENDERER_RELEASED;
