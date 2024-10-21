@@ -47,7 +47,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event)
     }
 }
 
-std::function<bool()> NapiAVCastControllerCallback::CheckCallbackValid(int_32 event,
+std::function<bool()> NapiAVCastControllerCallback::CheckCallbackValid(int32_t event,
     const std::list<napi_ref>::iterator& ref)
 {
     return [this, event, ref]() {
