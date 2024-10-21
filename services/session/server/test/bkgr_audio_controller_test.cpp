@@ -107,9 +107,9 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease003, TestSize.Level1)
 static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange001, TestSize.Level1)
 {
     SLOGI("HandleAudioStreamRendererStateChange001 begin!");
-    std::unique_ptr<OHOS::AudioStandard::AudioRendererChangeInfo> info =
+    std::shared_ptr<OHOS::AudioStandard::AudioRendererChangeInfo> info =
         std::make_unique<OHOS::AudioStandard::AudioRendererChangeInfo>();
-    std::vector<std::unique_ptr<OHOS::AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfos;
+    std::vector<std::shared_ptr<OHOS::AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfos;
     info->rendererState = OHOS::AudioStandard::RENDERER_NEW;
     audioRendererChangeInfos.push_back(move(info));
     BackgroundAudioController backgroundaudiocontroller;
@@ -126,9 +126,9 @@ static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange001, 
 static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange002, TestSize.Level1)
 {
     SLOGI("HandleAudioStreamRendererStateChange002 begin!");
-    std::unique_ptr<OHOS::AudioStandard::AudioRendererChangeInfo> info =
+    std::shared_ptr<OHOS::AudioStandard::AudioRendererChangeInfo> info =
         std::make_unique<OHOS::AudioStandard::AudioRendererChangeInfo>();
-    std::vector<std::unique_ptr<OHOS::AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfos;
+    std::vector<std::shared_ptr<OHOS::AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfos;
     info->rendererState = OHOS::AudioStandard::RENDERER_RUNNING;
     info->clientUID = -1;
     info->clientPid = -1;
