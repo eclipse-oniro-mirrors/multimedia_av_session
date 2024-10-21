@@ -23,7 +23,7 @@
 #include "audio_info.h"
 
 namespace OHOS::AVSession {
-using AudioRendererChangeInfos = std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>>;
+using AudioRendererChangeInfos = std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>>;
 using DeviceChangeAction = AudioStandard::DeviceChangeAction;
 class AudioAdapter : public AudioStandard::AudioRendererStateChangeCallback,
                      public AudioStandard::AudioManagerDeviceChangeCallback,

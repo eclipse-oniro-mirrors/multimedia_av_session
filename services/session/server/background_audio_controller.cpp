@@ -118,7 +118,7 @@ void BackgroundAudioController::HandleAppMuteState(int32_t uid, int32_t pid, boo
     }
 
     if (isBackground) {
-        std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> infos;
+        std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> infos;
         auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(infos);
         if (ret != 0) {
             SLOGE("get renderer state failed");
