@@ -1984,6 +1984,13 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 {
     SLOGI("UpdateCastDeviceMap with id: %{public}s", deviceInfo.deviceid_.c_str());
     castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
+
+    if (descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0 &&
+        descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceId_ == deviceInfo.deviceId_) {
+        OutputDeviceInfo outputDeviceInfo;
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+        descriptor_.outputDeviceInfo_ = outputDeviceInfo;
+    }
 }
 #endif
 
