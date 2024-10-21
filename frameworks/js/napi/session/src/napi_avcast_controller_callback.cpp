@@ -47,6 +47,24 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event)
     }
 }
 
+std::function<bool()> NapiAVCastControllerCallback::CheckCallbackValid(int_32 event,
+    const std::list<napi_ref>::iterator& ref)
+{
+    return [this, event, ref]() {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (callbacks_[event].empty()) {
+            SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+            return false;
+        }
+        bool hasFunc = false;
+        for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+            hasFunc = (ref == it ? true : hasFunc);
+        }
+        SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+        return hasFunc;
+    };
+}
+
 template<typename T>
 void NapiAVCastControllerCallback::HandleEvent(int32_t event, const T& param)
 {
@@ -57,20 +75,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const T& param)
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         SLOGI("call with flag for event %{public}d", event);
-        asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
-                std::lock_guard<std::mutex> lockGuard(lock_);
-                if (callbacks_[event].empty()) {
-                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
-                    return false;
-                }
-                bool hasFunc = false;
-                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
-                }
-                SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
-                return hasFunc;
-            },
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
             [param](napi_env env, int& argc, napi_value *argv) {
                 argc = NapiUtils::ARGC_ONE;
                 auto status = NapiUtils::SetValue(env, param, *argv);
@@ -88,13 +93,14 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const std::string&
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
-            argc = NapiUtils::ARGC_TWO;
-            auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-            status = NapiUtils::SetValue(env, secondParam, argv[1]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-        });
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
+            [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
+                argc = NapiUtils::ARGC_TWO;
+                auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+                status = NapiUtils::SetValue(env, secondParam, argv[1]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            });
     }
 }
 
@@ -107,13 +113,14 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const int32_t firs
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
-            argc = NapiUtils::ARGC_TWO;
-            auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-            status = NapiUtils::SetValue(env, secondParam, argv[1]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-        });
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
+            [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
+                argc = NapiUtils::ARGC_TWO;
+                auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+                status = NapiUtils::SetValue(env, secondParam, argv[1]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            });
     }
 }
 
@@ -126,15 +133,16 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event,
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [firstParam, secondParam, thirdParam](napi_env env, int& argc, napi_value *argv) {
-            argc = NapiUtils::ARGC_TWO;
-            auto status = NapiUtils::SetValue(env, firstParam, argv[NapiUtils::ARGV_FIRST]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-            status = NapiUtils::SetValue(env, secondParam, argv[NapiUtils::ARGV_SECOND]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-            status = NapiUtils::SetValue(env, thirdParam, argv[NapiUtils::ARGV_THIRD]);
-            CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
-        });
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
+            [firstParam, secondParam, thirdParam](napi_env env, int& argc, napi_value *argv) {
+                argc = NapiUtils::ARGC_THREE;
+                auto status = NapiUtils::SetValue(env, firstParam, argv[NapiUtils::ARGV_FIRST]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+                status = NapiUtils::SetValue(env, secondParam, argv[NapiUtils::ARGV_SECOND]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+                status = NapiUtils::SetValue(env, thirdParam, argv[NapiUtils::ARGV_THIRD]);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValue invalid");
+            });
     }
 }
 
@@ -147,21 +155,22 @@ void NapiAVCastControllerCallback::HandleErrorEvent(int32_t event, const int32_t
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, [errorCode, errorMsg](napi_env env, int& argc, napi_value *argv) {
-            napi_status status = napi_create_object(env, argv);
-            CHECK_RETURN_VOID((status == napi_ok) && (argv != nullptr), "create object failed");
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
+            [errorCode, errorMsg](napi_env env, int& argc, napi_value *argv) {
+                napi_status status = napi_create_object(env, argv);
+                CHECK_RETURN_VOID((status == napi_ok) && (argv != nullptr), "create object failed");
 
-            napi_value property = nullptr;
-            status = NapiUtils::SetValue(env, errorCode, property);
-            CHECK_RETURN_VOID((status == napi_ok) && (property != nullptr), "create property failed");
-            status = napi_set_named_property(env, *argv, "code", property);
-            CHECK_RETURN_VOID(status == napi_ok, "napi_set_named_property failed");
+                napi_value property = nullptr;
+                status = NapiUtils::SetValue(env, errorCode, property);
+                CHECK_RETURN_VOID((status == napi_ok) && (property != nullptr), "create property failed");
+                status = napi_set_named_property(env, *argv, "code", property);
+                CHECK_RETURN_VOID(status == napi_ok, "napi_set_named_property failed");
 
-            status = NapiUtils::SetValue(env, errorMsg, property);
-            CHECK_RETURN_VOID((status == napi_ok) && (property != nullptr), "create property failed");
-            status = napi_set_named_property(env, *argv, "message", property);
-            CHECK_RETURN_VOID(status == napi_ok, "napi_set_named_property failed");
-        });
+                status = NapiUtils::SetValue(env, errorMsg, property);
+                CHECK_RETURN_VOID((status == napi_ok) && (property != nullptr), "create property failed");
+                status = napi_set_named_property(env, *argv, "message", property);
+                CHECK_RETURN_VOID(status == napi_ok, "napi_set_named_property failed");
+            });
     }
 }
 
