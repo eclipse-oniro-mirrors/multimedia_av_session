@@ -369,7 +369,7 @@ int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListen
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
-                             "write interface token failed");
+                             "write interface token failed in RegisterSessionListener");
     CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(listener->AsObject()), ERR_MARSHALLING, "write tag failed");
 
     auto remote = Remote();
@@ -378,6 +378,25 @@ int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListen
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
         static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
+}
+
+int32_t AVSessionServiceProxy::RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed in RegisterSessionListenerForAllUsers");
+    CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(listener->AsObject()), ERR_MARSHALLING, "write tag failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER_FOR_ALL_USERS),\
         data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t res = AVSESSION_ERROR;

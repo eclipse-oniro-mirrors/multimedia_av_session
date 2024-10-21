@@ -290,11 +290,40 @@ int32_t AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel& data,
     }
     auto listener = iface_cast<SessionListenerProxy>(remoteObject);
     if (listener == nullptr) {
-        SLOGI("iface_cast remote object failed");
+        SLOGI("RegisterSessionListener but iface_cast remote object failed");
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
     if (!reply.WriteInt32(RegisterSessionListener(listener))) {
+        SLOGI("reply write int32 failed");
+    }
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleRegisterSessionListenerForAllUsers(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(
+        PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("RegisterSessionListenerForAllUsers: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice RegisterSessionListenerForAllUsers checkpermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    auto remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        SLOGI("read remote object failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    auto listener = iface_cast<SessionListenerProxy>(remoteObject);
+    if (listener == nullptr) {
+        SLOGI("RegisterSessionListenerForAllUsers but iface_cast remote object failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    if (!reply.WriteInt32(RegisterSessionListenerForAllUsers(listener))) {
         SLOGI("reply write int32 failed");
     }
     return ERR_NONE;

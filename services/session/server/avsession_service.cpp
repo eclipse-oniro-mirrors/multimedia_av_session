@@ -20,8 +20,10 @@
 #include <dlfcn.h>
 #include <thread>
 #include <chrono>
+#include <filesystem>
 
 #include "accesstoken_kit.h"
+#include "account_manager_adapter.h"
 #include "app_manager_adapter.h"
 #include "audio_adapter.h"
 #include "avsession_errors.h"
@@ -103,15 +105,13 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
 
 AVSessionService::~AVSessionService()
 {
-    std::string cachePath(AVSessionUtils::GetCachePathName());
-    AVSessionUtils::DeleteCacheFiles(cachePath);
+    GetUsersManager().ClearCache();
     SLOGD("destroy");
 }
 
 void AVSessionService::OnStart()
 {
-    std::string cachePath(AVSessionUtils::GetCachePathName());
-    AVSessionUtils::DeleteCacheFiles(cachePath);
+    GetUsersManager().ClearCache();
     CHECK_AND_RETURN_LOG(Publish(this), "publish avsession service failed");
     dumpHelper_ = std::make_unique<AVSessionDumper>();
     CHECK_AND_RETURN_LOG(dumpHelper_ != nullptr, "no memory");
@@ -140,8 +140,8 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(CAST_ENGINE_SA_ID);
     AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
-
-    SLOGI("SubscribeCommonEvent result=%{public}d", SubscribeCommonEvent());
+    AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
@@ -204,6 +204,26 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         } else {
             SLOGE("get screenEvent with servicePtr_ null");
         }
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) == 0) {
+        int32_t userId = eventData.GetCode();
+        if (servicePtr_ != nullptr) {
+            servicePtr_->HandleUserEvent(AVSessionUsersManager::accountEventSwitched, userId);
+        } else {
+            SLOGE("get accountEventSwitched with servicePtr_ null");
+        }
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) == 0) {
+        int32_t userId = eventData.GetCode();
+        if (servicePtr_ != nullptr) {
+            servicePtr_->HandleUserEvent(AVSessionUsersManager::accountEventRemoved, userId);
+        } else {
+            SLOGE("get accountEventRemoved with servicePtr_ null");
+        }
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
+        if (servicePtr_ != nullptr) {
+            servicePtr_->RegisterBundleDeleteEventForHistory();
+        } else {
+            SLOGE("get user unlock with servicePtr_ null");
+        }
     }
 }
 
@@ -240,6 +260,22 @@ void AVSessionService::HandleScreenStatusChange(std::string event)
 #endif
 }
 
+std::string AVSessionService::GetAVQueueDir()
+{
+    return GetUsersManager().GetDirForCurrentUser() + AVQUEUE_FILE_NAME;
+}
+
+std::string AVSessionService::GetAVSortDir()
+{
+    return GetUsersManager().GetDirForCurrentUser() + SORT_FILE_NAME;
+}
+
+void AVSessionService::HandleUserEvent(const std::string &type, const int &userId)
+{
+    GetUsersManager().NotifyAccountsEvent(type, userId);
+    UpdateTopSession(GetUsersManager().GetTopSession());
+}
+
 void AVSessionService::SetScreenOn(bool on)
 {
     std::lock_guard lockGuard(screenStateLock_);
@@ -271,6 +307,9 @@ bool AVSessionService::SubscribeCommonEvent()
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON,
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED,
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED,
     };
 
     EventFwk::MatchingSkills matchingSkills;
@@ -341,6 +380,12 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             break;
         case MEMORY_MANAGER_SA_ID:
             NotifyProcessStatus(true);
+            break;
+        case SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN:
+            InitAccountMgr();
+            break;
+        case COMMON_EVENT_SERVICE_ID:
+            InitCommonEventService();
             break;
         default:
             SLOGE("undefined system ability %{public}d", systemAbilityId);
@@ -486,6 +531,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
             topSession_->SetTop(false);
         }
         topSession_ = nullptr;
+        GetUsersManager().SetTopSession(nullptr);
         SLOGI("set topSession to nullptr");
         HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "DETAILED_MSG", "avsessionservice set topsession to nullptr");
         return;
@@ -514,6 +560,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
                 "DETAILED_MSG", "avsessionservice handlefocussession, updatetopsession");
         }
         topSession_ = newTopSession;
+        GetUsersManager().SetTopSession(newTopSession);
         topSession_->SetTop(true);
         descriptor = topSession_->GetDescriptor();
     }
@@ -536,7 +583,9 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         return;
     }
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    for (const auto& session : sessionListForFront_) {
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+    for (const auto& session : *sessionListForFront) {
         if (session->GetUid() == info.uid &&
             (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call")) {
             UpdateTopSession(session);
@@ -556,7 +605,7 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
 {
     std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
     std::string oldSortContent;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
+    if (!LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
         SLOGE("SelectFocusSession read sort fail !");
         return;
     }
@@ -590,7 +639,7 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
 
     std::string newSortContent = values.dump();
     SLOGD("SelectFocusSession::Dump json object finished");
-    if (!SaveStringToFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, newSortContent)) {
+    if (!SaveStringToFileEx(GetAVSortDir(), newSortContent)) {
         SLOGE("SelectFocusSession save sort fail !");
     }
 }
@@ -607,13 +656,15 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
     std::lock_guard frontLockGuard(sessionFrontLock_);
     SLOGD("UpdateFrontSession pass lock");
-    auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sessionItem);
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+    auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
     if (isAdd) {
-        if (it != sessionListForFront_.end()) {
+        if (it != sessionListForFront->end()) {
             SLOGI("sessionListForFront has same session bundle=%{public}s", sessionItem->GetBundleName().c_str());
             return;
         }
-        sessionListForFront_.push_front(sessionItem);
+        sessionListForFront->push_front(sessionItem);
         auto iter = sessionPublishedMap_.find(sessionItem->GetUid());
         if (iter != sessionPublishedMap_.end() && !sessionPublishedMap_[sessionItem->GetUid()]) {
             SLOGI("RepublishNotification for uid=%{public}d", sessionItem->GetUid());
@@ -628,7 +679,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             int32_t ret = Notification::NotificationHelper::CancelNotification(0);
             SLOGI("CancelNotification ret=%{public}d", ret);
         }
-        sessionListForFront_.remove(sessionItem);
+        sessionListForFront->remove(sessionItem);
     }
 }
 
@@ -646,11 +697,13 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         GetContainer().UpdateSessionSort(session);
         RefreshFocusSessionSort(session);
         std::lock_guard frontLockGuard(sessionFrontLock_);
-        auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), session);
-        if (it != sessionListForFront_.end()) {
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+        CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr!");
+        auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), session);
+        if (it != sessionListForFront->end()) {
             SLOGI(" front session exist, change order");
-            sessionListForFront_.remove(session);
-            sessionListForFront_.push_front(session);
+            sessionListForFront->remove(session);
+            sessionListForFront->push_front(session);
         }
         return true;
     }
@@ -740,8 +793,32 @@ void AVSessionService::InitBMS()
     std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
     SLOGI("enter");
     BundleStatusAdapter::GetInstance().Init();
+    int userId = GetUsersManager().GetCurrentUserId();
+    if (userId < 0) {
+        SLOGE("InitBMS with userId: %{public}d, not valid, return and wait for InitAccountMgr", userId);
+        return;
+    }
+    RegisterBundleDeleteEventForHistory();
+}
+
+void AVSessionService::InitAccountMgr()
+{
+    SLOGI("InitAccountMgr in");
+    GetUsersManager().Init();
+    RegisterBundleDeleteEventForHistory();
+}
+
+void AVSessionService::InitCommonEventService()
+{
+    SLOGI("InitCommonEventService in");
+    bool ret = SubscribeCommonEvent();
+    CHECK_AND_RETURN_LOG(ret, "SubscribeCommonEvent error!");
+}
+
+void AVSessionService::RegisterBundleDeleteEventForHistory()
+{
     std::string oldSortContent;
-    if (LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
+    if (LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
         CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
         auto callback = [this](std::string bundleName) {
@@ -750,6 +827,7 @@ void AVSessionService::InitBMS()
         };
         for (auto value : values) {
             if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(value["bundleName"], callback)) {
+                SLOGI("do register bundle delete event for %{public}s", std::string(value["bundleName"]).c_str());
                 std::string bundleName = value["bundleName"];
                 SLOGE("SubscribeBundleStatusEvent failed for bundle:%{public}s", bundleName.c_str());
             }
@@ -759,8 +837,18 @@ void AVSessionService::InitBMS()
 
 SessionContainer& AVSessionService::GetContainer()
 {
-    static SessionStack sessionStack;
-    return sessionStack;
+    return GetUsersManager().GetContainer();
+}
+
+AVSessionUsersManager& AVSessionService::GetUsersManager()
+{
+    static AVSessionUsersManager usersManager;
+    return usersManager;
+}
+
+inline std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionService::GetCurSessionListForFront()
+{
+    return GetUsersManager().GetCurSessionListForFront();
 }
 
 std::string AVSessionService::AllocSessionId()
@@ -814,9 +902,16 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
         }
     }
     std::lock_guard lockGuard(sessionListenersLock_);
-    for (const auto& [pid, listener] : sessionListeners_) {
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
         SLOGI("notify session create for pid %{public}d", static_cast<int>(pid));
+        listener->OnSessionCreate(descriptor);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
+        SLOGI("notify session create for pid %{public}d across users", static_cast<int>(pid));
         listener->OnSessionCreate(descriptor);
     }
 }
@@ -830,7 +925,14 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
         }
     }
     std::lock_guard lockGuard(sessionListenersLock_);
-    for (const auto& [pid, listener] : sessionListeners_) {
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        SLOGI("notify session release for pid %{public}d", static_cast<int>(pid));
+        listener->OnSessionRelease(descriptor);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        SLOGI("notify session release for pid %{public}d across users", static_cast<int>(pid));
         listener->OnSessionRelease(descriptor);
     }
 }
@@ -844,9 +946,16 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
         }
     }
     std::lock_guard lockGuard(sessionListenersLock_);
-    for (const auto& [pid, listener] : sessionListeners_) {
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
         SLOGI("notify top session change to pid %{public}d", static_cast<int>(pid));
+        listener->OnTopSessionChange(descriptor);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
+        SLOGI("notify top session change to pid %{public}d across users", static_cast<int>(pid));
         listener->OnTopSessionChange(descriptor);
     }
 }
@@ -862,8 +971,15 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
         }
     }
     std::lock_guard lockGuard(sessionListenersLock_);
-    for (const auto& [pid, listener] : sessionListeners_) {
-        SLOGI("Found session listener with pid");
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        SLOGI("Found session listener with pid %{public}d", static_cast<int>(pid));
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnAudioSessionCheck");
+        listener->OnAudioSessionChecked(uid);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        SLOGI("Found session listener with pid %{public}d across users", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnAudioSessionCheck");
         listener->OnAudioSessionChecked(uid);
     }
@@ -940,10 +1056,12 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
     
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
-        auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), sinkSession);
-        if (it == sessionListForFront_.end()) {
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+        CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+        auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sinkSession);
+        if (it == sessionListForFront->end()) {
             SLOGI(" front session add cast session");
-            sessionListForFront_.push_front(sinkSession);
+            sessionListForFront->push_front(sinkSession);
         }
     }
 
@@ -976,7 +1094,13 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     for (const auto& listener : innerSessionListeners_) {
         listener->OnDeviceAvailable(castOutputDeviceInfo);
     }
-    for (const auto& [pid, listener] : sessionListeners_) {
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
+        listener->OnDeviceAvailable(castOutputDeviceInfo);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
         listener->OnDeviceAvailable(castOutputDeviceInfo);
     }
@@ -986,7 +1110,13 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
 void AVSessionService::NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
-    for (const auto& [pid, listener] : sessionListeners_) {
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
+        listener->OnDeviceLogEvent(eventId, param);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
         listener->OnDeviceLogEvent(eventId, param);
     }
@@ -999,7 +1129,15 @@ void AVSessionService::NotifyDeviceOffline(const std::string& deviceId)
     for (const auto& listener : innerSessionListeners_) {
         listener->OnDeviceOffline(deviceId);
     }
-    for (const auto& [pid, listener] : sessionListeners_) {
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        SLOGI("notify device offline with pid %{public}d", static_cast<int>(pid));
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceOffline");
+        listener->OnDeviceOffline(deviceId);
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        SLOGI("notify device offline with pid %{public}d across users", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceOffline");
         listener->OnDeviceOffline(deviceId);
     }
@@ -1032,7 +1170,7 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
 
 int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 {
-    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionToken.sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_SUCCESS, "StopCast: session is not exist");
     CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
     if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
@@ -1134,7 +1272,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     descriptor.elementName_ = elementName;
     descriptor.isThirdPartyApp_ = thirdPartyApp;
 
-    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor);
+    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor, GetUsersManager().GetCurrentUserId());
     if (result == nullptr) {
         return nullptr;
     }
@@ -1189,15 +1327,26 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
             elementName.GetBundleName(), "ERROR_MSG", "avsessionservice createsessioninner create new session failed");
         return ERR_NO_MEMORY;
     }
-    if (GetContainer().AddSession(pid, elementName.GetAbilityName(), result) != AVSESSION_SUCCESS) {
+    if (GetUsersManager().AddSessionForCurrentUser(pid, elementName.GetAbilityName(), result) != AVSESSION_SUCCESS) {
         SLOGE("session num exceed max");
         return ERR_SESSION_EXCEED_MAX;
     }
+
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
     sessionItem = result;
+    
+    std::lock_guard frontLockGuard(sessionFrontLock_);
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
+    auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
+    if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL ||
+        (tag == "anco_audio" && GetCallingUid() == ancoUid)) && it == sessionListForFront->end()) {
+        SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
+        sessionListForFront->push_front(sessionItem);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -1225,16 +1374,6 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
         SLOGI("bundleName=%{public}s support play intent, refreshSortFile", elementName.GetBundleName().c_str());
         refreshSortFileOnCreateSession(session->GetSessionId(), session->GetSessionType(), elementName);
-    }
-
-    {
-        std::lock_guard frontLockGuard(sessionFrontLock_);
-        auto it = std::find(sessionListForFront_.begin(), sessionListForFront_.end(), session);
-        if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL ||
-            (tag == "anco_audio" && GetCallingUid() == ancoUid)) && it == sessionListForFront_.end()) {
-            SLOGI(" front session add voice_call session=%{public}s", session->GetBundleName().c_str());
-            sessionListForFront_.push_front(session);
-        }
     }
 
     {
@@ -1275,7 +1414,7 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
     std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
     SLOGI("refresh sort when session created, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
     std::string oldSortContent;
-    if (LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
+    if (LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
         CHECK_AND_RETURN_LOG(!values.is_discarded(), "sort json object is null");
         if (oldSortContent.find(elementName.GetBundleName()) == string::npos) {
@@ -1308,7 +1447,7 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
         }
         std::string newSortContent = values.dump();
         SLOGD("refreshSortFileOnCreateSession::Dump json object finished");
-        if (!SaveStringToFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, newSortContent)) {
+        if (!SaveStringToFileEx(GetAVSortDir(), newSortContent)) {
             SLOGE("SaveStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
         }
     } else {
@@ -1320,7 +1459,9 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
 int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    for (const auto& session : sessionListForFront_) {
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
+    for (const auto& session : *sessionListForFront) {
         descriptors.push_back(session->GetDescriptor());
     }
     for (const auto& desc: descriptors) {
@@ -1359,7 +1500,7 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
 int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors)
 {
     std::string oldSortContent;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldSortContent)) {
+    if (!LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
         SLOGE("GetHistoricalSessionDescriptorsFromFile read sort fail, Return!");
         return AVSESSION_ERROR;
     }
@@ -1417,9 +1558,9 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
 {
     std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
     std::string oldAVQueueInfoContent;
-    std::vector<AVQueueInfo> tempAVQueueinfos;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldAVQueueInfoContent)) {
-        SLOGE(" lq GetHistoricalAVQueueInfos read sort fail, Return!");
+    std::vector<AVQueueInfo> tempAVQueueInfos;
+    if (!LoadStringFromFileEx(GetAVQueueDir(), oldAVQueueInfoContent)) {
+        SLOGE("GetHistoricalAVQueueInfos read avqueueinfo fail, Return!");
         return AVSESSION_ERROR;
     }
     nlohmann::json avQueueValues = json::parse(oldAVQueueInfoContent, nullptr, false);
@@ -1430,12 +1571,12 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
         avQueueInfo.SetAVQueueName(value["avQueueName"]);
         avQueueInfo.SetAVQueueId(value["avQueueId"]);
         std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
-        AVSessionUtils::ReadImageFromFile(avQueuePixelMap, value["avQueueImage"]);
+        AVSessionUtils::ReadImageFromFile(avQueuePixelMap, value["avQueueImageDir"], value["avQueueImageName"]);
         avQueueInfo.SetAVQueueImage(avQueuePixelMap);
         avQueueInfo.SetAVQueueImageUri(value["avQueueImageUri"]);
-        tempAVQueueinfos.push_back(avQueueInfo);
+        tempAVQueueInfos.push_back(avQueueInfo);
     }
-    for (auto iterator = tempAVQueueinfos.begin(); iterator != tempAVQueueinfos.end(); ++iterator) {
+    for (auto iterator = tempAVQueueInfos.begin(); iterator != tempAVQueueInfos.end(); ++iterator) {
         avQueueInfos.push_back(*iterator);
     }
     SLOGI("get historical avQueueinfo size=%{public}d", static_cast<int>(avQueueInfos.size()));
@@ -1444,7 +1585,8 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
-bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, const AVMetaData& meta)
+bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName,
+    const AVMetaData& meta, const int32_t userId)
 {
     nlohmann::json values = json::parse(oldContent, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), false, "avQueue json object is null");
@@ -1467,13 +1609,15 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
     value["avQueueId"] = meta.GetAVQueueId();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = meta.GetAVQueueImage();
     if (innerPixelMap != nullptr) {
-        std::string fileName = AVSessionUtils::GetFixedPathName() + bundleName + "_" +
-            meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
-        AVSessionUtils::WriteImageToFile(innerPixelMap, fileName);
+        std::string fileDir = AVSessionUtils::GetFixedPathName();
+        std::string fileName = bundleName + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+        AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
         innerPixelMap->Clear();
-        value["avQueueImage"] = fileName;
+        value["avQueueImageDir"] = fileDir;
+        value["avQueueImageName"] = fileName;
     } else {
-        value["avQueueImage"] = "";
+        value["avQueueImageDir"] = "";
+        value["avQueueImageName"] = "";
     }
     value["avQueueImageUri"] = meta.GetAVQueueImageUri();
     if (values.size() <= 0) {
@@ -1482,7 +1626,8 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
         values.insert(values.begin(), value);
     }
     std::string newContent = values.dump();
-    if (!SaveStringToFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, newContent)) {
+    SLOGD("SaveAvQueueInfo::Dump json object finished");
+    if (!SaveStringToFileEx(GetAVQueueDir(), newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return false;
     }
@@ -1511,13 +1656,13 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
     }
     std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
     std::string oldContent;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldContent)) {
+    if (!LoadStringFromFileEx(GetAVQueueDir(), oldContent)) {
         SLOGE("AddAvQueueInfoToFile read avqueueinfo fail, Return!");
         DoMetadataImgClean(meta);
         return;
     }
-    if (!SaveAvQueueInfo(oldContent, bundleName, meta)) {
-        SLOGE("AddAvQueueInfoToFile same avqueueinfo, Return!");
+    if (!SaveAvQueueInfo(oldContent, bundleName, meta, session.GetUserId())) {
+        SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
         DoMetadataImgClean(meta);
         return;
     }
@@ -1559,7 +1704,7 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
 {
     SLOGI("pid=%{public}d sessionId=%{public}s", pid,
         AVSessionUtils::GetAnonySessionId(session->GetSessionId()).c_str());
-    sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(pid, session);
+    sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(pid, session, session->GetUserId());
     if (result == nullptr) {
         SLOGE("malloc controller failed");
         return nullptr;
@@ -1568,7 +1713,7 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
     session->AddController(pid, result);
     if (AbilityHasSession(pid)) {
         SLOGI("set isfromsession for pid %{public}d", static_cast<int>(pid));
-        result->isFromSession = true;
+        result->isFromSession_ = true;
     }
     return result;
 }
@@ -1601,7 +1746,7 @@ bool AVSessionService::IsHistoricalSession(const std::string& sessionId)
     {
         std::string sortContent;
         std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
-        if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, sortContent)) {
+        if (!LoadStringFromFileEx(GetAVSortDir(), sortContent)) {
             SLOGE("IsHistoricalSession read sort failed, filename=%{public}s", SORT_FILE_NAME);
             return false;
         }
@@ -1631,7 +1776,7 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
 
     {
         std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
-        if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, sortContent)) {
+        if (!LoadStringFromFileEx(GetAVSortDir(), sortContent)) {
             SLOGE("GetAllSessionDescriptors read sort fail! ");
             return AVSESSION_ERROR;
         }
@@ -1682,7 +1827,7 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
 
     {
         std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
-        if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, content)) {
+        if (!LoadStringFromFileEx(GetAVSortDir(), content)) {
             SLOGE("LoadStringFromFile failed, filename=%{public}s", SORT_FILE_NAME);
             return AVSESSION_ERROR;
         }
@@ -1790,19 +1935,32 @@ int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId,
 void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
-    sessionListeners_[pid] = listener;
+    GetUsersManager().AddSessionListener(pid, listener);
+}
+
+void AVSessionService::AddSessionListenerForAllUsers(pid_t pid, const sptr<ISessionListener>& listener)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    GetUsersManager().AddSessionListenerForAllUsers(pid, listener);
 }
 
 void AVSessionService::RemoveSessionListener(pid_t pid)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
-    sessionListeners_.erase(pid);
+    GetUsersManager().RemoveSessionListener(pid);
 }
 
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    SLOGI("Enter RegisterSessionListener process");
+    SLOGI("Enter RegisterSessionListener process and return current userId");
     AddSessionListener(GetCallingPid(), listener);
+    return GetUsersManager().GetCurrentUserId();
+}
+
+int32_t AVSessionService::RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener)
+{
+    SLOGI("Enter RegisterSessionListenerForAllUsers process");
+    AddSessionListenerForAllUsers(GetCallingPid(), listener);
     return AVSESSION_SUCCESS;
 }
 
@@ -1912,7 +2070,9 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
     // try proc command for first front session
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
-        for (const auto& session : sessionListForFront_) {
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+        CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+        for (const auto& session : *sessionListForFront) {
             if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
                 session->ExecuteControllerCommand(command);
                 SLOGI("ExecuteCommand %{public}d for front session: %{public}s", command.GetCommand(),
@@ -2029,7 +2189,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
     std::string oldContent;
     std::string newContent;
     nlohmann::json values;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, oldContent)) {
+    if (!LoadStringFromFileEx(GetAVSortDir(), oldContent)) {
         SLOGE("LoadStringFromFile failed, filename=%{public}s", SORT_FILE_NAME);
         return;
     }
@@ -2043,7 +2203,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
     }
     newContent = values.dump();
     SLOGD("DeleteHistoricalRecord::Dump json object finished");
-    if (!SaveStringToFileEx(AVSESSION_FILE_DIR + SORT_FILE_NAME, newContent)) {
+    if (!SaveStringToFileEx(GetAVSortDir(), newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
         return;
     }
@@ -2058,7 +2218,7 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
     std::string oldContent;
     std::string newContent;
     nlohmann::json values;
-    if (!LoadStringFromFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, oldContent)) {
+    if (!LoadStringFromFileEx(GetAVQueueDir(), oldContent)) {
         SLOGE("LoadStringFromFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return;
     }
@@ -2067,7 +2227,8 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
     for (auto it = values.begin(); it != values.end();) {
         if (it->at("bundleName") == bundleName) {
             std::string avQueueId = it->at("avQueueId");
-            std::string fileName = AVSessionUtils::GetFixedPathName() + bundleName + "_" +
+            int32_t userId = GetUsersManager().GetCurrentUserId();
+            std::string fileName = AVSessionUtils::GetFixedPathName(userId) + bundleName + "_" +
                 avQueueId + AVSessionUtils::GetFileSuffix();
             AVSessionUtils::DeleteFile(fileName);
             values.erase(it);
@@ -2077,7 +2238,7 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
     }
     newContent = values.dump();
     SLOGD("DeleteAVQueueInfoRecord::Dump json object finished");
-    if (!SaveStringToFileEx(AVSESSION_FILE_DIR + AVQUEUE_FILE_NAME, newContent)) {
+    if (!SaveStringToFileEx(GetAVQueueDir(), newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return;
     }
@@ -2089,7 +2250,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
     SLOGI("HandleSessionRelease, sessionId=%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     std::lock_guard lockGuard(sessionAndControllerLock_);
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
+    sptr<AVSessionItem> sessionItem = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
     NotifySessionRelease(sessionItem->GetDescriptor());
     sessionItem->DestroyTask();
@@ -2108,10 +2269,11 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
         sessionItem->GetDescriptor().sessionType_, false);
     SLOGI("HandleSessionRelease, remove session: sessionId=%{public}s",
         AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-    GetContainer().RemoveSession(sessionItem->GetPid(), sessionItem->GetAbilityName());
+    GetUsersManager().RemoveSessionForAllUser(sessionItem->GetPid(), sessionItem->GetAbilityName());
     UpdateFrontSession(sessionItem, false);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if ((GetContainer().GetAllSessions().size() == 0 || (GetContainer().GetAllSessions().size() == 1 &&
+    if ((GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0 ||
+        (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 1 &&
         CheckAncoAudio())) && !is2in1_) {
         SLOGI("call disable cast for no session alive");
         checkEnableCast(false);
@@ -2633,7 +2795,7 @@ int32_t AVSessionService::GetAudioDescriptor(const std::string deviceId,
 void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid)
 {
     SLOGI("clear session in ");
-    auto sessions = GetContainer().GetSessionsByPid(pid);
+    auto sessions = GetUsersManager().GetContainerFromAll().GetSessionsByPid(pid);
     for (const auto& session : sessions) {
         SLOGI("check session release task for id %{public}s",
             AVSessionUtils::GetAnonySessionId(session->GetSessionId()).c_str());
@@ -2670,14 +2832,41 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
     }
 }
 
+bool AVSessionService::CheckUserDirValid()
+{
+    std::string filePath = GetUsersManager().GetDirForCurrentUser();
+    filesystem::path directory(filePath);
+    std::error_code errCode;
+    if (!filesystem::exists(directory, errCode)) {
+        SLOGE("check user dir not exsit %{public}s, errCode %{public}d",
+            filePath.c_str(), static_cast<int>(errCode.value()));
+        return false;
+    }
+    return true;
+}
+
+bool AVSessionService::CheckAndCreateDir(const string& filePath)
+{
+    std::lock_guard lockGuard(fileCheckLock_);
+    CHECK_AND_RETURN_RET_LOG(CheckUserDirValid(), false, "check userDir err!");
+    filesystem::path directory = filesystem::path(filePath).parent_path();
+    if (!filesystem::exists(directory)) {
+        SLOGI("check file not exist and try create %{public}s", filePath.c_str());
+        CHECK_AND_RETURN_RET_LOG(filesystem::create_directories(directory),
+            false, "Failed to create directory");
+    }
+    return true;
+}
+
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
     std::lock_guard lockGuard(fileCheckLock_);
     SLOGD("file load in for path: %{public}s", filePath.c_str());
+    CheckAndCreateDir(filePath);
     ifstream file(filePath.c_str());
     if (!file.is_open()) {
         SLOGD("file not open! try open first ! ");
-        file.open(filePath.c_str(), ios::app);
+        file.open(filePath.c_str(), ios::out | ios::app);
         if (!file.is_open()) {
             SLOGE("open file again fail !");
             return false;
