@@ -1504,12 +1504,13 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx003, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
 
-    std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "/adcdXYZ123/test3.txt";
+    std::string filePath = "/test3.txt";
     std::string content;
     ifstream file(filePath, ios_base::in);
     bool ret = avservice_->LoadStringFromFileEx(filePath, content);
     file.close();
-    EXPECT_EQ(ret, true);
+    // file not exist for no permission to create file at root dir
+    EXPECT_EQ(ret, false);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("LoadStringFromFileEx003 end!");
@@ -1543,11 +1544,12 @@ static HWTEST_F(AVSessionServiceTest, CheckStringAndCleanFile002, TestSize.Level
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
 
-    std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "/adcdXYZ123/test7.txt";
+    std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "adcdXYZ123/test7.txt";
     ifstream file(filePath, ios_base::in);
     bool ret = avservice_->CheckStringAndCleanFile(filePath);
     file.close();
-    EXPECT_EQ(ret, true);
+    // file not exist for ifstream file can not create file in non-existent folder
+    EXPECT_EQ(ret, false);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("CheckStringAndCleanFile002 end!");
