@@ -411,7 +411,7 @@ private:
 
     bool CheckAndCreateDir(const std::string& filePath);
 
-    bool CheckUserDirValid();
+    bool CheckUserDirValid(int32_t userId = 0);
 
     bool LoadStringFromFileEx(const std::string& filePath, std::string& content);
 
