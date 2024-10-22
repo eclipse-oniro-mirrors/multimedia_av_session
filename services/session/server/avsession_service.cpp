@@ -1507,7 +1507,10 @@ bool AVSessionService::IsAudioPlaybackAllowed(const int32_t uid, const int32_t p
 {
     bool hasSession = GetContainer().UidHasSession(uid);
     bool isBack = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
-    return hasSession || !isBack;
+    bool isSystem = PermissionChecker::GetInstance().CheckSystemPermissionByUid(uid);
+    SLOGI("uid=%{public}d pid=%{public}d hasSession=%{public}d isBack=%{public}d isSystem=%{public}d", uid,
+        pid, hasSession, isBack, isSystem);
+    return hasSession || isSystem || !isBack;
 }
 
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session)
@@ -2059,6 +2062,8 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
     sessionItem->DestroyTask();
     if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
         UpdateTopSession(nullptr);
+        int32_t ret = Notification::NotificationHelper::CancelNotification(0);
+        SLOGI("topsession release cancelNotification ret=%{public}d", ret);
     }
     if (sessionItem->GetRemoteSource() != nullptr) {
         int32_t ret = CancelCastAudioForClientExit(sessionItem->GetPid(), sessionItem);
