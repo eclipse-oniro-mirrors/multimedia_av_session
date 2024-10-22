@@ -1978,6 +1978,10 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName, int
     if (userId <= 0) {
         userId = GetUsersManager().GetCurrentUserId();
     }
+    if (!CheckUserDirValid(userId)) {
+        SLOGE("DeleteHistoricalRecord target user:%{public}d not valid, return", userId);
+        return;
+    }
     SLOGI("delete historical record, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
     std::string oldContent;
     std::string newContent;
@@ -2007,6 +2011,13 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName, int
 void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName, int32_t userId)
 {
     std::lock_guard avQueueFileLockGuard(avQueueFileLock_);
+    if (userId <= 0) {
+        userId = GetUsersManager().GetCurrentUserId();
+    }
+    if (!CheckUserDirValid(userId)) {
+        SLOGE("DeleteAVQueueInfoRecord target user:%{public}d not valid, return", userId);
+        return;
+    }
     SLOGI("DeleteAVQueueInfoRecord, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
     std::string oldContent;
     std::string newContent;
@@ -2596,14 +2607,14 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
     }
 }
 
-bool AVSessionService::CheckUserDirValid()
+bool AVSessionService::CheckUserDirValid(int32_t userId)
 {
-    std::string filePath = GetUsersManager().GetDirForCurrentUser();
+    std::string filePath = GetUsersManager().GetDirForCurrentUser(userId);
     filesystem::path directory(filePath);
     std::error_code errCode;
     if (!filesystem::exists(directory, errCode)) {
-        SLOGE("check user dir not exsit %{public}s, errCode %{public}d",
-            filePath.c_str(), static_cast<int>(errCode.value()));
+        SLOGE("check user dir not exsit %{public}s for user %{public}d, errCode %{public}d",
+            filePath.c_str(), userId, static_cast<int>(errCode.value()));
         return false;
     }
     return true;
