@@ -63,6 +63,8 @@ public:
 
     virtual int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
 
+    virtual int32_t RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener) = 0;
+
     virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
 
     virtual int32_t SendSystemControlCommand(const AVControlCommand& command) = 0;

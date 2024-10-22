@@ -49,6 +49,7 @@ ohos_shared_library("avsession_service") {
     "server/avsession_dumper.cpp",
     "server/avsession_service.cpp",
     "server/avsession_service_ext.cpp",
+    "server/avsession_users_manager.cpp",
     "server/background_audio_controller.cpp",
     "server/focus_session_strategy.cpp",
     "server/migrate/migrate_avsession_manager.cpp",
@@ -63,6 +64,7 @@ ohos_shared_library("avsession_service") {
   adapter_sources = [
     "adapter/ability_connect_helper.cpp",
     "adapter/ability_manager_adapter.cpp",
+    "adapter/account_manager_adapter.cpp",
     "adapter/app_manager_adapter.cpp",
     "adapter/audio_adapter.cpp",
     "adapter/bundle_status_adapter.cpp",

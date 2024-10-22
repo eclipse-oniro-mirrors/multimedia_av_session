@@ -21,8 +21,8 @@ namespace OHOS::AVSession {
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
     std::string extraInfo, const std::string& state)
 {
-    SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s, extraInfo: %{public}s",
-        serviceName.c_str(), state.c_str(), extraInfo.c_str());
+    SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s, no extraInfo for private",
+        serviceName.c_str(), state.c_str());
 
     if (state == "IDLE" && serviceName == "SuperLauncher") {
         MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);

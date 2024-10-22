@@ -71,8 +71,7 @@ void AVSessionManagerImpl::OnServiceDie()
     {
         std::lock_guard<std::mutex> lockGuard(lock_);
         service_.clear();
-        listener_.clear();
-        clientDeath_.clear();
+        listenerMapByUserId_.clear();
         deathCallback_ = nullptr;
     }
     if (callback) {
@@ -201,32 +200,64 @@ int32_t AVSessionManagerImpl::GetAVCastController(const std::string& sessionId,
 }
 #endif
 
-int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener>& listener)
+sptr<ISessionListener> AVSessionManagerImpl::GetSessionListenerClient(const std::shared_ptr<SessionListener>& listener)
 {
     if (listener == nullptr) {
-        SLOGE("listener is nullptr");
-        return ERR_INVALID_PARAM;
+        SLOGE("listener recv is nullptr");
+        return nullptr;
     }
 
+    sptr<ISessionListener> listenerPtr = new(std::nothrow) SessionListenerClient(listener);
+    if (listenerPtr == nullptr) {
+        SLOGE("listener create is nullptr");
+        return nullptr;
+    }
+    return listenerPtr;
+}
+
+int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<SessionListener>& listener)
+{
     auto service = GetService();
     if (service == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
     }
 
     std::lock_guard<std::mutex> lockGuard(lock_);
-    if (listener_ != nullptr) {
-        return ERR_SESSION_LISTENER_EXIST;
+    sptr<ISessionListener> listenerPtr = GetSessionListenerClient(listener);
+    if (listenerPtr == nullptr) {
+        return ERR_INVALID_PARAM;
     }
 
-    listener_ = new(std::nothrow) SessionListenerClient(listener);
-    if (listener_ == nullptr) {
-        return ERR_NO_MEMORY;
-    }
-    auto ret = service->RegisterSessionListener(listener_);
-    if (ret != AVSESSION_SUCCESS) {
-        listener_.clear();
+    int32_t ret = service->RegisterSessionListener(listenerPtr);
+    if (ret <= AVSESSION_SUCCESS) {
+        SLOGE("RegisterSessionListener fail with ret %{public}d", ret);
         return ret;
     }
+    SLOGI("RegisterSessionListener for user %{public}d", ret);
+    listenerMapByUserId_[ret] = listenerPtr;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionManagerImpl::RegisterSessionListenerForAllUsers(const std::shared_ptr<SessionListener>& listener)
+{
+    SLOGI("RegisterSessionListenerForAllUsers in");
+    auto service = GetService();
+    if (service == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    sptr<ISessionListener> listenerPtr = GetSessionListenerClient(listener);
+    if (listenerPtr == nullptr) {
+        return ERR_INVALID_PARAM;
+    }
+
+    auto ret = service->RegisterSessionListenerForAllUsers(listenerPtr);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("RegisterSessionListenerForAllUsers fail with ret %{public}d", ret);
+        return ret;
+    }
+    listenerMapByUserId_[userIdForAllUsers_] = listenerPtr;
     return AVSESSION_SUCCESS;
 }
 
@@ -302,7 +333,7 @@ int32_t AVSessionManagerImpl::Close(void)
         ret = service->Close();
     }
     SLOGI("manager impl close with listener clear");
-    listener_.clear();
+    listenerMapByUserId_.clear();
     return ret;
 }
 

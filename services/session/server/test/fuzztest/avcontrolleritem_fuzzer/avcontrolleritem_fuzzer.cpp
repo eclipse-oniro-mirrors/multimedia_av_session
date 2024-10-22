@@ -295,7 +295,6 @@ void AvControllerItemTestImplSecond(const uint8_t* data, size_t size,
     auto avControllerCallback = std::make_shared<AVControllerObserver>(sessionId);
     avControllerItem->SetServiceCallbackForRelease(releaseCallback);
     avControllerItem->RegisterAVControllerCallback(avControllerCallback);
-    avControllerItem->CheckIfFromSession();
 }
 
 /* Fuzzer entry point */

@@ -92,7 +92,7 @@ void SoftbusSessionManagerTest::NativeTokenGet(const char *perms[], int size)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.Level1)
 {
     SLOGI("SoftbusDistributedTest001 begin");
     distributed_->Init();
@@ -136,7 +136,7 @@ HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusSessionManagerTest, CreateSessionServer001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerTest, CreateSessionServer001, TestSize.Level1)
 {
     SLOGI("CreateSessionServer001 begin");
     std::string pkg = "111";
@@ -151,7 +151,7 @@ HWTEST_F(SoftbusSessionManagerTest, CreateSessionServer001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusSessionManagerTest, RemoveSessionServer001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerTest, RemoveSessionServer001, TestSize.Level1)
 {
     SLOGI("RemoveSessionServer001 begin");
     int32_t sessionId = 123;
@@ -165,7 +165,7 @@ HWTEST_F(SoftbusSessionManagerTest, RemoveSessionServer001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusSessionManagerTest, SendMessage001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerTest, SendMessage001, TestSize.Level1)
 {
     SLOGI("SendMessage001 begin");
     int32_t sessionId = 123;
@@ -181,7 +181,7 @@ HWTEST_F(SoftbusSessionManagerTest, SendMessage001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusSessionManagerTest, SendByte001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerTest, SendByte001, TestSize.Level1)
 {
     SLOGI("SendByte001 begin");
     int32_t sessionId = 123;
@@ -197,7 +197,7 @@ HWTEST_F(SoftbusSessionManagerTest, SendByte001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusSessionManagerTest, ObtainPeerDeviceId001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerTest, ObtainPeerDeviceId001, TestSize.Level1)
 {
     SLOGI("ObtainPeerDeviceId001 begin");
     int32_t sessionId = 0;
@@ -213,7 +213,7 @@ HWTEST_F(SoftbusSessionManagerTest, ObtainPeerDeviceId001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level1)
 {
     SLOGI("OnSessionOpened001 begin");
     int32_t sessionId = 123;

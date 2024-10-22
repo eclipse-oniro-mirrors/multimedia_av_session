@@ -63,6 +63,11 @@ bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleNam
     const std::function<void(const std::string)>& callback)
 {
     SLOGI("Bundle status adapter subscribe bundle status event, bundleName=%{public}s", bundleName.c_str());
+    auto bundleStatusListener = bundleStatusListeners_.find(bundleName);
+    if (bundleStatusListener != bundleStatusListeners_.end()) {
+        SLOGE("bundle status has already register");
+        return false;
+    }
     auto bundleStatusCallback = [this](std::string bundleName) {
         NotifyBundleRemoved(bundleName);
     };

@@ -30,20 +30,21 @@ class AVSessionUtils {
 public:
     static constexpr const int32_t MAX_FILE_SIZE = 4 * 1024 * 1024;
 
-    static void WriteImageToFile(const std::shared_ptr<AVSessionPixelMap>& innerPixelMap, const std::string& fileName)
+    static void WriteImageToFile(const std::shared_ptr<AVSessionPixelMap>& innerPixelMap,
+        const std::string& fileDir, const std::string& fileName)
     {
         if (innerPixelMap == nullptr) {
             SLOGE("innerPixelMap is nullptr");
             return;
         }
 
-        char realCachePath[PATH_MAX] = { 0x00 };
-        char realFixedPath[PATH_MAX] = { 0x00 };
-        if (realpath(AVSessionUtils::GetCachePathName(), realCachePath) == nullptr ||
-            realpath(AVSessionUtils::GetFixedPathName(), realFixedPath) == nullptr) {
-            SLOGE("check path failed %{public}s", AVSessionUtils::GetCachePathName());
+        char realPath[PATH_MAX] = { 0x00 };
+        if (realpath(fileDir.c_str(), realPath) == nullptr
+            && !OHOS::ForceCreateDirectory(fileDir)) {
+            SLOGE("WriteImageToFile check and create path failed %{public}s", fileDir.c_str());
             return;
         }
+        std::string filePath = fileDir + fileName;
 
         std::vector<uint8_t> tempBuffer = innerPixelMap->GetInnerImgBuffer();
         size_t imgBufferSize = tempBuffer.size();
@@ -53,9 +54,9 @@ public:
             return;
         }
 
-        std::ofstream ofile(fileName.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);
+        std::ofstream ofile(filePath.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);
         if (!ofile.is_open()) {
-            SLOGE("open file error, fileName=%{public}s", fileName.c_str());
+            SLOGE("open file error, filePath=%{public}s", filePath.c_str());
             return;
         }
 
@@ -65,24 +66,24 @@ public:
         ofile.close();
     }
 
-    static void ReadImageFromFile(std::shared_ptr<AVSessionPixelMap>& innerPixelMap, const std::string& fileName)
+    static void ReadImageFromFile(std::shared_ptr<AVSessionPixelMap>& innerPixelMap,
+        const std::string& fileDir, const std::string& fileName)
     {
         if (innerPixelMap == nullptr) {
             SLOGE("innerPixelMap is nullptr");
             return;
         }
 
-        char realCachePath[PATH_MAX] = { 0x00 };
-        char realFixedPath[PATH_MAX] = { 0x00 };
-        if (realpath(AVSessionUtils::GetCachePathName(), realCachePath) == nullptr ||
-            realpath(AVSessionUtils::GetFixedPathName(), realFixedPath) == nullptr) {
-            SLOGE("check path failed %{public}s", AVSessionUtils::GetCachePathName());
+        char realPath[PATH_MAX] = { 0x00 };
+        if (realpath(fileDir.c_str(), realPath) == nullptr) {
+            SLOGE("ReadImageFromFile check path failed %{public}s", fileDir.c_str());
             return;
         }
+        std::string filePath = fileDir + fileName;
 
-        std::ifstream ifile(fileName.c_str(), std::ios::binary | std::ios::in);
+        std::ifstream ifile(filePath.c_str(), std::ios::binary | std::ios::in);
         if (!ifile.is_open()) {
-            SLOGE("open file error, fileName=%{public}s", fileName.c_str());
+            SLOGE("open file error, filePath=%{public}s", filePath.c_str());
             return;
         }
 
@@ -121,14 +122,25 @@ public:
             }
         }
     }
-    static const char* GetCachePathName()
+
+    static std::string GetCachePathName()
     {
-        return CACHE_PATH_NAME;
+        return std::string(DATA_PATH_NAME) + PUBLIC_PATH_NAME + CACHE_PATH_NAME;
     }
 
-    static const char* GetFixedPathName()
+    static std::string GetCachePathName(int32_t userId)
     {
-        return FIXED_PATH_NAME;
+        return std::string(DATA_PATH_NAME) + std::to_string(userId) + CACHE_PATH_NAME;
+    }
+
+    static std::string GetFixedPathName()
+    {
+        return std::string(DATA_PATH_NAME) + PUBLIC_PATH_NAME + FIXED_PATH_NAME;
+    }
+
+    static std::string GetFixedPathName(int32_t userId)
+    {
+        return std::string(DATA_PATH_NAME) + std::to_string(userId) + FIXED_PATH_NAME;
     }
 
     static const char* GetFileSuffix()
@@ -158,8 +170,10 @@ public:
     }
 
 private:
-    static constexpr const char* CACHE_PATH_NAME = "/data/service/el2/public/av_session/cache/";
-    static constexpr const char* FIXED_PATH_NAME = "/data/service/el2/public/av_session/";
+    static constexpr const char* DATA_PATH_NAME = "/data/service/el2/";
+    static constexpr const char* CACHE_PATH_NAME = "/av_session/cache/";
+    static constexpr const char* FIXED_PATH_NAME = "/av_session/";
+    static constexpr const char* PUBLIC_PATH_NAME = "public";
     static constexpr const char* FILE_SUFFIX = ".image.dat";
 };
 } // namespace OHOS::AVSession

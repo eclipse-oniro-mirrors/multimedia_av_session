@@ -16,6 +16,8 @@
 #ifndef AV_SESSION_BUNDLE_STATUS_ADAPTER_H
 #define AV_SESSION_BUNDLE_STATUS_ADAPTER_H
 
+#include <mutex>
+
 #include "bundle_mgr_proxy.h"
 #include "bundle_status_callback_host.h"
 
