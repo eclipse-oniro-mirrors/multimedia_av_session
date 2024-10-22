@@ -32,13 +32,56 @@
 using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
+class AVSessionStubDemo;
 
 static constexpr int32_t MAX_CODE_TEST = 30;
 static constexpr int32_t MAX_CODE_LEN  = 512;
 static constexpr int32_t MIN_SIZE_NUM  = 4;
 
-static char g_testSessionTag[] = "test";
-static std::shared_ptr<AVSessionService> g_AVSessionService;
+shared_ptr<AVSessionStubDemo> g_AVSessionStubDemo(nullptr);
+class AVSessionStubDemo : public AVSessionStub {
+public:
+    std::string GetSessionId() override { return ""; };
+    std::string GetSessionType() override { return ""; };
+    int32_t GetAVMetaData(AVMetaData &meta) override { return 0; };
+    int32_t SetAVMetaData(const AVMetaData &meta) override { return 0; };
+    int32_t SetAVCallMetaData(const AVCallMetaData &meta) override { return 0; };
+    int32_t SetAVCallState(const AVCallState &avCallState) override { return 0; };
+    int32_t GetAVPlaybackState(AVPlaybackState &state) override { return 0; };
+    int32_t SetAVPlaybackState(const AVPlaybackState &state) override { return 0; };
+    int32_t GetAVQueueItems(std::vector<AVQueueItem> &items) override { return 0; };
+    int32_t SetAVQueueItems(const std::vector<AVQueueItem> &items) override { return 0; };
+    int32_t GetAVQueueTitle(std::string &title) override { return 0; };
+    int32_t SetAVQueueTitle(const std::string &title) override { return 0; };
+    int32_t SetLaunchAbility(const OHOS::AbilityRuntime::WantAgent::WantAgent &ability) override { return 0; };
+    int32_t GetExtras(OHOS::AAFwk::WantParams &extras) override { return 0; };
+    int32_t SetExtras(const OHOS::AAFwk::WantParams &extras) override { return 0; };
+    std::shared_ptr<AVSessionController> GetController() override { return nullptr; };
+    int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback> &callback) override { return 0; };
+    int32_t Activate() override { return 0; };
+    int32_t Deactivate() override { return 0; };
+    bool IsActive() override { return true; };
+    int32_t Destroy() override { return 0; };
+    int32_t AddSupportCommand(const int32_t cmd) override { return 0; };
+    int32_t DeleteSupportCommand(const int32_t cmd) override { return 0; };
+    int32_t SetSessionEvent(const std::string &event, const OHOS::AAFwk::WantParams &args) override { return 0; };
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::shared_ptr<AVCastController> GetAVCastController() override { return nullptr; };
+    int32_t ReleaseCast() override { return 0; };
+    int32_t StartCastDisplayListener() override { return 0; };
+    int32_t StopCastDisplayListener() override { return 0; };
+    int32_t GetAllCastDisplays(std::vector<CastDisplayInfo> &castDisplays) override { return 0; };
+#endif
+
+protected:
+    int32_t RegisterCallbackInner(const OHOS::sptr<IAVSessionCallback> &callback) override { return 0; };
+    OHOS::sptr<IRemoteObject> GetControllerInner() override { return nullptr; };
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::sptr<IRemoteObject> GetAVCastControllerInner() override { return nullptr; };
+#endif
+};
 
 void AvSessionFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
 {
@@ -48,18 +91,6 @@ void AvSessionFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, siz
     if (code >= MAX_CODE_TEST) {
         return;
     }
-    g_AVSessionService = std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID);
-    OHOS::AppExecFwk::ElementName elementName;
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    std::string abilityName(reinterpret_cast<const char*>(data), size);
-    elementName.SetBundleName(bundleName);
-    elementName.SetAbilityName(abilityName);
-    OHOS::sptr<AVSessionItem> avSessionItem = g_AVSessionService->CreateSessionInner(
-        g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    if (avSessionItem == nullptr) {
-        return;
-    }
-
     MessageParcel dataMessageParcel;
     MessageParcel reply;
     MessageOption option;
@@ -67,11 +98,11 @@ void AvSessionFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, siz
     size -= sizeof(uint32_t);
     dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
     dataMessageParcel.RewindRead(0);
-    int32_t ret = avSessionItem->OnRemoteRequest(code, dataMessageParcel, reply, option);
+    int32_t ret = g_AVSessionStubDemo->OnRemoteRequest(code, dataMessageParcel, reply, option);
     if (ret == 0) {
         SLOGI("OnRemoteRequest ERR_NONE");
     }
-    avSessionItem->Destroy();
+    g_AVSessionStubDemo->Destroy();
 }
 
 void OHOS::AVSession::AvSessionOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
@@ -87,6 +118,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
+    
+    g_AVSessionStubDemo = make_shared<AVSessionStubDemo>();
+
     for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
         OHOS::AVSession::AvSessionOnRemoteRequest(i, data, size);
     }

@@ -22,7 +22,6 @@ group("fuzztest") {
     "avqueueinfo_fuzzer:AVQueueInfoFuzzTest",
     "avsessioncallbackstub_fuzzer:AVSessionCallbackStubFuzzTest",
     "avsessioncontrollerproxy_fuzzer:AvSessionControllerProxyFuzzTest",
-    "avsessioncontrollerstub_fuzzer:AVSessionControllerStubFuzzTest",
     "avsessionmanager_fuzzer:AVSessionManagerFuzzTest",
     "avsessionproxy_fuzzer:AvSessionProxyFuzzTest",
     "avsessionserviceproxy_fuzzer:AvSessionServiceProxyFuzzTest",
