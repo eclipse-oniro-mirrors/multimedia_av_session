@@ -57,7 +57,7 @@ void AudioAdapterTest::TearDown()
 static HWTEST(AudioAdapterTest, OnRendererStateChange001, TestSize.Level1)
 {
     SLOGI("OnRendererStateChange001 begin!");
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
     info->sessionId = AudioAdapterTest::TEST_SESSION_ID;
     info->rendererState = RendererState::RENDERER_RELEASED;
@@ -69,7 +69,7 @@ static HWTEST(AudioAdapterTest, OnRendererStateChange001, TestSize.Level1)
     AudioAdapter::GetInstance().AddStreamRendererStateListener([&infosActual](const AudioRendererChangeInfos& infos) {
         SLOGI("AddStreamRendererStateListener start!");
         for (const auto& info : infos) {
-            std::unique_ptr<AudioRendererChangeInfo> infoActual = std::make_unique<AudioRendererChangeInfo>();
+            std::shared_ptr<AudioRendererChangeInfo> infoActual = std::make_shared<AudioRendererChangeInfo>();
             *infoActual = *info;
             infosActual.push_back(std::move(infoActual));
         }
@@ -95,7 +95,7 @@ static HWTEST(AudioAdapterTest, OnRendererStateChange001, TestSize.Level1)
 static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level1)
 {
     SLOGI("MuteAudioStream001 begin!");
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
     info->sessionId = AudioAdapterTest::TEST_SESSION_ID;
     info->rendererState = RendererState::RENDERER_RELEASED;
@@ -107,7 +107,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level1)
     AudioAdapter::GetInstance().AddStreamRendererStateListener([&infosActual](const AudioRendererChangeInfos& infos) {
         SLOGI("AddStreamRendererStateListener start!");
         for (const auto& info : infos) {
-            std::unique_ptr<AudioRendererChangeInfo> infoActual = std::make_unique<AudioRendererChangeInfo>();
+            std::shared_ptr<AudioRendererChangeInfo> infoActual = std::make_shared<AudioRendererChangeInfo>();
             *infoActual = *info;
             infosActual.push_back(std::move(infoActual));
         }
@@ -126,7 +126,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level1)
 static HWTEST(AudioAdapterTest, UnMuteAudioStream001, TestSize.Level1)
 {
     SLOGI("UnMuteAudioStream001 begin!");
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
     info->sessionId = AudioAdapterTest::TEST_SESSION_ID;
     info->rendererState = RendererState::RENDERER_RELEASED;
@@ -138,7 +138,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream001, TestSize.Level1)
     AudioAdapter::GetInstance().AddStreamRendererStateListener([&infosActual](const AudioRendererChangeInfos& infos) {
         SLOGI("AddStreamRendererStateListener start!");
         for (const auto& info : infos) {
-            std::unique_ptr<AudioRendererChangeInfo> infoActual = std::make_unique<AudioRendererChangeInfo>();
+            std::shared_ptr<AudioRendererChangeInfo> infoActual = std::make_shared<AudioRendererChangeInfo>();
             *infoActual = *info;
             infosActual.push_back(std::move(infoActual));
         }

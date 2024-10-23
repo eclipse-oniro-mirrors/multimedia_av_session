@@ -488,7 +488,7 @@ void SelectSessionByUid002(const uint8_t* data, size_t size)
     AudioRendererChangeInfo info = {};
     info.clientUID = avsessionHere_->GetUid();
 
-    std::unique_ptr<AudioRendererChangeInfo> info_ = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info_ = std::make_shared<AudioRendererChangeInfo>();
     info_->clientUID = CLIENT_UID;
     info_->sessionId = SESSION_ID;
     info_->rendererState = RendererState::RENDERER_RELEASED;
