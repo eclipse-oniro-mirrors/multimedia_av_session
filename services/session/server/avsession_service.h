@@ -455,6 +455,9 @@ private:
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
 
+    void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
+        const std::chrono::system_clock::time_point &now, int32_t time = 1);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     std::recursive_mutex sessionAndControllerLock_;
