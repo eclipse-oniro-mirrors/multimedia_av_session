@@ -20,7 +20,6 @@
 #include <dlfcn.h>
 #include <thread>
 #include <chrono>
-#include <filesystem>
 
 #include "accesstoken_kit.h"
 #include "account_manager_adapter.h"
@@ -1119,11 +1118,6 @@ void AVSessionService::NotifyDeviceLogEvent(const DeviceLogEventCode eventId, co
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
-        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
-        listener->OnDeviceLogEvent(eventId, param);
-    }
-    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
-    for (const auto& [pid, listener] : listenerMapForAll) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
         listener->OnDeviceLogEvent(eventId, param);
     }
@@ -3072,7 +3066,8 @@ void AVSessionService::RemoveExpired(std::list<std::chrono::system_clock::time_p
 {
     auto iter = list.begin();
     while (iter != list.end()) {
-        if (abs(now - *iter) > std::chrono::seconds(time)) {
+        if (abs(now - static_cast<std::chrono::system_clock::time_point>(*item)) >
+            std::chrono::second(static_cast<int>(time))) {
             iter = list.erase(iter);
         } else {
             break;
