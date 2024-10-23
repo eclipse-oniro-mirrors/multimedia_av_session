@@ -245,6 +245,7 @@ void AVSessionServiceSendSystemControlCommandTest(const uint8_t* data, size_t si
         return;
     }
     service->RegisterSessionListener(listener);
+    service->RegisterSessionListenerForAllUser(listener);
 }
 
 void AvSessionServiceClientTest(const uint8_t* data, size_t size,
@@ -515,12 +516,12 @@ void SaveAvQueueInfo001(const uint8_t* data, size_t size)
         avsessionService_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     AVMetaData meta = avsessionHere_->GetMetaData();
     std::string oldContent;
-    if (!avsessionService_->LoadStringFromFileEx(avsessionService_->AVSESSION_FILE_DIR +
-        avsessionService_->AVQUEUE_FILE_NAME, oldContent)) {
+    if (!avsessionService_->LoadStringFromFileEx(avsessionService_->GetAVQueueDir(), oldContent)) {
         SLOGE("SaveAvQueueInfo001 read avqueueinfo fail, Return!");
         return;
     }
-    avsessionService_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta);
+    avsessionService_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta,
+        avsessionService_->GetUsersManager().GetCurrentUserId());
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("SaveAvQueueInfo001 end!");
 }
