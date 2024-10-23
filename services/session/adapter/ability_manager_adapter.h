@@ -20,7 +20,6 @@
 #include <condition_variable>
 #include <mutex>
 #include <string>
-#include <atomic>
 
 namespace OHOS::AVSession {
 enum class Status {
@@ -47,7 +46,7 @@ private:
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     std::condition_variable syncCon_;
     std::mutex syncMutex_;
-    std::atomic<Status> status_ = Status::ABILITY_STATUS_INIT;
+    Status status_ = Status::ABILITY_STATUS_INIT;
     std::string bundleName_;
     std::string abilityName_;
     std::string sessionId_;
