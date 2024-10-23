@@ -387,7 +387,9 @@ private:
     std::recursive_mutex destroyLock_;
     volatile bool isDestroyed_ = false;
 
-    std::recursive_mutex metaDataLock_;
+    std::recursive_mutex displayListenerLock_;
+    AVSessionDisplayIntf *avsessionDisaplayIntf_;
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
 
     static const int32_t DEFAULT_USER_ID = 100;
     std::recursive_mutex cmdsLock_;
