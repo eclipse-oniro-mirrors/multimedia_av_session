@@ -245,7 +245,7 @@ void AVSessionServiceSendSystemControlCommandTest(const uint8_t* data, size_t si
         return;
     }
     service->RegisterSessionListener(listener);
-    service->RegisterSessionListenerForAllUser(listener);
+    service->RegisterSessionListenerForAllUsers(listener);
 }
 
 void AvSessionServiceClientTest(const uint8_t* data, size_t size,
