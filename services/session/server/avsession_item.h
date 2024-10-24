@@ -22,6 +22,8 @@
 
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
+#include "avsession_display_interface.h"
+#include "avsession_dynamic_loader.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"
@@ -34,7 +36,6 @@
 
 #include "i_avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
-#include "hw_cast_display_listener.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -75,7 +76,7 @@ public:
 
     void DealDisconnect(DeviceInfo deviceInfo);
 
-    void DealCollaborationPublishState(int32_t castState);
+    void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
@@ -289,10 +290,15 @@ private:
     void ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo);
     void ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo);
     void SaveLocalDeviceInfo();
-    __attribute__((no_sanitize("cfi"))) int32_t ProcessFrontSession(const std::string& source);
+    int32_t ProcessFrontSession(const std::string& source);
     void HandleFrontSession();
     int32_t doContinuousTaskRegister();
     int32_t doContinuousTaskUnregister();
+    AVSessionDisplayIntf* GetAVSessionDisplayIntf();
+    void ReportSetAVMetaDataInfo(const AVMetaData& meta);
+    std::string GetAnonymousDeviceId(std::string deviceId);
+    void ReportAVCastControllerInfo();
+    void GetAVCastControllerProxy();
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -383,19 +389,22 @@ private:
 
     std::recursive_mutex metaDataLock_;
 
+    std::recursive_mutex displayListenerLock_;
+    AVSessionDisplayIntf *avsessionDisaplayIntf_;
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
+
     static const int32_t DEFAULT_USER_ID = 100;
     std::recursive_mutex cmdsLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;
-    int32_t deviceStateAddCommand_ = 0;
+    std::string castHandleDeviceId_ = "-100";
     const int32_t streamStateConnection = 6;
     const int32_t virtualDeviceStateConnection = -6;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const int32_t firstStep = 1;
     const int32_t secondStep = 2;
-    const int32_t playingState = 3;
     int32_t removeTimes = 0;
     int32_t newCastState = -1;
     int32_t counter_ = -1;
@@ -420,8 +429,6 @@ private:
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
-    sptr<HwCastDisplayListener> displayListener_;
-    std::recursive_mutex displayListenerLock_;
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;

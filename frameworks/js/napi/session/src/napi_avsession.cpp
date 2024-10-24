@@ -423,7 +423,6 @@ int32_t DoDownload(AVMetaData& meta, const std::string uri)
     if (ret && pixelMap != nullptr) {
         SLOGI("DoDownload success");
         meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
-        meta.SetSmallMediaImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
         return AVSESSION_SUCCESS;
     }
     return AVSESSION_ERROR;
@@ -1051,6 +1050,7 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
 
     context->GetCbInfo(env, info);
 
+    SLOGI("Destroy session begin");
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {

@@ -51,6 +51,18 @@ void HwCastProvider::Init()
     CastSessionManager::GetInstance().RegisterListener(shared_from_this());
 }
 
+int32_t HwCastProvider::StartDeviceLogging(int32_t fd, uint32_t maxSize)
+{
+    SLOGI("start StartDeviceLogging, fd is %{public}d and maxSize is %{public}d", fd, maxSize);
+    return CastSessionManager::GetInstance().StartDeviceLogging(fd, maxSize);
+}
+
+int32_t HwCastProvider::StopDeviceLogging()
+{
+    SLOGI("StopDeviceLogging");
+    return CastSessionManager::GetInstance().StartDeviceLogging(-1, 0);
+}
+
 bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
@@ -65,6 +77,7 @@ bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string>
     }
     return ret;
 }
+
 void HwCastProvider::StopDiscovery()
 {
     SLOGI("stop discovery");
@@ -139,7 +152,6 @@ int HwCastProvider::StartCastSession()
 
     return castId;
 }
-
 void HwCastProvider::StopCastSession(int castId)
 {
     SLOGI("StopCastSession begin");
@@ -374,18 +386,36 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
         deviceInfo.networkId_ = castRemoteDevice.networkId;
+        deviceInfo.manufacturer_ = castRemoteDevice.dlnaDeviceManufacturerStr;
+        deviceInfo.modelName_ = castRemoteDevice.dlnaDeviceModelNameStr;
         deviceInfo.supportedProtocols_ = castPlusTypeToAVSessionType_ [castRemoteDevice.capability];
         deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType) == 0 ?
             TRUSTED_DEVICE : UNTRUSTED_DEVICE;
         deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
         deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
-        deviceInfo.mediumTypes_ = castRemoteDevice.mediumTypes;
+        deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnDeviceAvailable for registered listeners");
             listener->OnDeviceAvailable(deviceInfoList);
+        }
+    }
+}
+
+void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
+{
+    SLOGI("eventId is %{public}d, param is %{public}ld", eventId, param);
+    std::lock_guard lockGuard(mutexLock_);
+    for (auto listener : castStateListenerList_) {
+        if (listener != nullptr) {
+            SLOGI("trigger the OnDeviceLogEvent for registered listeners");
+            if (eventId == DeviceLogEventCode::DEVICE_LOG_FULL) {
+                listener->OnDeviceLogEvent(DeviceLogEventCode::DEVICE_LOG_FULL, param);
+            } else {
+                listener->OnDeviceLogEvent(DeviceLogEventCode::DEVICE_LOG_EXCEPTION, param);
+            }
         }
     }
 }
@@ -401,29 +431,11 @@ void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
     }
 }
 
-void HwCastProvider::WaitSessionRelease()
-{
-    SLOGI("waitSessionRelease get in");
-    std::lock_guard lockGuard(mutexLock_);
-    if (hwCastProviderSessionMap_.find(lastCastId_) == hwCastProviderSessionMap_.end()) {
-        SLOGI("waitSessionRelease for the castId is not exit, check cache session");
-    }
-    auto hwCastProviderSession = lastCastSession;
-    if (hwCastProviderSession == nullptr) {
-        SLOGI("waitSessionRelease failed for the hwCastProviderSession is nullptr");
-        return;
-    }
-    hwCastProviderSession->CheckProcessDone();
-    SLOGI("waitSessionRelease get done");
-}
-
 void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession)
 {
     SLOGI("Cast provider received session create event");
     std::thread([this, castSession]() {
         SLOGI("Cast pvd received session create event and create task thread");
-        WaitSessionRelease();
-        SLOGI("Cast pvd received session create event and wait session release done");
         for (auto listener : castStateListenerList_) {
             listener->OnSessionNeedDestroy();
             SLOGI("Cast pvd received session create event and session destroy check done");
@@ -445,8 +457,6 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
         {
             std::lock_guard lockGuard(mutexLock_);
             hwCastProviderSessionMap_[castId] = hwCastProviderSession;
-            lastCastSession = hwCastProviderSession;
-            lastCastId_ = castId;
             SLOGI("Cast task thread to create player");
             std::shared_ptr<IStreamPlayer> streamPlayer = hwCastProviderSession->CreateStreamPlayer();
             std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(streamPlayer);

@@ -72,15 +72,6 @@ public:
     void OnRemoteDied() override {};
 };
 
-class AudioDeviceDescriptorComp {
-public:
-    bool operator()(const AudioStandard::AudioDeviceDescriptor& left,
-                    const AudioStandard::AudioDeviceDescriptor& right) const
-    {
-        return left.networkId_ == right.networkId_;
-    }
-};
-
 #ifdef BLUETOOTH_ENABLE
 class DetectBluetoothHostObserver : public OHOS::Bluetooth::BluetoothHostObserver {
 public:
@@ -279,8 +270,6 @@ private:
 
     bool AbilityHasSession(pid_t pid);
 
-    bool FilePathIsValid(const std::string& filePath, const std::string& functionName);
-
     sptr<AVControllerItem> GetPresentController(pid_t pid, const std::string& sessionId);
 
     void NotifySessionCreate(const AVSessionDescriptor& descriptor);
@@ -290,7 +279,8 @@ private:
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
     void NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction);
 
-    void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer);
+    void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
+        const sptr<ClientDeathRecipient> recipient);
     void RemoveClientDeathObserver(pid_t pid);
 
     void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener);
@@ -457,11 +447,16 @@ private:
 
     bool UnSubscribeCommonEvent();
 
+    void ReportSessionInfo(const sptr <AVSessionItem>& session, int res);
+
     bool CheckAncoAudio();
 
     int32_t ConvertKeyCodeToCommand(int keyCode);
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
+
+    void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
+        const std::chrono::system_clock::time_point &now, int32_t time = 1);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
@@ -472,6 +467,7 @@ private:
 
     std::recursive_mutex clientDeathObserversLock_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
+    std::map<pid_t, sptr<ClientDeathRecipient>> clientDeathRecipients_;
 
     std::recursive_mutex sessionListenersLock_;
     std::list<SessionListener*> innerSessionListeners_;
@@ -507,14 +503,14 @@ private:
     bool screenOn = false;
     bool screenLocked = true;
 
+    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
+
 #ifdef BLUETOOTH_ENABLE
     OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
     std::shared_ptr<DetectBluetoothHostObserver> bluetoothObserver;
 #endif
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::recursive_mutex castDeviceInfoMapLock_;
-    std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const std::string seperator = ",";
@@ -529,7 +525,6 @@ private:
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
-    static constexpr const char *ABILITY_FILE_NAME = "abilityinfo";
     static constexpr const char *DEFAULT_SESSION_ID = "default";
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
@@ -557,11 +552,13 @@ private:
     const int32_t CLICK_TIMEOUT = 500;
     const int32_t defMaxHistoryNum = 10;
     const int32_t maxFileLength = 32 * 1024 * 1024;
-    const int32_t maxAVQueueInfoLen = 5;
+    const int32_t maxAVQueueInfoLen = 99;
     const int32_t allocSpace = 2;
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
     const int32_t saType = 1;
+    const int32_t MAX_NOTIFICATION_NUM = 3;
+    const int32_t NOTIFICATION_CONTROL_TIME = 1000;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

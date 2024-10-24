@@ -67,8 +67,8 @@ public:
         MSERR_EXT_API9_UNSUPPORT_FORMAT = 5400106,      // unsupport format.
     };
 
-    // cast api12 error code
-    enum CastExtErrCodeAPI12 : ErrCode {
+    // cast api13 error code
+    enum CastExtErrCodeAPI13 : ErrCode {
         // Generic error
         CAST_GENERICERR_EXT_API13_UNSPECIFIED = 6611000,
         CAST_GENERICERR_EXT_API13_REMOTE_ERROR,
@@ -305,7 +305,7 @@ public:
     // Generic error
     const std::map<CastErrCode, std::string> CAST_GENERIC_ERRCODE_INFOS = {
         {ERROR_CODE_UNSPECIFIED, "The error code for cast control is unspecified"},
-        {ERROR_CODE_REMOTE_ERRORR, "An unspecified error occurs in the remote player"},
+        {ERROR_CODE_REMOTE_ERROR, "An unspecified error occurs in the remote player"},
         {ERROR_CODE_BEHIND_LIVE_WINDOW, "The playback position falls behind the live window"},
         {ERROR_CODE_TIMEOUT, "The process of cast contorl times out"},
         {ERROR_CODE_FAILED_RUNTIME_CHECK, "The runtime check failed"},
@@ -427,7 +427,7 @@ public:
         {MSERR_UNKNOWN,                             MSERR_EXT_API9_IO},
     };
 
-    const std::map<CastErrCode, CastExtErrCodeAPI12> CASTERRCODE_TO_EXTERRORCODEAPI12 = {
+    const std::map<CastErrCode, CastExtErrCodeAPI13> CASTERRCODE_TO_EXTERRORCODEAPI13 = {
         // Generic error
         {ERROR_CODE_UNSPECIFIED,                        CAST_GENERICERR_EXT_API13_UNSPECIFIED},
         {ERROR_CODE_REMOTE_ERROR,                       CAST_GENERICERR_EXT_API13_REMOTE_ERROR},

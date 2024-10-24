@@ -222,7 +222,6 @@ AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMeta
         default:
             SLOGE("Failed to generate avMetadata: Unsupported skip intervals: %d", intervals_);
             delete metadata;
-            metadata = nullptr;
             *avMetadata = nullptr;
             return AVMETADATA_ERROR_INVALID_PARAM;
     }
@@ -267,7 +266,6 @@ AVMetadata_Result OH_AVMetadataBuilder_Destroy(OH_AVMetadataBuilder* builder)
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     delete metadata;
-    metadata = nullptr;
     return AVMETADATA_SUCCESS;
 }
 
@@ -398,6 +396,5 @@ AVMetadata_Result OH_AVMetadata_Destroy(OH_AVMetadata* avMetadata)
     CHECK_AND_RETURN_RET_LOG(avMetadata != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "avMetadata is null");
     AVMetaData* metadata = reinterpret_cast<AVMetaData*>(avMetadata);
     delete metadata;
-    metadata = nullptr;
     return AVMETADATA_SUCCESS;
 }

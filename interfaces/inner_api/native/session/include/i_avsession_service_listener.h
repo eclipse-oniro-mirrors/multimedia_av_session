@@ -28,13 +28,13 @@ class IAVSessionServiceListener {
 public:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+
     /**
      * Release cast session at sink end.
      *
      * @since 10
     */
     virtual void ReleaseCastSession() = 0;
-
     /**
      * Create a new session at sink device.
      *

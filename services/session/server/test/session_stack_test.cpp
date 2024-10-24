@@ -68,7 +68,6 @@ static HWTEST(SessionStackTest, RemoveSession001, TestSize.Level1)
     SessionStack sessionStack;
     sessionStack.AddSession(1234, elementName.GetAbilityName(), item);
     OHOS::sptr<AVSessionItem> actual = sessionStack.RemoveSession(sessionId);
-
     EXPECT_NE(actual, nullptr);
     SLOGI("RemoveSession001 end!");
 }

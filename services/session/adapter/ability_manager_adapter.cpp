@@ -15,12 +15,14 @@
 
 #include "ability_manager_adapter.h"
 
+#include "avsession_dynamic_loader.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "bundle_status_adapter.h"
 #include "ability_connect_helper.h"
 
 namespace OHOS::AVSession {
+static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
 
 AbilityManagerAdapter::AbilityManagerAdapter(const std::string& bundleName, const std::string& abilityName)
 {
@@ -32,42 +34,57 @@ AbilityManagerAdapter::AbilityManagerAdapter(const std::string& bundleName, cons
 AbilityManagerAdapter::~AbilityManagerAdapter()
 {}
 
-int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
+__attribute__((no_sanitize("cfi"))) int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
 {
-    if (status_.load() != Status::ABILITY_STATUS_INIT) {
+    std::unique_lock<std::mutex> lock(syncMutex_);
+    if (status_ != Status::ABILITY_STATUS_INIT) {
         SLOGE("Start Ability is running");
         return ERR_START_ABILITY_IS_RUNNING;
     }
-    status_.store(Status::ABILITY_STATUS_RUNNING);
-    AppExecFwk::InsightIntentExecuteParam executeParam;
-    bool isSupport = BundleStatusAdapter::GetInstance().GetPlayIntentParam(bundleName_, "", executeParam);
+    status_ = Status::ABILITY_STATUS_RUNNING;
     int32_t ret = AVSESSION_ERROR;
+    bool isSupport = false;
 
-    if (bundleName_ != DEFAULT_BUNDLE_NAME && isSupport && !executeParam.insightIntentName_.empty()) {
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+    typedef bool (*IsSupportPlayIntentFunc)(const std::string& bundleName, const std::string& assetId);
+    IsSupportPlayIntentFunc isSupportPlayIntent =
+        reinterpret_cast<IsSupportPlayIntentFunc>(dynamicLoader->GetFuntion(
+            AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "IsSupportPlayIntent"));
+    if (isSupportPlayIntent) {
+        isSupport = (*isSupportPlayIntent)(bundleName_, "");
+    }
+
+    if (isSupport) {
         SLOGI("Start Ability mediaintent");
-        ret = AbilityConnectHelper::GetInstance().StartAVPlayback(executeParam);
+        typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId);
+        StartAVPlaybackFunc startAVPlayback =
+            reinterpret_cast<StartAVPlaybackFunc>(dynamicLoader->GetFuntion(
+                AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlayback"));
+        if (startAVPlayback) {
+            ret = (*startAVPlayback)(bundleName_, "");
+        }
     } else {
         ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName_, abilityName_);
     }
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("Start Ability failed: %{public}d", ret);
-        status_.store(Status::ABILITY_STATUS_INIT);
+        status_ = Status::ABILITY_STATUS_INIT;
         return ret;
     }
 
     WaitForTimeout(ABILITY_START_TIMEOUT_MS);
     ret = ERR_START_ABILITY_TIMEOUT;
-    if (status_.load() == Status::ABILITY_STATUS_SUCCESS) {
+    if (status_ == Status::ABILITY_STATUS_SUCCESS) {
         ret = AVSESSION_SUCCESS;
         sessionId = sessionId_;
     }
-    status_.store(Status::ABILITY_STATUS_INIT);
+    status_ = Status::ABILITY_STATUS_INIT;
     return ret;
 }
 
 void AbilityManagerAdapter::StartAbilityByCallDone(const std::string& sessionId)
 {
-    if (status_.load() != Status::ABILITY_STATUS_RUNNING) {
+    if (status_ != Status::ABILITY_STATUS_RUNNING) {
         SLOGI("no need to notify");
         return;
     }
@@ -82,10 +99,10 @@ void AbilityManagerAdapter::WaitForTimeout(uint32_t timeout)
     auto waitStatus = syncCon_.wait_for(lock, std::chrono::milliseconds(timeout));
     if (waitStatus == std::cv_status::timeout) {
         SLOGE("StartAbilityByCall timeout");
-        status_.store(Status::ABILITY_STATUS_FAILED);
+        status_ = Status::ABILITY_STATUS_FAILED;
         return;
     }
-    status_.store(Status::ABILITY_STATUS_SUCCESS);
+    status_ = Status::ABILITY_STATUS_SUCCESS;
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

@@ -180,6 +180,12 @@ export struct AVCastPicker {
    */
   private maxFonSizeScale: number = 2;
 
+  /**
+   * Accessibility Strings
+   */
+  @State accessibilityConnectedStr: string = '已连接';
+  @State accessibilityAudioControlStr: string = '音视频投播';
+
   MenuStateChange() {
     if (this.extensionProxy != null) {
       this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
@@ -258,6 +264,8 @@ export struct AVCastPicker {
               }
               .justifyContent(FlexAlign.Start)
               .alignItems(VerticalAlign.Center)
+              .accessibilityLevel('yes')
+              .accessibilityText(this.accessibilityConnectedStr)
             }
           }
           .constraintSize({ minHeight: 48 })
@@ -335,6 +343,7 @@ export struct AVCastPicker {
             this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
           if (isExtMenuScene || isPanelForMedia) {
             this.isMenuShow = false;
+            this.touchMenuItemIndex = -1;
           }
         }
 
@@ -361,11 +370,24 @@ export struct AVCastPicker {
         if (JSON.stringify(data['isShowMenu']) !== undefined) {
           console.info(TAG, `isShowMenu : ${JSON.stringify(data['isShowMenu'])}`);
           this.isMenuShow = data['isShowMenu'] as boolean;
+          if (!this.isMenuShow) {
+            this.touchMenuItemIndex = -1;
+          }
         }
 
         if (JSON.stringify(data['configurationColorMode']) !== undefined) {
           console.info(TAG, `configurationColorMode : ${JSON.stringify(data['configurationColorMode'])}`);
           this.configurationColorMode = data['configurationColorMode'] as number;
+        }
+
+        if (JSON.stringify(data['accessConnected']) !== undefined) {
+          console.info(TAG, `accessConnected : ${JSON.stringify(data['accessConnected'])}`);
+          this.accessibilityConnectedStr = data['accessConnected'] as string;
+        }
+
+        if (JSON.stringify(data['accessAudioControl']) !== undefined) {
+          console.info(TAG, `accessAudioControl : ${JSON.stringify(data['accessAudioControl'])}`);
+          this.accessibilityAudioControlStr = data['accessAudioControl'] as string;
         }
       })
       .size({ width: '100%', height: '100%' })
@@ -373,6 +395,7 @@ export struct AVCastPicker {
         placement: Placement.TopRight,
         onDisappear: () => {
           this.isMenuShow = false;
+          this.touchMenuItemIndex = -1;
           this.menuShowStateCallback(this.isMenuShow);
         },
         onAppear: () => {
@@ -392,17 +415,22 @@ export struct AVCastPicker {
           (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
           this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);        
         if (isExtMenuScene || isPanelForMedia) {
-          this.isMenuShow = false;
           if (this.extensionProxy != null) {
             this.extensionProxy.send({'clickEvent': true});
           }
+          this.isMenuShow = false;
+          this.touchMenuItemIndex = -1;
         } else {
           this.isMenuShow = !this.isMenuShow;
           if (this.isMenuShow) {
             this.pickerClickTime = new Date().getTime();
+          } else {
+            this.touchMenuItemIndex = -1;
           }
         }
       })
+      .accessibilityLevel('yes')
+      .accessibilityText(this.accessibilityAudioControlStr)
   }
 
   private hasExtDevice(allDevice: Array<AVCastPickerDeviceInfo>): boolean {

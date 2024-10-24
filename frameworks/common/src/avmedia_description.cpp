@@ -279,7 +279,7 @@ void AVMediaDescription::SetDrmScheme(const std::string& drmScheme)
 {
     drmScheme_ = drmScheme;
 }
- 
+
 std::string AVMediaDescription::GetDrmScheme() const
 {
     return drmScheme_;

@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,10 +27,12 @@ ohos_shared_library("avsession_utils") {
     debug = false
   }
   sources = [
+    "src/avsession_dynamic_loader.cpp",
     "src/avsession_event_handler.cpp",
     "src/avsession_radar.cpp",
     "src/avsession_sysevent.cpp",
     "src/hash_calculator.cpp",
+    "src/permission_checker.cpp",
   ]
 
   include_dirs = [
@@ -43,6 +45,9 @@ ohos_shared_library("avsession_utils") {
   deps = [ "//third_party/openssl:libcrypto_shared" ]
 
   external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "access_token:libtokensetproc_shared",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -68,4 +73,7 @@ ohos_shared_library("avsession_utils") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "av_session"
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+  if (use_libfuzzer || use_clang_coverage) {
+    defines += [ "TEST_COVERAGE" ]
+  }
 }

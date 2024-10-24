@@ -319,7 +319,6 @@ napi_status NapiMetaData::GetAVQueueImage(napi_env env, napi_value in, AVMetaDat
         status = NapiUtils::GetValue(env, property, uri);
         CHECK_RETURN(status == napi_ok, "get property failed", status);
         out.SetAVQueueImageUri(uri);
-        SLOGD(" napi get avqueueimageuri=%{public}s", uri.c_str());
     } else if (type == napi_object) {
         auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, property);
         if (pixelMap == nullptr) {
@@ -462,9 +461,8 @@ napi_status NapiMetaData::GetMediaImage(napi_env env, napi_value in, AVMetaData&
             SLOGE("unwrap failed");
             return napi_invalid_arg;
         }
-        SLOGI("set mediaImage with small size");
+        SLOGI("set mediaImage without small size");
         out.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
-        out.SetSmallMediaImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
     } else {
         SLOGE("mediaImage property value type invalid");
         return napi_invalid_arg;

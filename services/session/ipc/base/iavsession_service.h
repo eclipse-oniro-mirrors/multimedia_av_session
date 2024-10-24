@@ -49,10 +49,10 @@ public:
         AVSessionDescriptor& descriptor) = 0;
 
     virtual int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) = 0;
-    
+
     virtual int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                               std::vector<AVQueueInfo>& avQueueInfos) = 0;
-    
+
     virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) = 0;
 
     virtual int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;

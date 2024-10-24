@@ -129,7 +129,7 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
 
 bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
 {
-    //check bundle support background mode & playmusiclist intent
+    // check bundle support background mode & playmusiclist intent
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
@@ -156,8 +156,8 @@ bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
     return false;
 }
 
-bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std::string& supportModule,
-                                              std::string& profile)
+__attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName,
+    std::string& supportModule, std::string& profile)
 {
     if (bundleMgrProxy == nullptr) {
         return false;
@@ -183,59 +183,6 @@ bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName, std
         return false;
     }
     return CheckBundleSupport(profile);
-}
-
-bool BundleStatusAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
-                                             AppExecFwk::InsightIntentExecuteParam &executeParam)
-{
-    if (bundleMgrProxy == nullptr) {
-        return false;
-    }
-    std::string supportModule;
-    std::string profile;
-    if (!IsSupportPlayIntent(bundleName, supportModule, profile)) {
-        SLOGE("bundle=%{public}s does not support play insights", bundleName.c_str());
-        return false;
-    }
-    SLOGD("GetJsonProfile profile=%{public}s", profile.c_str());
-    nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
-    auto res = false;
-    CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
-    for (const auto& value : profileValues["insightIntents"]) {
-        std::string insightName = value["intentName"];
-        nlohmann::json abilityValue = value["uiAbility"];
-        if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
-            continue;
-        }
-        if (!value.contains("uiAbility") || abilityValue.is_discarded()) {
-            SLOGE(" uiability discarded=%{public}d", abilityValue.is_discarded());
-            continue;
-        }
-        SLOGD(" insightName=%{public}s", insightName.c_str());
-        executeParam.bundleName_ = bundleName;
-        executeParam.moduleName_ = supportModule;
-        executeParam.abilityName_ = abilityValue["ability"];
-        executeParam.insightIntentName_ = insightName;
-        executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
-        std::shared_ptr<AppExecFwk::WantParams> wantParam = std::make_shared<AppExecFwk::WantParams>();
-        if (insightName == PLAY_MUSICLIST) {
-            // construct items array
-            AppExecFwk::WantParams innerParams;
-            innerParams.SetParam("entityId", OHOS::AAFwk::String::Box(assetId));
-            sptr<OHOS::AAFwk::IArray> array = new (std::nothrow) OHOS::AAFwk::Array(1, OHOS::AAFwk::g_IID_IWantParams);
-            array->Set(0, OHOS::AAFwk::WantParamWrapper::Box(innerParams));
-            wantParam->SetParam("items", array);
-            res = true;
-        }
-        if (insightName == PLAY_AUDIO) {
-            wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(interfaceType, assetId));
-            res = true;
-        }
-        executeParam.insightIntentParam_ = wantParam;
-    }
-
-    return res;
 }
 
 BundleStatusCallbackImpl::BundleStatusCallbackImpl(const std::function<void(const std::string)>& callback)

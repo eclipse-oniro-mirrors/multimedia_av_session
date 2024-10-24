@@ -404,7 +404,6 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     int32_t reSize = descriptors.size();
     SLOGI("GetHistoricalSessionDescriptors001 get size after destroy %{public}d", static_cast<int>(reSize));
-    // historical descriptors list may push default session when no session alive
     EXPECT_EQ(reSize >= size, true);
     SLOGI("GetHistoricalSessionDescriptors001 end");
 }
@@ -468,7 +467,6 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
     std::shared_ptr<AVSessionController> controller;
     auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
     SLOGI("CreateController003 get ret %{public}d", static_cast<int>(ret));
-    // ability may be not available
     EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS, true);
     SLOGI("CreateController003 here end");
     sleep(1);

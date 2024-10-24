@@ -57,10 +57,8 @@ void AVControllerCallbackClient::OnAVCallStateChange(const AVCallState& state)
 void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-
     auto callback = callback_;
     callback->OnPlaybackStateChange(state);
-
     if (playbackStateListener_) {
         playbackStateListener_(state);
     }
@@ -69,7 +67,6 @@ void AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState& st
 void AVControllerCallbackClient::OnMetaDataChange(const AVMetaData& data)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
-
     auto callback = callback_;
     callback->OnMetaDataChange(data);
 }

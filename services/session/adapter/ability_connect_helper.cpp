@@ -131,24 +131,6 @@ int32_t AbilityConnectHelper::StartAbilityByCall(const std::string& bundleName, 
     return reply.ReadInt32() == ERR_OK ? AVSESSION_SUCCESS : ERR_ABILITY_NOT_AVAILABLE;
 }
 
-int32_t AbilityConnectHelper::StartAVPlayback(AppExecFwk::InsightIntentExecuteParam &executeParam)
-{
-    SLOGD("bundleName=%{public}s abilityName=%{public}s moduleName=%{public}s IntentName=%{public}s",
-        executeParam.bundleName_.c_str(), executeParam.abilityName_.c_str(),
-        executeParam.moduleName_.c_str(), executeParam.insightIntentName_.c_str());
-    sptr<IRemoteObject> remote = GetSystemAbility();
-    if (remote == nullptr) {
-        return ERR_SERVICE_NOT_EXIST;
-    }
-    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteIntent((uint64_t) AVSESSION_SERVICE_ID,
-        remote, executeParam);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("ExecuteIntent insightIntent=%{public}s fail", executeParam.insightIntentName_.c_str());
-        return AVSESSION_ERROR;
-    }
-    return AVSESSION_SUCCESS;
-}
-
 sptr<IRemoteObject> AbilityConnectHelper::GetSystemAbility()
 {
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
