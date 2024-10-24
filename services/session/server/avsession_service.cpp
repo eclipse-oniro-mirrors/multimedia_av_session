@@ -1028,8 +1028,8 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
 {
-    SLOGI("%{public}s %{public}d %{public}s %{public}s", tag.c_str(), type,
-          elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str());
+    SLOGI("%{public}s %{public}d %{public}s %{public}s thirdPartyApp=%{public}d", tag.c_str(), type,
+          elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str(), thirdPartyApp);
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = AllocSessionId();
     if (descriptor.sessionId_.empty()) {
@@ -1177,7 +1177,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
 {
     sptr<AVSessionItem> session;
     auto res = CreateSessionInner(tag, type,
-        !PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION),
+        PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION),
         elementName, session);
     CHECK_AND_RETURN_RET_LOG(res == AVSESSION_SUCCESS, res, "create session fail");
 
