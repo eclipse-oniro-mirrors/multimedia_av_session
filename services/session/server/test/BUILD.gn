@@ -874,6 +874,10 @@ group("av_session_server_unittest") {
   testonly = true
 
   deps = [
+    ":AbilityConnectHelperTest",
+    ":AbilityManagerAdapterDemoTest",
+    ":AppManagerAdapterTest",
+    ":AudioAdapterTest",
     ":AVControllerCallbackProxyTest",
     ":AVControllerCallbackStubTest",
     ":AVRouterTest",
@@ -887,11 +891,6 @@ group("av_session_server_unittest") {
     ":AVSessionServiceStubPermissionTest",
     ":AVSessionServiceStubTest",
     ":AVSessionServiceTest",
-    ":AbilityConnectHelperTest",
-    ":AbilityConnectHelperTest",
-    ":AbilityManagerAdapterDemoTest",
-    ":AppManagerAdapterTest",
-    ":AudioAdapterTest",
     ":BkGrAudioControllerTest",
     ":BundleStatusAdapterTest",
     ":CommandSendLimitTest",
