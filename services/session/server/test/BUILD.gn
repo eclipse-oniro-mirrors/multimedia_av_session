@@ -40,11 +40,11 @@ config("module_private_config") {
 common_deps = [
   "../../../../frameworks/common:avsession_common",
   "../../../../frameworks/native/session:avsession_client",
-  "../../../../utils:avsession_utils",
   "../../../session:avsession_item",
   "../../../session:avsession_service",
   "//third_party/bounds_checking_function:libsec_shared",
   "//third_party/googletest:gtest_main",
+  "../../../../utils:avsession_utils",
 ]
 
 common_external_deps = [
