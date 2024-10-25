@@ -24,6 +24,7 @@
 using namespace testing::ext;
 
 static OHOS::AVSession::AVSessionService* avSessionService_;
+static OHOS::sptr<OHOS::AVSession::AVSessionItem> item_;
 
 namespace OHOS {
 namespace AVSession {
@@ -46,8 +47,12 @@ void AVSessionDumperTest::SetUp()
 {
     SLOGI("AVSessionDumperTest do SetUp");
     if (avSessionService_ == nullptr) {
-        SLOGE("AVSessionDumperTest do service newUp");
+        SLOGI("AVSessionDumperTest do service newUp");
         avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+        SLOGI("AVSessionDumperTest do service newUp checkNull:%{public}d",
+            static_cast<int>(avSessionService_ != nullptr));
+        avSessionService_->dumpHelper_ = std::make_unique<AVSessionDumper>();
+        item_ = doSessionCreateTemp();
     }
 }
 
@@ -60,8 +65,9 @@ sptr<AVSessionItem> AVSessionDumperTest::doSessionCreateTemp()
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName("test.ohos.avsession");
     elementName.SetAbilityName("test.ability");
-    auto item = avSessionService_->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    SLOGI("doSessionCreateTemp done!");
+    sptr<AVSessionItem> item = avSessionService_->CreateSessionInner("test",
+        AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    SLOGI("doSessionCreateTemp done with item checkNull %{public}d", static_cast<int>(item != nullptr));
     return item;
 }
 
@@ -241,7 +247,11 @@ HWTEST_F(AVSessionDumperTest, OnStop001, TestSize.Level1)
 HWTEST_F(AVSessionDumperTest, UpdataTopSession001, TestSize.Level1)
 {
     sleep(1);
-    auto item = doSessionCreateTemp();
+    sptr<AVSessionItem> item = item_;
+    if (item == nullptr) {
+        item = doSessionCreateTemp();
+    }
+    EXPECT_NE(item, nullptr);
     avSessionService_->topSession_ = item;
     avSessionService_->UpdateTopSession(item);
     EXPECT_NE(avSessionService_, nullptr);
@@ -258,7 +268,11 @@ HWTEST_F(AVSessionDumperTest, HandleFocusSession001, TestSize.Level1)
 {
     sleep(1);
     SLOGI("HandleFocusSession001 in ");
-    auto item = doSessionCreateTemp();
+    sptr<AVSessionItem> item = item_;
+    if (item == nullptr) {
+        item = doSessionCreateTemp();
+    }
+    EXPECT_NE(item, nullptr);
     avSessionService_->topSession_ = item;
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = 0;
@@ -279,7 +293,11 @@ HWTEST_F(AVSessionDumperTest, HandleFocusSession002, TestSize.Level1)
 {
     sleep(1);
     SLOGI("HandleFocusSession002 in");
-    auto item = doSessionCreateTemp();
+    sptr<AVSessionItem> item = item_;
+    if (item == nullptr) {
+        item = doSessionCreateTemp();
+    }
+    EXPECT_NE(item, nullptr);
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = 2;
     avSessionService_->HandleFocusSession(info);
@@ -376,7 +394,11 @@ HWTEST_F(AVSessionDumperTest, GetSessionDescriptorsBySessionId001, TestSize.Leve
 {
     SLOGI("GetSessionDescriptorsBySessionId001 in");
     AVSessionDescriptor descriptor;
-    sptr<AVSessionItem> item = doSessionCreateTemp();
+    sptr<AVSessionItem> item = item_;
+    if (item == nullptr) {
+        item = doSessionCreateTemp();
+    }
+    EXPECT_NE(item, nullptr);
     avSessionService_->GetContainer().AddSession(1, "abilityName1", item);
     std::string sessionId = item->GetDescriptor().sessionId_;
     EXPECT_EQ(avSessionService_->GetSessionDescriptorsBySessionId(sessionId, descriptor), AVSESSION_SUCCESS);
@@ -393,7 +415,9 @@ HWTEST_F(AVSessionDumperTest, GetSessionDescriptorsBySessionId001, TestSize.Leve
 HWTEST_F(AVSessionDumperTest, StartDefaultAbilityByCall001, TestSize.Level1)
 {
     std::string sessionId = "sessionId";
-    EXPECT_EQ(avSessionService_->StartDefaultAbilityByCall(sessionId), -1016);
+    // startability may go with mediaintent, will return AVSESSION_ERROR
+    int32_t ret = avSessionService_->StartDefaultAbilityByCall(sessionId);
+    EXPECT_TRUE(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_ERROR);
 }
 
 /**
@@ -479,15 +503,21 @@ HWTEST_F(AVSessionDumperTest, SetBasicInfo001, TestSize.Level1)
  */
 HWTEST_F(AVSessionDumperTest, SetDeviceInfo001, TestSize.Level1)
 {
+    SLOGI("SetDeviceInfo001 in");
     std::vector<AudioStandard::AudioDeviceDescriptor> castAudioDescriptors;
     AudioStandard::AudioDeviceDescriptor des;
     castAudioDescriptors.push_back(des);
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = "sessionId";
-    sptr<AVSessionItem> item = doSessionCreateTemp();
+    sptr<AVSessionItem> item = item_;
+    if (item == nullptr) {
+        item = doSessionCreateTemp();
+    }
+    EXPECT_NE(item, nullptr);
     avSessionService_->SetDeviceInfo(castAudioDescriptors, item);
     EXPECT_NE(item, nullptr);
     avSessionService_->HandleSessionRelease(item->GetDescriptor().sessionId_);
+    SLOGI("SetDeviceInfo001 done");
 }
 
 /**
