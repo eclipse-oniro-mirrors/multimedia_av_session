@@ -515,6 +515,8 @@ private:
     void HandleEvent(int32_t event);
     void HandlePlayerErrorAPI13(const int32_t errorCode, const std::string& errorMsg);
 
+    std::function<bool()> CheckCallbackValid(int32_t event, const std::list<napi_ref>::iterator& ref);
+
     template<typename T>
     void HandleEvent(int32_t event, const T& param);
 

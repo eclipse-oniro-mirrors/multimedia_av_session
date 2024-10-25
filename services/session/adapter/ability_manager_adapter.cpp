@@ -36,11 +36,11 @@ AbilityManagerAdapter::~AbilityManagerAdapter()
 
 __attribute__((no_sanitize("cfi"))) int32_t AbilityManagerAdapter::StartAbilityByCall(std::string& sessionId)
 {
-    if (status_ != Status::ABILITY_STATUS_INIT) {
+    if (status_.load() != Status::ABILITY_STATUS_INIT) {
         SLOGE("Start Ability is running");
         return ERR_START_ABILITY_IS_RUNNING;
     }
-    status_ = Status::ABILITY_STATUS_RUNNING;
+    status_.store(Status::ABILITY_STATUS_RUNNING);
     int32_t ret = AVSESSION_ERROR;
     bool isSupport = false;
 
@@ -67,23 +67,23 @@ __attribute__((no_sanitize("cfi"))) int32_t AbilityManagerAdapter::StartAbilityB
     }
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("Start Ability failed: %{public}d", ret);
-        status_ = Status::ABILITY_STATUS_INIT;
+        status_.store(Status::ABILITY_STATUS_INIT);
         return ret;
     }
 
     WaitForTimeout(ABILITY_START_TIMEOUT_MS);
     ret = ERR_START_ABILITY_TIMEOUT;
-    if (status_ == Status::ABILITY_STATUS_SUCCESS) {
+    if (status_.load() == Status::ABILITY_STATUS_SUCCESS) {
         ret = AVSESSION_SUCCESS;
         sessionId = sessionId_;
     }
-    status_ = Status::ABILITY_STATUS_INIT;
+    status_.store(Status::ABILITY_STATUS_INIT);
     return ret;
 }
 
 void AbilityManagerAdapter::StartAbilityByCallDone(const std::string& sessionId)
 {
-    if (status_ != Status::ABILITY_STATUS_RUNNING) {
+    if (status_.load() != Status::ABILITY_STATUS_RUNNING) {
         SLOGI("no need to notify");
         return;
     }
@@ -98,10 +98,10 @@ void AbilityManagerAdapter::WaitForTimeout(uint32_t timeout)
     auto waitStatus = syncCon_.wait_for(lock, std::chrono::milliseconds(timeout));
     if (waitStatus == std::cv_status::timeout) {
         SLOGE("StartAbilityByCall timeout");
-        status_ = Status::ABILITY_STATUS_FAILED;
+        status_.store(Status::ABILITY_STATUS_FAILED);
         return;
     }
-    status_ = Status::ABILITY_STATUS_SUCCESS;
+    status_.store(Status::ABILITY_STATUS_SUCCESS);
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

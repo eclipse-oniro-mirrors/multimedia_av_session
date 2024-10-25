@@ -66,7 +66,7 @@ void AudioAdapter::AddDeviceChangeListener(const DeviceChangeListener& listener)
 
 int32_t AudioAdapter::MuteAudioStream(int32_t uid)
 {
-    std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
+    std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
     auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     if (ret != 0) {
         SLOGE("get renderer state failed");
@@ -89,7 +89,7 @@ int32_t AudioAdapter::MuteAudioStream(int32_t uid)
 
 int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
 {
-    std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
+    std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
     auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     if (ret != 0) {
         SLOGE("get renderer state failed");
@@ -141,7 +141,7 @@ void AudioAdapter::OnDeviceChange(const DeviceChangeAction& deviceChangeAction)
 
 bool AudioAdapter::GetRendererRunning(int32_t uid)
 {
-    std::vector<std::unique_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
+    std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
     auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     if (ret != 0) {
         SLOGE("get renderer state failed");

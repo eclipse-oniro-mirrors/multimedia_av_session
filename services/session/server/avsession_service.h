@@ -248,15 +248,15 @@ public:
 
     bool GetScreenLocked();
 
-    std::string GetAVQueueDir();
+    std::string GetAVQueueDir(int32_t userId = 0);
 
-    std::string GetAVSortDir();
+    std::string GetAVSortDir(int32_t userId = 0);
 
     void HandleUserEvent(const std::string &type, const int &userId);
 
     void HandleScreenStatusChange(std::string event);
 
-    void RegisterBundleDeleteEventForHistory();
+    void RegisterBundleDeleteEventForHistory(int32_t userId = 0);
 
 private:
     void CheckBrEnable();
@@ -400,18 +400,18 @@ private:
 
     bool IsHistoricalSession(const std::string& sessionId);
 
-    void DeleteHistoricalRecord(const std::string& bundleName);
+    void DeleteHistoricalRecord(const std::string& bundleName, int32_t userId = 0);
     
-    void DeleteAVQueueInfoRecord(const std::string& bundleName);
+    void DeleteAVQueueInfoRecord(const std::string& bundleName, int32_t userId = 0);
 
     const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
 
     void SaveSessionInfoInFile(const std::string& sessionId, const std::string& sessionType,
         const AppExecFwk::ElementName& elementName);
 
-    bool CheckAndCreateDir(const string& filePath);
+    bool CheckAndCreateDir(const std::string& filePath);
 
-    bool CheckUserDirValid();
+    bool CheckUserDirValid(int32_t userId = 0);
 
     bool LoadStringFromFileEx(const std::string& filePath, std::string& content);
 

@@ -688,7 +688,7 @@ enum AVSessionErrorCode {
      * @since 10
      */
     ERR_CODE_REMOTE_CONNECTION_NOT_EXIST = 6600109,
-    
+
     /**
      * The error code for cast control is unspecified.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast

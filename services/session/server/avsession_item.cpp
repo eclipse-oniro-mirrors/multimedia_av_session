@@ -222,7 +222,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
 
-    std::string avQueueFileDir = AVSessionUtils::GetFixedPathName();
+    std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
     std::string avQueueFileName = GetBundleName() + "_" + metaData_.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
     AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
@@ -837,7 +837,11 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     if (castHandle_ > 0) {
         return AVSESSION_ERROR;
     }
-    mirrorToStreamFlag_ = true;
+    {
+        std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
+        mirrorToStreamFlag_ = true;
+    }
+    std::lock_guard lockGuard(castHandleLock_);
     castServiceNameMapState_ = serviceNameMapState;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
@@ -1263,6 +1267,7 @@ void AVSessionItem::ListenCollaborationRejectToStopCast()
 
 int32_t AVSessionItem::StopCast()
 {
+    std::lock_guard lockGuard(castHandleLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         int32_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -1273,7 +1278,6 @@ int32_t AVSessionItem::StopCast()
     }
     SLOGI("Stop cast process");
     {
-        std::lock_guard lockGuard(castHandleLock_);
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
         AVSessionRadarInfo info("AVSessionItem::StopCast");
         AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
@@ -1497,7 +1501,7 @@ AVMetaData AVSessionItem::GetMetaData()
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
 
-    std::string avQueueFileDir = AVSessionUtils::GetFixedPathName();
+    std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
     std::string avQueueFileName = GetBundleName() + "_" + metaData_.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
     AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
@@ -1956,6 +1960,13 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 {
     SLOGI("UpdateCastDeviceMap with id: %{public}s", deviceInfo.deviceid_.c_str());
     castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
+
+    if (descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0 &&
+        descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceId_ == deviceInfo.deviceId_) {
+        OutputDeviceInfo outputDeviceInfo;
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+        descriptor_.outputDeviceInfo_ = outputDeviceInfo;
+    }
 }
 #endif
 

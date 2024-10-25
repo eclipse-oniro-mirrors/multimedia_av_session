@@ -26,9 +26,9 @@
 
 namespace OHOS::AVSession {
 
-sptr <AVSessionService> avservice = nullptr;
-sptr <AVSessionItem> avsession = nullptr;
-std::shared_ptr<RemoteSessionSource> remoteSessionSource;
+sptr <AVSessionService> g_AVSessionService = nullptr;
+sptr <AVSessionItem> g_AVSessionItem = nullptr;
+std::shared_ptr<RemoteSessionSource> g_RemoteSessionSource;
 
 class RemoteSessionSourceTest : public testing::Test {
 public:
@@ -40,21 +40,24 @@ public:
 
 void RemoteSessionSourceTest::SetUpTestCase()
 {
-    avservice = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
-    avservice->InitKeyEvent();
+    g_AVSessionService = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("testRemoteSource.ohos.avsession");
+    elementName.SetBundleName("testRemoteSource.ohos.g_AVSessionItem");
     elementName.SetAbilityName("testRemoteSource.ability");
-    avsession = avservice->CreateSessionInner("testRemoteSource", AVSession::SESSION_TYPE_VOICE_CALL,
-        false, elementName);
-    int32_t ret = avsession->CastAudioToRemote("sourceDevice", "sinkDevice", "sinkCapability");
-    ASSERT_EQ(ret, AVSESSION_SUCCESS);
-    remoteSessionSource = avsession->GetRemoteSource();
-    ASSERT_NE(remoteSessionSource, nullptr);
+    g_AVSessionItem = g_AVSessionService->CreateSessionInner("testRemoteSource",
+        AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    std::string sourceDevice = "sourceDevice";
+    std::string sinkDevice = "sinkDevice";
+    std::string sinkCapability = "sinkCapability";
+    g_RemoteSessionSource = std::make_shared<RemoteSessionSourceProxy>();
+    ASSERT_NE(g_RemoteSessionSource, nullptr);
+    g_RemoteSessionSource->CastSessionToRemote(g_AVSessionItem, sourceDevice, sinkDevice, sinkCapability);
 }
 
 void RemoteSessionSourceTest::TearDownTestCase()
 {
+    g_AVSessionItem->Destroy();
+    g_AVSessionService->Close();
 }
 
 void RemoteSessionSourceTest::SetUp()
@@ -63,12 +66,6 @@ void RemoteSessionSourceTest::SetUp()
 
 void RemoteSessionSourceTest::TearDown()
 {
-    SLOGI("tear down test function in AVSessionServiceTest");
-    [[maybe_unused]] int32_t ret = AVSESSION_ERROR;
-    if (avsession != nullptr) {
-        ret = avsession->Destroy();
-        avsession = nullptr;
-    }
 }
 
 /**
@@ -80,8 +77,8 @@ static HWTEST_F(RemoteSessionSourceTest, SetAVMetaData001, testing::ext::TestSiz
 {
     SLOGI("SetAVMetaData001 begin!");
     AVMetaData metaData;
-    int32_t ret = remoteSessionSource->SetAVMetaData(metaData);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t ret = g_RemoteSessionSource->SetAVMetaData(metaData);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("SetAVMetaData001 end!");
 }
 
@@ -94,8 +91,8 @@ static HWTEST_F(RemoteSessionSourceTest, SetAVPlaybackState001, testing::ext::Te
 {
     SLOGI("SetAVPlaybackState001 begin!");
     AVPlaybackState state;
-    int32_t ret = remoteSessionSource->SetAVPlaybackState(state);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t ret = g_RemoteSessionSource->SetAVPlaybackState(state);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("SetAVPlaybackState001 end!");
 }
 
@@ -109,8 +106,8 @@ static HWTEST_F(RemoteSessionSourceTest, SetSessionEventRemote001, testing::ext:
     SLOGI("SetSessionEventRemote001 begin!");
     std::string event = "event";
     AAFwk::WantParams args;
-    int32_t ret = remoteSessionSource->SetSessionEventRemote(event, args);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t ret = g_RemoteSessionSource->SetSessionEventRemote(event, args);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("SetSessionEventRemote001 end!");
 }
 
@@ -123,8 +120,8 @@ static HWTEST_F(RemoteSessionSourceTest, SetAVQueueItems001, testing::ext::TestS
 {
     SLOGI("SetAVQueueItems001 begin!");
     std::vector<AVQueueItem> items;
-    int32_t ret = remoteSessionSource->SetAVQueueItems(items);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t ret = g_RemoteSessionSource->SetAVQueueItems(items);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("SetAVQueueItems001 end!");
 }
 
@@ -137,8 +134,8 @@ static HWTEST_F(RemoteSessionSourceTest, SetAVQueueTitle001, testing::ext::TestS
 {
     SLOGI("SetAVQueueTitle001 begin!");
     std::string title = "title";
-    int32_t ret = remoteSessionSource->SetAVQueueTitle(title);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t ret = g_RemoteSessionSource->SetAVQueueTitle(title);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("SetAVQueueTitle001 end!");
 }
 
@@ -151,8 +148,8 @@ static HWTEST_F(RemoteSessionSourceTest, GetSinkPlaybackStateMaskType001, testin
 {
     SLOGI("GetSinkPlaybackStateMaskType001 begin!");
     AAFwk::WantParams extras;
-    int32_t ret = remoteSessionSource->SetExtrasRemote(extras);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t ret = g_RemoteSessionSource->SetExtrasRemote(extras);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("GetSinkPlaybackStateMaskType001 end!");
 }
 

@@ -54,7 +54,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, 
 {
     SLOGD("HandleAudioRenderStateChangeEvent001 begin!");
     FocusSessionStrategy focusSessionStrategy;
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
     info->sessionId = 2;
     info->rendererState = RendererState::RENDERER_RELEASED;
@@ -74,7 +74,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, 
 {
     SLOGD("HandleAudioRenderStateChangeEvent002 begin!");
     FocusSessionStrategy focusSessionStrategy;
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
     info->sessionId = 2;
     info->rendererState = RendererState::RENDERER_RELEASED;
@@ -96,7 +96,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, 
 {
     SLOGD("HandleAudioRenderStateChangeEvent003 begin!");
     FocusSessionStrategy focusSessionStrategy;
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
     info->sessionId = 2;
     info->rendererState = RendererState::RENDERER_RUNNING;
@@ -116,7 +116,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, 
 {
     SLOGD("HandleAudioRenderStateChangeEvent004 begin!");
     FocusSessionStrategy focusSessionStrategy;
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
     info->sessionId = 2;
     info->rendererState = RendererState::RENDERER_RUNNING;
@@ -138,12 +138,12 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, 
 {
     SLOGD("HandleAudioRenderStateChangeEvent005 begin!");
     FocusSessionStrategy focusSessionStrategy;
-    std::unique_ptr<AudioRendererChangeInfo> info1 = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info1 = std::make_shared<AudioRendererChangeInfo>();
     info1->clientUID = 1;
     info1->sessionId = 2;
     info1->rendererState = RendererState::RENDERER_RELEASED;
 
-    std::unique_ptr<AudioRendererChangeInfo> info2 = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info2 = std::make_shared<AudioRendererChangeInfo>();
     info2->clientUID = 3;
     info2->sessionId = 4;
     info2->rendererState = RendererState::RENDERER_RUNNING;
@@ -166,7 +166,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, 
 static HWTEST_F(FocusSessionStrategyTest, IsFocusSession001, testing::ext::TestSize.Level1)
 {
     SLOGD("IsFocusSession001 begin!");
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
     info->sessionId = 2;
     info->rendererState = RendererState::RENDERER_RELEASED;
@@ -198,7 +198,7 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession002, testing::ext::TestS
 {
     SLOGD("IsFocusSession002 begin!");
     
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
     info->sessionId = 2;
     info->rendererState = RendererState::RENDERER_RELEASED;
