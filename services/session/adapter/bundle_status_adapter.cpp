@@ -116,8 +116,9 @@ void BundleStatusAdapter::NotifyBundleRemoved(const std::string bundleName, cons
         return;
     }
     bundleStatusListener->second(bundleName, userId);
-    SLOGI("erase bundle status callback, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
-    bundleStatusListeners_.erase(bundleStatusListener);
+    // BMS will keep callbackImpl for the bundleName & userId until avsession do ClearBundleStatusCallback
+    SLOGI("notify bundle status callback without erase, bundleName=%{public}s, userId=%{public}d",
+        bundleName.c_str(), userId);
 }
 
 std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)

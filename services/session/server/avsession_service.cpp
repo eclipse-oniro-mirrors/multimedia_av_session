@@ -1374,6 +1374,8 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
         avQueueInfo.SetAVQueueName(value["avQueueName"]);
         avQueueInfo.SetAVQueueId(value["avQueueId"]);
         std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
+        CHECK_AND_RETURN_RET_LOG(value.contains("avQueueImageDir"), AVSESSION_ERROR, "avQueueImageDir not contain");
+        CHECK_AND_RETURN_RET_LOG(value.contains("avQueueImageName"), AVSESSION_ERROR, "avQueueImageName not contain");
         AVSessionUtils::ReadImageFromFile(avQueuePixelMap, value["avQueueImageDir"], value["avQueueImageName"]);
         avQueueInfo.SetAVQueueImage(avQueuePixelMap);
         avQueueInfo.SetAVQueueImageUri(value["avQueueImageUri"]);
@@ -1412,7 +1414,7 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
     value["avQueueId"] = meta.GetAVQueueId();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = meta.GetAVQueueImage();
     if (innerPixelMap != nullptr) {
-        std::string fileDir = AVSessionUtils::GetFixedPathName();
+        std::string fileDir = AVSessionUtils::GetFixedPathName(userId);
         std::string fileName = bundleName + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
         innerPixelMap->Clear();
