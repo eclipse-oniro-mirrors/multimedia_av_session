@@ -70,6 +70,7 @@
             "//foundation/multimedia/av_session/frameworks/native/ohavsession:ohavsession",
             "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
             "//foundation/multimedia/av_session/frameworks/js/napi/session:avsession_napi",
+            "//foundation/multimedia/av_session/frameworks/cj:cj_multimedia_avsession_ffi",
             "//foundation/multimedia/av_session/utils:avsession_utils",
             "//foundation/multimedia/av_session/avpicker:avcastpicker",
             "//foundation/multimedia/av_session/avpicker:avcastpickerparam",
