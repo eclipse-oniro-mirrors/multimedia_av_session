@@ -3066,8 +3066,9 @@ void AVSessionService::RemoveExpired(std::list<std::chrono::system_clock::time_p
 {
     auto iter = list.begin();
     while (iter != list.end()) {
-        if (abs(now - static_cast<std::chrono::system_clock::time_point>(*iter)) >
-            std::chrono::seconds(static_cast<int>(time))) {
+        auto duration = now - static_cast<std::chrono::system_clock::time_point>(*iter);
+        int32_t durationInSeconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+        if (std::abs(durationInSeconds) > time) {
             iter = list.erase(iter);
         } else {
             break;

@@ -28,12 +28,12 @@
 namespace OHOS::AVSession {
 AVCastControllerItem::AVCastControllerItem()
 {
-    SLOGI("AVCastControllerItem construct");
+    SLOGD("AVCastControllerItem construct");
 }
 
 AVCastControllerItem::~AVCastControllerItem()
 {
-    SLOGI("AVCastControllerItem destruct");
+    SLOGD("AVCastControllerItem destruct");
 }
 
 void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy,
@@ -61,7 +61,7 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
         AVSessionRadar::GetInstance().ControlCommandRespond(info);
     }
     AVPlaybackState stateOut;
-    std::lock_guard lockGuard(itemrCallbackLock_);
+    std::lock_guard lockGuard(itemCallbackLock_);
     if (state.CopyToByMask(castPlaybackMask_, stateOut)) {
         SLOGI("update cast playback state");
         AVSESSION_TRACE_SYNC_START("AVCastControllerItem::OnCastPlaybackStateChange");
@@ -74,7 +74,7 @@ void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
 {
     SLOGI("OnMediaItemChange");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    std::lock_guard lockGuard(ietmCallbackLock_);
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnMediaItemChange(avQueueItem);
     SLOGI("OnMediaItemChange done");
 }
@@ -82,6 +82,7 @@ void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
 void AVCastControllerItem::OnPlayNext()
 {
     SLOGI("OnPlayNext");
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback is nullptr");
     AVSessionRadarInfo info("AVCastControllerItem::OnPlayNext");
     AVSessionRadar::GetInstance().ControlCommandRespond(info);
     std::lock_guard lockGuard(itemCallbackLock_);
@@ -123,7 +124,7 @@ void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::str
     AVSessionRadarInfo info("AVCastControllerItem::OnPlayerError");
     info.errorCode_ = errorCode;
     AVSessionRadar::GetInstance().ControlCommandError(info);
-    std::lock_guard lockGuard(itemControllerCallbackLock_);
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayerError(errorCode, errorMsg);
 }
 
@@ -131,7 +132,7 @@ void AVCastControllerItem::OnEndOfStream(const int32_t isLooping)
 {
     SLOGI("OnEndOfStream");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    std::lock_guard lockGuard(itemControllerCallbackLock_);
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnEndOfStream(isLooping);
 }
 
@@ -141,7 +142,7 @@ void AVCastControllerItem::OnPlayRequest(const AVQueueItem& avQueueItem)
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     AVSessionRadarInfo info("AVCastControllerItem::OnPlayRequest");
     AVSessionRadar::GetInstance().ControlCommandRespond(info);
-    std::lock_guard lockGuard(itemControllerCallbackLock_);
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnPlayRequest(avQueueItem);
 }
 
@@ -149,7 +150,7 @@ void AVCastControllerItem::OnKeyRequest(const std::string &assetId, const std::v
 {
     SLOGI("OnKeyRequest");
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    std::lock_guard lockGuard(itemControllerCallbackLock_);
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnKeyRequest(assetId, keyRequestData);
 }
 
@@ -399,7 +400,7 @@ int32_t AVCastControllerItem::HandleCastValidCommandChange(const std::vector<int
 {
     SLOGI("HandleCastValidCommandChange cmd size:%{public}zd", cmds.size());
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
-    std::lock_guard lockGuard(itemControllerCallbackLock_);
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_->OnCastValidCommandChanged(cmds);
     return AVSESSION_SUCCESS;
 }
@@ -419,7 +420,7 @@ bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastCon
 int32_t AVCastControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
     SLOGI("call RegisterCallbackInner of cast controller proxy");
-    std::lock_guard lockGuard(itemControllerCallbackLock_);
+    std::lock_guard lockGuard(itemCallbackLock_);
     callback_ = iface_cast<AVCastControllerCallbackProxy>(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
     return AVSESSION_SUCCESS;
@@ -432,7 +433,7 @@ int32_t AVCastControllerItem::Destroy()
         castControllerProxy_ = nullptr;
     }
     {
-        std::lock_guard lockGuard(itemControllerCallbackLock_);
+        std::lock_guard lockGuard(itemCallbackLock_);
         if (callback_) {
             callback_ = nullptr;
         }
