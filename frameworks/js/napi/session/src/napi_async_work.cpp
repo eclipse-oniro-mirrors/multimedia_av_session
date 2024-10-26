@@ -84,7 +84,11 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
     ctxt->taskName = name;
     napi_value promise = nullptr;
     if (ctxt->callbackRef == nullptr) {
-        napi_create_promise(ctxt->env, &ctxt->deferred, &promise);
+        if (napi_create_promise(ctxt->env, &ctxt->deferred, &promise) != napi_ok) {
+            NapiUtils::ThrowError(env, "napi_create_promise failed",
+                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            return NapiUtils::GetUndefinedValue(env);
+        }
         SLOGD("create deferred promise");
     } else {
         napi_get_undefined(ctxt->env, &promise);
