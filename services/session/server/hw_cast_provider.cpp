@@ -324,6 +324,11 @@ bool HwCastProvider::GetRemoteNetWorkId(int32_t castId, std::string deviceId, st
     return hwCastProviderSession->GetRemoteNetWorkId(deviceId, networkId);
 }
 
+int32_t HwCastProvider::GetMirrorCastId()
+{
+    return mirrorCastId;
+}
+
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,
     std::shared_ptr<IAVCastSessionStateListener> listener)
 {

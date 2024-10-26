@@ -192,6 +192,14 @@ public:
     virtual bool SetStreamState(int32_t castId, DeviceInfo deviceInfo) = 0;
 
     /**
+     * @brief get mirror castid.
+     *
+     * @return { int32_t } mirror castid.
+     * @since 11
+    */
+    virtual int32_t GetMirrorCastId() = 0;
+
+    /**
      * @brief get remote networkId.
      *
      * @param { int32_t } castHandle const - The ID corresponding to the castprovider.

@@ -205,11 +205,12 @@ public:
      *
      * @param { int64_t } castHandleconst - The ID corresponding to the provider.
      * @param { std::shared_ptr<IAVRouterListener> } callback - Callback function.
+     * @param { std::string } sessionId - avsession id.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
     virtual int32_t RegisterCallback(int64_t castHandleconst,
-        std::shared_ptr<IAVRouterListener> callback) = 0;
+        std::shared_ptr<IAVRouterListener> callback, std::string sessionId) = 0;
 
     /**
      * @brief Cancel listening for AVRouter Callback event.
@@ -243,6 +244,15 @@ public:
      * @since 11
     */
     virtual int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) = 0;
+
+    /**
+     * @brief get mirror castid.
+     *
+     * @param { const int64_t } castHandle - The ID corresponding to the provider.
+     * @return { int32_t } mirror castid.
+     * @since 13
+    */
+    virtual int32_t GetMirrorCastId(const int64_t castHandle) = 0;
 
     /**
      * @brief Listen to the change of cast state change.
