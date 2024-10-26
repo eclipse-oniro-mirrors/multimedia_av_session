@@ -28,14 +28,16 @@ public:
     static CollaborationManager& GetInstance();
     CollaborationManager();
     virtual ~CollaborationManager();
-    void SendRejectStateToStopCast(const std::function<void(const int32_t code)>& callback);
+    void SendCollaborationApplyResult(const std::function<void(const int32_t code)>& callback);
+    void SendCollaborationOnStop(const std::function<void(void)>& callback);
     int32_t ReadCollaborationManagerSo();
     int32_t RegisterLifecycleCallback();
     int32_t UnRegisterLifecycleCallback();
     int32_t PublishServiceState(const char* peerNetworkId, ServiceCollaborationManagerBussinessStatus state);
     int32_t ApplyAdvancedResource(const char* peerNetworkId);
 
-    std::function<void(const int32_t code)> sendRejectStateToStopCast_;
+    std::function<void(const int32_t code)> sendCollaborationApplyResult_;
+    std::function<void(void)> sendCollaborationOnStop_;
 
 private:
     const int32_t remoteHardwareListSize_ = 2;

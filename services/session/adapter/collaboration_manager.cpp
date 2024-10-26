@@ -52,18 +52,22 @@ CollaborationManager::~CollaborationManager()
     resourceRequest_ = nullptr;
 }
 
-void CollaborationManager::SendRejectStateToStopCast(const std::function<
-    void(const int32_t code)>& callback)
+void CollaborationManager::SendCollaborationOnStop(const std::function<void(void)>& callback)
 {
-    sendRejectStateToStopCast_ = callback;
+    sendCollaborationOnStop_ = callback;
 }
 
 __attribute__((no_sanitize("cfi")))static int32_t OnStop(const char* peerNetworkId)
 {
     SLOGE("Onstop to stop cast");
-    CollaborationManager::GetInstance().sendRejectStateToStopCast_(
-        ServiceCollaborationManagerResultCode::ONSTOP);
+    CollaborationManager::GetInstance().sendCollaborationOnStop_();
     return AVSESSION_SUCCESS;
+}
+
+void CollaborationManager::SendCollaborationApplyResult(const std::function<
+    void(const int32_t code)>& callback)
+{
+    sendCollaborationApplyResult_ = callback;
 }
 
 __attribute__((no_sanitize("cfi")))static int32_t ApplyResult(int32_t errorcode,
@@ -72,7 +76,7 @@ __attribute__((no_sanitize("cfi")))static int32_t ApplyResult(int32_t errorcode,
     if (result == ServiceCollaborationManagerResultCode::REJECT) {
         SLOGE("return connect reject and reson:%{public}s", reason);
     }
-    CollaborationManager::GetInstance().sendRejectStateToStopCast_(result);
+    CollaborationManager::GetInstance().sendCollaborationApplyResult_(result);
     return AVSESSION_SUCCESS;
 }
 
