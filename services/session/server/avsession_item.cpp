@@ -52,6 +52,8 @@ using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
 
+static const std::string AVSESSION_DYNAMIC_DISPLAY_LIBRARY_PATH = std::string("libavsession_dynamic_display.z.so");
+
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId)
     : descriptor_(descriptor), userId_(userId)
 {
@@ -820,6 +822,7 @@ std::string AVSessionItem::GetAnonymousDeviceId(std::string deviceId)
 int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
     DeviceInfo deviceInfo)
 {
+    std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
     if (castHandle_ > 0) {
         return AVSESSION_ERROR;
     }
@@ -1186,8 +1189,6 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s",
         static_cast<int32_t>(castState), deviceInfo.deviceId_.c_str());
-    SLOGI("deviceInfo.modelName_ is %{public}s", deviceInfo.modelName_.c_str());
-    SLOGI("deviceInfo.manufacturer_ is %{public}s", deviceInfo.manufacturer_.c_str());
     DealCollaborationPublishState(castState, deviceInfo);
     DealCastState(castState);
     if (castState == streamStateConnection && counter_ == secondStep) {
@@ -1967,13 +1968,6 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 {
     SLOGI("UpdateCastDeviceMap with id: %{public}s", deviceInfo.deviceId_.c_str());
     castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
-
-    if (descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0 &&
-        descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceId_ == deviceInfo.deviceId_) {
-        OutputDeviceInfo outputDeviceInfo;
-        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-        descriptor_.outputDeviceInfo_ = outputDeviceInfo;
-    }
 }
 #endif
 
