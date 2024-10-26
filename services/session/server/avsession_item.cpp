@@ -1141,7 +1141,6 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 void AVSessionItem::ListenCollaborationOnStop()
 {
     CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
-        std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
         if (newCastState == castConnectStateForConnected_) {
             SLOGI("onstop to stop cast");
             StopCast();
