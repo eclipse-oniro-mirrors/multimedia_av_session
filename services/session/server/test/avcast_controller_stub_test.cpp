@@ -462,6 +462,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode7_1, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = aVCastControllerStubDemo.OnRemoteRequest(code, data, reply, option);
+    SLOGI("OnRemoteRequestCode7_1 ret with %{public}d", ret);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
     SLOGI("OnRemoteRequestCode7_1 end");
 }
@@ -493,6 +494,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode7_2, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = aVCastControllerStubDemo.OnRemoteRequest(code, data, reply, option);
+    SLOGI("OnRemoteRequestCode7_2 ret with %{public}d", ret);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("OnRemoteRequestCode7_2 end");
 }

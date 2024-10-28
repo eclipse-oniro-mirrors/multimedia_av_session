@@ -23,8 +23,50 @@
 #undef protected
 #undef private
 
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 using namespace testing::ext;
-using namespace OHOS::AVSession;
+using namespace OHOS::Security::AccessToken;
+
+namespace OHOS {
+namespace AVSession {
+static uint64_t g_selfTokenId = 0;
+
+static HapInfoParams g_info = {
+    .userID = 100,
+    .bundleName = "ohos.permission_test.demo",
+    .instIndex = 0,
+    .appIDDesc = "ohos.permission_test.demo",
+    .isSystemApp = true
+};
+
+static HapPolicyParams g_policy = {
+    .apl = APL_NORMAL,
+    .domain = "test.domain",
+    .permList = {
+        {
+            .permissionName = "ohos.permission.LISTEN_BUNDLE_CHANGE",
+            .bundleName = "ohos.permission_test.demo",
+            .grantMode = 1,
+            .availableLevel = APL_NORMAL,
+            .label = "label",
+            .labelId = 1,
+            .description = "test",
+            .descriptionId = 1
+        }
+    },
+    .permStateList = {
+        {
+            .permissionName = "ohos.permission.LISTEN_BUNDLE_CHANGE",
+            .isGeneral = true,
+            .resDeviceID = { "local" },
+            .grantStatus = { PermissionState::PERMISSION_GRANTED },
+            .grantFlags = { 1 }
+        }
+    }
+};
 
 class BundleStatusAdapterTest : public testing::Test {
 public:
@@ -36,10 +78,17 @@ public:
 
 void BundleStatusAdapterTest::SetUpTestCase()
 {
+    g_selfTokenId = GetSelfTokenID();
+    AccessTokenKit::AllocHapToken(g_info, g_policy);
+    AccessTokenIDEx tokenID = AccessTokenKit::GetHapTokenIDEx(g_info.userID, g_info.bundleName, g_info.instIndex);
+    SetSelfTokenID(tokenID.tokenIDEx);
 }
 
 void BundleStatusAdapterTest::TearDownTestCase()
 {
+    SetSelfTokenID(g_selfTokenId);
+    auto tokenId = AccessTokenKit::GetHapTokenID(g_info.userID, g_info.bundleName, g_info.instIndex);
+    AccessTokenKit::DeleteToken(tokenId);
 }
 
 void BundleStatusAdapterTest::SetUp()
@@ -174,7 +223,7 @@ static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent001, testing:
 static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent002, testing::ext::TestSize.Level1)
 {
     SLOGI("SubscribeBundleStatusEvent002, start");
-    std::string bundleName = "com.ohos.camera";
+    std::string bundleName = "com.ohos.sceneboard";
     auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
         SLOGI("SubscribeBundleStatusEvent002: get bundle name: %{public}s, userId: %{public}d",
             capturedBundleName.c_str(), userId);
@@ -290,3 +339,5 @@ static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent002, testing::ext::T
     EXPECT_EQ(ret, false);
     SLOGI("IsSupportPlayIntent002, end");
 }
+} // namespace AVSession
+} // namespace OHOS
