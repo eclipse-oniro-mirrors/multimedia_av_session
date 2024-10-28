@@ -45,16 +45,16 @@ class RemoteSessionSink;
 class RemoteSessionSource;
 class AVSessionItem : public AVSessionStub {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-class CssListener : public IAVCastSessionStateListener {
+class CssListener : public IAVRouterListener {
 public:
     explicit CssListener(AVSessionItem *ptr)
     {
         ptr_ = ptr;
     }
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
     {
-        ptr_->OnCastStateChange(castState, deviceInfo);
+        ptr_->OnCastStateChange(castState, deviceInfo, isNeedRemove);
     }
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
@@ -73,11 +73,11 @@ public:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void DealCastState(int32_t castState);
 
-    void DealDisconnect(DeviceInfo deviceInfo);
+    void DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove);
 
     void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
@@ -403,14 +403,8 @@ private:
     int64_t castHandle_ = 0;
     std::string castHandleDeviceId_ = "-100";
     const int32_t streamStateConnection = 6;
-    const int32_t virtualDeviceStateConnection = -6;
     const std::string deviceStateConnection = "CONNECT_SUCC";
-    const int32_t firstStep = 1;
-    const int32_t secondStep = 2;
-    int32_t removeTimes = 0;
     int32_t newCastState = -1;
-    int32_t counter_ = -1;
-    bool isUpdate = false;
     std::map<std::string, std::string> castServiceNameMapState_;
 
     bool collaborationRejectFlag_ = false;
@@ -430,7 +424,7 @@ private:
     std::recursive_mutex castControllersLock_;
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
-    std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
+    std::shared_ptr<IAVRouterListener> iAVRouterListener_;
     sptr<HwCastDisplayListener> displayListener_;
     std::recursive_mutex displayListenerLock_;
 

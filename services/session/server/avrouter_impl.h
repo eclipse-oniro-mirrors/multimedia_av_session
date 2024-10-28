@@ -21,10 +21,29 @@
 
 namespace OHOS::AVSession {
 class AVRouterImpl : public AVRouter {
+class CastSessionListener : public IAVCastSessionStateListener {
+public:
+    explicit CastSessionListener(AVRouterImpl *ptr)
+    {
+        ptr_ = ptr;
+    }
+
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+    {
+        ptr_->OnCastStateChange(castState, deviceInfo);
+    }
+
+    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
+    {
+        ptr_->OnCastEventRecv(errorCode, errorMsg);
+    }
+
+    AVRouterImpl *ptr_;
+};
 public:
     AVRouterImpl();
 
-    void Init(IAVSessionServiceListener *servicePtr) override;
+    int32_t Init(IAVSessionServiceListener *servicePtr) override;
 
     bool Release() override;
     
@@ -53,23 +72,27 @@ public:
     std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int64_t castHandle) override;
 
     int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
-        std::map<std::string, std::string>& serviceNameMapState) override;
+        std::map<std::string, std::string>& serviceNameMapState, std::string sessionId) override;
 
     int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) override;
 
-    int32_t StopCast(const int64_t castHandle, int32_t removeTimes) override;
+    int32_t StopCast(const int64_t castHandle) override;
 
     int32_t StopCastSession(const int64_t castHandle) override;
 
     int32_t RegisterCallback(int64_t castHandleconst,
-        std::shared_ptr<IAVCastSessionStateListener> callback) override;
+        std::shared_ptr<IAVRouterListener> callback) override;
 
     int32_t UnRegisterCallback(int64_t castHandleconst,
-        std::shared_ptr<IAVCastSessionStateListener> callback) override;
+        std::shared_ptr<IAVRouterListener> callback, std::string sessionId) override;
 
     int32_t SetServiceAllConnectState(int64_t castHandle, DeviceInfo deviceInfo) override;
 
     int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) override;
+
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
+
+    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
 protected:
 
@@ -81,15 +104,17 @@ private:
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     int32_t providerNumber_ = 0;
-    std::map<int32_t, OutputDeviceInfo> castHandleToOutputDeviceMap_;
+    std::map<int64_t, CastHandleInfo> castHandleToInfoMap_;
     bool hasSessionAlive_ = false;
     int32_t providerNumberEnableDefault_ = 1;
     int32_t providerNumberDisable_ = 0;
-    OutputDeviceInfo castOutputDeviceInfo_;
     bool cacheStartDiscovery_ = false;
     bool cacheStartDeviceLogging_ = false;
     int32_t cacheCastDeviceCapability_ = -1;
     std::vector<std::string> cacheDrmSchemes_;
+    std::shared_ptr<CastSessionListener> castSessionListener_;
+    int32_t castConnectStateForDisconnect_ = 5;
+    int32_t castConnectStateForConnected_ = 6;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

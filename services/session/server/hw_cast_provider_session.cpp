@@ -16,6 +16,7 @@
 #include "hw_cast_provider_session.h"
 #include <thread>
 #include "avsession_log.h"
+#include "avsession_errors.h"
 
 using namespace OHOS::CastEngine;
 
@@ -26,12 +27,13 @@ HwCastProviderSession::~HwCastProviderSession()
     Release();
 }
 
-void HwCastProviderSession::Init()
+int32_t HwCastProviderSession::Init()
 {
     SLOGI("Init the HwCastProviderSession");
     if (castSession_) {
-        castSession_->RegisterListener(shared_from_this());
+        return castSession_->RegisterListener(shared_from_this());
     }
+    return AVSESSION_ERROR;
 }
 
 void HwCastProviderSession::Release()
@@ -107,7 +109,7 @@ bool HwCastProviderSession::SetStreamState(DeviceInfo deviceInfo)
         }
     }
     stashDeviceState_ = deviceStateConnection;
-    stashDeviceId_ = "0";
+    stashDeviceId_ = deviceInfo.deviceId_;
     return true;
 }
 
@@ -167,6 +169,11 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     int32_t deviceState = static_cast<int32_t>(stateInfo.deviceState);
     std::vector<std::shared_ptr<IAVCastSessionStateListener>> tempListenerList;
     SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(deviceState));
+    if (stashDeviceState_ == deviceState) {
+        SLOGI("duplicate devicestate");
+        return;
+    }
+
     {
         std::lock_guard lockGuard(mutex_);
         if (castSessionStateListenerList_.size() == 0) {

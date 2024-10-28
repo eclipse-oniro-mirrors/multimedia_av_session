@@ -59,6 +59,10 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
             SplitExtraInfo(info);
         }
         NotifyMirrorToStreamCast();
+        if (state == "IDLE") {
+            SLOGI("call disable cast for cast idle");
+            checkEnableCast(false);
+        }
     }
 #endif
 }
@@ -134,11 +138,14 @@ int32_t AVSessionService::checkEnableCast(bool enable)
     SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
     if (enable == true && isInCast_ == false) {
         isInCast_ = true;
-        AVRouter::GetInstance().Init(this);
+        return AVRouter::GetInstance().Init(this);
     } else if (enable == false && isInCast_ == true) {
         CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
             (GetContainer().GetAllSessions().size() == 1 && !CheckAncoAudio())) && !is2in1_),
             AVSESSION_SUCCESS, "can not release cast with session alive");
+        CHECK_AND_RETURN_RET_LOG(!(castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+            castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection),
+            AVSESSION_SUCCESS, "can not release cast with casting");
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
         SLOGD("AVRouter Init in nothing change");
