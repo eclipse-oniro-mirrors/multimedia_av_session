@@ -554,7 +554,7 @@ private:
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
     const int32_t saType = 1;
-    const int32_t MAX_NOTIFICATION_NUM = 3;
+    const uint32_t MAX_NOTIFICATION_NUM = 3;
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
 };
 } // namespace OHOS::AVSession
