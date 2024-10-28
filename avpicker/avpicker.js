@@ -77,6 +77,7 @@ export class AVCastPicker extends ViewPU {
         this.maxFontSizeScale = 2;
         this.__accessibilityConnectedStr = new ObservedPropertySimplePU('已连接', this, 'accessibilityConnectedStr');
         this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('音视频投播', this, 'accessibilityAudioControlStr');
+        this.scroller = new Scroller();
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -136,6 +137,9 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.__accessibilityAudioControlStr !== undefined) {
             this.accessibilityAudioControlStr = c11.accessibilityAudioControlStr;
+        }
+        if (c11.scroller !== undefined) {
+            this.scroller = c11.scroller;
         }
     }
 
@@ -349,9 +353,13 @@ export class AVCastPicker extends ViewPU {
     }
 
     deviceMenu(o8 = null) {
+        this.observeComponentCreation2((h10, i10) => {
+            Scroll.create(this.scroller);
+            Scroll.width(216);
+            Scroll.constraintSize({ maxHeight: 345 });
+        }, Scroll);
         this.observeComponentCreation2((j10, k10) => {
             Column.create();
-            Column.width(216);
         }, Column);
         this.observeComponentCreation2((r8, s8) => {
             ForEach.create();
@@ -476,6 +484,7 @@ export class AVCastPicker extends ViewPU {
         }, ForEach);
         ForEach.pop();
         Column.pop();
+        Scroll.pop();
     }
 
     buildDefaultPicker(c8, d8 = null) {
