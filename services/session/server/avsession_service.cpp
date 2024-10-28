@@ -2227,7 +2227,7 @@ void AVSessionService::SetDeviceInfo(const std::vector<AudioStandard::AudioDevic
     session->SetOutputDevice(outputDeviceInfo);
 }
 
-bool AVSessionService::GetAudioDescriptorByDeviceId(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>>&
+bool AVSessionService::GetAudioDescriptorByDeviceId(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>&
     descriptors, const std::string& deviceId,
     AudioStandard::AudioDeviceDescriptor& audioDescriptor)
 {
@@ -2271,8 +2271,8 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
     audioFilter->rendererInfo.contentType = ContentType::CONTENT_TYPE_MUSIC;
     audioFilter->rendererInfo.streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
 
-    std::vector<sptr<AudioDeviceDescriptor>> audioDescriptor;
-    auto audioDeviceDescriptor = new(std::nothrow) AudioDeviceDescriptor(descriptor);
+    std::vector<std::shared_ptr<AudioDeviceDescriptor>> audioDescriptor;
+    auto audioDeviceDescriptor = std::make_shared<AudioDeviceDescriptor>(descriptor);
     CHECK_AND_RETURN_RET_LOG(audioDeviceDescriptor != nullptr, ERR_NO_MEMORY, "audioDeviceDescriptor is nullptr");
     audioDescriptor.push_back(audioDeviceDescriptor);
     SLOGI("select the device %{public}s role is %{public}d, networkId is %{public}.6s",

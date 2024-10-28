@@ -135,8 +135,8 @@ static HWTEST_F(AVSessionServiceSupplementTest, SetDeviceInfo001, TestSize.Level
 static HWTEST_F(AVSessionServiceSupplementTest, GetAudioDescriptorByDeviceId001, TestSize.Level1)
 {
     SLOGI("GetAudioDescriptorByDeviceId001 begin!");
-    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> descriptors;
-    sptr<AudioStandard::AudioDeviceDescriptor> descriptor = new AudioStandard::AudioDeviceDescriptor();
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> descriptors;
+    std::shared_ptr<AudioStandard::AudioDeviceDescriptor> descriptor = std::make_shared<AudioStandard::AudioDeviceDescriptor>();
     descriptors.push_back(descriptor);
     std::string deviceId = "0";
     AudioStandard::AudioDeviceDescriptor audioDescriptor;
@@ -153,8 +153,8 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetAudioDescriptorByDeviceId001,
 static HWTEST_F(AVSessionServiceSupplementTest, GetAudioDescriptorByDeviceId002, TestSize.Level1)
 {
     SLOGI("GetAudioDescriptorByDeviceId002 begin!");
-    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> descriptors;
-    sptr<AudioStandard::AudioDeviceDescriptor> descriptor = new AudioStandard::AudioDeviceDescriptor();
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> descriptors;
+    std::shared_ptr<AudioStandard::AudioDeviceDescriptor> descriptor = std::make_shared<AudioStandard::AudioDeviceDescriptor>();
     descriptors.push_back(descriptor);
     std::string deviceId = "1";
     AudioStandard::AudioDeviceDescriptor audioDescriptor;

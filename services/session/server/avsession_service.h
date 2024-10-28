@@ -383,7 +383,7 @@ private:
     int32_t GetAudioDescriptor(const std::string deviceId,
                                std::vector<AudioStandard::AudioDeviceDescriptor>& audioDeviceDescriptors);
 
-    bool GetAudioDescriptorByDeviceId(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>>& descriptors,
+    bool GetAudioDescriptorByDeviceId(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>& descriptors,
                                       const std::string& deviceId,
                                       AudioStandard::AudioDeviceDescriptor& audioDescriptor);
 
