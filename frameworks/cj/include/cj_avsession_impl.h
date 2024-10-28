@@ -23,11 +23,9 @@
 namespace OHOS::AVSession {
 
 class CJAVSessionImpl : public OHOS::FFI::FFIData {
-    friend class CJAVSessionManagerImpl;
-protected:
-    CJAVSessionImpl(std::shared_ptr<AVSession> session);
-
+    DECL_TYPE(CJAVSessionImpl, OHOS::FFI::FFIData)
 public:
+    CJAVSessionImpl(std::shared_ptr<AVSession> session);
     int32_t SetAVMetaData(CAVMetaData& data);
     int32_t SetAVCallMetaData(CAVCallMetaData& dat);
     int32_t SetAVCallState(CAVCallState& state);
