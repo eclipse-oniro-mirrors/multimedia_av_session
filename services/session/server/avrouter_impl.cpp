@@ -61,9 +61,9 @@ int32_t AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
         SLOGE("init with null pvd to registerlistener");
         return AVSESSION_ERROR;
     }
+    std::lock_guard lockGuard(providerManagerLock_);
     if (cacheStartDiscovery_) {
         SLOGI("cacheStartDiscovery check do discovery");
-        std::lock_guard lockGuard(providerManagerLock_);
         StartCastDiscovery(cacheCastDeviceCapability_, cacheDrmSchemes_);
         cacheStartDiscovery_ = false;
     }
