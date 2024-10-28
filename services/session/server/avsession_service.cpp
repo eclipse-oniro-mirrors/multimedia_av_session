@@ -716,7 +716,8 @@ void AVSessionService::InitAudio()
     AudioAdapter::GetInstance().AddStreamRendererStateListener([this] (const AudioRendererChangeInfos& infos) {
         OutputDeviceChangeListener(infos);
     });
-    AudioAdapter::GetInstance().AddDeviceChangeListener([this] (const std::vector<sptr<AudioDeviceDescriptor>> &desc) {
+    AudioAdapter::GetInstance().AddDeviceChangeListener(
+        [this] (const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) {
         HandleDeviceChange(desc);
     });
 }
@@ -2227,8 +2228,9 @@ void AVSessionService::SetDeviceInfo(const std::vector<AudioStandard::AudioDevic
     session->SetOutputDevice(outputDeviceInfo);
 }
 
-bool AVSessionService::GetAudioDescriptorByDeviceId(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>&
-    descriptors, const std::string& deviceId,
+bool AVSessionService::GetAudioDescriptorByDeviceId(
+    const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>& descriptors,
+    const std::string& deviceId,
     AudioStandard::AudioDeviceDescriptor& audioDescriptor)
 {
     for (const auto& descriptor : descriptors) {
@@ -2896,7 +2898,8 @@ void AVSessionService::NotifyDeviceChange()
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
-void AVSessionService::HandleDeviceChange(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> &desc)
+void AVSessionService::HandleDeviceChange(
+    const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc)
 {
     for (auto &audioDeviceDescriptor : desc) {
         if (audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADSET ||

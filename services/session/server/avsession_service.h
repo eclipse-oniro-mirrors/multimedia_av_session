@@ -341,7 +341,7 @@ private:
 
     void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 
-    void HandleDeviceChange(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> &desc);
+    void HandleDeviceChange(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc);
 
     __attribute__((no_sanitize("cfi"))) std::shared_ptr<RemoteSessionCommandProcess> GetService(
         const std::string& deviceId);
@@ -383,9 +383,10 @@ private:
     int32_t GetAudioDescriptor(const std::string deviceId,
                                std::vector<AudioStandard::AudioDeviceDescriptor>& audioDeviceDescriptors);
 
-    bool GetAudioDescriptorByDeviceId(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>& descriptors,
-                                      const std::string& deviceId,
-                                      AudioStandard::AudioDeviceDescriptor& audioDescriptor);
+    bool GetAudioDescriptorByDeviceId(
+        const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>& descriptors,
+        const std::string& deviceId,
+        AudioStandard::AudioDeviceDescriptor& audioDescriptor);
 
     void GetDeviceInfo(const sptr<AVSessionItem>& session,
                            const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors,

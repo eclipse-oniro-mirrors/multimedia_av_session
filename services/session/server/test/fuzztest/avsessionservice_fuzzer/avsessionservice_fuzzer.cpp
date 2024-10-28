@@ -711,8 +711,8 @@ void ConvertKeyCodeToCommand001(const uint8_t* data, size_t size)
 void HandleDeviceChange001(const uint8_t* data, size_t size)
 {
     SLOGI("HandleDeviceChange001 begin!");
-    std::vector<OHOS::sptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
-    OHOS::sptr<AudioDeviceDescriptor> descriptor = new(std::nothrow) AudioDeviceDescriptor();
+    std::vector<std::shared_ptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
+    std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
     descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
     audioDeviceDescriptors.push_back(descriptor);
     avsessionService_->HandleDeviceChange(audioDeviceDescriptors);
@@ -723,8 +723,8 @@ void HandleDeviceChange002(const uint8_t* data, size_t size)
 {
     SLOGI("HandleDeviceChange002 begin!");
     DeviceChangeAction deviceChange;
-    std::vector<OHOS::std::shared_ptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
-    OHOS::std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
+    std::vector<std::shared_ptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
+    std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
     descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
     deviceChange.type = static_cast<DeviceChangeType>(0);
     deviceChange.flag = static_cast<DeviceFlag>(0);

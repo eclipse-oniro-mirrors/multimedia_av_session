@@ -34,7 +34,8 @@ class AudioAdapter : public AudioStandard::AudioRendererStateChangeCallback,
 public:
     using StateListener = std::function<void(const AudioRendererChangeInfos& infos)>;
     using DeviceChangeListener = std::function<void(const DeviceChangeAction& deviceChangeAction)>;
-    using PreferOutputDeviceChangeListener = std::function<void(const std::vector<sptr<AudioDeviceDescriptor>> &desc)>;
+    using PreferOutputDeviceChangeListener =
+        std::function<void(const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc)>;
     static AudioAdapter& GetInstance();
 
     AudioAdapter();
@@ -60,7 +61,7 @@ public:
 
     void OnDeviceChange(const DeviceChangeAction& deviceChangeAction) override;
 
-    void OnPreferredOutputDeviceUpdated(const std::vector<sptr<AudioDeviceDescriptor>> &desc) override;
+    void OnPreferredOutputDeviceUpdated(const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) override;
 
     bool GetRendererRunning(int32_t uid);
 
