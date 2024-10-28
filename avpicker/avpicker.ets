@@ -186,6 +186,8 @@ export struct AVCastPicker {
   @State accessibilityConnectedStr: string = '已连接';
   @State accessibilityAudioControlStr: string = '音视频投播';
 
+  private scroller: Scroller = new Scroller();
+
   MenuStateChange() {
     if (this.extensionProxy != null) {
       this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
@@ -221,7 +223,7 @@ export struct AVCastPicker {
 
   @Builder
   deviceMenu() {
-    Column() {
+    Scroller(this.scroller) {
       ForEach(this.deviceList, (item: AVCastPickerDeviceInfo, index) => {
         Flex({
           direction: FlexDirection.Column,
@@ -299,6 +301,7 @@ export struct AVCastPicker {
       })
     }
     .width(216)
+    .constraintSize({ maxHeight: 345 })
   }
 
   @Builder
