@@ -24,13 +24,16 @@ extern "C" {
 int32_t FfiMultimediaAVSessionManagerCreateAVSession(void* abilityContext,
     char** tag, int32_t* type, int64_t* session, char** sessionId)
 {
-    if (abilityContext == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
+    if (abilityContext == nullptr || type == nullptr || session == nullptr || sessionId == nullptr) {
+        return OHOS::AVSession::ERR_INVALID_PARAM;
+    }
     auto context = static_cast<OHOS::AbilityRuntime::AbilityContext*>(abilityContext);
     return CJ_AVSESSION_MANAGER_IMPL->CreateAVSession(*context, std::string(*tag), *type, *session, *sessionId);
 }
 
 int32_t FfiMultimediaAVSessionManagerCreateController(int64_t *sessionId)
 {
+    if (sessionId == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
     return CJ_AVSESSION_MANAGER_IMPL->CreateController(
         OHOS::FFI::FFIData::GetData<OHOS::AVSession::CJAVSessionImpl>(*sessionId)->GetSessionId());
 }
