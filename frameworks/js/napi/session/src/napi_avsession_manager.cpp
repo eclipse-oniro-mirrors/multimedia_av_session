@@ -926,6 +926,10 @@ std::string NapiAVSessionManager::GetStartCastErrMsg(int32_t error)
 bool NapiAVSessionManager::JudgeNumString(std::string str)
 {
     SLOGI("enter JudgeNumString");
+    if (str.empty()) {
+        return false;
+    }
+
     int minNumChar = 48;
     int maxNumChar = 57;
     for (int i = 0; i < static_cast<int>(str.size()); i++) {
