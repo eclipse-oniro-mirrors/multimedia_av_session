@@ -31,7 +31,7 @@ public:
     void Init();
 
     bool SubscribeBundleStatusEvent(const std::string bundleName,
-        const std::function<void(const std::string)>& callback);
+        const std::function<void(const std::string, const int32_t userId)>& callback, int32_t userId = DEFAULT_USER_ID);
 
     bool IsAudioPlayback(const std::string& bundleName, const std::string& abilityName);
 
@@ -43,13 +43,14 @@ public:
 private:
     BundleStatusAdapter();
 
-    void NotifyBundleRemoved(const std::string bundleName);
+    void NotifyBundleRemoved(const std::string bundleName, const int32_t userId);
 
     bool CheckBundleSupport(std::string& profile);
 
     sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy;
 
-    std::map<std::string, std::function<void(const std::string)>> bundleStatusListeners_;
+    std::map<std::pair<std::string, int32_t>, std::function<void(const std::string, const int32_t)>>
+        bundleStatusListeners_;
 
     const int32_t backgroundModeDemand = 2;
 
@@ -60,11 +61,16 @@ private:
     const std::string PLAY_MUSICLIST = "PlayMusicList";
 
     const std::string PLAY_AUDIO = "PlayAudio";
+
+    std::recursive_mutex bundleMgrProxyLock_;
+
+    static const int32_t DEFAULT_USER_ID = 100;
 };
 
 class BundleStatusCallbackImpl : public AppExecFwk::BundleStatusCallbackHost {
 public:
-    explicit BundleStatusCallbackImpl(const std::function<void(const std::string)>& callback);
+    explicit BundleStatusCallbackImpl(const std::function<void(const std::string, const int32_t)>& callback,
+        int32_t userId);
     ~BundleStatusCallbackImpl() override;
     void OnBundleStateChanged(const uint8_t installType, const int32_t resultCode,
         const std::string &resultMsg, const std::string &bundleName) override;
@@ -73,7 +79,8 @@ public:
     void OnBundleRemoved(const std::string &bundleName, const int userId) override {};
 private:
     DISALLOW_COPY_AND_MOVE(BundleStatusCallbackImpl);
-    std::function<void(std::string)> callback_;
+    std::function<void(const std::string, const int32_t userId)> callback_;
+    int32_t userId_;
 };
 }
 #endif // AV_SESSION_BUNDLE_STATUS_ADAPTER_H
