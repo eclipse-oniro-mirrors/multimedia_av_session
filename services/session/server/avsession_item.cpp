@@ -1133,6 +1133,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
     {
         std::lock_guard lockGuard(avsessionItemLock_);
         supportedCastCmds_.clear();
+        ProcessFrontSession("Disconnect");
     }
     SaveLocalDeviceInfo();
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
