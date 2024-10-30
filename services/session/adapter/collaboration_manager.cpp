@@ -59,7 +59,7 @@ void CollaborationManager::SendCollaborationOnStop(const std::function<void(void
 
 __attribute__((no_sanitize("cfi")))static int32_t OnStop(const char* peerNetworkId)
 {
-    SLOGE("Onstop to stop cast");
+    SLOGE("enter onstop");
     CollaborationManager::GetInstance().sendCollaborationOnStop_();
     return AVSESSION_SUCCESS;
 }
@@ -73,6 +73,7 @@ void CollaborationManager::SendCollaborationApplyResult(const std::function<
 __attribute__((no_sanitize("cfi")))static int32_t ApplyResult(int32_t errorcode,
     int32_t result, const char* reason)
 {
+    SLOGI("enter ApplyResult");
     if (result == ServiceCollaborationManagerResultCode::REJECT) {
         SLOGE("return connect reject and reson:%{public}s", reason);
     }

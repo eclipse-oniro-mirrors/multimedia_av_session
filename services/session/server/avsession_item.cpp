@@ -1139,16 +1139,6 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
 
-void AVSessionItem::ListenCollaborationOnStop()
-{
-    CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
-        if (newCastState == castConnectStateForConnected_) {
-            SLOGI("onstop to stop cast");
-            StopCast();
-        }
-    });
-}
-
 void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
@@ -1177,6 +1167,25 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
     }
+}
+
+void AVSessionItem::ListenCollaborationOnStop()
+{
+    SLOGI("enter ListenCollaborationOnStop");
+    CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
+        if (newCastState == castConnectStateForConnected_) {
+            if (descriptor_.sessionTag_ == "RemoteCast") {
+                OutputDeviceInfo outputDeviceInfo;
+                DeviceInfo deviceInfo;
+                deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+                deviceInfo.deviceId_ = "0";
+                deviceInfo.deviceName_ = "LocalDevice";
+                SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
+                OnCastStateChange(castConnectStateForDisconnect_, deviceInfo);
+            }
+            StopCast();
+        }
+    });
 }
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
@@ -1246,6 +1255,7 @@ void AVSessionItem::OnRemoveCastEngine()
 
 void AVSessionItem::ListenCollaborationApplyResult()
 {
+    SLOGI("enter ListenCollaborationApplyResult");
     CollaborationManager::GetInstance().SendCollaborationApplyResult([this](const int32_t code) {
         std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
         if (code == ServiceCollaborationManagerResultCode::PASS && newCastState != castConnectStateForConnected_) {
