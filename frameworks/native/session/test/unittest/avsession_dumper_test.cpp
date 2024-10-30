@@ -52,6 +52,11 @@ void AVSessionDumperTest::SetUp()
         SLOGI("AVSessionDumperTest do service newUp checkNull:%{public}d",
             static_cast<int>(avSessionService_ != nullptr));
         avSessionService_->dumpHelper_ = std::make_unique<AVSessionDumper>();
+        sleep(1);
+        SLOGI("AVSessionDumperTest do abilityManager init");
+        avSessionService_->InitAMS();
+        SLOGI("AVSessionDumperTest do abilityManager init done");
+        sleep(1);
         item_ = doSessionCreateTemp();
     }
 }
@@ -257,7 +262,7 @@ HWTEST_F(AVSessionDumperTest, UpdataTopSession001, TestSize.Level1)
     avSessionService_->UpdateTopSession(item);
     EXPECT_NE(avSessionService_, nullptr);
     avSessionService_->HandleSessionRelease(item->GetDescriptor().sessionId_);
-    SLOGI("UpdataTopSession001 out");
+    SLOGI("UpdataTopSession001 done");
 }
 
 /**

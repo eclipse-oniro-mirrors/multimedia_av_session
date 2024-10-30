@@ -468,8 +468,8 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
     std::shared_ptr<AVSessionController> controller;
     auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
     SLOGI("CreateController003 get ret %{public}d", static_cast<int>(ret));
-    // ability may be not available
-    EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS, true);
+    // ability may be not available or go with mediaintent will return AVSESSION_ERROR
+    EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS || ret == AVSESSION_ERROR, true);
     SLOGI("CreateController003 here end");
     sleep(1);
     system("killall -9 com.example.himusicdemo");

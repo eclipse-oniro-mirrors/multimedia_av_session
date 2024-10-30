@@ -110,13 +110,12 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionSe
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool enable = *(reinterpret_cast<const bool*>(data));
     int32_t castDeviceCapability = *(reinterpret_cast<const int32_t*>(data));
-    int32_t fd = *(reinterpret_cast<const int32_t*>(data));
-    uint32_t maxSize = *(reinterpret_cast<const uint32_t*>(data));
     std::vector<std::string> drmSchemes;
     avServiceProxy->StartCastDiscovery(castDeviceCapability, drmSchemes);
     avServiceProxy->StopCastDiscovery();
     avServiceProxy->SetDiscoverable(enable);
-    avServiceProxy->StartDeviceLogging(fd, maxSize);
+    // do not test StartDeviceLogging at fuzz, as it may pass fd for alive testFile to avsession service
+    // so test fwk can not check whether this test case is ending
     avServiceProxy->StopDeviceLogging();
     avServiceProxy->StartCast(sessionToken, outputDeviceInfo);
     avServiceProxy->StopCast(sessionToken);
