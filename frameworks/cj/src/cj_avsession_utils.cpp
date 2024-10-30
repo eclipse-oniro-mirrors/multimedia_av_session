@@ -506,7 +506,7 @@ int32_t CJConverterMalloc(T*& obj, int64_t size)
         obj = nullptr;
         return CJNO_ERROR;
     }
-    obj = (T *)malloc(sizeof(T) * size);
+    obj = static_cast<T *>(malloc(sizeof(T) * size));
     if (obj == nullptr) {
         return ERR_NO_MEMORY;
     }
