@@ -48,6 +48,7 @@ public:
     virtual int32_t GetExtras(CArray& extras) = 0;
     virtual int32_t SendCommonCommand(char*& command, CArray& args) = 0;
     virtual int32_t SkipToQueueItem(int32_t& itemId) = 0;
+    virtual bool Exists() = 0;
 };
 
 class CJAVSessionControllerImpl : public CJAVSessionControllerBase {
@@ -73,6 +74,7 @@ public:
     int32_t GetExtras(CArray& extras);
     int32_t SendCommonCommand(char*& command, CArray& args);
     int32_t SkipToQueueItem(int32_t& itemId);
+    bool Exists() { return true; }
 
 private:
     std::string sessionId_;
@@ -100,6 +102,7 @@ public:
     int32_t GetExtras(CArray& extras) {return ERR_CONTROLLER_NOT_EXIST; }
     int32_t SendCommonCommand(char*& command, CArray& args) {return ERR_CONTROLLER_NOT_EXIST; }
     int32_t SkipToQueueItem(int32_t& itemId) {return ERR_CONTROLLER_NOT_EXIST; }
+    bool Exists() { return false; }
 };
 
 #define CJ_AVSESSION_CONTROLLER_INVALID_IMPL OHOS::DelayedSingleton<CJAVSessionControllerInvalidImpl>::GetInstance()
