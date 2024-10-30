@@ -27,6 +27,8 @@
 #include "avsession_service_stub.h"
 #include "session_xcollie.h"
 #include "permission_checker.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 
 using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
@@ -249,6 +251,10 @@ int32_t AVSessionServiceStub::HandleStartAVPlayback(MessageParcel& data, Message
 
 int32_t AVSessionServiceStub::HandleIsAudioPlaybackAllowed(MessageParcel& data, MessageParcel& reply)
 {
+    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHECK_AND_RETURN_RET_LOG(mgr != nullptr, ERR_NONE, "SystemAbilityManager is null");
+    auto object = mgr->GetSystemAbility(ACCESS_TOKEN_MANAGER_SERVICE_ID);
+    CHECK_AND_RETURN_RET_LOG(object != nullptr, ERR_NONE, "ACCESS_TOKEN_MANAGER_SERVICE is null");
     int32_t err = PermissionChecker::GetInstance().CheckPermission(
         PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
     if (err != ERR_NONE) {

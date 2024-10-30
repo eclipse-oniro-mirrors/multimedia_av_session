@@ -32,6 +32,7 @@ static const int32_t MAX_CODE_LEN = 512;
 static const int32_t MIN_SIZE_NUM = 4;
 
 static const int32_t TEST_CLIENT_UID = 1;
+static const int32_t TEST_CLIENT_PID = 1;
 static const int32_t TEST_SESSION_ID = 2;
 
 void OHOS::AVSession::AudioAdapterTest(uint8_t *data, size_t size)
@@ -41,17 +42,19 @@ void OHOS::AVSession::AudioAdapterTest(uint8_t *data, size_t size)
     }
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = TEST_CLIENT_UID;
+    info->clientPid = TEST_CLIENT_PID;
     info->sessionId = TEST_SESSION_ID;
     info->rendererState = AudioStandard::RENDERER_RELEASED;
     AudioRendererChangeInfos infosExpected;
     infosExpected.push_back(std::move(info));
     DeviceChangeAction deviceChangeAction;
     int32_t uid = *(reinterpret_cast<const int32_t *>(data));
+    int32_t pid = *(reinterpret_cast<const int32_t *>(data));
     OHOS::AudioStandard::StreamUsage streamUsage {};
 
     AudioAdapter audioAdapter;
-    audioAdapter.MuteAudioStream(uid);
-    audioAdapter.MuteAudioStream(TEST_CLIENT_UID);
+    audioAdapter.MuteAudioStream(uid, pid);
+    audioAdapter.MuteAudioStream(TEST_CLIENT_UID, TEST_CLIENT_PID);
     audioAdapter.UnMuteAudioStream(uid);
     audioAdapter.UnMuteAudioStream(TEST_CLIENT_UID);
     audioAdapter.GetRendererRunning(uid);

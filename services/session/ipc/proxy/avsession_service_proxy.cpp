@@ -308,7 +308,7 @@ bool AVSessionServiceProxy::IsAudioPlaybackAllowed(const int32_t uid, const int3
         static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CHECK_BACKGROUND_ALLOWED),\
         data, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
 
-    bool ret = false;
+    bool ret = true;
     CHECK_AND_RETURN_RET_LOG(reply.ReadBool(ret), ERR_UNMARSHALLING, "read bool failed");
     return ret;
 }

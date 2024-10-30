@@ -42,9 +42,11 @@ public:
 
     void AddDeviceChangeListener(const DeviceChangeListener& listener);
 
-    int32_t MuteAudioStream(int32_t uid);
+    int32_t MuteAudioStream(int32_t uid, int32_t pid);
 
     int32_t UnMuteAudioStream(int32_t uid);
+
+    int32_t MuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage);
 
     int32_t PauseAudioStream(int32_t uid, AudioStandard::StreamUsage usage);
 
@@ -59,6 +61,12 @@ private:
     static std::once_flag onceFlag_;
     std::vector<StateListener> listeners_;
     std::vector<DeviceChangeListener> deviceChangeListeners_;
+    const std::vector<AudioStandard::StreamUsage> BACKGROUND_MUTE_STREAM_USAGE {
+        AudioStandard::STREAM_USAGE_MUSIC,
+        AudioStandard::STREAM_USAGE_MOVIE,
+        AudioStandard::STREAM_USAGE_GAME,
+        AudioStandard::STREAM_USAGE_AUDIOBOOK
+    };
 };
 }
 #endif // AV_SESSION_AUDIO_ADAPTER_H
