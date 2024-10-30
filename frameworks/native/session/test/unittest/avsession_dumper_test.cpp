@@ -247,15 +247,17 @@ HWTEST_F(AVSessionDumperTest, OnStop001, TestSize.Level1)
 HWTEST_F(AVSessionDumperTest, UpdataTopSession001, TestSize.Level1)
 {
     sleep(1);
+    SLOGI("UpdataTopSession001 in");
     sptr<AVSessionItem> item = item_;
     if (item == nullptr) {
         item = doSessionCreateTemp();
     }
     EXPECT_NE(item, nullptr);
-    avSessionService_->topSession_ = item;
+    // not set topsession for crash
     avSessionService_->UpdateTopSession(item);
     EXPECT_NE(avSessionService_, nullptr);
     avSessionService_->HandleSessionRelease(item->GetDescriptor().sessionId_);
+    SLOGI("UpdataTopSession001 out");
 }
 
 /**
@@ -273,7 +275,7 @@ HWTEST_F(AVSessionDumperTest, HandleFocusSession001, TestSize.Level1)
         item = doSessionCreateTemp();
     }
     EXPECT_NE(item, nullptr);
-    avSessionService_->topSession_ = item;
+    // not set topsession for crash
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = 0;
     avSessionService_->HandleFocusSession(info);
