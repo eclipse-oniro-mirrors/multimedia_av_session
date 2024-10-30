@@ -1043,7 +1043,7 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
         SLOGE("deviceId map deviceinfo is not exit");
         return AVSESSION_ERROR;
     }
-    ListenCollaborationRejectToStopCast();
+    ListenCollaborationApplyResult();
     DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
     if (cacheDeviceInfo.networkId_.empty()) {
         SLOGI("untrusted device, networkId is empty, then input deviceId to ApplyAdvancedResource");
@@ -1169,12 +1169,32 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     }
 }
 
+void AVSessionItem::ListenCollaborationOnStop()
+{
+    SLOGI("enter ListenCollaborationOnStop");
+    CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
+        if (newCastState == castConnectStateForConnected_) {
+            if (descriptor_.sessionTag_ == "RemoteCast") {
+                OutputDeviceInfo outputDeviceInfo;
+                DeviceInfo deviceInfo;
+                deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+                deviceInfo.deviceId_ = "0";
+                deviceInfo.deviceName_ = "LocalDevice";
+                SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
+                OnCastStateChange(castConnectStateForDisconnect_, deviceInfo);
+            }
+            StopCast();
+        }
+    });
+}
+
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
     DealCollaborationPublishState(castState, deviceInfo);
     newCastState = castState;
+    ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
         outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);
@@ -1233,14 +1253,11 @@ void AVSessionItem::OnRemoveCastEngine()
     }
 }
 
-void AVSessionItem::ListenCollaborationRejectToStopCast()
+void AVSessionItem::ListenCollaborationApplyResult()
 {
-    CollaborationManager::GetInstance().SendRejectStateToStopCast([this](const int32_t code) {
+    SLOGI("enter ListenCollaborationApplyResult");
+    CollaborationManager::GetInstance().SendCollaborationApplyResult([this](const int32_t code) {
         std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
-        if (code == ServiceCollaborationManagerResultCode::ONSTOP && newCastState == castConnectStateForConnected_) {
-            SLOGI("onstop to stop cast");
-            StopCast();
-        }
         if (code == ServiceCollaborationManagerResultCode::PASS && newCastState != castConnectStateForConnected_) {
             SLOGI("ApplyResult can cast");
             applyResultFlag_ = true;

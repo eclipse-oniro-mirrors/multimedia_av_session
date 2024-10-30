@@ -83,7 +83,9 @@ public:
 
     void OnRemoveCastEngine();
 
-    void ListenCollaborationRejectToStopCast();
+    void ListenCollaborationApplyResult();
+
+    void ListenCollaborationOnStop();
 #endif
 
     std::string GetSessionId() override;
