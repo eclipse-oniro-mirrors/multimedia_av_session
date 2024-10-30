@@ -153,7 +153,6 @@ int32_t AVSessionItem::DestroyTask()
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}ld", castHandle_);
-    ReleaseAVCastControllerInner();
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
         if (!collaborationNeedNetworkId_.empty()) {
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
@@ -163,6 +162,7 @@ int32_t AVSessionItem::DestroyTask()
         ReleaseCast();
         StopCastSession();
     }
+    ReleaseAVCastControllerInner();
     StopCastDisplayListener();
 #endif
     return AVSESSION_SUCCESS;
@@ -850,9 +850,10 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
     castHandleDeviceId_ = deviceInfo.deviceId_;
     SLOGI("RegisterListenerStreamToCast check handle set to %{public}ld", castHandle_);
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
-    AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_);
+    AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_, GetSessionId());
     AVRouter::GetInstance().SetServiceAllConnectState(castHandle, deviceInfo);
     UpdateCastDeviceMap(deviceInfo);
+    InitAVCastControllerProxy();
 
     DoContinuousTaskRegister();
     HISYSEVENT_BEHAVIOR("SESSION_CAST_CONTROL",
@@ -1112,7 +1113,7 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
 {
     SLOGI("Add device process");
     std::lock_guard lockGuard(castHandleLock_);
-    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_);
+    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId());
     int32_t castId = static_cast<int32_t>(castHandle_);
     int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo);
     SLOGI("Add device process with ret %{public}d", ret);
@@ -1294,15 +1295,24 @@ int32_t AVSessionItem::StopCast()
         SLOGI("Unregister and Stop cast process for sink with ret %{public}d", ret);
         return ret;
     }
-    SLOGI("Stop cast process");
     {
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
-        AVSessionRadarInfo info("AVSessionItem::StopCast");
-        AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
-        int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
-        AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
-        SLOGI("StopCast with unchange castHandle is %{public}ld", castHandle_);
-        CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
+        int32_t castId = static_cast<int32_t>((static_cast<const uint64_t>(castHandle_) << 32) >> 32);
+        SLOGI("Stop cast process %{public}d", castId);
+        if (castId == AVRouter::GetInstance().GetMirrorCastId(castHandle_)) {
+            if (castControllerProxy_ != nullptr) {
+                AVCastControlCommand cmd;
+                cmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_STOP);
+                castControllerProxy_->SendControlCommand(cmd);
+            }
+        } else {
+            AVSessionRadarInfo info("AVSessionItem::StopCast");
+            AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
+            int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
+            AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
+            SLOGI("StopCast with unchange castHandle is %{public}ld", castHandle_);
+            CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
+        }
     }
 
     if (castServiceNameMapState_["HuaweiCast"] != deviceStateConnection &&
@@ -1333,7 +1343,7 @@ void AVSessionItem::RegisterDeviceStateCallback()
     localInfo.deviceName_ = "LocalDevice";
     localDevice.deviceInfos_.emplace_back(localInfo);
     descriptor_.outputDeviceInfo_ = localDevice;
-    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_);
+    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId());
     SLOGI("register callback for device state change done");
 }
 
