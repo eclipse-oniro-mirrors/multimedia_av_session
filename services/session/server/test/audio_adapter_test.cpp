@@ -32,6 +32,7 @@ public:
     void TearDown();
 
     static constexpr int32_t TEST_CLIENT_UID = 1;
+    static constexpr int32_t TEST_CLIENT_PID = 1;
     static constexpr int32_t TEST_SESSION_ID = 2;
     static constexpr int32_t TEST_SESSION_FAIL_ID = -1;
 };
@@ -97,6 +98,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level1)
     SLOGI("MuteAudioStream001 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->clientPid = AudioAdapterTest::TEST_CLIENT_PID;
     info->sessionId = AudioAdapterTest::TEST_SESSION_ID;
     info->rendererState = RendererState::RENDERER_RELEASED;
     AudioRendererChangeInfos infosExpected;
@@ -113,7 +115,8 @@ static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level1)
         }
         SLOGI("AddStreamRendererStateListener end!");
     });
-    auto ret = AudioAdapter::GetInstance().MuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    auto ret = AudioAdapter::GetInstance().MuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID,
+        AudioAdapterTest::TEST_CLIENT_PID);
     EXPECT_NE(ret, AVSESSION_ERROR_BASE);
 }
 

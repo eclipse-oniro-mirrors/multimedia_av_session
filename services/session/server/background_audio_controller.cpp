@@ -63,15 +63,10 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
     if (descriptor.isThirdPartyApp_) {
         SLOGI("OnSessionRelease add observe for uid %{public}d", descriptor.uid_);
         AppManagerAdapter::GetInstance().AddObservedApp(descriptor.uid_);
-        int32_t uid = descriptor.uid_;
-        bool isRunning = AudioAdapter::GetInstance().GetRendererRunning(uid);
-        if (!isRunning) {
-            SLOGI("renderer state is not running when session release");
-            return;
-        }
         if (AppManagerAdapter::GetInstance().IsAppBackground(descriptor.uid_, descriptor.pid_)) {
-            AudioAdapter::GetInstance().MuteAudioStream(descriptor.uid_);
-            if (ptr_ != nullptr) {
+            auto mute = AudioAdapter::GetInstance().MuteAudioStream(descriptor.uid_, descriptor.pid_);
+            if (mute == AVSESSION_SUCCESS && ptr_ != nullptr) {
+                SLOGI("mute uid=%{public}d done", descriptor.uid_);
                 ptr_->NotifyAudioSessionCheckTrigger(descriptor.uid_);
             }
         }
@@ -97,8 +92,9 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
         }
 
         if (AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
-            AudioAdapter::GetInstance().MuteAudioStream(info->clientUID);
-            if (ptr_ != nullptr) {
+            auto mute = AudioAdapter::GetInstance().MuteAudioStream(info->clientUID, info->rendererInfo.streamUsage);
+            if (mute == AVSESSION_SUCCESS && ptr_ != nullptr) {
+                SLOGI("mute uid=%{public}d done", info->clientUID);
                 ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
             }
         } else {
@@ -118,27 +114,9 @@ void BackgroundAudioController::HandleAppMuteState(int32_t uid, int32_t pid, boo
     }
 
     if (isBackground) {
-        std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> infos;
-        auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(infos);
-        if (ret != 0) {
-            SLOGE("get renderer state failed");
-            return;
-        }
-        bool isRunning = false;
-        for (const auto& info : infos) {
-            if (info->rendererState == AudioStandard::RENDERER_RUNNING &&
-                (info->clientUID == uid and info->clientPid == pid)) {
-                isRunning = true;
-                break;
-            }
-        }
-        if (!isRunning) {
-            SLOGI("find uid=%{public}d pid=%{public}d isn't running, return", uid, pid);
-            return;
-        }
-        SLOGI("mute uid=%{public}d", uid);
-        AudioAdapter::GetInstance().MuteAudioStream(uid);
-        if (ptr_ != nullptr) {
+        auto mute = AudioAdapter::GetInstance().MuteAudioStream(uid, pid);
+        if (mute == AVSESSION_SUCCESS && ptr_ != nullptr) {
+            SLOGI("mute uid=%{public}d done", uid);
             ptr_->NotifyAudioSessionCheckTrigger(uid);
         }
     } else {
