@@ -1509,7 +1509,7 @@ bool AVSessionService::IsAudioPlaybackAllowed(const int32_t uid, const int32_t p
 {
     auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     CHECK_AND_RETURN_RET_LOG(mgr != nullptr, true, "SystemAbilityManager is null");
-    auto object = mgr->GetSystemAbility(APP_MGR_SERVICE_ID);
+    auto object = mgr->CheckSystemAbility(APP_MGR_SERVICE_ID);
     CHECK_AND_RETURN_RET_LOG(object != nullptr, true, "APP_MAGR_SERVICE is null");
     bool hasSession = GetContainer().UidHasSession(uid);
     bool isBack = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
