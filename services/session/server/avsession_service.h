@@ -258,6 +258,8 @@ public:
 
     void RegisterBundleDeleteEventForHistory(int32_t userId = 0);
 
+    void NotifyMigrateStop(const std::string &deviceId);
+
 private:
     void CheckBrEnable();
 
