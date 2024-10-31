@@ -140,11 +140,13 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
 
     AvControllerItemDataTestSecond(avControllerItem, data, size);
     AvControllerItemDataTestThird(avControllerItem, data, size);
+    avControllerItem->RegisterCallbackInner(avControllerItemObj);
 }
 
 void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem, const uint8_t* data, size_t size)
 {
     std::string sessionId(reinterpret_cast<const char*>(data), size);
+    avControllerItem->GetUserId();
     avControllerItem->GetSessionId();
     avControllerItem->GetPid();
     avControllerItem->HasSession(sessionId);
@@ -298,6 +300,8 @@ void AvControllerItemTestImplSecond(const uint8_t* data, size_t size,
     auto avControllerCallback = std::make_shared<AVControllerObserver>(sessionId);
     avControllerItem->SetServiceCallbackForRelease(releaseCallback);
     avControllerItem->RegisterAVControllerCallback(avControllerCallback);
+    std::shared_ptr<AVControllerCallback> callback;
+    avControllerItem->RegisterAVControllerCallback(callback);
 }
 
 /* Fuzzer entry point */

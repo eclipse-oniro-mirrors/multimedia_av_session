@@ -33,6 +33,7 @@ ohos_fuzztest("AVControllerItemFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fno-access-control",
   ]
   sources = [ "avcontrolleritem_fuzzer.cpp" ]
   deps = [

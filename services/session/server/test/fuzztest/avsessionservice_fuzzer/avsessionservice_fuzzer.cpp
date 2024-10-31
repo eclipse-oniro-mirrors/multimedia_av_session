@@ -177,6 +177,7 @@ void AvSessionServiceSystemAbilityTest(const uint8_t* data, size_t size,
         CAST_ENGINE_SA_ID,
         BLUETOOTH_HOST_SYS_ABILITY_ID,
         MEMORY_MANAGER_SA_ID,
+        COMMON_EVENT_SERVICE_ID,
     };
 
     int32_t randomNumber = *(reinterpret_cast<const int32_t *>(data));
@@ -349,6 +350,7 @@ void NotifyTopSessionChangedTest(const uint8_t* data, size_t size,
     AVSessionDescriptor descriptor;
 
     service->NotifyTopSessionChanged(descriptor);
+    service->CreateWantAgent(&descriptor);
 }
 
 void AvSessionServiceHandleEventTest(const uint8_t* data, size_t size,
@@ -847,6 +849,76 @@ void RemoveInnerSessionListener001(const uint8_t* data, size_t size)
     SLOGI("RemoveInnerSessionListener001 end!");
 }
 
+void EventSubscriberTest(const uint8_t* data, size_t size)
+{
+    OHOS::EventFwk::CommonEventData eventData;
+    string action = OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON;
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avsessionService_);
+    eventSubscriber.OnReceiveEvent(eventData);
+}
+
+void handleusereventTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    auto userId = *(reinterpret_cast<const int*>(data));
+    std::string type(reinterpret_cast<const char*>(data), size);
+    service->HandleUserEvent(type, userId);
+}
+
+void HandleScreenStatusChangeTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    if (service == nullptr) {
+        SLOGE("service is null, return");
+        return;
+    }
+    std::string event(reinterpret_cast<const char*>(data), size);
+    service->HandleScreenStatusChange(event);
+}
+
+void SetScreenTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    if (service == nullptr) {
+        SLOGE("service is null, return");
+        return;
+    }
+    auto on = *(reinterpret_cast<const bool*>(data));
+    service->SetScreenOn(on);
+    auto isLocked = *(reinterpret_cast<const bool*>(data));
+    service->SetScreenLocked(isLocked);
+    service->GetScreenLocked();
+    service->SubscribeCommonEvent();
+}
+
+void OnRemoteDiedTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    wptr<IRemoteObject> object = nullptr;
+    auto func = []() {};
+    sptr<ClientDeathRecipient> recipient = new ClientDeathRecipient(func);
+    if (recipient == nullptr) {
+        SLOGE("recipient is null, return");
+        return;
+    }
+    recipient->OnRemoteDied(object);
+}
+
+void CheckAncoAudioTest(const uint8_t* data, size_t size,
+    sptr<AVSessionService> service)
+{
+    if (service == nullptr) {
+        SLOGE("service is null, return");
+        return;
+    }
+    service->CheckAncoAudio();
+}
+
 void AvSessionServiceTest001(const uint8_t* data, size_t size)
 {
     GetDeviceInfoTest(data, size);
@@ -919,6 +991,12 @@ void AvSessionServiceTest(const uint8_t* data, size_t size)
     GetService001(data, size);
     SetDeviceInfo001(data, size);
     ConvertKeyCodeToCommand001(data, size);
+    EventSubscriberTest(data, size);
+    handleusereventTest(data, size, avsessionService_);
+    HandleScreenStatusChangeTest(data, size, avsessionService_);
+    SetScreenTest(data, size, avsessionService_);
+    OnRemoteDiedTest(data, size, avsessionService_);
+    CheckAncoAudioTest(data, size, avsessionService_);
     
     AvSessionServiceTest001(data, size);
 }
