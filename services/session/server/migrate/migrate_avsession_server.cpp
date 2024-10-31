@@ -45,7 +45,11 @@ void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
 {
     SLOGI("OnDisConnectProxy: %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     isSoftbusConnecting_ = false;
-    StopObserveControllerChanged(deviceId);
+    if (servicePtr_ == nullptr) {
+        SLOGE("do NotifyMigrateStop without servicePtr, return");
+        return;
+    }
+    servicePtr_->NotifyMigrateStop(deviceId);
 }
 
 int32_t MigrateAVSessionServer::GetCharacteristic()
@@ -140,7 +144,7 @@ void MigrateAVSessionServer::UpdateCache(const std::string &sessionId, sptr<AVCo
 
 void MigrateAVSessionServer::StopObserveControllerChanged(const std::string &deviceId)
 {
-    SLOGI("StopObserveControllerChanged");
+    SLOGI("StopObserveControllerChanged with id %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     std::lock_guard lockGuard(migrateControllerLock_);
     for (auto it = sortControllerList_.begin(); it != sortControllerList_.end(); it++) {
         (*it)->Destroy();

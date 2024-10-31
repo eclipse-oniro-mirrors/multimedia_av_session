@@ -67,6 +67,16 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
 #endif
 }
 
+void AVSessionService::NotifyMigrateStop(const std::string &deviceId)
+{
+    if (migrateAVSession_ == nullptr) {
+        SLOGI("NotifyMigrateStop without migrate, create new");
+        migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+    }
+    std::lock_guard lockGuard(sessionServiceLock_);
+    migrateAVSession_->StopObserveControllerChanged(deviceId);
+}
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 void AVSessionService::SplitExtraInfo(std::string info)
 {
