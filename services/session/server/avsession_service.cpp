@@ -223,12 +223,29 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
             SLOGE("get accountEventRemoved with servicePtr_ null");
         }
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
+        int32_t userId = eventData.GetCode();
         if (servicePtr_ != nullptr) {
-            servicePtr_->RegisterBundleDeleteEventForHistory();
+            servicePtr_->RegisterBundleDeleteEventForHistory(userId);
         } else {
             SLOGE("get user unlock with servicePtr_ null");
         }
     }
+}
+
+std::string AVSessionService::GetAVQueueDir(int32_t userId)
+{
+    return GetUsersManager().GetDirForCurrentUser(userId) + AVQUEUE_FILE_NAME;
+}
+
+std::string AVSessionService::GetAVSortDir(int32_t userId)
+{
+    return GetUsersManager().GetDirForCurrentUser(userId) + SORT_FILE_NAME;
+}
+
+void AVSessionService::HandleUserEvent(const std::string &type, const int &userId)
+{
+    GetUsersManager().NotifyAccountsEvent(type, userId);
+    UpdateTopSession(GetUsersManager().GetTopSession());
 }
 
 void AVSessionService::HandleScreenStatusChange(std::string event)
@@ -262,22 +279,6 @@ void AVSessionService::HandleScreenStatusChange(std::string event)
     }
 
 #endif
-}
-
-std::string AVSessionService::GetAVQueueDir()
-{
-    return GetUsersManager().GetDirForCurrentUser() + AVQUEUE_FILE_NAME;
-}
-
-std::string AVSessionService::GetAVSortDir()
-{
-    return GetUsersManager().GetDirForCurrentUser() + SORT_FILE_NAME;
-}
-
-void AVSessionService::HandleUserEvent(const std::string &type, const int &userId)
-{
-    GetUsersManager().NotifyAccountsEvent(type, userId);
-    UpdateTopSession(GetUsersManager().GetTopSession());
 }
 
 void AVSessionService::SetScreenOn(bool on)
@@ -806,7 +807,7 @@ void AVSessionService::InitBMS()
         SLOGE("InitBMS with userId: %{public}d, not valid, return and wait for InitAccountMgr", userId);
         return;
     }
-    RegisterBundleDeleteEventForHistory();
+    RegisterBundleDeleteEventForHistory(userId);
 }
 
 void AVSessionService::InitAccountMgr()
@@ -823,19 +824,26 @@ void AVSessionService::InitCommonEventService()
     CHECK_AND_RETURN_LOG(ret, "SubscribeCommonEvent error!");
 }
 
-void AVSessionService::RegisterBundleDeleteEventForHistory()
+void AVSessionService::RegisterBundleDeleteEventForHistory(int32_t userId)
 {
+    if (userId <= 0) {
+        userId = GetUsersManager().GetCurrentUserId();
+        SLOGI("do RegisterBundleDeleteEventForHistory with cur userId:%{public}d", userId);
+    } else {
+        SLOGI("do RegisterBundleDeleteEventForHistory with recv userId:%{public}d", userId);
+    }
+
     std::string oldSortContent;
-    if (LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
+    if (LoadStringFromFileEx(GetAVSortDir(userId), oldSortContent)) {
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
         CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
-        auto callback = [this](std::string bundleName) {
-            DeleteAVQueueInfoRecord(bundleName);
-            DeleteHistoricalRecord(bundleName);
+        auto callback = [this](std::string bundleName, int32_t userId) {
+            SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
+            DeleteAVQueueInfoRecord(bundleName, userId);
+            DeleteHistoricalRecord(bundleName, userId);
         };
         for (auto value : values) {
-            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(value["bundleName"], callback)) {
-                SLOGI("do register bundle delete event for %{public}s", std::string(value["bundleName"]).c_str());
+            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(value["bundleName"], callback, userId)) {
                 std::string bundleName = value["bundleName"];
                 SLOGE("SubscribeBundleStatusEvent failed for bundle:%{public}s", bundleName.c_str());
             }
@@ -1448,11 +1456,13 @@ void AVSessionService::refreshSortFileOnCreateSession(const std::string& session
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
         CHECK_AND_RETURN_LOG(!values.is_discarded(), "sort json object is null");
         if (oldSortContent.find(elementName.GetBundleName()) == string::npos) {
-            auto callback = [this](std::string bundleName) {
-                DeleteAVQueueInfoRecord(bundleName);
-                DeleteHistoricalRecord(bundleName);
+            auto callback = [this](std::string bundleName, int32_t userId) {
+                SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
+                DeleteAVQueueInfoRecord(bundleName, userId);
+                DeleteHistoricalRecord(bundleName, userId);
             };
-            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(elementName.GetBundleName(), callback)) {
+            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(elementName.GetBundleName(),
+                callback, GetUsersManager().GetCurrentUserId())) {
                 SLOGE("SubscribeBundleStatusEvent failed");
             }
         }
@@ -1596,6 +1606,8 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
         avQueueInfo.SetAVQueueName(value["avQueueName"]);
         avQueueInfo.SetAVQueueId(value["avQueueId"]);
         std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
+        CHECK_AND_RETURN_RET_LOG(value.contains("avQueueImageDir"), AVSESSION_ERROR, "avQueueImageDir not contain");
+        CHECK_AND_RETURN_RET_LOG(value.contains("avQueueImageName"), AVSESSION_ERROR, "avQueueImageName not contain");
         AVSessionUtils::ReadImageFromFile(avQueuePixelMap, value["avQueueImageDir"], value["avQueueImageName"]);
         avQueueInfo.SetAVQueueImage(avQueuePixelMap);
         avQueueInfo.SetAVQueueImageUri(value["avQueueImageUri"]);
@@ -1634,7 +1646,7 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
     value["avQueueId"] = meta.GetAVQueueId();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = meta.GetAVQueueImage();
     if (innerPixelMap != nullptr) {
-        std::string fileDir = AVSessionUtils::GetFixedPathName();
+        std::string fileDir = AVSessionUtils::GetFixedPathName(userId);
         std::string fileName = bundleName + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
         innerPixelMap->Clear();
@@ -2217,14 +2229,20 @@ void AVSessionService::OnClientDied(pid_t pid)
 }
 
 // LCOV_EXCL_START
-void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
+void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName, int32_t userId)
 {
-    std::lock_guard sortFileLockGuard(sortFileReadWriteLock_);
-    SLOGI("delete historical record, bundleName=%{public}s", bundleName.c_str());
+    if (userId <= 0) {
+        userId = GetUsersManager().GetCurrentUserId();
+    }
+    if (!CheckUserDirValid(userId)) {
+        SLOGE("DeleteHistoricalRecord target user:%{public}d not valid, return", userId);
+        return;
+    }
+    SLOGI("delete historical record, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
     std::string oldContent;
     std::string newContent;
     nlohmann::json values;
-    if (!LoadStringFromFileEx(GetAVSortDir(), oldContent)) {
+    if (!LoadStringFromFileEx(GetAVSortDir(userId), oldContent)) {
         SLOGE("LoadStringFromFile failed, filename=%{public}s", SORT_FILE_NAME);
         return;
     }
@@ -2238,7 +2256,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
     }
     newContent = values.dump();
     SLOGD("DeleteHistoricalRecord::Dump json object finished");
-    if (!SaveStringToFileEx(GetAVSortDir(), newContent)) {
+    if (!SaveStringToFileEx(GetAVSortDir(userId), newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
         return;
     }
@@ -2246,14 +2264,20 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName)
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
-void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
+void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName, int32_t userId)
 {
-    std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
-    SLOGI("DeleteAVQueueInfoRecord, bundleName=%{public}s", bundleName.c_str());
+    if (userId <= 0) {
+        userId = GetUsersManager().GetCurrentUserId();
+    }
+    if (!CheckUserDirValid(userId)) {
+        SLOGE("DeleteAVQueueInfoRecord target user:%{public}d not valid, return", userId);
+        return;
+    }
+    SLOGI("DeleteAVQueueInfoRecord, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
     std::string oldContent;
     std::string newContent;
     nlohmann::json values;
-    if (!LoadStringFromFileEx(GetAVQueueDir(), oldContent)) {
+    if (!LoadStringFromFileEx(GetAVQueueDir(userId), oldContent)) {
         SLOGE("LoadStringFromFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return;
     }
@@ -2262,7 +2286,6 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
     for (auto it = values.begin(); it != values.end();) {
         if (it->at("bundleName") == bundleName) {
             std::string avQueueId = it->at("avQueueId");
-            int32_t userId = GetUsersManager().GetCurrentUserId();
             std::string fileName = AVSessionUtils::GetFixedPathName(userId) + bundleName + "_" +
                 avQueueId + AVSessionUtils::GetFileSuffix();
             AVSessionUtils::DeleteFile(fileName);
@@ -2273,7 +2296,7 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName)
     }
     newContent = values.dump();
     SLOGD("DeleteAVQueueInfoRecord::Dump json object finished");
-    if (!SaveStringToFileEx(GetAVQueueDir(), newContent)) {
+    if (!SaveStringToFileEx(GetAVQueueDir(userId), newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return;
     }
@@ -2867,14 +2890,14 @@ void ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
     }
 }
 
-bool AVSessionService::CheckUserDirValid()
+bool AVSessionService::CheckUserDirValid(int32_t userId)
 {
-    std::string filePath = GetUsersManager().GetDirForCurrentUser();
+    std::string filePath = GetUsersManager().GetDirForCurrentUser(userId);
     filesystem::path directory(filePath);
     std::error_code errCode;
     if (!filesystem::exists(directory, errCode)) {
-        SLOGE("check user dir not exsit %{public}s, errCode %{public}d",
-            filePath.c_str(), static_cast<int>(errCode.value()));
+        SLOGE("check user dir not exsit %{public}s for user %{public}d, errCode %{public}d",
+            filePath.c_str(), userId, static_cast<int>(errCode.value()));
         return false;
     }
     return true;

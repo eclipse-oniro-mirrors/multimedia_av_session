@@ -131,13 +131,16 @@ int32_t AVSessionUsersManager::GetCurrentUserId()
     return curUserId_;
 }
 
-std::string AVSessionUsersManager::GetDirForCurrentUser()
+std::string AVSessionUsersManager::GetDirForCurrentUser(int32_t userId)
 {
     std::lock_guard lockGuard(userLock_);
     if (curUserId_ < 0) {
         return AVSESSION_FILE_PUBLIC_DIR;
-    } else {
+    } else if (userId <= 0) {
         return AVSESSION_FILE_DIR_HEAD + std::to_string(curUserId_) + AVSESSION_FILE_DIR_TAIL;
+    } else {
+        SLOGI("GetDirForCurrentUser with specific userId:%{public}d", userId);
+        return AVSESSION_FILE_DIR_HEAD + std::to_string(userId) + AVSESSION_FILE_DIR_TAIL;
     }
 }
 

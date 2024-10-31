@@ -78,7 +78,9 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const T& param)
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
                     hasFunc = (ref == it ? true : hasFunc);
                 }
-                SLOGE("checkCallbackValid res false for event=%{public}d", event);
+                if (!hasFunc) {
+                    SLOGE("checkCallbackValid res false for event=%{public}d", event);
+                }
                 return hasFunc;
             },
             [param](napi_env env, int& argc, napi_value* argv) {
