@@ -116,7 +116,7 @@ int32_t CJAVSessionImpl::SetExtras(CArray& extras)
 int32_t CJAVSessionImpl::GetController()
 {
     auto controller = CJAVSessionControllerImpl::GetInstance(sessionId_);
-    if (controller) {
+    if (controller->Exists()) {
         return CJNO_ERROR;
     } else {
         return CJ_AVSESSION_MANAGER_IMPL->CreateController(sessionId_);
