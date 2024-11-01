@@ -1151,6 +1151,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo)
     doContinuousTaskUnregister();
     castControllerProxy_ = nullptr;
     supportedCastCmds_.clear();
+    ProcessFrontSession("Disconnect");
     SaveLocalDeviceInfo();
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
