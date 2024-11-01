@@ -17,7 +17,6 @@
 
 #include "napi_avsession.h"
 #include "avsession_controller.h"
-#include "napi_async_work.h"
 #include "napi_utils.h"
 #include "napi_avcall_meta_data.h"
 #include "napi_avcall_state.h"
@@ -86,6 +85,11 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "playFromAssetId", OffPlayFromAssetId },
     { "castDisplayChange", OffCastDisplayChange },
 };
+std::mutex NapiAVSession::syncMutex_;
+std::mutex NapiAVSession::syncAsyncMutex_;
+std::condition_variable NapiAVSession::syncCond_;
+std::condition_variable NapiAVSession::syncAsyncCond_;
+int32_t NapiAVSession::playBackStateRet_ = AVSESSION_ERROR;
 
 NapiAVSession::NapiAVSession()
 {
@@ -518,6 +522,48 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
 }
 
+std::function<void()> NapiAVSession::PlaybackStateSyncExecutor(NapiAVSession* napiSession,
+    AVPlaybackState playBackState)
+{
+    return [napiSession, playBackState]() {
+        playBackStateRet_ = napiSession->session_->SetAVPlaybackState(playBackState);
+        syncCond_.notify_one();
+        std::unique_lock<std::mutex> lock(syncAsyncMutex_);
+        auto waitStatus = syncAsyncCond_.wait_for(lock, std::chrono::milliseconds(100));
+        if (waitStatus == std::cv_status::timeout) {
+            SLOGE("SetAVPlaybackState in syncExecutor timeout");
+            return;
+        }
+    };
+}
+
+std::function<void()> NapiAVSession::PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context)
+{
+    return [context]() {
+        std::unique_lock<std::mutex> lock(syncMutex_);
+        auto waitStatus = syncCond_.wait_for(lock, std::chrono::milliseconds(100));
+        if (waitStatus == std::cv_status::timeout) {
+            SLOGE("SetAVPlaybackState in asyncExecutor timeout");
+            return;
+        }
+
+        if (playBackStateRet_ != AVSESSION_SUCCESS) {
+            if (playBackStateRet_ == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetAVPlaybackState failed : native session not exist";
+            } else if (playBackStateRet_ == ERR_INVALID_PARAM) {
+                context->errMessage = "SetAVPlaybackState failed : native invalid parameters";
+            } else if (playBackStateRet_ == ERR_NO_PERMISSION) {
+                context->errMessage = "SetAVPlaybackState failed : native no permission";
+            } else {
+                context->errMessage = "SetAVPlaybackState failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[playBackStateRet_];
+        }
+        syncAsyncCond_.notify_one();
+    };
+}
+
 napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVPlaybackState");
@@ -542,33 +588,23 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_AV_PLAYBACK_STATE_TASK_ID;
 
-    auto executor = [context]() {
-        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
-            context->status = napi_generic_failure;
-            context->errMessage = "SetAVPlaybackState failed : session is nullptr";
-            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
-            return;
-        }
-        int32_t ret = napiSession->session_->SetAVPlaybackState(context->playBackState_);
-        if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "SetAVPlaybackState failed : native session not exist";
-            } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "SetAVPlaybackState failed : native invalid parameters";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "SetAVPlaybackState failed : native no permission";
-            } else {
-                context->errMessage = "SetAVPlaybackState failed : native server exception";
-            }
-            context->status = napi_generic_failure;
-            context->errCode = NapiAVSessionManager::errcode_[ret];
-        }
-    };
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
-    return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", executor, complete);
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession->session_ == nullptr) {
+        SLOGE("SetAVPlaybackState failed : session is nullptr");
+        context->status = napi_generic_failure;
+        context->errMessage = "SetAVPlaybackState failed : session is nullptr";
+        context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto syncExecutor = PlaybackStateSyncExecutor(napiSession, context->playBackState_);
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask(syncExecutor, "SetAVPlaybackState"),
+        "NapiAVSession SetAVPlaybackState handler postTask failed");
+
+    auto asyncExecutor = PlaybackStateAsyncExecutor(context);
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+    return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", asyncExecutor, complete);
 }
 
 napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
