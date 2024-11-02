@@ -1091,9 +1091,17 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             return AVSESSION_ERROR;
         } else {
             SLOGI("cast check with pre cast alive %{public}ld, unregister callback", castHandle_);
-            AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
+            isSwitchNewDevice_ = true;
+            newOutputDeviceInfo_ = outputDeviceInfo;
+            StopCast();
+            return AVSESSION_SUCCESS;
         }
     }
+    return SubStartCast(outputDeviceInfo);
+}
+
+int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
+{
     int32_t flag = CastAddToCollaboration(outputDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, AVSESSION_ERROR, "collaboration to start cast fail");
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_, GetSessionId());
@@ -1189,6 +1197,26 @@ void AVSessionItem::ListenCollaborationOnStop()
     });
 }
 
+void AVSessionItem::DealLocalState(int32_t castState)
+{
+    if (castState == ConnectionState::STATE_DISCONNECTED) {
+        if (!isSwitchNewDevice_) {
+            OutputDeviceInfo outputDeviceInfo;
+            DeviceInfo deviceInfo;
+            deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+            deviceInfo.deviceId_ = "0";
+            deviceInfo.deviceName_ = "LocalDevice";
+            outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+            SetOutputDevice(outputDeviceInfo);
+        } else {
+            if (newOutputDeviceInfo_.deviceInfos_.size() > 0) {
+                SubStartCast(newOutputDeviceInfo_);
+            }
+            isSwitchNewDevice_ = false;
+        }
+    }
+}
+
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
@@ -1232,6 +1260,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             Destroy();
         }
     }
+    DealLocalState(castState);
 }
 
 void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
@@ -1314,18 +1343,6 @@ int32_t AVSessionItem::StopCast()
             CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
         }
     }
-
-    if (castServiceNameMapState_["HuaweiCast"] != deviceStateConnection &&
-        castServiceNameMapState_["HuaweiCast-Dual"] != deviceStateConnection) {
-        OutputDeviceInfo outputDeviceInfo;
-        DeviceInfo deviceInfo;
-        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-        deviceInfo.deviceId_ = "0";
-        deviceInfo.deviceName_ = "LocalDevice";
-        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-        SetOutputDevice(outputDeviceInfo);
-    }
-
     return AVSESSION_SUCCESS;
 }
 

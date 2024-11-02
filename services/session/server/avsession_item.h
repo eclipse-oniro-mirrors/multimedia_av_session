@@ -77,6 +77,8 @@ public:
 
     void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 
+    void DealLocalState(int32_t castState);
+
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
@@ -229,6 +231,8 @@ public:
     int32_t ReleaseCast() override;
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
+
+    int32_t SubStartCast(const OutputDeviceInfo& outputDeviceInfo);
 
     int32_t CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo);
 
@@ -432,6 +436,8 @@ private:
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::function<void(std::string)> serviceCallbackForStream_;
+    bool isSwitchNewDevice_ = false;
+    OutputDeviceInfo newOutputDeviceInfo_;
 #endif
 };
 } // namespace OHOS::AVSession
