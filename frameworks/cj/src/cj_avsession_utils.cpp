@@ -212,9 +212,6 @@ void SetDataParameters(const CArray& parameters, WantParams &wantP)
 
 char *MallocCString(const std::string &origin)
 {
-    if (origin.empty()) {
-        return nullptr;
-    }
     auto len = origin.length() + 1;
     char *res = static_cast<char *>(malloc(sizeof(char) * len));
     if (res == nullptr) {
@@ -225,9 +222,6 @@ char *MallocCString(const std::string &origin)
 
 char *MallocCString(const std::string &origin, int32_t &code)
 {
-    if (origin.empty() || code != CJNO_ERROR) {
-        return nullptr;
-    }
     auto len = origin.length() + 1;
     char *res = static_cast<char *>(malloc(sizeof(char) * len));
     if (res == nullptr) {
@@ -240,6 +234,7 @@ char *MallocCString(const std::string &origin, int32_t &code)
 // WantParameters -> CArrParameters
 int32_t InnerWrapWantParamsString(const WantParams &wantParams, CParameters *p)
 {
+    int ret = CJNO_ERROR;
     auto value = wantParams.GetParam(p->key);
     AAFwk::IString *ao = AAFwk::IString::Query(value);
     if (ao == nullptr) {
@@ -248,10 +243,10 @@ int32_t InnerWrapWantParamsString(const WantParams &wantParams, CParameters *p)
         return CJNO_ERROR;
     }
     std::string natValue = OHOS::AAFwk::String::Unbox(ao);
-    p->value = MallocCString(natValue);
+    p->value = MallocCString(natValue, ret);
     p->size = static_cast<int64_t>(natValue.length()) + 1;
     p->valueType = STR_TYPE;
-    return CJNO_ERROR;
+    return ret;
 }
 
 template <class TBase, class T, class NativeT>
@@ -275,6 +270,20 @@ int32_t InnerWrapWantParamsT(const WantParams &wantParams, CParameters *p)
     return CJNO_ERROR;
 }
 
+int32_t InnerWrapWantParamsUnboxArrayString(sptr<AAFwk::IArray>& ao, int index, char*& strPtr)
+{
+    sptr<AAFwk::IInterface> iface = nullptr;
+    if (ao->Get(index, iface) == ERR_OK) {
+        AAFwk::IString *iValue = AAFwk::IString::Query(iface);
+        if (iValue != nullptr) {
+            auto val = AAFwk::String::Unbox(iValue);
+            strPtr = MallocCString(val);
+            if (strPtr == nullptr) { return ERR_NO_MEMORY; }
+        }
+    }
+    return CJNO_ERROR;
+}
+
 int32_t InnerWrapWantParamsArrayString(sptr<AAFwk::IArray> &ao, CParameters *p)
 {
     long size = 0;
@@ -290,15 +299,10 @@ int32_t InnerWrapWantParamsArrayString(sptr<AAFwk::IArray> &ao, CParameters *p)
         SLOGE("fail to malloc");
         return ERR_NO_MEMORY;
     }
+    int ret = CJNO_ERROR;
     for (long i = 0; i < size; i++) {
-        sptr<AAFwk::IInterface> iface = nullptr;
-        if (ao->Get(i, iface) == ERR_OK) {
-            AAFwk::IString *iValue = AAFwk::IString::Query(iface);
-            if (iValue != nullptr) {
-                auto val = AAFwk::String::Unbox(iValue);
-                arrP[i] = MallocCString(val);
-            }
-        }
+        ret = InnerWrapWantParamsUnboxArrayString(ao, i, arrP[i]);
+        if (ret != CJNO_ERROR) { return ret; }
     }
     p->size = size;
     p->value = static_cast<void *>(arrP);
@@ -657,7 +661,7 @@ int32_t convertNativeToCJStruct(const std::string& native, char*& cj)
     if (ret != CJNO_ERROR) {
         return ret;
     }
-    if (strcpy_s(cj, native.length(), native.c_str()) != 0) {
+    if (strcpy_s(cj, native.length() + 1, native.c_str()) != 0) {
         return AVSESSION_ERROR;
     }
     return CJNO_ERROR;
