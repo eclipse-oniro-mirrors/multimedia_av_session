@@ -130,9 +130,10 @@ int32_t CJAVSessionControllerImpl::GetOutputDevice(COutputDeviceInfo& outputDevi
 {
     auto call =  [&](OutputDeviceInfo& native) {
         AVSessionDescriptor descriptor;
-        AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(controller_->GetSessionId(), descriptor);
+        int ret = AVSessionManager::GetInstance().
+            GetSessionDescriptorsBySessionId(controller_->GetSessionId(), descriptor);
         native = descriptor.outputDeviceInfo_;
-        return CJNO_ERROR;
+        return ret;
     };
     return CJControllerGetterCStruct<OutputDeviceInfo, COutputDeviceInfo>(call, outputDeviceInfo, "GetOutputDevice");
 }

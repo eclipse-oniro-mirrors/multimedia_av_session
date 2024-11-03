@@ -126,12 +126,12 @@ int32_t CJAVSessionImpl::GetController()
 int32_t CJAVSessionImpl::GetOutputDevice(COutputDeviceInfo& outputDeviceInfo)
 {
     AVSessionDescriptor descriptor;
-    AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId_, descriptor);
-    int32_t ret = convertNativeToCJStruct(descriptor.outputDeviceInfo_, outputDeviceInfo);
+    int32_t ret = AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId_, descriptor);
     if (ret != CJNO_ERROR) {
         SLOGE("controller GetOutputDevice failed:%{public}d", ret);
+        return ret;
     }
-    return ret;
+    return convertNativeToCJStruct(descriptor.outputDeviceInfo_, outputDeviceInfo);
 }
 
 int32_t CJAVSessionImpl::Activate()
