@@ -148,11 +148,11 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     std::shared_ptr<MigrateAVSessionManager> migrateManager_, int32_t sessionId, std::string deviceId)
 {
     SLOGI("MigrateTest001 TestMigrateConnect");
-    avservice_->SuperLauncher("", "SuperLauncher", "", "CONNECTING");
+    avservice_->SuperLauncher("", "SuperLauncher-Dual", "", "CONNECTING");
     avservice_->AddInnerSessionListener(server_.get());
 
     server_->Init(avservice_);
-    migrateManager_->CreateLocalSessionStub("SuperLauncher", server_);
+    migrateManager_->CreateLocalSessionStub("SuperLauncher-Dual", server_);
     EXPECT_EQ(migrateManager_->serverMap_.find("SuperLauncher") != migrateManager_->serverMap_.end(), true);
 
     char infoName[] = "testInfoName";
@@ -230,7 +230,7 @@ static HWTEST_F(MigrateAVSessionTest, MigrateTest001, TestSize.Level1)
     TestMigrateSendByte(avsession_, server_, deviceId);
 
     // disconnect release
-    avservice_->SuperLauncher("", "SuperLauncher", "", "IDLE");
+    avservice_->SuperLauncher("", "SuperLauncher-Dual", "", "IDLE");
     avservice_->RemoveInnerSessionListener(server_.get());
     server_->OnSessionRelease(descriptor);
     server_->ClearCacheBySessionId(descriptor.sessionId_);
@@ -242,8 +242,8 @@ static HWTEST_F(MigrateAVSessionTest, MigrateTest001, TestSize.Level1)
     server_->OnDisConnectSession(sessionId);
     server_->OnDisconnectProxy(deviceId);
     EXPECT_EQ(server_->isSoftbusConnecting_, false);
-    migrateManager_->ReleaseLocalSessionStub("SuperLauncher");
-    EXPECT_EQ(migrateManager_->serverMap_.find("SuperLauncher") == migrateManager_->serverMap_.end(), true);
+    migrateManager_->ReleaseLocalSessionStub("SuperLauncher-Dual");
+    EXPECT_EQ(migrateManager_->serverMap_.find("SuperLauncher-Dual") == migrateManager_->serverMap_.end(), true);
     SLOGI("MigrateTest001 end");
 }
 
@@ -475,7 +475,7 @@ static HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub001, TestSize.Level1
 static HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub002, TestSize.Level1)
 {
     SLOGI("CreateLocalSessionStub002 begin");
-    std::string scene = "SuperLauncher";
+    std::string scene = "SuperLauncher-Dual";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
     EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->CreateLocalSessionStub(scene, server_);
@@ -508,7 +508,7 @@ static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub001, TestSize.Level
 static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub002, TestSize.Level1)
 {
     SLOGI("ReleaseLocalSessionStub002 begin");
-    std::string scene = "SuperLauncher";
+    std::string scene = "SuperLauncher-Dual";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
     EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->CreateLocalSessionStub(scene, server_);
@@ -525,7 +525,7 @@ static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub002, TestSize.Level
 static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub003, TestSize.Level1)
 {
     SLOGI("ReleaseLocalSessionStub003 begin");
-    std::string scene = "SuperLauncher";
+    std::string scene = "SuperLauncher-Dual";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
     EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->ReleaseLocalSessionStub(scene);
