@@ -2306,29 +2306,33 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName, in
 void AVSessionService::HandleSessionRelease(std::string sessionId)
 {
     SLOGI("HandleSessionRelease, sessionId=%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-    std::lock_guard lockGuard(sessionAndControllerLock_);
-    std::lock_guard frontLockGuard(sessionFrontLock_);
-    sptr<AVSessionItem> sessionItem = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
-    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
-    NotifySessionRelease(sessionItem->GetDescriptor());
-    sessionItem->DestroyTask();
-    if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
-        SLOGD("Top session is released session");
-        UpdateTopSession(nullptr);
+    {
+        std::lock_guard lockGuard(sessionAndControllerLock_);
+        std::lock_guard frontLockGuard(sessionFrontLock_);
+        sptr<AVSessionItem> sessionItem = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
+        NotifySessionRelease(sessionItem->GetDescriptor());
+        sessionItem->DestroyTask();
+        if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
+            SLOGD("Top session is released session");
+            UpdateTopSession(nullptr);
+            int32_t ret = Notification::NotificationHelper::CancelNotification(0);
+            SLOGI("topsession release cancelNotification ret=%{public}d", ret);
+        }
+        if (sessionItem->GetRemoteSource() != nullptr) {
+            int32_t ret = CancelCastAudioForClientExit(sessionItem->GetPid(), sessionItem);
+            SLOGI("CancelCastAudioForClientExit ret is %{public}d", ret);
+        } else {
+            SLOGI("GetContainer has no this session");
+        }
+        HISYSEVENT_ADD_LIFE_CYCLE_INFO(sessionItem->GetDescriptor().elementName_.GetBundleName(),
+            AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()),
+            sessionItem->GetDescriptor().sessionType_, false);
+        SLOGI("HandleSessionRelease, remove session: sessionId=%{public}s",
+            AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        GetUsersManager().RemoveSessionForAllUser(sessionItem->GetPid(), sessionItem->GetAbilityName());
+        UpdateFrontSession(sessionItem, false);
     }
-    if (sessionItem->GetRemoteSource() != nullptr) {
-        int32_t ret = CancelCastAudioForClientExit(sessionItem->GetPid(), sessionItem);
-        SLOGI("CancelCastAudioForClientExit ret is %{public}d", ret);
-    } else {
-        SLOGI("GetContainer has no this session");
-    }
-    HISYSEVENT_ADD_LIFE_CYCLE_INFO(sessionItem->GetDescriptor().elementName_.GetBundleName(),
-        AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()),
-        sessionItem->GetDescriptor().sessionType_, false);
-    SLOGI("HandleSessionRelease, remove session: sessionId=%{public}s",
-        AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-    GetUsersManager().RemoveSessionForAllUser(sessionItem->GetPid(), sessionItem->GetAbilityName());
-    UpdateFrontSession(sessionItem, false);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0 ||
         (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 1 &&

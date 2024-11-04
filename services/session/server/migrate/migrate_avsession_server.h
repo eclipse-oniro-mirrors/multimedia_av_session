@@ -52,6 +52,7 @@ public:
 
     void OnMetaDataChange(const std::string &playerId, const AVMetaData &data);
     void OnPlaybackStateChanged(const std::string &playerId, const AVPlaybackState &state);
+    void StopObserveControllerChanged(const std::string &deviceId);
 
 private:
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;
@@ -59,7 +60,6 @@ private:
     std::list<sptr<AVControllerItem>> sortControllerList_;
 
     void ObserveControllerChanged(const std::string &deviceId);
-    void StopObserveControllerChanged(const std::string &deviceId);
     void CreateController(const std::string &sessionId);
     void UpdateCache(const std::string &sessionId, sptr<AVControllerItem> avcontroller,
         std::shared_ptr<AVControllerObserver> callback, bool isAdd);
