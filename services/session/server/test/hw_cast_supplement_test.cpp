@@ -530,7 +530,7 @@ static HWTEST(HwCastSupplementTest, GetRemoteController003, TestSize.Level1)
  */
 static HWTEST(HwCastSupplementTest, GetRemoteController004, TestSize.Level1)
 {
-    SLOGI("GetRemoteController003 begin!");
+    SLOGI("GetRemoteController004 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
     EXPECT_EQ(hwCastProvider != nullptr, true);
     hwCastProvider->Init();
@@ -539,8 +539,9 @@ static HWTEST(HwCastSupplementTest, GetRemoteController004, TestSize.Level1)
     auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
     hwCastProvider->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
     auto ret = hwCastProvider->GetRemoteController(castId);
-    EXPECT_NE(ret, nullptr);
-    SLOGI("GetRemoteController003 end!");
+    // HwCastProviderSession construct with null can not CreateStreamPlayer
+    EXPECT_EQ(ret, nullptr);
+    SLOGI("GetRemoteController004 end!");
 }
 
 /**

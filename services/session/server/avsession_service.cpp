@@ -210,37 +210,27 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     const AAFwk::Want &want = eventData.GetWant();
     std::string action = want.GetAction();
     SLOGI("OnReceiveEvent action:%{public}s.", action.c_str());
-
+    if (servicePtr_ == nullptr) {
+        SLOGE("OnReceiveEvent get action:%{public}s with servicePtr_ null", action.c_str());
+        return;
+    }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) == 0 ||
         action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) == 0 ||
         action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) == 0 ||
         action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) == 0) {
-        if (servicePtr_ != nullptr) {
-            servicePtr_->HandleScreenStatusChange(action);
-        } else {
-            SLOGE("get screenEvent with servicePtr_ null");
-        }
+        servicePtr_->HandleScreenStatusChange(action);
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_FOREGROUND) == 0) {
+        int32_t userIdForeground = eventData.GetCode();
+        servicePtr_->HandleUserEvent(AVSessionUsersManager::accountEventSwitched, userIdForeground);
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) == 0) {
-        int32_t userId = eventData.GetCode();
-        if (servicePtr_ != nullptr) {
-            servicePtr_->HandleUserEvent(AVSessionUsersManager::accountEventSwitched, userId);
-        } else {
-            SLOGE("get accountEventSwitched with servicePtr_ null");
-        }
+        int32_t userIdSwitched = eventData.GetCode();
+        servicePtr_->HandleUserEvent(AVSessionUsersManager::accountEventSwitched, userIdSwitched);
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) == 0) {
         int32_t userId = eventData.GetCode();
-        if (servicePtr_ != nullptr) {
-            servicePtr_->HandleUserEvent(AVSessionUsersManager::accountEventRemoved, userId);
-        } else {
-            SLOGE("get accountEventRemoved with servicePtr_ null");
-        }
+        servicePtr_->HandleUserEvent(AVSessionUsersManager::accountEventRemoved, userId);
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
         int32_t userId = eventData.GetCode();
-        if (servicePtr_ != nullptr) {
-            servicePtr_->RegisterBundleDeleteEventForHistory(userId);
-        } else {
-            SLOGE("get user unlock with servicePtr_ null");
-        }
+        servicePtr_->RegisterBundleDeleteEventForHistory(userId);
     }
 }
 
@@ -325,6 +315,7 @@ bool AVSessionService::SubscribeCommonEvent()
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED,
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_USER_FOREGROUND,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED,
     };
@@ -579,7 +570,8 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
 // LCOV_EXCL_START
 void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
-    SLOGI("HandleFocusSession with uid=%{public}d", info.uid);
+    SLOGI("HandleFocusSession with uid=%{public}d, cur topSession:%{public}s",
+        info.uid, (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
     std::lock_guard lockGuard(sessionServiceLock_);
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("The focusSession is the same as current topSession.");
@@ -619,6 +611,10 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
     CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
     bool sessionExist = false;
     for (auto value : values) {
+        if (!value.contains("bundleName") || !value.contains("abilityName")) {
+            SLOGI("not contain bundleName or abilityName, pass");
+            continue;
+        }
         if (session->GetBundleName() == value["bundleName"] &&
             session->GetAbilityName() == value["abilityName"]) {
             values.erase(std::remove(values.begin(), values.end(), value));
@@ -1229,6 +1225,10 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& sessionId, const
     if (LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
         nlohmann::json values = json::parse(oldSortContent, nullptr, false);
         CHECK_AND_RETURN_LOG(!values.is_discarded(), "sort json object is null");
+        if (!values.is_array()) {
+            SLOGI("create new json array for SaveSessionInfoInFile");
+            values = json::array();
+        }
         if (oldSortContent.find(elementName.GetBundleName()) == string::npos) {
             auto callback = [this](std::string bundleName, int32_t userId) {
                 SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
@@ -1592,7 +1592,6 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
     std::string bundleName = DEFAULT_BUNDLE_NAME;
     std::string abilityName = DEFAULT_ABILITY_NAME;
     std::string sortContent;
-
     {
         std::lock_guard sortFileLockGuard(sessionFileLock_);
         if (!LoadStringFromFileEx(GetAVSortDir(), sortContent)) {
@@ -1600,11 +1599,11 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
             return AVSESSION_ERROR;
         }
     }
-
     if (!sortContent.empty()) {
         nlohmann::json sortValues = json::parse(sortContent, nullptr, false);
         CHECK_AND_RETURN_RET_LOG(!sortValues.is_discarded(), AVSESSION_ERROR, "json object is null");
         for (auto& value : sortValues) {
+            CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("sessionId"));
             auto session = GetContainer().GetSessionById(value["sessionId"]);
             if (session == nullptr) {
                 bundleName = value["bundleName"];
@@ -1616,7 +1615,6 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
             }
         }
     }
-
     std::shared_ptr<AbilityManagerAdapter> ability = nullptr;
     {
         std::lock_guard lockGuard(abilityManagerLock_);
@@ -1696,7 +1694,10 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
     
 int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
+    auto pid = GetCallingPid();
     std::string sessionIdInner;
+    SLOGI("CreateControllerInner for sessionId:%{public}s, pid:%{public}d",
+        AVSessionUtils::GetAnonySessionId(sessionId).c_str(), static_cast<int>(pid));
     if (sessionId == "default") {
         auto ret = StartDefaultAbilityByCall(sessionIdInner);
         if (ret != AVSESSION_SUCCESS) {
@@ -1715,7 +1716,6 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
         }
     }
 
-    auto pid = GetCallingPid();
     auto existController = GetPresentController(pid, sessionIdInner);
     if (existController != nullptr) {
         SLOGI("Controller is already existed.");
