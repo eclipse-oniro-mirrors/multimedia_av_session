@@ -378,7 +378,7 @@ void AvSessionServiceSuperLauncherTest001(const uint8_t* data, size_t size,
     };
     vector<string> serviceNames {
         "Unknown",
-        "SuperLauncher",
+        "SuperLauncher-Dual",
         "HuaweiCast",
     };
     int32_t randomNumber = 1;
@@ -402,7 +402,7 @@ void AvSessionServiceSuperLauncherTest002(const uint8_t* data, size_t size,
     };
     vector<string> serviceNames {
         "Unknown",
-        "SuperLauncher",
+        "SuperLauncher-Dual",
         "HuaweiCast",
     };
     int32_t randomNumber = *(reinterpret_cast<const int32_t *>(data));
@@ -411,7 +411,7 @@ void AvSessionServiceSuperLauncherTest002(const uint8_t* data, size_t size,
     std::string deviceId(reinterpret_cast<const char*>(data), size);
     std::string extraInfo(reinterpret_cast<const char*>(data), size);
     service->SuperLauncher(deviceId, serviceName, extraInfo, state);
-    service->SuperLauncher(deviceId, "SuperLauncher", extraInfo, "CONNECTING");
+    service->SuperLauncher(deviceId, "SuperLauncher-Dual", extraInfo, "CONNECTING");
     bool on = *(reinterpret_cast<const int32_t *>(data));
     service->SetScreenOn(on);
     service->GetScreenOn();

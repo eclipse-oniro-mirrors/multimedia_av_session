@@ -70,7 +70,7 @@ void AVSessionServiceExtFuzzer::AVSessionServiceExtFuzzTest(uint8_t* data, size_
     };
     vector<string> serviceNames {
         "Unknown",
-        "SuperLauncher",
+        "SuperLauncher-Dual",
         "HuaweiCast",
     };
 
@@ -78,7 +78,7 @@ void AVSessionServiceExtFuzzer::AVSessionServiceExtFuzzTest(uint8_t* data, size_
     static sptr<AVSessionService> service = new AVSessionService(systemAbilityId);
     
     std::string state = "CONNECTING";
-    std::string serviceName = "SuperLauncher";
+    std::string serviceName = "SuperLauncher-Dual";
     std::string deviceId(reinterpret_cast<const char*>(data), size);
     std::string extraInfo(reinterpret_cast<const char*>(data), size);
     service->SuperLauncher(deviceId, serviceName, extraInfo, state);

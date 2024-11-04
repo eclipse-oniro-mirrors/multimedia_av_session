@@ -25,7 +25,7 @@ MigrateAVSessionManager& MigrateAVSessionManager::GetInstance()
 void MigrateAVSessionManager::CreateLocalSessionStub(std::string scene, std::shared_ptr<MigrateAVSessionServer> server)
 {
     SLOGI("enter CreateLocalSessionStub");
-    if ("SuperLauncher" != scene) {
+    if ("SuperLauncher-Dual" != scene) {
         SLOGW("CreateLocalSessionStub error, scene: %{public}s", scene.c_str());
         return;
     }
@@ -44,7 +44,7 @@ void MigrateAVSessionManager::CreateLocalSessionStub(std::string scene, std::sha
 void MigrateAVSessionManager::ReleaseLocalSessionStub(std::string scene)
 {
     SLOGI("enter ReleaseLocalSessionStub");
-    if ("SuperLauncher" != scene) {
+    if ("SuperLauncher-Dual" != scene) {
         SLOGW("not ReleaseLocalSessionStub: scene: %{public}s", scene.c_str());
         return;
     }
