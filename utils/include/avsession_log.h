@@ -107,11 +107,8 @@
     } while (0)
 
 #define CHECK_AND_CONTINUE(cond)                       \
-    do {                                               \
         if (!(cond)) {                                 \
             SLOGE("%{public}s, check failed!", #cond); \
             continue;                                  \
-        }                                              \
-    } while (0)
-
+        }
 #endif // OHOS_AVSESSION_LOG_H
