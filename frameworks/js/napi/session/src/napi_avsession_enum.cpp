@@ -371,7 +371,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
         DECLARE_NAPI_PROPERTY("DisplayTag", ExportDisplayTag(env)),
         DECLARE_NAPI_PROPERTY("CastDisplayState", ExportCastDisplayState(env)),
-        DECLARE_NAPI_PROPERTY("DeviceLogEventCode ", ExportDeviceLogEventCode(env)),
+        DECLARE_NAPI_PROPERTY("DeviceLogEventCode", ExportDeviceLogEventCode(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
