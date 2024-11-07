@@ -18,58 +18,59 @@
 
 namespace OHOS::AVSession {
 // LCOV_EXCL_START
-void HwCastDisplayListener::OnConnect(Rosen::ScreenId screenId)
+void HwCastDisplayListener::OnConnect(Rosen::DisplayId displayId)
 {
     SLOGI("Screen OnConnect");
-    auto displayInfo = Rosen::ScreenManager::GetInstance().GetScreenById(screenId);
-    if (displayInfo == nullptr) {
-        return;
-    }
+    auto display = Rosen::DisplayManagerLite::GetInstance().GetDisplayById(displayId);
+    CHECK_AND_RETURN_LOG(display != nullptr, "display is nullptr");
+    auto displayInfo = display->GetDisplayInfo();
+    CHECK_AND_RETURN_LOG(displayInfo != nullptr, "displayInfo is nullptr");
     auto displayName = displayInfo->GetName();
-    SLOGI("ScreenId OnConnect: %{public}s", displayName.c_str());
-    if (displayName == "CastEngine") {
+    SLOGI("DisplayId OnConnect: %{public}s", displayName.c_str());
+    auto flag = Rosen::DisplayManagerLite::GetInstance().GetVirtualScreenFlag(displayId);
+    if (flag == Rosen::VirtualScreenFlag::CAST) {
         ReportCastDisplay(displayInfo, CastDisplayState::STATE_ON);
         SetDisplayInfo(displayInfo);
     }
 }
 // LCOV_EXCL_STOP
 
-void HwCastDisplayListener::OnDisconnect(Rosen::ScreenId screenId)
+void HwCastDisplayListener::OnDisconnect(Rosen::DisplayId displayId)
 {
-    SLOGI("ScreenId OnDisconnect");
+    SLOGI("OnDisconnect in");
     auto curDisplayInfo = GetDisplayInfo();
-    if (!curDisplayInfo || curDisplayInfo->GetId() != screenId) {
+    if (!curDisplayInfo || curDisplayInfo->GetDisplayId() != displayId) {
         SLOGE("curDisplayInfo_ is null");
         return;
     }
     auto displayName = curDisplayInfo->GetName();
-    SLOGI("ScreenId OnDisconnect: %{public}s", displayName.c_str());
+    SLOGI("DisplayId OnDisconnect: %{public}s", displayName.c_str());
     ReportCastDisplay(curDisplayInfo, CastDisplayState::STATE_OFF);
     SetDisplayInfo(nullptr);
 }
 
-void HwCastDisplayListener::OnChange(Rosen::ScreenId screenId) {}
+void HwCastDisplayListener::OnChange(Rosen::DisplayId displayId) {}
 
 // LCOV_EXCL_START
-void HwCastDisplayListener::SetDisplayInfo(sptr<Rosen::Screen> displayInfo)
+void HwCastDisplayListener::SetDisplayInfo(sptr<Rosen::DisplayInfo> displayInfo)
 {
     std::lock_guard<std::mutex> lock(dataMutex_);
     curDisplayInfo_ = displayInfo;
 }
 // LCOV_EXCL_STOP
 
-sptr<Rosen::Screen> HwCastDisplayListener::GetDisplayInfo()
+sptr<Rosen::DisplayInfo> HwCastDisplayListener::GetDisplayInfo()
 {
     std::lock_guard<std::mutex> lock(dataMutex_);
     return curDisplayInfo_;
 }
 
 // LCOV_EXCL_START
-void HwCastDisplayListener::ReportCastDisplay(sptr<Rosen::Screen> displayInfo, CastDisplayState displayState)
+void HwCastDisplayListener::ReportCastDisplay(sptr<Rosen::DisplayInfo> displayInfo, CastDisplayState displayState)
 {
     CastDisplayInfo castDisplayInfo;
     castDisplayInfo.displayState = displayState;
-    castDisplayInfo.displayId = displayInfo->GetId();
+    castDisplayInfo.displayId = displayInfo->GetDisplayId();
     castDisplayInfo.name = displayInfo->GetName();
     castDisplayInfo.width = static_cast<int32_t>(displayInfo->GetWidth());
     castDisplayInfo.height = static_cast<int32_t>(displayInfo->GetHeight());

@@ -288,8 +288,8 @@ static HWTEST_F(AVSessionServiceSupplementTest, IsHistoricalSession001, TestSize
 
     std::string id = "*****";
     std::string filePath = g_AVSessionService->GetAVSortDir();
-    ofstream ofs;
-    ofs.open(filePath, ios::out);
+    std::ofstream ofs;
+    ofs.open(filePath, std::ios::out);
     ofs << id;
     ofs.close();
 
@@ -316,8 +316,8 @@ static HWTEST_F(AVSessionServiceSupplementTest, IsHistoricalSession002, TestSize
 
     std::string sessionId = avsessionItem->GetSessionId();
     std::string filePath = g_AVSessionService->GetAVSortDir();
-    ofstream ofs;
-    ofs.open(filePath, ios::out);
+    std::ofstream ofs;
+    ofs.open(filePath, std::ios::out);
     ofs << sessionId;
     ofs.close();
 
@@ -376,7 +376,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx001, TestSize.
 
     std::string filePath = "/adcdXYZ123/test5.txt";
     std::string content;
-    ifstream file(filePath, ios_base::in);
+    std::ifstream file(filePath, std::ios_base::in);
     bool ret = g_AVSessionService->SaveStringToFileEx(filePath, content);
     file.close();
     EXPECT_EQ(ret, false);
