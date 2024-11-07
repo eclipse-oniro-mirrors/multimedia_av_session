@@ -22,8 +22,6 @@
 
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
-#include "avsession_display_interface.h"
-#include "avsession_dynamic_loader.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"
@@ -297,7 +295,6 @@ private:
     void HandleFrontSession();
     int32_t DoContinuousTaskRegister();
     int32_t DoContinuousTaskUnregister();
-    AVSessionDisplayIntf* GetAVSessionDisplayIntf();
     void ReportSetAVMetaDataInfo(const AVMetaData& meta);
     std::string GetAnonymousDeviceId(std::string deviceId);
     void ReportAVCastControllerInfo();
@@ -381,9 +378,6 @@ private:
     int32_t removeCmdStep_ = 1000;
 
     volatile bool isDestroyed_ = false;
-
-    AVSessionDisplayIntf *avsessionDisaplayIntf_;
-    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
 
     static const int32_t DEFAULT_USER_ID = 100;
 

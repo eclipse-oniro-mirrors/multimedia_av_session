@@ -47,8 +47,7 @@ common_external_deps = [
   "ipc:ipc_single",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
-  "window_manager:libdm",
-  "window_manager:libwm",
+  "window_manager:libdm_lite",
 ]
 
 common_cflags = []
