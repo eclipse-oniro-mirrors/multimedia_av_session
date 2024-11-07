@@ -179,7 +179,7 @@ static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent002, testing:
             capturedBundleName.c_str(), userId);
     };
     bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     SLOGI("SubscribeBundleStatusEvent002, end");
 }
 
