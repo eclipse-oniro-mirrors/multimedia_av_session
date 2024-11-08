@@ -93,11 +93,66 @@ void BundleStatusAdapterTest::TearDownTestCase()
 
 void BundleStatusAdapterTest::SetUp()
 {
-    BundleStatusAdapter::GetInstance().Init();
 }
 
 void BundleStatusAdapterTest::TearDown()
 {
+}
+
+/**
+ * @tc.name: SubscribeBundleStatusEvent001
+ * @tc.desc: Test SubscribeBundleStatusEvent
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent001, testing::ext::TestSize.Level1)
+{
+    SLOGI("SubscribeBundleStatusEvent001, start");
+    std::string bundleName = "test1";
+    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("SubscribeBundleStatusEvent001: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
+    };
+    bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
+    EXPECT_NE(ret, true);
+    SLOGI("SubscribeBundleStatusEvent001, end");
+}
+
+/**
+ * @tc.name: SubscribeBundleStatusEvent002
+ * @tc.desc: Test SubscribeBundleStatusEvent
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent002, testing::ext::TestSize.Level1)
+{
+    SLOGI("SubscribeBundleStatusEvent002, start");
+    BundleStatusAdapter::GetInstance().Init();
+    std::string bundleName = "";
+    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("SubscribeBundleStatusEvent002: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
+    };
+    bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
+    EXPECT_EQ(ret, false);
+    SLOGI("SubscribeBundleStatusEvent002, end");
+}
+
+/**
+ * @tc.name: SubscribeBundleStatusEvent003
+ * @tc.desc: Test SubscribeBundleStatusEvent
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent003, testing::ext::TestSize.Level1)
+{
+    SLOGI("SubscribeBundleStatusEvent003, start");
+    BundleStatusAdapter::GetInstance().Init();
+    std::string bundleName = "com.ohos.sceneboard";
+    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("SubscribeBundleStatusEvent003: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
+    };
+    bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
+    EXPECT_EQ(ret, true);
+    SLOGI("SubscribeBundleStatusEvent003, end");
 }
 
 /**
@@ -108,6 +163,7 @@ void BundleStatusAdapterTest::TearDown()
 static HWTEST_F(BundleStatusAdapterTest, GetBundleNameFromUid001, testing::ext::TestSize.Level1)
 {
     SLOGI("GetBundleNameFromUid001, start");
+    BundleStatusAdapter::GetInstance().Init();
     const int32_t uid = 0;
     BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
     EXPECT_EQ(uid, 0);
@@ -122,6 +178,7 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleNameFromUid001, testing::ext::
 static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport001, testing::ext::TestSize.Level1)
 {
     SLOGI("CheckBundleSupport001, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string profile = "";
     bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport(profile);
     EXPECT_EQ(ret, false);
@@ -136,6 +193,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport001, testing::ext::Te
 static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport002, testing::ext::TestSize.Level1)
 {
     SLOGI("CheckBundleSupport002, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string profile = R"({
         "insightIntents": [
             {
@@ -159,6 +217,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport002, testing::ext::Te
 static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport003, testing::ext::TestSize.Level1)
 {
     SLOGI("CheckBundleSupport003, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string profile = R"({
         "insightIntents": [
             {
@@ -182,6 +241,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport003, testing::ext::Te
 static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport004, testing::ext::TestSize.Level1)
 {
     SLOGI("CheckBundleSupport004, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string profile = R"({
         "insightIntents": [
             {
@@ -198,42 +258,6 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport004, testing::ext::Te
 }
 
 /**
- * @tc.name: SubscribeBundleStatusEvent001
- * @tc.desc: Test SubscribeBundleStatusEvent
- * @tc.type: FUNC
- */
-static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent001, testing::ext::TestSize.Level1)
-{
-    SLOGI("SubscribeBundleStatusEvent001, start");
-    std::string bundleName = "";
-    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
-        SLOGI("SubscribeBundleStatusEvent001: get bundle name: %{public}s, userId: %{public}d",
-            capturedBundleName.c_str(), userId);
-    };
-    bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
-    EXPECT_EQ(ret, false);
-    SLOGI("SubscribeBundleStatusEvent001, end");
-}
-
-/**
- * @tc.name: SubscribeBundleStatusEvent002
- * @tc.desc: Test SubscribeBundleStatusEvent
- * @tc.type: FUNC
- */
-static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent002, testing::ext::TestSize.Level1)
-{
-    SLOGI("SubscribeBundleStatusEvent002, start");
-    std::string bundleName = "com.ohos.sceneboard";
-    auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
-        SLOGI("SubscribeBundleStatusEvent002: get bundle name: %{public}s, userId: %{public}d",
-            capturedBundleName.c_str(), userId);
-    };
-    bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
-    EXPECT_EQ(ret, true);
-    SLOGI("SubscribeBundleStatusEvent002, end");
-}
-
-/**
  * @tc.name: IsAudioPlayback001
  * @tc.desc: Test IsAudioPlayback
  * @tc.type: FUNC
@@ -241,6 +265,7 @@ static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent002, testing:
 static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback001, testing::ext::TestSize.Level1)
 {
     SLOGI("IsAudioPlayback001, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string bundleName = "";
     std::string abilityName = "";
     bool ret = BundleStatusAdapter::GetInstance().IsAudioPlayback(bundleName, abilityName);
@@ -256,6 +281,7 @@ static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback001, testing::ext::TestS
 static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback002, testing::ext::TestSize.Level1)
 {
     SLOGI("IsAudioPlayback002, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string bundleName = "com.ohos.screenshot";
     std::string abilityName = "MainAbility";
     auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
@@ -276,6 +302,7 @@ static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback002, testing::ext::TestS
 static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved001, testing::ext::TestSize.Level1)
 {
     SLOGI("NotifyBundleRemoved001, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string bundleName = "com.ohos.screenshot";
     std::string abilityName = "MainAbility";
     auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
@@ -296,6 +323,7 @@ static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved001, testing::ext::T
 static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved002, testing::ext::TestSize.Level1)
 {
     SLOGI("NotifyBundleRemoved002, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string bundleName = "com.ohos.test";
     std::string abilityName = "MainAbility";
     BundleStatusAdapter::GetInstance().NotifyBundleRemoved(bundleName, 100);
@@ -311,6 +339,7 @@ static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved002, testing::ext::T
 static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent001, testing::ext::TestSize.Level1)
 {
     SLOGI("IsSupportPlayIntent001, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string bundleName = "";
     std::string supportModule = "";
     std::string profile = "";
@@ -327,17 +356,55 @@ static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent001, testing::ext::T
 static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent002, testing::ext::TestSize.Level1)
 {
     SLOGI("IsSupportPlayIntent002, start");
+    BundleStatusAdapter::GetInstance().Init();
     std::string bundleName = "com.IsSupportPlayIntent.test";
     std::string supportModule = "";
     std::string profile = "";
     auto callback = [bundleName](const std::string& capturedBundleName, int32_t userId) {
-        SLOGI("SubscribeBundleStatusEvent005: get bundle name: %{public}s, userId: %{public}d",
+        SLOGI("IsSupportPlayIntent002: get bundle name: %{public}s, userId: %{public}d",
             capturedBundleName.c_str(), userId);
     };
     BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
     bool ret = BundleStatusAdapter::GetInstance().IsSupportPlayIntent(bundleName, supportModule, profile);
     EXPECT_EQ(ret, false);
     SLOGI("IsSupportPlayIntent002, end");
+}
+
+/**
+ * @tc.name: OnBundleStateChanged001
+ * @tc.desc: Test OnBundleStateChanged
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, OnBundleStateChanged001, testing::ext::TestSize.Level1)
+{
+    bool ret = false;
+    auto callback = [&ret](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("OnBundleStateChanged001: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
+        ret = true;
+    };
+    sptr<BundleStatusCallbackImpl> bundleStatusCallbackImpl =
+            new(std::nothrow) BundleStatusCallbackImpl(callback, 1);
+    bundleStatusCallbackImpl->OnBundleStateChanged(1, 0, "test1", "");
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: OnBundleStateChanged002
+ * @tc.desc: Test OnBundleStateChanged
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, OnBundleStateChanged002, testing::ext::TestSize.Level1)
+{
+    bool ret = true;
+    auto callback = [&ret](const std::string& capturedBundleName, int32_t userId) {
+        SLOGI("OnBundleStateChanged002: get bundle name: %{public}s, userId: %{public}d",
+            capturedBundleName.c_str(), userId);
+        ret = false;
+    };
+    sptr<BundleStatusCallbackImpl> bundleStatusCallbackImpl = new(std::nothrow) BundleStatusCallbackImpl(callback, 1);
+    bundleStatusCallbackImpl->OnBundleStateChanged(0, 0, "test2", "");
+    EXPECT_TRUE(ret);
 }
 } // namespace AVSession
 } // namespace OHOS

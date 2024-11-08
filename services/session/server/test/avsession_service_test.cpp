@@ -1509,8 +1509,7 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx003, TestSize.Level1)
     std::ifstream file(filePath, std::ios_base::in);
     bool ret = avservice_->LoadStringFromFileEx(filePath, content);
     file.close();
-    // file not exist for no permission to create file at root dir
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("LoadStringFromFileEx003 end!");

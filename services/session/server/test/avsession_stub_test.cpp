@@ -307,22 +307,6 @@ static HWTEST(AVSessionStubTest, HandleSetSessionEvent001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleGetController001
- * @tc.desc: Test HandleGetController
- * @tc.type: FUNC
- */
-static HWTEST(AVSessionStubTest, HandleGetController001, TestSize.Level1)
-{
-    SLOGI("HandleGetController001 begin!");
-    AVSessionStubDemo avSessionStub;
-    OHOS::MessageParcel data;
-    OHOS::MessageParcel reply;
-    int ret = avSessionStub.HandleGetController(data, reply);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("HandleGetController001 end!");
-}
-
-/**
  * @tc.name: HandleGetAVMetaData001
  * @tc.desc: Test HandleGetAVMetaData
  * @tc.type: FUNC

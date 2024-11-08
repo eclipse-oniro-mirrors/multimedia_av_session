@@ -384,6 +384,22 @@ ohos_unittest("AVSessionServiceProxyTest") {
   external_deps = common_external_deps
 }
 
+ohos_unittest("AVSessionStubTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_stub_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
 ohos_unittest("AVSessionServiceStubPermissionTest") {
   module_out_path = module_output_path
 
@@ -1344,6 +1360,7 @@ group("av_session_server_unittest") {
     ":AVSessionServiceStubTest",
     ":AVSessionServiceSupplementTest",
     ":AVSessionServiceTest",
+    ":AVSessionStubTest",
     ":AVsessionSyseventTest",
     ":AbilityConnectHelperTest",
     ":AbilityConnectHelperTest",
