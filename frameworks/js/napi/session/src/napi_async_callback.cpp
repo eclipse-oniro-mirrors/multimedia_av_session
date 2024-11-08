@@ -106,7 +106,6 @@ void NapiAsyncCallback::AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus)
         napi_close_handle_scope(context->env, scope);
         return;
     }
-    SLOGI("callback with flag ref %{public}p, %{public}p", &(context->method), *(&(context->method)));
     napi_get_reference_value(context->env, context->method, &function);
     napi_value result;
     napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
