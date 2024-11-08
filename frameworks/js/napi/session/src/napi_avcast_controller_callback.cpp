@@ -334,7 +334,7 @@ napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t even
             return napi_generic_failure;
         }
     }
-    SLOGI("addCallback isValidSet to prevent off, with ref %{public}d, %{public}p, %{public}p", event, &ref, *(&ref));
+    SLOGI("addCallback isValidSet to prevent off, with ref %{public}d", event);
     callbacks_[event].push_back(ref);
     if (isValid_ == nullptr) {
         SLOGI("addCallback with no isValid_ init");
@@ -373,7 +373,7 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
         napi_generic_failure, "get callback reference failed");
-    SLOGI("remove single callback with ref %{public}d, %{public}p, %{public}p", event, &ref, *(&ref));
+    SLOGI("remove single callback with ref %{public}d", event);
     CHECK_AND_RETURN_RET_LOG(ref != nullptr, napi_ok, "callback has been remove");
     callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);
