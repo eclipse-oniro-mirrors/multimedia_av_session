@@ -308,7 +308,7 @@ export struct AVCastPicker {
       }
     }
     .width(224)
-    .constraintSize({ maxHeight: this.isSmallFoldOuterScreen ? 245 : 345 })
+    .constraintSize({ maxHeight: this.isSmallFoldOuterScreen ? 276 : 345 })
   }
 
   @Builder
