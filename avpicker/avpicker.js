@@ -370,7 +370,7 @@ export class AVCastPicker extends ViewPU {
         this.observeComponentCreation2((h10, i10) => {
             Scroll.create(this.scroller);
             Scroll.width(224);
-            Scroll.constraintSize({ maxHeight: this.isSmallFoldOuterScreen ? 245 : 345 });
+            Scroll.constraintSize({ maxHeight: this.isSmallFoldOuterScreen ? 276 : 345 });
         }, Scroll);
         this.observeComponentCreation2((j10, k10) => {
             Column.create();
