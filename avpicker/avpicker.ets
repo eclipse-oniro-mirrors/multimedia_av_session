@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const TAG = 'avcastpicker_component ';
+const TAG = 'avcastpicker_component';
 
 /**
  * Definition of av cast picker state.
