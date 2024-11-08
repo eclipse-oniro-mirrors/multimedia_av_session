@@ -1480,8 +1480,8 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx002, TestSize.Level1)
     EXPECT_EQ(avsessionHere_ != nullptr, true);
     int32_t maxFileLength = 32 * 1024 * 1024;
     std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "test2.txt";
-    ofstream ofs;
-    ofs.open(filePath, ios::out);
+    std::ofstream ofs;
+    ofs.open(filePath, std::ios::out);
     for (int32_t i = 0; i <= maxFileLength; i++) {
         ofs << "A";
     }
@@ -1506,7 +1506,7 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx003, TestSize.Level1)
 
     std::string filePath = "/test3.txt";
     std::string content;
-    ifstream file(filePath, ios_base::in);
+    std::ifstream file(filePath, std::ios_base::in);
     bool ret = avservice_->LoadStringFromFileEx(filePath, content);
     file.close();
     // file not exist for no permission to create file at root dir
@@ -1545,7 +1545,7 @@ static HWTEST_F(AVSessionServiceTest, CheckStringAndCleanFile002, TestSize.Level
     EXPECT_EQ(avsessionHere_ != nullptr, true);
 
     std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "adcdXYZ123/test7.txt";
-    ifstream file(filePath, ios_base::in);
+    std::ifstream file(filePath, std::ios_base::in);
     bool ret = avservice_->CheckStringAndCleanFile(filePath);
     file.close();
     // file not exist for ifstream file can not create file in non-existent folder
