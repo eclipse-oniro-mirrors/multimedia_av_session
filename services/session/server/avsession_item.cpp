@@ -1191,11 +1191,12 @@ void AVSessionItem::ListenCollaborationOnStop()
                 deviceInfo.deviceName_ = "LocalDevice";
                 outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
                 SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
+                DealDisconnect(deviceInfo, castDisconnectStateInAVSession_);
                 {
                     std::lock_guard controllersLockGuard(controllersLock_);
                     for (const auto& controller : controllers_) {
                         if (controller.second != nullptr) {
-                            controller.second->HandleOutputDeviceChange(castConnectStateForDisconnect_, outputDeviceInfo);
+                            controller.second->HandleOutputDeviceChange(castDisconnectStateInAVSession_, outputDeviceInfo);
                         }
                     }
                 }
