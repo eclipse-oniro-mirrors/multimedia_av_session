@@ -1252,7 +1252,9 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             Destroy();
         }
     }
-    DealLocalState(castState);
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
+        DealLocalState(castState);
+        }, "DealLocalState", 0);
 }
 
 void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
