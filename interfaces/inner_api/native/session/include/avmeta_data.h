@@ -170,6 +170,7 @@ public:
     std::vector<std::string> GetDrmSchemes() const;
 
     void Reset();
+    void ResetExtAssetId();
 
     MetaMaskType GetMetaMask() const;
 

@@ -293,6 +293,19 @@ ohos_unittest("AVDumperTest") {
     external_deps += [ "bluetooth:btframework" ]
   }
 
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../../services/session:avsession_cast_item",
+      "../../../../../services/session:avsession_router",
+    ]
+    external_deps += [
+      "cast_engine:cast_engine_client",
+      "window_manager:libdm_lite",
+    ]
+  }
+
   if (efficiency_manager_enable_in_avsession) {
     cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
   }
