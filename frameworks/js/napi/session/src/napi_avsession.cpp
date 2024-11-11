@@ -17,7 +17,6 @@
 
 #include "napi_avsession.h"
 #include "avsession_controller.h"
-#include "napi_async_work.h"
 #include "napi_utils.h"
 #include "napi_avcall_meta_data.h"
 #include "napi_avcall_state.h"
@@ -86,6 +85,11 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "playFromAssetId", OffPlayFromAssetId },
     { "castDisplayChange", OffCastDisplayChange },
 };
+std::mutex NapiAVSession::syncMutex_;
+std::mutex NapiAVSession::syncAsyncMutex_;
+std::condition_variable NapiAVSession::syncCond_;
+std::condition_variable NapiAVSession::syncAsyncCond_;
+int32_t NapiAVSession::playBackStateRet_ = AVSESSION_ERROR;
 
 NapiAVSession::NapiAVSession()
 {
@@ -518,6 +522,52 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
 }
 
+std::function<void()> NapiAVSession::PlaybackStateSyncExecutor(NapiAVSession* napiSession,
+    AVPlaybackState playBackState)
+{
+    return [napiSession, playBackState]() {
+        if (napiSession->session_ == nullptr) {
+            playBackStateRet_ = ERR_SESSION_NOT_EXIST;
+            return;
+        }
+        playBackStateRet_ = napiSession->session_->SetAVPlaybackState(playBackState);
+        syncCond_.notify_one();
+        std::unique_lock<std::mutex> lock(syncAsyncMutex_);
+        auto waitStatus = syncAsyncCond_.wait_for(lock, std::chrono::milliseconds(100));
+        if (waitStatus == std::cv_status::timeout) {
+            SLOGE("SetAVPlaybackState in syncExecutor timeout");
+            return;
+        }
+    };
+}
+
+std::function<void()> NapiAVSession::PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context)
+{
+    return [context]() {
+        std::unique_lock<std::mutex> lock(syncMutex_);
+        auto waitStatus = syncCond_.wait_for(lock, std::chrono::milliseconds(100));
+        if (waitStatus == std::cv_status::timeout) {
+            SLOGE("SetAVPlaybackState in asyncExecutor timeout");
+            return;
+        }
+
+        if (playBackStateRet_ != AVSESSION_SUCCESS) {
+            if (playBackStateRet_ == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SetAVPlaybackState failed : native session not exist";
+            } else if (playBackStateRet_ == ERR_INVALID_PARAM) {
+                context->errMessage = "SetAVPlaybackState failed : native invalid parameters";
+            } else if (playBackStateRet_ == ERR_NO_PERMISSION) {
+                context->errMessage = "SetAVPlaybackState failed : native no permission";
+            } else {
+                context->errMessage = "SetAVPlaybackState failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[playBackStateRet_];
+        }
+        syncAsyncCond_.notify_one();
+    };
+}
+
 napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVPlaybackState");
@@ -542,33 +592,25 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_AV_PLAYBACK_STATE_TASK_ID;
 
-    auto executor = [context]() {
-        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
-            context->status = napi_generic_failure;
-            context->errMessage = "SetAVPlaybackState failed : session is nullptr";
-            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
-            return;
-        }
-        int32_t ret = napiSession->session_->SetAVPlaybackState(context->playBackState_);
-        if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "SetAVPlaybackState failed : native session not exist";
-            } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "SetAVPlaybackState failed : native invalid parameters";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "SetAVPlaybackState failed : native no permission";
-            } else {
-                context->errMessage = "SetAVPlaybackState failed : native server exception";
-            }
-            context->status = napi_generic_failure;
-            context->errCode = NapiAVSessionManager::errcode_[ret];
-        }
-    };
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
-    return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", executor, complete);
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession->session_ == nullptr) {
+        SLOGE("SetAVPlaybackState failed : session is nullptr");
+        context->status = napi_generic_failure;
+        context->errMessage = "SetAVPlaybackState failed : session is nullptr";
+        context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+        auto executor = []() {};
+        auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+        return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", executor, complete);
+    }
+
+    auto syncExecutor = PlaybackStateSyncExecutor(napiSession, context->playBackState_);
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask(syncExecutor, "SetAVPlaybackState"),
+        "NapiAVSession SetAVPlaybackState handler postTask failed");
+
+    auto asyncExecutor = PlaybackStateAsyncExecutor(context);
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+    return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", asyncExecutor, complete);
 }
 
 napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
@@ -1248,6 +1290,7 @@ void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)
 
 napi_status NapiAVSession::OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1257,6 +1300,7 @@ napi_status NapiAVSession::OnPlay(napi_env env, NapiAVSession* napiSession, napi
 
 napi_status NapiAVSession::OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PAUSE);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1266,6 +1310,7 @@ napi_status NapiAVSession::OnPause(napi_env env, NapiAVSession* napiSession, nap
 
 napi_status NapiAVSession::OnStop(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_STOP);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1275,6 +1320,7 @@ napi_status NapiAVSession::OnStop(napi_env env, NapiAVSession* napiSession, napi
 
 napi_status NapiAVSession::OnPlayNext(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1284,6 +1330,7 @@ napi_status NapiAVSession::OnPlayNext(napi_env env, NapiAVSession* napiSession, 
 
 napi_status NapiAVSession::OnPlayPrevious(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1293,6 +1340,7 @@ napi_status NapiAVSession::OnPlayPrevious(napi_env env, NapiAVSession* napiSessi
 
 napi_status NapiAVSession::OnFastForward(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_FAST_FORWARD);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1302,6 +1350,7 @@ napi_status NapiAVSession::OnFastForward(napi_env env, NapiAVSession* napiSessio
 
 napi_status NapiAVSession::OnRewind(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_REWIND);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1311,6 +1360,7 @@ napi_status NapiAVSession::OnRewind(napi_env env, NapiAVSession* napiSession, na
 
 napi_status NapiAVSession::OnSeek(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_SEEK);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1320,6 +1370,7 @@ napi_status NapiAVSession::OnSeek(napi_env env, NapiAVSession* napiSession, napi
 
 napi_status NapiAVSession::OnSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_SPEED);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1329,6 +1380,7 @@ napi_status NapiAVSession::OnSetSpeed(napi_env env, NapiAVSession* napiSession, 
 
 napi_status NapiAVSession::OnSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1338,6 +1390,7 @@ napi_status NapiAVSession::OnSetLoopMode(napi_env env, NapiAVSession* napiSessio
 
 napi_status NapiAVSession::OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1347,6 +1400,7 @@ napi_status NapiAVSession::OnToggleFavorite(napi_env env, NapiAVSession* napiSes
 
 napi_status NapiAVSession::OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT);
     SLOGI("add media key event listen ret %{public}d", static_cast<int>(ret));
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1373,6 +1427,7 @@ napi_status NapiAVSession::OnSkipToQueueItem(napi_env env, NapiAVSession* napiSe
 
 napi_status NapiAVSession::OnAVCallAnswer(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_AVCALL_ANSWER);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1382,6 +1437,7 @@ napi_status NapiAVSession::OnAVCallAnswer(napi_env env, NapiAVSession* napiSessi
 
 napi_status NapiAVSession::OnAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_AVCALL_HANG_UP);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1391,6 +1447,7 @@ napi_status NapiAVSession::OnAVCallHangUp(napi_env env, NapiAVSession* napiSessi
 
 napi_status NapiAVSession::OnAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
@@ -1400,6 +1457,7 @@ napi_status NapiAVSession::OnAVCallToggleCallMute(napi_env env, NapiAVSession* n
 
 napi_status NapiAVSession::OnPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
     int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
