@@ -40,7 +40,6 @@
           "device_manager",
           "dsoftbus",
           "eventhandler",
-          "graphic_2d",
           "graphic_surface",
           "hilog",
           "hisysevent",

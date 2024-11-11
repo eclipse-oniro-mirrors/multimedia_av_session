@@ -149,7 +149,6 @@ ohos_shared_library("avsession_service") {
     "device_manager:devicemanagersdk",
     "distributed_notification_service:ans_innerkits",
     "dsoftbus:softbus_client",
-    "graphic_2d:librender_service_base",
     "graphic_surface:surface",
     "hilog:libhilog",
     "image_framework:image_native",
