@@ -1046,7 +1046,7 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     ListenCollaborationApplyResult();
     DeviceInfo deviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
     AVRouter::GetInstance().GetRemoteNetWorkId(
-                castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
+        castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
     CHECK_AND_RETURN_RET_LOG(collaborationNeedNetworkId_ != "", AVSESSION_ERROR, "networkId is empty");
     CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
     //wait collaboration callback 10s
@@ -1154,8 +1154,8 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     }
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(
-                castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
-        CHECK_AND_RETURN_RET_LOG(collaborationNeedNetworkId_ != "", AVSESSION_ERROR, "networkId is empty");
+            castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
+        CHECK_AND_RETURN_LOG(collaborationNeedNetworkId_ != "", "networkId is empty");
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     }
