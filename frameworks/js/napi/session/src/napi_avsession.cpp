@@ -425,8 +425,7 @@ int32_t DoDownload(AVMetaData& meta, const std::string uri)
     bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);
     SLOGI("DoDownload with ret %{public}d, %{public}d", static_cast<int>(ret), static_cast<int>(pixelMap == nullptr));
     if (ret && pixelMap != nullptr) {
-        SLOGI("DoDownload success and reset meta except assetId");
-        meta.ResetExtAssetId();
+        SLOGI("DoDownload success and reset meta except assetId but not, wait for mediacontrol fix");
         meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
         return AVSESSION_SUCCESS;
     }

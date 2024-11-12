@@ -1652,10 +1652,11 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
     }
 
     nlohmann::json values = json::parse(content, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), AVSESSION_ERROR, "json object is null");
+    CHECK_AND_RETURN_RET_LOG(!values.is_null() && !values.is_discarded(), AVSESSION_ERROR, "json object is null");
     std::string bundleName;
     std::string abilityName;
     for (auto& value : values) {
+        CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("sessionId"));
         if (sessionIdNeeded == value["sessionId"]) {
             bundleName = value["bundleName"];
             abilityName = value["abilityName"];
