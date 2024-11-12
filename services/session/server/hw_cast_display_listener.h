@@ -18,25 +18,26 @@
 
 #include <mutex>
 #include "avsession_descriptor.h"
-#include "screen_manager.h"
-#include "screen.h"
+#include "screen_manager_lite.h"
+#include "display_manager_lite.h"
+#include "display_info.h"
 #include "iavsession_callback.h"
 
 namespace OHOS::AVSession {
-class HwCastDisplayListener : public Rosen::ScreenManager::IScreenListener {
+class HwCastDisplayListener : public Rosen::ScreenManagerLite::IScreenListener {
 public:
     explicit HwCastDisplayListener(sptr<IAVSessionCallback> callback) : listener_(callback) {};
-    void OnConnect(Rosen::ScreenId screenId) override;
-    void OnDisconnect(Rosen::ScreenId screenId) override;
-    void OnChange(Rosen::ScreenId screenId) override;
-    void SetDisplayInfo(sptr<Rosen::Screen> displayInfo);
-    sptr<Rosen::Screen> GetDisplayInfo();
+    void OnConnect(Rosen::DisplayId displayId) override;
+    void OnDisconnect(Rosen::DisplayId displayId) override;
+    void OnChange(Rosen::DisplayId displayId) override;
+    void SetDisplayInfo(sptr<Rosen::DisplayInfo> displayInfo);
+    sptr<Rosen::DisplayInfo> GetDisplayInfo();
 
 private:
-    void ReportCastDisplay(sptr<Rosen::Screen> displayInfo, CastDisplayState displayState);
+    void ReportCastDisplay(sptr<Rosen::DisplayInfo> displayInfo, CastDisplayState displayState);
 
     sptr<IAVSessionCallback> listener_;
-    sptr<Rosen::Screen> curDisplayInfo_;
+    sptr<Rosen::DisplayInfo> curDisplayInfo_;
     std::mutex dataMutex_;
 };
 } // namespace OHOS::AVSession

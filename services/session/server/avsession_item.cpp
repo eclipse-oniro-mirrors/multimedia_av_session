@@ -52,8 +52,6 @@ using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
 
-static const std::string AVSESSION_DYNAMIC_DISPLAY_LIBRARY_PATH = std::string("libavsession_dynamic_display.z.so");
-
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId)
     : descriptor_(descriptor), userId_(userId)
 {
@@ -62,8 +60,6 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t user
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     cssListener_ = std::make_shared<CssListener>(this);
 #endif
-    dynamicLoader_ = std::make_unique<AVSessionDynamicLoader>();
-    avsessionDisaplayIntf_ = nullptr;
 }
 
 AVSessionItem::~AVSessionItem()
@@ -1369,20 +1365,6 @@ void AVSessionItem::StopCastSession()
     }
 }
 
-AVSessionDisplayIntf* AVSessionItem::GetAVSessionDisplayIntf()
-{
-    if (avsessionDisaplayIntf_ == nullptr) {
-        typedef AVSessionDisplayIntf *(*CreateAVSessionDisplayIntfFunc)();
-        CreateAVSessionDisplayIntfFunc createAVSessionDisplayIntf =
-            reinterpret_cast<CreateAVSessionDisplayIntfFunc>(dynamicLoader_->GetFuntion(
-                AVSESSION_DYNAMIC_DISPLAY_LIBRARY_PATH, "createAVSessionDisplayIntf"));
-        if (createAVSessionDisplayIntf) {
-            avsessionDisaplayIntf_ = (*createAVSessionDisplayIntf)();
-        }
-    }
-    return avsessionDisaplayIntf_;
-}
-
 int32_t AVSessionItem::StartCastDisplayListener()
 {
     SLOGI("StartCastDisplayListener in");
@@ -1416,11 +1398,12 @@ int32_t AVSessionItem::StopCastDisplayListener()
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
     std::lock_guard displayListenerLockGuard(displayListenerLock_);
-
-    if (avsessionDisaplayIntf_ != nullptr) {
-        avsessionDisaplayIntf_->StopCastDisplayListener();
+    CHECK_AND_RETURN_RET_LOG(displayListener_ != nullptr, AVSESSION_ERROR, "displayListener_ is nullptr");
+    Rosen::DMError ret = Rosen::ScreenManagerLite::GetInstance().UnregisterScreenListener(displayListener_);
+    if (ret != Rosen::DMError::DM_OK) {
+        SLOGE("UnregisterScreenListener failed, ret: %{public}d.", ret);
     }
-    // close here is unsafe
+    displayListener_ = nullptr;
     return AVSESSION_SUCCESS;
 }
 
@@ -1428,24 +1411,48 @@ void AVSessionItem::GetDisplayListener(sptr<IAVSessionCallback> callback)
 {
     SLOGI("GetDisplayListener in");
     std::lock_guard displayListenerLockGuard(displayListenerLock_);
-
-    if (GetAVSessionDisplayIntf() != nullptr) {
-        avsessionDisaplayIntf_->StartCastDisplayListener(callback);
+    if (displayListener_ == nullptr) {
+        SLOGI("displayListener_ is null, try to create new listener");
+        displayListener_ = new HwCastDisplayListener(callback);
+        CHECK_AND_RETURN_LOG(displayListener_ != nullptr, "Create displayListener failed");
+        SLOGI("Start to register display listener");
+        Rosen::DMError ret = Rosen::ScreenManagerLite::GetInstance().RegisterScreenListener(displayListener_);
+        if (ret != Rosen::DMError::DM_OK) {
+            SLOGE("UnregisterScreenListener failed, ret: %{public}d.", ret);
+        }
     }
-    // if closed here, may cause failure in GetDisplayListener for callback
     return;
 }
 
 int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays)
 {
     SLOGI("GetAllCastDisplays in");
-    std::lock_guard displayListenerLockGuard(displayListenerLock_);
-
-    if (GetAVSessionDisplayIntf() != nullptr) {
-        avsessionDisaplayIntf_->GetAllCastDisplays(castDisplays);
-        SLOGI("GetAllCastDisplays length = %{public}zu", castDisplays.size());
+    std::vector<Rosen::DisplayId> allDisplayIds = Rosen::DisplayManagerLite::GetInstance().GetAllDisplayIds();
+    std::vector<CastDisplayInfo> displays;
+    for (auto &displayId : allDisplayIds) {
+        sptr<Rosen::DisplayLite> display = Rosen::DisplayManagerLite::GetInstance().GetDisplayById(displayId);
+        CHECK_AND_RETURN_RET_LOG(display != nullptr, AVSESSION_ERROR, "display is nullptr");
+        auto displayInfo = display->GetDisplayInfo();
+        SLOGI("GetAllCastDisplays name: %{public}s, id: %{public}lu",
+            displayInfo->GetName().c_str(), displayInfo->GetDisplayId());
+        auto flag = Rosen::DisplayManagerLite::GetInstance().GetVirtualScreenFlag(displayInfo->GetDisplayId());
+        if (flag == Rosen::VirtualScreenFlag::CAST) {
+            SLOGI("ReportCastDisplay start in");
+            CastDisplayInfo castDisplayInfo;
+            castDisplayInfo.displayState W= CastDisplayState::STATE_ON;
+            castDisplayInfo.displayId = displayInfo->GetDisplayId();
+            castDisplayInfo.name = displayInfo->GetName();
+            castDisplayInfo.width = static_cast<int32_t>(displayInfo->GetWidth());
+            castDisplayInfo.height = static_cast<int32_t>(displayInfo->GetHeight());
+            displays.push_back(castDisplayInfo);
+            std::lock_guard displayListenerLockGuard(displayListenerLock_);
+            if (displayListener_ != nullptr) {
+                displayListener_->SetDisplayInfo(displayInfo);
+            }
+        }
     }
-    // if closed here, may cause failure in GetDisplayListener for callback
+    castDisplays = displays;
+    SLOGI("GetAllCastDisplays out");
     return AVSESSION_SUCCESS;
 }
 
