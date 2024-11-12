@@ -156,6 +156,7 @@ int32_t AVSessionItem::DestroyTask()
         if (!collaborationNeedNetworkId_.empty()) {
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+            collaborationNeedNetworkId_ = "";
         }
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         ReleaseCast();
@@ -1044,15 +1045,9 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
         return AVSESSION_ERROR;
     }
     ListenCollaborationApplyResult();
-    DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
-    if (cacheDeviceInfo.networkId_.empty()) {
-        SLOGI("untrusted device, networkId is empty, then input deviceId to ApplyAdvancedResource");
-        collaborationNeedNetworkId_ = cacheDeviceInfo.deviceId_;
-        networkIdIsEmpty_ = true;
-    } else {
-        collaborationNeedNetworkId_= cacheDeviceInfo.networkId_;
-    }
-    CollaborationManager::GetInstance().ApplyAdvancedResource(collaborationNeedNetworkId_.c_str());
+    DeviceInfo deviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
+    CHECK_AND_RETURN_RET_LOG(deviceInfo.deviceId_ != "", AVSESSION_ERROR, "deviceid is empty");
+    CollaborationManager::GetInstance().ApplyAdvancedResource(deviceInfo.deviceId_.c_str());
     //wait collaboration callback 10s
     std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
     bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
@@ -1157,23 +1152,17 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
         return;
     }
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
-        if (networkIdIsEmpty_) {
-            SLOGI("untrusted device, networkId is empty, get netwokId from castplus");
-            AVRouter::GetInstance().GetRemoteNetWorkId(
-                castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
-            networkIdIsEmpty_ = false;
-        }
-        if (collaborationNeedNetworkId_.empty()) {
-            SLOGI("cast add to collaboration in peer, get netwokId from castplus");
-            AVRouter::GetInstance().GetRemoteNetWorkId(
-                castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
-        }
+        AVRouter::GetInstance().GetRemoteNetWorkId(
+            castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
+        CHECK_AND_RETURN_LOG(collaborationNeedNetworkId_ != "", "networkId is empty");
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     }
     if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
+        CHECK_AND_RETURN_LOG(collaborationNeedNetworkId_ != "", "networkId is empty");
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+        collaborationNeedNetworkId_ = "";
     }
 }
 
@@ -1279,6 +1268,7 @@ void AVSessionItem::OnRemoveCastEngine()
         if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+            collaborationNeedNetworkId_ = "";
         }
     }
 }
