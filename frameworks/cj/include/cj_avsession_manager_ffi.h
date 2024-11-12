@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_CJ_AVSESSION_CONTROLLER_FFI_H
-#define OHOS_CJ_AVSESSION_CONTROLLER_FFI_H
+#ifndef OHOS_CJ_AVSESSION_MANAGER_FFI_H
+#define OHOS_CJ_AVSESSION_MANAGER_FFI_H
 
 #include <cstdint>
 
@@ -43,5 +43,5 @@ FFI_EXPORT int32_t FfiMultimediaAVSessionManagerCreateController(int64_t *sessio
 }
 #endif
 #endif
-#endif /* OHOS_CJ_SENSOR_FFI_H */
+#endif /* OHOS_CJ_AVSESSION_MANAGER_FFI_H */
 /**< @} */

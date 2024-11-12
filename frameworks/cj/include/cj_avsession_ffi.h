@@ -42,11 +42,16 @@ FFI_EXPORT int32_t FfiMultimediaAVSessionSetAVQueueItems(int64_t sessionId, CArr
 FFI_EXPORT int32_t FfiMultimediaAVSessionSetAVQueueTitle(int64_t sessionId, char** title);
 FFI_EXPORT int32_t FfiMultimediaAVSessionSetExtras(int64_t sessionId, CArray* extras);
 FFI_EXPORT int32_t FfiMultimediaAVSessionGetController(int64_t sessionId);
+FFI_EXPORT int32_t FfiMultimediaAVSessionGetAVCastController(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionGetOutputDevice(int64_t sessionId, COutputDeviceInfo* outputDeviceInfo);
+FFI_EXPORT int32_t FfiMultimediaAVSessionGetAllCastDisplays(int64_t sessionId, CArray* infos);
 FFI_EXPORT int32_t FfiMultimediaAVSessionActivate(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionDeactivate(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionDestroy(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionStopCasting(int64_t sessionId);
+FFI_EXPORT int32_t FfiMultimediaAVSessionDispatchSessionEvent(int64_t sessionId, char** event, CArray* args);
+FFI_EXPORT int32_t FfiMultimediaAVSessionOn(int64_t sessionId, int32_t eventType, int64_t id);
+FFI_EXPORT int32_t FfiMultimediaAVSessionOff(int64_t sessionId, int32_t eventType);
 
 
 #ifdef __cplusplus
@@ -54,5 +59,5 @@ FFI_EXPORT int32_t FfiMultimediaAVSessionStopCasting(int64_t sessionId);
 }
 #endif
 #endif
-#endif /* OHOS_CJ_SENSOR_FFI_H */
+#endif /* OHOS_CJ_AVSESSION_FFI_H */
 /**< @} */

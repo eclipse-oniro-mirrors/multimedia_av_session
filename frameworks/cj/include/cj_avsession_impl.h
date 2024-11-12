@@ -19,6 +19,7 @@
 #include "av_session.h"
 #include "ffi_remote_data.h"
 #include "cj_avsession_prototypes.h"
+#include "cj_avsession_callback.h"
 
 namespace OHOS::AVSession {
 
@@ -26,6 +27,10 @@ class CJAVSessionImpl : public OHOS::FFI::FFIData {
     DECL_TYPE(CJAVSessionImpl, OHOS::FFI::FFIData)
 public:
     CJAVSessionImpl(std::shared_ptr<AVSession> session);
+
+    int32_t OnEvent(int32_t type, int64_t id);
+    int32_t OffEvent(int32_t type);
+
     int32_t SetAVMetaData(CAVMetaData& data);
     int32_t SetAVCallMetaData(CAVCallMetaData& dat);
     int32_t SetAVCallState(CAVCallState& state);
@@ -34,17 +39,21 @@ public:
     int32_t SetAVQueueTitle(char*& title);
     int32_t SetExtras(CArray& extras);
     int32_t GetController();
+    int32_t GetAVCastController();
     int32_t GetOutputDevice(COutputDeviceInfo& outputDeviceInfo);
+    int32_t GetAllCastDisplays(CArray& infos);
     int32_t Activate();
     int32_t Deactivate();
     int32_t Destroy();
     int32_t StopCasting();
+    int32_t DispatchSessionEvent(char*& event, CArray& args);
 
     std::string GetSessionId() { return sessionId_; }
 private:
     std::string sessionId_;
     std::string sessionType_;
     std::shared_ptr<AVSession> session_;
+    std::shared_ptr<CJAVSessionCallback> callback_;
 };
 
 }  // namespace AVSession::OHOS

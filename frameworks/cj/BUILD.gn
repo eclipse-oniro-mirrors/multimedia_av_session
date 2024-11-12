@@ -38,6 +38,8 @@ ohos_shared_library("cj_multimedia_avsession_ffi") {
   ]
 
   sources = [
+    "src/cj_avsession_callback.cpp",
+    "src/cj_avsession_controller_callback.cpp",
     "src/cj_avsession_controller_ffi.cpp",
     "src/cj_avsession_controller_impl.cpp",
     "src/cj_avsession_ffi.cpp",
@@ -83,6 +85,16 @@ ohos_shared_library("cj_multimedia_avsession_ffi") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    sources += [
+      "src/cj_avsession_cast_controller_callback.cpp",
+      "src/cj_avsession_cast_controller_ffi.cpp",
+      "src/cj_avsession_cast_controller_impl.cpp",
+    ]
+    deps += [ "../native/session:avsession_cast_client" ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "av_session"

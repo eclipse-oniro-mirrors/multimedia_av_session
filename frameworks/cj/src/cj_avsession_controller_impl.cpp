@@ -26,25 +26,11 @@
 #include "avsession_log.h"
 #include "avsession_manager.h"
 #include "cj_avsession_utils.h"
+#include "avsession_errors.h"
+#include "cj_avsession_controller_callback.h"
+#include "cj_avsession_controller_impl.h"
 
 namespace OHOS::AVSession {
-
-template<class NT, class CJT>
-int32_t CJControllerGetterCStruct(
-    std::function<int32_t(NT&)> method, CJT& cj, std::string method_name)
-{
-    NT native;
-    int32_t ret = method(native);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("controller %{public}s failed:%{public}d", method_name.c_str(), ret);
-    } else {
-        ret = convertNativeToCJStruct(native, cj);
-        if (ret != CJNO_ERROR) {
-            SLOGE("controller %{public}s failed:%{public}d", method_name.c_str(), ret);
-        }
-    }
-    return ret;
-}
 
 std::map<std::string, std::shared_ptr<CJAVSessionControllerImpl>> CJAVSessionControllerImpl::ControllerList_ = {};
 std::mutex CJAVSessionControllerImpl::controllerListMutex_;
@@ -184,6 +170,20 @@ int32_t CJAVSessionControllerImpl::GetExtras(CArray& extras)
     return CJControllerGetterCStruct<AAFwk::WantParams, CArray>(call, extras, "GetExtras");
 }
 
+int32_t CJAVSessionControllerImpl::SendAVKeyEvent(CKeyEvent& event)
+{
+    std::shared_ptr<MMI::KeyEvent> ptr = MMI::KeyEvent::Create();
+    if (ptr == nullptr) {
+        return ERR_NO_MEMORY;
+    }
+    convertCJStructToNative(event, *ptr);
+    int32_t ret = controller_->SendAVKeyEvent(*ptr);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("controller SendAVKeyEvent failed:%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t CJAVSessionControllerImpl::SendCommonCommand(char*& command, CArray& args)
 {
     if (args.size != 1) {
@@ -198,13 +198,240 @@ int32_t CJAVSessionControllerImpl::SendCommonCommand(char*& command, CArray& arg
     return ret;
 }
 
+int32_t CJAVSessionControllerImpl::SendControlCommand(CAVSessionCommand& command)
+{
+    auto call = [&](const AVControlCommand& cmd) {
+        return controller_->SendControlCommand(cmd);
+    };
+    return CJAVSessionSetterCStruct<AVControlCommand, CAVSessionCommand>(call, command, "SendControlCommand");
+}
+
 int32_t CJAVSessionControllerImpl::SkipToQueueItem(int32_t& itemId)
 {
-    int32_t ret = controller_->SkipToQueueItem(itemId);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("controller SkipToQueueItem failed:%{public}d", ret);
+    auto call = [&](int32_t& itemId) {
+        return controller_->SkipToQueueItem(itemId);
+    };
+    return CJAVSessionSetterCStruct<int32_t, int32_t>(call, itemId, "SkipToQueueItem");
+}
+
+int32_t CJAVSessionControllerImpl::OnEvent(int32_t type, int64_t id)
+{
+    if (controller_ == nullptr) {
+        SLOGE("OnEvent failed : controller is nullptr");
+        return AVSESSION_ERROR;
     }
+    int32_t ret = AVSESSION_SUCCESS;
+    if (callback_ == nullptr) {
+        callback_ = std::make_shared<CJAVControllerCallback>();
+        int32_t ret = controller_->RegisterCallback(callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("OnEvent failed : register callback failed");
+            return ret;
+        }
+    }
+    callback_->RegisterCallback(type, id);
     return ret;
 }
 
+int32_t CJAVSessionControllerImpl::OffEvent(int32_t type)
+{
+    if (controller_ == nullptr) {
+        SLOGE("OffEvent failed : controller is nullptr");
+        return AVSESSION_ERROR;
+    }
+    int32_t ret = AVSESSION_SUCCESS;
+    if (callback_ == nullptr) {
+        return ret;
+    }
+    callback_->UnRegisterCallback(type);
+    return ret;
+}
+
+int32_t CJAVSessionControllerImpl::OnEventCallMetadataChange(int32_t type, CParameters* filter, int64_t id)
+{
+    if (controller_ == nullptr) {
+        SLOGE("OnEvent failed : controller is nullptr");
+        return AVSESSION_ERROR;
+    }
+    AVCallMetaData::AVCallMetaMaskType avCallMetaMask;
+    if (filter == nullptr) {
+        SLOGE("filter is nullptr");
+        return AVSESSION_ERROR;
+    } else {
+        if (filter->valueType != I32_PTR_TYPE) {
+            SLOGE("Expect AVCallMetaDataFilter Kind is 'int32_t array', but actual is %{public}d", filter->valueType);
+            return AVSESSION_ERROR;
+        }
+        if (filter->value == nullptr || filter->size == 0) {
+            SLOGE("No filter is provided to set");
+            return AVSESSION_ERROR;
+        }
+        auto head = static_cast<int32_t*>(filter->value);
+        for (int i = 0; i < filter->size; i++) {
+            if (head[i] == AVCallMetaData::AVCALL_META_KEY_MAX) {
+                avCallMetaMask.set();
+                break;
+            } else {
+                avCallMetaMask.set(head[i]);
+            }
+        }
+        auto retConvert = controller_->SetAVCallMetaFilter(avCallMetaMask);
+        if (retConvert != AVSESSION_SUCCESS) {
+            SLOGE("controller SetAVCallMetaFilter failed");
+            return retConvert;
+        }
+    }
+    int32_t ret = AVSESSION_SUCCESS;
+    if (callback_ == nullptr) {
+        callback_ = std::make_shared<CJAVControllerCallback>();
+        int32_t ret = controller_->RegisterCallback(callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("OnEvent failed : register callback failed");
+            return ret;
+        }
+    }
+    callback_->RegisterCallback(type, id);
+    return ret;
+}
+
+int32_t CJAVSessionControllerImpl::OnEventCallStateChange(int32_t type, CParameters* filter, int64_t id)
+{
+    if (controller_ == nullptr) {
+        SLOGE("OnEvent failed : controller is nullptr");
+        return AVSESSION_ERROR;
+    }
+    AVCallState::AVCallStateMaskType avCallStateMask;
+    if (filter == nullptr) {
+        SLOGE("filter is nullptr");
+        return AVSESSION_ERROR;
+    } else {
+        if (filter->valueType != I32_PTR_TYPE) {
+            SLOGE("Expect AVCallStateFilter Kind is 'int32_t array', but actual is %{public}d", filter->valueType);
+            return AVSESSION_ERROR;
+        }
+        if (filter->value == nullptr || filter->size == 0) {
+            SLOGE("No filter is provided to set");
+            return AVSESSION_ERROR;
+        }
+        auto head = static_cast<int32_t*>(filter->value);
+        for (int i = 0; i < filter->size; i++) {
+            if (head[i] == AVCallState::AVCALL_STATE_KEY_MAX) {
+                avCallStateMask.set();
+                break;
+            } else {
+                avCallStateMask.set(head[i]);
+            }
+        }
+        auto retConvert = controller_->SetAVCallStateFilter(avCallStateMask);
+        if (retConvert != AVSESSION_SUCCESS) {
+            SLOGE("controller SetAVCallStateFilter failed");
+            return retConvert;
+        }
+    }
+    int32_t ret = AVSESSION_SUCCESS;
+    if (callback_ == nullptr) {
+        callback_ = std::make_shared<CJAVControllerCallback>();
+        int32_t ret = controller_->RegisterCallback(callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("OnEvent failed : register callback failed");
+            return ret;
+        }
+    }
+    callback_->RegisterCallback(type, id);
+    return ret;
+}
+
+int32_t CJAVSessionControllerImpl::OnEventPlaybackStateChange(int32_t type, CParameters* filter, int64_t id)
+{
+    if (controller_ == nullptr) {
+        SLOGE("OnEvent failed : controller is nullptr");
+        return AVSESSION_ERROR;
+    }
+    AVPlaybackState::PlaybackStateMaskType playbackMask;
+    if (filter == nullptr) {
+        SLOGE("filter is nullptr");
+        return AVSESSION_ERROR;
+    } else {
+        if (filter->valueType != I32_PTR_TYPE) {
+            SLOGE("Expect AVPlaybackStateFilter Kind is 'int32_t array', but actual is %{public}d", filter->valueType);
+            return AVSESSION_ERROR;
+        }
+        if (filter->value == nullptr || filter->size == 0) {
+            SLOGE("No filter is provided to set");
+            return AVSESSION_ERROR;
+        }
+        auto head = static_cast<int32_t*>(filter->value);
+        for (int i = 0; i < filter->size; i++) {
+            if (head[i] == AVPlaybackState::PLAYBACK_KEY_MAX) {
+                playbackMask.set();
+                break;
+            } else {
+                playbackMask.set(head[i]);
+            }
+        }
+        auto retConvert = controller_->SetPlaybackFilter(playbackMask);
+        if (retConvert != AVSESSION_SUCCESS) {
+            SLOGE("controller SetPlaybackFilter failed");
+            return retConvert;
+        }
+    }
+    int32_t ret = AVSESSION_SUCCESS;
+    if (callback_ == nullptr) {
+        callback_ = std::make_shared<CJAVControllerCallback>();
+        int32_t ret = controller_->RegisterCallback(callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("OnEvent failed : register callback failed");
+            return ret;
+        }
+    }
+    callback_->RegisterCallback(type, id);
+    return ret;
+}
+
+int32_t CJAVSessionControllerImpl::OnEventMetaDataChang(int32_t type, CParameters* filter, int64_t id)
+{
+    if (controller_ == nullptr) {
+        SLOGE("OnEvent failed : controller is nullptr");
+        return AVSESSION_ERROR;
+    }
+    AVMetaData::MetaMaskType metaMask;
+    if (filter == nullptr) {
+        SLOGE("filter is nullptr");
+        return AVSESSION_ERROR;
+    } else {
+        if (filter->valueType != I32_PTR_TYPE) {
+            SLOGE("Expect AVMetaDataFilter Kind is 'int32_t array', but actual is %{public}d", filter->valueType);
+            return AVSESSION_ERROR;
+        }
+        if (filter->value == nullptr || filter->size == 0) {
+            SLOGE("No filter is provided to set");
+            return AVSESSION_ERROR;
+        }
+        auto head = static_cast<int32_t*>(filter->value);
+        for (int i = 0; i < filter->size; i++) {
+            if (head[i] == AVMetaData::META_KEY_MAX) {
+                metaMask.set();
+                break;
+            } else {
+                metaMask.set(head[i]);
+            }
+        }
+        auto retConvert = controller_->SetMetaFilter(metaMask);
+        if (retConvert != AVSESSION_SUCCESS) {
+            SLOGE("controller SetMetaFilter failed");
+            return retConvert;
+        }
+    }
+    int32_t ret = AVSESSION_SUCCESS;
+    if (callback_ == nullptr) {
+        callback_ = std::make_shared<CJAVControllerCallback>();
+        int32_t ret = controller_->RegisterCallback(callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("OnEvent failed : register callback failed");
+            return ret;
+        }
+    }
+    callback_->RegisterCallback(type, id);
+    return ret;
+}
 } // namespace OHOS::AVSession

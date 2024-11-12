@@ -17,6 +17,9 @@
 
 #include "avsession_errors.h"
 #include "cj_avsession_controller_impl.h"
+#include "cj_avsession_impl.h"
+#include "avsession_log.h"
+#include "cj_lambda.h"
 
 #define CJ_AVSESSION_CONTROLLER_IMPL_STRING \
     OHOS::AVSession::CJAVSessionControllerImpl::GetInstance(std::string(sessionId))
@@ -100,9 +103,56 @@ int32_t FfiMultimediaAVSessionControllerSendCommonCommand(char *sessionId, char*
     return CJ_AVSESSION_CONTROLLER_IMPL_STRING->SendCommonCommand(command, *args);
 }
 
+int32_t FfiMultimediaAVSessionControllerSendControlCommand(
+    char *sessionId, CAVSessionCommand* command)
+{
+    if (sessionId == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
+    return CJ_AVSESSION_CONTROLLER_IMPL_STRING->SendControlCommand(*command);
+}
+
 int32_t FfiMultimediaAVSessionControllerSkipToQueueItem(char *sessionId, int32_t* itemId)
 {
     if (sessionId == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
     return CJ_AVSESSION_CONTROLLER_IMPL_STRING->SkipToQueueItem(*itemId);
+}
+
+int32_t FfiMultimediaAVSessionControllerSendAVKeyEvent(char *sessionId, CKeyEvent* eventPtr)
+{
+    if (sessionId == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
+    return CJ_AVSESSION_CONTROLLER_IMPL_STRING->SendAVKeyEvent(*eventPtr);
+}
+
+int32_t FfiMultimediaAVSessionControllerOn(char *sessionId, int32_t type, int64_t id)
+{
+    return CJ_AVSESSION_CONTROLLER_IMPL_STRING->OnEvent(type, id);
+}
+
+int32_t FfiMultimediaAVSessionControllerOff(char *sessionId, int32_t type)
+{
+    return CJ_AVSESSION_CONTROLLER_IMPL_STRING->OffEvent(type);
+}
+
+int32_t FfiMultimediaAVSessionControllerOnCallMetadataChange(
+    char *sessionId, int32_t type, CParameters* filter, int64_t id)
+{
+    return CJ_AVSESSION_CONTROLLER_IMPL_STRING->OnEventCallMetadataChange(type, filter, id);
+}
+
+int32_t FfiMultimediaAVSessionControllerOnCallStateChange(
+    char *sessionId, int32_t type, CParameters* filter, int64_t id)
+{
+    return CJ_AVSESSION_CONTROLLER_IMPL_STRING->OnEventCallStateChange(type, filter, id);
+}
+
+int32_t FfiMultimediaAVSessionControllerOnPlaybackStateChange(
+    char *sessionId, int32_t type, CParameters* filter, int64_t id)
+{
+    return CJ_AVSESSION_CONTROLLER_IMPL_STRING->OnEventPlaybackStateChange(type, filter, id);
+}
+
+int32_t FfiMultimediaAVSessionControllerOnMetaDataChange(
+    char *sessionId, int32_t type, CParameters* filter, int64_t id)
+{
+    return CJ_AVSESSION_CONTROLLER_IMPL_STRING->OnEventMetaDataChang(type, filter, id);
 }
 }
