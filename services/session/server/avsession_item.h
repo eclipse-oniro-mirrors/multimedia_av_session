@@ -22,8 +22,6 @@
 
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
-#include "avsession_display_interface.h"
-#include "avsession_dynamic_loader.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"
@@ -294,7 +292,6 @@ private:
     void HandleFrontSession();
     int32_t doContinuousTaskRegister();
     int32_t doContinuousTaskUnregister();
-    AVSessionDisplayIntf* GetAVSessionDisplayIntf();
     void ReportSetAVMetaDataInfo(const AVMetaData& meta);
     std::string GetAnonymousDeviceId(std::string deviceId);
     void ReportAVCastControllerInfo();
@@ -389,10 +386,6 @@ private:
 
     std::recursive_mutex metaDataLock_;
 
-    std::recursive_mutex displayListenerLock_;
-    AVSessionDisplayIntf *avsessionDisaplayIntf_;
-    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
-
     static const int32_t DEFAULT_USER_ID = 100;
     std::recursive_mutex cmdsLock_;
 
@@ -429,6 +422,8 @@ private:
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
+    sptr<HwCastDisplayListener> displayListener_;
+    std::recursive_mutex displayListenerLock_;
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;

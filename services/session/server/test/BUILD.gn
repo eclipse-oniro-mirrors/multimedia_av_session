@@ -40,11 +40,11 @@ config("module_private_config") {
 common_deps = [
   "../../../../frameworks/common:avsession_common",
   "../../../../frameworks/native/session:avsession_client",
+  "../../../../utils:avsession_utils",
   "../../../session:avsession_item",
   "../../../session:avsession_service",
   "//third_party/bounds_checking_function:libsec_shared",
   "//third_party/googletest:gtest_main",
-  "../../../../utils:avsession_utils",
 ]
 
 common_external_deps = [
@@ -64,6 +64,7 @@ common_external_deps = [
   "ipc:ipc_single",
   "jsoncpp:jsoncpp",
   "samgr:samgr_proxy",
+  "window_manager:libdm_lite",
 ]
 
 ohos_unittest("ParamsConfigOperatorTest") {
@@ -406,6 +407,7 @@ ohos_unittest("MigrateAVSessionTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 
   cflags = []
@@ -461,6 +463,7 @@ ohos_unittest("SoftbusSessionManagerTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -497,8 +500,7 @@ ohos_unittest("AVSessionServiceTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
-    "window_manager:libdm",
-    "window_manager:libwm",
+    "window_manager:libdm_lite",
   ]
 
   cflags = []
@@ -551,6 +553,7 @@ ohos_unittest("AppManagerAdapterTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -584,6 +587,7 @@ ohos_unittest("AbilityConnectHelperTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -618,6 +622,7 @@ ohos_unittest("BkGrAudioControllerTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -637,6 +642,7 @@ ohos_unittest("AudioAdapterTest") {
   external_deps = [
     "audio_framework:audio_client",
     "hilog:libhilog",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -660,6 +666,7 @@ ohos_unittest("RemoteUtilsTest") {
     "hilog:libhilog",
     "input:libmmi-client",
     "safwk:system_ability_fwk",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -692,6 +699,7 @@ ohos_unittest("SessionStackTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 
   cflags = []
@@ -747,6 +755,7 @@ ohos_unittest("AVRouterTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 
   if (castplus_cast_engine_enable) {
@@ -796,6 +805,7 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm_lite",
     ]
   }
 }
@@ -837,6 +847,7 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm_lite",
     ]
   }
 }
@@ -865,6 +876,7 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm_lite",
     ]
   }
 }
@@ -874,10 +886,6 @@ group("av_session_server_unittest") {
   testonly = true
 
   deps = [
-    ":AbilityConnectHelperTest",
-    ":AbilityManagerAdapterDemoTest",
-    ":AppManagerAdapterTest",
-    ":AudioAdapterTest",
     ":AVControllerCallbackProxyTest",
     ":AVControllerCallbackStubTest",
     ":AVRouterTest",
@@ -891,6 +899,10 @@ group("av_session_server_unittest") {
     ":AVSessionServiceStubPermissionTest",
     ":AVSessionServiceStubTest",
     ":AVSessionServiceTest",
+    ":AbilityConnectHelperTest",
+    ":AbilityManagerAdapterDemoTest",
+    ":AppManagerAdapterTest",
+    ":AudioAdapterTest",
     ":BkGrAudioControllerTest",
     ":BundleStatusAdapterTest",
     ":CommandSendLimitTest",

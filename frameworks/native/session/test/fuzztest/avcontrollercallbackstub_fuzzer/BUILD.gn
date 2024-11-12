@@ -42,6 +42,7 @@ ohos_fuzztest("AVControllerCallbackStubFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 }
 ###############################################################################

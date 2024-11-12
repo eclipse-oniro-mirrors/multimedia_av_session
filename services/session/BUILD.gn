@@ -21,7 +21,6 @@ openssl_dir = "//third_party/openssl"
 
 group("avsession_server") {
   deps = [
-    ":avsession_dynamic_display",
     ":avsession_dynamic_insight",
     ":avsession_item",
     ":avsession_service",
@@ -161,6 +160,7 @@ ohos_shared_library("avsession_service") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 
   if (castplus_cast_engine_enable) {
@@ -371,64 +371,6 @@ ohos_shared_library("avsession_dynamic_insight") {
   part_name = "av_session"
 }
 
-ohos_shared_library("avsession_dynamic_display") {
-  install_enable = true
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  sources = [
-    "adapter/avsession_dynamic_display.cpp",
-    "adapter/hw_cast_display_listener.cpp",
-  ]
-
-  include_dirs = [
-    "./../../frameworks/native/session/include",
-    "./../../interfaces/inner_api/native/session/include",
-    "./adapter",
-    "ipc/base",
-  ]
-
-  cflags = [
-    "-fPIC",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-fno-asynchronous-unwind-tables",
-    "-fno-unwind-tables",
-  ]
-
-  if (!use_libfuzzer) {
-    cflags += [ "-flto" ]
-    ldflags = [
-      "-flto",
-      "-Wl,--gc-sections",
-    ]
-  }
-  cflags_cc = cflags
-  cflags_cc += [ "-fvisibility-inlines-hidden" ]
-
-  deps = [
-    "../../frameworks/common:avsession_common",
-    "../../utils:avsession_utils",
-  ]
-
-  external_deps = [
-    "ability_runtime:wantagent_innerkits",
-    "c_utils:utils",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-    "init:libbegetutil",
-    "input:libmmi-client",
-    "window_manager:libdm",
-    "window_manager:libwm",
-  ]
-
-  subsystem_name = "multimedia"
-  part_name = "av_session"
-}
-
 ohos_shared_library("avsession_item") {
   install_enable = true
   sanitize = {
@@ -446,6 +388,7 @@ ohos_shared_library("avsession_item") {
   service_sources = [
     "server/avcontroller_item.cpp",
     "server/avsession_item.cpp",
+    "server/hw_cast_display_listener.cpp",
     "server/remote/json_utils.cpp",
     "server/remote/remote_session_command_process.cpp",
     "server/remote/remote_session_sink_proxy.cpp",
@@ -533,6 +476,7 @@ ohos_shared_library("avsession_item") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 
   if (castplus_cast_engine_enable) {
