@@ -118,6 +118,46 @@ static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level1)
     auto ret = AudioAdapter::GetInstance().MuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID,
         AudioAdapterTest::TEST_CLIENT_PID);
     EXPECT_NE(ret, AVSESSION_ERROR_BASE);
+
+    ret = AudioAdapter::GetInstance().MuteAudioStream(AudioAdapterTest::TEST_SESSION_FAIL_ID,
+        AudioAdapterTest::TEST_SESSION_FAIL_ID);
+    EXPECT_NE(ret, AVSESSION_ERROR_BASE);
+}
+
+/**
+* @tc.name: MuteAudioStream002
+* @tc.desc: mute audio stream for valid uid TEST_CLIENT_UID
+* @tc.type: FUNC
+*/
+static HWTEST(AudioAdapterTest, MuteAudioStream002, TestSize.Level1)
+{
+    SLOGI("MuteAudioStream002 begin!");
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->clientPid = AudioAdapterTest::TEST_CLIENT_PID;
+    info->sessionId = AudioAdapterTest::TEST_SESSION_ID;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    AudioRendererChangeInfos infosExpected;
+    infosExpected.push_back(std::move(info));
+    AudioRendererChangeInfos infosActual;
+
+    AudioAdapter::GetInstance().Init();
+    AudioAdapter::GetInstance().AddStreamRendererStateListener([&infosActual](const AudioRendererChangeInfos& infos) {
+        SLOGI("AddStreamRendererStateListener start!");
+        for (const auto& info : infos) {
+            std::shared_ptr<AudioRendererChangeInfo> infoActual = std::make_shared<AudioRendererChangeInfo>();
+            *infoActual = *info;
+            infosActual.push_back(std::move(infoActual));
+        }
+        SLOGI("AddStreamRendererStateListener end!");
+    });
+    auto ret = AudioAdapter::GetInstance().MuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID,
+        OHOS::AudioStandard::StreamUsage::STREAM_USAGE_INVALID);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+
+    ret = AudioAdapter::GetInstance().MuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID,
+        OHOS::AudioStandard::StreamUsage::STREAM_USAGE_MUSIC);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 
 /**
@@ -194,4 +234,24 @@ static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level1)
     int32_t ret = AudioAdapter::GetInstance().PauseAudioStream(uid, streamUsage);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGD("PauseAudioStream001 end!");
+}
+
+/**
+* @tc.name: OnDeviceChange001
+* @tc.desc: Test OnDeviceChange
+* @tc.type: FUNC
+*/
+static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
+{
+    SLOGD("PauseAudioStream001 begin!");
+    bool ret = false;
+    AudioAdapter::GetInstance().AddDeviceChangeListener([&ret] (const DeviceChangeAction& deviceChangeAction) {
+        ret = deviceChangeAction.type == OHOS::AudioStandard::DeviceChangeType::CONNECT;
+    });
+    AudioAdapter::GetInstance().AddDeviceChangeListener(nullptr);
+
+    DeviceChangeAction action = {};
+    action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
+    AudioAdapter::GetInstance().OnDeviceChange(action);
+    EXPECT_TRUE(ret);
 }

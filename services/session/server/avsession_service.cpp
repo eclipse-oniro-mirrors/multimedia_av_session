@@ -1694,39 +1694,18 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
     
 int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
-    auto pid = GetCallingPid();
-    std::string sessionIdInner;
-    SLOGI("CreateControllerInner for sessionId:%{public}s, pid:%{public}d",
-        AVSessionUtils::GetAnonySessionId(sessionId).c_str(), static_cast<int>(pid));
-    if (sessionId == "default") {
-        auto ret = StartDefaultAbilityByCall(sessionIdInner);
-        if (ret != AVSESSION_SUCCESS) {
-            SLOGE("StartDefaultAbilityByCall failed: %{public}d.", ret);
-            return ret;
-        }
-    } else {
-        if (IsHistoricalSession(sessionId)) {
-            auto ret = StartAbilityByCall(sessionId, sessionIdInner);
-            if (ret != AVSESSION_SUCCESS) {
-                SLOGE("StartAbilityByCall failed: %{public}d", ret);
-                return ret;
-            }
-        } else {
-            sessionIdInner = sessionId;
-        }
+    SLOGI("CreateControllerInner for sessionId:%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+    if (session == nullptr) {
+        SLOGE("no session id %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        return ERR_SESSION_NOT_EXIST;
     }
-
-    auto existController = GetPresentController(pid, sessionIdInner);
+    auto pid = GetCallingPid();
+    auto existController = GetPresentController(pid, sessionId);
     if (existController != nullptr) {
         SLOGI("Controller is already existed.");
         object = existController;
         return ERR_CONTROLLER_IS_EXIST;
-    }
-
-    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionIdInner);
-    if (session == nullptr) {
-        SLOGE("no session id %{public}s", AVSessionUtils::GetAnonySessionId(sessionIdInner).c_str());
-        return ERR_SESSION_NOT_EXIST;
     }
     sptr<AVControllerItem> newController = CreateNewControllerForSession(pid, session);
     if (newController == nullptr) {
@@ -1884,7 +1863,7 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
     // try start play for first history session
     if (command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY && hisDescriptors.size() != 0) {
         sptr<IRemoteObject> object;
-        int32_t ret = CreateControllerInner(hisDescriptors[0].sessionId_, object);
+        int32_t ret = StartAVPlayback(hisDescriptors[0].elementName_.GetBundleName(), "");
         SLOGI("Cold play %{public}s, ret=%{public}d", hisDescriptors[0].elementName_.GetBundleName().c_str(), ret);
     } else {
         SLOGI("Cold start command=%{public}d, hisDescriptorsSize=%{public}d return", command.GetCommand(),

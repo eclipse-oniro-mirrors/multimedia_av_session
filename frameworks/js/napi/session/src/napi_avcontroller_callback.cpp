@@ -362,7 +362,7 @@ napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, n
             return napi_generic_failure;
         }
     }
-    SLOGI("add callback with ref %{public}d, %{public}p, %{public}p", event, &ref, *(&ref));
+    SLOGI("add callback with ref %{public}d", event);
     callbacks_[event].push_back(ref);
     return napi_ok;
 }
@@ -385,7 +385,7 @@ napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
                              napi_generic_failure, "get callback reference failed");
     CHECK_AND_RETURN_RET_LOG(ref != nullptr, napi_ok, "callback has been remove");
-    SLOGI("remove single callback with ref %{public}d, %{public}p, %{public}p", event, &ref, *(&ref));
+    SLOGI("remove single callback with ref %{public}d", event);
     callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);
 }

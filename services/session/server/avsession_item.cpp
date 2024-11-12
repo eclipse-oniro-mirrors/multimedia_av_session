@@ -98,6 +98,13 @@ std::string AVSessionItem::GetSessionType()
 int32_t AVSessionItem::Destroy()
 {
     SLOGI("AVSessionItem send service destroy event to service, check serviceCallback exist");
+    {
+        std::lock_guard lockGuard(destroyLock_);
+        if (isDestroyed_) {
+            SLOGE("AVSessionItem Destroy process but check already destroyed");
+            return AVSESSION_SUCCESS;
+        }
+    }
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "Destroy",
         "BUNDLE_NAME", GetBundleName(),
@@ -1254,14 +1261,15 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         }
     }
     {
-        std::lock_guard lockGuard(destroyLock_);
         if (castState == ConnectionState::STATE_DISCONNECTED &&
-            descriptor_.sessionTag_ == "RemoteCast" && !isDestroyed_) {
+            descriptor_.sessionTag_ == "RemoteCast") {
             SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
             Destroy();
         }
     }
-    DealLocalState(castState);
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
+        DealLocalState(castState);
+        }, "DealLocalState", 0);
 }
 
 void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)

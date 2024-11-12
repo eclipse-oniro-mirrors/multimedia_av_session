@@ -76,6 +76,7 @@ common_external_deps = [
   "ipc:ipc_single",
   "jsoncpp:jsoncpp",
   "samgr:samgr_proxy",
+  "window_manager:libdm_lite",
 ]
 
 ohos_unittest("AVSessionServiceSupplementTest") {
@@ -680,6 +681,7 @@ ohos_unittest("MigrateAVSessionTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 
   cflags = []
@@ -687,6 +689,19 @@ ohos_unittest("MigrateAVSessionTest") {
   if (bluetooth_part_enable) {
     cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
+  }
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item",
+      "../../../../services/session:avsession_router",
+    ]
+    external_deps += [
+      "cast_engine:cast_engine_client",
+      "window_manager:libdm_lite",
+    ]
   }
 
   if (efficiency_manager_enable_in_avsession) {
@@ -736,6 +751,7 @@ ohos_unittest("SoftbusSessionManagerTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -773,8 +789,7 @@ ohos_unittest("AVSessionServiceTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
-    "window_manager:libdm",
-    "window_manager:libwm",
+    "window_manager:libdm_lite",
   ]
 
   cflags = []
@@ -827,6 +842,7 @@ ohos_unittest("AppManagerAdapterTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -861,6 +877,7 @@ ohos_unittest("AbilityConnectHelperTest") {
     "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -902,6 +919,7 @@ ohos_unittest("BkGrAudioControllerTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -922,6 +940,7 @@ ohos_unittest("AudioAdapterTest") {
     "audio_framework:audio_client",
     "c_utils:utils",
     "hilog:libhilog",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -945,6 +964,7 @@ ohos_unittest("RemoteUtilsTest") {
     "hilog:libhilog",
     "input:libmmi-client",
     "safwk:system_ability_fwk",
+    "window_manager:libdm_lite",
   ]
 }
 
@@ -978,6 +998,7 @@ ohos_unittest("SessionStackTest") {
     "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 
   cflags = []
@@ -985,6 +1006,19 @@ ohos_unittest("SessionStackTest") {
   if (bluetooth_part_enable) {
     cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
+  }
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item",
+      "../../../../services/session:avsession_router",
+    ]
+    external_deps += [
+      "cast_engine:cast_engine_client",
+      "window_manager:libdm_lite",
+    ]
   }
 
   if (efficiency_manager_enable_in_avsession) {
@@ -1035,6 +1069,7 @@ ohos_unittest("AVRouterTest") {
     "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
   ]
 
   if (castplus_cast_engine_enable) {
@@ -1090,6 +1125,7 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm_lite",
     ]
   }
 
@@ -1133,6 +1169,7 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm_lite",
     ]
   }
 }
@@ -1174,6 +1211,7 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm_lite",
     ]
   }
 }
@@ -1202,6 +1240,7 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm_lite",
     ]
   }
 }
@@ -1324,6 +1363,22 @@ if (castplus_cast_engine_enable) {
   }
 }
 
+ohos_unittest("AVSessionStubTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_stub_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
 ###############################################################################
 group("av_session_server_unittest") {
   testonly = true
@@ -1344,6 +1399,7 @@ group("av_session_server_unittest") {
     ":AVSessionServiceStubTest",
     ":AVSessionServiceSupplementTest",
     ":AVSessionServiceTest",
+    ":AVSessionStubTest",
     ":AVsessionSyseventTest",
     ":AbilityConnectHelperTest",
     ":AbilityConnectHelperTest",

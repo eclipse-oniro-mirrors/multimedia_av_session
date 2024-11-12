@@ -40,9 +40,8 @@ const char *FD = "FD";
 const char *REMOTE_OBJECT = "RemoteObject";
 const char *TYPE_PROPERTY = "type";
 const char *VALUE_PROPERTY = "value";
-constexpr int32_t I32_TYPE = 1;
-constexpr int32_t DOUBLE_TYPE = 11;
 constexpr int32_t STR_TYPE = 0;
+constexpr int32_t I32_TYPE = 1;
 constexpr int32_t BOOL_TYPE = 3;
 constexpr int32_t FD_TYPE = 4;
 constexpr int32_t STR_PTR_TYPE = 5;
@@ -51,6 +50,8 @@ constexpr int32_t I64_PTR_TYPE = 7;
 constexpr int32_t BOOL_PTR_TYPE = 8;
 constexpr int32_t DOUBLE_PTR_TYPE = 9;
 constexpr int32_t FD_PTR_TYPE = 10;
+constexpr int32_t DOUBLE_TYPE = 11;
+constexpr int32_t PIXEL_MAP_TYPE = 13;
 constexpr int32_t NONE_VALUE = -1;
 
 using WantParams = OHOS::AAFwk::WantParams;
@@ -166,10 +167,14 @@ void InnerSetWantParamsArrayFD(CParameters* head, int64_t size, WantParams &want
     return;
 }
 
-void SetDataParameters(const CArray& parameters, WantParams &wantP)
+int32_t SetDataParameters(const CArray& parameters, WantParams &wantP)
 {
-    for (int i = 0; i < parameters.size; i++) {
-        auto head = reinterpret_cast<CParameters*>(parameters.head) + i;
+    auto head = static_cast<CParameters*>(parameters.head);
+    if (head == nullptr) {
+        SLOGE("CParameters has nullptr head!");
+        return AVSESSION_ERROR;
+    }
+    for (int i = 0; i < parameters.size; i++, head++) {
         auto key = std::string(head->key);
         if (head->valueType == I32_TYPE) { // int32_t
             wantP.SetParam(key, OHOS::AAFwk::Integer::Box(*static_cast<int32_t *>(head->value)));
@@ -206,8 +211,10 @@ void SetDataParameters(const CArray& parameters, WantParams &wantP)
             InnerSetWantParamsArrayFD(head, head->size, wantP);
         } else {
             SLOGE("Wrong type!");
+            return AVSESSION_ERROR;
         }
     }
+    return CJNO_ERROR;
 }
 
 char *MallocCString(const std::string &origin)
@@ -240,7 +247,7 @@ int32_t InnerWrapWantParamsString(const WantParams &wantParams, CParameters *p)
     if (ao == nullptr) {
         SLOGE("No value");
         p->valueType = NONE_VALUE;
-        return CJNO_ERROR;
+        return AVSESSION_ERROR;
     }
     std::string natValue = OHOS::AAFwk::String::Unbox(ao);
     p->value = MallocCString(natValue, ret);
@@ -468,8 +475,8 @@ void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &co
         return;
     }
     cArray.size = size;
-    for (auto iter = paramsMap.begin(); iter != paramsMap.end(); iter++) {
-        auto ptr = reinterpret_cast<CParameters *>(cArray.head) + count;
+    auto ptr = static_cast<CParameters *>(cArray.head);
+    for (auto iter = paramsMap.begin(); iter != paramsMap.end(); iter++, ptr++) {
         ptr->key = MallocCString(iter->first);
         if (ptr->key == nullptr) {
             code = ERR_NO_MEMORY;
@@ -498,7 +505,6 @@ void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &co
         if (code == ERR_NO_MEMORY || code == AVSESSION_ERROR) {
             return ClearParametersPtr(reinterpret_cast<CParameters *&>(cArray.head), count, true);
         }
-        count++;
     }
 }
 
@@ -625,14 +631,14 @@ int32_t convertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native
 int32_t convertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native, StringPixelMapParameter& cj)
 {
     cj.pixelMap = Media::PixelMapImpl(AVSessionPixelMapAdapter::ConvertFromInner(native)).GetID();
-    cj.kind = 1;
+    cj.kind = PIXEL_MAP_TYPE;
     return CJNO_ERROR;
 }
 
 int32_t convertNativeToCJStruct(const std::string& native, StringPixelMapParameter& cj)
 {
     convertNativeToCJStruct(native, cj.string);
-    cj.kind = 0;
+    cj.kind = STR_TYPE;
     return CJNO_ERROR;
 }
 
@@ -827,43 +833,45 @@ int32_t convertNativeToCJStruct(const AVPlaybackState& native, CAVPlaybackState&
 
 int32_t convertCJStructToNative(const CArray& cj, AAFwk::WantParams &native)
 {
-    SetDataParameters(cj, native);
+    if (cj.size > 0) {
+        return SetDataParameters(cj, native);
+    }
     return CJNO_ERROR;
 }
 
 int32_t convertCJStructToNative(const CAVMetaData& cj, AVMetaData &native)
 {
     int32_t ret = CJNO_ERROR;
-    native.SetAssetId(std::string(cj.assetId));
-    native.SetTitle(std::string(cj.title));
-    native.SetArtist(std::string(cj.artist));
-    native.SetAuthor(std::string(cj.author));
-    native.SetAVQueueName(std::string(cj.avQueueName));
-    native.SetAVQueueId(std::string(cj.avQueueId));
-    if (cj.avQueueImage.kind == 0) {
+    if (cj.assetId != nullptr) { native.SetAssetId(std::string(cj.assetId)); }
+    if (cj.title != nullptr) { native.SetTitle(std::string(cj.title)); }
+    if (cj.artist != nullptr) { native.SetArtist(std::string(cj.artist)); }
+    if (cj.author != nullptr) { native.SetAuthor(std::string(cj.author)); }
+    if (cj.avQueueName != nullptr) { native.SetAVQueueName(std::string(cj.avQueueName)); }
+    if (cj.avQueueId != nullptr) { native.SetAVQueueId(std::string(cj.avQueueId)); }
+    if (cj.avQueueImage.kind == STR_TYPE) {
         native.SetAVQueueImageUri(std::string(cj.avQueueImage.string));
-    } else {
+    } else if (cj.avQueueImage.kind == PIXEL_MAP_TYPE) {
         auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(
             cj.avQueueImage.pixelMap)->GetRealPixelMap();
         native.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
     }
-    native.SetAlbum(std::string(cj.album));
-    native.SetWriter(std::string(cj.writer));
-    native.SetComposer(std::string(cj.composer));
+    if (cj.album != nullptr) { native.SetAlbum(std::string(cj.album)); }
+    if (cj.writer != nullptr) { native.SetWriter(std::string(cj.writer)); }
+    if (cj.composer != nullptr) { native.SetComposer(std::string(cj.composer)); }
     native.SetDuration(cj.duration);
-    if (cj.mediaImage.kind == 0) {
+    if (cj.mediaImage.kind == STR_TYPE) {
         native.SetMediaImageUri(std::string(cj.mediaImage.string));
-    } else {
+    } else if (cj.mediaImage.kind == PIXEL_MAP_TYPE) {
         auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(
             cj.mediaImage.pixelMap)->GetRealPixelMap();
         native.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
     }
     native.SetPublishDate(cj.publishDate);
-    native.SetSubTitle(std::string(cj.subtitle));
-    native.SetDescription(std::string(cj.description));
-    native.SetLyric(std::string(cj.lyric));
-    native.SetPreviousAssetId(std::string(cj.previousAssetId));
-    native.SetNextAssetId(std::string(cj.nextAssetId));
+    if (cj.subtitle != nullptr) { native.SetSubTitle(std::string(cj.subtitle)); }
+    if (cj.description != nullptr) { native.SetDescription(std::string(cj.description)); }
+    if (cj.lyric != nullptr) { native.SetLyric(std::string(cj.lyric)); }
+    if (cj.previousAssetId != nullptr) { native.SetPreviousAssetId(std::string(cj.previousAssetId)); }
+    if (cj.nextAssetId != nullptr) { native.SetNextAssetId(std::string(cj.nextAssetId)); }
     native.SetFilter(cj.filter);
 
     std::vector<std::string> drmS;
@@ -894,11 +902,13 @@ int32_t convertCJStructToNative(const CArray& cj, std::vector<std::string>& nati
 
 int32_t convertCJStructToNative(const CAVCallMetaData& cj, AVCallMetaData & native)
 {
-    native.SetName(std::string(cj.name));
-    native.SetPhoneNumber(std::string(cj.phoneNumber));
-    auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(
-            cj.avatar)->GetRealPixelMap();
-    native.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+    if (cj.name != nullptr) { native.SetName(std::string(cj.name)); }
+    if (cj.phoneNumber != nullptr) { native.SetPhoneNumber(std::string(cj.phoneNumber)); }
+    if (cj.avatar != 0) {
+        auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(
+                cj.avatar)->GetRealPixelMap();
+        native.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+    }
     return CJNO_ERROR;
 }
 
@@ -928,7 +938,7 @@ int32_t convertCJStructToNative(const CAVPlaybackState& cj, AVPlaybackState& nat
     native.SetDuration(cj.duration);
     native.SetVideoWidth(cj.videoWidth);
     native.SetVideoHeight(cj.videoHeight);
-    std::shared_ptr<AAFwk::WantParams> wantP;
+    auto wantP = std::make_shared<AAFwk::WantParams>();
     ret = convertCJStructToNative(cj.extras, *wantP);
     if (ret != CJNO_ERROR) {
         return ret;
@@ -956,7 +966,7 @@ int32_t convertCJStructToNative(const CAVQueueItem& cj, AVQueueItem& native)
 {
     int32_t ret = CJNO_ERROR;
     native.SetItemId(cj.itemId);
-    std::shared_ptr<AVMediaDescription> desc;
+    auto desc = std::make_shared<AVMediaDescription>();
     ret = convertCJStructToNative(cj.description, *desc);
     if (ret != CJNO_ERROR) {
         return ret;
@@ -968,41 +978,41 @@ int32_t convertCJStructToNative(const CAVQueueItem& cj, AVQueueItem& native)
 int32_t convertCJStructToNative(const CAVMediaDescription& cj, AVMediaDescription& native)
 {
     int32_t ret = CJNO_ERROR;
-    native.SetMediaId(std::string(cj.mediaId));
-    native.SetTitle(std::string(cj.title));
-    native.SetSubtitle(std::string(cj.subtitle));
-    native.SetDescription(std::string(cj.description));
-    native.SetMediaUri(std::string(cj.mediaUri));
-    if (cj.mediaImage.kind == 0) {
+    if (cj.mediaId != nullptr) { native.SetMediaId(std::string(cj.mediaId)); }
+    if (cj.title != nullptr) { native.SetTitle(std::string(cj.title)); }
+    if (cj.subtitle != nullptr) { native.SetSubtitle(std::string(cj.subtitle)); }
+    if (cj.description != nullptr) { native.SetDescription(std::string(cj.description)); }
+    if (cj.mediaUri != nullptr) { native.SetMediaUri(std::string(cj.mediaUri)); }
+    if (cj.mediaImage.kind == STR_TYPE) {
         native.SetIconUri(std::string(cj.mediaImage.string));
-    } else {
+    } else if (cj.mediaImage.kind == PIXEL_MAP_TYPE) {
         auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(
             cj.mediaImage.pixelMap)->GetRealPixelMap();
         native.SetIcon(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
     }
-    std::shared_ptr<AAFwk::WantParams> wantP;
+    auto wantP = std::make_shared<AAFwk::WantParams>();
     ret = convertCJStructToNative(cj.extras, *wantP);
     if (ret != CJNO_ERROR) {
         return ret;
     }
     native.SetExtras(wantP);
-    native.SetMediaType(std::string(cj.mediaType));
+    if (cj.mediaType != nullptr) { native.SetMediaType(std::string(cj.mediaType)); }
     native.SetMediaSize(cj.mediaSize);
-    native.SetAlbumTitle(std::string(cj.albumTitle));
-    native.SetAlbumCoverUri(std::string(cj.albumCoverUri));
-    native.SetLyricContent(std::string(cj.lyricContent));
-    native.SetLyricUri(std::string(cj.lyricUri));
-    native.SetArtist(std::string(cj.artist));
+    if (cj.albumTitle != nullptr) { native.SetAlbumTitle(std::string(cj.albumTitle)); }
+    if (cj.albumCoverUri != nullptr) { native.SetAlbumCoverUri(std::string(cj.albumCoverUri)); }
+    if (cj.lyricContent != nullptr) { native.SetLyricContent(std::string(cj.lyricContent)); }
+    if (cj.lyricUri != nullptr) { native.SetLyricUri(std::string(cj.lyricUri)); }
+    if (cj.artist != nullptr) { native.SetArtist(std::string(cj.artist)); }
     AVFileDescriptor fdSrc;
     fdSrc.fd_ = cj.fdSrc.fd;
     fdSrc.offset_ = cj.fdSrc.offset;
     fdSrc.length_ = cj.fdSrc.length;
     native.SetFdSrc(fdSrc);
-    native.SetDrmScheme(std::string(cj.drmScheme));
+    if (cj.drmScheme != nullptr) { native.SetDrmScheme(std::string(cj.drmScheme)); }
     native.SetDuration(cj.duration);
     native.SetStartPosition(cj.startPosition);
     native.SetCreditsPosition(cj.creditsPosition);
-    native.SetAppName(std::string(cj.appName));
+    if (cj.appName != nullptr) { native.SetAppName(std::string(cj.appName)); }
     FFI_MD_HELPER->SetMediaDescriptionDataSrc(cj);
     FFI_MD_HELPER->SetMediaDescriptionDataSrc(cj);
     return ret;

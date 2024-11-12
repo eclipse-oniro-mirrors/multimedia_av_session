@@ -320,8 +320,8 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
               " StartAVPlayback invalid bundlename", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             
             context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->assetId_);
-            CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->assetId_.empty(),
-              " StartAVPlayback invalid assetId", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, " StartAVPlayback invalid assetId",
+                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         }
     };
 

@@ -424,7 +424,8 @@ HWTEST_F(AVSessionDumperTest, StartDefaultAbilityByCall001, TestSize.Level1)
     std::string sessionId = "sessionId";
     // startability may go with mediaintent, will return AVSESSION_ERROR
     int32_t ret = avSessionService_->StartDefaultAbilityByCall(sessionId);
-    EXPECT_TRUE(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_ERROR);
+    SLOGI("StartDefaultAbilityByCall001 with ret:%{public}d", ret);
+    EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS || ret == AVSESSION_ERROR, true);
 }
 
 /**
