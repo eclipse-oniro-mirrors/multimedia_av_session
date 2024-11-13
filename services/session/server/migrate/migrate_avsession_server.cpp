@@ -114,8 +114,11 @@ void MigrateAVSessionServer::ClearCacheBySessionId(const std::string &sessionId)
     std::lock_guard lockGuard(migrateControllerLock_);
     auto it = playerIdToControllerMap_.find(sessionId);
     if (it != playerIdToControllerMap_.end()) {
+        if (std::count(sortControllerList_.begin(), sortControllerList_.end(), it->second) > 0) {
+            SLOGI("ClearCacheBySessionId in and remove controller in sortList");
+            sortControllerList_.remove(it->second);
+        }
         playerIdToControllerMap_.erase(it);
-        sortControllerList_.remove(it->second);
     }
 
     auto item = playerIdToControllerCallbackMap_.find(sessionId);

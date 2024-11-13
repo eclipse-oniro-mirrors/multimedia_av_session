@@ -570,6 +570,34 @@ void AVMetaData::Reset()
     drmSchemes_.clear();
 }
 
+void AVMetaData::ResetExtAssetId()
+{
+    metaMask_.reset();
+    metaMask_.set(META_KEY_ASSET_ID);
+    title_ = "";
+    artist_ = "";
+    author_ = "";
+    avQueueName_ = "";
+    avQueueId_ = "";
+    avQueueImage_ = nullptr;
+    avQueueImageUri_ = "";
+    album_ = "";
+    writer_ = "";
+    composer_ = "";
+    duration_ = 0;
+    mediaImage_ = nullptr;
+    mediaImageUri_ = "";
+    publishDate_ = 0;
+    subTitle_ = "";
+    description_ = "";
+    lyric_ = "";
+    previousAssetId_ = "";
+    nextAssetId_ = "";
+    skipIntervals_ = SECONDS_15;
+    displayTags_ = 0;
+    drmSchemes_.clear();
+}
+
 bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
 {
     bool result = false;

@@ -96,6 +96,13 @@ std::string AVSessionItem::GetSessionType()
 int32_t AVSessionItem::Destroy()
 {
     SLOGI("AVSessionItem check service destroy event with service, check serviceCallback exist");
+    {
+        std::lock_guard lockGuard(destroyLock_);
+        if (isDestroyed_) {
+            SLOGE("AVSessionItem Destroy process but check already destroyed");
+            return AVSESSION_SUCCESS;
+        }
+    }
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "Destroy",
         "BUNDLE_NAME", GetBundleName(),
