@@ -77,8 +77,6 @@ export class AVCastPicker extends ViewPU {
         this.maxFontSizeScale = 2;
         this.__accessibilityConnectedStr = new ObservedPropertySimplePU('已连接', this, 'accessibilityConnectedStr');
         this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('音视频投播', this, 'accessibilityAudioControlStr');
-        this.__isSmallFoldOuterScreen = new ObservedPropertySimplePU(false, this, 'isSmallFoldOuterScreen');
-        this.scroller = new Scroller();
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -139,12 +137,6 @@ export class AVCastPicker extends ViewPU {
         if (c11.__accessibilityAudioControlStr !== undefined) {
             this.accessibilityAudioControlStr = c11.accessibilityAudioControlStr;
         }
-        if (c11.scroller !== undefined) {
-            this.scroller = c11.scroller;
-        }
-        if (c11.isSmallFoldOuterScreen !== undefined) {
-            this.isSmallFoldOuterScreen = c11.isSmallFoldOuterScreen;
-        }
     }
 
     updateStateVars(b11) {
@@ -164,7 +156,6 @@ export class AVCastPicker extends ViewPU {
         this.__deviceInfoType.purgeDependencyOnElmtId(a11);
         this.__accessibilityConnectedStr.purgeDependencyOnElmtId(a11);
         this.__accessibilityAudioControlStr.purgeDependencyOnElmtId(a11);
-        this.__isSmallFoldOuterScreen.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -181,7 +172,6 @@ export class AVCastPicker extends ViewPU {
         this.__deviceInfoType.aboutToBeDeleted();
         this.__accessibilityConnectedStr.aboutToBeDeleted();
         this.__accessibilityAudioControlStr.aboutToBeDeleted();
-        this.__isSmallFoldOuterScreen.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -290,14 +280,6 @@ export class AVCastPicker extends ViewPU {
         this.__accessibilityAudioControlStr.set(d1);
     }
 
-    get isSmallFoldOuterScreen() {
-        return this.__isSmallFoldOuterScreen.get();
-    }
-
-    set isSmallFoldOuterScreen(e1) {
-        this.__isSmallFoldOuterScreen.set(e1);
-    }
-
     MenuStateChange() {
         if (this.extensionProxy != null) {
             this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
@@ -367,13 +349,9 @@ export class AVCastPicker extends ViewPU {
     }
 
     deviceMenu(o8 = null) {
-        this.observeComponentCreation2((h10, i10) => {
-            Scroll.create(this.scroller);
-            Scroll.width(224);
-            Scroll.constraintSize({ maxHeight: this.isSmallFoldOuterScreen ? 245 : 345 });
-        }, Scroll);
         this.observeComponentCreation2((j10, k10) => {
             Column.create();
+            Column.width(224);
         }, Column);
         this.observeComponentCreation2((r8, s8) => {
             ForEach.create();
@@ -498,7 +476,6 @@ export class AVCastPicker extends ViewPU {
         }, ForEach);
         ForEach.pop();
         Column.pop();
-        Scroll.pop();
     }
 
     buildDefaultPicker(c8, d8 = null) {
@@ -516,7 +493,6 @@ export class AVCastPicker extends ViewPU {
                 }
             });
             UIExtensionComponent.onRemoteReady((n8) => {
-                
                 console.info(TAG, 'onRemoteReady');
                 this.extensionProxy = n8;
             });
@@ -588,11 +564,6 @@ export class AVCastPicker extends ViewPU {
                 if (JSON.stringify(l8.accessAudioControl) !== undefined) {
                     console.info(TAG, `accessibilityAudioControlStr : ${l8.accessAudioControl}`);
                     this.accessibilityAudioControlStr = l8.accessAudioControl;
-                }
-
-                if (JSON.stringify(l8.isSmallFoldOuterScreen) !== undefined) {
-                    console.info(TAG, `isSmallFoldOuterScreen : ${l8.isSmallFoldOuterScreen}`);
-                    this.isSmallFoldOuterScreen = l8.isSmallFoldOuterScreen;
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });

@@ -176,7 +176,7 @@ export struct AVCastPicker {
   @State deviceInfoType: string = '';
 
   /**
-   * Max Font and graphic magnification.
+   * Max Font and graphic magnification. 
    */
   private maxFonSizeScale: number = 2;
 
@@ -185,13 +185,6 @@ export struct AVCastPicker {
    */
   @State accessibilityConnectedStr: string = '已连接';
   @State accessibilityAudioControlStr: string = '音视频投播';
-
-  private scroller: Scroller = new Scroller();
-
-  /**
-   * is small fold outer screen
-   */
-  @State isSmallFoldOuterScreen: boolean = false;
 
   MenuStateChange() {
     if (this.extensionProxy != null) {
@@ -228,87 +221,84 @@ export struct AVCastPicker {
 
   @Builder
   deviceMenu() {
-    Scroll(this.scroller) {
-      Column {
-        ForEach(this.deviceList, (item: AVCastPickerDeviceInfo, index) => {
+    Column() {
+      ForEach(this.deviceList, (item: AVCastPickerDeviceInfo, index) => {
+        Flex({
+          direction: FlexDirection.Column,
+          justifyContent: FlexAlign.SpaceBetween,
+          alignItems: ItemAlign.End
+        }) {
           Flex({
-            direction: FlexDirection.Column,
+            direction: FlexDirection.Row,
             justifyContent: FlexAlign.SpaceBetween,
-            alignItems: ItemAlign.End
+            alignItems: ItemAlign.Center
           }) {
-            Flex({
-              direction: FlexDirection.Row,
-              justifyContent: FlexAlign.SpaceBetween,
-              alignItems: ItemAlign.Center
-            }) {
-              Row() {
-                this.buildIcon(item, false)
+            Row() {
+              this.buildIcon(item, false)
 
-                Text(item.deviceName)
-                  .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                  .fontColor(item.isConnected ?
-                    (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
-                    $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
-                    (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
-                    $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
-                  .width(144)
-                  .padding({
-                    left: 8,
-                    top: 12,
-                    right: 8,
-                    bottom: 12
-                  })
-                  .textOverflow({ overflow: TextOverflow.Ellipsis })
-                  .maxLines(2)
-                  .wordBreak(WordBreak.BREAK_ALL)
-                  .maxFontScale(this.maxFonSizeScale)
+              Text(item.deviceName)
+                .fontSize($r('sys.float.ohos_id_text_size_body2'))
+                .fontColor(item.isConnected ?
+                  (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+                  $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
+                  (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+                  $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
+                .width(144)
+                .padding({
+                  left: 8,
+                  top: 12,
+                  right: 8,
+                  bottom: 12
+                })
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .maxLines(2)
+                .wordBreak(WordBreak.BREAK_ALL)
+                .maxFontScale(this.maxFonSizeScale)
+            }
+            .justifyContent(FlexAlign.Start)
+            .alignItems(VerticalAlign.Center)
+
+            if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined) {
+              Row() {
+                this.buildIcon(item, true)
               }
               .justifyContent(FlexAlign.Start)
               .alignItems(VerticalAlign.Center)
-
-              if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined) {
-                Row() {
-                  this.buildIcon(item, true)
-                }
-                .justifyContent(FlexAlign.Start)
-                .alignItems(VerticalAlign.Center)
-                .accessibilityLevel('yes')
-                .accessibilityText(this.accessibilityConnectedStr)
-              }
-            }
-            .constraintSize({ minHeight: 48 })
-            .padding({ left: 12, right: 12 })
-            .onTouch((event) => {
-              if (event.type === TouchType.Down) {
-                this.touchMenuItemIndex = index;
-              } else if (event.type === TouchType.Up) {
-                this.touchMenuItemIndex = -1;
-              }
-            })
-            .backgroundColor(this.touchMenuItemIndex === index
-              ? $r('sys.color.interactive_click') : '#00FFFFFF')
-            .borderRadius(this.touchMenuItemIndex === index
-              ? $r('sys.float.corner_radius_level8') : 0)
-
-            if (index != this.deviceList.length - 1) {
-              Divider()
-                .height(1)
-                .width(172)
-                .color($r('sys.color.comp_divider'))
-                .padding({ right: 12 })
+              .accessibilityLevel('yes')
+              .accessibilityText(this.accessibilityConnectedStr)
             }
           }
-          .width('100%')
-          .onClick(() => {
-            if (this.extensionProxy != null && !item.isConnected) {
-              this.extensionProxy.send({ 'selectedDeviceInfo': item })
+          .constraintSize({ minHeight: 48 })
+          .padding({ left: 12, right: 12 })
+          .onTouch((event) => {
+            if (event.type === TouchType.Down) {
+              this.touchMenuItemIndex = index;
+            } else if (event.type === TouchType.Up) {
+              this.touchMenuItemIndex = -1;
             }
           })
+          .backgroundColor(this.touchMenuItemIndex === index
+            ? $r('sys.color.interactive_click') : '#00FFFFFF')
+          .borderRadius(this.touchMenuItemIndex === index
+            ? $r('sys.float.corner_radius_level8') : 0)
+
+          if (index != this.deviceList.length - 1) {
+            Divider()
+              .height(1)
+              .width(172)
+              .color($r('sys.color.comp_divider'))
+              .padding({ right: 12 })
+          }
+        }
+        .width('100%')
+        .onClick(() => {
+          if (this.extensionProxy != null && !item.isConnected) {
+            this.extensionProxy.send({ 'selectedDeviceInfo': item })
+          }
         })
-      }
+      })
     }
     .width(224)
-    .constraintSize({ maxHeight: this.isSmallFoldOuterScreen ? 245 : 345 })
   }
 
   @Builder
@@ -398,11 +388,6 @@ export struct AVCastPicker {
         if (JSON.stringify(data['accessAudioControl']) !== undefined) {
           console.info(TAG, `accessAudioControl : ${JSON.stringify(data['accessAudioControl'])}`);
           this.accessibilityAudioControlStr = data['accessAudioControl'] as string;
-        }
-
-        if (JSON.stringify(data['isSmallFoldOuterScreen']) !== undefined) {
-          console.info(TAG, `isSmallFoldOuterScreen : ${JSON.stringify(data['isSmallFoldOuterScreen'])}`);
-          this.isSmallFoldOuterScreen = data['isSmallFoldOuterScreen'] as boolean;
         }
       })
       .size({ width: '100%', height: '100%' })
