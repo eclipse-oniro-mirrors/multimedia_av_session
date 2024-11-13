@@ -425,7 +425,7 @@ int32_t DoDownload(AVMetaData& meta, const std::string uri)
     bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);
     SLOGI("DoDownload with ret %{public}d, %{public}d", static_cast<int>(ret), static_cast<int>(pixelMap == nullptr));
     if (ret && pixelMap != nullptr) {
-        SLOGI("DoDownload success");
+        SLOGI("DoDownload success and reset meta except assetId but not, wait for mediacontrol fix");
         meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
         return AVSESSION_SUCCESS;
     }
@@ -449,7 +449,8 @@ void processErrMsg(std::shared_ptr<ContextBase> context, int32_t ret)
 
 bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVSession> sessionPtr, AVMetaData& data)
 {
-    SLOGI("do metadata set with online download prepare with uri alive");
+    SLOGI("do metadata set with check uri alive:%{public}d, pixel alive:%{public}d",
+        static_cast<int>(!data.GetMediaImageUri().empty()), static_cast<int>(data.GetMediaImage() != nullptr));
     auto uri = data.GetMediaImageUri();
     int32_t ret = sessionPtr->SetAVMetaData(data);
     if (ret != AVSESSION_SUCCESS) {
@@ -487,18 +488,19 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, inputParser);
-
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     auto* napiAvSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiAvSession == nullptr || napiAvSession->metaData_.EqualWithUri((context->metaData))) {
         SLOGI("napiAvSession is nullptr or metadata with uri is the same as last time");
         auto executor = []() {};
-        auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
         return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
     }
     napiAvSession->metaData_ = context->metaData;
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
-    if (!context->metaData.GetMediaImageUri().empty()) {
+    if (napiAvSession->latestMetadataAssetId_ != napiAvSession->metaData_.GetAssetId() ||
+        !napiAvSession->metaData_.GetMediaImageUri().empty() || napiAvSession->metaData_.GetMediaImage() != nullptr) {
         context->metadataTs = std::chrono::system_clock::now();
+        napiAvSession->latestMetadataAssetId_ = napiAvSession->metaData_.GetAssetId();
         reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
     }
     auto executor = [context]() {
@@ -518,7 +520,6 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
         }
         context->metaData.Reset();
     };
-    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
 }
 
