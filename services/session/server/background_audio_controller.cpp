@@ -98,7 +98,7 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
                 ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
             }
         } else {
-            AudioAdapter::GetInstance().UnMuteAudioStream(info->clientUID);
+            AudioAdapter::GetInstance().UnMuteAudioStream(info->clientUID, info->rendererInfo.streamUsage);
         }
     }
 }

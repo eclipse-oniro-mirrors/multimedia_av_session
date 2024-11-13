@@ -115,6 +115,18 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AudioAdapter::UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage)
+{
+    SLOGI("unmute uid=%{public}d stream usage %{public}d", uid, usage);
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
+        uid, AudioStandard::StreamSetState::STREAM_UNMUTE, usage);
+    if (ret != 0) {
+        SLOGE("unmute uid=%{public}d failed", uid);
+        return AVSESSION_ERROR;
+    }
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AudioAdapter::MuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage)
 {
     if (std::count(BACKGROUND_MUTE_STREAM_USAGE.begin(), BACKGROUND_MUTE_STREAM_USAGE.end(), usage) == 0) {
