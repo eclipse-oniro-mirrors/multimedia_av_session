@@ -48,6 +48,8 @@ public:
 
     int32_t MuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage);
 
+    int32_t UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage);
+
     int32_t PauseAudioStream(int32_t uid, AudioStandard::StreamUsage usage);
 
     void OnRendererStateChange(const AudioRendererChangeInfos& infos) override;
