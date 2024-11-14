@@ -18,6 +18,7 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "migrate_avsession_constant.h"
+#include "audio_device_manager.h"
 
 namespace OHOS::AVSession {
 SoftbusSessionManager& SoftbusSessionManager::GetInstance()
