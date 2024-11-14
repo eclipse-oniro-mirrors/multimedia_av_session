@@ -711,10 +711,11 @@ void ConvertKeyCodeToCommand001(const uint8_t* data, size_t size)
 void HandleDeviceChange001(const uint8_t* data, size_t size)
 {
     SLOGI("HandleDeviceChange001 begin!");
-    DeviceChangeAction deviceChange;
-    deviceChange.type = static_cast<DeviceChangeType>(0);
-    deviceChange.flag = static_cast<DeviceFlag>(0);
-    avsessionService_->HandleDeviceChange(deviceChange);
+    std::vector<OHOS::sptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
+    OHOS::sptr<AudioDeviceDescriptor> descriptor = new(std::nothrow) AudioDeviceDescriptor();
+    descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
+    audioDeviceDescriptors.push_back(descriptor);
+    avsessionService_->HandleDeviceChange(audioDeviceDescriptors);
     SLOGI("HandleDeviceChange001 end!");
 }
 
@@ -730,7 +731,7 @@ void HandleDeviceChange002(const uint8_t* data, size_t size)
 
     audioDeviceDescriptors.push_back(descriptor);
     deviceChange.deviceDescriptors = audioDeviceDescriptors;
-    avsessionService_->HandleDeviceChange(deviceChange);
+    avsessionService_->HandleDeviceChange(audioDeviceDescriptors);
     SLOGI("HandleDeviceChange002 end!");
 }
 
