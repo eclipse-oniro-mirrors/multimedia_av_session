@@ -45,6 +45,7 @@ ohos_shared_library("avsession_service") {
   ]
 
   service_sources = [
+    "server/audio_device_manager.cpp",
     "server/avsession_dumper.cpp",
     "server/avsession_service.cpp",
     "server/avsession_service_ext.cpp",
