@@ -58,6 +58,7 @@ ohos_shared_library("avsession_service") {
     "server/softbus/softbus_session.cpp",
     "server/softbus/softbus_session_manager.cpp",
     "server/softbus/softbus_session_server.cpp",
+    "server/audio_device_manager.cpp"
   ]
 
   adapter_sources = [
