@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <cstddef>
+#include <cstdint>
 
 #include <gtest/gtest.h>
 #include "audio_adapter.h"
@@ -245,13 +247,14 @@ static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
 {
     SLOGD("PauseAudioStream001 begin!");
     bool ret = false;
-    AudioAdapter::GetInstance().AddDeviceChangeListener([&ret] (const DeviceChangeAction& deviceChangeAction) {
-        ret = deviceChangeAction.type == OHOS::AudioStandard::DeviceChangeType::CONNECT;
+    AudioAdapter::GetInstance().AddDeviceChangeListener(
+        [&ret] (const std::vector<OHOS::sptr<AudioDeviceDescriptor>> &desc) {
+        ret = desc.empty();
     });
     AudioAdapter::GetInstance().AddDeviceChangeListener(nullptr);
 
     DeviceChangeAction action = {};
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     AudioAdapter::GetInstance().OnDeviceChange(action);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }

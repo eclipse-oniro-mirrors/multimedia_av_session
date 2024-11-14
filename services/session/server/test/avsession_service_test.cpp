@@ -850,9 +850,13 @@ static HWTEST_F(AVSessionServiceTest, HandleDeviceChange001, TestSize.Level1)
 {
     SLOGI("HandleDeviceChange001 begin!");
     DeviceChangeAction deviceChange;
+    std::vector<OHOS::sptr<AudioDeviceDescriptor>> desc;
+    OHOS::sptr<AudioDeviceDescriptor> descriptor = new(std::nothrow) AudioDeviceDescriptor();
+    descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
     deviceChange.type = static_cast<DeviceChangeType>(0);
     deviceChange.flag = static_cast<DeviceFlag>(0);
-    avservice_->HandleDeviceChange(deviceChange);
+    desc.push_back(descriptor);
+    avservice_->HandleDeviceChange(desc);
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("HandleDeviceChange001 end!");
 }
@@ -868,8 +872,7 @@ static HWTEST_F(AVSessionServiceTest, HandleDeviceChange002, TestSize.Level1)
     deviceChange.flag = static_cast<DeviceFlag>(0);
 
     audioDeviceDescriptors.push_back(descriptor);
-    deviceChange.deviceDescriptors = audioDeviceDescriptors;
-    avservice_->HandleDeviceChange(deviceChange);
+    avservice_->HandleDeviceChange(audioDeviceDescriptors);
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("HandleDeviceChange002 end!");
 }
