@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+#include "audio_device_manager.h"
 #include "avsession_service.h"
 
 #include "migrate_avsession_manager.h"
-#include "audio_device_manager.h"
 
 namespace OHOS::AVSession {
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
