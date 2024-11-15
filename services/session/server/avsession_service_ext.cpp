@@ -16,6 +16,7 @@
 #include "avsession_service.h"
 
 #include "migrate_avsession_manager.h"
+#include "audio_device_manager.h"
 
 namespace OHOS::AVSession {
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
@@ -36,6 +37,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         migrateAVSession_->Init(this);
         MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession_);
         AddInnerSessionListener(migrateAVSession_.get());
+        AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback(migrateAVSession_, deviceId);
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") &&
@@ -77,6 +79,7 @@ void AVSessionService::NotifyMigrateStop(const std::string &deviceId)
     }
     std::lock_guard lockGuard(sessionServiceLock_);
     migrateAVSession_->StopObserveControllerChanged(deviceId);
+    AudioDeviceManager::GetInstance().UnRegisterAudioDeviceChangeCallback();
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE

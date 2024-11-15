@@ -27,6 +27,22 @@ public:
     ~AudioDeviceManager() = default;
     static AudioDeviceManager &GetInstance();
     bool GetVehicleA2dpConnectState();
+    void RegisterAudioDeviceChangeCallback(std::shared_ptr<MigrateAVSessionServer> migrateAVSession,
+        std::string deviceId);
+    void UnRegisterAudioDeviceChangeCallback();
+    void SendRemoteAvSessionInfo(const std::string &deviceId);
+    std::string GetDeviceId();
+
+private:
+    std::shared_ptr<AudioStandard::AudioManagerDeviceChangeCallback> audioDeviceChangeCallback_;
+    bool isRegistered_ = false;
+    std::shared_ptr<MigrateAVSessionServer> migrateSession_;
+    std::string deviceId_;
 };
+
+class DeviceChangeCallback : public AudioStandard::AudioManagerDeviceChangeCallback {
+public:
+    void OnDeviceChange(const AudioStandard::DeviceChangeAction& deviceChangeAction) override;
+}
 }
 #endif
