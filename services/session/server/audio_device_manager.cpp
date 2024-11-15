@@ -14,6 +14,7 @@
  */
 
 #include "audio_device_manager.h"
+#include "avsession_log.h"
 
 namespace OHOS::AVSession {
 AudioDeviceManager &AudioDeviceManager::GetInstance()
@@ -38,5 +39,78 @@ bool AudioDeviceManager::GetVehicleA2dpConnectState()
         }
     }
     return isConnected;
+}
+
+void AudioDeviceManager::RegisterAudioDeviceChangeCallback(std::shared_ptr<MigrateAVSessionServer> migrateAVSession,
+    std::string deviceId)
+{
+    SLOGI("enter RegisterAudioDeviceChangeCallback");
+    if (isRegistered_) {
+        SLOGW("device change callback already registered");
+        return;
+    }
+    if (audioDeviceChangeCallback_ == nullptr) {
+        audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();
+    }
+    AudioStandard::AudioSystemManager *audioSystemManager =
+        AudioStandard::AudioSystemManager::GetInstance();
+    if (audioSystemManager == nullptr) {
+        SLOGE("audioSystemManager is null");
+        return;
+    }
+    audioSystemManager->SetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG,
+        audioDeviceChangeCallback_);
+    migrateSession_ = migrateAVSession;
+    isRegistered_ = true;
+    deviceId_ = deviceId;
+}
+
+void AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
+{
+    SLOGI("enter UnRegisterAudioDeviceChangeCallback");
+    AudioStandard::AudioSystemManager *audioSystemManager =
+        AudioStandard::AudioSystemManager::GetInstance();
+    if (audioSystemManager == nullptr) {
+        SLOGE("audioSystemManager is null");
+        return;
+    }
+    audioSystemManager->UnsetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
+    isRegistered_ = false;
+}
+
+void AudioDeviceManager::SendRemoteAvSessionInfo(const std::string &deviceId)
+{
+    if (migrateSession_ != nullptr) {
+        migrateSession_->OnConnectProxy(deviceId);
+    }
+}
+
+std::string AudioDeviceManager::GetDeviceId()
+{
+    return deviceId_;
+}
+
+void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeAction &deviceChangeAction)
+{
+    SLOGI("receive OnDeviceChange");
+    AudioStandard::AudioSystemManager *audioSystemManager =
+        AudioStandard::AudioSystemManager::GetInstance();
+    if (audioSystemManager == nullptr) {
+        SLOGE("audioSystemManager is null");
+        return;
+    }
+    if (AudioStandard::DeviceChangeType::DISCONNECT == deviceChangeAction.type) {
+        std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> deviceDescriptors =
+            deviceChangeAction.deviceDescriptors;
+        for (auto &device : deviceDescriptors) {
+            if (device != nullptr &&
+                AudioStandard::DeviceCategory::BT_CAR == device->deviceCategory_ &&
+                AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP == device->deviceType_) {
+                AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(
+                    AudioDeviceManager::GetInstance().GetDeviceId());
+                break;
+            }
+        }
+    }
 }
 }
