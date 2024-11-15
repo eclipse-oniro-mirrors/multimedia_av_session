@@ -1412,7 +1412,7 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
             values.erase(std::remove(values.begin(), values.end(), value));
         }
     }
-    if (values.size() >= (size_t)maxHistoryNums_) {
+    if (values.size() >= (size_t)maxAVQueueInfoLen) {
         values.erase(values.end() - 1);
     }
 
