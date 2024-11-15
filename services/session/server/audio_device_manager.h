@@ -43,6 +43,6 @@ private:
 class DeviceChangeCallback : public AudioStandard::AudioManagerDeviceChangeCallback {
 public:
     void OnDeviceChange(const AudioStandard::DeviceChangeAction& deviceChangeAction) override;
-}
+};
 }
 #endif

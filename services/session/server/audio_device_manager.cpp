@@ -42,7 +42,7 @@ bool AudioDeviceManager::GetVehicleA2dpConnectState()
     return isConnected;
 }
 
-void RegisterAudioDeviceChangeCallback(std::shared_ptr<MigrateAVSessionServer> migrateAVSession,
+void AudioDeviceManager::RegisterAudioDeviceChangeCallback(std::shared_ptr<MigrateAVSessionServer> migrateAVSession,
     std::string deviceId)
 {
     SLOGI("enter RegisterAudioDeviceChangeCallback");
@@ -66,7 +66,7 @@ void RegisterAudioDeviceChangeCallback(std::shared_ptr<MigrateAVSessionServer> m
     deviceId_ = deviceId;
 }
 
-void UnRegisterAudioDeviceChangeCallback()
+void AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
 {
     SLOGI("enter UnRegisterAudioDeviceChangeCallback");
     AudioStandard::AudioSystemManager *audioSystemManager =
@@ -79,12 +79,12 @@ void UnRegisterAudioDeviceChangeCallback()
     isRegistered_ = false;
 }
 
-void SendRemoteAvSessionInfo(const std::string &deviceId)
+void AudioDeviceManager::SendRemoteAvSessionInfo(const std::string &deviceId)
 {
     migrateSession_->OnConnectProxy(deviceId);
 }
 
-std::string GetDeviceId()
+std::string AudioDeviceManager::GetDeviceId()
 {
     return deviceId_;
 }
