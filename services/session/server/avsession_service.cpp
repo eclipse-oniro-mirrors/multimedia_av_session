@@ -1663,7 +1663,7 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
     }
     std::string newContent = values.dump();
     SLOGD("SaveAvQueueInfo::Dump json object finished");
-    if (!SaveStringToFileEx(GetAVQueueDir(), newContent)) {
+    if (!SaveStringToFileEx(GetAVQueueDir(userId), newContent)) {
         SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return false;
     }
@@ -1692,12 +1692,14 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
     }
     std::lock_guard avQueueFileLockGuard(avQueueFileReadWriteLock_);
     std::string oldContent;
-    if (!LoadStringFromFileEx(GetAVQueueDir(), oldContent)) {
+    int32_t userId = session.GetUserId();
+    SLOGI("AddAvQueueInfoToFile for bundleName:%{public}s,userId:%{public}d", bundleName.c_str(), userId);
+    if (!LoadStringFromFileEx(GetAVQueueDir(userId), oldContent)) {
         SLOGE("AddAvQueueInfoToFile read avqueueinfo fail, Return!");
         DoMetadataImgClean(meta);
         return;
     }
-    if (!SaveAvQueueInfo(oldContent, bundleName, meta, session.GetUserId())) {
+    if (!SaveAvQueueInfo(oldContent, bundleName, meta, userId)) {
         SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
         DoMetadataImgClean(meta);
         return;
