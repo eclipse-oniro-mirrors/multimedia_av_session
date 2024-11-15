@@ -80,7 +80,9 @@ void AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
 
 void AudioDeviceManager::SendRemoteAvSessionInfo(const std::string &deviceId)
 {
-    migrateSession_->OnConnectProxy(deviceId);
+    if (migrateSession_ != nullptr) {
+        migrateSession_->OnConnectProxy(deviceId);
+    }
 }
 
 std::string AudioDeviceManager::GetDeviceId()
