@@ -19,6 +19,7 @@
 #include "audio_system_manager.h"
 #include "audio_device_descriptor.h"
 #include "audio_device_info.h"
+#include "migrate_avsession_server.h"
 
 namespace OHOS::AVSession {
 class AudioDeviceManager {

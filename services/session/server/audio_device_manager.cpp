@@ -15,7 +15,6 @@
 
 #include "audio_device_manager.h"
 #include "avsession_log.h"
-#include "migrate_avsession_server.h"
 
 namespace OHOS::AVSession {
 AudioDeviceManager &AudioDeviceManager::GetInstance()
