@@ -122,7 +122,8 @@ void OHOS::AVSession::AvSessionServiceTests(const uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    SLOGI("the maximum length of size should not be verified");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
     for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
