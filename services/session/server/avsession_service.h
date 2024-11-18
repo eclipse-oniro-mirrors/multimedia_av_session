@@ -279,7 +279,7 @@ private:
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
-    void NotifyDeviceChange(const DeviceChangeAction& deviceChangeAction);
+    void NotifyDeviceChange();
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
         const sptr<ClientDeathRecipient> recipient);
@@ -341,7 +341,7 @@ private:
 
     void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 
-    void HandleDeviceChange(const AudioStandard::DeviceChangeAction& deviceChangeAction);
+    void HandleDeviceChange(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> &desc);
 
     __attribute__((no_sanitize("cfi"))) std::shared_ptr<RemoteSessionCommandProcess> GetService(
         const std::string& deviceId);

@@ -60,7 +60,6 @@ void OHOS::AVSession::AudioAdapterTest(uint8_t *data, size_t size)
     audioAdapter.GetRendererRunning(uid);
     audioAdapter.PauseAudioStream(uid, streamUsage);
     audioAdapter.OnRendererStateChange(infosExpected);
-    audioAdapter.OnDeviceChange(deviceChangeAction);
 }
 
 /* Fuzzer entry point */

@@ -24,7 +24,6 @@ char g_name[] = "testInfoName";
 char g_infoNetworkId[] = "testInfoNetworkId";
 char g_infoPkgName[] = "testInfoPkgName";
 
-static const int32_t MAX_CODE_LEN = 512;
 static const int32_t MIN_SIZE_NUM = 4;
 
 PeerSocketInfo info = {
@@ -97,7 +96,8 @@ void SoftbusSessionManagerOnRemoteRequest(uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    SLOGI("the maximum length of size should not be verified");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
     /* Run your code on data */

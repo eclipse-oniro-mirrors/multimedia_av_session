@@ -385,6 +385,42 @@ ohos_unittest("AVSessionServiceProxyTest") {
   external_deps = common_external_deps
 }
 
+ohos_unittest("AVSessionStubTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_stub_test.cpp" ]
+
+  include_dirs = [
+    "../../ipc/base/",
+    "../../ipc/proxy/",
+    "../../ipc/stub/",
+    "../../server/",
+    "../../server/migrate/",
+    "../../server/softbus/",
+    "../../server/remote/",
+    "../../../../interfaces/inner_api/native/session/include/",
+    "../../../../frameworks/native/session/include",
+    "../../adapter/",
+    "../../../../utils/include/",
+    "../",
+    "../remote",
+  ]
+
+  cflags_cc = [ "--coverage" ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = [
+    "../../../../frameworks/common:avsession_common",
+    "../../../../frameworks/native/session:avsession_client",
+    "../../../../utils:avsession_utils",
+    "../../../session:avsession_item",
+    "../../../session:avsession_service",
+  ]
+
+  external_deps = common_external_deps
+}
+
 ohos_unittest("AVSessionServiceStubPermissionTest") {
   module_out_path = module_output_path
 
@@ -808,7 +844,7 @@ ohos_unittest("AVSessionServiceTest") {
   }
 
   if (bluetooth_part_enable) {
-    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
   }
 }
@@ -1361,22 +1397,6 @@ if (castplus_cast_engine_enable) {
       "cast_engine:cast_engine_client",
     ]
   }
-}
-
-ohos_unittest("AVSessionStubTest") {
-  module_out_path = module_output_path
-
-  sources = [ "avsession_stub_test.cpp" ]
-
-  configs = [ ":module_private_config" ]
-
-  cflags_cc = [ "--coverage" ]
-
-  ldflags = [ "--coverage" ]
-
-  deps = common_deps
-
-  external_deps = common_external_deps
 }
 
 ###############################################################################

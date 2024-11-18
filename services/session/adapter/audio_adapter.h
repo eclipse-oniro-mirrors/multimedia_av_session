@@ -20,17 +20,21 @@
 #include <memory>
 #include <mutex>
 #include "audio_stream_manager.h"
+#include "audio_routing_manager.h"
 #include "audio_info.h"
 
 namespace OHOS::AVSession {
 using AudioRendererChangeInfos = std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>>;
 using DeviceChangeAction = AudioStandard::DeviceChangeAction;
+using AudioDeviceDescriptor = AudioStandard::AudioDeviceDescriptor;
 class AudioAdapter : public AudioStandard::AudioRendererStateChangeCallback,
                      public AudioStandard::AudioManagerDeviceChangeCallback,
+                     public AudioStandard::AudioPreferredOutputDeviceChangeCallback,
                      public std::enable_shared_from_this<AudioAdapter> {
 public:
     using StateListener = std::function<void(const AudioRendererChangeInfos& infos)>;
     using DeviceChangeListener = std::function<void(const DeviceChangeAction& deviceChangeAction)>;
+    using PreferOutputDeviceChangeListener = std::function<void(const std::vector<sptr<AudioDeviceDescriptor>> &desc)>;
     static AudioAdapter& GetInstance();
 
     AudioAdapter();
@@ -40,7 +44,7 @@ public:
 
     void AddStreamRendererStateListener(const StateListener& listener);
 
-    void AddDeviceChangeListener(const DeviceChangeListener& listener);
+    void AddDeviceChangeListener(const PreferOutputDeviceChangeListener& listener);
 
     int32_t MuteAudioStream(int32_t uid, int32_t pid);
 
@@ -48,11 +52,15 @@ public:
 
     int32_t MuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage);
 
+    int32_t UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage);
+
     int32_t PauseAudioStream(int32_t uid, AudioStandard::StreamUsage usage);
 
     void OnRendererStateChange(const AudioRendererChangeInfos& infos) override;
 
     void OnDeviceChange(const DeviceChangeAction& deviceChangeAction) override;
+
+    void OnPreferredOutputDeviceUpdated(const std::vector<sptr<AudioDeviceDescriptor>> &desc) override;
 
     bool GetRendererRunning(int32_t uid);
 
@@ -60,7 +68,7 @@ private:
     static std::shared_ptr<AudioAdapter> instance_;
     static std::once_flag onceFlag_;
     std::vector<StateListener> listeners_;
-    std::vector<DeviceChangeListener> deviceChangeListeners_;
+    std::vector<PreferOutputDeviceChangeListener> deviceChangeListeners_;
     const std::vector<AudioStandard::StreamUsage> BACKGROUND_MUTE_STREAM_USAGE {
         AudioStandard::STREAM_USAGE_MUSIC,
         AudioStandard::STREAM_USAGE_MOVIE,

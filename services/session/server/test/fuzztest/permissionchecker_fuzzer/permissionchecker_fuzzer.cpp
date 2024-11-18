@@ -22,7 +22,6 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
-static const int32_t MAX_CODE_LEN = 512;
 static const int32_t MIN_SIZE_NUM = 4;
 
 void OHOS::AVSession::CheckPermissionTest001()
@@ -64,7 +63,8 @@ void OHOS::AVSession::CheckSystemPermissionByUidTest001()
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    SLOGI("the maximum length of size should not be verified");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
     OHOS::AVSession::CheckPermissionTest001();

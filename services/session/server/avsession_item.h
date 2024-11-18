@@ -411,7 +411,6 @@ private:
     bool collaborationRejectFlag_ = false;
     bool applyUserResultFlag_ = false;
     bool applyResultFlag_ = false;
-    bool networkIdIsEmpty_ = false;
     bool waitUserDecisionFlag_ = false;
     bool mirrorToStreamFlag_ = false;
     std::string collaborationNeedNetworkId_;

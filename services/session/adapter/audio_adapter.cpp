@@ -47,8 +47,10 @@ void AudioAdapter::Init()
     if (ret != 0) {
         SLOGE("register audio renderer event listener failed");
     }
-    ret = AudioStandard::AudioSystemManager::GetInstance()->SetDeviceChangeCallback(
-        AudioStandard::DeviceFlag::ALL_DEVICES_FLAG, shared_from_this());
+    AudioStandard::AudioRendererInfo rendererInfo = {};
+    rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+    ret = AudioStandard::AudioRoutingManager::GetInstance()->SetPreferredOutputDeviceChangeCallback(
+        rendererInfo, shared_from_this());
     if (ret != 0) {
         SLOGE("register audio device changed event listener failed");
     }
@@ -59,7 +61,7 @@ void AudioAdapter::AddStreamRendererStateListener(const StateListener& listener)
     listeners_.push_back(listener);
 }
 
-void AudioAdapter::AddDeviceChangeListener(const DeviceChangeListener& listener)
+void AudioAdapter::AddDeviceChangeListener(const PreferOutputDeviceChangeListener& listener)
 {
     deviceChangeListeners_.push_back(listener);
 }
@@ -115,6 +117,18 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AudioAdapter::UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage)
+{
+    SLOGI("unmute uid=%{public}d stream usage %{public}d", uid, usage);
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
+        uid, AudioStandard::StreamSetState::STREAM_UNMUTE, usage);
+    if (ret != 0) {
+        SLOGE("unmute uid=%{public}d failed", uid);
+        return AVSESSION_ERROR;
+    }
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AudioAdapter::MuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage)
 {
     if (std::count(BACKGROUND_MUTE_STREAM_USAGE.begin(), BACKGROUND_MUTE_STREAM_USAGE.end(), usage) == 0) {
@@ -152,9 +166,13 @@ void AudioAdapter::OnRendererStateChange(const AudioRendererChangeInfos& infos)
 
 void AudioAdapter::OnDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
+}
+
+void AudioAdapter::OnPreferredOutputDeviceUpdated(const std::vector<sptr<AudioDeviceDescriptor>> &desc)
+{
     for (const auto& listener : deviceChangeListeners_) {
         if (listener) {
-            listener(deviceChangeAction);
+            listener(desc);
         }
     }
 }

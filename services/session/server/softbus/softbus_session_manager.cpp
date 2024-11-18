@@ -18,6 +18,7 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "migrate_avsession_constant.h"
+#include "audio_device_manager.h"
 
 namespace OHOS::AVSession {
 SoftbusSessionManager& SoftbusSessionManager::GetInstance()
@@ -109,6 +110,10 @@ int32_t SoftbusSessionManager::SendMessage(int32_t socket, const std::string &da
 
 int32_t SoftbusSessionManager::SendBytes(int32_t socket, const std::string &data)
 {
+    if (AudioDeviceManager::GetInstance().GetVehicleA2dpConnectState()) {
+        SLOGE("car a2dp online, dont send.");
+        return AVSESSION_ERROR;
+    }
     if (socket <= 0 || data == "") {
         SLOGE("the params invalid, unable to send sendBytes by session.");
         return AVSESSION_ERROR;
