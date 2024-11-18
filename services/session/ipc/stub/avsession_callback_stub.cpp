@@ -222,7 +222,8 @@ int32_t AVSessionCallbackStub::HandleOnCommonCommand(MessageParcel& data, Messag
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnCommonCommand");
     auto commonCommand = data.ReadString();
     sptr commonArgs = data.ReadParcelable<AAFwk::WantParams>();
-    CHECK_AND_RETURN_RET_LOG(commonArgs != nullptr, ERR_NONE, "Read common args failed");
+    CHECK_AND_RETURN_RET_LOG(commonArgs != nullptr && commonArgs.get() != nullptr,
+        ERR_NONE, "Read common args failed");
     OnCommonCommand(commonCommand, *commonArgs);
     return ERR_NONE;
 }

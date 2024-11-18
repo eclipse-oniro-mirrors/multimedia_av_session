@@ -27,6 +27,7 @@ class AVSessionPixelMapAdapter {
 public:
     static std::shared_ptr<Media::PixelMap> ConvertFromInner(const std::shared_ptr<AVSessionPixelMap>& innerPixelMap);
     static std::shared_ptr<AVSessionPixelMap> ConvertToInner(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    static std::shared_ptr<AVSessionPixelMap> SetImgBuffer(const std::shared_ptr<Media::PixelMap>& pixelMapTemp);
     static std::shared_ptr<AVSessionPixelMap>
         ConvertToInnerWithLimitedSize(const std::shared_ptr<Media::PixelMap>& pixelMap);
     static bool CopyPixMapToDst(Media::PixelMap &source, void* dstPixels, uint32_t bufferSize);
