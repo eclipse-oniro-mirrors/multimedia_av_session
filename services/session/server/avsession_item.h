@@ -85,6 +85,8 @@ public:
 
     void ListenCollaborationApplyResult();
 
+    void CancleAVPlayerInSink();
+
     void ListenCollaborationOnStop();
 #endif
 
