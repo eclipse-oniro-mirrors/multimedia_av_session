@@ -296,10 +296,8 @@ void AVMediaDescription::Reset()
     title_ = "";
     subtitle_ = "";
     description_ = "";
-    delete icon_;
     icon_ = nullptr;
     iconUri_ = "";
-    delete extras_;
     extras_ = nullptr;
     mediaType_ = "";
     mediaSize_ = 0;

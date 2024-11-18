@@ -129,7 +129,6 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::SetImgBuffer(
         pixelMapTemp->GetPixels() + pixelDataSize);
     innerPixelMap->SetInnerImgBuffer(imgBuffer);
     imgBuffer.clear();
-    free(dataAddr);
     return innerPixelMap;
 }
 
@@ -162,7 +161,9 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
         originalPixelMapBytes_ = pixelMapTemp->GetByteCount();
         SLOGI("imgBufferSize exceeds limited: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
     }
-    return SetImgBuffer(pixelMapTemp);
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = SetImgBuffer(pixelMapTemp);
+    free(dataAddr);
+    return innerPixelMap;
 }
 
 std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(
