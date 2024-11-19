@@ -18,6 +18,7 @@
 
 #include "av_router.h"
 #include "avcast_provider_manager.h"
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
 class AVRouterImpl : public AVRouter {
@@ -81,7 +82,7 @@ public:
     int32_t StopCastSession(const int64_t castHandle) override;
 
     int32_t RegisterCallback(int64_t castHandleconst,
-        std::shared_ptr<IAVRouterListener> callback, std::string sessionId) override;
+        std::shared_ptr<IAVRouterListener> callback, std::string sessionId, DeviceInfo deviceInfo) override;
 
     int32_t UnRegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVRouterListener> callback, std::string sessionId) override;
@@ -90,11 +91,15 @@ public:
 
     int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) override;
 
-    int32_t GetMirrorCastId(const int64_t castHandle) override;
+    int64_t GetMirrorCastHandle() override;
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
+
+    void ClearOutputDevice(std::string sessionId) override;
+
+    void DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo) override;
 
 protected:
 
@@ -107,6 +112,7 @@ private:
     const std::string deviceStateConnection = "CONNECT_SUCC";
     int32_t providerNumber_ = 0;
     std::map<int64_t, CastHandleInfo> castHandleToInfoMap_;
+    std::map<std::string, std::shared_ptr<IAVRouterListener>> mirrorSessionMap_;
     bool hasSessionAlive_ = false;
     int32_t providerNumberEnableDefault_ = 1;
     int32_t providerNumberDisable_ = 0;

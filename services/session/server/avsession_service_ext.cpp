@@ -342,6 +342,11 @@ void AVSessionService::NotifyMirrorToStreamCast()
             MirrorToStreamCast(session);
         }
     }
+    if (castServiceNameMapState_["HuaweiCast"] == deviceStateDisconnection ||
+        castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateDisconnection) {
+        DeviceInfo localDeviceInfo;
+        AVRouter::GetInstance().SetServiceAllConnectState(-1, localDeviceInfo);
+    }
 }
 
 __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)

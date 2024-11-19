@@ -189,15 +189,15 @@ public:
      * @return { bool } Whether the operation was successful.
      * @since 11
     */
-    virtual bool SetStreamState(int32_t castId, DeviceInfo deviceInfo) = 0;
+    virtual bool SetStreamState(int64_t castHandle, DeviceInfo deviceInfo) = 0;
 
     /**
-     * @brief get mirror castid.
+     * @brief get mirror castHandle.
      *
-     * @return { int32_t } mirror castid.
+     * @return { int64_t } mirror castHandle.
      * @since 11
     */
-    virtual int32_t GetMirrorCastId() = 0;
+    virtual int64_t GetMirrorCastHandle() = 0;
 
     /**
      * @brief get remote networkId.
