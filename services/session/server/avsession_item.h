@@ -86,6 +86,8 @@ public:
     void ListenCollaborationApplyResult();
 
     void ListenCollaborationOnStop();
+
+    void CancleAVPlayerInSink();
 #endif
 
     std::string GetSessionId() override;
@@ -375,6 +377,7 @@ private:
 
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
+    int32_t castDisconnectStateInAVSession_ = 6;
     int32_t removeCmdStep_ = 1000;
 
     volatile bool isDestroyed_ = false;

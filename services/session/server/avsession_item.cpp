@@ -1166,25 +1166,6 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     }
 }
 
-void AVSessionItem::ListenCollaborationOnStop()
-{
-    SLOGI("enter ListenCollaborationOnStop");
-    CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
-        if (newCastState == castConnectStateForConnected_) {
-            if (descriptor_.sessionTag_ == "RemoteCast") {
-                OutputDeviceInfo outputDeviceInfo;
-                DeviceInfo deviceInfo;
-                deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-                deviceInfo.deviceId_ = "0";
-                deviceInfo.deviceName_ = "LocalDevice";
-                SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
-                OnCastStateChange(castConnectStateForDisconnect_, deviceInfo);
-            }
-            StopCast();
-        }
-    });
-}
-
 void AVSessionItem::DealLocalState(int32_t castState)
 {
     if (castState == ConnectionState::STATE_DISCONNECTED) {
@@ -1203,6 +1184,40 @@ void AVSessionItem::DealLocalState(int32_t castState)
             isSwitchNewDevice_ = false;
         }
     }
+}
+
+void AVSessionItem::CancleAVPlayerInSink()
+{
+    if (descriptor_.sessionTag_ == "RemoteCast") {
+        OutputDeviceInfo outputDeviceInfo;
+        DeviceInfo deviceInfo;
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        deviceInfo.deviceId_ = "0";
+        deviceInfo.deviceName_ = "LocalDevice";
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+        SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
+        DealDisconnect(deviceInfo, true);
+        {
+            std::lock_guard controllersLockGuard(controllersLock_);
+            for (const auto& controller : controllers_) {
+                if (controller.second != nullptr) {
+                    controller.second->HandleOutputDeviceChange(castDisconnectStateInAVSession_,
+                        outputDeviceInfo);
+                }
+            }
+        }
+    }
+}
+
+void AVSessionItem::ListenCollaborationOnStop()
+{
+    SLOGI("enter ListenCollaborationOnStop");
+    CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
+        if (newCastState == castConnectStateForConnected_) {
+            CancleAVPlayerInSink();
+            StopCast();
+        }
+    });
 }
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
