@@ -123,7 +123,7 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
         return false;
     }
     int32_t deviceInfoSize;
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfoSize), false, "read deviceInfoSize failed");
     int32_t maxDeviceInfoSize = 1000;
     CHECK_AND_RETURN_RET_LOG((deviceInfoSize >= 0) && (deviceInfoSize < maxDeviceInfoSize),
         false, "deviceInfoSize is illegal");

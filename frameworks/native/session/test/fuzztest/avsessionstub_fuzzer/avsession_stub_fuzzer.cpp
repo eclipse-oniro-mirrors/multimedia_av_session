@@ -38,7 +38,7 @@ static constexpr int32_t MAX_CODE_TEST = 30;
 static constexpr int32_t MAX_CODE_LEN  = 512;
 static constexpr int32_t MIN_SIZE_NUM  = 4;
 
-shared_ptr<AVSessionStubDemo> g_AVSessionStubDemo(nullptr);
+static shared_ptr<AVSessionStubDemo> g_AVSessionStubDemo(nullptr);
 class AVSessionStubDemo : public AVSessionStub {
 public:
     std::string GetSessionId() override { return ""; };
