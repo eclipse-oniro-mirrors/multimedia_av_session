@@ -1166,6 +1166,26 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     }
 }
 
+void AVSessionItem::DealLocalState(int32_t castState)
+{
+    if (castState == ConnectionState::STATE_DISCONNECTED) {
+        if (!isSwitchNewDevice_) {
+            OutputDeviceInfo outputDeviceInfo;
+            DeviceInfo deviceInfo;
+            deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+            deviceInfo.deviceId_ = "0";
+            deviceInfo.deviceName_ = "LocalDevice";
+            outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+            SetOutputDevice(outputDeviceInfo);
+        } else {
+            if (newOutputDeviceInfo_.deviceInfos_.size() > 0) {
+                SubStartCast(newOutputDeviceInfo_);
+            }
+            isSwitchNewDevice_ = false;
+        }
+    }
+}
+
 void AVSessionItem::CancleAVPlayerInSink()
 {
     if (descriptor_.sessionTag_ == "RemoteCast") {
@@ -1198,26 +1218,6 @@ void AVSessionItem::ListenCollaborationOnStop()
             StopCast();
         }
     });
-}
-
-void AVSessionItem::DealLocalState(int32_t castState)
-{
-    if (castState == ConnectionState::STATE_DISCONNECTED) {
-        if (!isSwitchNewDevice_) {
-            OutputDeviceInfo outputDeviceInfo;
-            DeviceInfo deviceInfo;
-            deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-            deviceInfo.deviceId_ = "0";
-            deviceInfo.deviceName_ = "LocalDevice";
-            outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-            SetOutputDevice(outputDeviceInfo);
-        } else {
-            if (newOutputDeviceInfo_.deviceInfos_.size() > 0) {
-                SubStartCast(newOutputDeviceInfo_);
-            }
-            isSwitchNewDevice_ = false;
-        }
-    }
 }
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)

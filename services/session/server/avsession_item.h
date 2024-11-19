@@ -85,9 +85,9 @@ public:
 
     void ListenCollaborationApplyResult();
 
-    void CancleAVPlayerInSink();
-
     void ListenCollaborationOnStop();
+
+    void CancleAVPlayerInSink();
 #endif
 
     std::string GetSessionId() override;
