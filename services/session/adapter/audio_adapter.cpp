@@ -42,8 +42,8 @@ AudioAdapter::~AudioAdapter()
 void AudioAdapter::Init()
 {
     SLOGI("register audio renderer event listener");
-    auto ret = AudioStandard::AudioStreamManager::GetInstance()->RegisterAudioRendererEventListener(getpid(),
-                                                                                                    shared_from_this());
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->RegisterAudioRendererEventListener(
+        getpid(), shared_from_this());
     if (ret != 0) {
         SLOGE("register audio renderer event listener failed");
     }
@@ -69,7 +69,8 @@ void AudioAdapter::AddDeviceChangeListener(const PreferOutputDeviceChangeListene
 int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
 {
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
-    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    auto ret =
+        AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     if (ret != 0) {
         SLOGE("get renderer state failed");
         return AVSESSION_ERROR;
@@ -97,7 +98,8 @@ int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
 int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
 {
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
-    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    auto ret =
+        AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     if (ret != 0) {
         SLOGE("get renderer state failed");
         return AVSESSION_ERROR;
@@ -168,7 +170,7 @@ void AudioAdapter::OnDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
 }
 
-void AudioAdapter::OnPreferredOutputDeviceUpdated(const std::vector<sptr<AudioDeviceDescriptor>> &desc)
+void AudioAdapter::OnPreferredOutputDeviceUpdated(const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc)
 {
     for (const auto& listener : deviceChangeListeners_) {
         if (listener) {
@@ -180,7 +182,8 @@ void AudioAdapter::OnPreferredOutputDeviceUpdated(const std::vector<sptr<AudioDe
 bool AudioAdapter::GetRendererRunning(int32_t uid)
 {
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
-    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    auto ret =
+        AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     if (ret != 0) {
         SLOGE("get renderer state failed");
         return false;

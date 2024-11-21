@@ -1088,16 +1088,19 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             isSwitchNewDevice_ = true;
             newOutputDeviceInfo_ = outputDeviceInfo;
             StopCast();
+            int32_t flag = CastAddToCollaboration(outputDeviceInfo);
+            CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, AVSESSION_ERROR, "collaboration to start cast fail");
             return AVSESSION_SUCCESS;
         }
+    } else {
+        int32_t flag = CastAddToCollaboration(outputDeviceInfo);
+        CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, AVSESSION_ERROR, "collaboration to start cast fail");
     }
     return SubStartCast(outputDeviceInfo);
 }
 
 int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
-    int32_t flag = CastAddToCollaboration(outputDeviceInfo);
-    CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, AVSESSION_ERROR, "collaboration to start cast fail");
     int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_, GetSessionId());
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
@@ -1260,11 +1263,12 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             descriptor_.sessionTag_ == "RemoteCast") {
             SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
             Destroy();
+        } else {
+            AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
+                DealLocalState(castState);
+                }, "DealLocalState", 0);
         }
     }
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
-        DealLocalState(castState);
-        }, "DealLocalState", 0);
 }
 
 void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
@@ -1908,6 +1912,7 @@ void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
     int32_t connectionStateConnected = 1;
     HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
     std::lock_guard controllersLockGuard(controllersLock_);
+    CHECK_AND_RETURN_LOG(controllers_.size() > 0, "handle with no controller, return");
     for (const auto& controller : controllers_) {
         if (controller.second != nullptr) {
             (controller.second)->HandleOutputDeviceChange(connectionStateConnected, descriptor_.outputDeviceInfo_);
