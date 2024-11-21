@@ -73,6 +73,7 @@ enum AVSessionTraceTaskId : int32_t {
     NAPI_PROVIDE_KEY_RESPONSE_TASK_ID = 35,
     NAPI_START_DEVICE_LOGGING_TASK_ID = 36,
     NAPI_STOP_DEVICE_LOGGING_TASK_ID = 37,
+    NAPI_CAST_PICKER_HELPER_TASK_ID = 38,
 };
 #ifdef ENBABLE_AVSESSION_TRACE_CONTROL
 class __attribute__((visibility("default"))) AVSessionTrace {
