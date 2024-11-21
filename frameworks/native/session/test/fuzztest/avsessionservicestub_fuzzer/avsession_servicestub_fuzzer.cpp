@@ -64,6 +64,9 @@ void AvSessionServiceFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* da
 
 void AvSessionServiceFuzzer::FuzzTests(const uint8_t* data, size_t size)
 {
+    if (size > 0) {
+        SLOGI("data[0] = %{public}d", data[0]);
+    }
     sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
 
     MessageParcel dataMessageParcel;

@@ -836,6 +836,9 @@ void SendSystemAVKeyEvent001(const uint8_t* data, size_t size)
 void SendSystemAVKeyEvent002(const uint8_t* data, size_t size)
 {
     SLOGI("SendSystemAVKeyEvent001 begin!");
+    if (size > 0) {
+        SLOGI("data[0] = %{public}d", data[0]);
+    }
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HOME);
     keyEvent->SetActionTime(1);
