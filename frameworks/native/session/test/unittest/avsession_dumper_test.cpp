@@ -536,8 +536,9 @@ HWTEST_F(AVSessionDumperTest, SetDeviceInfo001, TestSize.Level1)
  */
 HWTEST_F(AVSessionDumperTest, GetAudioDescriptorByDeviceId001, TestSize.Level1)
 {
-    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> castAudioDescriptors;
-    sptr<AudioStandard::AudioDeviceDescriptor> des = new AudioStandard::AudioDeviceDescriptor();
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> castAudioDescriptors;
+    std::shared_ptr<AudioStandard::AudioDeviceDescriptor> des =
+        std::make_shared<AudioStandard::AudioDeviceDescriptor>();
     AudioStandard::AudioDeviceDescriptor res;
     des->deviceId_ = 12;
     castAudioDescriptors.push_back(des);
@@ -553,8 +554,9 @@ HWTEST_F(AVSessionDumperTest, GetAudioDescriptorByDeviceId001, TestSize.Level1)
  */
 HWTEST_F(AVSessionDumperTest, GetAudioDescriptorByDeviceId002, TestSize.Level1)
 {
-    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> castAudioDescriptors;
-    sptr<AudioStandard::AudioDeviceDescriptor> des = new AudioStandard::AudioDeviceDescriptor();
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> castAudioDescriptors;
+    std::shared_ptr<AudioStandard::AudioDeviceDescriptor> des =
+        std::make_shared<AudioStandard::AudioDeviceDescriptor>();
     AudioStandard::AudioDeviceDescriptor res;
     des->deviceId_ = 11;
     castAudioDescriptors.push_back(des);
