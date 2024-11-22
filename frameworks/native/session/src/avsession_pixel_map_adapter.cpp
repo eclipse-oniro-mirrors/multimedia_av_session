@@ -151,7 +151,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     if (!CopyPixMapToDst(*pixelMap, dataAddr, dataSize)) {
         SLOGE("CopyPixMapToDst failed");
         free(dataAddr);
-        reutrn nullptr;
+        return nullptr;
     }
     pixelMapTemp->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
     if (originalPixelMapBytes_ > MAX_PIXEL_BUFFER_SIZE) {
@@ -185,7 +185,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
     if (!CopyPixMapToDst(*pixelMap, dataAddr, dataSize)) {
         SLOGE("CopyPixMapToDst failed");
         free(dataAddr);
-        reutrn nullptr;
+        return nullptr;
     }
     pixelMapTemp->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
     if (originalPixelMapBytes_ > LIMITED_PIXEL_BUFFER_SIZE) {
