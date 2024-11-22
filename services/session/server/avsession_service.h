@@ -260,6 +260,8 @@ public:
 
     void NotifyMigrateStop(const std::string &deviceId);
 
+    void InitCastEngineService();
+
 private:
     void CheckBrEnable();
 
@@ -334,8 +336,6 @@ private:
     void InitCommonEventService();
 
     void InitCollaboration();
-
-    void InitCastEngineService();
 
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
     
