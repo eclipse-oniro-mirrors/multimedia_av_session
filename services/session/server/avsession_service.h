@@ -333,6 +333,10 @@ private:
 
     void InitCommonEventService();
 
+    void InitCollaboration();
+
+    void InitCastEngineService();
+
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
     
     void RefreshFocusSessionSort(sptr<AVSessionItem> &session);
