@@ -136,6 +136,9 @@ void GetDeviceInfoTest(const uint8_t* data, size_t size)
 
 void AvSessionServiceExternalCallTest(const uint8_t* data, size_t size)
 {
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     if (avsessionService_ == nullptr) {
         SLOGI("check service null, try create");
         avsessionService_ = new AVSessionService(AVSESSION_SERVICE_ID);
@@ -199,6 +202,9 @@ void AvSessionServiceGetAVQueueInfosTest(const uint8_t* data, size_t size,
 void AvSessionServiceGetDescriptorsTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     std::string systemAbilityId(reinterpret_cast<const char *>(data), size);
     std::vector<AVSessionDescriptor> descriptors;
     AVSessionDescriptor descriptor;
@@ -231,6 +237,9 @@ void AvSessionServiceAVPlaybackTest(const uint8_t* data, size_t size,
 void DoMetadataImgCleanTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     AVMetaData meta = avsessionHere_->GetMetaData();
 
     service->DoMetadataImgClean(meta);
@@ -346,6 +355,9 @@ void AvSessionServiceClientTest(const uint8_t* data, size_t size,
 void NotifyTopSessionChangedTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     std::vector<AVSessionDescriptor> descriptors;
     AVSessionDescriptor descriptor;
 
@@ -422,6 +434,9 @@ void NotifyDeviceAvailable001(const uint8_t* data, size_t size)
     SLOGI("NotifyDeviceAvailable001 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("NotifyDeviceAvailable001 in!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     OutputDeviceInfo outputDeviceInfo;
     OHOS::AVSession::DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = 1;
@@ -437,6 +452,9 @@ void NotifyMirrorToStreamCast001(const uint8_t* data, size_t size)
     SLOGI("NotifyMirrorToStreamCast001 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("NotifyMirrorToStreamCast001 in!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->NotifyMirrorToStreamCast();
 #endif
     SLOGI("NotifyMirrorToStreamCast001 end!");
@@ -447,6 +465,9 @@ void NotifyMirrorToStreamCast002(const uint8_t* data, size_t size)
     SLOGI("NotifyMirrorToStreamCast002 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("NotifyMirrorToStreamCast002 in!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->UpdateTopSession(avsessionHere_);
     avsessionService_->NotifyMirrorToStreamCast();
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -459,6 +480,9 @@ void NotifyMirrorToStreamCast003(const uint8_t* data, size_t size)
     SLOGI("NotifyMirrorToStreamCast003 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("NotifyMirrorToStreamCast002 in!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->UpdateTopSession(avsessionHere_);
     avsessionService_->NotifyMirrorToStreamCast();
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -469,6 +493,9 @@ void NotifyMirrorToStreamCast003(const uint8_t* data, size_t size)
 void RefreshFocusSessionSort001(const uint8_t* data, size_t size)
 {
     SLOGI("RefreshFocusSessionSort001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->RefreshFocusSessionSort(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("RefreshFocusSessionSort001 end!");
@@ -477,6 +504,9 @@ void RefreshFocusSessionSort001(const uint8_t* data, size_t size)
 void SelectSessionByUid001(const uint8_t* data, size_t size)
 {
     SLOGI("SelectSessionByUid001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     AudioRendererChangeInfo info = {};
     info.clientUID = 0;
     avsessionService_->SelectSessionByUid(info);
@@ -487,6 +517,9 @@ void SelectSessionByUid001(const uint8_t* data, size_t size)
 void SelectSessionByUid002(const uint8_t* data, size_t size)
 {
     SLOGI("SelectSessionByUid002 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     AudioRendererChangeInfo info = {};
     info.clientUID = avsessionHere_->GetUid();
 
@@ -505,6 +538,9 @@ void SelectSessionByUid002(const uint8_t* data, size_t size)
 void InitBMS001(const uint8_t* data, size_t size)
 {
     SLOGI("InitBMS001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->InitBMS();
     SLOGI("InitBMS001 end!");
 }
@@ -514,6 +550,9 @@ void ReleaseCastSession001(const uint8_t* data, size_t size)
     SLOGI("ReleaseCastSession001 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("ReleaseCastSession001 in!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->ReleaseCastSession();
 #endif
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -525,6 +564,9 @@ void CreateSessionByCast001(const uint8_t* data, size_t size)
     SLOGI("CreateSessionByCast001 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("CreateSessionByCast001 in!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->CreateSessionByCast(0);
     avsessionService_->ClearSessionForClientDiedNoLock(getpid());
 #endif
@@ -536,6 +578,9 @@ void MirrorToStreamCast001(const uint8_t* data, size_t size)
     SLOGI("MirrorToStreamCast001 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("MirrorToStreamCast001 in!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->is2in1_ = true;
     avsessionService_->MirrorToStreamCast(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -548,6 +593,9 @@ void MirrorToStreamCast002(const uint8_t* data, size_t size)
     SLOGI("MirrorToStreamCast002 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("MirrorToStreamCast002 in!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->is2in1_ = false;
     avsessionService_->MirrorToStreamCast(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -560,6 +608,9 @@ void MirrorToStreamCast003(const uint8_t* data, size_t size)
     SLOGI("MirrorToStreamCast003 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("MirrorToStreamCast003 in!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->is2in1_ = true;
     avsessionService_->MirrorToStreamCast(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -570,6 +621,9 @@ void MirrorToStreamCast003(const uint8_t* data, size_t size)
 void SaveSessionInfoInFile001(const uint8_t* data, size_t size)
 {
     SLOGI("SaveSessionInfoInFile001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->SaveSessionInfoInFile(avsessionHere_->GetSessionId(),
         "audio", elementName);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -589,6 +643,9 @@ void StartDefaultAbilityByCall001(const uint8_t* data, size_t size)
 void GetHistoricalAVQueueInfos001(const uint8_t* data, size_t size)
 {
     SLOGI("GetHistoricalAVQueueInfos001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     std::vector<AVQueueInfo> avQueueInfos_;
     avsessionService_->GetHistoricalAVQueueInfos(0, 0, avQueueInfos_);
     SLOGI("GetHistoricalAVQueueInfos001 end!");
@@ -597,6 +654,9 @@ void GetHistoricalAVQueueInfos001(const uint8_t* data, size_t size)
 void SaveAvQueueInfo001(const uint8_t* data, size_t size)
 {
     SLOGI("SaveAvQueueInfo001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     AVMetaData meta = avsessionHere_->GetMetaData();
     std::string oldContent;
     if (!avsessionService_->LoadStringFromFileEx(avsessionService_->GetAVQueueDir(), oldContent)) {
@@ -612,6 +672,9 @@ void SaveAvQueueInfo001(const uint8_t* data, size_t size)
 void AddAvQueueInfoToFile001(const uint8_t* data, size_t size)
 {
     SLOGI("AddAvQueueInfoToFile001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->AddAvQueueInfoToFile(*avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     SLOGI("AddAvQueueInfoToFile001 end!");
@@ -620,6 +683,9 @@ void AddAvQueueInfoToFile001(const uint8_t* data, size_t size)
 void StartAVPlayback001(const uint8_t* data, size_t size)
 {
     SLOGI("StartAVPlayback001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME");
     SLOGI("StartAVPlayback001 end!");
 }
@@ -627,6 +693,9 @@ void StartAVPlayback001(const uint8_t* data, size_t size)
 void GetSubNode001(const uint8_t* data, size_t size)
 {
     SLOGI("GetSubNode001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     nlohmann::json value;
     value["bundleName"] = g_testAnotherBundleName;
     avsessionService_->GetSubNode(value, "FAKE_NAME");
@@ -636,6 +705,9 @@ void GetSubNode001(const uint8_t* data, size_t size)
 void DeleteHistoricalRecord001(const uint8_t* data, size_t size)
 {
     SLOGI("DeleteHistoricalRecord001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     avsessionService_->DeleteHistoricalRecord(g_testAnotherBundleName);
     SLOGI("DeleteHistoricalRecord001 end!");
 }
@@ -643,6 +715,9 @@ void DeleteHistoricalRecord001(const uint8_t* data, size_t size)
 void Dump001(const uint8_t* data, size_t size)
 {
     SLOGI("Dump001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     std::vector<std::u16string> argsList;
     avsessionService_->Dump(1, argsList);
     SLOGI("Dump001 end!");
@@ -651,6 +726,9 @@ void Dump001(const uint8_t* data, size_t size)
 void ProcessCastAudioCommand001(const uint8_t* data, size_t size)
 {
     SLOGI("ProcessCastAudioCommand001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     std::string sourceSessionInfo = "SOURCE";
     std::string sinkSessionInfo = " SINK";
     avsessionService_->ProcessCastAudioCommand(
@@ -711,6 +789,9 @@ void ConvertKeyCodeToCommand001(const uint8_t* data, size_t size)
 void HandleDeviceChange001(const uint8_t* data, size_t size)
 {
     SLOGI("HandleDeviceChange001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     std::vector<std::shared_ptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
     std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
     descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
@@ -722,6 +803,9 @@ void HandleDeviceChange001(const uint8_t* data, size_t size)
 void HandleDeviceChange002(const uint8_t* data, size_t size)
 {
     SLOGI("HandleDeviceChange002 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     DeviceChangeAction deviceChange;
     std::vector<std::shared_ptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
     std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
@@ -738,6 +822,9 @@ void HandleDeviceChange002(const uint8_t* data, size_t size)
 void SendSystemAVKeyEvent001(const uint8_t* data, size_t size)
 {
     SLOGI("SendSystemAVKeyEvent001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HEADSETHOOK);
     keyEvent->SetActionTime(1);
@@ -749,6 +836,9 @@ void SendSystemAVKeyEvent001(const uint8_t* data, size_t size)
 void SendSystemAVKeyEvent002(const uint8_t* data, size_t size)
 {
     SLOGI("SendSystemAVKeyEvent001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HOME);
     keyEvent->SetActionTime(1);
@@ -760,6 +850,9 @@ void SendSystemAVKeyEvent002(const uint8_t* data, size_t size)
 void GetTrustedDeviceName001(const uint8_t* data, size_t size)
 {
     SLOGI("GetTrustedDeviceName001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     std::string networkId = "networkId";
     std::string deviceName = "LocalDevice";
     avsessionService_->GetTrustedDeviceName(networkId, deviceName);
@@ -778,6 +871,9 @@ void GetTrustedDeviceName002(const uint8_t* data, size_t size)
 void GetService001(const uint8_t* data, size_t size)
 {
     SLOGD("GetService001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     std::string deviceId = "deviceId";
     avsessionService_->GetService(deviceId);
     SLOGD("GetService001 end!");
@@ -786,6 +882,9 @@ void GetService001(const uint8_t* data, size_t size)
 void SetDeviceInfo001(const uint8_t* data, size_t size)
 {
     SLOGD("SetDeviceInfo001 begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     std::vector<AudioStandard::AudioDeviceDescriptor> castAudioDescriptors;
     AudioStandard::AudioDeviceDescriptor des;
     castAudioDescriptors.push_back(des);
@@ -797,6 +896,9 @@ void SetDeviceInfo001(const uint8_t* data, size_t size)
 void OnStateChangedTest(const uint8_t* data, size_t size)
 {
     SLOGD("OnStateChangedTest begin!");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     DetectBluetoothHostObserver detectBluetoothHostObserver(avsessionService_);
     int transport = OHOS::Bluetooth::BTTransport::ADAPTER_BREDR;
     int status = OHOS::Bluetooth::BTStateID::STATE_TURN_ON;
@@ -852,6 +954,9 @@ void RemoveInnerSessionListener001(const uint8_t* data, size_t size)
 
 void EventSubscriberTest(const uint8_t* data, size_t size)
 {
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     OHOS::EventFwk::CommonEventData eventData;
     string action = OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON;
     OHOS::AAFwk::Want want = eventData.GetWant();
@@ -900,6 +1005,9 @@ void SetScreenTest(const uint8_t* data, size_t size,
 void OnRemoteDiedTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     wptr<IRemoteObject> object = nullptr;
     auto func = []() {};
     sptr<ClientDeathRecipient> recipient = new ClientDeathRecipient(func);
@@ -913,6 +1021,9 @@ void OnRemoteDiedTest(const uint8_t* data, size_t size,
 void CheckAncoAudioTest(const uint8_t* data, size_t size,
     sptr<AVSessionService> service)
 {
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
     if (service == nullptr) {
         SLOGE("service is null, return");
         return;
