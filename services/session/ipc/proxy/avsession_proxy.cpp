@@ -332,8 +332,10 @@ int32_t AVSessionProxy::GetAVQueueItems(std::vector<AVQueueItem>& items)
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         std::vector<AVQueueItem> items_;
+        int32_t maxItemNumber = 1000; // A maximum of 1000 queue items can be processed at a time
         int32_t itemNum = reply.ReadInt32();
-        CHECK_AND_RETURN_RET_LOG(itemNum >= 0, ERR_UNMARSHALLING, "read int32 itemNum failed");
+        CHECK_AND_RETURN_RET_LOG((itemNum >= 0) && (itemNum < maxItemNumber),
+            ERR_UNMARSHALLING, "read int32 itemNum failed");
         for (int32_t i = 0; i < itemNum; i++) {
             AVQueueItem *item = reply.ReadParcelable<AVQueueItem>();
             if (item == nullptr) {

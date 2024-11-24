@@ -133,7 +133,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAVMetaData failed");
 
     int twoImageLength = reply.ReadInt32();
-    if (twoImageLength == 0) {
+    if (twoImageLength <= 0 || twoImageLength > MAX_IMAGE_SIZE) {
         sptr<AVMetaData> data_ = reply.ReadParcelable<AVMetaData>();
         CHECK_AND_RETURN_RET_LOG(data_ != nullptr, ERR_UNMARSHALLING, "read AVMetaData failed");
         data = *data_;
@@ -155,6 +155,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     std::vector<uint8_t> mediaImageBuffer(buffer, buffer + mediaImageLength);
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
     data.SetMediaImage(mediaPixelMap);
+    
     if (twoImageLength > mediaImageLength) {
         std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
         CHECK_AND_RETURN_RET_LOG(avQueuePixelMap != nullptr, AVSESSION_ERROR, "avQueuePixelMap new fail");
