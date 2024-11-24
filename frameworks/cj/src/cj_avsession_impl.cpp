@@ -17,43 +17,52 @@
 
 #include "avsession_log.h"
 #include "avsession_manager.h"
+#include "avsession_errors.h"
 #include "cj_avsession_utils.h"
 #include "cj_avsession_manager_impl.h"
 #include "cj_avsession_controller_impl.h"
+#include "cj_avsession_cast_controller_impl.h"
 
 namespace OHOS::AVSession {
-
-template<class NT, class CJT>
-int32_t CJAVSessionSetterCStruct(
-    std::function<int32_t(NT&)> method, CJT& cj, std::string method_name)
-{
-    NT native;
-    int32_t ret = convertCJStructToNative(cj, native);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("controller %{public}s failed:%{public}d", method_name.c_str(), ret);
-    } else {
-        ret = method(native);
-        if (ret != CJNO_ERROR) {
-            SLOGE("controller %{public}s failed:%{public}d", method_name.c_str(), ret);
-        }
-    }
-    return ret;
-}
-
-int32_t CJExecMethod(std::function<int32_t()> method, std::string method_name)
-{
-    int32_t ret = method();
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("controller %{public}s failed:%{public}d", method_name.c_str(), ret);
-    }
-    return ret;
-}
 
 CJAVSessionImpl::CJAVSessionImpl(std::shared_ptr<AVSession> session)
 {
     session_ = session;
     sessionId_ = session_->GetSessionId();
     sessionType_ = session_->GetSessionType();
+}
+
+int32_t CJAVSessionImpl::OnEvent(int32_t type, int64_t id)
+{
+    if (session_ == nullptr) {
+        SLOGE("OnEvent failed : session is nullptr");
+        return ERR_SESSION_NOT_EXIST;
+    }
+    int32_t ret = AVSESSION_SUCCESS;
+    if (callback_ == nullptr) {
+        callback_ = std::make_shared<CJAVSessionCallback>();
+        ret = session_->RegisterCallback(callback_);
+        if (ret != AVSESSION_SUCCESS) { //in avsession_errors.h
+            SLOGE("OnEvent failed : register callback failed");
+            return ret;
+        }
+    }
+    callback_->RegisterCallback(type, id);
+    return ret;
+}
+
+int32_t CJAVSessionImpl::OffEvent(int32_t type)
+{
+    int32_t ret = AVSESSION_SUCCESS;
+    if (session_ == nullptr) {
+        SLOGE("OffEvent failed : session is nullptr");
+        return ERR_SESSION_NOT_EXIST;
+    }
+    if (callback_ == nullptr) {
+        return ret;
+    }
+    callback_->UnRegisterCallback(type);
+    return ret;
 }
 
 int32_t CJAVSessionImpl::SetAVMetaData(CAVMetaData& data)
@@ -123,6 +132,26 @@ int32_t CJAVSessionImpl::GetController()
     }
 }
 
+int32_t CJAVSessionImpl::GetAVCastController()
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::shared_ptr<AVCastController> nativeController = session_->GetAVCastController();
+    if (nativeController == nullptr) {
+        SLOGE("GetAVCastController failed : native get controller failed");
+        return AVSESSION_ERROR;
+    }
+    auto controller = CJAVCastControllerImpl::NewInstance(nativeController, sessionId_);
+    if (controller) {
+        return CJNO_ERROR;
+    } else {
+        return ERR_NO_MEMORY;
+    }
+#else
+    SLOGE("Cast Engine is disabled!");
+    return AVSESSION_ERROR;
+#endif
+}
+
 int32_t CJAVSessionImpl::GetOutputDevice(COutputDeviceInfo& outputDeviceInfo)
 {
     AVSessionDescriptor descriptor;
@@ -132,6 +161,19 @@ int32_t CJAVSessionImpl::GetOutputDevice(COutputDeviceInfo& outputDeviceInfo)
         return ret;
     }
     return convertNativeToCJStruct(descriptor.outputDeviceInfo_, outputDeviceInfo);
+}
+
+int32_t CJAVSessionImpl::GetAllCastDisplays(CArray& infos)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    auto call = [&](std::vector<CastDisplayInfo>& castDisplays) {
+        return session_->GetAllCastDisplays(castDisplays);
+    };
+    return CJControllerGetterCStruct<std::vector<CastDisplayInfo>, CArray>(call, infos, "GetAllCastDisplays");
+#else
+    SLOGE("Cast Engine is disabled!");
+    return AVSESSION_ERROR;
+#endif
 }
 
 int32_t CJAVSessionImpl::Activate()
@@ -169,5 +211,15 @@ int32_t CJAVSessionImpl::StopCasting()
     return CJNO_ERROR;
 #endif
 }
-    
+
+int32_t CJAVSessionImpl::DispatchSessionEvent(char*& event, CArray& args)
+{
+    AAFwk::WantParams paras;
+    int ret = convertCJStructToNative(args, paras);
+    if (ret != CJNO_ERROR) {
+        SLOGE("Convert CParameters to WantParams Failed!");
+        return ret;
+    }
+    return session_->SetSessionEvent(std::string(event), paras);
+}
 }  // namespace AVSession::OHOS

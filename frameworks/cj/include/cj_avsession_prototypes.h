@@ -162,8 +162,53 @@ typedef struct {
 typedef struct {
     int32_t command;
     CParameters parameter;
-} CAVControlCommand;
+} CAVSessionCommand;
 
+typedef struct {
+    int32_t kind;
+    void* data;
+    void* data2;
+    int32_t error;
+} CCallbackData;
+
+typedef struct {
+    uint64_t id;
+    char* name;
+    int32_t displayState;
+    int32_t width;
+    int32_t height;
+} CCastDisplayInfo;
+
+typedef struct {
+    int32_t id;
+    int32_t deviceId;
+    int64_t actionTime;
+    int32_t screenId;
+    int32_t windowId;
+} CInputEvent;
+
+typedef struct {
+    int32_t code;
+    int64_t pressedTime;
+    int32_t deviceId;
+} CKey;
+
+typedef struct {
+    CInputEvent base;
+    int32_t action;
+    CKey key;
+    uint32_t unicodeChar;
+    CKey* keys;
+    int64_t keysLength;
+    bool ctrlKey;
+    bool altKey;
+    bool shiftKey;
+    bool logoKey;
+    bool fnKey;
+    bool capsLock;
+    bool numLock;
+    bool scrollLock;
+} CKeyEvent;
 
 #ifdef __cplusplus
 #if __cplusplus
