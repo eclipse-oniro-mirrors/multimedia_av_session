@@ -86,6 +86,7 @@ namespace OHOS::AVSession {
 static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
     
 static const int32_t CAST_ENGINE_SA_ID = 65546;
+static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t MINNUM_FOR_NOTIFICATION = 5;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
@@ -145,23 +146,12 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     AddSystemAbilityListener(CAST_ENGINE_SA_ID);
+    AddSystemAbilityListener(COLLABORATION_SA_ID);
     AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
-    SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
-    if (is2in1_) {
-        SLOGI("startup enable cast check 2in1");
-        checkEnableCast(true);
-        AVRouter::GetInstance().SetDiscoverable(false);
-        AVRouter::GetInstance().SetDiscoverable(true);
-    }
-    CollaborationManager::GetInstance().ReadCollaborationManagerSo();
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
-#endif
     PullMigrateStub();
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
@@ -231,6 +221,9 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
         int32_t userId = eventData.GetCode();
         servicePtr_->RegisterBundleDeleteEventForHistory(userId);
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0 ||
+        action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED) == 0) {
+        servicePtr_->InitCastEngineService();
     }
 }
 
@@ -318,6 +311,8 @@ bool AVSessionService::SubscribeCommonEvent()
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_FOREGROUND,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED,
     };
 
     EventFwk::MatchingSkills matchingSkills;
@@ -383,6 +378,9 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             InitRadarBMS();
             break;
         case CAST_ENGINE_SA_ID:
+            break;
+        case COLLABORATION_SA_ID:
+            InitCollaboration();
             break;
         case BLUETOOTH_HOST_SYS_ABILITY_ID:
             CheckBrEnable();
@@ -781,6 +779,30 @@ void AVSessionService::InitCommonEventService()
     SLOGI("InitCommonEventService in");
     bool ret = SubscribeCommonEvent();
     CHECK_AND_RETURN_LOG(ret, "SubscribeCommonEvent error!");
+}
+
+void AVSessionService::InitCollaboration()
+{
+    SLOGI("InitCollaboration in");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CollaborationManager::GetInstance().ReadCollaborationManagerSo();
+    CollaborationManager::GetInstance().RegisterLifecycleCallback();
+#endif
+}
+
+void AVSessionService::InitCastEngineService()
+{
+    SLOGI("InitCastEngineService in");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
+    SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
+    if (is2in1_) {
+        SLOGI("startup enable cast check 2in1");
+        checkEnableCast(true);
+        AVRouter::GetInstance().SetDiscoverable(false);
+        AVRouter::GetInstance().SetDiscoverable(true);
+    }
+#endif
 }
 
 void AVSessionService::RegisterBundleDeleteEventForHistory(int32_t userId)
