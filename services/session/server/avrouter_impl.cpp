@@ -81,7 +81,7 @@ bool AVRouterImpl::Release()
         SLOGE("Start Release AVRouter err for no provider");
         return false;
     }
-    std::lock_ground lockGuard(providerManagerLock_);
+    std::lock_guard lockGuard(providerManagerLock_);
 
     if (hwProvider_ == nullptr) {
         SLOGE("repeat check for no pvd");
@@ -222,8 +222,8 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
     int64_t castHandle = -1;
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumberEnableDefault_) !=
         providerManagerMap_.end(), castHandle, "Can not find corresponding provider");
-    CHECK_AND_RETURN_RET_LOG(providerManagerMap_[1] != nullptr &&
-        providerManagerMap_[1]->provider_ ! = nullptr, AVSESSION_ERROR, "provider is nullptr");
+    CHECK_AND_RETURN_RET_LOG((providerManagerMap_[1] != nullptr)
+        && (providerManagerMap_[1]->provider_ != nullptr), AVSESSION_ERROR, "provider is nullptr");
     int64_t tempId = 1;
     // The first 32 bits are providerId, the last 32 bits are castId
     castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
