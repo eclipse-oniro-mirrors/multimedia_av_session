@@ -61,7 +61,7 @@ ohos_fuzztest("AVSessionStubFuzzTest") {
     "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "window_manager:libdm",
+    "window_manager:libdm_lite",
     "window_manager:libwm",
   ]
 

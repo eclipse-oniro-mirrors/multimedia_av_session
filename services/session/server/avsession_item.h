@@ -428,7 +428,7 @@ private:
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVRouterListener> iAVRouterListener_;
     sptr<HwCastDisplayListener> displayListener_;
-    std::recursive_mutex displayListenerLock_;
+    std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::function<void(std::string)> serviceCallbackForStream_;

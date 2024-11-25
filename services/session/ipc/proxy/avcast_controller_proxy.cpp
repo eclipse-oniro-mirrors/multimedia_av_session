@@ -207,7 +207,7 @@ int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
 
     sptr<Surface> surface = SurfaceUtils::GetInstance()->GetSurface(surfaceUniqueId);
     if (!surface) {
-        SLOGE("surface is null, surface uniqueId %{public}lu", surfaceUniqueId);
+        SLOGE("surface is null, surface uniqueId %{public}llu", surfaceUniqueId);
         return AVSESSION_ERROR;
     }
     sptr<IBufferProducer> producer = surface->GetProducer();
@@ -244,7 +244,7 @@ int32_t AVCastControllerProxy::ProcessMediaKeyResponse(const std::string& assetI
     MessageOption option;
     auto len = response.size();
     if (len > parcel.GetDataCapacity()) {
-        SLOGD("ProcessMediaKeyResponse SetDataCapacity totalSize: %lu", len);
+        SLOGD("ProcessMediaKeyResponse SetDataCapacity totalSize: %{public}d", static_cast<int>(len));
         parcel.SetMaxCapacity(len + len);
         parcel.SetDataCapacity(len);
     }
