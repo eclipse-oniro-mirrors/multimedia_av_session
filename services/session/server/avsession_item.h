@@ -434,6 +434,7 @@ private:
     std::function<void(std::string)> serviceCallbackForStream_;
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;
+    std::shared_ptr<bool> isAlivePtr_;
 #endif
 };
 } // namespace OHOS::AVSession
