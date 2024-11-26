@@ -31,20 +31,20 @@ config("module_private_config") {
 }
 
 common_deps = [
-  "../../../../../services/session:avsession_item",
-  "../../../../../services/session:avsession_service",
+  "../../../../../services/session:avsession_item_static",
+  "../../../../../services/session:avsession_service_static",
   "../../../../../utils:avsession_utils",
   "../../../../common:avsession_common",
-  "../../../session:avsession_client",
+  "../../../session:avsession_client_static",
   "//third_party/googletest:gtest_main",
 ]
 
 common_deps_without_third_party = [
-  "../../../../../services/session:avsession_item",
-  "../../../../../services/session:avsession_service",
+  "../../../../../services/session:avsession_item_static",
+  "../../../../../services/session:avsession_service_static",
   "../../../../../utils:avsession_utils",
   "../../../../common:avsession_common",
-  "../../../session:avsession_client",
+  "../../../session:avsession_client_static",
 ]
 
 common_external_deps = [
@@ -305,8 +305,8 @@ ohos_unittest("AVDumperTest") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../../services/session:avsession_cast_item",
-      "../../../../../services/session:avsession_router",
+      "../../../../../services/session:avsession_cast_item_static",
+      "../../../../../services/session:avsession_router_static",
     ]
     external_deps += [
       "cast_engine:cast_engine_client",
@@ -340,8 +340,8 @@ if (castplus_cast_engine_enable) {
     deps = common_deps_without_third_party
 
     deps += [
-      "../../../../../services/session:avsession_cast_item",
-      "../../../../../services/session:avsession_router",
+      "../../../../../services/session:avsession_cast_item_static",
+      "../../../../../services/session:avsession_router_static",
     ]
 
     visibility = [ ":*" ]

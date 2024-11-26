@@ -30,9 +30,9 @@ ohos_benchmarktest("ControllerTest") {
   sources = [ "avsession_controller_test.cpp" ]
 
   deps = [
-    "./../../../../../../services/session:avsession_item",
-    "./../../../../../../services/session:avsession_service",
-    "./../../../../session:avsession_client",
+    "./../../../../../../services/session:avsession_item_static",
+    "./../../../../../../services/session:avsession_service_static",
+    "./../../../../session:avsession_client_static",
   ]
 
   external_deps = [

@@ -38,6 +38,7 @@ ohos_shared_library("avsession_common") {
     "src/avqueue_item.cpp",
     "src/avsession_descriptor.cpp",
     "src/avsession_pixel_map.cpp",
+    "src/avsession_pixel_map_adapter.cpp",
     "src/media_info.cpp",
     "src/media_info_holder.cpp",
   ]
@@ -51,6 +52,7 @@ ohos_shared_library("avsession_common") {
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
   ]
 
   subsystem_name = "multimedia"

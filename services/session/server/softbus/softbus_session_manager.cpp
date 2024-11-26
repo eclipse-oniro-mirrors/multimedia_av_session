@@ -67,7 +67,7 @@ int32_t SoftbusSessionManager::Socket(const std::string &pkgName)
         return AVSESSION_ERROR;
     }
     SocketInfo info = {
-        .name = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG.c_str()),
+        .name = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG),
         .pkgName = const_cast<char *>(pkgName.c_str()),
         .dataType = DATA_TYPE_BYTES
     };

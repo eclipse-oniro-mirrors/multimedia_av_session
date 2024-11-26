@@ -70,10 +70,10 @@ config("common_config") {
 
 common_deps = [
   "../../../../frameworks/common:avsession_common",
-  "../../../../frameworks/native/session:avsession_client",
+  "../../../../frameworks/native/session:avsession_client_static",
   "../../../../utils:avsession_utils",
-  "../../../session:avsession_item",
-  "../../../session:avsession_service",
+  "../../../session:avsession_item_static",
+  "../../../session:avsession_service_static",
   "//third_party/bounds_checking_function:libsec_shared",
   "//third_party/googletest:gtest_main",
   "//third_party/openssl:libcrypto_shared",
@@ -81,10 +81,10 @@ common_deps = [
 
 common_deps_without_third_party = [
   "../../../../frameworks/common:avsession_common",
-  "../../../../frameworks/native/session:avsession_client",
+  "../../../../frameworks/native/session:avsession_client_static",
   "../../../../utils:avsession_utils",
-  "../../../session:avsession_item",
-  "../../../session:avsession_service",
+  "../../../session:avsession_item_static",
+  "../../../session:avsession_service_static",
 ]
 
 common_external_deps = [
@@ -147,8 +147,8 @@ ohos_unittest("AVSessionServiceSupplementTest") {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
     external_deps += [ "cast_engine:cast_engine_client" ]
   }
@@ -204,8 +204,8 @@ ohos_unittest("RemoteSessionSinkTest") {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
     external_deps += [ "cast_engine:cast_engine_client" ]
   }
@@ -240,8 +240,8 @@ ohos_unittest("RemoteSessionSourceTest") {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
     external_deps += [ "cast_engine:cast_engine_client" ]
   }
@@ -451,10 +451,10 @@ ohos_unittest("AVSessionStubTest") {
 
   deps = [
     "../../../../frameworks/common:avsession_common",
-    "../../../../frameworks/native/session:avsession_client",
+    "../../../../frameworks/native/session:avsession_client_static",
     "../../../../utils:avsession_utils",
-    "../../../session:avsession_item",
-    "../../../session:avsession_service",
+    "../../../session:avsession_item_static",
+    "../../../session:avsession_service_static",
   ]
 
   external_deps = common_external_deps
@@ -521,8 +521,8 @@ ohos_unittest("AVSessionProxyTest") {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
     external_deps += [ "cast_engine:cast_engine_client" ]
   }
@@ -727,11 +727,11 @@ ohos_unittest("MigrateAVSessionTest") {
 
   deps = [
     "../../../../frameworks/common:avsession_common",
-    "../../../../frameworks/native/session:avsession_client",
+    "../../../../frameworks/native/session:avsession_client_static",
     "../../../../utils:avsession_utils",
-    "../../../session:avsession_item",
-    "../../../session:avsession_server",
-    "../../../session:avsession_service",
+    "../../../session:avsession_item_static",
+    "../../../session:avsession_server_static",
+    "../../../session:avsession_service_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
     "//third_party/jsoncpp:jsoncpp",
@@ -766,8 +766,8 @@ ohos_unittest("MigrateAVSessionTest") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
     external_deps += [
       "cast_engine:cast_engine_client",
@@ -802,7 +802,7 @@ ohos_unittest("SoftbusSessionManagerTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "../../../session:avsession_server",
+    "../../../session:avsession_server_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
@@ -835,9 +835,9 @@ ohos_unittest("AVSessionServiceTest") {
 
   deps = [
     "../../../../frameworks/common:avsession_common",
-    "../../../../frameworks/native/session:avsession_client",
-    "../../../../services/session:avsession_item",
-    "../../../../services/session:avsession_service",
+    "../../../../frameworks/native/session:avsession_client_static",
+    "../../../../services/session:avsession_item_static",
+    "../../../../services/session:avsession_service_static",
     "../../../../utils:avsession_utils",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
@@ -868,8 +868,8 @@ ohos_unittest("AVSessionServiceTest") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
     external_deps += [ "cast_engine:cast_engine_client" ]
   }
@@ -888,8 +888,8 @@ ohos_unittest("AppManagerAdapterTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "./../../../session:avsession_item",
-    "./../../../session:avsession_service",
+    "./../../../session:avsession_item_static",
+    "./../../../session:avsession_service_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
@@ -921,8 +921,8 @@ ohos_unittest("AbilityConnectHelperTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "./../../../session:avsession_item",
-    "./../../../session:avsession_service",
+    "./../../../session:avsession_item_static",
+    "./../../../session:avsession_service_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
@@ -963,8 +963,8 @@ ohos_unittest("BkGrAudioControllerTest") {
   ldflags = [ "--coverage" ]
 
   deps = [
-    "./../../../session:avsession_item",
-    "./../../../session:avsession_service",
+    "./../../../session:avsession_item_static",
+    "./../../../session:avsession_service_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
@@ -998,7 +998,7 @@ ohos_unittest("AudioAdapterTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "../../../session:avsession_server",
+    "../../../session:avsession_server_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
@@ -1019,7 +1019,7 @@ ohos_unittest("RemoteUtilsTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "../../../session:avsession_server",
+    "../../../session:avsession_server_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
@@ -1043,7 +1043,7 @@ ohos_unittest("SessionStackTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "../../../session:avsession_server",
+    "../../../session:avsession_server_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
@@ -1079,8 +1079,8 @@ ohos_unittest("SessionStackTest") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
     external_deps += [
       "cast_engine:cast_engine_client",
@@ -1111,7 +1111,7 @@ ohos_unittest("AVRouterTest") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "../../../session:avsession_server",
+    "../../../session:avsession_server_static",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
@@ -1142,8 +1142,8 @@ ohos_unittest("AVRouterTest") {
   if (castplus_cast_engine_enable) {
     cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
-      "../../../../services/session:avsession_cast_item",
-      "../../../session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../session:avsession_router_static",
     ]
   }
 }
@@ -1159,13 +1159,13 @@ if (castplus_cast_engine_enable) {
     cflags_cc = [ "-fno-access-control" ]
 
     deps = [
-      "../../../session:avsession_server",
+      "../../../session:avsession_server_static",
       "./../../../../frameworks/common:avsession_common",
       "./../../../../frameworks/native/session:avsession_cast_client",
       "./../../../../utils:avsession_utils",
-      "./../../../session:avsession_cast_item",
-      "./../../../session:avsession_item",
-      "./../../../session:avsession_router",
+      "./../../../session:avsession_cast_item_static",
+      "./../../../session:avsession_item_static",
+      "./../../../session:avsession_router_static",
     ]
 
     external_deps = [
@@ -1205,13 +1205,13 @@ if (castplus_cast_engine_enable) {
     configs = [ ":module_private_config_without_third_party" ]
 
     deps = [
-      "../../../session:avsession_server",
+      "../../../session:avsession_server_static",
       "./../../../../frameworks/common:avsession_common",
       "./../../../../frameworks/native/session:avsession_cast_client",
       "./../../../../utils:avsession_utils",
-      "./../../../session:avsession_cast_item",
-      "./../../../session:avsession_item",
-      "./../../../session:avsession_router",
+      "./../../../session:avsession_cast_item_static",
+      "./../../../session:avsession_item_static",
+      "./../../../session:avsession_router_static",
     ]
 
     external_deps = [
@@ -1252,9 +1252,9 @@ if (castplus_cast_engine_enable) {
 
     deps = [
       "../../../../frameworks/common:avsession_common",
-      "../../../session:avsession_cast_item",
-      "../../../session:avsession_item",
-      "../../../session:avsession_router",
+      "../../../session:avsession_cast_item_static",
+      "../../../session:avsession_item_static",
+      "../../../session:avsession_router_static",
     ]
 
     external_deps = [
@@ -1328,8 +1328,8 @@ if (castplus_cast_engine_enable) {
 
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
 
     external_deps = common_external_deps_with_third_party
@@ -1353,8 +1353,8 @@ if (castplus_cast_engine_enable) {
 
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
 
     external_deps = common_external_deps_with_third_party
@@ -1378,8 +1378,8 @@ if (castplus_cast_engine_enable) {
 
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
 
     external_deps = common_external_deps_with_third_party
@@ -1403,8 +1403,8 @@ if (castplus_cast_engine_enable) {
 
     deps += [
       "../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../services/session:avsession_cast_item",
-      "../../../../services/session:avsession_router",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
     ]
 
     external_deps = common_external_deps_with_third_party
