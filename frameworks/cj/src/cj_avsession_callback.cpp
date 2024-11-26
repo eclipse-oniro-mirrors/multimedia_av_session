@@ -541,7 +541,7 @@ void CJAVSessionCallback::OnPlayFromAssetId(int64_t assetId)
 {
     std::lock_guard<std::recursive_mutex> lock(*callbackMutexMap_[PLAY_FROM_ASSET_ID]);
     if (playFromAssetId) {
-        SLOGD("play from asset id: %{public}lld", assetId);
+        SLOGD("play from asset id: %" PRId64 "", assetId);
         playFromAssetId(assetId);
     }
 }
