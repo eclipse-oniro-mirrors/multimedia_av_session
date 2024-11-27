@@ -35,6 +35,8 @@ class AVSessionManagerImpl : public AVSessionManager {
 public:
     AVSessionManagerImpl();
 
+    static void DetachCallback();
+
     std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                              const AppExecFwk::ElementName& elementName) override;
 
@@ -111,7 +113,7 @@ private:
     sptr<AVSessionServiceProxy> service_;
     sptr<ServiceDeathRecipient> serviceDeathRecipient_;
     std::map<int32_t, sptr<ISessionListener>> listenerMapByUserId_;
-    sptr<ClientDeathStub> clientDeath_;
+    static sptr<ClientDeathStub> clientDeath_;
     DeathCallback deathCallback_;
     static constexpr int userIdForAllUsers_ = -1;
 };
