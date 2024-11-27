@@ -98,8 +98,11 @@ void AvSessionServiceFuzzer::FuzzTests(const uint8_t* data, size_t size)
     OHOS::AVSession::DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = 1;
     deviceInfo.deviceId_ = "deviceid";
-    deviceInfo.deviceName_ = "devicename";
     deviceInfo.ipAddress_ = "ipaddress";
+    vector<string> deviceNames { "devicename1", "devicename2" };
+    int32_t randomNumber = *(reinterpret_cast<const int32_t *>(data));
+    std::string deviceName = deviceNames[randomNumber % deviceNames.size()];
+    deviceInfo.deviceName_ = deviceName;
     deviceInfo.providerId_ = 1;
     deviceInfo.supportedProtocols_ = 1;
     deviceInfo.authenticationStatus_ = 1;
