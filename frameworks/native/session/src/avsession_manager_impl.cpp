@@ -25,9 +25,23 @@
 #include "avsession_utils.h"
 
 namespace OHOS::AVSession {
+
+sptr<ClientDeathStub> AVSessionManagerImpl::clientDeath_ = nullptr;
+
 AVSessionManagerImpl::AVSessionManagerImpl()
 {
     SLOGD("constructor");
+}
+
+extern "C" __attribute__((destructor)) void AVSessionManagerImpl::DetachCallback()
+{
+    SLOGI("DetachCallback in");
+    if (clientDeath_ != nullptr) {
+        SLOGI("DetachCallback with clientDeath delete");
+        auto ref = clientDeath_.GetRefPtr();
+        clientDeath_ = nullptr;
+        delete ref;
+    }
 }
 
 sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
