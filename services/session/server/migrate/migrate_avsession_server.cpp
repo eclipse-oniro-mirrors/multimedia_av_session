@@ -259,7 +259,7 @@ void MigrateAVSessionServer::OnSessionCreate(const AVSessionDescriptor &descript
         return;
     }
     if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO) {
-        SLOGW("not audio avsession");
+        SLOGI("not audio avsession");
         return;
     }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
@@ -284,7 +284,7 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
     {
         std::lock_guard lockGuard(topSessionLock_);
         if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO) {
-            SLOGW("not audio avsession");
+            SLOGI("not audio avsession");
             return;
         }
         if (topSessionId_ == descriptor.sessionId_) {
