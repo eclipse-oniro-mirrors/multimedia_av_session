@@ -583,7 +583,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         }
         return;
     }
-
+    std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     for (const auto& session : *sessionListForFront) {
@@ -651,6 +651,7 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
 {
     SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
+        std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
@@ -686,6 +687,7 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         }
         GetContainer().UpdateSessionSort(session);
         RefreshFocusSessionSort(session);
+        std::lock_guard frontLockGuard(sessionFrontLock_);
         std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
         CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr!");
         auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), session);
