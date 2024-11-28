@@ -33,15 +33,15 @@ public:
         return Remote();
     }
 };
-bool AvsessionControllerProxySendRequest(uint8_t* data, size_t size);
-void AvsessionControllerProxyTest(uint8_t* data, size_t size);
-void AvsessionItemTest(uint8_t* data, size_t size);
+void AvsessionControllerProxySendRequest();
+void AvsessionControllerProxyTest();
+void AvsessionItemTest();
 
 class AvsessionControllerProxyFuzzer {
 public:
     AvsessionControllerProxyFuzzer() = default;
     ~AvsessionControllerProxyFuzzer() = default;
-    bool FuzzSendRequest(uint8_t* data, size_t size);
+    bool FuzzSendRequest();
 };
 }
 #endif

@@ -20,9 +20,9 @@
 #include "avsession_manager.h"
 
 namespace OHOS::AVSession {
-bool AVSessionManagerInterfaceTest(uint8_t* data, size_t size);
-void AVSessionManagerTestClient(uint8_t* data, size_t size);
-void AVSessionManagerTestServer(uint8_t* data, size_t size);
+void AVSessionManagerInterfaceTest();
+void AVSessionManagerTestClient();
+void AVSessionManagerTestServer();
 
 class TestSessionListener : public SessionListener {
 public:
@@ -61,8 +61,8 @@ class AVSessionManagerFuzzer {
 public:
     AVSessionManagerFuzzer() = default;
     ~AVSessionManagerFuzzer() = default;
-    bool AVSessionManagerFuzzTest(const uint8_t* data, size_t size);
-    bool SendSystemControlCommandFuzzTest(const uint8_t* data);
+    bool AVSessionManagerFuzzTest();
+    bool SendSystemControlCommandFuzzTest();
 };
 }
 #endif
