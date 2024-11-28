@@ -35,6 +35,8 @@ public:
 
     std::vector<sptr<AVSessionItem>> GetSessionsByPid(pid_t pid) override;
 
+    sptr<AVSessionItem> GetSessionByUid(const int32_t uid) override;
+
     bool PidHasSession(pid_t pid) override;
 
     bool UidHasSession(int32_t uid) override;

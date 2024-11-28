@@ -73,10 +73,25 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
     }
 }
 
+void BackgroundAudioController::RendererChangeReport(AudioStandard::AudioRendererChangeInfo& info)
+{
+    if (info.rendererState == AudioStandard::RENDERER_RUNNING ||
+        info.rendererState == AudioStandard::RENDERER_PAUSED ||
+        info.rendererState == AudioStandard::RENDERER_STOPPED) {
+            ptr_->NotifyBackgroundReportCheck(info.clientUID, info.clientPid, info.rendererInfo.streamUsage,
+                info.rendererState);
+        }
+}
+
 // LCOV_EXCL_START
 void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos)
 {
     for (const auto& info : infos) {
+        if (HasAVSession(info->clientUID)) {
+            RendererChangeReport(*info);
+            continue;
+        }
+
         if (info->rendererState != AudioStandard::RENDERER_RUNNING) {
             continue;
         }
@@ -86,10 +101,6 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
         }
         SLOGI("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
         AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
-        
-        if (HasAVSession(info->clientUID)) {
-            continue;
-        }
 
         if (AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
             auto mute = AudioAdapter::GetInstance().MuteAudioStream(info->clientUID, info->rendererInfo.streamUsage);
