@@ -138,14 +138,18 @@ int32_t AVSessionItem::DestroyTask()
     std::string sessionId = descriptor_.sessionId_;
     std::string fileName = AVSessionUtils::GetCachePathName(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileName);
+    std::list<sptr<AVControllerItem>> controllerList;
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (auto it = controllers_.begin(); it != controllers_.end();) {
             if (it->second) {
-                (it->second)->HandleSessionDestroy();
+                controllerList.push_back(it->second);
             }
             it = controllers_.erase(it);
         }
+    }
+    for (auto& controller : controllerList) {
+        controller->HandleSessionDestroy();
     }
     {
         std::lock_guard lockGuard(callbackLock_);
