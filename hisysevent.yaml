@@ -176,7 +176,7 @@ SESSION_CAST_CONTROL:
   PEER_SUPPORTED_PROTOCOL: {type: INT32, desc: supported protocol}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
 
- PLAYING_COMBIND_AVSESSION_STATIS:
+PLAYING_COMBIND_AVSESSION_STATIS:
   __BASE: {type: STATISTIC, level: MINOR, desc: low quality check statistics}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   PLAY_DURATION: {type: INT32, desc: play duration}
