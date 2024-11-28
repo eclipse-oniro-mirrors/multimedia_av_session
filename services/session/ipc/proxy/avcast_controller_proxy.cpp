@@ -207,7 +207,7 @@ int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
 
     sptr<Surface> surface = SurfaceUtils::GetInstance()->GetSurface(surfaceUniqueId);
     if (!surface) {
-        SLOGE("surface is null, surface uniqueId %{public}llu", surfaceUniqueId);
+        SLOGE("surface is null, surface uniqueId %{public}llu", (unsigned long long)surfaceUniqueId);
         return AVSESSION_ERROR;
     }
     sptr<IBufferProducer> producer = surface->GetProducer();
