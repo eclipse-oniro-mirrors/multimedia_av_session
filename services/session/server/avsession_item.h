@@ -389,6 +389,10 @@ private:
     static const int32_t DEFAULT_USER_ID = 100;
     std::recursive_mutex cmdsLock_;
 
+    std::shared_ptr<bool> isAlivePtr_;
+
+    std::recursive_mutex isAliveLock_;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
     int64_t castHandle_ = 0;

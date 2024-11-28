@@ -57,6 +57,10 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t user
 {
     SLOGI("constructor session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
+    {
+        std::lock_guard aliveLockGuard(isAliveLock_);
+        isAlivePtr_ = std::make_shared<bool>(true);
+    }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     cssListener_ = std::make_shared<CssListener>(this);
 #endif
@@ -69,6 +73,12 @@ AVSessionItem::~AVSessionItem()
     if (IsActive()) {
         SLOGI("destroy with activate session, try deactivate it");
         Deactivate();
+    }
+    {
+        std::lock_guard aliveLockGuard(isAliveLock_);
+        if (isAlivePtr_ != nullptr) {
+            *isAlivePtr_ = false;
+        }
     }
 }
 
@@ -329,8 +339,11 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     if (hasAvQueueInfo && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
-    SLOGI("send metadata change event to controllers with title %{public}s", meta.GetTitle().c_str());
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta]() {
+    SLOGI("send metadata change event to controllers with title %{public}s from pid:%{public}d, isAlive:%{public}d",
+        meta.GetTitle().c_str(), static_cast<int>(GetPid()), (isAlivePtr_ == nullptr) ? -1 : *isAlivePtr_);
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_]() {
+        std::lock_guard aliveLockGuard(isAliveLock_);
+        CHECK_AND_RETURN_LOG(isAlivePtr != nullptr && *isAlivePtr, "handle metadatachange with session gone, return");
         SLOGI("HandleMetaDataChange in postTask with title %{public}s and size %{public}d",
             meta.GetTitle().c_str(), static_cast<int>(controllers_.size()));
         std::lock_guard controllerLockGuard(controllersLock_);
