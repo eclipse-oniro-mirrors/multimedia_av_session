@@ -185,7 +185,8 @@ int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& item
     if (ret == AVSESSION_SUCCESS) {
         std::vector<AVQueueItem> items_;
         int32_t itemNum = reply.ReadInt32();
-        CHECK_AND_RETURN_RET_LOG(itemNum >= 0, ERR_UNMARSHALLING, "read int32 itemNum failed");
+        CHECK_AND_RETURN_RET_LOG((itemNum >= 0) && (itemNum < MAX_ITEM_NUMBER), ERR_UNMARSHALLING,
+            "read int32 itemNum failed");
         for (int32_t i = 0; i < itemNum; i++) {
             AVQueueItem *item = reply.ReadParcelable<AVQueueItem>();
             if (item == nullptr) {

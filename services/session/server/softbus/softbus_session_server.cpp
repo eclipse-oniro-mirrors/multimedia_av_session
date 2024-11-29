@@ -47,11 +47,11 @@ void SoftbusSessionServer::DisconnectProxy(int sessionId)
 void SoftbusSessionServer::DisconnectAllProxy()
 {
     SLOGI("DisConnectAllProxy");
-    for (auto it = deviceToSessionMap_.begin(); it != deviceToSessionMap_.end();) {
+    for (auto it = deviceToSessionMap_.begin(); it != deviceToSessionMap_.end(); it++) {
         SLOGI("disConnectAllProxy anonymizeDeviceId: %{public}s.",
             SoftbusSessionUtils::AnonymizeDeviceId(it->first).c_str());
         OnDisconnectProxy(it->first);
-        deviceToSessionMap_.erase(it++);
+        it = deviceToSessionMap_.erase(it);
     }
 }
 // LCOV_EXCL_STOP

@@ -212,7 +212,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::string& out)
 
     size_t maxLen = STR_MAX_LENGTH;
     status = napi_get_value_string_utf8(env, in, nullptr, 0, &maxLen);
-    if (maxLen >= STR_MAX_LENGTH) {
+    if (status != napi_ok || maxLen >= STR_MAX_LENGTH) {
         return napi_invalid_arg;
     }
 

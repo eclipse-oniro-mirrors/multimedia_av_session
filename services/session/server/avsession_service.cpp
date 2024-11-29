@@ -87,7 +87,7 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
     
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 static const int32_t COLLABORATION_SA_ID = 70633;
-static const int32_t MINNUM_FOR_NOTIFICATION = 5;
+static const int32_t MININUM_FOR_NOTIFICATION = 5;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
 const std::map<int, int32_t> keyCodeToCommandMap_ = {
@@ -2912,7 +2912,7 @@ void AVSessionService::NotifyDeviceChange()
         SLOGI("no match hisAvqueue for %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
         return;
     }
-    if (avQueueInfos.size() >= MINNUM_FOR_NOTIFICATION) {
+    if (avQueueInfos.size() >= MININUM_FOR_NOTIFICATION) {
         SLOGI("history bundle name %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
         NotifySystemUI(&(hisDescriptors[0]), false);
     }

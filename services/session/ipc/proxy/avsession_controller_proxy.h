@@ -83,7 +83,8 @@ private:
     std::recursive_mutex currentStateLock_;
     AVPlaybackState currentState_;
     bool isDestroy_ = false;
-    int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+    const int32_t MAX_ITEM_NUMBER = 1000;
+    const int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
     std::recursive_mutex controllerProxyLock_;
 };

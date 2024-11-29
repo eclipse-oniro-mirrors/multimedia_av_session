@@ -54,6 +54,10 @@ CollaborationManager::~CollaborationManager()
 
 void CollaborationManager::SendCollaborationOnStop(const std::function<void(void)>& callback)
 {
+    if (callback == nullptr) {
+        SLOGE("SendCollaborationOnStop callback null");
+        return;
+    }
     sendCollaborationOnStop_ = callback;
 }
 
@@ -67,6 +71,10 @@ __attribute__((no_sanitize("cfi")))static int32_t OnStop(const char* peerNetwork
 void CollaborationManager::SendCollaborationApplyResult(const std::function<
     void(const int32_t code)>& callback)
 {
+    if (callback == nullptr) {
+        SLOGE("SendCollaborationApplyResult callback null");
+        return;
+    }
     sendCollaborationApplyResult_ = callback;
 }
 
