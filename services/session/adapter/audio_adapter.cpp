@@ -78,7 +78,7 @@ int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
     auto muteRet = AVSESSION_ERROR;
     for (const auto& info : audioRendererChangeInfo) {
         if ((info->clientUID == uid && info->clientPid == pid) &&
-            info->rendererState == AudioStandard::RENDERER_RUNNING &&
+            info->rendererState == AudioStandard::RENDERER_RUNNING && !info->backMute &&
             (std::count(BACKGROUND_MUTE_STREAM_USAGE.begin(), BACKGROUND_MUTE_STREAM_USAGE.end(),
                 info->rendererInfo.streamUsage) != 0)) {
             SLOGI("mute uid=%{public}d pid=%{public}d stream usage %{public}d renderer state is %{public}d",
@@ -105,7 +105,7 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
         return AVSESSION_ERROR;
     }
     for (const auto& info : audioRendererChangeInfo) {
-        if (info->clientUID == uid) {
+        if (info->clientUID == uid && info->rendererState == AudioStandard::RENDERER_RUNNING && info->backMute) {
             SLOGI("unmute uid=%{public}d stream usage %{public}d renderer state is %{public}d",
                 uid, info->rendererInfo.streamUsage, info->rendererState);
             auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(

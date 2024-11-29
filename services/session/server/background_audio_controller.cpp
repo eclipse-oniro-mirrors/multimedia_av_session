@@ -103,12 +103,20 @@ void BackgroundAudioController::HandleAudioStreamRendererStateChange(const Audio
         AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
 
         if (AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
+            if (info->backMute) {
+                SLOGI("renderer is mute, return");
+                continue;
+            }
             auto mute = AudioAdapter::GetInstance().MuteAudioStream(info->clientUID, info->rendererInfo.streamUsage);
             if (mute == AVSESSION_SUCCESS && ptr_ != nullptr) {
                 SLOGI("mute uid=%{public}d done", info->clientUID);
                 ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
             }
         } else {
+            if (!info->backMute) {
+                SLOGI("renderer is unmute, return");
+                continue;
+            }
             AudioAdapter::GetInstance().UnMuteAudioStream(info->clientUID, info->rendererInfo.streamUsage);
         }
     }

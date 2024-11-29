@@ -985,7 +985,7 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
     }
 }
 
-void AVSessionService::LowQualityCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
+void AVSessionService::LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::StreamUsage streamUsage,
     AudioStandard::RendererState rendererState)
 {
     sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
@@ -994,6 +994,10 @@ void AVSessionService::LowQualityCheck(int32_t uid, AudioStandard::StreamUsage s
     AVMetaData meta = session->GetMetaData();
     bool hasTitle = !meta.GetTitle().empty();
     bool hasImage = meta.GetMediaImage() != nullptr || !meta.GetMediaImageUri().empty();
+    if ((hasTitle || hasImage) && (session->GetSupportCommand().size() != 0)) {
+        SLOGD("LowQualityCheck pass for %{public}s, return", session->GetBundleName().c_str());
+        return;
+    }
     int32_t commandQuality = 0;
     for (auto cmd : session->GetSupportCommand()) {
         auto it = cmdToOffsetMap_.find(cmd);
@@ -1001,19 +1005,17 @@ void AVSessionService::LowQualityCheck(int32_t uid, AudioStandard::StreamUsage s
             commandQuality += (1 << it->second);
         }
     }
-    if ((!hasTitle && !hasImage) || (session->GetSupportCommand().size() == 0)) {
-        SLOGI("LowQualityCheck report for %{public}s", session->GetBundleName().c_str());
-        AVSessionSysEvent::BackControlReportInfo reportInfo;
-        reportInfo.bundleName_ = session->GetBundleName();
-        reportInfo.streamUsage_ = streamUsage;
-        reportInfo.isBack_ = true;
-        reportInfo.playDuration_ = -1;
-        reportInfo.isAudioActive_ = true;
-        reportInfo.metaDataQuality_ = (hasTitle << 1) + hasImage;
-        reportInfo.cmdQuality_ = commandQuality;
-        reportInfo.playbackState_ = session->GetPlaybackState().GetState();
-        AVSessionSysEvent::GetInstance().AddLowQualityInfo(reportInfo);
-    }
+    SLOGD("LowQualityCheck report for %{public}s", session->GetBundleName().c_str());
+    AVSessionSysEvent::BackControlReportInfo reportInfo;
+    reportInfo.bundleName_ = session->GetBundleName();
+    reportInfo.streamUsage_ = streamUsage;
+    reportInfo.isBack_ = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
+    reportInfo.playDuration_ = -1;
+    reportInfo.isAudioActive_ = true;
+    reportInfo.metaDataQuality_ = (hasTitle << 1) + hasImage;
+    reportInfo.cmdQuality_ = commandQuality;
+    reportInfo.playbackState_ = session->GetPlaybackState().GetState();
+    AVSessionSysEvent::GetInstance().AddLowQualityInfo(reportInfo);
 }
 
 void AVSessionService::PlayStateCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
@@ -1026,22 +1028,22 @@ void AVSessionService::PlayStateCheck(int32_t uid, AudioStandard::StreamUsage st
     if ((rState == AudioStandard::RENDERER_RUNNING && aState.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY) ||
         ((rState == AudioStandard::RENDERER_PAUSED || rState == AudioStandard::RENDERER_STOPPED) &&
         aState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY)) {
-            HISYSEVENT_FAULT("AVSESSION_WRONG_STATE",
-                "BUNDLE_NAME", session->GetBundleName(),
-                "RENDERER_STATE", rState,
-                "AVSESSION_STATE", aState.GetState());
-        }
+        SLOGD("PlayStateCheck report for %{public}s", session->GetBundleName().c_str());
+        HISYSEVENT_FAULT("AVSESSION_WRONG_STATE",
+            "BUNDLE_NAME", session->GetBundleName(),
+            "RENDERER_STATE", rState,
+            "AVSESSION_STATE", aState.GetState());
+    }
 }
 
 void AVSessionService::NotifyBackgroundReportCheck(const int32_t uid, const int32_t pid,
     AudioStandard::StreamUsage streamUsage, AudioStandard::RendererState rendererState)
 {
-    bool isBack = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
     // low quality check
-    if (isBack && rendererState == AudioStandard::RENDERER_RUNNING) {
+    if (rendererState == AudioStandard::RENDERER_RUNNING) {
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
-            [this, uid, streamUsage, rendererState]() {
-                LowQualityCheck(uid, streamUsage, rendererState);
+            [this, uid, pid, streamUsage, rendererState]() {
+                LowQualityCheck(uid, pid, streamUsage, rendererState);
             }, "LowQualityCheck", lowQualityTimeout);
     }
 
