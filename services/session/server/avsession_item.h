@@ -86,6 +86,8 @@ public:
     void ListenCollaborationApplyResult();
 
     void ListenCollaborationOnStop();
+
+    void CancleAVPlayerInSink();
 #endif
 
     std::string GetSessionId() override;
@@ -377,6 +379,7 @@ private:
 
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
+    int32_t castDisconnectStateInAVSession_ = 6;
     int32_t removeCmdStep_ = 1000;
 
     volatile bool isDestroyed_ = false;
@@ -427,12 +430,13 @@ private:
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVRouterListener> iAVRouterListener_;
     sptr<HwCastDisplayListener> displayListener_;
-    std::recursive_mutex displayListenerLock_;
+    std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::function<void(std::string)> serviceCallbackForStream_;
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;
+    std::shared_ptr<bool> isAlivePtr_;
     bool isFirstCallback_ = true;
 #endif
 };

@@ -60,6 +60,17 @@ public:
         int32_t controllerCmd_;
     };
 
+    struct BackControlReportInfo {
+        std::string bundleName_;
+        int32_t streamUsage_;
+        bool isBack_;
+        int32_t playDuration_;
+        bool isAudioActive_;
+        int32_t metaDataQuality_;
+        int32_t cmdQuality_;
+        int32_t playbackState_;
+    };
+
     static AVSessionSysEvent& GetInstance();
 
     template<typename... Types>
@@ -98,8 +109,10 @@ public:
         const int32_t& sessionType, bool isCreateSession);
     void AddControllerCommandInfo(const std::string& bundleName, const pid_t& controllerPid,
         const int32_t& controllerCmd, const int32_t& sessionType);
+    void AddLowQualityInfo(AVSessionSysEvent::BackControlReportInfo &reportInfo);
     void SetAudioStatus(pid_t uid, int32_t rendererState);
     int32_t GetAudioStatus(pid_t uid);
+    void ReportLowQuality();
 
 private:
     std::map<pid_t, int32_t> audioStatuses_;
@@ -111,6 +124,7 @@ private:
     static constexpr uint32_t NOTIFY_TIME_INTERVAL = 1 * 60 * 60 * 1000; // retry after 1 hours
     std::list<AVSessionSysEvent::LifeCycleInfo> lifeCycleInfos_;
     std::list<AVSessionSysEvent::ControllerCommandInfo> controllerCommandInfos_;
+    std::map<std::string, AVSessionSysEvent::BackControlReportInfo> lowQualityInfos_;
     static constexpr float MULTIPLE = 1.0f;
 };
 #endif

@@ -27,6 +27,7 @@ config("avsession_client_config") {
 
 ohos_shared_library("avsession_client") {
   install_enable = true
+  deps = []
   ipc_sources = [
     "../../../services/session/ipc/proxy/avsession_controller_proxy.cpp",
     "../../../services/session/ipc/proxy/avsession_proxy.cpp",
@@ -76,7 +77,7 @@ ohos_shared_library("avsession_client") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    public_deps += [ "./../session:avsession_cast_client" ]
+    deps += [ "./../session:avsession_cast_client" ]
   }
 
   if (multimedia_av_session_enable_trace_control) {

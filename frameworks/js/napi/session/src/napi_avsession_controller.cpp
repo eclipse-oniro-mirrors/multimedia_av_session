@@ -118,7 +118,7 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
         napiController = nullptr;
     };
 
-    auto* napiController = new(std::nothrow) NapiAVSessionController();
+    sptr<NapiAVSessionController> napiController = new(std::nothrow) NapiAVSessionController();
     if (napiController == nullptr) {
         SLOGE("no memory");
         return nullptr;
@@ -803,7 +803,7 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetLaunchAbility failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetLaunchAbility failed : controller is nullptr";

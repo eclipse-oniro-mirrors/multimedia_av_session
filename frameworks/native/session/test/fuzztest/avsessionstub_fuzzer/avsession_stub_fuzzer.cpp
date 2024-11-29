@@ -38,7 +38,7 @@ static constexpr int32_t MAX_CODE_TEST = 30;
 static constexpr int32_t MAX_CODE_LEN  = 512;
 static constexpr int32_t MIN_SIZE_NUM  = 4;
 
-shared_ptr<AVSessionStubDemo> g_AVSessionStubDemo(nullptr);
+static shared_ptr<AVSessionStubDemo> g_AVSessionStubDemo(nullptr);
 class AVSessionStubDemo : public AVSessionStub {
 public:
     std::string GetSessionId() override { return ""; };
@@ -115,7 +115,8 @@ void OHOS::AVSession::AvSessionOnRemoteRequest(int32_t code, const uint8_t* data
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    SLOGI("the maximum length of size should not be verified");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
     

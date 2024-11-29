@@ -68,10 +68,21 @@ int32_t FfiMultimediaAVSessionGetController(int64_t sessionId)
     return CJGET_FFIDATA_AVSESSION->GetController();
 }
 
+int32_t FfiMultimediaAVSessionGetAVCastController(int64_t sessionId)
+{
+    return CJGET_FFIDATA_AVSESSION->GetAVCastController();
+}
+
 int32_t FfiMultimediaAVSessionGetOutputDevice(int64_t sessionId, COutputDeviceInfo* outputDeviceInfo)
 {
     if (outputDeviceInfo == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
     return CJGET_FFIDATA_AVSESSION->GetOutputDevice(*outputDeviceInfo);
+}
+
+int32_t FfiMultimediaAVSessionGetAllCastDisplays(int64_t sessionId, CArray* infos)
+{
+    if (infos == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
+    return CJGET_FFIDATA_AVSESSION->GetAllCastDisplays(*infos);
 }
 
 int32_t FfiMultimediaAVSessionActivate(int64_t sessionId)
@@ -92,5 +103,21 @@ int32_t FfiMultimediaAVSessionDestroy(int64_t sessionId)
 int32_t FfiMultimediaAVSessionStopCasting(int64_t sessionId)
 {
     return CJGET_FFIDATA_AVSESSION->StopCasting();
+}
+
+int32_t FfiMultimediaAVSessionDispatchSessionEvent(int64_t sessionId, char** event, CArray* args)
+{
+    if (event == nullptr || args == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
+    return CJGET_FFIDATA_AVSESSION->DispatchSessionEvent(*event, *args);
+}
+
+int32_t FfiMultimediaAVSessionOn(int64_t sessionId, int32_t eventType, int64_t callbackId)
+{
+    return CJGET_FFIDATA_AVSESSION->OnEvent(eventType, callbackId);
+}
+
+int32_t FfiMultimediaAVSessionOff(int64_t sessionId, int32_t eventType)
+{
+    return CJGET_FFIDATA_AVSESSION->OffEvent(eventType);
 }
 }

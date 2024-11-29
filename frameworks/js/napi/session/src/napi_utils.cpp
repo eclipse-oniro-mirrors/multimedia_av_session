@@ -770,6 +770,18 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<CastDisplayInfo>
     return status;
 }
 
+/* napi_value <-> NapiAVCastPickerOptions */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, NapiAVCastPickerOptions& out)
+{
+    napi_value value {};
+    auto status = napi_get_named_property(env, in, "sessionType", &value);
+    CHECK_RETURN(status == napi_ok, "get sessionType failed", status);
+    status = GetValue(env, value, out.sessionType);
+    CHECK_RETURN(status == napi_ok, "get sessionType value failed", status);
+
+    return napi_ok;
+}
+
 template <typename T>
 void TypedArray2Vector(uint8_t* data, size_t length, napi_typedarray_type type, std::vector<T>& out)
 {

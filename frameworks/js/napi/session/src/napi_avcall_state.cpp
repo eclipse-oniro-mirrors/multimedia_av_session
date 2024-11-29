@@ -99,7 +99,7 @@ napi_status NapiAVCallState::SetValue(napi_env env, const AVCallState& in, napi_
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
 
     auto mask = in.GetMask();
-    for (int i = 0; i < AVCallState::AVCALL_STATE_KEY_MAX; ++i) {
+    for (int32_t i = 0; i < AVCallState::AVCALL_STATE_KEY_MAX; ++i) {
         if (!mask.test(i)) {
             continue;
         }

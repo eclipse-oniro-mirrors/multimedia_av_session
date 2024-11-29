@@ -28,7 +28,6 @@
 #include "want_params_wrapper.h"
 #include "pixel_map_impl.h"
 #include "avsession_pixel_map_adapter.h"
-#include "avsession_log.h"
 #include "avsession_errors.h"
 #include "cj_avsession_media_description.h"
 
@@ -40,19 +39,6 @@ const char *FD = "FD";
 const char *REMOTE_OBJECT = "RemoteObject";
 const char *TYPE_PROPERTY = "type";
 const char *VALUE_PROPERTY = "value";
-constexpr int32_t STR_TYPE = 0;
-constexpr int32_t I32_TYPE = 1;
-constexpr int32_t BOOL_TYPE = 3;
-constexpr int32_t FD_TYPE = 4;
-constexpr int32_t STR_PTR_TYPE = 5;
-constexpr int32_t I32_PTR_TYPE = 6;
-constexpr int32_t I64_PTR_TYPE = 7;
-constexpr int32_t BOOL_PTR_TYPE = 8;
-constexpr int32_t DOUBLE_PTR_TYPE = 9;
-constexpr int32_t FD_PTR_TYPE = 10;
-constexpr int32_t DOUBLE_TYPE = 11;
-constexpr int32_t PIXEL_MAP_TYPE = 13;
-constexpr int32_t NONE_VALUE = -1;
 
 using WantParams = OHOS::AAFwk::WantParams;
 
@@ -508,6 +494,16 @@ void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &co
     }
 }
 
+/* Common Methods ===========================================*/
+int32_t CJExecMethod(std::function<int32_t()> method, std::string methodName)
+{
+    int32_t ret = method();
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("controller %{public}s failed:%{public}d", methodName.c_str(), ret);
+    }
+    return ret;
+}
+
 /* Converter ================================================*/
 template<class T>
 int32_t CJConverterMalloc(T*& obj, int64_t size)
@@ -688,6 +684,123 @@ int32_t convertNativeToCJStruct(const OutputDeviceInfo& native, COutputDeviceInf
     return ret;
 }
 
+int32_t convertNativeToCJStruct(const MMI::KeyEvent::KeyItem& native, CKey& cj)
+{
+    int32_t ret = CJNO_ERROR;
+    cj.code = native.GetKeyCode();
+    cj.pressedTime = native.GetDownTime();
+    cj.deviceId = native.GetDeviceId();
+    return ret;
+}
+
+int32_t convertNativeToCJStruct(const std::vector<MMI::KeyEvent::KeyItem>& native, CKey*& cj)
+{
+    int32_t ret = CJNO_ERROR;
+    ret = CJConverterMalloc<CKey>(cj, native.size());
+    if (ret != CJNO_ERROR) {
+        return ret;
+    }
+    for (uint32_t i = 0; i < native.size(); i++) {
+        convertNativeToCJStruct(native[i], *(cj+i));
+    }
+    return ret;
+}
+
+int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CInputEvent& cj)
+{
+    int32_t ret = CJNO_ERROR;
+    cj.id = native.GetId();
+    cj.deviceId = native.GetDeviceId();
+    cj.actionTime = native.GetActionTime();
+    cj.screenId = native.GetTargetDisplayId();
+    cj.windowId = native.GetTargetWindowId();
+    return ret;
+}
+
+int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CKeyEvent& cj)
+{
+    int32_t ret = CJNO_ERROR;
+    ret = convertNativeToCJStruct(native, cj.base);
+    if (ret != CJNO_ERROR) {
+        return ret;
+    }
+    cj.action = native.GetKeyAction();
+    if (native.GetKeyItem()) {
+        ret = convertNativeToCJStruct(native.GetKeyItem().value(), cj.key);
+        if (ret != CJNO_ERROR) {
+            return ret;
+        }
+        cj.unicodeChar = native.GetKeyItem().value().GetUnicode();
+    } else {
+        cj.key.code = MMI::KeyEvent::KEYCODE_UNKNOWN;
+        cj.unicodeChar = 0;
+    }
+    std::vector<MMI::KeyEvent::KeyItem> allKeys_ = native.GetKeyItems();
+    std::vector<MMI::KeyEvent::KeyItem> keys_;
+    cj.keysLength = 0;
+    for (const auto &item : allKeys_) {
+        if (item.IsPressed()) {
+            keys_.push_back(item);
+            cj.keysLength++;
+        }
+    }
+    ret = convertNativeToCJStruct(keys_, cj.keys);
+    if (ret != CJNO_ERROR) {
+        return ret;
+    }
+    auto isPressed = [&native](const int32_t keyCode) {
+        if (native.GetKeyItem(keyCode)) {
+            return native.GetKeyItem(keyCode).value().IsPressed();
+        } else {
+            return false;
+        }
+    };
+    cj.ctrlKey = isPressed(MMI::KeyEvent::KEYCODE_CTRL_LEFT) || isPressed(MMI::KeyEvent::KEYCODE_CTRL_RIGHT);
+    cj.altKey = isPressed(MMI::KeyEvent::KEYCODE_ALT_LEFT) || isPressed(MMI::KeyEvent::KEYCODE_ALT_RIGHT);
+    cj.shiftKey = isPressed(MMI::KeyEvent::KEYCODE_SHIFT_LEFT) || isPressed(MMI::KeyEvent::KEYCODE_SHIFT_RIGHT);
+    cj.logoKey = isPressed(MMI::KeyEvent::KEYCODE_ALT_LEFT) || isPressed(MMI::KeyEvent::KEYCODE_ALT_RIGHT);
+    cj.logoKey = isPressed(MMI::KeyEvent::KEYCODE_META_LEFT) || isPressed(MMI::KeyEvent::KEYCODE_META_RIGHT);
+    cj.fnKey = isPressed(MMI::KeyEvent::KEYCODE_FN);
+    cj.capsLock = isPressed(MMI::KeyEvent::KEYCODE_CAPS_LOCK);
+    cj.numLock = isPressed(MMI::KeyEvent::KEYCODE_NUM_LOCK);
+    cj.scrollLock = isPressed(MMI::KeyEvent::KEYCODE_SCROLL_LOCK);
+    return ret;
+}
+
+int32_t convertCJStructToNative(const CKeyEvent& cj, MMI::KeyEvent& native)
+{
+    int32_t ret = CJNO_ERROR;
+    native.SetKeyAction(cj.action);
+    MMI::KeyEvent::KeyItem nkey;
+    ret = convertCJStructToNative(cj.key, nkey);
+    if (ret != CJNO_ERROR) {
+        return ret;
+    }
+    native.SetKeyCode(nkey.GetKeyCode());
+    for (int64_t i = 0; i < cj.keysLength; i++) {
+        MMI::KeyEvent::KeyItem nitem;
+        ret = convertCJStructToNative(*(cj.keys+i), nitem);
+        if (ret != CJNO_ERROR) {
+            return ret;
+        }
+        if ((nkey.GetKeyCode() == nitem.GetKeyCode()) && (cj.action == MMI::KeyEvent::KEY_ACTION_UP)) {
+            nitem.SetPressed(false);
+        }
+        native.AddKeyItem(nitem);
+    }
+    return ret;
+}
+
+int32_t convertCJStructToNative(const CKey& cj, MMI::KeyEvent::KeyItem& native)
+{
+    int32_t ret = CJNO_ERROR;
+    native.SetKeyCode(cj.code);
+    native.SetDownTime(cj.pressedTime);
+    native.SetDeviceId(cj.deviceId);
+    native.SetPressed(true);
+    return ret;
+}
+
 int32_t convertNativeToCJStruct(const DeviceInfo& native, CDeviceInfo& cj)
 {
     std::vector<Step> steps;
@@ -703,6 +816,12 @@ int32_t convertNativeToCJStruct(const DeviceInfo& native, CDeviceInfo& cj)
     cj.castCategory = native.castCategory_;
     cj.deviceType = native.deviceType_;
     cj.supportedProtocols = native.supportedProtocols_;
+    return CJNO_ERROR;
+}
+
+int32_t convertNativeToCJStruct(const int32_t& native, int32_t& cj)
+{
+    cj = native;
     return CJNO_ERROR;
 }
 
@@ -723,6 +842,21 @@ int32_t convertNativeToCJStruct(const std::vector<int32_t>& native, CArray&cj)
     int32_t ret = CJNO_ERROR;
     int32_t* &cjArrHead = reinterpret_cast<int32_t*&>(cj.head);
     ret = CJConverterMalloc<int32_t>(cjArrHead, native.size());
+    if (ret != CJNO_ERROR) {
+        return ret;
+    }
+    cj.size = native.size();
+    for (uint32_t i = 0; i < native.size(); i++) {
+        cjArrHead[i] = native[i];
+    }
+    return ret;
+}
+
+int32_t convertNativeToCJStruct(const std::vector<uint8_t>& native, CArray& cj)
+{
+    int32_t ret = CJNO_ERROR;
+    uint8_t* &cjArrHead = reinterpret_cast<uint8_t*&>(cj.head);
+    ret = CJConverterMalloc<uint8_t>(cjArrHead, native.size());
     if (ret != CJNO_ERROR) {
         return ret;
     }
@@ -829,7 +963,40 @@ int32_t convertNativeToCJStruct(const AVPlaybackState& native, CAVPlaybackState&
     return convertNativeToCJStruct(*native.GetExtras(), cj.extras);
 }
 
+int32_t convertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArray& cj)
+{
+    CCastDisplayInfo* &cjArrHead = reinterpret_cast<CCastDisplayInfo*&>(cj.head);
+    int32_t ret = CJConverterMalloc<CCastDisplayInfo>(cjArrHead, native.size());
+    if (ret != CJNO_ERROR) {
+        SLOGE("Convert std::vector<CastDisplayInfo> to CArray failed!");
+        return ret;
+    }
+    cj.size = native.size();
+    for (uint32_t i = 0; i < native.size(); i++) {
+        ret = convertNativeToCJStruct(native[i], cjArrHead[i]);
+        if (ret != CJNO_ERROR) {
+            return ret;
+        }
+    }
+    return ret;
+}
+
+int32_t convertNativeToCJStruct(const CastDisplayInfo& native, CCastDisplayInfo& cj)
+{
+    cj.id = native.displayId;
+    cj.displayState = native.displayState;
+    cj.width = native.width;
+    cj.height = native.height;
+    return convertNativeToCJStruct(native.name, cj.name);
+}
+
 /* Cangjie to Native*/
+
+int32_t convertCJStructToNative(const int32_t& cj, int32_t& native)
+{
+    native = cj;
+    return CJNO_ERROR;
+}
 
 int32_t convertCJStructToNative(const CArray& cj, AAFwk::WantParams &native)
 {
@@ -894,7 +1061,7 @@ int32_t convertCJStructToNative(const CArray& cj, std::vector<std::string>& nati
         return CJNO_ERROR;
     }
     auto ptr = reinterpret_cast<char**>(cj.head);
-    for (int i = 0; i < cj.size; i++) {
+    for (uint32_t i = 0; i < cj.size; i++) {
         native.push_back(std::string(ptr[i]));
     }
     return CJNO_ERROR;
@@ -951,7 +1118,7 @@ int32_t convertCJStructToNative(const CArray& cj, std::vector<AVQueueItem>& nati
 {
     int32_t ret = CJNO_ERROR;
     auto ptr = reinterpret_cast<CAVQueueItem*>(cj.head);
-    for (int i = 0; i < cj.size; i++) {
+    for (uint32_t i = 0; i < cj.size; i++) {
         AVQueueItem item;
         ret = convertCJStructToNative(ptr[i], item);
         if (ret != CJNO_ERROR) {
@@ -1018,4 +1185,78 @@ int32_t convertCJStructToNative(const CAVMediaDescription& cj, AVMediaDescriptio
     return ret;
 }
 
+int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVControlCommand& native)
+{
+    native.SetCommand(cj.command);
+    switch (cj.command) {
+        case AVControlCommand::SESSION_CMD_FAST_FORWARD:
+            native.SetForwardTime(*static_cast<int32_t *>(cj.parameter.value));break;
+        case AVControlCommand::SESSION_CMD_REWIND:
+            native.SetRewindTime(*static_cast<int32_t *>(cj.parameter.value));break;
+        case AVControlCommand::SESSION_CMD_SEEK:
+            native.SetSeekTime(*static_cast<int32_t *>(cj.parameter.value));break;
+        case AVControlCommand::SESSION_CMD_SET_SPEED:
+            native.SetSpeed(*static_cast<double *>(cj.parameter.value));break;
+        case AVControlCommand::SESSION_CMD_SET_LOOP_MODE:
+            native.SetLoopMode(*static_cast<int32_t *>(cj.parameter.value));break;
+        case AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE:
+            native.SetAssetId(std::string(static_cast<char *>(cj.parameter.value)));break;
+        case AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID:
+            native.SetPlayFromAssetId(*static_cast<int64_t *>(cj.parameter.value));break;
+        default:
+            break;
+    }
+    return CJNO_ERROR;
+}
+
+int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVCastControlCommand& native)
+{
+    native.SetCommand(cj.command);
+    switch (cj.command) {
+        case AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD:
+            native.SetForwardTime(*static_cast<int32_t *>(cj.parameter.value));break;
+        case AVCastControlCommand::CAST_CONTROL_CMD_REWIND:
+            native.SetRewindTime(*static_cast<int32_t *>(cj.parameter.value));break;
+        case AVCastControlCommand::CAST_CONTROL_CMD_SEEK:
+            native.SetSeekTime(*static_cast<int32_t *>(cj.parameter.value));break;
+        case AVCastControlCommand::CAST_CONTROL_CMD_SET_VOLUME:
+            native.SetVolume(*static_cast<int32_t *>(cj.parameter.value));break;
+        case AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED:
+            native.SetSpeed(*static_cast<int32_t *>(cj.parameter.value));break;
+        case AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE:
+            native.SetLoopMode(*static_cast<int32_t *>(cj.parameter.value));break;
+        default:
+            break;
+    }
+    return CJNO_ERROR;
+}
+
+int32_t convertCJStructToNative(const CArray& cj, std::vector<uint8_t>& native)
+{
+    for (uint32_t i = 0; i < cj.size; i++) {
+        native.push_back(static_cast<uint8_t*>(cj.head)[i]);
+    }
+    return CJNO_ERROR;
+}
+
+/* Free cjObject ============================================*/
+void cjStructHeapFree(CCastDisplayInfo& cj)
+{
+    free(cj.name);
+    cj.name = nullptr;
+}
+
+void cjStructHeapFree(COutputDeviceInfo& cj)
+{
+    free(cj.devices.head);
+    cj.devices.head = nullptr;
+    cj.devices.size = 0;
+}
+
+void cjStructHeapFree(CArray& cj)
+{
+    free(cj.head);
+    cj.head = nullptr;
+    cj.size = 0;
+}
 }  // namespace AVSession::OHOS

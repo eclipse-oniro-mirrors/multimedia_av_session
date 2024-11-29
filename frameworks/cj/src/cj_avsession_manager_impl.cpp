@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "cj_avsession_controller_impl.h"
+#include "cj_avsession_manager_impl.h"
 
 #include "av_session.h"
 #include "avsession_manager.h"
@@ -21,6 +21,8 @@
 #include "avsession_log.h"
 #include "cj_avsession_impl.h"
 #include "cj_avsession_utils.h"
+#include "cj_avsession_controller_impl.h"
+#include "cj_avsession_cast_controller_impl.h"
 
 namespace OHOS::AVSession {
 

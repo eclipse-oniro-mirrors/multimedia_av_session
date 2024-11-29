@@ -25,18 +25,38 @@
 #include "avmedia_description.h"
 #include "avplayback_state.h"
 #include "avsession_errors.h"
+#include "avsession_log.h"
+#include "avcast_control_command.h"
+#include "avcontrol_command.h"
 #include "cj_avsession_prototypes.h"
+#include "key_event.h"
 
 namespace OHOS::AVSession {
-const int32_t CJNO_ERROR = 0;
+constexpr int32_t CJNO_ERROR = 0;
+
+constexpr int32_t STR_TYPE = 0;
+constexpr int32_t I32_TYPE = 1;
+constexpr int32_t BOOL_TYPE = 3;
+constexpr int32_t FD_TYPE = 4;
+constexpr int32_t STR_PTR_TYPE = 5;
+constexpr int32_t I32_PTR_TYPE = 6;
+constexpr int32_t I64_PTR_TYPE = 7;
+constexpr int32_t BOOL_PTR_TYPE = 8;
+constexpr int32_t DOUBLE_PTR_TYPE = 9;
+constexpr int32_t FD_PTR_TYPE = 10;
+constexpr int32_t DOUBLE_TYPE = 11;
+constexpr int32_t PIXEL_MAP_TYPE = 13;
+constexpr int32_t NONE_VALUE = -1;
 
 /* Native => Cangjie FFI Object*/
 /*Primitive Type*/
 int32_t convertNativeToCJStruct(const std::string& native, char*& cj);
 int32_t convertNativeToCJStruct(const std::vector<std::string>& native, CArray& cj);
+int32_t convertNativeToCJStruct(const int32_t& native, int32_t& cj);
 int32_t convertNativeToCJStruct(const int64_t& native, int64_t& cj);
 int32_t convertNativeToCJStruct(const bool& native, bool& cj);
 int32_t convertNativeToCJStruct(const std::vector<int32_t>& native, CArray& cj);
+int32_t convertNativeToCJStruct(const std::vector<uint8_t>& native, CArray& cj);
 int32_t convertNativeToCJStruct(const AAFwk::WantParams& native, CArray& cj);
 
 /* String | PixelMap*/
@@ -58,7 +78,19 @@ int32_t convertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray& 
 int32_t convertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescription& cj);
 int32_t convertNativeToCJStruct(const AVFileDescriptor& native, CAVFileDescriptor& cj);
 
+int32_t convertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArray& cj);
+int32_t convertNativeToCJStruct(const CastDisplayInfo& native, CCastDisplayInfo& cj);
+
+int32_t convertNativeToCJStruct(const MMI::KeyEvent::KeyItem& native, CKey& cj);
+int32_t convertNativeToCJStruct(const std::vector<MMI::KeyEvent::KeyItem>& native, CKey*& cj);
+int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CInputEvent& cj);
+int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CKeyEvent& cj);
+
 /* Canjie FFI Object => Native*/
+int32_t convertCJStructToNative(const int32_t& cj, int32_t& native);
+int32_t convertCJStructToNative(const CKeyEvent& cj, MMI::KeyEvent& native);
+int32_t convertCJStructToNative(const CKey& cj, MMI::KeyEvent::KeyItem& native);
+
 int32_t convertCJStructToNative(const CArray& cj, AAFwk::WantParams& native);
 int32_t convertCJStructToNative(const CAVMetaData& cj, AVMetaData &native);
 int32_t convertCJStructToNative(const CArray& cj, std::vector<std::string>& native);
@@ -68,7 +100,52 @@ int32_t convertCJStructToNative(const CAVPlaybackState& cj, AVPlaybackState& nat
 int32_t convertCJStructToNative(const CArray& cj, std::vector<AVQueueItem>& native);
 int32_t convertCJStructToNative(const CAVQueueItem& cj, AVQueueItem& native);
 int32_t convertCJStructToNative(const CAVMediaDescription& cj, AVMediaDescription& native);
+int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVControlCommand& native);
+int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVCastControlCommand& native);
+int32_t convertCJStructToNative(const CArray& cj, std::vector<uint8_t>& native);
 
+/* Free cjObject */
+void cjStructHeapFree(COutputDeviceInfo& cj);
+void cjStructHeapFree(CArray& cj);
+void cjStructHeapFree(CCastDisplayInfo& cj);
+
+
+/* Common Methods */
+int32_t CJExecMethod(std::function<int32_t()> method, std::string methodName);
+
+template<class NT, class CJT>
+int32_t CJControllerGetterCStruct(
+    std::function<int32_t(NT&)> method, CJT& cj, std::string method_name)
+{
+    NT native;
+    int32_t ret = method(native);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("%{public}s failed:%{public}d", method_name.c_str(), ret);
+    } else {
+        ret = convertNativeToCJStruct(native, cj);
+        if (ret != CJNO_ERROR) {
+            SLOGE("%{public}s failed:%{public}d", method_name.c_str(), ret);
+        }
+    }
+    return ret;
+}
+
+template<class NT, class CJT>
+int32_t CJAVSessionSetterCStruct(
+    std::function<int32_t(NT&)> method, CJT& cj, std::string method_name)
+{
+    NT native;
+    int32_t ret = convertCJStructToNative(cj, native);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("%{public}s failed:%{public}d", method_name.c_str(), ret);
+    } else {
+        ret = method(native);
+        if (ret != CJNO_ERROR) {
+            SLOGE("%{public}s failed:%{public}d", method_name.c_str(), ret);
+        }
+    }
+    return ret;
+}
 } // namespace AVSession::OHOS
 
 #endif // OHOS_CJ_AVSESSION_UTILS_H

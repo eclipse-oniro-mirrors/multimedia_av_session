@@ -148,7 +148,7 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
         delete napiSession;
         napiSession = nullptr;
     };
-    auto* napiSession = new(std::nothrow) NapiAVSession();
+    sptr<NapiAVSession> napiSession = new(std::nothrow) NapiAVSession();
     if (napiSession == nullptr) {
         SLOGE("no memory");
         return nullptr;

@@ -86,6 +86,7 @@ namespace OHOS::AVSession {
 static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
     
 static const int32_t CAST_ENGINE_SA_ID = 65546;
+static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t MINNUM_FOR_NOTIFICATION = 5;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
@@ -98,6 +99,18 @@ const std::map<int, int32_t> keyCodeToCommandMap_ = {
     {MMI::KeyEvent::KEYCODE_MEDIA_PREVIOUS, AVControlCommand::SESSION_CMD_PLAY_PREVIOUS},
     {MMI::KeyEvent::KEYCODE_MEDIA_REWIND, AVControlCommand::SESSION_CMD_REWIND},
     {MMI::KeyEvent::KEYCODE_MEDIA_FAST_FORWARD, AVControlCommand::SESSION_CMD_FAST_FORWARD},
+};
+
+const std::map<int32_t, int32_t> cmdToOffsetMap_ = {
+    {AVControlCommand::SESSION_CMD_PLAY, 8},
+    {AVControlCommand::SESSION_CMD_PAUSE, 7},
+    {AVControlCommand::SESSION_CMD_PLAY_NEXT, 6},
+    {AVControlCommand::SESSION_CMD_PLAY_PREVIOUS, 5},
+    {AVControlCommand::SESSION_CMD_FAST_FORWARD, 4},
+    {AVControlCommand::SESSION_CMD_REWIND, 3},
+    {AVControlCommand::SESSION_CMD_SEEK, 2},
+    {AVControlCommand::SESSION_CMD_SET_LOOP_MODE, 1},
+    {AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE, 0}
 };
 
 class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
@@ -145,23 +158,12 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     AddSystemAbilityListener(CAST_ENGINE_SA_ID);
+    AddSystemAbilityListener(COLLABORATION_SA_ID);
     AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
-    SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
-    if (is2in1_) {
-        SLOGI("startup enable cast check 2in1");
-        checkEnableCast(true);
-        AVRouter::GetInstance().SetDiscoverable(false);
-        AVRouter::GetInstance().SetDiscoverable(true);
-    }
-    CollaborationManager::GetInstance().ReadCollaborationManagerSo();
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
-#endif
     PullMigrateStub();
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
@@ -231,6 +233,9 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
         int32_t userId = eventData.GetCode();
         servicePtr_->RegisterBundleDeleteEventForHistory(userId);
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0 ||
+        action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED) == 0) {
+        servicePtr_->InitCastEngineService();
     }
 }
 
@@ -318,6 +323,8 @@ bool AVSessionService::SubscribeCommonEvent()
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_FOREGROUND,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED,
     };
 
     EventFwk::MatchingSkills matchingSkills;
@@ -383,6 +390,9 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             InitRadarBMS();
             break;
         case CAST_ENGINE_SA_ID:
+            break;
+        case COLLABORATION_SA_ID:
+            InitCollaboration();
             break;
         case BLUETOOTH_HOST_SYS_ABILITY_ID:
             CheckBrEnable();
@@ -585,7 +595,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         }
         return;
     }
-
+    std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     for (const auto& session : *sessionListForFront) {
@@ -653,6 +663,7 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
 {
     SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
+        std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
@@ -688,6 +699,7 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         }
         GetContainer().UpdateSessionSort(session);
         RefreshFocusSessionSort(session);
+        std::lock_guard frontLockGuard(sessionFrontLock_);
         std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
         CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr!");
         auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), session);
@@ -716,7 +728,8 @@ void AVSessionService::InitAudio()
     AudioAdapter::GetInstance().AddStreamRendererStateListener([this] (const AudioRendererChangeInfos& infos) {
         OutputDeviceChangeListener(infos);
     });
-    AudioAdapter::GetInstance().AddDeviceChangeListener([this] (const std::vector<sptr<AudioDeviceDescriptor>> &desc) {
+    AudioAdapter::GetInstance().AddDeviceChangeListener(
+        [this] (const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) {
         HandleDeviceChange(desc);
     });
 }
@@ -780,6 +793,30 @@ void AVSessionService::InitCommonEventService()
     SLOGI("InitCommonEventService in");
     bool ret = SubscribeCommonEvent();
     CHECK_AND_RETURN_LOG(ret, "SubscribeCommonEvent error!");
+}
+
+void AVSessionService::InitCollaboration()
+{
+    SLOGI("InitCollaboration in");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CollaborationManager::GetInstance().ReadCollaborationManagerSo();
+    CollaborationManager::GetInstance().RegisterLifecycleCallback();
+#endif
+}
+
+void AVSessionService::InitCastEngineService()
+{
+    SLOGI("InitCastEngineService in");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
+    SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
+    if (is2in1_) {
+        SLOGI("startup enable cast check 2in1");
+        checkEnableCast(true);
+        AVRouter::GetInstance().SetDiscoverable(false);
+        AVRouter::GetInstance().SetDiscoverable(true);
+    }
+#endif
 }
 
 void AVSessionService::RegisterBundleDeleteEventForHistory(int32_t userId)
@@ -946,6 +983,73 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
             }
         }
     }
+}
+
+void AVSessionService::LowQualityCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
+    AudioStandard::RendererState rendererState)
+{
+    sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
+    CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for LowQualityCheck");
+
+    AVMetaData meta = session->GetMetaData();
+    bool hasTitle = !meta.GetTitle().empty();
+    bool hasImage = meta.GetMediaImage() != nullptr || !meta.GetMediaImageUri().empty();
+    int32_t commandQuality = 0;
+    for (auto cmd : session->GetSupportCommand()) {
+        auto it = cmdToOffsetMap_.find(cmd);
+        if (it != cmdToOffsetMap_.end()) {
+            commandQuality += (1 << it->second);
+        }
+    }
+    if ((!hasTitle && !hasImage) || (session->GetSupportCommand().size() == 0)) {
+        SLOGI("LowQualityCheck report for %{public}s", session->GetBundleName().c_str());
+        AVSessionSysEvent::BackControlReportInfo reportInfo;
+        reportInfo.bundleName_ = session->GetBundleName();
+        reportInfo.streamUsage_ = streamUsage;
+        reportInfo.isBack_ = true;
+        reportInfo.playDuration_ = -1;
+        reportInfo.isAudioActive_ = true;
+        reportInfo.metaDataQuality_ = (hasTitle << 1) + hasImage;
+        reportInfo.cmdQuality_ = commandQuality;
+        reportInfo.playbackState_ = session->GetPlaybackState().GetState();
+        AVSessionSysEvent::GetInstance().AddLowQualityInfo(reportInfo);
+    }
+}
+
+void AVSessionService::PlayStateCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
+    AudioStandard::RendererState rState)
+{
+    sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
+    CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for LowQualityCheck");
+
+    AVPlaybackState aState = session->GetPlaybackState();
+    if ((rState == AudioStandard::RENDERER_RUNNING && aState.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY) ||
+        ((rState == AudioStandard::RENDERER_PAUSED || rState == AudioStandard::RENDERER_STOPPED) &&
+        aState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY)) {
+            HISYSEVENT_FAULT("AVSESSION_WRONG_STATE",
+                "BUNDLE_NAME", session->GetBundleName(),
+                "RENDERER_STATE", rState,
+                "AVSESSION_STATE", aState.GetState());
+        }
+}
+
+void AVSessionService::NotifyBackgroundReportCheck(const int32_t uid, const int32_t pid,
+    AudioStandard::StreamUsage streamUsage, AudioStandard::RendererState rendererState)
+{
+    bool isBack = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
+    // low quality check
+    if (isBack && rendererState == AudioStandard::RENDERER_RUNNING) {
+        AVSessionEventHandler::GetInstance().AVSessionPostTask(
+            [this, uid, streamUsage, rendererState]() {
+                LowQualityCheck(uid, streamUsage, rendererState);
+            }, "LowQualityCheck", lowQualityTimeout);
+    }
+
+    // error renderer state check
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this, uid, streamUsage, rendererState]() {
+            PlayStateCheck(uid, streamUsage, rendererState);
+        }, "PlayStateCheck", errorStateTimeout);
 }
 
 // LCOV_EXCL_START
@@ -2227,8 +2331,9 @@ void AVSessionService::SetDeviceInfo(const std::vector<AudioStandard::AudioDevic
     session->SetOutputDevice(outputDeviceInfo);
 }
 
-bool AVSessionService::GetAudioDescriptorByDeviceId(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>>&
-    descriptors, const std::string& deviceId,
+bool AVSessionService::GetAudioDescriptorByDeviceId(
+    const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>& descriptors,
+    const std::string& deviceId,
     AudioStandard::AudioDeviceDescriptor& audioDescriptor)
 {
     for (const auto& descriptor : descriptors) {
@@ -2271,8 +2376,8 @@ int32_t AVSessionService::SelectOutputDevice(const int32_t uid, const AudioDevic
     audioFilter->rendererInfo.contentType = ContentType::CONTENT_TYPE_MUSIC;
     audioFilter->rendererInfo.streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
 
-    std::vector<sptr<AudioDeviceDescriptor>> audioDescriptor;
-    auto audioDeviceDescriptor = new(std::nothrow) AudioDeviceDescriptor(descriptor);
+    std::vector<std::shared_ptr<AudioDeviceDescriptor>> audioDescriptor;
+    auto audioDeviceDescriptor = std::make_shared<AudioDeviceDescriptor>(descriptor);
     CHECK_AND_RETURN_RET_LOG(audioDeviceDescriptor != nullptr, ERR_NO_MEMORY, "audioDeviceDescriptor is nullptr");
     audioDescriptor.push_back(audioDeviceDescriptor);
     SLOGI("select the device %{public}s role is %{public}d, networkId is %{public}.6s",
@@ -2896,7 +3001,8 @@ void AVSessionService::NotifyDeviceChange()
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
-void AVSessionService::HandleDeviceChange(const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> &desc)
+void AVSessionService::HandleDeviceChange(
+    const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc)
 {
     for (auto &audioDeviceDescriptor : desc) {
         if (audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADSET ||

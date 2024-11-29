@@ -29,14 +29,14 @@ public:
         return Remote();
     }
 };
-bool AvsessionProxySendRequestTest(uint8_t* data, size_t size);
-void AvsessionProxyTest(uint8_t* data, size_t size);
+void AvsessionProxySendRequestTest();
+void AvsessionProxyTest();
 
 class AvsessionProxyFuzzer {
 public:
     AvsessionProxyFuzzer() = default;
     ~AvsessionProxyFuzzer() = default;
-    bool FuzzSendRequest(uint8_t* data, size_t size);
+    bool FuzzSendRequest();
 };
 }
 #endif

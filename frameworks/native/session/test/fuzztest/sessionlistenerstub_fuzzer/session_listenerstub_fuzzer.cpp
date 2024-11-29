@@ -22,7 +22,6 @@
 
 namespace OHOS::AVSession {
 static constexpr int32_t MAX_CODE_NUM = 6;
-static constexpr int32_t MAX_CODE_LEN = 512;
 static constexpr int32_t MIN_SIZE_NUM = 4;
 std::shared_ptr<SessionListenerClient> g_SessionListenerStubClient(nullptr);
 
@@ -71,7 +70,8 @@ void SessionListenerStubTest(uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    SLOGI("the maximum length of size should not be verified");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
     

@@ -44,6 +44,7 @@ public:
 
     void HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos);
     void HandleAppMuteState(int32_t uid, int32_t pid, bool isBackground);
+    void RendererChangeReport(AudioStandard::AudioRendererChangeInfo& info);
 
 private:
     bool HasAVSession(int32_t uid);

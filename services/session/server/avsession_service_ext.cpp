@@ -22,8 +22,7 @@ namespace OHOS::AVSession {
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
     std::string extraInfo, const std::string& state)
 {
-    SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s, extraInfo: %{public}s",
-        serviceName.c_str(), state.c_str(), extraInfo.c_str());
+    SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s", serviceName.c_str(), state.c_str());
 
     if (state == "IDLE" && serviceName == "SuperLauncher-Dual") {
         MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
@@ -145,8 +144,17 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
 }
 // LCOV_EXCL_STOP
 
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
+{
+    SLOGI("Start get cast controller with pid %{public}d", static_cast<int>(GetCallingPid()));
+    auto session = GetContainer().GetSessionById(sessionId);
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "StopCast: session is not exist");
+    auto result = session->GetAVCastControllerInner();
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, AVSESSION_ERROR, "GetAVCastControllerInner failed");
+    object = result;
+    return AVSESSION_SUCCESS;
+}
 
 int32_t AVSessionService::checkEnableCast(bool enable)
 {
@@ -209,7 +217,8 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
     
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
-        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront =
+            GetUsersManager().GetCurSessionListForFront();
         CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
         auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sinkSession);
         if (it == sessionListForFront->end()) {

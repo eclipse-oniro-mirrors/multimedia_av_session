@@ -25,6 +25,7 @@
 #include "avsession_callback_client.h"
 #include "want_params.h"
 #include "avsession_callbackclient_fuzzer.h"
+#include "securec.h"
 
 using namespace std;
 using namespace OHOS;
@@ -33,6 +34,40 @@ using namespace OHOS::AVSession;
 static constexpr int32_t MAX_CODE_TEST = 5;
 static constexpr int32_t MAX_CODE_LEN  = 512;
 static constexpr int32_t MIN_SIZE_NUM  = 8;
+static const uint8_t *RAW_DATA = nullptr;
+const size_t THRESHOLD = 10;
+static size_t g_dataSize = 0;
+static size_t g_pos;
+
+/*
+* describe: get data from outside untrusted data(RAW_DATA) which size is according to sizeof(T)
+* tips: only support basic type
+*/
+template<class T>
+T GetData()
+{
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
+
+template<class T>
+uint32_t GetArrLength(T& arr)
+{
+    if (arr == nullptr) {
+        SLOGI("%{public}s: The array length is equal to 0", __func__);
+        return 0;
+    }
+    return sizeof(arr) / sizeof(arr[0]);
+}
 
 class TestAVSessionCallback : public AVSessionCallback {
     void OnAVCallAnswer() override;
@@ -158,9 +193,9 @@ void TestAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDispl
     SLOGI("Enter into TestAVSessionCallback::OnCastDisplayChange.");
 }
 
-void AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
+void AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(int32_t code)
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
         return;
     }
     if (code >= MAX_CODE_TEST) {
@@ -183,8 +218,7 @@ void AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(int32_t code, const uint
     if (!dataMessageParcel.WriteInterfaceToken(aVSessionCallbackClient->GetDescriptor())) {
         return;
     }
-    size -= sizeof(uint32_t);
-    dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
+    dataMessageParcel.WriteBuffer(RAW_DATA + sizeof(uint32_t), g_dataSize - sizeof(uint32_t));
     dataMessageParcel.RewindRead(0);
     int32_t ret = aVSessionCallbackClient->OnRemoteRequest(code, dataMessageParcel, reply, option);
     if (ret == 0) {
@@ -192,17 +226,16 @@ void AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(int32_t code, const uint
     }
 }
 
-void AvSessionCallbackClientFuzzer::FuzzTests(const uint8_t* data, size_t size)
+void AvSessionCallbackClientFuzzer::FuzzTests()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
         return;
     }
-
-    FuzzTestInner1(data, size);
-    FuzzTestInner2(data, size);
+    FuzzTestInner1();
+    FuzzTestInner2();
 }
 
-void AvSessionCallbackClientFuzzer::FuzzTestInner1(const uint8_t* data, size_t size)
+void AvSessionCallbackClientFuzzer::FuzzTestInner1()
 {
     std::shared_ptr<TestAVSessionCallback> testAVSessionCallback = std::make_shared<TestAVSessionCallback>();
     if (!testAVSessionCallback) {
@@ -219,20 +252,22 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner1(const uint8_t* data, size_t s
     aVSessionCallbackClient.OnPlayNext();
     aVSessionCallbackClient.OnPlayPrevious();
 
-    auto speed = *(reinterpret_cast<const double*>(data));
-    auto time = *(reinterpret_cast<const int64_t*>(data));
-    auto loopMode = *(reinterpret_cast<const int32_t*>(data));
+    auto speed = GetData<double>();
+    auto time = GetData<int64_t>();
+    auto loopMode = GetData<int32_t>();
     aVSessionCallbackClient.OnFastForward(time);
     aVSessionCallbackClient.OnRewind(time);
     aVSessionCallbackClient.OnSeek(time);
     aVSessionCallbackClient.OnSetSpeed(speed);
     aVSessionCallbackClient.OnSetLoopMode(loopMode);
 
-    std::string mediald(reinterpret_cast<const char*>(data), size);
+    uint8_t randomNum = GetData<uint8_t>();
+    std::vector<std::string> medialds = { "mediald1", "mediald2", "mediald3" };
+    std::string mediald(medialds[randomNum % medialds.size()]);
     aVSessionCallbackClient.OnToggleFavorite(mediald);
 }
 
-void AvSessionCallbackClientFuzzer::FuzzTestInner2(const uint8_t* data, size_t size)
+void AvSessionCallbackClientFuzzer::FuzzTestInner2()
 {
     std::shared_ptr<TestAVSessionCallback> testAVSessionCallback = std::make_shared<TestAVSessionCallback>();
     if (!testAVSessionCallback) {
@@ -247,57 +282,88 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner2(const uint8_t* data, size_t s
     aVSessionCallbackClient.OnMediaKeyEvent(*(keyEvent.get()));
 
     int32_t connectionState = 0;
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    uint8_t randomNum1 = GetData<uint8_t>();
+    std::vector<std::string> deviceIds = { "device1", "device2", "device3" };
+    std::string deviceId(deviceIds[randomNum1 % deviceIds.size()]);
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
-    deviceInfo.castCategory_ = *(reinterpret_cast<const int32_t*>(data));
+    deviceInfo.castCategory_ = GetData<uint32_t>();
     deviceInfo.deviceId_ = deviceId;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     aVSessionCallbackClient.OnOutputDeviceChange(connectionState, outputDeviceInfo);
 
     AAFwk::WantParams commandArgs;
-    std::string commonCommand(reinterpret_cast<const char*>(data), size);
+    uint8_t randomNum2 = GetData<uint8_t>();
+    std::vector<std::string> commonCommands = { "command1", "command2", "command3" };
+    std::string commonCommand(commonCommands[randomNum2 % commonCommands.size()]);
     aVSessionCallbackClient.OnCommonCommand(commonCommand, commandArgs);
 
-    auto itemId = *(reinterpret_cast<const int32_t*>(data));
-    auto assetId = *(reinterpret_cast<const int64_t*>(data));
+    auto itemId = GetData<uint32_t>();
+    auto assetId = GetData<uint64_t>();
     aVSessionCallbackClient.OnSkipToQueueItem(itemId);
     aVSessionCallbackClient.OnPlayFromAssetId(assetId);
 
     CastDisplayInfo castDisplayInfo;
+    uint8_t randomNum3 = GetData<uint8_t>();
+    std::vector<std::string> infoNames = { "info1", "info2", "info3" };
+    castDisplayInfo.name = infoNames[randomNum3 % infoNames.size()];
     aVSessionCallbackClient.OnCastDisplayChange(castDisplayInfo);
 }
 
-void OHOS::AVSession::AvSessionCallbackOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
+void OHOS::AVSession::AvSessionCallbackOnRemoteRequest()
 {
-    auto avSessionCallbackClient = std::make_unique<AvSessionCallbackClientFuzzer>();
-    if (avSessionCallbackClient == nullptr) {
-        SLOGI("avSessionCallbackClient is null");
-        return;
+    for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
+        auto avSessionCallbackClient = std::make_unique<AvSessionCallbackClientFuzzer>();
+        if (avSessionCallbackClient == nullptr) {
+            SLOGI("avSessionCallbackClient is null");
+            return;
+        }
+        avSessionCallbackClient->FuzzOnRemoteRequest(i);
     }
-    avSessionCallbackClient->FuzzOnRemoteRequest(code, data, size);
 }
 
-void OHOS::AVSession::AvSessionCallbackClientTests(const uint8_t* data, size_t size)
+void OHOS::AVSession::AvSessionCallbackClientTests()
 {
     auto avSessionCallbackClient = std::make_unique<AvSessionCallbackClientFuzzer>();
     if (avSessionCallbackClient == nullptr) {
         SLOGI("avSessionCallbackClient is null");
         return;
     }
-    avSessionCallbackClient->FuzzTests(data, size);
+    avSessionCallbackClient->FuzzTests();
+}
+
+typedef void (*TestFuncs[2])();
+
+TestFuncs g_testFuncs = {
+    OHOS::AVSession::AvSessionCallbackOnRemoteRequest,
+    OHOS::AVSession::AvSessionCallbackClientTests,
+};
+
+bool FuzzTest(const uint8_t* rawData, size_t size)
+{
+    // initialize data
+    RAW_DATA = rawData;
+    g_dataSize = size;
+    g_pos = 0;
+
+    uint32_t code = GetData<uint32_t>();
+    uint32_t len = GetArrLength(g_testFuncs);
+    if (len > 0) {
+        g_testFuncs[code % len]();
+    } else {
+        SLOGI("%{public}s: The len length is equal to 0", __func__);
+    }
+
+    return true;
 }
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    if (size < THRESHOLD) {
         return 0;
     }
-    for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
-        OHOS::AVSession::AvSessionCallbackOnRemoteRequest(i, data, size);
-    }
-    OHOS::AVSession::AvSessionCallbackClientTests(data, size);
+
+    FuzzTest(data, size);
     return 0;
 }

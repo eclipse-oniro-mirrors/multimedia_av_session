@@ -27,7 +27,7 @@ bool AudioDeviceManager::GetVehicleA2dpConnectState()
 {
     AudioStandard::AudioSystemManager *audioSystemManager =
         AudioStandard::AudioSystemManager::GetInstance();
-    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> devices =
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> devices =
         audioSystemManager->GetActiveOutputDeviceDescriptors();
     bool isConnected = false;
     for (auto& device : devices) {
@@ -100,7 +100,7 @@ void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeActio
         return;
     }
     if (AudioStandard::DeviceChangeType::DISCONNECT == deviceChangeAction.type) {
-        std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> deviceDescriptors =
+        std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> deviceDescriptors =
             deviceChangeAction.deviceDescriptors;
         for (auto &device : deviceDescriptors) {
             if (device != nullptr &&

@@ -14,6 +14,7 @@
  */
 
 #include "napi/native_api.h"
+#include "napi_avcast_picker_helper.h"
 #include "napi_avsession_manager.h"
 #include "napi_avsession.h"
 #include "napi_avsession_controller.h"
@@ -30,6 +31,7 @@ static napi_value Export(napi_env env, napi_value exports)
     NapiAVSessionManager::Init(env, exports);
     NapiAVSession::Init(env, exports);
     NapiAVSessionController::Init(env, exports);
+    NapiAVCastPickerHelper::Init(env, exports);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     NapiAVCastController::Init(env, exports);

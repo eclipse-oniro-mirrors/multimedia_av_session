@@ -39,6 +39,14 @@ common_deps = [
   "//third_party/googletest:gtest_main",
 ]
 
+common_deps_without_third_party = [
+  "../../../../../services/session:avsession_item",
+  "../../../../../services/session:avsession_service",
+  "../../../../../utils:avsession_utils",
+  "../../../../common:avsession_common",
+  "../../../session:avsession_client",
+]
+
 common_external_deps = [
   "ability_base:want",
   "ability_runtime:wantagent_innerkits",
@@ -327,11 +335,9 @@ if (castplus_cast_engine_enable) {
 
     sources = [ "avcast_controller_test.cpp" ]
 
-    configs = [ ":module_private_config" ]
-
     cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
 
-    deps = common_deps
+    deps = common_deps_without_third_party
 
     deps += [
       "../../../../../services/session:avsession_cast_item",
@@ -342,7 +348,6 @@ if (castplus_cast_engine_enable) {
 
     include_dirs = [
       "../../include/",
-      "../../../../../../interfaces/inner_api/native/session/include/",
       "../../../../../services/session/adapter",
       "../../../../../services/session/ipc/server",
       "../../../../../services/session/server/",
@@ -364,6 +369,7 @@ if (castplus_cast_engine_enable) {
       "cast_engine:cast_engine_client",
       "data_object:distributeddataobject_impl",
       "device_manager:devicemanagersdk",
+      "googletest:gtest_main",
       "hilog:libhilog",
       "input:libmmi-client",
       "ipc:ipc_single",
