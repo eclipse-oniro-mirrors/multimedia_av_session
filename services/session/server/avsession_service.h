@@ -240,6 +240,9 @@ public:
         return NotifyAudioSessionCheck(uid);
     }
 
+    void NotifyBackgroundReportCheck(const int32_t uid, const int32_t pid,
+        AudioStandard::StreamUsage streamUsage, AudioStandard::RendererState rendererState);
+
     void SuperLauncher(std::string deviceId, std::string serviceName,
         std::string extraInfo, const std::string& state);
 
@@ -487,6 +490,12 @@ private:
     
     void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
+    
+    void LowQualityCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
+        AudioStandard::RendererState rendererState);
+
+    void PlayStateCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
+        AudioStandard::RendererState rState);
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
 
@@ -581,6 +590,8 @@ private:
     const int32_t THREE_CLICK = 3;
     const int32_t unSetHistoryNum = 3;
     const int32_t CLICK_TIMEOUT = 500;
+    const int32_t lowQualityTimeout = 1000;
+    const int32_t errorStateTimeout = 3 * 1000;
     const int32_t defMaxHistoryNum = 10;
     const int32_t maxFileLength = 32 * 1024 * 1024;
     const int32_t maxAVQueueInfoLen = 99;

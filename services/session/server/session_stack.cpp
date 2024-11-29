@@ -150,6 +150,17 @@ sptr<AVSessionItem> SessionStack::GetSessionById(const std::string& sessionId)
     return nullptr;
 }
 
+sptr<AVSessionItem> SessionStack::GetSessionByUid(const int32_t uid)
+{
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
+    for (const auto& session : stack_) {
+        if (session->GetUid() == uid) {
+            return session;
+        }
+    }
+    return nullptr;
+}
+
 std::vector<sptr<AVSessionItem>> SessionStack::GetAllSessions()
 {
     std::vector<sptr<AVSessionItem>> result;
