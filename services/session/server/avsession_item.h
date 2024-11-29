@@ -240,6 +240,8 @@ public:
 
     int32_t StopCast();
 
+    void dealValidCallback(int32_t cmd, std::vector<int32_t>& supportedCastCmds);
+
     sptr<IRemoteObject> GetAVCastControllerInner() override;
 
     void ReleaseAVCastControllerInner();
@@ -435,6 +437,7 @@ private:
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;
     std::shared_ptr<bool> isAlivePtr_;
+    bool isFirstCallback_ = true;
 #endif
 };
 } // namespace OHOS::AVSession

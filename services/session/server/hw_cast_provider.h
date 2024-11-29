@@ -55,8 +55,8 @@ public:
     void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void OnServiceDied() override;
-    bool SetStreamState(int32_t castId, DeviceInfo deviceInfo) override;
-    int32_t GetMirrorCastId() override;
+    bool SetStreamState(int64_t castHandle, DeviceInfo deviceInfo) override;
+    int64_t GetMirrorCastHandle() override;
     bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) override;
     int32_t GetProtocolType(uint32_t castProtocolType) override;
 
@@ -68,7 +68,7 @@ private:
     std::vector<std::shared_ptr<IAVCastStateListener>> castStateListenerList_;
     std::recursive_mutex mutexLock_;
     bool isRelease_ = false;
-    int32_t mirrorCastId = -1;
+    int64_t mirrorCastHandle = -1;
 };
 } // namespace OHOS::AVSession
 
