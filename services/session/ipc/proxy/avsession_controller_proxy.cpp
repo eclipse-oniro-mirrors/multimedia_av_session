@@ -133,7 +133,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAVMetaData failed");
 
     int twoImageLength = reply.ReadInt32();
-    if (twoImageLength <= 0 || twoImageLength > MAX_IMAGE_SIZE) {
+    if (twoImageLength <= 0 || twoImageLength > maxImageSize) {
         sptr<AVMetaData> data_ = reply.ReadParcelable<AVMetaData>();
         CHECK_AND_RETURN_RET_LOG(data_ != nullptr, ERR_UNMARSHALLING, "read AVMetaData failed");
         data = *data_;
@@ -185,7 +185,7 @@ int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& item
     if (ret == AVSESSION_SUCCESS) {
         std::vector<AVQueueItem> items_;
         int32_t itemNum = reply.ReadInt32();
-        CHECK_AND_RETURN_RET_LOG((itemNum >= 0) && (itemNum < MAX_ITEM_NUMBER), ERR_UNMARSHALLING,
+        CHECK_AND_RETURN_RET_LOG((itemNum >= 0) && (itemNum < maxItemNumber), ERR_UNMARSHALLING,
             "read int32 itemNum failed");
         for (int32_t i = 0; i < itemNum; i++) {
             AVQueueItem *item = reply.ReadParcelable<AVQueueItem>();
