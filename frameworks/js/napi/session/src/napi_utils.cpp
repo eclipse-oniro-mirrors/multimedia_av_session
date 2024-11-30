@@ -259,9 +259,7 @@ bool NapiUtils::JudgeNumString(const std::string& str)
 {
     std::string tempStr = str;
     return all_of(tempStr.begin(), tempStr.end(), [](char ch){
-        if (isdigit(ch)) {
-            return true;
-        }
+        return isdigit(ch);
     });
 }
 
