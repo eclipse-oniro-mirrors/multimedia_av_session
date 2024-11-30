@@ -1128,7 +1128,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             SLOGI("repeat startcast %{public}lld", (long long)castHandle_);
             return AVSESSION_ERROR;
         } else {
-            SLOGI("cast check with pre cast alive %{public}lld, unregister callback", castHandle_);
+            SLOGI("cast check with pre cast alive %" PRId64 ", unregister callback", castHandle_);
             isSwitchNewDevice_ = true;
             newOutputDeviceInfo_ = outputDeviceInfo;
             StopCast();
