@@ -32,6 +32,7 @@ constexpr size_t BUFFER_MAX_SIZE = 1024 * 1024;
 constexpr size_t DEFAULT_QUALITY = 100;
 constexpr int64_t DELAY_TIME = 2000;
 constexpr int64_t DELAY_PLAY_COM_TIME = 500;
+constexpr int32_t MAX_SESSION_NUMS = 2;
 
 class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServer,
     public std::enable_shared_from_this<MigrateAVSessionServer> {
@@ -98,7 +99,7 @@ private:
     bool isSoftbusConnecting_ = false;
     std::string deviceId_;
     std::string topSessionId_;
-    std:;string lastSessionId_;
+    std::string lastSessionId_;
     std::recursive_mutex migrateControllerLock_;
     std::recursive_mutex topSessionLock_;
 };

@@ -373,8 +373,8 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(
     SLOGI("ConvertControllersToStr");
     Json::Value jsonArray(Json::arrayValue);
     int32_t sessionNums = 0;
-    for (auto& controller : controllers) {
-        if (sessionNums >= 2) {
+    for (auto& controller : avcontrollers) {
+        if (sessionNums >= MAX_SESSION_NUMS) {
             break;
         }
         if (controller == nullptr) {
@@ -385,7 +385,7 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(
             playerId.compare(lastSessionId_) == 0) {
             Json::Value jsonObject = ConvertControllerToJson(controller);
             jsonObject[PLAYER_ID] = playerId;
-            jsonArray[0] = jsonObject;
+            jsonArray[sessionNums] = jsonObject;
             sessionNums++;
         }
     }
@@ -624,7 +624,7 @@ void MigrateAVSessionServer::PlaybackCommandDataProc(int mediaCommand, const std
                 AVControlCommand cmd;
                 cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
                 controller->SendControlCommand(cmd);
-            }, "DelaySendPlayCom", DELAY_PLAY_COM_TIME);
+                }, "DelaySendPlayCom", DELAY_PLAY_COM_TIME);
             break;
         case SYNC_MEDIASESSION_CALLBACK_ON_PAUSE:
             cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
