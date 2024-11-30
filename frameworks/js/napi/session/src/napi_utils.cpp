@@ -258,7 +258,7 @@ napi_status NapiUtils::SetValue(napi_env env, const AppExecFwk::ElementName& in,
 bool NapiUtils::JudgeNumString(const std::string& str)
 {
     std::string tempStr = str;
-    return all_of(tempStr.begin(), tempStr.end(), [](char ch){
+    return all_of(tempStr.begin(), tempStr.end(), [](char ch) {
         return isdigit(ch);
     });
 }

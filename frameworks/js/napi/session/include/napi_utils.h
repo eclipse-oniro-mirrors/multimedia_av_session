@@ -274,7 +274,6 @@ public:
     static bool DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri);
     static bool JudgeNumString(const std::string& str);
 
-
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
 
     static napi_status ThrowError(napi_env env, const char* napiMessage, int32_t napiCode);
