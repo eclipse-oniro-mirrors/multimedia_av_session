@@ -491,7 +491,7 @@ private:
     void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
     
-    void LowQualityCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
+    void LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::StreamUsage streamUsage,
         AudioStandard::RendererState rendererState);
 
     void PlayStateCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
