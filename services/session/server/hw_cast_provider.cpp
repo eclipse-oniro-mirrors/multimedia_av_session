@@ -412,7 +412,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
 
 void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
 {
-    SLOGI("eventId is %{public}d, param is %{public}lld", eventId, param);
+    SLOGI("eventId is %{public}d, param is %{public}" PRId64, eventId, param);
     std::lock_guard lockGuard(mutexLock_);
     for (auto listener : castStateListenerList_) {
         if (listener != nullptr) {

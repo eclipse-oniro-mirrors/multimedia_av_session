@@ -170,7 +170,7 @@ int32_t AVCastControllerStub::HandleSetDisplaySurface(MessageParcel& data, Messa
     uint64_t uniqueId = pSurface->GetUniqueId();
 
     auto surfaceId = std::to_string(uniqueId);
-    SLOGI("Get surface id uint64_t: %{public}llu, get the string: %{public}s",
+    SLOGI("Get surface id uint64_t: %{public}" PRIu64 ", get the string: %{public}s",
         uniqueId, surfaceId.c_str());
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetDisplaySurface(surfaceId)),
         AVSESSION_ERROR, "WriteInt32 result failed");
