@@ -255,6 +255,16 @@ napi_status NapiUtils::SetValue(napi_env env, const AppExecFwk::ElementName& in,
     return napi_ok;
 }
 
+bool NapiUtils::JudgeNumString(const std::string& str)
+{
+    std::string tempStr = str;
+    return all_of(tempStr.begin(), tempStr.end(), [](char ch){
+        if (isdigit(ch)) {
+            return true;
+        }
+    });
+}
+
 napi_status NapiUtils::SetOutPutDeviceIdValue(napi_env env, const std::vector<std::string>& in, napi_value& out)
 {
     napi_status status = napi_create_array_with_length(env, in.size(), &out);
@@ -262,6 +272,10 @@ napi_status NapiUtils::SetOutPutDeviceIdValue(napi_env env, const std::vector<st
     int index = 0;
     for (auto& item : in) {
         napi_value element = nullptr;
+        if (!JudgeNumString(item)) {
+            SLOGE("item is not num string");
+            return napi_invalid_arg;
+        }
         SetValue(env, static_cast<int32_t>(std::stoi(item)), element);
         status = napi_set_element(env, out, index++, element);
         CHECK_RETURN((status == napi_ok), "napi_set_element failed!", status);

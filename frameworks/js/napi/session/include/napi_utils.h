@@ -271,6 +271,8 @@ public:
     static size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer);
     static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri);
     static bool DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri);
+    static bool JudgeNumString(const std::string& str);
+
 
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
 
