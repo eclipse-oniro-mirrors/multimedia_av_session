@@ -47,7 +47,7 @@ void SoftbusSessionServer::DisconnectProxy(int sessionId)
 void SoftbusSessionServer::DisconnectAllProxy()
 {
     SLOGI("DisConnectAllProxy");
-    for (auto it = deviceToSessionMap_.begin(); it != deviceToSessionMap_.end(); it++) {
+    for (auto it = deviceToSessionMap_.begin(); it != deviceToSessionMap_.end();) {
         SLOGI("disConnectAllProxy anonymizeDeviceId: %{public}s.",
             SoftbusSessionUtils::AnonymizeDeviceId(it->first).c_str());
         OnDisconnectProxy(it->first);
