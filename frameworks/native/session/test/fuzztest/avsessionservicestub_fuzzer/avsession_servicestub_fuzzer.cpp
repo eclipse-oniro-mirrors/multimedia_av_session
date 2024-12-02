@@ -169,7 +169,7 @@ TestFuncs g_testFuncs = {
     AvSessionServiceTests,
 };
 
-bool FuzzTest(const uint8_t* rawData, size_t size)
+static bool FuzzTest(const uint8_t* rawData, size_t size)
 {
     if ((rawData == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return false;

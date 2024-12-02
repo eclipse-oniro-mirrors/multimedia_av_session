@@ -339,7 +339,7 @@ TestFuncs g_testFuncs = {
     OHOS::AVSession::AvSessionCallbackClientTests,
 };
 
-bool FuzzTest(const uint8_t* rawData, size_t size)
+static bool FuzzTest(const uint8_t* rawData, size_t size)
 {
     // initialize data
     RAW_DATA = rawData;
