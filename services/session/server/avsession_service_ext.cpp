@@ -117,7 +117,7 @@ void AVSessionService::RemoveInnerSessionListener(SessionListener *listener)
     for (auto it = innerSessionListeners_.begin(); it != innerSessionListeners_.end();) {
         if (*it == listener) {
             SLOGI("RemoveInnerSessionListener");
-            innerSessionListeners_.erase(it++);
+            it = innerSessionListeners_.erase(it);
         } else {
             it++;
         }
