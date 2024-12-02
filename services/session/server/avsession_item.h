@@ -240,6 +240,8 @@ public:
 
     int32_t StopCast();
 
+    void dealValidCallback(int32_t cmd, std::vector<int32_t>& supportedCastCmds);
+
     sptr<IRemoteObject> GetAVCastControllerInner() override;
 
     void ReleaseAVCastControllerInner();
@@ -428,12 +430,14 @@ private:
     std::shared_ptr<CssListener> cssListener_;
     std::shared_ptr<IAVRouterListener> iAVRouterListener_;
     sptr<HwCastDisplayListener> displayListener_;
-    std::recursive_mutex displayListenerLock_;
+    std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::function<void(std::string)> serviceCallbackForStream_;
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;
+    std::shared_ptr<bool> isAlivePtr_;
+    bool isFirstCallback_ = true;
 #endif
 };
 } // namespace OHOS::AVSession

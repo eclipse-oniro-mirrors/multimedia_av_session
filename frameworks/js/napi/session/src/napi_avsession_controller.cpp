@@ -118,7 +118,7 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
         napiController = nullptr;
     };
 
-    auto* napiController = new(std::nothrow) NapiAVSessionController();
+    sptr<NapiAVSessionController> napiController = new(std::nothrow) NapiAVSessionController();
     if (napiController == nullptr) {
         SLOGE("no memory");
         return nullptr;

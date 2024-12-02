@@ -206,11 +206,12 @@ public:
      * @param { int64_t } castHandleconst - The ID corresponding to the provider.
      * @param { std::shared_ptr<IAVRouterListener> } callback - Callback function.
      * @param { std::string } sessionId - avsession id.
+     * @param deviceInfo The device info.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
     virtual int32_t RegisterCallback(int64_t castHandleconst,
-        std::shared_ptr<IAVRouterListener> callback, std::string sessionId) = 0;
+        std::shared_ptr<IAVRouterListener> callback, std::string sessionId, DeviceInfo deviceInfo) = 0;
 
     /**
      * @brief Cancel listening for AVRouter Callback event.
@@ -246,13 +247,12 @@ public:
     virtual int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) = 0;
 
     /**
-     * @brief get mirror castid.
+     * @brief get mirror castHandle.
      *
-     * @param { const int64_t } castHandle - The ID corresponding to the provider.
-     * @return { int32_t } mirror castid.
+     * @return { int64_t } mirror castHandle.
      * @since 13
     */
-    virtual int32_t GetMirrorCastId(const int64_t castHandle) = 0;
+    virtual int64_t GetMirrorCastHandle() = 0;
 
     /**
      * @brief Listen to the change of cast state change.
@@ -272,6 +272,23 @@ public:
      * @since 13
     */
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
+
+    /**
+     * @brief clear outputDevice.
+     *
+     * @param { std::string } sessionId - avsession id.
+     * @since 13
+    */
+    virtual void ClearOutputDevice(std::string sessionId) = 0;
+
+    /**
+     * @brief disconnect other session.
+     *
+     * @param { std::string } sessionId - avsession id.
+     * @param { DeviceInfo } deviceinfo - The deviceinfo to the castprovider.
+     * @since 13
+    */
+    virtual void DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo) = 0;
 
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;

@@ -22,6 +22,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_manager_impl.h"
+#include "securec.h"
 
 using namespace std;
 namespace OHOS {
@@ -31,18 +32,46 @@ static constexpr int32_t MAX_CODE_LEN = 512;
 static constexpr int32_t MIN_SIZE_NUM = 4;
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
+static const uint8_t *RAW_DATA = nullptr;
+const size_t THRESHOLD = 10;
+static size_t g_dataSize = 0;
+static size_t g_pos;
 
-bool AvsessionControllerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
+/*
+* describe: get data from outside untrusted data(RAW_DATA) which size is according to sizeof(T)
+* tips: only support basic type
+*/
+template<class T>
+T GetData()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
+
+template<class T>
+uint32_t GetArrLength(T& arr)
+{
+    if (arr == nullptr) {
+        SLOGI("%{public}s: The array length is equal to 0", __func__);
+        return 0;
+    }
+    return sizeof(arr) / sizeof(arr[0]);
+}
+
+bool AvsessionControllerProxyFuzzer::FuzzSendRequest()
+{
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
         return false;
     }
-
-    uint32_t cmdCode = *(reinterpret_cast<const uint32_t*>(data));
-    if (cmdCode >= MAX_CODE_TEST) {
-        return false;
-    }
-
     sptr<IRemoteObject> remoteObject = nullptr;
     std::shared_ptr<AvsessionControllerProxyFuzzerTest> avSessionProxy =
         std::make_shared<AvsessionControllerProxyFuzzerTest>(remoteObject);
@@ -55,47 +84,53 @@ bool AvsessionControllerProxyFuzzer::FuzzSendRequest(uint8_t* data, size_t size)
     MessageOption option;
     auto remote = avSessionProxy->GetRemote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
-    size -= sizeof(uint32_t);
-    request.WriteBuffer(data + sizeof(uint32_t), size);
+    request.WriteBuffer(RAW_DATA + sizeof(uint32_t), g_dataSize - sizeof(uint32_t));
     request.RewindRead(0);
     int32_t result = AVSESSION_ERROR;
-    CHECK_AND_RETURN_RET_LOG((result = remote->SendRequest(cmdCode, request, reply, option)) == 0,
+    CHECK_AND_RETURN_RET_LOG(
+        (result = remote->SendRequest(GetData<uint32_t>() % MAX_CODE_TEST + 1, request, reply, option)) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     return result == AVSESSION_SUCCESS;
 }
 
-bool AvsessionControllerProxySendRequest(uint8_t* data, size_t size)
+void AvsessionControllerProxySendRequest()
 {
     auto avsessionProxy = std::make_unique<AvsessionControllerProxyFuzzer>();
-    CHECK_AND_RETURN_RET_LOG(avsessionProxy != nullptr, false, "avsessionProxy is null");
-    return avsessionProxy->FuzzSendRequest(data, size);
-}
-
-void AvsessionControllerProxyTest(uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    if (avsessionProxy == nullptr) {
+        SLOGE("avsessionProxy is not null");
         return;
     }
+    avsessionProxy->FuzzSendRequest();
+}
 
+void AvsessionControllerProxyTest()
+{
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
+        return;
+    }
     AVPlaybackState state;
-    int32_t stateTemp = *(reinterpret_cast<const int32_t*>(data));
+    int32_t stateTemp = GetData<int32_t>();
     state.SetState(stateTemp);
 
     AVMetaData metaData;
-    std::string dataTemp(reinterpret_cast<const char*>(data), size);
+    uint8_t randomNum = GetData<uint8_t>();
+    std::vector<std::string> dataTemps = { "test1", "test2", "test3" };
+    std::string dataTemp(dataTemps[randomNum % dataTemps.size()]);
     metaData.SetAssetId(dataTemp);
 
     std::vector<int32_t> cmds;
-    int32_t fuzzCmds = *(reinterpret_cast<const int32_t*>(data));
+    int32_t fuzzCmds = GetData<int32_t>();
     cmds.push_back(fuzzCmds);
 
-    bool isActive = *(reinterpret_cast<const bool*>(data));
+    bool isActive = GetData<bool>();
 
     AVControlCommand controlCommand;
-    int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
+    int32_t cmd = GetData<int32_t>();
     controlCommand.SetCommand(cmd);
 
-    std::string eventName(reinterpret_cast<const char*>(data), size);
+    randomNum = GetData<uint8_t>();
+    std::vector<std::string> eventNames = { "event1", "event2", "event3" };
+    std::string eventName(eventNames[randomNum % eventNames.size()]);
     AAFwk::WantParams wantParams;
 
     sptr<IRemoteObject> impl = nullptr;
@@ -109,14 +144,14 @@ void AvsessionControllerProxyTest(uint8_t* data, size_t size)
     avSessionControllerProxy.GetExtras(wantParams);
 }
 
-void AvsessionItemTest(uint8_t* data, size_t size)
+void AvsessionItemTest()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
         return;
     }
-    std::string fuzzString(reinterpret_cast<const char*>(data), size);
+    std::string fuzzString(reinterpret_cast<const char*>(RAW_DATA), g_dataSize);
 
-    int32_t type = (*reinterpret_cast<const int32_t *>(data)) % 2; // valid type 0-1
+    int32_t type = GetData<int32_t>() % 2; // valid type 0-1
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
     elementName.SetAbilityName(g_testAbilityName);
@@ -144,13 +179,40 @@ void AvsessionItemTest(uint8_t* data, size_t size)
     avSessionController->SendCommonCommand(fuzzString, wantParams);
 }
 
-/* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
+typedef void (*TestFuncs[3])();
+
+TestFuncs g_testFuncs = {
+    AvsessionControllerProxySendRequest,
+    AvsessionControllerProxyTest,
+    AvsessionItemTest,
+};
+
+bool FuzzTest(const uint8_t* rawData, size_t size)
 {
-    /* Run your code on data */
-    AvsessionControllerProxySendRequest(data, size);
-    AvsessionControllerProxyTest(data, size);
-    AvsessionItemTest(data, size);
+    // initialize data
+    RAW_DATA = rawData;
+    g_dataSize = size;
+    g_pos = 0;
+
+    uint32_t code = GetData<uint32_t>();
+    uint32_t len = GetArrLength(g_testFuncs);
+    if (len > 0) {
+        g_testFuncs[code % len]();
+    } else {
+        SLOGI("%{public}s: The len length is equal to 0", __func__);
+    }
+
+    return true;
+}
+
+/* Fuzzer entry point */
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+{
+    if (size < OHOS::AVSession::THRESHOLD) {
+        return 0;
+    }
+
+    FuzzTest(data, size);
     return 0;
 }
 } // namespace AVSession

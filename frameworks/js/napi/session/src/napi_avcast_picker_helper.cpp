@@ -102,6 +102,8 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
     if (napi_wrap(env, context->self, static_cast<void*>(napiAVCastPickerHelper),
         finalize, nullptr, &napiAVCastPickerHelper->wrapperRef_) != napi_ok) {
         SLOGE("wrap failed");
+        delete napiAVCastPickerHelper;
+        napiAVCastPickerHelper = nullptr;
         return nullptr;
     }
     return context->self;

@@ -39,6 +39,28 @@
 #include "i_avsession_service_listener.h"
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
+#include "account_manager_adapter.h"
+#include "app_manager_adapter.h"
+#include "avsession_dynamic_loader.h"
+#include "avsession_errors.h"
+#include "avsession_log.h"
+#include "avsession_info.h"
+#include "file_ex.h"
+#include "iservice_registry.h"
+#include "key_event_adapter.h"
+#include "nlohmann/json.hpp"
+#include "session_stack.h"
+#include "avsession_trace.h"
+#include "avsession_dumper.h"
+#include "command_send_limit.h"
+#include "avsession_sysevent.h"
+#include "json_utils.h"
+#include "avsession_utils.h"
+#include "avcontrol_command.h"
+#include "avsession_event_handler.h"
+#include "bundle_status_adapter.h"
+#include "if_system_ability_manager.h"
+#include "avsession_radar.h"
 
 #include "common_event_manager.h"
 #include "common_event_subscribe_info.h"
@@ -50,6 +72,11 @@
 
 #ifdef BLUETOOTH_ENABLE
 #include "bluetooth_host.h"
+#endif
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "av_router.h"
+#include "collaboration_manager.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -212,6 +239,9 @@ public:
     {
         return NotifyAudioSessionCheck(uid);
     }
+
+    void NotifyBackgroundReportCheck(const int32_t uid, const int32_t pid,
+        AudioStandard::StreamUsage streamUsage, AudioStandard::RendererState rendererState);
 
     void SuperLauncher(std::string deviceId, std::string serviceName,
         std::string extraInfo, const std::string& state);
@@ -460,6 +490,12 @@ private:
     
     void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
+    
+    void LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::StreamUsage streamUsage,
+        AudioStandard::RendererState rendererState);
+
+    void PlayStateCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
+        AudioStandard::RendererState rState);
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
 
@@ -518,6 +554,7 @@ private:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
+    const std::string deviceStateDisconnection = "IDLE";
     const std::string seperator = ",";
     int appState = -1;
     bool isSupportMirrorToStream_ = false;
@@ -554,6 +591,8 @@ private:
     const int32_t THREE_CLICK = 3;
     const int32_t unSetHistoryNum = 3;
     const int32_t CLICK_TIMEOUT = 500;
+    const int32_t lowQualityTimeout = 1000;
+    const int32_t errorStateTimeout = 3 * 1000;
     const int32_t defMaxHistoryNum = 10;
     const int32_t maxFileLength = 32 * 1024 * 1024;
     const int32_t maxAVQueueInfoLen = 99;

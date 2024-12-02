@@ -101,6 +101,18 @@ const std::map<int, int32_t> keyCodeToCommandMap_ = {
     {MMI::KeyEvent::KEYCODE_MEDIA_FAST_FORWARD, AVControlCommand::SESSION_CMD_FAST_FORWARD},
 };
 
+const std::map<int32_t, int32_t> cmdToOffsetMap_ = {
+    {AVControlCommand::SESSION_CMD_PLAY, 8},
+    {AVControlCommand::SESSION_CMD_PAUSE, 7},
+    {AVControlCommand::SESSION_CMD_PLAY_NEXT, 6},
+    {AVControlCommand::SESSION_CMD_PLAY_PREVIOUS, 5},
+    {AVControlCommand::SESSION_CMD_FAST_FORWARD, 4},
+    {AVControlCommand::SESSION_CMD_REWIND, 3},
+    {AVControlCommand::SESSION_CMD_SEEK, 2},
+    {AVControlCommand::SESSION_CMD_SET_LOOP_MODE, 1},
+    {AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE, 0}
+};
+
 class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
     void OnConnected() {}
     void OnDisconnected() {}
@@ -583,7 +595,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         }
         return;
     }
-
+    std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     for (const auto& session : *sessionListForFront) {
@@ -651,6 +663,7 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
 {
     SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
+        std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
@@ -686,6 +699,7 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         }
         GetContainer().UpdateSessionSort(session);
         RefreshFocusSessionSort(session);
+        std::lock_guard frontLockGuard(sessionFrontLock_);
         std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
         CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr!");
         auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), session);
@@ -969,6 +983,75 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
             }
         }
     }
+}
+
+void AVSessionService::LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::StreamUsage streamUsage,
+    AudioStandard::RendererState rendererState)
+{
+    sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
+    CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for LowQualityCheck");
+
+    AVMetaData meta = session->GetMetaData();
+    bool hasTitle = !meta.GetTitle().empty();
+    bool hasImage = meta.GetMediaImage() != nullptr || !meta.GetMediaImageUri().empty();
+    if ((hasTitle || hasImage) && (session->GetSupportCommand().size() != 0)) {
+        SLOGD("LowQualityCheck pass for %{public}s, return", session->GetBundleName().c_str());
+        return;
+    }
+    int32_t commandQuality = 0;
+    for (auto cmd : session->GetSupportCommand()) {
+        auto it = cmdToOffsetMap_.find(cmd);
+        if (it != cmdToOffsetMap_.end()) {
+            commandQuality += (1 << it->second);
+        }
+    }
+    SLOGD("LowQualityCheck report for %{public}s", session->GetBundleName().c_str());
+    AVSessionSysEvent::BackControlReportInfo reportInfo;
+    reportInfo.bundleName_ = session->GetBundleName();
+    reportInfo.streamUsage_ = streamUsage;
+    reportInfo.isBack_ = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
+    reportInfo.playDuration_ = -1;
+    reportInfo.isAudioActive_ = true;
+    reportInfo.metaDataQuality_ = (hasTitle << 1) + hasImage;
+    reportInfo.cmdQuality_ = commandQuality;
+    reportInfo.playbackState_ = session->GetPlaybackState().GetState();
+    AVSessionSysEvent::GetInstance().AddLowQualityInfo(reportInfo);
+}
+
+void AVSessionService::PlayStateCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
+    AudioStandard::RendererState rState)
+{
+    sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
+    CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for LowQualityCheck");
+
+    AVPlaybackState aState = session->GetPlaybackState();
+    if ((rState == AudioStandard::RENDERER_RUNNING && aState.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY) ||
+        ((rState == AudioStandard::RENDERER_PAUSED || rState == AudioStandard::RENDERER_STOPPED) &&
+        aState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY)) {
+        SLOGD("PlayStateCheck report for %{public}s", session->GetBundleName().c_str());
+        HISYSEVENT_FAULT("AVSESSION_WRONG_STATE",
+            "BUNDLE_NAME", session->GetBundleName(),
+            "RENDERER_STATE", rState,
+            "AVSESSION_STATE", aState.GetState());
+    }
+}
+
+void AVSessionService::NotifyBackgroundReportCheck(const int32_t uid, const int32_t pid,
+    AudioStandard::StreamUsage streamUsage, AudioStandard::RendererState rendererState)
+{
+    // low quality check
+    if (rendererState == AudioStandard::RENDERER_RUNNING) {
+        AVSessionEventHandler::GetInstance().AVSessionPostTask(
+            [this, uid, pid, streamUsage, rendererState]() {
+                LowQualityCheck(uid, pid, streamUsage, rendererState);
+            }, "LowQualityCheck", lowQualityTimeout);
+    }
+
+    // error renderer state check
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this, uid, streamUsage, rendererState]() {
+            PlayStateCheck(uid, streamUsage, rendererState);
+        }, "PlayStateCheck", errorStateTimeout);
 }
 
 // LCOV_EXCL_START

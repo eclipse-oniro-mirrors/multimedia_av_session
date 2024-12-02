@@ -17,13 +17,13 @@
 #define OHOS_AVCALLMETADATA_FUZZER_H
 
 namespace OHOS::AVSession {
-void AVCallMetaDataOnRemoteRequest(uint8_t* data, size_t size);
+void AVCallMetaDataOnRemoteRequest();
 
 class AVCallMetaDataFuzzer {
 public:
     AVCallMetaDataFuzzer() = default;
     ~AVCallMetaDataFuzzer() = default;
-    void AVCallMetaDataFuzzTest(uint8_t* data, size_t size);
+    void AVCallMetaDataFuzzTest();
 };
 }
 

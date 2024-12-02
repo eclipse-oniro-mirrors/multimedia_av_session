@@ -18,17 +18,17 @@
 #include <cstdint>
 #include <cstddef>
 namespace OHOS::AVSession {
-void AvSessionCallbackOnRemoteRequest(int32_t code, const uint8_t* data, size_t size);
-void AvSessionCallbackClientTests(const uint8_t* data, size_t size);
+void AvSessionCallbackOnRemoteRequest();
+void AvSessionCallbackClientTests();
 
 class AvSessionCallbackClientFuzzer {
 public:
     AvSessionCallbackClientFuzzer() = default;
     ~AvSessionCallbackClientFuzzer() = default;
-    void FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size);
-    void FuzzTests(const uint8_t* data, size_t size);
-    void FuzzTestInner1(const uint8_t* data, size_t size);
-    void FuzzTestInner2(const uint8_t* data, size_t size);
+    void FuzzOnRemoteRequest(int32_t code);
+    void FuzzTests();
+    void FuzzTestInner1();
+    void FuzzTestInner2();
 };
 }
 #endif

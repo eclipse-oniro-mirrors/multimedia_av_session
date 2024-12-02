@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "cj_avsession_prototypes.h"
+#include "cj_common_ffi.h"
 
 #ifndef FFI_EXPORT
 #ifndef WINDOWS_PLATFORM
@@ -52,8 +53,21 @@ FFI_EXPORT int32_t FfiMultimediaAVSessionControllerGetAVQueueTitle(char *session
 FFI_EXPORT int32_t FfiMultimediaAVSessionControllerGetExtras(char *sessionId, CArray* extras);
 FFI_EXPORT int32_t FfiMultimediaAVSessionControllerSendCommonCommand(
     char *sessionId, char* command, CArray* args);
+FFI_EXPORT int32_t FfiMultimediaAVSessionControllerSendControlCommand(
+    char *sessionId, CAVSessionCommand* command);
+FFI_EXPORT int32_t FfiMultimediaAVSessionControllerSendAVKeyEvent(char *sessionId, CKeyEvent* eventPtr);
 FFI_EXPORT int32_t FfiMultimediaAVSessionControllerSkipToQueueItem(char *sessionId, int32_t* itemId);
 
+FFI_EXPORT int32_t FfiMultimediaAVSessionControllerOn(char *sessionId, int32_t type, int64_t id);
+FFI_EXPORT int32_t FfiMultimediaAVSessionControllerOff(char *sessionId, int32_t type);
+FFI_EXPORT int32_t FfiMultimediaAVSessionControllerOnCallMetadataChange(
+    char *sessionId, int32_t type, CParameters* filter, int64_t id);
+FFI_EXPORT int32_t FfiMultimediaAVSessionControllerOnCallStateChange(
+    char *sessionId, int32_t type, CParameters* filter, int64_t id);
+FFI_EXPORT int32_t FfiMultimediaAVSessionControllerOnPlaybackStateChange(
+    char *sessionId, int32_t type, CParameters* filter, int64_t id);
+FFI_EXPORT int32_t FfiMultimediaAVSessionControllerOnMetaDataChange(
+    char *sessionId, int32_t type, CParameters* filter, int64_t id);
 #ifdef __cplusplus
 #if __cplusplus
 }

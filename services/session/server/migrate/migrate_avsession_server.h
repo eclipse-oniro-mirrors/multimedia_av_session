@@ -31,6 +31,8 @@ class AVControllerObserver;
 constexpr size_t BUFFER_MAX_SIZE = 1024 * 1024;
 constexpr size_t DEFAULT_QUALITY = 100;
 constexpr int64_t DELAY_TIME = 2000;
+constexpr int64_t DELAY_PLAY_COM_TIME = 500;
+constexpr int32_t MAX_SESSION_NUMS = 2;
 
 class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServer,
     public std::enable_shared_from_this<MigrateAVSessionServer> {
@@ -68,8 +70,9 @@ private:
     int32_t ConvertStateFromSingleToDouble(int32_t state);
 
     int32_t GetControllerById(const std::string &sessionId, sptr<AVControllerItem> &controller);
+    int32_t GetAllControllers(std::vector<sptr<AVControllerItem>> &controller);
 
-    std::string ConvertControllersToStr(sptr<AVControllerItem> avcontroller);
+    std::string ConvertControllersToStr(std::vector<sptr<AVControllerItem>> avcontrollers);
 
     Json::Value ConvertControllerToJson(sptr<AVControllerItem> avcontroller);
 
@@ -96,6 +99,7 @@ private:
     bool isSoftbusConnecting_ = false;
     std::string deviceId_;
     std::string topSessionId_;
+    std::string lastSessionId_;
     std::recursive_mutex migrateControllerLock_;
     std::recursive_mutex topSessionLock_;
 };

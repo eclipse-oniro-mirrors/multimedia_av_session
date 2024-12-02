@@ -18,6 +18,7 @@
 #include <memory>
 #include "avsession_errors.h"
 #include "avsession_manager_impl.h"
+#include "securec.h"
 
 using namespace std;
 namespace OHOS {
@@ -27,15 +28,51 @@ static constexpr int32_t TIME = 1000;
 static constexpr int32_t MIN_SIZE_NUM = 4;
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
+static const uint8_t *RAW_DATA = nullptr;
+const size_t THRESHOLD = 10;
+static size_t g_dataSize = 0;
+static size_t g_pos;
 
-bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_t size)
+/*
+* describe: get data from outside untrusted data(RAW_DATA) which size is according to sizeof(T)
+* tips: only support basic type
+*/
+template<class T>
+T GetData()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
+
+template<class T>
+uint32_t GetArrLength(T& arr)
+{
+    if (arr == nullptr) {
+        SLOGI("%{public}s: The array length is equal to 0", __func__);
+        return 0;
+    }
+    return sizeof(arr) / sizeof(arr[0]);
+}
+
+bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest()
+{
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
         return false;
     }
 
-    int32_t type = *reinterpret_cast<const int32_t *>(data);
-    std::string tag(reinterpret_cast<const char *>(data), size);
+    int32_t type = GetData<int32_t>();
+    int8_t random = GetData<int8_t>();
+    std::vector<std::string> tags = { "tag1", "tag2", "tag3" };
+    std::string tag(tags[random % tags.size()]);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
     elementName.SetAbilityName(g_testAbilityName);
@@ -63,11 +100,11 @@ bool AVSessionManagerFuzzer::AVSessionManagerFuzzTest(const uint8_t* data, size_
         avSessionController->Destroy();
     }
 
-    bool result = SendSystemControlCommandFuzzTest(data);
+    bool result = SendSystemControlCommandFuzzTest();
     return result == AVSESSION_SUCCESS;
 }
 
-bool AVSessionManagerFuzzer::SendSystemControlCommandFuzzTest(const uint8_t *data)
+bool AVSessionManagerFuzzer::SendSystemControlCommandFuzzTest()
 {
     std::shared_ptr<TestSessionListener> listener = std::make_shared<TestSessionListener>();
     if (!listener) {
@@ -80,54 +117,57 @@ bool AVSessionManagerFuzzer::SendSystemControlCommandFuzzTest(const uint8_t *dat
         SLOGI("keyEvent is null");
         return false;
     }
-    int32_t keyCode = *reinterpret_cast<const int32_t*>(data);
+    int32_t keyCode = GetData<int32_t>();
     keyEvent->SetKeyCode(keyCode);
-    keyEvent->SetKeyAction(*reinterpret_cast<const int32_t*>(data));
+    keyEvent->SetKeyAction(GetData<int32_t>());
     keyEvent->SetActionTime(TIME);
     auto keyItem = OHOS::MMI::KeyEvent::KeyItem();
-    keyItem.SetKeyCode(*reinterpret_cast<const int32_t*>(data));
+    keyItem.SetKeyCode(GetData<int32_t>());
     keyItem.SetDownTime(TIME);
     keyItem.SetPressed(true);
     keyEvent->AddKeyItem(keyItem);
     result = AVSessionManager::GetInstance().SendSystemAVKeyEvent(*keyEvent);
     AVControlCommand command;
-    command.SetCommand(*reinterpret_cast<const int32_t*>(data));
+    command.SetCommand(GetData<int32_t>());
     result = AVSessionManager::GetInstance().SendSystemControlCommand(command);
 
     return result;
 }
 
-bool AVSessionManagerInterfaceTest(uint8_t* data, size_t size)
+void AVSessionManagerInterfaceTest()
 {
     auto avSessionManager = std::make_unique<AVSessionManagerFuzzer>();
     if (avSessionManager == nullptr) {
         SLOGI("avSessionManagerFuzzer is null");
-        return false;
+        return;
     }
-    return avSessionManager->AVSessionManagerFuzzTest(data, size);
+    avSessionManager->AVSessionManagerFuzzTest();
 }
 
-void AVSessionManagerTestClient(uint8_t* data, size_t size)
+void AVSessionManagerTestClient()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
         SLOGI("Invalid data");
         return;
     }
 
     std::vector<AVSessionDescriptor> descriptors;
-    std::string avSessionId(reinterpret_cast<const char*>(data), size);
+    uint8_t randomNum = GetData<uint8_t>();
+    std::vector<std::string> sessionIds = { "session1", "session2", "session3" };
+    std::string avSessionId(sessionIds[randomNum % sessionIds.size()]);
     AVSessionDescriptor avSessionDescriptor;
     avSessionDescriptor.sessionId_ = avSessionId;
     descriptors.push_back(avSessionDescriptor);
 
-    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    randomNum = GetData<uint8_t>();
+    std::string sessionId(sessionIds[randomNum % sessionIds.size()]);
     std::shared_ptr<AVSessionController> controller;
 
-    std::string bySessionId(reinterpret_cast<const char*>(data), size);
+    std::string bySessionId(sessionIds[randomNum % sessionIds.size()]);
     AVSessionDescriptor descriptor;
-    int32_t maxSize = 10;
+    int32_t maxSize = GetData<int32_t>() % 11; // valid size 0~10
     AVControlCommand command;
-    int32_t cmd = *(reinterpret_cast<const int32_t*>(data));
+    int32_t cmd = GetData<int32_t>();
     command.SetCommand(cmd);
     SessionToken sessionToken;
     sessionToken.sessionId = sessionId;
@@ -143,13 +183,13 @@ void AVSessionManagerTestClient(uint8_t* data, size_t size)
     avSessionManagerImpl.CastAudio(sessionToken, deviceDescriptor);
 }
 
-void AVSessionManagerTestServer(uint8_t* data, size_t size)
+void AVSessionManagerTestServer()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
         return;
     }
 
-    int32_t type = (*reinterpret_cast<const int32_t *>(data)) % 2; // valid type 0-1
+    int32_t type = GetData<uint8_t>() % 2; // valid type 0-1
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testBundleName);
     elementName.SetAbilityName(g_testAbilityName);
@@ -188,13 +228,40 @@ void AVSessionManagerTestServer(uint8_t* data, size_t size)
     }
 }
 
-/* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
+typedef void (*TestFuncs[3])();
+
+TestFuncs g_testFuncs = {
+    AVSessionManagerInterfaceTest,
+    AVSessionManagerTestClient,
+    AVSessionManagerTestServer,
+};
+
+bool FuzzTest(const uint8_t* rawData, size_t size)
 {
-    /* Run your code on data */
-    AVSessionManagerInterfaceTest(data, size);
-    AVSessionManagerTestClient(data, size);
-    AVSessionManagerTestServer(data, size);
+    // initialize data
+    RAW_DATA = rawData;
+    g_dataSize = size;
+    g_pos = 0;
+
+    uint32_t code = GetData<uint32_t>();
+    uint32_t len = GetArrLength(g_testFuncs);
+    if (len > 0) {
+        g_testFuncs[code % len]();
+    } else {
+        SLOGI("%{public}s: The len length is equal to 0", __func__);
+    }
+
+    return true;
+}
+
+/* Fuzzer entry point */
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+{
+    if (size < OHOS::AVSession::THRESHOLD) {
+        return 0;
+    }
+
+    FuzzTest(data, size);
     return 0;
 }
 } // namespace AVSession
