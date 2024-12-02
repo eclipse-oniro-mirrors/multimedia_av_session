@@ -106,7 +106,7 @@ void SoftbusDistributedDataManager::DestroySessionServer(const std::string &pkg)
     std::lock_guard lockGuard(softbusDistributedDataLock_);
     for (auto it = serverMap_.begin(); it != serverMap_.end();) {
         it->second->DisconnectAllProxy();
-        serverMap_.erase(it++);
+        it = serverMap_.erase(it);
     }
     int32_t mSocket = mMap_[pkg];
     mMap_.erase(pkg);
