@@ -12,26 +12,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <string>
 #include "avsession_log.h"
 #include "softbussessionmanager_fuzzer.h"
 #include "softbus_session_manager.h"
+#include "securec.h"
 
 using namespace std;
 namespace OHOS::AVSession {
-
-char g_name[] = "testInfoName";
-char g_infoNetworkId[] = "testInfoNetworkId";
-char g_infoPkgName[] = "testInfoPkgName";
-
 static const int32_t MIN_SIZE_NUM = 4;
+static const uint8_t *RAW_DATA = nullptr;
+static size_t g_dataSize = 0;
+static size_t g_pos;
 
-PeerSocketInfo info = {
-    .name = g_name,
-    .networkId = g_infoNetworkId,
-    .pkgName = g_infoPkgName,
-    .dataType = DATA_TYPE_BYTES,
-};
+template<class T>
+T GetData()
+{
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
 
 class SoftbusSessionListenerDemo : public SoftbusSessionListener {
 public:
@@ -47,36 +55,44 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
     std::shared_ptr<SoftbusSessionListenerDemo> softbusSessionListenerDemo =
         std::make_shared<SoftbusSessionListenerDemo>();
     manager_->AddSessionListener(softbusSessionListenerDemo);
-
-    int32_t socket = *reinterpret_cast<const int32_t *>(data);
+    int32_t socket = GetData<uint8_t>();
+    std::string infoName = std::to_string(GetData<uint8_t>());
+    std::string infoNetworkId = std::to_string(GetData<uint8_t>());
+    std::string infoPkgName = std::to_string(GetData<uint8_t>());
+    PeerSocketInfo info = {
+        .name = const_cast<char *>(infoName.c_str()),
+        .networkId = const_cast<char *>(infoNetworkId.c_str()),
+        .pkgName = const_cast<char *>(infoPkgName.c_str()),
+        .dataType = DATA_TYPE_BYTES,
+    };
     manager_->OnBind(socket, info);
     manager_->OnShutdown(socket, ShutdownReason::SHUTDOWN_REASON_LOCAL);
 
     MessageParcel data_;
     data_.WriteRawData(data, size);
 
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    std::string deviceId = std::to_string(GetData<uint8_t>());
     manager_->ObtainPeerDeviceId(socket, deviceId);
 
-    data_.RewindRead(0);
+    data_.RewindRead(GetData<uint8_t>());
     auto obj = std::make_unique<int32_t>(data_.ReadInt32());
     const void *objectId = obj.get();
-    unsigned int dataLen = 1;
+    unsigned int dataLen = GetData<unsigned int>();
     manager_->OnBytes(socket, objectId, dataLen);
     manager_->OnBytes(socket, nullptr, dataLen);
     manager_->OnMessage(socket, objectId, dataLen);
     manager_->OnMessage(socket, nullptr, dataLen);
 
-    std::string pkg = "111";
+    std::string pkg = to_string(GetData<uint8_t>());
     manager_->Socket(pkg);
     manager_->Shutdown(socket);
 
-    std::string infor_ = "info";
-    std::string infor(reinterpret_cast<const char*>(data), size);
-    manager_->SendMessage(socket, infor_);
-    manager_->SendMessage(socket, infor);
-    manager_->SendBytes(socket, infor_);
-    manager_->SendBytes(socket, infor);
+    std::string inforOne = std::to_string(GetData<uint8_t>());
+    std::string inforTwo = std::to_string(GetData<uint8_t>());
+    manager_->SendMessage(socket, inforOne);
+    manager_->SendMessage(socket, inforTwo);
+    manager_->SendBytes(socket, inforOne);
+    manager_->SendBytes(socket, inforTwo);
 
     info.networkId = nullptr;
     manager_->OnBind(socket, info);
@@ -100,6 +116,9 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
     if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
+    RAW_DATA = data;
+    g_dataSize = size;
+    g_pos = 0;
     /* Run your code on data */
     SoftbusSessionManagerOnRemoteRequest(data, size);
     return 0;
