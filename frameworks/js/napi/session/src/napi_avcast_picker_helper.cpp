@@ -144,7 +144,7 @@ napi_value NapiAVCastPickerHelper::OnEvent(napi_env env, napi_callback_info info
     }
     auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
     if (it->second.first(env, napiAVCastPickerHelper, callback) != napi_ok) {
-        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     }
     return NapiUtils::GetUndefinedValue(env);
 }
@@ -183,11 +183,11 @@ napi_value NapiAVCastPickerHelper::OffEvent(napi_env env, napi_callback_info inf
     if (napiAVCastPickerHelper == nullptr) {
         SLOGE("OffEvent failed : napiAVCastPickerHelper is nullptr");
         NapiUtils::ThrowError(env, "OffEvent failed : napiAVCastPickerHelper is nullptr",
-            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         return NapiUtils::GetUndefinedValue(env);
     }
     if (napiAVCastPickerHelper != nullptr && it->second.second(env, napiAVCastPickerHelper, callback) != napi_ok) {
-        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     }
     return NapiUtils::GetUndefinedValue(env);
 }
