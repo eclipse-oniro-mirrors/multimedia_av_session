@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 #include "avsession_errors.h"
 #include "avsession_item.h"
@@ -24,19 +25,40 @@
 #include "migrate_avsession_server.h"
 #include "migrate_avsession_manager.h"
 #include "system_ability_definition.h"
+#include "securec.h"
 
 namespace OHOS::AVSession {
 static const int32_t MAX_CODE_LEN = 512;
 static const int32_t MIN_SIZE_NUM = 4;
+
+static const uint8_t *RAW_DATA = nullptr;
+static size_t g_dataSize = 0;
+static size_t g_pos;
+
+template<class T>
+T GetData()
+{
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
 
 void MigrateAVSessionFuzzerTest(uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    int32_t sessionId = *reinterpret_cast<const int32_t*>(data);
-    std::string scene(reinterpret_cast<const char*>(data), size);
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    int32_t sessionId = GetData<uint8_t>();
+    std::string scene = std::to_string(GetData<uint8_t>());
+    std::string deviceId = std::to_string(GetData<uint8_t>());
 
     std::shared_ptr<MigrateAVSessionServer> migrateServer_ = std::make_shared<MigrateAVSessionServer>();
     sptr<AVSessionService> avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
@@ -57,6 +79,9 @@ void MigrateAVSessionFuzzerTest(uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    RAW_DATA = data;
+    g_dataSize = size;
+    g_pos = 0;
     /* Run your code on data */
     MigrateAVSessionFuzzerTest(const_cast<uint8_t*>(data), size);
     return 0;
