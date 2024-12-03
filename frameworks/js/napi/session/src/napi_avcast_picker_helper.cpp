@@ -79,7 +79,11 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         auto stageContext = AbilityRuntime::GetStageModeContext(env, argv[ARGV_FIRST]);
-        CHECK_RETURN_VOID(stageContext != nullptr, "get stageContext failed");
+        if (stageContext == nullptr) {
+            SLOGI("get stageContext failed");
+            NapiUtils::ThrowError(env, "get stageContext failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            return;
+        }
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(stageContext);
         if (abilityContext == nullptr) {
             auto extensionContext =
