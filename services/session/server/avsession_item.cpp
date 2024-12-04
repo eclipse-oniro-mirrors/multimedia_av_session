@@ -101,7 +101,8 @@ std::string AVSessionItem::GetSessionType()
 
 int32_t AVSessionItem::Destroy()
 {
-    SLOGI("AVSessionItem check service destroy event with service, check serviceCallback exist");
+    SLOGI("AVSessionItem %{public}d check service destroy event with service, check serviceCallback exist",
+        static_cast<int>(GetPid()));
     {
         std::lock_guard lockGuard(destroyLock_);
         if (isDestroyed_) {
