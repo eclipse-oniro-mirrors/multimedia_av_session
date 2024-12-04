@@ -12,12 +12,11 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../../av_session_ohos_sources.gni")
 import("../../bluetooth_part.gni")
 import("../../castplus_cast_engine_part.gni")
 import("../../config.gni")
 import("../../efficiency_manager_part.gni")
-
-openssl_dir = "//third_party/openssl"
 
 group("avsession_server") {
   deps = [
@@ -30,7 +29,18 @@ group("avsession_server") {
   ]
 }
 
-ohos_shared_library("avsession_service") {
+group("avsession_server_static") {
+  deps = [
+    ":avsession_dynamic_insight",
+    ":avsession_item_static",
+    ":avsession_service_static",
+    "../../sa_profile:avsession_sa_profile",
+    "../etc:avsession_service.rc",
+    "../etc:ohos.para.dac",
+  ]
+}
+
+av_session_ohos_library("avsession_service") {
   stack_protector_ret = true
   install_enable = true
   sanitize = {
@@ -87,9 +97,6 @@ ohos_shared_library("avsession_service") {
     "server/remote",
     "../../frameworks/native/session/include",
     "../../interfaces/inner_api/native/session/include",
-    "//third_party/json/single_include",
-    "$openssl_dir/include/",
-    "$commontype_dir/include",
   ]
 
   cflags = [
@@ -124,17 +131,13 @@ ohos_shared_library("avsession_service") {
   defines += [ "SYSTEM_LIB_PATH = ${system_lib_path}" ]
 
   deps = [
-    "$openssl_dir:libcrypto_shared",
     "./../../frameworks/common:avsession_common",
-    "./../../frameworks/native/session:avsession_client",
     "./../../utils:avsession_utils",
     "./../session:avsession_item",
-    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
     "ability_base:base",
-    "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -146,18 +149,14 @@ ohos_shared_library("avsession_service") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
     "distributed_notification_service:ans_innerkits",
     "dsoftbus:softbus_client",
-    "graphic_surface:surface",
     "hilog:libhilog",
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "jsoncpp:jsoncpp",
-    "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
@@ -201,12 +200,20 @@ ohos_shared_library("avsession_service") {
     defines += [ "TEST_COVERAGE" ]
   }
 
+  public_external_deps = [
+    "data_object:distributeddataobject_impl",
+    "jsoncpp:jsoncpp",
+    "openssl:libcrypto_shared",
+    "relational_store:native_rdb",
+  ]
+
   subsystem_name = "multimedia"
   part_name = "av_session"
+  version_script = "avsession_service.versionscript"
 }
 
 if (castplus_cast_engine_enable) {
-  ohos_shared_library("avsession_router") {
+  av_session_ohos_library("avsession_router") {
     install_enable = true
     sanitize = {
       cfi = true
@@ -269,7 +276,6 @@ if (castplus_cast_engine_enable) {
 
     deps = [
       "../../frameworks/common:avsession_common",
-      "../../frameworks/native/session:avsession_client",
       "../../utils:avsession_utils",
     ]
 
@@ -312,6 +318,7 @@ if (castplus_cast_engine_enable) {
 
     subsystem_name = "multimedia"
     part_name = "av_session"
+    version_script = "avsession_router.versionscript"
   }
 }
 
@@ -371,7 +378,7 @@ ohos_shared_library("avsession_dynamic_insight") {
   part_name = "av_session"
 }
 
-ohos_shared_library("avsession_item") {
+av_session_ohos_library("avsession_item") {
   install_enable = true
   sanitize = {
     cfi = true
@@ -414,8 +421,6 @@ ohos_shared_library("avsession_item") {
     "./adapter",
     "./server",
     "./server/remote",
-    "//third_party/json/single_include",
-    "$commontype_dir/include",
   ]
 
   cflags = [
@@ -452,7 +457,6 @@ ohos_shared_library("avsession_item") {
   deps = [
     "../../frameworks/common:avsession_common",
     "../../utils:avsession_utils",
-    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
@@ -468,13 +472,11 @@ ohos_shared_library("avsession_item") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
     "graphic_surface:surface",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
@@ -517,11 +519,19 @@ ohos_shared_library("avsession_item") {
     defines += [ "TEST_COVERAGE" ]
   }
 
+  public_external_deps = [
+    "data_object:distributeddataobject_impl",
+    "jsoncpp:jsoncpp",
+    "openssl:libcrypto_shared",
+    "relational_store:native_rdb",
+  ]
+
   subsystem_name = "multimedia"
   part_name = "av_session"
+  version_script = "avsession_item.versionscript"
 }
 
-ohos_shared_library("avsession_cast_item") {
+av_session_ohos_library("avsession_cast_item") {
   install_enable = true
   sanitize = {
     cfi = true
@@ -551,7 +561,6 @@ ohos_shared_library("avsession_cast_item") {
     "./adapter",
     "./server",
     "./server/remote",
-    "//third_party/json/single_include",
   ]
 
   cflags = [
@@ -588,7 +597,6 @@ ohos_shared_library("avsession_cast_item") {
   deps = [
     "../../frameworks/common:avsession_common",
     "../../utils:avsession_utils",
-    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
@@ -632,6 +640,12 @@ ohos_shared_library("avsession_cast_item") {
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
+  public_external_deps = [
+    "jsoncpp:jsoncpp",
+    "openssl:libcrypto_shared",
+  ]
+
   subsystem_name = "multimedia"
   part_name = "av_session"
+  version_script = "avsession_cast_item.versionscript"
 }

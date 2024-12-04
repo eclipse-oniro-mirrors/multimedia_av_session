@@ -41,9 +41,9 @@ ohos_fuzztest("AVCallMetaDataFuzzTest") {
   ]
   sources = [ "avcallmetadata_fuzzer.cpp" ]
   deps = [
-    "./../../../../../../services/session:avsession_item",
-    "./../../../../../../services/session:avsession_service",
-    "./../../../../session:avsession_client",
+    "./../../../../../../services/session:avsession_item_static",
+    "./../../../../../../services/session:avsession_service_static",
+    "./../../../../session:avsession_client_static",
   ]
   external_deps = [
     "ability_base:want",
@@ -66,7 +66,7 @@ ohos_fuzztest("AVCallMetaDataFuzzTest") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    deps += [ "../../../../../../services/session:avsession_cast_item" ]
+    deps += [ "../../../../../../services/session:avsession_cast_item_static" ]
   }
 
   if (bluetooth_part_enable) {

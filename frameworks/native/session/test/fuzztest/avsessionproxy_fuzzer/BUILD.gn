@@ -46,7 +46,7 @@ ohos_fuzztest("AvSessionProxyFuzzTest") {
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
-      "../../../../../../services/session:avsession_cast_item",
+      "../../../../../../services/session:avsession_cast_item_static",
       "../../../../session:avsession_cast_client",
     ]
   }

@@ -62,65 +62,67 @@ constexpr int32_t SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED = 14;
 
 constexpr int REASON_EXIST = -3;
 
-const std::string EMIT_UTF8 = "emitUTF8";
-const std::string PLAYBACK_SPEED = "playbackSpeed";
-const std::string PLAYBACK_POSITION_ELAPSED_TIME = "playbackPositionElapsedTime_";
-const std::string PLAYBACK_POSITION_UPDATE_TIME = "playbackPositionUpdateTime_";
-const std::string PLAYBACK_GET_ACTIVE_ITEM_ID = "playbackGetActiveItemId";
+namespace {
+const char* EMIT_UTF8 = "emitUTF8";
+const char* PLAYBACK_SPEED = "playbackSpeed";
+const char* PLAYBACK_POSITION_ELAPSED_TIME = "playbackPositionElapsedTime_";
+const char* PLAYBACK_POSITION_UPDATE_TIME = "playbackPositionUpdateTime_";
+const char* PLAYBACK_GET_ACTIVE_ITEM_ID = "playbackGetActiveItemId";
 
-const std::string EVENT_COMMAND_UNLOCK_LYRIC = "EVENT_COMMAND_UNLOCK_LYRIC";
-const std::string EVENT_COMMAND_SHOW_LYRIC = "EVENT_COMMAND_SHOW_LYRIC";
-const std::string EVENT_COMMAND_HIDE_LYRIC = "EVENT_COMMAND_HIDE_LYRIC";
+const char* EVENT_COMMAND_UNLOCK_LYRIC = "EVENT_COMMAND_UNLOCK_LYRIC";
+const char* EVENT_COMMAND_SHOW_LYRIC = "EVENT_COMMAND_SHOW_LYRIC";
+const char* EVENT_COMMAND_HIDE_LYRIC = "EVENT_COMMAND_HIDE_LYRIC";
 
-const std::string MEDIA_CONTROLLER_LIST = "MediaControllerList";
+const char* MEDIA_CONTROLLER_LIST = "MediaControllerList";
 
-const std::string HISTORY_MEDIA_PLAYER_INFO = "HistoryMediaPlayerInfo";
+const char* HISTORY_MEDIA_PLAYER_INFO = "HistoryMediaPlayerInfo";
 
-const std::string MEDIA_SESSION = "MediaSession";
+const char* MEDIA_SESSION = "MediaSession";
 
-const std::string METADATA_TITLE = "MetadataTitle";
+const char* METADATA_TITLE = "MetadataTitle";
 
-const std::string METADATA_ARTIST = "MetadataArtist";
+const char* METADATA_ARTIST = "MetadataArtist";
 
-const std::string METADATA_IMAGE = "MetadataArt";
+const char* METADATA_IMAGE = "MetadataArt";
 
-const std::string PLAYBACK_STATE = "PlaybackState";
+const char* PLAYBACK_STATE = "PlaybackState";
 
-const std::string SESSION_INFO = "SessionInfo";
+const char* SESSION_INFO = "SessionInfo";
 
-const std::string RATING = "Rating";
+const char* RATING = "Rating";
 
-const std::string LYRIC_STATE = "LyricState";
+const char* LYRIC_STATE = "LyricState";
 
-const std::string PLAYBACK_INFO = "PlaybackInfo";
+const char* PLAYBACK_INFO = "PlaybackInfo";
 
-const std::string MEDIA_COMMAND = "MediaCommand";
+const char* MEDIA_COMMAND = "MediaCommand";
 
-const std::string COMMAND = "command";
+const char* COMMAND = "command";
 
-const std::string QUERY = "query";
+const char* QUERY = "query";
 
-const std::string EVENT = "event";
+const char* EVENT = "event";
 
-const std::string EXTRAS = "extras";
+const char* EXTRAS = "extras";
 
-const std::string PLAYER_ID = "PlayerId";
+const char* PLAYER_ID = "PlayerId";
 
-const std::string PACKAGE_NAME = "PackageName";
+const char* PACKAGE_NAME = "PackageName";
 
-const std::string MEDIA_INFO = "MediaInfo";
+const char* MEDIA_INFO = "MediaInfo";
 
-const std::string CALLBACK_INFO = "CallbackInfo";
+const char* CALLBACK_INFO = "CallbackInfo";
 
-const std::string VOLUME_INFO = "VolumeInfo";
+const char* VOLUME_INFO = "VolumeInfo";
 
-const std::string METADATA_MASK_ALL = "11111111111111111";
-const std::string METADATA_MASK_NULL = "00000000000000000";
-const std::string PLAYBACK_MASK_ALL = "111111111";
-const std::string PLAYBACK_MASK_NULL = "000000000";
+const char* METADATA_MASK_ALL = "11111111111111111";
+const char* METADATA_MASK_NULL = "00000000000000000";
+const char* PLAYBACK_MASK_ALL = "111111111";
+const char* PLAYBACK_MASK_NULL = "000000000";
 constexpr int32_t VOLUMN_INFO = 15;
 
-const std::string CONFIG_SOFTBUS_SESSION_TAG = "Media_Session_RemoteCtrl";
+const char* CONFIG_SOFTBUS_SESSION_TAG = "Media_Session_RemoteCtrl";
+}
 } // namespace OHOS::AVSession
 
 #endif // MIGRATE_AVSESSION_CONSTANT_H

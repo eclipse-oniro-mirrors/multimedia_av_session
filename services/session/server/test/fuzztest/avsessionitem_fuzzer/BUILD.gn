@@ -36,9 +36,9 @@ ohos_fuzztest("AVSessionItemFuzzTest") {
   ]
   sources = [ "avsessionitem_fuzzer.cpp" ]
   deps = [
-    "./../../../../../../frameworks/native/session:avsession_client",
-    "./../../../../../session:avsession_item",
-    "./../../../../../session:avsession_service",
+    "./../../../../../../frameworks/native/session:avsession_client_static",
+    "./../../../../../session:avsession_item_static",
+    "./../../../../../session:avsession_service_static",
   ]
   external_deps = [
     "ability_base:want",
@@ -64,7 +64,7 @@ ohos_fuzztest("AVSessionItemFuzzTest") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../../session:avsession_cast_item",
+      "../../../../../session:avsession_cast_item_static",
     ]
   }
 

@@ -21,7 +21,6 @@
 #include <mutex>
 #include "audio_stream_manager.h"
 #include "audio_routing_manager.h"
-#include "audio_info.h"
 
 namespace OHOS::AVSession {
 using AudioRendererChangeInfos = std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>>;
