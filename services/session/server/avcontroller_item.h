@@ -69,6 +69,8 @@ public:
 
     int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
 
+    void DoMetadataImgCleanInItem(AVMetaData& data) override;
+
     int32_t Destroy() override;
 
     std::string GetSessionId() override;

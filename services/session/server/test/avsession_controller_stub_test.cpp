@@ -192,6 +192,7 @@ public:
     {
         return isSuccess ? AVSESSION_SUCCESS : 0;
     };
+    void DoMetadataImgCleanInItem(AVMetaData& data) override { return isSuccess ? AVSESSION_SUCCESS : 0; };
     bool isSuccess = true;
 };
 
