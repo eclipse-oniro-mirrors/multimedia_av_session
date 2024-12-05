@@ -192,7 +192,17 @@ public:
     {
         return isSuccess ? AVSESSION_SUCCESS : 0;
     };
-    void DoMetadataImgCleanInItem(AVMetaData& data) override { return isSuccess ? AVSESSION_SUCCESS : 0; };
+    void DoMetadataImgCleanInItem(AVMetaData& data) override
+    {
+        std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
+        if (innerQueuePixelMap != nullptr) {
+            innerQueuePixelMap->Clear();
+        }
+        std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = data.GetMediaImage();
+        if (innerMediaPixelMap != nullptr) {
+            innerMediaPixelMap->Clear();
+        }
+    };
     bool isSuccess = true;
 };
 
@@ -1207,30 +1217,31 @@ static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub002, TestSi
 }
 
 /**
- * @tc.name: DoMetadataImgCleanInStub001
+ * @tc.name: DoMetadataImgCleanInItem001
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgCleanInStub001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgCleanInItem001, TestSize.Level1)
 {
-    SLOGI("DoMetadataImgCleanInStub001 begin!");
+    SLOGI("DoMetadataImgCleanInItem001 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
     AVMetaData data = GetAVMetaData();
-    avSessionControllerStub.DoMetadataImgCleanInStub(data);
-    SLOGI("DoMetadataImgCleanInStub001 end!");
+    avSessionControllerStub.DoMetadataImgCleanInItem(data);
+    SLOGI("DoMetadataImgCleanInItem001 end!");
 }
 
 /**
- * @tc.name: DoMetadataImgCleanInStub002
+ * @tc.name: DoMetadataImgCleanInItem002
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgCleanInStub002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgCleanInItem002, TestSize.Level1)
 {
-    SLOGI("DoMetadataImgCleanInStub002 begin!");
+    SLOGI("DoMetadataImgCleanInItem002 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
     AVMetaData data = GetAVMetaData();
-    avSessionControllerStub.DoMetadataImgCleanInStub(data);
+    avSessionControllerStub.DoMetadataImgCleanInItem(data);
+    SLOGI("DoMetadataImgCleanInItem002 end!");
 }
 
 /**
