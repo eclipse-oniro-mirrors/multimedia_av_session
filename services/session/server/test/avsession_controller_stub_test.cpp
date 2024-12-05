@@ -192,6 +192,7 @@ public:
     {
         return isSuccess ? AVSESSION_SUCCESS : 0;
     };
+    void DoMetadataImgClean(AVMetaData& data) override { };
     bool isSuccess = true;
 };
 
@@ -1206,29 +1207,29 @@ static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub002, TestSi
 }
 
 /**
- * @tc.name: DoMetadataImgCleanInStub001
+ * @tc.name: DoMetadataImgClean001
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgCleanInStub001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean001, TestSize.Level1)
 {
-    SLOGI("DoMetadataImgCleanInStub001 begin!");
+    SLOGI("DoMetadataImgClean001 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
     AVMetaData data = GetAVMetaData();
-    avSessionControllerStub.DoMetadataImgCleanInStub(data);
-    SLOGI("DoMetadataImgCleanInStub001 end!");
+    avSessionControllerStub.DoMetadataImgClean(data);
+    SLOGI("DoMetadataImgClean001 end!");
 }
 
 /**
- * @tc.name: DoMetadataImgCleanInStub002
+ * @tc.name: DoMetadataImgClean002
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgCleanInStub002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean002, TestSize.Level1)
 {
-    SLOGI("DoMetadataImgCleanInStub002 begin!");
+    SLOGI("DoMetadataImgClean002 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
     AVMetaData data = GetAVMetaData();
-    avSessionControllerStub.DoMetadataImgCleanInStub(data);
-    SLOGI("DoMetadataImgCleanInStub002 end!");
+    avSessionControllerStub.DoMetadataImgClean(data);
+    SLOGI("DoMetadataImgClean002 end!");
 }

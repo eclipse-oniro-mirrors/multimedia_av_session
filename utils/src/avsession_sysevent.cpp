@@ -30,6 +30,7 @@ AVSessionSysEvent::AVSessionSysEvent() : optCounts_ {},
 
 void AVSessionSysEvent::AddOperationCount(Operation operation)
 {
+    std::lock_guard lockGuard(lock_);
     auto it = optCounts_.find(operation);
     if (it == optCounts_.end()) {
         optCounts_.insert(std::make_pair(operation, 0));
@@ -55,6 +56,7 @@ void AVSessionSysEvent::Regiter()
 
     timer_ = std::make_unique<OHOS::Utils::Timer>("EventStatisticTimer");
     auto timeCallback = [this]() {
+        std::lock_guard lockGuard(lock_);
         HiSysWriteStatistic("CONTROL_COMMAND_STATISTICS", "PLAY_COUNT", optCounts_[Operation::OPT_PLAY],
             "PAUSE_COUNT", optCounts_[Operation::OPT_PAUSE], "STOP_COUNT", optCounts_[Operation::OPT_STOP],
             "PLAY_NEXT_COUNT", optCounts_[Operation::OPT_PLAY_NEXT],
