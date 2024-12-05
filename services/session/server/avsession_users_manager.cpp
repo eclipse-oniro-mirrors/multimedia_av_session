@@ -110,17 +110,20 @@ SessionStack& AVSessionUsersManager::GetContainerFromAll()
     return *sessionStackForAll_;
 }
 
-std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionUsersManager::GetCurSessionListForFront()
+std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionUsersManager::GetCurSessionListForFront(int32_t userId)
 {
     std::lock_guard lockGuard(userLock_);
+    if (userId <= 0) {
+        userId = curUserId_;
+    }
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = nullptr;
-    auto iterForFrontList = frontSessionListMapByUserId_.find(curUserId_);
+    auto iterForFrontList = frontSessionListMapByUserId_.find(userId);
     if (iterForFrontList != frontSessionListMapByUserId_.end()) {
         sessionListForFront = iterForFrontList->second;
     } else {
-        SLOGI("GetCurSessionListForFront without curUser: %{public}d, create new", curUserId_);
+        SLOGI("GetCurSessionListForFront without targetUser: %{public}d, create new", userId);
         sessionListForFront = std::make_shared<std::list<sptr<AVSessionItem>>>();
-        frontSessionListMapByUserId_[curUserId_] = sessionListForFront;
+        frontSessionListMapByUserId_[userId] = sessionListForFront;
     }
     return sessionListForFront;
 }
@@ -226,12 +229,16 @@ void AVSessionUsersManager::AddSessionListenerForAllUsers(pid_t pid, const sptr<
 void AVSessionUsersManager::RemoveSessionListener(pid_t pid)
 {
     std::lock_guard lockGuard(userLock_);
-    SLOGI("remove sessionListener for pid %{public}d, curUser %{public}d", static_cast<int>(pid), curUserId_);
-    auto iterForListenerMap = sessionListenersMapByUserId_.find(curUserId_);
-    if (iterForListenerMap != sessionListenersMapByUserId_.end()) {
-        (iterForListenerMap->second).erase(pid);
+    for (auto& listenersMapByUserIdPair : sessionListenersMapByUserId_) {
+        int32_t userId = listenersMapByUserIdPair.first;
+        auto iterForListenersMapByUserId = (listenersMapByUserIdPair.second).find(pid);
+        if (iterForListenersMapByUserId != (listenersMapByUserIdPair.second).end()) {
+            SLOGI("remove sessionListener for pid:%{public}d, targetUser:%{public}d", static_cast<int>(pid), userId);
+            (listenersMapByUserIdPair.second).erase(iterForListenersMapByUserId);
+        }
     }
     sessionListenersMap_.erase(pid);
+    SLOGI("remove sessionListener for pid %{public}d, curUser %{public}d", static_cast<int>(pid), curUserId_);
 }
 
 std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListener()

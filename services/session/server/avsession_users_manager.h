@@ -37,7 +37,7 @@ public:
 
     SessionStack& GetContainerFromAll();
 
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront(int32_t userId);
 
     int32_t GetCurrentUserId();
 
