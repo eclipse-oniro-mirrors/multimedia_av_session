@@ -85,7 +85,7 @@ private:
 
     static bool CheckInterfaceToken(MessageParcel& data);
 
-    virtual void DoMetadataImgCleanInItem(AVMetaData& data) = 0;
+    virtual void DoMetadataImgClean(AVMetaData& data) = 0;
     
     static int32_t DoMetadataGetReplyInStub(AVMetaData& metaData, MessageParcel& reply);
 

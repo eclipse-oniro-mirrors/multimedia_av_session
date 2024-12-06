@@ -145,7 +145,7 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
     int res = DoMetadataGetReplyInStub(metaData, reply);
     SLOGI("HandleGetAVMetaData DoMetadataGetReplyInStub with res %{public}d", res);
     metaData.SetMediaImageUri(uri);
-    DoMetadataImgCleanInItem(metaData);
+    DoMetadataImgClean(metaData);
     return ERR_NONE;
 }
 
