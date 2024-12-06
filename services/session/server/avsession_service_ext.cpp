@@ -217,7 +217,7 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
         std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront =
-            GetUsersManager().GetCurSessionListForFront();
+            GetUsersManager().GetCurSessionListForFront(0);
         CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
         auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sinkSession);
         if (it == sessionListForFront->end()) {

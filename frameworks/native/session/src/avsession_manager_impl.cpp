@@ -35,13 +35,7 @@ AVSessionManagerImpl::AVSessionManagerImpl()
 
 extern "C" __attribute__((destructor)) void AVSessionManagerImpl::DetachCallback()
 {
-    SLOGI("DetachCallback in");
-    if (clientDeath_ != nullptr) {
-        SLOGI("DetachCallback with clientDeath delete");
-        auto ref = clientDeath_.GetRefPtr();
-        clientDeath_ = nullptr;
-        delete ref;
-    }
+    SLOGI("DetachCallback success");
 }
 
 sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
@@ -80,7 +74,7 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
 
 void AVSessionManagerImpl::OnServiceDie()
 {
-    SLOGI("enter");
+    SLOGI("OnServiceDie enter");
     auto callback = deathCallback_;
     {
         std::lock_guard<std::mutex> lockGuard(lock_);

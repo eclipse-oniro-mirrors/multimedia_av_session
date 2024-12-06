@@ -26,6 +26,8 @@ class SessionListenerClient : public SessionListenerStub {
 public:
     explicit SessionListenerClient(const std::shared_ptr<SessionListener>& listener);
 
+    ~SessionListenerClient();
+
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
 
     void OnSessionRelease(const AVSessionDescriptor& descriptor) override;

@@ -23,6 +23,11 @@ SessionListenerClient::SessionListenerClient(const std::shared_ptr<SessionListen
     SLOGD("construct");
 }
 
+SessionListenerClient::~SessionListenerClient()
+{
+    SLOGI("SessionListenerClient gone");
+}
+
 void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     auto copiedListener = listener_;

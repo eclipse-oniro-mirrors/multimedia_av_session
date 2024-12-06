@@ -497,7 +497,7 @@ private:
     void PlayStateCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
         AudioStandard::RendererState rState);
 
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront(int32_t userId = 0);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
