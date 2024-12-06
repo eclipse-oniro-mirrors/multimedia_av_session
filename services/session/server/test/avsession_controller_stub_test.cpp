@@ -192,7 +192,7 @@ public:
     {
         return isSuccess ? AVSESSION_SUCCESS : 0;
     };
-    void DoMetadataImgCleanInItem(AVMetaData& data) override
+    void DoMetadataImgClean(AVMetaData& data) override
     {
         std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
         if (innerQueuePixelMap != nullptr) {
@@ -1217,31 +1217,31 @@ static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub002, TestSi
 }
 
 /**
- * @tc.name: DoMetadataImgCleanInItem001
+ * @tc.name: DoMetadataImgClean001
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgCleanInItem001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean001, TestSize.Level1)
 {
-    SLOGI("DoMetadataImgCleanInItem001 begin!");
+    SLOGI("DoMetadataImgClean001 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
     AVMetaData data = GetAVMetaData();
-    avSessionControllerStub.DoMetadataImgCleanInItem(data);
-    SLOGI("DoMetadataImgCleanInItem001 end!");
+    avSessionControllerStub.DoMetadataImgClean(data);
+    SLOGI("DoMetadataImgClean001 end!");
 }
 
 /**
- * @tc.name: DoMetadataImgCleanInItem002
+ * @tc.name: DoMetadataImgClean002
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgCleanInItem002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean002, TestSize.Level1)
 {
-    SLOGI("DoMetadataImgCleanInItem002 begin!");
+    SLOGI("DoMetadataImgClean002 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
     AVMetaData data = GetAVMetaData();
-    avSessionControllerStub.DoMetadataImgCleanInItem(data);
-    SLOGI("DoMetadataImgCleanInItem002 end!");
+    avSessionControllerStub.DoMetadataImgClean(data);
+    SLOGI("DoMetadataImgClean002 end!");
 }
 
 /**

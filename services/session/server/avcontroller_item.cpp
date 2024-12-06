@@ -106,10 +106,10 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     return AVSESSION_SUCCESS;
 }
 
-void AVControllerItem::DoMetadataImgCleanInItem(AVMetaData& data)
+void AVControllerItem::DoMetadataImgClean(AVMetaData& data)
 {
     std::lock_guard metaMaskLockGuard(metaMaskMutex_);
-    SLOGD("still clear media img in DoMetadataImgCleanInItem");
+    SLOGD("still clear media img in DoMetadataImgClean");
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
     if (innerQueuePixelMap != nullptr) {
         innerQueuePixelMap->Clear();
