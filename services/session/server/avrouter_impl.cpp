@@ -403,6 +403,11 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     providerManagerMap_[providerNumber]->provider_->StopCastSession(castId);
     hasSessionAlive_ = false;
 
+    for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
+        if (number == castHandle) {
+            castHandleToInfoMap_[number].avCastControllerProxy_ = nullptr;
+        }
+    }
     return AVSESSION_SUCCESS;
 }
 

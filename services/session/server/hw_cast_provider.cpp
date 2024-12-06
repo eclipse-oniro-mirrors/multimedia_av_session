@@ -158,15 +158,15 @@ void HwCastProvider::StopCastSession(int castId)
     SLOGI("StopCastSession begin with %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
     SLOGI("StopCastSession check lock");
-    int32_t mirrorCastId = static_cast<int32_t>((static_cast<uint64_t>(mirrorCastHandle) << 32) >> 32);
-    if (castId == mirrorCastId) {
-        return;
-    }
     auto hwCastStreamPlayer = avCastControllerMap_[castId];
     if (hwCastStreamPlayer) {
         hwCastStreamPlayer->Release();
     }
-
+    avCastControllerMap_.erase(castId);
+    int32_t mirrorCastId = static_cast<int32_t>((static_cast<uint64_t>(mirrorCastHandle) << 32) >> 32);
+    if (castId == mirrorCastId) {
+        return;
+    }
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("no need to release castSession for castId %{public}d is not exit in hwCastProviderSessionMap_", castId);
         return;
@@ -177,7 +177,6 @@ void HwCastProvider::StopCastSession(int castId)
     }
     hwCastProviderSessionMap_.erase(castId);
     castFlag_[castId] = false;
-    avCastControllerMap_.erase(castId);
 }
 
 bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)

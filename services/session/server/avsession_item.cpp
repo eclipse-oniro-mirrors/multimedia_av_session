@@ -881,6 +881,8 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
         castHandle_ = AVRouter::GetInstance().GetMirrorCastHandle();
         InitAVCastControllerProxy();
         if (castControllerProxy_ !=  nullptr && castControllerProxy_->GetCurrentItem().GetDescription() != nullptr) {
+            castHandle_ = -1;
+            castControllerProxy_ = nullptr;
             return AVSESSION_ERROR;
         }
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId(), deviceInfo);
