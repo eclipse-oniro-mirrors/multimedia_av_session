@@ -15,7 +15,7 @@ import("../../config.gni")
 import("//build/ohos.gni")
 
 etc_file = {
-  if (av_session_enable_start_stop_on_demand) {
+  if (multimedia_av_session_enable_start_stop_on_demand) {
     sa_profile_json = "./on_demand/avsession_service.cfg"
   } else {
     sa_profile_json = "avsession_service.cfg"
