@@ -11,9 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("./../config.gni")
 import("//build/ohos/sa_profile/sa_profile.gni")
 
+etc_file = {
+  if (multimedia_av_session_enable_start_stop_on_demand) {
+    sa_profile_json = "./../services/etc/on_demand/av_session.json"
+  } else {
+    sa_profile_json = "av_session.json"
+  }
+}
+
 ohos_sa_profile("avsession_sa_profile") {
-  sources = [ "av_session.json" ]
+  sources = [ etc_file.sa_profile_json ]
   part_name = "av_session"
 }
