@@ -36,7 +36,7 @@ public:
     void SetSessionId(int32_t sessionId);
     void OnRelease(int32_t releaseCode);
     void OnResult(int32_t resultCode, const OHOS::AAFwk::Want& result);
-    void OnReceive(const OHOS::AAFwk::WantParams& requerst);
+    void OnReceive(const OHOS::AAFwk::WantParams& request);
     void OnError(int32_t code, const std::string& name, const std::string& message);
     void OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy);
     void OnDestroy();
