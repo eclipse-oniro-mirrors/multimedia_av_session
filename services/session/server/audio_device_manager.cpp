@@ -114,7 +114,7 @@ void AudioDeviceManager::RegisterPreferedOutputDeviceChangeCallback()
         SLOGE("no available device");
         return;
     }
-    sptr<AudioStandard::AudioDeviceDescriptor> device = desc[0];
+    std::shared_ptr<AudioStandard::AudioDeviceDescriptor> device = desc[0];
     if (device != nullptr) {
         if (AudioStandard::LOCAL_NETWORK_ID == device->networkId_) {
             outputDevice_ = AUDIO_OUTPUT_SOURCE;
