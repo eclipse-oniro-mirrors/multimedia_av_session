@@ -108,7 +108,7 @@ void AudioDeviceManager::RegisterPreferedOutputDeviceChangeCallback()
     rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
     audioRoutingManager->SetPreferredOutputDeviceChangeCallback(rendererInfo,
         audioPreferedOutputDeviceChangeCallback_);
-    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> desc;
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> desc;
     audioRoutingManager->GetPreferredOutputDeviceForRendererInfo(rendererInfo, desc);
     if (desc.empty()) {
         SLOGE("no available device");

@@ -62,7 +62,8 @@ public:
 
 class OutputDeviceChangeCallback : public AudioStandard::AudioPreferredOutputDeviceChangeCallback {
 public:
-    void OnPreferredOutputDeviceUpdated(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc) override;
+    void OnPreferredOutputDeviceUpdated(
+        const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc) override;
 };
 }
 #endif
