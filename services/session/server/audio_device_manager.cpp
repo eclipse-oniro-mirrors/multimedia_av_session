@@ -28,7 +28,7 @@ bool AudioDeviceManager::GetSessionInfoSyncState()
 {
     AudioStandard::AudioRoutingManager *audioRoutingManager =
         AudioStandard::AudioRoutingManager::GetInstance();
-    std::vector<std::unique_ptr<AudioStandard::AudioDeviceDescriptor>> devices =
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> devices =
         audioRoutingManager->GetAvailableDevices(AudioStandard::AudioDeviceUsage::MEDIA_OUTPUT_DEVICES);
     bool isConnected = false;
     for (auto& device : devices) {
@@ -194,7 +194,7 @@ void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeActio
         return;
     }
     if (AudioStandard::DeviceChangeType::DISCONNECT == deviceChangeAction.type) {
-        std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> deviceDescriptors =
+        std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> deviceDescriptors =
             deviceChangeAction.deviceDescriptors;
         for (auto &device : deviceDescriptors) {
             if (device != nullptr &&
@@ -209,7 +209,7 @@ void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeActio
 }
 
 void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
-    const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> &desc)
+    const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc)
 {
     SLOGI("receive OnPreferedOutputDeviceUpdated");
     if (desc.empty()) {
