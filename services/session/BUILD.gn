@@ -196,7 +196,7 @@ av_session_ohos_library("avsession_service") {
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
-  if (multimedia_av_session_enable_start_stop_on_demand) {
+  if (av_session_enable_start_stop_on_demand) {
     defines += [ "START_STOP_ON_DEMAND_ENABLE" ]
   }
 
