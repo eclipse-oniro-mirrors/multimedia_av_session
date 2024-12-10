@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <thread>
+#include <chrono>
+
 #include "avsession_errors.h"
 #include "avsession_trace.h"
 #include "napi_async_work.h"
@@ -23,6 +26,7 @@ namespace OHOS::AVSession {
 
 static const std::string ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE = "ability.want.params.uiExtensionType";
 static const std::string ABILITY_WANT_ELEMENT_NAME = "com.ohos.mediacontroller";
+static const std::string TARGET_TYPE = "sysPicker/mediaControl";
 
 static __thread napi_ref AVCastPickerHelperConstructorRef = nullptr;
 std::map<std::string, std::pair<NapiAVCastPickerHelper::OnEventHandlerType,
@@ -104,7 +108,7 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
         napiAVCastPickerHelper = nullptr;
     };
     if (napi_wrap(env, context->self, static_cast<void*>(napiAVCastPickerHelper),
-        finalize, nullptr, &napiAVCastPickerHelper->wrapperRef_) != napi_ok) {
+        finalize, nullptr, nullptr) != napi_ok) {
         SLOGE("wrap failed");
         delete napiAVCastPickerHelper;
         napiAVCastPickerHelper = nullptr;
@@ -202,7 +206,6 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
         NapiAVCastPickerOptions napiAVCastPickerOptions;
     };
     auto context = std::make_shared<ConcreteContext>();
-
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
                                "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -220,8 +223,7 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
     auto executor = [context]() {
         auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
         AAFwk::Want request;
-        std::string targetType = "sysPicker/mediaControl";
-        request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, targetType);
+        request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, TARGET_TYPE);
         request.SetParam("isAVCastPickerHelper", true);
         request.SetParam("AVCastPickerOptionsType", context->napiAVCastPickerOptions.sessionType);
         request.SetElementName(ABILITY_WANT_ELEMENT_NAME, "UIExtAbility");
@@ -231,16 +233,17 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
         Ace::ModalUIExtensionCallbacks extensionCallback = {
             .onRelease = ([callback](auto arg) { callback->OnRelease(arg); }),
             .onResult = ([callback](auto arg1, auto arg2) { callback->OnResult(arg1, arg2); }),
-            .onReceive = ([callback](auto arg) { callback->OnReceive(arg); }),
+            .onReceive = ([callback, napiAVCastPickerHelper](auto arg) {
+                callback->OnReceive(arg);
+                napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_DISAPPEARING);
+            }),
             .onError = ([callback](auto arg1, auto arg2, auto arg3) { callback->OnError(arg1, arg2, arg3); }),
             .onRemoteReady = ([callback, napiAVCastPickerHelper](auto arg) {
                 callback->OnRemoteReady(arg);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_APPEARING);
             }),
-            .onDestroy = ([callback, napiAVCastPickerHelper]() {
-                callback->OnDestroy();
-                napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_DISAPPEARING);
-            }),
+            .onDestroy = ([callback]() { callback->OnDestroy(); }),
         };
         Ace::ModalUIExtensionConfig config;
         config.isProhibitBack = true;
@@ -372,7 +375,7 @@ void ModalUICallback::OnResult(int32_t resultCode, const OHOS::AAFwk::Want& resu
     pickerCallBack_->resultCode = resultCode;
 }
 
-void ModalUICallback::OnReceive(const OHOS::AAFwk::WantParams& requerst)
+void ModalUICallback::OnReceive(const OHOS::AAFwk::WantParams& request)
 {
     SLOGI("ModalUICallback OnReceive enter.");
 }
