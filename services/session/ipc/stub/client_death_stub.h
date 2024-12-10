@@ -18,10 +18,16 @@
 
 #include "iclient_death.h"
 #include "iremote_stub.h"
+#include "avsession_log.h"
 
 namespace OHOS::AVSession {
 class ClientDeathStub : public IRemoteStub<IClientDeath> {
 public:
+    ~ClientDeathStub()
+    {
+        SLOGI("ClientDeathStub gone");
+    }
+
     int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override
     {
         return 0;

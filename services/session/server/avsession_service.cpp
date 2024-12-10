@@ -657,10 +657,12 @@ bool AVSessionService::IsMediaStream(AudioStandard::StreamUsage usage)
 
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
 {
-    SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "sessionItem get nullptr!");
+    int32_t userId = sessionItem->GetUserId();
+    SLOGI("UpdateFrontSession with bundle=%{public}s,userId=%{public}d,isAdd=%{public}d",
+        sessionItem->GetBundleName().c_str(), userId, isAdd);
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    SLOGD("UpdateFrontSession pass lock");
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
     if (isAdd) {
@@ -857,9 +859,9 @@ AVSessionUsersManager& AVSessionService::GetUsersManager()
     return usersManager;
 }
 
-inline std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionService::GetCurSessionListForFront()
+inline std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionService::GetCurSessionListForFront(int32_t userId)
 {
-    return GetUsersManager().GetCurSessionListForFront();
+    return GetUsersManager().GetCurSessionListForFront(userId);
 }
 
 std::string AVSessionService::AllocSessionId()
@@ -1067,7 +1069,8 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
     
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
-        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront =
+            GetUsersManager().GetCurSessionListForFront(0);
         CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
         auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sinkSession);
         if (it == sessionListForFront->end()) {
@@ -1991,15 +1994,19 @@ void AVSessionService::RemoveSessionListener(pid_t pid)
 
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    SLOGI("Enter RegisterSessionListener process and return current userId");
-    AddSessionListener(GetCallingPid(), listener);
-    return GetUsersManager().GetCurrentUserId();
+    int32_t userId = GetUsersManager().GetCurrentUserId();
+    pid_t pid = GetCallingPid();
+    SLOGI("Enter RegisterSessionListener process for pid:%{public}d and return current userId:%{public}d",
+        static_cast<int>(pid), userId);
+    AddSessionListener(pid, listener);
+    return userId;
 }
 
 int32_t AVSessionService::RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener)
 {
-    SLOGI("Enter RegisterSessionListenerForAllUsers process");
-    AddSessionListenerForAllUsers(GetCallingPid(), listener);
+    pid_t pid = GetCallingPid();
+    SLOGI("Enter RegisterSessionListenerForAllUsers process for pid:%{public}d", static_cast<int>(pid));
+    AddSessionListenerForAllUsers(pid, listener);
     return AVSESSION_SUCCESS;
 }
 
@@ -2166,24 +2173,20 @@ void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath
 void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 {
     std::lock_guard lockGuard(clientDeathObserversLock_);
-    if (clientDeathObservers_.empty()) {
-        SLOGE("try remove observer with empty list");
-    } else {
-        clientDeathObservers_.erase(pid);
+    sptr<IClientDeath> observer = clientDeathObservers_[pid];
+    sptr<ClientDeathRecipient> recipient = clientDeathRecipients_[pid];
+    if (observer && recipient) {
+        SLOGI("remove clientDeath recipient for %{public}d", static_cast<int>(pid));
+        observer->AsObject()->RemoveDeathRecipient(recipient);
     }
-
-    if (clientDeathRecipients_.empty()) {
-        SLOGE("try remove recipient with empty list");
-    } else {
-        clientDeathRecipients_.erase(pid);
-    }
-    SLOGI("do RemoveClientDeathObserver for pid %{public}d done", static_cast<int>(pid));
+    clientDeathObservers_.erase(pid);
+    clientDeathRecipients_.erase(pid);
 }
 
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
-    SLOGI("enter ClientDeathObserver register with recipient point");
     auto pid = GetCallingPid();
+    SLOGI("enter ClientDeathObserver register with recipient point for pid:%{public}d", static_cast<int>(pid));
     sptr<ClientDeathRecipient> recipient =
         new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
     if (recipient == nullptr) {
