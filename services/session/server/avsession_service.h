@@ -455,7 +455,7 @@ private:
 
     int32_t ConvertKeyCodeToCommand(int keyCode);
 
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront(int32_t userId = 0);
 
     void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
