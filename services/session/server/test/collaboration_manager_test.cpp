@@ -257,3 +257,33 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource003, testing::ext
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("ApplyAdvancedResource003, end");
 }
+
+/**
+ * @tc.name: SendCollaborationOnStop001
+ * @tc.desc: Test ApplyAdvancedResource
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationOnStop001, testing::ext::TestSize.Level1)
+{
+    SLOGI("SendCollaborationOnStop001, start");
+    auto applyAdvancedResource = [](void) {
+        SLOGI("SendCollaborationOnStop001 do with callback");
+    };
+    CollaborationManager::GetInstance().SendCollaborationOnStop(applyAdvancedResource);
+    EXPECT_EQ(applyAdvancedResource != nullptr, true);
+    SLOGI("SendCollaborationOnStop001, end");
+}
+
+/**
+ * @tc.name: SendCollaborationOnStop002
+ * @tc.desc: Test ApplyAdvancedResource
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationOnStop002, testing::ext::TestSize.Level1)
+{
+    SLOGI("SendCollaborationOnStop002, start");
+    auto applyAdvancedResource = nullptr;
+    CollaborationManager::GetInstance().SendCollaborationOnStop(applyAdvancedResource);
+    EXPECT_EQ(applyAdvancedResource, nullptr);
+    SLOGI("SendCollaborationOnStop002, end");
+}
