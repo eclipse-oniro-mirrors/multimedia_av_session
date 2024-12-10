@@ -2102,6 +2102,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName, int
     values = json::parse(oldContent, nullptr, false);
     CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
     for (auto value : values) {
+        CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("bundleName"));
         if (bundleName == value["bundleName"]) {
             values.erase(std::remove(values.begin(), values.end(), value));
             break;
