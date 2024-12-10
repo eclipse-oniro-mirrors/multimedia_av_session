@@ -232,6 +232,17 @@ public:
     int32_t Destroy() override;
     std::string GetSessionId() override;
     int32_t RegisterCallbackInner(const OHOS::sptr<IRemoteObject>& callback) override;
+    void DoMetadataImgClean(AVMetaData& data) override
+    {
+        std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
+        if (innerQueuePixelMap != nullptr) {
+            innerQueuePixelMap->Clear();
+        }
+        std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = data.GetMediaImage();
+        if (innerMediaPixelMap != nullptr) {
+            innerMediaPixelMap->Clear();
+        }
+    };
 };
 
 int32_t AVSessionControllerStubTest::GetAVCallState(AVCallState& avCallState)
