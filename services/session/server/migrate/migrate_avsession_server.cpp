@@ -353,6 +353,13 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
         }, "DelaySendMetaData", DELAY_TIME);
 }
 
+void MigrateAVSessionServer::SendRemoteControllerInfo(const std::string &deviceId, std::string msg)
+{
+    if (!deviceId.empty()) {
+        SendByte(deviceId, msg);
+    }
+}
+
 void MigrateAVSessionServer::DelaySendMetaData()
 {
     sptr<AVControllerItem> avcontroller{nullptr};

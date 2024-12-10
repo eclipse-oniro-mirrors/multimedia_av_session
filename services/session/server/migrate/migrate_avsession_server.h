@@ -55,6 +55,8 @@ public:
     void OnMetaDataChange(const std::string &playerId, const AVMetaData &data);
     void OnPlaybackStateChanged(const std::string &playerId, const AVPlaybackState &state);
     void StopObserveControllerChanged(const std::string &deviceId);
+    void SendRemoteControllerList(const std::string &deviceId);
+    void SendRemoteControllerInfo(const std::string &deviceId, std::string msg);
 
 private:
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;
@@ -66,7 +68,6 @@ private:
     void UpdateCache(const std::string &sessionId, sptr<AVControllerItem> avcontroller,
         std::shared_ptr<AVControllerObserver> callback, bool isAdd);
     void ClearCacheBySessionId(const std::string &sessionId);
-    void SendRemoteControllerList(const std::string &deviceId);
     int32_t ConvertStateFromSingleToDouble(int32_t state);
 
     int32_t GetControllerById(const std::string &sessionId, sptr<AVControllerItem> &controller);
