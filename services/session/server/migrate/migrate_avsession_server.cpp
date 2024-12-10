@@ -18,6 +18,7 @@
 #include <chrono>
 #include <thread>
 
+#include "audio_device_manager.h"
 #include "avsession_errors.h"
 #include "avsession_item.h"
 #include "avsession_log.h"
@@ -284,6 +285,10 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
         return;
     }
     SLOGI("OnSessionRelease : %{public}s", sessionId.c_str());
+    if (sessionId.compare(topSessionId_) == 0) {
+        std::string msg = AudioDeviceManager::GetInstance().GenerateEmptySession();
+        AudioDeviceManager::GetInstance().SendRemoteAudioMsg(deviceId_, msg);
+    }
     ClearCacheBySessionId(sessionId);
 }
 
