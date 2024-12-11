@@ -26,7 +26,6 @@ namespace OHOS::AVSession {
 
 static const std::string ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE = "ability.want.params.uiExtensionType";
 static const std::string ABILITY_WANT_ELEMENT_NAME = "com.ohos.mediacontroller";
-static const std::string TARGET_TYPE = "sysPicker/mediaControl";
 
 static __thread napi_ref AVCastPickerHelperConstructorRef = nullptr;
 std::map<std::string, std::pair<NapiAVCastPickerHelper::OnEventHandlerType,
@@ -215,7 +214,6 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->napiAVCastPickerOptions);
         }
         CHECK_STATUS_RETURN_VOID(context, "get object failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        SLOGI("SelectAVPicker get type %{public}s", context->napiAVCastPickerOptions.sessionType.c_str());
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_CAST_PICKER_HELPER_TASK_ID;
@@ -223,13 +221,14 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
     auto executor = [context]() {
         auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
         AAFwk::Want request;
-        request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, TARGET_TYPE);
+        std::string targetType = "sysPicker/mediaControl";
+        request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, targetType);
         request.SetParam("isAVCastPickerHelper", true);
         request.SetParam("AVCastPickerOptionsType", context->napiAVCastPickerOptions.sessionType);
         request.SetElementName(ABILITY_WANT_ELEMENT_NAME, "UIExtAbility");
 
-        std::shared_ptr<PickerCallBack> pickerCallBack = std::make_shared<PickerCallBack>();
-        auto callback = std::make_shared<ModalUICallback>(napiAVCastPickerHelper->uiContent_, pickerCallBack.get());
+        PickerCallBack pickerCallBack;
+        auto callback = std::make_shared<ModalUICallback>(napiAVCastPickerHelper->uiContent_, pickerCallBack);
         Ace::ModalUIExtensionCallbacks extensionCallback = {
             .onRelease = ([callback](auto arg) { callback->OnRelease(arg); }),
             .onResult = ([callback](auto arg1, auto arg2) { callback->OnResult(arg1, arg2); }),
@@ -240,7 +239,7 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
             .onError = ([callback](auto arg1, auto arg2, auto arg3) { callback->OnError(arg1, arg2, arg3); }),
             .onRemoteReady = ([callback, napiAVCastPickerHelper](auto arg) {
                 callback->OnRemoteReady(arg);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_APPEARING);
             }),
             .onDestroy = ([callback]() { callback->OnDestroy(); }),
@@ -351,7 +350,7 @@ bool NapiAVCastPickerHelper::IsCallbacksEmpty(int32_t event)
     return callbacks_[event].empty();
 }
 
-ModalUICallback::ModalUICallback(Ace::UIContent* uiContent, PickerCallBack* pickerCallBack)
+ModalUICallback::ModalUICallback(Ace::UIContent* uiContent, PickerCallBack& pickerCallBack)
 {
     this->uiContent_ = uiContent;
     this->pickerCallBack_ = pickerCallBack;
@@ -366,13 +365,13 @@ void ModalUICallback::OnRelease(int32_t releaseCode)
 {
     SLOGI("ModalUICallback OnRelease enter. release code is %{public}d", releaseCode);
     this->uiContent_->CloseModalUIExtension(this->sessionId_);
-    pickerCallBack_->ready = true;
+    pickerCallBack_.ready = true;
 }
 
 void ModalUICallback::OnResult(int32_t resultCode, const OHOS::AAFwk::Want& result)
 {
     SLOGI("ModalUICallback OnResult enter. resultCode code is %{public}d", resultCode);
-    pickerCallBack_->resultCode = resultCode;
+    pickerCallBack_.resultCode = resultCode;
 }
 
 void ModalUICallback::OnReceive(const OHOS::AAFwk::WantParams& request)
@@ -384,9 +383,9 @@ void ModalUICallback::OnError(int32_t code, const std::string& name, const std::
 {
     SLOGI("ModalUICallback OnError enter. errorCode=%{public}d, name=%{public}s, message=%{public}s",
         code, name.c_str(), message.c_str());
-    if (!pickerCallBack_->ready) {
+    if (!pickerCallBack_.ready) {
         this->uiContent_->CloseModalUIExtension(this->sessionId_);
-        pickerCallBack_->ready = true;
+        pickerCallBack_.ready = true;
     }
 }
 

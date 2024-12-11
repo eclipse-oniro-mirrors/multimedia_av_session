@@ -32,7 +32,7 @@ struct PickerCallBack {
 
 class ModalUICallback {
 public:
-    explicit ModalUICallback(Ace::UIContent* uiContent, PickerCallBack* pickerCallBack);
+    explicit ModalUICallback(Ace::UIContent* uiContent, PickerCallBack& pickerCallBack);
     void SetSessionId(int32_t sessionId);
     void OnRelease(int32_t releaseCode);
     void OnResult(int32_t resultCode, const OHOS::AAFwk::Want& result);
@@ -44,7 +44,7 @@ public:
 private:
     int32_t sessionId_ = 0;
     Ace::UIContent* uiContent_;
-    PickerCallBack* pickerCallBack_;
+    PickerCallBack pickerCallBack_;
 };
 
 struct NapiAVCastPickerOptions {
