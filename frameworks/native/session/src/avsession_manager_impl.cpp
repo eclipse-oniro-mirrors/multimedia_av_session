@@ -54,7 +54,7 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
     auto object = mgr->CheckSystemAbility(AVSESSION_SERVICE_ID);
     if (object == nullptr) {
         SLOGE("check no SystemAbility");
-        object = mgr->LoadSystemAbility(AVSESSION_SERVICE_ID, 30);
+        object = mgr->LoadSystemAbility(AVSESSION_SERVICE_ID, loadSystemAbilityWaitTimeOut_);
         if (object == nullptr) {
             SLOGE("failed to load SystemAbility");
             return nullptr;

@@ -116,6 +116,7 @@ private:
     static sptr<ClientDeathStub> clientDeath_;
     DeathCallback deathCallback_;
     static constexpr int userIdForAllUsers_ = -1;
+    const int32_t loadSystemAbilityWaitTimeOut_ = 30;
 };
 
 class ServiceDeathRecipient : public IRemoteObject::DeathRecipient {
