@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos/sa_profile/sa_profile.gni")
-import("./../config.gni")
+import("../config.gni")
 
 etc_file = {
   if (av_session_enable_start_stop_on_demand) {
