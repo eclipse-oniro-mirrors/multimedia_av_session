@@ -27,6 +27,7 @@
 #include "array_wrapper.h"
 #include "want_params_wrapper.h"
 #include "pixel_map_impl.h"
+#include "cj_want_agent_ffi.h"
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_errors.h"
 #include "cj_avsession_media_description.h"
@@ -990,6 +991,18 @@ int32_t convertNativeToCJStruct(const CastDisplayInfo& native, CCastDisplayInfo&
     return convertNativeToCJStruct(native.name, cj.name);
 }
 
+int32_t convertNativeToCJStruct(const AbilityRuntime::WantAgent::WantAgent& native, int64_t& cj)
+{
+    auto ptr = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(native);
+    cj = OHOS::FfiWantAgent::CJWantAgent(ptr).GetID();
+    if (cj == 0) {
+        SLOGE("Create CJWantAgent failed!");
+        return AVSESSION_ERROR;
+    } else {
+        return CJNO_ERROR;
+    }
+}
+
 /* Cangjie to Native*/
 
 int32_t convertCJStructToNative(const int32_t& cj, int32_t& native)
@@ -1237,6 +1250,18 @@ int32_t convertCJStructToNative(const CArray& cj, std::vector<uint8_t>& native)
         native.push_back(static_cast<uint8_t*>(cj.head)[i]);
     }
     return CJNO_ERROR;
+}
+
+int32_t convertCJStructToNative(const int64_t& cj, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& native)
+{
+    auto cjWantAgent = OHOS::FFI::FFIData::GetData<OHOS::FfiWantAgent::CJWantAgent>(cj);
+    if (cjWantAgent) {
+        native = cjWantAgent->wantAgent_;
+        return CJNO_ERROR;
+    } else {
+        SLOGE("Fail to get WantAgent from FFIData!");
+        return AVSESSION_ERROR;
+    }
 }
 
 /* Free cjObject ============================================*/

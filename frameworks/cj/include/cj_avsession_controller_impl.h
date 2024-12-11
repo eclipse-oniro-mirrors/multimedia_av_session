@@ -47,6 +47,7 @@ public:
     virtual int32_t GetAVQueueItems(CArray& items) = 0;
     virtual int32_t GetAVQueueTitle(char*& title) = 0;
     virtual int32_t GetExtras(CArray& extras) = 0;
+    virtual int32_t GetLaunchAbility(int64_t& abilityId) = 0;
     virtual int32_t SendCommonCommand(char*& command, CArray& args) = 0;
     virtual int32_t SendControlCommand(CAVSessionCommand& command) = 0;
     virtual int32_t SendAVKeyEvent(CKeyEvent& event) = 0;
@@ -81,6 +82,7 @@ public:
     int32_t GetAVQueueItems(CArray& items);
     int32_t GetAVQueueTitle(char*& title);
     int32_t GetExtras(CArray& extras);
+    int32_t GetLaunchAbility(int64_t& abilityId);
     int32_t SendCommonCommand(char*& command, CArray& args);
     int32_t SendControlCommand(CAVSessionCommand& command);
     int32_t SendAVKeyEvent(CKeyEvent& event);
@@ -117,6 +119,7 @@ public:
     int32_t GetAVQueueItems(CArray& items) { return ERR_CONTROLLER_NOT_EXIST; }
     int32_t GetAVQueueTitle(char*& title) { return ERR_CONTROLLER_NOT_EXIST; }
     int32_t GetExtras(CArray& extras) { return ERR_CONTROLLER_NOT_EXIST; }
+    int32_t GetLaunchAbility(int64_t& abilityId) { return ERR_CONTROLLER_NOT_EXIST; }
     int32_t SendCommonCommand(char*& command, CArray& args) { return ERR_CONTROLLER_NOT_EXIST; }
     int32_t SendControlCommand(CAVSessionCommand& command) { return ERR_CONTROLLER_NOT_EXIST; }
     int32_t SendAVKeyEvent(CKeyEvent& event) { return ERR_CONTROLLER_NOT_EXIST; }

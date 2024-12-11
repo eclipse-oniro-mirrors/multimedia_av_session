@@ -97,6 +97,12 @@ int32_t FfiMultimediaAVSessionControllerGetExtras(char* sessionId, CArray* extra
     return CJ_AVSESSION_CONTROLLER_IMPL_STRING->GetExtras(*extras);
 }
 
+int32_t FfiMultimediaAVSessionControllerGetLaunchAbility(char *sessionId, int64_t* abilityId)
+{
+    if (sessionId == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
+    return CJ_AVSESSION_CONTROLLER_IMPL_STRING->GetLaunchAbility(*abilityId);
+}
+
 int32_t FfiMultimediaAVSessionControllerSendCommonCommand(char *sessionId, char* command, CArray* args)
 {
     if (sessionId == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }

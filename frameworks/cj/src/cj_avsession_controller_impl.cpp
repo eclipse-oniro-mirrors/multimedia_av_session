@@ -170,6 +170,15 @@ int32_t CJAVSessionControllerImpl::GetExtras(CArray& extras)
     return CJControllerGetterCStruct<AAFwk::WantParams, CArray>(call, extras, "GetExtras");
 }
 
+int32_t CJAVSessionControllerImpl::GetLaunchAbility(int64_t& abilityId)
+{
+    auto call =  [&](AbilityRuntime::WantAgent::WantAgent& native) {
+        return controller_->GetLaunchAbility(native);
+    };
+    return CJControllerGetterCStruct<AbilityRuntime::WantAgent::WantAgent, int64_t>(
+        call, abilityId, "GetLaunchAbility");
+}
+
 int32_t CJAVSessionControllerImpl::SendAVKeyEvent(CKeyEvent& event)
 {
     std::shared_ptr<MMI::KeyEvent> ptr = MMI::KeyEvent::Create();
