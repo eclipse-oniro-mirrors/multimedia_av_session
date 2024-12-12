@@ -41,6 +41,7 @@ FFI_EXPORT int32_t FfiMultimediaAVSessionSetAVPlaybackState(int64_t sessionId, C
 FFI_EXPORT int32_t FfiMultimediaAVSessionSetAVQueueItems(int64_t sessionId, CArray* items);
 FFI_EXPORT int32_t FfiMultimediaAVSessionSetAVQueueTitle(int64_t sessionId, char** title);
 FFI_EXPORT int32_t FfiMultimediaAVSessionSetExtras(int64_t sessionId, CArray* extras);
+FFI_EXPORT int32_t FfiMultimediaAVSessionSetLaunchAbility(int64_t sessionId, int64_t abilityId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionGetController(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionGetAVCastController(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionGetOutputDevice(int64_t sessionId, COutputDeviceInfo* outputDeviceInfo);

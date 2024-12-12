@@ -38,6 +38,7 @@ public:
     int32_t SetAVQueueItems(CArray& items);
     int32_t SetAVQueueTitle(char*& title);
     int32_t SetExtras(CArray& extras);
+    int32_t SetLaunchAbility(int64_t abilityId);
     int32_t GetController();
     int32_t GetAVCastController();
     int32_t GetOutputDevice(COutputDeviceInfo& outputDeviceInfo);
