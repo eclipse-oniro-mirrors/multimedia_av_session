@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#include <thread>
-#include <chrono>
-
 #include "avsession_errors.h"
 #include "avsession_trace.h"
 #include "napi_async_work.h"
@@ -239,7 +236,6 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
             .onError = ([callback](auto arg1, auto arg2, auto arg3) { callback->OnError(arg1, arg2, arg3); }),
             .onRemoteReady = ([callback, napiAVCastPickerHelper](auto arg) {
                 callback->OnRemoteReady(arg);
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_APPEARING);
             }),
             .onDestroy = ([callback]() { callback->OnDestroy(); }),
