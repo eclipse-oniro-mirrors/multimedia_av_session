@@ -56,6 +56,7 @@ ohos_fuzztest("SoftbusSessionManagerFuzzTest") {
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
