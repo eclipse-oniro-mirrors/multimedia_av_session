@@ -197,9 +197,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start002, TestSize.Level1)
     SLOGI("Start002 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
     description->SetMediaUri("");
-    AVFileDescriptor avFileDescriptor;
-    avFileDescriptor.fd_ = 100;
-    description->SetFdSrc(avFileDescriptor);
+    // do not use fd of descriptor which cause crash
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
     auto ret = hwCastStreamPlayer->Start(avQueueItem);
@@ -257,9 +255,7 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare002, TestSize.Level1)
     SLOGI("Prepare002 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
     description->SetMediaUri("");
-    AVFileDescriptor avFileDescriptor;
-    avFileDescriptor.fd_ = 100;
-    description->SetFdSrc(avFileDescriptor);
+    // do not use fd of descriptor which cause crash
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
     auto ret = hwCastStreamPlayer->Start(avQueueItem);

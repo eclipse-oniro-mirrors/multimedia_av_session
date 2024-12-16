@@ -152,6 +152,11 @@ ohos_unittest("AVSessionServiceSupplementTest") {
     ]
     external_deps += [ "cast_engine:cast_engine_client" ]
   }
+
+  if (bluetooth_part_enable) {
+    cflags_cc += [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 ohos_unittest("DetectBluetoothHostObserverTest") {
@@ -596,6 +601,19 @@ ohos_unittest("AVSessionDumperTest") {
   external_deps = common_external_deps
 
   external_deps += [ "ability_base:base" ]
+
+  if (castplus_cast_engine_enable) {
+    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../session:avsession_router_static",
+    ]
+  }
+
+  if (bluetooth_part_enable) {
+    cflags_cc += [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 ohos_unittest("SessionListenerStubTest") {
