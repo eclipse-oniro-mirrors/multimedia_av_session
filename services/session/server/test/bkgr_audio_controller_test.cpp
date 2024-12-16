@@ -211,8 +211,11 @@ static HWTEST(BkGrAudioControllerTest, HasAVSession002, TestSize.Level1)
 {
     SLOGI("HasAVSession002 begin!");
     int32_t uid = 1000;
+    int32_t pid = 1000;
     BackgroundAudioController backgroundaudiocontroller;
-    backgroundaudiocontroller.sessionUIDs_.insert(uid);
+    std::set<int32_t> pidSet;
+    pidSet.insert(pid);
+    backgroundaudiocontroller.sessionUIDs_.insert(std::make_pair(uid, pidSet));
     bool ret = backgroundaudiocontroller.HasAVSession(uid);
     EXPECT_EQ(ret, true);
 }
