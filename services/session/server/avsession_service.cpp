@@ -1439,6 +1439,12 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
             SLOGI("GetHistoricalSessionDescriptorsFromFile with no video type session.");
             continue;
         }
+        auto session = GetContainer().GetSessionById(value["sessionId"]);
+        if (session != nullptr) {
+            SLOGE("GetHistoricalSessionDescriptorsFromFile find session alive, sessionId=%{public}s",
+                AVSessionUtils::GetAnonySessionId(value["sessionId"]).c_str());
+            continue;
+        }
         AVSessionDescriptor descriptor;
         descriptor.sessionId_ = value["sessionId"];
         descriptor.elementName_.SetBundleName(value["bundleName"]);

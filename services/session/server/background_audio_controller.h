@@ -51,7 +51,7 @@ private:
     bool IsBackgroundMode(int32_t creatorUid, BackgroundMode backgroundMode) const;
 
     std::recursive_mutex lock_;
-    std::set<int32_t> sessionUIDs_;
+    std::map<int32_t, std::set<int32_t>> sessionUIDs_;
     AVSessionService *ptr_;
 };
 }
