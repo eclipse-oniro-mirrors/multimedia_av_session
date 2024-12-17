@@ -118,13 +118,15 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
         napiController = nullptr;
     };
 
-    sptr<NapiAVSessionController> napiController = new(std::nothrow) NapiAVSessionController();
+    auto* napiController = new(std::nothrow) NapiAVSessionController();
     if (napiController == nullptr) {
         SLOGE("no memory");
         return nullptr;
     }
     if (napi_wrap(env, self, static_cast<void*>(napiController), finalize, nullptr, nullptr) != napi_ok) {
         SLOGE("wrap failed");
+        delete napiController;
+        napiController = nullptr;
         return nullptr;
     }
     return self;
