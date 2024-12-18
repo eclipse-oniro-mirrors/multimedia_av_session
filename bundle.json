@@ -31,6 +31,7 @@
           "ability_runtime",
           "init",
           "access_token",
+          "ace_engine",
           "audio_framework",
           "bundle_framework",
           "c_utils",
