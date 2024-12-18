@@ -77,6 +77,8 @@ export class AVCastPicker extends ViewPU {
         this.maxFontSizeScale = 2;
         this.__accessibilityConnectedStr = new ObservedPropertySimplePU('已连接', this, 'accessibilityConnectedStr');
         this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('音视频投播', this, 'accessibilityAudioControlStr');
+        this.__isPc = new ObservedPropertySimplePU(false, this, 'isPc');
+        this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -134,8 +136,14 @@ export class AVCastPicker extends ViewPU {
         if (c11.accessibilityConnectedStr !== undefined) {
             this.accessibilityConnectedStr = c11.accessibilityConnectedStr;
         }
-        if (c11.__accessibilityAudioControlStr !== undefined) {
+        if (c11.accessibilityAudioControlStr !== undefined) {
             this.accessibilityAudioControlStr = c11.accessibilityAudioControlStr;
+        }
+        if (c11.isPc !== undefined) {
+            this.isPc = c11.isPc;
+        }
+        if (c11.isRTL !== undefined) {
+            this.isRTL = c11.isRTL;
         }
     }
 
@@ -156,6 +164,8 @@ export class AVCastPicker extends ViewPU {
         this.__deviceInfoType.purgeDependencyOnElmtId(a11);
         this.__accessibilityConnectedStr.purgeDependencyOnElmtId(a11);
         this.__accessibilityAudioControlStr.purgeDependencyOnElmtId(a11);
+        this.__isPc.purgeDependencyOnElmtId(a11);
+        this.__isRTL.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -172,6 +182,8 @@ export class AVCastPicker extends ViewPU {
         this.__deviceInfoType.aboutToBeDeleted();
         this.__accessibilityConnectedStr.aboutToBeDeleted();
         this.__accessibilityAudioControlStr.aboutToBeDeleted();
+        this.__isPc.aboutToBeDeleted();
+        this.__isRTL.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -280,6 +292,22 @@ export class AVCastPicker extends ViewPU {
         this.__accessibilityAudioControlStr.set(d1);
     }
 
+    get isPc() {
+        return this.__isPc.get();
+    }
+
+    set isPc(e1) {
+        this.__isPc.set(e1);
+    }
+
+    get isRTL() {
+        return this.__isRTL.get();
+    }
+
+    set isRTL(f1) {
+        this.__isRTL.set(f1);
+    }
+
     MenuStateChange() {
         if (this.extensionProxy != null) {
             this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
@@ -351,7 +379,7 @@ export class AVCastPicker extends ViewPU {
     deviceMenu(o8 = null) {
         this.observeComponentCreation2((j10, k10) => {
             Column.create();
-            Column.width(224);
+            Column.width(this.isPc ? 334 : 224);
         }, Column);
         this.observeComponentCreation2((r8, s8) => {
             ForEach.create();
@@ -415,12 +443,12 @@ export class AVCastPicker extends ViewPU {
                         'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
                         { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                         'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
-                    Text.width(144);
+                    Text.width(this.isPc ? 254 : 144);
                     Text.padding({
                         left: 8,
-                        top: 12,
+                        top: 13,
                         right: 8,
-                        bottom: 12
+                        bottom: 13
                     });
                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                     Text.maxLines(2);
@@ -457,10 +485,9 @@ export class AVCastPicker extends ViewPU {
                             this.observeComponentCreation2((k9, l9) => {
                                 Divider.create();
                                 Divider.height(1);
-                                Divider.width(172);
                                 Divider.color({ 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'],
                                     'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                Divider.padding({ right: 12 });
+                                Divider.padding({ right: (this.isRTL ? 48 : 16), left: (this.isRTL ? 16 : 48) });
                             }, Divider);
                         });
                     }
@@ -564,6 +591,16 @@ export class AVCastPicker extends ViewPU {
                 if (JSON.stringify(l8.accessAudioControl) !== undefined) {
                     console.info(TAG, `accessibilityAudioControlStr : ${l8.accessAudioControl}`);
                     this.accessibilityAudioControlStr = l8.accessAudioControl;
+                }
+
+                if (JSON.stringify(l8.isPc) !== undefined) {
+                    console.info(TAG, `isPc : ${l8.isPc}`);
+                    this.isPc = l8.isPc;
+                }
+
+                if (JSON.stringify(l8.isRTL) !== undefined) {
+                    console.info(TAG, `isRTL : ${l8.isRTL}`);
+                    this.isRTL = l8.isRTL;
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
