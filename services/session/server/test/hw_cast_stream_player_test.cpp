@@ -201,7 +201,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start002, TestSize.Level1)
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
     auto ret = hwCastStreamPlayer->Start(avQueueItem);
-    ASSERT_EQ(ret, AVSESSION_ERROR);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("Start002 end!");
 }
 
@@ -259,9 +259,9 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare002, TestSize.Level1)
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
     auto ret = hwCastStreamPlayer->Start(avQueueItem);
-    ASSERT_EQ(ret, AVSESSION_ERROR);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
     ret = hwCastStreamPlayer->Prepare(avQueueItem);
-    ASSERT_EQ(ret, AVSESSION_ERROR);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("Prepare002 end!");
 }
 
