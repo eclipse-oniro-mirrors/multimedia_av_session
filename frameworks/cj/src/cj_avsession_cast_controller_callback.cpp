@@ -93,8 +93,8 @@ template<class CT, class CT2> void freeCallbackData(CCallbackData* callbackData)
     if (callbackData->data != nullptr) {
         free(static_cast<CT *>(callbackData->data));
     }
-    if (callbackData->data != nullptr) {
-        free(static_cast<CT2 *>(callbackData->data));
+    if (callbackData->data2 != nullptr) {
+        free(static_cast<CT2 *>(callbackData->data2));
     }
     free(callbackData);
 }
