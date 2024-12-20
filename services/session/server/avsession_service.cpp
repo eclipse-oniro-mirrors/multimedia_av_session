@@ -88,7 +88,9 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t MININUM_FOR_NOTIFICATION = 5;
+#ifndef START_STOP_ON_DEMAND_ENABLE
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
+#endif
 
 const std::map<int, int32_t> keyCodeToCommandMap_ = {
     {MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE, AVControlCommand::SESSION_CMD_PLAY},
@@ -122,7 +124,11 @@ class NotificationSubscriber : public Notification::NotificationLocalLiveViewSub
 
 static const auto NOTIFICATION_SUBSCRIBER = NotificationSubscriber();
 
+#ifndef START_STOP_ON_DEMAND_ENABLE
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
+#else
+REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, false);
+#endif
 
 AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate)
@@ -136,6 +142,7 @@ AVSessionService::~AVSessionService()
 
 void AVSessionService::OnStart()
 {
+    SLOGI("OnStart SA");
     GetUsersManager().ClearCache();
     CHECK_AND_RETURN_LOG(Publish(this), "publish avsession service failed");
     dumpHelper_ = std::make_unique<AVSessionDumper>();
@@ -168,14 +175,29 @@ void AVSessionService::OnStart()
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
+#ifndef START_STOP_ON_DEMAND_ENABLE
     if (!system::GetBoolParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), false)) {
         system::SetParameter(BOOTEVENT_AVSESSION_SERVICE_READY.c_str(), "true");
         SLOGI("set boot avsession service started true");
     }
+#endif
 }
 
 void AVSessionService::OnDump()
 {
+}
+
+int32_t AVSessionService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
+{
+    SLOGI("OnIdle SA, idle reason %{public}d, %{public}s, %{public}s",
+        idleReason.GetId(), idleReason.GetName().c_str(), idleReason.GetValue().c_str());
+    return 0;
+}
+
+void AVSessionService::OnActive(const SystemAbilityOnDemandReason& activeReason)
+{
+    SLOGI("OnActive SA, idle reason %{public}d, %{public}s, %{public}s",
+        activeReason.GetId(), activeReason.GetName().c_str(), activeReason.GetValue().c_str());
 }
 
 void AVSessionService::OnStop()

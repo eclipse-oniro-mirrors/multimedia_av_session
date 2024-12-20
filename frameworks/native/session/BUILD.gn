@@ -88,6 +88,10 @@ av_session_ohos_library("avsession_client") {
     external_deps += [ "hisysevent:libhisysevent" ]
   }
 
+  if (av_session_enable_start_stop_on_demand) {
+    cflags += [ "-DSTART_STOP_ON_DEMAND_ENABLE" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "multimedia"
   part_name = "av_session"

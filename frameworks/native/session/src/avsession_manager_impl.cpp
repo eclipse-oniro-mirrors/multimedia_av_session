@@ -40,6 +40,7 @@ extern "C" __attribute__((destructor)) void AVSessionManagerImpl::DetachCallback
 
 sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
 {
+    SLOGI("enter GetService");
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (service_) {
         return service_;
@@ -50,11 +51,24 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
         SLOGE("failed to get sa mgr");
         return nullptr;
     }
+#ifndef START_STOP_ON_DEMAND_ENABLE
     auto object = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
     if (object == nullptr) {
         SLOGE("failed to get service");
         return nullptr;
     }
+#else
+    SLOGI("enter check SystemAbility");
+    auto object = mgr->CheckSystemAbility(AVSESSION_SERVICE_ID);
+    if (object == nullptr) {
+        SLOGI("check no SystemAbility");
+        object = mgr->LoadSystemAbility(AVSESSION_SERVICE_ID, loadSystemAbilityWaitTimeOut_);
+        if (object == nullptr) {
+            SLOGE("failed to load SystemAbility");
+            return nullptr;
+        }
+    }
+#endif
     service_ = iface_cast<AVSessionServiceProxy>(object);
     if (service_ != nullptr) {
         serviceDeathRecipient_ = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDie(); });
