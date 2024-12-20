@@ -18,6 +18,7 @@
 #include <iostream>
 #include <memory>
 
+#include "securec.h"
 #include "avsession_item.h"
 #include "iav_session.h"
 #include "iremote_stub.h"
@@ -36,22 +37,97 @@ using namespace std;
 namespace OHOS {
 namespace AVSession {
 static const int32_t MAX_CODE_TEST = 24;
-static const int32_t MAX_CODE_LEN = 512;
-static const int32_t MIN_SIZE_NUM = 4;
+static const int32_t MAX_CODE_LEN  = 20;
+static const int32_t MIN_SIZE_NUM = 10;
+static const uint8_t *RAW_DATA = nullptr;
+static size_t g_totalSize = 0;
+static size_t g_sizePos;
 
-void AvSessionItemFuzzer::AvSessionItemFuzzerTest(uint8_t* data, size_t size)
+/*
+* describe: get data from FUZZ untrusted data(RAW_DATA) which size is according to sizeof(T)
+* tips: only support basic type
+*/
+template<class T>
+T GetData()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
+        return object;
     }
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_sizePos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_sizePos += objectSize;
+    return object;
+}
+
+std::string GetString()
+{
+    size_t objectSize = (GetData<int8_t>() % MAX_CODE_LEN) + 1;
+    if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
+        return "OVER_SIZE";
+    }
+    char object[objectSize + 1];
+    errno_t ret = memcpy_s(object, sizeof(object), RAW_DATA + g_sizePos, objectSize);
+    if (ret != EOK) {
+        return "";
+    }
+    g_sizePos += objectSize;
+    std::string output(object);
+    return output;
+}
+
+template<class T>
+uint32_t GetArrLength(T& arr)
+{
+    if (arr == nullptr) {
+        SLOGE("%{public}s: The array length is equal to 0", __func__);
+        return 0;
+    }
+    return sizeof(arr) / sizeof(arr[0]);
+}
+
+typedef void (*TestFuncs[2])();
+
+TestFuncs g_allFuncs = {
+    AvSessionItemOnRemoteRequest,
+    AvSessionItemTest
+};
+
+bool FuzzTest(const uint8_t* rawData, size_t size)
+{
+    if (rawData == nullptr) {
+        return false;
+    }
+
+    // initialize data
+    RAW_DATA = rawData;
+    g_totalSize = size;
+    g_sizePos = 0;
+
+    uint32_t code = GetData<uint32_t>();
+    uint32_t len = GetArrLength(g_allFuncs);
+    if (len > 0) {
+        g_allFuncs[code % len]();
+    } else {
+        SLOGE("%{public}s: The len length is equal to 0", __func__);
+    }
+
+    return true;
+}
+
+void AvSessionItemFuzzer::AvSessionItemFuzzerTest()
+{
+    uint32_t code = GetData<uint32_t>();
     if (code >= MAX_CODE_TEST) {
         return;
     }
-    std::string tag(reinterpret_cast<const char*>(data), size);
-    int32_t type = *reinterpret_cast<const int32_t*>(data);
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    std::string tag = GetString();
+    int32_t type = GetData<int32_t>();
+    std::string bundleName = GetString();
+    std::string abilityName = GetString();
 
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
@@ -74,17 +150,14 @@ void AvSessionItemFuzzer::AvSessionItemFuzzerTest(uint8_t* data, size_t size)
     if (!dataMessageParcel.WriteInterfaceToken(IAVSession::GetDescriptor())) {
         return;
     }
-    size -= sizeof(uint32_t);
-    dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
+    dataMessageParcel.WriteBuffer(RAW_DATA + g_sizePos, sizeof(uint32_t));
+    g_sizePos += sizeof(uint32_t);
     dataMessageParcel.RewindRead(0);
     avSessionItem->OnRemoteRequest(code, dataMessageParcel, reply, option);
 }
 
-void AvSessionItemTest(uint8_t *data, size_t size)
+void AvSessionItemTest()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
     sptr<AVSessionService> service = new AVSessionService(AVSESSION_SERVICE_ID);
     if (!service) {
         SLOGI("service is null");
@@ -101,38 +174,38 @@ void AvSessionItemTest(uint8_t *data, size_t size)
         SLOGI("avSessionItem is null");
         return;
     }
-    AvSessionItemTestImpl(avSessionItem, data, size);
-    AvSessionCallItemTest(avSessionItem, data, size);
-    AvSessionItemTestImplExtension(avSessionItem, data, size);
-    AvSessionCallItemTestExtension(avSessionItem, data, size);
+    AvSessionItemTestImpl(avSessionItem);
+    AvSessionCallItemTest(avSessionItem);
+    AvSessionItemTestImplExtension(avSessionItem);
+    AvSessionCallItemTestExtension(avSessionItem);
 }
 
-void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
+void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem)
 {
     AVPlaybackState avState;
-    int32_t state = *(reinterpret_cast<const int32_t *>(data));
+    int32_t state = GetData<int32_t>();
     avState.SetState(state);
 
     AVMetaData metaData;
-    std::string assetId(reinterpret_cast<const char *>(data), size);
+    std::string assetId = GetString();
     metaData.SetAssetId(assetId);
 
     std::vector<int32_t> cmds;
-    int32_t fuzzCmds = *(reinterpret_cast<const int32_t *>(data));
+    int32_t fuzzCmds = GetData<int32_t>();
     cmds.push_back(fuzzCmds);
 
-    bool top = *(reinterpret_cast<const bool *>(data));
+    bool top = GetData<bool>();
 
     AVControlCommand controlCommand;
-    int32_t cmd = *(reinterpret_cast<const int32_t *>(data));
+    int32_t cmd = GetData<int32_t>();
     controlCommand.SetCommand(cmd);
 
     OutputDeviceInfo info;
     DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = 0;
-    std::string deviceId(reinterpret_cast<const char *>(data), size);
+    std::string deviceId = GetString();
     deviceInfo.deviceId_= deviceId;
-    std::string deviceName(reinterpret_cast<const char *>(data), size);
+    std::string deviceName = GetString();
     deviceInfo.deviceName_ = deviceName;
     info.deviceInfos_.push_back(deviceInfo);
 
@@ -160,38 +233,38 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* dat
     avSessionItem->GetRemoteSource();
 }
 
-void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
+void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem)
 {
-    int32_t state = *(reinterpret_cast<const int32_t *>(data));
-    int32_t itemId = *(reinterpret_cast<const int32_t *>(data));
-    int32_t pid = *(reinterpret_cast<const int32_t *>(data));
-    int32_t uid = *(reinterpret_cast<const int32_t *>(data));
+    int32_t state = GetData<int32_t>();
+    int32_t itemId = GetData<int32_t>();
+    int32_t pid = GetData<int32_t>();
+    int32_t uid = GetData<int32_t>();
 
     OutputDeviceInfo info;
     DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = 0;
-    std::string deviceId(reinterpret_cast<const char *>(data), size);
+    std::string deviceId = GetString();
     deviceInfo.deviceId_= deviceId;
-    std::string deviceName(reinterpret_cast<const char *>(data), size);
+    std::string deviceName = GetString();
     deviceInfo.deviceName_ = deviceName;
     info.deviceInfos_.push_back(deviceInfo);
 
     std::vector<AVQueueItem> avQueueItems;
     AVQueueItem avQueueItem;
-    avQueueItem.SetItemId(*(reinterpret_cast<const int32_t *>(data)));
+    avQueueItem.SetItemId(GetData<int32_t>());
     avQueueItems.push_back(avQueueItem);
 
-    std::string title(reinterpret_cast<const char *>(data), size);
-    std::string commonCommand(reinterpret_cast<const char *>(data), size);
+    std::string title = GetString();
+    std::string commonCommand = GetString();
 
     auto wantAgentPtr = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
 
     AAFwk::WantParams wantParams;
 
     auto keyEvent = MMI::KeyEvent::Create();
-    keyEvent->SetKeyCode(*(reinterpret_cast<const int32_t*>(data)));
+    keyEvent->SetKeyCode(GetData<int32_t>());
     MMI::KeyEvent::KeyItem keyItem;
-    keyItem.SetKeyCode(*(reinterpret_cast<const int32_t*>(data)));
+    keyItem.SetKeyCode(GetData<int32_t>());
     keyEvent->AddKeyItem(keyItem);
 
     sptr<AVControllerItem> avControllerItem = new(std::nothrow) AVControllerItem(pid, avSessionItem);
@@ -216,10 +289,10 @@ void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem, const uin
     avSessionItem->HandleControllerRelease(pid);
 }
 
-void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
+void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem)
 {
     AVCallMetaData callMetaData;
-    int32_t numberDate = *(reinterpret_cast<const int32_t*>(data));
+    int32_t numberDate = GetData<int32_t>();
     std::string dataToS(std::to_string(numberDate));
     std::string strCallMetaData(dataToS);
     callMetaData.SetName(strCallMetaData);
@@ -235,10 +308,10 @@ void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem, const uint8_t* dat
     avSessionItem->SetAVCallState(avCallState);
 }
 
-void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size)
+void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem)
 {
-    string sinkDevice(reinterpret_cast<const char *>(data), size);
-    string event(reinterpret_cast<const char *>(data), size);
+    string sinkDevice = GetString();
+    string event = GetString();
 
     auto releaseAndStartCallback = [](AVSessionItem& item) {};
     auto updateSessionCallback = [](string str, bool flag) {};
@@ -264,22 +337,24 @@ void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem, const uin
     avSessionItem->SetServiceCallbackForUpdateSession(updateSessionCallback);
 }
 
-void AvSessionItemOnRemoteRequest(uint8_t *data, size_t size)
+void AvSessionItemOnRemoteRequest()
 {
     auto avSessionItem = std::make_unique<AvSessionItemFuzzer>();
     if (avSessionItem == nullptr) {
         SLOGI("avSessionItem is null");
         return;
     }
-    avSessionItem->AvSessionItemFuzzerTest(data, size);
+    avSessionItem->AvSessionItemFuzzerTest();
 }
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    if (size < MIN_SIZE_NUM) {
+        return 0;
+    }
     /* Run your code on data */
-    AvSessionItemOnRemoteRequest(const_cast<uint8_t*>(data), size);
-    AvSessionItemTest(const_cast<uint8_t*>(data), size);
+    FuzzTest(data, size);
     return 0;
 }
 } // namespace AVSession

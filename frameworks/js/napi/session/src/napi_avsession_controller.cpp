@@ -1258,9 +1258,9 @@ napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_
             return;
         }
         AVSessionDescriptor descriptor;
-        AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(napiController->controller_->GetSessionId(),
-                                                                         descriptor);
-        SLOGI("set outputdevice info");
+        std::string sessionId = napiController->controller_->GetSessionId();
+        AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
+        SLOGI("set outputdevice info for session:%{public}s***", sessionId.substr(0, ARGC_THREE).c_str());
         context->outputDeviceInfo_ = descriptor.outputDeviceInfo_;
     };
 

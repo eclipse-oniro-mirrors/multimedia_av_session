@@ -23,6 +23,6 @@
 #include "ability_connect_helper.h"
 
 namespace OHOS::AVSession {
-    void AbilityManagerAdapterTest(uint8_t *data, size_t size);
+    void AbilityManagerAdapterTest();
 }
 #endif

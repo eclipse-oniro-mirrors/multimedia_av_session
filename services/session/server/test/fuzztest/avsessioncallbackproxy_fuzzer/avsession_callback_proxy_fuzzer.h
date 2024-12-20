@@ -29,13 +29,13 @@ public:
     }
 };
 
-bool AvsessionCallbackProxySendRequestTest(uint8_t* data, size_t size);
+void AvsessionCallbackProxySendRequestTest();
 
 class AvsessionCallbackProxyFuzzer {
 public:
     AvsessionCallbackProxyFuzzer() = default;
     ~AvsessionCallbackProxyFuzzer() = default;
-    bool FuzzSendRequest(uint8_t* data, size_t size);
+    bool FuzzSendRequest();
 };
 }
 #endif
