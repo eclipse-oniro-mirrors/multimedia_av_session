@@ -16,6 +16,7 @@
 #ifndef OHOS_CJ_AVSESSION_UTILS_H
 #define OHOS_CJ_AVSESSION_UTILS_H
 
+#include "want_agent.h"
 #include "avcall_state.h"
 #include "avmeta_data.h"
 #include "avcall_meta_data.h"
@@ -86,6 +87,8 @@ int32_t convertNativeToCJStruct(const std::vector<MMI::KeyEvent::KeyItem>& nativ
 int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CInputEvent& cj);
 int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CKeyEvent& cj);
 
+int32_t convertNativeToCJStruct(const AbilityRuntime::WantAgent::WantAgent& native, int64_t& cj);
+
 /* Canjie FFI Object => Native*/
 int32_t convertCJStructToNative(const int32_t& cj, int32_t& native);
 int32_t convertCJStructToNative(const CKeyEvent& cj, MMI::KeyEvent& native);
@@ -103,6 +106,7 @@ int32_t convertCJStructToNative(const CAVMediaDescription& cj, AVMediaDescriptio
 int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVControlCommand& native);
 int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVCastControlCommand& native);
 int32_t convertCJStructToNative(const CArray& cj, std::vector<uint8_t>& native);
+int32_t convertCJStructToNative(const int64_t& cj, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& native);
 
 /* Free cjObject */
 void cjStructHeapFree(COutputDeviceInfo& cj);

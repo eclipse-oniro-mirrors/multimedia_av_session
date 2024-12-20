@@ -15,6 +15,7 @@
 
 #include "cj_avsession_impl.h"
 
+#include "want_agent.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"
 #include "avsession_errors.h"
@@ -120,6 +121,15 @@ int32_t CJAVSessionImpl::SetExtras(CArray& extras)
         return session_->SetExtras(native);
     };
     return CJAVSessionSetterCStruct<AAFwk::WantParams, CArray>(call, extras, "SetExtras");
+}
+
+int32_t CJAVSessionImpl::SetLaunchAbility(int64_t abilityId)
+{
+    auto call = [&](std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& native) {
+        return session_->SetLaunchAbility(*native);
+    };
+    return CJAVSessionSetterCStruct<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>, int64_t>(
+        call, abilityId, "SetLaunchAbility");
 }
 
 int32_t CJAVSessionImpl::GetController()

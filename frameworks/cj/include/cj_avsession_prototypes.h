@@ -27,7 +27,7 @@ extern "C" {
 /* Value Type =====================*/
 typedef struct {
     void* head;
-    int64_t size;
+    uint64_t size;
 } CArray;
 
 typedef struct {

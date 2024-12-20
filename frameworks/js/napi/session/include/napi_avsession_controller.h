@@ -26,7 +26,7 @@
 #include "napi_async_work.h"
 
 namespace OHOS::AVSession {
-class NapiAVSessionController : public RefBase {
+class NapiAVSessionController {
 public:
     NapiAVSessionController();
     ~NapiAVSessionController();

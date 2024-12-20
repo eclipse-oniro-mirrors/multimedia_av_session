@@ -63,6 +63,12 @@ int32_t FfiMultimediaAVSessionSetExtras(int64_t sessionId, CArray* extras)
     return CJGET_FFIDATA_AVSESSION->SetExtras(*extras);
 }
 
+int32_t FfiMultimediaAVSessionSetLaunchAbility(int64_t sessionId, int64_t abilityId)
+{
+    if (abilityId == 0) { return OHOS::AVSession::ERR_INVALID_PARAM; }
+    return CJGET_FFIDATA_AVSESSION->SetLaunchAbility(abilityId);
+}
+
 int32_t FfiMultimediaAVSessionGetController(int64_t sessionId)
 {
     return CJGET_FFIDATA_AVSESSION->GetController();

@@ -27,11 +27,98 @@
 #include "array_wrapper.h"
 #include "want_params_wrapper.h"
 #include "pixel_map_impl.h"
+#include "cj_want_agent_ffi.h"
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_errors.h"
 #include "cj_avsession_media_description.h"
 
 namespace OHOS::AVSession {
+
+/* Common Methods ===========================================*/
+int32_t CJExecMethod(std::function<int32_t()> method, std::string methodName)
+{
+    int32_t ret = method();
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("controller %{public}s failed:%{public}d", methodName.c_str(), ret);
+    }
+    return ret;
+}
+
+template<class T>
+int32_t CJConverterMalloc(T*& obj, int64_t size)
+{
+    if (size <= 0) {
+        obj = nullptr;
+        return CJNO_ERROR;
+    }
+    obj = static_cast<T *>(malloc(sizeof(T) * size));
+    if (obj == nullptr) {
+        return ERR_NO_MEMORY;
+    }
+    return CJNO_ERROR;
+}
+
+char *MallocCString(const std::string &origin)
+{
+    char* cstr = nullptr;
+    int len = origin.length() + 1;
+    if (CJConverterMalloc<char>(cstr, len) != CJNO_ERROR) {
+        return cstr;
+    }
+    if (strcpy_s(cstr, len, origin.c_str()) != 0) {
+        free(cstr);
+        cstr = nullptr;
+    }
+    return cstr;
+}
+
+char *MallocCString(const std::string &origin, int32_t &code)
+{
+    char* result = MallocCString(origin);
+    if (result == nullptr) {
+        code = AVSESSION_ERROR;
+    } else {
+        code = CJNO_ERROR;
+    }
+    return result;
+}
+
+using Step = std::function<int32_t()>;
+class CJUtilsChainCall {
+public:
+
+    void addStep(Step step)
+    {
+        steps.push_back(step);
+    }
+
+    static int32_t runSteps(std::vector<Step> &funcs)
+    {
+        int code = CJNO_ERROR;
+        for (auto& step: funcs) {
+            int32_t code = step();
+            if (code != CJNO_ERROR) {
+                return code;
+            }
+        }
+        return code;
+    }
+
+    int32_t run()
+    {
+        int code = CJNO_ERROR;
+        for (auto& step: steps) {
+            int32_t code = step();
+            if (code != CJNO_ERROR) {
+                return code;
+            }
+        }
+        return code;
+    }
+
+    private:
+        std::vector<Step> steps;
+};
 
 /* WantParas <=> CArray<CParameters> ========================*/
 
@@ -160,7 +247,7 @@ int32_t SetDataParameters(const CArray& parameters, WantParams &wantP)
         SLOGE("CParameters has nullptr head!");
         return AVSESSION_ERROR;
     }
-    for (int i = 0; i < parameters.size; i++, head++) {
+    for (uint64_t i = 0; i < parameters.size; i++, head++) {
         auto key = std::string(head->key);
         if (head->valueType == I32_TYPE) { // int32_t
             wantP.SetParam(key, OHOS::AAFwk::Integer::Box(*static_cast<int32_t *>(head->value)));
@@ -201,27 +288,6 @@ int32_t SetDataParameters(const CArray& parameters, WantParams &wantP)
         }
     }
     return CJNO_ERROR;
-}
-
-char *MallocCString(const std::string &origin)
-{
-    auto len = origin.length() + 1;
-    char *res = static_cast<char *>(malloc(sizeof(char) * len));
-    if (res == nullptr) {
-        return nullptr;
-    }
-    return std::char_traits<char>::copy(res, origin.c_str(), len);
-}
-
-char *MallocCString(const std::string &origin, int32_t &code)
-{
-    auto len = origin.length() + 1;
-    char *res = static_cast<char *>(malloc(sizeof(char) * len));
-    if (res == nullptr) {
-        code = ERR_NO_MEMORY;
-        return nullptr;
-    }
-    return std::char_traits<char>::copy(res, origin.c_str(), len);
 }
 
 // WantParameters -> CArrParameters
@@ -294,8 +360,14 @@ int32_t InnerWrapWantParamsArrayString(sptr<AAFwk::IArray> &ao, CParameters *p)
     }
     int ret = CJNO_ERROR;
     for (long i = 0; i < size; i++) {
+        arrP[i] = nullptr;
         ret = InnerWrapWantParamsUnboxArrayString(ao, i, arrP[i]);
-        if (ret != CJNO_ERROR) { return ret; }
+        if (ret != CJNO_ERROR) {
+            for (long j = 0; j < i; j++) {
+                free(arrP[j]);
+            }
+            return ret;
+        }
     }
     p->size = size;
     p->value = static_cast<void *>(arrP);
@@ -494,69 +566,7 @@ void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &co
     }
 }
 
-/* Common Methods ===========================================*/
-int32_t CJExecMethod(std::function<int32_t()> method, std::string methodName)
-{
-    int32_t ret = method();
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("controller %{public}s failed:%{public}d", methodName.c_str(), ret);
-    }
-    return ret;
-}
-
 /* Converter ================================================*/
-template<class T>
-int32_t CJConverterMalloc(T*& obj, int64_t size)
-{
-    if (size <= 0) {
-        obj = nullptr;
-        return CJNO_ERROR;
-    }
-    obj = static_cast<T *>(malloc(sizeof(T) * size));
-    if (obj == nullptr) {
-        return ERR_NO_MEMORY;
-    }
-    return CJNO_ERROR;
-}
-
-using Step = std::function<int32_t()>;
-class CJUtilsChainCall {
-public:
-
-    void addStep(Step step)
-    {
-        steps.push_back(step);
-    }
-
-    static int32_t runSteps(std::vector<Step> &funcs)
-    {
-        int code = CJNO_ERROR;
-        for (auto& step: funcs) {
-            int32_t code = step();
-            if (code != CJNO_ERROR) {
-                return code;
-            }
-        }
-        return code;
-    }
-
-    int32_t run()
-    {
-        int code = CJNO_ERROR;
-        for (auto& step: steps) {
-            int32_t code = step();
-            if (code != CJNO_ERROR) {
-                return code;
-            }
-        }
-        return code;
-    }
-
-    private:
-        std::vector<Step> steps;
-};
-
-
 /* Native to Cangjie*/
 int32_t convertNativeToCJStruct(const AVCallState& native, CAVCallState& cj)
 {
@@ -647,7 +657,7 @@ int32_t convertNativeToCJStruct(const std::vector<std::string>& native, CArray& 
         return ret;
     }
     cj.size = native.size();
-    for (uint32_t i = 0; i < native.size(); i++) {
+    for (size_t i = 0; i < native.size(); i++) {
         int32_t errCode = convertNativeToCJStruct(native[i], cjArrHead[i]);
         if (errCode != CJNO_ERROR) {
             return errCode;
@@ -658,12 +668,8 @@ int32_t convertNativeToCJStruct(const std::vector<std::string>& native, CArray& 
 
 int32_t convertNativeToCJStruct(const std::string& native, char*& cj)
 {
-    int32_t ret = CJNO_ERROR;
-    ret = CJConverterMalloc<char>(cj, native.length() + 1);
-    if (ret != CJNO_ERROR) {
-        return ret;
-    }
-    if (strcpy_s(cj, native.length() + 1, native.c_str()) != 0) {
+    cj = MallocCString(native);
+    if (cj == nullptr) {
         return AVSESSION_ERROR;
     }
     return CJNO_ERROR;
@@ -700,7 +706,7 @@ int32_t convertNativeToCJStruct(const std::vector<MMI::KeyEvent::KeyItem>& nativ
     if (ret != CJNO_ERROR) {
         return ret;
     }
-    for (uint32_t i = 0; i < native.size(); i++) {
+    for (size_t i = 0; i < native.size(); i++) {
         convertNativeToCJStruct(native[i], *(cj+i));
     }
     return ret;
@@ -846,7 +852,7 @@ int32_t convertNativeToCJStruct(const std::vector<int32_t>& native, CArray&cj)
         return ret;
     }
     cj.size = native.size();
-    for (uint32_t i = 0; i < native.size(); i++) {
+    for (size_t i = 0; i < native.size(); i++) {
         cjArrHead[i] = native[i];
     }
     return ret;
@@ -861,7 +867,7 @@ int32_t convertNativeToCJStruct(const std::vector<uint8_t>& native, CArray& cj)
         return ret;
     }
     cj.size = native.size();
-    for (uint32_t i = 0; i < native.size(); i++) {
+    for (size_t i = 0; i < native.size(); i++) {
         cjArrHead[i] = native[i];
     }
     return ret;
@@ -876,7 +882,7 @@ int32_t convertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray&c
         return ret;
     }
     cj.size = native.size();
-    for (uint32_t i = 0; i < native.size(); i++) {
+    for (size_t i = 0; i < native.size(); i++) {
         int32_t errCode = convertNativeToCJStruct(native[i], cjArrHead[i]);
         if (errCode != CJNO_ERROR) {
             return errCode;
@@ -972,7 +978,7 @@ int32_t convertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArr
         return ret;
     }
     cj.size = native.size();
-    for (uint32_t i = 0; i < native.size(); i++) {
+    for (size_t i = 0; i < native.size(); i++) {
         ret = convertNativeToCJStruct(native[i], cjArrHead[i]);
         if (ret != CJNO_ERROR) {
             return ret;
@@ -988,6 +994,18 @@ int32_t convertNativeToCJStruct(const CastDisplayInfo& native, CCastDisplayInfo&
     cj.width = native.width;
     cj.height = native.height;
     return convertNativeToCJStruct(native.name, cj.name);
+}
+
+int32_t convertNativeToCJStruct(const AbilityRuntime::WantAgent::WantAgent& native, int64_t& cj)
+{
+    auto ptr = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(native);
+    cj = OHOS::FfiWantAgent::CJWantAgent(ptr).GetID();
+    if (cj == 0) {
+        SLOGE("Create CJWantAgent failed!");
+        return AVSESSION_ERROR;
+    } else {
+        return CJNO_ERROR;
+    }
 }
 
 /* Cangjie to Native*/
@@ -1061,7 +1079,7 @@ int32_t convertCJStructToNative(const CArray& cj, std::vector<std::string>& nati
         return CJNO_ERROR;
     }
     auto ptr = reinterpret_cast<char**>(cj.head);
-    for (uint32_t i = 0; i < cj.size; i++) {
+    for (uint64_t i = 0; i < cj.size; i++) {
         native.push_back(std::string(ptr[i]));
     }
     return CJNO_ERROR;
@@ -1118,7 +1136,7 @@ int32_t convertCJStructToNative(const CArray& cj, std::vector<AVQueueItem>& nati
 {
     int32_t ret = CJNO_ERROR;
     auto ptr = reinterpret_cast<CAVQueueItem*>(cj.head);
-    for (uint32_t i = 0; i < cj.size; i++) {
+    for (uint64_t i = 0; i < cj.size; i++) {
         AVQueueItem item;
         ret = convertCJStructToNative(ptr[i], item);
         if (ret != CJNO_ERROR) {
@@ -1233,10 +1251,22 @@ int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVCastControlComman
 
 int32_t convertCJStructToNative(const CArray& cj, std::vector<uint8_t>& native)
 {
-    for (uint32_t i = 0; i < cj.size; i++) {
+    for (uint64_t i = 0; i < cj.size; i++) {
         native.push_back(static_cast<uint8_t*>(cj.head)[i]);
     }
     return CJNO_ERROR;
+}
+
+int32_t convertCJStructToNative(const int64_t& cj, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& native)
+{
+    auto cjWantAgent = OHOS::FFI::FFIData::GetData<OHOS::FfiWantAgent::CJWantAgent>(cj);
+    if (cjWantAgent) {
+        native = cjWantAgent->wantAgent_;
+        return CJNO_ERROR;
+    } else {
+        SLOGE("Fail to get WantAgent from FFIData!");
+        return AVSESSION_ERROR;
+    }
 }
 
 /* Free cjObject ============================================*/

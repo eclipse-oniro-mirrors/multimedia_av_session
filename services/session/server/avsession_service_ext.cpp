@@ -36,7 +36,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         migrateAVSession_->Init(this);
         MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession_);
         AddInnerSessionListener(migrateAVSession_.get());
-        AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback(migrateAVSession_, deviceId);
+        AudioDeviceManager::GetInstance().InitAudioStateCallback(migrateAVSession_, deviceId);
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") &&
@@ -77,7 +77,7 @@ void AVSessionService::NotifyMigrateStop(const std::string &deviceId)
     }
     std::lock_guard lockGuard(sessionServiceLock_);
     migrateAVSession_->StopObserveControllerChanged(deviceId);
-    AudioDeviceManager::GetInstance().UnRegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().UnInitAudioStateCallback();
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE

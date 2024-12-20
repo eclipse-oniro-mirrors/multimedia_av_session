@@ -51,6 +51,7 @@ FFI_EXPORT int32_t FfiMultimediaAVSessionControllerGetValidCommands(char *sessio
 FFI_EXPORT int32_t FfiMultimediaAVSessionControllerGetAVQueueItems(char *sessionId, CArray* items);
 FFI_EXPORT int32_t FfiMultimediaAVSessionControllerGetAVQueueTitle(char *sessionId, char** title);
 FFI_EXPORT int32_t FfiMultimediaAVSessionControllerGetExtras(char *sessionId, CArray* extras);
+FFI_EXPORT int32_t FfiMultimediaAVSessionControllerGetLaunchAbility(char *sessionId, int64_t* abilityId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionControllerSendCommonCommand(
     char *sessionId, char* command, CArray* args);
 FFI_EXPORT int32_t FfiMultimediaAVSessionControllerSendControlCommand(

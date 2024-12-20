@@ -34,7 +34,7 @@
 #include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
-class NapiAVSession : public RefBase {
+class NapiAVSession {
 public:
     static napi_value Init(napi_env env, napi_value exports);
     static napi_status NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out);

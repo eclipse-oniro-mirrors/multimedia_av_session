@@ -1456,6 +1456,12 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
             SLOGI("GetHistoricalSessionDescriptorsFromFile with no video type session.");
             continue;
         }
+        auto session = GetContainer().GetSessionById(value["sessionId"]);
+        if (session != nullptr) {
+            SLOGE("GetHistoricalSessionDescriptorsFromFile find session alive, sessionId=%{public}s",
+                AVSessionUtils::GetAnonySessionId(value["sessionId"]).c_str());
+            continue;
+        }
         AVSessionDescriptor descriptor;
         descriptor.sessionId_ = value["sessionId"];
         descriptor.elementName_.SetBundleName(value["bundleName"]);
@@ -2002,7 +2008,9 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
     std::vector<AVSessionDescriptor> hisDescriptors;
     GetHistoricalSessionDescriptorsFromFile(hisDescriptors);
     // try start play for first history session
-    if (command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY && hisDescriptors.size() != 0) {
+    if ((command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY ||
+         command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_NEXT ||
+         command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_PREVIOUS) && hisDescriptors.size() != 0) {
         sptr<IRemoteObject> object;
         int32_t ret = StartAVPlayback(hisDescriptors[0].elementName_.GetBundleName(), "");
         SLOGI("Cold play %{public}s, ret=%{public}d", hisDescriptors[0].elementName_.GetBundleName().c_str(), ret);
@@ -2119,6 +2127,7 @@ void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName, int
     values = json::parse(oldContent, nullptr, false);
     CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
     for (auto value : values) {
+        CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("bundleName"));
         if (bundleName == value["bundleName"]) {
             values.erase(std::remove(values.begin(), values.end(), value));
             break;

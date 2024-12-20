@@ -48,8 +48,15 @@ void BackgroundAudioController::Init(AVSessionService *ptr)
 void BackgroundAudioController::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(lock_);
-    sessionUIDs_.insert(descriptor.uid_);
-    SLOGI("OnSessionCreate remove observe for uid %{public}d", descriptor.uid_);
+    auto it = sessionUIDs_.find(descriptor.uid_);
+    if (it == sessionUIDs_.end()) {
+        std::set<int32_t> pidSet;
+        pidSet.insert(descriptor.pid_);
+        sessionUIDs_.insert(std::make_pair(descriptor.uid_, pidSet));
+    } else {
+        it->second.insert(descriptor.pid_);
+    }
+    SLOGI("OnSessionCreate remove observe for uid %{public}d pid %{public}d", descriptor.uid_, descriptor.pid_);
     AppManagerAdapter::GetInstance().RemoveObservedApp(descriptor.uid_);
 }
 
@@ -57,7 +64,13 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
 {
     {
         std::lock_guard lockGuard(lock_);
-        sessionUIDs_.erase(descriptor.uid_);
+        auto it = sessionUIDs_.find(descriptor.uid_);
+        if (it != sessionUIDs_.end()) {
+            it->second.erase(descriptor.pid_);
+            if (it->second.empty()) {
+                it = sessionUIDs_.erase(it);
+            }
+        }
     }
 
     if (descriptor.isThirdPartyApp_) {

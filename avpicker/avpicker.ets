@@ -186,6 +186,9 @@ export struct AVCastPicker {
   @State accessibilityConnectedStr: string = '已连接';
   @State accessibilityAudioControlStr: string = '音视频投播';
 
+  @State isPc: boolean = false;
+  @State isRTL: boolean = false;
+
   MenuStateChange() {
     if (this.extensionProxy != null) {
       this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
@@ -243,12 +246,12 @@ export struct AVCastPicker {
                   $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
                   (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
                   $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
-                .width(144)
+                .width(this.isPc ? 254 : 144)
                 .padding({
                   left: 8,
-                  top: 12,
+                  top: 13,
                   right: 8,
-                  bottom: 12
+                  bottom: 13
                 })
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .maxLines(2)
@@ -269,7 +272,7 @@ export struct AVCastPicker {
             }
           }
           .constraintSize({ minHeight: 48 })
-          .padding({ left: 12, right: 12 })
+          .padding({ left: 16, right: 16 })
           .onTouch((event) => {
             if (event.type === TouchType.Down) {
               this.touchMenuItemIndex = index;
@@ -285,9 +288,8 @@ export struct AVCastPicker {
           if (index != this.deviceList.length - 1) {
             Divider()
               .height(1)
-              .width(172)
               .color($r('sys.color.comp_divider'))
-              .padding({ right: 12 })
+              .padding({ right: (this.isRTL ? 48 : 16), left: (this.isRTL ? 16 : 48) })
           }
         }
         .width('100%')
@@ -298,7 +300,7 @@ export struct AVCastPicker {
         })
       })
     }
-    .width(224)
+    .width(this.isPc ? 334 : 224)
   }
 
   @Builder
@@ -388,6 +390,16 @@ export struct AVCastPicker {
         if (JSON.stringify(data['accessAudioControl']) !== undefined) {
           console.info(TAG, `accessAudioControl : ${JSON.stringify(data['accessAudioControl'])}`);
           this.accessibilityAudioControlStr = data['accessAudioControl'] as string;
+        }
+
+        if (JSON.stringify(data['isPc']) !== undefined) {
+          console.info(TAG, `isPc : ${JSON.stringify(data['isPc'])}`);
+          this.isPc = data['isPc'] as boolean;
+        }
+
+        if (JSON.stringify(data['isRTL']) !== undefined) {
+          console.info(TAG, `isRTL : ${JSON.stringify(data['isRTL'])}`);
+          this.isRTL = data['isRTL'] as boolean;
         }
       })
       .size({ width: '100%', height: '100%' })
