@@ -62,6 +62,7 @@ void BackgroundAudioController::OnSessionCreate(const AVSessionDescriptor& descr
 
 void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
+    bool isEmpty = false;
     {
         std::lock_guard lockGuard(lock_);
         auto it = sessionUIDs_.find(descriptor.uid_);
@@ -69,12 +70,13 @@ void BackgroundAudioController::OnSessionRelease(const AVSessionDescriptor& desc
             it->second.erase(descriptor.pid_);
             if (it->second.empty()) {
                 it = sessionUIDs_.erase(it);
+                isEmpty = true;
             }
         }
     }
 
-    if (descriptor.isThirdPartyApp_) {
-        SLOGI("OnSessionRelease add observe for uid %{public}d", descriptor.uid_);
+    if (descriptor.isThirdPartyApp_ && isEmpty) {
+        SLOGI("OnSessionRelease add observe for uid %{public}d isPidEmpty %{public}d", descriptor.uid_, isEmpty);
         AppManagerAdapter::GetInstance().AddObservedApp(descriptor.uid_);
         if (AppManagerAdapter::GetInstance().IsAppBackground(descriptor.uid_, descriptor.pid_)) {
             auto mute = AudioAdapter::GetInstance().MuteAudioStream(descriptor.uid_, descriptor.pid_);
