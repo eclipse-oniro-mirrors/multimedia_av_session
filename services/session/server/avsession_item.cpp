@@ -1185,11 +1185,13 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
     castHandleDeviceId_ = "-100";
     castControllerProxy_ = nullptr;
     isFirstCallback_ = true;
-    {
-        std::lock_guard lockGuard(avsessionItemLock_);
-        supportedCastCmds_.clear();
+    if (!isSwitchNewDevice_) {
+        {
+            std::lock_guard lockGuard(avsessionItemLock_);
+            supportedCastCmds_.clear();
+        }
+        ProcessFrontSession("Disconnect");
     }
-    ProcessFrontSession("Disconnect");
     SaveLocalDeviceInfo();
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
