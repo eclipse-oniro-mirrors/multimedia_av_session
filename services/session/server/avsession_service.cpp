@@ -124,7 +124,11 @@ class NotificationSubscriber : public Notification::NotificationLocalLiveViewSub
 
 static const auto NOTIFICATION_SUBSCRIBER = NotificationSubscriber();
 
+#ifndef START_STOP_ON_DEMAND_ENABLE
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
+#else
+REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, false);
+#endif
 
 AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate)
@@ -138,6 +142,7 @@ AVSessionService::~AVSessionService()
 
 void AVSessionService::OnStart()
 {
+    SLOGI("OnStart SA");
     GetUsersManager().ClearCache();
     CHECK_AND_RETURN_LOG(Publish(this), "publish avsession service failed");
     dumpHelper_ = std::make_unique<AVSessionDumper>();
