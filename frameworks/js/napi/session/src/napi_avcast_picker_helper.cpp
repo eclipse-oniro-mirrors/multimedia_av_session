@@ -85,13 +85,14 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
             return;
         }
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(stageContext);
-        if (abilityContext == nullptr) {
+        if (abilityContext != nullptr) {
+            context->uiContent = abilityContext->GetUIContent();
+        } else {
             auto extensionContext =
                 AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(stageContext);
             CHECK_RETURN_VOID(extensionContext != nullptr, "convert to AbilityContext and ExtensionContext fail");
             context->uiContent = extensionContext->GetUIContent();
         }
-        context->uiContent = abilityContext->GetUIContent();
     };
     context->GetCbInfo(env, info, inputParser);
 
@@ -99,6 +100,7 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
     CHECK_AND_RETURN_RET_LOG(napiAVCastPickerHelper != nullptr, nullptr, "no memory");
     auto finalize = [](napi_env env, void* data, void* hint) {
         auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(data);
+        CHECK_AND_RETURN_LOG(napiAVCastPickerHelper != nullptr, "napiAVCastPickerHelper is nullptr");
         napi_delete_reference(env, napiAVCastPickerHelper->wrapperRef_);
         delete napiAVCastPickerHelper;
         napiAVCastPickerHelper = nullptr;
