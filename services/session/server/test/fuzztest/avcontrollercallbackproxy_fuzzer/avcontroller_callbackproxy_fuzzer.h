@@ -30,13 +30,13 @@ public:
     }
 };
 
-bool AVControllerCallbackProxySendRequest(uint8_t* data, size_t size);
+void AVControllerCallbackProxySendRequest();
 
 class AvControllerCallbackProxyFuzzer {
 public:
     AvControllerCallbackProxyFuzzer() = default;
     ~AvControllerCallbackProxyFuzzer() = default;
-    bool FuzzSendRequest(uint8_t* data, size_t size);
+    bool FuzzSendRequest();
 };
 }
 #endif

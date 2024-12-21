@@ -27,8 +27,8 @@
 
 
 namespace OHOS::AVSession {
-    void AbilityConnectHelperFuzzTest(uint8_t *data, size_t size);
-    void AbilityConnectionStubFuzzTest(uint8_t* data, size_t size);
-    void AbilityConnectCallbackFuzzTest(uint8_t* data, size_t size);
+    void AbilityConnectHelperFuzzTest();
+    void AbilityConnectionStubFuzzTest();
+    void AbilityConnectCallbackFuzzTest();
 }
 #endif
