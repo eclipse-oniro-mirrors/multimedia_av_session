@@ -42,6 +42,7 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
     castControllerProxy_ = castControllerProxy;
     castControllerProxy_->RegisterControllerListener(shared_from_this());
     validCommandsChangecallback_ = validCommandsChangecallback;
+    preparecallback_ = preparecallback;
     {
         std::lock_guard<std::mutex> lock(callbackToSessionLock_);
         isSessionCallbackAvailable_ = true;
@@ -249,6 +250,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
                                         + "startPosition: " + startPosition + ","
                                         + "duration: " + duration;
     }
+    preparecallback_();
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "Prepare",
         "BUNDLE_NAME", BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),

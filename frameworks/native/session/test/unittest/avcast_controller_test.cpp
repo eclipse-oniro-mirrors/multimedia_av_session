@@ -127,12 +127,15 @@ void AVCastControllerTest::SetUp()
     ASSERT_NE(controller_, nullptr);
 
     std::shared_ptr<HwCastStreamPlayer> HwCastStreamPlayer_ = std::make_shared<HwCastStreamPlayer>(nullptr);
-    auto callback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
+    auto validCallback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
         supportedCastCmds = supportedCastCmd_;
         return;
     };
-    castController_->Init(HwCastStreamPlayer_, callback);
+    auto preparecallback = []() {
+        SLOGI("prepare callback");
+    };
+    castController_->Init(HwCastStreamPlayer_, validCallback, preparecallback);
 }
 
 void AVCastControllerTest::TearDown()

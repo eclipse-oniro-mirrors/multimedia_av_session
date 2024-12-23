@@ -30,7 +30,8 @@ public:
     ~AVCastControllerItem();
 
     void Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy,
-        const std::function<void(int32_t, std::vector<int32_t>&)>& validCommandsChangecallback);
+        const std::function<void(int32_t, std::vector<int32_t>&)>& validCommandsChangecallback,
+        const std::function<void()>& preparecallback);
 
     void OnCastPlaybackStateChange(const AVPlaybackState& state) override;
 
@@ -97,6 +98,7 @@ private:
     AVQueueItem currentAVQueueItem_;
     std::vector<int32_t> supportedCastCmds_;
     std::function<void(int32_t, std::vector<int32_t>&)> validCommandsChangecallback_;
+    std::function<void()> preparecallback_;
     int32_t removeCmdStep_ = 1000;
     int32_t currentState_ = AVPlaybackState::PLAYBACK_STATE_INITIAL;
     std::string sessionTag_;
