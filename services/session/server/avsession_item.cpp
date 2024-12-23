@@ -1304,7 +1304,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     {
         std::lock_guard controllersLockGuard(controllersLock_);
         for (const auto& controller : controllers_) {
-            if (controller.second != nullptr) {
+            if (!controllers_.empty() && controller.second != nullptr) {
                 controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
             }
         }
