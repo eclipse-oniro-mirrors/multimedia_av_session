@@ -678,12 +678,11 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool enable;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(enable), AVSESSION_ERROR, "write enable info failed");
-    checkEnableCast(enable);
-    int32_t ret = AVSESSION_SUCCESS;
+    int32_t ret = checkEnableCast(enable);
 
     bool is2in1 = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     SLOGI("GetDeviceEnableCast,Prop=%{public}d,enable=%{public}d", static_cast<int>(is2in1), static_cast<int>(enable));
-    if (enable && is2in1) {
+    if (enable && is2in1 && ret) {
         AVRouter::GetInstance().SetDiscoverable(false);
         ret = AVRouter::GetInstance().SetDiscoverable(enable);
     }

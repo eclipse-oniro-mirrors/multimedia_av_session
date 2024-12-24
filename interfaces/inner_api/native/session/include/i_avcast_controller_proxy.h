@@ -64,7 +64,8 @@ public:
     /**
      * @brief Unregister listener for AVCast state callback event.
      *
-     * @param { std::shared_ptr<IAVCastSessionStateListener> } iAVCastControllerProxyListener - Unregistered listener.
+     * @param { std::shared_ptr<IAVCastControllerProxyListener> }
+           iAVCastControllerProxyListener - Unregistered listener.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */

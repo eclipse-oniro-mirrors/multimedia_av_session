@@ -59,6 +59,11 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
             SplitExtraInfo(info);
         }
         NotifyMirrorToStreamCast();
+        int32_t sessionSize = static_cast<int32_t>(GetUsersManager().GetContainerFromAll().GetAllSessions().size());
+        if ((sessionSize == 0 || (sessionSize == 1 && CheckAncoAudio())) && !is2in1_ && state == "IDLE") {
+            SLOGI("call disable cast for cast idle");
+            checkEnableCast(false);
+        }
     }
 #endif
 }
