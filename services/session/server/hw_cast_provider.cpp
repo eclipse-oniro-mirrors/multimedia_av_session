@@ -34,10 +34,13 @@ HwCastProvider::~HwCastProvider()
     Release();
 }
 
-void HwCastProvider::Init()
+int32_t HwCastProvider::Init()
 {
-    SLOGI("Init the HwCastProvider");
-    CastSessionManager::GetInstance().RegisterListener(shared_from_this());
+    SLOGD("pre init the HwCastProvider");
+    std::lock_guard lockGuard(mutexLock_);
+    int32_t ret = CastSessionManager::GetInstance().RegisterListener(shared_from_this());
+    SLOGI("Init the HwCastProvider %{public}d", ret);
+    return ret;
 }
 
 int32_t HwCastProvider::StartDeviceLogging(int32_t fd, uint32_t maxSize)
@@ -119,6 +122,8 @@ int HwCastProvider::StartCastSession()
         AVSessionRadarInfo info("HwCastProvider::StartCastSession");
         info.errorCode_ = ret;
         AVSessionRadar::GetInstance().FailToStartCast(info);
+        SLOGI("StartCastSession failed and return the ret is %{public}d", ret);
+        return AVSESSION_ERROR;
     }
     int castId;
     {
@@ -127,14 +132,19 @@ int HwCastProvider::StartCastSession()
         SLOGI("StartCastSession check lock");
         std::vector<bool>::iterator iter = find(castFlag_.begin(), castFlag_.end(), false);
         if (iter == castFlag_.end()) {
-            SLOGE("StartCastSession faileded");
+            SLOGE("StartCastSession failed");
             return AVSESSION_ERROR;
         }
         *iter = true;
         castId = iter - castFlag_.begin();
         auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
         if (hwCastProviderSession) {
-            hwCastProviderSession->Init();
+            if (hwCastProviderSession->Init() != AVSESSION_ERROR) {
+                SLOGI("CastSession init successed");
+            } else {
+                hwCastProviderSession->Release();
+                return AVSESSION_ERROR;
+            }
         }
         hwCastProviderSessionMap_[castId] = hwCastProviderSession;
     }
@@ -142,32 +152,31 @@ int HwCastProvider::StartCastSession()
 
     return castId;
 }
-}
 
 void HwCastProvider::StopCastSession(int castId)
 {
     SLOGI("StopCastSession begin with %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
     SLOGI("StopCastSession check lock");
-
     auto hwCastStreamPlayer = avCastControllerMap_[castId];
     if (hwCastStreamPlayer) {
         hwCastStreamPlayer->Release();
     }
-
+    avCastControllerMap_.erase(castId);
+    int32_t mirrorCastId = static_cast<int32_t>((static_cast<uint64_t>(mirrorCastHandle) << 32) >> 32);
+    if (castId == mirrorCastId) {
+        return;
+    }
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("no need to release castSession for castId %{public}d is not exit in hwCastProviderSessionMap_", castId);
         return;
     }
     auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
-    if (hwCastProviderSession && castId != mirrorCastId) {
+    if (hwCastProviderSession) {
         hwCastProviderSession->Release();
     }
-    if (castId != mirrorCastId) {
-        hwCastProviderSessionMap_.erase(castId);
-        castFlag_[castId] = false;
-    }
-    avCastControllerMap_.erase(castId);
+    hwCastProviderSessionMap_.erase(castId);
+    castFlag_[castId] = false;
 }
 
 bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
@@ -273,14 +282,20 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
         SLOGE("the created hwCastStreamPlayer is nullptr");
         return nullptr;
     }
-    hwCastStreamPlayer->Init();
+    if (hwCastStreamPlayer->Init() == AVSESSION_ERROR) {
+        SLOGE("hwCastStreamPlayer init failed");
+        return nullptr;
+    }
     avCastControllerMap_[castId] = hwCastStreamPlayer;
     SLOGI("Create streamPlayer finished");
     return hwCastStreamPlayer;
 }
 
-bool HwCastProvider::SetStreamState(int32_t castId, DeviceInfo deviceInfo)
+bool HwCastProvider::SetStreamState(int64_t castHandle, DeviceInfo deviceInfo)
 {
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
+    mirrorCastHandle = castHandle;
+    SLOGI("mirrorCastHandle is %" PRId64 "", mirrorCastHandle);
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("SetStreamState failed for the castSession corresponding to castId is not exit");
         return false;
@@ -290,8 +305,6 @@ bool HwCastProvider::SetStreamState(int32_t castId, DeviceInfo deviceInfo)
         SLOGE("SetStreamState failed for the hwCastProviderSession is nullptr");
         return false;
     }
-    mirrorCastId = castId;
-    SLOGI("mirrorCastId is %{public}d", mirrorCastId);
     return hwCastProviderSession->SetStreamState(deviceInfo);
 }
 
@@ -310,9 +323,9 @@ bool HwCastProvider::GetRemoteNetWorkId(int32_t castId, std::string deviceId, st
     return hwCastProviderSession->GetRemoteNetWorkId(deviceId, networkId);
 }
 
-int HwCastProvider::GetMirrorCastId()
+int64_t HwCastProvider::GetMirrorCastHandle()
 {
-    return mirrorCastId;
+    return mirrorCastHandle;
 }
 
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,
@@ -378,11 +391,11 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
         deviceInfo.networkId_ = castRemoteDevice.networkId;
-        deviceInfo.manufacturer_ = castRemoteDevice.dlnaDeviceManufacturerStr;
-        deviceInfo.modelName_ = castRemoteDevice.dlnaDeviceModelNameStr;
-        deviceInfo.supportedProtocols_ = castPlusTypeToAVSessionType_ [castRemoteDevice.capability];
-        deviceInfo.authenticationStatus_ = static_cast<int>(castRemoteDevice.subDeviceType) == 0 ?
-            TRUSTED_DEVICE : UNTRUSTED_DEVICE;
+        deviceInfo.manufacturer_ = castRemoteDevice.manufacturerName;
+        deviceInfo.modelName_ = castRemoteDevice.modelName;
+        deviceInfo.supportedProtocols_ = GetProtocolType(castRemoteDevice.protocolCapabilities);
+        // should be castRemoteDevice.isTrusted ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
+        deviceInfo.authenticationStatus_ = castRemoteDevice.isLeagacy ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
         deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
         deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
         deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
@@ -398,7 +411,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
 
 void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
 {
-    SLOGI("eventId is %{public}d, param is %{public}ld", eventId, param);
+    SLOGI("eventId is %{public}d, param is %{public}" PRId64, eventId, param);
     std::lock_guard lockGuard(mutexLock_);
     for (auto listener : castStateListenerList_) {
         if (listener != nullptr) {
@@ -471,5 +484,12 @@ void HwCastProvider::OnServiceDied()
             listener->OnCastServerDied();
         }
     }
+}
+
+int32_t HwCastProvider::GetProtocolType(uint32_t castProtocolType)
+{
+    int32_t protocolType = (castProtocolType & ProtocolType::TYPE_CAST_PLUS_STREAM) |
+        (castProtocolType & ProtocolType::TYPE_DLNA);
+    return protocolType;
 }
 } // namespace OHOS::AVSession

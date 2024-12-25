@@ -35,9 +35,9 @@ ohos_fuzztest("AbilityConnectHelperFuzzTest") {
   ]
   sources = [ "ability_connect_helper_fuzzer.cpp" ]
   deps = [
-    "./../../../../../../frameworks/native/session:avsession_client",
-    "./../../../../../session:avsession_item",
-    "./../../../../../session:avsession_service",
+    "./../../../../../../frameworks/native/session:avsession_client_static",
+    "./../../../../../session:avsession_item_static",
+    "./../../../../../session:avsession_service_static",
   ]
   external_deps = [
     "ability_base:want",

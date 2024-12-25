@@ -37,9 +37,9 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
   ]
   sources = [ "migrateavsession_fuzzer.cpp" ]
   deps = [
-    "./../../../../../../frameworks/native/session:avsession_client",
-    "./../../../../../session:avsession_item",
-    "./../../../../../session:avsession_service",
+    "./../../../../../../frameworks/native/session:avsession_client_static",
+    "./../../../../../session:avsession_item_static",
+    "./../../../../../session:avsession_service_static",
   ]
   external_deps = [
     "ability_base:want",
@@ -50,6 +50,7 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -57,7 +58,7 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
     "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "window_manager:libdm",
+    "window_manager:libdm_lite",
     "window_manager:libwm",
   ]
 
@@ -65,7 +66,7 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../../session:avsession_cast_item",
+      "../../../../../session:avsession_cast_item_static",
     ]
   }
 

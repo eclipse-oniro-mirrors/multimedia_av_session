@@ -18,6 +18,7 @@
 #include <chrono>
 #include <thread>
 
+#include "audio_device_manager.h"
 #include "avsession_errors.h"
 #include "avsession_item.h"
 #include "avsession_log.h"
@@ -45,7 +46,11 @@ void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
 {
     SLOGI("OnDisConnectProxy: %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     isSoftbusConnecting_ = false;
-    StopObserveControllerChanged(deviceId);
+    if (servicePtr_ == nullptr) {
+        SLOGE("do NotifyMigrateStop without servicePtr, return");
+        return;
+    }
+    servicePtr_->NotifyMigrateStop(deviceId);
 }
 
 int32_t MigrateAVSessionServer::GetCharacteristic()
@@ -63,6 +68,9 @@ void MigrateAVSessionServer::ObserveControllerChanged(const std::string &deviceI
     }
 
     for (auto &item : descriptors) {
+        if (item.sessionType_ != AVSession::SESSION_TYPE_AUDIO) {
+            continue;
+        }
         if (item.isTopSession_) {
             std::lock_guard lockGuard(topSessionLock_);
             topSessionId_ = item.sessionId_;
@@ -110,8 +118,11 @@ void MigrateAVSessionServer::ClearCacheBySessionId(const std::string &sessionId)
     std::lock_guard lockGuard(migrateControllerLock_);
     auto it = playerIdToControllerMap_.find(sessionId);
     if (it != playerIdToControllerMap_.end()) {
+        if (std::count(sortControllerList_.begin(), sortControllerList_.end(), it->second) > 0) {
+            SLOGI("ClearCacheBySessionId in and remove controller in sortList");
+            sortControllerList_.remove(it->second);
+        }
         playerIdToControllerMap_.erase(it);
-        sortControllerList_.remove(it->second);
     }
 
     auto item = playerIdToControllerCallbackMap_.find(sessionId);
@@ -140,7 +151,7 @@ void MigrateAVSessionServer::UpdateCache(const std::string &sessionId, sptr<AVCo
 
 void MigrateAVSessionServer::StopObserveControllerChanged(const std::string &deviceId)
 {
-    SLOGI("StopObserveControllerChanged");
+    SLOGI("StopObserveControllerChanged with id %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     std::lock_guard lockGuard(migrateControllerLock_);
     for (auto it = sortControllerList_.begin(); it != sortControllerList_.end(); it++) {
         (*it)->Destroy();
@@ -232,6 +243,15 @@ int32_t MigrateAVSessionServer::GetControllerById(const std::string &sessionId, 
     SLOGW("controller not found");
     return AVSESSION_ERROR;
 }
+
+int32_t MigrateAVSessionServer::GetAllControllers(std::vector<sptr<AVControllerItem>> &controller)
+{
+    std::lock_guard lockGuard(migrateControllerLock_);
+    for (auto it = playerIdToControllerMap_.begin(); it != playerIdToControllerMap_.end(); it++) {
+        controller.push_back(it->second);
+    }
+    return AVSESSION_SUCCESS;
+}
 // LCOV_EXCL_STOP
 
 void MigrateAVSessionServer::Init(AVSessionService *ptr)
@@ -248,6 +268,10 @@ void MigrateAVSessionServer::OnSessionCreate(const AVSessionDescriptor &descript
         SLOGW("no valid avsession");
         return;
     }
+    if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO) {
+        SLOGI("not audio avsession");
+        return;
+    }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     CreateController(sessionId);
     IPCSkeleton::SetCallingIdentity(identity);
@@ -261,6 +285,10 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
         return;
     }
     SLOGI("OnSessionRelease : %{public}s", sessionId.c_str());
+    if (sessionId.compare(topSessionId_) == 0) {
+        std::string msg = AudioDeviceManager::GetInstance().GenerateEmptySession();
+        AudioDeviceManager::GetInstance().SendRemoteAudioMsg(deviceId_, msg);
+    }
     ClearCacheBySessionId(sessionId);
 }
 
@@ -269,9 +297,14 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
     SLOGI("OnTopSessionChange sessionId_: %{public}s", descriptor.sessionId_.c_str());
     {
         std::lock_guard lockGuard(topSessionLock_);
+        if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO) {
+            SLOGI("not audio avsession");
+            return;
+        }
         if (topSessionId_ == descriptor.sessionId_) {
             return;
         }
+        lastSessionId_ = topSessionId_;
         topSessionId_ = descriptor.sessionId_;
         auto it = playerIdToControllerMap_.find(descriptor.sessionId_);
         if (it == playerIdToControllerMap_.end()) {
@@ -302,14 +335,14 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
 {
     SLOGI("SendRemoteControllerList");
     SortControllers(sortControllerList_);
-    sptr<AVControllerItem> avcontroller{nullptr};
+    std::vector<sptr<AVControllerItem>> avcontroller;
     std::lock_guard lockGuard(topSessionLock_);
-    auto res = GetControllerById(topSessionId_, avcontroller);
+    auto res = GetAllControllers(avcontroller);
     if (res != AVSESSION_SUCCESS) {
         SLOGE("SendRemoteControllerList no top session");
         return;
     }
-    if (avcontroller == nullptr) {
+    if (avcontroller.empty()) {
         SLOGE("SendRemoteControllerList avcontroller is null");
         return;
     }
@@ -323,6 +356,13 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
         DelaySendMetaData();
         }, "DelaySendMetaData", DELAY_TIME);
+}
+
+void MigrateAVSessionServer::SendRemoteControllerInfo(const std::string &deviceId, std::string msg)
+{
+    if (!deviceId.empty()) {
+        SendByte(deviceId, msg);
+    }
 }
 
 void MigrateAVSessionServer::DelaySendMetaData()
@@ -339,15 +379,28 @@ void MigrateAVSessionServer::DelaySendMetaData()
     }
 }
 
-std::string MigrateAVSessionServer::ConvertControllersToStr(sptr<AVControllerItem> controller)
+std::string MigrateAVSessionServer::ConvertControllersToStr(
+    std::vector<sptr<AVControllerItem>> avcontrollers)
 {
     SLOGI("ConvertControllersToStr");
-    Json::Value jsonArray;
-    jsonArray.resize(1);
-    std::string playerId = controller->GetSessionId();
-    Json::Value jsonObject = ConvertControllerToJson(controller);
-    jsonObject[PLAYER_ID] = playerId;
-    jsonArray[0] = jsonObject;
+    Json::Value jsonArray(Json::arrayValue);
+    int32_t sessionNums = 0;
+    for (auto& controller : avcontrollers) {
+        if (sessionNums >= MAX_SESSION_NUMS) {
+            break;
+        }
+        if (controller == nullptr) {
+            continue;
+        }
+        std::string playerId = controller->GetSessionId();
+        if (playerId.compare(topSessionId_) == 0 ||
+            playerId.compare(lastSessionId_) == 0) {
+            Json::Value jsonObject = ConvertControllerToJson(controller);
+            jsonObject[PLAYER_ID] = playerId;
+            jsonArray[sessionNums] = jsonObject;
+            sessionNums++;
+        }
+    }
     Json::Value jsonData;
     jsonData[MEDIA_CONTROLLER_LIST] = jsonArray;
 
@@ -579,8 +632,11 @@ void MigrateAVSessionServer::PlaybackCommandDataProc(int mediaCommand, const std
     AVControlCommand cmd;
     switch (mediaCommand) {
         case SYNC_MEDIASESSION_CALLBACK_ON_PLAY:
-            cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
-            controller->SendControlCommand(cmd);
+            AVSessionEventHandler::GetInstance().AVSessionPostTask([=]() {
+                AVControlCommand cmd;
+                cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+                controller->SendControlCommand(cmd);
+                }, "DelaySendPlayCom", DELAY_PLAY_COM_TIME);
             break;
         case SYNC_MEDIASESSION_CALLBACK_ON_PAUSE:
             cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);

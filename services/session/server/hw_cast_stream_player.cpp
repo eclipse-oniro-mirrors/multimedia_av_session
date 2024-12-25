@@ -32,14 +32,15 @@ HwCastStreamPlayer::~HwCastStreamPlayer()
     SLOGI("destruct the HwCastStreamPlayer without release");
 }
 
-void HwCastStreamPlayer::Init()
+int32_t HwCastStreamPlayer::Init()
 {
     SLOGI("Init the HwCastStreamPlayer");
     std::lock_guard lockGuard(streamPlayerLock_);
     if (streamPlayer_) {
         SLOGI("register self in streamPlayer");
-        streamPlayer_->RegisterListener(shared_from_this());
+        return streamPlayer_->RegisterListener(shared_from_this());
     }
+    return AVSESSION_ERROR;
 }
 
 void HwCastStreamPlayer::Release()
@@ -199,7 +200,8 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     }
     mediaInfo.mediaType = mediaDescription->GetMediaType();
     mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
-    mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
+    mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition() < 0 ?
+        0 : mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
     mediaInfo.albumCoverUrl = mediaDescription->GetIconUri() == "" ?
@@ -228,7 +230,6 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         return AVSESSION_ERROR;
     }
     RefreshCurrentAVQueueItem(avQueueItem);
-    currentAlbumCoverUri_ = mediaInfo.albumCoverUrl;
     SLOGI("Set media info and start successfully");
     return AVSESSION_SUCCESS;
 }
@@ -254,7 +255,8 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     }
     mediaInfo.mediaType = mediaDescription->GetMediaType();
     mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
-    mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
+    mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition() < 0 ?
+        0 : mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
     if (mediaDescription->GetIconUri() == "") {
@@ -274,7 +276,6 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
         std::lock_guard lockGuard(curItemLock_);
         SLOGI("Set media info and prepare with curItemLock successed");
         currentAVQueueItem_ = avQueueItem;
-        currentAlbumCoverUri_ = mediaInfo.albumCoverUrl;
         return AVSESSION_SUCCESS;
     }
     SLOGE("Set media info and prepare failed");
@@ -499,7 +500,7 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetStartPosition(static_cast<uint32_t>(mediaInfo.startPosition));
     mediaDescription->SetDuration(static_cast<uint32_t>(mediaInfo.duration));
     mediaDescription->SetCreditsPosition(static_cast<int32_t>(mediaInfo.closingCreditsPosition));
-    mediaDescription->SetAlbumCoverUri(currentAlbumCoverUri_);
+    mediaDescription->SetAlbumCoverUri(mediaInfo.albumCoverUrl);
     mediaDescription->SetAlbumTitle(mediaInfo.albumTitle);
     mediaDescription->SetArtist(mediaInfo.mediaArtist);
     mediaDescription->SetLyricUri(mediaInfo.lrcUrl);

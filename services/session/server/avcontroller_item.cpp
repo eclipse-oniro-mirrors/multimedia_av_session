@@ -106,6 +106,20 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     return AVSESSION_SUCCESS;
 }
 
+void AVControllerItem::DoMetadataImgClean(AVMetaData& data)
+{
+    std::lock_guard metaMaskLockGuard(metaMaskMutex_);
+    SLOGD("still clear media img in DoMetadataImgClean");
+    std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
+    if (innerQueuePixelMap != nullptr) {
+        innerQueuePixelMap->Clear();
+    }
+    std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = data.GetMediaImage();
+    if (innerMediaPixelMap != nullptr) {
+        innerMediaPixelMap->Clear();
+    }
+}
+
 // LCOV_EXCL_START
 int32_t AVControllerItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {

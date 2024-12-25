@@ -403,8 +403,9 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     ret = AVSessionManager::GetInstance().GetHistoricalSessionDescriptors(10, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     int32_t reSize = descriptors.size();
-    SLOGI("GetHistoricalSessionDescriptors001 get after destroy size %{public}d", static_cast<int>(reSize));
-    EXPECT_EQ(reSize <= size, true);
+    SLOGI("GetHistoricalSessionDescriptors001 get size after destroy %{public}d", static_cast<int>(reSize));
+    // historical descriptors list may push default session when no session alive
+    EXPECT_EQ(reSize >= size, true);
     SLOGI("GetHistoricalSessionDescriptors001 end");
 }
 
@@ -467,7 +468,8 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
     std::shared_ptr<AVSessionController> controller;
     auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
     SLOGI("CreateController003 get ret %{public}d", static_cast<int>(ret));
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    // not support default any more for cold start logic refresh
+    EXPECT_EQ(ret == ERR_SESSION_NOT_EXIST, true);
     SLOGI("CreateController003 here end");
     sleep(1);
     system("killall -9 com.example.himusicdemo");

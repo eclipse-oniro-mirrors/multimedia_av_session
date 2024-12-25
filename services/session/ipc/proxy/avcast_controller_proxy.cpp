@@ -59,6 +59,7 @@ int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
+    parcel.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
@@ -206,7 +207,7 @@ int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
 
     sptr<Surface> surface = SurfaceUtils::GetInstance()->GetSurface(surfaceUniqueId);
     if (!surface) {
-        SLOGE("surface is null, surface uniqueId %{public}lu", surfaceUniqueId);
+        SLOGE("surface is null, surface uniqueId %{public}llu", (unsigned long long)surfaceUniqueId);
         return AVSESSION_ERROR;
     }
     sptr<IBufferProducer> producer = surface->GetProducer();
@@ -243,7 +244,7 @@ int32_t AVCastControllerProxy::ProcessMediaKeyResponse(const std::string& assetI
     MessageOption option;
     auto len = response.size();
     if (len > parcel.GetDataCapacity()) {
-        SLOGD("ProcessMediaKeyResponse SetDataCapacity totalSize: %lu", len);
+        SLOGD("ProcessMediaKeyResponse SetDataCapacity totalSize: %{public}d", static_cast<int>(len));
         parcel.SetMaxCapacity(len + len);
         parcel.SetDataCapacity(len);
     }

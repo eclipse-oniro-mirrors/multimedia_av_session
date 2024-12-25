@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../../../av_session_ohos_sources.gni")
 import("../../../castplus_cast_engine_part.gni")
 import("../../../config.gni")
 
@@ -25,8 +26,9 @@ config("avsession_client_config") {
   ]
 }
 
-ohos_shared_library("avsession_client") {
+av_session_ohos_library("avsession_client") {
   install_enable = true
+  deps = []
   ipc_sources = [
     "../../../services/session/ipc/proxy/avsession_controller_proxy.cpp",
     "../../../services/session/ipc/proxy/avsession_proxy.cpp",
@@ -41,7 +43,6 @@ ohos_shared_library("avsession_client") {
     "src/avsession_callback_client.cpp",
     "src/avsession_manager.cpp",
     "src/avsession_manager_impl.cpp",
-    "src/avsession_pixel_map_adapter.cpp",
     "src/session_listener_client.cpp",
   ]
 
@@ -66,7 +67,6 @@ ohos_shared_library("avsession_client") {
     "audio_framework:audio_client",
     "c_utils:utils",
     "hilog:libhilog",
-    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
@@ -76,7 +76,7 @@ ohos_shared_library("avsession_client") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    public_deps += [ "./../session:avsession_cast_client" ]
+    deps += [ "./../session:avsession_cast_client" ]
   }
 
   if (multimedia_av_session_enable_trace_control) {
@@ -86,6 +86,10 @@ ohos_shared_library("avsession_client") {
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
     external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (av_session_enable_start_stop_on_demand) {
+    cflags += [ "-DSTART_STOP_ON_DEMAND_ENABLE" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

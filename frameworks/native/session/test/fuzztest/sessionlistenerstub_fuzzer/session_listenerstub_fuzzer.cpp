@@ -20,84 +20,65 @@
 #include "session_listener_client.h"
 #include "session_listenerstub_fuzzer.h"
 
-using namespace std;
-using namespace OHOS;
-using namespace OHOS::AVSession;
-
+namespace OHOS::AVSession {
 static constexpr int32_t MAX_CODE_NUM = 6;
-static constexpr int32_t MAX_CODE_LEN = 512;
 static constexpr int32_t MIN_SIZE_NUM = 4;
+std::shared_ptr<SessionListenerClient> g_SessionListenerStubClient(nullptr);
 
-int32_t SessionListenerStubFuzzer::OnRemoteRequest(int32_t code, uint8_t* data, size_t size)
+void SessionListenerStubFuzzer::OnRemoteRequest(int32_t code, uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return 0;
-    }
-    if (code >= MAX_CODE_NUM) {
-        return 0;
-    }
-
     size -= sizeof(uint32_t);
-    std::shared_ptr<TestSessionListener> testSessionListener = std::make_shared<TestSessionListener>();
-    sptr<SessionListenerClient> sessionListenerStubClient = new SessionListenerClient(testSessionListener);
+    
     MessageParcel dataMessageParcel;
-    dataMessageParcel.WriteInterfaceToken(sessionListenerStubClient->GetDescriptor());
+    dataMessageParcel.WriteInterfaceToken(ISessionListener::GetDescriptor());
     dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
     dataMessageParcel.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = sessionListenerStubClient->OnRemoteRequest(code, dataMessageParcel, reply, option);
-    return ret;
+    g_SessionListenerStubClient->OnRemoteRequest(code, dataMessageParcel, reply, option);
 }
 
 void SessionListenerStubFuzzer::FuzzTests(const uint8_t* data, size_t size)
 {
-    std::shared_ptr<TestSessionListener> testSessionListener = std::make_shared<TestSessionListener>();
-    
-    sptr<SessionListenerClient> sessionListenerStubClient = new SessionListenerClient(testSessionListener);
     int32_t uid = *(reinterpret_cast<const int32_t*>(data));
-    sessionListenerStubClient->OnAudioSessionChecked(uid);
+    g_SessionListenerStubClient->OnAudioSessionChecked(uid);
 
     OutputDeviceInfo outputDeviceInfo;
-    OHOS::AVSession::DeviceInfo deviceInfo;
+    DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = 1;
     deviceInfo.deviceId_ = "deviceId";
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
-    sessionListenerStubClient->OnDeviceAvailable(outputDeviceInfo);
+    g_SessionListenerStubClient->OnDeviceAvailable(outputDeviceInfo);
 
     std::string deviceId(reinterpret_cast<const char *>(data), size);
-    sessionListenerStubClient->OnDeviceOffline(deviceId);
+    g_SessionListenerStubClient->OnDeviceOffline(deviceId);
 }
 
-int32_t OHOS::AVSession::SessionListenerStubRemoteRequestTest(int32_t code, uint8_t* data, size_t size)
-{
-    auto sessionListenerStub = std::make_unique<SessionListenerStubFuzzer>();
-    if (sessionListenerStub == nullptr) {
-        return false;
-    }
-    return sessionListenerStub->OnRemoteRequest(code, data, size);
-}
-
-void OHOS::AVSession::SessionListenerStubRemoteRequestTests(const uint8_t* data, size_t size)
+void SessionListenerStubTest(uint8_t* data, size_t size)
 {
     auto sessionListenerStubFuzzer = std::make_unique<SessionListenerStubFuzzer>();
     if (sessionListenerStubFuzzer == nullptr) {
-        SLOGI("sessionListenerStubFuzzer is null");
         return;
     }
     sessionListenerStubFuzzer->FuzzTests(data, size);
+    for (uint32_t i = 0; i <= MAX_CODE_NUM; i++) {
+        sessionListenerStubFuzzer->OnRemoteRequest(i, data, size);
+    }
 }
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    SLOGI("the maximum length of size should not be verified");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
-    for (uint32_t i = 0; i <= MAX_CODE_NUM; i++) {
-        OHOS::AVSession::SessionListenerStubRemoteRequestTest(i, data, size);
-    }
-    OHOS::AVSession::SessionListenerStubRemoteRequestTests(data, size);
+    
+    std::shared_ptr<TestSessionListener> testSessionListener = std::make_shared<TestSessionListener>();
+    g_SessionListenerStubClient = std::make_shared<SessionListenerClient>(testSessionListener);
+
+    SessionListenerStubTest(data, size);
     return 0;
+}
 }

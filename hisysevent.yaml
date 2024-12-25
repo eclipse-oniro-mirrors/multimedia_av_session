@@ -175,3 +175,21 @@ SESSION_CAST_CONTROL:
   PEER_NETWORK_ID: {type: STRING, desc: peer network id}
   PEER_SUPPORTED_PROTOCOL: {type: INT32, desc: supported protocol}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
+
+PLAYING_COMBIND_AVSESSION_STATIS:
+  __BASE: {type: STATISTIC, level: MINOR, desc: low quality check statistics}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  PLAY_DURATION: {type: INT32, desc: play duration}
+  STREAM_USAGE: {type: UINT32, desc: stream usage}
+  PLAY_BACK: {type: BOOL, desc: is audio play back}
+  AUDIO_ACTIVE: {type: BOOL, desc: is audio playing}
+  AVSESSION_META_QUALITY: {type: UINT32, desc: avsession avmetadata quality}
+  AVSESSION_COMMAND_QUALITY: {type: UINT32, desc: avsession command quality}
+  AVSESSION_PLAYBACK_STATE: {type: UINT32, desc: avsession playstate}
+
+AVSESSION_WRONG_STATE:
+  __BASE: {type: FAULT, level: MINOR, desc: error play state}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  RENDERER_STATE: {type: UINT32, desc: audiorenderer state}
+  AVSESSION_STATE: {type: UINT32, desc: avsession play state}
+  USER_BEHAVIOR: {type: UINT32, desc: user behavior}

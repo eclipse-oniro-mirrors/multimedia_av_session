@@ -42,9 +42,10 @@ public:
     /**
      * Get AVRouter instance.
      * @param { AVSessionService* } servicePtr - The pointer of avsession service.
+     * @return {int32_t} Returns whether init successfully.
      * @since 10
     */
-    virtual void Init(IAVSessionServiceListener *servicePtr) = 0;
+    virtual int32_t Init(IAVSessionServiceListener *servicePtr) = 0;
 
     /**
      * Release AVRouter instance.
@@ -163,12 +164,13 @@ public:
      * @brief Start cast process.
      *
      * @param { OutputDeviceInfo } outputDeviceInfo - Output device ready for use.
-     * @param { std::shared_ptr<IAVCastSessionStateListener > } callback - Callback function.
+     * @param { std::map<std::string, std::string>& } serviceNameMapState - serviceName state.
+     * @param { std::string } sessionId - avsession id.
      * @return { int64_t } ID returned after successful start of cast.
      * @since 10
     */
     virtual int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
-        std::map<std::string, std::string>& serviceNameMapState) = 0;
+        std::map<std::string, std::string>& serviceNameMapState, std::string sessionId) = 0;
     
     /**
      * @brief Notify CastEngine to add (connect) remote devices.
@@ -184,11 +186,10 @@ public:
      * @brief Stop cast process.
      *
      * @param { const int64_t } castHandle - The ID corresponding to the provider that needs to be stopped.
-     * @param { int32_t } removeTimes - The remove times.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t StopCast(const int64_t castHandle, int32_t removeTimes) = 0;
+    virtual int32_t StopCast(const int64_t castHandle) = 0;
 
     /**
      * @brief Stop cast session process.
@@ -203,23 +204,26 @@ public:
      * @brief Listen for AVRouter Callback event.
      *
      * @param { int64_t } castHandleconst - The ID corresponding to the provider.
-     * @param { std::shared_ptr<IAVCastSessionStateListener> } callback - Callback function.
+     * @param { std::shared_ptr<IAVRouterListener> } callback - Callback function.
+     * @param { std::string } sessionId - avsession id.
+     * @param deviceInfo The device info.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
     virtual int32_t RegisterCallback(int64_t castHandleconst,
-        std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
+        std::shared_ptr<IAVRouterListener> callback, std::string sessionId, DeviceInfo deviceInfo) = 0;
 
     /**
      * @brief Cancel listening for AVRouter Callback event.
      *
      * @param { int64_t } castHandleconst - The ID corresponding to the provider.
-     * @param { std::shared_ptr<IAVCastSessionStateListener> } callback - Callback function.
+     * @param { std::shared_ptr<IAVRouterListener> } callback - Callback function.
+     * @param { std::string } sessionId - avsession id.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
     virtual int32_t UnRegisterCallback(int64_t castHandleconst,
-        std::shared_ptr<IAVCastSessionStateListener> callback) = 0;
+        std::shared_ptr<IAVRouterListener> callback, std::string sessionId) = 0;
 
     /**
      * @brief set allconnect state.
@@ -241,6 +245,57 @@ public:
      * @since 11
     */
     virtual int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) = 0;
+
+    /**
+     * @brief get mirror castHandle.
+     *
+     * @return { int64_t } mirror castHandle.
+     * @since 13
+    */
+    virtual int64_t GetMirrorCastHandle() = 0;
+
+    /**
+     * @brief Listen to the change of cast state change.
+     *
+     * @param castState The cast state of device info.
+     * @param deviceInfo The device info.
+     * @param isNeedRemove is need remove cast device
+     * @since 13
+    */
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove);
+
+    /**
+     * @brief Listen to the change of cast event.
+     *
+     * @param errorCode The error code of cast event.
+     * @param errorMsg The error message of cast event.
+     * @since 13
+    */
+    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
+
+    /**
+     * @brief clear outputDevice.
+     *
+     * @param { std::string } sessionId - avsession id.
+     * @since 13
+    */
+    virtual void ClearOutputDevice(std::string sessionId) = 0;
+
+    /**
+     * @brief disconnect other session.
+     *
+     * @param { std::string } sessionId - avsession id.
+     * @param { DeviceInfo } deviceinfo - The deviceinfo to the castprovider.
+     * @since 13
+    */
+    virtual void DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo) = 0;
+
+struct CastHandleInfo {
+    OutputDeviceInfo outputDeviceInfo_;
+    std::string sessionId_ = "-1";
+    std::shared_ptr<IAVCastControllerProxy> avCastControllerProxy_ = nullptr;
+    std::shared_ptr<IAVRouterListener> avRouterListener_ = nullptr;
+};
 #endif
 };
 } // namespace OHOS::AVSession

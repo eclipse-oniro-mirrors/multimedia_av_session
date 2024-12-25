@@ -47,7 +47,7 @@ ohos_fuzztest("AvSessionServiceProxyFuzzTest") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    deps += [ "../../../../../../services/session:avsession_cast_item" ]
+    deps += [ "../../../../../../services/session:avsession_cast_item_static" ]
   }
 
   if (bluetooth_part_enable) {

@@ -27,6 +27,7 @@
 #include "avsession_service.h"
 #include "want_params.h"
 #include "avsession_servicestub_fuzzer.h"
+#include "securec.h"
 
 using namespace std;
 using namespace OHOS;
@@ -35,16 +36,51 @@ using namespace OHOS::AVSession;
 static constexpr int32_t MAX_CODE_TEST = 24;
 static constexpr int32_t MAX_CODE_LEN  = 512;
 static constexpr int32_t MIN_SIZE_NUM  = 4;
+static const uint8_t* RAW_DATA = nullptr;
+const size_t THRESHOLD = 10;
+static size_t g_dataSize = 0;
+static size_t g_pos;
 
-void AvSessionServiceFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
+/*
+* describe: get data from outside untrusted data(g_data) which size is according to sizeof(T)
+* tips: only support basic type
+*/
+template<class T>
+T GetData()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
+
+template<class T>
+uint32_t GetArrLength(T& arr)
+{
+    if (arr == nullptr) {
+        SLOGI("%{public}s: The array length is equal to 0", __func__);
+        return 0;
+    }
+    return sizeof(arr) / sizeof(arr[0]);
+}
+
+void AvSessionServiceFuzzer::FuzzOnRemoteRequest()
+{
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
         return;
     }
+    int32_t code = GetData<int32_t>();
     if (code >= MAX_CODE_TEST) {
         return;
     }
-    sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    sptr<AVSessionService> avSessionService = new AVSessionService(GetData<int32_t>());
     if (avSessionService == nullptr) {
         return;
     }
@@ -53,8 +89,7 @@ void AvSessionServiceFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* da
     MessageParcel reply;
     MessageOption option;
     dataMessageParcel.WriteInterfaceToken(avSessionService->GetDescriptor());
-    size -= sizeof(uint32_t);
-    dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
+    dataMessageParcel.WriteBuffer(RAW_DATA + sizeof(uint32_t), g_dataSize - sizeof(uint32_t));
     dataMessageParcel.RewindRead(0);
     int32_t ret = avSessionService->OnRemoteRequest(code, dataMessageParcel, reply, option);
     if (ret == 0) {
@@ -62,8 +97,11 @@ void AvSessionServiceFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* da
     }
 }
 
-void AvSessionServiceFuzzer::FuzzTests(const uint8_t* data, size_t size)
+void AvSessionServiceFuzzer::FuzzTests()
 {
+    if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
+        return;
+    }
     sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
 
     MessageParcel dataMessageParcel;
@@ -82,7 +120,7 @@ void AvSessionServiceFuzzer::FuzzTests(const uint8_t* data, size_t size)
     }
     avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
-    std::vector<uint8_t> imgBuffer = {1, 2, 3};
+    std::vector<uint8_t> imgBuffer = {GetData<uint8_t>(), GetData<uint8_t>(), GetData<uint8_t>()};
     mediaPixelMap->SetInnerImgBuffer(imgBuffer);
     aVQueueInfo.SetAVQueueImage(mediaPixelMap);
     avQueueInfos = {aVQueueInfo};
@@ -93,41 +131,72 @@ void AvSessionServiceFuzzer::FuzzTests(const uint8_t* data, size_t size)
     }
 
     OHOS::AVSession::DeviceInfo deviceInfo;
-    deviceInfo.castCategory_ = 1;
-    deviceInfo.deviceId_ = "deviceid";
-    deviceInfo.deviceName_ = "devicename";
-    deviceInfo.ipAddress_ = "ipaddress";
-    deviceInfo.providerId_ = 1;
-    deviceInfo.supportedProtocols_ = 1;
-    deviceInfo.authenticationStatus_ = 1;
+    deviceInfo.castCategory_ = GetData<int32_t>();
+    uint8_t randomNum = GetData<uint8_t>();
+    std::vector<std::string> mediaImageUris = {"deviceid", "deviceid2"};
+    deviceInfo.deviceId_ = std::string (mediaImageUris[randomNum % mediaImageUris.size()]);
+    uint8_t randomNum2 = GetData<uint8_t>();
+    std::vector<std::string> mediaImageUris2 = {"devicename", "devicename2"};
+    deviceInfo.deviceName_ = std::string (mediaImageUris2[randomNum2 % mediaImageUris.size()]);
+    uint8_t randomNum3 = GetData<uint8_t>();
+    std::vector<std::string> mediaImageUris3 = {"ipaddress", "ipaddress2"};
+    deviceInfo.ipAddress_ = std::string (mediaImageUris3[randomNum3 % mediaImageUris.size()]);
+    deviceInfo.providerId_ = GetData<int32_t>();
+    deviceInfo.supportedProtocols_ = GetData<int32_t>();
+    deviceInfo.authenticationStatus_ = GetData<int32_t>();
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     avSessionService->CheckBeforeHandleStartCast(dataMessageParcel, outputDeviceInfo);
 }
 
-void OHOS::AVSession::AvSessionServiceOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
+void OHOS::AVSession::AvSessionServiceOnRemoteRequest()
 {
     auto aVSessionService = std::make_unique<AvSessionServiceFuzzer>();
 
-    aVSessionService->FuzzOnRemoteRequest(code, data, size);
+    aVSessionService->FuzzOnRemoteRequest();
 }
 
-void OHOS::AVSession::AvSessionServiceTests(const uint8_t* data, size_t size)
+void OHOS::AVSession::AvSessionServiceTests()
 {
     auto aVSessionService = std::make_unique<AvSessionServiceFuzzer>();
 
-    aVSessionService->FuzzTests(data, size);
+    aVSessionService->FuzzTests();
+}
+
+typedef void (*TestFuncs[2])();
+
+TestFuncs g_testFuncs = {
+    AvSessionServiceOnRemoteRequest,
+    AvSessionServiceTests,
+};
+
+static bool FuzzTest(const uint8_t* rawData, size_t size)
+{
+    if ((rawData == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return false;
+    }
+
+    // initialize data
+    RAW_DATA = rawData;
+    g_dataSize = size;
+    g_pos = 0;
+
+    uint32_t code = GetData<uint32_t>();
+    uint32_t len = GetArrLength(g_testFuncs);
+    if (len > 0) {
+        g_testFuncs[code % len]();
+    } else {
+        SLOGI("%{public}s: The len length is equal to 0", __func__);
+    }
+
+    return true;
 }
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    if (size < THRESHOLD) {
         return 0;
     }
-    for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
-        OHOS::AVSession::AvSessionServiceOnRemoteRequest(i, data, size);
-    }
-    OHOS::AVSession::AvSessionServiceTests(data, size);
+    FuzzTest(data, size);
     return 0;
 }

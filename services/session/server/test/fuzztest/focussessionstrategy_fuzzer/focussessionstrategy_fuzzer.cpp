@@ -24,6 +24,7 @@
 #include "focussessionstrategy_fuzzer.h"
 #include "focus_session_strategy.h"
 #include "avsession_item.h"
+#include "securec.h"
 
 using namespace std;
 namespace OHOS::AVSession {
@@ -31,35 +32,55 @@ using OHOS::AudioStandard::AudioRendererChangeInfo;
 using OHOS::AudioStandard::RendererState;
 static const int32_t MAX_CODE_LEN = 512;
 static const int32_t MIN_SIZE_NUM = 4;
-static const int32_t MAX_CODE_TEST = 24;
-static constexpr int32_t SESSION_ID = 2;
-static constexpr int32_t CLIENT_UID = 1;
+
+static const uint8_t *RAW_DATA = nullptr;
+static size_t g_dataSize = 0;
+static size_t g_pos;
+
+template<class T>
+T GetData()
+{
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
 
 void FocusSessionStrategyFuzzer::FocusSessionStrategyFuzzTest(uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-    if (code >= MAX_CODE_TEST) {
-        return;
-    }
-
+    vector<RendererState> rendererStates;
+    rendererStates.push_back(RendererState::RENDERER_INVALID);
+    rendererStates.push_back(RendererState::RENDERER_NEW);
+    rendererStates.push_back(RendererState::RENDERER_PREPARED);
+    rendererStates.push_back(RendererState::RENDERER_RUNNING);
+    rendererStates.push_back(RendererState::RENDERER_STOPPED);
+    rendererStates.push_back(RendererState::RENDERER_RELEASED);
+    rendererStates.push_back(RendererState::RENDERER_PAUSED);
     FocusSessionStrategy focusSessionStrategy;
 
-    std::unique_ptr<AudioRendererChangeInfo> info = std::make_unique<AudioRendererChangeInfo>();
-    info->clientUID = *(reinterpret_cast<const int32_t*>(data));
-    info->sessionId = *(reinterpret_cast<const int32_t*>(data));
-    info->rendererState = RendererState::RENDERER_RELEASED;
+    std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = GetData<uint8_t>();
+    info->sessionId = GetData<uint8_t>();
+    info->rendererState = rendererStates[GetData<uint8_t>() % rendererStates.size()];
 
     AudioRendererChangeInfo info_ = {};
-    info_.clientUID = CLIENT_UID;
-    info_.sessionId = SESSION_ID;
-    info_.rendererState = RendererState::RENDERER_RUNNING;
+    info_.clientUID = GetData<uint8_t>();
+    info_.sessionId = GetData<uint8_t>();
+    info_.rendererState = rendererStates[GetData<uint8_t>() % rendererStates.size()];
     focusSessionStrategy.IsFocusSession(info_);
 
     FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
-    sessionInfo.uid = *(reinterpret_cast<const int32_t*>(data));
+    sessionInfo.uid = GetData<uint8_t>();
 
     AudioRendererChangeInfos infosExpected;
     infosExpected.push_back(std::move(info));
@@ -80,6 +101,9 @@ void FocusSessionStrategyRemoteRequest(uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
+    RAW_DATA = data;
+    g_dataSize = size;
+    g_pos = 0;
     /* Run your code on data */
     FocusSessionStrategyRemoteRequest(data, size);
     return 0;

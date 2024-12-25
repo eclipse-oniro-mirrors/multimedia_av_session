@@ -168,7 +168,7 @@ void AVCastControllerCallbackProxy::OnKeyRequest(const std::string &assetId, con
     MessageOption option = { MessageOption::TF_ASYNC };
     auto len = keyRequestData.size();
     if (len > parcel.GetDataCapacity()) {
-        SLOGI("OnKeyRequest SetDataCapacity totalSize: %lu", len);
+        SLOGI("OnKeyRequest SetDataCapacity totalSize: %{public}d", static_cast<int>(len));
         parcel.SetMaxCapacity(len + len);
         parcel.SetDataCapacity(len);
     }

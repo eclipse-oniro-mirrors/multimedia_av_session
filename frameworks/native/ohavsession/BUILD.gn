@@ -41,7 +41,10 @@ ohos_shared_library("ohavsession") {
     "src/OHAVSessionCallbackImpl.cpp",
   ]
 
-  deps = [ "../session:avsession_client" ]
+  deps = [
+    "../../common:avsession_common",
+    "../session:avsession_client",
+  ]
 
   external_deps = [
     "ability_base:want",

@@ -31,12 +31,20 @@ config("module_private_config") {
 }
 
 common_deps = [
-  "../../../../../services/session:avsession_item",
-  "../../../../../services/session:avsession_service",
+  "../../../../../services/session:avsession_item_static",
+  "../../../../../services/session:avsession_service_static",
   "../../../../../utils:avsession_utils",
   "../../../../common:avsession_common",
-  "../../../session:avsession_client",
+  "../../../session:avsession_client_static",
   "//third_party/googletest:gtest_main",
+]
+
+common_deps_without_third_party = [
+  "../../../../../services/session:avsession_item_static",
+  "../../../../../services/session:avsession_service_static",
+  "../../../../../utils:avsession_utils",
+  "../../../../common:avsession_common",
+  "../../../session:avsession_client_static",
 ]
 
 common_external_deps = [
@@ -293,6 +301,19 @@ ohos_unittest("AVDumperTest") {
     external_deps += [ "bluetooth:btframework" ]
   }
 
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../../services/session:avsession_cast_item_static",
+      "../../../../../services/session:avsession_router_static",
+    ]
+    external_deps += [
+      "cast_engine:cast_engine_client",
+      "window_manager:libdm_lite",
+    ]
+  }
+
   if (efficiency_manager_enable_in_avsession) {
     cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
   }
@@ -314,22 +335,19 @@ if (castplus_cast_engine_enable) {
 
     sources = [ "avcast_controller_test.cpp" ]
 
-    configs = [ ":module_private_config" ]
-
     cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
 
-    deps = common_deps
+    deps = common_deps_without_third_party
 
     deps += [
-      "../../../../../services/session:avsession_cast_item",
-      "../../../../../services/session:avsession_router",
+      "../../../../../services/session:avsession_cast_item_static",
+      "../../../../../services/session:avsession_router_static",
     ]
 
     visibility = [ ":*" ]
 
     include_dirs = [
       "../../include/",
-      "../../../../../../interfaces/inner_api/native/session/include/",
       "../../../../../services/session/adapter",
       "../../../../../services/session/ipc/server",
       "../../../../../services/session/server/",
@@ -351,6 +369,7 @@ if (castplus_cast_engine_enable) {
       "cast_engine:cast_engine_client",
       "data_object:distributeddataobject_impl",
       "device_manager:devicemanagersdk",
+      "googletest:gtest_main",
       "hilog:libhilog",
       "input:libmmi-client",
       "ipc:ipc_single",

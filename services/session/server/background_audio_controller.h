@@ -44,13 +44,14 @@ public:
 
     void HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos);
     void HandleAppMuteState(int32_t uid, int32_t pid, bool isBackground);
+    void RendererChangeReport(AudioStandard::AudioRendererChangeInfo& info);
 
 private:
     bool HasAVSession(int32_t uid);
     bool IsBackgroundMode(int32_t creatorUid, BackgroundMode backgroundMode) const;
 
     std::recursive_mutex lock_;
-    std::set<int32_t> sessionUIDs_;
+    std::map<int32_t, std::set<int32_t>> sessionUIDs_;
     AVSessionService *ptr_;
 };
 }

@@ -32,7 +32,7 @@ public:
     explicit HwCastStreamPlayer(std::shared_ptr<CastEngine::IStreamPlayer> streamPlayer)
         : streamPlayer_(streamPlayer) {}
     ~HwCastStreamPlayer() override;
-    void Init();
+    int32_t Init();
     void Release() override;
     void SendControlCommand(const AVCastControlCommand castControlCommand) override;
     AVQueueItem GetCurrentItem() override;
@@ -83,7 +83,6 @@ private:
     std::recursive_mutex streamPlayerListenerListLock_;
     std::vector<std::shared_ptr<IAVCastControllerProxyListener>> streamPlayerListenerList_;
     AVQueueItem currentAVQueueItem_;
-    std::string currentAlbumCoverUri_ = "";
     std::map<CastEngine::PlayerStates, int32_t> castPlusStateToString_ = {
         {CastEngine::PlayerStates::PLAYER_STATE_ERROR, AVPlaybackState::PLAYBACK_STATE_ERROR},
         {CastEngine::PlayerStates::PLAYER_IDLE, AVPlaybackState::PLAYBACK_STATE_INITIAL},

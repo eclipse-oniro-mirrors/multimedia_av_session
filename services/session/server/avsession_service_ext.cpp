@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "audio_device_manager.h"
 #include "avsession_service.h"
 
 #include "migrate_avsession_manager.h"
@@ -21,21 +22,21 @@ namespace OHOS::AVSession {
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
     std::string extraInfo, const std::string& state)
 {
-    SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s, extraInfo: %{public}s",
-        serviceName.c_str(), state.c_str(), extraInfo.c_str());
+    SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s", serviceName.c_str(), state.c_str());
 
-    if (state == "IDLE" && serviceName == "SuperLauncher") {
+    if (state == "IDLE" && serviceName == "SuperLauncher-Dual") {
         MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
         if (migrateAVSession_ != nullptr) {
             RemoveInnerSessionListener(migrateAVSession_.get());
         }
-    } else if (state == "CONNECTING" && serviceName == "SuperLauncher") {
+    } else if (state == "CONNECTING" && serviceName == "SuperLauncher-Dual") {
         if (migrateAVSession_ == nullptr) {
             migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
         }
         migrateAVSession_->Init(this);
         MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession_);
         AddInnerSessionListener(migrateAVSession_.get());
+        AudioDeviceManager::GetInstance().InitAudioStateCallback(migrateAVSession_, deviceId);
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") &&
@@ -59,8 +60,24 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
             SplitExtraInfo(info);
         }
         NotifyMirrorToStreamCast();
+        int32_t sessionSize = static_cast<int32_t>(GetUsersManager().GetContainerFromAll().GetAllSessions().size());
+        if ((sessionSize == 0 || (sessionSize == 1 && CheckAncoAudio())) && !is2in1_ && state == "IDLE") {
+            SLOGI("call disable cast for cast idle");
+            checkEnableCast(false);
+        }
     }
 #endif
+}
+
+void AVSessionService::NotifyMigrateStop(const std::string &deviceId)
+{
+    if (migrateAVSession_ == nullptr) {
+        SLOGI("NotifyMigrateStop without migrate, create new");
+        migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+    }
+    std::lock_guard lockGuard(sessionServiceLock_);
+    migrateAVSession_->StopObserveControllerChanged(deviceId);
+    AudioDeviceManager::GetInstance().UnInitAudioStateCallback();
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -99,7 +116,7 @@ void AVSessionService::RemoveInnerSessionListener(SessionListener *listener)
     for (auto it = innerSessionListeners_.begin(); it != innerSessionListeners_.end();) {
         if (*it == listener) {
             SLOGI("RemoveInnerSessionListener");
-            innerSessionListeners_.erase(it++);
+            it = innerSessionListeners_.erase(it);
         } else {
             it++;
         }
@@ -126,19 +143,31 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
 }
 // LCOV_EXCL_STOP
 
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
+{
+    SLOGI("Start get cast controller with pid %{public}d", static_cast<int>(GetCallingPid()));
+    auto session = GetContainer().GetSessionById(sessionId);
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "StopCast: session is not exist");
+    auto result = session->GetAVCastControllerInner();
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, AVSESSION_ERROR, "GetAVCastControllerInner failed");
+    object = result;
+    return AVSESSION_SUCCESS;
+}
 
 int32_t AVSessionService::checkEnableCast(bool enable)
 {
     SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
     if (enable == true && isInCast_ == false) {
         isInCast_ = true;
-        AVRouter::GetInstance().Init(this);
+        return AVRouter::GetInstance().Init(this);
     } else if (enable == false && isInCast_ == true) {
         CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
             (GetContainer().GetAllSessions().size() == 1 && !CheckAncoAudio())) && !is2in1_),
             AVSESSION_SUCCESS, "can not release cast with session alive");
+        CHECK_AND_RETURN_RET_LOG(!(castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
+            castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection),
+            AVSESSION_SUCCESS, "can not release cast with casting");
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
         SLOGD("AVRouter Init in nothing change");
@@ -187,7 +216,8 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
     
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
-        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront =
+            GetUsersManager().GetCurSessionListForFront(0);
         CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
         auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sinkSession);
         if (it == sessionListForFront->end()) {
@@ -319,6 +349,11 @@ void AVSessionService::NotifyMirrorToStreamCast()
             !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
             MirrorToStreamCast(session);
         }
+    }
+    if (castServiceNameMapState_["HuaweiCast"] == deviceStateDisconnection ||
+        castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateDisconnection) {
+        DeviceInfo localDeviceInfo;
+        AVRouter::GetInstance().SetServiceAllConnectState(-1, localDeviceInfo);
     }
 }
 

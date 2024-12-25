@@ -27,6 +27,8 @@
 #include "avsession_service_stub.h"
 #include "session_xcollie.h"
 #include "permission_checker.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 
 using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
@@ -197,7 +199,7 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
     auto maxAppSize = data.ReadInt32();
     int32_t ret = GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    
+
     int bufferLength = GetAVQueueInfosImgLength(avQueueInfos);
     CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(bufferLength), ERR_NONE, "write buffer length failed");
     if (bufferLength == 0) {
@@ -216,7 +218,7 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
         SLOGE("new buffer failed of length = %{public}d", bufferLength);
         return AVSESSION_ERROR;
     }
-    
+
     MarshallingAVQueueInfos(reply, avQueueInfos);
     AVQueueInfoImgToBuffer(avQueueInfos, buffer);
     if (!reply.WriteRawData(buffer, bufferLength)) {
@@ -249,6 +251,10 @@ int32_t AVSessionServiceStub::HandleStartAVPlayback(MessageParcel& data, Message
 
 int32_t AVSessionServiceStub::HandleIsAudioPlaybackAllowed(MessageParcel& data, MessageParcel& reply)
 {
+    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHECK_AND_RETURN_RET_LOG(mgr != nullptr, ERR_NONE, "SystemAbilityManager is null");
+    auto object = mgr->CheckSystemAbility(ACCESS_TOKEN_MANAGER_SERVICE_ID);
+    CHECK_AND_RETURN_RET_LOG(object != nullptr, ERR_NONE, "ACCESS_TOKEN_MANAGER_SERVICE is null");
     int32_t err = PermissionChecker::GetInstance().CheckPermission(
         PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
     if (err != ERR_NONE) {
@@ -492,7 +498,7 @@ int32_t AVSessionServiceStub::HandleCastAudio(MessageParcel& data, MessageParcel
 
     std::vector<AudioDeviceDescriptor> sinkAudioDescriptors;
     for (int i = 0; i < deviceNum; i++) {
-        auto audioDeviceDescriptor = AudioDeviceDescriptor::Unmarshalling(data);
+        auto audioDeviceDescriptor = AudioDeviceDescriptor::UnmarshallingPtr(data);
         if (audioDeviceDescriptor == nullptr) {
             SLOGI("read AudioDeviceDescriptor failed");
             CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
@@ -532,7 +538,7 @@ int32_t AVSessionServiceStub::HandleCastAudioForAll(MessageParcel& data, Message
 
     std::vector<AudioDeviceDescriptor> sinkAudioDescriptors {};
     for (int i = 0; i < deviceNum; i++) {
-        auto audioDeviceDescriptor = AudioDeviceDescriptor::Unmarshalling(data);
+        auto audioDeviceDescriptor = AudioDeviceDescriptor::UnmarshallingPtr(data);
         if (audioDeviceDescriptor == nullptr) {
             SLOGI("read AudioDeviceDescriptor failed");
             reply.WriteInt32(ERR_UNMARSHALLING);
@@ -696,23 +702,15 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool enable;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(enable), AVSESSION_ERROR, "write enable info failed");
-    int32_t ret = AVSESSION_SUCCESS;
+    int32_t ret = checkEnableCast(enable);
 
     bool is2in1 = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
-    SLOGI("GetDeviceEnableCast , Prop=%{public}d", static_cast<int>(is2in1));
-    if (enable) {
-        checkEnableCast(enable);
-        if (is2in1) {
-            AVRouter::GetInstance().SetDiscoverable(false);
-            ret = AVRouter::GetInstance().SetDiscoverable(enable);
-        } else {
-            SLOGI("setdiscoverable not 2in1");
-        }
-    } else {
-        SLOGI("setdiscoverable not set with enable");
+    SLOGI("GetDeviceEnableCast,Prop=%{public}d,enable=%{public}d", static_cast<int>(is2in1), static_cast<int>(enable));
+    if (enable && is2in1 && ret) {
+        AVRouter::GetInstance().SetDiscoverable(false);
+        ret = AVRouter::GetInstance().SetDiscoverable(enable);
     }
 
-    AVRouter::GetInstance().SetDiscoverable(enable);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleSetDiscoverable failed");
 #else
@@ -823,7 +821,7 @@ int32_t AVSessionServiceStub::HandleStopCast(MessageParcel& data, MessageParcel&
     sessionToken.sessionId = data.ReadString();
     sessionToken.pid = data.ReadInt32();
     sessionToken.uid = data.ReadInt32();
-    
+
     int32_t ret = StopCast(sessionToken);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StopCast failed");
     SLOGI("StopCast ret %{public}d", ret);

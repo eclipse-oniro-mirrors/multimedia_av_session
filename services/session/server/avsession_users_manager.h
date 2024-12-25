@@ -37,11 +37,11 @@ public:
 
     SessionStack& GetContainerFromAll();
 
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront(int32_t userId);
 
     int32_t GetCurrentUserId();
 
-    std::string GetDirForCurrentUser();
+    std::string GetDirForCurrentUser(int32_t userId = 0);
 
     int32_t AddSessionForCurrentUser(pid_t pid, const std::string& abilityName, sptr<AVSessionItem>& item);
 

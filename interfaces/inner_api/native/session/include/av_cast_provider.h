@@ -41,9 +41,10 @@ public:
     /**
      * @brief Initialize AVCastProvider object.
      *
+     * @return {int32_t} Returns whether init successfully.
      * @since 10
     */
-    virtual void Init() = 0;
+    virtual int32_t Init() = 0;
 
     /**
      * Transmission fd
@@ -188,15 +189,15 @@ public:
      * @return { bool } Whether the operation was successful.
      * @since 11
     */
-    virtual bool SetStreamState(int32_t castId, DeviceInfo deviceInfo) = 0;
+    virtual bool SetStreamState(int64_t castHandle, DeviceInfo deviceInfo) = 0;
 
     /**
-     * @brief get mirror castid.
+     * @brief get mirror castHandle.
      *
-     * @return { int } mirror castid.
+     * @return { int64_t } mirror castHandle.
      * @since 11
     */
-    virtual int GetMirrorCastId() = 0;
+    virtual int64_t GetMirrorCastHandle() = 0;
 
     /**
      * @brief get remote networkId.
@@ -208,6 +209,15 @@ public:
      * @since 11
     */
     virtual bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) = 0;
+
+    /**
+     * @brief get protocol type.
+     *
+     * @param { uint32_t } cast protocol type - The type of cast protocol.
+     * @return { int32_t } The type of avsession protocol.
+     * @since 13
+    */
+    virtual int32_t GetProtocolType(uint32_t castProtocolType) = 0;
 };
 } // namespace OHOS::AVSession
 #endif

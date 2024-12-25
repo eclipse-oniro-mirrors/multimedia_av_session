@@ -31,9 +31,9 @@ ohos_fuzztest("AvSessionControllerProxyFuzzTest") {
   ]
   sources = [ "avsession_controller_proxy_fuzzer.cpp" ]
   deps = [
-    "./../../../../../../services/session:avsession_item",
-    "./../../../../../../services/session:avsession_service",
-    "./../../../../session:avsession_client",
+    "./../../../../../../services/session:avsession_item_static",
+    "./../../../../../../services/session:avsession_service_static",
+    "./../../../../session:avsession_client_static",
   ]
   external_deps = [
     "ability_base:want",

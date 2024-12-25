@@ -22,8 +22,6 @@
 
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
-#include "avsession_display_interface.h"
-#include "avsession_dynamic_loader.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"
@@ -45,16 +43,16 @@ class RemoteSessionSink;
 class RemoteSessionSource;
 class AVSessionItem : public AVSessionStub {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-class CssListener : public IAVCastSessionStateListener {
+class CssListener : public IAVRouterListener {
 public:
     explicit CssListener(AVSessionItem *ptr)
     {
         ptr_ = ptr;
     }
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
     {
-        ptr_->OnCastStateChange(castState, deviceInfo);
+        ptr_->OnCastStateChange(castState, deviceInfo, isNeedRemove);
     }
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
@@ -73,17 +71,23 @@ public:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void DealCastState(int32_t castState);
 
-    void DealDisconnect(DeviceInfo deviceInfo);
+    void DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove);
 
     void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
+    void DealLocalState(int32_t castState);
+
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
     void OnRemoveCastEngine();
 
-    void ListenCollaborationRejectToStopCast();
+    void ListenCollaborationApplyResult();
+
+    void ListenCollaborationOnStop();
+
+    void CancleAVPlayerInSink();
 #endif
 
     std::string GetSessionId() override;
@@ -228,11 +232,15 @@ public:
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
 
+    int32_t SubStartCast(const OutputDeviceInfo& outputDeviceInfo);
+
     int32_t CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo);
 
     int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo);
 
     int32_t StopCast();
+
+    void dealValidCallback(int32_t cmd, std::vector<int32_t>& supportedCastCmds);
 
     sptr<IRemoteObject> GetAVCastControllerInner() override;
 
@@ -291,7 +299,6 @@ private:
     void HandleFrontSession();
     int32_t DoContinuousTaskRegister();
     int32_t DoContinuousTaskUnregister();
-    AVSessionDisplayIntf* GetAVSessionDisplayIntf();
     void ReportSetAVMetaDataInfo(const AVMetaData& meta);
     std::string GetAnonymousDeviceId(std::string deviceId);
     void ReportAVCastControllerInfo();
@@ -372,12 +379,10 @@ private:
 
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
+    int32_t castDisconnectStateInAVSession_ = 6;
     int32_t removeCmdStep_ = 1000;
 
     volatile bool isDestroyed_ = false;
-
-    AVSessionDisplayIntf *avsessionDisaplayIntf_;
-    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader_ {};
 
     static const int32_t DEFAULT_USER_ID = 100;
 
@@ -403,20 +408,13 @@ private:
     int64_t castHandle_ = 0;
     std::string castHandleDeviceId_ = "-100";
     const int32_t streamStateConnection = 6;
-    const int32_t virtualDeviceStateConnection = -6;
     const std::string deviceStateConnection = "CONNECT_SUCC";
-    const int32_t firstStep = 1;
-    const int32_t secondStep = 2;
-    int32_t removeTimes = 0;
     int32_t newCastState = -1;
-    int32_t counter_ = -1;
-    bool isUpdate = false;
     std::map<std::string, std::string> castServiceNameMapState_;
 
     bool collaborationRejectFlag_ = false;
     bool applyUserResultFlag_ = false;
     bool applyResultFlag_ = false;
-    bool networkIdIsEmpty_ = false;
     bool waitUserDecisionFlag_ = false;
     bool mirrorToStreamFlag_ = false;
     std::string collaborationNeedNetworkId_;
@@ -430,12 +428,16 @@ private:
     std::recursive_mutex castControllersLock_;
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
-    std::shared_ptr<IAVCastSessionStateListener> iAVCastSessionStateListener_;
+    std::shared_ptr<IAVRouterListener> iAVRouterListener_;
     sptr<HwCastDisplayListener> displayListener_;
-    std::recursive_mutex displayListenerLock_;
+    std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::function<void(std::string)> serviceCallbackForStream_;
+    bool isSwitchNewDevice_ = false;
+    OutputDeviceInfo newOutputDeviceInfo_;
+    std::shared_ptr<bool> isAlivePtr_;
+    bool isFirstCallback_ = true;
 #endif
 };
 } // namespace OHOS::AVSession

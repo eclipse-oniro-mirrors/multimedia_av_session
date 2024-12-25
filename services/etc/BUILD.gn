@@ -12,9 +12,18 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../../config.gni")
+
+etc_file = {
+  if (av_session_enable_start_stop_on_demand) {
+    sa_profile_json = "./on_demand/avsession_service.cfg"
+  } else {
+    sa_profile_json = "avsession_service.cfg"
+  }
+}
 
 ohos_prebuilt_etc("avsession_service.rc") {
-  source = "avsession_service.cfg"
+  source = etc_file.sa_profile_json
   relative_install_dir = "init"
   part_name = "av_session"
   subsystem_name = "multimedia"

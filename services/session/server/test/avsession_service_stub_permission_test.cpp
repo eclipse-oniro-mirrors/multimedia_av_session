@@ -679,6 +679,25 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest026, TestSize
 }
 
 /**
+ * @tc.name: HandleStartDeviceLogging001
+ * @tc.desc: Test HandleStartDeviceLogging
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubPermissionTest, HandleStartDeviceLogging001, TestSize.Level1)
+{
+    SLOGI("HandleStartDeviceLogging001 begin!");
+    AVSessionServiceStubDemo avsessionservicestub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int ret = avsessionservicestub.HandleStartDeviceLogging(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+
+    ret = avsessionservicestub.HandleStopDeviceLogging(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleStartDeviceLogging001 end!");
+}
+
+/**
  * @tc.name: MarshallingAVQueueInfos001
  * @tc.desc: Test MarshallingAVQueueInfos
  * @tc.type: FUNC
@@ -748,4 +767,20 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer002, T
     unsigned char *buffer = new unsigned char[255];
     avsessionservicestub.AVQueueInfoImgToBuffer(avQueueInfos, buffer);
     SLOGI("AVQueueInfoImgToBuffer002 end!");
+}
+
+/**
+ * @tc.name: HandleClose001
+ * @tc.desc: Test HandleClose
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubPermissionTest, HandleClose001, TestSize.Level1)
+{
+    SLOGI("HandleClose001 begin!");
+    AVSessionServiceStubDemo avsessionservicestub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int ret = avsessionservicestub.HandleClose(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleClose001 end!");
 }

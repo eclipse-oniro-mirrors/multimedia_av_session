@@ -21,9 +21,11 @@
 #include <cstdint>
 #include <map>
 #include <list>
+#include <algorithm>
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
+#include "napi_avcast_picker_helper.h"
 #include "avsession_log.h"
 #include "audio_system_manager.h"
 #include "avsession_info.h"
@@ -219,6 +221,9 @@ public:
 
     /* napi_value <-> CastDisplayInfo Array */
     static napi_status SetValue(napi_env env, const std::vector<CastDisplayInfo>& in, napi_value& out);
+    
+    /* napi_value <-> NapiAVCastPickerOptions */
+    static napi_status GetValue(napi_env env, napi_value in, NapiAVCastPickerOptions& out);
 
     /* napi_get_named_property wrapper */
     template <typename T>
@@ -267,6 +272,7 @@ public:
     static size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer);
     static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri);
     static bool DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri);
+    static bool JudgeNumString(const std::string& str);
 
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
 

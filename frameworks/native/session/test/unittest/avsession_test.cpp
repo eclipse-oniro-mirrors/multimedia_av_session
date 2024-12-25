@@ -1005,7 +1005,7 @@ HWTEST_F(AvsessionTest, GetExtras001, TestSize.Level1)
     EXPECT_EQ(avsession_->GetExtras(wantParamsOut), AVSESSION_SUCCESS);
     SLOGD("GetExtras001 End");
 }
- 
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 /**
 * @tc.name: GetAllCastDisplays001

@@ -14,6 +14,7 @@
  */
 
 #include "avsession_sysevent.h"
+#include "avsession_log.h"
 
 namespace OHOS::AVSession {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
@@ -24,12 +25,13 @@ AVSessionSysEvent& AVSessionSysEvent::GetInstance()
 }
 
 AVSessionSysEvent::AVSessionSysEvent() : optCounts_ {},
-    timer_(nullptr), timerId_(0), lifeCycleInfos_ {}, controllerCommandInfos_ {}
+    timer_(nullptr), timerId_(0), lifeCycleInfos_ {}, controllerCommandInfos_ {}, lowQualityInfos_ {}
 {
 }
 
 void AVSessionSysEvent::AddOperationCount(Operation operation)
 {
+    std::lock_guard lockGuard(lock_);
     auto it = optCounts_.find(operation);
     if (it == optCounts_.end()) {
         optCounts_.insert(std::make_pair(operation, 0));
@@ -45,6 +47,23 @@ void AVSessionSysEvent::Reset()
     lifeCycleInfos_.clear();
     controllerCommandInfos_.clear();
     audioStatuses_.clear();
+    lowQualityInfos_.clear();
+}
+
+void AVSessionSysEvent::ReportLowQuality()
+{
+    for (auto it = lowQualityInfos_.begin(); it != lowQualityInfos_.end(); it++) {
+        SLOGD("report low quality for %{public}s", it->second.bundleName_.c_str());
+        HiSysWriteStatistic("PLAYING_COMBIND_AVSESSION_STATIS",
+            "BUNDLE_NAME", it->second.bundleName_,
+            "PLAY_DURATION", it->second.playDuration_,
+            "STREAM_USAGE", it->second.streamUsage_,
+            "PLAY_BACK", it->second.isBack_,
+            "AUDIO_ACTIVE", it->second.isAudioActive_,
+            "AVSESSION_META_QUALITY", it->second.metaDataQuality_,
+            "AVSESSION_COMMAND_QUALITY", it->second.cmdQuality_,
+            "AVSESSION_PLAYBACK_STATE", it->second.playbackState_);
+    }
 }
 
 void AVSessionSysEvent::Regiter()
@@ -55,6 +74,7 @@ void AVSessionSysEvent::Regiter()
 
     timer_ = std::make_unique<OHOS::Utils::Timer>("EventStatisticTimer");
     auto timeCallback = [this]() {
+        std::lock_guard lockGuard(lock_);
         HiSysWriteStatistic("CONTROL_COMMAND_STATISTICS", "PLAY_COUNT", optCounts_[Operation::OPT_PLAY],
             "PAUSE_COUNT", optCounts_[Operation::OPT_PAUSE], "STOP_COUNT", optCounts_[Operation::OPT_STOP],
             "PLAY_NEXT_COUNT", optCounts_[Operation::OPT_PLAY_NEXT],
@@ -77,6 +97,8 @@ void AVSessionSysEvent::Regiter()
                 "CONTROLLER_PID", it.controllerPid_, "CMD", it.controllerCmd_,
                 "DETAILED_MSG", "receiver handle command");
         }
+
+        ReportLowQuality();
 
         HiSysWriteStatistic("SESSION_LIFECYCLE_STATISTICS",
             "CREATE_SESSION_COUNT", optCounts_[Operation::OPT_CREATE_SESSION],
@@ -120,6 +142,13 @@ void AVSessionSysEvent::AddLifeCycleInfo(const std::string& bundleName, bool app
     lifeCycleInfo.sessionType_ = sessionType;
     lifeCycleInfo.isCreateSession_ = isCreateSession;
     lifeCycleInfos_.push_back(lifeCycleInfo);
+}
+
+void AVSessionSysEvent::AddLowQualityInfo(AVSessionSysEvent::BackControlReportInfo &reportInfo)
+{
+    if (lowQualityInfos_.find(reportInfo.bundleName_) == lowQualityInfos_.end()) {
+        lowQualityInfos_.insert(std::make_pair(reportInfo.bundleName_, reportInfo));
+    }
 }
 
 // LCOV_EXCL_START

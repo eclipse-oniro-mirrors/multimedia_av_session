@@ -246,7 +246,7 @@ napi_status NapiCastControlCommand::SetSeekTime(napi_env env, AVCastControlComma
     napi_value property {};
     auto status = NapiUtils::SetValue(env, seekTime, property);
     if (status != napi_ok) {
-        SLOGE("create speed property failed");
+        SLOGE("create seekTime property failed");
         return status;
     }
 

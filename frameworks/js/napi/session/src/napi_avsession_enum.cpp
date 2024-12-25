@@ -158,6 +158,140 @@ static napi_value ExportAVCallState(napi_env env)
     return result;
 }
 
+static void AVSessionControlErrorCode(napi_env env, napi_value result)
+{
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_UNSPECIFIED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_UNSPECIFIED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_REMOTE_ERROR",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_REMOTE_ERROR);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_BEHIND_LIVE_WINDOW",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_BEHIND_LIVE_WINDOW);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_TIMEOUT",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_TIMEOUT);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_RUNTIME_CHECK_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_RUNTIME_CHECK_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_PLAYER_NOT_WORKING",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_PLAYER_NOT_WORKING);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_SEEK_MODE_UNSUPPORTED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_SEEK_MODE_UNSUPPORTED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_ILLEGAL_SEEK_TARGET",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_ILLEGAL_SEEK_TARGET);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_PLAY_MODE_UNSUPPORTED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_PLAY_MODE_UNSUPPORTED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_PLAY_SPEED_UNSUPPORTED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_PLAY_SPEED_UNSUPPORTED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DEVICE_MISSING",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DEVICE_MISSING);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_INVALID_PARAM",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_INVALID_PARAM);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_NO_MEMORY",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_NO_MEMORY);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_OPERATION_NOT_ALLOWED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_OPERATION_NOT_ALLOWED);
+}
+
+static void AVSessionIOErrorCode(napi_env env, napi_value result)
+{
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_UNSPECIFIED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_UNSPECIFIED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_NETWORK_CONNECTION_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_NETWORK_CONNECTION_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_NETWORK_CONNECTION_TIMEOUT",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_NETWORK_CONNECTION_TIMEOUT);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_INVALID_HTTP_CONTENT_TYPE",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_INVALID_HTTP_CONTENT_TYPE);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_BAD_HTTP_STATUS",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_BAD_HTTP_STATUS);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_FILE_NOT_FOUND",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_FILE_NOT_FOUND);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_NO_PERMISSION",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_NO_PERMISSION);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_CLEARTEXT_NOT_PERMITTED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_CLEARTEXT_NOT_PERMITTED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_READ_POSITION_OUT_OF_RANGE",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_READ_POSITION_OUT_OF_RANGE);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_NO_CONTENTS",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_NO_CONTENTS);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_READ_ERROR",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_READ_ERROR);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_CONTENT_BUSY",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_CONTENT_BUSY);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_CONTENT_EXPIRED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_CONTENT_EXPIRED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_USE_FORBIDDEN",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_USE_FORBIDDEN);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_NOT_VERIFIED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_NOT_VERIFIED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_EXHAUSTED_ALLOWED_USES",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_EXHAUSTED_ALLOWED_USES);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_IO_NETWORK_PACKET_SENDING_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_IO_NETWORK_PACKET_SENDING_FAILED);
+}
+
+static void AVSessionParsingErrorCode(napi_env env, napi_value result)
+{
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_PARSING_UNSPECIFIED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_PARSING_UNSPECIFIED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_PARSING_CONTAINER_MALFORMED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_PARSING_CONTAINER_MALFORMED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_PARSING_MANIFEST_MALFORMED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_PARSING_MANIFEST_MALFORMED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_PARSING_CONTAINER_UNSUPPORTED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_PARSING_CONTAINER_UNSUPPORTED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_PARSING_MANIFEST_UNSUPPORTED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_PARSING_MANIFEST_UNSUPPORTED);
+}
+
+static void AVSessionDecodingErrorCode(napi_env env, napi_value result)
+{
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DECODING_UNSPECIFIED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DECODING_UNSPECIFIED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DECODING_INIT_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DECODING_INIT_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DECODING_QUERY_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DECODING_QUERY_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DECODING_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DECODING_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DECODING_FORMAT_EXCEEDS_CAPABILITIES",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DECODING_FORMAT_EXCEEDS_CAPABILITIES);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DECODING_FORMAT_UNSUPPORTED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DECODING_FORMAT_UNSUPPORTED);
+}
+
+static void AVSessionAudioRenderErrorCode(napi_env env, napi_value result)
+{
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_AUDIO_RENDERER_UNSPECIFIED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_AUDIO_RENDERER_UNSPECIFIED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_AUDIO_RENDERER_INIT_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_AUDIO_RENDERER_INIT_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_AUDIO_RENDERER_WRITE_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_AUDIO_RENDERER_WRITE_FAILED);
+}
+
+static void AVSessionDRMErrorCode(napi_env env, napi_value result)
+{
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_UNSPECIFIED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_UNSPECIFIED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_SCHEME_UNSUPPORTED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_SCHEME_UNSUPPORTED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_PROVISIONING_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_PROVISIONING_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_CONTENT_ERROR",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_CONTENT_ERROR);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_LICENSE_ACQUISITION_FAILED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_LICENSE_ACQUISITION_FAILED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_DISALLOWED_OPERATION",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_DISALLOWED_OPERATION);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_SYSTEM_ERROR",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_SYSTEM_ERROR);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_DEVICE_REVOKED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_DEVICE_REVOKED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_LICENSE_EXPIRED",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_LICENSE_EXPIRED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_CAST_CONTROL_DRM_PROVIDE_KEY_RESPONSE_ERROR",
+        AVSessionErrorCode::ERR_CODE_CAST_CONTROL_DRM_PROVIDE_KEY_RESPONSE_ERROR);
+}
+
 static napi_value ExportAVSessionErrorCode(napi_env env)
 {
     napi_value result = nullptr;
@@ -176,7 +310,12 @@ static napi_value ExportAVSessionErrorCode(napi_env env)
         AVSessionErrorCode::ERR_CODE_DEVICE_CONNECTION_FAILED);
     (void)SetNamedProperty(env, result, "ERR_CODE_REMOTE_CONNECTION_NOT_EXIST",
         AVSessionErrorCode::ERR_CODE_REMOTE_CONNECTION_NOT_EXIST);
-
+    AVSessionControlErrorCode(env, result);
+    AVSessionIOErrorCode(env, result);
+    AVSessionParsingErrorCode(env, result);
+    AVSessionDecodingErrorCode(env, result);
+    AVSessionAudioRenderErrorCode(env, result);
+    AVSessionDRMErrorCode(env, result);
     napi_object_freeze(env, result);
     return result;
 }
@@ -232,7 +371,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
         DECLARE_NAPI_PROPERTY("DisplayTag", ExportDisplayTag(env)),
         DECLARE_NAPI_PROPERTY("CastDisplayState", ExportCastDisplayState(env)),
-        DECLARE_NAPI_PROPERTY("DeviceLogEventCode ", ExportDeviceLogEventCode(env)),
+        DECLARE_NAPI_PROPERTY("DeviceLogEventCode", ExportDeviceLogEventCode(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

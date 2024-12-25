@@ -15,6 +15,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 #include "ipc_skeleton.h"
 #include "avsession_errors.h"
@@ -23,23 +24,38 @@
 #include "audio_info.h"
 #include "collaborationmanager_fuzzer.h"
 #include "collaboration_manager.h"
+#include "securec.h"
 
 using namespace std;
 namespace OHOS::AVSession {
 static const int32_t MAX_CODE_LEN  = 512;
 static const int32_t MIN_SIZE_NUM = 4;
-static const int32_t MAX_CODE_TEST = 24;
+
+static const uint8_t *RAW_DATA = nullptr;
+static size_t g_dataSize = 0;
+static size_t g_pos;
+
+template<class T>
+T GetData()
+{
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
 
 void CollaborationManagerFuzzer::CollaborationManagerFuzzTest(uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-    if (code >= MAX_CODE_TEST) {
-        return;
-    }
-
     CollaborationManager::GetInstance().RegisterLifecycleCallback();
 
     auto registerLifecycleCallback1 = [](const char* serviceName, ServiceCollaborationManager_Callback* callback) {
@@ -55,13 +71,16 @@ void CollaborationManagerFuzzer::CollaborationManagerFuzzTest(uint8_t* data, siz
     CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
         = registerLifecycleCallback2;
     CollaborationManager::GetInstance().RegisterLifecycleCallback();
-
-    const char* peerNetworkId = reinterpret_cast<const char*>(data);
     CollaborationManager collaborationManager;
     collaborationManager.ReadCollaborationManagerSo();
-    ServiceCollaborationManagerBussinessStatus state = ServiceCollaborationManagerBussinessStatus::SCM_IDLE;
-    collaborationManager.PublishServiceState(peerNetworkId, state);
-    collaborationManager.ApplyAdvancedResource(peerNetworkId);
+    std::string peerNetworkId = std::to_string(GetData<uint8_t>());
+    vector<ServiceCollaborationManagerBussinessStatus> states;
+    states.push_back(ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+    states.push_back(ServiceCollaborationManagerBussinessStatus::SCM_PREPARE);
+    states.push_back(ServiceCollaborationManagerBussinessStatus::SCM_CONNECTING);
+    states.push_back(ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
+    collaborationManager.PublishServiceState(peerNetworkId.c_str(), states[GetData<uint8_t>() % states.size()]);
+    collaborationManager.ApplyAdvancedResource(peerNetworkId.c_str());
 }
 
 void CollaborationManagerRemoteRequest(uint8_t* data, size_t size)
@@ -77,6 +96,9 @@ void CollaborationManagerRemoteRequest(uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
+    RAW_DATA = data;
+    g_dataSize = size;
+    g_pos = 0;
     /* Run your code on data */
     CollaborationManagerRemoteRequest(data, size);
     return 0;

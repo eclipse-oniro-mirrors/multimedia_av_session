@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "securec.h"
 #include "avsession_item.h"
 #include "ipc_skeleton.h"
 #include "avcontroller_callback_proxy.h"
@@ -28,9 +29,88 @@
 using namespace std;
 namespace OHOS {
 namespace AVSession {
-static const int32_t MAX_CODE_TEST = 17;
-static const int32_t MAX_CODE_LEN = 512;
-static const int32_t MIN_SIZE_NUM = 4;
+static const int32_t MAX_CODE_TEST = 5;
+static const int32_t MAX_CODE_LEN  = 20;
+static const int32_t MIN_SIZE_NUM = 10;
+static const uint8_t *RAW_DATA = nullptr;
+static size_t g_totalSize = 0;
+static size_t g_sizePos;
+
+/*
+* describe: get data from FUZZ untrusted data(RAW_DATA) which size is according to sizeof(T)
+* tips: only support basic type
+*/
+template<class T>
+T GetData()
+{
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_sizePos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_sizePos += objectSize;
+    return object;
+}
+
+std::string GetString()
+{
+    size_t objectSize = (GetData<int8_t>() % MAX_CODE_LEN) + 1;
+    if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
+        return "OVER_SIZE";
+    }
+    char object[objectSize + 1];
+    errno_t ret = memcpy_s(object, sizeof(object), RAW_DATA + g_sizePos, objectSize);
+    if (ret != EOK) {
+        return "";
+    }
+    g_sizePos += objectSize;
+    std::string output(object);
+    return output;
+}
+
+template<class T>
+uint32_t GetArrLength(T& arr)
+{
+    if (arr == nullptr) {
+        SLOGE("%{public}s: The array length is equal to 0", __func__);
+        return 0;
+    }
+    return sizeof(arr) / sizeof(arr[0]);
+}
+
+typedef void (*TestFuncs[3])();
+
+TestFuncs g_allFuncs = {
+    AvControllerItemRemoteRequestTest,
+    AvControllerItemDataTest,
+    AvControllerItemTest
+};
+
+bool FuzzTest(const uint8_t* rawData, size_t size)
+{
+    if (rawData == nullptr) {
+        return false;
+    }
+
+    // initialize data
+    RAW_DATA = rawData;
+    g_totalSize = size;
+    g_sizePos = 0;
+
+    uint32_t code = GetData<uint32_t>();
+    uint32_t len = GetArrLength(g_allFuncs);
+    if (len > 0) {
+        g_allFuncs[code % len]();
+    } else {
+        SLOGE("%{public}s: The len length is equal to 0", __func__);
+    }
+
+    return true;
+}
 
 template<typename T>
 class ResourceAutoDestroy {
@@ -50,16 +130,13 @@ private:
     T ptr_;
 };
 
-void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t size)
+void AvControllerItemFuzzer::FuzzOnRemoteRequest()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
     sptr<AVControllerItem> avControllerItem;
-    std::string tag(reinterpret_cast<const char*>(data), size);
-    int32_t type = *reinterpret_cast<const int32_t*>(data);
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    std::string tag = GetString();
+    int32_t type = GetData<int8_t>();
+    std::string bundleName = GetString();
+    std::string abilityName = GetString();
     sptr<AVSessionService> service = new AVSessionService(AVSESSION_SERVICE_ID);
     CHECK_AND_RETURN_LOG(service != nullptr, "service is null");
     AppExecFwk::ElementName elementName;
@@ -69,7 +146,7 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
     CHECK_AND_RETURN_LOG(avSessionItem != nullptr, "avSessionItem is null");
     ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+    uint32_t code = GetData<uint32_t>();
     CHECK_AND_RETURN_LOG(code < MAX_CODE_TEST, "Unsupport code");
     sptr<IRemoteObject> avControllerItemObj;
     auto ret = service->CreateControllerInner(avSessionItem->GetSessionId(), avControllerItemObj);
@@ -84,30 +161,29 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest(const uint8_t* data, size_t siz
     if (!dataMessageParcel.WriteInterfaceToken(avControllerItem->GetDescriptor())) {
         return;
     }
-    size -= sizeof(uint32_t);
-    dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
+    dataMessageParcel.WriteBuffer(RAW_DATA + g_sizePos, sizeof(uint32_t));
+    g_sizePos += sizeof(uint32_t);
     dataMessageParcel.RewindRead(0);
     avControllerItem->OnRemoteRequest(code, dataMessageParcel, reply, option);
 }
 
-void AvControllerItemRemoteRequestTest(const uint8_t* data, size_t size)
+void AvControllerItemRemoteRequestTest()
 {
     auto avControllerItemFuzzer = std::make_unique<AvControllerItemFuzzer>();
     if (avControllerItemFuzzer == nullptr) {
         return;
     }
-    avControllerItemFuzzer->FuzzOnRemoteRequest(data, size);
+    avControllerItemFuzzer->FuzzOnRemoteRequest();
 }
 
-void AvControllerItemDataTest(const uint8_t* data, size_t size)
+void AvControllerItemDataTest()
 {
-    CHECK_AND_RETURN_LOG((data != nullptr) && (size <= MAX_CODE_LEN) && (size >= MIN_SIZE_NUM), "Invalid data");
     sptr<AVSessionService> service = new AVSessionService(AVSESSION_SERVICE_ID);
     CHECK_AND_RETURN_LOG(service != nullptr, "service is null");
-    std::string tag(reinterpret_cast<const char*>(data), size);
-    int32_t type = 0;
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    std::string tag = GetString();
+    int32_t type = GetData<uint8_t>();
+    std::string bundleName = GetString();
+    std::string abilityName = GetString();
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
@@ -130,7 +206,7 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     std::vector<int32_t> cmds;
     avControllerItem->GetValidCommands(cmds);
     AVPlaybackState::PlaybackStateMaskType playBackFilter;
-    uint32_t playCode = *(reinterpret_cast<const uint32_t*>(data));
+    uint32_t playCode = GetData<uint32_t>();
     if (playCode <= AVPlaybackState::PLAYBACK_KEY_MAX) {
         playBackFilter.set(playCode);
     } else {
@@ -138,28 +214,30 @@ void AvControllerItemDataTest(const uint8_t* data, size_t size)
     }
     avControllerItem->SetPlaybackFilter(playBackFilter);
 
-    AvControllerItemDataTestSecond(avControllerItem, data, size);
-    AvControllerItemDataTestThird(avControllerItem, data, size);
+    AvControllerItemDataTestSecond(avControllerItem);
+    AvControllerItemDataTestThird(avControllerItem);
+    avControllerItem->RegisterCallbackInner(avControllerItemObj);
 }
 
-void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem, const uint8_t* data, size_t size)
+void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem)
 {
-    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    std::string sessionId = GetString();
+    avControllerItem->GetUserId();
     avControllerItem->GetSessionId();
     avControllerItem->GetPid();
     avControllerItem->HasSession(sessionId);
     auto keyEvent = MMI::KeyEvent::Create();
-    keyEvent->SetKeyCode(*(reinterpret_cast<const int32_t*>(data)));
+    keyEvent->SetKeyCode(GetData<int32_t>());
     MMI::KeyEvent::KeyItem item;
-    item.SetKeyCode(*(reinterpret_cast<const int32_t*>(data)));
+    item.SetKeyCode(GetData<int32_t>());
     keyEvent->AddKeyItem(item);
-    bool isActive = *(reinterpret_cast<const bool*>(data));
+    bool isActive = GetData<int32_t>();
     avControllerItem->IsSessionActive(isActive);
     avControllerItem->SendAVKeyEvent(*(keyEvent.get()));
     AbilityRuntime::WantAgent::WantAgent ability;
     avControllerItem->GetLaunchAbility(ability);
 
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+    uint32_t code = GetData<int32_t>();
     AVMetaData::MetaMaskType metaFilter;
     metaFilter.set(code % AVMetaData::META_KEY_MAX);
     avControllerItem->SetMetaFilter(metaFilter);
@@ -173,7 +251,7 @@ void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem, con
     avControllerItem->GetAVCallMetaData(callMetaData);
 }
 
-void AvControllerItemDataTestThird(sptr<AVControllerItem> avControllerItem, const uint8_t* data, size_t size)
+void AvControllerItemDataTestThird(sptr<AVControllerItem> avControllerItem)
 {
     std::vector<AVQueueItem> items;
     avControllerItem->GetAVQueueItems(items);
@@ -181,16 +259,16 @@ void AvControllerItemDataTestThird(sptr<AVControllerItem> avControllerItem, cons
     std::string title;
     avControllerItem->GetAVQueueTitle(title);
 
-    int32_t itemId = *(reinterpret_cast<const int32_t*>(data));
+    int32_t itemId = GetData<int32_t>();
     avControllerItem->SkipToQueueItem(itemId);
 
     AAFwk::WantParams extras;
     avControllerItem->GetExtras(extras);
 
-    std::string commonCommand(reinterpret_cast<const char*>(data), size);
+    std::string commonCommand = GetString();
     avControllerItem->SendCommonCommand(commonCommand, extras);
 
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
+    uint32_t code = GetData<uint32_t>();
     AVCallMetaData::AVCallMetaMaskType avCallMetaMaskType;
     avCallMetaMaskType.set(code % AVCallMetaData::AVCALL_META_KEY_MAX);
     avControllerItem->SetAVCallMetaFilter(avCallMetaMaskType);
@@ -199,20 +277,17 @@ void AvControllerItemDataTestThird(sptr<AVControllerItem> avControllerItem, cons
     avControllerItem->SetAVCallStateFilter(avCallStateMaskType);
 }
 
-void AvControllerItemTest(const uint8_t* data, size_t size)
+void AvControllerItemTest()
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
-        return;
-    }
     sptr<AVSessionService> service = new AVSessionService(AVSESSION_SERVICE_ID);
     if (!service) {
         SLOGI("service is null");
         return;
     }
-    std::string tag(reinterpret_cast<const char*>(data), size);
+    std::string tag = GetString();
     int32_t type = 0;
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    std::string bundleName = GetString();
+    std::string abilityName = GetString();
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
@@ -225,7 +300,7 @@ void AvControllerItemTest(const uint8_t* data, size_t size)
     ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
     sptr<AVControllerItem> avControllerItem;
     sptr<IRemoteObject> avControllerItemObj;
-    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    std::string sessionId = GetString();
     auto ret = service->CreateControllerInner(avSessionItem->GetSessionId(), avControllerItemObj);
     if (ret != AVSESSION_SUCCESS) {
         SLOGI("CreateControllerInner fail");
@@ -237,40 +312,38 @@ void AvControllerItemTest(const uint8_t* data, size_t size)
         return;
     }
     ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
-    AvControllerItemTestImpl(data, size, avControllerItem);
-    AvControllerItemTestImplSecond(data, size, avControllerItem);
+    AvControllerItemTestImpl(avControllerItem);
+    AvControllerItemTestImplSecond(avControllerItem);
 }
 
-void AvControllerItemTestImpl(const uint8_t* data, size_t size,
-    sptr<AVControllerItem> avControllerItem)
+void AvControllerItemTestImpl(sptr<AVControllerItem> avControllerItem)
 {
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    std::string deviceId = GetString();
     AVPlaybackState controllerBackState;
-    controllerBackState.SetState(*(reinterpret_cast<const int32_t*>(data)));
+    controllerBackState.SetState(GetData<int32_t>());
     avControllerItem->HandlePlaybackStateChange(controllerBackState);
     AVMetaData controllerMetaData;
     controllerMetaData.Reset();
     controllerMetaData.SetAssetId(deviceId);
     avControllerItem->HandleMetaDataChange(controllerMetaData);
-    avControllerItem->HandleActiveStateChange(*(reinterpret_cast<const bool*>(data)));
+    avControllerItem->HandleActiveStateChange(GetData<bool>());
     std::vector<int32_t> controlCmds;
-    controlCmds.push_back(*(reinterpret_cast<const int32_t*>(data)));
+    controlCmds.push_back(GetData<int32_t>());
     avControllerItem->HandleValidCommandChange(controlCmds);
     int32_t connectionState = 0;
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
-    deviceInfo.castCategory_ = *(reinterpret_cast<const int32_t*>(data));
+    deviceInfo.castCategory_ = GetData<int32_t>();
     deviceInfo.deviceId_ = deviceId;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     avControllerItem->HandleOutputDeviceChange(connectionState, outputDeviceInfo);
     avControllerItem->HandleSessionDestroy();
 }
 
-void AvControllerItemTestImplSecond(const uint8_t* data, size_t size,
-    sptr<AVControllerItem> avControllerItem)
+void AvControllerItemTestImplSecond(sptr<AVControllerItem> avControllerItem)
 {
     AVCallMetaData callMetaData;
-    int32_t numberDate = *(reinterpret_cast<const int32_t*>(data));
+    int32_t numberDate = GetData<int32_t>();
     std::string dataToS(std::to_string(numberDate));
     std::string strCallMetaData(dataToS);
     callMetaData.SetName(strCallMetaData);
@@ -284,8 +357,8 @@ void AvControllerItemTestImplSecond(const uint8_t* data, size_t size,
     avCallState.SetAVCallMuted(mute);
     avControllerItem->HandleAVCallStateChange(avCallState);
 
-    const std::string event(reinterpret_cast<const char*>(data), size);
-    const std::string title(reinterpret_cast<const char*>(data), size);
+    const std::string event = GetString();
+    const std::string title = GetString();
     AAFwk::WantParams wantParams;
     vector<AVQueueItem> items;
     avControllerItem->HandleSetSessionEvent(event, wantParams);
@@ -293,20 +366,23 @@ void AvControllerItemTestImplSecond(const uint8_t* data, size_t size,
     avControllerItem->HandleQueueTitleChange(title);
     avControllerItem->HandleExtrasChange(wantParams);
 
-    std::string sessionId(reinterpret_cast<const char*>(data), size);
+    std::string sessionId = GetString();
     auto releaseCallback = [](AVControllerItem& item) {};
     auto avControllerCallback = std::make_shared<AVControllerObserver>(sessionId);
     avControllerItem->SetServiceCallbackForRelease(releaseCallback);
     avControllerItem->RegisterAVControllerCallback(avControllerCallback);
+    std::shared_ptr<AVControllerCallback> callback;
+    avControllerItem->RegisterAVControllerCallback(callback);
 }
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    if (size < MIN_SIZE_NUM) {
+        return 0;
+    }
     /* Run your code on data */
-    AvControllerItemRemoteRequestTest(data, size);
-    AvControllerItemDataTest(data, size);
-    AvControllerItemTest(data, size);
+    FuzzTest(data, size);
     return 0;
 }
 } // namespace AVSession

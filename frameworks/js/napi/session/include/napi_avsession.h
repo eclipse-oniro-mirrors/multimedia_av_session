@@ -17,8 +17,10 @@
 #define OHOS_NAPI_AVSESSION_H
 
 #include <chrono>
+#include <mutex>
 
 #include <map>
+#include "napi_async_work.h"
 #include "napi_base_context.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
@@ -29,6 +31,7 @@
 #include "avsession_errors.h"
 #include "napi_avsession_callback.h"
 #include "want_agent.h"
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
 class NapiAVSession {
@@ -69,6 +72,9 @@ private:
     static napi_value SetExtras(napi_env env, napi_callback_info info);
     static napi_value ReleaseCast(napi_env env, napi_callback_info info);
     static napi_value GetAllCastDisplays(napi_env env, napi_callback_info info);
+
+    static std::function<void()> PlaybackStateSyncExecutor(NapiAVSession* napiSession, AVPlaybackState playBackState);
+    static std::function<void()> PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context);
 
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -123,7 +129,15 @@ private:
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
     std::chrono::system_clock::time_point latestMetadataTs_;
+    std::string latestMetadataAssetId_;
+    std::string latestDownloadedAssetId_;
     AVMetaData metaData_;
+
+    static std::mutex syncMutex_;
+    static std::mutex syncAsyncMutex_;
+    static std::condition_variable syncCond_;
+    static std::condition_variable syncAsyncCond_;
+    static int32_t playBackStateRet_;
 
     static std::map<std::string, OnEventHandlerType> onEventHandlers_;
     static std::map<std::string, OffEventHandlerType> offEventHandlers_;

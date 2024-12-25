@@ -23,12 +23,16 @@
 #include "audio_info.h"
 #include "avsessionserviceext_fuzzer.h"
 #include "avsession_service.h"
+#include "securec.h"
 
 using namespace std;
 namespace OHOS::AVSession {
 static const int32_t MAX_CODE_LEN  = 512;
 static const int32_t MIN_SIZE_NUM = 4;
-static const int32_t MAX_CODE_TEST = 24;
+
+static const uint8_t *RAW_DATA = nullptr;
+static size_t g_dataSize = 0;
+static size_t g_pos = 0;
 
 class FuzzExtSessionListener : public SessionListener {
 public:
@@ -53,37 +57,38 @@ public:
     }
 };
 
+template<class T>
+T GetData()
+{
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
+
 void AVSessionServiceExtFuzzer::AVSessionServiceExtFuzzTest(uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    uint32_t code = *(reinterpret_cast<const uint32_t*>(data));
-    if (code >= MAX_CODE_TEST) {
-        return;
-    }
 
-    vector<string> states {
-        "UNKNOWN",
-        "IDLE",
-        "CONNECTING",
-    };
-    vector<string> serviceNames {
-        "Unknown",
-        "SuperLauncher",
-        "HuaweiCast",
-    };
+    vector<string> states { "UNKNOWN", "IDLE", "CONNECTING" };
+    vector<string> serviceNames { "Unknown", "SuperLauncher-Dual", "HuaweiCast" };
+    vector<string> deviceIds { " ", "1234567", "7654321" };
+    vector<string> extraInfos { "nothings", "reason", "others" };
+    std::string state = states[GetData<uint8_t>() % states.size()];
+    std::string serviceName = serviceNames[GetData<uint8_t>() % serviceNames.size()];
+    std::string deviceId = deviceIds[GetData<uint8_t>() % deviceIds.size()];
+    std::string extraInfo = extraInfos[GetData<uint8_t>() % extraInfos.size()];
 
-    int32_t systemAbilityId = 1;
-    static sptr<AVSessionService> service = new AVSessionService(systemAbilityId);
-    
-    std::string state = "CONNECTING";
-    std::string serviceName = "SuperLauncher";
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
-    std::string extraInfo(reinterpret_cast<const char*>(data), size);
-    service->SuperLauncher(deviceId, serviceName, extraInfo, state);
-    
-    state = "IDLE";
+    static sptr<AVSessionService> service = new AVSessionService(GetData<uint8_t>());
     service->SuperLauncher(deviceId, serviceName, extraInfo, state);
 }
 
@@ -100,6 +105,9 @@ void AVSessionServiceExtRemoteRequest(uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
+    RAW_DATA = data;
+    g_dataSize = size;
+    g_pos = 0;
     /* Run your code on data */
     AVSessionServiceExtRemoteRequest(data, size);
     return 0;

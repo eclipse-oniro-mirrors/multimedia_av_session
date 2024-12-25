@@ -41,9 +41,9 @@ ohos_fuzztest("AVSessionStubFuzzTest") {
   ]
   sources = [ "avsession_stub_fuzzer.cpp" ]
   deps = [
-    "./../../../../../../services/session:avsession_item",
-    "./../../../../../../services/session:avsession_service",
-    "./../../../../session:avsession_client",
+    "./../../../../../../services/session:avsession_item_static",
+    "./../../../../../../services/session:avsession_service_static",
+    "./../../../../session:avsession_client_static",
   ]
   external_deps = [
     "ability_base:want",
@@ -61,14 +61,14 @@ ohos_fuzztest("AVSessionStubFuzzTest") {
     "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "window_manager:libdm",
+    "window_manager:libdm_lite",
     "window_manager:libwm",
   ]
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
-      "../../../../../../services/session:avsession_cast_item",
+      "../../../../../../services/session:avsession_cast_item_static",
       "../../../../session:avsession_cast_client",
     ]
   }

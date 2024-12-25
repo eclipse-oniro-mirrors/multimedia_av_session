@@ -125,6 +125,8 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
     }
     if (napi_wrap(env, self, static_cast<void*>(napiController), finalize, nullptr, nullptr) != napi_ok) {
         SLOGE("wrap failed");
+        delete napiController;
+        napiController = nullptr;
         return nullptr;
     }
     return self;
@@ -803,7 +805,7 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetLaunchAbility failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetLaunchAbility failed : controller is nullptr";
@@ -1256,9 +1258,9 @@ napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_
             return;
         }
         AVSessionDescriptor descriptor;
-        AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(napiController->controller_->GetSessionId(),
-                                                                         descriptor);
-        SLOGI("set outputdevice info");
+        std::string sessionId = napiController->controller_->GetSessionId();
+        AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(sessionId, descriptor);
+        SLOGI("set outputdevice info for session:%{public}s***", sessionId.substr(0, ARGC_THREE).c_str());
         context->outputDeviceInfo_ = descriptor.outputDeviceInfo_;
     };
 

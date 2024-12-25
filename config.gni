@@ -12,6 +12,7 @@
 # limitations under the License.
 
 declare_args() {
+  av_session_enable_start_stop_on_demand = false
   multimedia_av_session_enable_background_audio_control = true
   multimedia_av_session_enable_trace_control = true
   multimedia_av_session_enable_sysevent_control = true

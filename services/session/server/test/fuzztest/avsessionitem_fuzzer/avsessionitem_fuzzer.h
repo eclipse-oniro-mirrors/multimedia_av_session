@@ -22,18 +22,18 @@
 #include "avsession_manager.h"
 
 namespace OHOS::AVSession {
-void AvSessionItemOnRemoteRequest(uint8_t* data, size_t size);
-void AvSessionItemTest(uint8_t* data, size_t size);
-void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size);
-void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size);
-void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size);
-void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem, const uint8_t* data, size_t size);
+void AvSessionItemOnRemoteRequest();
+void AvSessionItemTest();
+void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem);
+void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem);
+void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem);
+void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem);
 
 class AvSessionItemFuzzer {
 public:
     AvSessionItemFuzzer() = default;
     ~AvSessionItemFuzzer() = default;
-    void AvSessionItemFuzzerTest(uint8_t* data, size_t size);
+    void AvSessionItemFuzzerTest();
 };
 }
 #endif
