@@ -178,7 +178,7 @@ export struct AVCastPicker {
   /**
    * Max Font and graphic magnification. 
    */
-  private maxFonSizeScale: number = 2;
+  private maxFontSizeScale: number = 2;
 
   /**
    * Accessibility Strings
@@ -206,7 +206,7 @@ export struct AVCastPicker {
   }
 
   @Builder
-  buildIcon(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
+  iconBuilder(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
     if (this.deviceInfoType === 'true') {
       SymbolGlyph(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
         .fontSize('24vp')
@@ -220,6 +220,29 @@ export struct AVCastPicker {
         .fillColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
           $r('sys.color.comp_background_emphasize') : $r('sys.color.icon_primary'))
     }
+  }
+
+
+  @Builder
+  textBuilder(item: AVCastPickerDeviceInfo) {
+    Text(item.deviceName)
+      .fontSize($r('sys.float.ohos_id_text_size_body2'))
+      .fontColor(item.isConnected ?
+        (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+        $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
+        (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+        $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
+      .width(this.isPc ? 254 : 144)
+      .padding({
+        left: 8,
+        top: this.isPc ? 11 : 17,
+        right: 8,
+        bottom: this.isPc ? 11 : 17
+      })
+      .textOverflow({ overflow: TextOverflow.Ellipsis })
+      .maxLines(2)
+      .wordBreak(WordBreak.BREAK_ALL)
+      .maxFontScale(this.maxFontSizeScale)
   }
 
   @Builder
@@ -237,42 +260,23 @@ export struct AVCastPicker {
             alignItems: ItemAlign.Center
           }) {
             Row() {
-              this.buildIcon(item, false)
+              this.iconBuilder(item, false)
 
-              Text(item.deviceName)
-                .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                .fontColor(item.isConnected ?
-                  (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
-                  $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
-                  (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
-                  $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
-                .width(this.isPc ? 254 : 144)
-                .padding({
-                  left: 8,
-                  top: 13,
-                  right: 8,
-                  bottom: 13
-                })
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                .maxLines(2)
-                .wordBreak(WordBreak.BREAK_ALL)
-                .maxFontScale(this.maxFonSizeScale)
+              this.textBuilder(item)
             }
-            .justifyContent(FlexAlign.Start)
             .alignItems(VerticalAlign.Center)
 
             if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined) {
               Row() {
-                this.buildIcon(item, true)
+                this.iconBuilder(item, true)
               }
-              .justifyContent(FlexAlign.Start)
               .alignItems(VerticalAlign.Center)
               .accessibilityLevel('yes')
               .accessibilityText(this.accessibilityConnectedStr)
             }
           }
-          .constraintSize({ minHeight: 48 })
-          .padding({ left: 16, right: 16 })
+          .constraintSize({ minHeight: this.isPc ? 40 : 48 })
+          .padding({ left: 12, right: 12 })
           .onTouch((event) => {
             if (event.type === TouchType.Down) {
               this.touchMenuItemIndex = index;
@@ -280,16 +284,20 @@ export struct AVCastPicker {
               this.touchMenuItemIndex = -1;
             }
           })
-          .backgroundColor(this.touchMenuItemIndex === index
-            ? $r('sys.color.interactive_click') : '#00FFFFFF')
-          .borderRadius(this.touchMenuItemIndex === index
-            ? $r('sys.float.corner_radius_level8') : 0)
+          .backgroundColor(this.touchMenuItemIndex === index ?
+            $r('sys.color.interactive_click') : '#00FFFFFF')
+          .borderRadius(this.touchMenuItemIndex === index ?
+            (this.isPc ? $r('sys.float.corner_radius_level2') : $r('sys.float.corner_radius_level8')): 0)
 
-          if (index != this.deviceList.length - 1) {
+          if (!this.isPc && (index != this.deviceList.length - 1)) {
             Divider()
               .height(1)
               .color($r('sys.color.comp_divider'))
-              .padding({ right: (this.isRTL ? 48 : 16), left: (this.isRTL ? 16 : 48) })
+              .padding({ right: (this.isRTL ? 44 : 12), left: (this.isRTL ? 12 : 44) })
+          } else if (this.isPc && (index != this.deviceList.length - 1)) {
+            Row()
+              .width('100%')
+              .height(2)
           }
         }
         .width('100%')
@@ -300,7 +308,8 @@ export struct AVCastPicker {
         })
       })
     }
-    .width(this.isPc ? 334 : 224)
+    .width(this.isPc ? 326 : 216)
+    .borderRadius(this.isPc ? 8 : 20)
   }
 
   @Builder
@@ -427,11 +436,11 @@ export struct AVCastPicker {
           (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
           this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);        
         if (isExtMenuScene || isPanelForMedia) {
+          this.isMenuShow = false;
+          this.touchMenuItemIndex = -1;
           if (this.extensionProxy != null) {
             this.extensionProxy.send({'clickEvent': true});
           }
-          this.isMenuShow = false;
-          this.touchMenuItemIndex = -1;
         } else {
           this.isMenuShow = !this.isMenuShow;
           if (this.isMenuShow) {
