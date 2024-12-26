@@ -38,7 +38,6 @@ namespace OHOS::AVSession {
         AVSessionServiceStubFuzzer() = default;
         ~AVSessionServiceStubFuzzer() = default;
         int32_t OnRemoteRequest();
-        int32_t OnRemoteRequestForSessionStub();
         void AvSessionServiceTest001();
     };
 }

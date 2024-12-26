@@ -734,29 +734,6 @@ void AvSessionServiceTest()
     AvSessionServiceTest001();
 }
 
-int32_t AVSessionServiceStubFuzzer::OnRemoteRequestForSessionStub()
-{
-    uint32_t code = GetData<uint32_t>();
-    code %= static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX);
-
-    sptr<IRemoteObject> remoteObject = nullptr;
-    std::shared_ptr<AVSessionProxyTestOnServiceFuzzer> avSessionProxy =
-        std::make_shared<AVSessionProxyTestOnServiceFuzzer>(remoteObject);
-    MessageParcel dataMessageParcelForSession;
-    if (!dataMessageParcelForSession.WriteInterfaceToken(avSessionProxy->GetDescriptor())) {
-        SLOGE("testAVSession item write interface token error");
-        return AVSESSION_ERROR;
-    }
-    dataMessageParcelForSession.WriteBuffer(RAW_DATA + g_sizePos, sizeof(uint32_t));
-    g_sizePos += sizeof(uint32_t);
-    dataMessageParcelForSession.RewindRead(0);
-    MessageParcel replyForSession;
-    MessageOption optionForSession;
-    int32_t ret = avsessionService_->OnRemoteRequest(code, dataMessageParcelForSession,
-        replyForSession, optionForSession);
-    return ret;
-}
-
 int32_t AVSessionServiceStubFuzzer::OnRemoteRequest()
 {
     uint32_t code = GetData<uint32_t>();
@@ -774,7 +751,7 @@ int32_t AVSessionServiceStubFuzzer::OnRemoteRequest()
     if (!dataMessageParcel.WriteInterfaceToken(avsessionService_->GetDescriptor())) {
         return AVSESSION_ERROR;
     }
-    dataMessageParcel.WriteBuffer(RAW_DATA + g_sizePos, sizeof(uint32_t));
+    dataMessageParcel.WriteBuffer(RAW_DATA, g_sizePos);
     g_sizePos += sizeof(uint32_t);
     dataMessageParcel.RewindRead(0);
     MessageParcel reply;
@@ -790,7 +767,6 @@ void AVSessionServiceStubRemoteRequestTest()
         return;
     }
     serviceStub->OnRemoteRequest();
-    serviceStub->OnRemoteRequestForSessionStub();
     if (avsessionService_ == nullptr) {
         SLOGI("check service null, try create");
         avsessionService_ = new AVSessionService(AVSESSION_SERVICE_ID);
