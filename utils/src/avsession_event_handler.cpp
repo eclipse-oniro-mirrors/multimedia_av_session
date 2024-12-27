@@ -53,4 +53,11 @@ void AVSessionEventHandler::AVSessionRemoveTask(const std::string &name)
         handler_->RemoveTask(name);
     }
 }
+
+void AVSessionEventHandler::AVSessionRemoveHandler()
+{
+    SLOGI("AVSessionEventHandler RemoveEventHandler");
+    std::lock_guard<std::mutex> lockGuard(handlerLock_);
+    handler_ = nullptr;
+}
 }
