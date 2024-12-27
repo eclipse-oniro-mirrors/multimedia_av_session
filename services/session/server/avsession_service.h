@@ -171,6 +171,8 @@ public:
 
     void OnStart() override;
 
+    void OnStartProcess();
+
     void OnStop() override;
 
     int32_t OnIdle(const SystemAbilityOnDemandReason& idleReason) override;
