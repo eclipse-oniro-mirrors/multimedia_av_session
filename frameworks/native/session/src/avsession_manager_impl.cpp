@@ -19,6 +19,7 @@
 #include "system_ability_definition.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_event_handler.h"
 #include "session_listener_client.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
@@ -362,6 +363,8 @@ int32_t AVSessionManagerImpl::Close(void)
     }
     SLOGI("manager impl close with listener clear");
     listenerMapByUserId_.clear();
+
+    AVSessionEventHandler::GetInstance().AVSessionRemoveHandler();
     return ret;
 }
 
