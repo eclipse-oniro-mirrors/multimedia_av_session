@@ -27,10 +27,7 @@ namespace OHOS::AVSession {
 PluginLib::PluginLib(const std::string &libName)
     : libName_(GetRealPath(libName)), handle_(nullptr)
 {
-    if (!CheckPathExist(libName_)) {
-        SLOGE("%{public}s path invalid", libName_.c_str());
-        return;
-    }
+    CHECK_AND_RETURN_LOG(CheckPathExist(libName_), "%{public}s path invalid", libName_.c_str());
     handle_ = dlopen(libName_.c_str(), RTLD_NOW);
     if (handle_ == nullptr) {
         LogDlfcnErr("open lib failed");
@@ -54,10 +51,7 @@ PluginLib::~PluginLib()
 
 void *PluginLib::LoadSymbol(const std::string &symbolName)
 {
-    if (handle_ == nullptr) {
-        SLOGE("%{public}s lib is null", libName_.c_str());
-    return nullptr;
-    }
+    CHECK_AND_RETURN_RET_LOG(handle_ != nullptr, nullptr, "%{public}s lib is null", libName_.c_str());
     void *sym = dlsym(handle_, symbolName.c_str());
     if (sym == nullptr) {
         LogDlfcnErr("load symbol [" + symbolName + "] failed");

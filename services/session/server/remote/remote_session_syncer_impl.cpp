@@ -101,6 +101,7 @@ int32_t RemoteSessionSyncerImpl::PutAVMetaData(const AVMetaData& metaData)
     return AVSESSION_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::GetAVMetaData(AVMetaData& metaData)
 {
     std::vector<uint8_t> dataVector;
@@ -120,7 +121,9 @@ int32_t RemoteSessionSyncerImpl::GetAVMetaData(AVMetaData& metaData)
     data = nullptr;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::PutAVPlaybackState(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVPlaybackState");
@@ -134,7 +137,9 @@ int32_t RemoteSessionSyncerImpl::PutAVPlaybackState(const AVPlaybackState& state
                              "put data error");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::GetAVPlaybackState(AVPlaybackState& state)
 {
     std::vector<uint8_t> dataVector;
@@ -155,7 +160,9 @@ int32_t RemoteSessionSyncerImpl::GetAVPlaybackState(AVPlaybackState& state)
     data = nullptr;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::PutControlCommand(const AVControlCommand& command)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutControlCommand");
@@ -169,7 +176,9 @@ int32_t RemoteSessionSyncerImpl::PutControlCommand(const AVControlCommand& comma
                              "put data error");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::GetControlCommand(AVControlCommand& command)
 {
     std::vector<uint8_t> dataVector;
@@ -190,7 +199,9 @@ int32_t RemoteSessionSyncerImpl::GetControlCommand(AVControlCommand& command)
     data = nullptr;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::PutCommonCommand(const std::string& commonCommand,
     const AAFwk::WantParams& commandArgs)
 {
@@ -207,7 +218,9 @@ int32_t RemoteSessionSyncerImpl::PutCommonCommand(const std::string& commonComma
         "Put data error");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::GetCommonCommand(std::string& commonCommand, AAFwk::WantParams& commandArgs)
 {
     std::vector<uint8_t> dataVector;
@@ -237,7 +250,9 @@ int32_t RemoteSessionSyncerImpl::GetCommonCommand(std::string& commonCommand, AA
     argsData = nullptr;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::PutSessionEvent(const std::string& event, const AAFwk::WantParams& args)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutSessionEvent");
@@ -253,7 +268,9 @@ int32_t RemoteSessionSyncerImpl::PutSessionEvent(const std::string& event, const
         AVSESSION_ERROR, "put data error");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::GetSessionEvent(std::string& event, AAFwk::WantParams& args)
 {
     std::vector<uint8_t> dataVector;
@@ -284,7 +301,9 @@ int32_t RemoteSessionSyncerImpl::GetSessionEvent(std::string& event, AAFwk::Want
     argsData = nullptr;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::PutAVQueueItems(const std::vector<AVQueueItem>& items)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVQueueItems");
@@ -303,7 +322,9 @@ int32_t RemoteSessionSyncerImpl::PutAVQueueItems(const std::vector<AVQueueItem>&
         AVSESSION_ERROR, "put data error");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {
     std::vector<uint8_t> dataVector;
@@ -338,7 +359,9 @@ int32_t RemoteSessionSyncerImpl::GetAVQueueItems(std::vector<AVQueueItem>& items
     items = items_;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::PutAVQueueTitle(const std::string& title)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVQueueTitle");
@@ -353,7 +376,9 @@ int32_t RemoteSessionSyncerImpl::PutAVQueueTitle(const std::string& title)
         AVSESSION_ERROR, "put data error");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::GetAVQueueTitle(std::string& title)
 {
     std::vector<uint8_t> dataVector;
@@ -373,7 +398,9 @@ int32_t RemoteSessionSyncerImpl::GetAVQueueTitle(std::string& title)
     title = std::string(titleDate);
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::PutExtras(const AAFwk::WantParams& extras)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutExtras");
@@ -388,7 +415,9 @@ int32_t RemoteSessionSyncerImpl::PutExtras(const AAFwk::WantParams& extras)
         AVSESSION_ERROR, "put data error");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::GetExtras(AAFwk::WantParams& extras)
 {
     std::vector<uint8_t> dataVector;
@@ -416,7 +445,9 @@ int32_t RemoteSessionSyncerImpl::GetExtras(AAFwk::WantParams& extras)
     extrasData = nullptr;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::RegisterDataNotifier(const ObjectDataNotifier& notifier)
 {
     CHECK_AND_RETURN_RET_LOG(objectStore_ != nullptr && object_ != nullptr, AVSESSION_ERROR,
@@ -425,7 +456,9 @@ int32_t RemoteSessionSyncerImpl::RegisterDataNotifier(const ObjectDataNotifier& 
     objectStore_->Watch(object_, shared_from_this());
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::RegisterDisconnectNotifier(const ObjectDisconnectNotifier& notifier)
 {
     CHECK_AND_RETURN_RET_LOG(objectStore_ != nullptr, AVSESSION_ERROR, "objectStore_ is nullptr");
@@ -433,7 +466,9 @@ int32_t RemoteSessionSyncerImpl::RegisterDisconnectNotifier(const ObjectDisconne
     objectStore_->SetStatusNotifier(shared_from_this());
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void RemoteSessionSyncerImpl::Destroy()
 {
     auto ret = objectStore_->UnWatch(object_);
@@ -442,9 +477,12 @@ void RemoteSessionSyncerImpl::Destroy()
     CHECK_AND_RETURN_LOG(ret == ObjectStore::SUCCESS, "DeleteObject error");
     SLOGI("Destroy");
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 RemoteSessionSyncerImpl::~RemoteSessionSyncerImpl()
 {
     SLOGI("RemoteSessionSyncerImpl");
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

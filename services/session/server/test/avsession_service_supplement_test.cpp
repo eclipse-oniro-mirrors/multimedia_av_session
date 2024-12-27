@@ -39,7 +39,7 @@ public:
 
 void AVSessionServiceSupplementTest::SetUpTestCase()
 {
-    SLOGI("set up AVSessionServiceTest");
+    SLOGI("set up AVSessionServiceTest with OnStart");
     system("killall -9 com.example.hiMusicDemo");
     g_AVSessionService = new AVSessionService(OHOS::AVSESSION_SERVICE_ID, true);
     g_AVSessionService->OnStart();
@@ -340,9 +340,9 @@ static HWTEST_F(AVSessionServiceSupplementTest, IsHistoricalSession002, TestSize
  */
 static HWTEST_F(AVSessionServiceSupplementTest, Dump001, TestSize.Level1)
 {
-    SLOGI("Dump001 begin!");
+    SLOGI("Dump001 with OnStartProcess begin!");
     std::vector<std::u16string> argsList;
-    g_AVSessionService->OnStart();
+    g_AVSessionService->OnStartProcess();
     int32_t ret = g_AVSessionService->Dump(1, argsList);
     EXPECT_EQ(ret, ERR_INVALID_PARAM);
     SLOGI("Dump001 end!");
@@ -355,11 +355,11 @@ static HWTEST_F(AVSessionServiceSupplementTest, Dump001, TestSize.Level1)
  */
 static HWTEST_F(AVSessionServiceSupplementTest, Dump002, TestSize.Level1)
 {
-    SLOGI("Dump002 begin!");
+    SLOGI("Dump002 with OnStartProcess begin!");
     std::vector<std::u16string> argsList;
     std::u16string str(5, 'a');
     argsList.emplace_back(str);
-    g_AVSessionService->OnStart();
+    g_AVSessionService->OnStartProcess();
     int32_t ret = g_AVSessionService->Dump(1, argsList);
     EXPECT_EQ(ret, ERR_INVALID_PARAM);
     SLOGI("Dump002 end!");

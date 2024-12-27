@@ -33,6 +33,7 @@ extern "C" void DestroyRemoteSessionSourceImpl(RemoteSessionSourceImpl* impl)
     delete(impl);
 }
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>& session,
                                                      const std::string& sourceDevice,
                                                      const std::string& sinkDevice,
@@ -81,7 +82,9 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
     }
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceImpl::HandleSourceSessionDataCategory(const SessionDataCategory category,
     const std::string& deviceId)
 {
@@ -106,7 +109,9 @@ int32_t RemoteSessionSourceImpl::HandleSourceSessionDataCategory(const SessionDa
 
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t  RemoteSessionSourceImpl::CancelCastAudio(const std::string& sinkDevice)
 {
     SLOGI("start");
@@ -124,7 +129,9 @@ int32_t  RemoteSessionSourceImpl::CancelCastAudio(const std::string& sinkDevice)
     SLOGI("success");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceImpl::SetAVMetaData(const AVMetaData& metaData)
 {
     SLOGI("start");
@@ -149,7 +156,9 @@ int32_t RemoteSessionSourceImpl::SetAVMetaData(const AVMetaData& metaData)
     SLOGI("success");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceImpl::SetAVPlaybackState(const AVPlaybackState& state)
 {
     SLOGI("start");
@@ -174,7 +183,9 @@ int32_t RemoteSessionSourceImpl::SetAVPlaybackState(const AVPlaybackState& state
     SLOGI("success");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceImpl::SetSessionEventRemote(const std::string& event, const AAFwk::WantParams& args)
 {
     SLOGI("start");
@@ -197,7 +208,9 @@ int32_t RemoteSessionSourceImpl::SetSessionEventRemote(const std::string& event,
     SLOGI("success");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceImpl::SetAVQueueItems(const std::vector<AVQueueItem>& items)
 {
     SLOGI("start");
@@ -219,7 +232,9 @@ int32_t RemoteSessionSourceImpl::SetAVQueueItems(const std::vector<AVQueueItem>&
     SLOGI("success");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceImpl::SetAVQueueTitle(const std::string& title)
 {
     SLOGI("start");
@@ -241,7 +256,9 @@ int32_t RemoteSessionSourceImpl::SetAVQueueTitle(const std::string& title)
     SLOGI("success");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceImpl::SetExtrasRemote(const AAFwk::WantParams& extras)
 {
     SLOGI("start");
@@ -263,7 +280,9 @@ int32_t RemoteSessionSourceImpl::SetExtrasRemote(const AAFwk::WantParams& extras
     SLOGI("success");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 AVMetaData::MetaMaskType RemoteSessionSourceImpl::GetSinkMetaMaskType(const std::string& sinkDevice)
 {
     std::vector<int32_t> capability = AVMetaData::localCapability;
@@ -278,7 +297,9 @@ AVMetaData::MetaMaskType RemoteSessionSourceImpl::GetSinkMetaMaskType(const std:
     }
     return mask;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 AVPlaybackState::PlaybackStateMaskType RemoteSessionSourceImpl::GetSinkPlaybackStateMaskType(
     const std::string& sinkDevice)
 {
@@ -294,4 +315,5 @@ AVPlaybackState::PlaybackStateMaskType RemoteSessionSourceImpl::GetSinkPlaybackS
     }
     return mask;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

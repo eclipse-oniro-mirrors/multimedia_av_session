@@ -142,9 +142,14 @@ AVSessionService::~AVSessionService()
 
 void AVSessionService::OnStart()
 {
-    SLOGI("OnStart SA");
+    SLOGI("OnStart SA with process check");
     GetUsersManager().ClearCache();
     CHECK_AND_RETURN_LOG(Publish(this), "publish avsession service failed");
+    OnStartProcess();
+}
+
+void AVSessionService::OnStartProcess()
+{
     dumpHelper_ = std::make_unique<AVSessionDumper>();
     CommandSendLimit::GetInstance().StartTimer();
 
