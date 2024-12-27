@@ -30,6 +30,8 @@ public:
 
     void AVSessionRemoveTask(const std::string &name);
 
+    void AVSessionRemoveHandler();
+    
 private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::mutex handlerLock_;
