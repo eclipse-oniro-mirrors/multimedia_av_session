@@ -136,7 +136,7 @@ bool AvControllerCallbackProxyFuzzer::FuzzSendRequest()
         SLOGD("remote is null");
         return false;
     }
-    parcel.WriteBuffer(RAW_DATA + g_sizePos, sizeof(uint32_t));
+    parcel.WriteBuffer(RAW_DATA, g_sizePos);
     g_sizePos += sizeof(uint32_t);
     parcel.RewindRead(0);
     int32_t result = AVSESSION_ERROR;

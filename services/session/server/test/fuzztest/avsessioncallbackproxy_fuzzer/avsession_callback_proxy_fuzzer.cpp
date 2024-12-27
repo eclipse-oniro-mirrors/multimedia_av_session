@@ -135,7 +135,7 @@ bool AvsessionCallbackProxyFuzzer::FuzzSendRequest()
         SLOGI("remote is null");
         return false;
     }
-    request.WriteBuffer(RAW_DATA + g_sizePos, sizeof(uint32_t));
+    request.WriteBuffer(RAW_DATA, g_sizePos);
     g_sizePos += sizeof(uint32_t);
     request.RewindRead(0);
     int32_t result = AVSESSION_ERROR;

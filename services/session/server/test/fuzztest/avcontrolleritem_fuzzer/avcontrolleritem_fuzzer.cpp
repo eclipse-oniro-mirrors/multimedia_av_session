@@ -161,7 +161,7 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest()
     if (!dataMessageParcel.WriteInterfaceToken(avControllerItem->GetDescriptor())) {
         return;
     }
-    dataMessageParcel.WriteBuffer(RAW_DATA + g_sizePos, sizeof(uint32_t));
+    dataMessageParcel.WriteBuffer(RAW_DATA, g_sizePos);
     g_sizePos += sizeof(uint32_t);
     dataMessageParcel.RewindRead(0);
     avControllerItem->OnRemoteRequest(code, dataMessageParcel, reply, option);

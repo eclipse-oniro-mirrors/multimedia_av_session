@@ -150,7 +150,7 @@ void AvSessionItemFuzzer::AvSessionItemFuzzerTest()
     if (!dataMessageParcel.WriteInterfaceToken(IAVSession::GetDescriptor())) {
         return;
     }
-    dataMessageParcel.WriteBuffer(RAW_DATA + g_sizePos, sizeof(uint32_t));
+    dataMessageParcel.WriteBuffer(RAW_DATA, g_sizePos);
     g_sizePos += sizeof(uint32_t);
     dataMessageParcel.RewindRead(0);
     avSessionItem->OnRemoteRequest(code, dataMessageParcel, reply, option);
