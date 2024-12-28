@@ -110,6 +110,7 @@ private:
     std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
+    const int64_t noMirrorCastHandle = -1;
     int32_t providerNumber_ = 0;
     std::map<int64_t, CastHandleInfo> castHandleToInfoMap_;
     std::map<std::string, std::shared_ptr<IAVRouterListener>> mirrorSessionMap_;
