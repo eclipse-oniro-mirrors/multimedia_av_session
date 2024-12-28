@@ -9,7 +9,7 @@
             "auto-restart": true,
             "stop-on-demand": {
                 "allow-update": false,
-                "recycle-delaytime": 180000,
+                "longtimeunused-unload": 180,
                 "unreferenced-unload": true
             },
             "dump_level": 1
