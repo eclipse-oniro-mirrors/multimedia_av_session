@@ -31,84 +31,69 @@ using namespace OHOS;
 using namespace OHOS::AVSession;
 
 static const int32_t MAX_CODE_TEST = 5;
-static const int32_t MAX_CODE_LEN  = 20;
 static const int32_t MIN_SIZE_NUM = 10;
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_totalSize = 0;
 static size_t g_sizePos;
 
-/*
-* describe: get data from FUZZ untrusted data(RAW_DATA) which size is according to sizeof(T)
-* tips: only support basic type
-*/
-template<class T>
-T GetData()
-{
-    T object {};
-    size_t objectSize = sizeof(object);
-    if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
+namespace {
+    /*
+    * describe: get data from FUZZ untrusted data(RAW_DATA) which size is according to sizeof(T)
+    * tips: only support basic type
+    */
+    template<class T>
+    T GetData()
+    {
+        T object {};
+        size_t objectSize = sizeof(object);
+        if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
+            return object;
+        }
+        errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_sizePos, objectSize);
+        if (ret != EOK) {
+            return {};
+        }
+        g_sizePos += objectSize;
         return object;
     }
-    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_sizePos, objectSize);
-    if (ret != EOK) {
-        return {};
-    }
-    g_sizePos += objectSize;
-    return object;
-}
 
-std::string GetString()
-{
-    size_t objectSize = (GetData<int8_t>() % MAX_CODE_LEN) + 1;
-    if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
-        return "OVER_SIZE";
-    }
-    char object[objectSize + 1];
-    errno_t ret = memcpy_s(object, sizeof(object), RAW_DATA + g_sizePos, objectSize);
-    if (ret != EOK) {
-        return "";
-    }
-    g_sizePos += objectSize;
-    std::string output(object);
-    return output;
-}
-
-template<class T>
-uint32_t GetArrLength(T& arr)
-{
-    if (arr == nullptr) {
-        SLOGE("%{public}s: The array length is equal to 0", __func__);
-        return 0;
-    }
-    return sizeof(arr) / sizeof(arr[0]);
-}
-
-typedef void (*TestFuncs[1])();
-
-TestFuncs g_allFuncs = {
-    AVControllerCallbackProxySendRequest
-};
-
-bool FuzzTest(const uint8_t* rawData, size_t size)
-{
-    if (rawData == nullptr) {
-        return false;
+    template<class T>
+    uint32_t GetArrLength(T& arr)
+    {
+        if (arr == nullptr) {
+            SLOGE("%{public}s: The array length is equal to 0", __func__);
+            return 0;
+        }
+        return sizeof(arr) / sizeof(arr[0]);
     }
 
-    // initialize data
-    RAW_DATA = rawData;
-    g_totalSize = size;
-    g_sizePos = 0;
+    typedef void (*TestFuncs[1])();
 
-    uint32_t code = GetData<uint32_t>();
-    uint32_t len = GetArrLength(g_allFuncs);
-    if (len > 0) {
-        g_allFuncs[code % len]();
-    } else {
-        SLOGE("%{public}s: The len length is equal to 0", __func__);
+    TestFuncs g_allFuncs = {
+        AVControllerCallbackProxySendRequest
+    };
+
+    bool FuzzTest(const uint8_t* rawData, size_t size)
+    {
+        if (rawData == nullptr) {
+            return false;
+        }
+
+        // initialize data
+        RAW_DATA = rawData;
+        g_totalSize = size;
+        g_sizePos = 0;
+
+        uint32_t code = GetData<uint32_t>();
+        uint32_t len = GetArrLength(g_allFuncs);
+        if (len > 0) {
+            g_allFuncs[code % len]();
+        } else {
+            SLOGE("%{public}s: The len length is equal to 0", __func__);
+        }
+
+        return true;
     }
-
-    return true;
 }
 
 bool AvControllerCallbackProxyFuzzer::FuzzSendRequest()

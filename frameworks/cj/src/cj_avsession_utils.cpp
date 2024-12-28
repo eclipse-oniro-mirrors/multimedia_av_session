@@ -61,7 +61,7 @@ int32_t CJConverterMalloc(T*& obj, int64_t size)
 char *MallocCString(const std::string &origin)
 {
     char* cstr = nullptr;
-    int len = origin.length() + 1;
+    int len = static_cast<int>(origin.length() + 1);
     if (CJConverterMalloc<char>(cstr, len) != CJNO_ERROR) {
         return cstr;
     }
@@ -522,7 +522,7 @@ void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &co
 {
     std::map<std::string, sptr<OHOS::AAFwk::IInterface>> paramsMap = wantP.GetParams();
     int count = 0;
-    auto size = static_cast<int64_t>(paramsMap.size());
+    auto size = static_cast<uint64_t>(paramsMap.size());
     SLOGD("paramsMap size = %{public}" PRId64, size);
     if (size == 0) {
         return;
