@@ -165,7 +165,6 @@ int32_t AVSessionItem::DestroyTask()
         if (!collaborationNeedNetworkId_.empty()) {
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-            collaborationNeedNetworkId_ = "";
         }
         AVRouter::GetInstance().ClearOutputDevice(GetSessionId());
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
@@ -1222,7 +1221,6 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
         }
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-        collaborationNeedNetworkId_ = "";
     }
 }
 
@@ -1344,7 +1342,6 @@ void AVSessionItem::OnRemoveCastEngine()
         if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-            collaborationNeedNetworkId_ = "";
         }
     }
 }
@@ -1383,6 +1380,8 @@ int32_t AVSessionItem::StopCast()
 {
     std::lock_guard lockGuard(castHandleLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         int32_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
         castHandle_ = -1;
