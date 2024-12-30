@@ -140,7 +140,6 @@ void AVSessionRadar::GetJsonCastDeviceList(const OutputDeviceInfo &deviceInfo, s
     }
 
     deviceList = jDeviceInfos.dump();
-    SLOGI("GetJsonCastDeviceList: %{public}s", deviceList.c_str());
 }
 
 void AVSessionRadar::GetPeerInfoFromDeviceInfo(const DeviceInfo &deviceInfo, AVSessionRadarInfo &info)
