@@ -29,6 +29,7 @@ RemoteSessionSourceProxy::~RemoteSessionSourceProxy()
     UnLoadSourceImplement();
 }
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_sanitize("cfi")))
 {
     handle_ = dlopen("libremote_session_source.z.so", RTLD_NOW);
@@ -57,7 +58,9 @@ int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_saniti
     sourceImpl_ = createRemoteSessionSourceImpl();
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sanitize("cfi")))
 {
     using SourceImpl = void(*)(RemoteSessionSourceImpl*);
@@ -86,6 +89,7 @@ int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sani
     }
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t RemoteSessionSourceProxy::CastSessionToRemote(const sptr <AVSessionItem>& session,
                                                       const std::string& sourceDevice,

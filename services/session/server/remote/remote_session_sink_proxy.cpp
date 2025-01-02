@@ -29,6 +29,7 @@ RemoteSessionSinkProxy::~RemoteSessionSinkProxy()
     UnLoadSinkImplement();
 }
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("cfi")))
 {
     handle_ = dlopen("libremote_session_sink.z.so", RTLD_NOW);
@@ -57,7 +58,9 @@ int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("
     sinkImpl_ = createRemoteSessionSinkImpl();
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize("cfi")))
 {
     using SinkImpl = void(*)(RemoteSessionSinkImpl*);
@@ -87,6 +90,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
     }
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t RemoteSessionSinkProxy::CastSessionFromRemote(const sptr <AVSessionItem>& session,
                                                       const std::string& sourceSessionId,

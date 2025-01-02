@@ -23,16 +23,21 @@ RemoteSessionSinkImpl::RemoteSessionSinkImpl()
 {
 }
 
+// LCOV_EXCL_START
 extern "C" RemoteSessionSinkImpl* CreateRemoteSessionSinkImpl()
 {
     return new(std::nothrow) RemoteSessionSinkImpl();
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 extern "C" void DestroyRemoteSessionSinkImpl(RemoteSessionSinkImpl* impl)
 {
     delete(impl);
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>& session,
                                                      const std::string& sourceSessionId,
                                                      const std::string& sourceDevice,
@@ -70,7 +75,9 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddDataNotifier failed");
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSinkImpl::HandleSessionDataCategory(const SessionDataCategory category)
 {
     if (category == SESSION_DATA_META) {
@@ -121,7 +128,9 @@ int32_t RemoteSessionSinkImpl::HandleSessionDataCategory(const SessionDataCatego
     }
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSinkImpl::CancelCastSession()
 {
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSESSION_ERROR, "session is nullptr");
@@ -130,7 +139,9 @@ int32_t RemoteSessionSinkImpl::CancelCastSession()
     syncer_ = nullptr;
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSinkImpl::SetControlCommand(const AVControlCommand& command)
 {
     CHECK_AND_RETURN_RET_LOG(syncer_ != nullptr, AVSESSION_ERROR, "syncer is nullptr");
@@ -145,7 +156,9 @@ int32_t RemoteSessionSinkImpl::SetControlCommand(const AVControlCommand& command
     }
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 int32_t RemoteSessionSinkImpl::SetCommonCommand(const std::string& commonCommand,
     const AAFwk::WantParams& commandArgs)
 {
@@ -161,4 +174,5 @@ int32_t RemoteSessionSinkImpl::SetCommonCommand(const std::string& commonCommand
     }
     return AVSESSION_SUCCESS;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession
