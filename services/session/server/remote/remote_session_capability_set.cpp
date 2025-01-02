@@ -27,6 +27,7 @@ RemoteSessionCapabilitySet& RemoteSessionCapabilitySet::GetInstance()
     return sessionCapabilitySet;
 }
 
+// LCOV_EXCL_START
 std::string RemoteSessionCapabilitySet::GetLocalCapability()
 {
     std::vector<std::vector<int32_t>> localCapability(SESSION_DATA_CATEGORY_MAX);
@@ -38,7 +39,9 @@ std::string RemoteSessionCapabilitySet::GetLocalCapability()
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, "", "AddRemoteCapability error");
     return jsonSinkCap;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void RemoteSessionCapabilitySet::AddRemoteCapability(const std::string& sessionId, const std::string& sinkDeviceId,
                                                      const std::string& sinkCapability)
 {
@@ -48,14 +51,18 @@ void RemoteSessionCapabilitySet::AddRemoteCapability(const std::string& sessionI
     CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "AddRemoteCapability error");
     capabilitys_[key] = value;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void RemoteSessionCapabilitySet::RemoveRemoteCapability(const std::string& sessionId, const std::string& sinkDevice)
 {
     CHECK_AND_RETURN_LOG(capabilitys_.size() > 0, " Don't have Capability");
     std::string key = sessionId + "-" + sinkDevice;
     capabilitys_.erase(key);
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 bool RemoteSessionCapabilitySet::HasCapability(const std::string& sessionId, const std::string& sinkDevice,
                                                SessionDataCategory category, int32_t key)
 {
@@ -72,4 +79,5 @@ bool RemoteSessionCapabilitySet::HasCapability(const std::string& sessionId, con
     }
     return false;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

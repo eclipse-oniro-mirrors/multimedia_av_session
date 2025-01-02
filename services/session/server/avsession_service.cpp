@@ -1957,8 +1957,9 @@ void AVSessionService::HandleEventHandlerCallBack()
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    SLOGI("SendSystemAVKeyEvent get key=%{public}d", keyEvent.GetKeyCode());
-    if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK) {
+    SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
+    if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK ||
+        keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
         pressCount_++;
         SLOGI("isFirstPress_=%{public}d", isFirstPress_);
         if (isFirstPress_) {
