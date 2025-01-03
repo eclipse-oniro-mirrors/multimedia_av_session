@@ -167,7 +167,6 @@ int32_t AVSessionItem::DestroyTask()
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         }
-        AVRouter::GetInstance().ClearOutputDevice(GetSessionId());
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         ReleaseCast();
         StopCastSession();

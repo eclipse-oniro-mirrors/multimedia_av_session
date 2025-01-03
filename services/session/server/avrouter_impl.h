@@ -98,8 +98,6 @@ public:
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
-    void ClearOutputDevice(std::string sessionId) override;
-
     void DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo) override;
 
 protected:
