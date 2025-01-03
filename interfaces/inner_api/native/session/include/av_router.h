@@ -274,14 +274,6 @@ public:
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
     /**
-     * @brief clear outputDevice.
-     *
-     * @param { std::string } sessionId - avsession id.
-     * @since 13
-    */
-    virtual void ClearOutputDevice(std::string sessionId) = 0;
-
-    /**
      * @brief disconnect other session.
      *
      * @param { std::string } sessionId - avsession id.
