@@ -393,12 +393,16 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(
             continue;
         }
         std::string playerId = controller->GetSessionId();
-        if (playerId.compare(topSessionId_) == 0 ||
-            playerId.compare(lastSessionId_) == 0) {
-            Json::Value jsonObject = ConvertControllerToJson(controller);
-            jsonObject[PLAYER_ID] = playerId;
-            jsonArray[sessionNums] = jsonObject;
+        Json::Value jsonObject = ConvertControllerToJson(controller);
+        jsonObject[PLAYER_ID] = playerId;
+        if (playerId.compare(topSessionId_) == 0) {
+            jsonArray[0] = jsonObject;
             sessionNums++;
+        } else if (playerId.compare(lastSessionId_) == 0) {
+            jsonArray[1] = jsonObject;
+            sessionNums++;
+        } else {
+            SLOGD("session not deal");
         }
     }
     Json::Value jsonData;
