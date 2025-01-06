@@ -381,6 +381,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
         }
         if ((metaMask_.test(AVMetaData::META_KEY_AVQUEUE_IMAGE)) && (metaOut.GetAVQueueImage() != nullptr)) {
             std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
+            CHECK_AND_RETURN_LOG(session_ != nullptr, "Session not exist");
             std::string avQueueFileName =
                 session_->GetBundleName() + "_" + metaOut.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
             std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaOut.GetAVQueueImage();
