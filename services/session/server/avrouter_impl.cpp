@@ -544,21 +544,6 @@ void AVRouterImpl::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     }
 }
 
-void AVRouterImpl::ClearOutputDevice(std::string sessionId)
-{
-    for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
-        if (castHandleInfo.sessionId_ == sessionId) {
-            OutputDeviceInfo localDevice;
-            DeviceInfo localInfo;
-            localInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-            localInfo.deviceId_ = "-1";
-            localInfo.deviceName_ = "LocalDevice";
-            localDevice.deviceInfos_.emplace_back(localInfo);
-            castHandleToInfoMap_[number].outputDeviceInfo_ = localDevice;
-        }
-    }
-}
-
 void AVRouterImpl::DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo)
 {
     for (const auto& [string, avRouterListener] : mirrorSessionMap_) {
