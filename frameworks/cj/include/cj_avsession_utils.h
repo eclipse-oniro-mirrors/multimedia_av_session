@@ -51,43 +51,43 @@ constexpr int32_t NONE_VALUE = -1;
 
 /* Native => Cangjie FFI Object*/
 /*Primitive Type*/
-int32_t convertNativeToCJStruct(const std::string& native, char*& cj);
-int32_t convertNativeToCJStruct(const std::vector<std::string>& native, CArray& cj);
-int32_t convertNativeToCJStruct(const int32_t& native, int32_t& cj);
-int32_t convertNativeToCJStruct(const int64_t& native, int64_t& cj);
-int32_t convertNativeToCJStruct(const bool& native, bool& cj);
-int32_t convertNativeToCJStruct(const std::vector<int32_t>& native, CArray& cj);
-int32_t convertNativeToCJStruct(const std::vector<uint8_t>& native, CArray& cj);
-int32_t convertNativeToCJStruct(const AAFwk::WantParams& native, CArray& cj);
+int32_t ConvertNativeToCJStruct(const std::string& native, char*& cj);
+int32_t ConvertNativeToCJStruct(const std::vector<std::string>& native, CArray& cj);
+int32_t ConvertNativeToCJStruct(const int32_t& native, int32_t& cj);
+int32_t ConvertNativeToCJStruct(const int64_t& native, int64_t& cj);
+int32_t ConvertNativeToCJStruct(const bool& native, bool& cj);
+int32_t ConvertNativeToCJStruct(const std::vector<int32_t>& native, CArray& cj);
+int32_t ConvertNativeToCJStruct(const std::vector<uint8_t>& native, CArray& cj);
+int32_t ConvertNativeToCJStruct(const AAFwk::WantParams& native, CArray& cj);
 
 /* String | PixelMap*/
-int32_t convertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native, int64_t& cj);
-int32_t convertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native, StringPixelMapParameter& cj);
-int32_t convertNativeToCJStruct(const std::string& native, StringPixelMapParameter& cj);
+int32_t ConvertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native, int64_t& cj);
+int32_t ConvertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native, StringPixelMapParameter& cj);
+int32_t ConvertNativeToCJStruct(const std::string& native, StringPixelMapParameter& cj);
 
-int32_t convertNativeToCJStruct(const AVCallState& native, CAVCallState& cj);
-int32_t convertNativeToCJStruct(const AVCallMetaData& native, CAVCallMetaData& cj);
-int32_t convertNativeToCJStruct(const AVPlaybackState::Position& native, CPlaybackPosition& cj);
-int32_t convertNativeToCJStruct(const AVPlaybackState& native, CAVPlaybackState& cj);
-int32_t convertNativeToCJStruct(const AVMetaData& native, CAVMetaData& cj);
+int32_t ConvertNativeToCJStruct(const AVCallState& native, CAVCallState& cj);
+int32_t ConvertNativeToCJStruct(const AVCallMetaData& native, CAVCallMetaData& cj);
+int32_t ConvertNativeToCJStruct(const AVPlaybackState::Position& native, CPlaybackPosition& cj);
+int32_t ConvertNativeToCJStruct(const AVPlaybackState& native, CAVPlaybackState& cj);
+int32_t ConvertNativeToCJStruct(const AVMetaData& native, CAVMetaData& cj);
 
-int32_t convertNativeToCJStruct(const DeviceInfo& native, CDeviceInfo& cj);
-int32_t convertNativeToCJStruct(const OutputDeviceInfo& native, COutputDeviceInfo& cj);
+int32_t ConvertNativeToCJStruct(const DeviceInfo& native, CDeviceInfo& cj);
+int32_t ConvertNativeToCJStruct(const OutputDeviceInfo& native, COutputDeviceInfo& cj);
 
-int32_t convertNativeToCJStruct(const AVQueueItem& native, CAVQueueItem& cj);
-int32_t convertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray& cj);
-int32_t convertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescription& cj);
-int32_t convertNativeToCJStruct(const AVFileDescriptor& native, CAVFileDescriptor& cj);
+int32_t ConvertNativeToCJStruct(const AVQueueItem& native, CAVQueueItem& cj);
+int32_t ConvertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray& cj);
+int32_t ConvertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescription& cj);
+int32_t ConvertNativeToCJStruct(const AVFileDescriptor& native, CAVFileDescriptor& cj);
 
-int32_t convertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArray& cj);
-int32_t convertNativeToCJStruct(const CastDisplayInfo& native, CCastDisplayInfo& cj);
+int32_t ConvertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArray& cj);
+int32_t ConvertNativeToCJStruct(const CastDisplayInfo& native, CCastDisplayInfo& cj);
 
-int32_t convertNativeToCJStruct(const MMI::KeyEvent::KeyItem& native, CKey& cj);
-int32_t convertNativeToCJStruct(const std::vector<MMI::KeyEvent::KeyItem>& native, CKey*& cj);
-int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CInputEvent& cj);
-int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CKeyEvent& cj);
+int32_t ConvertNativeToCJStruct(const MMI::KeyEvent::KeyItem& native, CKey& cj);
+int32_t ConvertNativeToCJStruct(const std::vector<MMI::KeyEvent::KeyItem>& native, CKey*& cj);
+int32_t ConvertNativeToCJStruct(const MMI::KeyEvent& native, CInputEvent& cj);
+int32_t ConvertNativeToCJStruct(const MMI::KeyEvent& native, CKeyEvent& cj);
 
-int32_t convertNativeToCJStruct(const AbilityRuntime::WantAgent::WantAgent& native, int64_t& cj);
+int32_t ConvertNativeToCJStruct(const AbilityRuntime::WantAgent::WantAgent& native, int64_t& cj);
 
 /* Canjie FFI Object => Native*/
 int32_t convertCJStructToNative(const int32_t& cj, int32_t& native);
@@ -126,7 +126,7 @@ int32_t CJControllerGetterCStruct(
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("%{public}s failed:%{public}d", method_name.c_str(), ret);
     } else {
-        ret = convertNativeToCJStruct(native, cj);
+        ret = ConvertNativeToCJStruct(native, cj);
         if (ret != CJNO_ERROR) {
             SLOGE("%{public}s failed:%{public}d", method_name.c_str(), ret);
         }

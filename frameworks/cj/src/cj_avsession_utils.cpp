@@ -92,7 +92,7 @@ public:
         steps.push_back(step);
     }
 
-    static int32_t runSteps(std::vector<Step> &funcs)
+    static int32_t RunSteps(std::vector<Step> &funcs)
     {
         int code = CJNO_ERROR;
         for (auto& step: funcs) {
@@ -104,7 +104,7 @@ public:
         return code;
     }
 
-    int32_t run()
+    int32_t Run()
     {
         int code = CJNO_ERROR;
         for (auto& step: steps) {
@@ -568,40 +568,40 @@ void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &co
 
 /* Converter ================================================*/
 /* Native to Cangjie*/
-int32_t convertNativeToCJStruct(const AVCallState& native, CAVCallState& cj)
+int32_t ConvertNativeToCJStruct(const AVCallState& native, CAVCallState& cj)
 {
     cj.state = native.GetAVCallState();
     cj.muted = native.IsAVCallMuted();
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const AVCallMetaData& native, CAVCallMetaData& cj)
+int32_t ConvertNativeToCJStruct(const AVCallMetaData& native, CAVCallMetaData& cj)
 {
     std::vector<Step> steps;
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetName(), cj.name); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetPhoneNumber(), cj.phoneNumber); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetMediaImage(), cj.avatar); });
-    return CJUtilsChainCall::runSteps(steps);
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetName(), cj.name); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetPhoneNumber(), cj.phoneNumber); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetMediaImage(), cj.avatar); });
+    return CJUtilsChainCall::RunSteps(steps);
 }
 
-int32_t convertNativeToCJStruct(const AVMetaData& native, CAVMetaData& cj)
+int32_t ConvertNativeToCJStruct(const AVMetaData& native, CAVMetaData& cj)
 {
     std::vector<Step> steps;
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetAssetId(), cj.assetId); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetTitle(), cj.title); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetArtist(), cj.artist); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetAuthor(), cj.author); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetAVQueueName(), cj.avQueueName); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetAVQueueId(), cj.avQueueId); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetAlbum(), cj.album); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetWriter(), cj.writer); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetComposer(), cj.composer); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetSubTitle(), cj.subtitle); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetDescription(), cj.description); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetLyric(), cj.lyric); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetPreviousAssetId(), cj.previousAssetId); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetNextAssetId(), cj.nextAssetId); });
-    int32_t errCode = CJUtilsChainCall::runSteps(steps);
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAssetId(), cj.assetId); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetTitle(), cj.title); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetArtist(), cj.artist); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAuthor(), cj.author); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAVQueueName(), cj.avQueueName); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAVQueueId(), cj.avQueueId); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAlbum(), cj.album); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetWriter(), cj.writer); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetComposer(), cj.composer); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetSubTitle(), cj.subtitle); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetDescription(), cj.description); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetLyric(), cj.lyric); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetPreviousAssetId(), cj.previousAssetId); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetNextAssetId(), cj.nextAssetId); });
+    int32_t errCode = CJUtilsChainCall::RunSteps(steps);
     if (errCode != CJNO_ERROR) {
         return errCode;
     }
@@ -614,41 +614,41 @@ int32_t convertNativeToCJStruct(const AVMetaData& native, CAVMetaData& cj)
     cj.avQueueLength = native.GetAVQueueLength();
 
     if (native.GetMetaMask() == AVMetaData::META_KEY_AVQUEUE_IMAGE) {
-        errCode = convertNativeToCJStruct(native.GetAVQueueImage(), cj.avQueueImage);
+        errCode = ConvertNativeToCJStruct(native.GetAVQueueImage(), cj.avQueueImage);
     } else {
-        errCode = convertNativeToCJStruct(native.GetAVQueueImageUri(), cj.avQueueImage);
+        errCode = ConvertNativeToCJStruct(native.GetAVQueueImageUri(), cj.avQueueImage);
     }
     if (errCode != CJNO_ERROR) { return errCode; }
     if (native.GetMetaMask() == AVMetaData::META_KEY_MEDIA_IMAGE) {
-        errCode = convertNativeToCJStruct(native.GetMediaImage(), cj.mediaImage);
+        errCode = ConvertNativeToCJStruct(native.GetMediaImage(), cj.mediaImage);
     } else {
-        errCode = convertNativeToCJStruct(native.GetMediaImageUri(), cj.mediaImage);
+        errCode = ConvertNativeToCJStruct(native.GetMediaImageUri(), cj.mediaImage);
     }
     if (errCode != CJNO_ERROR) { return errCode; }
-    return convertNativeToCJStruct(native.GetDrmSchemes(), cj.drmSchemes);
+    return ConvertNativeToCJStruct(native.GetDrmSchemes(), cj.drmSchemes);
 }
 
-int32_t convertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native, int64_t& cj)
+int32_t ConvertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native, int64_t& cj)
 {
     cj = Media::PixelMapImpl(AVSessionPixelMapAdapter::ConvertFromInner(native)).GetID();
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native, StringPixelMapParameter& cj)
+int32_t ConvertNativeToCJStruct(const std::shared_ptr<AVSessionPixelMap>& native, StringPixelMapParameter& cj)
 {
     cj.pixelMap = Media::PixelMapImpl(AVSessionPixelMapAdapter::ConvertFromInner(native)).GetID();
     cj.kind = PIXEL_MAP_TYPE;
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const std::string& native, StringPixelMapParameter& cj)
+int32_t ConvertNativeToCJStruct(const std::string& native, StringPixelMapParameter& cj)
 {
-    convertNativeToCJStruct(native, cj.string);
+    ConvertNativeToCJStruct(native, cj.string);
     cj.kind = STR_TYPE;
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const std::vector<std::string>& native, CArray& cj)
+int32_t ConvertNativeToCJStruct(const std::vector<std::string>& native, CArray& cj)
 {
     int32_t ret = CJNO_ERROR;
     char** &cjArrHead = reinterpret_cast<char**&>(cj.head);
@@ -658,7 +658,7 @@ int32_t convertNativeToCJStruct(const std::vector<std::string>& native, CArray& 
     }
     cj.size = native.size();
     for (size_t i = 0; i < native.size(); i++) {
-        int32_t errCode = convertNativeToCJStruct(native[i], cjArrHead[i]);
+        int32_t errCode = ConvertNativeToCJStruct(native[i], cjArrHead[i]);
         if (errCode != CJNO_ERROR) {
             return errCode;
         }
@@ -666,7 +666,7 @@ int32_t convertNativeToCJStruct(const std::vector<std::string>& native, CArray& 
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const std::string& native, char*& cj)
+int32_t ConvertNativeToCJStruct(const std::string& native, char*& cj)
 {
     cj = MallocCString(native);
     if (cj == nullptr) {
@@ -675,7 +675,7 @@ int32_t convertNativeToCJStruct(const std::string& native, char*& cj)
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const OutputDeviceInfo& native, COutputDeviceInfo& cj)
+int32_t ConvertNativeToCJStruct(const OutputDeviceInfo& native, COutputDeviceInfo& cj)
 {
     int32_t ret = CJNO_ERROR;
     CDeviceInfo* &cjArrHead = reinterpret_cast<CDeviceInfo*&>(cj.devices.head);
@@ -685,12 +685,12 @@ int32_t convertNativeToCJStruct(const OutputDeviceInfo& native, COutputDeviceInf
     }
     cj.devices.size = native.deviceInfos_.size();
     for (uint32_t i = 0; i < native.deviceInfos_.size(); i++) {
-        convertNativeToCJStruct(native.deviceInfos_[i], cjArrHead[i]);
+        ConvertNativeToCJStruct(native.deviceInfos_[i], cjArrHead[i]);
     }
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const MMI::KeyEvent::KeyItem& native, CKey& cj)
+int32_t ConvertNativeToCJStruct(const MMI::KeyEvent::KeyItem& native, CKey& cj)
 {
     int32_t ret = CJNO_ERROR;
     cj.code = native.GetKeyCode();
@@ -699,7 +699,7 @@ int32_t convertNativeToCJStruct(const MMI::KeyEvent::KeyItem& native, CKey& cj)
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const std::vector<MMI::KeyEvent::KeyItem>& native, CKey*& cj)
+int32_t ConvertNativeToCJStruct(const std::vector<MMI::KeyEvent::KeyItem>& native, CKey*& cj)
 {
     int32_t ret = CJNO_ERROR;
     ret = CJConverterMalloc<CKey>(cj, native.size());
@@ -707,12 +707,12 @@ int32_t convertNativeToCJStruct(const std::vector<MMI::KeyEvent::KeyItem>& nativ
         return ret;
     }
     for (size_t i = 0; i < native.size(); i++) {
-        convertNativeToCJStruct(native[i], *(cj+i));
+        ConvertNativeToCJStruct(native[i], *(cj+i));
     }
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CInputEvent& cj)
+int32_t ConvertNativeToCJStruct(const MMI::KeyEvent& native, CInputEvent& cj)
 {
     int32_t ret = CJNO_ERROR;
     cj.id = native.GetId();
@@ -723,16 +723,16 @@ int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CInputEvent& cj)
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CKeyEvent& cj)
+int32_t ConvertNativeToCJStruct(const MMI::KeyEvent& native, CKeyEvent& cj)
 {
     int32_t ret = CJNO_ERROR;
-    ret = convertNativeToCJStruct(native, cj.base);
+    ret = ConvertNativeToCJStruct(native, cj.base);
     if (ret != CJNO_ERROR) {
         return ret;
     }
     cj.action = native.GetKeyAction();
     if (native.GetKeyItem()) {
-        ret = convertNativeToCJStruct(native.GetKeyItem().value(), cj.key);
+        ret = ConvertNativeToCJStruct(native.GetKeyItem().value(), cj.key);
         if (ret != CJNO_ERROR) {
             return ret;
         }
@@ -750,7 +750,7 @@ int32_t convertNativeToCJStruct(const MMI::KeyEvent& native, CKeyEvent& cj)
             cj.keysLength++;
         }
     }
-    ret = convertNativeToCJStruct(keys_, cj.keys);
+    ret = ConvertNativeToCJStruct(keys_, cj.keys);
     if (ret != CJNO_ERROR) {
         return ret;
     }
@@ -807,15 +807,15 @@ int32_t convertCJStructToNative(const CKey& cj, MMI::KeyEvent::KeyItem& native)
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const DeviceInfo& native, CDeviceInfo& cj)
+int32_t ConvertNativeToCJStruct(const DeviceInfo& native, CDeviceInfo& cj)
 {
     std::vector<Step> steps;
-    steps.push_back([&]() { return convertNativeToCJStruct(native.deviceId_, cj.deviceId); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.deviceName_, cj.deviceName); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.deviceId_, cj.deviceId); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.deviceName_, cj.deviceName); });
     steps.push_back([&]() {
-        return convertNativeToCJStruct(native.supportedDrmCapabilities_, cj.supportedDrmCapabilities);
+        return ConvertNativeToCJStruct(native.supportedDrmCapabilities_, cj.supportedDrmCapabilities);
     });
-    int32_t errCode = CJUtilsChainCall::runSteps(steps);
+    int32_t errCode = CJUtilsChainCall::RunSteps(steps);
     if (errCode != CJNO_ERROR) {
         return errCode;
     }
@@ -825,25 +825,25 @@ int32_t convertNativeToCJStruct(const DeviceInfo& native, CDeviceInfo& cj)
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const int32_t& native, int32_t& cj)
+int32_t ConvertNativeToCJStruct(const int32_t& native, int32_t& cj)
 {
     cj = native;
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const int64_t& native, int64_t& cj)
+int32_t ConvertNativeToCJStruct(const int64_t& native, int64_t& cj)
 {
     cj = native;
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const bool& native, bool& cj)
+int32_t ConvertNativeToCJStruct(const bool& native, bool& cj)
 {
     cj = native;
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const std::vector<int32_t>& native, CArray&cj)
+int32_t ConvertNativeToCJStruct(const std::vector<int32_t>& native, CArray&cj)
 {
     int32_t ret = CJNO_ERROR;
     int32_t* &cjArrHead = reinterpret_cast<int32_t*&>(cj.head);
@@ -858,7 +858,7 @@ int32_t convertNativeToCJStruct(const std::vector<int32_t>& native, CArray&cj)
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const std::vector<uint8_t>& native, CArray& cj)
+int32_t ConvertNativeToCJStruct(const std::vector<uint8_t>& native, CArray& cj)
 {
     int32_t ret = CJNO_ERROR;
     uint8_t* &cjArrHead = reinterpret_cast<uint8_t*&>(cj.head);
@@ -873,7 +873,7 @@ int32_t convertNativeToCJStruct(const std::vector<uint8_t>& native, CArray& cj)
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray&cj)
+int32_t ConvertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray&cj)
 {
     int32_t ret = CJNO_ERROR;
     CAVQueueItem* &cjArrHead = reinterpret_cast<CAVQueueItem*&>(cj.head);
@@ -883,7 +883,7 @@ int32_t convertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray&c
     }
     cj.size = native.size();
     for (size_t i = 0; i < native.size(); i++) {
-        int32_t errCode = convertNativeToCJStruct(native[i], cjArrHead[i]);
+        int32_t errCode = ConvertNativeToCJStruct(native[i], cjArrHead[i]);
         if (errCode != CJNO_ERROR) {
             return errCode;
         }
@@ -891,31 +891,31 @@ int32_t convertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray&c
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const AVQueueItem& native, CAVQueueItem& cj)
+int32_t ConvertNativeToCJStruct(const AVQueueItem& native, CAVQueueItem& cj)
 {
     cj.itemId = native.GetItemId();
-    return convertNativeToCJStruct(*native.GetDescription(), cj.description);
+    return ConvertNativeToCJStruct(*native.GetDescription(), cj.description);
 }
 
-int32_t convertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescription& cj)
+int32_t ConvertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescription& cj)
 {
     std::vector<Step> steps;
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetMediaId(), cj.mediaId); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetTitle(), cj.title); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetSubtitle(), cj.subtitle); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetDescription(), cj.description); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetMediaUri(), cj.mediaUri); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetMediaType(), cj.mediaType); });
-    steps.push_back([&]() { return convertNativeToCJStruct(*native.GetExtras(), cj.extras); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetAlbumTitle(), cj.albumTitle); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetAlbumCoverUri(), cj.albumCoverUri); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetLyricContent(), cj.lyricContent); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetLyricUri(), cj.lyricUri); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetArtist(), cj.artist); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetFdSrc(), cj.fdSrc); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetDrmScheme(), cj.drmScheme); });
-    steps.push_back([&]() { return convertNativeToCJStruct(native.GetAppName(), cj.appName); });
-    int32_t errCode = CJUtilsChainCall::runSteps(steps);
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetMediaId(), cj.mediaId); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetTitle(), cj.title); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetSubtitle(), cj.subtitle); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetDescription(), cj.description); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetMediaUri(), cj.mediaUri); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetMediaType(), cj.mediaType); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(*native.GetExtras(), cj.extras); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAlbumTitle(), cj.albumTitle); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAlbumCoverUri(), cj.albumCoverUri); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetLyricContent(), cj.lyricContent); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetLyricUri(), cj.lyricUri); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetArtist(), cj.artist); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetFdSrc(), cj.fdSrc); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetDrmScheme(), cj.drmScheme); });
+    steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAppName(), cj.appName); });
+    int32_t errCode = CJUtilsChainCall::RunSteps(steps);
     if (errCode != CJNO_ERROR) {
         return errCode;
     }
@@ -929,14 +929,14 @@ int32_t convertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescri
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const AAFwk::WantParams& native, CArray& cj)
+int32_t ConvertNativeToCJStruct(const AAFwk::WantParams& native, CArray& cj)
 {
     int32_t errCode = CJNO_ERROR;
     ParseParameters(native, cj, errCode);
     return errCode;
 }
 
-int32_t convertNativeToCJStruct(const AVFileDescriptor& native, CAVFileDescriptor& cj)
+int32_t ConvertNativeToCJStruct(const AVFileDescriptor& native, CAVFileDescriptor& cj)
 {
     cj.fd = native.fd_;
     cj.offset = native.offset_;
@@ -944,18 +944,18 @@ int32_t convertNativeToCJStruct(const AVFileDescriptor& native, CAVFileDescripto
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const AVPlaybackState::Position& native, CPlaybackPosition& cj)
+int32_t ConvertNativeToCJStruct(const AVPlaybackState::Position& native, CPlaybackPosition& cj)
 {
     cj.elapsedTime = native.elapsedTime_;
     cj.updateTime = native.updateTime_;
     return CJNO_ERROR;
 }
 
-int32_t convertNativeToCJStruct(const AVPlaybackState& native, CAVPlaybackState& cj)
+int32_t ConvertNativeToCJStruct(const AVPlaybackState& native, CAVPlaybackState& cj)
 {
     cj.state = native.GetState();
     cj.speed = native.GetSpeed();
-    convertNativeToCJStruct(native.GetPosition(), cj.position);
+    ConvertNativeToCJStruct(native.GetPosition(), cj.position);
     cj.bufferedTime = native.GetBufferedTime();
     cj.loopMode = native.GetLoopMode();
     cj.isFavorite = native.GetFavorite();
@@ -966,10 +966,10 @@ int32_t convertNativeToCJStruct(const AVPlaybackState& native, CAVPlaybackState&
     cj.duration = native.GetDuration();
     cj.videoWidth = native.GetVideoWidth();
     cj.videoHeight = native.GetVideoHeight();
-    return convertNativeToCJStruct(*native.GetExtras(), cj.extras);
+    return ConvertNativeToCJStruct(*native.GetExtras(), cj.extras);
 }
 
-int32_t convertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArray& cj)
+int32_t ConvertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArray& cj)
 {
     CCastDisplayInfo* &cjArrHead = reinterpret_cast<CCastDisplayInfo*&>(cj.head);
     int32_t ret = CJConverterMalloc<CCastDisplayInfo>(cjArrHead, native.size());
@@ -979,7 +979,7 @@ int32_t convertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArr
     }
     cj.size = native.size();
     for (size_t i = 0; i < native.size(); i++) {
-        ret = convertNativeToCJStruct(native[i], cjArrHead[i]);
+        ret = ConvertNativeToCJStruct(native[i], cjArrHead[i]);
         if (ret != CJNO_ERROR) {
             return ret;
         }
@@ -987,16 +987,16 @@ int32_t convertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArr
     return ret;
 }
 
-int32_t convertNativeToCJStruct(const CastDisplayInfo& native, CCastDisplayInfo& cj)
+int32_t ConvertNativeToCJStruct(const CastDisplayInfo& native, CCastDisplayInfo& cj)
 {
     cj.id = native.displayId;
     cj.displayState = native.displayState;
     cj.width = native.width;
     cj.height = native.height;
-    return convertNativeToCJStruct(native.name, cj.name);
+    return ConvertNativeToCJStruct(native.name, cj.name);
 }
 
-int32_t convertNativeToCJStruct(const AbilityRuntime::WantAgent::WantAgent& native, int64_t& cj)
+int32_t ConvertNativeToCJStruct(const AbilityRuntime::WantAgent::WantAgent& native, int64_t& cj)
 {
     auto ptr = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(native);
     cj = OHOS::FfiWantAgent::CJWantAgent(ptr).GetID();

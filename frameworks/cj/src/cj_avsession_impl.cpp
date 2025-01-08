@@ -170,7 +170,7 @@ int32_t CJAVSessionImpl::GetOutputDevice(COutputDeviceInfo& outputDeviceInfo)
         SLOGE("controller GetOutputDevice failed:%{public}d", ret);
         return ret;
     }
-    return convertNativeToCJStruct(descriptor.outputDeviceInfo_, outputDeviceInfo);
+    return ConvertNativeToCJStruct(descriptor.outputDeviceInfo_, outputDeviceInfo);
 }
 
 int32_t CJAVSessionImpl::GetAllCastDisplays(CArray& infos)
