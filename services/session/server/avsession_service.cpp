@@ -1292,7 +1292,7 @@ void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, in
     std::string sessionTag = "";
     std::string sessionType = "";
     std::string bundleName = "";
-    std::string apiParamString= "";
+    std::string apiParamString = "";
     if (session != nullptr) {
         sessionId = AVSessionUtils::GetAnonySessionId(session->GetDescriptor().sessionId_);
         sessionTag = session->GetDescriptor().sessionTag_;
