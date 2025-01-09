@@ -67,7 +67,9 @@ void MigrateAVSessionServer::ObserveControllerChanged(const std::string &deviceI
     }
 
     for (auto &item : descriptors) {
-        if (item.sessionType_ != AVSession::SESSION_TYPE_AUDIO) {
+        if (item.sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
+            item.elementName_.GetBundleName().empty() ||
+            item.elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME) {
             continue;
         }
         if (item.isTopSession_) {
@@ -259,8 +261,10 @@ void MigrateAVSessionServer::OnSessionCreate(const AVSessionDescriptor &descript
         SLOGW("no valid avsession");
         return;
     }
-    if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO) {
-        SLOGI("not audio avsession");
+    if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
+        descriptor.elementName_.GetBundleName().empty() ||
+        descriptor.elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME) {
+        SLOGI("not audio avsession or anco audio");
         return;
     }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
@@ -284,8 +288,10 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
     SLOGI("OnTopSessionChange sessionId_: %{public}s", descriptor.sessionId_.c_str());
     {
         std::lock_guard lockGuard(topSessionLock_);
-        if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO) {
-            SLOGI("not audio avsession");
+        if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
+            descriptor.elementName_.GetBundleName().empty() ||
+            descriptor.elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME) {
+            SLOGI("not audio avsession or anco audio");
             return;
         }
         if (topSessionId_ == descriptor.sessionId_) {

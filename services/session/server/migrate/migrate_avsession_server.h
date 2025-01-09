@@ -31,6 +31,7 @@ class AVControllerObserver;
 constexpr size_t BUFFER_MAX_SIZE = 1024 * 1024;
 constexpr size_t DEFAULT_QUALITY = 100;
 constexpr int64_t DELAY_TIME = 2000;
+const std::string ANCO_AUDIO_BUNDLE_NAME = "anco_audio";
 
 class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServer,
     public std::enable_shared_from_this<MigrateAVSessionServer> {
