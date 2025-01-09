@@ -309,7 +309,6 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
             return number;
         }
     }
-    castHandleToInfoMap_.clear();
     int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].
         providerId_]->provider_->StartCastSession();
     CHECK_AND_RETURN_RET_LOG(castId != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
