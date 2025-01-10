@@ -684,6 +684,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             SLOGI("CancelNotification ret=%{public}d", ret);
         }
         sessionListForFront->remove(sessionItem);
+        SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
     }
 }
 
@@ -1259,6 +1260,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(session != nullptr, "Session not exist");
         uidForAppStateChange_ = session->GetUid();
         if (isSupportMirrorToStream_ &&
             !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
