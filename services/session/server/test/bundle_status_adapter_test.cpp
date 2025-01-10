@@ -114,6 +114,7 @@ static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent001, testing:
     };
     bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
     SLOGI("SubscribeBundleStatusEvent001 get ret:%{public}d", static_cast<int>(ret));
+    EXPECT_EQ(ret, true);
     SLOGI("SubscribeBundleStatusEvent001, end");
 }
 
