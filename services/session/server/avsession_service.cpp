@@ -2975,7 +2975,6 @@ void AVSessionService::PublishEvent()
     OHOS::AAFwk::Want want;
     want.SetAction(MEDIA_CONTROL_STATE);
     want.SetParam(MEDIA_PLAY_STATE, mediaPlayStateTrue);
-
     EventFwk::CommonEventData data;
     data.SetWant(want);
     EventFwk::CommonEventPublishInfo publishInfo;
