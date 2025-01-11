@@ -318,7 +318,7 @@ private:
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
     void NotifyDeviceChange();
-    void PublishEvent();
+    void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
         const sptr<ClientDeathRecipient> recipient);
@@ -610,6 +610,7 @@ private:
     const int32_t ancoUid = 1041;
     const int32_t saType = 1;
     const int32_t mediaPlayStateTrue = 1;
+    const int32_t mediaPlayStateFalse = 0;
     const uint32_t MAX_NOTIFICATION_NUM = 3;
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
 };
