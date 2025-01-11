@@ -318,6 +318,7 @@ private:
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
     void NotifyDeviceChange();
+    void PublishEvent();
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
         const sptr<ClientDeathRecipient> recipient);
@@ -581,6 +582,8 @@ private:
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";
+    const std::string MEDIA_CONTROL_STATE = "usual.event.MEDIA_CONTROL_STATE";
+    const std::string MEDIA_PLAY_STATE = "MediaPlaybackState";
 
     int32_t pressCount_ {};
     int32_t maxHistoryNums_ = 10;
@@ -606,6 +609,7 @@ private:
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
     const int32_t saType = 1;
+    const int32_t mediaPlayStateTrue = 1;
     const uint32_t MAX_NOTIFICATION_NUM = 3;
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
 };
