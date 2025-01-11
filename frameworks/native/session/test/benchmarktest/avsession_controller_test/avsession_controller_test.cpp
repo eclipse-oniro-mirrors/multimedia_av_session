@@ -331,16 +331,16 @@ BENCHMARK_F(AVSessionControllerTest, GetSessionId)(benchmark::State& state)
 BENCHMARK_F(AVSessionControllerTest, GetRealPlaybackPosition)(benchmark::State& state)
 {
     AVMetaData metaData;
-    constexpr int64_t MICRO_SECOND = 1000;
+    int64_t microSecond = 1000;
     metaData.Reset();
     metaData.SetAssetId("GetRealPlaybackPosition");
-    metaData.SetDuration(MICRO_SECOND * MICRO_SECOND + MICRO_SECOND);
+    metaData.SetDuration(microSecond * microSecond + microSecond);
     avsession_->SetAVMetaData(metaData);
 
     AVPlaybackState backState;
     AVPlaybackState::Position position;
-    position.elapsedTime_ = MICRO_SECOND * MICRO_SECOND;
-    position.updateTime_ = MICRO_SECOND;
+    position.elapsedTime_ = microSecond * microSecond;
+    position.updateTime_ = microSecond;
     backState.SetPosition(position);
     avsession_->SetAVPlaybackState(backState);
     AVPlaybackState resultState;
