@@ -300,7 +300,7 @@ void AVSessionItem::ReportSetAVMetaDataInfo(const AVMetaData& meta)
     if (meta.GetAVQueueImage() != nullptr || !(meta.GetAVQueueImageUri().empty())) {
         avQueueImage = "true";
     }
-    std::string API_PARAM_STRING = "assetId: " + meta.GetAssetId() + ", "
+    std::string apiParamString = "assetId: " + meta.GetAssetId() + ", "
                                     + "artist: " + meta.GetArtist() + ", "
                                     + "title: " + meta.GetTitle() + ", "
                                     + "subtitle: " + meta.GetSubTitle() + ", "
@@ -311,7 +311,7 @@ void AVSessionItem::ReportSetAVMetaDataInfo(const AVMetaData& meta)
                                     + "avqueueImage: " + avQueueImage;
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR", "API_NAME", "SetAVMetaData",
         "BUNDLE_NAME", GetBundleName(), "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
-        "SESSION_TAG", descriptor_.sessionTag_, "SESSION_TYPE", GetSessionType(), "API_PARAM", API_PARAM_STRING,
+        "SESSION_TAG", descriptor_.sessionTag_, "SESSION_TYPE", GetSessionType(), "API_PARAM", apiParamString,
         "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
 }
 
@@ -439,7 +439,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     }
 
     std::string isFavor = state.GetFavorite()? "true" : "false";
-    std::string API_PARAM_STRING = "state: " + std::to_string(state.GetState()) + ", "
+    std::string apiParamString = "state: " + std::to_string(state.GetState()) + ", "
                                     + "elapsedTime: " + std::to_string(state.GetPosition().elapsedTime_) + ", "
                                     + "updateTime: " + std::to_string(state.GetPosition().updateTime_) + ", "
                                     + "loopMode: " + std::to_string(state.GetLoopMode()) + ", "
@@ -450,7 +450,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
         "SESSION_TAG", descriptor_.sessionTag_,
         "SESSION_TYPE", GetSessionType(),
-        "API_PARAM", API_PARAM_STRING,
+        "API_PARAM", apiParamString,
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
@@ -488,7 +488,7 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
         moduleName = want->GetElement().GetModuleName().c_str();
         errMsg = "SUCCESS";
     }
-    std::string API_PARAM_STRING = "bundleName: " + bundleName + ", "
+    std::string apiParamString = "bundleName: " + bundleName + ", "
                                     + "moduleName: " + moduleName + ", "
                                     + "abilityName: " + abilityName;
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
@@ -497,7 +497,7 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
         "SESSION_TAG", descriptor_.sessionTag_,
         "SESSION_TYPE", GetSessionType(),
-        "API_PARAM", API_PARAM_STRING,
+        "API_PARAM", apiParamString,
         "ERROR_CODE", res,
         "ERROR_MSG", errMsg);
     return AVSESSION_SUCCESS;
@@ -755,14 +755,14 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
         std::lock_guard lockGuard(avsessionItemLock_);
         supportedCmd_.push_back(cmd);
     }
-    std::string API_PARAM_STRING = "cmd :" + std::to_string(cmd);
+    std::string apiParamString = "cmd :" + std::to_string(cmd);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "OnEvent",
         "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
         "SESSION_TAG", descriptor_.sessionTag_,
         "SESSION_TYPE", GetSessionType(),
-        "API_PARAM", API_PARAM_STRING,
+        "API_PARAM", apiParamString,
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
     ProcessFrontSession("AddSupportCommand");
@@ -798,14 +798,14 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
         std::lock_guard lockGuard(avsessionItemLock_);
         supportedCmd_.erase(iter, supportedCmd_.end());
     }
-    std::string API_PARAM_STRING = "cmd :" + std::to_string(cmd);
+    std::string apiParamString = "cmd :" + std::to_string(cmd);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "OffEvent",
         "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
         "SESSION_TAG", descriptor_.sessionTag_,
         "SESSION_TYPE", GetSessionType(),
-        "API_PARAM", API_PARAM_STRING,
+        "API_PARAM", apiParamString,
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
     ProcessFrontSession("DeleteSupportCommand");

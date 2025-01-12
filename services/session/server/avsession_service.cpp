@@ -1294,15 +1294,15 @@ void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, in
 {
     std::string sessionId = "";
     std::string sessionTag = "";
-    std::string SessionType = "";
+    std::string sessionType = "";
     std::string bundleName = "";
-    std::string API_PARAM_STRING = "";
+    std::string apiParamString = "";
     if (session != nullptr) {
         sessionId = AVSessionUtils::GetAnonySessionId(session->GetDescriptor().sessionId_);
         sessionTag = session->GetDescriptor().sessionTag_;
-        SessionType = session->GetSessionType();
+        sessionType = session->GetSessionType();
         bundleName = session->GetDescriptor().elementName_.GetBundleName();
-        API_PARAM_STRING = "abilityName: " +
+        apiParamString = "abilityName: " +
             session->GetDescriptor().elementName_.GetAbilityName() + ","
             + "moduleName: " + session->GetDescriptor().elementName_.GetModuleName();
     }
@@ -1312,7 +1312,7 @@ void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, in
         "BUNDLE_NAME", bundleName,
         "SESSION_ID",  sessionId,
         "SESSION_TAG", sessionTag,
-        "SESSION_TYPE", SessionType,
+        "SESSION_TYPE", sessionType,
         "ERROR_CODE", res,
         "ERROR_MSG", errMsg);
 }

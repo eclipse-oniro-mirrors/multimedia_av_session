@@ -41,7 +41,7 @@ int32_t CJAVSessionManagerImpl::CreateAVSession(OHOS::AbilityRuntime::AbilityCon
     int32_t ret = AVSessionManager::GetInstance().CreateSession(tag, type, elementName, out);
     if (ret == AVSESSION_SUCCESS) {
         auto sid = out->GetSessionId();
-        convertNativeToCJStruct(sid, sessionId);
+        ConvertNativeToCJStruct(sid, sessionId);
         auto cjSession = FFI::FFIData::Create<CJAVSessionImpl>(out);
         if (cjSession) {
             session = cjSession->GetID();

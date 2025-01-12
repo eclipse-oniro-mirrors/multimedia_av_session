@@ -223,7 +223,7 @@ void CJAVControllerCallback::OnAVCallMetaDataChange(const AVCallMetaData& avCall
     }
     CAVCallMetaData cAvCallMetaData;
     int ret = CJNO_ERROR;
-    ret = convertNativeToCJStruct(avCallMetaData, cAvCallMetaData);
+    ret = ConvertNativeToCJStruct(avCallMetaData, cAvCallMetaData);
     if (ret != CJNO_ERROR) {
         return;
     }
@@ -240,7 +240,7 @@ void CJAVControllerCallback::OnAVCallStateChange(const AVCallState& avCallState)
     }
     CAVCallState cAvCallState;
     int ret = CJNO_ERROR;
-    ret = convertNativeToCJStruct(avCallState, cAvCallState);
+    ret = ConvertNativeToCJStruct(avCallState, cAvCallState);
     if (ret != CJNO_ERROR) {
         return;
     }
@@ -268,7 +268,7 @@ void CJAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
     }
     CAVPlaybackState cAvPlaybackState;
     int ret = CJNO_ERROR;
-    ret = convertNativeToCJStruct(state, cAvPlaybackState);
+    ret = ConvertNativeToCJStruct(state, cAvPlaybackState);
     if (ret != CJNO_ERROR) {
         return;
     }
@@ -285,7 +285,7 @@ void CJAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
     }
     CAVMetaData cAvMetaData;
     int ret = CJNO_ERROR;
-    ret = convertNativeToCJStruct(data, cAvMetaData);
+    ret = ConvertNativeToCJStruct(data, cAvMetaData);
     if (ret != CJNO_ERROR) {
         return;
     }
@@ -313,7 +313,7 @@ void CJAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cm
     }
     CArray cCmds;
     int ret = CJNO_ERROR;
-    ret = convertNativeToCJStruct(cmds, cCmds);
+    ret = ConvertNativeToCJStruct(cmds, cCmds);
     if (ret != CJNO_ERROR) {
         return;
     }
@@ -330,7 +330,7 @@ void CJAVControllerCallback::OnOutputDeviceChange(const int32_t connectionState,
     }
     COutputDeviceInfo cOutputDeviceInfo;
     int ret = CJNO_ERROR;
-    ret = convertNativeToCJStruct(info, cOutputDeviceInfo);
+    ret = ConvertNativeToCJStruct(info, cOutputDeviceInfo);
     if (ret != CJNO_ERROR) {
         return;
     }
@@ -348,14 +348,14 @@ void CJAVControllerCallback::OnSessionEventChange(const std::string& event, cons
     }
     int ret = CJNO_ERROR;
     char* cEvent = nullptr;
-    ret = convertNativeToCJStruct(event, cEvent);
+    ret = ConvertNativeToCJStruct(event, cEvent);
     if (ret != CJNO_ERROR) {
         SLOGD("std::string convert to c_str failed");
         return ;
     }
     
     CArray cArgs;
-    ret = convertNativeToCJStruct(args, cArgs);
+    ret = ConvertNativeToCJStruct(args, cArgs);
     if (ret != CJNO_ERROR) {
         SLOGD("AAFwk::WantParams convert to C Type failed");
         return ;
@@ -374,7 +374,7 @@ void CJAVControllerCallback::OnQueueItemsChange(const std::vector<AVQueueItem>& 
     }
     CArray cQueueItems;
     int ret = CJNO_ERROR;
-    ret = convertNativeToCJStruct(items, cQueueItems);
+    ret = ConvertNativeToCJStruct(items, cQueueItems);
     if (ret != CJNO_ERROR) {
         return;
     }
@@ -402,7 +402,7 @@ void CJAVControllerCallback::OnExtrasChange(const AAFwk::WantParams& extras)
     }
     CArray cExtras;
     int ret = CJNO_ERROR;
-    ret = convertNativeToCJStruct(extras, cExtras);
+    ret = ConvertNativeToCJStruct(extras, cExtras);
     if (ret != CJNO_ERROR) {
         return;
     }

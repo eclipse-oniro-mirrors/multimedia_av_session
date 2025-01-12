@@ -430,7 +430,7 @@ void CJAVSessionCallback::OnToggleFavorite(const std::string& assertId)
         SLOGD("toggle favorite for assertId: %s", assertId.c_str());
         int ret = CJNO_ERROR;
         char* cassertId = nullptr;
-        ret = convertNativeToCJStruct(assertId, cassertId);
+        ret = ConvertNativeToCJStruct(assertId, cassertId);
         if (ret != CJNO_ERROR) {
             SLOGD("std::string convert to C Type failed");
             return ;
@@ -447,7 +447,7 @@ void CJAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
         SLOGD("media key event received");
         CKeyEvent ckeyEvent;
         int ret = CJNO_ERROR;
-        ret = convertNativeToCJStruct(keyEvent, ckeyEvent);
+        ret = ConvertNativeToCJStruct(keyEvent, ckeyEvent);
         if (ret != CJNO_ERROR) {
             SLOGD("KeyEvent convert to C Type failed");
             return ;
@@ -465,7 +465,7 @@ void CJAVSessionCallback::OnOutputDeviceChange(
         SLOGD("output device connection state: %d", connectionState);
         COutputDeviceInfo coutputDeviceInfo;
         int ret = CJNO_ERROR;
-        ret = convertNativeToCJStruct(outputDeviceInfo, coutputDeviceInfo);
+        ret = ConvertNativeToCJStruct(outputDeviceInfo, coutputDeviceInfo);
         if (ret != CJNO_ERROR) {
             SLOGD("OutputDeviceInfo convert to C Type failed");
             return ;
@@ -483,14 +483,14 @@ void CJAVSessionCallback::OnCommonCommand(
         SLOGD("common command received");
         int ret = CJNO_ERROR;
         char* ccommand = nullptr;
-        ret = convertNativeToCJStruct(command, ccommand);
+        ret = ConvertNativeToCJStruct(command, ccommand);
         if (ret != CJNO_ERROR) {
             SLOGD("std::string convert to c_str failed");
             return ;
         }
         SLOGD("common command received: %s", ccommand);
         CArray cArgs;
-        ret = convertNativeToCJStruct(commandArgs, cArgs);
+        ret = ConvertNativeToCJStruct(commandArgs, cArgs);
         if (ret != CJNO_ERROR) {
             SLOGD("AAFwk::WantParams convert to C Type failed");
             return ;
@@ -553,7 +553,7 @@ void CJAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDisplay
         SLOGD("cast display change");
         CCastDisplayInfo ccastDisplayInfo;
         int ret = CJNO_ERROR;
-        ret = convertNativeToCJStruct(castDisplayInfo, ccastDisplayInfo);
+        ret = ConvertNativeToCJStruct(castDisplayInfo, ccastDisplayInfo);
         if (ret != CJNO_ERROR) {
             SLOGD("CastDisplayInfo convert to C Type failed");
             return ;

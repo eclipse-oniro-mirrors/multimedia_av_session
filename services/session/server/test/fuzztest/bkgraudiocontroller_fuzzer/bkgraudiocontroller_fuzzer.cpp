@@ -45,7 +45,7 @@ T GetData()
     return object;
 }
 
-void OHOS::AVSession::BackGroundAudioControllerTest_01(uint8_t *data, size_t size)
+void OHOS::AVSession::BackgroundAudioControllerTest01(uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
@@ -69,6 +69,6 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
     g_dataSize = size;
     g_pos = 0;
     /* Run your code on data */
-    OHOS::AVSession::BackGroundAudioControllerTest_01(data, size);
+    OHOS::AVSession::BackgroundAudioControllerTest01(data, size);
     return 0;
 }

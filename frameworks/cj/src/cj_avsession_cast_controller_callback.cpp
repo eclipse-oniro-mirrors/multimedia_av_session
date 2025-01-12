@@ -32,7 +32,7 @@ template<class T, class CT> CCallbackData* convertToCallbackData(
         }
         CT* cData = static_cast<CT *>(malloc(sizeof(CT)));
         if (cData != nullptr) {
-            callbackData->error = convertNativeToCJStruct(native, *cData);
+            callbackData->error = ConvertNativeToCJStruct(native, *cData);
             callbackData->data = static_cast<void *>(cData);
         } else {
             callbackData->error = ERR_NO_MEMORY;
@@ -50,7 +50,7 @@ template<class T, class CT, class T2, class CT2> CCallbackData* convertToCallbac
         callbackData->kind = eventType;
         CT* cData = static_cast<CT *>(malloc(sizeof(CT)));
         if (cData != nullptr) {
-            callbackData->error = convertNativeToCJStruct(native, *cData);
+            callbackData->error = ConvertNativeToCJStruct(native, *cData);
             callbackData->data = static_cast<void *>(cData);
         } else {
             callbackData->error = ERR_NO_MEMORY;
@@ -58,7 +58,7 @@ template<class T, class CT, class T2, class CT2> CCallbackData* convertToCallbac
         }
         CT2* cData2 = static_cast<CT2 *>(malloc(sizeof(CT2)));
         if (cData2 != nullptr) {
-            callbackData->error = convertNativeToCJStruct(native2, *cData2);
+            callbackData->error = ConvertNativeToCJStruct(native2, *cData2);
             callbackData->data2 = static_cast<void *>(cData2);
         } else {
             callbackData->error = ERR_NO_MEMORY;
