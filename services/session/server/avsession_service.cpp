@@ -615,6 +615,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
             topSession_->GetUid() != ancoUid) {
             AVSessionService::NotifySystemUI(nullptr, true);
+            PublishEvent(mediaPlayStateTrue);
         }
         if (topSession_->GetUid() == ancoUid) {
             int32_t ret = Notification::NotificationHelper::CancelNotification(0);
@@ -632,6 +633,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
             if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
                 topSession_->GetUid() != ancoUid) {
                 AVSessionService::NotifySystemUI(nullptr, true);
+                PublishEvent(mediaPlayStateTrue);
             }
             if (topSession_->GetUid() == ancoUid) {
                 int32_t ret = Notification::NotificationHelper::CancelNotification(0);
@@ -708,6 +710,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             UpdateTopSession(sessionItem);
             AVSessionDescriptor selectSession = sessionItem->GetDescriptor();
             NotifySystemUI(&selectSession, true);
+            PublishEvent(mediaPlayStateTrue);
         }
     } else {
         std::lock_guard lockGuard(sessionServiceLock_);
@@ -966,6 +969,7 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    PublishEvent(mediaPlayStateFalse);
     for (const auto& [pid, listener] : listenerMap) {
         if (listener != nullptr) {
             listener->OnSessionRelease(descriptor);
@@ -2966,6 +2970,18 @@ void AVSessionService::RemoveExpired(std::list<std::chrono::system_clock::time_p
     }
 }
 
+void AVSessionService::PublishEvent(int32_t mediaPlayState)
+{
+    OHOS::AAFwk::Want want;
+    want.SetAction(MEDIA_CONTROL_STATE);
+    want.SetParam(MEDIA_PLAY_STATE, mediaPlayState);
+    EventFwk::CommonEventData data;
+    data.SetWant(want);
+    EventFwk::CommonEventPublishInfo publishInfo;
+    int ret = EventFwk::CommonEventManager::NewPublishCommonEvent(data, publishInfo);
+    SLOGI("NewPublishCommonEvent return %{public}d", ret);
+}
+
 // LCOV_EXCL_START
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession)
 {
@@ -3041,6 +3057,7 @@ void AVSessionService::NotifyDeviceChange()
     if (avQueueInfos.size() >= MININUM_FOR_NOTIFICATION) {
         SLOGI("history bundle name %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
         NotifySystemUI(&(hisDescriptors[0]), false);
+        PublishEvent(mediaPlayStateTrue);
     }
 }
 // LCOV_EXCL_STOP
