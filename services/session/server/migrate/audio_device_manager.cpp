@@ -129,7 +129,7 @@ void AudioDeviceManager::RegisterPreferedOutputDeviceChangeCallback()
         SLOGE("no available device");
         return;
     }
-    sptr<AudioStandard::AudioDeviceDescriptor> device = desc[0];
+    std::shared_ptr<AudioStandard::AudioDeviceDescriptor> device = desc[0];
     if (device != nullptr) {
         if (AudioStandard::LOCAL_NETWORK_ID == device->networkId_) {
             outputDevice_ = AUDIO_OUTPUT_SOURCE;
@@ -395,7 +395,7 @@ void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeActio
         SLOGE("audioSystemManager is null");
         return;
     }
-    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> deviceDescriptors =
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> deviceDescriptors =
         deviceChangeAction.deviceDescriptors;
     for (auto &device : deviceDescriptors) {
         if (device != nullptr &&
