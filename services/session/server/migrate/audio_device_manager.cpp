@@ -84,7 +84,7 @@ void AudioDeviceManager::RegisterAudioDeviceChangeCallback()
         SLOGE("audioRoutingManager is null");
         return;
     }
-    std::vector<std::unique_ptr<AudioStandard::AudioDeviceDescriptor>> devices =
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> devices =
         audioRoutingManager->GetAvailableDevices(AudioStandard::AudioDeviceUsage::MEDIA_OUTPUT_DEVICES);
     for (auto& device : devices) {
         if (device != nullptr &&
@@ -123,7 +123,7 @@ void AudioDeviceManager::RegisterPreferedOutputDeviceChangeCallback()
     rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
     audioRoutingManager->SetPreferredOutputDeviceChangeCallback(rendererInfo,
         audioPreferedOutputDeviceChangeCallback_);
-    std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> desc;
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> desc;
     audioRoutingManager->GetPreferredOutputDeviceForRendererInfo(rendererInfo, desc);
     if (desc.empty()) {
         SLOGE("no available device");
@@ -234,7 +234,7 @@ bool AudioDeviceManager::GetAppDisplayState(std::string sessionId)
     }
     uint64_t displayId = 0;
     GetAppDisplayId(displayId, currentPid, infos);
-    SLOGI("current app display %{public}lu", displayId);
+    SLOGI("current app display %{public}llu", displayId);
     return displayId >= VIRTUAL_DISPLAY_ID;
 }
 
@@ -262,7 +262,7 @@ int32_t AudioDeviceManager::GetAppDisplayId(uint64_t &displayId, pid_t currentPi
             break;
         }
     }
-    SLOGI("current app display %{public}lu", displayId);
+    SLOGI("current app display %{public}llu", displayId);
     return AVSESSION_SUCCESS;
 }
 
@@ -426,7 +426,7 @@ void DeviceChangeCallback::OnCarA2dpStateChange(AudioStandard::DeviceChangeType 
 }
 
 void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
-    const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> &desc)
+    const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc)
 {
     SLOGI("receive OnPreferedOutputDeviceUpdated");
     if (desc.empty()) {

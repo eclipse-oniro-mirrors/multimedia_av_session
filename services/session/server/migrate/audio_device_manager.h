@@ -98,7 +98,7 @@ private:
 class OutputDeviceChangeCallback : public AudioStandard::AudioPreferredOutputDeviceChangeCallback {
 public:
     void OnPreferredOutputDeviceUpdated(
-        const std::vector<sptr<AudioStandard::AudioDeviceDescriptor>> &desc) override;
+        const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc) override;
 };
 
 class FocusInfoChangeCallback : public AudioStandard::AudioFocusInfoChangeCallback {
