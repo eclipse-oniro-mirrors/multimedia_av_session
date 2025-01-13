@@ -39,7 +39,9 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
     deviceId_ = deviceId;
     ObserveControllerChanged(deviceId);
     SendSpecialKeepaliveData();
-    SendRemoteControllerList(deviceId);
+    if (!AudioDeviceManager::GetInstance().GetSessionInfoSyncState()) {
+        SendRemoteControllerList(deviceId);
+    }
 }
 
 void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
@@ -291,7 +293,7 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
     SLOGI("OnSessionRelease : %{public}s", sessionId.c_str());
     if (sessionId.compare(topSessionId_) == 0) {
         std::string msg = AudioDeviceManager::GetInstance().GenerateEmptySession();
-        AudioDeviceManager::GetInstance().SendRemoteAudioMsg(deviceId_, msg);
+        AudioDeviceManager::GetInstance().SendRemoteAudioMsg(deviceId_, "", msg);
     }
     ClearCacheBySessionId(sessionId);
 }
@@ -317,7 +319,9 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
             CreateController(descriptor.sessionId_);
         }
     }
-    SendRemoteControllerList(deviceId_);
+    if (!AudioDeviceManager::GetInstance().GetSessionInfoSyncState()) {
+        SendRemoteControllerList(deviceId_);
+    }
 }
 
 void MigrateAVSessionServer::SortControllers(std::list<sptr<AVControllerItem>> controllers)
@@ -334,6 +338,18 @@ void MigrateAVSessionServer::SortControllers(std::list<sptr<AVControllerItem>> c
             controllers.splice(controllers.begin(), controllers, iter);
             break;
         }
+    }
+}
+
+void MigrateAVSessionServer::SendPlayCommand()
+{
+    sptr<AVControllerItem> avcontroller{nullptr};
+    GetControllerById(topSessionId_, avcontroller);
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    if (avcontroller != nullptr) {
+        SLOGI("SendPlayCommand top %{public}s", topSessionId_.c_str());
+        avcontroller->SendControlCommand(cmd);
     }
 }
 
@@ -360,26 +376,67 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
         SendByteToAll(msg);
     }
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
-        DelaySendMetaData();
+        DelaySendMetaData(topSessionId_);
         }, "DelaySendMetaData", DELAY_TIME);
 }
 
-void MigrateAVSessionServer::SendRemoteControllerInfo(const std::string &deviceId, std::string msg)
+void MigrateAVSessionServer::SendRemoteControllerInfo(const std::string &deviceId,
+    std::string sessionId, std::string msg)
 {
     if (!deviceId.empty()) {
+        if (!sessionId.empty()) {
+            msg = ConvertControllerByIdToStr(sessionId);
+            SLOGI("SendRemoteControllerInfo msg %{public}s", msg.c_str());
+        }
         SendByte(deviceId, msg);
+
+        AVSessionEventHandler::GetInstance().AVSessionPostTask([=]() {
+            DelaySendMetaData(sessionId);
+            }, "DelaySendMetaData", DELAY_TIME);
     }
 }
 
-void MigrateAVSessionServer::DelaySendMetaData()
+std::string MigrateAVSessionServer::ConvertControllerByIdToStr(std::string sessionId)
 {
     sptr<AVControllerItem> avcontroller{nullptr};
-    GetControllerById(topSessionId_, avcontroller);
+    auto res = GetControllerById(sessionId, avcontroller);
+    if (res != AVSESSION_SUCCESS || avcontroller == nullptr) {
+        SLOGE("GetControllerById no session");
+        return "";
+    }
+    Json::Value jsonArray;
+    jsonArray.resize(1);
+    std::string playerId = avcontroller->GetSessionId();
+    Json::Value jsonObject = ConvertControllerToJson(avcontroller);
+    jsonObject[PLAYER_ID] = playerId;
+    jsonArray[0] = jsonObject;
+    Json::Value jsonData;
+    jsonData[MEDIA_CONTROLLER_LIST] = jsonArray;
+    Json::FastWriter writer;
+    std::string jsonStr = writer.write(jsonData);
+    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER_LIST, '0'};
+    std::string msg = std::string(header) + jsonStr;
+    return msg;
+}
+
+int32_t MigrateAVSessionServer::GetAllSessionDescriptors(std::vector<AVSessionDescriptor> &descriptors)
+{
+    if (servicePtr_ != nullptr) {
+        return servicePtr_->GetAllSessionDescriptors(descriptors);
+    }
+    return AVSESSION_ERROR;
+}
+
+void MigrateAVSessionServer::DelaySendMetaData(std::string sessionId)
+{
+    sptr<AVControllerItem> avcontroller{nullptr};
+    GetControllerById(sessionId, avcontroller);
     if (avcontroller != nullptr) {
         AVMetaData resultMetaData;
         resultMetaData.Reset();
         avcontroller->GetAVMetaData(resultMetaData);
-        std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
+        currentMetaAsset_ = resultMetaData.GetAssetId();
+        std::string metaDataStr = ConvertMetadataInfoToStr(sessionId,
             SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, resultMetaData);
         SendByte(deviceId_, metaDataStr);
     }
@@ -676,15 +733,33 @@ void MigrateAVSessionServer::PlaybackCommandDataProc(int mediaCommand, const std
 
 void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, const AVMetaData &data)
 {
+    if (data.GetAssetId().compare(currentMetaAsset_) != 0 && GetVehicleRelatingState(playerId)) {
+        currentMetaAsset_ = data.GetAssetId();
+        AudioDeviceManager::GetInstance().ProcessVirtualDisplay();
+        return;
+    }
     std::string metaDataStr = ConvertMetadataInfoToStr(playerId, SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, data);
     SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s", metaDataStr.c_str());
 
-    SendByte(deviceId_, metaDataStr);
+    if (!AudioDeviceManager::GetInstance().GetSessionInfoSyncState()) {
+        SendByte(deviceId_, metaDataStr);
+    }
+}
+
+bool MigrateAVSessionServer::GetVehicleRelatingState(std::string playerId)
+{
+    return AUDIO_OUTPUT_SINK == AudioDeviceManager::GetInstance().GetAudioState() &&
+        AudioDeviceManager::GetInstance().GetCarA2dpState() &&
+        AudioDeviceManager::GetInstance().GetAppDisplayState(playerId);
 }
 // LCOV_EXCL_STOP
 
 void MigrateAVSessionServer::OnPlaybackStateChanged(const std::string &playerId, const AVPlaybackState &state)
 {
+    if (AudioDeviceManager::GetInstance().GetSessionInfoSyncState()) {
+        SLOGI("dont send play state");
+        return;
+    }
     Json::Value value;
     value[PLAYER_ID] = playerId;
     value[MEDIA_INFO] = SYNC_CONTROLLER_CALLBACK_ON_PLAYBACKSTATE_CHANGED;
