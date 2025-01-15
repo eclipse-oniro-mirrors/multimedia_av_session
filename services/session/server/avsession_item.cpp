@@ -1236,6 +1236,7 @@ void AVSessionItem::DealLocalState(int32_t castState)
             SetOutputDevice(outputDeviceInfo);
         } else {
             if (newOutputDeviceInfo_.deviceInfos_.size() > 0) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(SWITCH_WAIT_TIME));
                 SubStartCast(newOutputDeviceInfo_);
             }
             isSwitchNewDevice_ = false;
@@ -1389,7 +1390,7 @@ int32_t AVSessionItem::StopCast()
         return ret;
     }
     {
-        CHECK_AND_RETURN_RET_LOG(castHandle_ != 0, AVSESSION_SUCCESS, "Not cast session, return");
+        CHECK_AND_RETURN_RET_LOG(castHandle_ != 0 && castHandle_ != -1, AVSESSION_SUCCESS, "Not cast session, return");
         SLOGI("Stop cast process %" PRId64 "", castHandle_);
         if (castHandle_ == AVRouter::GetInstance().GetMirrorCastHandle()) {
             if (castControllerProxy_ != nullptr) {

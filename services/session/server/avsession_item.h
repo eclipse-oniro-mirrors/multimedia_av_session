@@ -438,6 +438,7 @@ private:
     OutputDeviceInfo newOutputDeviceInfo_;
     std::shared_ptr<bool> isAlivePtr_;
     bool isFirstCallback_ = true;
+    const int32_t SWITCH_WAIT_TIME = 300;
 #endif
 };
 } // namespace OHOS::AVSession
