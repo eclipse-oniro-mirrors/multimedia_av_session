@@ -1579,49 +1579,6 @@ static HWTEST_F(AVSessionServiceTest, ReportStartCastEnd001, TestSize.Level1)
     SLOGI("NotifyDeviceAvailable001 end!");
 }
 
-#ifdef BLUETOOTH_ENABLE
-static HWTEST_F(AVSessionServiceTest, OnStateChanged001, TestSize.Level1)
-{
-    SLOGI("OnStateChanged001 begin!");
-    DetectBluetoothHostObserver detectBluetoothHostObserver(avservice_);
-    int transport = 111222;
-    int status = 111222;
-    detectBluetoothHostObserver.OnStateChanged(transport, status);
-    SLOGI("OnStateChanged001 end!");
-}
-
-static HWTEST_F(AVSessionServiceTest, OnStateChanged002, TestSize.Level1)
-{
-    SLOGI("OnStateChanged002 begin!");
-    DetectBluetoothHostObserver detectBluetoothHostObserver(avservice_);
-    int transport = OHOS::Bluetooth::BTTransport::ADAPTER_BREDR;
-    int status = 111222;
-    detectBluetoothHostObserver.OnStateChanged(transport, status);
-    SLOGI("OnStateChanged002 end!");
-}
-
-static HWTEST_F(AVSessionServiceTest, OnStateChanged003, TestSize.Level1)
-{
-    SLOGI("OnStateChanged003 begin!");
-    DetectBluetoothHostObserver detectBluetoothHostObserver(avservice_);
-    int transport = OHOS::Bluetooth::BTTransport::ADAPTER_BREDR;
-    int status = OHOS::Bluetooth::BTStateID::STATE_TURN_ON;
-    detectBluetoothHostObserver.OnStateChanged(transport, status);
-    SLOGI("OnStateChanged003 end!");
-}
-
-static HWTEST_F(AVSessionServiceTest, OnStateChanged004, TestSize.Level1)
-{
-    SLOGI("OnStateChanged004 begin!");
-    AVSessionService *avservice = nullptr;
-    DetectBluetoothHostObserver detectBluetoothHostObserver(avservice);
-    int transport = OHOS::Bluetooth::BTTransport::ADAPTER_BREDR;
-    int status = OHOS::Bluetooth::BTStateID::STATE_TURN_ON;
-    detectBluetoothHostObserver.OnStateChanged(transport, status);
-    SLOGI("OnStateChanged004 end!");
-}
-#endif
-
 static HWTEST_F(AVSessionServiceTest, OnReceiveEvent003, TestSize.Level1)
 {
     SLOGD("OnReceiveEvent003 begin!");

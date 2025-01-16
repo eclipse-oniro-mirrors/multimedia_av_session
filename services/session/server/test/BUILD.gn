@@ -159,27 +159,6 @@ ohos_unittest("AVSessionServiceSupplementTest") {
   }
 }
 
-ohos_unittest("DetectBluetoothHostObserverTest") {
-  module_out_path = module_output_path
-
-  sources = [ "detect_bluetooth_host_observer_test.cpp" ]
-
-  configs = [ ":module_private_config" ]
-
-  cflags_cc = [ "--coverage" ]
-
-  ldflags = [ "--coverage" ]
-
-  deps = common_deps
-
-  external_deps = common_external_deps
-
-  if (bluetooth_part_enable) {
-    cflags_cc += [ "-DBLUETOOTH_ENABLE" ]
-    external_deps += [ "bluetooth:btframework" ]
-  }
-}
-
 ohos_unittest("RemoteSessionSinkTest") {
   module_out_path = module_output_path
 
@@ -1462,7 +1441,6 @@ group("av_session_server_unittest") {
     ":BundleStatusAdapterTest",
     ":CollaborationManagerTest",
     ":CommandSendLimitTest",
-    ":DetectBluetoothHostObserverTest",
     ":FocusSessionStrategyTest",
     ":HashCalculatorTest",
     ":JsonUtilsTest",

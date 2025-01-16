@@ -70,10 +70,6 @@
 
 #include "avsession_users_manager.h"
 
-#ifdef BLUETOOTH_ENABLE
-#include "bluetooth_host.h"
-#endif
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
 #include "collaboration_manager.h"
@@ -98,55 +94,6 @@ public:
     ~AVSessionInitDMCallback() override = default;
     void OnRemoteDied() override {};
 };
-
-#ifdef BLUETOOTH_ENABLE
-class DetectBluetoothHostObserver : public OHOS::Bluetooth::BluetoothHostObserver {
-public:
-    DetectBluetoothHostObserver(AVSessionService *ptr);
-    virtual ~DetectBluetoothHostObserver() = default;
-    void OnStateChanged(const int transport, const int status) override;
-    void OnDiscoveryStateChanged(int status) override
-    {
-        return;
-    }
-    
-    void OnDiscoveryResult(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int rssi,
-        const std::string deviceName, int deviceClass) override
-    {
-        return;
-    }
-
-    void OnPairRequested(const OHOS::Bluetooth::BluetoothRemoteDevice &device) override
-    {
-        return;
-    }
-
-    void OnPairConfirmed(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int reqType, int number) override
-    {
-        return;
-    }
-
-    void OnScanModeChanged(int mode) override
-    {
-        return;
-    }
-
-    void OnDeviceNameChanged(const std::string &deviceName) override
-    {
-        return;
-    }
-
-    void OnDeviceAddrChanged(const std::string &address) override
-    {
-        return;
-    }
-
-private:
-    bool is2in1_ = false;
-    bool lastEnabled_ = false;
-    AVSessionService *servicePtr_ = nullptr;
-};
-#endif
 
 class EventSubscriber : public EventFwk::CommonEventSubscriber {
 public:
@@ -276,21 +223,11 @@ public:
     
     void AddAvQueueInfoToFile(AVSessionItem& session);
 
-    void SetScreenOn(bool on);
-
-    bool GetScreenOn();
-
-    void SetScreenLocked(bool isLocked);
-
-    bool GetScreenLocked();
-
     std::string GetAVQueueDir(int32_t userId = 0);
 
     std::string GetAVSortDir(int32_t userId = 0);
 
     void HandleUserEvent(const std::string &type, const int &userId);
-
-    void HandleScreenStatusChange(std::string event);
 
     void RegisterBundleDeleteEventForHistory(int32_t userId = 0);
 
@@ -299,7 +236,6 @@ public:
     void InitCastEngineService();
 
 private:
-    void CheckBrEnable();
 
     void NotifyProcessStatus(bool isStart);
 
@@ -552,11 +488,6 @@ private:
     std::recursive_mutex outputDeviceIdLock_;
 
     std::recursive_mutex castAudioSessionMapLock_;
-
-#ifdef BLUETOOTH_ENABLE
-    OHOS::Bluetooth::BluetoothHost *bluetoothHost_ = nullptr;
-    std::shared_ptr<DetectBluetoothHostObserver> bluetoothObserver;
-#endif
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::map<std::string, std::string> castServiceNameMapState_;
