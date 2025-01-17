@@ -57,9 +57,7 @@ public:
     void OnPlaybackStateChanged(const std::string &playerId, const AVPlaybackState &state);
     void StopObserveControllerChanged(const std::string &deviceId);
     void SendRemoteControllerList(const std::string &deviceId);
-    void SendRemoteControllerInfo(const std::string &deviceId, std::string sessionId, std::string msg);
-    int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor> &descriptors);
-    void SendPlayCommand();
+    void SendRemoteControllerInfo(const std::string &deviceId, std::string msg);
 
 private:
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;
@@ -77,8 +75,6 @@ private:
     int32_t GetAllControllers(std::vector<sptr<AVControllerItem>> &controller);
 
     std::string ConvertControllersToStr(std::vector<sptr<AVControllerItem>> avcontrollers);
-
-    std::string ConvertControllerByIdToStr(std::string sessionId);
 
     Json::Value ConvertControllerToJson(sptr<AVControllerItem> avcontroller);
 
@@ -99,15 +95,13 @@ private:
     void SendSpecialKeepaliveData();
     std::string GetBundleName(std::string sessionId);
     bool CompressToJPEG(const AVMetaData &metadata, std::vector<uint8_t> &outputData);
-    void DelaySendMetaData(std::string sessionId);
-    bool GetVehicleRelatingState(std::string playerId);
+    void DelaySendMetaData();
 
     AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
     std::string deviceId_;
     std::string topSessionId_;
     std::string lastSessionId_;
-    std::string currentMetaAsset_;
     std::recursive_mutex migrateControllerLock_;
     std::recursive_mutex topSessionLock_;
 };
