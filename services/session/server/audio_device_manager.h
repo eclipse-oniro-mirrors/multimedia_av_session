@@ -66,3 +66,4 @@ public:
         const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc) override;
 };
 }
+#endif
