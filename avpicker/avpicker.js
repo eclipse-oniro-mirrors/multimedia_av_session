@@ -492,7 +492,7 @@ export class AVCastPicker extends ViewPU {
                                 Divider.height(1);
                                 Divider.color({ 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'],
                                     'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                Divider.padding({ right: (this.isRTL ? 48 : 16), left: (this.isRTL ? 16 : 48) });
+                                Divider.padding({ right: (this.isRTL ? 44 : 12), left: (this.isRTL ? 12 : 44) });
                             }, Divider);
                         });
                     } else if (this.isPc && (w8 !== this.deviceList.length - 1)) {
