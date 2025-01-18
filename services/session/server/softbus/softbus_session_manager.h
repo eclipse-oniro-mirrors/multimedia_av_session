@@ -38,6 +38,8 @@ public:
 
     int32_t Socket(const std::string &pkgName);
 
+    int32_t Bind(const std::string &peerNetworkId, const std::string &pkgName);
+
     void Shutdown(int32_t socket);
 
     int32_t SendMessage(int32_t socket, const std::string &data);

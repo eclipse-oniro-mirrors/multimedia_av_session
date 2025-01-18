@@ -20,6 +20,7 @@
 
 #include "softbus_session_manager.h"
 #include "softbus_session_server.h"
+#include "softbus_session_proxy.h"
 
 namespace OHOS::AVSession {
 class SoftbusDistributedDataManager : public std::enable_shared_from_this<SoftbusDistributedDataManager> {
@@ -82,6 +83,11 @@ public:
 
     void ReleaseServer(const std::shared_ptr<SoftbusSessionServer> &server);
 
+    bool CreateProxy(const std::shared_ptr<SoftbusSessionProxy> &proxy,
+        const std::string &peerNetworkId, const std::string &packageName);
+
+    bool ReleaseProxy(const std::shared_ptr<SoftbusSessionProxy> &proxy, const std::string &peerNetworkId);
+
 private:
     void SessionOpened(int32_t socket, PeerSocketInfo info);
     void SessionClosed(int32_t socket);
@@ -90,11 +96,17 @@ private:
     void OnSessionServerOpened();
     void OnSessionServerClosed(int32_t socket);
     void OnMessageHandleReceived(int32_t socket, const std::string &data);
-    void OnBytesServerReceived(const std::string &data);
+    void OnBytesServerReceived(int32_t socket, const std::string &data);
+    int32_t ConnectRemoteDevice(const std::string &peerNetworkId,
+        const std::string &packageName, int32_t retryCount);
+    void OnSessionProxyOpened(int32_t socket);
+    void OnSessionProxyClosed(int32_t socket);
+    void OnBytesProxyReceived(int32_t socket, const std::string &data);
 
     std::map<int32_t, std::shared_ptr<SoftbusSessionServer>> serverMap_;
     std::shared_ptr<SSListener> ssListener_;
     std::recursive_mutex softbusDistributedDataLock_;
+    std::map<const std::string, int32_t> mServerSocketMap_;
 
     static constexpr const int MESSAGE_CODE_CONNECT_SERVER = 1;
 
@@ -104,7 +116,12 @@ private:
         .pkgName = nullptr,
         .dataType = DATA_TYPE_BYTES,
     };
-    
+
+    bool isServer_ = true;
+    std::map<const std::string, int32_t> mProxySocketMap_;
+    std::map<const std::string, std::map<int32_t, std::shared_ptr<SoftbusSessionProxy>>> mDeviceToProxyMap_;
+    static constexpr const int softbusLinkMaxRetryTimes = 5;
+    static constexpr int retryIntervalTime = 500;
     std::map<const std::string, int32_t> mMap_;
 };
 } // namespace OHOS::AVSession
