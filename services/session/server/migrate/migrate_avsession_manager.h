@@ -21,6 +21,7 @@
 
 #include "softbus_distributed_data_manager.h"
 #include "migrate_avsession_server.h"
+#include "migrate_avsession_proxy.h"
 
 namespace OHOS::AVSession {
 class MigrateAVSessionManager {
@@ -30,6 +31,12 @@ public:
     void CreateLocalSessionStub(std::string scene, std::shared_ptr<MigrateAVSessionServer> server);
 
     void ReleaseLocalSessionStub(std::string scene);
+
+    void CreateRemoteSessionProxy(std::string &networkId, std::string scene,
+        std::shared_ptr<MigrateAVSessionProxy> proxy);
+    
+    void ReleaseRemoteSessionProxy(std::string &networkId, std::string scene);
+
 private:
     MigrateAVSessionManager() = default;
     ~MigrateAVSessionManager() = default;
@@ -38,6 +45,7 @@ private:
     void DecSoftBusRef();
 
     std::map<std::string, std::shared_ptr<SoftbusSessionServer>> serverMap_;
+    std::map<std::string, std::shared_ptr<SoftbusSessionProxy>> proxyMap_;
     std::shared_ptr<SoftbusDistributedDataManager> softBusDistributedDataMgr_ =
         std::make_shared<SoftbusDistributedDataManager>();
     std::atomic<int32_t> refs_ = 0;

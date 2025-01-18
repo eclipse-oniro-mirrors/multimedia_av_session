@@ -88,6 +88,39 @@ int32_t SoftbusSessionManager::Socket(const std::string &pkgName)
     return socket;
 }
 
+int32_t SoftbusSessionManager::Bind(const std::string &peerNetworkId, const std::string &pkgName)
+{
+    if (peerNetworkId.c_str() == nullptr || peerNetworkId.length() <= 0 || pkgName.c_str() == nullptr) {
+        SLOGE("pkg or networkId name is empty");
+        return AVSESSION_ERROR;
+    }
+    SocketInfo info = {
+        .name = const_cast<char*>(CONFIG_SOFTBUS_SESSION_TAG),
+        .peerName = const_cast<char*>(CONFIG_SOFTBUS_SESSION_TAG),
+        .peerNetworkId = const_cast<char*>(peerNetworkId.c_str()),
+        .pkgName = const_cast<char*>(pkgName.c_str()),
+        .dataType = DATA_TYPE_BYTES
+    };
+    int32_t socket = ::Socket(info);
+    QosTV serverQos[] = {
+        {.qos = QOS_TYPE_MIN_BW,        .value = 64 * 1024 }, //最小带宽64k
+        {.qos = QOS_TYPE_MAX_LATENCY,   .value = 19000 }, //最大建链时延19s
+        {.qos = QOS_TYPE_MIN_LATENCY,   .value = 500 }, //最小建链时延0.5s
+    };
+    int32_t ret = ::Bind(socket, serverQos, QOS_COUNT, &iSessionListener);
+    if (ret == 0) {
+        SLOGI("service success ,socket[%{public}d]", socket);
+        std::lock_guard lockGuard(socketLock_);
+        mMap_.insert({socket, peerNetworkId});
+        //建立服务成功
+        return socket;
+    } else {
+        SLOGI("service failed ,ret[%{public}d]", ret);
+        //建立服务失败，错误码
+        return AVSESSION_ERROR;
+    }
+}
+
 void SoftbusSessionManager::Shutdown(int32_t socket)
 {
     SLOGI("socket Shutdown");
@@ -156,6 +189,7 @@ void SoftbusSessionManager::OnBind(int32_t socket, PeerSocketInfo info)
     for (auto listener : sessionListeners_) {
         listener->OnBind(socket, info);
         mMap_.insert({socket, info.networkId});
+        listener->OnBind(socket, info);
     }
 }
 

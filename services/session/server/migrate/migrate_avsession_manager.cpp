@@ -60,6 +60,50 @@ void MigrateAVSessionManager::ReleaseLocalSessionStub(std::string scene)
     serverMap_.erase(scene);
 }
 
+void MigrateAVSessionManager::CreateRemoteSessionProxy(std::string &networkId, std::string scene,
+    std::shared_ptr<MigrateAVSessionProxy> proxy)
+{
+    SLOGI("enter CreateRemoteSessionProxy");
+    if (proxy == nullptr || networkId.c_str() == nullptr || networkId.empty()) {
+        SLOGW("CreateRemoteSessionProxy error, invalid params");
+        return;
+    }
+    if ("SuperLauncher-Dual" != scene) {
+        SLOGW("CreateRemoteSessionProxy error, scene: %{public}s", scene.c_str());
+        return;
+    }
+    if (proxyMap_.find(scene) != proxyMap_.end()) {
+        SLOGW("CreateRemoteSessionProxy error, %{public}s scene already exist", scene.c_str());
+        return;
+    }
+    softBusDistributedDataMgr_->Init();
+    refs_++;
+    softBusDistributedDataMgr_->CreateProxy(proxy,  networkId, "AVSession");
+    proxyMap_.insert({scene, proxy});
+}
+
+void MigrateAVSessionManager::ReleaseRemoteSessionProxy(std::string &networkId, std::string scene)
+{
+    SLOGI("enter ReleaseRemoteSessionProxy");
+    if (networkId.c_str() == nullptr || networkId.empty()) {
+        SLOGW("ReleaseRemoteSessionProxy error, invalid params");
+        return;
+    }
+    if ("SuperLauncher-Dual" != scene) {
+        SLOGW("not ReleaseRemoteSessionProxy: scene: %{public}s", scene.c_str());
+        return;
+    }
+    std::lock_guard lockGuard(migrateServerMapLock_);
+    auto it = proxyMap_.find(scene);
+    if (it == proxyMap_.end()) {
+        SLOGW("not find and return");
+        return;
+    }
+    softBusDistributedDataMgr_->ReleaseProxy(it->second,  networkId);
+    DecSoftBusRef();
+    proxyMap_.erase(scene);
+}
+
 void MigrateAVSessionManager::IncSoftBusRef()
 {
     if (refs_ == 0) {

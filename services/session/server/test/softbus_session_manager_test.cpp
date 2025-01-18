@@ -116,12 +116,13 @@ static HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.L
     distributed_->SessionOpened(sessionId, info);
     distributed_->SessionClosed(sessionId);
     std::string data = "111";
+    int32_t socket = 1;
     distributed_->MessageReceived(sessionId, data);
     distributed_->BytesReceived(sessionId, data);
     distributed_->OnSessionServerOpened();
     distributed_->OnSessionServerClosed(sessionId);
     distributed_->OnMessageHandleReceived(sessionId, data);
-    distributed_->OnBytesServerReceived(data);
+    distributed_->OnBytesServerReceived(socket, data);
 
     distributed_->ReleaseServer(server);
     EXPECT_EQ(distributed_->serverMap_.size() == 0, true);

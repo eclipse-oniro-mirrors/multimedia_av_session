@@ -63,11 +63,13 @@ av_session_ohos_library("avsession_service") {
     "server/focus_session_strategy.cpp",
     "server/migrate/audio_device_manager.cpp",
     "server/migrate/migrate_avsession_manager.cpp",
+    "server/migrate/migrate_avsession_proxy.cpp",
     "server/migrate/migrate_avsession_server.cpp",
     "server/session_stack.cpp",
     "server/softbus/softbus_distributed_data_manager.cpp",
     "server/softbus/softbus_session.cpp",
     "server/softbus/softbus_session_manager.cpp",
+    "server/softbus/softbus_session_proxy.cpp",
     "server/softbus/softbus_session_server.cpp",
   ]
 
