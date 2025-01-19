@@ -102,43 +102,46 @@ void BackgroundAudioController::RendererChangeReport(AudioStandard::AudioRendere
 void BackgroundAudioController::HandleAudioStreamRendererStateChange(const AudioRendererChangeInfos& infos)
 {
     for (const auto& info : infos) {
-        if (HasAVSession(info->clientUID)) {
-            RendererChangeReport(*info);
+        if (info->rendererState != AudioStandard::RENDERER_RUNNING) {
             continue;
         }
-
-        if (info->rendererState != AudioStandard::RENDERER_RUNNING) {
+        if (!AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
+            if (!info->backMute) {
+                SLOGI("renderer=%{public}d fore is unmute, continue", info->sessionId);
+            } else {
+                AudioAdapter::GetInstance().UnMuteAudioStream(info->clientUID, info->rendererInfo.streamUsage);
+            }
+            continue;
+        }
+        if (HasAVSession(info->clientUID)) {
+            RendererChangeReport(*info);
             continue;
         }
         if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(info->clientUID)) {
             SLOGD("uid=%{public}d is system app", info->clientUID);
             continue;
         }
+        if (info->backMute) {
+            SLOGI("renderer=%{public}d back is mute, continue", info->sessionId);
+            continue;
+        }
         SLOGI("AudioStreamRendererStateChange add observe for uid %{public}d", info->clientUID);
         AppManagerAdapter::GetInstance().AddObservedApp(info->clientUID);
-
-        if (AppManagerAdapter::GetInstance().IsAppBackground(info->clientUID, info->clientPid)) {
-            if (info->backMute) {
-                SLOGI("renderer is mute, return");
-                continue;
-            }
-            auto mute = AudioAdapter::GetInstance().MuteAudioStream(info->clientUID, info->rendererInfo.streamUsage);
-            if (mute == AVSESSION_SUCCESS && ptr_ != nullptr) {
-                SLOGI("mute uid=%{public}d done", info->clientUID);
-                ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
-            }
-        } else {
-            if (!info->backMute) {
-                SLOGI("renderer is unmute, return");
-                continue;
-            }
-            AudioAdapter::GetInstance().UnMuteAudioStream(info->clientUID, info->rendererInfo.streamUsage);
+        auto mute = AudioAdapter::GetInstance().MuteAudioStream(info->clientUID, info->rendererInfo.streamUsage);
+        if (mute == AVSESSION_SUCCESS && ptr_ != nullptr) {
+            SLOGI("mute uid=%{public}d done", info->clientUID);
+            ptr_->NotifyAudioSessionCheckTrigger(info->clientUID);
         }
     }
 }
 
 void BackgroundAudioController::HandleAppMuteState(int32_t uid, int32_t pid, bool isBackground)
 {
+    if (!isBackground) {
+        SLOGI("try unmute uid=%{public}d", uid);
+        AudioAdapter::GetInstance().UnMuteAudioStream(uid);
+        return;
+    }
     if (PermissionChecker::GetInstance().CheckSystemPermissionByUid(uid)) {
         SLOGD("uid=%{public}d is system app", uid);
         return;
@@ -147,15 +150,10 @@ void BackgroundAudioController::HandleAppMuteState(int32_t uid, int32_t pid, boo
         return;
     }
 
-    if (isBackground) {
-        auto mute = AudioAdapter::GetInstance().MuteAudioStream(uid, pid);
-        if (mute == AVSESSION_SUCCESS && ptr_ != nullptr) {
-            SLOGI("mute uid=%{public}d done", uid);
-            ptr_->NotifyAudioSessionCheckTrigger(uid);
-        }
-    } else {
-        SLOGI("unmute uid=%{public}d", uid);
-        AudioAdapter::GetInstance().UnMuteAudioStream(uid);
+    auto mute = AudioAdapter::GetInstance().MuteAudioStream(uid, pid);
+    if (mute == AVSESSION_SUCCESS && ptr_ != nullptr) {
+        SLOGI("mute uid=%{public}d done", uid);
+        ptr_->NotifyAudioSessionCheckTrigger(uid);
     }
 }
 // LCOV_EXCL_STOP
