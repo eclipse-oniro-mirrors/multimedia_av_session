@@ -726,4 +726,55 @@ int32_t AVSessionServiceProxy::StopCast(const SessionToken& sessionToken)
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 #endif
+
+int32_t AVSessionServiceProxy::GetDistributedSessionControllers(const DistributedSessionType& sessionType,
+    std::vector<std::shared_ptr<AVSessionController>>& sessionControllers)
+{
+    std::vector<sptr<IRemoteObject>> objects;
+    auto ret = AVSessionServiceProxy::GetDistributedSessionControllersInner(sessionType, objects);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetDistributedSessionControllers failed");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
+    for (auto& object: objects) {
+        auto controllerObject = iface_cast<AVSessionControllerProxy>(object);
+        CHECK_AND_RETURN_RET_LOG(controllerObject, AVSESSION_ERROR, "controllerObject is nullptr");
+        sessionControllers.push_back(std::shared_ptr<AVSessionController>(controllerObject.GetRefPtr(),
+            [holder = controllerObject](const auto*) {}));
+    }
+    return ret;
+}
+
+int32_t AVSessionServiceProxy::GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
+    std::vector<sptr<IRemoteObject>>& sessionControllers)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_UNMARSHALLING,
+                             "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionType), ERR_UNMARSHALLING, "write sessionType failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(static_cast<uint32_t>(
+        AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_DISTRIBUTED_SESSION_CONTROLLERS), data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
+    if (ret == AVSESSION_SUCCESS) {
+        uint32_t size {};
+        CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
+        CHECK_AND_RETURN_RET_LOG(size, ret, "get all session with true empty");
+
+        std::vector<sptr<IRemoteObject>> controllerResult(size);
+        for (auto& controller : controllerResult) {
+            controller = reply.ReadRemoteObject();
+            CHECK_AND_RETURN_RET_LOG(controller, ERR_UNMARSHALLING, "read controller failed");
+        }
+        sessionControllers = controllerResult;
+    }
+    return ret;
+}
 } // namespace OHOS::AVSession

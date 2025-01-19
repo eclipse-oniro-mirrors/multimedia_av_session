@@ -32,6 +32,7 @@ public:
         LISTENER_CMD_DEVICE_AVAILABLE,
         LISTENER_CMD_DEVICE_LOG_EVENT,
         LISTENER_CMD_DEVICE_OFFLINE,
+        LISTENER_CMD_REMOTE_SESSION_CONTROLLER_CHANGED,
         LISTENER_CMD_MAX
     };
 
@@ -48,6 +49,9 @@ public:
     virtual void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) = 0;
 
     virtual void OnDeviceOffline(const std::string& deviceId) = 0;
+
+    virtual void OnRemoteDistributedSessionChange(
+        const std::vector<sptr<IRemoteObject>>& sessionControllers) = 0;
 };
 }
 #endif // OHOS_ISESSION_LISTENER_H

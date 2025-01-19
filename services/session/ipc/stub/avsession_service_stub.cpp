@@ -832,4 +832,38 @@ int32_t AVSessionServiceStub::HandleStopCast(MessageParcel& data, MessageParcel&
 #endif
     return ERR_NONE;
 }
+
+int32_t AVSessionServiceStub::HandleGetDistributedSessionControllersInner(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleGetDistributedSessionControllersInner");
+    SLOGI("HandleGetDistributedSessionControllersInner start");
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("HandleGetDistributedSessionControllersInner: CheckPermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    int32_t sessionTypeValue;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(sessionTypeValue), false, "Read sessionType failed");
+    DistributedSessionType sessionType = DistributedSessionType(sessionTypeValue);
+    if (sessionType < DistributedSessionType::TYPE_SESSION_REMOTE ||
+        sessionType >= DistributedSessionType::TYPE_SESSION_MAX) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "write int32 result failed");
+        return ERR_NONE;
+    }
+    std::vector<sptr<IRemoteObject>> objects;
+    int32_t ret = GetDistributedSessionControllersInner(sessionType, objects);
+    SLOGI("HandleGetDistributedSessionControllersInner ret: %{public}d, size: %{public}d", ret, (int) objects.size());
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(objects.size()), ERR_NONE, "write size failed");
+    if (ret == AVSESSION_SUCCESS) {
+        for (const auto& object : objects) {
+            if (!reply.WriteRemoteObject(object)) {
+                SLOGE("write object failed");
+                break;
+            }
+        }
+    }
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

@@ -40,6 +40,8 @@ private:
 
     int32_t HandleOnDeviceOffline(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnRemoteDistributedSessionChange(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
@@ -57,7 +59,10 @@ private:
         {LISTENER_CMD_DEVICE_LOG_EVENT,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleOnDeviceLogEvent(data, reply); }},
         {LISTENER_CMD_DEVICE_OFFLINE,
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnDeviceOffline(data, reply); }}
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnDeviceOffline(data, reply); }},
+        {LISTENER_CMD_REMOTE_SESSION_CONTROLLER_CHANGED,
+            [this](MessageParcel& data, MessageParcel& reply) {
+            return HandleOnRemoteDistributedSessionChange(data, reply); }}
     };
 };
 }

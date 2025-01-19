@@ -36,6 +36,7 @@
 #include "media_info.h"
 #include "av_file_descriptor.h"
 #include "avqueue_info.h"
+#include "avsession_controller.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -268,6 +269,9 @@ public:
     static napi_status GetChannels(napi_env env, napi_value in, AudioStandard::AudioChannel& out);
     static napi_status GetChannelMasks(napi_env env, napi_value in, int32_t& out);
     static napi_status SetOutPutDeviceIdValue(napi_env env, const std::vector<std::string>& in, napi_value& out);
+    static napi_status GetValue(napi_env env, napi_value in, DistributedSessionType& out);
+    static napi_status SetValue(
+        napi_env env, const std::vector<std::shared_ptr<AVSessionController>>& in, napi_value& out);
 
     static size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer);
     static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri);

@@ -110,6 +110,12 @@ public:
 
     int32_t Close(void) override;
 
+    int32_t GetDistributedSessionControllers(const DistributedSessionType& sessionType,
+        std::vector<std::shared_ptr<AVSessionController>>& sessionControllers);
+
+    int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
+        std::vector<sptr<IRemoteObject>>& sessionControllers) override;
+
 private:
     void UnMarshallingAVQueueInfos(MessageParcel &reply, std::vector<AVQueueInfo>& avQueueInfos);
     void BufferToAVQueueInfoImg(const char *buffer, std::vector<AVQueueInfo>& avQueueInfos);

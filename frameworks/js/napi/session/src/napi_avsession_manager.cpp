@@ -49,6 +49,14 @@ std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAV
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
 };
 
+std::map<DistributedSessionType, std::pair<NapiAVSessionManager::OnEventHandlerType,
+    NapiAVSessionManager::OffEventHandlerType>> NapiAVSessionManager::distributedControllerEventHandlers_ = {
+    { DistributedSessionType::TYPE_SESSION_REMOTE, {
+        OnRemoteDistributedSessionChange, OffRemoteDistributedSessionChange } },
+};
+
+const std::string NapiAVSessionManager::DISTRIBUTED_SESSION_CHANGE_EVENT = "distributedSessionChange";
+
 std::shared_ptr<NapiSessionListener> NapiAVSessionManager::listener_;
 std::shared_ptr<NapiAsyncCallback> NapiAVSessionManager::asyncCallback_;
 std::list<napi_ref> NapiAVSessionManager::serviceDiedCallbacks_;
@@ -102,6 +110,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("setDiscoverable", SetDiscoverable),
         DECLARE_NAPI_STATIC_FUNCTION("startCasting", StartCast),
         DECLARE_NAPI_STATIC_FUNCTION("stopCasting", StopCast),
+        DECLARE_NAPI_STATIC_FUNCTION("getDistributedSessionController", GetDistributedSessionControllers),
     };
 
     napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
@@ -345,6 +354,57 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
     return NapiAsyncWork::Enqueue(env, context, "StartAVPlayback", executor);
 }
 
+napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, napi_callback_info info)
+{
+    SLOGI("GetDistributedSessionControllers");
+    struct ConcreteContext : public ContextBase {
+        DistributedSessionType sessionType_ {};
+        std::vector<std::shared_ptr<AVSessionController>> controllers_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        if (argc == ARGC_TWO && (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
+                               && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null))) {
+            int32_t sessionTypeValue;
+            context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], sessionTypeValue);
+            context->sessionType_ = DistributedSessionType(sessionTypeValue);
+            CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok &&
+                context->sessionType_ >= DistributedSessionType::TYPE_SESSION_REMOTE &&
+                context->sessionType_ <= DistributedSessionType::TYPE_SESSION_MAX,
+                "GetDistributedSessionControllers invalid sessionType",
+                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        }
+    };
+
+    context->GetCbInfo(env, info, input);
+
+    auto executor = [context]() {
+        int32_t ret = AVSessionManager::GetInstance().GetDistributedSessionControllers(
+            context->sessionType_, context->controllers_);
+        SLOGI("GetDistributedSessionControllers executor ret: %{public}d, controller size: %{public}d", ret,
+            (int) context->controllers_.size());
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "StartAVPlayback failed : native no permission";
+            } else if (ret == ERR_PERMISSION_DENIED) {
+                context->errMessage = "StartAVPlayback failed : native permission denied";
+            } else {
+                context->errMessage = "StartAVPlayback failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->controllers_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+                                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetDistributedSessionControllers", executor, complete);
+}
+
 napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::CreateController");
@@ -577,10 +637,12 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
         CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
             NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         /* require 2 arguments <event, callback> */
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid argument number",
+        CHECK_ARGS_RETURN_VOID(context, argc >= ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        CHECK_RETURN_VOID(eventName != DISTRIBUTED_SESSION_CHANGE_EVENT,
+                          "no need process the distributed session changed event");
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_SECOND], &type);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
@@ -592,6 +654,10 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
     if (context->status != napi_ok) {
         NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
         return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (eventName == DISTRIBUTED_SESSION_CHANGE_EVENT) {
+        return OnDistributedSessionChangeEvent(env, info);
     }
 
     auto it = eventHandlers_.find(eventName);
@@ -628,7 +694,7 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
             PermissionChecker::CHECK_SYSTEM_PERMISSION);
         CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
             NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE || argc == ARGC_TWO, "invalid argument number",
+        CHECK_ARGS_RETURN_VOID(context, argc >= ARGC_ONE || argc <= ARGC_THREE, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
         CHECK_STATUS_RETURN_VOID(context, "get event name failed",
@@ -644,6 +710,10 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
         return NapiUtils::GetUndefinedValue(env);
     }
 
+    if (eventName == DISTRIBUTED_SESSION_CHANGE_EVENT) {
+        return OffDistributedSessionChangeEvent(env, info);
+    }
+
     auto it = eventHandlers_.find(eventName);
     if (it == eventHandlers_.end()) {
         SLOGE("event name invalid");
@@ -653,6 +723,119 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
 
     if (it->second.second(env, callback) != napi_ok) {
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionManager::OnDistributedSessionChangeEvent(napi_env env, napi_callback_info info)
+{
+    SLOGI("OnDistributedSessionChangeEvent");
+    struct ConcreteContext : public ContextBase {
+        DistributedSessionType sessionType_ {};
+        napi_value callback_ = nullptr;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("OnEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto input = [env, &context](size_t argc, napi_value* argv) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+        /* require 3 arguments <event, callback> */
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        int32_t sessionTypeValue;
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], sessionTypeValue);
+        CHECK_STATUS_RETURN_VOID(context, "get session type failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->sessionType_ = DistributedSessionType(sessionTypeValue);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_THIRD], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->callback_ = argv[ARGV_THIRD];
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto it = distributedControllerEventHandlers_.find(context->sessionType_);
+    if (it == distributedControllerEventHandlers_.end()) {
+        SLOGE("session type invalid");
+        NapiUtils::ThrowError(env, "session type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (RegisterNativeSessionListener(env) == napi_generic_failure) {
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (it->second.first(env, context->callback_) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionManager::OffDistributedSessionChangeEvent(napi_env env, napi_callback_info info)
+{
+    SLOGI("OffDistributedSessionChangeEvent");
+    struct ConcreteContext : public ContextBase {
+        DistributedSessionType sessionType_ {};
+        napi_value callback_ = nullptr;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("OffEvent failed : no memory");
+        NapiUtils::ThrowError(env, "OffEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto input = [env, &context](size_t argc, napi_value* argv) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        int32_t sessionTypeValue;
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], sessionTypeValue);
+        CHECK_STATUS_RETURN_VOID(context, "get session type failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->sessionType_ = DistributedSessionType(sessionTypeValue);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_THIRD], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->callback_ = argv[ARGV_THIRD];
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto it = distributedControllerEventHandlers_.find(context->sessionType_);
+    if (it == distributedControllerEventHandlers_.end()) {
+        SLOGE("session type invalid");
+        NapiUtils::ThrowError(env, "session type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (RegisterNativeSessionListener(env) == napi_generic_failure) {
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (it->second.second(env, context->callback_) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
 
     return NapiUtils::GetUndefinedValue(env);
@@ -1202,6 +1385,13 @@ napi_status NapiAVSessionManager::OnServiceDie(napi_env env, napi_value callback
     return napi_ok;
 }
 
+napi_status NapiAVSessionManager::OnRemoteDistributedSessionChange(napi_env env, napi_value callback)
+{
+    SLOGI("OnRemoteDistributedSessionChange AddCallback");
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, callback);
+}
+
 void NapiAVSessionManager::HandleServiceDied()
 {
     if (!serviceDiedCallbacks_.empty() && asyncCallback_ != nullptr) {
@@ -1263,6 +1453,13 @@ napi_status NapiAVSessionManager::OffDeviceOffline(napi_env env, napi_value call
     std::lock_guard lockGuard(listenerMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_OFFLINE, callback);
+}
+
+napi_status NapiAVSessionManager::OffRemoteDistributedSessionChange(napi_env env, napi_value callback)
+{
+    SLOGI("OffRemoteDistributedSessionChange RemoveCallback");
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, callback);
 }
 
 napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)

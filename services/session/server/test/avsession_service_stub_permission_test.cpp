@@ -145,6 +145,9 @@ public:
 #endif
 
     int32_t Close() override { return 0; };
+
+    int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
+        std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return 0; };
     bool isSuccess = true;
 };
 

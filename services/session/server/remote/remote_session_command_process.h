@@ -142,6 +142,12 @@ public:
     {
         return AVSESSION_SUCCESS;
     }
+
+    int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
+        std::vector<sptr<IRemoteObject>>& sessionControllers) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 private:
     static sptr<IRemoteObject>& impl_;
     static inline BrokerDelegator<RemoteSessionCommandProcess> delegator_;
