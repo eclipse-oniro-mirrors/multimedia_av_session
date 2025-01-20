@@ -237,7 +237,6 @@ void AvSessionServiceSystemAbilityTest(sptr<AVSessionService> service)
         DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID,
         BUNDLE_MGR_SERVICE_SYS_ABILITY_ID,
         CAST_ENGINE_SA_ID,
-        BLUETOOTH_HOST_SYS_ABILITY_ID,
         MEMORY_MANAGER_SA_ID,
         COMMON_EVENT_SERVICE_ID,
     };
@@ -424,9 +423,6 @@ void AvSessionServiceSuperLauncherTest001(sptr<AVSessionService> service)
     std::string deviceId = GetString();
     std::string extraInfo = GetString();
     service->SuperLauncher(deviceId, serviceName, extraInfo, state);
-    bool on = GetData<bool>();
-    service->SetScreenOn(on);
-    service->GetScreenOn();
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     avsessionService_->NotifyMirrorToStreamCast();
 #endif
@@ -594,24 +590,6 @@ void GetTrustedDeviceName001()
     castAudioDescriptors.push_back(des);
     avsessionService_->SetDeviceInfo(castAudioDescriptors, avsessionHere_);
     avsessionService_->CastAudioForNewSession(avsessionHere_);
-    DetectBluetoothHostObserver detectBluetoothHostObserver(avsessionService_);
-    int transport = OHOS::Bluetooth::BTTransport::ADAPTER_BREDR;
-    int status = OHOS::Bluetooth::BTStateID::STATE_TURN_ON;
-    detectBluetoothHostObserver.OnStateChanged(transport, status);
-
-    transport = OHOS::Bluetooth::BTTransport::ADAPTER_BLE;
-    status = OHOS::Bluetooth::BTStateID::STATE_TURN_ON;
-    detectBluetoothHostObserver.OnStateChanged(transport, status);
-
-    transport = OHOS::Bluetooth::BTTransport::ADAPTER_BLE;
-    status = OHOS::Bluetooth::BTStateID::STATE_TURN_OFF;
-    detectBluetoothHostObserver.OnStateChanged(transport, status);
-
-    OHOS::AVSession::AVSessionService* avSessionService = nullptr;
-    DetectBluetoothHostObserver detectBluetoothHostObserver_(avSessionService);
-    transport = OHOS::Bluetooth::BTTransport::ADAPTER_BREDR;
-    status = OHOS::Bluetooth::BTStateID::STATE_TURN_ON;
-    detectBluetoothHostObserver_.OnStateChanged(transport, status);
     SLOGI("GetTrustedDeviceName001 end!");
 }
 
@@ -657,39 +635,6 @@ void handleusereventTest(sptr<AVSessionService> service)
     service->HandleUserEvent(type, userId);
 }
 
-void HandleScreenStatusChangeTest(sptr<AVSessionService> service)
-{
-    if (service == nullptr) {
-        SLOGE("service is null, return");
-        return;
-    }
-    std::string event = GetString();
-    service->HandleScreenStatusChange(event);
-}
-
-void SetScreenTest(sptr<AVSessionService> service)
-{
-    if (service == nullptr) {
-        SLOGE("service is null, return");
-        return;
-    }
-    auto on = GetData<bool>();
-    service->SetScreenOn(on);
-    auto isLocked = GetData<bool>();
-    service->SetScreenLocked(isLocked);
-    service->GetScreenLocked();
-    service->SubscribeCommonEvent();
-    wptr<IRemoteObject> object = nullptr;
-    auto func = []() {};
-    sptr<ClientDeathRecipient> recipient = new ClientDeathRecipient(func);
-    if (recipient == nullptr) {
-        SLOGE("recipient is null, return");
-        return;
-    }
-    recipient->OnRemoteDied(object);
-    service->CheckAncoAudio();
-}
-
 void AvSessionServiceTest001()
 {
     GetDeviceInfoTest();
@@ -728,8 +673,6 @@ void AvSessionServiceTest()
     AvSessionServiceHandleEventTest(avsessionService_);
     ConvertKeyCodeToCommand001();
     handleusereventTest(avsessionService_);
-    HandleScreenStatusChangeTest(avsessionService_);
-    SetScreenTest(avsessionService_);
 
     AvSessionServiceTest001();
 }

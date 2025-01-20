@@ -703,14 +703,6 @@ int32_t AVSessionServiceStub::HandleSetDiscoverable(MessageParcel& data, Message
     bool enable;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(enable), AVSESSION_ERROR, "write enable info failed");
     int32_t ret = checkEnableCast(enable);
-
-    bool is2in1 = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
-    SLOGI("GetDeviceEnableCast,Prop=%{public}d,enable=%{public}d", static_cast<int>(is2in1), static_cast<int>(enable));
-    if (enable && is2in1 && ret) {
-        AVRouter::GetInstance().SetDiscoverable(false);
-        ret = AVRouter::GetInstance().SetDiscoverable(enable);
-    }
-
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleSetDiscoverable failed");
 #else
