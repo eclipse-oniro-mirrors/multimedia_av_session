@@ -92,7 +92,7 @@ private:
     const std::string AVSESSION_FILE_DIR_HEAD = "/data/service/el2/";
     const std::string AVSESSION_FILE_DIR_TAIL = "/av_session/";
 
-    int32_t curUserId_ = -1;
+    int32_t curUserId_ = 100;
     std::list<int32_t> aliveUsers_;
     std::recursive_mutex userLock_;
 };
