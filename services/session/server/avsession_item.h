@@ -436,6 +436,7 @@ private:
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;
     bool isFirstCallback_ = true;
+    const int32_t SWITCH_WAIT_TIME = 300;
 #endif
 };
 } // namespace OHOS::AVSession
