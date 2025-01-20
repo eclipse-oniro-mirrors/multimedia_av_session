@@ -390,6 +390,9 @@ void MigrateAVSessionServer::DelaySendMetaData()
                 SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, metaDataInfo);
             SendByte(deviceId_, metaDataStr);
         }
+        if (mediaImage != nullptr) {
+            mediaImage.Clear();
+        }
     }
 }
 
