@@ -382,7 +382,7 @@ void MigrateAVSessionServer::DelaySendMetaData()
         AVMetaData metaDataInfo = resultMetaData;
         std::shared_ptr<AVSessionPixelMap> pixelImage = resultMetaData.GetMediaImage();
         std::shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
-        if (pixelImage !- nullptr) {
+        if (pixelImage != nullptr) {
             mediaImage->SetInnerImgBuffer(pixelImage->GetInnerImgBuffer());
             metaDataInfo.SetMediaImage(mediaImage);
             std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
