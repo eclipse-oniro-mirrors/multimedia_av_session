@@ -159,6 +159,11 @@ public:
     {
     };
 
+    void OnRemoteDistributedSessionChange(
+        const std::vector<sptr<IRemoteObject>>& sessionControllers) override
+    {
+    };
+
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;

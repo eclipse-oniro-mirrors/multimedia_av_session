@@ -58,6 +58,7 @@ private:
     void MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos);
     void AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQueueInfos, unsigned char *buffer);
     int32_t HandleIsAudioPlaybackAllowed(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetDistributedSessionControllersInner(MessageParcel& data, MessageParcel& reply);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
     std::map<uint32_t, HandlerFunc> handlers = {
@@ -115,7 +116,10 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleClose(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CHECK_BACKGROUND_ALLOWED),
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleIsAudioPlaybackAllowed(data, reply); }}
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleIsAudioPlaybackAllowed(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_DISTRIBUTED_SESSION_CONTROLLERS),
+            [this](MessageParcel& data, MessageParcel& reply) {
+            return HandleGetDistributedSessionControllersInner(data, reply); }}
     };
     std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION),
@@ -167,7 +171,9 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
             "HandleClose"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CHECK_BACKGROUND_ALLOWED),
-            "HandleIsAudioPlaybackAllowed"}
+            "HandleIsAudioPlaybackAllowed"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_DISTRIBUTED_SESSION_CONTROLLERS),
+            "HandleGetDistributedSessionControllersInner"}
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;

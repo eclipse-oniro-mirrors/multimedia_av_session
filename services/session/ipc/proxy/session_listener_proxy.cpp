@@ -118,4 +118,22 @@ void SessionListenerProxy::OnDeviceOffline(const std::string& deviceId)
     CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_DEVICE_OFFLINE, data, reply, option) == 0,
         "send request fail");
 }
+
+void SessionListenerProxy::OnRemoteDistributedSessionChange(
+    const std::vector<sptr<IRemoteObject>>& sessionControllers)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteUint32(sessionControllers.size()), "write size failed");
+
+    for (const auto& object : sessionControllers) {
+        CHECK_AND_RETURN_LOG(data.WriteRemoteObject(object), "write sessionControllers failed");
+    }
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_REMOTE_SESSION_CONTROLLER_CHANGED, data, reply, option) == 0,
+        "send request fail");
+}
 } // namespace OHOS::AVSession

@@ -19,6 +19,8 @@
 #include "avsession_info.h"
 #include "avsession_trace.h"
 #include "napi_session_listener.h"
+#include "avsession_controller.h"
+#include "avsession_controller_proxy.h"
 
 namespace OHOS::AVSession {
 NapiSessionListener::NapiSessionListener()
@@ -179,6 +181,21 @@ void NapiSessionListener::OnDeviceOffline(const std::string& deviceId)
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceOffline");
     SLOGI("Start handle device offline event");
     HandleEvent(EVENT_DEVICE_OFFLINE, deviceId);
+}
+
+void NapiSessionListener::OnRemoteDistributedSessionChange(
+    const std::vector<sptr<IRemoteObject>>& sessionControllers)
+{
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnRemoteDistributedSessionChange");
+    SLOGI("Start handle remote distributed session changed event");
+    std::vector<std::shared_ptr<AVSessionController>> sessionControllersRef;
+    for (auto& object: sessionControllers) {
+        auto controllerObject = iface_cast<AVSessionControllerProxy>(object);
+        sessionControllersRef.push_back(std::shared_ptr<AVSessionController>(controllerObject.GetRefPtr(),
+                                                              [holder = controllerObject](const auto*) {}));
+    }
+    SLOGI("handle remote distributed session changed end size=%{public}d", (int) sessionControllersRef.size());
+    HandleEvent(EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, sessionControllersRef);
 }
 
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)

@@ -102,4 +102,19 @@ int32_t SessionListenerStub::HandleOnDeviceOffline(MessageParcel& data, MessageP
     OnDeviceOffline(deviceId);
     return ERR_NONE;
 }
+
+int32_t SessionListenerStub::HandleOnRemoteDistributedSessionChange(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("SessionListenerStub::HandleOnRemoteDistributedSessionChange");
+    uint32_t size {};
+    CHECK_AND_RETURN_RET_LOG(data.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
+
+    std::vector<sptr<IRemoteObject>> controllerResult(size);
+    for (auto& controller : controllerResult) {
+        controller = data.ReadRemoteObject();
+        CHECK_AND_RETURN_RET_LOG(controller, ERR_UNMARSHALLING, "read controller failed");
+    }
+    OnRemoteDistributedSessionChange(controllerResult);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

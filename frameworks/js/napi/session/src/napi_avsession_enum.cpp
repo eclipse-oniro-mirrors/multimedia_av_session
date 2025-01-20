@@ -357,6 +357,22 @@ static napi_value ExportDeviceLogEventCode(napi_env env)
     return result;
 }
 
+static napi_value ExportDistributedSessionType(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "TYPE_SESSION_REMOTE",
+        static_cast<int32_t>(DistributedSessionType::TYPE_SESSION_REMOTE));
+    (void)SetNamedProperty(env, result, "TYPE_SESSION_MIGRATE_IN",
+        static_cast<int32_t>(DistributedSessionType::TYPE_SESSION_MIGRATE_IN));
+    (void)SetNamedProperty(env, result, "TYPE_SESSION_MIGRATE_OUT",
+        static_cast<int32_t>(DistributedSessionType::TYPE_SESSION_MIGRATE_OUT));
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -372,6 +388,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DisplayTag", ExportDisplayTag(env)),
         DECLARE_NAPI_PROPERTY("CastDisplayState", ExportCastDisplayState(env)),
         DECLARE_NAPI_PROPERTY("DeviceLogEventCode", ExportDeviceLogEventCode(env)),
+        DECLARE_NAPI_PROPERTY("DistributedSessionType", ExportDistributedSessionType(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

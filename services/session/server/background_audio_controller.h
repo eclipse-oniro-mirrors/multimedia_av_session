@@ -39,6 +39,8 @@ public:
     void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override {}
     void OnAudioSessionChecked(const int32_t uid) override {}
+    void OnRemoteDistributedSessionChange(
+        const std::vector<sptr<IRemoteObject>>& sessionControllers) override {};
 
     void Init(AVSessionService *ptr);
 

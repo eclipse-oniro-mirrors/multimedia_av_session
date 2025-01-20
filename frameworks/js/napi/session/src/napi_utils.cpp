@@ -36,6 +36,7 @@
 #include "curl/curl.h"
 #include "image_source.h"
 #include "pixel_map.h"
+#include "napi_avsession_controller.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 40960;
@@ -1767,6 +1768,37 @@ napi_status NapiUtils::SetValue(napi_env env, const AVFileDescriptor& in, napi_v
         CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
     }
     return napi_ok;
+}
+
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, DistributedSessionType& out)
+{
+    napi_value value {};
+    auto status = napi_ok;
+    bool hasSessionType = false;
+    int32_t type = -1;
+    napi_has_named_property(env, in, "distributedSessionType", &hasSessionType);
+    if (hasSessionType) {
+        status = napi_get_named_property(env, in, "distributedSessionType", &value);
+        CHECK_RETURN(status == napi_ok, "get sessionType failed", status);
+        status = GetValue(env, value, type);
+        CHECK_RETURN(status == napi_ok, "get sessionType value failed", status);
+    }
+    out = DistributedSessionType(type);
+    return napi_ok;
+}
+napi_status NapiUtils::SetValue(
+    napi_env env, const std::vector<std::shared_ptr<AVSessionController>>& in, napi_value& out)
+{
+    SLOGD("napi_value <- std::vector<std::shared_ptr<AVSessionController>>  %{public}d", static_cast<int>(in.size()));
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN((status == napi_ok), "create_array failed!", status);
+    int index = 0;
+    for (const auto& item : in) {
+        napi_value entry = nullptr;
+        NapiAVSessionController::NewInstance(env, item, entry);
+        napi_set_element(env, out, index++, entry);
+    }
+    return status;
 }
 
 napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t napiCode)

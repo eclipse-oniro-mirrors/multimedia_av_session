@@ -39,6 +39,7 @@ private:
     static napi_value GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetHistoricalAVQueueInfos(napi_env env, napi_callback_info info);
     static napi_value StartAVPlayback(napi_env env, napi_callback_info info);
+    static napi_value GetDistributedSessionControllers(napi_env env, napi_callback_info info);
     static napi_value CreateController(napi_env env, napi_callback_info info);
     static napi_value GetAVCastController(napi_env env, napi_callback_info info);
     static napi_value CastAudio(napi_env env, napi_callback_info info);
@@ -54,6 +55,8 @@ private:
 
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
+    static napi_value OnDistributedSessionChangeEvent(napi_env env, napi_callback_info info);
+    static napi_value OffDistributedSessionChangeEvent(napi_env env, napi_callback_info info);
 
     static napi_status OnSessionCreate(napi_env env, napi_value callback);
     static napi_status OnSessionDestroy(napi_env env, napi_value callback);
@@ -63,6 +66,7 @@ private:
     static napi_status OnDeviceLogEvent(napi_env env, napi_value callback);
     static napi_status OnDeviceOffline(napi_env env, napi_value callback);
     static napi_status OnServiceDie(napi_env env, napi_value callback);
+    static napi_status OnRemoteDistributedSessionChange(napi_env env, napi_value callback);
 
     static napi_status OffSessionCreate(napi_env env, napi_value callback);
     static napi_status OffSessionDestroy(napi_env env, napi_value callback);
@@ -72,6 +76,7 @@ private:
     static napi_status OffDeviceLogEvent(napi_env env, napi_value callback);
     static napi_status OffDeviceOffline(napi_env env, napi_value callback);
     static napi_status OffServiceDie(napi_env env, napi_value callback);
+    static napi_status OffRemoteDistributedSessionChange(napi_env env, napi_value callback);
 
     static void HandleServiceDied();
     
@@ -106,6 +111,8 @@ private:
     static std::shared_ptr<NapiSessionListener> listener_;
     static std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     static std::list<napi_ref> serviceDiedCallbacks_;
+    static std::map<DistributedSessionType, std::pair<OnEventHandlerType, OffEventHandlerType>>
+        distributedControllerEventHandlers_;
 
     static constexpr size_t ARGC_ZERO = 0;
     static constexpr size_t ARGC_ONE = 1;
@@ -119,6 +126,8 @@ private:
     static constexpr size_t HISTORICAL_UNSET_NUM = 3;
     static constexpr size_t HISTORICAL_MIN_NUM = 0;
     static constexpr size_t HISTORICAL_MAX_NUM = 10;
+
+    static const std::string DISTRIBUTED_SESSION_CHANGE_EVENT;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_MANAGER_H

@@ -96,6 +96,15 @@ public:
     virtual void OnDeviceOffline(const std::string& deviceId) {};
 
     /**
+     * @brief Listen for the distributed session changed.
+     *
+     * @param { std::vector<sptr<IRemoteObject>>& } sessionControllers - changed distributed session.
+     * @since 16
+    */
+    virtual void OnRemoteDistributedSessionChange(
+        const std::vector<sptr<IRemoteObject>>& sessionControllers) {};
+
+    /**
      * @brief Deconstruct SessionListener.
      * @since 9
     */
@@ -550,6 +559,47 @@ enum ProtocolType {
      * @since 12
      */
     TYPE_DLNA = 4,
+};
+
+/**
+ * Define different distributed session type
+ * @enum { number }
+ * @syscap SystemCapability.Multimedia.AVSession.Manager
+ * @systemapi
+ * @since 16
+ */
+enum DistributedSessionType {
+    /**
+     * Remote session sensed from remote device.
+     * @syscap SystemCapability.Multimedia.AVSession.Manager
+     * @systemapi
+     * @since 16
+     */
+    TYPE_SESSION_REMOTE = 0,
+
+    /**
+     * Migrate from remote device to this device.
+     * @syscap SystemCapability.Multimedia.AVSession.Manager
+     * @systemapi
+     * @since 16
+     */
+    TYPE_SESSION_MIGRATE_IN = 1,
+
+    /**
+     * Migrate from this device to remote device.
+     * @syscap SystemCapability.Multimedia.AVSession.Manager
+     * @systemapi
+     * @since 16
+     */
+    TYPE_SESSION_MIGRATE_OUT = 2,
+
+    /**
+     * Migrate session max flag.
+     * @syscap SystemCapability.Multimedia.AVSession.Manager
+     * @systemapi
+     * @since 16
+     */
+    TYPE_SESSION_MAX = 3,
 };
 
 /**

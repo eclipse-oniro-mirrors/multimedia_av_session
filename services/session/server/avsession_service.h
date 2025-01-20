@@ -235,6 +235,9 @@ public:
 
     void InitCastEngineService();
 
+    int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
+        std::vector<sptr<IRemoteObject>>& sessionControllers) override;
+
 private:
 
     void NotifyProcessStatus(bool isStart);
@@ -254,6 +257,8 @@ private:
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
     void NotifyDeviceChange();
+    void NotifyRemoteDistributedSessionControllersChanged(
+        const std::vector<sptr<IRemoteObject>>& sessionControllers);
     void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,

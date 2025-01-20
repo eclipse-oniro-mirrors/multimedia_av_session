@@ -132,8 +132,8 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
     return self;
 }
 
-napi_status NapiAVSessionController::NewInstance(napi_env env, std::shared_ptr<AVSessionController>& nativeController,
-    napi_value& out)
+napi_status NapiAVSessionController::NewInstance(
+    napi_env env, const std::shared_ptr<AVSessionController>& nativeController, napi_value& out)
 {
     napi_value constructor {};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVControllerConstructorRef, &constructor), napi_generic_failure);

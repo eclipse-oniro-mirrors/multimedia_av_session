@@ -32,7 +32,7 @@ public:
     ~NapiAVSessionController();
 
     static napi_value Init(napi_env env, napi_value exports);
-    static napi_status NewInstance(napi_env env, std::shared_ptr<AVSessionController>& nativeController,
+    static napi_status NewInstance(napi_env env, const std::shared_ptr<AVSessionController>& nativeController,
         napi_value& out);
     static napi_status RepeatedInstance(napi_env env, const std::string& controllerId, napi_value& out);
 

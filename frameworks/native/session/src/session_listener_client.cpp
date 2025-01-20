@@ -86,4 +86,13 @@ void SessionListenerClient::OnDeviceOffline(const std::string& deviceId)
         copiedListener->OnDeviceOffline(deviceId);
     }
 }
+
+void SessionListenerClient::OnRemoteDistributedSessionChange(
+    const std::vector<sptr<IRemoteObject>>& sessionControllers)
+{
+    auto copiedListener = listener_;
+    if (copiedListener) {
+        copiedListener->OnRemoteDistributedSessionChange(sessionControllers);
+    }
+}
 } // namespace OHOS::AVSession

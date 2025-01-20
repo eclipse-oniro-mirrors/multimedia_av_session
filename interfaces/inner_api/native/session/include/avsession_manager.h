@@ -288,6 +288,17 @@ public:
 
     virtual int32_t SetDiscoverable(const bool enable) = 0;
 #endif
+
+    /**
+     * Get distributed session controllers.
+     *
+     * @param sessionType sessionType
+     * @param sessionControllers sessionControllers
+     * @return Returns whether get distributed session controller successfully.
+     * @since 16
+    */
+    virtual int32_t GetDistributedSessionControllers(const DistributedSessionType& sessionType,
+        std::vector<std::shared_ptr<AVSessionController>>& sessionControllers) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

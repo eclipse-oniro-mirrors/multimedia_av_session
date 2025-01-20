@@ -729,6 +729,13 @@ void AVSessionService::InitCastEngineService()
 #endif
 }
 
+int32_t AVSessionService::GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
+    std::vector<sptr<IRemoteObject>>& sessionControllers)
+{
+    SLOGI("GetDistributedSessionControllersInner");
+    return AVSESSION_SUCCESS;
+}
+
 void AVSessionService::RegisterBundleDeleteEventForHistory(int32_t userId)
 {
     if (userId <= 0) {
@@ -2953,6 +2960,36 @@ void AVSessionService::HandleDeviceChange(
     }
 }
 // LCOV_EXCL_STOP
+
+void AVSessionService::NotifyRemoteDistributedSessionControllersChanged(
+    const std::vector<sptr<IRemoteObject>>& sessionControllers)
+{
+    SLOGI("NotifyRemoteDistributedSessionControllersChanged size: %{public}d", (int) sessionControllers.size());
+    std::lock_guard lockGuard(sessionListenersLock_);
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
+        if (listener != nullptr) {
+            listener->OnRemoteDistributedSessionChange(sessionControllers);
+        }
+    }
+    std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
+    for (const auto& [pid, listener] : listenerMapForAll) {
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
+        if (listener != nullptr) {
+            listener->OnRemoteDistributedSessionChange(sessionControllers);
+        }
+    }
+
+    {
+        std::lock_guard lockGuard(migrateListenersLock_);
+        for (const auto& listener : innerSessionListeners_) {
+            if (listener != nullptr) {
+                listener->OnRemoteDistributedSessionChange(sessionControllers);
+            }
+        }
+    }
+}
 
 void AVSessionService::InitRadarBMS()
 {
