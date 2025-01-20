@@ -386,7 +386,7 @@ void MigrateAVSessionServer::DelaySendMetaData()
             mediaImage->SetInnerImgBuffer(pixelImage->GetInnerImgBuffer());
             metaDataInfo.SetMediaImage(mediaImage);
             std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
-                SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, resultMetaData);
+                SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, metaDataInfo);
             SendByte(deviceId_, metaDataStr);
         }
     }
