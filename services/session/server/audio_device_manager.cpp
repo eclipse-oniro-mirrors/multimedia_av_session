@@ -233,3 +233,4 @@ void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
         AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SINK);
     }
 }
+}
