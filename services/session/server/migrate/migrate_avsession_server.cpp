@@ -379,9 +379,16 @@ void MigrateAVSessionServer::DelaySendMetaData()
         AVMetaData resultMetaData;
         resultMetaData.Reset();
         avcontroller->GetAVMetaData(resultMetaData);
-        std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
-            SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, resultMetaData);
-        SendByte(deviceId_, metaDataStr);
+        AVMetaData metaDataInfo = resultMetaData;
+        std::shared_ptr<AVSessionPixelMap> pixelImage = resultMetaData.GetMediaImage();
+        std::shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
+        if (pixelImage !- nullptr) {
+            mediaImage->SetInnerImgBuffer(pixelImage->GetInnerImgBuffer());
+            metaDataInfo.SetMediaImage(mediaImage);
+            std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
+                SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, resultMetaData);
+            SendByte(deviceId_, metaDataStr);
+        }
     }
 }
 
