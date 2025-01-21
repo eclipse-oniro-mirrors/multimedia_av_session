@@ -391,7 +391,7 @@ void MigrateAVSessionServer::DelaySendMetaData()
             SendByte(deviceId_, metaDataStr);
         }
         if (mediaImage != nullptr) {
-            mediaImage.Clear();
+            mediaImage->Clear();
         }
     }
 }
