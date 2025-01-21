@@ -492,6 +492,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     SLOGI("HandleFocusSession with uid=%{public}d, cur topSession:%{public}s",
         info.uid, (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
     std::lock_guard lockGuard(sessionServiceLock_);
+    int32_t userId = GetUsersManager().GetCurrentUserId();
     if (topSession_ && topSession_->GetUid() == info.uid) {
         SLOGI("The focusSession is the same as current topSession.");
         if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
@@ -500,8 +501,8 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
             PublishEvent(mediaPlayStateTrue);
         }
         if (topSession_->GetUid() == ancoUid) {
-            int32_t ret = Notification::NotificationHelper::CancelNotification(0);
-            SLOGI("CancelNotification for anco ret=%{public}d", ret);
+            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
+            SLOGI("CancelNotification with userId:%{public}d for anco ret=%{public}d", userId, ret);
         }
         return;
     }
@@ -518,8 +519,8 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
                 PublishEvent(mediaPlayStateTrue);
             }
             if (topSession_->GetUid() == ancoUid) {
-                int32_t ret = Notification::NotificationHelper::CancelNotification(0);
-                SLOGI("CancelNotification for anco ret=%{public}d", ret);
+                int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
+                SLOGI("CancelNotification with userId:%{public}d for anco ret=%{public}d", userId, ret);
             }
             return;
         }
@@ -598,8 +599,8 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         std::lock_guard lockGuard(sessionServiceLock_);
         if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
             UpdateTopSession(nullptr);
-            int32_t ret = Notification::NotificationHelper::CancelNotification(0);
-            SLOGI("CancelNotification ret=%{public}d", ret);
+            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
+            SLOGI("CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
         }
         sessionListForFront->remove(sessionItem);
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
@@ -2090,8 +2091,9 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
         sessionItem->DestroyTask();
         if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
             UpdateTopSession(nullptr);
-            int32_t ret = Notification::NotificationHelper::CancelNotification(0);
-            SLOGI("topsession release cancelNotification ret=%{public}d", ret);
+            int32_t userId = GetUsersManager().GetCurrentUserId();
+            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
+            SLOGI("topsession release CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
         }
         if (sessionItem->GetRemoteSource() != nullptr) {
             int32_t ret = CancelCastAudioForClientExit(sessionItem->GetPid(), sessionItem);
@@ -2900,7 +2902,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
     request.SetWantAgent(wantAgent);
-    result = Notification::NotificationHelper::PublishNotification(request);
+    result = Notification::NotificationHelper::PublishNotification(std::to_string(userId), request);
     SLOGI("PublishNotification uid %{public}d, userId %{public}d, result %{public}d", uid, userId, result);
 }
 // LCOV_EXCL_STOP
