@@ -470,7 +470,18 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
             castHandleToInfoMap_[castHandle].sessionId_ = sessionId;
         }
     } else {
-        mirrorSessionMap_[sessionId] = callback;
+        if (castHandleToInfoMap_.find(castHandle) != castHandleToInfoMap_.end() &&
+            castHandleToInfoMap_[castHandle].avRouterListener_ == nullptr) {
+            providerManagerMap_[providerNumber]->provider_->RegisterCastSessionStateListener(castId,
+                castSessionListener_);
+            OutputDeviceInfo outputDevice;
+            outputDevice.deviceInfos_.emplace_back(deviceInfo);
+            castHandleToInfoMap_[castHandle].outputDeviceInfo_ = outputDevice;
+            castHandleToInfoMap_[castHandle].avRouterListener_ = callback;
+            castHandleToInfoMap_[castHandle].sessionId_ = sessionId;
+        } else {
+            mirrorSessionMap_[sessionId] = callback;
+        }
         callback->OnCastStateChange(castConnectStateForConnected_, deviceInfo, false);
     }
     SLOGD("AVRouter impl register callback finished");
