@@ -83,7 +83,7 @@ class TestAVSessionCallback : public AVSessionCallback {
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
-    void OnToggleFavorite(const std::string& mediald) override;
+    void OnToggleFavorite(const std::string& mediaId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
@@ -157,7 +157,7 @@ void TestAVSessionCallback::OnSetLoopMode(int32_t loopMode)
     SLOGI("Enter into TestAVSessionCallback::OnSetLoopMode.");
 }
 
-void TestAVSessionCallback::OnToggleFavorite(const std::string& mediald)
+void TestAVSessionCallback::OnToggleFavorite(const std::string& mediaId)
 {
     SLOGI("Enter into TestAVSessionCallback::OnToggleFavorite.");
 }
@@ -262,9 +262,9 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner1()
     aVSessionCallbackClient.OnSetLoopMode(loopMode);
 
     uint8_t randomNum = GetData<uint8_t>();
-    std::vector<std::string> medialds = { "mediald1", "mediald2", "mediald3" };
-    std::string mediald(medialds[randomNum % medialds.size()]);
-    aVSessionCallbackClient.OnToggleFavorite(mediald);
+    std::vector<std::string> mediaIds = { "mediaId1", "mediaId2", "mediaId3" };
+    std::string mediaId(mediaIds[randomNum % mediaIds.size()]);
+    aVSessionCallbackClient.OnToggleFavorite(mediaId);
 }
 
 void AvSessionCallbackClientFuzzer::FuzzTestInner2()

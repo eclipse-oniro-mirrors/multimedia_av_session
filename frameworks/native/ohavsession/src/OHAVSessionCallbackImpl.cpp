@@ -84,10 +84,10 @@ void OHAVSessionCallbackImpl::OnSetLoopMode(int32_t loopMode)
     }
 }
 
-void OHAVSessionCallbackImpl::OnToggleFavorite(const std::string& mediald)
+void OHAVSessionCallbackImpl::OnToggleFavorite(const std::string& mediaId)
 {
     for (auto it = toggleFavoriteCallbacks_.begin(); it != toggleFavoriteCallbacks_.end(); ++it) {
-        it->first(avsession_, mediald.c_str(), it->second);
+        it->first(avsession_, mediaId.c_str(), it->second);
     }
 }
 

@@ -20,6 +20,7 @@
 
 #include "bundle_mgr_proxy.h"
 #include "bundle_status_callback_host.h"
+#include "bundle_resource_proxy.h"
 
 namespace OHOS::AVSession {
 class BundleStatusAdapter {
@@ -29,6 +30,8 @@ public:
     ~BundleStatusAdapter();
 
     void Init();
+
+    bool GetBundleIcon(const std::string bundleName, std::string& icon);
 
     bool SubscribeBundleStatusEvent(const std::string bundleName,
         const std::function<void(const std::string, const int32_t userId)>& callback, int32_t userId = DEFAULT_USER_ID);
@@ -48,6 +51,7 @@ private:
     bool CheckBundleSupport(std::string& profile);
 
     sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy;
+    sptr<AppExecFwk::IBundleResource> bundleResourceProxy;
 
     std::map<std::pair<std::string, int32_t>, std::function<void(const std::string, const int32_t)>>
         bundleStatusListeners_;

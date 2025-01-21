@@ -25,7 +25,7 @@ MigrateAVSessionManager& MigrateAVSessionManager::GetInstance()
 void MigrateAVSessionManager::CreateLocalSessionStub(std::string scene, std::shared_ptr<MigrateAVSessionServer> server)
 {
     SLOGI("enter CreateLocalSessionStub");
-    if ("SuperLauncher-Dual" != scene) {
+    if ("SuperLauncher-Dual" != scene && migrateSceneNext != scene) {
         SLOGW("CreateLocalSessionStub error, scene: %{public}s", scene.c_str());
         return;
     }
@@ -44,7 +44,7 @@ void MigrateAVSessionManager::CreateLocalSessionStub(std::string scene, std::sha
 void MigrateAVSessionManager::ReleaseLocalSessionStub(std::string scene)
 {
     SLOGI("enter ReleaseLocalSessionStub");
-    if ("SuperLauncher-Dual" != scene) {
+    if ("SuperLauncher-Dual" != scene && migrateSceneNext != scene) {
         SLOGW("not ReleaseLocalSessionStub: scene: %{public}s", scene.c_str());
         return;
     }
@@ -68,7 +68,7 @@ void MigrateAVSessionManager::CreateRemoteSessionProxy(std::string &networkId, s
         SLOGW("CreateRemoteSessionProxy error, invalid params");
         return;
     }
-    if ("SuperLauncher-Dual" != scene) {
+    if ("SuperLauncher-Dual" != scene && migrateSceneNext != scene) {
         SLOGW("CreateRemoteSessionProxy error, scene: %{public}s", scene.c_str());
         return;
     }
@@ -89,7 +89,7 @@ void MigrateAVSessionManager::ReleaseRemoteSessionProxy(std::string &networkId, 
         SLOGW("ReleaseRemoteSessionProxy error, invalid params");
         return;
     }
-    if ("SuperLauncher-Dual" != scene) {
+    if ("SuperLauncher-Dual" != scene && migrateSceneNext != scene) {
         SLOGW("not ReleaseRemoteSessionProxy: scene: %{public}s", scene.c_str());
         return;
     }

@@ -111,13 +111,10 @@ int32_t AVSessionItem::Destroy()
         }
     }
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
-        "API_NAME", "Destroy",
-        "BUNDLE_NAME", GetBundleName(),
+        "API_NAME", "Destroy", "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
-        "SESSION_TAG", descriptor_.sessionTag_,
-        "SESSION_TYPE", GetSessionType(),
-        "ERROR_CODE", AVSESSION_SUCCESS,
-        "ERROR_MSG", "SUCCESS");
+        "SESSION_TAG", descriptor_.sessionTag_, "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
     if (serviceCallback_) {
         SLOGI("AVSessionItem send service destroy event to service");
         serviceCallback_(*this);
@@ -445,14 +442,11 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
                                     + "loopMode: " + std::to_string(state.GetLoopMode()) + ", "
                                     + "isFavorite: " + isFavor;
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
-        "API_NAME", "SetAVPlaybackState",
-        "BUNDLE_NAME", GetBundleName(),
+        "API_NAME", "SetAVPlaybackState", "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
         "SESSION_TAG", descriptor_.sessionTag_,
-        "SESSION_TYPE", GetSessionType(),
-        "API_PARAM", apiParamString,
-        "ERROR_CODE", AVSESSION_SUCCESS,
-        "ERROR_MSG", "SUCCESS");
+        "SESSION_TYPE", GetSessionType(), "API_PARAM", apiParamString,
+        "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
         remoteSource_->SetAVPlaybackState(state);
@@ -492,14 +486,11 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
                                     + "moduleName: " + moduleName + ", "
                                     + "abilityName: " + abilityName;
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
-        "API_NAME", "SetLaunchAbility",
-        "BUNDLE_NAME", GetBundleName(),
+        "API_NAME", "SetLaunchAbility", "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
         "SESSION_TAG", descriptor_.sessionTag_,
-        "SESSION_TYPE", GetSessionType(),
-        "API_PARAM", apiParamString,
-        "ERROR_CODE", res,
-        "ERROR_MSG", errMsg);
+        "SESSION_TYPE", GetSessionType(), "API_PARAM", apiParamString,
+        "ERROR_CODE", res, "ERROR_MSG", errMsg);
     return AVSESSION_SUCCESS;
 }
 
@@ -576,13 +567,10 @@ void AVSessionItem::InitAVCastControllerProxy()
 void AVSessionItem::ReportAVCastControllerInfo()
 {
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
-        "API_NAME", "getAVCastController",
-        "BUNDLE_NAME", GetBundleName(),
+        "API_NAME", "getAVCastController", "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
-        "SESSION_TAG", descriptor_.sessionTag_,
-        "SESSION_TYPE", GetSessionType(),
-        "ERROR_CODE", AVSESSION_SUCCESS,
-        "ERROR_MSG", "SUCCESS");
+        "SESSION_TAG", descriptor_.sessionTag_, "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
 }
 
 void AVSessionItem::dealValidCallback(int32_t cmd, std::vector<int32_t>& supportedCastCmds)
@@ -662,6 +650,12 @@ void AVSessionItem::ReleaseAVCastControllerInner()
     isFirstCallback_ = true;
 }
 #endif
+
+void AVSessionItem::RegisterAVSessionCallback(std::shared_ptr<AVSessionCallback> callbackOfMigrate)
+{
+    std::lock_guard callbackLockGuard(callbackLock_);
+    callbackForMigrate_ = callbackOfMigrate;
+}
 
 int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback>& callback)
 {
@@ -1634,6 +1628,35 @@ std::vector<int32_t> AVSessionItem::GetSupportCommand()
     return supportedCmd_;
 }
 
+void AVSessionItem::SetSupportCommand(std::vector<int32_t> cmds)
+{
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        supportedCmd_ = cmds;
+    }
+    std::string apiParamString = "cmd num:" + std::to_string(cmds.size());
+    HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
+        "API_NAME", "SetSupportCommand",
+        "BUNDLE_NAME", GetBundleName(),
+        "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
+        "SESSION_TAG", descriptor_.sessionTag_,
+        "SESSION_TYPE", GetSessionType(),
+        "API_PARAM", apiParamString,
+        "ERROR_CODE", AVSESSION_SUCCESS,
+        "ERROR_MSG", "SUCCESS");
+    ProcessFrontSession("SetSupportCommand");
+
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        SLOGI("send add command event to controller, size:%{public}d", static_cast<int>(controllers_.size()));
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                controller->HandleValidCommandChange(supportedCmd_);
+            }
+        }
+    }
+}
+
 AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
 {
     return launchAbility_;
@@ -1700,6 +1723,9 @@ void AVSessionItem::ExecueCommonCommand(const std::string& commonCommand, const 
     AVSESSION_TRACE_SYNC_START("AVSessionItem::ExecueCommonCommand");
     {
         std::lock_guard callbackLockGuard(callbackLock_);
+        if (callbackForMigrate_) {
+            callbackForMigrate_->OnCommonCommand(commonCommand, commandArgs);
+        }
         CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
         callback_->OnCommonCommand(commonCommand, commandArgs);
     }
@@ -1748,6 +1774,9 @@ void AVSessionItem::HandleOnPlay(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlay");
     std::lock_guard callbackLockGuard(callbackLock_);
+    if (callbackForMigrate_) {
+        callbackForMigrate_->OnPlay();
+    }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlay();
 }
@@ -1756,6 +1785,9 @@ void AVSessionItem::HandleOnPause(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPause");
     std::lock_guard callbackLockGuard(callbackLock_);
+    if (callbackForMigrate_) {
+        callbackForMigrate_->OnPause();
+    }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPause();
 }
@@ -1783,6 +1815,9 @@ void AVSessionItem::HandleOnPlayNext(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayNext");
     std::lock_guard callbackLockGuard(callbackLock_);
+    if (callbackForMigrate_) {
+        callbackForMigrate_->OnPlayNext();
+    }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlayNext();
 }
@@ -1791,6 +1826,9 @@ void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayPrevious");
     std::lock_guard callbackLockGuard(callbackLock_);
+    if (callbackForMigrate_) {
+        callbackForMigrate_->OnPlayPrevious();
+    }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlayPrevious();
 }
@@ -1849,9 +1887,12 @@ void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnToggleFavorite");
     std::lock_guard callbackLockGuard(callbackLock_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     std::string assetId;
     CHECK_AND_RETURN_LOG(cmd.GetAssetId(assetId) == AVSESSION_SUCCESS, "GetMediaId failed");
+    if (callbackForMigrate_) {
+        callbackForMigrate_->OnToggleFavorite(assetId);
+    }
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnToggleFavorite(assetId);
 }
 
@@ -2166,6 +2207,16 @@ int32_t AVSessionItem::DoContinuousTaskUnregister()
 #endif
 #endif
     return AVSESSION_SUCCESS;
+}
+
+bool AVSessionItem::IsCasting()
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+        return true;
+    }
+#endif
+    return false;
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

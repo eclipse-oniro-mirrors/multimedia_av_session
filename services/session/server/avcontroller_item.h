@@ -75,6 +75,8 @@ public:
 
     std::string GetSessionId() override;
 
+    AppExecFwk::ElementName GetElementOfSession();
+
     void HandleSessionDestroy();
 
     void HandleAVCallStateChange(const AVCallState& avCallState);

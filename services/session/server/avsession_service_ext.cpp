@@ -377,4 +377,290 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
     return AVSESSION_SUCCESS;
 }
 #endif
+
+AVSessionSystemAbilityLoadCallback::AVSessionSystemAbilityLoadCallback(AVSessionService *ptr)
+{
+    SLOGI("AVSessionSystemAbilityLoadCallback construct");
+    servicePtr_ = ptr;
+}
+
+AVSessionSystemAbilityLoadCallback::~AVSessionSystemAbilityLoadCallback()
+{
+    SLOGI("AVSessionSystemAbilityLoadCallback destruct");
+}
+
+void AVSessionSystemAbilityLoadCallback::OnLoadSACompleteForRemote(const std::string& deviceId,
+    int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject)
+{
+    SLOGI("OnLoadSACompleteForRemote systemAbilityId:%{public}d, loaded with object:%{public}d",
+        systemAbilityId, static_cast<int>(remoteObject != nullptr));
+}
+
+AVSessionDeviceStateCallback::AVSessionDeviceStateCallback(AVSessionService *ptr)
+{
+    SLOGI("AVSessionDeviceStateCallback construct");
+    servicePtr_ = ptr;
+}
+AVSessionDeviceStateCallback::~AVSessionDeviceStateCallback()
+{
+    SLOGI("AVSessionDeviceStateCallback destruct");
+}
+
+void AVSessionDeviceStateCallback::OnDeviceOnline(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo)
+{
+    SLOGI("AVSessionDeviceStateCallback OnDeviceOnline %{public}d", static_cast<int>(deviceInfo.deviceTypeId));
+}
+
+void AVSessionDeviceStateCallback::OnDeviceReady(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo)
+{
+    SLOGI("AVSessionDeviceStateCallback OnDeviceReady %{public}d", static_cast<int>(deviceInfo.deviceTypeId));
+    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnDeviceReady get servicePtr_ nullptr");
+    if (servicePtr_->ProcessTargetMigrate(true, deviceInfo)) {
+        SLOGI("OnDeviceReady ProcessTargetMigrate pass");
+    }
+}
+
+void AVSessionDeviceStateCallback::OnDeviceOffline(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo)
+{
+    SLOGI("AVSessionDeviceStateCallback OnDeviceOffline %{public}d", static_cast<int>(deviceInfo.deviceTypeId));
+    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnDeviceOffline get servicePtr_ nullptr");
+    if (servicePtr_->ProcessTargetMigrate(false, deviceInfo)) {
+        SLOGI("OnDeviceOffline ProcessTargetMigrate pass");
+    }
+}
+
+void AVSessionDeviceStateCallback::OnDeviceChanged(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo)
+{
+    SLOGD("AVSessionDeviceStateCallback OnDeviceChanged %{public}d", static_cast<int>(deviceInfo.deviceTypeId));
+}
+
+int32_t AVSessionService::GetLocalDeviceType()
+{
+    int32_t deviceType = -1;
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceType(serviceName, deviceType);
+    CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "get local device type failed with ret:%{public}d", ret);
+    return deviceType;
+}
+
+void AVSessionService::DoTargetDevListenWithDM()
+{
+    localDeviceType_ = GetLocalDeviceType();
+    targetDeviceType_ = (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) ?
+        DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE : DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+    SLOGI("get localDeviceType:%{public}d", localDeviceType_);
+
+    std::vector<DistributedHardware::DmDeviceInfo> deviceList;
+    int32_t ret = GetTrustedDevicesInfo(deviceList);
+    CHECK_AND_PRINT_LOG(ret == AVSESSION_SUCCESS, "get trusted devcie list fail with ret:%{public}d", ret);
+    for (DistributedHardware::DmDeviceInfo& deviceInfo : deviceList) {
+        if (ProcessTargetMigrate(true, deviceInfo)) {
+            SLOGI("GetTrustedDevicesInfo find target");
+        }
+    }
+
+    deviceStateCallback_ = std::make_shared<AVSessionDeviceStateCallback>(this);
+    ret = DistributedHardware::DeviceManager::GetInstance().
+        RegisterDevStateCallback(serviceName, "extra", deviceStateCallback_);
+    SLOGE("RegisterDevStateCallback with ret:%{public}d", ret);
+}
+
+bool AVSessionService::ProcessTargetMigrate(bool isOnline, const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    if (deviceInfo.deviceTypeId != targetDeviceType_ || !CheckWhetherTargetDevIsNext(deviceInfo)) {
+        SLOGE("ProcessTargetMigrate wtih deviceType:%{public}d or version not fit", deviceInfo.deviceTypeId);
+        return false;
+    }
+    if (!isOnline) {
+        isMigrateTargetFound_ = false;
+        DoDisconnectProcessWithMigrate(deviceInfo);
+        deviceIdForMigrate_ = "";
+    } else {
+        isMigrateTargetFound_ = true;
+        deviceIdForMigrate_ = std::string(deviceInfo.deviceId);
+        DoConnectProcessWithMigrate(deviceInfo);
+        if (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+            DoRemoteAVSessionLoad(deviceIdForMigrate_);
+        }
+    }
+    return true;
+}
+
+void AVSessionService::DoRemoteAVSessionLoad(std::string remoteDeviceId)
+{
+    SLOGI("DoRemoteAVSessionLoad with deviceId:%{public}s", remoteDeviceId.c_str());
+    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (mgr == nullptr) {
+        SLOGE("DoRemoteAVSessionLoad get SystemAbilityManager fail");
+        return;
+    }
+    abilityLoadCallback_ = new AVSessionSystemAbilityLoadCallback(this);
+    int32_t ret = mgr->LoadSystemAbility(AVSESSION_SERVICE_ID, remoteDeviceId, abilityLoadCallback_);
+    SLOGI("DoRemoteAVSessionLoad LoadSystemAbility with ret:%{public}d", ret);
+}
+
+void AVSessionService::DoConnectProcessWithMigrate(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    if (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        DoConnectProcessWithMigrateServer(deviceInfo);
+    } else {
+        DoDisconnectProcessWithMigrateServer(deviceInfo);
+    }
+}
+
+void AVSessionService::DoConnectProcessWithMigrateServer(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    SLOGI("DoConnectProcessWithMigrateServer with deviceType:%{public}d", deviceInfo.deviceTypeId);
+    std::string networkId = std::string(deviceInfo.networkId);
+    if (migrateAVSessionServerMap_.find(networkId) == migrateAVSessionServerMap_.end()) {
+        std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer =
+            std::make_shared<MigrateAVSessionServer>(MIGRATE_MODE_NEXT);
+        migrateAVSessionServer->Init(this);
+        migrateAVSessionServer->LocalFrontSessionArrive(localFrontSessionId_);
+        MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(MigrateAVSessionManager::migrateSceneNext,
+            migrateAVSessionServer);
+        migrateAVSessionServerMap_.insert({networkId, migrateAVSessionServer});
+        SLOGI("DoConnectProcessWithMigrateServer create migrate server success");
+    } else {
+        SLOGE("DoConnectProcessWithMigrateServer find migrate server already alive");
+    }
+}
+
+void AVSessionService::DoConnectProcessWithMigrateProxy(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    SLOGI("DoConnectProcessWithMigrateProxy with deviceType:%{public}d", deviceInfo.deviceTypeId);
+    std::string networkId = std::string(deviceInfo.networkId);
+    if (migrateAVSessionProxyMap_.find(networkId) == migrateAVSessionProxyMap_.end()) {
+        std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
+            std::make_shared<MigrateAVSessionProxy>(this);
+        MigrateAVSessionManager::GetInstance().CreateRemoteSessionProxy(networkId,
+            MigrateAVSessionManager::migrateSceneNext, migrateAVSessionProxy);
+        migrateAVSessionProxyMap_.insert({networkId, std::static_pointer_cast<SoftbusSession>(migrateAVSessionProxy)});
+        SLOGI("DoConnectProcessWithMigrateProxy create migrate proxy success");
+    } else {
+        SLOGE("DoConnectProcessWithMigrateProxy find migrate proxy already alive");
+    }
+}
+
+void AVSessionService::DoDisconnectProcessWithMigrate(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    if (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        DoDisconnectProcessWithMigrateServer(deviceInfo);
+    } else {
+        DoDisconnectProcessWithMigrateProxy(deviceInfo);
+    }
+}
+
+void AVSessionService::DoDisconnectProcessWithMigrateServer(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    SLOGI("DoDisconnectProcessWithMigrateServer with deviceType:%{public}d", deviceInfo.deviceTypeId);
+    std::string networkId = std::string(deviceInfo.networkId);
+    MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(MigrateAVSessionManager::migrateSceneNext);
+    if (migrateAVSessionServerMap_.find(networkId) != migrateAVSessionServerMap_.end()) {
+        migrateAVSessionServerMap_.erase(networkId);
+    } else {
+        SLOGE("DoDisconnectProcessWithMigrateServer find networkId not exist");
+    }
+}
+
+void AVSessionService::DoDisconnectProcessWithMigrateProxy(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    SLOGI("DoDisconnectProcessWithMigrateProxy with networkId:%{public}s", deviceInfo.networkId);
+    std::string networkId = std::string(deviceInfo.networkId);
+    MigrateAVSessionManager::GetInstance().ReleaseRemoteSessionProxy(networkId,
+        MigrateAVSessionManager::migrateSceneNext);
+    if (migrateAVSessionProxyMap_.find(networkId) != migrateAVSessionProxyMap_.end()) {
+        migrateAVSessionProxyMap_.erase(networkId);
+    } else {
+        SLOGE("DoDisconnectProcessWithMigrateProxy find networkId not exist");
+    }
+}
+
+void AVSessionService::UpdateLocalFrontSession(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront)
+{
+    CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "UpdateLocalFrontSession get sessionListForFront nullptr");
+    std::string preloadSessionId;
+    if (sessionListForFront->size() <= 0) {
+        SLOGI("UpdateLocalFrontSession with empty list");
+        preloadSessionId = "";
+        NotifyLocalFrontSessionChangeForMigrate(preloadSessionId);
+        return;
+    }
+    if (topSession_ != nullptr && !topSession_->IsCasting()) {
+        preloadSessionId = topSession_->GetSessionId();
+        NotifyLocalFrontSessionChangeForMigrate(preloadSessionId);
+        return;
+    }
+    for (const auto& session : *sessionListForFront) {
+        if (session == nullptr || session->IsCasting()) {
+            continue;
+        }
+        preloadSessionId = session->GetSessionId();
+        break;
+    }
+    NotifyLocalFrontSessionChangeForMigrate(preloadSessionId);
+}
+
+void AVSessionService::NotifyLocalFrontSessionChangeForMigrate(std::string localFrontSessionIdUpdate)
+{
+    SLOGI("NotifyLocalFrontSessionChangeForMigrate with sessionId:%{public}s",
+        AVSessionUtils::GetAnonySessionId(localFrontSessionIdUpdate).c_str());
+    if (migrateAVSessionServerMap_.size() <= 0) {
+        SLOGE("NotifyLocalFrontSessionChangeForMigrate with no migrate");
+        localFrontSessionId_ = localFrontSessionIdUpdate;
+        return;
+    }
+    for (auto it = migrateAVSessionServerMap_.begin(); it != migrateAVSessionServerMap_.end(); it++) {
+        std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer = it->second;
+        if (migrateAVSessionServer == nullptr) {
+            SLOGE("notify session change but get migrateserver null, continue");
+            continue;
+        }
+        if (localFrontSessionId_.empty() && localFrontSessionIdUpdate.length() > 0) {
+            DoRemoteAVSessionLoad(deviceIdForMigrate_);
+            migrateAVSessionServer->LocalFrontSessionArrive(localFrontSessionIdUpdate);
+        } else if (!localFrontSessionId_.empty() && localFrontSessionIdUpdate.length() > 0
+            && localFrontSessionId_ != localFrontSessionIdUpdate) {
+            migrateAVSessionServer->LocalFrontSessionChange(localFrontSessionIdUpdate);
+        } else if (!localFrontSessionId_.empty() && localFrontSessionIdUpdate.empty()) {
+            DoRemoteAVSessionLoad(deviceIdForMigrate_);
+            migrateAVSessionServer->LocalFrontSessionArrive(localFrontSessionId_);
+        }
+    }
+    localFrontSessionId_ = localFrontSessionIdUpdate;
+}
+
+bool AVSessionService::CheckWhetherTargetDevIsNext(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    Json::Reader reader;
+    Json::Value jsonData;
+    if (!reader.parse(deviceInfo.extraData, jsonData)) {
+        SLOGE("CheckWhetherTargetDevIsNext json parse failed");
+        return false;
+    }
+    if (jsonData.isMember("OS_TYPE")) {
+        Json::Value osValue = jsonData["OS_TYPE"];
+        if (osValue.isNumeric()) {
+            double number = osValue.asDouble();
+            if (number > 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int32_t AVSessionService::GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
+    std::vector<sptr<IRemoteObject>>& sessionControllers)
+{
+    if (sessionType == DistributedSessionType::TYPE_SESSION_REMOTE && !migrateAVSessionProxyMap_.empty()) {
+        for (const auto& pair : migrateAVSessionProxyMap_) {
+            std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
+                std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
+            CHECK_AND_CONTINUE(migrateAVSessionProxy != nullptr);
+            migrateAVSessionProxy->GetDistributedSessionControllerList(sessionControllers);
+        }
+    }
+    SLOGI("GetDistributedSessionControllersInner with size:%{public}d", static_cast<int>(sessionControllers.size()));
+    return AVSESSION_SUCCESS;
+}
 }

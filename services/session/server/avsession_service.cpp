@@ -604,6 +604,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         sessionListForFront->remove(sessionItem);
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
     }
+    UpdateLocalFrontSession(sessionListForFront);
 }
 
 // LCOV_EXCL_START
@@ -682,6 +683,7 @@ void AVSessionService::InitDM()
     CHECK_AND_RETURN_LOG(callback != nullptr, "no memory");
     int32_t ret = OHOS::DistributedHardware::DeviceManager::GetInstance().InitDeviceManager("av_session", callback);
     CHECK_AND_RETURN_LOG(ret == 0, "InitDeviceManager error ret is %{public}d", ret);
+    DoTargetDevListenWithDM();
 }
 
 void AVSessionService::InitBMS()
@@ -727,13 +729,6 @@ void AVSessionService::InitCastEngineService()
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
 #endif
-}
-
-int32_t AVSessionService::GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
-    std::vector<sptr<IRemoteObject>>& sessionControllers)
-{
-    SLOGI("GetDistributedSessionControllersInner");
-    return AVSESSION_SUCCESS;
 }
 
 void AVSessionService::RegisterBundleDeleteEventForHistory(int32_t userId)

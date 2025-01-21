@@ -153,13 +153,13 @@ void AVSessionCallbackClient::OnSetLoopMode(int32_t loopMode)
         "AVSessionCallbackClient handler postTask failed");
 }
 
-void AVSessionCallbackClient::OnToggleFavorite(const std::string& mediald)
+void AVSessionCallbackClient::OnToggleFavorite(const std::string& mediaId)
 {
     CHECK_AND_RETURN_LOG(callback_, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, mediald]() { callback->OnToggleFavorite(mediald); }, std::string(__FUNCTION__)),
+        .AVSessionPostTask([callback, mediaId]() { callback->OnToggleFavorite(mediaId); }, std::string(__FUNCTION__)),
         "AVSessionCallbackClient handler postTask failed");
 }
 

@@ -23,6 +23,7 @@ namespace OHOS::AVSession {
 namespace {
     constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 1 * 1024 * 1024;
     constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 500 * 1024; // ipc max 1m at the same time
+    constexpr int32_t MIN_PIXEL_BUFFER_SIZE = 100 * 1024;
     constexpr uint8_t IMAGE_BYTE_SIZE = 2;
     constexpr uint8_t DATA_BYTE_SIZE = 4;
     constexpr uint8_t OFFSET_BYTE = 8;
@@ -192,6 +193,41 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
         int32_t originSize = originalPixelMapBytes_;
         float scaleRatio =
             sqrt(static_cast<float>(LIMITED_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_));
+        pixelMapTemp->scale(scaleRatio, scaleRatio);
+        originalPixelMapBytes_ = pixelMapTemp->GetByteCount();
+        SLOGI("imgBufferSize exceeds limited: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
+    }
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = ConvertAndSetInnerImgBuffer(pixelMapTemp);
+    free(dataAddr);
+    return innerPixelMap;
+}
+
+std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithMinSize(
+    const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    std::lock_guard<std::mutex> lockGuard(pixelMapLock_);
+    CHECK_AND_RETURN_RET_LOG(pixelMap != nullptr, nullptr, "invalid parameter");
+    originalPixelMapBytes_ = pixelMap->GetByteCount();
+    originalWidth_ = pixelMap->GetWidth();
+    originalHeight_ = pixelMap->GetHeight();
+    Media::ImageInfo imageInfoTemp;
+    pixelMap->GetImageInfo(imageInfoTemp);
+    const std::shared_ptr<Media::PixelMap>& pixelMapTemp = std::make_shared<Media::PixelMap>();
+    pixelMapTemp->SetImageInfo(imageInfoTemp);
+    uint32_t dataSize = static_cast<uint32_t>(originalPixelMapBytes_);
+    void* dataAddr = malloc(dataSize);
+    CHECK_AND_RETURN_RET_LOG(dataAddr != nullptr, nullptr, "create dataSize with null, return");
+
+    if (!CopyPixMapToDst(*pixelMap, dataAddr, dataSize)) {
+        SLOGE("CopyPixMapToDst failed");
+        free(dataAddr);
+        return nullptr;
+    }
+    pixelMapTemp->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
+    if (originalPixelMapBytes_ > MIN_PIXEL_BUFFER_SIZE) {
+        int32_t originSize = originalPixelMapBytes_;
+        float scaleRatio =
+            sqrt(static_cast<float>(MIN_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_));
         pixelMapTemp->scale(scaleRatio, scaleRatio);
         originalPixelMapBytes_ = pixelMapTemp->GetByteCount();
         SLOGI("imgBufferSize exceeds limited: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);

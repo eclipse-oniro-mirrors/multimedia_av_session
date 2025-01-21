@@ -219,10 +219,10 @@ public:
     /**
      * @brief Whether to collect the current song.
      *
-     * @param mediald current song id.
+     * @param mediaId current song id.
      * @since 9
     */
-    virtual void OnToggleFavorite(const std::string& mediald) = 0;
+    virtual void OnToggleFavorite(const std::string& mediaId) = 0;
 
     /**
      * @brief Listening for Media key events.
@@ -599,7 +599,7 @@ enum DistributedSessionType {
      * @systemapi
      * @since 16
      */
-    TYPE_SESSION_MAX = 3,
+    TYPE_SESSION_MAX = 1,
 };
 
 /**

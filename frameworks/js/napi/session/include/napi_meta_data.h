@@ -55,6 +55,9 @@ private:
     static napi_status SetAVQueueImage(napi_env env, const AVMetaData& in, napi_value& out);
     static napi_status SetAVQueueImageUri(napi_env env, const AVMetaData& in, napi_value& out);
 
+    static napi_status GetBundleIcon(napi_env env, napi_value in, AVMetaData& out);
+    static napi_status SetBundleIcon(napi_env env, const AVMetaData& in, napi_value& out);
+
     static napi_status GetAlbum(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetAlbum(napi_env env, const AVMetaData& in, napi_value& out);
 

@@ -35,7 +35,7 @@ public:
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override {};
     void OnSetLoopMode(int32_t loopMode) override;
-    void OnToggleFavorite(const std::string& mediald) override;
+    void OnToggleFavorite(const std::string& mediaId) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override {};
     void OnOutputDeviceChange(const int32_t connectionState,
     const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};

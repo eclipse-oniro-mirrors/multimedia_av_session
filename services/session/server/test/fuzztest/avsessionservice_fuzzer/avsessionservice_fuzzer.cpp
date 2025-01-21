@@ -37,7 +37,7 @@ namespace OHOS {
 namespace AVSession {
 
 static constexpr int32_t CAST_ENGINE_SA_ID = 65546;
-static constexpr int32_t SESSION_ID = 2;
+static constexpr int32_t TEST_SESSION_ID = 2;
 static constexpr int32_t CLIENT_UID = 1;
 static char g_testSessionTag[] = "test";
 static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
@@ -449,7 +449,7 @@ void StartDefaultAbilityByCall001()
 
     std::shared_ptr<AudioRendererChangeInfo> info_ = std::make_shared<AudioRendererChangeInfo>();
     info_->clientUID = CLIENT_UID;
-    info_->sessionId = SESSION_ID;
+    info_->sessionId = TEST_SESSION_ID;
     info_->rendererState = RendererState::RENDERER_RELEASED;
     AudioRendererChangeInfos infos;
     infos.push_back(std::move(info_));
