@@ -482,9 +482,8 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
         moduleName = want->GetElement().GetModuleName().c_str();
         errMsg = "SUCCESS";
     }
-    std::string apiParamString = "bundleName: " + bundleName + ", "
-                                    + "moduleName: " + moduleName + ", "
-                                    + "abilityName: " + abilityName;
+    std::string apiParamString = "bundleName: " + bundleName + ", " +
+        "moduleName: " + moduleName + ", " + "abilityName: " + abilityName;
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "SetLaunchAbility", "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
@@ -670,13 +669,10 @@ int32_t AVSessionItem::Activate()
     descriptor_.isActive_ = true;
     std::lock_guard controllerLockGuard(controllersLock_);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
-        "API_NAME", "Activate",
-        "BUNDLE_NAME", GetBundleName(),
+        "API_NAME", "Activate", "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
-        "SESSION_TAG", descriptor_.sessionTag_,
-        "SESSION_TYPE", GetSessionType(),
-        "ERROR_CODE", AVSESSION_SUCCESS,
-        "ERROR_MSG", "SUCCESS");
+        "SESSION_TAG", descriptor_.sessionTag_, "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
     for (const auto& [pid, controller] : controllers_) {
         if (controller != nullptr) {
             controller->HandleActiveStateChange(true);
@@ -701,13 +697,10 @@ int32_t AVSessionItem::Deactivate()
     descriptor_.isActive_ = false;
     std::lock_guard controllerLockGuard(controllersLock_);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
-        "API_NAME", "Deactivate",
-        "BUNDLE_NAME", GetBundleName(),
+        "API_NAME", "Deactivate", "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
-        "SESSION_TAG", descriptor_.sessionTag_,
-        "SESSION_TYPE", GetSessionType(),
-        "ERROR_CODE", AVSESSION_SUCCESS,
-        "ERROR_MSG", "SUCCESS");
+        "SESSION_TAG", descriptor_.sessionTag_, "SESSION_TYPE", GetSessionType(),
+        "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
     for (const auto& [pid, controller] : controllers_) {
         if (controller != nullptr) {
             controller->HandleActiveStateChange(false);
@@ -751,14 +744,11 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     }
     std::string apiParamString = "cmd :" + std::to_string(cmd);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
-        "API_NAME", "OnEvent",
-        "BUNDLE_NAME", GetBundleName(),
+        "API_NAME", "OnEvent", "BUNDLE_NAME", GetBundleName(),
         "SESSION_ID", AVSessionUtils::GetAnonySessionId(GetSessionId()),
         "SESSION_TAG", descriptor_.sessionTag_,
-        "SESSION_TYPE", GetSessionType(),
-        "API_PARAM", apiParamString,
-        "ERROR_CODE", AVSESSION_SUCCESS,
-        "ERROR_MSG", "SUCCESS");
+        "SESSION_TYPE", GetSessionType(), "API_PARAM", apiParamString,
+        "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
     ProcessFrontSession("AddSupportCommand");
 
     {

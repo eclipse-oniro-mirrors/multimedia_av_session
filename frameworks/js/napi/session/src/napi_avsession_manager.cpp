@@ -1464,7 +1464,7 @@ napi_status NapiAVSessionManager::OffRemoteDistributedSessionChange(napi_env env
 
 napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)
 {
-    AVSessionManager::GetInstance().UnregisterServiceDeathCallback();
+    SLOGI("OffServiceDie but no longer UnregisterServiceDeathCallback");
     if (callback == nullptr) {
         for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
              ++callbackRef) {
