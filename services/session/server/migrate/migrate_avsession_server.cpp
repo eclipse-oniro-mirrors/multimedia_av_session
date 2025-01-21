@@ -32,11 +32,21 @@
 #include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
+MigrateAVSessionServer::MigrateAVSessionServer(int32_t migrateMode)
+{
+    migrateMode_ = migrateMode;
+}
+
 void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
 {
     SLOGI("OnConnectProxy: %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     isSoftbusConnecting_ = true;
     deviceId_ = deviceId;
+    if (migrateMode_ == MIGRATE_MODE_NEXT) {
+        SLOGI("connect process as next behavior");
+        LocalFrontSessionArrive(lastSessionId_);
+        return;
+    }
     ObserveControllerChanged(deviceId);
     SendSpecialKeepaliveData();
     SendRemoteControllerList(deviceId);
@@ -102,7 +112,7 @@ void MigrateAVSessionServer::CreateController(const std::string &sessionId)
     }
     std::shared_ptr<AVControllerObserver> callback = std::make_shared<AVControllerObserver>(sessionId);
     std::weak_ptr<MigrateAVSessionServer> migrageServerWeak(shared_from_this());
-    callback->Init(migrageServerWeak);
+    callback->Init(migrageServerWeak, migrateMode_);
     ret = controller->RegisterAVControllerCallback(callback);
     if (ret != AVSESSION_SUCCESS) {
         SLOGW("RegisteAVControllerCallback fail");
@@ -171,6 +181,10 @@ void MigrateAVSessionServer::OnBytesReceived(const std::string &deviceId, const 
     SLOGI("OnBytesReceived: %{public}s", data.c_str());
     if (data.length() < MSG_HEAD_LENGTH) {
         SLOGW("OnBytesReceived: invalid data");
+        return;
+    }
+    if (migrateMode_ == MIGRATE_MODE_NEXT) {
+        ProcControlCommandFromNext(deviceId, data);
         return;
     }
     if (data[1] == SYNC_COMMAND) {
@@ -264,6 +278,9 @@ void MigrateAVSessionServer::Init(AVSessionService *ptr)
 // LCOV_EXCL_START
 void MigrateAVSessionServer::OnSessionCreate(const AVSessionDescriptor &descriptor)
 {
+    if (migrateMode_ == MIGRATE_MODE_NEXT) {
+        return;
+    }
     SLOGI("OnSessionCreate");
     std::string sessionId = descriptor.sessionId_;
     if (sessionId.empty()) {
@@ -283,6 +300,9 @@ void MigrateAVSessionServer::OnSessionCreate(const AVSessionDescriptor &descript
 
 void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descriptor)
 {
+    if (migrateMode_ == MIGRATE_MODE_NEXT) {
+        return;
+    }
     std::string sessionId = descriptor.sessionId_;
     if (sessionId.empty()) {
         SLOGW("no valid avsession");
@@ -298,6 +318,9 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
 
 void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descriptor)
 {
+    if (migrateMode_ == MIGRATE_MODE_NEXT) {
+        return;
+    }
     SLOGI("OnTopSessionChange sessionId_: %{public}s", descriptor.sessionId_.c_str());
     {
         std::lock_guard lockGuard(topSessionLock_);
@@ -705,6 +728,10 @@ void AVControllerObserver::OnSessionDestroy()
 void AVControllerObserver::OnPlaybackStateChange(const AVPlaybackState &state)
 {
     std::shared_ptr<MigrateAVSessionServer> server = migrateServer_.lock();
+    if (server != nullptr && migrateMode_ == MIGRATE_MODE_NEXT) {
+        server->HandleFocusPlaybackStateChange(playerId_, state);
+        return;
+    }
     if (server != nullptr && state.GetState() != AVPlaybackState::PLAYBACK_STATE_INITIAL) {
         server->OnPlaybackStateChanged(playerId_, state);
     }
@@ -712,16 +739,31 @@ void AVControllerObserver::OnPlaybackStateChange(const AVPlaybackState &state)
 
 void AVControllerObserver::OnMetaDataChange(const AVMetaData &data)
 {
-    SLOGI("OnMetaDataChange");
+    SLOGI("OnMetaDataChange check migrateMode:%{public}d", migrateMode_);
     std::shared_ptr<MigrateAVSessionServer> server = migrateServer_.lock();
+    if (server != nullptr && migrateMode_ == MIGRATE_MODE_NEXT) {
+        server->HandleFocusMetaDataChange(playerId_, data);
+        return;
+    }
     if (server != nullptr) {
         server->OnMetaDataChange(playerId_, data);
     }
 }
 
-void AVControllerObserver::Init(std::weak_ptr<MigrateAVSessionServer> migrateServer)
+void AVControllerObserver::OnValidCommandChange(const std::vector<int32_t> &cmds)
+{
+    std::shared_ptr<MigrateAVSessionServer> server = migrateServer_.lock();
+    if (server != nullptr && migrateMode_ == MIGRATE_MODE_NEXT) {
+        server->HandleFocusValidCommandChange(playerId_, cmds);
+        return;
+    }
+}
+
+
+void AVControllerObserver::Init(std::weak_ptr<MigrateAVSessionServer> migrateServer, int32_t migrateMode)
 {
     migrateServer_ = migrateServer;
+    migrateMode_ = migrateMode;
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

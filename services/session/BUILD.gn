@@ -65,6 +65,7 @@ av_session_ohos_library("avsession_service") {
     "server/migrate/migrate_avsession_manager.cpp",
     "server/migrate/migrate_avsession_proxy.cpp",
     "server/migrate/migrate_avsession_server.cpp",
+    "server/migrate/migrate_avsession_server_for_next.cpp",
     "server/session_stack.cpp",
     "server/softbus/softbus_distributed_data_manager.cpp",
     "server/softbus/softbus_session.cpp",

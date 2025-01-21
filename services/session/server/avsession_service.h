@@ -39,6 +39,7 @@
 #include "i_avsession_service_listener.h"
 #include "avqueue_info.h"
 #include "migrate/migrate_avsession_server.h"
+#include "migrate/migrate_avsession_proxy.h"
 #include "account_manager_adapter.h"
 #include "app_manager_adapter.h"
 #include "avsession_dynamic_loader.h"
@@ -61,6 +62,7 @@
 #include "bundle_status_adapter.h"
 #include "if_system_ability_manager.h"
 #include "avsession_radar.h"
+#include "system_ability_load_callback_stub.h"
 
 #include "common_event_manager.h"
 #include "common_event_subscribe_info.h"
@@ -93,6 +95,32 @@ public:
     AVSessionInitDMCallback() = default;
     ~AVSessionInitDMCallback() override = default;
     void OnRemoteDied() override {};
+};
+
+class AVSessionSystemAbilityLoadCallback : public SystemAbilityLoadCallbackStub {
+public:
+    explicit AVSessionSystemAbilityLoadCallback(AVSessionService *ptr);
+    virtual ~AVSessionSystemAbilityLoadCallback();
+
+    void OnLoadSACompleteForRemote(const std::string& deviceId,
+        int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject);
+
+private:
+    AVSessionService *servicePtr_ = nullptr;
+};
+
+class AVSessionDeviceStateCallback : public OHOS::DistributedHardware::DeviceStateCallback {
+public:
+    explicit AVSessionDeviceStateCallback(AVSessionService *ptr);
+    virtual ~AVSessionDeviceStateCallback();
+
+    void OnDeviceOnline(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo) override;
+    void OnDeviceReady(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo) override;
+    void OnDeviceOffline(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo) override;
+    void OnDeviceChanged(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo) override;
+
+private:
+    AVSessionService *servicePtr_ = nullptr;
 };
 
 class EventSubscriber : public EventFwk::CommonEventSubscriber {
@@ -235,8 +263,13 @@ public:
 
     void InitCastEngineService();
 
+    bool ProcessTargetMigrate(bool isOnline, const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
     int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
         std::vector<sptr<IRemoteObject>>& sessionControllers) override;
+
+    void NotifyRemoteDistributedSessionControllersChanged(
+        const std::vector<sptr<IRemoteObject>>& sessionControllers);
 
 private:
 
@@ -257,8 +290,6 @@ private:
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
     void NotifyDeviceChange();
-    void NotifyRemoteDistributedSessionControllersChanged(
-        const std::vector<sptr<IRemoteObject>>& sessionControllers);
     void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
@@ -447,6 +478,30 @@ private:
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront(int32_t userId = 0);
 
+    int32_t GetLocalDeviceType();
+
+    void DoTargetDevListenWithDM();
+
+    void DoRemoteAVSessionLoad(std::string remoteDeviceId);
+
+    void DoConnectProcessWithMigrate(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
+    void DoConnectProcessWithMigrateServer(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
+    void DoConnectProcessWithMigrateProxy(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
+    void DoDisconnectProcessWithMigrate(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
+    void DoDisconnectProcessWithMigrateServer(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
+    void DoDisconnectProcessWithMigrateProxy(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
+    void UpdateLocalFrontSession(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront);
+
+    void NotifyLocalFrontSessionChangeForMigrate(std::string localFrontSessionIdUpdate);
+
+    bool CheckWhetherTargetDevIsNext(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
 
     sptr<AVSessionItem> topSession_;
@@ -530,6 +585,17 @@ private:
     bool is2in1_ = false;
 
     void *migrateStubFuncHandle_ = nullptr;
+
+    std::shared_ptr<AVSessionDeviceStateCallback> deviceStateCallback_ = nullptr;
+    sptr<AVSessionSystemAbilityLoadCallback> abilityLoadCallback_ = nullptr;
+    int32_t localDeviceType_ = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE;
+    int32_t targetDeviceType_ = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+    const std::string serviceName = "av_session";
+    std::string deviceIdForMigrate_ = "";
+    std::string localFrontSessionId_ = "";
+    bool isMigrateTargetFound_ = false;
+    std::map<std::string, std::shared_ptr<MigrateAVSessionServer>> migrateAVSessionServerMap_;
+    std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap_;
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;

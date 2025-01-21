@@ -30,6 +30,7 @@ constexpr int32_t MEDIA_SESSION_PLAYBACK_STATE_STOP = 1;
 constexpr int32_t MEDIA_SESSION_PLAYBACK_STATE_ERROR = 7;
 
 constexpr int32_t HEART_BEAT_TIME = 180000;
+constexpr int32_t HEART_BEAT_TIME_FOR_NEXT = 30000;
 
 constexpr int32_t SYNC_MEDIASESSION_CALLBACK_ON_COMMAND = 30;
 constexpr int32_t SYNC_MEDIASESSION_CALLBACK_ON_MEDIABUTTON_EVENT = 31;
@@ -54,13 +55,20 @@ constexpr int32_t SYNC_COMMAND = 3;
 constexpr int32_t SYNC_HEARTBEAT = 4;
 constexpr int32_t GET_HISTORY_MEDIA_INFO = 5;
 constexpr int32_t COLD_START = 6;
+constexpr int32_t SYNC_FOCUS_META_INFO = 7;
+constexpr int32_t SYNC_FOCUS_PLAY_STATE = 8;
+constexpr int32_t SYNC_FOCUS_VALID_COMMANDS = 9;
+constexpr int32_t SYNC_FOCUS_BUNDLE_IMG = 10;
 
 constexpr int32_t SYNC_CONTROLLER_CALLBACK_ON_DESTROYED = 11;
 constexpr int32_t SYNC_CONTROLLER_CALLBACK_ON_SESSION_EVENT = 12;
 constexpr int32_t SYNC_CONTROLLER_CALLBACK_ON_PLAYBACKSTATE_CHANGED = 13;
 constexpr int32_t SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED = 14;
+constexpr int32_t SYNC_FOCUS_SESSION_INFO = 15;
+constexpr int32_t SYNC_FOCUS_MEDIA_IMAGE = 16;
 
 constexpr int32_t MESSAGE_CODE_CONNECT_SERVER = 1;
+constexpr int32_t DEFAULT_NUM = 0;
 
 constexpr int REASON_EXIST = -3;
 
@@ -124,6 +132,18 @@ const char* PLAYBACK_MASK_NULL = "000000000";
 constexpr int32_t VOLUMN_INFO = 15;
 
 const char* CONFIG_SOFTBUS_SESSION_TAG = "Media_Session_RemoteCtrl";
+
+const char* DEFAULT_STRING = "DEFAULT";
+const char* METADATA_ASSET_ID = "MetadataAssetId";
+const char* FAVOR_STATE = "FavorState";
+const char* VALID_COMMANDS = "ValidCommands";
+const char* BUNDLE_ICON = "BundleIcon";
+const char* COMMAND_CODE = "CommandCode";
+const char* COMMAND_ARGS = "CommandArgs";
+const char* EMPTY_SESSION = "Empty";
+const char* SESSION_ID = "SessionId";
+const char* BUNDLE_NAME = "BundleName";
+const char* ABILITY_NAME = "AbilityName";
 }
 } // namespace OHOS::AVSession
 

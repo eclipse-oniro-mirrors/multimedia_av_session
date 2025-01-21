@@ -25,6 +25,9 @@
 #include "avsession_info.h"
 #include "softbus/softbus_session_server.h"
 
+#define MIGRATE_MODE_CROSS 0
+#define MIGRATE_MODE_NEXT 1
+
 namespace OHOS::AVSession {
 class AVSessionService;
 class AVControllerObserver;
@@ -38,7 +41,7 @@ const std::string ANCO_AUDIO_BUNDLE_NAME = "anco_audio";
 class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServer,
     public std::enable_shared_from_this<MigrateAVSessionServer> {
 public:
-    MigrateAVSessionServer() {}
+    explicit MigrateAVSessionServer(int32_t migrateMode = 0);
     ~MigrateAVSessionServer() {}
 
     void OnConnectProxy(const std::string &deviceId) override;
@@ -58,6 +61,18 @@ public:
     void StopObserveControllerChanged(const std::string &deviceId);
     void SendRemoteControllerList(const std::string &deviceId);
     void SendRemoteControllerInfo(const std::string &deviceId, std::string msg);
+
+    void LocalFrontSessionArrive(std::string &sessionId);
+    void LocalFrontSessionChange(std::string &sessionId);
+    void LocalFrontSessionLeave(std::string &sessionId);
+    void HandleFocusPlaybackStateChange(const std::string &sessionId, const AVPlaybackState &state);
+    void HandleFocusMetaDataChange(const std::string &sessionId, const AVMetaData &data);
+    void HandleFocusValidCommandChange(const std::string &sessionId, const std::vector<int32_t> &cmds);
+    void DoMetaDataSyncToRemote(const AVMetaData& data);
+    void DoMediaImageSyncToRemote(std::shared_ptr<AVSessionPixelMap> innerPixelMap);
+    void DoPlaybackStateSyncToRemote(const AVPlaybackState& state);
+    void DoValidCommandsSyncToRemote(const std::vector<int32_t>& commands);
+    void DoBundleInfoSyncToRemote(sptr<AVControllerItem> controller);
 
 private:
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;
@@ -96,6 +111,10 @@ private:
     std::string GetBundleName(std::string sessionId);
     bool CompressToJPEG(const AVMetaData &metadata, std::vector<uint8_t> &outputData);
     void DelaySendMetaData();
+    bool GetVehicleRelatingState(std::string playerId);
+    void UpdateFrontSessionInfoToRemote(sptr<AVControllerItem> controller);
+    void UpdateEmptyInfoToRemote();
+    void ProcControlCommandFromNext(const std::string &deviceId, const std::string &data);
 
     AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
@@ -104,6 +123,8 @@ private:
     std::string lastSessionId_;
     std::recursive_mutex migrateControllerLock_;
     std::recursive_mutex topSessionLock_;
+    int32_t migrateMode_ = MIGRATE_MODE_CROSS;
+    std::string curAssetId_;
 };
 
 class AVControllerObserver : public AVControllerCallback {
@@ -112,7 +133,7 @@ public:
     AVControllerObserver() {};
     ~AVControllerObserver() {};
 
-    void Init(std::weak_ptr<MigrateAVSessionServer> migrateServer);
+    void Init(std::weak_ptr<MigrateAVSessionServer> migrateServer, int32_t migrateMode = MIGRATE_MODE_CROSS);
 
     void OnSessionDestroy() override;
     void OnPlaybackStateChange(const AVPlaybackState &state) override;
@@ -120,7 +141,7 @@ public:
     void OnAVCallMetaDataChange(const AVCallMetaData &avCallMetaData) override {}
     void OnAVCallStateChange(const AVCallState &avCallState) override {}
     void OnActiveStateChange(bool isActive) override {}
-    void OnValidCommandChange(const std::vector<int32_t> &cmds) override {}
+    void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
     void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo &outputDeviceInfo) override {}
     void OnSessionEventChange(const std::string &event, const AAFwk::WantParams &args) override {}
     void OnQueueItemsChange(const std::vector<AVQueueItem> &items) override {}
@@ -130,6 +151,7 @@ public:
 private:
     std::weak_ptr<MigrateAVSessionServer> migrateServer_;
     std::string playerId_ = "";
+    int32_t migrateMode_ = MIGRATE_MODE_CROSS;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVER_H

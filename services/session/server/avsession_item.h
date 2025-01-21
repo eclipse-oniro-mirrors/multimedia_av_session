@@ -210,6 +210,12 @@ public:
 
     void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback);
 
+    void RegisterAVSessionCallback(std::shared_ptr<AVSessionCallback> callbackOfMigrate);
+
+    void SetSupportCommand(std::vector<int32_t> cmds);
+
+    bool IsCasting();
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void InitializeCastCommands();
 
@@ -364,7 +370,7 @@ private:
     std::vector<int32_t> supportedCmd_;
     std::vector<int32_t> supportedCastCmds_;
     sptr<IAVSessionCallback> callback_;
-    std::shared_ptr<AVSessionCallback> remoteCallback_;
+    std::shared_ptr<AVSessionCallback> callbackForMigrate_;
     std::function<void(AVSessionItem&)> serviceCallback_;
     std::function<void(AVSessionItem&)> callStartCallback_;
     friend class AVSessionDumper;

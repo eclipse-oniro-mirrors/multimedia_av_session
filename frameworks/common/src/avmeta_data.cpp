@@ -43,7 +43,8 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(displayTags_) &&
         WriteDrmSchemes(parcel) &&
         parcel.WriteParcelable(mediaImage_.get()) &&
-        parcel.WriteParcelable(avQueueImage_.get());
+        parcel.WriteParcelable(avQueueImage_.get()) &&
+        parcel.WriteParcelable(bundleIcon_.get());
 }
 
 AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
@@ -111,6 +112,11 @@ bool AVMetaData::UnmarshallingCheckImageTask(Parcel& data, AVMetaData *result)
         SLOGE("read avqueue PixelMap failed");
         return false;
     }
+    result->bundleIcon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
+    if (result->metaMask_.test(META_KEY_BUNDLE_ICON) && result->bundleIcon_ == nullptr) {
+        SLOGE("read bundle icon failed");
+        return false;
+    }
     return true;
 }
 
@@ -140,6 +146,7 @@ bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData meta
         data.WriteInt32(metaIn.mediaLength_) &&
         data.WriteInt32(metaIn.avQueueLength_) &&
         data.WriteInt32(metaIn.displayTags_) &&
+        data.WriteParcelable(metaIn.bundleIcon_.get());
         WriteDrmSchemes(data, metaIn);
     SLOGD("MarshallingExceptImg without small img ret %{public}d", static_cast<int>(ret));
     return ret;
@@ -183,8 +190,13 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
         !data.ReadInt32(metaOut.filter_) ||
         !data.ReadInt32(metaOut.mediaLength_) ||
         !data.ReadInt32(metaOut.avQueueLength_) ||
-        !data.ReadInt32(metaOut.displayTags_) ||
-        !ReadDrmSchemes(data, metaOut);
+        !data.ReadInt32(metaOut.displayTags_);
+    metaOut.bundleIcon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
+    if (metaOut.metaMask_.test(META_KEY_BUNDLE_ICON) && metaOut.bundleIcon_ == nullptr) {
+        SLOGE("read bundle icon failed");
+        return false;
+    }
+    ret = ret || !ReadDrmSchemes(data, metaOut);
     SLOGD("UnmarshallingExceptImg with drm but no small img ret %{public}d", static_cast<int>(ret));
     return ret;
 }
@@ -318,6 +330,17 @@ void AVMetaData::SetAVQueueImage(const std::shared_ptr<AVSessionPixelMap>& avQue
 std::shared_ptr<AVSessionPixelMap> AVMetaData::GetAVQueueImage() const
 {
     return avQueueImage_;
+}
+
+void AVMetaData::SetBundleIcon(const std::shared_ptr<AVSessionPixelMap>& bundleIcon)
+{
+    bundleIcon_ = bundleIcon;
+    metaMask_.set(META_KEY_BUNDLE_ICON);
+}
+
+std::shared_ptr<AVSessionPixelMap> AVMetaData::GetBundleIcon() const
+{
+    return bundleIcon_;
 }
 
 void AVMetaData::SetAVQueueImageUri(const std::string& avQueueImageUri)
@@ -555,6 +578,7 @@ void AVMetaData::Reset()
     avQueueId_ = "";
     avQueueImage_ = nullptr;
     avQueueImageUri_ = "";
+    bundleIcon_ = nullptr;
     album_ = "";
     writer_ = "";
     composer_ = "";
@@ -716,6 +740,11 @@ void AVMetaData::CloneAVQueueImage(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneAVQueueImageUri(const AVMetaData& from, AVMetaData& to)
 {
     to.avQueueImageUri_ = from.avQueueImageUri_;
+}
+
+void AVMetaData::CloneBundleIcon(const AVMetaData& from, AVMetaData& to)
+{
+    to.bundleIcon_ = from.bundleIcon_;
 }
 
 void AVMetaData::CloneAlbum(const AVMetaData& from, AVMetaData& to)

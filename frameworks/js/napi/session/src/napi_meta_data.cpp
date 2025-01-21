@@ -28,6 +28,7 @@ std::map<std::string, NapiMetaData::GetterType> NapiMetaData::getterMap_ = {
     { "avQueueName",  GetAVQueueName },
     { "avQueueId",  GetAVQueueId },
     { "avQueueImage",  GetAVQueueImage },
+    { "bundleIcon",  GetBundleIcon },
     { "album",  GetAlbum },
     { "writer", GetWriter },
     { "composer", GetComposer },
@@ -69,7 +70,8 @@ std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
     { AVMetaData::META_KEY_SKIP_INTERVALS, SetSkipIntervals },
     { AVMetaData::META_KEY_FILTER, SetFilter },
     { AVMetaData::META_KEY_DISPLAY_TAGS, SetDisplayTags },
-    { AVMetaData::META_KEY_DRM_SCHEMES, SetDrmSchemes }
+    { AVMetaData::META_KEY_DRM_SCHEMES, SetDrmSchemes },
+    { AVMetaData::META_KEY_BUNDLE_ICON, SetBundleIcon }
 };
 
 std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
@@ -96,7 +98,8 @@ std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
     { "skipIntervals", AVMetaData::META_KEY_SKIP_INTERVALS },
     { "filter", AVMetaData::META_KEY_FILTER },
     { "displayTags", AVMetaData::META_KEY_DISPLAY_TAGS },
-    { "drmSchemes", AVMetaData::META_KEY_DRM_SCHEMES }
+    { "drmSchemes", AVMetaData::META_KEY_DRM_SCHEMES },
+    { "bundleIcon", AVMetaData::META_KEY_BUNDLE_ICON },
 };
 
 napi_status NapiMetaData::ConvertFilter(napi_env env, napi_value filter, AVMetaData::MetaMaskType& mask)
@@ -305,7 +308,6 @@ napi_status NapiMetaData::SetAVQueueId(napi_env env, const AVMetaData& in, napi_
     return status;
 }
 
-
 napi_status NapiMetaData::GetAVQueueImage(napi_env env, napi_value in, AVMetaData& out)
 {
     napi_value property {};
@@ -347,6 +349,27 @@ napi_status NapiMetaData::SetAVQueueImage(napi_env env, const AVMetaData& in, na
         AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
     auto status = napi_set_named_property(env, out, "avQueueImage", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMetaData::GetBundleIcon(napi_env env, napi_value in, AVMetaData& out)
+{
+    SLOGE("bundle icon readonly, can't be set");
+    return napi_ok;
+}
+
+napi_status NapiMetaData::SetBundleIcon(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    auto pixelMap = in.GetBundleIcon();
+    if (pixelMap == nullptr) {
+        SLOGI("bundle icon is none");
+        return napi_ok;
+    }
+
+    napi_value property = Media::PixelMapNapi::CreatePixelMap(env,
+        AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
+    auto status = napi_set_named_property(env, out, "bundleIcon", property);
+    CHECK_RETURN(status == napi_ok, "set bundleIcon property failed", status);
     return status;
 }
 

@@ -57,6 +57,33 @@ void BundleStatusAdapter::Init()
     std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
     SLOGI("get bundle manager proxy success");
     bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    bundleResourceProxy = bundleMgrProxy->GetBundleResourceProxy();
+}
+
+bool BundleStatusAdapter::GetBundleIcon(const std::string bundleName, std::string& icon)
+{
+    SLOGI("GetBundleIcon with bundleName:%{public}s", bundleName.c_str());
+    
+    if (bundleMgrProxy == nullptr || bundleResourceProxy == nullptr) {
+        SLOGE("GetBundleIcon with bundleMgrProxy:%{public}d, bundleResourceProxy:%{public}d",
+            static_cast<int>(bundleMgrProxy != nullptr), static_cast<int>(bundleResourceProxy != nullptr));
+        return false;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!bundleMgrProxy->GetBundleInfo(bundleName, getBundleInfoWithHapModule, bundleInfo, startUserId)) {
+        SLOGE("GetBundleInfo of bundleName:%{public}s fail!", bundleName.c_str());
+        return false;
+    }
+    std::vector<AppExecFwk::LauncherAbilityResourceInfo> LauncherAbilityResourceInfoList;
+    ErrCode ret = bundleResourceProxy->GetLauncherAbilityResourceInfo(bundleName, 0, LauncherAbilityResourceInfoList);
+    if (ret != ERR_OK) {
+        SLOGE("GetLauncherAbilityResourceInfo of bundleName:%{public}s fail for errCode:%{public}d",
+            bundleName.c_str(), ret);
+        return false;
+    }
+
+    icon = LauncherAbilityResourceInfoList[0].icon;
+    return true;
 }
 
 bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleName,

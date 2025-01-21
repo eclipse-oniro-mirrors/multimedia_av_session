@@ -184,7 +184,7 @@ public:
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
-    void OnToggleFavorite(const std::string& mediald) override;
+    void OnToggleFavorite(const std::string& mediaId) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
@@ -250,9 +250,9 @@ void AVSessionCastAudioCallbackImpl::OnSetLoopMode(int32_t loopMode)
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnSetLoopMode %{public}d", g_onCall);
 }
-void AVSessionCastAudioCallbackImpl::OnToggleFavorite(const std::string& mediald)
+void AVSessionCastAudioCallbackImpl::OnToggleFavorite(const std::string& mediaId)
 {
-    SLOGE("OnToggleFavorite %{public}s", mediald.c_str());
+    SLOGE("OnToggleFavorite %{public}s", mediaId.c_str());
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnToggleFavorite %{public}d", g_onCall);
 }

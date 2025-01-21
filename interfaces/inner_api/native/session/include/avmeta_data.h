@@ -57,7 +57,8 @@ public:
         META_KEY_FILTER = 21,
         META_KEY_DISPLAY_TAGS = 22,
         META_KEY_DRM_SCHEMES = 23,
-        META_KEY_MAX = 24
+        META_KEY_BUNDLE_ICON = 24,
+        META_KEY_MAX = 25
     };
 
     enum {
@@ -114,6 +115,9 @@ public:
   
     void SetAVQueueImageUri(const std::string& avQueueImageUri);
     std::string GetAVQueueImageUri() const;
+
+    void SetBundleIcon(const std::shared_ptr<AVSessionPixelMap>& avQueueImage);
+    std::shared_ptr<AVSessionPixelMap> GetBundleIcon() const;
 
     void SetAlbum(const std::string& album);
     std::string GetAlbum() const;
@@ -205,7 +209,8 @@ public:
         META_KEY_SKIP_INTERVALS,
         META_KEY_FILTER,
         META_KEY_DISPLAY_TAGS,
-        META_KEY_DRM_SCHEMES
+        META_KEY_DRM_SCHEMES,
+        META_KEY_BUNDLE_ICON
     };
 
 private:
@@ -237,6 +242,7 @@ private:
     int32_t avQueueLength_ = 0;
     int32_t displayTags_ = 0;
     std::vector<std::string> drmSchemes_;
+    std::shared_ptr<AVSessionPixelMap> bundleIcon_ = nullptr;
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneTitle(const AVMetaData& from, AVMetaData& to);
@@ -262,6 +268,7 @@ private:
     static void CloneFilter(const AVMetaData& from, AVMetaData& to);
     static void CloneDisplayTags(const AVMetaData& from, AVMetaData& to);
     static void CloneDrmSchemes(const AVMetaData& from, AVMetaData& to);
+    static void CloneBundleIcon(const AVMetaData& from, AVMetaData& to);
 
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
@@ -288,7 +295,8 @@ private:
         &AVMetaData::CloneSkipIntervals,
         &AVMetaData::CloneFilter,
         &AVMetaData::CloneDisplayTags,
-        &AVMetaData::CloneDrmSchemes
+        &AVMetaData::CloneDrmSchemes,
+        &AVMetaData::CloneBundleIcon
     };
 };
 } // namespace OHOS::AVSession

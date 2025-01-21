@@ -281,6 +281,16 @@ std::string AVControllerItem::GetSessionId()
 }
 // LCOV_EXCL_STOP
 
+AppExecFwk::ElementName AVControllerItem::GetElementOfSession()
+{
+    std::lock_guard sessionLockGuard(sessionMutex_);
+    AppExecFwk::ElementName elementOfSession;
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, elementOfSession, "session not exist");
+    elementOfSession.SetBundleName(session_->GetBundleName());
+    elementOfSession.SetAbilityName(session_->GetAbilityName());
+    return elementOfSession;
+}
+
 void AVControllerItem::HandleSessionDestroy()
 {
     {
@@ -443,6 +453,9 @@ void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds
         static_cast<int>(pid_), static_cast<int>(cmds.size()));
     if (callback_ != nullptr) {
         callback_->OnValidCommandChange(cmds);
+    }
+    if (innerCallback_ != nullptr) {
+        innerCallback_->OnValidCommandChange(cmds);
     }
 }
 // LCOV_EXCL_STOP

@@ -17,6 +17,7 @@
 #define SOFTBUS_SESSION_UTILS_H
 
 #include <string>
+#include "json/json.h"
 
 namespace OHOS::AVSession {
 class SoftbusSessionUtils {
@@ -35,6 +36,21 @@ public:
             std::string suffix = deviceId.substr(deviceId.length() - index, deviceId.length());
             return prefix + std::string(DEVICE_ANONYMIZE_ID) + suffix;
         }
+    }
+
+    static inline void TransferJsonToStr(const Json::Value& jsonValue, std::string& jsonStr)
+    {
+        Json::FastWriter writer;
+        jsonStr += writer.write(jsonValue);
+    }
+
+    static inline bool TransferStrToJson(const std::string& jsonStr, Json::Value& jsonValue)
+    {
+        Json::Reader jsonReader;
+        if (!jsonReader.parse(jsonStr, jsonValue)) {
+            return false;
+        }
+        return true;
     }
 
 private:
