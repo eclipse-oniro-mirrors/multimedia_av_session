@@ -2902,8 +2902,9 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
     request.SetWantAgent(wantAgent);
-    result = Notification::NotificationHelper::PublishNotification(std::to_string(userId), request);
-    SLOGI("PublishNotification uid %{public}d, userId %{public}d, result %{public}d", uid, userId, result);
+    request.SetLabel(std::to_string(userId));
+    result = Notification::NotificationHelper::PublishNotification(request);
+    SLOGI("PublishNotification uid %{public}d, user id %{public}d, result %{public}d", uid, userId, result);
 }
 // LCOV_EXCL_STOP
 
