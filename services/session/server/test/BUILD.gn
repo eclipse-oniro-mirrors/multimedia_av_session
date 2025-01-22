@@ -641,6 +641,7 @@ ohos_unittest("AudioAdapterTest") {
 
   external_deps = [
     "audio_framework:audio_client",
+    "c_utils:utils",
     "hilog:libhilog",
     "window_manager:libdm_lite",
   ]

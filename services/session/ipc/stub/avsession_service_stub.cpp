@@ -197,7 +197,7 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
     auto maxAppSize = data.ReadInt32();
     int32_t ret = GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    
+
     int bufferLength = GetAVQueueInfosImgLength(avQueueInfos);
     CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(bufferLength), ERR_NONE, "write buffer length failed");
     if (bufferLength == 0) {
@@ -216,7 +216,7 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
         SLOGE("new buffer failed of length = %{public}d", bufferLength);
         return AVSESSION_ERROR;
     }
-    
+
     MarshallingAVQueueInfos(reply, avQueueInfos);
     AVQueueInfoImgToBuffer(avQueueInfos, buffer);
     if (!reply.WriteRawData(buffer, bufferLength)) {
@@ -474,7 +474,7 @@ int32_t AVSessionServiceStub::HandleCastAudio(MessageParcel& data, MessageParcel
 
     std::vector<AudioDeviceDescriptor> sinkAudioDescriptors;
     for (int i = 0; i < deviceNum; i++) {
-        auto audioDeviceDescriptor = AudioDeviceDescriptor::Unmarshalling(data);
+        auto audioDeviceDescriptor = AudioDeviceDescriptor::UnmarshallingPtr(data);
         if (audioDeviceDescriptor == nullptr) {
             SLOGI("read AudioDeviceDescriptor failed");
             CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
@@ -514,7 +514,7 @@ int32_t AVSessionServiceStub::HandleCastAudioForAll(MessageParcel& data, Message
 
     std::vector<AudioDeviceDescriptor> sinkAudioDescriptors {};
     for (int i = 0; i < deviceNum; i++) {
-        auto audioDeviceDescriptor = AudioDeviceDescriptor::Unmarshalling(data);
+        auto audioDeviceDescriptor = AudioDeviceDescriptor::UnmarshallingPtr(data);
         if (audioDeviceDescriptor == nullptr) {
             SLOGI("read AudioDeviceDescriptor failed");
             reply.WriteInt32(ERR_UNMARSHALLING);
@@ -797,7 +797,7 @@ int32_t AVSessionServiceStub::HandleStopCast(MessageParcel& data, MessageParcel&
     sessionToken.sessionId = data.ReadString();
     sessionToken.pid = data.ReadInt32();
     sessionToken.uid = data.ReadInt32();
-    
+
     int32_t ret = StopCast(sessionToken);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StopCast failed");
     SLOGI("StopCast ret %{public}d", ret);
