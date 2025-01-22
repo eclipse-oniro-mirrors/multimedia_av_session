@@ -114,7 +114,7 @@ static HWTEST_F(CommandSendLimitTest, StopTimer001, testing::ext::TestSize.Level
 {
     SLOGI("StopTimer001 begin!");
     CommandSendLimit::GetInstance().timer_ = std::make_unique<OHOS::Utils::Timer>("EventStatisticTimer");
-    EXPECT_TRUE(timer_ != nullptr);
+    EXPECT_TRUE(CommandSendLimit::GetInstance().timer_ != nullptr);
     CommandSendLimit::GetInstance().StopTimer();
     SLOGI("StopTimer001 end!");
 }

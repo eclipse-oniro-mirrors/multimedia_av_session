@@ -1269,7 +1269,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter001, TestS
     OHOS::MessageParcel reply;
     data.WriteString("1111111");
     int ret = avSessionControllerStub.HandleSetAVCallMetaFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetAVCallMetaFilter001 end!");
 }
 
@@ -1286,7 +1286,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter002, TestS
     OHOS::MessageParcel reply;
     data.WriteString("2222");
     int ret = avSessionControllerStub.HandleSetAVCallMetaFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetAVCallMetaFilter002 end!");
 }
 
@@ -1303,7 +1303,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter003, TestS
     OHOS::MessageParcel reply;
     data.WriteString("1010");
     int ret = avSessionControllerStub.HandleSetAVCallMetaFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetAVCallMetaFilter003 end!");
 }
 
@@ -1320,7 +1320,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter001, Test
     OHOS::MessageParcel reply;
     data.WriteString("1111111");
     int ret = avSessionControllerStub.HandleSetAVCallStateFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetAVCallStateFilter001 end!");
 }
 
@@ -1337,7 +1337,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter002, Test
     OHOS::MessageParcel reply;
     data.WriteString("2222");
     int ret = avSessionControllerStub.HandleSetAVCallStateFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetAVCallStateFilter002 end!");
 }
 
@@ -1354,7 +1354,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter003, Test
     OHOS::MessageParcel reply;
     data.WriteString("1010");
     int ret = avSessionControllerStub.HandleSetAVCallStateFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetAVCallStateFilter003 end!");
 }
 
@@ -1371,7 +1371,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter001, TestSize.Le
     OHOS::MessageParcel reply;
     data.WriteString("1111111");
     int ret = avSessionControllerStub.HandleSetMetaFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetMetaFilter001 end!");
 }
 
@@ -1388,7 +1388,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter002, TestSize.Le
     OHOS::MessageParcel reply;
     data.WriteString("2222");
     int ret = avSessionControllerStub.HandleSetMetaFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetMetaFilter002 end!");
 }
 
@@ -1405,7 +1405,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter003, TestSize.Le
     OHOS::MessageParcel reply;
     data.WriteString("1010");
     int ret = avSessionControllerStub.HandleSetMetaFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetMetaFilter003 end!");
 }
 
@@ -1422,7 +1422,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter001, TestSiz
     OHOS::MessageParcel reply;
     data.WriteString("1111111");
     int ret = avSessionControllerStub.HandleSetPlaybackFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetPlaybackFilter001 end!");
 }
 
@@ -1439,7 +1439,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter002, TestSiz
     OHOS::MessageParcel reply;
     data.WriteString("2222");
     int ret = avSessionControllerStub.HandleSetPlaybackFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetPlaybackFilter002 end!");
 }
 
@@ -1456,6 +1456,6 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter003, TestSiz
     OHOS::MessageParcel reply;
     data.WriteString("1010");
     int ret = avSessionControllerStub.HandleSetPlaybackFilter(data, reply);
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetPlaybackFilter003 end!");
 }
