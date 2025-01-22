@@ -503,7 +503,7 @@ void AVSessionService::DoConnectProcessWithMigrate(const OHOS::DistributedHardwa
     if (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         DoConnectProcessWithMigrateServer(deviceInfo);
     } else {
-        DoDisconnectProcessWithMigrateServer(deviceInfo);
+        DoConnectProcessWithMigrateProxy(deviceInfo);
     }
 }
 

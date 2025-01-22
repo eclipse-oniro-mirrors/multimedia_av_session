@@ -72,6 +72,18 @@ constexpr int32_t DEFAULT_NUM = 0;
 
 constexpr int REASON_EXIST = -3;
 
+#define DEFAULT_STRING "DEFAULT"
+#define METADATA_ASSET_ID "MetadataAssetId"
+#define  FAVOR_STATE "FavorState"
+#define  VALID_COMMANDS "ValidCommands"
+#define  BUNDLE_ICON "BundleIcon"
+#define  COMMAND_CODE "CommandCode"
+#define  COMMAND_ARGS "CommandArgs"
+#define  EMPTY_SESSION "Empty"
+#define  MIGRATE_SESSION_ID "SessionId"
+#define  MIGRATE_BUNDLE_NAME "BundleName"
+#define  MIGRATE_ABILITY_NAME "AbilityName"
+
 namespace {
 const char* EMIT_UTF8 = "emitUTF8";
 const char* PLAYBACK_SPEED = "playbackSpeed";
@@ -132,18 +144,6 @@ const char* PLAYBACK_MASK_NULL = "000000000";
 constexpr int32_t VOLUMN_INFO = 15;
 
 const char* CONFIG_SOFTBUS_SESSION_TAG = "Media_Session_RemoteCtrl";
-
-const char* DEFAULT_STRING = "DEFAULT";
-const char* METADATA_ASSET_ID = "MetadataAssetId";
-const char* FAVOR_STATE = "FavorState";
-const char* VALID_COMMANDS = "ValidCommands";
-const char* BUNDLE_ICON = "BundleIcon";
-const char* COMMAND_CODE = "CommandCode";
-const char* COMMAND_ARGS = "CommandArgs";
-const char* EMPTY_SESSION = "Empty";
-const char* SESSION_ID = "SessionId";
-const char* BUNDLE_NAME = "BundleName";
-const char* ABILITY_NAME = "AbilityName";
 }
 } // namespace OHOS::AVSession
 
