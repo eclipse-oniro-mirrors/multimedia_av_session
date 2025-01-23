@@ -64,6 +64,15 @@ int32_t AVControllerItem::RegisterAVControllerCallback(const std::shared_ptr<AVC
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::RegisterMigrateAVSessionProxyCallback(
+    const std::function<int32_t(const std::string&, AAFwk::WantParams&)>& callback)
+{
+    migrateProxyCallback_ = callback;
+    CHECK_AND_RETURN_RET_LOG(migrateProxyCallback_ != nullptr, AVSESSION_ERROR,
+        "RegisterMigrateAVSessionProxyCallback migrateProxyCallback_ is nullptr");
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::GetAVCallMetaData(AVCallMetaData& avCallMetaData)
 {
     std::lock_guard lockGuard(sessionMutex_);
@@ -155,6 +164,21 @@ int32_t AVControllerItem::GetExtras(AAFwk::WantParams& extras)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras)
+{
+    if(migrateProxyCallback_ != nullptr) {
+        int32_t ret = migrateProxyCallback_(extraEvent, extras);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "extraEvent not support");
+    } else {
+        SLOGI("migrateProxyCallback_ function is nullptr");
+    }
+
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     std::lock_guard lockGuard(sessionMutex_);
@@ -207,6 +231,13 @@ int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
 
 int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
 {
+    if(migrateProxyCallback_ != nullptr) {
+        int32_t ret = migrateProxyCallback_(commonCommand, const_cast<AAFwk::WantParams&>(commandArgs));
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "extraEvent not support");
+    } else {
+        SLOGI("migrateProxyCallback_ function is nullptr");
+    }
+
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
     CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),

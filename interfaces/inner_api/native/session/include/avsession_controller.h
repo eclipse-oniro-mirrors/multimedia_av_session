@@ -205,6 +205,16 @@ public:
     virtual int32_t GetExtras(AAFwk::WantParams& extras) = 0;
 
     /**
+     * @brief Get extra information for remote device, such as volume level, connected devices.
+     *
+     * @param extraEvent The event name to get
+     * @param extras Custom media packet key-value pairs
+     * @return Return whether the operation is successful
+     * @since 16
+    */
+    virtual int32_t GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras) = 0;
+
+    /**
      * @brief Destroy session.
      *
      * @return Returns whether destroy successful.

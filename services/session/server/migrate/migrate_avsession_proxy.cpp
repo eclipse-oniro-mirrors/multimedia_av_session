@@ -21,6 +21,8 @@
 #include "avsession_log.h"
 #include "avsession_service.h"
 #include "softbus/softbus_session_utils.h"
+#include "int_wrapper.h"
+#include "string_wrapper.h"
 
 namespace OHOS::AVSession {
 
@@ -97,6 +99,15 @@ void MigrateAVSessionProxy::OnBytesReceived(const std::string &deviceId, const s
             break;
         case SYNC_FOCUS_VALID_COMMANDS:
             ProcessValidCommands(jsonValue);
+            break;
+        case SYNC_SET_VOLUME_COMMAND:
+            ProcessVolumeControlCommand(jsonValue);
+            break;
+        case SYNC_AVAIL_DEVICES_LIST:
+            ProcessAvailableDevices(jsonValue);
+            break;
+        case SYNC_CURRENT_DEVICE:
+            ProcessPreferredOutputDevice(jsonValue);
             break;
         default:
             SLOGE("OnBytesReceived with unknow infoType:%{public}d", infoType);
@@ -176,9 +187,98 @@ void MigrateAVSessionProxy::PrepareSessionFromRemote()
 void MigrateAVSessionProxy::PrepareControllerOfRemoteSession(sptr<AVSessionItem> sessionItem)
 {
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "PrepareControllerOfRemoteSession with remote session null");
-    preSetController_ = new(std::nothrow) AVControllerItem(DEFAULT_NUM, sessionItem);\
+    preSetController_ = new(std::nothrow) AVControllerItem(DEFAULT_NUM, sessionItem);
     CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "PrepareControllerOfRemoteSession with controller create null");
+    migrateProxyCallback_ = MigrateAVSessionProxyControllerCallback();
+    preSetController_->RegisterMigrateAVSessionProxyCallback(migrateProxyCallback_);
     sessionItem->AddController(DEFAULT_NUM, preSetController_);
+}
+
+const std::function<int32_t(const std::string&, AAFwk::WantParams&)>
+    MigrateAVSessionProxy::MigrateAVSessionProxyControllerCallback()
+{
+    return [this](const std::string& extraEvent, AAFwk::WantParams& extras) {
+        const auto& it = AUDIO_EVENT_MAPS.find(extraEvent);
+        if (it == AUDIO_EVENT_MAPS.end()) {
+            SLOGE("extraEvent %{public}s not support", extraEvent.c_str());
+            return ERR_COMMAND_NOT_SUPPORT;
+        }
+        switch (it->second) {
+            case AUDIO_NUM_SET_VOLUME:
+                SetVolume(extras);
+                break;
+            case AUDIO_NUM_SELECT_OUTPUT_DEVICE:
+                SelectOutputDevice(extras);
+                break;
+            case AUDIO_NUM_GET_VOLUME:
+                GetVolume(extras);
+                break;
+            case AUDIO_NUM_GET_AVAILABLE_DEVICES:
+                GetAvailableDevices(extras);
+                break;
+            case AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO:
+                GetPreferredOutputDeviceForRendererInfo(extras);
+                break;
+            default:
+                break;
+        }
+        return AVSESSION_SUCCESS;
+    };
+}
+
+void MigrateAVSessionProxy::SetVolume(const AAFwk::WantParams& extras)
+{
+    SLOGI("proxy in SetVolume case");
+    CHECK_AND_RETURN_LOG(extras.HasParam(AUDIO_SET_VOLUME), "extras not have event");
+    auto volume = extras.GetParam(AUDIO_SET_VOLUME);
+    AAFwk::IInteger* ao = AAFwk::IInteger::Query(volume);
+    CHECK_AND_RETURN_LOG(ao != nullptr, "extras have no value");
+
+    volumeNum_ = OHOS::AAFwk::Integer::Unbox(ao);
+    Json::Value value;
+    std::string msg = std::string({MSG_HEAD_MODE, SYNC_SET_VOLUME_COMMAND});
+    value[AUDIO_VOLUME] = volumeNum_;
+    SoftbusSessionUtils::TransferJsonToStr(value, msg);
+    SendByte(deviceId_, msg);
+}
+
+void MigrateAVSessionProxy::SelectOutputDevice(const AAFwk::WantParams& extras)
+{
+    SLOGI("proxy in SelectOutputDevice case");
+    CHECK_AND_RETURN_LOG(extras.HasParam(AUDIO_SELECT_OUTPUT_DEVICE), "extras not have event");
+    auto value = extras.GetParam(AUDIO_SELECT_OUTPUT_DEVICE);
+    AAFwk::IString* stringValue = AAFwk::IString::Query(value);
+    CHECK_AND_RETURN_LOG(stringValue != nullptr, "extras have no value");
+
+    std::string deviceValue = AAFwk::String::Unbox(stringValue);
+    std::string msg = std::string({MSG_HEAD_MODE, SYNC_SWITCH_AUDIO_DEVICE_COMMAND});
+    SendByte(deviceId_, msg + deviceValue);
+}
+
+void MigrateAVSessionProxy::GetVolume(AAFwk::WantParams& extras)
+{
+    SLOGI("proxy in GetVolume case");
+    extras.SetParam(AUDIO_GET_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
+}
+
+void MigrateAVSessionProxy::GetAvailableDevices(AAFwk::WantParams& extras)
+{
+    SLOGI("proxy in GetAvailableDevices case");
+    Json::Value jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(availableDevices_);
+    Json::Value jsonArray = jsonData[MEDIA_AVAILABLE_DEVICES_LIST];
+    std::string jsonStr;
+    SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
+    extras.SetParam(AUDIO_GET_AVAILABLE_DEVICES, OHOS::AAFwk::String::Box(jsonStr));
+}
+
+void MigrateAVSessionProxy::GetPreferredOutputDeviceForRendererInfo(AAFwk::WantParams& extras)
+{
+    SLOGI("proxy in GetPreferredOutputDeviceForRendererInfo case");
+    Json::Value jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(preferredOutputDevice_);
+    Json::Value jsonArray = jsonData[MEDIA_AVAILABLE_DEVICES_LIST];
+    std::string jsonStr;
+    SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
+    extras.SetParam(AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, OHOS::AAFwk::String::Box(jsonStr));
 }
 
 void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
@@ -267,6 +367,73 @@ void MigrateAVSessionProxy::ProcessValidCommands(Json::Value jsonValue)
         remoteSession_->SetSupportCommand(commands);
     }
     SLOGI("ProcessValidCommands set cmd size:%{public}d", static_cast<int>(commands.size()));
+}
+
+void MigrateAVSessionProxy::ProcessVolumeControlCommand(Json::Value jsonValue)
+{
+    if(!jsonValue.isMember(AUDIO_VOLUME)) {
+        SLOGE("json parse with error member");
+        return;
+    }
+
+    volumeNum_ = jsonValue[AUDIO_VOLUME].isInt() ? jsonValue[AUDIO_VOLUME].asInt() : -1;
+    AudioAdapter::GetInstance().SetVolume(volumeNum_);
+
+    AAFwk::WantParams args;
+    args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
+    preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_VOLUME, args);
+}
+
+void DeviceJsonArrayToVector(Json::Value& jsonArray, AudioDeviceDescriptorsWithSptr& devices)
+{
+    devices.clear();
+    for (const Json::Value& jsonObject : jsonArray) {
+        int deviceCategory = jsonObject[AUDIO_DEVICE_CATEGORY].asInt();
+        int deviceType = jsonObject[AUDIO_DEVICE_TYPE].asInt();
+        int deviceRole = jsonObject[AUDIO_DEVICE_ROLE].asInt();
+        std::string networkId = jsonObject[AUDIO_NETWORK_ID].asString();
+        std::string deviceName = jsonObject[AUDIO_DEVICE_NAME].asString();
+        std::string macAddress = jsonObject[AUDIO_MAC_ADDRESS].asString();
+
+        std::shared_ptr<AudioDeviceDescriptor> device = std::make_shared<AudioDeviceDescriptor>();
+        device->deviceCategory_ = static_cast<AudioStandard::DeviceCategory>(deviceCategory);
+        device->deviceType_ = static_cast<AudioStandard::DeviceType>(deviceType);
+        device->deviceRole_ = static_cast<AudioStandard::DeviceRole>(deviceRole);
+        device->networkId_ = networkId;
+        device->deviceName_ = deviceName;
+        device->macAddress_ = macAddress;
+        devices.push_back(device);
+    }
+}
+
+void MigrateAVSessionProxy::ProcessAvailableDevices(Json::Value jsonValue)
+{
+    CHECK_AND_RETURN_LOG(jsonValue.isMember(MEDIA_AVAILABLE_DEVICES_LIST), "json parse with error member");
+    CHECK_AND_RETURN_LOG(jsonValue[MEDIA_AVAILABLE_DEVICES_LIST].isArray(), "json object is not array");
+    
+    Json::Value jsonArray = jsonValue[MEDIA_AVAILABLE_DEVICES_LIST];
+    DeviceJsonArrayToVector(jsonArray, availableDevices_);
+
+    std::string jsonStr;
+    SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
+    AAFwk::WantParams args;
+    args.SetParam(AUDIO_CALLBACK_AVAILABLE_DEVICES, OHOS::AAFwk::String::Box(jsonStr));
+    preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_AVAILABLE_DEVICES, args);
+}
+
+void MigrateAVSessionProxy::ProcessPreferredOutputDevice(Json::Value jsonValue)
+{
+    CHECK_AND_RETURN_LOG(jsonValue.isMember(MEDIA_AVAILABLE_DEVICES_LIST), "json parse with error member");
+    CHECK_AND_RETURN_LOG(jsonValue[MEDIA_AVAILABLE_DEVICES_LIST].isArray(), "json object is not array");
+
+    Json::Value jsonArray = jsonValue[MEDIA_AVAILABLE_DEVICES_LIST];
+    DeviceJsonArrayToVector(jsonArray, preferredOutputDevice_);
+
+    std::string jsonStr;
+    SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
+    AAFwk::WantParams args;
+    args.SetParam(AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, OHOS::AAFwk::String::Box(jsonStr));
+    preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, args);
 }
 
 void MigrateAVSessionProxy::ProcessBundleImg(std::string bundleIconStr)

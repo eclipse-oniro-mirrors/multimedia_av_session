@@ -729,7 +729,7 @@ int32_t AVSessionItem::Deactivate()
 
 bool AVSessionItem::IsActive()
 {
-    return descriptor_.isActive_;
+    return descriptor_.isActive_ || GetSessionId() == "DEFAULT";
 }
 
 // LCOV_EXCL_START

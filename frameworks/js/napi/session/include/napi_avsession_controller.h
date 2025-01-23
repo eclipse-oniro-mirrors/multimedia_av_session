@@ -68,6 +68,7 @@ private:
     static napi_value GetAVQueueTitleSync(napi_env env, napi_callback_info info);
     static napi_value SkipToQueueItem(napi_env env, napi_callback_info info);
     static napi_value GetExtras(napi_env env, napi_callback_info info);
+    static napi_value GetExtrasWithEvent(napi_env env, napi_callback_info info);
 
     static napi_status OnAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
         napi_value param, napi_value callback);

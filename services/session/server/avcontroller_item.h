@@ -49,6 +49,8 @@ public:
 
     int32_t GetExtras(AAFwk::WantParams& extras) override;
 
+    int32_t GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras) override;
+
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability) override;
@@ -109,6 +111,9 @@ public:
 
     int32_t RegisterAVControllerCallback(const std::shared_ptr<AVControllerCallback> &callback);
 
+    int32_t RegisterMigrateAVSessionProxyCallback(
+        const std::function<int32_t(const std::string&, AAFwk::WantParams&)>& callback);
+
     bool isFromSession_ = false;
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
@@ -126,6 +131,7 @@ private:
     AVMetaData::MetaMaskType metaMask_;
     AVPlaybackState::PlaybackStateMaskType playbackMask_;
     std::function<void(AVControllerItem&)> serviceCallback_;
+    std::function<int32_t(const std::string&, AAFwk::WantParams&)> migrateProxyCallback_;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex callbackMutex_;

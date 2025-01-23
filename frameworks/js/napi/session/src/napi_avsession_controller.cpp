@@ -92,6 +92,7 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getAVQueueTitleSync", GetAVQueueTitleSync),
         DECLARE_NAPI_FUNCTION("skipToQueueItem", SkipToQueueItem),
         DECLARE_NAPI_FUNCTION("getExtras", GetExtras),
+        DECLARE_NAPI_FUNCTION("getExtrasWithEvent", GetExtrasWithEvent),
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
@@ -743,6 +744,63 @@ napi_value NapiAVSessionController::GetExtras(napi_env env, napi_callback_info i
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetExtras", executor, complete);
+}
+
+napi_value NapiAVSessionController::GetExtrasWithEvent(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionController::GetExtrasWithEvent");
+    struct ConcreteContext : public ContextBase {
+        std::string extraEvent_;
+        AAFwk::WantParams extras_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->extraEvent_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get extras event failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        SLOGD("NapiAVSessionController GetExtrasWithEvent process check lock");
+        std::lock_guard<std::mutex> lock(uvMutex_);
+        SLOGI("Start NapiAVSessionController GetExtrasWithEvent process");
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("GetExtrasWithEvent failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetExtrasWithEvent failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->GetExtrasWithEvent(context->extraEvent_, context->extras_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetExtrasWithEvent failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetExtrasWithEvent failed : native controller not exist";
+            } else if (ret == ERR_COMMAND_NOT_SUPPORT) {
+                context->errMessage = "GetExtrasWithEvent failed : native invalid key event";
+            } else {
+                context->errMessage = "GetExtrasWithEvent failed : native server exception";
+            }
+            SLOGE("Controller getExtras with event failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->extras_, output);
+        CHECK_STATUS_RETURN_VOID(context, "Convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        SLOGI("check getextraswithevent done");
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "GetExtrasWithEvent", executor, complete);
 }
 
 napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_info info)

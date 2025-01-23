@@ -45,6 +45,7 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
         SLOGI("connect process as next behavior");
         LocalFrontSessionArrive(lastSessionId_);
+        RegisterAudioCallbackAndTrigger();
         return;
     }
     ObserveControllerChanged(deviceId);
@@ -55,12 +56,37 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
 void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
 {
     SLOGI("OnDisConnectProxy: %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    UnregisterAudioCallback();
     isSoftbusConnecting_ = false;
     if (servicePtr_ == nullptr) {
         SLOGE("do NotifyMigrateStop without servicePtr, return");
         return;
     }
     servicePtr_->NotifyMigrateStop(deviceId);
+}
+
+void MigrateAVSessionServer::RegisterAudioCallbackAndTrigger()
+{
+    volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
+    AudioAdapter::GetInstance().RegisterVolumeKeyEventCallback(volumeKeyEventCallbackFunc_);
+    AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
+
+    availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();
+    availableDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetAvailableDevices());
+    AudioAdapter::GetInstance().SetAvailableDeviceChangeCallback(availableDeviceChangeCallbackFunc_);
+
+    preferredDeviceChangeCallbackFunc_ = GetPreferredDeviceChangeCallbackFunc();
+    preferredDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
+    AudioAdapter::GetInstance().SetPreferredOutputDeviceChangeCallback(preferredDeviceChangeCallbackFunc_);
+}
+
+void MigrateAVSessionServer::UnregisterAudioCallback()
+{
+    if (migrateMode_ == MIGRATE_MODE_NEXT) {
+        AudioAdapter::GetInstance().UnregisterVolumeKeyEventCallback();
+        AudioAdapter::GetInstance().UnsetAvailableDeviceChangeCallback();
+        AudioAdapter::GetInstance().UnsetPreferredOutputDeviceChangeCallback();
+    }
 }
 
 int32_t MigrateAVSessionServer::GetCharacteristic()
@@ -184,7 +210,7 @@ void MigrateAVSessionServer::OnBytesReceived(const std::string &deviceId, const 
         return;
     }
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
-        ProcControlCommandFromNext(deviceId, data);
+        ProcFromNext(deviceId, data);
         return;
     }
     if (data[1] == SYNC_COMMAND) {
