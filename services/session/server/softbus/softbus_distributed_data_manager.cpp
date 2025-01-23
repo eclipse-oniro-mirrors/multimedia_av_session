@@ -82,12 +82,12 @@ void SoftbusDistributedDataManager::MessageReceived(int32_t socket, const std::s
 
 void SoftbusDistributedDataManager::BytesReceived(int32_t socket, const std::string &data)
 {
-    if (peerSocketInfo.name != CONFIG_SOFTBUS_SESSION_TAG) {
-        SLOGE("onBytesReceived: the group id is not match the media session group. sessionName is %{public}s",
-            peerSocketInfo.name);
-        return;
-    }
     if (isServer_) {
+        if (peerSocketInfo.name != CONFIG_SOFTBUS_SESSION_TAG) {
+            SLOGE("onBytesReceived: the group id is not match the media session group. sessionName is %{public}s",
+                peerSocketInfo.name);
+            return;
+        }
         OnBytesServerReceived(socket, data);
     } else {
         OnBytesProxyReceived(socket, data);
@@ -296,7 +296,7 @@ int32_t SoftbusDistributedDataManager::ConnectRemoteDevice(const std::string &pe
     std::string anonymizeNetworkId = SoftbusSessionUtils::AnonymizeDeviceId(peerNetworkId);
     SLOGI("ConnectRemoteDevice remote device %{public}s, retryCount: %{pulic}d",
         anonymizeNetworkId.c_str(), retryCount);
-    if (mProxySocketMap_.find(peerNetworkId) == mProxySocketMap_.end()) {
+    if (mProxySocketMap_.find(peerNetworkId) != mProxySocketMap_.end()) {
         SLOGI("%{public}s is connected, no need to connect.", anonymizeNetworkId.c_str());
         return mProxySocketMap_[peerNetworkId];
     }
@@ -321,13 +321,13 @@ void SoftbusDistributedDataManager::OnSessionProxyOpened(int32_t socket)
         mProxySocketMap_.insert({softbusNetworkId, socket});
     } else {
         SLOGI("OnSessionProxyOpened: session exit, no need to add for %{public}s", anonymizeNetworkId.c_str());
-        if (mDeviceToProxyMap_.find(softbusNetworkId) == mDeviceToProxyMap_.end()) {
-            return;
-        }
-        std::map<int32_t, std::shared_ptr<SoftbusSessionProxy>> proxyMap = mDeviceToProxyMap_[softbusNetworkId];
-        for (auto it = proxyMap.begin(); it != proxyMap.end(); it++) {
-            it->second->ConnectServer(socket);
-        }
+    }
+    if (mDeviceToProxyMap_.find(softbusNetworkId) == mDeviceToProxyMap_.end()) {
+        return;
+    }
+    std::map<int32_t, std::shared_ptr<SoftbusSessionProxy>> proxyMap = mDeviceToProxyMap_[softbusNetworkId];
+    for (auto it = proxyMap.begin(); it != proxyMap.end(); it++) {
+        it->second->ConnectServer(socket);
     }
 }
 
