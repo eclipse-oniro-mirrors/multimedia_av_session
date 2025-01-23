@@ -354,7 +354,11 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             InitRadarBMS();
             break;
         case CAST_ENGINE_SA_ID:
-            checkEnableCast(true);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+            if (is2in1_) {
+                checkEnableCast(true);
+            }
+#endif
             break;
         case COLLABORATION_SA_ID:
             InitCollaboration();
