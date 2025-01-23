@@ -25,6 +25,14 @@ using namespace OHOS::AVSession;
 using OHOS::AudioStandard::AudioRendererChangeInfo;
 using OHOS::AudioStandard::RendererState;
 
+static std::string g_errLog;
+
+void MyLogCallback(const LogType type, const LogLevel level,
+    const unsigned int domain, const char *tag, const char *msg)
+{
+    g_errLog = msg;
+}
+
 class FocusSessionStrategyTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -53,6 +61,7 @@ void FocusSessionStrategyTest::TearDown()
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, testing::ext::TestSize.Level1)
 {
     SLOGD("HandleAudioRenderStateChangeEvent001 begin!");
+    LOG_SetCallback(MyLogCallback);
     FocusSessionStrategy focusSessionStrategy;
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
@@ -62,6 +71,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, 
     infos.push_back(std::move(info));
     
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGD("HandleAudioRenderStateChangeEvent001 end!");
 }
 
@@ -73,6 +83,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, 
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, testing::ext::TestSize.Level1)
 {
     SLOGD("HandleAudioRenderStateChangeEvent002 begin!");
+    LOG_SetCallback(MyLogCallback);
     FocusSessionStrategy focusSessionStrategy;
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
@@ -84,6 +95,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, 
     auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGD("HandleAudioRenderStateChangeEvent002 end!");
 }
 
@@ -95,6 +107,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, 
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, testing::ext::TestSize.Level1)
 {
     SLOGD("HandleAudioRenderStateChangeEvent003 begin!");
+    LOG_SetCallback(MyLogCallback);
     FocusSessionStrategy focusSessionStrategy;
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
@@ -104,6 +117,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, 
     infos.push_back(std::move(info));
     
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGD("HandleAudioRenderStateChangeEvent003 end!");
 }
 
@@ -115,6 +129,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, 
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, testing::ext::TestSize.Level1)
 {
     SLOGD("HandleAudioRenderStateChangeEvent004 begin!");
+    LOG_SetCallback(MyLogCallback);
     FocusSessionStrategy focusSessionStrategy;
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
     info->clientUID = 1;
@@ -126,6 +141,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, 
     auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGD("HandleAudioRenderStateChangeEvent004 end!");
 }
 
@@ -137,6 +153,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, 
 static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, testing::ext::TestSize.Level1)
 {
     SLOGD("HandleAudioRenderStateChangeEvent005 begin!");
+    LOG_SetCallback(MyLogCallback);
     FocusSessionStrategy focusSessionStrategy;
     std::shared_ptr<AudioRendererChangeInfo> info1 = std::make_shared<AudioRendererChangeInfo>();
     info1->clientUID = 1;
@@ -155,6 +172,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, 
     auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGD("HandleAudioRenderStateChangeEvent005 end!");
 }
 

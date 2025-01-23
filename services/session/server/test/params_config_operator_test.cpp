@@ -27,6 +27,14 @@
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
+static std::string g_errLog;
+
+void MyLogCallback(const LogType type, const LogLevel level,
+    const unsigned int domain, const char *tag, const char *msg)
+{
+    g_errLog = msg;
+}
+
 class ParamsConfigOperatorTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -59,8 +67,10 @@ void ParamsConfigOperatorTest::TearDown()
 static HWTEST_F(ParamsConfigOperatorTest, InitConfig001, testing::ext::TestSize.Level1)
 {
     SLOGI("InitConfig001 begin!");
+    LOG_SetCallback(MyLogCallback);
     auto paramsConfigOperator = ParamsConfigOperator::GetInstance();
     paramsConfigOperator.InitConfig();
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("InitConfig001 end!");
 }
 

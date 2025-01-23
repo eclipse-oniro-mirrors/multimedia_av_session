@@ -37,6 +37,14 @@ using namespace OHOS::Security::AccessToken;
 
 static uint64_t g_selfTokenId = 0;
 
+static std::string g_errLog;
+
+void MyLogCallback(const LogType type, const LogLevel level,
+    const unsigned int domain, const char *tag, const char *msg)
+{
+    g_errLog = msg;
+}
+
 static HapInfoParams g_info = {
     .userID = 100,
     .bundleName = "ohos.permission_test.demo",
@@ -179,8 +187,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnSessionDestroy001, testing::ext
 static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallMetaDataChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnAVCallMetaDataChange001, start");
+    LOG_SetCallback(MyLogCallback);
     OHOS::AVSession::AVCallMetaData data;
     aVControllerCallbackProxy->OnAVCallMetaDataChange(data);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnAVCallMetaDataChange001, end");
 }
 
@@ -192,8 +202,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallMetaDataChange001, testin
 static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallStateChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnAVCallStateChange001, start");
+    LOG_SetCallback(MyLogCallback);
     OHOS::AVSession::AVCallState data;
     aVControllerCallbackProxy->OnAVCallStateChange(data);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnAVCallStateChange001, end");
 }
 
@@ -205,8 +217,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallStateChange001, testing::
 static HWTEST_F(AVControllerCallbackProxyTest, OnPlaybackStateChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnAVCallStateChange001, start");
+    LOG_SetCallback(MyLogCallback);
     OHOS::AVSession::AVPlaybackState data;
     aVControllerCallbackProxy->OnPlaybackStateChange(data);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnAVCallStateChange001, end");
 }
 
@@ -218,8 +232,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnPlaybackStateChange001, testing
 static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnMetaDataChange001, start");
+    LOG_SetCallback(MyLogCallback);
     OHOS::AVSession::AVMetaData data;
     aVControllerCallbackProxy->OnMetaDataChange(data);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnMetaDataChange001, end");
 }
 
@@ -231,8 +247,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange001, testing::ext
 static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange002, testing::ext::TestSize.Level1)
 {
     SLOGI("OnMetaDataChange002, start");
+    LOG_SetCallback(MyLogCallback);
     OHOS::AVSession::AVMetaData data = GetAVMetaData();
     aVControllerCallbackProxy->OnMetaDataChange(data);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnMetaDataChange002, end");
 }
 
@@ -335,8 +353,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer003, testing::ex
 static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnActiveStateChange001, start");
+    LOG_SetCallback(MyLogCallback);
     bool isActive = true;
     aVControllerCallbackProxy->OnActiveStateChange(isActive);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnActiveStateChange001, end");
 }
 
@@ -348,8 +368,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange001, testing::
  static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange002, testing::ext::TestSize.Level1)
 {
     SLOGI("OnActiveStateChange002, start");
+    LOG_SetCallback(MyLogCallback);
     bool isActive = false;
     aVControllerCallbackProxy->OnActiveStateChange(isActive);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnActiveStateChange002, end");
 }
 
@@ -361,8 +383,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange001, testing::
 static HWTEST_F(AVControllerCallbackProxyTest, OnValidCommandChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnValidCommandChange001, start");
+    LOG_SetCallback(MyLogCallback);
     std::vector<int32_t> cmds = {0};
     aVControllerCallbackProxy->OnValidCommandChange(cmds);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnValidCommandChange001, end");
 }
 
@@ -374,9 +398,11 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnValidCommandChange001, testing:
 static HWTEST_F(AVControllerCallbackProxyTest, OnOutputDeviceChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnOutputDeviceChange001, start");
+    LOG_SetCallback(MyLogCallback);
     int32_t connectionState = 0;
     OHOS::AVSession::OutputDeviceInfo outputDeviceInfo;
     aVControllerCallbackProxy->OnOutputDeviceChange(connectionState, outputDeviceInfo);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnOutputDeviceChange001, end");
 }
 
@@ -388,9 +414,11 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnOutputDeviceChange001, testing:
 static HWTEST_F(AVControllerCallbackProxyTest, OnSessionEventChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnSessionEventChange001, start");
+    LOG_SetCallback(MyLogCallback);
     std::string event = "";
     OHOS::AAFwk::WantParams args;
     aVControllerCallbackProxy->OnSessionEventChange(event, args);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnSessionEventChange001, end");
 }
 
@@ -402,8 +430,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnSessionEventChange001, testing:
 static HWTEST_F(AVControllerCallbackProxyTest, OnQueueItemsChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnQueueItemsChange001, start");
+    LOG_SetCallback(MyLogCallback);
     std::vector<AVQueueItem> items = {};
     aVControllerCallbackProxy->OnQueueItemsChange(items);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnQueueItemsChange001, end");
 }
 
@@ -415,8 +445,10 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnQueueItemsChange001, testing::e
 static HWTEST_F(AVControllerCallbackProxyTest, OnQueueTitleChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnQueueTitleChange001, start");
+    LOG_SetCallback(MyLogCallback);
     std::string title = "title";
     aVControllerCallbackProxy->OnQueueTitleChange(title);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnQueueTitleChange001, end");
 }
 
@@ -428,7 +460,9 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnQueueTitleChange001, testing::e
 static HWTEST_F(AVControllerCallbackProxyTest, OnExtrasChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnExtrasChange001, start");
+    LOG_SetCallback(MyLogCallback);
     OHOS::AAFwk::WantParams extras;
     aVControllerCallbackProxy->OnExtrasChange(extras);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnExtrasChange001, end");
 }

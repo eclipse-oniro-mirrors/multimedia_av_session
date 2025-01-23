@@ -19,6 +19,14 @@
 
 using namespace OHOS::AVSession;
 
+static std::string g_errLog;
+
+void MyLogCallback(const LogType type, const LogLevel level,
+    const unsigned int domain, const char *tag, const char *msg)
+{
+    g_errLog = msg;
+}
+
 class SessionListenerProxyTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -55,8 +63,10 @@ void SessionListenerProxyTest::TearDown()
 static HWTEST_F(SessionListenerProxyTest, OnSessionCreate001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnSessionCreate001, start");
+    LOG_SetCallback(MyLogCallback);
     AVSessionDescriptor descriptor;
     sessionListenerProxy->OnSessionCreate(descriptor);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnSessionCreate001, end");
 }
 
@@ -68,8 +78,10 @@ static HWTEST_F(SessionListenerProxyTest, OnSessionCreate001, testing::ext::Test
 static HWTEST_F(SessionListenerProxyTest, OnSessionRelease001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnSessionRelease001, start");
+    LOG_SetCallback(MyLogCallback);
     AVSessionDescriptor descriptor;
     sessionListenerProxy->OnSessionRelease(descriptor);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnSessionRelease001, end");
 }
 
@@ -81,8 +93,10 @@ static HWTEST_F(SessionListenerProxyTest, OnSessionRelease001, testing::ext::Tes
 static HWTEST_F(SessionListenerProxyTest, OnTopSessionChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnTopSessionChange001, start");
+    LOG_SetCallback(MyLogCallback);
     AVSessionDescriptor descriptor;
     sessionListenerProxy->OnTopSessionChange(descriptor);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnTopSessionChange001, end");
 }
 
@@ -94,8 +108,10 @@ static HWTEST_F(SessionListenerProxyTest, OnTopSessionChange001, testing::ext::T
 static HWTEST_F(SessionListenerProxyTest, OnAudioSessionChecked001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnAudioSessionChecked001, start");
+    LOG_SetCallback(MyLogCallback);
     int32_t uid = 0;
     sessionListenerProxy->OnAudioSessionChecked(uid);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnAudioSessionChecked001, end");
 }
 
@@ -107,8 +123,10 @@ static HWTEST_F(SessionListenerProxyTest, OnAudioSessionChecked001, testing::ext
 static HWTEST_F(SessionListenerProxyTest, OnDeviceAvailable001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnDeviceAvailable001, start");
+    LOG_SetCallback(MyLogCallback);
     OutputDeviceInfo castOutputDeviceInfo;
     sessionListenerProxy->OnDeviceAvailable(castOutputDeviceInfo);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnDeviceAvailable001, end");
 }
 
@@ -120,7 +138,9 @@ static HWTEST_F(SessionListenerProxyTest, OnDeviceAvailable001, testing::ext::Te
 static HWTEST_F(SessionListenerProxyTest, OnDeviceOffline001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnDeviceOffline001, start");
+    LOG_SetCallback(MyLogCallback);
     std::string deviceId = "deviceId";
     sessionListenerProxy->OnDeviceOffline(deviceId);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnDeviceOffline001, end");
 }

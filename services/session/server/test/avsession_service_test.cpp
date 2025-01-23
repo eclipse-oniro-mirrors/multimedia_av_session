@@ -1012,6 +1012,7 @@ static HWTEST_F(AVSessionServiceTest, DoMetadataImgClean001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, DoMetadataImgClean002, TestSize.Level1)
 {
     SLOGI("DoMetadataImgClean002 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
     OHOS::AVSession::AVMetaData metaData;
     avservice_->DoMetadataImgClean(metaData);
     SLOGI("DoMetadataImgClean002 end!");
