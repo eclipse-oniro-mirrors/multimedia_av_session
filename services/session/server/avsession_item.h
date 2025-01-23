@@ -82,8 +82,6 @@ public:
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
-    void OnRemoveCastEngine();
-
     void ListenCollaborationRejectToStopCast();
 #endif
 

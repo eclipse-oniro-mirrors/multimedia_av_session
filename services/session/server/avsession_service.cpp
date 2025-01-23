@@ -136,7 +136,6 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     AddSystemAbilityListener(CAST_ENGINE_SA_ID);
-    AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
@@ -144,12 +143,6 @@ void AVSessionService::OnStart()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
-    if (is2in1_) {
-        SLOGI("startup enable cast check 2in1");
-        checkEnableCast(true);
-        AVRouter::GetInstance().SetDiscoverable(false);
-        AVRouter::GetInstance().SetDiscoverable(true);
-    }
     CollaborationManager::GetInstance().ReadCollaborationManagerSo();
     CollaborationManager::GetInstance().RegisterLifecycleCallback();
 #endif
@@ -202,12 +195,7 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         SLOGE("OnReceiveEvent get action:%{public}s with servicePtr_ null", action.c_str());
         return;
     }
-    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) == 0 ||
-        action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) == 0 ||
-        action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) == 0 ||
-        action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) == 0) {
-        servicePtr_->HandleScreenStatusChange(action);
-    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_FOREGROUND) == 0) {
+    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_FOREGROUND) == 0) {
         int32_t userIdForeground = eventData.GetCode();
         servicePtr_->HandleUserEvent(AVSessionUsersManager::accountEventSwitched, userIdForeground);
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) == 0) {
@@ -236,63 +224,6 @@ void AVSessionService::HandleUserEvent(const std::string &type, const int &userI
 {
     GetUsersManager().NotifyAccountsEvent(type, userId);
     UpdateTopSession(GetUsersManager().GetTopSession());
-}
-
-void AVSessionService::HandleScreenStatusChange(std::string event)
-{
-    std::lock_guard lockGuard(screenStateLock_);
-
-    if (event.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) == 0) {
-        SetScreenOn(false);
-    } else if (event.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) == 0) {
-        SetScreenOn(true);
-    } else if (event.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) == 0) {
-        SetScreenLocked(true);
-    } else if (event.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) == 0) {
-        SetScreenLocked(false);
-    }
-    SLOGI("check screen status with screenOn %{public}d and screenLocked %{public}d",
-        static_cast<int>(GetScreenOn()), static_cast<int>(GetScreenLocked()));
-
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    bool is2in1 = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
-    if (!is2in1) {
-        return;
-    }
-    if (GetScreenOn() && !GetScreenLocked()) {
-        SLOGI("enable cast check 2in1");
-        AVRouter::GetInstance().SetDiscoverable(false);
-        AVRouter::GetInstance().SetDiscoverable(true);
-    } else {
-        SLOGI("disable cast check 2in1");
-        AVRouter::GetInstance().SetDiscoverable(false);
-    }
-
-#endif
-}
-
-void AVSessionService::SetScreenOn(bool on)
-{
-    std::lock_guard lockGuard(screenStateLock_);
-    screenOn = on;
-}
-
-bool AVSessionService::GetScreenOn()
-{
-    std::lock_guard lockGuard(screenStateLock_);
-    return screenOn;
-}
-
-void AVSessionService::SetScreenLocked(bool isLocked)
-{
-    std::lock_guard lockGuard(screenStateLock_);
-    screenLocked = isLocked;
-}
-
-bool AVSessionService::GetScreenLocked()
-{
-    std::lock_guard lockGuard(screenStateLock_);
-    return screenLocked;
 }
 
 bool AVSessionService::SubscribeCommonEvent()
@@ -370,9 +301,11 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             break;
         case CAST_ENGINE_SA_ID:
             CheckInitCast();
-            break;
-        case BLUETOOTH_HOST_SYS_ABILITY_ID:
-            CheckBrEnable();
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+            if (is2in1_) {
+                checkEnableCast(true);
+            }
+#endif
             break;
         case MEMORY_MANAGER_SA_ID:
             NotifyProcessStatus(true);
@@ -390,24 +323,7 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
 
 void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
-    if (systemAbilityId == CAST_ENGINE_SA_ID) {
-        SLOGE("on cast engine remove ability");
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        for (auto& session : GetContainer().GetAllSessions()) {
-            session->OnRemoveCastEngine();
-        }
-#endif
-        isInCast_ = false;
-    }
-    if (systemAbilityId == BLUETOOTH_HOST_SYS_ABILITY_ID) {
-#ifdef BLUETOOTH_ENABLE
-        SLOGI("on bluetooth remove ability");
-        bluetoothHost_ = &OHOS::Bluetooth::BluetoothHost::GetDefaultHost();
-        if (bluetoothHost_ != nullptr && bluetoothObserver != nullptr) {
-            bluetoothHost_->DeregisterObserver(bluetoothObserver);
-        }
-#endif
-    }
+    SLOGI("remove system ability %{public}d", systemAbilityId);
 }
 
 // LCOV_EXCL_START
@@ -429,51 +345,6 @@ void AVSessionService::CheckInitCast()
 #endif
 }
 // LCOV_EXCL_STOP
-
-#ifdef BLUETOOTH_ENABLE
-DetectBluetoothHostObserver::DetectBluetoothHostObserver(AVSessionService *ptr)
-{
-    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
-    SLOGI("DetectBluetoothHostObserver, Prop=%{public}d", static_cast<int>(is2in1_));
-    servicePtr_ = ptr;
-}
-
-void DetectBluetoothHostObserver::OnStateChanged(const int transport, const int status)
-{
-    SLOGI("transport=%{public}d status=%{public}d", transport, status);
-    if (transport != OHOS::Bluetooth::BTTransport::ADAPTER_BREDR) {
-        return;
-    }
-    bool newStatus = (status == OHOS::Bluetooth::BTStateID::STATE_TURN_ON);
-    if (newStatus == lastEnabled_) {
-        return;
-    }
-    bool screenOn = true;
-    if (servicePtr_ != nullptr) {
-        screenOn = servicePtr_->GetScreenOn();
-        SLOGI("screenOn=%{public}d", screenOn);
-    }
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (newStatus && is2in1_ && screenOn) {
-        AVRouter::GetInstance().SetDiscoverable(false);
-        AVRouter::GetInstance().SetDiscoverable(true);
-    }
-#endif
-    lastEnabled_ = newStatus;
-}
-#endif
-
-void AVSessionService::CheckBrEnable()
-{
-#ifdef BLUETOOTH_ENABLE
-    SLOGI("AVSessionService CheckBrEnable in");
-    bluetoothHost_ = &OHOS::Bluetooth::BluetoothHost::GetDefaultHost();
-    bluetoothObserver = std::make_shared<DetectBluetoothHostObserver>(this);
-    if (bluetoothHost_ != nullptr) {
-        bluetoothHost_->RegisterObserver(bluetoothObserver);
-    }
-#endif
-}
 
 void AVSessionService::NotifyProcessStatus(bool isStart)
 {
@@ -1028,6 +899,12 @@ int32_t AVSessionService::checkEnableCast(bool enable)
         SLOGD("AVRouter Init in nothing change ");
     }
     return AVSESSION_SUCCESS;
+}
+
+void AVSessionService::setInCast(bool isInCast)
+{
+    SLOGI("setInCast, isInCast:%{public}d", isInCast);
+    isInCast_ = isInCast;
 }
 
 // LCOV_EXCL_START

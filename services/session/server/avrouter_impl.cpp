@@ -253,14 +253,19 @@ int32_t AVRouterImpl::OnDeviceOffline(const std::string& deviceId)
 
 int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
 {
-    SLOGI("AVRouterImpl received OnCastServerDied event");
-    hasSessionAlive_ = false;
-    std::lock_guard lockGuard(providerManagerLock_);
-    if (providerManagerMap_.find(providerNumber) != providerManagerMap_.end()) {
-        providerManagerMap_.erase(providerNumber);
-    } else {
-        return AVSESSION_ERROR;
+    SLOGI("AVRouterImpl received OnCastServerDied event %{public}d", providerNumber);
+    {
+        std::lock_guard lockGuard(servicePtrLock_);
+        if (servicePtr_ == nullptr) {
+            return ERR_SERVICE_NOT_EXIST;
+        }
+        servicePtr_->setInCast(false);
     }
+    std::lock_guard lockGuard(providerManagerLock_);
+    hasSessionAlive_ = false;
+    providerNumber_ = providerNumberDisable_;
+    providerManagerMap_.clear();
+    castHandleToInfoMap_.clear();
     return AVSESSION_SUCCESS;
 }
 
