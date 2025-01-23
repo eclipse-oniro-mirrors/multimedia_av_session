@@ -74,6 +74,7 @@ private:
     void checkAbilityFromCmds(
         const std::vector<int32_t>& supportedCastCmds, CastEngine::StreamCapability& streamCapability);
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem);
+    bool RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription);
 
     int32_t castMinTime = 1000;
     std::recursive_mutex streamPlayerLock_;

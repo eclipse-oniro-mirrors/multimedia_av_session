@@ -234,10 +234,24 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     return AVSESSION_SUCCESS;
 }
 
+bool HwCastStreamPlayer::RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription)
+{
+    std::lock_guard lockGuard(curItemLock_);
+    if (mediaDescription->GetIconUri() == "URI_CHANGE" && mediaDescription->GetIcon() != nullptr) {
+        currentAVQueueItem_.GetDescription()->SetIcon(mediaDescription->GetIcon());
+        SLOGI("Repeat Prepare only setIcon");
+        return true;
+    }
+    return false;
+}
+
 int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
 {
     CastEngine::MediaInfo mediaInfo;
     std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
+    if (RepeatPrepare(mediaDescription)) {
+        return AVSESSION_SUCCESS;
+    }
     mediaInfo.mediaId = mediaDescription->GetMediaId();
     mediaInfo.mediaName = mediaDescription->GetTitle();
     SLOGI("do Prepare with mediaId %{public}s | title %{public}s",

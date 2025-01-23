@@ -1051,7 +1051,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFocusSession001, TestSize.Level1)
     avservice_->UpdateTopSession(avsessionHere_);
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = pid;
-    avservice_->HandleFocusSession(info);
+    avservice_->HandleFocusSession(info, false);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("HandleFocusSession001 end!");
@@ -1071,7 +1071,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFocusSession002, TestSize.Level1)
     avservice_->UpdateTopSession(avsessionHere_);
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = 203;
-    avservice_->HandleFocusSession(info);
+    avservice_->HandleFocusSession(info, false);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("HandleFocusSession002 end!");
@@ -1090,7 +1090,7 @@ static HWTEST_F(AVSessionServiceTest, UpdateFrontSession001, TestSize.Level1)
     avsessionHere_->SetUid(pid);
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = pid;
-    avservice_->HandleFocusSession(info);
+    avservice_->HandleFocusSession(info, false);
     avservice_->UpdateFrontSession(avsessionHere_, true);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
@@ -1110,7 +1110,7 @@ static HWTEST_F(AVSessionServiceTest, UpdateFrontSession002, TestSize.Level1)
     avsessionHere_->SetUid(pid);
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = 205;
-    avservice_->HandleFocusSession(info);
+    avservice_->HandleFocusSession(info, false);
     avservice_->UpdateFrontSession(avsessionHere_, true);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();

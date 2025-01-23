@@ -288,7 +288,8 @@ private:
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
-    void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession);
+    void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession, bool addCapsule,
+                        bool isCapsuleUpdate, bool isFromCastSession);
     void NotifyDeviceChange();
     void PublishEvent(int32_t mediaPlayState);
 
@@ -352,7 +353,7 @@ private:
 
     void UpdateTopSession(const sptr<AVSessionItem>& newTopSession);
 
-    void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
+    void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info, bool isPlaying);
 
     void HandleDeviceChange(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc);
 
@@ -501,6 +502,8 @@ private:
     void NotifyLocalFrontSessionChangeForMigrate(std::string localFrontSessionIdUpdate);
 
     bool CheckWhetherTargetDevIsNext(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
+    void AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 

@@ -318,6 +318,9 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         std::lock_guard lockGuard(avsessionItemLock_);
         SessionXCollie sessionXCollie("avsession::SetAVMetaData");
         ReportSetAVMetaDataInfo(meta);
+        if ((metaData_.GetAssetId() != meta.GetAssetId()) || (metaData_.GetTitle() != meta.GetTitle())) {
+            isMediaChange_ = true;
+        }
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
         std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
         if (innerPixelMap != nullptr) {
@@ -326,6 +329,11 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
             AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, sessionId + AVSessionUtils::GetFileSuffix());
             innerPixelMap->Clear();
             metaData_.SetMediaImage(innerPixelMap);
+            SLOGI("MediaCapsule addLocalCapsule isMediaChange_:%{public}d", isMediaChange_);
+            if (serviceCallbackForNtf_ && isMediaChange_) {
+                serviceCallbackForNtf_(GetSessionId(), isMediaChange_);
+            }
+            isMediaChange_ = false;
         }
     }
     ProcessFrontSession("SetAVMetaData");
@@ -632,6 +640,14 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     sptr<IRemoteObject> remoteObject = castController;
 
     sharedPtr->SetSessionTag(descriptor_.sessionTag_);
+    sharedPtr->SetSessionId(descriptor_.sessionId_);
+    sharedPtr->SetSessionCallbackForCastCap([this](std::string sessionId, bool isPlaying, bool isMediaChange) {
+        if (serviceCallbackForCastNtf_) {
+            SLOGI("MediaCapsule CastCapsule for service isPlaying %{public}d, isMediaChange %{public}d",
+                isPlaying, isMediaChange);
+            serviceCallbackForCastNtf_(sessionId, isPlaying, isMediaChange);
+        }
+    });
     InitializeCastCommands();
     return remoteObject;
 }
@@ -1039,6 +1055,14 @@ void AVSessionItem::HandleCastValidCommandChange(std::vector<int32_t> &cmds)
             controller->HandleCastValidCommandChange(cmds);
         }
     }
+}
+
+void AVSessionItem::GetCurrentCastItem(AVQueueItem& currentItem)
+{
+    std::lock_guard lockGuard(avsessionItemLock_);
+    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
+    currentItem = castControllerProxy_->GetCurrentItem();
+    return;
 }
 
 int32_t AVSessionItem::ReleaseCast()
@@ -1541,6 +1565,12 @@ void AVSessionItem::SetServiceCallbackForStream(const std::function<void(std::st
     SLOGI("SetServiceCallbackForStream in");
     serviceCallbackForStream_ = callback;
 }
+
+void AVSessionItem::SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback)
+{
+    SLOGI("SetServiceCallbackForCastNtfCapsule in");
+    serviceCallbackForCastNtf_ = callback;
+}
 #endif
 
 AVSessionDescriptor AVSessionItem::GetDescriptor()
@@ -1981,6 +2011,12 @@ void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(
 {
     SLOGI("SetServiceCallbackForUpdateSession in");
     serviceCallbackForUpdateSession_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForNtfCapsule(const std::function<void(std::string, bool)>& callback)
+{
+    SLOGI("SetServiceCallbackForNtfCapsule in");
+    serviceCallbackForNtf_ = callback;
 }
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)

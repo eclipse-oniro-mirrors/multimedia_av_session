@@ -122,6 +122,8 @@ private:
     static napi_status OffPlayRequest(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffKeyRequest(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
 
+    static std::function<void()> PrepareAsyncExecutor(NapiAVCastController* napiController, AVQueueItem& avQueueItem);
+
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
         const std::string& event, napi_value filter, napi_value callback);
@@ -130,6 +132,7 @@ private:
     static std::string GetSendControlCommandErrMsg(int32_t error);
     static void CheckSendCtrlCmdReportRadar(bool condition, int32_t error);
     static void CheckStartReportRadar(bool condition, int32_t error);
+    static int32_t DownloadCastImg(std::shared_ptr<AVMediaDescription> description, const std::string& uri);
 
     napi_ref wrapperRef_ {};
     std::shared_ptr<AVCastController> castController_;

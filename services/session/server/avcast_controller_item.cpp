@@ -22,6 +22,7 @@
 #include "avsession_sysevent.h"
 #include "avmedia_description.h"
 #include "bundle_status_adapter.h"
+#include "avsession_event_handler.h"
 
 #include <string>
 
@@ -51,16 +52,40 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
     }
 }
 
+bool AVCastControllerItem::IsStopState(int32_t playbackState)
+{
+    return playbackState == AVPlaybackState::PLAYBACK_STATE_PAUSE ||
+        playbackState == AVPlaybackState::PLAYBACK_STATE_STOP ||
+        playbackState == AVPlaybackState::PLAYBACK_STATE_RELEASED ||
+        playbackState == AVPlaybackState::PLAYBACK_STATE_ERROR;
+}
+
 void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
     SLOGI("OnCastPlaybackStateChange with state: %{public}d", state.GetState());
     if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
         AVSessionRadar::GetInstance().PlayerStarted(info);
+        // play state try notify notification
+        isPlayingState_ = true;
+        if (sessionCallbackForCastNtf_ && (state.GetState() != currentState_)) {
+            SLOGI("MediaCapsule addCastCapsule isMediaChange_ %{public}d", isMediaChange_);
+            sessionCallbackForCastNtf_(sessionId_, true, isMediaChange_);
+        }
     } else if (state.GetState() != currentState_) {
         currentState_ = state.GetState();
+        if (IsStopState(currentState_)) {
+            isPlayingState_ = false;
+        }
         AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
         AVSessionRadar::GetInstance().ControlCommandRespond(info);
+        AVSessionEventHandler::GetInstance().AVSessionPostTask(
+            [this]() {
+                if (sessionCallbackForCastNtf_ && !isPlayingState_) {
+                    SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", isPlayingState_);
+                    sessionCallbackForCastNtf_(sessionId_, false, false);
+                }
+            }, "CancelCastCapsule", cancelTimeout);
     }
     AVPlaybackState stateOut;
     std::lock_guard lockGuard(castControllerCallbackLock_);
@@ -80,6 +105,7 @@ void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
     if (callback_ != nullptr) {
         callback_->OnMediaItemChange(avQueueItem);
     }
+    isMediaChange_ = true;
 }
 
 void AVCastControllerItem::OnPlayNext()
@@ -238,6 +264,15 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     auto ret = castControllerProxy_->Prepare(avQueueItem);
+    if (avQueueItem.GetDescription() != nullptr && (avQueueItem.GetDescription()->GetIcon() != nullptr &&
+        avQueueItem.GetDescription()->GetIconUri() == "URI_CACHE")) {
+        SLOGI("MediaCapsule prepare icon, isPlayingState_ %{public}d isMediaChange_ %{public}d",
+            isPlayingState_, isMediaChange_);
+        if (sessionCallbackForCastNtf_ && isPlayingState_) {
+            sessionCallbackForCastNtf_(sessionId_, true, isMediaChange_);
+        }
+        return AVSESSION_SUCCESS;
+    }
     std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "prepare failed";
     std::string mediaIcon = "false";
     std::string apiParamString = "";
@@ -428,6 +463,16 @@ int32_t AVCastControllerItem::HandleCastValidCommandChange(const std::vector<int
 void AVCastControllerItem::SetSessionTag(const std::string tag)
 {
     sessionTag_ = tag;
+}
+
+void AVCastControllerItem::SetSessionId(const std::string sessionId)
+{
+    sessionId_ = sessionId;
+}
+
+void AVCastControllerItem::SetSessionCallbackForCastCap(const std::function<void(std::string, bool, bool)>& callback)
+{
+    sessionCallbackForCastNtf_ = callback;
 }
 
 bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
