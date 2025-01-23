@@ -48,6 +48,13 @@ static char g_testSessionTag[] = "test";
 static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
 static uint64_t g_selfTokenId = 0;
+static std::string g_errLog;
+
+void MyLogCallback(const LogType type, const LogLevel level,
+    const unsigned int domain, const char *tag, const char *msg)
+{
+    g_errLog = msg;
+}
 
 static HapInfoParams g_info = {
     .userID = 100,
@@ -575,8 +582,10 @@ HWTEST_F(AVCastControllerTest, Destroy001, TestSize.Level1)
 */
 HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange001, TestSize.Level1)
 {
+    LOG_SetCallback(MyLogCallback);
     AVPlaybackState state;
     castController_->OnCastPlaybackStateChange(state);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
 /**
@@ -587,8 +596,10 @@ HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange001, TestSize.Level1)
 */
 HWTEST_F(AVCastControllerTest, OnMediaItemChange001, TestSize.Level1)
 {
+    LOG_SetCallback(MyLogCallback);
     AVQueueItem avQueueItem;
     castController_->OnMediaItemChange(avQueueItem);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
 /**
@@ -599,7 +610,9 @@ HWTEST_F(AVCastControllerTest, OnMediaItemChange001, TestSize.Level1)
 */
 HWTEST_F(AVCastControllerTest, OnPlayNext001, TestSize.Level1)
 {
+    LOG_SetCallback(MyLogCallback);
     castController_->OnPlayNext();
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
 /**
@@ -610,7 +623,9 @@ HWTEST_F(AVCastControllerTest, OnPlayNext001, TestSize.Level1)
 */
 HWTEST_F(AVCastControllerTest, OnPlayPrevious001, TestSize.Level1)
 {
+    LOG_SetCallback(MyLogCallback);
     castController_->OnPlayPrevious();
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
 /**
@@ -621,8 +636,10 @@ HWTEST_F(AVCastControllerTest, OnPlayPrevious001, TestSize.Level1)
 */
 HWTEST_F(AVCastControllerTest, OnSeekDone001, TestSize.Level1)
 {
+    LOG_SetCallback(MyLogCallback);
     int32_t seekNumber = 0;
     castController_->OnSeekDone(seekNumber);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
 /**
@@ -633,9 +650,11 @@ HWTEST_F(AVCastControllerTest, OnSeekDone001, TestSize.Level1)
 */
 HWTEST_F(AVCastControllerTest, OnVideoSizeChange001, TestSize.Level1)
 {
+    LOG_SetCallback(MyLogCallback);
     int32_t width = 0;
     int32_t height = 0;
     castController_->OnVideoSizeChange(width, height);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
 /**
@@ -646,9 +665,11 @@ HWTEST_F(AVCastControllerTest, OnVideoSizeChange001, TestSize.Level1)
 */
 HWTEST_F(AVCastControllerTest, OnPlayerError001, TestSize.Level1)
 {
+    LOG_SetCallback(MyLogCallback);
     int32_t errorCode = 0;
     std::string errorMsg = "errorMsg";
     castController_->OnPlayerError(errorCode, errorMsg);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
 /**

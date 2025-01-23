@@ -148,20 +148,19 @@ bool SoftbusDistributedDataManager::CreateProxy(const std::shared_ptr<SoftbusSes
     } else {
         proxyMap = mDeviceToProxyMap_[peerNetworkId];
         proxyMap[characteristic] = proxy;
-        int32_t socketId = ConnectRemoteDevice(peerNetworkId, packageName, softbusLinkMaxRetryTimes);
-        if (socketId <= 0) {
-            proxyMap.erase(characteristic);
-            if (proxyMap.empty()) {
-                mDeviceToProxyMap_.erase(peerNetworkId);
-            }
-            SLOGI("createProxy failed for no remote device connected");
-            return false;
-        } else {
-            OnSessionProxyOpened(socketId);
-            return true;
-        }
     }
-    return true;
+    int32_t socketId = ConnectRemoteDevice(peerNetworkId, packageName, softbusLinkMaxRetryTimes);
+    if (socketId <= 0) {
+        proxyMap.erase(characteristic);
+        if (proxyMap.empty()) {
+            mDeviceToProxyMap_.erase(peerNetworkId);
+        }
+        SLOGI("createProxy failed for no remote device connected");
+        return false;
+    } else {
+        OnSessionProxyOpened(socketId);
+        return true;
+    }
 }
 
 bool SoftbusDistributedDataManager::ReleaseProxy(const std::shared_ptr<SoftbusSessionProxy> &proxy,

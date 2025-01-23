@@ -229,6 +229,7 @@ public:
     int32_t GetAVQueueTitle(std::string& title) override;
     int32_t SkipToQueueItem(int32_t& itemId) override;
     int32_t GetExtras(OHOS::AAFwk::WantParams& extras) override;
+    int32_t GetExtrasWithEvent(const std::string& extraEvent, OHOS::AAFwk::WantParams& extras) override;
     int32_t Destroy() override;
     std::string GetSessionId() override;
     int32_t RegisterCallbackInner(const OHOS::sptr<IRemoteObject>& callback) override;
@@ -329,6 +330,12 @@ int32_t AVSessionControllerStubTest::SkipToQueueItem(int32_t& itemId)
 }
 
 int32_t AVSessionControllerStubTest::GetExtras(OHOS::AAFwk::WantParams& extras)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetExtrasWithEvent(
+    const std::string& extraEvent, OHOS::AAFwk::WantParams& extras)
 {
     return 0;
 }

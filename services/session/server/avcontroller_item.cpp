@@ -166,7 +166,7 @@ int32_t AVControllerItem::GetExtras(AAFwk::WantParams& extras)
 
 int32_t AVControllerItem::GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras)
 {
-    if(migrateProxyCallback_ != nullptr) {
+    if (migrateProxyCallback_ != nullptr) {
         int32_t ret = migrateProxyCallback_(extraEvent, extras);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "extraEvent not support");
     } else {
@@ -231,7 +231,7 @@ int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
 
 int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
 {
-    if(migrateProxyCallback_ != nullptr) {
+    if (migrateProxyCallback_ != nullptr) {
         int32_t ret = migrateProxyCallback_(commonCommand, const_cast<AAFwk::WantParams&>(commandArgs));
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "extraEvent not support");
     } else {

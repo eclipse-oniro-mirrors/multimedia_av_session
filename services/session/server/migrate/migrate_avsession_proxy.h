@@ -25,6 +25,8 @@
 #include "avsession_info.h"
 
 namespace OHOS::AVSession {
+using MigrateAVSessionProxyControllerCallbackFunc = std::function<int32_t(const std::string&, AAFwk::WantParams&)>;
+
 class AVSessionService;
 class MigrateAVSessionProxy : public SoftbusSessionProxy,
     public std::enable_shared_from_this<MigrateAVSessionProxy> {
@@ -77,7 +79,7 @@ private:
     void SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr);
     void SendSpecialKeepAliveData();
 
-    const std::function<int32_t(const std::string&, AAFwk::WantParams&)> MigrateAVSessionProxyControllerCallback();
+    const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxyControllerCallback();
 
     void SetVolume(const AAFwk::WantParams& extras);
     void SelectOutputDevice(const AAFwk::WantParams& extras);
@@ -95,7 +97,7 @@ private:
     int32_t volumeNum_ = 0;
     AudioDeviceDescriptorsWithSptr availableDevices_;
     AudioDeviceDescriptorsWithSptr preferredOutputDevice_;
-    std::function<int32_t(const std::string&, AAFwk::WantParams&)> migrateProxyCallback_;
+    MigrateAVSessionProxyControllerCallbackFunc migrateProxyCallback_;
 };
 
 class AVSessionObserver : public AVSessionCallback {

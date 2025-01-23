@@ -765,7 +765,6 @@ napi_value NapiAVSessionController::GetExtrasWithEvent(napi_env env, napi_callba
     context->GetCbInfo(env, info, inputParser);
 
     auto executor = [context]() {
-        SLOGD("NapiAVSessionController GetExtrasWithEvent process check lock");
         std::lock_guard<std::mutex> lock(uvMutex_);
         SLOGI("Start NapiAVSessionController GetExtrasWithEvent process");
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);

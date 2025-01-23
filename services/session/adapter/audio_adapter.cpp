@@ -152,7 +152,7 @@ void AudioAdapter::OnDeviceChange(const DeviceChangeAction& deviceChangeAction)
 void AudioAdapter::OnAvailableDeviceChange(const AudioStandard::AudioDeviceUsage usage,
     const AudioStandard::DeviceChangeAction& deviceChangeAction)
 {
-    if(AudioStandard::DeviceChangeType::CONNECT == deviceChangeAction.type) {
+    if (AudioStandard::DeviceChangeType::CONNECT == deviceChangeAction.type) {
         SLOGI("receive connect available device change");
     } else {
         SLOGI("receive disconnect available device change");
@@ -232,8 +232,7 @@ AudioDeviceDescriptorsWithSptr AudioAdapter::GetAvailableDevices()
     return outDeviceDescriptors;
 }
 
-int32_t AudioAdapter::SetAvailableDeviceChangeCallback(
-    const std::function<void(const AudioDeviceDescriptorsWithSptr&)>& callback)
+int32_t AudioAdapter::SetAvailableDeviceChangeCallback(const AudioDeviceDescriptorsCallbackFunc& callback)
 {
     availableDeviceChangeCallbackFunc_ = callback;
     auto ret = AudioStandard::AudioSystemManager::GetInstance()->SetAvailableDeviceChangeCallback(
@@ -293,8 +292,7 @@ AudioDeviceDescriptorsWithSptr AudioAdapter::GetPreferredOutputDeviceForRenderer
     return outDeviceDescriptors;
 }
 
-int32_t AudioAdapter::SetPreferredOutputDeviceChangeCallback(
-    const std::function<void(const AudioDeviceDescriptorsWithSptr&)>& callback)
+int32_t AudioAdapter::SetPreferredOutputDeviceChangeCallback(const AudioDeviceDescriptorsCallbackFunc& callback)
 {
     preferredDeviceChangeCallback_ = std::make_shared<AudioPreferredDeviceChangeCallback>(callback);
     AudioStandard::AudioRendererInfo rendererInfo = {};
@@ -317,7 +315,7 @@ int32_t AudioAdapter::SelectOutputDevice(const AudioDeviceDescriptorWithSptr& de
     AudioDeviceDescriptorsWithSptr deviceDescriptorVector;
     auto audioDeviceDescriptors = GetAvailableDevices();
     for (auto& device : audioDeviceDescriptors) {
-        if(device->deviceCategory_ == desc->deviceCategory_ && device->deviceType_ == desc->deviceType_) {
+        if (device->deviceCategory_ == desc->deviceCategory_ && device->deviceType_ == desc->deviceType_) {
             deviceDescriptorVector.push_back(device);
         }
     }

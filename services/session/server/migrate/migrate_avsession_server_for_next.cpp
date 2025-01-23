@@ -217,10 +217,10 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
         AVSessionUtils::GetAnonySessionId(controller->GetSessionId()).c_str());
 
     Json::Value sessionInfo;
-    sessionInfo[SESSION_ID] = controller->GetSessionId();
+    sessionInfo[MIGRATE_SESSION_ID] = controller->GetSessionId();
     AppExecFwk::ElementName elementName = controller->GetElementOfSession();
-    sessionInfo[BUNDLE_NAME] = elementName.GetBundleName();
-    sessionInfo[ABILITY_NAME] = elementName.GetAbilityName();
+    sessionInfo[MIGRATE_BUNDLE_NAME] = elementName.GetBundleName();
+    sessionInfo[MIGRATE_ABILITY_NAME] = elementName.GetAbilityName();
     std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_SESSION_INFO});
     SoftbusSessionUtils::TransferJsonToStr(sessionInfo, msg);
     SendByte(deviceId_, msg);
@@ -256,9 +256,9 @@ void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
 {
     SLOGI("UpdateEmptyInfoToRemote in");
     Json::Value sessionInfo;
-    sessionInfo[SESSION_ID] = EMPTY_SESSION;
-    sessionInfo[BUNDLE_NAME] = DEFAULT_STRING;
-    sessionInfo[ABILITY_NAME] = DEFAULT_STRING;
+    sessionInfo[MIGRATE_SESSION_ID] = EMPTY_SESSION;
+    sessionInfo[MIGRATE_BUNDLE_NAME] = DEFAULT_STRING;
+    sessionInfo[MIGRATE_ABILITY_NAME] = DEFAULT_STRING;
     std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_SESSION_INFO});
     SoftbusSessionUtils::TransferJsonToStr(sessionInfo, msg);
     SendByte(deviceId_, msg);
@@ -337,8 +337,7 @@ std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFu
     };
 }
 
-std::function<void(const AudioDeviceDescriptorsWithSptr&)>
-    MigrateAVSessionServer::GetAvailableDeviceChangeCallbackFunc()
+AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceChangeCallbackFunc()
 {
     return [this](const AudioDeviceDescriptorsWithSptr& devices) {
         std::lock_guard lockGuard(migrateDeviceChangeLock_);
@@ -350,8 +349,7 @@ std::function<void(const AudioDeviceDescriptorsWithSptr&)>
     };
 }
 
-std::function<void(const AudioDeviceDescriptorsWithSptr&)>
-    MigrateAVSessionServer::GetPreferredDeviceChangeCallbackFunc()
+AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceChangeCallbackFunc()
 {
     return [this](const AudioDeviceDescriptorsWithSptr& devices) {
         std::lock_guard lockGuard(migrateDeviceChangeLock_);

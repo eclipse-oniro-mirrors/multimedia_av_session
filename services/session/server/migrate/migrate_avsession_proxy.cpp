@@ -194,8 +194,7 @@ void MigrateAVSessionProxy::PrepareControllerOfRemoteSession(sptr<AVSessionItem>
     sessionItem->AddController(DEFAULT_NUM, preSetController_);
 }
 
-const std::function<int32_t(const std::string&, AAFwk::WantParams&)>
-    MigrateAVSessionProxy::MigrateAVSessionProxyControllerCallback()
+const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::MigrateAVSessionProxyControllerCallback()
 {
     return [this](const std::string& extraEvent, AAFwk::WantParams& extras) {
         const auto& it = AUDIO_EVENT_MAPS.find(extraEvent);
@@ -287,18 +286,18 @@ void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
     std::string sessionId;
     AppExecFwk::ElementName elementName;
 
-    if (jsonValue.isMember(SESSION_ID)) {
-        sessionId = jsonValue[SESSION_ID].isString() ?
-            jsonValue[SESSION_ID].asString() : DEFAULT_STRING;
+    if (jsonValue.isMember(MIGRATE_SESSION_ID)) {
+        sessionId = jsonValue[MIGRATE_SESSION_ID].isString() ?
+            jsonValue[MIGRATE_SESSION_ID].asString() : DEFAULT_STRING;
     }
-    if (jsonValue.isMember(BUNDLE_NAME)) {
-        std::string bundleName = jsonValue[BUNDLE_NAME].isString() ?
-            jsonValue[BUNDLE_NAME].asString() : DEFAULT_STRING;
+    if (jsonValue.isMember(MIGRATE_BUNDLE_NAME)) {
+        std::string bundleName = jsonValue[MIGRATE_BUNDLE_NAME].isString() ?
+            jsonValue[MIGRATE_BUNDLE_NAME].asString() : DEFAULT_STRING;
         elementName.SetBundleName(bundleName);
     }
-    if (jsonValue.isMember(ABILITY_NAME)) {
-        std::string abilityName = jsonValue[ABILITY_NAME].isString() ?
-            jsonValue[ABILITY_NAME].asString() : DEFAULT_STRING;
+    if (jsonValue.isMember(MIGRATE_ABILITY_NAME)) {
+        std::string abilityName = jsonValue[MIGRATE_ABILITY_NAME].isString() ?
+            jsonValue[MIGRATE_ABILITY_NAME].asString() : DEFAULT_STRING;
         elementName.SetAbilityName(abilityName);
     }
     SLOGI("ProcessMetaData with sessionId:%{public}s|bundleName:%{public}s",
@@ -371,7 +370,7 @@ void MigrateAVSessionProxy::ProcessValidCommands(Json::Value jsonValue)
 
 void MigrateAVSessionProxy::ProcessVolumeControlCommand(Json::Value jsonValue)
 {
-    if(!jsonValue.isMember(AUDIO_VOLUME)) {
+    if (!jsonValue.isMember(AUDIO_VOLUME)) {
         SLOGE("json parse with error member");
         return;
     }

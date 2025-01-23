@@ -127,8 +127,8 @@ private:
     void UnregisterAudioCallback();
     
     std::function<void(int32_t)> GetVolumeKeyEventCallbackFunc();
-    std::function<void(const AudioDeviceDescriptorsWithSptr&)> GetAvailableDeviceChangeCallbackFunc();
-    std::function<void(const AudioDeviceDescriptorsWithSptr&)> GetPreferredDeviceChangeCallbackFunc();
+    AudioDeviceDescriptorsCallbackFunc GetAvailableDeviceChangeCallbackFunc();
+    AudioDeviceDescriptorsCallbackFunc GetPreferredDeviceChangeCallbackFunc();
 
     AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
@@ -142,8 +142,8 @@ private:
     std::string curAssetId_;
 
     std::function<void(int32_t)> volumeKeyEventCallbackFunc_;
-    std::function<void(const AudioDeviceDescriptorsWithSptr&)> availableDeviceChangeCallbackFunc_;
-    std::function<void(const AudioDeviceDescriptorsWithSptr&)> preferredDeviceChangeCallbackFunc_;
+    AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
+    AudioDeviceDescriptorsCallbackFunc preferredDeviceChangeCallbackFunc_;
 };
 
 class AVControllerObserver : public AVControllerCallback {

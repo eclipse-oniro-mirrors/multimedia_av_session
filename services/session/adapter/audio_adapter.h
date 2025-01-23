@@ -30,6 +30,8 @@ using AudioDeviceDescriptorsWithSptr = std::vector<std::shared_ptr<AudioStandard
 using DeviceChangeAction = AudioStandard::DeviceChangeAction;
 using AudioDeviceDescriptor = AudioStandard::AudioDeviceDescriptor;
 
+using AudioDeviceDescriptorsCallbackFunc = std::function<void(const AudioDeviceDescriptorsWithSptr&)>;
+
 class AudioVolumeKeyEventCallback;
 class AudioPreferredDeviceChangeCallback;
 
@@ -113,7 +115,7 @@ private:
     std::shared_ptr<AudioVolumeKeyEventCallback> volumeCallback_;
     std::shared_ptr<AudioPreferredDeviceChangeCallback> preferredDeviceChangeCallback_;
 
-    std::function<void(const AudioDeviceDescriptorsWithSptr&)> availableDeviceChangeCallbackFunc_;
+    AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
 };
 
 class AudioVolumeKeyEventCallback : public AudioStandard::VolumeKeyEventCallback {
@@ -144,7 +146,7 @@ public:
     }
 
 private:
-    const std::function<void(const AudioDeviceDescriptorsWithSptr&)> callback_;
+    const AudioDeviceDescriptorsCallbackFunc callback_;
 };
 }
 #endif // AV_SESSION_AUDIO_ADAPTER_H
