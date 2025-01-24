@@ -353,25 +353,23 @@ int32_t InnerWrapWantParamsArrayString(sptr<AAFwk::IArray> &ao, CParameters *p)
     if (size == 0) {
         return AVSESSION_ERROR;
     }
-    char **arrP = static_cast<char **>(malloc(sizeof(char *) * size));
+    long mallocSize = sizeof(char *) * size;
+    char **arrP = static_cast<char **>(malloc(mallocSize));
     if (arrP == nullptr) {
         SLOGE("fail to malloc");
         return ERR_NO_MEMORY;
     }
     int ret = CJNO_ERROR;
+    memset_s(arrP, mallocSize, 0, mallocSize);
     for (long i = 0; i < size; i++) {
-        arrP[i] = nullptr;
         ret = InnerWrapWantParamsUnboxArrayString(ao, i, arrP[i]);
         if (ret != CJNO_ERROR) {
-            for (long j = 0; j < i; j++) {
-                free(arrP[j]);
-            }
-            return ret;
+            break;
         }
     }
     p->size = size;
     p->value = static_cast<void *>(arrP);
-    return CJNO_ERROR;
+    return ret;
 }
 
 void ClearParametersPtr(CParameters *&ptr, int count, bool isKey)
