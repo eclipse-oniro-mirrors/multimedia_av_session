@@ -1694,7 +1694,8 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
             CHECK_AND_RETURN_LOG(remoteSink_->SetControlCommand(cmd) == AVSESSION_SUCCESS, "SetControlCommand failed");
         }
     }
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    CHECK_AND_RETURN_LOG(callback_ != nullptr || callbackForMigrate_ != nullptr,
+        "callback_ or callbackForMigrate_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactivate");
 
     HISYSEVENT_ADD_OPERATION_COUNT(static_cast<Operation>(cmd.GetCommand()));
