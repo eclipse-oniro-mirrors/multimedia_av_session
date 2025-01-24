@@ -85,6 +85,7 @@ namespace OHOS::AVSession {
 static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
 
 static const int32_t CAST_ENGINE_SA_ID = 65546;
+static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t MININUM_FOR_NOTIFICATION = 5;
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 
@@ -136,6 +137,7 @@ void AVSessionService::OnStart()
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     AddSystemAbilityListener(CAST_ENGINE_SA_ID);
+    AddSystemAbilityListener(COLLABORATION_SA_ID);
     AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
@@ -153,7 +155,7 @@ void AVSessionService::OnStart()
     CollaborationManager::GetInstance().ReadCollaborationManagerSo();
     CollaborationManager::GetInstance().RegisterLifecycleCallback();
 #endif
-    PullMigrateStub();
+
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
@@ -370,6 +372,9 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             break;
         case CAST_ENGINE_SA_ID:
             CheckInitCast();
+            break;
+        case COLLABORATION_SA_ID:
+            PullMigrateStub();
             break;
         case BLUETOOTH_HOST_SYS_ABILITY_ID:
             CheckBrEnable();
