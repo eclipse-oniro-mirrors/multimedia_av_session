@@ -20,6 +20,7 @@
 #include <mutex>
 
 #include "json/json.h"
+#include "audio_adapter.h"
 #include "app_manager_adapter.h"
 #include "avcontroller_item.h"
 #include "avsession_info.h"
@@ -74,6 +75,9 @@ public:
     void DoValidCommandsSyncToRemote(const std::vector<int32_t>& commands);
     void DoBundleInfoSyncToRemote(sptr<AVControllerItem> controller);
 
+    static Json::Value ConvertAudioDeviceDescriptorToJson(const AudioDeviceDescriptorWithSptr& device);
+    static Json::Value ConvertAudioDeviceDescriptorsToJson(const AudioDeviceDescriptorsWithSptr& devices);
+
 private:
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;
     std::map<std::string, std::shared_ptr<AVControllerObserver>> playerIdToControllerCallbackMap_;
@@ -102,6 +106,9 @@ private:
     void SortControllers(std::list<sptr<AVControllerItem>> avcontrollerList);
 
     void ProcControlCommand(const std::string &data);
+    void ProcControlCommandFromNext(Json::Value commandJsonValue);
+    void VolumeControlCommand(Json::Value commandJsonValue);
+    void SwitchAudioDeviceCommand(Json::Value jsonObject);
     void SendCommandProc(const std::string &command, sptr<AVControllerItem> controller);
     void MediaButtonEventProc(const std::string &command, sptr<AVControllerItem> controller);
     void CommandWithExtrasProc(int mediaCommand, const std::string &extrasCommand, const std::string &extras,
@@ -114,7 +121,14 @@ private:
     bool GetVehicleRelatingState(std::string playerId);
     void UpdateFrontSessionInfoToRemote(sptr<AVControllerItem> controller);
     void UpdateEmptyInfoToRemote();
-    void ProcControlCommandFromNext(const std::string &deviceId, const std::string &data);
+    void ProcFromNext(const std::string &deviceId, const std::string &data);
+
+    void RegisterAudioCallbackAndTrigger();
+    void UnregisterAudioCallback();
+    
+    std::function<void(int32_t)> GetVolumeKeyEventCallbackFunc();
+    AudioDeviceDescriptorsCallbackFunc GetAvailableDeviceChangeCallbackFunc();
+    AudioDeviceDescriptorsCallbackFunc GetPreferredDeviceChangeCallbackFunc();
 
     AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
@@ -123,8 +137,13 @@ private:
     std::string lastSessionId_;
     std::recursive_mutex migrateControllerLock_;
     std::recursive_mutex topSessionLock_;
+    std::recursive_mutex migrateDeviceChangeLock_;
     int32_t migrateMode_ = MIGRATE_MODE_CROSS;
     std::string curAssetId_;
+
+    std::function<void(int32_t)> volumeKeyEventCallbackFunc_;
+    AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
+    AudioDeviceDescriptorsCallbackFunc preferredDeviceChangeCallbackFunc_;
 };
 
 class AVControllerObserver : public AVControllerCallback {

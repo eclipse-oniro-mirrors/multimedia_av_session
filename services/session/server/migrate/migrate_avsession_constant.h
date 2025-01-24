@@ -67,6 +67,11 @@ constexpr int32_t SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED = 14;
 constexpr int32_t SYNC_FOCUS_SESSION_INFO = 15;
 constexpr int32_t SYNC_FOCUS_MEDIA_IMAGE = 16;
 
+constexpr int32_t SYNC_SET_VOLUME_COMMAND = 17;
+constexpr int32_t SYNC_AVAIL_DEVICES_LIST = 18;
+constexpr int32_t SYNC_CURRENT_DEVICE = 19;
+constexpr int32_t SYNC_SWITCH_AUDIO_DEVICE_COMMAND = 20;
+
 constexpr int32_t MESSAGE_CODE_CONNECT_SERVER = 1;
 constexpr int32_t DEFAULT_NUM = 0;
 
@@ -96,6 +101,8 @@ const char* EVENT_COMMAND_SHOW_LYRIC = "EVENT_COMMAND_SHOW_LYRIC";
 const char* EVENT_COMMAND_HIDE_LYRIC = "EVENT_COMMAND_HIDE_LYRIC";
 
 const char* MEDIA_CONTROLLER_LIST = "MediaControllerList";
+
+const char* MEDIA_AVAILABLE_DEVICES_LIST = "MediaAvailableDevicesList";
 
 const char* HISTORY_MEDIA_PLAYER_INFO = "HistoryMediaPlayerInfo";
 
@@ -144,6 +151,31 @@ const char* PLAYBACK_MASK_NULL = "000000000";
 constexpr int32_t VOLUMN_INFO = 15;
 
 const char* CONFIG_SOFTBUS_SESSION_TAG = "Media_Session_RemoteCtrl";
+
+const char* SESSION_ID = "SessionId";
+const char* BUNDLE_NAME = "BundleName";
+const char* ABILITY_NAME = "AbilityName";
+
+const char* AUDIO_VOLUME = "AudioVolume";
+const char* AUDIO_DEVICE_CATEGORY = "AudioDeviceCategory";
+const char* AUDIO_DEVICE_TYPE = "AudioDeviceType";
+const char* AUDIO_DEVICE_ROLE = "AudioDeviceRole";
+const char* AUDIO_NETWORK_ID = "AudioNetworkId";
+const char* AUDIO_DEVICE_NAME = "AudioDeviceName";
+const char* AUDIO_MAC_ADDRESS = "AudioMacAddress";
+
+const char* AUDIO_SET_VOLUME = "AUDIO_SET_VOLUME";
+const char* AUDIO_SELECT_OUTPUT_DEVICE = "AUDIO_SELECT_OUTPUT_DEVICE";
+
+const char* AUDIO_GET_VOLUME = "AUDIO_GET_VOLUME";
+const char* AUDIO_GET_AVAILABLE_DEVICES = "AUDIO_GET_AVAILABLE_DEVICES";
+const char* AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO =
+    "AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO";
+
+const char* AUDIO_CALLBACK_VOLUME = "AUDIO_CALLBACK_VOLUME";
+const char* AUDIO_CALLBACK_AVAILABLE_DEVICES = "AUDIO_CALLBACK_AVAILABLE_DEVICES";
+const char* AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO =
+    "AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO";
 }
 } // namespace OHOS::AVSession
 

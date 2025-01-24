@@ -247,6 +247,19 @@ int32_t AVSessionControllerStub::HandleGetExtras(MessageParcel& data, MessagePar
     return ERR_NONE;
 }
 
+int32_t AVSessionControllerStub::HandleGetExtrasWithEvent(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::HandleGetExtrasWithEvent");
+    auto extraEvent = data.ReadString();
+    AAFwk::WantParams extras;
+    int32_t ret = GetExtrasWithEvent(extraEvent, extras);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteParcelable(&extras), "write title failed");
+    }
+    return ERR_NONE;
+}
+
 int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SendAVKeyEvent");

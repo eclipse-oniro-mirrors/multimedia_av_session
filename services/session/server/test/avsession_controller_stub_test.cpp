@@ -192,6 +192,10 @@ public:
     int32_t GetAVQueueTitle(std::string &title) override { return isSuccess ? AVSESSION_SUCCESS : 0; };
     int32_t SkipToQueueItem(int32_t &itemId) override { return isSuccess ? AVSESSION_SUCCESS : 0; };
     int32_t GetExtras(OHOS::AAFwk::WantParams &extras) override { return isSuccess ? AVSESSION_SUCCESS : 0; };
+    int32_t GetExtrasWithEvent(const std::string &extraEvent, OHOS::AAFwk::WantParams &extras) override
+    {
+        return isSuccess ? AVSESSION_SUCCESS : 0;
+    };
     int32_t Destroy() override { return isSuccess ? AVSESSION_SUCCESS : 0; };
     std::string GetSessionId() override { return ""; };
     int64_t GetRealPlaybackPosition() override { return isSuccess ? AVSESSION_SUCCESS : 0; };

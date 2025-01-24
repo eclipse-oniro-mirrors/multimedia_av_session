@@ -32,6 +32,23 @@
 
 namespace OHOS::AVSession {
 
+const int32_t ADDRESS_STR_LEN = 17;
+const int32_t START_POS = 6;
+const int32_t END_POS = 13;
+
+std::string GetEncryptAddr(const std::string& addr)
+{
+    if (addr.empty() || addr.length() != ADDRESS_STR_LEN) {
+        return std::string("");
+    }
+    std::string tmp = "**:**:**:**:**:**";
+    std::string out = addr;
+    for (int i = START_POS; i <= END_POS; i++) {
+        out[i] = tmp[i];
+    }
+    return out;
+}
+
 void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
 {
     if (sessionId.empty()) {
@@ -247,22 +264,38 @@ void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
     SendByte(deviceId_, msg);
 }
 
-void MigrateAVSessionServer::ProcControlCommandFromNext(const std::string &deviceId, const std::string &data)
+void MigrateAVSessionServer::ProcFromNext(const std::string &deviceId, const std::string &data)
 {
     if (data.length() <= MSG_HEAD_LENGTH) {
-        SLOGE("ProcControlCommandFromNext with data too short:%{public}s", data.c_str());
+        SLOGE("ProcFromNext with data too short:%{public}s", data.c_str());
         return;
     }
     int32_t messageType = data[1];
-    CHECK_AND_RETURN_LOG(messageType == SYNC_COMMAND,
-        "ProcControlCommandFromNext with unknow type:%{public}d", messageType);
-
     std::string commandStr = data.substr(MSG_HEAD_LENGTH);
     Json::Value commandJsonValue;
     if (!SoftbusSessionUtils::TransferStrToJson(commandStr, commandJsonValue)) {
-        SLOGE("ProcControlCommandFromNext parse json fail");
+        SLOGE("ProcFromNext parse json fail");
         return;
     }
+
+    switch (messageType) {
+        case SYNC_COMMAND:
+            ProcControlCommandFromNext(commandJsonValue);
+            break;
+        case SYNC_SET_VOLUME_COMMAND:
+            VolumeControlCommand(commandJsonValue);
+            break;
+        case SYNC_SWITCH_AUDIO_DEVICE_COMMAND:
+            SwitchAudioDeviceCommand(commandJsonValue);
+            break;
+        default:
+            SLOGE("messageType %{public}d not support", messageType);
+            break;
+    }
+}
+
+void MigrateAVSessionServer::ProcControlCommandFromNext(Json::Value commandJsonValue)
+{
     int32_t commandCode = -1;
     std::string commandArgs;
     if (commandJsonValue.isMember(COMMAND_CODE)) {
@@ -289,6 +322,106 @@ void MigrateAVSessionServer::ProcControlCommandFromNext(const std::string &devic
         SLOGE("ProcControlCommandFromNext parse invalid command type:%{public}d", commandCode);
         return;
     }
+}
+
+std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFunc()
+{
+    return [this](int32_t volumeNum) {
+        std::lock_guard lockGuard(migrateDeviceChangeLock_);
+        Json::Value value;
+        std::string msg = std::string({MSG_HEAD_MODE, SYNC_SET_VOLUME_COMMAND});
+        value[AUDIO_VOLUME] = volumeNum;
+        SoftbusSessionUtils::TransferJsonToStr(value, msg);
+        SLOGI("server prepare to send set volume num %{public}d", volumeNum);
+        SendByte(deviceId_, msg);
+    };
+}
+
+AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceChangeCallbackFunc()
+{
+    return [this](const AudioDeviceDescriptorsWithSptr& devices) {
+        std::lock_guard lockGuard(migrateDeviceChangeLock_);
+        Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
+        std::string msg = std::string({MSG_HEAD_MODE, SYNC_AVAIL_DEVICES_LIST});
+        SoftbusSessionUtils::TransferJsonToStr(value, msg);
+        SLOGI("server prepare to send get available device change callback");
+        SendByte(deviceId_, msg);
+    };
+}
+
+AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceChangeCallbackFunc()
+{
+    return [this](const AudioDeviceDescriptorsWithSptr& devices) {
+        std::lock_guard lockGuard(migrateDeviceChangeLock_);
+        Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
+        std::string msg = std::string({MSG_HEAD_MODE, SYNC_CURRENT_DEVICE});
+        SoftbusSessionUtils::TransferJsonToStr(value, msg);
+        SLOGI("server prepare to send get preferred device change callback");
+        SendByte(deviceId_, msg);
+    };
+}
+
+Json::Value MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(
+    const AudioDeviceDescriptorsWithSptr& devices)
+{
+    Json::Value jsonArray(Json::arrayValue);
+    int32_t deviceNum = 0;
+    for (auto& device : devices) {
+        if (device == nullptr) {
+            continue;
+        }
+        Json::Value jsonObject = ConvertAudioDeviceDescriptorToJson(device);
+        jsonArray[deviceNum++] = jsonObject;
+    }
+    Json::Value jsonData;
+    jsonData[MEDIA_AVAILABLE_DEVICES_LIST] = jsonArray;
+
+    return jsonData;
+}
+
+Json::Value MigrateAVSessionServer::ConvertAudioDeviceDescriptorToJson(
+    const AudioDeviceDescriptorWithSptr& desc)
+{
+    Json::Value device;
+    device[AUDIO_DEVICE_TYPE] = static_cast<int32_t>(desc->deviceType_);
+    device[AUDIO_MAC_ADDRESS] = desc->macAddress_;
+    device[AUDIO_NETWORK_ID] = desc->networkId_;
+    device[AUDIO_DEVICE_ROLE] = static_cast<int32_t>(desc->deviceRole_);
+    device[AUDIO_DEVICE_CATEGORY] = static_cast<int32_t>(desc->deviceCategory_);
+    device[AUDIO_DEVICE_NAME] = desc->deviceName_;
+
+    return device;
+}
+
+void MigrateAVSessionServer::VolumeControlCommand(Json::Value commandJsonValue)
+{
+    if (!commandJsonValue.isMember(AUDIO_VOLUME)) {
+        SLOGE("json parse with error member");
+        return;
+    }
+
+    int audioVolume = commandJsonValue[AUDIO_VOLUME].isInt() ? commandJsonValue[AUDIO_VOLUME].asInt() : -1;
+    AudioAdapter::GetInstance().SetVolume(audioVolume);
+}
+
+void MigrateAVSessionServer::SwitchAudioDeviceCommand(Json::Value jsonObject)
+{
+    int deviceCategory = jsonObject[AUDIO_DEVICE_CATEGORY].asInt();
+    int deviceType = jsonObject[AUDIO_DEVICE_TYPE].asInt();
+    int deviceRole = jsonObject[AUDIO_DEVICE_ROLE].asInt();
+    std::string networkId = jsonObject[AUDIO_NETWORK_ID].asString();
+    std::string deviceName = jsonObject[AUDIO_DEVICE_NAME].asString();
+    std::string macAddress = jsonObject[AUDIO_MAC_ADDRESS].asString();
+    
+    std::shared_ptr<AudioDeviceDescriptor> device = std::make_shared<AudioDeviceDescriptor>();
+    device->deviceCategory_ = static_cast<AudioStandard::DeviceCategory>(deviceCategory);
+    device->deviceType_ = static_cast<AudioStandard::DeviceType>(deviceType);
+    device->deviceRole_ = static_cast<AudioStandard::DeviceRole>(deviceRole);
+    device->networkId_ = networkId;
+    device->deviceName_ = deviceName;
+    device->macAddress_ = macAddress;
+
+    AudioAdapter::GetInstance().SelectOutputDevice(device);
 }
 }
 

@@ -24,10 +24,20 @@
 
 namespace OHOS::AVSession {
 using AudioRendererChangeInfos = std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>>;
+using AudioDeviceDescriptors = std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>;
+using AudioDeviceDescriptorWithSptr = std::shared_ptr<AudioStandard::AudioDeviceDescriptor>;
+using AudioDeviceDescriptorsWithSptr = std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>;
 using DeviceChangeAction = AudioStandard::DeviceChangeAction;
 using AudioDeviceDescriptor = AudioStandard::AudioDeviceDescriptor;
+
+using AudioDeviceDescriptorsCallbackFunc = std::function<void(const AudioDeviceDescriptorsWithSptr&)>;
+
+class AudioVolumeKeyEventCallback;
+class AudioPreferredDeviceChangeCallback;
+
 class AudioAdapter : public AudioStandard::AudioRendererStateChangeCallback,
                      public AudioStandard::AudioManagerDeviceChangeCallback,
+                     public AudioStandard::AudioManagerAvailableDeviceChangeCallback,
                      public AudioStandard::AudioPreferredOutputDeviceChangeCallback,
                      public std::enable_shared_from_this<AudioAdapter> {
 public:
@@ -60,9 +70,33 @@ public:
 
     void OnDeviceChange(const DeviceChangeAction& deviceChangeAction) override;
 
-    void OnPreferredOutputDeviceUpdated(const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) override;
+    void OnAvailableDeviceChange(const AudioStandard::AudioDeviceUsage usage,
+        const AudioStandard::DeviceChangeAction& deviceChangeAction) override;
+
+    void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptorsWithSptr& desc) override;
 
     bool GetRendererRunning(int32_t uid);
+
+    int32_t SetVolume(int32_t volume);
+    int32_t GetVolume();
+    int32_t RegisterVolumeKeyEventCallback(const std::function<void(int32_t)>& callback);
+    int32_t UnregisterVolumeKeyEventCallback();
+
+    AudioDeviceDescriptorsWithSptr GetAvailableDevices();
+    int32_t SetAvailableDeviceChangeCallback(const std::function<void(
+        const AudioDeviceDescriptorsWithSptr&)>& callback);
+    int32_t UnsetAvailableDeviceChangeCallback();
+
+    AudioDeviceDescriptorsWithSptr GetDevices();
+    int32_t SetDeviceChangeCallback();
+    int32_t UnsetDeviceChangeCallback();
+
+    AudioDeviceDescriptorsWithSptr GetPreferredOutputDeviceForRendererInfo();
+    int32_t SetPreferredOutputDeviceChangeCallback(const std::function<void(
+        const AudioDeviceDescriptorsWithSptr&)>& callback);
+    int32_t UnsetPreferredOutputDeviceChangeCallback();
+
+    int32_t SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc);
 
 private:
     static std::shared_ptr<AudioAdapter> instance_;
@@ -75,6 +109,44 @@ private:
         AudioStandard::STREAM_USAGE_GAME,
         AudioStandard::STREAM_USAGE_AUDIOBOOK
     };
+
+    int32_t volumeMax_;
+    int32_t volumeMin_;
+    std::shared_ptr<AudioVolumeKeyEventCallback> volumeCallback_;
+    std::shared_ptr<AudioPreferredDeviceChangeCallback> preferredDeviceChangeCallback_;
+
+    AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
+};
+
+class AudioVolumeKeyEventCallback : public AudioStandard::VolumeKeyEventCallback {
+public:
+    explicit AudioVolumeKeyEventCallback(const std::function<void(int32_t)>& callback)
+        : callback_(callback) { }
+    ~AudioVolumeKeyEventCallback() = default;
+
+    void OnVolumeKeyEvent(AudioStandard::VolumeEvent volumeEvent) override
+    {
+        callback_(volumeEvent.volume);
+    }
+
+private:
+    const std::function<void(int32_t)> callback_;
+};
+
+class AudioPreferredDeviceChangeCallback : public AudioStandard::AudioPreferredOutputDeviceChangeCallback {
+public:
+    explicit AudioPreferredDeviceChangeCallback(const std::function<void(
+        const AudioDeviceDescriptorsWithSptr&)>& callback) : callback_(callback) { }
+    ~AudioPreferredDeviceChangeCallback() = default;
+
+    void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptorsWithSptr& desc) override
+    {
+        auto device = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
+        callback_(device);
+    }
+
+private:
+    const AudioDeviceDescriptorsCallbackFunc callback_;
 };
 }
 #endif // AV_SESSION_AUDIO_ADAPTER_H

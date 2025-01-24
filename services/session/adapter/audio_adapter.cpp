@@ -50,6 +50,10 @@ void AudioAdapter::Init()
     ret = AudioStandard::AudioRoutingManager::GetInstance()->SetPreferredOutputDeviceChangeCallback(
         rendererInfo, shared_from_this());
     CHECK_AND_PRINT_LOG(ret == 0, "register audio device changed event listener failed!");
+
+    AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
+    volumeMax_ = AudioStandard::AudioSystemManager::GetInstance()->GetMaxVolume(streamType);
+    volumeMin_ = AudioStandard::AudioSystemManager::GetInstance()->GetMinVolume(streamType);
 }
 
 void AudioAdapter::AddStreamRendererStateListener(const StateListener& listener)
@@ -145,7 +149,23 @@ void AudioAdapter::OnDeviceChange(const DeviceChangeAction& deviceChangeAction)
 {
 }
 
-void AudioAdapter::OnPreferredOutputDeviceUpdated(const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc)
+void AudioAdapter::OnAvailableDeviceChange(const AudioStandard::AudioDeviceUsage usage,
+    const AudioStandard::DeviceChangeAction& deviceChangeAction)
+{
+    if (AudioStandard::DeviceChangeType::CONNECT == deviceChangeAction.type) {
+        SLOGI("receive connect available device change");
+    } else {
+        SLOGI("receive disconnect available device change");
+    }
+    AudioDeviceDescriptorsWithSptr deviceDescriptors = GetAvailableDevices();
+    for (auto& device : deviceDescriptors) {
+        SLOGI("OnDeviceChange output deviceCategory_ %{public}d, deviceType_ %{public}d",
+            static_cast<int32_t>(device->deviceCategory_), static_cast<int32_t>(device->deviceType_));
+    }
+    availableDeviceChangeCallbackFunc_(deviceDescriptors);
+}
+
+void AudioAdapter::OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptorsWithSptr& desc)
 {
     for (const auto& listener : deviceChangeListeners_) {
         if (listener) {
@@ -165,5 +185,143 @@ bool AudioAdapter::GetRendererRunning(int32_t uid)
             true, "find uid=%{public}d renderer state is %{public}d", uid, info->rendererState);
     }
     return false;
+}
+
+int32_t AudioAdapter::SetVolume(int32_t volume)
+{
+    AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
+    int32_t volumeNum = std::min(volumeMax_, std::max(volume, volumeMin_));
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->SetVolume(streamType, volumeNum);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetVolume failed");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AudioAdapter::GetVolume()
+{
+    AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
+    return AudioStandard::AudioSystemManager::GetInstance()->GetVolume(streamType);
+}
+
+int32_t AudioAdapter::RegisterVolumeKeyEventCallback(const std::function<void(int32_t)>& callback)
+{
+    volumeCallback_ = std::make_shared<AudioVolumeKeyEventCallback>(callback);
+    int32_t ret = AudioStandard::AudioSystemManager::GetInstance()->RegisterVolumeKeyEventCallback(
+        getpid(), volumeCallback_);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "RegisterVolumeKeyEventCallback failed");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AudioAdapter::UnregisterVolumeKeyEventCallback()
+{
+    int32_t ret = AudioStandard::AudioSystemManager::GetInstance()->UnregisterVolumeKeyEventCallback(
+        getpid(), volumeCallback_);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "UnregisterVolumeKeyEventCallback failed");
+    return AVSESSION_SUCCESS;
+}
+
+AudioDeviceDescriptorsWithSptr AudioAdapter::GetAvailableDevices()
+{
+    AudioDeviceDescriptorsWithSptr outDeviceDescriptors;
+    AudioDeviceDescriptors devices = AudioStandard::AudioRoutingManager::GetInstance()->GetAvailableDevices(
+        AudioStandard::AudioDeviceUsage::MEDIA_OUTPUT_DEVICES);
+    for (auto& device : devices) {
+        SLOGI("GetAvailableDevices output deviceCategory_ %{public}d, deviceType_ %{public}d",
+            static_cast<int32_t>(device->deviceCategory_), static_cast<int32_t>(device->deviceType_));
+        outDeviceDescriptors.push_back(std::move(device));
+    }
+    return outDeviceDescriptors;
+}
+
+int32_t AudioAdapter::SetAvailableDeviceChangeCallback(const AudioDeviceDescriptorsCallbackFunc& callback)
+{
+    availableDeviceChangeCallbackFunc_ = callback;
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->SetAvailableDeviceChangeCallback(
+        AudioStandard::AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, shared_from_this());
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAvailableDeviceChangeCallback failed");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AudioAdapter::UnsetAvailableDeviceChangeCallback()
+{
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UnsetAvailableDeviceChangeCallback(
+        AudioStandard::AudioDeviceUsage::MEDIA_OUTPUT_DEVICES);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "UnsetAvailableDeviceChangeCallback failed");
+    return AVSESSION_SUCCESS;
+}
+
+AudioDeviceDescriptorsWithSptr AudioAdapter::GetDevices()
+{
+    auto devices = AudioStandard::AudioSystemManager::GetInstance()->GetDevices(
+        AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
+    for (auto& device : devices) {
+        SLOGI("GetDevices output deviceCategory_ %{public}d, deviceType_ %{public}d",
+            static_cast<int32_t>(device->deviceCategory_), static_cast<int32_t>(device->deviceType_));
+    }
+    return devices;
+}
+
+int32_t AudioAdapter::SetDeviceChangeCallback()
+{
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->SetDeviceChangeCallback(
+        AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG, shared_from_this());
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetDeviceChangeCallback failed");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AudioAdapter::UnsetDeviceChangeCallback()
+{
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UnsetDeviceChangeCallback(
+        AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG, shared_from_this());
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "UnsetDeviceChangeCallback failed");
+    return AVSESSION_SUCCESS;
+}
+
+AudioDeviceDescriptorsWithSptr AudioAdapter::GetPreferredOutputDeviceForRendererInfo()
+{
+    AudioStandard::AudioRendererInfo rendererInfo = {};
+    rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+    AudioDeviceDescriptorsWithSptr outDeviceDescriptors;
+    auto ret = AudioStandard::AudioRoutingManager::GetInstance()->GetPreferredOutputDeviceForRendererInfo(
+        rendererInfo, outDeviceDescriptors);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AudioDeviceDescriptorsWithSptr{},
+        "GetPreferredOutputDeviceForRendererInfo failed");
+    for (auto& device : outDeviceDescriptors) {
+        SLOGI("preferred output deviceCategory_ %{public}d, deviceType_ %{public}d",
+            static_cast<int32_t>(device->deviceCategory_), static_cast<int32_t>(device->deviceType_));
+    }
+    return outDeviceDescriptors;
+}
+
+int32_t AudioAdapter::SetPreferredOutputDeviceChangeCallback(const AudioDeviceDescriptorsCallbackFunc& callback)
+{
+    preferredDeviceChangeCallback_ = std::make_shared<AudioPreferredDeviceChangeCallback>(callback);
+    AudioStandard::AudioRendererInfo rendererInfo = {};
+    rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+    auto ret = AudioStandard::AudioRoutingManager::GetInstance()->SetPreferredOutputDeviceChangeCallback(
+        rendererInfo, preferredDeviceChangeCallback_);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetPreferredOutputDeviceChangeCallback failed");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AudioAdapter::UnsetPreferredOutputDeviceChangeCallback()
+{
+    auto ret = AudioStandard::AudioRoutingManager::GetInstance()->UnsetPreferredOutputDeviceChangeCallback();
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "UnsetPreferredOutputDeviceChangeCallback failed");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AudioAdapter::SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc)
+{
+    AudioDeviceDescriptorsWithSptr deviceDescriptorVector;
+    auto audioDeviceDescriptors = GetAvailableDevices();
+    for (auto& device : audioDeviceDescriptors) {
+        if (device->deviceCategory_ == desc->deviceCategory_ && device->deviceType_ == desc->deviceType_) {
+            deviceDescriptorVector.push_back(device);
+        }
+    }
+    CHECK_AND_RETURN_RET_LOG(deviceDescriptorVector.size() == 1, AVSESSION_ERROR, "Give device invalid");
+    auto ret = AudioStandard::AudioSystemManager::GetInstance()->SelectOutputDevice(deviceDescriptorVector);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SelectOutputDevice failed");
+    return AVSESSION_SUCCESS;
 }
 }

@@ -21,9 +21,12 @@
 #include "avcontroller_item.h"
 #include "avsession_item.h"
 #include "json/json.h"
+#include "audio_adapter.h"
 #include "avsession_info.h"
 
 namespace OHOS::AVSession {
+using MigrateAVSessionProxyControllerCallbackFunc = std::function<int32_t(const std::string&, AAFwk::WantParams&)>;
+
 class AVSessionService;
 class MigrateAVSessionProxy : public SoftbusSessionProxy,
     public std::enable_shared_from_this<MigrateAVSessionProxy> {
@@ -44,6 +47,23 @@ public:
     void HandleCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
     void GetDistributedSessionControllerList(std::vector<sptr<IRemoteObject>>& controllerList);
 
+    enum {
+        AUDIO_NUM_SET_VOLUME = 0,
+        AUDIO_NUM_SELECT_OUTPUT_DEVICE = 1,
+        AUDIO_NUM_GET_VOLUME = 2,
+        AUDIO_NUM_GET_AVAILABLE_DEVICES = 3,
+        AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO = 4,
+    };
+
+    const std::map<const std::string, int32_t> AUDIO_EVENT_MAPS = {
+        {AUDIO_SET_VOLUME, AUDIO_NUM_SET_VOLUME},
+        {AUDIO_SELECT_OUTPUT_DEVICE, AUDIO_NUM_SELECT_OUTPUT_DEVICE},
+        {AUDIO_GET_VOLUME, AUDIO_NUM_GET_VOLUME},
+        {AUDIO_GET_AVAILABLE_DEVICES, AUDIO_NUM_GET_AVAILABLE_DEVICES},
+        {AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO,
+            AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO},
+    };
+
 private:
     void PrepareSessionFromRemote();
     void PrepareControllerOfRemoteSession(sptr<AVSessionItem> sessionItem);
@@ -51,16 +71,33 @@ private:
     void ProcessMetaData(Json::Value jsonValue);
     void ProcessPlaybackState(Json::Value jsonValue);
     void ProcessValidCommands(Json::Value jsonValue);
+    void ProcessVolumeControlCommand(Json::Value jsonValue);
+    void ProcessAvailableDevices(Json::Value jsonValue);
+    void ProcessPreferredOutputDevice(Json::Value jsonValue);
     void ProcessBundleImg(std::string bundleIconStr);
     void ProcessMediaImage(std::string mediaImageStr);
     void SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr);
     void SendSpecialKeepAliveData();
+
+    const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxyControllerCallback();
+
+    void SetVolume(const AAFwk::WantParams& extras);
+    void SelectOutputDevice(const AAFwk::WantParams& extras);
+
+    void GetVolume(AAFwk::WantParams& extras);
+    void GetAvailableDevices(AAFwk::WantParams& extras);
+    void GetPreferredOutputDeviceForRendererInfo(AAFwk::WantParams& extras);
 
     int32_t mMode_;
     std::string deviceId_;
     sptr<AVSessionItem> remoteSession_ = nullptr;
     sptr<AVControllerItem> preSetController_ = nullptr;
     AVSessionService *servicePtr_ = nullptr;
+
+    int32_t volumeNum_ = 0;
+    AudioDeviceDescriptorsWithSptr availableDevices_;
+    AudioDeviceDescriptorsWithSptr preferredOutputDevice_;
+    MigrateAVSessionProxyControllerCallbackFunc migrateProxyCallback_;
 };
 
 class AVSessionObserver : public AVSessionCallback {

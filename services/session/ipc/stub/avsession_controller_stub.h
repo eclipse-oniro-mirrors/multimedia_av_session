@@ -65,6 +65,8 @@ private:
 
     int32_t HandleGetExtras(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetExtrasWithEvent(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleSendAVKeyEvent(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetLaunchAbility(MessageParcel& data, MessageParcel& reply);
@@ -125,6 +127,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSkipToQueueItem(data, reply); }},
         {CONTROLLER_CMD_GET_EXTRAS,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetExtras(data, reply); }},
+        {CONTROLLER_CMD_GET_EXTRAS_WITH_EVENT,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetExtrasWithEvent(data, reply); }},
         {CONTROLLER_CMD_GET_AVCALL_META_DATA,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCallMetaData(data, reply); }},
         {CONTROLLER_CMD_SET_AVCALL_META_FILTER,
@@ -152,6 +156,7 @@ private:
         {CONTROLLER_CMD_GET_AV_QUEUE_TITLE, "HandleGetAVQueueTitle"},
         {CONTROLLER_CMD_SKIP_TO_QUEUE_ITEM, "HandleSkipToQueueItem"},
         {CONTROLLER_CMD_GET_EXTRAS, "HandleGetExtras"},
+        {CONTROLLER_CMD_GET_EXTRAS_WITH_EVENT, "HandleGetExtrasWithEvent"},
         {CONTROLLER_CMD_GET_AVCALL_META_DATA, "HandleGetAVCallMetaData"},
         {CONTROLLER_CMD_SET_AVCALL_META_FILTER, "HandleSetAVCallMetaFilter"},
         {CONTROLLER_CMD_GET_AVCALL_STATE, "HandleGetAVCallState"},
