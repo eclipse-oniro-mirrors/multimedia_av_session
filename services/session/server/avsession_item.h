@@ -209,6 +209,8 @@ public:
     void SetServiceCallbackForAVQueueInfo(const std::function<void(AVSessionItem&)>& callback);
 
     void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback);
+    
+    void SetServiceCallbackForNtfCapsule(const std::function<void(std::string, bool)>& callback);
 
     void RegisterAVSessionCallback(std::shared_ptr<AVSessionCallback> callbackOfMigrate);
 
@@ -273,6 +275,10 @@ public:
     void SetExtrasInner(AAFwk::IArray* list);
 
     void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
+    
+    void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
+
+    void GetCurrentCastItem(AVQueueItem& item);
 #endif
 
 protected:
@@ -380,8 +386,10 @@ private:
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
+    std::function<void(std::string, bool)> serviceCallbackForNtf_;
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
+    bool isMediaChange_ = true;
 
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
@@ -445,6 +453,7 @@ private:
     std::shared_ptr<bool> isAlivePtr_;
     bool isFirstCallback_ = true;
     const int32_t SWITCH_WAIT_TIME = 300;
+    std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
 #endif
 };
 } // namespace OHOS::AVSession

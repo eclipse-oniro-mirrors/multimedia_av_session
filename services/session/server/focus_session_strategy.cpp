@@ -17,6 +17,7 @@
 #include "avsession_log.h"
 #include "audio_adapter.h"
 #include "avsession_sysevent.h"
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
 FocusSessionStrategy::FocusSessionStrategy()
@@ -52,7 +53,7 @@ void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRenderer
     FocusSessionChangeInfo focusSessionChangeInfo;
     if (SelectFocusSession(infos, focusSessionChangeInfo)) {
         if (callback_) {
-            callback_(focusSessionChangeInfo);
+            callback_(focusSessionChangeInfo, true);
         }
     }
 }
@@ -76,10 +77,32 @@ bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChan
     return false;
 }
 
+void FocusSessionStrategy::CheckFocusSessionStop(const AudioStandard::AudioRendererChangeInfo& info)
+{
+    std::lock_guard lockGuard(stateLock_);
+    if (info.rendererState != AudioStandard::RendererState::RENDERER_RUNNING &&
+        lastStates_[info.clientUID] == AudioStandard::RendererState::RENDERER_RUNNING) {
+        int32_t uid = info.clientUID;
+        AVSessionEventHandler::GetInstance().AVSessionPostTask(
+            [this, uid]() {
+                SLOGI("check uid=%{public}d lastState=%{public}d", uid, lastStates_[uid]);
+                if (lastStates_[uid] == AudioStandard::RendererState::RENDERER_RUNNING) {
+                    return;
+                }
+                FocusSessionChangeInfo changeInfo;
+                changeInfo.uid = uid;
+                if (callback_) {
+                    callback_(changeInfo, false);
+                }
+            }, "CheckFocusStop", cancelTimeout);
+    }
+}
+
 bool FocusSessionStrategy::SelectFocusSession(const AudioRendererChangeInfos& infos,
                                               FocusSessionChangeInfo& sessionInfo)
 {
     for (const auto& info : infos) {
+        CheckFocusSessionStop(*info);
         if (!IsFocusSession(*info)) {
             std::lock_guard lockGuard(stateLock_);
             lastStates_[info->clientUID] = info->rendererState;

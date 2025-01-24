@@ -85,12 +85,18 @@ public:
 
     void SetSessionTag(const std::string tag);
 
+    void SetSessionId(const std::string id);
+
     int32_t Destroy() override;
+
+    void SetSessionCallbackForCastCap(const std::function<void(std::string, bool, bool)>& callback);
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 
 private:
+    bool IsStopState(int32_t playbackState);
+
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
     sptr<IAVCastControllerCallback> callback_;
     AVPlaybackState::PlaybackStateMaskType castPlaybackMask_;
@@ -99,10 +105,15 @@ private:
     int32_t removeCmdStep_ = 1000;
     int32_t currentState_ = AVPlaybackState::PLAYBACK_STATE_INITIAL;
     std::string sessionTag_;
+    std::string sessionId_;
     bool isSessionCallbackAvailable_ = true;
     std::recursive_mutex castControllerLock_;
     std::recursive_mutex castControllerCallbackLock_;
     std::mutex callbackToSessionLock_;
+    std::function<void(std::string&, bool, bool)> sessionCallbackForCastNtf_;
+    bool isPlayingState_ = false;
+    bool isMediaChange_ = false;
+    const int32_t cancelTimeout = 5000;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_ITEM_H

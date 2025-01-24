@@ -30,7 +30,7 @@ public:
         int32_t uid {};
         StreamUsage streamUsage {};
     };
-    using FocusSessionChangeCallback = std::function<void(const FocusSessionChangeInfo&)>;
+    using FocusSessionChangeCallback = std::function<void(const FocusSessionChangeInfo&, bool)>;
     using FocusSessionSelector = std::function<bool(const FocusSessionChangeInfo&)>;
 
     FocusSessionStrategy();
@@ -46,12 +46,14 @@ private:
 
     bool IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info);
     bool SelectFocusSession(const AudioRendererChangeInfos& infos, FocusSessionChangeInfo& sessionInfo);
+    void CheckFocusSessionStop(const AudioStandard::AudioRendererChangeInfo& info);
 
     FocusSessionChangeCallback callback_;
     FocusSessionSelector selector_;
     std::shared_ptr<AudioStandard::AudioRendererStateChangeCallback> audioRendererStateChangeCallback_;
     std::recursive_mutex stateLock_;
     std::map<int32_t, AudioStandard::RendererState> lastStates_;
+    const int32_t cancelTimeout = 5000;
 };
 }
 #endif // OHOS_FOCUS_SESSION_STRATEGY_H

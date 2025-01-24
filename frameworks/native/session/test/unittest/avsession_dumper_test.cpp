@@ -283,7 +283,7 @@ HWTEST_F(AVSessionDumperTest, HandleFocusSession001, TestSize.Level1)
     // not set topsession for crash
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = 0;
-    avSessionService_->HandleFocusSession(info);
+    avSessionService_->HandleFocusSession(info, false);
     AVSessionDescriptor descriptor = item->GetDescriptor();
     avSessionService_->HandleSessionRelease(descriptor.sessionId_);
     EXPECT_NE(avSessionService_, nullptr);
@@ -307,7 +307,7 @@ HWTEST_F(AVSessionDumperTest, HandleFocusSession002, TestSize.Level1)
     EXPECT_NE(item, nullptr);
     FocusSessionStrategy::FocusSessionChangeInfo info;
     info.uid = 2;
-    avSessionService_->HandleFocusSession(info);
+    avSessionService_->HandleFocusSession(info, false);
     EXPECT_NE(avSessionService_, nullptr);
     avSessionService_->HandleSessionRelease(item->GetDescriptor().sessionId_);
     SLOGI("HandleFocusSession002 done");

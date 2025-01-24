@@ -30,6 +30,11 @@
 #include "tokenid_kit.h"
 #include "napi_avcast_controller.h"
 #include "avsession_radar.h"
+#include "curl/curl.h"
+#include "image_source.h"
+#include "pixel_map.h"
+#include "avsession_pixel_map_adapter.h"
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
 
@@ -233,6 +238,49 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
     return NapiAsyncWork::Enqueue(env, context, "Start", executor, complete);
 }
 
+int32_t NapiAVCastController::DownloadCastImg(std::shared_ptr<AVMediaDescription> description, const std::string& uri)
+{
+    SLOGI("DownloadCastImg with title %{public}s", description->GetTitle().c_str());
+
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);
+    SLOGI("DownloadCastImg with ret %{public}d, %{public}d",
+        static_cast<int>(ret), static_cast<int>(pixelMap == nullptr));
+    if (ret && pixelMap != nullptr) {
+        SLOGI("DownloadCastImg success");
+        description->SetIcon(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
+        return AVSESSION_SUCCESS;
+    }
+    return AVSESSION_ERROR;
+}
+
+std::function<void()> NapiAVCastController::PrepareAsyncExecutor(NapiAVCastController* napiCastController,
+    AVQueueItem& data)
+{
+    return [napiCastController, data]() {
+        if (napiCastController->castController_ == nullptr) {
+            return;
+        }
+        SLOGI("do prepare set with online download prepare with uri alive");
+        std::shared_ptr<AVMediaDescription> description = data.GetDescription();
+        auto uri = description->GetIconUri() == "" ?
+            description->GetAlbumCoverUri() : description->GetIconUri();
+        AVQueueItem item;
+        if (description->GetIcon() == nullptr && !uri.empty()) {
+            auto ret = DownloadCastImg(description, uri);
+            SLOGI("DownloadCastImg complete with ret %{public}d", ret);
+            if (ret != AVSESSION_SUCCESS) {
+                SLOGE("DownloadCastImg failed but not repeat setmetadata again");
+            } else {
+                description->SetIconUri("URI_CACHE");
+                item.SetDescription(description);
+                auto ret = napiCastController->castController_->Prepare(item);
+                SLOGI("do prepare set second with ret %{public}d", ret);
+            }
+        }
+    };
+}
+
 napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastController::Prepare");
@@ -274,6 +322,12 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
+
+    auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+    auto syncExecutor = PrepareAsyncExecutor(napiCastController, context->avQueueItem_);
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask(syncExecutor, "PrepareAsync"),
+        "NapiAVCastController PrepareAsync handler postTask failed");
 
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);

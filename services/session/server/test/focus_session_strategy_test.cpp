@@ -92,7 +92,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, 
     AudioRendererChangeInfos infos;
     infos.push_back(std::move(info));
     
-    auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&) {};
+    auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&, bool) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
@@ -138,7 +138,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, 
     AudioRendererChangeInfos infos;
     infos.push_back(std::move(info));
     
-    auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&) {};
+    auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&, bool) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
@@ -169,7 +169,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, 
     infos.push_back(std::move(info1));
     infos.push_back(std::move(info2));
 
-    auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&) {};
+    auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&, bool) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
