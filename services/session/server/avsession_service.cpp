@@ -178,7 +178,6 @@ void AVSessionService::OnStartProcess()
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 
-    PullMigrateStub();
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
@@ -365,6 +364,7 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             break;
         case COLLABORATION_SA_ID:
             InitCollaboration();
+            PullMigrateStub();
             break;
         case MEMORY_MANAGER_SA_ID:
             NotifyProcessStatus(true);
