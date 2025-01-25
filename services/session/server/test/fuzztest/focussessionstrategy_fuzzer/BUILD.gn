@@ -46,6 +46,7 @@ ohos_fuzztest("FocusSessionStrategyFuzzTest") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
+    "audio_framework:audio_foundation",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
     "data_object:distributeddataobject_impl",

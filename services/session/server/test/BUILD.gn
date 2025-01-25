@@ -94,6 +94,7 @@ common_external_deps = [
   "access_token:libnativetoken",
   "access_token:libtoken_setproc",
   "audio_framework:audio_client",
+  "audio_framework:audio_foundation",
   "background_task_mgr:bgtaskmgr_innerkits",
   "c_utils:utils",
   "device_manager:devicemanagersdk",
@@ -847,6 +848,7 @@ ohos_unittest("AVSessionServiceTest") {
     "access_token:libnativetoken_shared",
     "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
+    "audio_framework:audio_foundation",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
     "device_manager:devicemanagersdk",
@@ -973,6 +975,7 @@ ohos_unittest("BkGrAudioControllerTest") {
     "access_token:libaccesstoken_sdk",
     "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
+    "audio_framework:audio_foundation",
     "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1002,6 +1005,7 @@ ohos_unittest("AudioAdapterTest") {
 
   external_deps = [
     "audio_framework:audio_client",
+    "audio_framework:audio_foundation",
     "c_utils:utils",
     "hilog:libhilog",
     "window_manager:libdm_lite",

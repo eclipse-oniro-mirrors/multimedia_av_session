@@ -43,6 +43,7 @@ ohos_fuzztest("AudioAdapterInterfaceFuzzTest") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
+    "audio_framework:audio_foundation",
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
