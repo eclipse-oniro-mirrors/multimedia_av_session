@@ -257,6 +257,10 @@ public:
 
     void HandleUserEvent(const std::string &type, const int &userId);
 
+    void HandleRemoveMediaCardEvent();
+
+    void HandleMediaCardStateChangeEvent(std::string isAppear);
+
     void RegisterBundleDeleteEventForHistory(int32_t userId = 0);
 
     void NotifyMigrateStop(const std::string &deviceId);
@@ -453,6 +457,8 @@ private:
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
         const AVSessionDescriptor* histroyDescriptor);
+    
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateNftRemoveWant(int32_t uid);
 
     void DoMetadataImgClean(AVMetaData& data);
 
@@ -505,7 +511,12 @@ private:
 
     void AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
 
+    bool VerifyNotification();
+
+    void HandleChangeTopSession(int32_t infoUid, int32_t userId);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
+    std::atomic<bool> isMediaCardOpen_ = false;
 
     sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;

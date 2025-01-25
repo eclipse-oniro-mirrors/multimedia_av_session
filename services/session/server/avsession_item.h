@@ -218,6 +218,12 @@ public:
 
     bool IsCasting();
 
+    void GetCurrentCastItem(AVQueueItem& item);
+
+    AVPlaybackState GetCastAVPlaybackState();
+
+    void SendControlCommandToCast(AVCastControlCommand cmd);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void InitializeCastCommands();
 
@@ -277,8 +283,6 @@ public:
     void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
     
     void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
-
-    void GetCurrentCastItem(AVQueueItem& item);
 #endif
 
 protected:
