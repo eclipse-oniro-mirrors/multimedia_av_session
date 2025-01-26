@@ -3043,14 +3043,18 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     std::shared_ptr<Notification::NotificationContent> content =
         std::make_shared<Notification::NotificationContent>(localLiveViewContent);
     CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
+    int32_t userId = GetUsersManager().GetCurrentUserId();
     if (addCapsule && topSession_) {
-        std::shared_ptr<AVSessionPixelMap> iPixelMap = nullptr;
+        std::shared_ptr<AVSessionPixelMap> iPixelMap = std::make_shared<AVSessionPixelMap>();
         if (isFromCastSession) {
             AVQueueItem item;
             topSession_->GetCurrentCastItem(item);
             iPixelMap = item.GetDescription() ? item.GetDescription()->GetIcon() : nullptr;
         } else {
-            iPixelMap = topSession_->GetMetaData().GetMediaImage();
+            std::string sessionId = topSession_->GetSessionId();
+            std::string fileDir = AVSessionUtils::GetCachePathName(userId);
+            std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
+            AVSessionUtils::ReadImageFromFile(iPixelMap, fileDir, fileName);
         }
         AddCapsule(topSession_->GetMetaData().GetTitle(), isCapsuleUpdate, iPixelMap, localLiveViewContent, &(request));
     }
@@ -3062,7 +3066,6 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     request.SetCreatorUid(avSessionUid);
     request.SetUnremovable(true);
     request.SetInProgress(true);
-    int32_t userId = GetUsersManager().GetCurrentUserId();
     request.SetCreatorUserId(userId);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
