@@ -35,6 +35,7 @@
 #include "bundle_status_adapter.h"
 #include "want_agent_helper.h"
 #include "array_wrapper.h"
+#include "bool_wrapper.h"
 #include "string_wrapper.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -525,6 +526,15 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
         }
     }
 #endif
+
+    if (extras.HasParam("hw_live_view_hidden_when_keyguard")) {
+        auto value = extras.GetParam("hw_live_view_hidden_when_keyguard");
+        AAFwk::IArray* list = AAFwk::IArray::Query(value);
+        if (list != nullptr && AAFwk::Array::IsBooleanArray(list)) {
+            NotificationExtras(list);
+        }
+    }
+
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
@@ -1565,6 +1575,12 @@ void AVSessionItem::SetServiceCallbackForCastNtfCapsule(const std::function<void
 }
 #endif
 
+void AVSessionItem::SetServiceCallbackForUpdateExtras(const std::function<void(std::string)>& callback)
+{
+    SLOGI("SetServiceCallbackForUpdateExtras in");
+    updateExtrasCallback_ = callback;
+}
+
 AVSessionDescriptor AVSessionItem::GetDescriptor()
 {
     return descriptor_;
@@ -1678,6 +1694,29 @@ AAFwk::WantParams AVSessionItem::GetExtras()
 {
     std::lock_guard lockGuard(avsessionItemLock_);
     return extras_;
+}
+
+void AVSessionItem::NotificationExtras(AAFwk::IArray* list)
+{
+    auto func = [&](AAFwk::IInterface* object) {
+        if (object != nullptr) {
+            AAFwk::IBoolean* booleanValue = AAFwk::IBoolean::Query(object);
+            if (booleanValue != nullptr && AAFwk::Boolean ::Unbox(booleanValue)) {
+                isNotShowNotification_ = true;
+            } else {
+                isNotShowNotification_ = false;
+            }
+        }
+    };
+    AAFwk::Array::ForEach(list, func);
+    if (updateExtrasCallback_) {
+        updateExtrasCallback_(GetSessionId());
+    }
+}
+
+bool AVSessionItem::IsNotShowNotification()
+{
+    return isNotShowNotification_;
 }
 
 void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
