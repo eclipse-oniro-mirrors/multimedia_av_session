@@ -1057,14 +1057,6 @@ void AVSessionItem::HandleCastValidCommandChange(std::vector<int32_t> &cmds)
     }
 }
 
-void AVSessionItem::GetCurrentCastItem(AVQueueItem& currentItem)
-{
-    std::lock_guard lockGuard(avsessionItemLock_);
-    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
-    currentItem = castControllerProxy_->GetCurrentItem();
-    return;
-}
-
 int32_t AVSessionItem::ReleaseCast()
 {
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
@@ -2244,6 +2236,37 @@ bool AVSessionItem::IsCasting()
     }
 #endif
     return false;
+}
+
+void AVSessionItem::GetCurrentCastItem(AVQueueItem& currentItem)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::lock_guard lockGuard(castHandleLock_);
+    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
+    currentItem = castControllerProxy_->GetCurrentItem();
+#endif
+    return;
+}
+
+AVPlaybackState AVSessionItem::GetCastAVPlaybackState()
+{
+    AVPlaybackState playbackState;
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::lock_guard lockGuard(castHandleLock_);
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, playbackState, "cast controller proxy is nullptr");
+    auto ret = castControllerProxy_->GetCastAVPlaybackState(playbackState);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, playbackState, "getstate error");
+#endif
+    return playbackState;
+}
+
+void AVSessionItem::SendControlCommandToCast(AVCastControlCommand cmd)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::lock_guard lockGuard(castHandleLock_);
+    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
+    castControllerProxy_->SendControlCommand(cmd);
+#endif
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::AVSession
