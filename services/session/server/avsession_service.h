@@ -80,6 +80,8 @@
 namespace OHOS::AVSession {
 class AVSessionDumper;
 
+extern bool g_isCapsuleLive2;
+
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
     explicit ClientDeathRecipient(const std::function<void()>& callback);

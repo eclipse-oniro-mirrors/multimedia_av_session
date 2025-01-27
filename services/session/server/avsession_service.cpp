@@ -133,6 +133,8 @@ REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, true);
 REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, false);
 #endif
 
+bool g_isCapsuleLive2 = system::GetBoolParameter("persist.systemui.live2", false);
+
 AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate)
 {
@@ -2985,7 +2987,13 @@ void AddCapsule(std::string title, bool isCapsuleUpdate, std::shared_ptr<AVSessi
         SLOGI("MediaCapsule CapsuleUpdate");
         request->SetAdditionalData(wantParam);
     }
-    content->SetLiveViewType(Notification::NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM);
+
+    if (!g_isCapsuleLive2) {
+        capsule.SetBackgroundColor("#2E3033");
+    } else {
+        content->SetLiveViewType(Notification::NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM);
+    }
+
     content->SetCapsule(capsule);
     content->addFlag(Notification::NotificationLocalLiveViewContent::LiveViewContentInner::CAPSULE);
     SLOGI("PublishNotification with MediaCapsule");
