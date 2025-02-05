@@ -134,6 +134,7 @@ REGISTER_SYSTEM_ABILITY_BY_ID(AVSessionService, AVSESSION_SERVICE_ID, false);
 #endif
 
 bool g_isCapsuleLive2 = system::GetBoolParameter("persist.systemui.live2", false);
+std::shared_ptr<Media::PixelMap> g_defaultMediaImage = nullptr;
 
 AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate)
@@ -2969,13 +2970,42 @@ void AVSessionService::PublishEvent(int32_t mediaPlayState)
     SLOGI("NewPublishCommonEvent return %{public}d", ret);
 }
 
+std::shared_ptr<Media::PixelMap> ConvertDefaultImage()
+{
+    if (g_defaultMediaImage) {
+        return g_defaultMediaImage;
+    }
+
+    std::string image = "defaultImage";
+    uint32_t errorCode = 0;
+    Media::SourceOptions opts;
+    auto imageSource = Media::ImageSource::CreateImageSource(reinterpret_cast<const uint8_t*>(image.c_str()),
+        image.length(), opts, errorCode);
+    if (imageSource != nullptr) {
+        Media::DecodeOptions dOpts;
+        dOpts.allocatorType = Media::AllocatorType::HEAP_ALLOC;
+        g_defaultMediaImage = imageSource->CreatePixelMap(dOpts, errorCode);
+        if (g_defaultMediaImage != nullptr) {
+            SLOGI("ConvertDefaultImage CreatePixelMap success");
+            return g_defaultMediaImage;
+        }
+    } else {
+        SLOGE("ConvertDefaultImage createImageSource fail");
+    }
+    return nullptr;
+}
+
+
 void AddCapsule(std::string title, bool isCapsuleUpdate, std::shared_ptr<AVSessionPixelMap> innerPixelMap,
     std::shared_ptr<Notification::NotificationLocalLiveViewContent> content,
     Notification::NotificationRequest* request)
 {
     const float scaleSize = 0.3;
     std::shared_ptr<Media::PixelMap> pixelMap = AVSessionPixelMapAdapter::ConvertFromInner(innerPixelMap);
-    if (pixelMap != nullptr) {
+    if (pixelMap == nullptr) {
+        SLOGI("AddCapsule ConvertDefaultImage");
+        pixelMap = ConvertDefaultImage();
+    } else {
         pixelMap->scale(scaleSize, scaleSize, Media::AntiAliasingOption::HIGH);
     }
     auto capsule = Notification::NotificationCapsule();
