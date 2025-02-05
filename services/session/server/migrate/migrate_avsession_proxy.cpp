@@ -34,7 +34,8 @@ MigrateAVSessionProxy::MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode
 
 MigrateAVSessionProxy::~MigrateAVSessionProxy()
 {
-    SLOGI("MigrateAVSessionProxy destruct");
+    SLOGI("MigrateAVSessionProxy destruct with deviceId clean");
+    deviceId_ = "";
 }
 
 void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
@@ -55,6 +56,7 @@ void MigrateAVSessionProxy::OnDisconnectServer(const std::string &deviceId)
         SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     deviceId_ = "";
     std::vector<sptr<IRemoteObject>> sessionControllers;
+    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnDisconnectServer find service ptr null!");
     servicePtr_->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
 }
 
@@ -300,13 +302,16 @@ void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
             jsonValue[MIGRATE_ABILITY_NAME].asString() : DEFAULT_STRING;
         elementName.SetAbilityName(abilityName);
     }
-    SLOGI("ProcessMetaData with sessionId:%{public}s|bundleName:%{public}s",
+    SLOGI("ProcessMetaData with sessionId:%{public}s|bundleName:%{public}s done",
         sessionId.c_str(), elementName.GetBundleName().c_str());
     if (sessionId.empty() || sessionId == DEFAULT_STRING || sessionId == EMPTY_SESSION) {
         remoteSession_->Deactivate();
+        elementName.SetBundleName("");
     } else {
         remoteSession_->Activate();
     }
+    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
+    servicePtr_->NotifyRemoteBundleChange(elementName.GetBundleName());
 }
 
 void MigrateAVSessionProxy::ProcessMetaData(Json::Value jsonValue)
@@ -496,7 +501,11 @@ void MigrateAVSessionProxy::SendSpecialKeepAliveData()
     std::thread([this]() {
         while (!this->deviceId_.empty()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(HEART_BEAT_TIME_FOR_NEXT));
-            SLOGI("send keep alive data for deviceId:%{public}s",
+            if (this->deviceId_.empty()) {
+                SLOGE("SendSpecialKeepAliveData without deviceId, return");
+                return;
+            }
+            SLOGI("SendSpecialKeepAliveData for deviceId:%{public}s",
                 SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
             std::string data = std::string({MSG_HEAD_MODE, SYNC_HEARTBEAT});
             SendByteToAll(data);

@@ -352,8 +352,8 @@ void SoftbusDistributedDataManager::OnSessionProxyClosed(int32_t socket)
         return;
     }
     for (auto it = proxyMap.begin(); it != proxyMap.end(); it++) {
-            it->second->DisconnectServer(socket);
-        }
+        it->second->DisconnectServer(socket);
+    }
 }
 
 void SoftbusDistributedDataManager::OnBytesProxyReceived(int32_t socket, const std::string &data)

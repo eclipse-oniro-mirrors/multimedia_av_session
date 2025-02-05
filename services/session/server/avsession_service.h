@@ -277,6 +277,8 @@ public:
     void NotifyRemoteDistributedSessionControllersChanged(
         const std::vector<sptr<IRemoteObject>>& sessionControllers);
 
+    void NotifyRemoteBundleChange(const std::string bundleName);
+
 private:
 
     void NotifyProcessStatus(bool isStart);
@@ -627,6 +629,8 @@ private:
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
     const int32_t saType = 1;
+    const int32_t remoteMediaNone = 4;
+    const int32_t remoteMediaAlive = 3;
     const int32_t mediaPlayStateTrue = 1;
     const int32_t mediaPlayStateFalse = 0;
     const uint32_t MAX_NOTIFICATION_NUM = 3;

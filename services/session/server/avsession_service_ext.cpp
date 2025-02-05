@@ -663,4 +663,13 @@ int32_t AVSessionService::GetDistributedSessionControllersInner(const Distribute
     SLOGI("GetDistributedSessionControllersInner with size:%{public}d", static_cast<int>(sessionControllers.size()));
     return AVSESSION_SUCCESS;
 }
+
+void AVSessionService::NotifyRemoteBundleChange(const std::string bundleName)
+{
+    if (migrateAVSessionProxyMap_.empty()) {
+        SLOGE("not in migrate proxy scene, return");
+        return;
+    }
+    PublishEvent(bundleName.empty() ? remoteMediaNone : remoteMediaAlive);
+}
 }
