@@ -150,6 +150,10 @@ public:
 
     AAFwk::WantParams GetExtras();
 
+    void NotificationExtras(AAFwk::IArray* list);
+
+    bool IsNotShowNotification();
+
     std::vector<int32_t> GetSupportCommand();
 
     AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
@@ -223,6 +227,8 @@ public:
     AVPlaybackState GetCastAVPlaybackState();
 
     void SendControlCommandToCast(AVCastControlCommand cmd);
+
+    void SetServiceCallbackForUpdateExtras(const std::function<void(std::string)>& callback);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void InitializeCastCommands();
@@ -391,6 +397,7 @@ private:
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
     std::function<void(std::string, bool)> serviceCallbackForNtf_;
+    std::function<void(std::string)> updateExtrasCallback_;
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
     bool isMediaChange_ = true;
@@ -457,6 +464,7 @@ private:
     std::shared_ptr<bool> isAlivePtr_;
     bool isFirstCallback_ = true;
     const int32_t SWITCH_WAIT_TIME = 300;
+    bool isNotShowNotification_ = false;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
 #endif
 };

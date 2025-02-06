@@ -65,6 +65,8 @@
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
 #include "int_wrapper.h"
+#include "array_wrapper.h"
+#include "bool_wrapper.h"
 #include "image_source.h"
 #include "avsession_pixel_map_adapter.h"
 
@@ -1144,6 +1146,15 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         UpdateFrontSession(session, isAdd);
     });
     AddCapsuleServiceCallback(sessionItem);
+    sessionItem->SetServiceCallbackForUpdateExtras([this](std::string sessionId) {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
+        if (topSession_ && topSession_.GetRefPtr() == session.GetRefPtr()) {
+            AVSessionDescriptor selectSession = session->GetDescriptor();
+            NotifySystemUI(&selectSession, true, true, false, false);
+        }
+    });
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
@@ -3081,6 +3092,13 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     request.SetLabel(std::to_string(userId));
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removeWantAgent = CreateNftRemoveWant(uid);
     request.SetRemovalWantAgent(removeWantAgent);
+    if (topSession_) {
+        if (topSession_->IsNotShowNotification()) {
+            std::shared_ptr<AAFwk::WantParams> want = std::make_shared<AAFwk::WantParams>();
+            want->SetParam("hw_live_view_hidden_when_keyguard", OHOS::AAFwk::Boolean::Box(true));
+            request.SetAdditionalData(want);
+        }
+    }
     result = Notification::NotificationHelper::PublishNotification(request);
     SLOGI("PublishNotification uid %{public}d, user id %{public}d, result %{public}d", uid, userId, result);
 }
