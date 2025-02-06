@@ -247,6 +247,8 @@ public:
     int32_t StopCast(const SessionToken& sessionToken) override;
 
     int32_t checkEnableCast(bool enable) override;
+
+    void setInCast(bool isInCast) override;
 #endif
 
     int32_t Close(void) override;

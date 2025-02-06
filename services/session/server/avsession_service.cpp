@@ -431,17 +431,7 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
 
 void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
-    if (systemAbilityId == CAST_ENGINE_SA_ID) {
-        SLOGI("cast engine ability is removed");
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        for (auto& session : GetContainer().GetAllSessions()) {
-            if (session != nullptr) {
-                session->OnRemoveCastEngine();
-            }
-        }
-#endif
-        isInCast_ = false;
-    }
+    SLOGI("remove system ability %{public}d", systemAbilityId);
 }
 
 void AVSessionService::NotifyProcessStatus(bool isStart)
