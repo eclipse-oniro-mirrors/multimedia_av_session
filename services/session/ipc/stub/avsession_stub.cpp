@@ -39,7 +39,7 @@ int32_t AVSessionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
-    SLOGI("cmd code is %{public}d", code);
+    SLOGD("cmd code is %{public}d", code);
     if (code >= static_cast<uint32_t>(IAVSession::SESSION_CMD_GET_SESSION_ID)
         && code < static_cast<uint32_t>(IAVSession::SESSION_CMD_MAX)) {
         return handlers[code](data, reply);
@@ -140,7 +140,7 @@ int32_t AVSessionStub::SetImageData(AVMetaData& meta, const char *buffer, int tw
     CHECK_AND_RETURN_RET_LOG(mediaImageLength <= twoImageLength, ERR_NONE, "Maybe cuase Out-of-bunds read");
     
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
-    SLOGI("change for-loop to vector init");
+    SLOGD("change for-loop to vector init");
     std::vector<uint8_t> mediaImageBuffer(buffer, buffer + mediaImageLength);
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
     meta.SetMediaImage(mediaPixelMap);

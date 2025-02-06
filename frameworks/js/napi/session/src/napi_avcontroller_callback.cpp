@@ -231,7 +231,7 @@ void NapiAVControllerCallback::ThreadSafeCallback(napi_env env, napi_value js_cb
         appData->getter(env, argc, argv);
     }
 
-    SLOGI("queue uv_after_work_cb with state %{public}d", static_cast<int>(appData->state));
+    SLOGD("queue uv_after_work_cb with state %{public}d", static_cast<int>(appData->state));
     if (!*appData->isValid) {
         SLOGE("ThreadSafeCallback failed for appData is invalid.");
         return;
@@ -283,7 +283,7 @@ void NapiAVControllerCallback::OnSessionDestroy()
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnPlaybackStateChange");
-    SLOGI("do playbackstate change notify with state %{public}d", state.GetState());
+    SLOGD("do playbackstate change notify with state %{public}d", state.GetState());
     HandleEventWithThreadSafe(EVENT_PLAYBACK_STATE_CHANGE, state.GetState(), state);
 }
 
