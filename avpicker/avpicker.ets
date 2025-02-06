@@ -178,7 +178,7 @@ export struct AVCastPicker {
   /**
    * Max Font and graphic magnification. 
    */
-  private maxFontSizeScale: number = 2;
+  @State maxFontSizeScale: number = 1;
 
   /**
    * Accessibility Strings
@@ -409,6 +409,11 @@ export struct AVCastPicker {
         if (JSON.stringify(data['isRTL']) !== undefined) {
           console.info(TAG, `isRTL : ${JSON.stringify(data['isRTL'])}`);
           this.isRTL = data['isRTL'] as boolean;
+        }
+
+        if (JSON.stringify(data['maxFontSizeScale']) !== undefined) {
+          console.info(TAG, `maxFontSizeScale : ${JSON.stringify(data['maxFontSizeScale'])}`);
+          this.maxFontSizeScale = data['maxFontSizeScale'] as number;
         }
       })
       .size({ width: '100%', height: '100%' })
