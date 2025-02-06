@@ -32,6 +32,14 @@ using namespace OHOS::Security::AccessToken;
 using namespace OHOS::AVSession;
 
 static uint64_t g_selfTokenId = 0;
+static std::string g_errLog;
+
+void MyLogCallback(const LogType type, const LogLevel level,
+    const unsigned int domain, const char *tag, const char *msg)
+{
+    g_errLog = msg;
+}
+
 static HapInfoParams g_info = {
     .userID = 100,
     .bundleName = "ohos.permission_test.demo",
@@ -708,11 +716,13 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, HandleStartDeviceLogging001,
 static HWTEST_F(AVSessionServiceStubPermissionTest, MarshallingAVQueueInfos001, TestSize.Level1)
 {
     SLOGI("MarshallingAVQueueInfos001 begin!");
+    LOG_SetCallback(MyLogCallback);
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel reply;
     AVQueueInfo aVQueueInfo;
     std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
     avsessionservicestub.MarshallingAVQueueInfos(reply, avQueueInfos);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("MarshallingAVQueueInfos001 end!");
 }
 
@@ -744,11 +754,13 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, GetAVQueueInfosImgLength002,
 static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer001, TestSize.Level1)
 {
     SLOGI("AVQueueInfoImgToBuffer001 begin!");
+    LOG_SetCallback(MyLogCallback);
     AVSessionServiceStubDemo avsessionservicestub;
     AVQueueInfo aVQueueInfo;
     std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
     unsigned char *buffer = new unsigned char[255];
     avsessionservicestub.AVQueueInfoImgToBuffer(avQueueInfos, buffer);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("AVQueueInfoImgToBuffer001 end!");
 }
 
@@ -760,6 +772,7 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer001, T
 static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer002, TestSize.Level1)
 {
     SLOGI("AVQueueInfoImgToBuffer002 begin!");
+    LOG_SetCallback(MyLogCallback);
     AVSessionServiceStubDemo avsessionservicestub;
     AVQueueInfo aVQueueInfo;
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
@@ -769,6 +782,7 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer002, T
     std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
     unsigned char *buffer = new unsigned char[255];
     avsessionservicestub.AVQueueInfoImgToBuffer(avQueueInfos, buffer);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("AVQueueInfoImgToBuffer002 end!");
 }
 

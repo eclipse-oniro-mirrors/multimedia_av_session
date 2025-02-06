@@ -175,7 +175,9 @@ static OHOS::AVSession::AVMetaData GetAVMetaData()
 static HWTEST_F(AVControllerCallbackProxyTest, OnSessionDestroy001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnSessionDestroy001, start");
+    LOG_SetCallback(MyLogCallback);
     aVControllerCallbackProxy->OnSessionDestroy();
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnSessionDestroy001, end");
 }
 
