@@ -237,7 +237,7 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
 bool HwCastStreamPlayer::RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription)
 {
     std::lock_guard lockGuard(curItemLock_);
-    if (mediaDescription->GetIconUri() == "URI_CHANGE" && mediaDescription->GetIcon() != nullptr) {
+    if (mediaDescription->GetIconUri() == "URI_CACHE" && mediaDescription->GetIcon() != nullptr) {
         currentAVQueueItem_.GetDescription()->SetIcon(mediaDescription->GetIcon());
         SLOGI("Repeat Prepare only setIcon");
         return true;

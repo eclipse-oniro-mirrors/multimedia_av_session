@@ -401,6 +401,7 @@ private:
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
     bool isMediaChange_ = true;
+    bool hasPixelMap_ = false;
 
     int32_t castConnectStateForDisconnect_ = 5;
     int32_t castConnectStateForConnected_ = 6;
