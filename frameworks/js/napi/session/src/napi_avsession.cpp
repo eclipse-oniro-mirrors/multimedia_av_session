@@ -470,12 +470,10 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
     } else if (data.GetMediaImageUri().empty()) {
         SLOGE("do metadata set with img uri empty");
     } else if (isRepeatDownload) {
-        SLOGE("do metadata set with repeat uri download:%{public}s.",
-            uri.substr(uri.size() - NapiUtils::ARGC_THREE).c_str());
+        SLOGI("do metadata set with repeat uriSize:%{public}d.", static_cast<int>(uri.size()));
     } else if (data.GetMediaImage() == nullptr) {
         ret = DoDownload(data, uri);
-        SLOGI("DoDownload %{public}s complete with ret %{public}d",
-            uri.substr(uri.size() - NapiUtils::ARGC_THREE).c_str(), ret);
+        SLOGI("DoDownload uriSize:%{public}d complete with ret %{public}d", static_cast<int>(uri.size()), ret);
         CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, false, "doMetaDataSet without session");
         if (ret != AVSESSION_SUCCESS) {
             SLOGE("DoDownload failed but not repeat setmetadata again");

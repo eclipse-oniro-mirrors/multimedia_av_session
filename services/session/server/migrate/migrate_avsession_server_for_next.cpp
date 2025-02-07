@@ -204,7 +204,7 @@ void MigrateAVSessionServer::DoBundleInfoSyncToRemote(sptr<AVControllerItem> con
     CHECK_AND_RETURN_LOG(innerPixelMapMin != nullptr, "DoBundleInfoSyncToRemote with innerPixelMapMin null");
     std::vector<uint8_t> imgBufferMin = innerPixelMapMin->GetInnerImgBuffer();
     std::string imgStrMin(imgBufferMin.begin(), imgBufferMin.end());
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_MEDIA_IMAGE});
+    std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_BUNDLE_IMG});
     msg += imgStrMin;
     SendByte(deviceId_, msg);
     SLOGI("DoBundleInfoSyncToRemote with size:%{public}d", static_cast<int>(msg.size()));
