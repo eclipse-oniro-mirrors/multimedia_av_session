@@ -202,6 +202,10 @@ int32_t AVSessionService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
 {
     SLOGI("OnIdle SA, idle reason %{public}d, %{public}s, %{public}s",
         idleReason.GetId(), idleReason.GetName().c_str(), idleReason.GetValue().c_str());
+    if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() != 0) {
+        SLOGI("IPC is not invoked for a long time, but the app has sa.");
+        return -1;
+    }
     return 0;
 }
 
