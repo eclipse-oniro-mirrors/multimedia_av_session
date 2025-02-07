@@ -364,14 +364,18 @@ napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, 
     auto context = std::make_shared<ConcreteContext>();
 
     auto input = [env, context](size_t argc, napi_value* argv) {
-        if (argc == ARGC_TWO && (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
-                               && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null))) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+        if (argc == ARGC_ONE && (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
+            && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null))) {
             int32_t sessionTypeValue;
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], sessionTypeValue);
             context->sessionType_ = DistributedSessionType(sessionTypeValue);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok &&
                 context->sessionType_ >= DistributedSessionType::TYPE_SESSION_REMOTE &&
-                context->sessionType_ <= DistributedSessionType::TYPE_SESSION_MAX,
+                context->sessionType_ < DistributedSessionType::TYPE_SESSION_MAX,
                 "GetDistributedSessionControllers invalid sessionType",
                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         }
@@ -386,11 +390,11 @@ napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, 
             (int) context->controllers_.size());
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "StartAVPlayback failed : native no permission";
+                context->errMessage = "GetDistributedSessionControllers failed : native no permission";
             } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "StartAVPlayback failed : native permission denied";
+                context->errMessage = "GetDistributedSessionControllers failed : native permission denied";
             } else {
-                context->errMessage = "StartAVPlayback failed : native server exception";
+                context->errMessage = "GetDistributedSessionControllers failed : native server exception";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -400,7 +404,7 @@ napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, 
     auto complete = [env, context](napi_value& output) {
         context->status = NapiUtils::SetValue(env, context->controllers_, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
-                                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+                                 NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetDistributedSessionControllers", executor, complete);
 }
