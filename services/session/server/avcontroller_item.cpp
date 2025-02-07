@@ -105,7 +105,7 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     data = session_->GetMetaData();
     if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
-        SLOGI("check isFromSession %{public}d when have two image resources", isFromSession_);
+        SLOGD("check isFromSession %{public}d when have two image resources", isFromSession_);
         if (isFromSession_) {
             data.GetMediaImage()->Clear();
         } else {

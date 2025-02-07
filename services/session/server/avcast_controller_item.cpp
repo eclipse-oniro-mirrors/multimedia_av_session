@@ -90,7 +90,7 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
     AVPlaybackState stateOut;
     std::lock_guard lockGuard(castControllerCallbackLock_);
     if (state.CopyToByMask(castPlaybackMask_, stateOut)) {
-        SLOGI("update cast playback state");
+        SLOGD("update cast playback state");
         AVSESSION_TRACE_SYNC_START("AVCastControllerItem::OnCastPlaybackStateChange");
         if (callback_ != nullptr) {
             callback_->OnCastPlaybackStateChange(stateOut);
