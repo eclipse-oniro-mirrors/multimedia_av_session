@@ -38,6 +38,10 @@ void KeyEventAdapter::SubscribeKeyEvent(const std::vector<int32_t>& keyCodes,
         keyOption->SetFinalKey(keyCode);
         keyOption->SetFinalKeyDown(true);
         keyOption->SetFinalKeyDownDuration(0);
+        if ((keyCode == MMI::KeyEvent::KEYCODE_HEADSETHOOK) ||
+            (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE)) {
+            keyOption->SetRepeat(false);
+        }
         if (inputManager->SubscribeKeyEvent(keyOption, callback) < 0) {
             SLOGE("keyCode=%{public}d failed", keyCode);
         }
