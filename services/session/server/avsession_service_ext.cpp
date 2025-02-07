@@ -159,8 +159,7 @@ int32_t AVSessionService::checkEnableCast(bool enable)
 {
     SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
     if (enable == true && isInCast_ == false) {
-        isInCast_ = true;
-        return AVRouter::GetInstance().Init(this);
+        isInCast_ = AVRouter::GetInstance().Init(this) == AVSESSION_SUCCESS ? true : false;
     } else if (enable == false && isInCast_ == true) {
         CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
             (GetContainer().GetAllSessions().size() == 1 && !CheckAncoAudio())) && !is2in1_),
@@ -173,6 +172,12 @@ int32_t AVSessionService::checkEnableCast(bool enable)
         SLOGD("AVRouter Init in nothing change");
     }
     return AVSESSION_SUCCESS;
+}
+
+void AVSessionService::setInCast(bool isInCast)
+{
+    SLOGI("setInCast, isInCast:%{public}d", isInCast);
+    isInCast_ = isInCast;
 }
 
 // LCOV_EXCL_START

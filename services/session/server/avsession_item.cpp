@@ -1349,17 +1349,6 @@ void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     }
 }
 
-void AVSessionItem::OnRemoveCastEngine()
-{
-    SLOGI("enter OnRemoveCastEngine");
-    if (!collaborationNeedNetworkId_.empty()) {
-        if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
-            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
-                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-        }
-    }
-}
-
 void AVSessionItem::ListenCollaborationApplyResult()
 {
     SLOGI("enter ListenCollaborationApplyResult");
