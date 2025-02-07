@@ -60,7 +60,7 @@ std::function<bool()> NapiAVCastControllerCallback::CheckCallbackValid(int32_t e
         for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
             hasFunc = (ref == it ? true : hasFunc);
         }
-        SLOGI("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+        SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
         return hasFunc;
     };
 }
