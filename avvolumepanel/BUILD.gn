@@ -16,11 +16,19 @@ import("//build/ohos.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
 es2abc_gen_abc("gen_avvolumepanel_abc") {
-  src_js = rebase_path("avvolumepanel.js")
-  dst_file = rebase_path(target_out_dir + "/avvolumepanel.abc")
-  in_puts = [ "avvolumepanel.js" ]
-  out_puts = [ target_out_dir + "/avvolumepanel.abc" ]
-  extra_args = [ "--module" ]
+  if ("${target_platform}" == "watch") {
+    src_js = rebase_path("avvolumepanel_watch.js")
+    dst_file = rebase_path(target_out_dir + "/avvolumepanel.abc")
+    in_puts = [ "avvolumepanel_watch.js" ]
+    out_puts = [ target_out_dir + "/avvolumepanel.abc" ]
+    extra_args = [ "--module" ]
+  } else {
+    src_js = rebase_path("avvolumepanel.js")
+    dst_file = rebase_path(target_out_dir + "/avvolumepanel.abc")
+    in_puts = [ "avvolumepanel.js" ]
+    out_puts = [ target_out_dir + "/avvolumepanel.abc" ]
+    extra_args = [ "--module" ]
+  }
 }
 
 gen_js_obj("avvolumepanel_abc") {
