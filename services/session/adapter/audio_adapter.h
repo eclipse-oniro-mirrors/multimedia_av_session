@@ -109,6 +109,7 @@ private:
         AudioStandard::STREAM_USAGE_GAME,
         AudioStandard::STREAM_USAGE_AUDIOBOOK
     };
+    std::recursive_mutex listenersLock_;
 
     int32_t volumeMax_;
     int32_t volumeMin_;
