@@ -87,7 +87,7 @@ void HwCastProvider::StopDiscovery()
 int32_t HwCastProvider::SetDiscoverable(const bool enable)
 {
     SLOGI("SetDiscoverable in %{public}d", static_cast<int32_t>(enable));
-    return CastSessionManager::GetInstance().SetDiscoverable(enable);
+    return AVSESSION_SUCCESS;
 }
 
 void HwCastProvider::Release()
