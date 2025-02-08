@@ -56,6 +56,7 @@ void AudioAdapter::Init()
 
 void AudioAdapter::AddStreamRendererStateListener(const StateListener& listener)
 {
+    std::lock_guard lockGuard(listenersLock_);
     listeners_.push_back(listener);
 }
 
@@ -100,6 +101,7 @@ int32_t AudioAdapter::PauseAudioStream(int32_t uid, AudioStandard::StreamUsage u
 
 void AudioAdapter::OnRendererStateChange(const AudioRendererChangeInfos& infos)
 {
+    std::lock_guard lockGuard(listenersLock_);
     for (const auto& listener : listeners_) {
         if (listener) {
             listener(infos);

@@ -57,6 +57,8 @@ private:
     static std::once_flag onceFlag_;
     std::vector<StateListener> listeners_;
     std::vector<DeviceChangeListener> deviceChangeListeners_;
+    
+    std::recursive_mutex listenersLock_;
 };
 }
 #endif // AV_SESSION_AUDIO_ADAPTER_H
