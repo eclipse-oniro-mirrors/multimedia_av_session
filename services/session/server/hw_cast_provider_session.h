@@ -50,6 +50,8 @@ private:
     std::string stashDeviceId_;
 
     const int32_t deviceStateConnection = 6;
+    const int32_t eventIdStart = 2000;
+    const int32_t eventIdEnd = 2999;
 };
 } // namespace OHOS::AVSession
 
