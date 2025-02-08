@@ -834,10 +834,6 @@ napi_value NapiAVSessionManager::OffDistributedSessionChangeEvent(napi_env env, 
         return NapiUtils::GetUndefinedValue(env);
     }
 
-    if (RegisterNativeSessionListener(env) == napi_generic_failure) {
-        return NapiUtils::GetUndefinedValue(env);
-    }
-
     if (it->second.second(env, context->callback_) != napi_ok) {
         NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
