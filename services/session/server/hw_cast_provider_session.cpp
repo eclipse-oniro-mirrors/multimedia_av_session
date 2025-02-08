@@ -202,12 +202,9 @@ void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const st
     SLOGI("OnEvent from cast with eventId %{public}d, %{public}s", eventId, jsonParam.c_str());
     std::string jsonStr = jsonParam;
     std::lock_guard lockGuard(mutex_);
-    for (auto listener : castSessionStateListenerList_) {
-        if (listener != nullptr) {
-            SLOGI("trigger the OnCastEventRecv for ListSize %{public}d",
-                static_cast<int>(castSessionStateListenerList_.size()));
-            listener->OnCastEventRecv(static_cast<int>(eventId), jsonStr);
-        }
+    int32_t castEventId = static_cast<int>(eventId);
+    if (castEventId >= eventIdStart && castEventId <= eventIdEnd) {
+        SLOGI("trigger the OnCastEventRecv");
     }
 }
 }
