@@ -162,7 +162,7 @@ void NapiAsyncWork::GenerateOutput(ContextBase* ctxt)
         napi_call_function(ctxt->env, nullptr, callback, RESULT_ALL, result, &callbackResult);
     }
     if (ctxt->callbackRef != nullptr) {
-        SLOGI("do clear callback here for leak bef reset");
+        SLOGD("do clear callback here for leak bef reset");
         napi_delete_reference(ctxt->env, ctxt->callbackRef);
         ctxt->callbackRef = nullptr;
     }
