@@ -479,7 +479,7 @@ void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int
     std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
-            SLOGI("trigger the OnPositionChange for registered listeners");
+            SLOGD("trigger the OnPositionChange");
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
