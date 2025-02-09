@@ -149,7 +149,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     int mediaImageLength = data.GetMediaLength();
     auto mediaPixelMap = new (std::nothrow) AVSessionPixelMap();
     CHECK_AND_RETURN_RET_LOG(mediaPixelMap != nullptr, AVSESSION_ERROR, "mediaPixelMap new fail");
-    SLOGI("change for-loop to vector init");
+    SLOGD("change for-loop to vector init");
     std::vector<uint8_t> mediaImageBuffer(buffer, buffer + mediaImageLength);
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
     data.SetMediaImage(std::shared_ptr<AVSessionPixelMap>(mediaPixelMap));
