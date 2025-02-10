@@ -521,6 +521,10 @@ private:
 
     void HandleChangeTopSession(int32_t infoUid, int32_t userId);
 
+    bool IsTopSessionPlaying();
+
+    bool NotifyFlowControl();
+
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
 
@@ -561,6 +565,8 @@ private:
     std::recursive_mutex screenStateLock_;
 
     std::recursive_mutex clientDeathLock_;
+
+    std::recursive_mutex notifyLock_;
 
     // DMSDP related locks
     std::recursive_mutex isAllSessionCastLock_;
@@ -637,6 +643,7 @@ private:
     const int32_t mediaPlayStateFalse = 0;
     const uint32_t MAX_NOTIFICATION_NUM = 3;
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
+    const int32_t cancelTimeout = 5000;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

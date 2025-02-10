@@ -96,6 +96,8 @@ protected:
 
 private:
     bool IsStopState(int32_t playbackState);
+    void CheckIfCancelCastCapsule();
+    void ReportPrepare(int32_t preRet, const AVQueueItem& avQueueItem);
 
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
     sptr<IAVCastControllerCallback> callback_;
@@ -113,6 +115,7 @@ private:
     std::function<void(std::string&, bool, bool)> sessionCallbackForCastNtf_;
     bool isPlayingState_ = false;
     bool isMediaChange_ = false;
+    bool isCapsuleAdd_ = false;
     const int32_t cancelTimeout = 5000;
 };
 } // namespace OHOS::AVSession
