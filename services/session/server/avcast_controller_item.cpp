@@ -62,7 +62,7 @@ bool AVCastControllerItem::IsStopState(int32_t playbackState)
 
 void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
-    SLOGI("OnCastPlaybackStateChange with state: %{public}d", state.GetState());
+    SLOGI("OnCastPlaybackStateChange state:%{public}d", state.GetState());
     if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
         AVSessionRadar::GetInstance().PlayerStarted(info);
