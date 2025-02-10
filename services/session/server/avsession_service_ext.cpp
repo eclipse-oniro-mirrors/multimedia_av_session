@@ -664,6 +664,10 @@ int32_t AVSessionService::GetDistributedSessionControllersInner(const Distribute
             CHECK_AND_CONTINUE(migrateAVSessionProxy != nullptr);
             migrateAVSessionProxy->GetDistributedSessionControllerList(sessionControllers);
         }
+    } else {
+        SLOGE("GetDistributedSessionControllersInner with err type:%{public}d|proxyEmpty:%{public}d",
+            static_cast<int>(sessionType), static_cast<int>(migrateAVSessionProxyMap_.empty()));
+        return ERR_REMOTE_CONNECTION_NOT_EXIST;
     }
     SLOGI("GetDistributedSessionControllersInner with size:%{public}d", static_cast<int>(sessionControllers.size()));
     return AVSESSION_SUCCESS;

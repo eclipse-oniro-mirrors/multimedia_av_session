@@ -735,6 +735,7 @@ int32_t AVSessionServiceProxy::GetDistributedSessionControllers(const Distribute
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetDistributedSessionControllers failed");
     CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
     CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_REMOTE_CONNECTION_NOT_EXIST, ret, "connect not exist");
     for (auto& object: objects) {
         auto controllerObject = iface_cast<AVSessionControllerProxy>(object);
         CHECK_AND_RETURN_RET_LOG(controllerObject, AVSESSION_ERROR, "controllerObject is nullptr");
@@ -763,10 +764,11 @@ int32_t AVSessionServiceProxy::GetDistributedSessionControllersInner(const Distr
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
     CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_REMOTE_CONNECTION_NOT_EXIST, ret, "connect not exist");
     if (ret == AVSESSION_SUCCESS) {
         uint32_t size {};
         CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
-        CHECK_AND_RETURN_RET_LOG(size, ret, "get all session with true empty");
+        CHECK_AND_RETURN_RET_LOG(size, ret, "get distributed controller with true empty");
 
         std::vector<sptr<IRemoteObject>> controllerResult(size);
         for (auto& controller : controllerResult) {

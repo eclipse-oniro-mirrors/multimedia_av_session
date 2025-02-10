@@ -172,7 +172,7 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
-    SLOGI("handle with thead safe without lock for event: %{public}d with num: %{public}d with state: %{public}d",
+    SLOGI("HandleEventWithThreadSafe for event:%{public}d|num:%{public}d|state:%{public}d",
         event, static_cast<int>(callbacks_[event].size()), state);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         CallWithThreadSafe(*ref, isValid_, state, threadSafeFunction_,
@@ -283,7 +283,7 @@ void NapiAVControllerCallback::OnSessionDestroy()
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnPlaybackStateChange");
-    SLOGD("do playbackstate change notify with state %{public}d", state.GetState());
+    SLOGD("OnPlaybackStateChange %{public}d", state.GetState());
     HandleEventWithThreadSafe(EVENT_PLAYBACK_STATE_CHANGE, state.GetState(), state);
 }
 

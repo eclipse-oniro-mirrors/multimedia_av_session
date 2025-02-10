@@ -376,8 +376,7 @@ napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, 
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok &&
                 context->sessionType_ >= DistributedSessionType::TYPE_SESSION_REMOTE &&
                 context->sessionType_ < DistributedSessionType::TYPE_SESSION_MAX,
-                "GetDistributedSessionControllers invalid sessionType",
-                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+                "GetDistributedControllers invalid sessionType", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         }
     };
 
@@ -386,13 +385,14 @@ napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, 
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().GetDistributedSessionControllers(
             context->sessionType_, context->controllers_);
-        SLOGI("GetDistributedSessionControllers executor ret: %{public}d, controller size: %{public}d", ret,
-            (int) context->controllers_.size());
+        SLOGI("GetDistributedControllers ret:%{public}d|Size:%{public}d", ret, (int) context->controllers_.size());
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetDistributedSessionControllers failed : native no permission";
             } else if (ret == ERR_PERMISSION_DENIED) {
                 context->errMessage = "GetDistributedSessionControllers failed : native permission denied";
+            } else if (ret == ERR_REMOTE_CONNECTION_NOT_EXIST) {
+                context->errMessage = "GetDistributedSessionControllers failed : connect not exist";
             } else {
                 context->errMessage = "GetDistributedSessionControllers failed : native server exception";
             }

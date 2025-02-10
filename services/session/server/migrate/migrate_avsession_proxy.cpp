@@ -34,8 +34,8 @@ MigrateAVSessionProxy::MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode
 
 MigrateAVSessionProxy::~MigrateAVSessionProxy()
 {
-    SLOGI("MigrateAVSessionProxy destruct with deviceId clean");
-    deviceId_ = "";
+    SLOGI("MigrateAVSessionProxy destruct with disconnect process");
+    OnConnectServer(deviceId_);
 }
 
 void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
