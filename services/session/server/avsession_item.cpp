@@ -325,17 +325,16 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         }
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
         std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
-        hasPixelMap_ = false;
         if (innerPixelMap != nullptr) {
             std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
             AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, GetSessionId() + AVSessionUtils::GetFileSuffix());
             innerPixelMap->Clear();
             metaData_.SetMediaImage(innerPixelMap);
-            hasPixelMap_ = true;
         }
     }
-    SLOGI("MediaCapsule addLocalCapsule hasImage_:%{public}d isMediaChange_:%{public}d", hasPixelMap_, isMediaChange_);
-    if (serviceCallbackForNtf_ && hasPixelMap_ && isMediaChange_) {
+    bool hasPixelMap = (meta.GetMediaImage() != nullptr);
+    SLOGI("MediaCapsule addLocalCapsule hasImage_:%{public}d isMediaChange_:%{public}d", hasPixelMap, isMediaChange_);
+    if (serviceCallbackForNtf_ && hasPixelMap && isMediaChange_) {
         serviceCallbackForNtf_(GetSessionId(), isMediaChange_);
         isMediaChange_ = false;
     }
