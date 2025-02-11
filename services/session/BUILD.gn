@@ -44,9 +44,12 @@ av_session_ohos_library("avsession_service") {
   stack_protector_ret = true
   install_enable = true
   sanitize = {
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
   }
   ipc_sources = [
     "ipc/proxy/session_listener_proxy.cpp",
@@ -106,6 +109,7 @@ av_session_ohos_library("avsession_service") {
     "-fPIC",
     "-fdata-sections",
     "-ffunction-sections",
+    "-fstack-protector-strong",
     "-fno-asynchronous-unwind-tables",
     "-fno-unwind-tables",
     "-Os",
@@ -224,9 +228,12 @@ if (castplus_cast_engine_enable) {
   av_session_ohos_library("avsession_router") {
     install_enable = true
     sanitize = {
+      boundary_sanitize = true
       cfi = true
       cfi_cross_dso = true
       debug = false
+      integer_overflow = true
+      ubsan = true
     }
     ipc_sources = []
 
@@ -255,6 +262,7 @@ if (castplus_cast_engine_enable) {
       "-fPIC",
       "-fdata-sections",
       "-ffunction-sections",
+      "-fstack-protector-strong",
       "-fno-asynchronous-unwind-tables",
       "-fno-unwind-tables",
       "-Os",
@@ -333,9 +341,12 @@ if (castplus_cast_engine_enable) {
 ohos_shared_library("avsession_dynamic_insight") {
   install_enable = true
   sanitize = {
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
   }
 
   sources = [ "adapter/avsession_dynamic_insight.cpp" ]
@@ -351,6 +362,7 @@ ohos_shared_library("avsession_dynamic_insight") {
     "-fPIC",
     "-fdata-sections",
     "-ffunction-sections",
+    "-fstack-protector-strong",
     "-fno-asynchronous-unwind-tables",
     "-fno-unwind-tables",
   ]
@@ -389,9 +401,12 @@ ohos_shared_library("avsession_dynamic_insight") {
 av_session_ohos_library("avsession_item") {
   install_enable = true
   sanitize = {
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
   }
   ipc_sources = [
     "ipc/proxy/avcontroller_callback_proxy.cpp",
@@ -435,6 +450,7 @@ av_session_ohos_library("avsession_item") {
     "-fPIC",
     "-fdata-sections",
     "-ffunction-sections",
+    "-fstack-protector-strong",
     "-fno-asynchronous-unwind-tables",
     "-fno-unwind-tables",
     "-Os",
@@ -542,9 +558,12 @@ av_session_ohos_library("avsession_item") {
 av_session_ohos_library("avsession_cast_item") {
   install_enable = true
   sanitize = {
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
   }
   ipc_sources = [
     "ipc/proxy/avcast_controller_callback_proxy.cpp",
@@ -575,6 +594,7 @@ av_session_ohos_library("avsession_cast_item") {
     "-fPIC",
     "-fdata-sections",
     "-ffunction-sections",
+    "-fstack-protector-strong",
     "-fno-asynchronous-unwind-tables",
     "-fno-unwind-tables",
     "-Os",
