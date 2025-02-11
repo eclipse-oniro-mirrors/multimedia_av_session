@@ -831,6 +831,7 @@ void AVSessionService::RegisterBundleDeleteEventForHistory(int32_t userId)
             DeleteHistoricalRecord(bundleName, userId);
         };
         for (auto value : values) {
+            CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("bundleName"));
             if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(value["bundleName"], callback, userId)) {
                 std::string bundleName = value["bundleName"];
                 SLOGE("SubscribeBundleStatusEvent failed for bundle:%{public}s", bundleName.c_str());
@@ -927,8 +928,10 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
 void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
-    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(descriptor.userId_);
     PublishEvent(mediaPlayStateFalse);
+    SLOGI("NotifySessionRelease for user:%{public}d|listenerSize:%{public}d",
+        descriptor.userId_, static_cast<int>(listenerMap.size()));
     for (const auto& [pid, listener] : listenerMap) {
         if (listener != nullptr) {
             listener->OnSessionRelease(descriptor);
@@ -1185,12 +1188,13 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         SLOGE("alloc session id failed");
         return nullptr;
     }
+    descriptor.userId_ = GetUsersManager().GetCurrentUserId();
     descriptor.sessionTag_ = tag;
     descriptor.sessionType_ = type;
     descriptor.elementName_ = elementName;
     descriptor.isThirdPartyApp_ = thirdPartyApp;
 
-    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor, GetUsersManager().GetCurrentUserId());
+    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor, descriptor.userId_);
     if (result == nullptr) {
         return nullptr;
     }
