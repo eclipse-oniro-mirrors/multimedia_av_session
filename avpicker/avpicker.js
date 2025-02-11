@@ -74,7 +74,7 @@ export class AVCastPicker extends ViewPU {
         this.__configurationColorMode =
             new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
         this.__deviceInfoType = new ObservedPropertySimplePU('', this, 'deviceInfoType');
-        this.maxFontSizeScale = 2;
+        this.__maxFontSizeScale = new ObservedPropertySimplePU(1, this, 'maxFontSizeScale');
         this.__accessibilityConnectedStr = new ObservedPropertySimplePU('已连接', this, 'accessibilityConnectedStr');
         this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('音视频投播', this, 'accessibilityAudioControlStr');
         this.__isPc = new ObservedPropertySimplePU(false, this, 'isPc');
@@ -162,6 +162,7 @@ export class AVCastPicker extends ViewPU {
         this.__touchMenuItemIndex.purgeDependencyOnElmtId(a11);
         this.__configurationColorMode.purgeDependencyOnElmtId(a11);
         this.__deviceInfoType.purgeDependencyOnElmtId(a11);
+        this.__maxFontSizeScale.purgeDependencyOnElmtId(a11);
         this.__accessibilityConnectedStr.purgeDependencyOnElmtId(a11);
         this.__accessibilityAudioControlStr.purgeDependencyOnElmtId(a11);
         this.__isPc.purgeDependencyOnElmtId(a11);
@@ -180,6 +181,7 @@ export class AVCastPicker extends ViewPU {
         this.__touchMenuItemIndex.aboutToBeDeleted();
         this.__configurationColorMode.aboutToBeDeleted();
         this.__deviceInfoType.aboutToBeDeleted();
+        this.__maxFontSizeScale.aboutToBeDeleted();
         this.__accessibilityConnectedStr.aboutToBeDeleted();
         this.__accessibilityAudioControlStr.aboutToBeDeleted();
         this.__isPc.aboutToBeDeleted();
@@ -274,6 +276,14 @@ export class AVCastPicker extends ViewPU {
 
     set deviceInfoType(b1) {
         this.__deviceInfoType.set(b1);
+    }
+
+    get maxFontSizeScale() {
+        return this.__maxFontSizeScale.get();
+    }
+
+    set maxFontSizeScale(e1) {
+        this.__maxFontSizeScale.set(e1);
     }
 
     get accessibilityConnectedStr() {
@@ -600,7 +610,6 @@ export class AVCastPicker extends ViewPU {
                     this.accessibilityConnectedStr = l8.accessConnected;
                 }
 
-                
                 if (JSON.stringify(l8.accessAudioControl) !== undefined) {
                     console.info(TAG, `accessibilityAudioControlStr : ${l8.accessAudioControl}`);
                     this.accessibilityAudioControlStr = l8.accessAudioControl;
@@ -614,6 +623,11 @@ export class AVCastPicker extends ViewPU {
                 if (JSON.stringify(l8.isRTL) !== undefined) {
                     console.info(TAG, `isRTL : ${l8.isRTL}`);
                     this.isRTL = l8.isRTL;
+                }
+
+                if (JSON.stringify(l8.maxFontSizeScale) !== undefined) {
+                    console.info(TAG, `maxFontSizeScale : ${l8.maxFontSizeScale}`);
+                    this.maxFontSizeScale = l8.maxFontSizeScale;
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
