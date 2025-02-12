@@ -3120,7 +3120,8 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     request.SetCreatorUid(avSessionUid);
     request.SetUnremovable(true);
     request.SetInProgress(true);
-    request.SetCreatorUserId(userId);
+    request.SetOwnerUid(uid);
+    request.SetIsAgentNotification(true);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
     request.SetWantAgent(wantAgent);
@@ -3139,6 +3140,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         g_NotifyRequest = request;
     }
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("NotifyFlowControl");
+    Notification::NotificationHelper::SetHashCodeRule(1);
     if (NotifyFlowControl()) {
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this, uid]() {
