@@ -80,7 +80,7 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         auto stageContext = AbilityRuntime::GetStageModeContext(env, argv[ARGV_FIRST]);
         if (stageContext == nullptr) {
-            SLOGI("get stageContext failed");
+            context->status = napi_generic_failure;
             NapiUtils::ThrowError(env, "get stageContext failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             return;
         }
@@ -93,8 +93,10 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
             CHECK_RETURN_VOID(extensionContext != nullptr, "convert to AbilityContext and ExtensionContext fail");
             context->uiContent = extensionContext->GetUIContent();
         }
+        context->status = napi_ok;
     };
     context->GetCbInfo(env, info, inputParser);
+    CHECK_AND_RETURN_RET_LOG(context->status == napi_ok, nullptr, "no need to wrap");
 
     auto* napiAVCastPickerHelper = new(std::nothrow) NapiAVCastPickerHelper(context->uiContent);
     CHECK_AND_RETURN_RET_LOG(napiAVCastPickerHelper != nullptr, nullptr, "no memory");
