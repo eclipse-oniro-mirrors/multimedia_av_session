@@ -50,7 +50,7 @@ common_external_deps = [
   "window_manager:libdm_lite",
 ]
 
-common_cflags = []
+common_cflags = [ "-fstack-protector-strong" ]
 
 if (castplus_cast_engine_enable) {
   common_cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -74,9 +74,12 @@ ohos_shared_library("remote_session_source") {
   cflags = common_cflags
   external_deps = common_external_deps
   sanitize = {
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
   }
   source_sources = [ "remote_session_source_impl.cpp" ]
 
@@ -99,9 +102,12 @@ ohos_shared_library("remote_session_sink") {
   cflags = common_cflags
   external_deps = common_external_deps
   sanitize = {
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
   }
   sink_sources = [ "remote_session_sink_impl.cpp" ]
 
