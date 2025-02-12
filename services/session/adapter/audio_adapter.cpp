@@ -72,8 +72,8 @@ void AudioAdapter::AddDeviceChangeListener(const PreferOutputDeviceChangeListene
 int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
 {
     if (is2in1_) {
-     SLOGI("PC no need mute");
-     return AVSESSION_ERROR;
+        SLOGI("PC no need mute");
+        return AVSESSION_ERROR;
     }
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
     auto ret =
@@ -99,8 +99,8 @@ int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
 int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
 {
     if (is2in1_) {
-     SLOGI("PC no need unmute");
-     return AVSESSION_ERROR;
+        SLOGI("PC no need unmute");
+        return AVSESSION_ERROR;
     }
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
     auto ret =
@@ -121,8 +121,8 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
 int32_t AudioAdapter::UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage)
 {
     if (is2in1_) {
-     SLOGI("PC no need unmute");
-     return AVSESSION_ERROR;
+        SLOGI("PC no need unmute");
+        return AVSESSION_ERROR;
     }
     SLOGI("unmute uid=%{public}d stream usage %{public}d", uid, usage);
     auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
@@ -134,8 +134,8 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage 
 int32_t AudioAdapter::MuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage)
 {
     if (is2in1_) {
-     SLOGI("PC no need mute");
-     return AVSESSION_ERROR;
+        SLOGI("PC no need mute");
+        return AVSESSION_ERROR;
     }
     if (std::count(BACKGROUND_MUTE_STREAM_USAGE.begin(), BACKGROUND_MUTE_STREAM_USAGE.end(), usage) == 0) {
         SLOGI("mute uid=%{public}d stream usage=%{public}d uncontrolled, return", uid, usage);
