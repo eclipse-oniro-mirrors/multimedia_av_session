@@ -299,7 +299,7 @@ private:
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession, bool addCapsule,
-                        bool isCapsuleUpdate, bool isFromCastSession);
+                        bool isCapsuleUpdate);
     void NotifyDeviceChange();
     void PublishEvent(int32_t mediaPlayState);
 
@@ -527,6 +527,7 @@ private:
 
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
+    std::atomic<bool> hasRemoveEvent_ = false;
 
     sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;

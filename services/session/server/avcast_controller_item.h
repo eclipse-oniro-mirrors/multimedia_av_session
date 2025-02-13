@@ -87,6 +87,8 @@ public:
 
     void SetSessionId(const std::string id);
 
+    void SetUserId(const int32_t userId);
+
     int32_t Destroy() override;
 
     void SetSessionCallbackForCastCap(const std::function<void(std::string, bool, bool)>& callback);
@@ -108,14 +110,13 @@ private:
     int32_t currentState_ = AVPlaybackState::PLAYBACK_STATE_INITIAL;
     std::string sessionTag_;
     std::string sessionId_;
+    int32_t userId_ = 0;
     bool isSessionCallbackAvailable_ = true;
     std::recursive_mutex castControllerLock_;
     std::recursive_mutex castControllerCallbackLock_;
     std::mutex callbackToSessionLock_;
     std::function<void(std::string&, bool, bool)> sessionCallbackForCastNtf_;
     bool isPlayingState_ = false;
-    bool isMediaChange_ = false;
-    bool isCapsuleAdd_ = false;
     const int32_t cancelTimeout = 5000;
 };
 } // namespace OHOS::AVSession

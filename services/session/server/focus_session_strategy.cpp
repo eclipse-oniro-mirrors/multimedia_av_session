@@ -85,9 +85,12 @@ void FocusSessionStrategy::CheckFocusSessionStop(const AudioStandard::AudioRende
         int32_t uid = info.clientUID;
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this, uid]() {
-                SLOGI("check uid=%{public}d lastState=%{public}d", uid, lastStates_[uid]);
-                if (lastStates_[uid] == AudioStandard::RendererState::RENDERER_RUNNING) {
-                    return;
+                {
+                    std::lock_guard lockGuard(stateLock_);
+                    SLOGI("check uid=%{public}d lastState=%{public}d", uid, lastStates_[uid]);
+                    if (lastStates_[uid] == AudioStandard::RendererState::RENDERER_RUNNING) {
+                        return;
+                    }
                 }
                 FocusSessionChangeInfo changeInfo;
                 changeInfo.uid = uid;
