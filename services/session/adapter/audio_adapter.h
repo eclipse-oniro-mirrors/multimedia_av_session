@@ -117,6 +117,7 @@ private:
     std::shared_ptr<AudioPreferredDeviceChangeCallback> preferredDeviceChangeCallback_;
 
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
+    bool is2in1_ {false};
 };
 
 class AudioVolumeKeyEventCallback : public AudioStandard::VolumeKeyEventCallback {
