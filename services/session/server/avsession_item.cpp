@@ -1542,7 +1542,7 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
 
 void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
 {
-    auto func = [&](AAFwk::IInterface* object) {
+    auto func = [this](AAFwk::IInterface* object) {
         if (object != nullptr) {
             AAFwk::IString* stringValue = AAFwk::IString::Query(object);
             if (stringValue != nullptr && AAFwk::String::Unbox(stringValue) == "url-cast" &&
@@ -1691,7 +1691,7 @@ AAFwk::WantParams AVSessionItem::GetExtras()
 
 void AVSessionItem::NotificationExtras(AAFwk::IArray* list)
 {
-    auto func = [&](AAFwk::IInterface* object) {
+    auto func = [this](AAFwk::IInterface* object) {
         if (object != nullptr) {
             AAFwk::IBoolean* booleanValue = AAFwk::IBoolean::Query(object);
             if (booleanValue != nullptr && AAFwk::Boolean ::Unbox(booleanValue)) {
