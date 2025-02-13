@@ -248,10 +248,11 @@ void AVSessionItem::HandleFrontSession()
         std::lock_guard lockGuard(metaDataLock_);
         isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
             metaData_.GetMediaImageUri().empty();
+        SLOGI("frontSession bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d "
+            "castCmd=%{public}d firstAdd=%{public}d",
+            GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
+            static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     }
-    SLOGI("frontSession bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d castCmd=%{public}d firstAdd=%{public}d",
-        GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
-        static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     if (isMetaEmpty || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), false);
