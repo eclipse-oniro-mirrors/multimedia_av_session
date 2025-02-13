@@ -157,6 +157,7 @@ int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId,
 
 int32_t AVSessionService::checkEnableCast(bool enable)
 {
+    std::lock_guard lockGuard(checkEnableCastLock_);
     SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
     if (enable == true && isInCast_ == false) {
         isInCast_ = AVRouter::GetInstance().Init(this) == AVSESSION_SUCCESS ? true : false;

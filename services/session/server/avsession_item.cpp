@@ -1309,7 +1309,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         ReportConnectFinish("AVSessionItem::OnCastStateChange", deviceInfo);
-        if (callStartCallback_ && isNeedRemove) {
+        if (callStartCallback_ && isNeedRemove && descriptor_.sessionTag_ == "RemoteCast") {
             SLOGI("AVSessionItem send callStart event to service for connected");
             callStartCallback_(*this);
         }
