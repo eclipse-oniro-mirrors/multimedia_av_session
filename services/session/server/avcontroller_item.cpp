@@ -97,7 +97,7 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     data = session_->GetMetaData();
     if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
-        SLOGI("check isFromSession %{public}d when have two image resources", isFromSession_);
+        SLOGD("isFromSession %{public}d in metaGet", isFromSession_);
         if (isFromSession_) {
             data.GetMediaImage()->Clear();
         } else {
@@ -396,7 +396,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
         SLOGI("update metaData pid %{public}d, title %{public}s", static_cast<int>(pid_), metaOut.GetTitle().c_str());
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         if (metaOut.GetMediaImage() != nullptr && !metaOut.GetMediaImageUri().empty()) {
-            SLOGI("check isFromSession %{public}d when have two image resources", isFromSession_);
+            SLOGI("isFromSession %{public}d in metaChange", isFromSession_);
             if (isFromSession_) {
                 metaOut.GetMediaImage()->Clear();
             } else {
