@@ -57,9 +57,7 @@ public:
 
     void RemoveSessionListener(pid_t pid);
 
-    std::map<pid_t, sptr<ISessionListener>>& GetSessionListener();
-
-    std::map<pid_t, sptr<ISessionListener>>& GetSessionListenerForCurUser();
+    std::map<pid_t, sptr<ISessionListener>>& GetSessionListener(int32_t userId = 0);
 
     std::map<pid_t, sptr<ISessionListener>>& GetSessionListenerForAllUsers();
 

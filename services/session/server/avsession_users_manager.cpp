@@ -241,22 +241,18 @@ void AVSessionUsersManager::RemoveSessionListener(pid_t pid)
     SLOGI("remove sessionListener for pid %{public}d, curUser %{public}d", static_cast<int>(pid), curUserId_);
 }
 
-std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListener()
-{
-    return GetSessionListenerForCurUser();
-}
-
-std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListenerForCurUser()
+std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListener(int32_t userId)
 {
     std::lock_guard lockGuard(userLock_);
-    auto iterForListenerMap = sessionListenersMapByUserId_.find(curUserId_);
+    userId = userId <= 0 ? curUserId_ : userId;
+    auto iterForListenerMap = sessionListenersMapByUserId_.find(userId);
     if (iterForListenerMap != sessionListenersMapByUserId_.end()) {
         return iterForListenerMap->second;
     } else {
         std::map<pid_t, sptr<ISessionListener>> listenerMap;
-        sessionListenersMapByUserId_[curUserId_] = listenerMap;
-        SLOGI("get session listener map with null, create new map and return for user %{public}d", curUserId_);
-        return sessionListenersMapByUserId_[curUserId_];
+        sessionListenersMapByUserId_[userId] = listenerMap;
+        SLOGI("get sessionListenerMap null, create new for user %{public}d", userId);
+        return sessionListenersMapByUserId_[userId];
     }
 }
 
