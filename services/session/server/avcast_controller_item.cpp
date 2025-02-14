@@ -23,7 +23,7 @@
 #include "avmedia_description.h"
 #include "bundle_status_adapter.h"
 #include "avsession_event_handler.h"
-
+#include "avsession_utils.h"
 #include <string>
 
 namespace OHOS::AVSession {
@@ -84,11 +84,9 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
             AVSessionRadar::GetInstance().PlayerStarted(info);
             // play state try notify notification
             isPlayingState_ = true;
-            if (sessionCallbackForCastNtf_ && !isCapsuleAdd_) {
-                SLOGI("MediaCapsule addCastCapsule isMediaChange_ %{public}d isCapsuleAdd_ %{public}d",
-                    isMediaChange_, isCapsuleAdd_);
-                isCapsuleAdd_ = true;
-                sessionCallbackForCastNtf_(sessionId_, true, isMediaChange_);
+            if (sessionCallbackForCastNtf_) {
+                SLOGI("MediaCapsule addCastCapsule by play");
+                sessionCallbackForCastNtf_(sessionId_, true, false);
             }
         } else {
             CheckIfCancelCastCapsule();
@@ -114,7 +112,6 @@ void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
     if (callback_ != nullptr) {
         callback_->OnMediaItemChange(avQueueItem);
     }
-    isMediaChange_ = true;
 }
 
 void AVCastControllerItem::OnPlayNext()
@@ -304,21 +301,15 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     SLOGI("Call prepare of cast controller proxy");
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
-    AVQueueItem currentItem;
-    GetCurrentItem(currentItem);
-    if (currentItem.GetDescription() != nullptr && avQueueItem.GetDescription() != nullptr &&
-        !currentItem.GetDescription()->GetMediaUri().empty() && !avQueueItem.GetDescription()->GetMediaUri().empty() &&
-        currentItem.GetDescription()->GetMediaUri() != avQueueItem.GetDescription()->GetMediaUri()) {
-        isCapsuleAdd_ = false;
-    }
     auto ret = castControllerProxy_->Prepare(avQueueItem);
     if (avQueueItem.GetDescription() != nullptr && (avQueueItem.GetDescription()->GetIcon() != nullptr &&
         avQueueItem.GetDescription()->GetIconUri() == "URI_CACHE")) {
-        SLOGI("MediaCapsule prepare icon, isPlayingState_ %{public}d isMediaChange_ %{public}d",
-            isPlayingState_, isMediaChange_);
-        if (sessionCallbackForCastNtf_ && isPlayingState_ && !isCapsuleAdd_) {
-            isCapsuleAdd_ = true;
-            sessionCallbackForCastNtf_(sessionId_, true, isMediaChange_);
+        SLOGI("MediaCapsule prepare icon, isPlayingState_ %{public}d", isPlayingState_);
+        std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+        AVSessionUtils::WriteImageToFile(avQueueItem.GetDescription()->GetIcon(), fileDir,
+            sessionId_ + AVSessionUtils::GetFileSuffix());
+        if (sessionCallbackForCastNtf_ && isPlayingState_) {
+            sessionCallbackForCastNtf_(sessionId_, true, true);
         }
         return AVSESSION_SUCCESS;
     }
@@ -490,6 +481,11 @@ void AVCastControllerItem::SetSessionTag(const std::string tag)
 void AVCastControllerItem::SetSessionId(const std::string sessionId)
 {
     sessionId_ = sessionId;
+}
+
+void AVCastControllerItem::SetUserId(const int32_t userId)
+{
+    userId_ = userId;
 }
 
 void AVCastControllerItem::SetSessionCallbackForCastCap(const std::function<void(std::string, bool, bool)>& callback)
