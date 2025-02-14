@@ -67,6 +67,14 @@ public:
      * @since 10
     */
     virtual void NotifyDeviceOffline(const std::string& deviceId) = 0;
+
+    /**
+     * set cast state at castservice state changed.
+     *
+     * @param { bool } isInCast - cast state.
+     * @since 14
+    */
+    virtual void setInCast(bool isInCast) = 0;
 #endif
 };
 } // namespace OHOS::AVSession

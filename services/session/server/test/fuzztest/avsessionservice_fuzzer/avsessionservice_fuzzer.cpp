@@ -144,7 +144,6 @@ void AvSessionServiceSystemAbilityTest(const uint8_t* data, size_t size,
         DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID,
         BUNDLE_MGR_SERVICE_SYS_ABILITY_ID,
         CAST_ENGINE_SA_ID,
-        BLUETOOTH_HOST_SYS_ABILITY_ID,
         MEMORY_MANAGER_SA_ID,
     };
 
@@ -292,9 +291,6 @@ void AvSessionServiceSuperLauncherTest(const uint8_t* data, size_t size,
     std::string deviceId(reinterpret_cast<const char*>(data), size);
     std::string extraInfo(reinterpret_cast<const char*>(data), size);
     service->SuperLauncher(deviceId, serviceName, extraInfo, state);
-    bool on = *(reinterpret_cast<const int32_t *>(data));
-    service->SetScreenOn(on);
-    service->GetScreenOn();
 }
 
 void NotifyDeviceAvailable001(const uint8_t* data, size_t size)
