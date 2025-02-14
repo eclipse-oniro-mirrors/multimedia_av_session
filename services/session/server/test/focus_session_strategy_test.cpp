@@ -27,7 +27,7 @@ using OHOS::AudioStandard::RendererState;
 
 static std::string g_errLog;
 
-void MyLogCallback(const LogType type, const LogLevel level,
+static void MyLogCallback(const LogType type, const LogLevel level,
     const unsigned int domain, const char *tag, const char *msg)
 {
     g_errLog = msg;
