@@ -31,7 +31,6 @@ const uint32_t TRUSTED_DEVICE = 1;
 HwCastProvider::~HwCastProvider()
 {
     SLOGI("destruct the HwCastProvider");
-    Release();
 }
 
 int32_t HwCastProvider::Init()

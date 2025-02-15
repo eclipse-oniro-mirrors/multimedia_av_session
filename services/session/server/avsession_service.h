@@ -589,6 +589,7 @@ private:
     const int32_t beginAddPos = 3;
     const int32_t endDecPos = 4;
     const int32_t typeAddPos = 2;
+    std::recursive_mutex checkEnableCastLock_;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
