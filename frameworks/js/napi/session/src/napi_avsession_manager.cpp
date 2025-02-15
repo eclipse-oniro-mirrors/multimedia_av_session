@@ -741,8 +741,7 @@ napi_value NapiAVSessionManager::OnDistributedSessionChangeEvent(napi_env env, n
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
-        SLOGE("OnEvent failed : no memory");
-        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        NapiUtils::ThrowError(env, "OnSessionEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
@@ -758,6 +757,10 @@ napi_value NapiAVSessionManager::OnDistributedSessionChangeEvent(napi_env env, n
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], sessionTypeValue);
         CHECK_STATUS_RETURN_VOID(context, "get session type failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->sessionType_ = DistributedSessionType(sessionTypeValue);
+        CHECK_ARGS_RETURN_VOID(context, context->sessionType_ >= DistributedSessionType::TYPE_SESSION_REMOTE &&
+            context->sessionType_ < DistributedSessionType::TYPE_SESSION_MAX,
+            "GetDistributedSessionControllers invalid sessionType",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_THIRD], &type);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
@@ -773,7 +776,6 @@ napi_value NapiAVSessionManager::OnDistributedSessionChangeEvent(napi_env env, n
 
     auto it = distributedControllerEventHandlers_.find(context->sessionType_);
     if (it == distributedControllerEventHandlers_.end()) {
-        SLOGE("session type invalid");
         NapiUtils::ThrowError(env, "session type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         return NapiUtils::GetUndefinedValue(env);
     }
@@ -798,8 +800,7 @@ napi_value NapiAVSessionManager::OffDistributedSessionChangeEvent(napi_env env, 
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
-        SLOGE("OffEvent failed : no memory");
-        NapiUtils::ThrowError(env, "OffEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        NapiUtils::ThrowError(env, "OffSessionEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
@@ -808,17 +809,23 @@ napi_value NapiAVSessionManager::OffDistributedSessionChangeEvent(napi_env env, 
             PermissionChecker::CHECK_SYSTEM_PERMISSION);
         CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
             NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE, "invalid argument number",
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO || argc == ARGC_THREE, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         int32_t sessionTypeValue;
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], sessionTypeValue);
         CHECK_STATUS_RETURN_VOID(context, "get session type failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->sessionType_ = DistributedSessionType(sessionTypeValue);
-        napi_valuetype type = napi_undefined;
-        context->status = napi_typeof(env, argv[ARGV_THIRD], &type);
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
-                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->callback_ = argv[ARGV_THIRD];
+        CHECK_ARGS_RETURN_VOID(context, context->sessionType_ >= DistributedSessionType::TYPE_SESSION_REMOTE &&
+            context->sessionType_ < DistributedSessionType::TYPE_SESSION_MAX,
+            "GetDistributedSessionControllers invalid sessionType",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_THREE) {
+            napi_valuetype type = napi_undefined;
+            context->status = napi_typeof(env, argv[ARGV_THIRD], &type);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            context->callback_ = argv[ARGV_THIRD];
+        }
     };
 
     context->GetCbInfo(env, info, input, true);
@@ -829,7 +836,6 @@ napi_value NapiAVSessionManager::OffDistributedSessionChangeEvent(napi_env env, 
 
     auto it = distributedControllerEventHandlers_.find(context->sessionType_);
     if (it == distributedControllerEventHandlers_.end()) {
-        SLOGE("session type invalid");
         NapiUtils::ThrowError(env, "session type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         return NapiUtils::GetUndefinedValue(env);
     }
