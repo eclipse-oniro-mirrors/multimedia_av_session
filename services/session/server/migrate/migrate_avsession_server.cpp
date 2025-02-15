@@ -391,7 +391,6 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
     SLOGI("SendRemoteControllerList");
     SortControllers(sortControllerList_);
     std::vector<sptr<AVControllerItem>> avcontroller;
-    std::lock_guard lockGuard(topSessionLock_);
     auto res = GetAllControllers(avcontroller);
     if (res != AVSESSION_SUCCESS) {
         SLOGE("SendRemoteControllerList no top session");
