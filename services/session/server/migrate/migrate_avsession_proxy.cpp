@@ -286,7 +286,6 @@ void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
 {
     CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessSessionInfo with remote session null");
     std::string sessionId;
-    AppExecFwk::ElementName elementName;
 
     if (jsonValue.isMember(MIGRATE_SESSION_ID)) {
         sessionId = jsonValue[MIGRATE_SESSION_ID].isString() ?
@@ -295,23 +294,28 @@ void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
     if (jsonValue.isMember(MIGRATE_BUNDLE_NAME)) {
         std::string bundleName = jsonValue[MIGRATE_BUNDLE_NAME].isString() ?
             jsonValue[MIGRATE_BUNDLE_NAME].asString() : DEFAULT_STRING;
-        elementName.SetBundleName(bundleName);
+        elementName_.SetBundleName(bundleName);
     }
     if (jsonValue.isMember(MIGRATE_ABILITY_NAME)) {
         std::string abilityName = jsonValue[MIGRATE_ABILITY_NAME].isString() ?
             jsonValue[MIGRATE_ABILITY_NAME].asString() : DEFAULT_STRING;
-        elementName.SetAbilityName(abilityName);
+        elementName_.SetAbilityName(abilityName);
     }
     SLOGI("ProcessMetaData with sessionId:%{public}s|bundleName:%{public}s done",
-        sessionId.c_str(), elementName.GetBundleName().c_str());
+        sessionId.c_str(), elementName_.GetBundleName().c_str());
     if (sessionId.empty() || sessionId == DEFAULT_STRING || sessionId == EMPTY_SESSION) {
         remoteSession_->Deactivate();
-        elementName.SetBundleName("");
+        elementName_.SetBundleName("");
     } else {
         remoteSession_->Activate();
     }
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
-    servicePtr_->NotifyRemoteBundleChange(elementName.GetBundleName());
+    servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
+}
+
+bool MigrateAVSessionProxy::CheckMediaAlive()
+{
+    return !elementName_.GetBundleName().empty();
 }
 
 void MigrateAVSessionProxy::ProcessMetaData(Json::Value jsonValue)

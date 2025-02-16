@@ -61,8 +61,10 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
     lastSessionId_ = sessionId;
     if (isSoftbusConnecting_) {
         UpdateFrontSessionInfoToRemote(controller);
+    } else {
+        SLOGE("LocalFrontSessionArrive without connect");
     }
-    SLOGE("LocalFrontSessionArrive done");
+    SLOGI("LocalFrontSessionArrive done");
 }
 
 void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
@@ -144,7 +146,12 @@ void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionP
     std::string imgStrMin(imgBufferMin.begin(), imgBufferMin.end());
     std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_MEDIA_IMAGE});
     msg += imgStrMin;
-    SendByte(deviceId_, msg);
+
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this, msg]() {
+            SendByte(deviceId_, msg);
+        },
+        "DoMediaImageSyncToRemote");
     SLOGI("DoMediaImageSyncToRemote with size:%{public}d", static_cast<int>(msg.size()));
 }
 
@@ -206,7 +213,12 @@ void MigrateAVSessionServer::DoBundleInfoSyncToRemote(sptr<AVControllerItem> con
     std::string imgStrMin(imgBufferMin.begin(), imgBufferMin.end());
     std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_BUNDLE_IMG});
     msg += imgStrMin;
-    SendByte(deviceId_, msg);
+
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this, msg]() {
+            SendByte(deviceId_, msg);
+        },
+        "DoBundleInfoSyncToRemote");
     SLOGI("DoBundleInfoSyncToRemote with size:%{public}d", static_cast<int>(msg.size()));
 }
 
