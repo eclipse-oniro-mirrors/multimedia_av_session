@@ -54,6 +54,7 @@ public:
         AUDIO_NUM_GET_VOLUME = 2,
         AUDIO_NUM_GET_AVAILABLE_DEVICES = 3,
         AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO = 4,
+        SESSION_NUM_COLD_START_FROM_PROXY = 5,
     };
 
     const std::map<const std::string, int32_t> AUDIO_EVENT_MAPS = {
@@ -63,6 +64,7 @@ public:
         {AUDIO_GET_AVAILABLE_DEVICES, AUDIO_NUM_GET_AVAILABLE_DEVICES},
         {AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO,
             AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO},
+        {SESSION_COLD_START_FROM_PROXY, SESSION_NUM_COLD_START_FROM_PROXY},
     };
 
 private:
@@ -88,6 +90,7 @@ private:
     void GetVolume(AAFwk::WantParams& extras);
     void GetAvailableDevices(AAFwk::WantParams& extras);
     void GetPreferredOutputDeviceForRendererInfo(AAFwk::WantParams& extras);
+    void ColdStartFromProxy();
 
     int32_t mMode_;
     std::string deviceId_;

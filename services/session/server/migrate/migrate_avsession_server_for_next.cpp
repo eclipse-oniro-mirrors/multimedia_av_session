@@ -269,8 +269,6 @@ void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
     SLOGI("UpdateEmptyInfoToRemote in");
     Json::Value sessionInfo;
     sessionInfo[MIGRATE_SESSION_ID] = EMPTY_SESSION;
-    sessionInfo[MIGRATE_BUNDLE_NAME] = DEFAULT_STRING;
-    sessionInfo[MIGRATE_ABILITY_NAME] = DEFAULT_STRING;
     std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_SESSION_INFO});
     SoftbusSessionUtils::TransferJsonToStr(sessionInfo, msg);
     SendByte(deviceId_, msg);
@@ -299,6 +297,9 @@ void MigrateAVSessionServer::ProcFromNext(const std::string &deviceId, const std
             break;
         case SYNC_SWITCH_AUDIO_DEVICE_COMMAND:
             SwitchAudioDeviceCommand(commandJsonValue);
+            break;
+        case COLD_START:
+            ProcessColdStartFromNext(commandJsonValue);
             break;
         default:
             SLOGE("messageType %{public}d not support", messageType);
@@ -334,6 +335,18 @@ void MigrateAVSessionServer::ProcControlCommandFromNext(Json::Value commandJsonV
         SLOGE("ProcControlCommandFromNext parse invalid command type:%{public}d", commandCode);
         return;
     }
+}
+
+void MigrateAVSessionServer::ProcessColdStartFromNext(Json::Value commandJsonValue)
+{
+    std::string bundleName;
+    if (commandJsonValue.isMember(MIGRATE_BUNDLE_NAME)) {
+        bundleName = commandJsonValue[MIGRATE_BUNDLE_NAME].isString() ?
+            commandJsonValue[MIGRATE_BUNDLE_NAME].asString() : "";
+    }
+    SLOGI("ProcessColdStartFromNext with bundleName:%{public}s", bundleName.c_str());
+    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessColdStartFromNext without servicePtr, return");
+    servicePtr_->StartAVPlayback(bundleName, "");
 }
 
 std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFunc()

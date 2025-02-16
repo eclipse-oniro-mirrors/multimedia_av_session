@@ -220,6 +220,8 @@ const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::Migrate
             case AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO:
                 GetPreferredOutputDeviceForRendererInfo(extras);
                 break;
+            case SESSION_NUM_COLD_START_FROM_PROXY:
+                ColdStartFromProxy();
             default:
                 break;
         }
@@ -282,6 +284,16 @@ void MigrateAVSessionProxy::GetPreferredOutputDeviceForRendererInfo(AAFwk::WantP
     extras.SetParam(AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, OHOS::AAFwk::String::Box(jsonStr));
 }
 
+void MigrateAVSessionProxy::ColdStartFromProxy()
+{
+    SLOGI("proxy in ColdStartFromProxy case with bundleName:%{public}s", elementName_.GetAbilityName().c_str());
+    std::string msg = std::string({MSG_HEAD_MODE, COLD_START});
+    Json::Value controlMsg;
+    controlMsg[MIGRATE_BUNDLE_NAME] = elementName_.GetAbilityName();
+    SoftbusSessionUtils::TransferJsonToStr(controlMsg, msg);
+    SendByte(deviceId_, msg);
+}
+
 void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
 {
     CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessSessionInfo with remote session null");
@@ -302,9 +314,10 @@ void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
         elementName_.SetAbilityName(abilityName);
     }
     SLOGI("ProcessMetaData with sessionId:%{public}s|bundleName:%{public}s done",
-        sessionId.c_str(), elementName_.GetBundleName().c_str());
+        SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), elementName_.GetBundleName().c_str());
     if (sessionId.empty() || sessionId == DEFAULT_STRING || sessionId == EMPTY_SESSION) {
         remoteSession_->Deactivate();
+        elementName_.SetAbilityName(elementName_.GetBundleName());
         elementName_.SetBundleName("");
     } else {
         remoteSession_->Activate();

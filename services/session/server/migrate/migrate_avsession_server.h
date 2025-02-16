@@ -109,6 +109,7 @@ private:
     void ProcControlCommandFromNext(Json::Value commandJsonValue);
     void VolumeControlCommand(Json::Value commandJsonValue);
     void SwitchAudioDeviceCommand(Json::Value jsonObject);
+    void ProcessColdStartFromNext(Json::Value commandJsonValue);
     void SendCommandProc(const std::string &command, sptr<AVControllerItem> controller);
     void MediaButtonEventProc(const std::string &command, sptr<AVControllerItem> controller);
     void CommandWithExtrasProc(int mediaCommand, const std::string &extrasCommand, const std::string &extras,
