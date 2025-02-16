@@ -278,6 +278,10 @@ int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackState
 
 int32_t AVControllerItem::Destroy()
 {
+    if (sessionId_ == "DEFAULT") {
+        SLOGE("controller create inside can not be destroy from outside");
+        return AVSESSION_SUCCESS;
+    }
     SLOGI("controller destroyed for pid %{public}d", static_cast<int>(pid_));
     {
         std::lock_guard callbackLockGuard(callbackMutex_);

@@ -46,6 +46,7 @@ public:
     void HandleToggleFavorite(const std::string& mediaId);
     void HandleCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
     void GetDistributedSessionControllerList(std::vector<sptr<IRemoteObject>>& controllerList);
+    bool CheckMediaAlive();
 
     enum {
         AUDIO_NUM_SET_VOLUME = 0,
@@ -93,6 +94,7 @@ private:
     sptr<AVSessionItem> remoteSession_ = nullptr;
     sptr<AVControllerItem> preSetController_ = nullptr;
     AVSessionService *servicePtr_ = nullptr;
+    AppExecFwk::ElementName elementName_;
 
     int32_t volumeNum_ = 0;
     AudioDeviceDescriptorsWithSptr availableDevices_;

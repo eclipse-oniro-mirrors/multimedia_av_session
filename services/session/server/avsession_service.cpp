@@ -207,6 +207,13 @@ int32_t AVSessionService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
         SLOGI("IPC is not invoked for a long time, but the app has sa.");
         return -1;
     }
+    for (const auto& pair : migrateAVSessionProxyMap_) {
+        std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
+            std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
+        CHECK_AND_CONTINUE(migrateAVSessionProxy != nullptr);
+        CHECK_AND_RETURN_RET_LOG(!migrateAVSessionProxy->CheckMediaAlive(), -1,
+            "migrate proxy with media alive, should not stop");
+    }
     return 0;
 }
 
@@ -218,6 +225,7 @@ void AVSessionService::OnActive(const SystemAbilityOnDemandReason& activeReason)
 
 void AVSessionService::OnStop()
 {
+    PublishEvent(remoteMediaNone);
     StopMigrateStubFunc stopMigrateStub =
         reinterpret_cast<StopMigrateStubFunc>(dlsym(migrateStubFuncHandle_, "StopMigrateStub"));
     if (stopMigrateStub == nullptr) {
@@ -522,7 +530,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
             return;
         }
 
-        SLOGI("uid=%{public}d sessionId=%{public}s", newTopSession->GetUid(),
+        SLOGI("updateNewTop uid=%{public}d sessionId=%{public}s", newTopSession->GetUid(),
             AVSessionUtils::GetAnonySessionId(newTopSession->GetSessionId()).c_str());
         if (topSession_ != nullptr) {
             topSession_->SetTop(false);
@@ -548,6 +556,10 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
     }
 
     NotifyTopSessionChanged(descriptor);
+    if (topSession_ != nullptr && !topSession_->IsCasting()) {
+        std::string preloadSessionId = topSession_->GetSessionId();
+        NotifyLocalFrontSessionChangeForMigrate(preloadSessionId);
+    }
 }
 
 void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t userId)
@@ -2990,7 +3002,7 @@ void AVSessionService::PublishEvent(int32_t mediaPlayState)
     data.SetWant(want);
     EventFwk::CommonEventPublishInfo publishInfo;
     int ret = EventFwk::CommonEventManager::NewPublishCommonEvent(data, publishInfo);
-    SLOGI("NewPublishCommonEvent return %{public}d", ret);
+    SLOGI("NewPublishCommonEvent:%{public}d return %{public}d", mediaPlayState, ret);
 }
 
 std::shared_ptr<Media::PixelMap> ConvertDefaultImage()
