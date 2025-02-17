@@ -150,6 +150,11 @@ void AVControllerCallbackClient::AddListenerForPlaybackState(const std::function
     playbackStateListener_ = listener;
 }
 
+void AVControllerCallbackClient::RemoveListenerForPlaybackState()
+{
+    playbackStateListener_ = nullptr;
+}
+
 AVControllerCallbackClient::~AVControllerCallbackClient()
 {
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask(EVENT_NAME);

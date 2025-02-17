@@ -20,6 +20,7 @@
 
 #include "iavsession_controller.h"
 #include "iremote_proxy.h"
+#include "avcontroller_callback_client.h"
 
 namespace OHOS::AVSession {
 class AVSessionControllerProxy : public IRemoteProxy<IAVSessionController> {
@@ -89,6 +90,7 @@ private:
     const int32_t maxImageSize = 10 * 1024 * 1024;
 
     std::recursive_mutex controllerProxyLock_;
+    sptr<AVControllerCallbackClient> callback_;
 };
 }
 
