@@ -188,6 +188,7 @@ export struct AVCastPicker {
 
   @State isPc: boolean = false;
   @State isRTL: boolean = false;
+  @State restartUECMessage: number = 1;
 
   MenuStateChange() {
     if (this.extensionProxy != null) {
@@ -325,6 +326,7 @@ export struct AVCastPicker {
           'avCastPickerStyle': this.pickerStyle,
           'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
           'isCustomPicker': isCustomPicker,
+          'message': this.restartUECMessage,
         }
       })
       .onRemoteReady((proxy: UIExtensionProxy) => {
@@ -454,6 +456,14 @@ export struct AVCastPicker {
             this.touchMenuItemIndex = -1;
           }
         }
+      })
+      .onRelease((releaseCode) => {
+        if (releaseCode === 1) {
+          this.restartUECMessage += 1;
+        }
+      })
+      .onError(() => {
+        this.restartUECMessage += 1;
       })
       .accessibilityLevel('yes')
       .accessibilityText(this.accessibilityAudioControlStr)
