@@ -42,128 +42,6 @@ napi_env NapiAsyncCallback::GetEnv() const
     return env_;
 }
 
-void NapiAsyncCallback::AfterWorkCallback(uv_work_t* work, int aStatus)
-{
-    AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::AfterWorkCallback");
-    std::shared_ptr<DataContext> context(static_cast<DataContext*>(work->data), [&work](DataContext* ptr) {
-        delete ptr;
-        ptr = nullptr;
-        delete work;
-        work = nullptr;
-    });
-
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(context->env, &scope);
-
-    int argc = 0;
-    napi_value argv[ARGC_MAX] = { nullptr };
-    if (context->getter) {
-        argc = ARGC_MAX;
-        context->getter(context->env, argc, argv);
-    }
-
-    SLOGD("queue uv_after_work_cb");
-    napi_value global {};
-    napi_get_global(context->env, &global);
-    napi_value function {};
-    napi_get_reference_value(context->env, context->method, &function);
-    napi_value result;
-    napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
-    if (status != napi_ok) {
-        SLOGE("call function failed status=%{public}d.", status);
-    }
-    napi_close_handle_scope(context->env, scope);
-}
-
-void NapiAsyncCallback::AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus)
-{
-    AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::AfterWorkCallbackWithFlag");
-    std::shared_ptr<DataContextWithFlag> context(static_cast<DataContextWithFlag*>(work->data),
-        [&work](DataContextWithFlag* ptr) {
-        delete ptr;
-        ptr = nullptr;
-        delete work;
-        work = nullptr;
-    });
-
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(context->env, &scope);
-
-    int argc = 0;
-    napi_value argv[ARGC_MAX] = { nullptr };
-    if (context->getter) {
-        argc = ARGC_MAX;
-        context->getter(context->env, argc, argv);
-    }
-
-    SLOGD("queue uv_after_work_cb");
-    napi_value global {};
-    napi_get_global(context->env, &global);
-    napi_value function {};
-    SLOGD("callback with flag");
-    if (!*context->isValid) {
-        SLOGE("AfterWorkCallbackWithFlag callback when callback is invalid");
-        napi_close_handle_scope(context->env, scope);
-        return;
-    }
-    napi_get_reference_value(context->env, context->method, &function);
-    napi_value result;
-    napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
-    if (status != napi_ok) {
-        SLOGE("call function failed status=%{public}d.", status);
-    }
-    napi_close_handle_scope(context->env, scope);
-}
-
-void NapiAsyncCallback::AfterWorkCallbackWithFunc(uv_work_t* work, int aStatus)
-{
-    AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::AfterWorkCallbackWithFunc");
-    std::shared_ptr<DataContextWithFunc> context(static_cast<DataContextWithFunc*>(work->data),
-        [&work](DataContextWithFunc* ptr) {
-        delete ptr;
-        ptr = nullptr;
-        delete work;
-        work = nullptr;
-    });
-
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(context->env, &scope);
-
-    int argc = 0;
-    napi_value argv[ARGC_MAX] = { nullptr };
-    if (context->getter) {
-        argc = ARGC_MAX;
-        context->getter(context->env, argc, argv);
-    }
-
-    SLOGD("queue uv_after_work_cb");
-    if (!*context->isValid) {
-        SLOGE("AfterWorkCallbackWithFunc failed for context is invalid.");
-        napi_close_handle_scope(context->env, scope);
-        return;
-    }
-    napi_value global {};
-    napi_get_global(context->env, &global);
-    napi_value function {};
-    if (!context->checkCallbackValid()) {
-        SLOGE("Get func reference failed for func has been deleted.");
-        napi_close_handle_scope(context->env, scope);
-        return;
-    }
-    napi_get_reference_value(context->env, context->method, &function);
-    napi_value result;
-    if (!context->checkCallbackValid()) {
-        SLOGE("Call func failed for func has been deleted.");
-        napi_close_handle_scope(context->env, scope);
-        return;
-    }
-    napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
-    if (status != napi_ok) {
-        SLOGE("call function failed status=%{public}d.", status);
-    }
-    napi_close_handle_scope(context->env, scope);
-}
-
 void NapiAsyncCallback::Call(napi_ref& method, NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
@@ -173,8 +51,41 @@ void NapiAsyncCallback::Call(napi_ref& method, NapiArgsGetter getter)
     CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
     work->data = new DataContext{env_, method, std::move(getter)};
-    int res = uv_queue_work_with_qos(loop_, work, [](uv_work_t* work) {}, AfterWorkCallback, uv_qos_user_initiated);
-    CHECK_RETURN_VOID(res == 0, "uv queue work failed");
+    auto task = [work] {
+        AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::Call");
+        std::shared_ptr<DataContext> context(static_cast<DataContext*>(work->data), [](DataContext* ptr) {
+            delete ptr;
+            ptr = nullptr;
+        });
+
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(context->env, &scope);
+
+        int argc = 0;
+        napi_value argv[ARGC_MAX] = { nullptr };
+        if (context == nullptr) {
+            SLOGE("context is nullptr");
+            return;
+        }
+        if (context->getter) {
+            argc = ARGC_MAX;
+            context->getter(context->env, argc, argv);
+        }
+
+        napi_value global {};
+        napi_get_global(context->env, &global);
+        napi_value function {};
+        napi_get_reference_value(context->env, context->method, &function);
+        napi_value result;
+        napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
+        if (status != napi_ok) {
+            SLOGE("call function failed status=%{public}d.", status);
+        }
+        napi_close_handle_scope(context->env, scope);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+        SLOGE("Call: napi_send_event fail");
+    }
 }
 
 void NapiAsyncCallback::CallWithFlag(napi_ref& method, std::shared_ptr<bool> isValid, NapiArgsGetter getter)
@@ -186,23 +97,105 @@ void NapiAsyncCallback::CallWithFlag(napi_ref& method, std::shared_ptr<bool> isV
     CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
     work->data = new DataContextWithFlag { env_, method, isValid, std::move(getter) };
-    int res = uv_queue_work_with_qos(loop_, work, [](uv_work_t* work) {}, AfterWorkCallbackWithFlag,
-        uv_qos_user_initiated);
-    CHECK_RETURN_VOID(res == 0, "uv queue work failed");
+    auto task = [work] {
+        AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::CallWithFlag");
+        std::shared_ptr<DataContextWithFlag> context(static_cast<DataContextWithFlag*>(work->data),
+            [](DataContextWithFlag* ptr) {
+            delete ptr;
+            ptr = nullptr;
+        });
+
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(context->env, &scope);
+
+        int argc = 0;
+        napi_value argv[ARGC_MAX] = { nullptr };
+        if (context == nullptr) {
+            SLOGE("context is nullptr");
+            return;
+        }
+        if (context->getter) {
+            argc = ARGC_MAX;
+            context->getter(context->env, argc, argv);
+        }
+
+        napi_value global {};
+        napi_get_global(context->env, &global);
+        napi_value function {};
+        SLOGD("callback with flag");
+        if (!*context->isValid) {
+            SLOGE("AfterWorkCallbackWithFlag callback when callback is invalid");
+            napi_close_handle_scope(context->env, scope);
+            return;
+        }
+        napi_get_reference_value(context->env, context->method, &function);
+        napi_value result;
+        napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
+        if (status != napi_ok) {
+            SLOGE("call function failed status=%{public}d.", status);
+        }
+        napi_close_handle_scope(context->env, scope);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+        SLOGE("CallWithFlag: napi_send_event fail");
+    }
 }
 
 void NapiAsyncCallback::CallWithFunc(napi_ref& method, std::shared_ptr<bool> isValid,
     const std::function<bool()>& checkCallbackValid, NapiArgsGetter getter)
 {
-    CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
-    CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
+    CHECK_RETURN_VOID(loop_ != nullptr && method != nullptr, "loop_ or method is nullptr");
 
     auto* work = new (std::nothrow) uv_work_t;
     CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
     work->data = new DataContextWithFunc { env_, method, isValid, std::move(getter), checkCallbackValid };
-    int res = uv_queue_work_with_qos(loop_, work, [](uv_work_t* work) {}, AfterWorkCallbackWithFunc,
-        uv_qos_user_initiated);
-    CHECK_RETURN_VOID(res == 0, "uv queue work failed");
+    auto task = [work] {
+        AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::AfterWorkCallbackWithFunc");
+        std::shared_ptr<DataContextWithFunc> context(static_cast<DataContextWithFunc*>(work->data),
+            [](DataContextWithFunc* ptr) {
+            delete ptr;
+            ptr = nullptr;
+        });
+
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(context->env, &scope);
+
+        int argc = 0;
+        napi_value argv[ARGC_MAX] = { nullptr };
+        CHECK_RETURN_VOID(context != nullptr, "context is nullptr");
+        if (context->getter) {
+            argc = ARGC_MAX;
+            context->getter(context->env, argc, argv);
+        }
+
+        if (!(*context->isValid)) {
+            SLOGE("AfterWorkCallbackWithFunc failed for context is invalid.");
+            napi_close_handle_scope(context->env, scope);
+            return;
+        }
+        napi_value global {};
+        napi_get_global(context->env, &global);
+        napi_value function {};
+        if (!context->checkCallbackValid()) {
+            SLOGE("Get func reference failed for func has been deleted.");
+            napi_close_handle_scope(context->env, scope);
+            return;
+        }
+        napi_get_reference_value(context->env, context->method, &function);
+        napi_value result;
+        if (!context->checkCallbackValid()) {
+            SLOGE("Call func failed for func has been deleted.");
+            napi_close_handle_scope(context->env, scope);
+            return;
+        }
+        if (napi_status::napi_ok != napi_call_function(context->env, global, function, argc, argv, &result)) {
+            SLOGE("call function failed");
+        }
+        napi_close_handle_scope(context->env, scope);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+        SLOGE("CallWithFlag: napi_send_event fail");
+    }
 }
 }

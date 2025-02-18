@@ -44,12 +44,6 @@ public:
         NapiArgsGetter getter = NapiArgsGetter());
 
 private:
-    static void AfterWorkCallback(uv_work_t* work, int aStatus);
-
-    static void AfterWorkCallbackWithFlag(uv_work_t* work, int aStatus);
-
-    static void AfterWorkCallbackWithFunc(uv_work_t* work, int aStatus);
-
     struct DataContext {
         napi_env env;
         napi_ref& method;
