@@ -34,6 +34,7 @@ using AudioDeviceDescriptorsCallbackFunc = std::function<void(const AudioDeviceD
 
 class AudioVolumeKeyEventCallback;
 class AudioPreferredDeviceChangeCallback;
+class AudioAllowedPlaybackCallback;
 
 class AudioAdapter : public AudioStandard::AudioRendererStateChangeCallback,
                      public AudioStandard::AudioManagerDeviceChangeCallback,
@@ -91,6 +92,8 @@ public:
     int32_t SetDeviceChangeCallback();
     int32_t UnsetDeviceChangeCallback();
 
+    int32_t RegisterAllowedPlaybackCallback(const std::function<bool(int32_t, int32_t)>& callback);
+
     AudioDeviceDescriptorsWithSptr GetPreferredOutputDeviceForRendererInfo();
     int32_t SetPreferredOutputDeviceChangeCallback(const std::function<void(
         const AudioDeviceDescriptorsWithSptr&)>& callback);
@@ -99,7 +102,7 @@ public:
     int32_t SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc);
     AudioDeviceDescriptorWithSptr FindRenderDeviceForUsage(const AudioDeviceDescriptorsWithSptr& devices,
         const AudioDeviceDescriptorWithSptr& desc);
-
+    std::function<bool(int32_t, int32_t)> GetAllowedPlaybackCallbackFunc();
 private:
     static std::shared_ptr<AudioAdapter> instance_;
     static std::once_flag onceFlag_;
@@ -120,6 +123,9 @@ private:
 
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
     bool is2in1_ {false};
+
+    std::function<bool(int32_t, int32_t)> queryAllowedPlaybackCallbackFunc_;
+    std::shared_ptr<AudioAllowedPlaybackCallback> playbackCallback_;
 };
 
 class AudioVolumeKeyEventCallback : public AudioStandard::VolumeKeyEventCallback {
@@ -152,5 +158,20 @@ public:
 private:
     const AudioDeviceDescriptorsCallbackFunc callback_;
 };
+
+class AudioAllowedPlaybackCallback : public AudioStandard::AudioQueryAllowedPlaybackCallback {
+    public:
+        explicit AudioAllowedPlaybackCallback(const std::function<bool(
+            int32_t, int32_t)>& callback) : callback_(callback) { }
+        ~AudioAllowedPlaybackCallback() = default;
+
+        bool OnQueryAllowedPlayback(int32_t uid, int32_t pid) override
+        {
+            return callback_(uid, pid);
+        }
+
+    private:
+        const std::function<bool(int32_t, int32_t)> callback_;
+    };
 }
 #endif // AV_SESSION_AUDIO_ADAPTER_H

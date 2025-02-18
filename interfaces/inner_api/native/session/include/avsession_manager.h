@@ -218,15 +218,6 @@ public:
      */
     virtual int32_t Close(void) = 0;
 
-    /**
-     * check if playing back is allowed
-     *
-     * @param uid uid.
-     * @return whether this app is allowed playing background.
-     * @since 12
-    */
-    virtual bool IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid) = 0;
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     virtual int32_t GetAVCastController(const std::string& sessionId,
         std::shared_ptr<AVCastController>& castController) = 0;

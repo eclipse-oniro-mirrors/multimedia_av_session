@@ -70,11 +70,6 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    bool IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid) override
-    {
-        return false;
-    }
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override
     {

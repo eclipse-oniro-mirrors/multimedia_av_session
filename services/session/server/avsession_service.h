@@ -185,8 +185,6 @@ public:
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
-    bool IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid) override;
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 #endif

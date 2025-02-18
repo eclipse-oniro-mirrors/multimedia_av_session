@@ -85,8 +85,6 @@ public:
     int32_t GetDistributedSessionControllers(const DistributedSessionType& sessionType,
         std::vector<std::shared_ptr<AVSessionController>>& sessionControllers) override;
 
-    bool IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid) override;
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes) override;
 

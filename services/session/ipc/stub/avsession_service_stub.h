@@ -57,7 +57,6 @@ private:
     int32_t GetAVQueueInfosImgLength(std::vector<AVQueueInfo>& avQueueInfos);
     void MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos);
     void AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQueueInfos, unsigned char *buffer);
-    int32_t HandleIsAudioPlaybackAllowed(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetDistributedSessionControllersInner(MessageParcel& data, MessageParcel& reply);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
@@ -115,8 +114,6 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleStopCast(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleClose(data, reply); }},
-        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CHECK_BACKGROUND_ALLOWED),
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleIsAudioPlaybackAllowed(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_DISTRIBUTED_SESSION_CONTROLLERS),
             [this](MessageParcel& data, MessageParcel& reply) {
             return HandleGetDistributedSessionControllersInner(data, reply); }}
@@ -170,8 +167,6 @@ private:
             "HandleStopCast"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
             "HandleClose"},
-        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CHECK_BACKGROUND_ALLOWED),
-            "HandleIsAudioPlaybackAllowed"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_DISTRIBUTED_SESSION_CONTROLLERS),
             "HandleGetDistributedSessionControllersInner"}
     };

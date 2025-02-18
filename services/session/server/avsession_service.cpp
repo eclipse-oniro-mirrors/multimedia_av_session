@@ -1724,20 +1724,6 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     return AVSESSION_ERROR;
 }
 
-bool AVSessionService::IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid)
-{
-    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    CHECK_AND_RETURN_RET_LOG(mgr != nullptr, true, "SystemAbilityManager is null");
-    auto object = mgr->CheckSystemAbility(APP_MGR_SERVICE_ID);
-    CHECK_AND_RETURN_RET_LOG(object != nullptr, true, "APP_MAGR_SERVICE is null");
-    bool hasSession = GetContainer().UidHasSession(uid);
-    bool isBack = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
-    bool isSystem = PermissionChecker::GetInstance().CheckSystemPermissionByUid(uid);
-    SLOGI("uid=%{public}d pid=%{public}d hasSession=%{public}d isBack=%{public}d isSystem=%{public}d", uid,
-        pid, hasSession, isBack, isSystem);
-    return hasSession || isSystem || !isBack;
-}
-
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session)
 {
     SLOGI("pid=%{public}d sessionId=%{public}s", pid,
