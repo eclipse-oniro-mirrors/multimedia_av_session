@@ -536,6 +536,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     SLOGI("UpdateFrontSession with bundle=%{public}s isAdd=%{public}d", sessionItem->GetBundleName().c_str(), isAdd);
     std::lock_guard frontLockGuard(sessionFrontLock_);
     SLOGD("UpdateFrontSession pass lock");
+    int32_t userId = GetUsersManager().GetCurrentUserId();
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
@@ -556,8 +557,8 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
             SLOGD("top session is remove session");
             UpdateTopSession(nullptr);
-            int32_t ret = Notification::NotificationHelper::CancelNotification(0);
-            SLOGI("CancelNotification ret=%{public}d", ret);
+            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
+            SLOGI("CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
         }
         sessionListForFront->remove(sessionItem);
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
@@ -2210,8 +2211,9 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
         if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
             SLOGD("Top session is released session");
             UpdateTopSession(nullptr);
-            int32_t ret = Notification::NotificationHelper::CancelNotification(0);
-            SLOGI("topsession release cancelNotification ret=%{public}d", ret);
+            int32_t userId = GetUsersManager().GetCurrentUserId();
+            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
+            SLOGI("Topsession release CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
         }
         if (sessionItem->GetRemoteSource() != nullptr) {
             int32_t ret = CancelCastAudioForClientExit(sessionItem->GetPid(), sessionItem);
@@ -3025,6 +3027,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     std::shared_ptr<Notification::NotificationContent> content =
         std::make_shared<Notification::NotificationContent>(localLiveViewContent);
     CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
+    int32_t userId = GetUsersManager().GetCurrentUserId();
 
     auto uid = topSession_ ? topSession_->GetUid() : (historyDescriptor ? historyDescriptor->uid_ : -1);
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
@@ -3033,14 +3036,14 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     request.SetCreatorUid(avSessionUid);
     request.SetUnremovable(true);
     request.SetInProgress(true);
-    int32_t userId;
     auto res = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
     request.SetCreatorUserId((res == 0) ? userId : 0);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
     request.SetWantAgent(wantAgent);
+    request.SetLabel(std::to_string(userId));
     result = Notification::NotificationHelper::PublishNotification(request);
-    SLOGI("PublishNotification uid %{public}d, userId %{public}d, result %{public}d", uid, userId, result);
+    SLOGI("PublishNotification uid %{public}d, user id %{public}d, result %{public}d", uid, userId, result);
 }
 // LCOV_EXCL_STOP
 
