@@ -45,8 +45,8 @@ private:
     void HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos& infos);
 
     bool IsFocusSession(const AudioStandard::AudioRendererChangeInfo& info);
-    bool SelectFocusSession(const AudioRendererChangeInfos& infos, FocusSessionChangeInfo& sessionInfo);
     void CheckFocusSessionStop(const AudioStandard::AudioRendererChangeInfo& info);
+    void UpdateFocusSession(const int32_t uid);
 
     FocusSessionChangeCallback callback_;
     FocusSessionSelector selector_;
@@ -54,6 +54,7 @@ private:
     std::recursive_mutex stateLock_;
     std::map<int32_t, AudioStandard::RendererState> lastStates_;
     const int32_t cancelTimeout = 5000;
+    const int32_t runningCheckTime = 100;
 };
 }
 #endif // OHOS_FOCUS_SESSION_STRATEGY_H
