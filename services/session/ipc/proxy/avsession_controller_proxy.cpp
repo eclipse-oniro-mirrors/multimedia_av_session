@@ -29,6 +29,9 @@ AVSessionControllerProxy::AVSessionControllerProxy(const sptr<IRemoteObject>& im
 AVSessionControllerProxy::~AVSessionControllerProxy()
 {
     SLOGI("destroy");
+    if (callback_) {
+        callback_->RemoveListenerForPlaybackState();
+    }
     Destroy();
 }
 
@@ -530,7 +533,6 @@ int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVContr
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
 
-    sptr<AVControllerCallbackClient> callback_;
     callback_ = new(std::nothrow) AVControllerCallbackClient(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVControllerCallbackClient failed");
 
