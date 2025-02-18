@@ -203,8 +203,9 @@ int32_t AVSessionService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
 {
     SLOGI("OnIdle SA, idle reason %{public}d, %{public}s, %{public}s",
         idleReason.GetId(), idleReason.GetName().c_str(), idleReason.GetValue().c_str());
-    if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() != 0) {
-        SLOGI("IPC is not invoked for a long time, but the app has sa.");
+    int ret = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
+    if (ret != 0) {
+        SLOGI("IPC is not used for a long time, there are %{public}d sessions.", ret);
         return -1;
     }
     for (const auto& pair : migrateAVSessionProxyMap_) {
