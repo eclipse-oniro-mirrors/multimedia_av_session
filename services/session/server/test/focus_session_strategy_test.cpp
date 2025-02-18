@@ -195,14 +195,11 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession001, testing::ext::TestS
         return false;
     };
     focusSessionStrategy.RegisterFocusSessionSelector(func);
-    FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
-    bool ret = focusSessionStrategy.SelectFocusSession(infos, sessionInfo);
-    EXPECT_EQ(ret, false);
     AudioRendererChangeInfo audioRendererChangeInfo;
     audioRendererChangeInfo.clientUID = 1;
     audioRendererChangeInfo.sessionId = 2;
     audioRendererChangeInfo.rendererState = RendererState::RENDERER_RELEASED;
-    ret = focusSessionStrategy.IsFocusSession(audioRendererChangeInfo);
+    bool ret = focusSessionStrategy.IsFocusSession(audioRendererChangeInfo);
     EXPECT_EQ(ret, false);
     SLOGD("IsFocusSession001 end!");
 }
@@ -227,14 +224,11 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession002, testing::ext::TestS
         return true;
     };
     focusSessionStrategy.RegisterFocusSessionSelector(func);
-    FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
-    bool ret = focusSessionStrategy.SelectFocusSession(infos, sessionInfo);
-    EXPECT_EQ(ret, false);
     AudioRendererChangeInfo audioRendererChangeInfo;
     audioRendererChangeInfo.clientUID = 1;
     audioRendererChangeInfo.sessionId = 2;
     audioRendererChangeInfo.rendererState = RendererState::RENDERER_RUNNING;
-    ret = focusSessionStrategy.IsFocusSession(audioRendererChangeInfo);
+    bool ret = focusSessionStrategy.IsFocusSession(audioRendererChangeInfo);
     EXPECT_EQ(ret, true);
     SLOGD("IsFocusSession002 end!");
 }
