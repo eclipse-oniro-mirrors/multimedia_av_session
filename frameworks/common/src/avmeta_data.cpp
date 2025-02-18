@@ -36,6 +36,7 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
         parcel.WriteString(subTitle_) &&
         parcel.WriteString(description_) &&
         parcel.WriteString(lyric_) &&
+        parcel.WriteString(singleLyricText_) &&
         parcel.WriteString(previousAssetId_) &&
         parcel.WriteString(nextAssetId_) &&
         parcel.WriteInt32(skipIntervals_) &&
@@ -87,6 +88,7 @@ bool AVMetaData::UnmarshallingCheckParamTask(Parcel& data, AVMetaData *result)
         !data.ReadString(result->subTitle_) ||
         !data.ReadString(result->description_) ||
         !data.ReadString(result->lyric_) ||
+        !data.ReadString(result->singleLyricText_) ||
         !data.ReadString(result->previousAssetId_) ||
         !data.ReadString(result->nextAssetId_) ||
         !data.ReadInt32(result->skipIntervals_) ||
@@ -139,6 +141,7 @@ bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData meta
         data.WriteString(metaIn.subTitle_) &&
         data.WriteString(metaIn.description_) &&
         data.WriteString(metaIn.lyric_) &&
+        data.WriteString(metaIn.singleLyricText_) &&
         data.WriteString(metaIn.previousAssetId_) &&
         data.WriteString(metaIn.nextAssetId_) &&
         data.WriteInt32(metaIn.skipIntervals_) &&
@@ -184,6 +187,7 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
         !data.ReadString(metaOut.subTitle_) ||
         !data.ReadString(metaOut.description_) ||
         !data.ReadString(metaOut.lyric_) ||
+        !data.ReadString(metaOut.singleLyricText_) ||
         !data.ReadString(metaOut.previousAssetId_) ||
         !data.ReadString(metaOut.nextAssetId_) ||
         !data.ReadInt32(metaOut.skipIntervals_) ||
@@ -470,6 +474,17 @@ std::string AVMetaData::GetLyric() const
     return lyric_;
 }
 
+void AVMetaData::SetSingleLyricText(const std::string& singleLyricText)
+{
+    singleLyricText_ = singleLyricText;
+    metaMask_.set(META_KEY_SINGLE_LYRIC_TEXT);
+}
+
+std::string AVMetaData::GetSingleLyricText() const
+{
+    return singleLyricText_;
+}
+
 void AVMetaData::SetPreviousAssetId(const std::string& assetId)
 {
     previousAssetId_ = assetId;
@@ -589,6 +604,7 @@ void AVMetaData::Reset()
     subTitle_ = "";
     description_ = "";
     lyric_ = "";
+    singleLyricText_ = "";
     previousAssetId_ = "";
     nextAssetId_ = "";
     skipIntervals_ = SECONDS_15;
@@ -617,6 +633,7 @@ void AVMetaData::ResetExtAssetId()
     subTitle_ = "";
     description_ = "";
     lyric_ = "";
+    singleLyricText_ = "";
     previousAssetId_ = "";
     nextAssetId_ = "";
     skipIntervals_ = SECONDS_15;
@@ -688,6 +705,7 @@ bool AVMetaData::EqualWithUri(const AVMetaData& metaData)
         && (subTitle_ == metaData.subTitle_)
         && (description_ == metaData.description_)
         && (lyric_ == metaData.lyric_)
+        && (singleLyricText_ == metaData.singleLyricText_)
         && (previousAssetId_ == metaData.previousAssetId_)
         && (nextAssetId_ == metaData.nextAssetId_)
         && (skipIntervals_ == metaData.skipIntervals_)
@@ -795,6 +813,11 @@ void AVMetaData::CloneDescription(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneLyric(const AVMetaData& from, AVMetaData& to)
 {
     to.lyric_ = from.lyric_;
+}
+
+void AVMetaData::CloneSingleLyricText(const AVMetaData& from, AVMetaData& to)
+{
+    to.singleLyricText_ = from.singleLyricText_;
 }
 
 void AVMetaData::ClonePreviousAssetId(const AVMetaData& from, AVMetaData& to)
