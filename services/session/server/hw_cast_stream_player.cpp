@@ -160,19 +160,8 @@ void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand
 AVQueueItem HwCastStreamPlayer::GetCurrentItem()
 {
     SLOGI("Received GetCurrentItem request");
-    int32_t duration;
-    GetDuration(duration);
     // do not place streamPlayerLock_ in side of curItemLock_
     std::lock_guard lockGuard(curItemLock_);
-    std::shared_ptr<AVMediaDescription> mediaDescription = currentAVQueueItem_.GetDescription();
-    if (mediaDescription == nullptr) {
-        SLOGE("GetCurrentItem with nullptr, return with default");
-        return currentAVQueueItem_;
-    }
-    mediaDescription->SetDuration(duration);
-    AVQueueItem queueItem;
-    queueItem.SetDescription(mediaDescription);
-    currentAVQueueItem_ = queueItem;
     return currentAVQueueItem_;
 }
 
