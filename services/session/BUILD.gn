@@ -480,6 +480,7 @@ av_session_ohos_library("avsession_item") {
 
   deps = [
     "../../frameworks/common:avsession_common",
+    "../../frameworks/native/session:avsession_client",
     "../../utils:avsession_utils",
   ]
 
