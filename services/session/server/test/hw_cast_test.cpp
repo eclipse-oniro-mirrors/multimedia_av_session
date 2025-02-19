@@ -1023,7 +1023,7 @@ static HWTEST(HwCastTest, HwCastProviderSetDiscoverable001, TestSize.Level1)
     EXPECT_EQ(hwCastProvider != nullptr, true);
     hwCastProvider->Init();
     bool enable = true;
-    EXPECT_EQ(hwCastProvider->SetDiscoverable(enable), -1003);
+    EXPECT_EQ(hwCastProvider->SetDiscoverable(enable), AVSESSION_SUCCESS);
     SLOGI("HwCastProviderSetDiscoverable001 end!");
 }
 

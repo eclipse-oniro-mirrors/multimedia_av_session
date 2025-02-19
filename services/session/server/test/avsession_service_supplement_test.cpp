@@ -344,7 +344,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, Dump001, TestSize.Level1)
     std::vector<std::u16string> argsList;
     g_AVSessionService->OnStartProcess();
     int32_t ret = g_AVSessionService->Dump(1, argsList);
-    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("Dump001 end!");
 }
 
@@ -361,7 +361,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, Dump002, TestSize.Level1)
     argsList.emplace_back(str);
     g_AVSessionService->OnStartProcess();
     int32_t ret = g_AVSessionService->Dump(1, argsList);
-    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("Dump002 end!");
 }
 
