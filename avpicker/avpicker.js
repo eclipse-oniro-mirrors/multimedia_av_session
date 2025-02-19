@@ -79,6 +79,7 @@ export class AVCastPicker extends ViewPU {
         this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('音视频投播', this, 'accessibilityAudioControlStr');
         this.__isPc = new ObservedPropertySimplePU(false, this, 'isPc');
         this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
+        this.__restartUECMessage = new ObservedPropertySimplePU(1, this, 'restartUECMessage');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -145,6 +146,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.isRTL !== undefined) {
             this.isRTL = c11.isRTL;
         }
+        if (c11.restartUECMessage !== undefined) {
+            this.restartUECMessage = c11.restartUECMessage;
+        }
     }
 
     updateStateVars(b11) {
@@ -167,6 +171,7 @@ export class AVCastPicker extends ViewPU {
         this.__accessibilityAudioControlStr.purgeDependencyOnElmtId(a11);
         this.__isPc.purgeDependencyOnElmtId(a11);
         this.__isRTL.purgeDependencyOnElmtId(a11);
+        this.__restartUECMessage.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -186,6 +191,7 @@ export class AVCastPicker extends ViewPU {
         this.__accessibilityAudioControlStr.aboutToBeDeleted();
         this.__isPc.aboutToBeDeleted();
         this.__isRTL.aboutToBeDeleted();
+        this.__restartUECMessage.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -316,6 +322,14 @@ export class AVCastPicker extends ViewPU {
 
     set isRTL(f1) {
         this.__isRTL.set(f1);
+    }
+
+    get restartUECMessage() {
+        return this.__restartUECMessage.get();
+    }
+
+    set restartUECMessage(f1) {
+        this.__restartUECMessage.set(f1);
     }
 
     MenuStateChange() {
@@ -540,6 +554,7 @@ export class AVCastPicker extends ViewPU {
                     'avCastPickerStyle': this.pickerStyle,
                     'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
                     'isCustomPicker': c8,
+                    'message': this.restartUECMessage,
                 }
             });
             UIExtensionComponent.onRemoteReady((n8) => {
@@ -668,6 +683,14 @@ export class AVCastPicker extends ViewPU {
                         this.touchMenuItemIndex = -1;
                     }
                 }
+            });
+            UIExtensionComponent.onRelease((releaseCode) => {
+                if (releaseCode === 1) {
+                    this.restartUECMessage += 1;
+                }
+            });
+            UIExtensionComponent.onError(() => {
+                this.restartUECMessage += 1;
             });
             UIExtensionComponent.accessibilityLevel('yes');
             UIExtensionComponent.accessibilityText(this.__accessibilityAudioControlStr);
