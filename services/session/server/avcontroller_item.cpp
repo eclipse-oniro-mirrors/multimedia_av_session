@@ -17,6 +17,7 @@
 #include "ipc_skeleton.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_pixel_map_adapter.h"
 #include "avsession_trace.h"
 #include "command_send_limit.h"
 #include "avsession_utils.h"
@@ -120,13 +121,9 @@ void AVControllerItem::DoMetadataImgClean(AVMetaData& data)
     std::lock_guard metaMaskLockGuard(metaMaskMutex_);
     SLOGD("still clear media img in DoMetadataImgClean");
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
-    if (innerQueuePixelMap != nullptr) {
-        innerQueuePixelMap->Clear();
-    }
+    AVSessionPixelMapAdapter::CleanAVSessionPixelMap(innerQueuePixelMap);
     std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = data.GetMediaImage();
-    if (innerMediaPixelMap != nullptr) {
-        innerMediaPixelMap->Clear();
-    }
+    AVSessionPixelMapAdapter::CleanAVSessionPixelMap(innerMediaPixelMap);
 }
 
 // LCOV_EXCL_START
