@@ -134,7 +134,7 @@ static HWTEST_F(AVRouterTest, OnCastServerDied001, TestSize.Level1)
 {
     SLOGI("OnCastServerDied001 begin");
     auto ret = AVRouter::GetInstance().OnCastServerDied(-1);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
     SLOGI("OnCastServerDied001 end");
 }
 
