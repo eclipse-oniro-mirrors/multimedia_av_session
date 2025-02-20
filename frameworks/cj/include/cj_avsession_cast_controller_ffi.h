@@ -34,20 +34,24 @@ extern "C" {
 #endif
 #endif
 
-typedef void (*DoCallFunc)(CCallbackData*);
+typedef void (*DoCallFunc)(CCallbackData *);
 
-int32_t FfiMultimediaAVSessionCastControllerSubscribeCallbackWithExtras(
-    char* sessionId, int32_t type, CParameters* extras, DoCallFunc doCall);
-int32_t FfiMultimediaAVSessionCastControllerSubscribeCallback(char* sessionId, int32_t type, DoCallFunc doCall);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerSubscribeCallbackWithExtras(char *sessionId, int32_t type,
+                                                                                   CParameters *extras,
+                                                                                   DoCallFunc doCall);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerSubscribeCallback(char *sessionId, int32_t type,
+                                                                         DoCallFunc doCall);
 
-int32_t FfiMultimediaAVSessionCastControllerStart(char* sessionId, CAVQueueItem* item);
-int32_t FfiMultimediaAVSessionCastControllerPrepare(char* sessionId, CAVQueueItem* item);
-int32_t FfiMultimediaAVSessionCastControllerSendControlCommand(char* sessionId, CAVSessionCommand* command);
-int32_t FfiMultimediaAVSessionCastControllerGetAVPlaybackState(char* sessionId, CAVPlaybackState* avPlaybackState);
-int32_t FfiMultimediaAVSessionCastControllerGetCurrentItem(char* sessionId, CAVQueueItem* item);
-int32_t FfiMultimediaAVSessionCastControllerGetValidCommands(char* sessionId, CArray* commands);
-int32_t FfiMultimediaAVSessionCastControllerRelease(char* sessionId);
-int32_t FfiMultimediaAVSessionCastControllerProcessMediaKeyResponse(char* sessionId, char** assetId, CArray* response);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerStart(char *sessionId, CAVQueueItem *item);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerPrepare(char *sessionId, CAVQueueItem *item);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerSendControlCommand(char *sessionId, CAVSessionCommand *command);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerGetAVPlaybackState(char *sessionId,
+                                                                          CAVPlaybackState *avPlaybackState);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerGetCurrentItem(char *sessionId, CAVQueueItem *item);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerGetValidCommands(char *sessionId, CArray *commands);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerRelease(char *sessionId);
+FFI_EXPORT int32_t FfiMultimediaAVSessionCastControllerProcessMediaKeyResponse(char *sessionId, char **assetId,
+                                                                               CArray *response);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -55,4 +59,4 @@ int32_t FfiMultimediaAVSessionCastControllerProcessMediaKeyResponse(char* sessio
 #endif
 #endif
 #endif /* OHOS_CJ_AVSESSION_CAST_CONTROLLER_FFI_H */
-/**< @} */
+       /**< @} */
