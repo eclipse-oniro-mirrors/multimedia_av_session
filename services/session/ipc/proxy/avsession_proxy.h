@@ -96,7 +96,7 @@ public:
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    int32_t ReleaseCast() override;
+    int32_t ReleaseCast(bool continuePlay = false) override;
 #endif
 
 protected:

@@ -62,15 +62,18 @@ bool HwCastProviderSession::AddDevice(const std::string deviceId)
     return (ret == 0) ? true : false;
 }
 
-bool HwCastProviderSession::RemoveDevice(std::string deviceId)
+bool HwCastProviderSession::RemoveDevice(std::string deviceId, bool continuePlay)
 {
-    SLOGI("RemoveDevice in HwCastProviderSession");
+    SLOGI("RemoveDevice in HwCastProviderSession, continuePlay=%{public}d", static_cast<int32_t>(continuePlay));
     if (!castSession_) {
         SLOGE("castSession_ is not exist");
         return false;
     }
 
-    return castSession_->RemoveDevice(deviceId);
+    int32_t removeType = continuePlay
+        ? CastEngine::DeviceRemoveType::DEVICE_REMOVE_CONTINUE_PLAY
+        : CastEngine::DeviceRemoveType::DEVICE_REMOVE_DISCONNECT;
+    return castSession_->RemoveDevice(deviceId, removeType);
 }
 
 std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPlayer()

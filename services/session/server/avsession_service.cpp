@@ -1156,7 +1156,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         return;
     }
     sessionItem->SetServiceCallbackForRelease([this](AVSessionItem& session) {
-        HandleSessionRelease(session.GetDescriptor().sessionId_);
+        HandleSessionRelease(session.GetDescriptor().sessionId_, true);
     });
     sessionItem->SetServiceCallbackForAVQueueInfo([this](AVSessionItem& session) {
         AddAvQueueInfoToFile(session);
@@ -2122,12 +2122,12 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionService::ClearClientResources(pid_t pid)
+void AVSessionService::ClearClientResources(pid_t pid, bool continuePlay)
 {
     RemoveSessionListener(pid);
     {
         std::lock_guard lockGuard(sessionServiceLock_);
-        ClearSessionForClientDiedNoLock(pid);
+        ClearSessionForClientDiedNoLock(pid, continuePlay);
         ClearControllerForClientDiedNoLock(pid);
     }
     RemoveClientDeathObserver(pid);
@@ -2136,13 +2136,13 @@ void AVSessionService::ClearClientResources(pid_t pid)
 int32_t AVSessionService::Close(void)
 {
     auto pid = GetCallingPid();
-    ClearClientResources(pid);
+    ClearClientResources(pid, false);
     return AVSESSION_SUCCESS;
 }
 
 void AVSessionService::OnClientDied(pid_t pid)
 {
-    ClearClientResources(pid);
+    ClearClientResources(pid, true);
 }
 
 // LCOV_EXCL_START
@@ -2223,7 +2223,7 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName, in
 }
 // LCOV_EXCL_STOP
 
-void AVSessionService::HandleSessionRelease(std::string sessionId)
+void AVSessionService::HandleSessionRelease(std::string sessionId, bool continuePlay)
 {
     SLOGI("HandleSessionRelease, sessionId=%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     {
@@ -2232,7 +2232,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId)
         sptr<AVSessionItem> sessionItem = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
         NotifySessionRelease(sessionItem->GetDescriptor());
-        sessionItem->DestroyTask();
+        sessionItem->DestroyTask(continuePlay);
         if (topSession_.GetRefPtr() == sessionItem.GetRefPtr()) {
             UpdateTopSession(nullptr);
             int32_t userId = GetUsersManager().GetCurrentUserId();
@@ -2748,14 +2748,14 @@ int32_t AVSessionService::GetAudioDescriptor(const std::string deviceId,
     return AVSESSION_ERROR;
 }
 
-void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid)
+void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid, bool continuePlay)
 {
     SLOGI("clear session in ");
     auto sessions = GetUsersManager().GetContainerFromAll().GetSessionsByPid(pid);
     for (const auto& session : sessions) {
         SLOGI("check session release task for id %{public}s",
             AVSessionUtils::GetAnonySessionId(session->GetSessionId()).c_str());
-        HandleSessionRelease(session->GetSessionId());
+        HandleSessionRelease(session->GetSessionId(), continuePlay);
     }
 }
 
