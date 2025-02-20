@@ -70,10 +70,10 @@ bool HwCastProviderSession::RemoveDevice(std::string deviceId, bool continuePlay
         return false;
     }
 
-    int32_t removeType = continuePlay
-        ? CastEngine::DeviceRemoveType::DEVICE_REMOVE_CONTINUE_PLAY
-        : CastEngine::DeviceRemoveType::DEVICE_REMOVE_DISCONNECT;
-    return castSession_->RemoveDevice(deviceId, removeType);
+    if (continuePlay) {
+        return castSession_->RemoveDevice(deviceId, CastEngine::DeviceRemoveType::DEVICE_REMOVE_CONTINUE_PLAY);
+    }
+    return castSession_->RemoveDevice(deviceId);
 }
 
 std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPlayer()
