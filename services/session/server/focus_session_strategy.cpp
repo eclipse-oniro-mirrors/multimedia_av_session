@@ -89,7 +89,6 @@ bool FocusSessionStrategy::IsFocusSession(const AudioStandard::AudioRendererChan
             "AUDIO_INFO_RENDERER_STATE", info.rendererState,
             "DETAILED_MSG", "focussessionstrategy selectfocussession, last focus session info");
         int32_t uid = info.clientUID;
-        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckFocusStart");
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this, uid]() {
                 {

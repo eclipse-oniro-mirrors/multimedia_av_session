@@ -64,8 +64,11 @@ void AVCastControllerItem::CheckIfCancelCastCapsule()
 {
     if (IsStopState(currentState_)) {
         isPlayingState_ = false;
+        CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "CheckIfCancelCast castcontrollerproxy is nullptr");
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CancelCastCapsule");
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this]() {
+                CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "delCastCapsule castcontrollerproxy is nullptr");
                 if (sessionCallbackForCastNtf_ && !isPlayingState_) {
                     SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", isPlayingState_);
                     sessionCallbackForCastNtf_(sessionId_, false, false);
@@ -84,7 +87,7 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
             AVSessionRadar::GetInstance().PlayerStarted(info);
             // play state try notify notification
             isPlayingState_ = true;
-            if (sessionCallbackForCastNtf_) {
+            if ((castControllerProxy_ != nullptr) && sessionCallbackForCastNtf_) {
                 SLOGI("MediaCapsule addCastCapsule by play");
                 sessionCallbackForCastNtf_(sessionId_, true, false);
             }
@@ -515,6 +518,7 @@ int32_t AVCastControllerItem::Destroy()
     {
         std::lock_guard lockGuard(castControllerLock_);
         if (castControllerProxy_) {
+            castControllerProxy_->UnRegisterControllerListener(shared_from_this());
             castControllerProxy_ = nullptr;
         }
     }
