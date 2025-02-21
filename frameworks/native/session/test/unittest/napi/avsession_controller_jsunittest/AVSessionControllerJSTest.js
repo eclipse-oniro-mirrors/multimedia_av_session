@@ -75,6 +75,7 @@ describe("AVSessionControllerJsTest", function () {
 
   afterAll(function () {
     controller.destroy();
+    session.stopCasting();
     session.destroy();
     console.info(TAG + 'afterAll called');
   })
