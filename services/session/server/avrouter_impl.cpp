@@ -418,10 +418,11 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
 
 int32_t AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, DeviceInfo deviceInfo)
 {
-    if (castHandleToInfoMap_.find(castHandle) != castHandleToInfoMap_.end()) {
+    int64_t realCastHandle = castHandle == noMirrorCastHandle ? GetMirrorCastHandle() : castHandle;
+    if (castHandleToInfoMap_.find(realCastHandle) != castHandleToInfoMap_.end()) {
         OutputDeviceInfo device;
         device.deviceInfos_.emplace_back(deviceInfo);
-        castHandleToInfoMap_[castHandle].outputDeviceInfo_ = device;
+        castHandleToInfoMap_[realCastHandle].outputDeviceInfo_ = device;
     }
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumberEnableDefault_) != providerManagerMap_.end(),
         AVSESSION_ERROR, "Can not find corresponding provider");
