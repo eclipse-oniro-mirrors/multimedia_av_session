@@ -179,6 +179,8 @@ public:
     
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
 
+    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId, const std::string& deviceId);
+
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
     bool IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid) override;
@@ -192,6 +194,8 @@ public:
     int32_t RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener) override;
 
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
+
+    int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const std::map<std::string, std::string> extraInfo);
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
@@ -468,7 +472,7 @@ private:
 
     void DoMetadataImgClean(AVMetaData& data);
 
-    void HandleSystemKeyColdStart(const AVControlCommand &command);
+    void HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId = "");
 
     bool SubscribeCommonEvent();
 
