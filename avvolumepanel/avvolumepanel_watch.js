@@ -79,7 +79,7 @@ export class AVVolumePanel extends ViewPU {
     this.observeComponentCreation2((c, d) => {
       UIExtensionComponent.create({
         abilityName: 'AVVolumeExtension',
-        bundleName: 'com.ohos.sceneboard',
+        bundleName: 'com.huawei.hmos.settings',
         parameters: {
           'volumeParameter': this.volumeParameter,
           'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
