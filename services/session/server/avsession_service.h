@@ -361,7 +361,7 @@ private:
     
     void RefreshFocusSessionSort(sptr<AVSessionItem> &session);
 
-    void UpdateTopSession(const sptr<AVSessionItem>& newTopSession);
+    void UpdateTopSession(const sptr<AVSessionItem>& newTopSession, int32_t userId = 0);
 
     void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info, bool isPlaying);
 
