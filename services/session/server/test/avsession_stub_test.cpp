@@ -127,7 +127,7 @@ public:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> GetAVCastController() override { return nullptr; };
-    int32_t ReleaseCast() override { return 0; };
+    int32_t ReleaseCast(bool continuePlay = false) override { return 0; };
     int32_t StartCastDisplayListener() override { return 0; };
     int32_t StopCastDisplayListener() override { return 0; };
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo> &castDisplays) override { return 0; };

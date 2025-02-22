@@ -128,7 +128,7 @@ public:
 
     int32_t DeleteSupportCommand(int32_t cmd) override;
 
-    int32_t DestroyTask();
+    int32_t DestroyTask(bool continuePlay = false);
 
     AVSessionDescriptor GetDescriptor();
 
@@ -246,7 +246,7 @@ public:
 
     void HandleCastValidCommandChange(std::vector<int32_t> &cmds);
 
-    int32_t ReleaseCast() override;
+    int32_t ReleaseCast(bool continuePlay = false) override;
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo);
 
@@ -256,7 +256,7 @@ public:
 
     int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo);
 
-    int32_t StopCast();
+    int32_t StopCast(bool continuePlay = false);
 
     void dealValidCallback(int32_t cmd, std::vector<int32_t>& supportedCastCmds);
 
