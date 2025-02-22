@@ -2020,7 +2020,9 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
         GetHistoricalSessionDescriptorsFromFile(hisDescriptors);
     }
     // try start play for first history session
-    if (command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY && hisDescriptors.size() != 0) {
+    if ((command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY ||
+        command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_NEXT ||
+        command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_PREVIOUS) && hisDescriptors.size() != 0) {
         sptr<IRemoteObject> object;
         int32_t ret = CreateControllerInner(hisDescriptors[0].sessionId_, object);
         SLOGI("Cold play %{public}s, ret=%{public}d", hisDescriptors[0].elementName_.GetBundleName().c_str(), ret);
