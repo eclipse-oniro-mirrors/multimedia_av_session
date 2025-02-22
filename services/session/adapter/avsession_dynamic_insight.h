@@ -19,6 +19,57 @@
 #include "insight_intent_execute_param.h"
 
 namespace OHOS::AVSession {
+#define BLUETOOTH_UID 1002
+
+enum class StartPlayType {
+    APP = 0,
+    BLUETOOTH = 1,
+};
+
+const std::map<StartPlayType, std::string> StartPlayTypeToString = {
+    {StartPlayType::APP, "app"},
+    {StartPlayType::BLUETOOTH, "bluetooth"},
+};
+
+class StartPlayInfo {
+public:
+    StartPlayInfo() = default;
+    
+    ~StartPlayInfo() = default;
+
+    std::string getBundleName() const
+    {
+        return bundleName;
+    }
+
+    void setBundleName(const std::string& name)
+    {
+        bundleName = name;
+    }
+ 
+    std::string getDeviceId() const
+    {
+        return deviceId;
+    }
+
+    void setDeviceId(const std::string& id)
+    {
+        deviceId = id;
+    }
+
+    nlohmann::json startPlayInfoToJson() const
+    {
+        nlohmann::json j;
+        j["deviceId"] = deviceId;
+        j["startPlayBundleName"] = bundleName;
+        return j;
+    }
+
+private:
+    std::string bundleName;
+
+    std::string deviceId;
+};
 class InsightAdapter {
 public:
     static InsightAdapter& GetInsightAdapterInstance();
@@ -29,7 +80,11 @@ public:
         std::string& supportModule, std::string& profile);
     
     bool GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
-                            AppExecFwk::InsightIntentExecuteParam &executeParam);
+                            AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo = {},
+                            StartPlayType startPlayType = StartPlayType::APP);
+
+    void SetStartPlayInfoToParam(AppExecFwk::WantParams &startPlayInfoParam,
+        const StartPlayInfo startPlayInfo, std::shared_ptr<AppExecFwk::WantParams> &wantParam);
 
     int32_t StartAVPlayback(AppExecFwk::InsightIntentExecuteParam &executeParam);
 

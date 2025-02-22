@@ -787,6 +787,15 @@ static HWTEST_F(AVSessionServiceTest, StartAVPlayback001, TestSize.Level1)
     SLOGI("StartAVPlayback001 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, StartAVPlayback002, TestSize.Level1)
+{
+    SLOGI("StartAVPlayback002 begin!");
+    std::string deviceId = "123";
+    avservice_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME", deviceId);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("StartAVPlayback002 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, GetSubNode001, TestSize.Level1)
 {
     SLOGI("GetSubNode001 begin!");
@@ -1229,6 +1238,25 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent008, TestSize.Level1)
     avsessionHere_->Destroy();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("SendSystemAVKeyEvent008 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent009, TestSize.Level1)
+{
+    SLOGI("SendSystemAVKeyEvent009 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    std::map<std::string, std::string> extraInfo;
+    extraInfo["deviceId"] = "123";
+    bool ret = avservice_->SendSystemAVKeyEvent(*keyEvent, extraInfo);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("SendSystemAVKeyEvent009 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, PullMigrateStub001, TestSize.Level1)

@@ -69,6 +69,7 @@
 #include "bool_wrapper.h"
 #include "image_source.h"
 #include "avsession_pixel_map_adapter.h"
+#include "avsession_dynamic_insight.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -93,6 +94,7 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t MININUM_FOR_NOTIFICATION = 5;
+static const int32_t AVSESSION_CONTINUE = 1;
 #ifndef START_STOP_ON_DEMAND_ENABLE
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 #endif
@@ -1667,20 +1669,56 @@ void AVSessionService::DoMetadataImgClean(AVMetaData& data)
     }
 }
 
+int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+    const std::string& deviceId)
+{
+    auto uid = GetCallingUid();
+    auto CallerBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    StartPlayType startPlayType = StartPlayType::APP;
+    if (uid == BLUETOOTH_UID) {
+        startPlayType = StartPlayType::BLUETOOTH;
+    }
+    StartPlayInfo startPlayInfo;
+    startPlayInfo.setBundleName(CallerBundleName);
+    startPlayInfo.setDeviceId(deviceId);
+
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+
+    typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId,
+        const StartPlayInfo startPlayInfo, StartPlayType startPlayType);
+    StartAVPlaybackFunc startAVPlayback =
+        reinterpret_cast<StartAVPlaybackFunc>(dynamicLoader->GetFuntion(
+            AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlaybackWithId"));
+    if (startAVPlayback) {
+        return (*startAVPlayback)(bundleName, assetId, startPlayInfo, startPlayType);
+    }
+    SLOGE("StartAVPlayback fail");
+    return AVSESSION_ERROR;
+}
+
 int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
 {
+    auto uid = GetCallingUid();
+    auto CallerBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    StartPlayType startPlayType = StartPlayType::APP;
+    if (uid == BLUETOOTH_UID) {
+        startPlayType = StartPlayType::BLUETOOTH;
+    }
+    StartPlayInfo startPlayInfo;
+    startPlayInfo.setBundleName(CallerBundleName);
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
     if (dynamicLoader == nullptr) {
         SLOGI("dynamicLoader is null");
         return AVSESSION_ERROR;
     }
 
-    typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId);
+    typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId,
+        const StartPlayInfo startPlayInfo, StartPlayType startPlayType);
     StartAVPlaybackFunc startAVPlayback =
         reinterpret_cast<StartAVPlaybackFunc>(dynamicLoader->GetFuntion(
-            AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlayback"));
+            AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlaybackWithId"));
     if (startAVPlayback) {
-        return (*startAVPlayback)(bundleName, assetId);
+        return (*startAVPlayback)(bundleName, assetId, startPlayInfo, startPlayType);
     }
     SLOGE("StartAVPlayback fail");
     return AVSESSION_ERROR;
@@ -1984,9 +2022,8 @@ void AVSessionService::HandleEventHandlerCallBack()
 }
 // LCOV_EXCL_STOP
 
-int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
+int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
     if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK ||
         keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
         pressCount_++;
@@ -2006,6 +2043,36 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
             topSession_->HandleMediaKeyEvent(keyEvent);
             return AVSESSION_SUCCESS;
         }
+    }
+    return AVSESSION_CONTINUE;
+}
+
+int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent,
+    const std::map<std::string, std::string> extraInfo)
+{
+    SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
+    std::string deviceId = extraInfo.at("deviceId");
+    int32_t ret = HandleKeyEvent(keyEvent);
+    if (ret != AVSESSION_CONTINUE) {
+        return ret;
+    }
+    {
+        int cmd = ConvertKeyCodeToCommand(keyEvent.GetKeyCode());
+        AVControlCommand controlCommand;
+        controlCommand.SetCommand(cmd);
+        SLOGI("topSession get nullptr, check if cold start for cmd %{public}d, deviceId is %{public}s",
+            cmd, deviceId.c_str());
+        HandleSystemKeyColdStart(controlCommand, deviceId);
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
+{
+    SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
+    int32_t ret = HandleKeyEvent(keyEvent);
+    if (ret != AVSESSION_CONTINUE) {
+        return ret;
     }
     {
         int cmd = ConvertKeyCodeToCommand(keyEvent.GetKeyCode());
@@ -2027,7 +2094,7 @@ int32_t AVSessionService::ConvertKeyCodeToCommand(int keyCode)
     }
 }
 
-void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
+void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId)
 {
     SLOGI("HandleSystemKeyColdStart cmd=%{public}d without topsession", command.GetCommand());
     // try proc command for first front session
@@ -2052,7 +2119,12 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command)
          command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_NEXT ||
          command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_PREVIOUS) && hisDescriptors.size() != 0) {
         sptr<IRemoteObject> object;
-        int32_t ret = StartAVPlayback(hisDescriptors[0].elementName_.GetBundleName(), "");
+        int32_t ret = 0;
+        if (deviceId.length() == 0) {
+            ret = StartAVPlayback(hisDescriptors[0].elementName_.GetBundleName(), "");
+        } else {
+            ret = StartAVPlayback(hisDescriptors[0].elementName_.GetBundleName(), "", deviceId);
+        }
         SLOGI("Cold play %{public}s, ret=%{public}d", hisDescriptors[0].elementName_.GetBundleName().c_str(), ret);
     } else {
         SLOGI("Cold start command=%{public}d, hisDescriptorsSize=%{public}d return", command.GetCommand(),

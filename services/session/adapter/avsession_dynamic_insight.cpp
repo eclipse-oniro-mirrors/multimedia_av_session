@@ -117,8 +117,21 @@ __attribute__((no_sanitize("cfi"))) bool InsightAdapter::IsSupportPlayIntent(con
     return CheckBundleSupport(profile);
 }
 
+void InsightAdapter::SetStartPlayInfoToParam(AppExecFwk::WantParams &startPlayInfoParam,
+    const StartPlayInfo startPlayInfo, std::shared_ptr<AppExecFwk::WantParams> &wantParam)
+{
+    startPlayInfoParam.SetParam("startPlayBundleName", OHOS::AAFwk::String::Box(startPlayInfo.getBundleName()));
+    startPlayInfoParam.SetParam("deviceId", OHOS::AAFwk::String::Box(startPlayInfo.getDeviceId()));
+        
+    if (wantParam == nullptr) {
+        SLOGE("wantParam is null when SetStartPlayInfoToParam");
+        return;
+    }
+    wantParam->SetParam("startPlayInfo", OHOS::AAFwk::WantParamWrapper::Box(startPlayInfoParam));
+}
+
 bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
-    AppExecFwk::InsightIntentExecuteParam &executeParam)
+    AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
 {
     std::string supportModule;
     std::string profile;
@@ -150,12 +163,15 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
         executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
         std::shared_ptr<AppExecFwk::WantParams> wantParam = std::make_shared<AppExecFwk::WantParams>();
         if (insightName == PLAY_MUSICLIST) {
-            // construct items array
-            AppExecFwk::WantParams innerParams;
+            AppExecFwk::WantParams innerParams; // construct items array
             innerParams.SetParam("entityId", OHOS::AAFwk::String::Box(assetId));
             sptr<OHOS::AAFwk::IArray> array = new (std::nothrow) OHOS::AAFwk::Array(1, OHOS::AAFwk::g_IID_IWantParams);
             array->Set(0, OHOS::AAFwk::WantParamWrapper::Box(innerParams));
             wantParam->SetParam("items", array);
+            AppExecFwk::WantParams startPlayInfoParam;
+            SetStartPlayInfoToParam(startPlayInfoParam, startPlayInfo, wantParam);
+
+            wantParam->SetParam("startPlayType", OHOS::AAFwk::String::Box(StartPlayTypeToString.at(startPlayType)));
             res = true;
         }
         if (insightName == PLAY_AUDIO) {
@@ -197,6 +213,18 @@ extern "C" bool IsSupportPlayIntent(const std::string& bundleName, const std::st
 {
     AppExecFwk::InsightIntentExecuteParam executeParam;
     return InsightAdapter::GetInsightAdapterInstance().GetPlayIntentParam(bundleName, assetId, executeParam);
+}
+
+extern "C" int32_t StartAVPlaybackWithId(const std::string& bundleName, const std::string& assetId,
+    const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
+{
+    AppExecFwk::InsightIntentExecuteParam executeParam;
+    bool isSupport = InsightAdapter::GetInsightAdapterInstance().GetPlayIntentParam(bundleName, assetId,
+        executeParam, startPlayInfo, startPlayType);
+    if (isSupport) {
+        return InsightAdapter::GetInsightAdapterInstance().StartAVPlayback(executeParam);
+    }
+    return AVSESSION_SUCCESS;
 }
 
 extern "C" int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId)
