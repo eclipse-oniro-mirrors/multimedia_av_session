@@ -181,6 +181,8 @@ public:
 
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId, const std::string& deviceId);
 
+    int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent);
+
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
     bool IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid) override;

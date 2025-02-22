@@ -94,6 +94,7 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t MININUM_FOR_NOTIFICATION = 5;
+static const int32_t AVSESSION_CONTINUE = 1;
 #ifndef START_STOP_ON_DEMAND_ENABLE
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 #endif
@@ -2021,11 +2022,8 @@ void AVSessionService::HandleEventHandlerCallBack()
 }
 // LCOV_EXCL_STOP
 
-int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent,
-    const std::map<std::string, std::string> extraInfo)
+int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
-    auto deviceId = extraInfo.at("deviceId");
     if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK ||
         keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
         pressCount_++;
@@ -2046,11 +2044,24 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent,
             return AVSESSION_SUCCESS;
         }
     }
+    return AVSESSION_CONTINUE;
+}
+
+int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent,
+    const std::map<std::string, std::string> extraInfo)
+{
+    SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
+    std::string deviceId = extraInfo.at("deviceId");
+    int32_t ret = HandleKeyEvent(keyEvent);
+    if (ret != AVSESSION_CONTINUE) {
+        return ret;
+    }
     {
         int cmd = ConvertKeyCodeToCommand(keyEvent.GetKeyCode());
         AVControlCommand controlCommand;
         controlCommand.SetCommand(cmd);
-        SLOGI("topSession get nullptr, check if cold start for cmd %{public}d", cmd);
+        SLOGI("topSession get nullptr, check if cold start for cmd %{public}d, deviceId is %{public}s",
+            cmd, deviceId.c_str());
         HandleSystemKeyColdStart(controlCommand, deviceId);
     }
     return AVSESSION_SUCCESS;
@@ -2059,25 +2070,9 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent,
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
-    if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK ||
-        keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
-        pressCount_++;
-        SLOGI("isFirstPress_=%{public}d", isFirstPress_);
-        if (isFirstPress_) {
-            auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
-                HandleEventHandlerCallBack();
-            }, "SendSystemAVKeyEvent", CLICK_TIMEOUT);
-            CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
-            isFirstPress_ = false;
-        }
-        return AVSESSION_SUCCESS;
-    }
-    {
-        std::lock_guard lockGuard(sessionServiceLock_);
-        if (topSession_) {
-            topSession_->HandleMediaKeyEvent(keyEvent);
-            return AVSESSION_SUCCESS;
-        }
+    int32_t ret = HandleKeyEvent(keyEvent);
+    if (ret != AVSESSION_CONTINUE) {
+        return ret;
     }
     {
         int cmd = ConvertKeyCodeToCommand(keyEvent.GetKeyCode());
