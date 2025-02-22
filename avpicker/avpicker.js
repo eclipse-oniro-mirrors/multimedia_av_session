@@ -694,6 +694,7 @@ export class AVCastPicker extends ViewPU {
             });
             UIExtensionComponent.accessibilityLevel('yes');
             UIExtensionComponent.accessibilityText(this.__accessibilityAudioControlStr);
+            UIExtensionComponent.accessibilityUseSamePage(AccessibilitySamePageMode.FULL_SILENT);
         }, UIExtensionComponent);
     }
 
