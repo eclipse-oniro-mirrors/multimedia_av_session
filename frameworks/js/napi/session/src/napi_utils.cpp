@@ -1083,6 +1083,11 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     status = napi_set_named_property(env, out, "ipAddress", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
+    status = SetValue(env, in.networkId_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "networkId", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
     status = SetValue(env, in.providerId_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "providerId", property);
@@ -1531,6 +1536,10 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     status = GetValue(env, value, out.deviceType_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ value failed", status);
     CHECK_RETURN(GetOptionalString(env, in, out) == napi_ok, "get DeviceInfo ip address value failed", status);
+    status = napi_get_named_property(env, in, "networkId", &value);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo networkId_ failed", status);
+    status = GetValue(env, value, out.networkId_);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo networkId_ value failed", status);
  
     bool hasKey = false;
     napi_has_named_property(env, in, "providerId", &hasKey);

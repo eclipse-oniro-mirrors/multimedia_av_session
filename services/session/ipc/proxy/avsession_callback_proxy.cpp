@@ -240,6 +240,7 @@ void AVSessionCallbackProxy::OnOutputDeviceChange(const int32_t connectionState,
         CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.deviceName_), "write deviceName failed");
         CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.deviceType_), "write deviceType failed");
         CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.ipAddress_), "write ipAddress failed");
+        CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.networkId_), "write networkId failed");
         CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.manufacturer_), "write manufacturer failed");
         CHECK_AND_RETURN_LOG(data.WriteString(deviceInfo.modelName_), "write modelName failed");
         CHECK_AND_RETURN_LOG(data.WriteInt32(deviceInfo.providerId_), "write providerId failed");
