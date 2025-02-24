@@ -185,10 +185,11 @@ public:
      *
      * @param { const int64_t } castHandle - The ID corresponding to the provider that needs to be stopped.
      * @param { int32_t } removeTimes - The remove times.
+     * @param { bool } continuePlay - whether continue play when stop cast.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t StopCast(const int64_t castHandle, int32_t removeTimes) = 0;
+    virtual int32_t StopCast(const int64_t castHandle, int32_t removeTimes, bool continuePlay = false) = 0;
 
     /**
      * @brief Stop cast session process.

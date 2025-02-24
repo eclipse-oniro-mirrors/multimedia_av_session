@@ -304,7 +304,7 @@ int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& ou
     return ret ? AVSESSION_SUCCESS : ERR_DEVICE_CONNECTION_FAILED;
 }
 
-int32_t AVRouterImpl::StopCast(const int64_t castHandle, int32_t removeTimes)
+int32_t AVRouterImpl::StopCast(const int64_t castHandle, int32_t removeTimes, bool continuePlay)
 {
     SLOGI("AVRouterImpl stop cast process");
 
@@ -322,7 +322,7 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle, int32_t removeTimes)
     CHECK_AND_RETURN_RET_LOG(castId != providerManagerMap_[providerNumber]->provider_->GetMirrorCastId() ||
         removeTimes == 0, AVSESSION_ERROR, "cannot remove");
     providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId,
-        castHandleToOutputDeviceMap_[castId].deviceInfos_[0]);
+        castHandleToOutputDeviceMap_[castId].deviceInfos_[0], continuePlay);
     hasSessionAlive_ = false;
     SLOGI("AVRouterImpl stop cast process remove device done");
 

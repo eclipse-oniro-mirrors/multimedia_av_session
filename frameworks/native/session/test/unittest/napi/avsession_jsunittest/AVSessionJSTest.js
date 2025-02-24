@@ -56,6 +56,7 @@ describe("AVSessionJsTest", function () {
   })
 
   afterAll(function () {
+    session.stopCasting();
     session.destroy();
     console.info(TAG + 'afterAll called')
   })
