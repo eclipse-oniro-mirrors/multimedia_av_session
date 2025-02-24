@@ -71,7 +71,7 @@ bool HwCastProviderSession::RemoveDevice(std::string deviceId, bool continuePlay
     }
 
     if (continuePlay) {
-        return castSession_->RemoveDevice(deviceId, CastEngine::DeviceRemoveType::DEVICE_REMOVE_CONTINUE_PLAY);
+        return castSession_->RemoveDevice(deviceId, CastEngine::DeviceRemoveAction::ACTION_CONTINUE_PLAY);
     }
     return castSession_->RemoveDevice(deviceId);
 }
