@@ -649,7 +649,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSessionByCast001, TestSize.Level1)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("CreateSessionByCast001 in!");
     avservice_->CreateSessionByCast(0);
-    avservice_->ClearSessionForClientDiedNoLock(getpid());
+    avservice_->ClearSessionForClientDiedNoLock(getpid(), false);
 #endif
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("CreateSessionByCast001 end!");
