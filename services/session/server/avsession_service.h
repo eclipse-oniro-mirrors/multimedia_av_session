@@ -134,7 +134,7 @@ public:
 
     void OnClientDied(pid_t pid);
 
-    void HandleSessionRelease(std::string sessionId);
+    void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
     void HandleCallStartEvent();
 
@@ -248,7 +248,7 @@ private:
 
     int32_t CancelCastAudioForClientExit(pid_t pid, const sptr<AVSessionItem>& session);
 
-    void ClearSessionForClientDiedNoLock(pid_t pid);
+    void ClearSessionForClientDiedNoLock(pid_t pid, bool continuePlay);
 
     void ClearControllerForClientDiedNoLock(pid_t pid);
 
@@ -358,7 +358,7 @@ private:
 
     bool CheckStringAndCleanFile(const std::string& filePath);
 
-    void ClearClientResources(pid_t pid);
+    void ClearClientResources(pid_t pid, bool continuePlay);
     
     bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName,
         const AVMetaData& meta, const int32_t userId);

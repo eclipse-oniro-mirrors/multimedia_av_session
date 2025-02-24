@@ -129,10 +129,11 @@ public:
      *
      * @param { int32_t } castId - Find the corresponding provider through this ID.
      * @param { OutputDeviceInfo } outputDeviceInfo - Devices to be disconnected.
+     * @param { bool } continuePlay - whether continue play when disconnect device.
      * @return { bool } Whether the operation was successful.
      * @since 10
     */
-    virtual bool RemoveCastDevice(int castId, DeviceInfo deviceInfo) = 0;
+    virtual bool RemoveCastDevice(int castId, DeviceInfo deviceInfo, bool continuePlay = false) = 0;
 
     /**
      * @brief Start cast process.

@@ -63,6 +63,7 @@ describe("AVSessionManagerJSTest", function () {
   }
 
   function destroySessionTask() {
+    session.stopCasting();
     session.destroy();
     console.info(TAG + 'Destroy session finished');
   }
