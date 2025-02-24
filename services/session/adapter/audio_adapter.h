@@ -97,6 +97,8 @@ public:
     int32_t UnsetPreferredOutputDeviceChangeCallback();
 
     int32_t SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc);
+    AudioDeviceDescriptorWithSptr FindRenderDeviceForUsage(const AudioDeviceDescriptorsWithSptr& devices,
+        const AudioDeviceDescriptorWithSptr& desc);
 
 private:
     static std::shared_ptr<AudioAdapter> instance_;

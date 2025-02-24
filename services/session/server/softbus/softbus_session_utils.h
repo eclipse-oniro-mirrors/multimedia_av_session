@@ -18,6 +18,7 @@
 
 #include <string>
 #include "json/json.h"
+#include "migrate_avsession_constant.h"
 
 namespace OHOS::AVSession {
 class SoftbusSessionUtils {
@@ -53,9 +54,45 @@ public:
         return true;
     }
 
+    static std::string GetEncryptAddr(const std::string& addr)
+    {
+        if (addr.empty() || addr.length() != addressStrLen) {
+            return std::string("");
+        }
+        std::string tmp = "**:**:**:**:**:**";
+        std::string out = addr;
+        for (int i = startPos; i <= endPos; i++) {
+            out[i] = tmp[i];
+        }
+        return out;
+    }
+
+    static std::string AnonymizeMacAddressInSoftBusMsg(const std::string& input)
+    {
+        std::string output = input;
+        std::string macKey = "\"" + AUDIO_MAC_ADDRESS + "\":\"";
+        std::string endKey = "\"";
+        size_t startPos = 0;
+
+        while ((startPos = output.find(macKey, startPos)) != std::string::npos) {
+            startPos += macKey.length();
+            size_t endPos = output.find(endKey, startPos);
+            if (endPos != std::string::npos) {
+                std::string macAddress = output.substr(startPos, endPos - startPos);
+                std::string encryptedMac = GetEncryptAddr(macAddress);
+                output.replace(startPos, endPos - startPos, encryptedMac);
+            }
+        }
+        return output;
+    }
+
 private:
     static constexpr const char *DEVICE_ANONYMIZE_ID = "******";
     static constexpr const int DEVICE_ANONYMIZE_LENGTH = 6;
+
+    static constexpr const int addressStrLen = 17;
+    static constexpr const int startPos = 6;
+    static constexpr const int endPos = 13;
 };
 } // namespace OHOS::AVSession
 

@@ -32,23 +32,6 @@
 
 namespace OHOS::AVSession {
 
-const int32_t ADDRESS_STR_LEN = 17;
-const int32_t START_POS = 6;
-const int32_t END_POS = 13;
-
-std::string GetEncryptAddr(const std::string& addr)
-{
-    if (addr.empty() || addr.length() != ADDRESS_STR_LEN) {
-        return std::string("");
-    }
-    std::string tmp = "**:**:**:**:**:**";
-    std::string out = addr;
-    for (int i = START_POS; i <= END_POS; i++) {
-        out[i] = tmp[i];
-    }
-    return out;
-}
-
 void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
 {
     if (sessionId.empty()) {
@@ -357,7 +340,7 @@ std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFu
         std::string msg = std::string({MSG_HEAD_MODE, SYNC_SET_VOLUME_COMMAND});
         value[AUDIO_VOLUME] = volumeNum;
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
-        SLOGI("server prepare to send set volume num %{public}d", volumeNum);
+        SLOGI("server send set volume num %{public}d", volumeNum);
         SendByte(deviceId_, msg);
     };
 }
@@ -369,8 +352,8 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceCha
         Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
         std::string msg = std::string({MSG_HEAD_MODE, SYNC_AVAIL_DEVICES_LIST});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
-        SLOGI("server prepare to send get available device change callback");
-        SendByte(deviceId_, msg);
+        SLOGI("server send get available device change callback");
+        SendJsonStringByte(deviceId_, msg);
     };
 }
 
@@ -381,8 +364,8 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceCha
         Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
         std::string msg = std::string({MSG_HEAD_MODE, SYNC_CURRENT_DEVICE});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
-        SLOGI("server prepare to send get preferred device change callback");
-        SendByte(deviceId_, msg);
+        SLOGI("server send get preferred device change callback");
+        SendJsonStringByte(deviceId_, msg);
     };
 }
 
@@ -420,6 +403,7 @@ Json::Value MigrateAVSessionServer::ConvertAudioDeviceDescriptorToJson(
 
 void MigrateAVSessionServer::VolumeControlCommand(Json::Value commandJsonValue)
 {
+    SLOGI("server recv in VolumeControlCommand case");
     if (!commandJsonValue.isMember(AUDIO_VOLUME)) {
         SLOGE("json parse with error member");
         return;
@@ -431,6 +415,7 @@ void MigrateAVSessionServer::VolumeControlCommand(Json::Value commandJsonValue)
 
 void MigrateAVSessionServer::SwitchAudioDeviceCommand(Json::Value jsonObject)
 {
+    SLOGI("server recv in SwitchAudioDeviceCommand case");
     int deviceCategory = jsonObject[AUDIO_DEVICE_CATEGORY].asInt();
     int deviceType = jsonObject[AUDIO_DEVICE_TYPE].asInt();
     int deviceRole = jsonObject[AUDIO_DEVICE_ROLE].asInt();
@@ -447,6 +432,7 @@ void MigrateAVSessionServer::SwitchAudioDeviceCommand(Json::Value jsonObject)
     device->macAddress_ = macAddress;
 
     AudioAdapter::GetInstance().SelectOutputDevice(device);
+    AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
 }
 }
 

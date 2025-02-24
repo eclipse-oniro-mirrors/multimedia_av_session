@@ -231,7 +231,7 @@ const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::Migrate
 
 void MigrateAVSessionProxy::SetVolume(const AAFwk::WantParams& extras)
 {
-    SLOGI("proxy in SetVolume case");
+    SLOGI("proxy send in SetVolume case");
     CHECK_AND_RETURN_LOG(extras.HasParam(AUDIO_SET_VOLUME), "extras not have event");
     auto volume = extras.GetParam(AUDIO_SET_VOLUME);
     AAFwk::IInteger* ao = AAFwk::IInteger::Query(volume);
@@ -247,7 +247,7 @@ void MigrateAVSessionProxy::SetVolume(const AAFwk::WantParams& extras)
 
 void MigrateAVSessionProxy::SelectOutputDevice(const AAFwk::WantParams& extras)
 {
-    SLOGI("proxy in SelectOutputDevice case");
+    SLOGI("proxy send in SelectOutputDevice case");
     CHECK_AND_RETURN_LOG(extras.HasParam(AUDIO_SELECT_OUTPUT_DEVICE), "extras not have event");
     auto value = extras.GetParam(AUDIO_SELECT_OUTPUT_DEVICE);
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
@@ -255,18 +255,18 @@ void MigrateAVSessionProxy::SelectOutputDevice(const AAFwk::WantParams& extras)
 
     std::string deviceValue = AAFwk::String::Unbox(stringValue);
     std::string msg = std::string({MSG_HEAD_MODE, SYNC_SWITCH_AUDIO_DEVICE_COMMAND});
-    SendByte(deviceId_, msg + deviceValue);
+    SendJsonStringByte(deviceId_, msg + deviceValue);
 }
 
 void MigrateAVSessionProxy::GetVolume(AAFwk::WantParams& extras)
 {
-    SLOGI("proxy in GetVolume case");
+    SLOGI("proxy send in GetVolume case");
     extras.SetParam(AUDIO_GET_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
 }
 
 void MigrateAVSessionProxy::GetAvailableDevices(AAFwk::WantParams& extras)
 {
-    SLOGI("proxy in GetAvailableDevices case");
+    SLOGI("proxy send in GetAvailableDevices case");
     Json::Value jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(availableDevices_);
     Json::Value jsonArray = jsonData[MEDIA_AVAILABLE_DEVICES_LIST];
     std::string jsonStr;
@@ -276,7 +276,7 @@ void MigrateAVSessionProxy::GetAvailableDevices(AAFwk::WantParams& extras)
 
 void MigrateAVSessionProxy::GetPreferredOutputDeviceForRendererInfo(AAFwk::WantParams& extras)
 {
-    SLOGI("proxy in GetPreferredOutputDeviceForRendererInfo case");
+    SLOGI("proxy send in GetPreferredOutputDeviceForRendererInfo case");
     Json::Value jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(preferredOutputDevice_);
     Json::Value jsonArray = jsonData[MEDIA_AVAILABLE_DEVICES_LIST];
     std::string jsonStr;
@@ -286,7 +286,7 @@ void MigrateAVSessionProxy::GetPreferredOutputDeviceForRendererInfo(AAFwk::WantP
 
 void MigrateAVSessionProxy::ColdStartFromProxy()
 {
-    SLOGI("proxy in ColdStartFromProxy case with bundleName:%{public}s", elementName_.GetAbilityName().c_str());
+    SLOGI("proxy send in ColdStartFromProxy case with bundleName:%{public}s", elementName_.GetAbilityName().c_str());
     std::string msg = std::string({MSG_HEAD_MODE, COLD_START});
     Json::Value controlMsg;
     controlMsg[MIGRATE_BUNDLE_NAME] = elementName_.GetAbilityName();
@@ -392,6 +392,7 @@ void MigrateAVSessionProxy::ProcessValidCommands(Json::Value jsonValue)
 
 void MigrateAVSessionProxy::ProcessVolumeControlCommand(Json::Value jsonValue)
 {
+    SLOGI("proxy recv in ProcessVolumeControlCommand case");
     if (!jsonValue.isMember(AUDIO_VOLUME)) {
         SLOGE("json parse with error member");
         return;
@@ -429,6 +430,7 @@ void DeviceJsonArrayToVector(Json::Value& jsonArray, AudioDeviceDescriptorsWithS
 
 void MigrateAVSessionProxy::ProcessAvailableDevices(Json::Value jsonValue)
 {
+    SLOGI("proxy recv in ProcessAvailableDevices case");
     CHECK_AND_RETURN_LOG(jsonValue.isMember(MEDIA_AVAILABLE_DEVICES_LIST), "json parse with error member");
     CHECK_AND_RETURN_LOG(jsonValue[MEDIA_AVAILABLE_DEVICES_LIST].isArray(), "json object is not array");
     
@@ -444,6 +446,7 @@ void MigrateAVSessionProxy::ProcessAvailableDevices(Json::Value jsonValue)
 
 void MigrateAVSessionProxy::ProcessPreferredOutputDevice(Json::Value jsonValue)
 {
+    SLOGI("proxy recv in ProcessPreferredOutputDevice case");
     CHECK_AND_RETURN_LOG(jsonValue.isMember(MEDIA_AVAILABLE_DEVICES_LIST), "json parse with error member");
     CHECK_AND_RETURN_LOG(jsonValue[MEDIA_AVAILABLE_DEVICES_LIST].isArray(), "json object is not array");
 
