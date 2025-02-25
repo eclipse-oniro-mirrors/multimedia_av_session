@@ -428,6 +428,7 @@ export class AVCastPicker extends ViewPU {
             Text.maxLines(2);
             Text.wordBreak(WordBreak.BREAK_ALL);
             Text.maxFontScale(this.maxFontSizeScale);
+            Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
         }, Text);
         Text.pop();
     }
