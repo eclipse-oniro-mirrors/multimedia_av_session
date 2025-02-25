@@ -244,6 +244,7 @@ export struct AVCastPicker {
       .maxLines(2)
       .wordBreak(WordBreak.BREAK_ALL)
       .maxFontScale(this.maxFontSizeScale)
+      .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
   }
 
   @Builder
