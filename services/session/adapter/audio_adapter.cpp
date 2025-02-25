@@ -330,16 +330,24 @@ int32_t AudioAdapter::UnsetPreferredOutputDeviceChangeCallback()
     return AVSESSION_SUCCESS;
 }
 
+AudioDeviceDescriptorWithSptr AudioAdapter::FindRenderDeviceForUsage(const AudioDeviceDescriptorsWithSptr& devices,
+    const AudioDeviceDescriptorWithSptr& desc)
+{
+    auto itr = std::find_if(devices.cbegin(), devices.cend(), [&desc](const auto &device) {
+        return (desc->deviceType_ == device->deviceType_) &&
+            (desc->macAddress_ == device->macAddress_) &&
+            (desc->networkId_ == device->networkId_) &&
+            (!AudioStandard::IsUsb(desc->deviceType_) || desc->deviceRole_ == device->deviceRole_);
+    });
+    return itr != devices.cend() ? *itr : nullptr;
+}
+
 int32_t AudioAdapter::SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc)
 {
-    AudioDeviceDescriptorsWithSptr deviceDescriptorVector;
-    auto audioDeviceDescriptors = GetAvailableDevices();
-    for (auto& device : audioDeviceDescriptors) {
-        if (device->deviceCategory_ == desc->deviceCategory_ && device->deviceType_ == desc->deviceType_) {
-            deviceDescriptorVector.push_back(device);
-        }
-    }
-    CHECK_AND_RETURN_RET_LOG(deviceDescriptorVector.size() == 1, AVSESSION_ERROR, "Give device invalid");
+    AudioDeviceDescriptorWithSptr device = FindRenderDeviceForUsage(GetAvailableDevices(), desc);
+    CHECK_AND_RETURN_RET_LOG(device != nullptr, AVSESSION_ERROR, "Give device invaild");
+    
+    AudioDeviceDescriptorsWithSptr deviceDescriptorVector { device };
     auto ret = AudioStandard::AudioSystemManager::GetInstance()->SelectOutputDevice(deviceDescriptorVector);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SelectOutputDevice failed");
     return AVSESSION_SUCCESS;

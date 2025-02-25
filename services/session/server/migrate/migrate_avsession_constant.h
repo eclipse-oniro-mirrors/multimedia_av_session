@@ -162,7 +162,7 @@ const char* AUDIO_DEVICE_TYPE = "AudioDeviceType";
 const char* AUDIO_DEVICE_ROLE = "AudioDeviceRole";
 const char* AUDIO_NETWORK_ID = "AudioNetworkId";
 const char* AUDIO_DEVICE_NAME = "AudioDeviceName";
-const char* AUDIO_MAC_ADDRESS = "AudioMacAddress";
+const std::string AUDIO_MAC_ADDRESS = "AudioMacAddress";
 
 const char* AUDIO_SET_VOLUME = "AUDIO_SET_VOLUME";
 const char* AUDIO_SELECT_OUTPUT_DEVICE = "AUDIO_SELECT_OUTPUT_DEVICE";

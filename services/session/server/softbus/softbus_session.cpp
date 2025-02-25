@@ -18,6 +18,7 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "softbus_session_manager.h"
+#include "softbus_session_utils.h"
 
 namespace OHOS::AVSession {
 void SoftbusSession::OnConnectSession(int32_t sessionId)
@@ -52,6 +53,16 @@ void SoftbusSession::SendByteToAll(const std::string &data)
 void SoftbusSession::SendByte(const std::string &deviceId, const std::string &data)
 {
     SLOGI("SendByte: %{public}s", data.c_str());
+    std::lock_guard lockGuard(deviceMapLock_);
+    auto iter = deviceToSessionMap_.find(deviceId);
+    if (iter != deviceToSessionMap_.end()) {
+        SoftbusSessionManager::GetInstance().SendBytes(iter->second, data);
+    }
+}
+
+void SoftbusSession::SendJsonStringByte(const std::string &deviceId, const std::string &data)
+{
+    SLOGI("SendByte: %{public}s", SoftbusSessionUtils::AnonymizeMacAddressInSoftBusMsg(data).c_str());
     std::lock_guard lockGuard(deviceMapLock_);
     auto iter = deviceToSessionMap_.find(deviceId);
     if (iter != deviceToSessionMap_.end()) {

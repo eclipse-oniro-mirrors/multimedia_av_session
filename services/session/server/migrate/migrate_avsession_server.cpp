@@ -204,7 +204,7 @@ void MigrateAVSessionServer::StopObserveControllerChanged(const std::string &dev
 // LCOV_EXCL_START
 void MigrateAVSessionServer::OnBytesReceived(const std::string &deviceId, const std::string &data)
 {
-    SLOGI("OnBytesReceived: %{public}s", data.c_str());
+    SLOGD("OnBytesReceived: %{public}s", data.c_str());
     if (data.length() < MSG_HEAD_LENGTH) {
         SLOGW("OnBytesReceived: invalid data");
         return;
