@@ -47,7 +47,7 @@ void NapiAsyncCallback::Call(napi_ref& method, NapiArgsGetter getter)
     CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
 
-    auto* work = new (std::nothrow) uv_work_t;
+    std::shared_ptr<uv_work_t> work = std::make_shared<uv_work_t>();
     CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
     work->data = new DataContext{env_, method, std::move(getter)};
@@ -93,7 +93,7 @@ void NapiAsyncCallback::CallWithFlag(napi_ref& method, std::shared_ptr<bool> isV
     CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
 
-    auto* work = new (std::nothrow) uv_work_t;
+    std::shared_ptr<uv_work_t> work = std::make_shared<uv_work_t>();
     CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
     work->data = new DataContextWithFlag { env_, method, isValid, std::move(getter) };
@@ -146,7 +146,7 @@ void NapiAsyncCallback::CallWithFunc(napi_ref& method, std::shared_ptr<bool> isV
 {
     CHECK_RETURN_VOID(loop_ != nullptr && method != nullptr, "loop_ or method is nullptr");
 
-    auto* work = new (std::nothrow) uv_work_t;
+    std::shared_ptr<uv_work_t> work = std::make_shared<uv_work_t>();
     CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
     work->data = new DataContextWithFunc { env_, method, isValid, std::move(getter), checkCallbackValid };

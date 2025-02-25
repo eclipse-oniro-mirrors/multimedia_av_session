@@ -205,7 +205,7 @@ int32_t AVSessionService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
 {
     SLOGI("OnIdle SA, idle reason %{public}d, %{public}s, %{public}s",
         idleReason.GetId(), idleReason.GetName().c_str(), idleReason.GetValue().c_str());
-    int ret = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
+    uint32_t ret = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
     if (ret != 0) {
         SLOGI("IPC is not used for a long time, there are %{public}d sessions.", ret);
         return -1;
@@ -3288,7 +3288,7 @@ void AVSessionService::HandleDeviceChange(
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADPHONES ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_USB_HEADSET ||
             audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_BLUETOOTH_A2DP) {
-            SLOGI("AVSessionService handle pre notify device type %{public}d", audioDeviceDescriptor->deviceType_);
+            SLOGI("AVSessionService handle pre notify device type");
             NotifyDeviceChange();
         }
     }
