@@ -647,7 +647,7 @@ export class AVCastPicker extends ViewPU {
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
             UIExtensionComponent.bindMenu(this.isMenuShow, { builder: () => { this.deviceMenu.call(this); }}, {
-                placement: Placement.TopRight,
+                placement: Placement.BottomRight,
                 onDisappear: () => {
                   this.isMenuShow = false;
                   this.touchMenuItemIndex = -1;
