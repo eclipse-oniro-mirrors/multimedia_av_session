@@ -421,7 +421,7 @@ export struct AVCastPicker {
       })
       .size({ width: '100%', height: '100%' })
       .bindMenu(this.isMenuShow, this.deviceMenu(), {
-        placement: Placement.TopRight,
+        placement: Placement.BottomRight,
         onDisappear: () => {
           this.isMenuShow = false;
           this.touchMenuItemIndex = -1;
