@@ -31,34 +31,35 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
+std::shared_ptr<SoftbusDistributedDataManager> g_SoftbusDistributedDataManager {nullptr};
+std::shared_ptr<MigrateAVSessionProxy> g_MigrateAVSessionProxy {nullptr};
+std::shared_ptr<AVSessionService> g_AVSessionService {nullptr};
+
 class SoftbusSessionManagerSupplementTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    std::shared_ptr<SoftbusDistributedDataManager> g_SoftbusDistributedDataManager {nullptr};
-    std::shared_ptr<MigrateAVSessionProxy> g_MigrateAVSessionProxy {nullptr};
-    std::shared_ptr<AVSessionService> g_AVSessionService {nullptr};
 };
 
-void SoftbusSessionManagerSupplementTest::SetUpTestCase() {}
-
-void SoftbusSessionManagerSupplementTest::TearDownTestCase() {}
-
-void SoftbusSessionManagerSupplementTest::SetUp()
+void SoftbusSessionManagerSupplementTest::SetUpTestCase()
 {
     g_SoftbusDistributedDataManager = std::make_shared<SoftbusDistributedDataManager>();
     g_AVSessionService = std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID);
     g_MigrateAVSessionProxy = std::make_shared<MigrateAVSessionProxy>(g_AVSessionService.get());
 }
 
-void SoftbusSessionManagerSupplementTest::TearDown()
+void SoftbusSessionManagerSupplementTest::TearDownTestCase()
 {
     g_SoftbusDistributedDataManager = nullptr;
-    g_AVSessionService = nullptr;
     g_MigrateAVSessionProxy = nullptr;
+    g_AVSessionService = nullptr;
 }
+
+void SoftbusSessionManagerSupplementTest::SetUp() {}
+
+void SoftbusSessionManagerSupplementTest::TearDown() {}
 
 /**
  * @tc.name: CreateProxy001

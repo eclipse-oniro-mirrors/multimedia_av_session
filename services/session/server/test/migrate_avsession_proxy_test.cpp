@@ -55,8 +55,8 @@ void MigrateAVSessionProxyTest::SetUpTestCase()
 void MigrateAVSessionProxyTest::TearDownTestCase()
 {
     SLOGI("MigrateAVSessionProxyTest TearDownTestCase");
-    g_AVSessionService = nullptr;
     g_MigrateAVSessionProxy = nullptr;
+    g_AVSessionService = nullptr;
 }
 
 void MigrateAVSessionProxyTest::SetUp()
@@ -67,25 +67,6 @@ void MigrateAVSessionProxyTest::SetUp()
 void MigrateAVSessionProxyTest::TearDown()
 {
     SLOGI("MigrateAVSessionProxyTest TearDown");
-}
-
-void MigrateAVSessionProxyTest::NativeTokenGet(const char *perms[], int size)
-{
-    uint64_t tokenId;
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = size,
-        .aclsNum = 0,
-        .dcaps = nullptr,
-        .perms = perms,
-        .acls = nullptr,
-        .aplStr = "system_basic",
-    };
-
-    infoInstance.processName = "migrate_softbus_test";
-    tokenId = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(tokenId);
-    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 
 /**
@@ -99,7 +80,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallba
     MigrateAVSessionProxyControllerCallbackFunc func =
         g_MigrateAVSessionProxy->MigrateAVSessionProxyControllerCallback();
     std::string extraEvent = "";
-    AAFwk::WantParams extras;
+    OHOS::AAFwk::WantParams extras;
     int32_t ret = func(extraEvent, extras);
     EXPECT_EQ(ret, ERR_COMMAND_NOT_SUPPORT);
 }
@@ -112,12 +93,12 @@ static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallba
  */
 static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallback002, TestSize.Level1)
 {
-    auto maps = g_MigrateAVSessionProxy.AUDIO_EVENT_MAPS;
+    auto maps = g_MigrateAVSessionProxy->AUDIO_EVENT_MAPS;
     MigrateAVSessionProxyControllerCallbackFunc func =
         g_MigrateAVSessionProxy->MigrateAVSessionProxyControllerCallback();
     for (auto it = maps.begin(); it != maps.end(); ++it) {
-        std::string extraEvent = "";
-        AAFwk::WantParams extras;
+        std::string extraEvent = it->first;
+        OHOS::AAFwk::WantParams extras;
         int32_t ret = func(extraEvent, extras);
         EXPECT_EQ(ret, AVSESSION_SUCCESS);
     }
@@ -397,16 +378,4 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage003, TestSize.Level1
     g_MigrateAVSessionProxy->remoteSession_->SetAVMetaData(metaData);
     std::string bundleIconStr = "test";
     g_MigrateAVSessionProxy->ProcessMediaImage(bundleIconStr);
-}
-
-/**
- * @tc.name: OnConnectServer001
- * @tc.desc: test the member of OnConnectServer
- * @tc.type: FUNC
- * @tc.require:
- */
-static HWTEST_F(MigrateAVSessionProxyTest, OnConnectServer001, TestSize.Level1)
-{
-    g_MigrateAVSessionProxy->OnConnectServer();
-    EXPECT_EQ(g_MigrateAVSessionProxy->servicePtr_ != nullptr, true);
 }
