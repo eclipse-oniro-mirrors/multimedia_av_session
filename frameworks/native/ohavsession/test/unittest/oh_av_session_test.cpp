@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,6 +212,25 @@ HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackState_001, TestSize.Level1)
     AVSession_PlaybackState state = PLAYBACK_STATE_PREPARING;
     ret = OH_AVSession_SetPlaybackState(avsession, state);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: OH_AVSession_SetPlaybackState_002
+ * @tc.desc: SetPlaybackState from the class of ohavsession
+ * @tc.type: FUNC
+ * @tc.require: none
+*/
+HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackState_002, TestSize.Level1)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_SetPlaybackState_001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    AVSession_PlaybackState state = PLAYBACK_STATE_MAX;
+    ret = OH_AVSession_SetPlaybackState(avsession, state);
+    EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
     ret = OH_AVSession_Destroy(avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
 }
@@ -817,5 +836,351 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterToggleFavoriteCallback_001, TestS
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_Destroy(avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: GetEncodeErrcode001
+ * @tc.desc: Test GetEncodeErrcode with an error code that is not in the errcodes map.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, GetEncodeErrcode_001, TestSize.Level1)
+{
+    auto oHAVSession = std::make_shared<OHAVSession>();
+    int32_t invalidErrorCode = 9999999;
+    AVSession_ErrCode result = oHAVSession->GetEncodeErrcode(invalidErrorCode);
+    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
+}
+
+/**
+ * @tc.name: OHAVSession_GetSessionId_001
+ * @tc.desc: Test GetSessionId without entering the if branch by setting sessionId_ to a non-empty value.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_GetSessionId_001, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+
+    const std::string preSetSessionId = "predefined_session_id";
+    oHAVSession->sessionId_ = preSetSessionId;
+
+    const std::string& sessionId = oHAVSession->GetSessionId();
+    EXPECT_EQ(sessionId, preSetSessionId);
+}
+
+/**
+ * @tc.name: RegisterCommandCallback001
+ * @tc.desc: Test RegisterCommandCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, RegisterCommandCallback_001, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = CONTROL_CMD_INVALID;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    AVSession_ErrCode result = oHAVSession->RegisterCommandCallback(command, callback, (void *)(&userData));
+    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
+}
+
+/**
+ * @tc.name: RegisterCommandCallback002
+ * @tc.desc: Test RegisterCommandCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, RegisterCommandCallback_002, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = CONTROL_CMD_PLAY;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->RegisterCommandCallback(command, callback, (void *)(&userData));
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterCommandCallback001
+ * @tc.desc: Test UnregisterCommandCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_001, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = CONTROL_CMD_PLAY;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int32_t code = 1;
+    AVSession_ErrCode ret = oHAVSession->GetEncodeErrcode(code);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SERVICE_EXCEPTION);
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->UnregisterCommandCallback(command, callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterCommandCallback002
+ * @tc.desc: Test UnregisterCommandCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_002, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = CONTROL_CMD_PAUSE;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->UnregisterCommandCallback(command, callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterCommandCallback003
+ * @tc.desc: Test UnregisterCommandCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_003, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = CONTROL_CMD_STOP;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->UnregisterCommandCallback(command, callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterCommandCallback004
+ * @tc.desc: Test UnregisterCommandCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_004, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = CONTROL_CMD_PLAY_NEXT;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->UnregisterCommandCallback(command, callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterCommandCallback005
+ * @tc.desc: Test UnregisterCommandCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_005, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = CONTROL_CMD_PLAY_PREVIOUS;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->UnregisterCommandCallback(command, callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterCommandCallback006
+ * @tc.desc: Test UnregisterCommandCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_006, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = CONTROL_CMD_INVALID;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->UnregisterCommandCallback(command, callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
+}
+
+/**
+ * @tc.name: UnregisterForwardCallback001
+ * @tc.desc: Test UnregisterForwardCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterForwardCallback_001, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    OH_AVSessionCallback_OnFastForward callback = [](OH_AVSession* session, uint32_t seekTime,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = nullptr;
+    AVSession_ErrCode result = oHAVSession->UnregisterForwardCallback(callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterRewindCallback001
+ * @tc.desc: Test UnregisterRewindCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterRewindCallback_001, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    OH_AVSessionCallback_OnRewind callback = [](OH_AVSession* session, uint32_t seekTime,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = nullptr;
+    AVSession_ErrCode result = oHAVSession->UnregisterRewindCallback(callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterSeekCallback001
+ * @tc.desc: Test UnregisterSeekCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterSeekCallback_001, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    OH_AVSessionCallback_OnSeek callback = [](OH_AVSession* session, uint64_t seekTime,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = nullptr;
+    AVSession_ErrCode result = oHAVSession->UnregisterSeekCallback(callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterSetLoopModeCallback
+ * @tc.desc: Test UnregisterSetLoopModeCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterSetLoopModeCallback_001, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    OH_AVSessionCallback_OnSetLoopMode callback = [](OH_AVSession* session, AVSession_LoopMode curLoopMode,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = nullptr;
+    AVSession_ErrCode result = oHAVSession->UnregisterSetLoopModeCallback(callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterToggleFavoriteCallback
+ * @tc.desc: Test UnregisterToggleFavoriteCallback.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, UnregisterToggleFavoriteCallback_001, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    OH_AVSessionCallback_OnToggleFavorite callback = [](OH_AVSession* session, const char* assetId,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    oHAVSession->ohAVSessionCallbackImpl_ = nullptr;
+    AVSession_ErrCode result = oHAVSession->UnregisterToggleFavoriteCallback(callback);
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
 }
