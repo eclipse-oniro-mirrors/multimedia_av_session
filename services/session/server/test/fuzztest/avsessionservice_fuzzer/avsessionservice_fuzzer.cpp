@@ -428,7 +428,7 @@ void CreateSessionByCast001(const uint8_t* data, size_t size)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("CreateSessionByCast001 in!");
     avsessionService_->CreateSessionByCast(0);
-    avsessionService_->ClearSessionForClientDiedNoLock(getpid());
+    avsessionService_->ClearSessionForClientDiedNoLock(getpid(), false);
 #endif
     SLOGI("CreateSessionByCast001 end!");
 }
