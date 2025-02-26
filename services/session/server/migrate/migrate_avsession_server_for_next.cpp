@@ -35,30 +35,63 @@ namespace OHOS::AVSession {
 void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
 {
     if (sessionId.empty()) {
+        SLOGE("LocalFrontSessionArrive with sessionId EMPTY");
         return;
     }
-    CreateController(sessionId);
-    sptr<AVControllerItem> controller = playerIdToControllerMap_[sessionId];
-    controller->isFromSession_ = false;
-    CHECK_AND_RETURN_LOG(controller != nullptr, "LocalFrontSessionArrive but get controller null");
-    lastSessionId_ = sessionId;
-    if (isSoftbusConnecting_) {
-        UpdateFrontSessionInfoToRemote(controller);
-    } else {
-        SLOGE("LocalFrontSessionArrive without connect");
-    }
-    SLOGI("LocalFrontSessionArrive done");
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this, sessionId]() {
+            SLOGI("LocalFrontSessionArrive in");
+            CreateController(sessionId);
+            sptr<AVControllerItem> controller = nullptr;
+            {
+                std::lock_guard lockGuard(migrateControllerLock_);
+                controller = playerIdToControllerMap_[sessionId];
+                CHECK_AND_RETURN_LOG(controller != nullptr, "LocalFrontSessionArrive but get controller null");
+            }
+
+            controller->isFromSession_ = false;
+            lastSessionId_ = sessionId;
+            if (isSoftbusConnecting_) {
+                UpdateFrontSessionInfoToRemote(controller);
+            } else {
+                SLOGE("LocalFrontSessionArrive without connect");
+            }
+            SLOGI("LocalFrontSessionArrive finish");
+        },
+        "LocalFrontSessionArrive");
 }
 
 void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
 {
-    ClearCacheBySessionId(lastSessionId_);
+    SLOGI("LocalFrontSessionChange in");
+    std::lock_guard lockGuard(migrateControllerLock_);
+    sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
+    if (controller != nullptr) {
+        controller->UnregisterAVControllerCallback();
+    } else {
+        SLOGE("LocalFrontSessionLeave but get controller null");
+    }
+    ClearCacheBySessionId(sessionId);
+    auto it = playerIdToControllerMap_.find(sessionId);
+    if (it != playerIdToControllerMap_.end()) {
+        playerIdToControllerMap_.erase(it);
+    } else {
+        SLOGE("LocalFrontSessionLeave no find sessionId:%{public}s",
+            AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    }
     LocalFrontSessionArrive(sessionId);
 }
 
 void MigrateAVSessionServer::LocalFrontSessionLeave(std::string &sessionId)
 {
     SLOGI("LocalFrontSessionLeave in");
+    std::lock_guard lockGuard(migrateControllerLock_);
+    sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
+    if (controller != nullptr) {
+        controller->UnregisterAVControllerCallback();
+    } else {
+        SLOGE("LocalFrontSessionLeave but get controller null");
+    }
     ClearCacheBySessionId(sessionId);
     auto it = playerIdToControllerMap_.find(sessionId);
     if (it != playerIdToControllerMap_.end()) {
