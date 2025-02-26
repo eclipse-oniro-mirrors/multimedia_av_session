@@ -128,7 +128,7 @@ int32_t AVSessionItem::Destroy()
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionItem::DestroyTask()
+int32_t AVSessionItem::DestroyTask(bool continuePlay)
 {
     {
         std::lock_guard lockGuard(callbackLock_);
@@ -168,7 +168,7 @@ int32_t AVSessionItem::DestroyTask()
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         }
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
-        ReleaseCast();
+        ReleaseCast(continuePlay);
         StopCastSession();
     }
     ReleaseAVCastControllerInner();
@@ -1051,7 +1051,7 @@ void AVSessionItem::HandleCastValidCommandChange(const std::vector<int32_t>& cmd
     }
 }
 
-int32_t AVSessionItem::ReleaseCast()
+int32_t AVSessionItem::ReleaseCast(bool continuePlay)
 {
     SLOGI("Release cast process");
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
@@ -1062,7 +1062,7 @@ int32_t AVSessionItem::ReleaseCast()
         "SESSION_TYPE", GetSessionType(),
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
-    return StopCast();
+    return StopCast(continuePlay);
 }
 
 int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo)
@@ -1349,7 +1349,7 @@ void AVSessionItem::ListenCollaborationRejectToStopCast()
     });
 }
 
-int32_t AVSessionItem::StopCast()
+int32_t AVSessionItem::StopCast(bool continuePlay)
 {
     std::lock_guard lockGuard(castHandleLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
@@ -1372,7 +1372,7 @@ int32_t AVSessionItem::StopCast()
         } else {
             AVSessionRadarInfo info("AVSessionItem::StopCast");
             AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
-            int64_t ret = AVRouter::GetInstance().StopCast(castHandle_);
+            int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, continuePlay);
             AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
             SLOGI("StopCast with unchange castHandle is %{public}lld", (long long)castHandle_);
             CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");

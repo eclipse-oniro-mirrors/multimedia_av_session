@@ -259,10 +259,11 @@ public:
     /**
      * @brief Release cast process.
      *
+     * @param { bool } continuePlay - whether continue play when release cast.
      * @return { int32_t } Return whether the release is successful
      * @since 10
     */
-    virtual int32_t ReleaseCast() = 0;
+    virtual int32_t ReleaseCast(bool continuePlay = false) = 0;
 
     /**
      * @brief Start to listen castDisplay event.
