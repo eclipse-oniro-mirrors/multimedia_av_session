@@ -772,7 +772,7 @@ int32_t AVSessionProxy::SetSessionEvent(const std::string& event, const AAFwk::W
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-int32_t AVSessionProxy::ReleaseCast()
+int32_t AVSessionProxy::ReleaseCast(bool continuePlay)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;

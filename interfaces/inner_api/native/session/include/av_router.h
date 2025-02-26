@@ -186,10 +186,11 @@ public:
      * @brief Stop cast process.
      *
      * @param { const int64_t } castHandle - The ID corresponding to the provider that needs to be stopped.
+     * @param { bool } continuePlay - whether continue play when stop cast.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t StopCast(const int64_t castHandle) = 0;
+    virtual int32_t StopCast(const int64_t castHandle, bool continuePlay = false) = 0;
 
     /**
      * @brief Stop cast session process.
