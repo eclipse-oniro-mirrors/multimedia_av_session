@@ -197,7 +197,7 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
     return hwCastProviderSession->AddDevice(deviceInfo.deviceId_);
 }
 
-bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo)
+bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo, bool continuePlay)
 {
     SLOGI("RemoveCastDevice with config castSession and corresonding castId is %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
@@ -212,7 +212,7 @@ bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo)
         return false;
     }
 
-    return hwCastProviderSession->RemoveDevice(deviceInfo.deviceId_);
+    return hwCastProviderSession->RemoveDevice(deviceInfo.deviceId_, continuePlay);
 }
 
 bool HwCastProvider::RegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener)

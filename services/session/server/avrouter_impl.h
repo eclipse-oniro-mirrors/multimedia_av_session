@@ -58,7 +58,7 @@ public:
 
     int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) override;
 
-    int32_t StopCast(const int64_t castHandle, int32_t removeTimes) override;
+    int32_t StopCast(const int64_t castHandle, int32_t removeTimes, bool continuePlay = false) override;
 
     int32_t StopCastSession(const int64_t castHandle) override;
 
