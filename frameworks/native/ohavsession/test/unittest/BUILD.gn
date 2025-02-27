@@ -119,6 +119,7 @@ ohos_unittest("OHAVSessionTest") {
   cflags = [
     "-Wall",
     "-Werror",
+    "-fno-access-control",
   ]
 
   sources = [ "./oh_av_session_test.cpp" ]
