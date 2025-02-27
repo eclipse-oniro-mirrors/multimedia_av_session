@@ -65,6 +65,14 @@ int32_t AVControllerItem::RegisterAVControllerCallback(const std::shared_ptr<AVC
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::UnregisterAVControllerCallback()
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    SLOGE("UnregisterAVControllerCallback pid:%{public}d", static_cast<int>(pid_));
+    innerCallback_ = nullptr;
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::RegisterMigrateAVSessionProxyCallback(
     const std::function<int32_t(const std::string&, AAFwk::WantParams&)>& callback)
 {

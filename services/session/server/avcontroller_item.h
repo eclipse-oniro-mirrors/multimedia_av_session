@@ -111,6 +111,8 @@ public:
 
     int32_t RegisterAVControllerCallback(const std::shared_ptr<AVControllerCallback> &callback);
 
+    int32_t UnregisterAVControllerCallback();
+
     int32_t RegisterMigrateAVSessionProxyCallback(
         const std::function<int32_t(const std::string&, AAFwk::WantParams&)>& callback);
 
