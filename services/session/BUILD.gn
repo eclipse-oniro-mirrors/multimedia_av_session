@@ -451,6 +451,7 @@ ohos_shared_library("avsession_item") {
 
   deps = [
     "../../frameworks/common:avsession_common",
+    "../../frameworks/native/session:avsession_client",
     "../../utils:avsession_utils",
     "//third_party/openssl:libcrypto_shared",
   ]
