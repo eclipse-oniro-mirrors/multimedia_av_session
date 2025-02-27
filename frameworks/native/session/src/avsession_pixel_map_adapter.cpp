@@ -33,9 +33,18 @@ int32_t AVSessionPixelMapAdapter::originalWidth_ = 0;
 int32_t AVSessionPixelMapAdapter::originalHeight_ = 0;
 std::mutex AVSessionPixelMapAdapter::pixelMapLock_;
 
+void AVSessionPixelMapAdapter::CleanAVSessionPixelMap(std::shared_ptr<AVSessionPixelMap>& innerPixelMap)
+{
+    std::lock_guard<std::mutex> lockGuard(pixelMapLock_);
+    if (innerPixelMap != nullptr) {
+        innerPixelMap->Clear();
+    }
+}
+
 std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
     const std::shared_ptr<AVSessionPixelMap>& innerPixelMap)
 {
+    std::lock_guard<std::mutex> lockGuard(pixelMapLock_);
     CHECK_AND_RETURN_RET_LOG(innerPixelMap != nullptr, nullptr, "invalid parameter");
     CHECK_AND_RETURN_RET_LOG(innerPixelMap->GetInnerImgBuffer().size() > IMAGE_BYTE_SIZE, nullptr,
         "innerPixelMap innerImgBuffer size less than 2");
