@@ -43,7 +43,8 @@ std::map<std::string, NapiMetaData::GetterType> NapiMetaData::getterMap_ = {
     { "skipIntervals", GetSkipIntervals },
     { "filter", GetFilter },
     { "displayTags", GetDisplayTags },
-    { "drmSchemes", GetDrmSchemes }
+    { "drmSchemes", GetDrmSchemes },
+    { "singleLyricText", GetSingleLyricText }
 };
 
 std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
@@ -71,7 +72,8 @@ std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
     { AVMetaData::META_KEY_FILTER, SetFilter },
     { AVMetaData::META_KEY_DISPLAY_TAGS, SetDisplayTags },
     { AVMetaData::META_KEY_DRM_SCHEMES, SetDrmSchemes },
-    { AVMetaData::META_KEY_BUNDLE_ICON, SetBundleIcon }
+    { AVMetaData::META_KEY_BUNDLE_ICON, SetBundleIcon },
+    { AVMetaData::META_KEY_SINGLE_LYRIC_TEXT, SetSingleLyricText }
 };
 
 std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
@@ -100,6 +102,7 @@ std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
     { "displayTags", AVMetaData::META_KEY_DISPLAY_TAGS },
     { "drmSchemes", AVMetaData::META_KEY_DRM_SCHEMES },
     { "bundleIcon", AVMetaData::META_KEY_BUNDLE_ICON },
+    { "singleLyricText", AVMetaData::META_KEY_SINGLE_LYRIC_TEXT }
 };
 
 napi_status NapiMetaData::ConvertFilter(napi_env env, napi_value filter, AVMetaData::MetaMaskType& mask)
@@ -600,6 +603,25 @@ napi_status NapiMetaData::SetLyric(napi_env env, const AVMetaData& in, napi_valu
     auto status = NapiUtils::SetValue(env, in.GetLyric(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "lyric", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMetaData::GetSingleLyricText(napi_env env, napi_value in, AVMetaData& out)
+{
+    std::string property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "singleLyricText", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    out.SetSingleLyricText(property);
+    return status;
+}
+
+napi_status NapiMetaData::SetSingleLyricText(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetSingleLyricText(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "singleLyricText", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }
