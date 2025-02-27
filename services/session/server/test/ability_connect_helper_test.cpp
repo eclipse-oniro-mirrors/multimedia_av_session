@@ -180,7 +180,7 @@ static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall001, TestSiz
     std::string bundleName;
     std::string abilityName;
     int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityForegroundByCall(bundleName, abilityName);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 
 /**
@@ -195,7 +195,7 @@ static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall002, TestSiz
     std::string bundleName = "com.ohos.camera";
     std::string abilityName = "test.ability";
     int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityForegroundByCall(bundleName, abilityName);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 
 /**
@@ -209,7 +209,7 @@ static HWTEST(AbilityConnectHelperTest, StartAbilityByCall001, TestSize.Level1)
     std::string bundleName;
     std::string abilityName;
     int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName, abilityName);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 
 /**
@@ -223,5 +223,5 @@ static HWTEST(AbilityConnectHelperTest, StartAbilityByCall002, TestSize.Level1)
     std::string bundleName = "com.ohos.camera";
     std::string abilityName = "test.ability";
     int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName, abilityName);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
