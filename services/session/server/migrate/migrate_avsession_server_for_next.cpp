@@ -454,7 +454,7 @@ void MigrateAVSessionServer::SwitchAudioDeviceCommand(Json::Value jsonObject)
     int deviceRole = jsonObject[AUDIO_DEVICE_ROLE].isInt() ? jsonObject[AUDIO_DEVICE_ROLE].asInt() : -1;
     std::string networkId = jsonObject[AUDIO_NETWORK_ID].isString() ?
         jsonObject[AUDIO_NETWORK_ID].asString() : "ERROR_VALUE";
-    std::string deviceName = jsonObject[AUDIO_DEVICE_NAME],isString() ?
+    std::string deviceName = jsonObject[AUDIO_DEVICE_NAME].isString() ?
         jsonObject[AUDIO_DEVICE_NAME].asString() : "ERROR_VALUE";
     std::string macAddress = jsonObject[AUDIO_MAC_ADDRESS].isString() ?
         jsonObject[AUDIO_MAC_ADDRESS].asString() : "ERROR_VALUE";
