@@ -79,6 +79,8 @@ private:
     static napi_status OffRemoteDistributedSessionChange(napi_env env, napi_value callback);
 
     static void HandleServiceDied();
+
+    static void HandleServiceStart();
     
     static bool JudgeNumString(std::string str);
 

@@ -37,10 +37,22 @@ namespace OHOS::AVSession {
 class NapiAVSession {
 public:
     static napi_value Init(napi_env env, napi_value exports);
-    static napi_status NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out);
+    static napi_status NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out,
+        std::shared_ptr<NapiAVSession>& napiSession);
+    static napi_status ReCreateInstance(std::shared_ptr<NapiAVSession>& napiSession,
+        std::shared_ptr<AVSession> nativeSession);
 
     NapiAVSession();
     ~NapiAVSession();
+
+    std::string GetSessionTag();
+    void SetSessionTag(std::string sessionTag);
+
+    std::string GetSessionType();
+    void SetSessionType(std::string sessionType);
+
+    AppExecFwk::ElementName GetSessionElement();
+    void SetSessionElement(AppExecFwk::ElementName elementName);
 
     using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
     using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
@@ -126,6 +138,8 @@ private:
     napi_ref wrapperRef_ {};
     std::string sessionId_ ;
     std::string sessionType_ ;
+    std::string sessionTag_ ;
+    AppExecFwk::ElementName elementName_;
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
     std::chrono::system_clock::time_point latestMetadataTs_;
