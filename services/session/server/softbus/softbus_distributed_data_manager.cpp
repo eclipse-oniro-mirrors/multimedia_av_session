@@ -294,7 +294,7 @@ int32_t SoftbusDistributedDataManager::ConnectRemoteDevice(const std::string &pe
     const std::string &packageName, int32_t retryCount)
 {
     std::string anonymizeNetworkId = SoftbusSessionUtils::AnonymizeDeviceId(peerNetworkId);
-    SLOGI("ConnectRemoteDevice remote device %{public}s, retryCount: %{pulic}d",
+    SLOGI("ConnectRemoteDevice remote device %{public}s, retryCount: %{public}d",
         anonymizeNetworkId.c_str(), retryCount);
     if (mProxySocketMap_.find(peerNetworkId) != mProxySocketMap_.end()) {
         SLOGI("%{public}s is connected, no need to connect.", anonymizeNetworkId.c_str());

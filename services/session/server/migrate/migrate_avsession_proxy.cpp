@@ -222,6 +222,7 @@ const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::Migrate
                 break;
             case SESSION_NUM_COLD_START_FROM_PROXY:
                 ColdStartFromProxy();
+                break;
             default:
                 break;
         }
@@ -382,7 +383,7 @@ void MigrateAVSessionProxy::ProcessValidCommands(Json::Value jsonValue)
     if (jsonValue.isMember(VALID_COMMANDS)) {
         std::string commandsStr = jsonValue[VALID_COMMANDS].isString() ?
             jsonValue[VALID_COMMANDS].asString() : "";
-        for (int8_t i = 0; i < commandsStr.length(); i++) {
+        for (unsigned long i = 0; i < commandsStr.length(); i++) {
             commands.insert(commands.begin(), static_cast<int>(commandsStr[i] - '0'));
         }
         remoteSession_->SetSupportCommand(commands);

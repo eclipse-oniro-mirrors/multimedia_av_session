@@ -113,8 +113,8 @@ private:
     };
     std::recursive_mutex listenersLock_;
 
-    int32_t volumeMax_;
-    int32_t volumeMin_;
+    int32_t volumeMax_ = 0;
+    int32_t volumeMin_ = 0;
     std::shared_ptr<AudioVolumeKeyEventCallback> volumeCallback_;
     std::shared_ptr<AudioPreferredDeviceChangeCallback> preferredDeviceChangeCallback_;
 
