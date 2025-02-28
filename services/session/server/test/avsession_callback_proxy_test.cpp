@@ -256,6 +256,21 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnSetLoopMode001, testing::ext::Test
 }
 
 /**
+ * @tc.name: OnSetTargetLoopMode001
+ * @tc.desc: Test OnSetTargetLoopMode
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionCallbackProxyTest, OnSetTargetLoopMode001, testing::ext::TestSize.Level1)
+{
+    SLOGI("OnSetTargetLoopMode001, start");
+    LOG_SetCallback(MyLogCallback);
+    int32_t targetLoopMode = 0;
+    aVSessionCallbackProxy->OnSetTargetLoopMode(targetLoopMode);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
+    SLOGI("OnSetTargetLoopMode001, end");
+}
+
+/**
  * @tc.name: OnToggleFavorite001
  * @tc.desc: Test OnToggleFavorite
  * @tc.type: FUNC

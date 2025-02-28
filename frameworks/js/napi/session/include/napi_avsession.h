@@ -86,6 +86,7 @@ private:
     static napi_status OnSeek(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnSetTargetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -107,6 +108,7 @@ private:
     static napi_status OffSeek(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffSetTargetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);

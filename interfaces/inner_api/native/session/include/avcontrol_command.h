@@ -44,6 +44,7 @@ public:
         SESSION_CMD_AVCALL_HANG_UP = 13,
         SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE = 14,
         SESSION_CMD_MEDIA_KEY_SUPPORT = 15,
+        SESSION_CMD_SET_TARGET_LOOP_MODE = 16,
         SESSION_CMD_MAX
     };
 
@@ -73,6 +74,9 @@ public:
     int32_t SetLoopMode(int32_t mode);
     int32_t GetLoopMode(int32_t& mode) const;
 
+    int32_t SetTargetLoopMode(int32_t targetMode);
+    int32_t GetTargetLoopMode(int32_t& targetMode) const;
+
     int32_t SetAssetId(const std::string& assetId);
     int32_t GetAssetId(std::string& assetId) const;
 
@@ -99,6 +103,7 @@ public:
         SESSION_CMD_AVCALL_HANG_UP,
         SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE,
         SESSION_CMD_MEDIA_KEY_SUPPORT,
+        SESSION_CMD_SET_TARGET_LOOP_MODE,
     };
 
 private:

@@ -220,6 +220,16 @@ void NapiAVSessionCallback::OnSetLoopMode(int32_t loopMode)
     }
 }
 
+void NapiAVSessionCallback::OnSetTargetLoopMode(int32_t targetLoopMode)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnSetTargetLoopMode");
+    if (targetLoopMode == AVPlaybackState::LOOP_MODE_UNDEFINED) {
+        HandleEvent(EVENT_SET_TARGET_LOOP_MODE);
+    } else {
+        HandleEvent(EVENT_SET_TARGET_LOOP_MODE, targetLoopMode);
+    }
+}
+
 void NapiAVSessionCallback::OnToggleFavorite(const std::string& assertId)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnToggleFavorite");

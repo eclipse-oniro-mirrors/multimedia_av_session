@@ -272,6 +272,7 @@ BENCHMARK_F(AVSessionControllerTest, GetValidCommands)(benchmark::State& state)
     avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_SEEK);
     avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_SPEED);
     avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
+    avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE);
     avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
 
     while (state.KeepRunning()) {

@@ -309,6 +309,7 @@ private:
     void HandleOnSeek(const AVControlCommand& cmd);
     void HandleOnSetSpeed(const AVControlCommand& cmd);
     void HandleOnSetLoopMode(const AVControlCommand& cmd);
+    void HandleOnSetTargetLoopMode(const AVControlCommand& cmd);
     void HandleOnToggleFavorite(const AVControlCommand& cmd);
     void HandleOnPlayFromAssetId(const AVControlCommand& cmd);
 
@@ -346,6 +347,8 @@ private:
             [this](const AVControlCommand& cmd) { HandleOnSetSpeed(cmd); }},
         {AVControlCommand::SESSION_CMD_SET_LOOP_MODE,
             [this](const AVControlCommand& cmd) { HandleOnSetLoopMode(cmd); }},
+        {AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE,
+            [this](const AVControlCommand& cmd) { HandleOnSetTargetLoopMode(cmd); }},
         {AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE,
             [this](const AVControlCommand& cmd) { HandleOnToggleFavorite(cmd); }},
         {AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID,
