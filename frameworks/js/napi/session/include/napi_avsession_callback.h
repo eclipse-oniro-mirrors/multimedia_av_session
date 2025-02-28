@@ -47,6 +47,7 @@ public:
         EVENT_AVCALL_TOGGLE_CALL_MUTE,
         EVENT_PLAY_FROM_ASSETID,
         EVENT_DISPLAY_CHANGE,
+        EVENT_SET_TARGET_LOOP_MODE,
         EVENT_TYPE_MAX
     };
 
@@ -63,6 +64,7 @@ public:
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
+    void OnSetTargetLoopMode(int32_t targetLoopMode) override;
     void OnToggleFavorite(const std::string& assertId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;

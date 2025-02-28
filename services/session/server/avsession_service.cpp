@@ -111,6 +111,7 @@ const std::map<int, int32_t> keyCodeToCommandMap_ = {
 };
 
 const std::map<int32_t, int32_t> cmdToOffsetMap_ = {
+    {AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE, 9},
     {AVControlCommand::SESSION_CMD_PLAY, 8},
     {AVControlCommand::SESSION_CMD_PAUSE, 7},
     {AVControlCommand::SESSION_CMD_PLAY_NEXT, 6},

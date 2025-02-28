@@ -40,6 +40,7 @@ private:
     int32_t HandleOnSeek(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnSetSpeed(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnSetLoopMode(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnSetTargetLoopMode(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnMediaKeyEvent(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply);
@@ -70,6 +71,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleOnSetSpeed(data, reply); }},
         {SESSION_CALLBACK_ON_SET_LOOPMODE,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleOnSetLoopMode(data, reply); }},
+        {SESSION_CALLBACK_ON_SET_TARGET_LOOPMODE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnSetTargetLoopMode(data, reply); }},
         {SESSION_CALLBACK_ON_TOGGLE_FAVORITE,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleOnToggleFavorite(data, reply); }},
         {SESSION_CALLBACK_ON_MEDIA_KEY_EVENT,

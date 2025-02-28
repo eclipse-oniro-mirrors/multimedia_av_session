@@ -613,6 +613,8 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand001, TestSize.Level1)
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_MAX), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_CUSTOM + 1), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_UNDEFINED - 1), ERR_INVALID_PARAM);
+    EXPECT_EQ(command.SetTargetLoopMode(AVPlaybackState::LOOP_MODE_CUSTOM + 1), ERR_INVALID_PARAM);
+    EXPECT_EQ(command.SetTargetLoopMode(AVPlaybackState::LOOP_MODE_UNDEFINED - 1), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetSpeed(-1), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetAssetId(""), ERR_INVALID_PARAM);
 }
@@ -631,10 +633,12 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand002, TestSize.Level1)
     int64_t time = 0;
     std::string assetId;
     EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetTargetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.GetSpeed(speed), AVSESSION_ERROR);
     EXPECT_EQ(command.GetSeekTime(time), AVSESSION_ERROR);
     EXPECT_EQ(command.GetAssetId(assetId), AVSESSION_ERROR);
     EXPECT_EQ(command.GetLoopMode(mode), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.GetTargetLoopMode(mode), AVSESSION_SUCCESS);
     EXPECT_EQ(mode, AVPlaybackState::LOOP_MODE_SEQUENCE);
 }
 
@@ -655,6 +659,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand003, TestSize.Level1)
     EXPECT_EQ(command.GetSpeed(speed), AVSESSION_ERROR);
     EXPECT_EQ(command.GetSeekTime(time), AVSESSION_ERROR);
     EXPECT_EQ(command.GetLoopMode(mode), AVSESSION_ERROR);
+    EXPECT_EQ(command.GetTargetLoopMode(mode), AVSESSION_ERROR);
     EXPECT_EQ(command.GetAssetId(assetId), AVSESSION_SUCCESS);
     EXPECT_EQ(assetId, "123456");
 }
@@ -676,6 +681,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand004, TestSize.Level1)
     EXPECT_EQ(command.GetSeekTime(time), AVSESSION_ERROR);
     EXPECT_EQ(command.GetAssetId(assetId), AVSESSION_ERROR);
     EXPECT_EQ(command.GetLoopMode(mode), AVSESSION_ERROR);
+    EXPECT_EQ(command.GetTargetLoopMode(mode), AVSESSION_ERROR);
     EXPECT_EQ(command.GetSpeed(speed), AVSESSION_SUCCESS);
     EXPECT_EQ(std::fabs(speed - 1.0) < 1e-6, true);
 }
@@ -696,6 +702,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand005, TestSize.Level1)
     command.SetSeekTime(1);
     EXPECT_EQ(command.GetAssetId(assetId), AVSESSION_ERROR);
     EXPECT_EQ(command.GetLoopMode(mode), AVSESSION_ERROR);
+    EXPECT_EQ(command.GetTargetLoopMode(mode), AVSESSION_ERROR);
     EXPECT_EQ(command.GetSpeed(speed), AVSESSION_ERROR);
     EXPECT_EQ(command.GetSeekTime(time), AVSESSION_SUCCESS);
     EXPECT_EQ(time, 1);
@@ -834,6 +841,68 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand012, TestSize.Level1)
     }
     EXPECT_EQ(failedCount >= 1, true);
     EXPECT_EQ(failedCount <= 11, true);
+}
+
+/**
+* @tc.name: SendControlCommand013
+* @tc.desc: send command, check if AVControlCommand is invalid
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand013, TestSize.Level1)
+{
+    AVControlCommand command;
+    int32_t mode = -1;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetTargetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE);
+    EXPECT_EQ(ret->GetLoopMode(mode), AVSESSION_SUCCESS);
+    EXPECT_EQ(mode, AVPlaybackState::LOOP_MODE_SEQUENCE);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand014
+* @tc.desc: send command, check if AVControlCommand is valid
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand014, TestSize.Level1)
+{
+    AVControlCommand command;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
+    bool isActive = false;
+    controller_->IsSessionActive(isActive);
+    if (!isActive) {
+        avsession_->Activate();
+    }
+    EXPECT_EQ(controller_->SendControlCommand(command), ERR_COMMAND_NOT_SUPPORT);
+}
+
+/**
+* @tc.name: SendControlCommand015
+* @tc.desc: send command, check if AVControlCommand is valid
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand015, TestSize.Level1)
+{
+    AVControlCommand command;
+    EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
+    bool isActive = false;
+    controller_->IsSessionActive(isActive);
+    if (!isActive) {
+        avsession_->Activate();
+    }
+    EXPECT_EQ(controller_->SendControlCommand(command), AVSESSION_SUCCESS);
 }
 
 /**

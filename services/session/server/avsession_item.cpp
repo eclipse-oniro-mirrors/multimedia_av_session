@@ -1929,6 +1929,16 @@ void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand& cmd)
     callback_->OnSetLoopMode(loopMode);
 }
 
+void AVSessionItem::HandleOnSetTargetLoopMode(const AVControlCommand& cmd)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSetTargetLoopMode");
+    std::lock_guard callbackLockGuard(callbackLock_);
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    int32_t targetLoopMode = AVSESSION_ERROR;
+    CHECK_AND_RETURN_LOG(cmd.GetTargetLoopMode(targetLoopMode) == AVSESSION_SUCCESS, "GetTargetLoopMode failed");
+    callback_->OnSetTargetLoopMode(targetLoopMode);
+}
+
 void AVSessionItem::HandleOnToggleFavorite(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnToggleFavorite");

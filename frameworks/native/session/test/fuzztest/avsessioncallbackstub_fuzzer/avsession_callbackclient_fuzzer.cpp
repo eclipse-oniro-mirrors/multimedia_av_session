@@ -83,6 +83,7 @@ class TestAVSessionCallback : public AVSessionCallback {
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
+    void OnSetTargetLoopMode(int32_t targetLoopMode) override;
     void OnToggleFavorite(const std::string& mediaId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
@@ -155,6 +156,11 @@ void TestAVSessionCallback::OnSetSpeed(double speed)
 void TestAVSessionCallback::OnSetLoopMode(int32_t loopMode)
 {
     SLOGI("Enter into TestAVSessionCallback::OnSetLoopMode.");
+}
+
+void TestAVSessionCallback::OnSetTargetLoopMode(int32_t targetLoopMode)
+{
+    SLOGI("Enter into TestAVSessionCallback::OnSetTargetLoopMode.");
 }
 
 void TestAVSessionCallback::OnToggleFavorite(const std::string& mediaId)
@@ -255,11 +261,13 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner1()
     auto speed = GetData<double>();
     auto time = GetData<int64_t>();
     auto loopMode = GetData<int32_t>();
+    auto targetLoopMode = GetData<int32_t>();
     aVSessionCallbackClient.OnFastForward(time);
     aVSessionCallbackClient.OnRewind(time);
     aVSessionCallbackClient.OnSeek(time);
     aVSessionCallbackClient.OnSetSpeed(speed);
     aVSessionCallbackClient.OnSetLoopMode(loopMode);
+    aVSessionCallbackClient.OnSetTargetLoopMode(targetLoopMode);
 
     uint8_t randomNum = GetData<uint8_t>();
     std::vector<std::string> mediaIds = { "mediaId1", "mediaId2", "mediaId3" };

@@ -50,6 +50,9 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
             case SESSION_CMD_SET_LOOP_MODE:
                 result->SetLoopMode(data.ReadInt32());
                 break;
+            case SESSION_CMD_SET_TARGET_LOOP_MODE:
+                result->SetTargetLoopMode(data.ReadInt32());
+                break;
             case SESSION_CMD_TOGGLE_FAVORITE:
                 result->SetAssetId(data.ReadString());
                 break;
@@ -91,6 +94,10 @@ bool AVControlCommand::Marshalling(Parcel& parcel) const
         case SESSION_CMD_SET_LOOP_MODE:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
                 && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write loop mode failed");
+            break;
+        case SESSION_CMD_SET_TARGET_LOOP_MODE:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
+                && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write target loop mode failed");
             break;
         case SESSION_CMD_TOGGLE_FAVORITE:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<std::string>(param_)
@@ -229,6 +236,26 @@ int32_t AVControlCommand::GetLoopMode(int32_t& mode) const
         return AVSESSION_ERROR;
     }
     mode = std::get<int32_t>(param_);
+    return AVSESSION_SUCCESS;
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+int32_t AVControlCommand::SetTargetLoopMode(int32_t targetMode)
+{
+    if (targetMode < AVPlaybackState::LOOP_MODE_UNDEFINED || targetMode > AVPlaybackState::LOOP_MODE_CUSTOM) {
+        return ERR_INVALID_PARAM;
+    }
+    param_ = targetMode;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::GetTargetLoopMode(int32_t& targetMode) const
+{
+    if (!std::holds_alternative<int32_t>(param_)) {
+        return AVSESSION_ERROR;
+    }
+    targetMode = std::get<int32_t>(param_);
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP

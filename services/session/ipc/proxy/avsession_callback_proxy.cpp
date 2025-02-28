@@ -197,6 +197,20 @@ void AVSessionCallbackProxy::OnSetLoopMode(int32_t loopMode)
         "send request failed");
 }
 
+void AVSessionCallbackProxy::OnSetTargetLoopMode(int32_t targetLoopMode)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(targetLoopMode), "write targetLoopMode failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(SESSION_CALLBACK_ON_SET_TARGET_LOOPMODE, data, reply, option) == 0,
+        "send request failed");
+}
+
 void AVSessionCallbackProxy::OnToggleFavorite(const std::string& mediaId)
 {
     MessageParcel data;

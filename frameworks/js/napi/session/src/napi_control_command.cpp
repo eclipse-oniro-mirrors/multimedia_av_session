@@ -32,6 +32,8 @@ std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlComm
     { "seek", { GetSeekTime, SetSeekTime, AVControlCommand::SESSION_CMD_SEEK } },
     { "setSpeed", { GetSpeed, SetSpeed, AVControlCommand::SESSION_CMD_SET_SPEED } },
     { "setLoopMode", { GetLoopMode, SetLoopMode, AVControlCommand::SESSION_CMD_SET_LOOP_MODE } },
+    { "setTargetLoopMode",
+        { GetTargetLoopMode, SetTargetLoopMode, AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE } },
     { "toggleFavorite", { GetAssetId, SetAssetId, AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE } },
     { "playFromAssetId", { GetPlayFromAssetId, SetPlayFromAssetId, AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID } },
     { "answer", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_ANSWER } },
@@ -289,6 +291,39 @@ napi_status NapiControlCommand::SetLoopMode(napi_env env, AVControlCommand& in, 
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "set parameter property failed");
     return status;
 }
+
+napi_status NapiControlCommand::GetTargetLoopMode(napi_env env, napi_value in, AVControlCommand& out)
+{
+    int32_t targetLoopMode {};
+    auto status = NapiUtils::GetNamedProperty(env, in, "parameter", targetLoopMode);
+    if (status != napi_ok) {
+        SLOGE("get parameter failed");
+        targetLoopMode = AVPlaybackState::LOOP_MODE_UNDEFINED;
+    }
+
+    CHECK_AND_RETURN_RET_LOG(out.SetTargetLoopMode(targetLoopMode) == AVSESSION_SUCCESS,
+        napi_invalid_arg, "set parameter failed");
+    return status;
+}
+
+napi_status NapiControlCommand::SetTargetLoopMode(napi_env env, AVControlCommand& in, napi_value& out)
+{
+    int32_t targetLoopMode {};
+    CHECK_AND_RETURN_RET_LOG(in.GetTargetLoopMode(targetLoopMode) == AVSESSION_SUCCESS,
+        napi_invalid_arg, "get parameter failed");
+
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, targetLoopMode, property);
+    if (status != napi_ok) {
+        SLOGE("create speed property failed");
+        return status;
+    }
+
+    status = napi_set_named_property(env, out, "parameter", property);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "set parameter property failed");
+    return status;
+}
+
 napi_status NapiControlCommand::GetAssetId(napi_env env, napi_value in, AVControlCommand& out)
 {
     std::string assetId;

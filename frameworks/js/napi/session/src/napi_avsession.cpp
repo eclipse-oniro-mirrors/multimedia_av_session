@@ -52,6 +52,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "seek", OnSeek },
     { "setSpeed", OnSetSpeed },
     { "setLoopMode", OnSetLoopMode },
+    { "setTargetLoopMode", OnSetTargetLoopMode },
     { "toggleFavorite", OnToggleFavorite },
     { "handleKeyEvent", OnMediaKeyEvent },
     { "outputDeviceChange", OnOutputDeviceChange },
@@ -74,6 +75,7 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "seek", OffSeek },
     { "setSpeed", OffSetSpeed },
     { "setLoopMode", OffSetLoopMode },
+    { "setTargetLoopMode", OffSetTargetLoopMode },
     { "toggleFavorite", OffToggleFavorite },
     { "handleKeyEvent", OffMediaKeyEvent },
     { "outputDeviceChange", OffOutputDeviceChange },
@@ -1397,6 +1399,16 @@ napi_status NapiAVSession::OnSetLoopMode(napi_env env, NapiAVSession* napiSessio
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_SET_LOOP_MODE, callback);
 }
 
+napi_status NapiAVSession::OnSetTargetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_SET_TARGET_LOOP_MODE, callback);
+}
+
 napi_status NapiAVSession::OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
     CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
@@ -1649,6 +1661,24 @@ napi_status NapiAVSession::OffSetLoopMode(napi_env env, NapiAVSession* napiSessi
         CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
                                  "NapiAVSession object is nullptr");
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
+    }
+    return napi_ok;
+}
+
+napi_status NapiAVSession::OffSetTargetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env,
+        NapiAVSessionCallback::EVENT_SET_TARGET_LOOP_MODE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+    if (napiSession->callback_ &&
+        napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_SET_TARGET_LOOP_MODE)) {
+        CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
+                                 "NapiAVSession object is nullptr");
+        int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     }
     return napi_ok;
