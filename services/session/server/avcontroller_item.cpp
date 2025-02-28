@@ -17,6 +17,7 @@
 #include "ipc_skeleton.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_pixel_map_adapter.h"
 #include "avsession_trace.h"
 #include "command_send_limit.h"
 #include "avsession_utils.h"
@@ -411,13 +412,9 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
         }
     }
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = metaOut.GetAVQueueImage();
-    if (innerQueuePixelMap != nullptr) {
-        innerQueuePixelMap->Clear();
-    }
+    AVSessionPixelMapAdapter::CleanAVSessionPixelMap(innerQueuePixelMap);
     std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = metaOut.GetMediaImage();
-    if (innerMediaPixelMap != nullptr) {
-        innerMediaPixelMap->Clear();
-    }
+    AVSessionPixelMapAdapter::CleanAVSessionPixelMap(innerMediaPixelMap);
 }
 
 void AVControllerItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
