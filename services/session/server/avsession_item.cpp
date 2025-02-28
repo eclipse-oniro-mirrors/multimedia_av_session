@@ -593,22 +593,24 @@ void AVSessionItem::ReportAVCastControllerInfo()
 
 void AVSessionItem::dealValidCallback(int32_t cmd, std::vector<int32_t>& supportedCastCmds)
 {
-    std::lock_guard lockGuard(avsessionItemLock_);
-    SLOGI("process cast valid cmd: %{public}d", cmd);
-    if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_INVALID) {
-        supportedCastCmds_.clear();
-        supportedCastCmds = supportedCastCmds_;
-        HandleCastValidCommandChange(supportedCastCmds_);
-        return;
-    }
-    if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_MAX) {
-        supportedCastCmds = supportedCastCmds_;
-        return;
-    }
-    if (descriptor_.sessionTag_ == "RemoteCast") {
-        SLOGI("sink session should not modify valid cmds");
-        supportedCastCmds = {};
-        return;
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        SLOGI("process cast valid cmd: %{public}d", cmd);
+        if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_INVALID) {
+            supportedCastCmds_.clear();
+            supportedCastCmds = supportedCastCmds_;
+            HandleCastValidCommandChange(supportedCastCmds_);
+            return;
+        }
+        if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_MAX) {
+            supportedCastCmds = supportedCastCmds_;
+            return;
+        }
+        if (descriptor_.sessionTag_ == "RemoteCast") {
+            SLOGI("sink session should not modify valid cmds");
+            supportedCastCmds = {};
+            return;
+        }
     }
     if (cmd > removeCmdStep_) {
         DeleteSupportCastCommand(cmd - removeCmdStep_);
@@ -996,24 +998,26 @@ int32_t AVSessionItem::AddSupportCastCommand(int32_t cmd)
         SLOGI("add invalid cmd: %{public}d", cmd);
         return AVSESSION_ERROR;
     }
-    std::lock_guard lockGuard(avsessionItemLock_);
-    if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE) {
-        auto iter = std::find(
-            supportedCastCmds_.begin(), supportedCastCmds_.end(), AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
-        CHECK_AND_RETURN_RET_LOG(iter == supportedCastCmds_.end(), AVSESSION_SUCCESS, "cmd already been added");
-        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
-        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
-        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_STOP);
-    } else if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_SEEK) {
-        auto iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(), cmd);
-        CHECK_AND_RETURN_RET_LOG(iter == supportedCastCmds_.end(), AVSESSION_SUCCESS, "cmd already been added");
-        supportedCastCmds_.push_back(cmd);
-        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD);
-        supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_REWIND);
-    } else {
-        auto iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(), cmd);
-        CHECK_AND_RETURN_RET_LOG(iter == supportedCastCmds_.end(), AVSESSION_SUCCESS, "cmd already been added");
-        supportedCastCmds_.push_back(cmd);
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE) {
+            auto iter = std::find(
+                supportedCastCmds_.begin(), supportedCastCmds_.end(), AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
+            CHECK_AND_RETURN_RET_LOG(iter == supportedCastCmds_.end(), AVSESSION_SUCCESS, "cmd already been added");
+            supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
+            supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
+            supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_STOP);
+        } else if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_SEEK) {
+            auto iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(), cmd);
+            CHECK_AND_RETURN_RET_LOG(iter == supportedCastCmds_.end(), AVSESSION_SUCCESS, "cmd already been added");
+            supportedCastCmds_.push_back(cmd);
+            supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD);
+            supportedCastCmds_.push_back(AVCastControlCommand::CAST_CONTROL_CMD_REWIND);
+        } else {
+            auto iter = std::find(supportedCastCmds_.begin(), supportedCastCmds_.end(), cmd);
+            CHECK_AND_RETURN_RET_LOG(iter == supportedCastCmds_.end(), AVSESSION_SUCCESS, "cmd already been added");
+            supportedCastCmds_.push_back(cmd);
+        }
     }
     ProcessFrontSession("AddSupportCastCommand");
     HandleCastValidCommandChange(supportedCastCmds_);
