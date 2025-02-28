@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,10 +32,12 @@
 #include "token_setproc.h"
 #include "accesstoken_kit.h"
 #include "system_ability_definition.h"
+#include "system_ability_ondemand_reason.h"
 #include "audio_info.h"
 #include "avsession_callback_client.h"
 #include "avsession_pixel_map.h"
 #include "avsession_pixel_map_adapter.h"
+#include "avsession_info.h"
 
 #define private public
 #define protected public
@@ -1739,4 +1741,664 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Leve
     avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
     SLOGD("HandleSystemKeyColdStart002 end!");
+}
+
+/**
+ * @tc.name: OnIdleWithSessions001
+ * @tc.desc: Verifying the OnIdle method with a valid idle reason.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, OnIdleWithSessions001, TestSize.Level1)
+{
+    SLOGD("OnIdleWithSessions001 begin!");
+    const OHOS::SystemAbilityOnDemandReason idleReason(
+        OHOS::OnDemandReasonId::INTERFACE_CALL, "INTERFACE_CALL", "TestValue", 12345);
+    int32_t result = avservice_->OnIdle(idleReason);
+    EXPECT_EQ(result, 0);
+    SLOGD("OnIdleWithSessions001 end!");
+}
+
+/**
+ * @tc.name: HandleRemoveMediaCardEvent001
+ * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a valid session.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent001, TestSize.Level1)
+{
+    SLOGD("HandleRemoveMediaCardEvent001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    avservice_->topSession_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    bool ret = avservice_->topSession_->IsCasting();
+    avservice_->HandleRemoveMediaCardEvent();
+    EXPECT_EQ(ret, false);
+    SLOGD("HandleRemoveMediaCardEvent001 end!");
+}
+
+/**
+ * @tc.name: HandleRemoveMediaCardEvent002
+ * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a null session.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent002, TestSize.Level1)
+{
+    SLOGD("HandleRemoveMediaCardEvent002 begin!");
+    avservice_->topSession_ = nullptr;
+    avservice_->HandleRemoveMediaCardEvent();
+    EXPECT_EQ(avservice_->topSession_, nullptr);
+    SLOGD("HandleRemoveMediaCardEvent002 end!");
+}
+
+/**
+ * @tc.name: IsTopSessionPlaying001
+ * @tc.desc: Verifying the IsTopSessionPlaying method with a null top session.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, IsTopSessionPlaying001, TestSize.Level1)
+{
+    SLOGD("IsTopSessionPlaying001 begin!");
+    avservice_->topSession_ = nullptr;
+    bool ret = avservice_->IsTopSessionPlaying();
+    EXPECT_EQ(ret, false);
+    SLOGD("IsTopSessionPlaying001 end!");
+}
+
+/**
+ * @tc.name: IsTopSessionPlaying002
+ * @tc.desc: Verifying the IsTopSessionPlaying method with a valid top session.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, IsTopSessionPlaying002, TestSize.Level1)
+{
+    SLOGD("IsTopSessionPlaying002 begin!");
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
+    avservice_->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    bool ret = avservice_->IsTopSessionPlaying();
+    EXPECT_EQ(ret, false);
+    SLOGD("IsTopSessionPlaying002 end!");
+}
+
+/**
+ * @tc.name: HandleMediaCardStateChangeEvent001
+ * @tc.desc: Verifying the HandleMediaCardStateChangeEvent method with "APPEAR" state.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, HandleMediaCardStateChangeEvent001, TestSize.Level1)
+{
+    SLOGD("HandleMediaCardStateChangeEvent001 begin!");
+    std::string isAppear = "APPEAR";
+    avservice_->HandleMediaCardStateChangeEvent(isAppear);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    SLOGD("HandleMediaCardStateChangeEvent001 end!");
+}
+
+/**
+ * @tc.name: HandleMediaCardStateChangeEvent002
+ * @tc.desc: Verifying the HandleMediaCardStateChangeEvent method with "DISAPPEAR" state.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, HandleMediaCardStateChangeEvent002, TestSize.Level1)
+{
+    SLOGD("HandleMediaCardStateChangeEvent002 begin!");
+    std::string isAppear = "DISAPPEAR";
+    avservice_->HandleMediaCardStateChangeEvent(isAppear);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    SLOGD("HandleMediaCardStateChangeEvent002 end!");
+}
+
+/**
+ * @tc.name: HandleMediaCardStateChangeEvent003
+ * @tc.desc: Verifying the HandleMediaCardStateChangeEvent method with an invalid state.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, HandleMediaCardStateChangeEvent003, TestSize.Level1)
+{
+    SLOGD("HandleMediaCardStateChangeEvent003 begin!");
+    std::string isAppear = "ISDISAPPEAR";
+    avservice_->HandleMediaCardStateChangeEvent(isAppear);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    SLOGD("HandleMediaCardStateChangeEvent003 end!");
+}
+
+/**
+ * @tc.name: OnAddSystemAbility001
+ * @tc.desc: Verifying the OnAddSystemAbility method with valid system ability ID and device ID.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, OnAddSystemAbility001, TestSize.Level1)
+{
+    SLOGD("OnAddSystemAbility001 begin!");
+    int32_t systemAbilityId = OHOS::XPOWER_MANAGER_SYSTEM_ABILITY_ID;
+    const std::string deviceId = "AUDIO";
+    avservice_->OnAddSystemAbility(systemAbilityId, deviceId);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    SLOGD("OnAddSystemAbility001 end!");
+}
+
+/**
+ * @tc.name: UpdateTopSession001
+ * @tc.desc: Verifying the UpdateTopSession method with a valid new top session.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, UpdateTopSession001, TestSize.Level1)
+{
+    SLOGD("UpdateTopSession001 begin!");
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
+    const OHOS::sptr<AVSessionItem> newTopSession = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    avservice_->UpdateTopSession(newTopSession);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    SLOGD("UpdateTopSession001 end!");
+}
+
+/**
+ * @tc.name: LowQualityCheck001
+ * @tc.desc: Verifying the LowQualityCheck method with valid parameters.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, LowQualityCheck001, TestSize.Level1)
+{
+    SLOGD("LowQualityCheck001 begin!");
+    int32_t uid = g_playOnCall;
+    int32_t pid = g_pauseOnCall;
+    StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
+    RendererState rendererState = RendererState::RENDERER_PAUSED;
+    avservice_->LowQualityCheck(uid, pid, streamUsage, rendererState);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    SLOGD("LowQualityCheck001 end!");
+}
+
+/**
+ * @tc.name: PlayStateCheck001
+ * @tc.desc: Verifying the PlayStateCheck method with valid parameters.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, PlayStateCheck001, TestSize.Level1)
+{
+    SLOGD("PlayStateCheck001 begin!");
+    int32_t uid = AVSESSION_ERROR_BASE;
+    StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
+    RendererState rendererState = RendererState::RENDERER_PAUSED;
+    avservice_->PlayStateCheck(uid, streamUsage, rendererState);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    SLOGD("PlayStateCheck001 end!");
+}
+
+/**
+ * @tc.name: NotifyBackgroundReportCheck001
+ * @tc.desc: Verifying NotifyBackgroundReportCheck with RENDERER_RUNNING state.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, NotifyBackgroundReportCheck001, TestSize.Level1)
+{
+    SLOGD("NotifyBackgroundReportCheck001 begin!");
+    int32_t uid = g_playOnCall;
+    int32_t pid = g_pauseOnCall;
+    StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
+    RendererState rendererState = RendererState::RENDERER_RUNNING;
+    avservice_->NotifyBackgroundReportCheck(uid, pid, streamUsage, rendererState);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    SLOGD("NotifyBackgroundReportCheck001 end!");
+}
+
+/**
+ * @tc.name: NotifyBackgroundReportCheck002
+ * @tc.desc: Verifying NotifyBackgroundReportCheck with RENDERER_PAUSED state.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, NotifyBackgroundReportCheck002, TestSize.Level1)
+{
+    SLOGD("NotifyBackgroundReportCheck002 begin!");
+    int32_t uid = g_playOnCall;
+    int32_t pid = g_pauseOnCall;
+    StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
+    RendererState rendererState = RendererState::RENDERER_PAUSED;
+    avservice_->NotifyBackgroundReportCheck(uid, pid, streamUsage, rendererState);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    SLOGD("NotifyBackgroundReportCheck002 end!");
+}
+
+/**
+ * @tc.name: ServiceCallback001
+ * @tc.desc: Verifying ServiceCallback with a null session item.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, ServiceCallback001, TestSize.Level1)
+{
+    SLOGD("ServiceCallback001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    auto sessionItem =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(sessionItem, nullptr);
+    avservice_->ServiceCallback(sessionItem);
+    SLOGD("ServiceCallback001 end!");
+}
+
+/**
+ * @tc.name: IsParamInvalid001
+ * @tc.desc: Verifying IsParamInvalid with an empty tag.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, IsParamInvalid001, TestSize.Level1)
+{
+    SLOGD("IsParamInvalid001 begin!");
+    std::string tag = "";
+    int32_t type = AVSession::SESSION_TYPE_AUDIO;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    bool result = avservice_->IsParamInvalid(tag, type, elementName);
+    EXPECT_FALSE(result);
+    SLOGD("IsParamInvalid001 end!");
+}
+
+/**
+ * @tc.name: IsParamInvalid002
+ * @tc.desc: Verifying IsParamInvalid with an invalid session type.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, IsParamInvalid002, TestSize.Level1)
+{
+    SLOGD("IsParamInvalid002 begin!");
+    std::string tag = "testTag";
+    int32_t type = AVSession::SESSION_TYPE_INVALID;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("com.example.bundle");
+    elementName.SetAbilityName("com.example.ability");
+    bool result = avservice_->IsParamInvalid(tag, type, elementName);
+    EXPECT_FALSE(result);
+    SLOGD("IsParamInvalid002 end!");
+}
+
+/**
+ * @tc.name: IsParamInvalid003
+ * @tc.desc: Verifying IsParamInvalid with an empty bundle name.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, IsParamInvalid003, TestSize.Level1)
+{
+    SLOGD("IsParamInvalid003 begin!");
+    std::string tag = "testTag";
+    int32_t type = AVSession::SESSION_TYPE_AUDIO;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("");
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    bool result = avservice_->IsParamInvalid(tag, type, elementName);
+    EXPECT_FALSE(result);
+    SLOGD("IsParamInvalid003 end!");
+}
+
+/**
+ * @tc.name: IsParamInvalid004
+ * @tc.desc: Verifying IsParamInvalid with an empty ability name.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, IsParamInvalid004, TestSize.Level1)
+{
+    SLOGD("IsParamInvalid004 begin!");
+    std::string tag = "testTag";
+    int32_t type = AVSession::SESSION_TYPE_AUDIO;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName("");
+    bool result = avservice_->IsParamInvalid(tag, type, elementName);
+    EXPECT_FALSE(result);
+    SLOGD("IsParamInvalid004 end!");
+}
+
+/**
+ * @tc.name: IsLocalDevice001
+ * @tc.desc: Verifying IsLocalDevice with a valid local network ID.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, IsLocalDevice001, TestSize.Level1)
+{
+    SLOGD("IsLocalDevice001 begin!");
+    const std::string networkId = "LocalDevice";
+    bool result = avservice_->IsLocalDevice(networkId);
+    EXPECT_TRUE(result);
+    SLOGD("IsLocalDevice001 end!");
+}
+
+/**
+ * @tc.name: GetDeviceInfo002
+ * @tc.desc: Verifying GetDeviceInfo with a valid session item and descriptors.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetDeviceInfo002, TestSize.Level1)
+{
+    SLOGI("GetDeviceInfo002 begin!");
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
+    auto avsessionHere = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors = {
+        OHOS::AudioStandard::AudioDeviceDescriptor(OHOS::AudioStandard::DeviceType::DEVICE_TYPE_EARPIECE,
+            OHOS::AudioStandard::DeviceRole::INPUT_DEVICE, 1, 1, "LocalDevice")
+    };
+    avservice_->SetDeviceInfo(descriptors, avsessionHere);
+    avservice_->GetDeviceInfo(avsessionHere, descriptors, descriptors, descriptors);
+    EXPECT_NE(avsessionHere, nullptr);
+    SLOGI("GetDeviceInfo002 end!");
+}
+
+/**
+ * @tc.name: CastAudioProcess001
+ * @tc.desc: Verifying CastAudioProcess with a valid session item and descriptors.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CastAudioProcess001, TestSize.Level1)
+{
+    SLOGI("CastAudioProcess001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors;
+    avservice_->GetDeviceInfo(avsessionHere, descriptors, descriptors, descriptors);
+    const std::string  sourceSessionInfo = "123443";
+    auto ret = avservice_->CastAudioProcess(descriptors, sourceSessionInfo, avsessionHere);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("CastAudioProcess001 end!");
+}
+
+/**
+ * @tc.name: CastAudioProcess002
+ * @tc.desc: Verifying CastAudioProcess with a valid session item and descriptors.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CastAudioProcess002, TestSize.Level1)
+{
+    SLOGI("CastAudioProcess002 begin!");
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
+    auto avsessionHere = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors = {
+        OHOS::AudioStandard::AudioDeviceDescriptor(OHOS::AudioStandard::DeviceType::DEVICE_TYPE_EARPIECE,
+            OHOS::AudioStandard::DeviceRole::INPUT_DEVICE, 1, 1, "LocalDevice")
+    };
+    avservice_->SetDeviceInfo(descriptors, avsessionHere);
+    avservice_->GetDeviceInfo(avsessionHere, descriptors, descriptors, descriptors);
+    EXPECT_NE(avsessionHere, nullptr);
+    const std::string  sourceSessionInfo = "123443";
+    auto ret = avservice_->CastAudioProcess(descriptors, sourceSessionInfo, avsessionHere);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("CastAudioProcess002 end!");
+}
+
+/**
+ * @tc.name: CastAudioInner001
+ * @tc.desc: Verifying CastAudioInner with a valid session item and descriptors.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CastAudioInner001, TestSize.Level1)
+{
+    SLOGI("CastAudioInner001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
+    auto avsessionHere = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors = {
+        OHOS::AudioStandard::AudioDeviceDescriptor(OHOS::AudioStandard::DeviceType::DEVICE_TYPE_EARPIECE,
+            OHOS::AudioStandard::DeviceRole::INPUT_DEVICE, 1, 1, "LocalDevice")
+    };
+    const std::string  sourceSessionInfo = "123443";
+    auto ret = avservice_->CastAudioInner(descriptors, sourceSessionInfo, avsessionHere);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("CastAudioInner001 end!");
+}
+
+/**
+ * @tc.name: CancelCastAudioInner001
+ * @tc.desc: Verifying CancelCastAudioInner with a valid session item and descriptors.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CancelCastAudioInner001, TestSize.Level1)
+{
+    SLOGI("CancelCastAudioInner001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+    avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors = {
+        OHOS::AudioStandard::AudioDeviceDescriptor(OHOS::AudioStandard::DeviceType::DEVICE_TYPE_EARPIECE,
+            OHOS::AudioStandard::DeviceRole::INPUT_DEVICE, 1, 1, "LocalDevice")
+    };
+    const std::string  sourceSessionInfo = "123443";
+    auto ret = avservice_->CancelCastAudioInner(descriptors, sourceSessionInfo, avsessionHere);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("CancelCastAudioInner001 end!");
+}
+
+/**
+ * @tc.name: CastAudioForAll001
+ * @tc.desc: Verifying CastAudioForAll with valid descriptors.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CastAudioForAll001, TestSize.Level1)
+{
+    SLOGI("CastAudioForAll001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors = {
+        OHOS::AudioStandard::AudioDeviceDescriptor(OHOS::AudioStandard::DeviceType::DEVICE_TYPE_EARPIECE,
+            OHOS::AudioStandard::DeviceRole::INPUT_DEVICE, 1, 1, "LocalDevice")
+    };
+    auto ret = avservice_->CastAudioForAll(descriptors);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("CastAudioForAll001 end!");
+}
+
+/**
+ * @tc.name: ClearControllerForClientDiedNoLock002
+ * @tc.desc: Verifying ClearControllerForClientDiedNoLock with a valid PID.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, ClearControllerForClientDiedNoLock002, TestSize.Level1)
+{
+    SLOGI("ClearControllerForClientDiedNoLock002 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    pid_t pid = 1234;
+    avservice_->ClearControllerForClientDiedNoLock(pid);
+    EXPECT_TRUE(avservice_ != nullptr);
+    SLOGI("ClearControllerForClientDiedNoLock002 end!");
+}
+
+/**
+ * @tc.name: CheckAndCreateDir001
+ * @tc.desc: Verifying CheckAndCreateDir with a valid file path.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CheckAndCreateDir001, TestSize.Level1)
+{
+    SLOGI("CheckAndCreateDir001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    const string filePath = "/data/path";
+    bool ret = avservice_->CheckAndCreateDir(filePath);
+    EXPECT_TRUE(ret);
+    SLOGI("CheckAndCreateDir001 end!");
+}
+
+/**
+ * @tc.name: SaveStringToFileEx001
+ * @tc.desc: Verifying SaveStringToFileEx with a valid file path and content.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, SaveStringToFileEx001, TestSize.Level1)
+{
+    SLOGI("SaveStringToFileEx001 begin!");
+    std::string filePath =  "uripath";
+    std::string content = "123456";
+    bool ret = avservice_->SaveStringToFileEx(filePath, content);
+    EXPECT_EQ(ret, true);
+    SLOGI("SaveStringToFileEx001 end!");
+}
+
+/**
+ * @tc.name: SaveStringToFileEx002
+ * @tc.desc: Verifying SaveStringToFileEx with an empty content.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, SaveStringToFileEx002, TestSize.Level1)
+{
+    SLOGI("SaveStringToFileEx002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+
+    std::string filePath = avservice_->GetAVSortDir();
+    std::string content = "";
+    bool ret = avservice_->SaveStringToFileEx(filePath, content);
+    EXPECT_EQ(ret, false);
+    SLOGI("SaveStringToFileEx002 end!");
+}
+
+/**
+ * @tc.name: RemoveExpired001
+ * @tc.desc: Verifying RemoveExpired with an expired time point.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, RemoveExpired001, TestSize.Level1)
+{
+    SLOGD("RemoveExpired001 begin!");
+    std::list<std::chrono::system_clock::time_point> timeList;
+    auto now = std::chrono::system_clock::now();
+    int32_t timeThreshold = 5;
+    timeList.push_back(now - std::chrono::seconds(10));
+    avservice_->RemoveExpired(timeList, now, timeThreshold);
+
+    EXPECT_TRUE(timeList.empty());
+    SLOGD("RemoveExpired001 end!");
+}
+
+/**
+ * @tc.name: RemoveExpired002
+ * @tc.desc: Verifying RemoveExpired with a non-expired time point.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, RemoveExpired002, TestSize.Level1)
+{
+    SLOGD("RemoveExpired002 begin!");
+    std::list<std::chrono::system_clock::time_point> timeList;
+    auto now = std::chrono::system_clock::now();
+    int32_t timeThreshold = 5;
+    timeList.push_back(now - std::chrono::seconds(3));
+
+    avservice_->RemoveExpired(timeList, now, timeThreshold);
+    EXPECT_EQ(timeList.size(), 1);
+    SLOGD("RemoveExpired002 end!");
+}
+
+/**
+ * @tc.name: RemoveExpired003
+ * @tc.desc: Verifying RemoveExpired with an empty time list.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, RemoveExpired003, TestSize.Level1)
+{
+    SLOGD("RemoveExpired003 begin!");
+    std::list<std::chrono::system_clock::time_point> timeList;
+    auto now = std::chrono::system_clock::now();
+    int32_t timeThreshold = 5;
+    avservice_->RemoveExpired(timeList, now, timeThreshold);
+    EXPECT_TRUE(timeList.empty());
+    SLOGD("RemoveExpired003 end!");
+}
+
+/**
+ * @tc.name: NotifyFlowControl001
+ * @tc.desc: Verifying NotifyFlowControl with a full flow control list.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, NotifyFlowControl001, TestSize.Level1)
+{
+    SLOGD("NotifyFlowControl001 begin!");
+    avservice_->flowControlPublishTimestampList_.clear();
+    const size_t count = 3;
+    for (size_t i = 0; i < count; ++i) {
+        avservice_->flowControlPublishTimestampList_.push_back(std::chrono::system_clock::now());
+    }
+    bool result = avservice_->NotifyFlowControl();
+    EXPECT_TRUE(result);
+    EXPECT_EQ(avservice_->flowControlPublishTimestampList_.size(), count);
+    SLOGD("NotifyFlowControl001 end!");
+}
+
+/**
+ * @tc.name: NotifyFlowControl002
+ * @tc.desc: Verifying NotifyFlowControl with a non-full flow control list.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, NotifyFlowControl002, TestSize.Level1)
+{
+    SLOGD("NotifyFlowControl002 begin!");
+    const size_t count = 3;
+    avservice_->flowControlPublishTimestampList_.clear();
+    for (size_t i = 0; i < count - 1; ++i) {
+        avservice_->flowControlPublishTimestampList_.push_back(std::chrono::system_clock::now());
+    }
+    bool result = avservice_->NotifyFlowControl();
+    EXPECT_FALSE(result);
+    SLOGD("NotifyFlowControl002 end!");
+}
+
+/**
+ * @tc.name: NotifyRemoteDistributedSessionControllersChanged001
+ * @tc.desc: Verifying NotifyRemoteDistributedSessionControllersChanged with a valid session controller.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, NotifyRemoteDistributedSessionControllersChanged001, TestSize.Level1)
+{
+    SLOGD("NotifyRemoteDistributedSessionControllersChanged001 begin!");
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    avservice_->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
+    OHOS::sptr<OHOS::ISystemAbilityManager> mgr =
+        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_TRUE(mgr != nullptr);
+    OHOS::sptr<IRemoteObject> obj = mgr->GetSystemAbility(OHOS::AVSESSION_SERVICE_ID);
+    sessionControllers.push_back(obj);
+    avservice_->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
+    EXPECT_TRUE(avservice_ != nullptr);
+    SLOGD("NotifyRemoteDistributedSessionControllersChanged001 end!");
 }

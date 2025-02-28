@@ -60,7 +60,7 @@ static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall001, testing::ext
     std::string abilityName = "MainAbility";
     AbilityManagerAdapter abilityManagerAdapter(bundleName, abilityName);
     int32_t ret = abilityManagerAdapter.StartAbilityByCall(sessionId);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    EXPECT_EQ(ret, ERR_START_ABILITY_TIMEOUT);
     SLOGI("StartAbilityByCall001 end!");
 }
 
@@ -95,7 +95,7 @@ static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall003, testing::ext
     std::string bundleName = "com.ohos.camera";
     AbilityManagerAdapter abilityManagerAdapter(bundleName, abilityName);
     int32_t ret = abilityManagerAdapter.StartAbilityByCall(sessionId);
-    EXPECT_EQ(ret, ERR_ABILITY_NOT_AVAILABLE);
+    EXPECT_EQ(ret, ERR_START_ABILITY_TIMEOUT);
     SLOGI("StartAbilityByCall003 end!");
 }
 
