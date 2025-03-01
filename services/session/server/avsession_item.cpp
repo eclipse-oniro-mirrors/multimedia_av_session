@@ -1049,7 +1049,7 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
             auto iter = std::remove(supportedCastCmds_.begin(), supportedCastCmds_.end(), cmd);
             supportedCastCmds_.erase(iter, supportedCastCmds_.end());
 
-            iter = std::remove(supportedCastCmds_.begin(), supportedCastCmds_.end(), 
+            iter = std::remove(supportedCastCmds_.begin(), supportedCastCmds_.end(),
                 AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD);
             supportedCastCmds_.erase(iter, supportedCastCmds_.end());
 
