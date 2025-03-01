@@ -87,6 +87,23 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "playFromAssetId", OffPlayFromAssetId },
     { "castDisplayChange", OffCastDisplayChange },
 };
+std::list<int32_t> registerEventList_;
+std::map<std::string, int32_t> convertEventType_ = {
+    { "play", AVControlCommand::SESSION_CMD_PLAY },
+    { "pause", AVControlCommand::SESSION_CMD_PAUSE },
+    { "stop", AVControlCommand::SESSION_CMD_STOP },
+    { "playNext", AVControlCommand::SESSION_CMD_PLAY_NEXT },
+    { "playPrevious", AVControlCommand::SESSION_CMD_PLAY_PREVIOUS },
+    { "fastForward", AVControlCommand::SESSION_CMD_FAST_FORWARD },
+    { "rewind", AVControlCommand::SESSION_CMD_REWIND },
+    { "seek", AVControlCommand::SESSION_CMD_SEEK },
+    { "setSpeed", AVControlCommand::SESSION_CMD_SET_SPEED },
+    { "setLoopMode", AVControlCommand::SESSION_CMD_SET_LOOP_MODE },
+    { "toggleFavorite", AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE },
+    { "handleKeyEvent", AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT },
+    { "playFromAssetId", AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID }
+};
+
 std::mutex NapiAVSession::syncMutex_;
 std::mutex NapiAVSession::syncAsyncMutex_;
 std::condition_variable NapiAVSession::syncCond_;
@@ -101,6 +118,7 @@ NapiAVSession::NapiAVSession()
 NapiAVSession::~NapiAVSession()
 {
     SLOGI("destroy");
+    registerEventList_.clear();
 }
 
 napi_value NapiAVSession::Init(napi_env env, napi_value exports)
@@ -164,13 +182,70 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
     return self;
 }
 
-napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out)
+std::string NapiAVSession::GetSessionTag()
+{
+    return sessionTag_;
+}
+
+void NapiAVSession::SetSessionTag(std::string sessionTag)
+{
+    sessionTag_ = sessionTag;
+}
+
+std::string NapiAVSession::GetSessionType()
+{
+    return sessionType_;
+}
+
+void NapiAVSession::SetSessionType(std::string sessionType)
+{
+    sessionType_ = sessionType;
+}
+
+AppExecFwk::ElementName NapiAVSession::GetSessionElement()
+{
+    return elementName_;
+}
+
+void NapiAVSession::SetSessionElement(AppExecFwk::ElementName elementName)
+{
+    elementName_ = elementName;
+}
+
+napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<NapiAVSession>& napiSession,
+    std::shared_ptr<AVSession> nativeSession)
+{
+    SLOGI("sessionId=%{public}s", napiSession->sessionId_.c_str());
+    napiSession->session_ = std::move(nativeSession);
+    napiSession->sessionId_ = napiSession->session_->GetSessionId();
+    napiSession->sessionType_ = napiSession->session_->GetSessionType();
+    if (napiSession->callback_ == nullptr) {
+        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    }
+    int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("RegisterCallback fail, ret=%{public}d", ret);
+    }
+
+    for (int32_t event : registerEventList_) {
+        int32_t res = napiSession->session_->AddSupportCommand(event);
+        if (res != AVSESSION_SUCCESS) {
+            SLOGE("AddSupportCommand fail, ret=%{public}d", res);
+            continue;
+        }
+    }
+    napiSession->session_->Activate();
+    return napi_ok;
+}
+
+napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out,
+    std::shared_ptr<NapiAVSession>& napiSession)
 {
     napi_value constructor {};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVSessionConstructorRef, &constructor), napi_generic_failure);
     napi_value instance{};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
-    NapiAVSession* napiAvSession{};
+    std::shared_ptr<NapiAVSession> napiAvSession = std::make_shared<NapiAVSession>();
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiAvSession)), napi_generic_failure);
     napiAvSession->session_ = std::move(nativeSession);
     napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
@@ -187,6 +262,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionType", property), napi_generic_failure);
     out = instance;
+    napiSession = napiAvSession;
     return napi_ok;
 }
 
@@ -228,7 +304,6 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     if (napiSession->callback_ == nullptr) {
         napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
         if (napiSession->callback_ == nullptr) {
-            SLOGE("OnEvent failed : no memory");
             return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
         }
         int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
@@ -239,6 +314,7 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     if (it->second(env, napiSession, callback) != napi_ok) {
         NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
+    registerEventList_.push_back(convertEventType_[eventName]);
     return NapiUtils::GetUndefinedValue(env);
 }
 
@@ -312,6 +388,7 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
     if (napiSession != nullptr && it->second(env, napiSession, callback) != napi_ok) {
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
+    registerEventList_.remove(convertEventType_[eventName]);
     return NapiUtils::GetUndefinedValue(env);
 }
 

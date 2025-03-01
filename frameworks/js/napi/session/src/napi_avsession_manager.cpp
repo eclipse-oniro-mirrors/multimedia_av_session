@@ -122,6 +122,21 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
     return exports;
 }
 
+std::shared_ptr<NapiAVSession> napiSession = nullptr;
+
+void processMsg(std::shared_ptr<ContextBase> context, int32_t ret)
+{
+    if (ret != AVSESSION_SUCCESS) {
+        if (ret == ERR_SESSION_IS_EXIST) {
+            context->errMessage = "CreateAVSession failed : session is existed";
+        } else {
+            context->errMessage = "CreateAVSession failed : native create session failed";
+        }
+        context->status = napi_generic_failure;
+        context->errCode = NapiAVSessionManager::errcode_[ret];
+    }
+}
+
 napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::CreateAVSession");
@@ -158,19 +173,19 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().CreateSession(context->tag_, context->type_,
                                                                     context->elementName_, context->session_);
-        if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_SESSION_IS_EXIST) {
-                context->errMessage = "CreateAVSession failed : session is existed";
-            } else {
-                context->errMessage = "CreateAVSession failed : native create session failed";
-            }
-            context->status = napi_generic_failure;
-            context->errCode = NapiAVSessionManager::errcode_[ret];
-        }
+        processMsg(context, ret);
     };
 
+    auto res = AVSessionManager::GetInstance().RegisterServiceStartCallback(HandleServiceStart);
+    SLOGI("RegisterServiceStartCallback res=%{public}d", res);
+
     auto complete = [context](napi_value& output) {
-        context->status = NapiAVSession::NewInstance(context->env, context->session_, output);
+        context->status = NapiAVSession::NewInstance(context->env, context->session_, output, napiSession);
+        if (napiSession) {
+            SLOGI("NewInstance napiSession");
+            napiSession->SetSessionTag(context->tag_);
+            napiSession->SetSessionElement(context->elementName_);
+        }
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
@@ -1410,6 +1425,21 @@ void NapiAVSessionManager::HandleServiceDied()
     if (listener_ != nullptr) {
         SLOGI("clear listener for service die");
         listener_ = nullptr;
+    }
+}
+
+void NapiAVSessionManager::HandleServiceStart()
+{
+    SLOGI("HandleServiceStart enter");
+    if (napiSession) {
+        std::shared_ptr<AVSession> session;
+        int32_t ret = AVSessionManager::GetInstance().CreateSession(napiSession->GetSessionTag(),
+            NapiUtils::ConvertSessionType(napiSession->GetSessionType()),
+            napiSession->GetSessionElement(), session);
+        if (ret == AVSESSION_SUCCESS) {
+            NapiAVSession::ReCreateInstance(napiSession, session);
+        }
+        SLOGI("HandleServiceStart ReCreateInstance ret=%{public}d", ret);
     }
 }
 
