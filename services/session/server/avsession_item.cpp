@@ -438,9 +438,13 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     }
     {
         std::lock_guard controllerLockGuard(controllersLock_);
-        for (const auto& [pid, controller] : controllers_) {
-            if (controller != nullptr) {
-                controller->HandlePlaybackStateChange(state);
+        SLOGD("send HandlePlaybackStateChange in postTask with state %{public}d and controller size %{public}d",
+            state.GetState(), static_cast<int>(controllers_.size()));
+        if (controllers_.size() > 0) {
+            for (const auto& [pid, controller] : controllers_) {
+                if (controller != nullptr) {
+                    controller->HandlePlaybackStateChange(state);
+                }
             }
         }
     }

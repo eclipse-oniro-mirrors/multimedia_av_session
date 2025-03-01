@@ -424,7 +424,7 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVPlaybackState");
     CHECK_AND_RETURN_RET_LOG(state.IsValid(), ERR_INVALID_PARAM, "state not valid");
     std::lock_guard lockGuard(setPlaybackLock_);
-    SLOGI("SetAVPlaybackState in proxy for state %{public}d", state.GetState());
+    SLOGI("SetAVPlaybackState:%{public}d", state.GetState());
 
     std::lock_guard isDestroyedLockGuard(isDestroyedLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
