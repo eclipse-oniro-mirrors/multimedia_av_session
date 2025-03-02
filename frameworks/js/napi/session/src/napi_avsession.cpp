@@ -108,6 +108,7 @@ std::mutex NapiAVSession::syncMutex_;
 std::mutex NapiAVSession::syncAsyncMutex_;
 std::condition_variable NapiAVSession::syncCond_;
 std::condition_variable NapiAVSession::syncAsyncCond_;
+std::recursive_mutex registerEventLock_;
 int32_t NapiAVSession::playBackStateRet_ = AVSESSION_ERROR;
 
 NapiAVSession::NapiAVSession()
@@ -118,6 +119,7 @@ NapiAVSession::NapiAVSession()
 NapiAVSession::~NapiAVSession()
 {
     SLOGI("destroy");
+    std::lock_guard lockGuard(registerEventLock_);
     registerEventList_.clear();
 }
 
@@ -215,6 +217,9 @@ void NapiAVSession::SetSessionElement(AppExecFwk::ElementName elementName)
 napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<NapiAVSession>& napiSession,
     std::shared_ptr<AVSession> nativeSession)
 {
+    if (napiSession == nullptr || nativeSession == nullptr) {
+        return napi_generic_failure;
+    }
     SLOGI("sessionId=%{public}s", napiSession->sessionId_.c_str());
     napiSession->session_ = std::move(nativeSession);
     napiSession->sessionId_ = napiSession->session_->GetSessionId();
@@ -227,13 +232,17 @@ napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<NapiAVSession>& napi
         SLOGE("RegisterCallback fail, ret=%{public}d", ret);
     }
 
-    for (int32_t event : registerEventList_) {
-        int32_t res = napiSession->session_->AddSupportCommand(event);
-        if (res != AVSESSION_SUCCESS) {
-            SLOGE("AddSupportCommand fail, ret=%{public}d", res);
-            continue;
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        for (int32_t event : registerEventList_) {
+            int32_t res = napiSession->session_->AddSupportCommand(event);
+            if (res != AVSESSION_SUCCESS) {
+                SLOGE("AddSupportCommand fail, ret=%{public}d", res);
+                continue;
+            }
         }
     }
+
     napiSession->session_->Activate();
     return napi_ok;
 }
@@ -264,6 +273,18 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     out = instance;
     napiSession = napiAvSession;
     return napi_ok;
+}
+
+void AddRegisterEvent(std::string eventName)
+{
+    std::lock_guard lockGuard(registerEventLock_);
+    registerEventList_.push_back(convertEventType_[eventName]);
+}
+
+void RemoveRegisterEvent(std::string eventName)
+{
+    std::lock_guard lockGuard(registerEventLock_);
+    registerEventList_.remove(convertEventType_[eventName]);
 }
 
 napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
@@ -314,7 +335,7 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     if (it->second(env, napiSession, callback) != napi_ok) {
         NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
-    registerEventList_.push_back(convertEventType_[eventName]);
+    AddRegisterEvent(eventName);
     return NapiUtils::GetUndefinedValue(env);
 }
 
@@ -388,7 +409,7 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
     if (napiSession != nullptr && it->second(env, napiSession, callback) != napi_ok) {
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
-    registerEventList_.remove(convertEventType_[eventName]);
+    RemoveRegisterEvent(eventName);
     return NapiUtils::GetUndefinedValue(env);
 }
 

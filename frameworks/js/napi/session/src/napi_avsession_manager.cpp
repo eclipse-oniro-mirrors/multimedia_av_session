@@ -1436,10 +1436,11 @@ void NapiAVSessionManager::HandleServiceStart()
         int32_t ret = AVSessionManager::GetInstance().CreateSession(napiSession->GetSessionTag(),
             NapiUtils::ConvertSessionType(napiSession->GetSessionType()),
             napiSession->GetSessionElement(), session);
+        SLOGI("HandleServiceStart CreateSession ret=%{public}d", ret);
         if (ret == AVSESSION_SUCCESS) {
-            NapiAVSession::ReCreateInstance(napiSession, session);
+            auto res = NapiAVSession::ReCreateInstance(napiSession, session);
+            SLOGI("HandleServiceStart ReCreateInstance ret=%{public}d", res);
         }
-        SLOGI("HandleServiceStart ReCreateInstance ret=%{public}d", ret);
     }
 }
 
