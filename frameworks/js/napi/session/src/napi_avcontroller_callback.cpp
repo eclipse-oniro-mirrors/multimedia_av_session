@@ -172,7 +172,7 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
         SLOGE("not register callback event=%{public}d", event);
         return;
     }
-    SLOGI("HandleEventWithThreadSafe for event:%{public}d|num:%{public}d|state:%{public}d",
+    SLOGI("event:%{public}d|num:%{public}d|state:%{public}d",
         event, static_cast<int>(callbacks_[event].size()), state);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         CallWithThreadSafe(*ref, isValid_, state, threadSafeFunction_,

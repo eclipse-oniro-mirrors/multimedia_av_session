@@ -583,7 +583,7 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     auto* napiAvSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiAvSession == nullptr || napiAvSession->metaData_.EqualWithUri((context->metaData))) {
-        SLOGI("napiAvSession is nullptr or metadata with uri is the same as last time");
+        SLOGI("Session nullptr or metadata all same");
         auto executor = []() {};
         return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
     }
@@ -698,7 +698,7 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
 
     auto asyncExecutor = PlaybackStateAsyncExecutor(context);
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
-    return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", asyncExecutor, complete);
+    return NapiAsyncWork::Enqueue(env, context, "SetAVPlayback", asyncExecutor, complete);
 }
 
 napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)

@@ -600,7 +600,7 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t userId)
 // LCOV_EXCL_START
 void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info, bool isPlaying)
 {
-    SLOGI("HandleFocusSession with uid=%{public}d, cur topSession:%{public}s",
+    SLOGI("uid=%{public}d, curTop:%{public}s",
         info.uid, (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
     std::lock_guard lockGuard(sessionServiceLock_);
     int32_t userId = GetUsersManager().GetCurrentUserId();
@@ -628,7 +628,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         return;
     }
     if (!isPlaying) {
-        SLOGI("HandleFocusSession focusSession not playing is not same as topSession");
+        SLOGI("focusSession no play");
         return;
     }
     HandleChangeTopSession(info.uid, userId);

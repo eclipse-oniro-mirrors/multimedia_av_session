@@ -79,7 +79,7 @@ void AVCastControllerItem::CheckIfCancelCastCapsule()
 
 void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
-    SLOGI("OnCastPlaybackStateChange with state: %{public}d", state.GetState());
+    SLOGI("State:%{public}d", state.GetState());
     if (state.GetState() != currentState_) {
         currentState_ = state.GetState();
         if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {

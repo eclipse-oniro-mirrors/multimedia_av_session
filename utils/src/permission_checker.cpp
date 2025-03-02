@@ -42,7 +42,7 @@ int32_t PermissionChecker::CheckSystemPermission(Security::AccessToken::AccessTo
         return ERR_NONE;
     }
 
-    SLOGE("Check system permission faild");
+    SLOGE("CheckSystemPermission faild");
     return ERR_NO_PERMISSION;
 }
 
@@ -110,7 +110,7 @@ bool PermissionChecker::CheckSystemPermissionByUid(int uid)
     }
     bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(accessTokenIdEx.tokenIDEx);
     if (!isSystemApp) {
-        SLOGI("CheckSystemPermissionByUid Not system app");
+        SLOGI("Not system app");
         return false;
     }
     SLOGD("CheckSystemPermissionByUid is system app done");
