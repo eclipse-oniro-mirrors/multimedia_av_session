@@ -355,8 +355,7 @@ int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent
     return service ? service->SendSystemAVKeyEvent(keyEvent) : ERR_SERVICE_NOT_EXIST;
 }
 
-int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent,
-    const std::map<std::string, std::string> extraInfo)
+int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemAVKeyEvent");
     if (!keyEvent.IsValid()) {
@@ -365,7 +364,7 @@ int32_t AVSessionManagerImpl::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent
     }
 
     auto service = GetService();
-    return service ? service->SendSystemAVKeyEvent(keyEvent, extraInfo) : ERR_SERVICE_NOT_EXIST;
+    return service ? service->SendSystemAVKeyEvent(keyEvent, wantParam) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand& command)

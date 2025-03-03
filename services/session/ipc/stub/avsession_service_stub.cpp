@@ -403,6 +403,13 @@ int32_t AVSessionServiceStub::HandleSendSystemAVKeyEvent(MessageParcel& data, Me
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
+    sptr bluetoothWant = data.ReadParcelable<AAFwk::Want>();
+    if (bluetoothWant != nullptr) {
+        if (!reply.WriteInt32(SendSystemAVKeyEvent(*keyEvent, *bluetoothWant))) {
+        SLOGI("reply write int32 failed");
+        }
+        return ERR_NONE;
+    }
     if (!reply.WriteInt32(SendSystemAVKeyEvent(*keyEvent))) {
         SLOGI("reply write int32 failed");
     }

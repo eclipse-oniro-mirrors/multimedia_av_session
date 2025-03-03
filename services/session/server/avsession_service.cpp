@@ -2057,11 +2057,10 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
     return AVSESSION_CONTINUE;
 }
 
-int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent,
-    const std::map<std::string, std::string> extraInfo)
+int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam)
 {
     SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
-    std::string deviceId = extraInfo.at("deviceId");
+    std::string deviceId = wantParam.GetStringParam("deivceId");
     int32_t ret = HandleKeyEvent(keyEvent);
     if (ret != AVSESSION_CONTINUE) {
         return ret;

@@ -118,6 +118,10 @@ public:
     {
         return 0;
     };
+    int32_t SendSystemAVKeyEvent(const OHOS::MMI::KeyEvent& keyEvent, const OHOS::AAFwk::Want &wantParam) override
+    {
+        return 0;
+    };
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
         std::vector<AVQueueInfo> &avQueueInfos) override { return 0; };
     int32_t StartAVPlayback(const std::string &bundleName, const std::string &assetId) override { return 0; };

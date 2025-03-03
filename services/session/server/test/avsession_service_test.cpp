@@ -1253,9 +1253,10 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent009, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     auto keyEvent = OHOS::MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
-    std::map<std::string, std::string> extraInfo;
-    extraInfo["deviceId"] = "123";
-    bool ret = avservice_->SendSystemAVKeyEvent(*keyEvent, extraInfo);
+    OHOS::AAFwk::Want bluetoothWant;
+    std::string activeAddress = "00:00:00:00:00:00";
+    bluetoothWant.SetParam("deivceId", activeAddress);
+    bool ret = avservice_->SendSystemAVKeyEvent(*keyEvent, bluetoothWant);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);

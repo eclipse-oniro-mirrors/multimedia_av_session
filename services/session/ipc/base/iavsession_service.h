@@ -69,6 +69,8 @@ public:
 
     virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
 
+    virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam) = 0;
+
     virtual int32_t SendSystemControlCommand(const AVControlCommand& command) = 0;
 
     virtual int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) = 0;

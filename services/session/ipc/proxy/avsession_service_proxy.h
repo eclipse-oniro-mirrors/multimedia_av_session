@@ -72,7 +72,7 @@ public:
 
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
-    int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const std::map<std::string, std::string> extraInfo);
+    int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam) override;
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
