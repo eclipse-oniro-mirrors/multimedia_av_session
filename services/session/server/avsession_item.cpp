@@ -1331,10 +1331,13 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     }
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
-        std::lock_guard controllersLockGuard(controllersLock_);
-        for (const auto& controller : controllers_) {
-            if (!controllers_.empty() && controller.second != nullptr) {
-                controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
+        std::lock_guard aliveLockGuard(isAliveLock_);
+        if (isAlivePtr_ != nullptr && *isAlivePtr_) {
+            std::lock_guard controllersLockGuard(controllersLock_);
+            for (const auto& controller : controllers_) {
+                if (!controllers_.empty() && controller.second != nullptr) {
+                    controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
+                }
             }
         }
     }

@@ -463,6 +463,7 @@ private:
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;
     std::shared_ptr<bool> isAlivePtr_;
+    std::recursive_mutex isAliveLock_;
     bool isFirstCallback_ = true;
     const int32_t SWITCH_WAIT_TIME = 300;
     bool isNotShowNotification_ = false;
