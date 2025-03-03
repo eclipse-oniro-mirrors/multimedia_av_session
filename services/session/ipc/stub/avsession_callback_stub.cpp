@@ -146,6 +146,15 @@ int32_t AVSessionCallbackStub::HandleOnSetLoopMode(MessageParcel& data, MessageP
     return ERR_NONE;
 }
 
+int32_t AVSessionCallbackStub::HandleOnSetTargetLoopMode(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnSetTargetLoopMode");
+    int32_t targetLoopMode = -1;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(targetLoopMode), ERR_NONE, "read targetLoopMode failed");
+    OnSetTargetLoopMode(targetLoopMode);
+    return ERR_NONE;
+}
+
 int32_t AVSessionCallbackStub::HandleOnToggleFavorite(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnToggleFavorite");

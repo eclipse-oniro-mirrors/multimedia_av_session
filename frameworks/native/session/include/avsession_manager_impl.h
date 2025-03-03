@@ -21,6 +21,8 @@
 #include <mutex>
 
 #include "iremote_object.h"
+#include "iservice_registry.h"
+#include "system_ability_status_change_stub.h"
 #include "av_session.h"
 #include "avsession_service_proxy.h"
 #include "avsession_info.h"
@@ -31,6 +33,7 @@
 
 namespace OHOS::AVSession {
 class ServiceDeathRecipient;
+class ServiceStatusListener;
 class AVSessionManagerImpl : public AVSessionManager {
 public:
     AVSessionManagerImpl();
@@ -68,6 +71,10 @@ public:
     int32_t RegisterServiceDeathCallback(const DeathCallback& callback) override;
 
     int32_t UnregisterServiceDeathCallback() override;
+
+    int32_t RegisterServiceStartCallback(const std::function<void()> serviceStartCallback) override;
+
+    int32_t UnregisterServiceStartCallback() override;
 
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
@@ -108,7 +115,11 @@ public:
 private:
     sptr<AVSessionServiceProxy> GetService();
 
+    void RegisterServiceStateListener(sptr<ISystemAbilityManager> mgr);
+
     void OnServiceDie();
+
+    void OnServiceStart();
 
     void RegisterClientDeathObserver();
 
@@ -120,10 +131,22 @@ private:
     std::map<int32_t, sptr<ISessionListener>> listenerMapByUserId_;
     static sptr<ClientDeathStub> clientDeath_;
     DeathCallback deathCallback_;
+    std::function<void()> serviceStartCallback_;
+    sptr<ServiceStatusListener> serviceListener_ = nullptr;
     static constexpr int userIdForAllUsers_ = -1;
 #ifdef START_STOP_ON_DEMAND_ENABLE
     const int32_t loadSystemAbilityWaitTimeOut_ = 3;
 #endif
+};
+
+class ServiceStatusListener : public SystemAbilityStatusChangeStub {
+public:
+    explicit ServiceStatusListener(const std::function<void()>& callback);
+
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+private:
+    std::function<void()> callback_;
 };
 
 class ServiceDeathRecipient : public IRemoteObject::DeathRecipient {

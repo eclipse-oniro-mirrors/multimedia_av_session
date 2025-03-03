@@ -150,6 +150,7 @@ public:
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
+    void OnSetTargetLoopMode(int32_t targetLoopMode) override;
     void OnToggleFavorite(const std::string& mediaId) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
     void OnOutputDeviceChange(const int32_t connectionState,
@@ -170,59 +171,77 @@ void AVSessionCallbackImpl::OnPlay()
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlay %{public}d", g_onCall);
 }
+
 void AVSessionCallbackImpl::OnPause()
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPause %{public}d", g_onCall);
 }
+
 void AVSessionCallbackImpl::OnStop()
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnStop %{public}d", g_onCall);
 }
+
 void AVSessionCallbackImpl::OnPlayNext()
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlayNext %{public}d", g_onCall);
 }
+
 void AVSessionCallbackImpl::OnPlayPrevious()
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlayPrevious %{public}d", g_onCall);
 }
+
 void AVSessionCallbackImpl::OnFastForward(int64_t time)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnFastForward %{public}d", g_onCall);
 }
+
 void AVSessionCallbackImpl::OnRewind(int64_t time)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnRewind %{public}d", g_onCall);
 }
+
 void AVSessionCallbackImpl::OnSeek(int64_t time)
 {
     SLOGE("OnSeek %{public}" PRId64, time);
     g_onCall = AVSESSION_SUCCESS;
 }
+
 void AVSessionCallbackImpl::OnSetSpeed(double speed)
 {
     SLOGE("OnSetSpeed %{public}f", speed);
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnSetSpeed %{public}d", g_onCall);
 }
+
 void AVSessionCallbackImpl::OnSetLoopMode(int32_t loopMode)
 {
     SLOGE("OnSetLoopMode %{public}d", loopMode);
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnSetLoopMode %{public}d", g_onCall);
 }
+
+void AVSessionCallbackImpl::OnSetTargetLoopMode(int32_t targetLoopMode)
+{
+    SLOGE("OnSetTargetLoopMode %{public}d", targetLoopMode);
+    g_onCall = AVSESSION_SUCCESS;
+    SLOGE("OnSetTargetLoopMode %{public}d", g_onCall);
+}
+
 void AVSessionCallbackImpl::OnToggleFavorite(const std::string& mediaId)
 {
     SLOGE("OnToggleFavorite %{public}s", mediaId.c_str());
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnToggleFavorite %{public}d", g_onCall);
 }
+
 void AVSessionCallbackImpl::OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent)
 {
     SLOGE("OnMediaKeyEvent");
@@ -728,6 +747,8 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
             case AVControlCommand::SESSION_CMD_SET_SPEED : controlCommand.SetSpeed(1.5);
                 break;
             case AVControlCommand::SESSION_CMD_SET_LOOP_MODE : controlCommand.SetLoopMode(2);
+                break;
+            case AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE : controlCommand.SetTargetLoopMode(2);
                 break;
             case AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE : controlCommand.SetAssetId("callback");
                 break;

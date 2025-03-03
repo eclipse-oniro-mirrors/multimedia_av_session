@@ -84,6 +84,7 @@ void AVSessionSysEvent::Regiter()
             "SEEK_COUNT", optCounts_[Operation::OPT_SEEK],
             "SET_SPEED_COUNT", optCounts_[Operation::OPT_SET_SPEED],
             "SET_LOOP_MODE_COUNT", optCounts_[Operation::OPT_SET_LOOP_MODE],
+            "SET_TARGET_LOOP_MODE_COUNT", optCounts_[Operation::OPT_SET_TARGET_LOOP_MODE],
             "TOGGLE_FAVORITE_COUNT", optCounts_[Operation::OPT_TOGGLE_FAVORITE]);
 
         for (const auto& it : lifeCycleInfos_) {

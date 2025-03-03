@@ -97,6 +97,8 @@ public:
     int32_t UnsetPreferredOutputDeviceChangeCallback();
 
     int32_t SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc);
+    AudioDeviceDescriptorWithSptr FindRenderDeviceForUsage(const AudioDeviceDescriptorsWithSptr& devices,
+        const AudioDeviceDescriptorWithSptr& desc);
 
 private:
     static std::shared_ptr<AudioAdapter> instance_;
@@ -111,8 +113,8 @@ private:
     };
     std::recursive_mutex listenersLock_;
 
-    int32_t volumeMax_;
-    int32_t volumeMin_;
+    int32_t volumeMax_ = 0;
+    int32_t volumeMin_ = 0;
     std::shared_ptr<AudioVolumeKeyEventCallback> volumeCallback_;
     std::shared_ptr<AudioPreferredDeviceChangeCallback> preferredDeviceChangeCallback_;
 

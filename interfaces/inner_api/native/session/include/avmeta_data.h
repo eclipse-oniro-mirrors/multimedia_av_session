@@ -58,7 +58,8 @@ public:
         META_KEY_DISPLAY_TAGS = 22,
         META_KEY_DRM_SCHEMES = 23,
         META_KEY_BUNDLE_ICON = 24,
-        META_KEY_MAX = 25
+        META_KEY_SINGLE_LYRIC_TEXT = 25,
+        META_KEY_MAX = 26
     };
 
     enum {
@@ -149,6 +150,9 @@ public:
     void SetLyric(const std::string& lyric);
     std::string GetLyric() const;
 
+    void SetSingleLyricText(const std::string& singleLyricText);
+    std::string GetSingleLyricText() const;
+
     void SetPreviousAssetId(const std::string& assetId);
     std::string GetPreviousAssetId() const;
 
@@ -210,7 +214,8 @@ public:
         META_KEY_FILTER,
         META_KEY_DISPLAY_TAGS,
         META_KEY_DRM_SCHEMES,
-        META_KEY_BUNDLE_ICON
+        META_KEY_BUNDLE_ICON,
+        META_KEY_SINGLE_LYRIC_TEXT
     };
 
 private:
@@ -243,6 +248,7 @@ private:
     int32_t displayTags_ = 0;
     std::vector<std::string> drmSchemes_;
     std::shared_ptr<AVSessionPixelMap> bundleIcon_ = nullptr;
+    std::string singleLyricText_ = "";
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneTitle(const AVMetaData& from, AVMetaData& to);
@@ -269,6 +275,7 @@ private:
     static void CloneDisplayTags(const AVMetaData& from, AVMetaData& to);
     static void CloneDrmSchemes(const AVMetaData& from, AVMetaData& to);
     static void CloneBundleIcon(const AVMetaData& from, AVMetaData& to);
+    static void CloneSingleLyricText(const AVMetaData& from, AVMetaData& to);
 
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
@@ -296,7 +303,8 @@ private:
         &AVMetaData::CloneFilter,
         &AVMetaData::CloneDisplayTags,
         &AVMetaData::CloneDrmSchemes,
-        &AVMetaData::CloneBundleIcon
+        &AVMetaData::CloneBundleIcon,
+        &AVMetaData::CloneSingleLyricText
     };
 };
 } // namespace OHOS::AVSession

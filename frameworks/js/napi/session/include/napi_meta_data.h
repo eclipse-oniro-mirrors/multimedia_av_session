@@ -86,6 +86,9 @@ private:
     static napi_status GetLyric(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetLyric(napi_env env, const AVMetaData& in, napi_value& out);
 
+    static napi_status GetSingleLyricText(napi_env env, napi_value in, AVMetaData& out);
+    static napi_status SetSingleLyricText(napi_env env, const AVMetaData& in, napi_value& out);
+
     static napi_status GetPreviousAssetId(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetPreviousAssetId(napi_env env, const AVMetaData& in, napi_value& out);
 

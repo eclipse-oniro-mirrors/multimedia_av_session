@@ -217,6 +217,15 @@ public:
     virtual void OnSetLoopMode(int32_t loopMode) = 0;
 
     /**
+     * @brief Set target cycle mode.
+     *
+     * @param mode Cycle mode to be set {@link LoopMode}
+     * @return Whether the cycle mode is set successfully.
+     * @since 9
+    */
+    virtual void OnSetTargetLoopMode(int32_t targetLoopMode) {}
+
+    /**
      * @brief Whether to collect the current song.
      *
      * @param mediaId current song id.

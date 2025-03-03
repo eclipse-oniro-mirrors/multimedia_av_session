@@ -32,50 +32,66 @@
 
 namespace OHOS::AVSession {
 
-const int32_t ADDRESS_STR_LEN = 17;
-const int32_t START_POS = 6;
-const int32_t END_POS = 13;
-
-std::string GetEncryptAddr(const std::string& addr)
-{
-    if (addr.empty() || addr.length() != ADDRESS_STR_LEN) {
-        return std::string("");
-    }
-    std::string tmp = "**:**:**:**:**:**";
-    std::string out = addr;
-    for (int i = START_POS; i <= END_POS; i++) {
-        out[i] = tmp[i];
-    }
-    return out;
-}
-
 void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
 {
     if (sessionId.empty()) {
+        SLOGE("LocalFrontSessionArrive with sessionId EMPTY");
         return;
     }
-    CreateController(sessionId);
-    sptr<AVControllerItem> controller = playerIdToControllerMap_[sessionId];
-    controller->isFromSession_ = false;
-    CHECK_AND_RETURN_LOG(controller != nullptr, "LocalFrontSessionArrive but get controller null");
-    lastSessionId_ = sessionId;
-    if (isSoftbusConnecting_) {
-        UpdateFrontSessionInfoToRemote(controller);
-    } else {
-        SLOGE("LocalFrontSessionArrive without connect");
-    }
-    SLOGI("LocalFrontSessionArrive done");
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this, sessionId]() {
+            SLOGI("LocalFrontSessionArrive in");
+            CreateController(sessionId);
+            sptr<AVControllerItem> controller = nullptr;
+            {
+                std::lock_guard lockGuard(migrateControllerLock_);
+                controller = playerIdToControllerMap_[sessionId];
+                CHECK_AND_RETURN_LOG(controller != nullptr, "LocalFrontSessionArrive but get controller null");
+            }
+
+            controller->isFromSession_ = false;
+            lastSessionId_ = sessionId;
+            if (isSoftbusConnecting_) {
+                UpdateFrontSessionInfoToRemote(controller);
+            } else {
+                SLOGE("LocalFrontSessionArrive without connect");
+            }
+            SLOGI("LocalFrontSessionArrive finish");
+        },
+        "LocalFrontSessionArrive");
 }
 
 void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
 {
-    ClearCacheBySessionId(lastSessionId_);
+    SLOGI("LocalFrontSessionChange in");
+    std::lock_guard lockGuard(migrateControllerLock_);
+    sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
+    if (controller != nullptr) {
+        controller->UnregisterAVControllerCallback();
+    } else {
+        SLOGE("LocalFrontSessionLeave but get controller null");
+    }
+    ClearCacheBySessionId(sessionId);
+    auto it = playerIdToControllerMap_.find(sessionId);
+    if (it != playerIdToControllerMap_.end()) {
+        playerIdToControllerMap_.erase(it);
+    } else {
+        SLOGE("LocalFrontSessionLeave no find sessionId:%{public}s",
+            AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    }
     LocalFrontSessionArrive(sessionId);
 }
 
 void MigrateAVSessionServer::LocalFrontSessionLeave(std::string &sessionId)
 {
     SLOGI("LocalFrontSessionLeave in");
+    std::lock_guard lockGuard(migrateControllerLock_);
+    sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
+    if (controller != nullptr) {
+        controller->UnregisterAVControllerCallback();
+    } else {
+        SLOGE("LocalFrontSessionLeave but get controller null");
+    }
     ClearCacheBySessionId(sessionId);
     auto it = playerIdToControllerMap_.find(sessionId);
     if (it != playerIdToControllerMap_.end()) {
@@ -357,7 +373,7 @@ std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFu
         std::string msg = std::string({MSG_HEAD_MODE, SYNC_SET_VOLUME_COMMAND});
         value[AUDIO_VOLUME] = volumeNum;
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
-        SLOGI("server prepare to send set volume num %{public}d", volumeNum);
+        SLOGI("server send set volume num %{public}d", volumeNum);
         SendByte(deviceId_, msg);
     };
 }
@@ -369,8 +385,8 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceCha
         Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
         std::string msg = std::string({MSG_HEAD_MODE, SYNC_AVAIL_DEVICES_LIST});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
-        SLOGI("server prepare to send get available device change callback");
-        SendByte(deviceId_, msg);
+        SLOGI("server send get available device change callback");
+        SendJsonStringByte(deviceId_, msg);
     };
 }
 
@@ -381,8 +397,8 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceCha
         Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
         std::string msg = std::string({MSG_HEAD_MODE, SYNC_CURRENT_DEVICE});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
-        SLOGI("server prepare to send get preferred device change callback");
-        SendByte(deviceId_, msg);
+        SLOGI("server send get preferred device change callback");
+        SendJsonStringByte(deviceId_, msg);
     };
 }
 
@@ -420,6 +436,7 @@ Json::Value MigrateAVSessionServer::ConvertAudioDeviceDescriptorToJson(
 
 void MigrateAVSessionServer::VolumeControlCommand(Json::Value commandJsonValue)
 {
+    SLOGI("server recv in VolumeControlCommand case");
     if (!commandJsonValue.isMember(AUDIO_VOLUME)) {
         SLOGE("json parse with error member");
         return;
@@ -431,12 +448,16 @@ void MigrateAVSessionServer::VolumeControlCommand(Json::Value commandJsonValue)
 
 void MigrateAVSessionServer::SwitchAudioDeviceCommand(Json::Value jsonObject)
 {
-    int deviceCategory = jsonObject[AUDIO_DEVICE_CATEGORY].asInt();
-    int deviceType = jsonObject[AUDIO_DEVICE_TYPE].asInt();
-    int deviceRole = jsonObject[AUDIO_DEVICE_ROLE].asInt();
-    std::string networkId = jsonObject[AUDIO_NETWORK_ID].asString();
-    std::string deviceName = jsonObject[AUDIO_DEVICE_NAME].asString();
-    std::string macAddress = jsonObject[AUDIO_MAC_ADDRESS].asString();
+    SLOGI("server recv in SwitchAudioDeviceCommand case");
+    int deviceCategory = jsonObject[AUDIO_DEVICE_CATEGORY].isInt() ? jsonObject[AUDIO_DEVICE_CATEGORY].asInt() : -1;
+    int deviceType = jsonObject[AUDIO_DEVICE_TYPE].isInt() ? jsonObject[AUDIO_DEVICE_TYPE].asInt() : -1;
+    int deviceRole = jsonObject[AUDIO_DEVICE_ROLE].isInt() ? jsonObject[AUDIO_DEVICE_ROLE].asInt() : -1;
+    std::string networkId = jsonObject[AUDIO_NETWORK_ID].isString() ?
+        jsonObject[AUDIO_NETWORK_ID].asString() : "ERROR_VALUE";
+    std::string deviceName = jsonObject[AUDIO_DEVICE_NAME].isString() ?
+        jsonObject[AUDIO_DEVICE_NAME].asString() : "ERROR_VALUE";
+    std::string macAddress = jsonObject[AUDIO_MAC_ADDRESS].isString() ?
+        jsonObject[AUDIO_MAC_ADDRESS].asString() : "ERROR_VALUE";
     
     std::shared_ptr<AudioDeviceDescriptor> device = std::make_shared<AudioDeviceDescriptor>();
     device->deviceCategory_ = static_cast<AudioStandard::DeviceCategory>(deviceCategory);
@@ -447,6 +468,7 @@ void MigrateAVSessionServer::SwitchAudioDeviceCommand(Json::Value jsonObject)
     device->macAddress_ = macAddress;
 
     AudioAdapter::GetInstance().SelectOutputDevice(device);
+    AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
 }
 }
 

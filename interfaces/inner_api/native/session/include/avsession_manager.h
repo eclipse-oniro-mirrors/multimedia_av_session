@@ -164,6 +164,23 @@ public:
     virtual int32_t UnregisterServiceDeathCallback() = 0;
 
     /**
+     * @brief Listen for service start callback event.
+     *
+     * @param callback Listen for service start event.
+     * @return Whether to return successful callback.
+     * @since 9
+    */
+    virtual int32_t RegisterServiceStartCallback(const std::function<void()> serviceStartCallback) = 0;
+
+    /**
+     * @brief Listen for service startcallback event.
+     *
+     * @return Whether to return successful callback.
+     * @since 9
+    */
+    virtual int32_t UnregisterServiceStartCallback() = 0;
+
+    /**
      * Send system key command.
      *
      * @param keyEvent Key event {@linkKeyEvent}

@@ -37,10 +37,22 @@ namespace OHOS::AVSession {
 class NapiAVSession {
 public:
     static napi_value Init(napi_env env, napi_value exports);
-    static napi_status NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out);
+    static napi_status NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out,
+        std::shared_ptr<NapiAVSession>& napiSession);
+    static napi_status ReCreateInstance(std::shared_ptr<NapiAVSession>& napiSession,
+        std::shared_ptr<AVSession> nativeSession);
 
     NapiAVSession();
     ~NapiAVSession();
+
+    std::string GetSessionTag();
+    void SetSessionTag(std::string sessionTag);
+
+    std::string GetSessionType();
+    void SetSessionType(std::string sessionType);
+
+    AppExecFwk::ElementName GetSessionElement();
+    void SetSessionElement(AppExecFwk::ElementName elementName);
 
     using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
     using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
@@ -86,6 +98,7 @@ private:
     static napi_status OnSeek(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnSetTargetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -107,6 +120,7 @@ private:
     static napi_status OffSeek(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffSetSpeed(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffSetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffSetTargetLoopMode(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffToggleFavorite(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -126,6 +140,8 @@ private:
     napi_ref wrapperRef_ {};
     std::string sessionId_ ;
     std::string sessionType_ ;
+    std::string sessionTag_ ;
+    AppExecFwk::ElementName elementName_;
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
     std::chrono::system_clock::time_point latestMetadataTs_;

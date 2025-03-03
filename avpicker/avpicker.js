@@ -428,6 +428,7 @@ export class AVCastPicker extends ViewPU {
             Text.maxLines(2);
             Text.wordBreak(WordBreak.BREAK_ALL);
             Text.maxFontScale(this.maxFontSizeScale);
+            Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
         }, Text);
         Text.pop();
     }
@@ -647,7 +648,7 @@ export class AVCastPicker extends ViewPU {
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
             UIExtensionComponent.bindMenu(this.isMenuShow, { builder: () => { this.deviceMenu.call(this); }}, {
-                placement: Placement.TopRight,
+                placement: Placement.BottomRight,
                 onDisappear: () => {
                   this.isMenuShow = false;
                   this.touchMenuItemIndex = -1;
