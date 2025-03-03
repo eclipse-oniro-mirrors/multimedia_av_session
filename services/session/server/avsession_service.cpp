@@ -346,12 +346,17 @@ void AVSessionService::HandleMediaCardStateChangeEvent(std::string isAppear)
         isMediaCardOpen_ = true;
     } else if (isAppear == "DISAPPEAR") {
         isMediaCardOpen_ = false;
-        if (IsTopSessionPlaying()) {
+        if (IsTopSessionPlaying() || hasRemoveEvent_) {
+            SLOGI("HandleMediaCardState hasRemoveEvent_:%{public}d ", hasRemoveEvent_.load());
             return;
         }
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this]() {
-                if (!IsTopSessionPlaying()) {
+                if (IsTopSessionPlaying() || hasRemoveEvent_) {
+                    return;
+                }
+                {
+                    std::lock_guard lockGuard(sessionServiceLock_);
                     NotifySystemUI(nullptr, true, false, false);
                 }
             }, "CheckCardStateChangeStop", cancelTimeout);
@@ -3182,6 +3187,8 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateNf
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession,
     bool addCapsule, bool isCapsuleUpdate)
 {
+    SLOGI("NotifySystemUI isActiveNtf %{public}d, addCapsule %{public}d isCapsuleUpdate %{public}d",
+        isActiveSession, addCapsule, isCapsuleUpdate);
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     CHECK_AND_RETURN_LOG(!is2in1_, "2in1 not support");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
@@ -3245,10 +3252,17 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     if (NotifyFlowControl()) {
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this, uid]() {
+                bool isTopSessionNtf = false;
+                {
+                    std::lock_guard lockGuard(sessionServiceLock_);
+                    isTopSessionNtf = topSession_ && topSession_->GetUid() == uid;
+                }
                 std::lock_guard lockGuard(notifyLock_);
                 hasRemoveEvent_ = false;
-                auto ret = Notification::NotificationHelper::PublishNotification(g_NotifyRequest);
-                SLOGI("WaitPublishNotification uid %{public}d, result %{public}d", uid, ret);
+                if (isTopSessionNtf) {
+                    auto ret = Notification::NotificationHelper::PublishNotification(g_NotifyRequest);
+                    SLOGI("WaitPublish uid %{public}d, isTop %{public}d result %{public}d", uid, isTopSessionNtf, ret);
+                }
             }, "NotifyFlowControl", CLICK_TIMEOUT);
     } else {
         hasRemoveEvent_ = false;
