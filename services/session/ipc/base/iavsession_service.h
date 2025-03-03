@@ -57,8 +57,6 @@ public:
 
     virtual int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
 
-    virtual bool IsAudioPlaybackAllowed(const int32_t uid, const int32_t pid) = 0;
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     virtual int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
 #endif
