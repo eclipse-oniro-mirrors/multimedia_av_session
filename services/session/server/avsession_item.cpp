@@ -1269,36 +1269,18 @@ void AVSessionItem::DealLocalState(int32_t castState)
     }
 }
 
-void AVSessionItem::CancleAVPlayerInSink()
-{
-    if (descriptor_.sessionTag_ == "RemoteCast") {
-        OutputDeviceInfo outputDeviceInfo;
-        DeviceInfo deviceInfo;
-        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-        deviceInfo.deviceId_ = "0";
-        deviceInfo.deviceName_ = "LocalDevice";
-        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-        SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
-        DealDisconnect(deviceInfo, true);
-        {
-            std::lock_guard controllersLockGuard(controllersLock_);
-            for (const auto& controller : controllers_) {
-                if (controller.second != nullptr) {
-                    controller.second->HandleOutputDeviceChange(castDisconnectStateInAVSession_,
-                        outputDeviceInfo);
-                }
-            }
-        }
-    }
-}
 
 void AVSessionItem::ListenCollaborationOnStop()
 {
     SLOGI("enter ListenCollaborationOnStop");
     CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
         if (newCastState == castConnectStateForConnected_) {
-            CancleAVPlayerInSink();
-            StopCast();
+            if (descriptor_.sessionTag_ == "RemoteCast") {
+                SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
+                AVRouter::GetInstance().StopCastSession(castHandle_);
+            } else {
+                StopCast();
+            }
         }
     });
 }
