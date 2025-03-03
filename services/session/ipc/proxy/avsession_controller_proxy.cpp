@@ -32,7 +32,6 @@ AVSessionControllerProxy::~AVSessionControllerProxy()
     if (callback_) {
         callback_->RemoveListenerForPlaybackState();
     }
-    Destroy();
 }
 
 int32_t AVSessionControllerProxy::GetAVCallMetaData(AVCallMetaData& avCallMetaData)
