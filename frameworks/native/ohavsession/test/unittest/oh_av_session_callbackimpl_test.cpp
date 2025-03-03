@@ -284,4 +284,117 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetPlayPreviousCallback002, TestSize.Level
     SLOGI("SetPlayPreviousCallback002 End");
 }
 
+/**
+ * @tc.name: SetPlayCallback001
+ * @tc.desc: test SetPlayCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, SetPlayCallback001, TestSize.Level1)
+{
+    SLOGI("SetPlayCallback001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "SetPlayCallback001", "com.xxx.hmxx", "ndkxx", &avsession);
+    AVSession_ControlCommand command = CONTROL_CMD_PLAY;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.SetPlayCallback(avsession, command, callback, (void *)(&userData));
+    AVSession_ErrCode ret = g_ohAVSessionCallbackImpl.UnSetPlayCallback(
+        avsession, command, callback);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    SLOGI("SetPlayCallback001 End");
+}
+
+/**
+ * @tc.name: RegisterForwardCallback001
+ * @tc.desc: test RegisterForwardCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterForwardCallback001, TestSize.Level1)
+{
+    SLOGI("RegisterForwardCallback001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "RegisterForwardCallback001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OnFastForward callback = [](OH_AVSession* session, uint32_t seekTime,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterForwardCallback(avsession, callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    SLOGI("RegisterForwardCallback001 End");
+}
+
+/**
+ * @tc.name: RegisterSeekCallback001
+ * @tc.desc: test RegisterSeekCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterSeekCallback001, TestSize.Level1)
+{
+    SLOGI("RegisterSeekCallback001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "RegisterSeekCallback001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OnSeek callback = [](OH_AVSession* session,  uint64_t seekTime,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterSeekCallback(avsession, callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    SLOGI("RegisterSeekCallback001 End");
+}
+
+/**
+ * @tc.name: RegisterSetLoopModeCallback001
+ * @tc.desc: test RegisterSetLoopModeCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterSetLoopModeCallback001, TestSize.Level1)
+{
+    SLOGI("RegisterSetLoopModeCallback001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "RegisterSetLoopModeCallback", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OnSetLoopMode callback = [](OH_AVSession* session, AVSession_LoopMode curLoopMode,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterSetLoopModeCallback(avsession, callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    SLOGI("RegisterSetLoopModeCallback001 End");
+}
+
+/**
+ * @tc.name: RegisterToggleFavoriteCallback001
+ * @tc.desc: test RegisterToggleFavoriteCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback001, TestSize.Level1)
+{
+    SLOGI("RegisterToggleFavoriteCallback001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "RegisterToggleFavoriteCallback001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OnToggleFavorite callback = [](OH_AVSession* session, const char* assetId,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterToggleFavoriteCallback(avsession, callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    SLOGI("RegisterToggleFavoriteCallback001 End");
+}
+
 }

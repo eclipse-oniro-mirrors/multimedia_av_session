@@ -1575,8 +1575,11 @@ if (castplus_cast_engine_enable) {
 
     configs = [ ":module_private_config_without_third_party" ]
 
+    cflags_cc = [ "-fno-access-control" ]
+
     deps = [
       "../../../../frameworks/common:avsession_common",
+      "../../../../frameworks/native/session:avsession_client_static",
       "../../../session:avsession_cast_item_static",
       "../../../session:avsession_item_static",
       "../../../session:avsession_router_static",

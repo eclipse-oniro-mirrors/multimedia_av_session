@@ -148,6 +148,26 @@ INSTANTIATE_TEST_CASE_P(SendControlCommand, HwCastStreamPlayerTest, testing::Val
     AVCastControlCommand::CAST_CONTROL_CMD_MAX
 ));
 
+static const int32_t DURATION_TIME = 40000;
+static OHOS::AVSession::AVMetaData GetAVMetaData()
+{
+    OHOS::AVSession::AVMetaData g_metaData;
+    g_metaData.Reset();
+    g_metaData.SetAssetId("123");
+    g_metaData.SetTitle("Black Humor");
+    g_metaData.SetArtist("zhoujielun");
+    g_metaData.SetAuthor("zhoujielun");
+    g_metaData.SetAlbum("Jay");
+    g_metaData.SetWriter("zhoujielun");
+    g_metaData.SetComposer("zhoujielun");
+    g_metaData.SetDuration(DURATION_TIME);
+    g_metaData.SetMediaImageUri("xxxxx");
+    g_metaData.SetSubTitle("fac");
+    g_metaData.SetDescription("for friends");
+    g_metaData.SetLyric("xxxxx");
+    return g_metaData;
+}
+
 /**
  * @tc.name: SendControlCommand001
  * @tc.desc: SendControlCommand all test
@@ -693,6 +713,76 @@ HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged001, TestSize.Level
     hwCastStreamPlayer->OnAvailableCapabilityChanged(streamCapability);
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
     SLOGI("OnAvailableCapabilityChanged001 end!");
+}
+
+/**
+ * @tc.name: CheckCastTime001
+ * @tc.desc: CheckCastTime
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, CheckCastTime001, TestSize.Level1)
+{
+    SLOGI("CheckCastTime001 begin!");
+    int32_t castTime = 1001;
+    int32_t ret = hwCastStreamPlayer->CheckCastTime(castTime);
+    EXPECT_EQ(ret, castTime);
+    SLOGI("CheckCastTime001 end!");
+}
+
+/**
+ * @tc.name: RepeatPrepare001
+ * @tc.desc: test RepeatPrepare
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, RepeatPrepare001, TestSize.Level1)
+{
+    SLOGI("RepeatPrepare001 begin!");
+    OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetIconUri("URI_CACHE");
+    description->SetIcon(mediaPixelMap);
+    auto ret = hwCastStreamPlayer->RepeatPrepare(description);
+    EXPECT_EQ(ret, true);
+    SLOGI("RepeatPrepare001 end!");
+}
+
+/**
+ * @tc.name: SetValidAbility002
+ * @tc.desc: test SetValidAbility
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, SetValidAbility002, TestSize.Level1)
+{
+    SLOGI("SetValidAbility002 begin!");
+    std::vector<int32_t> validAbilityList;
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_STOP);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT);
+    hwCastStreamPlayer->streamPlayer_ = nullptr;
+    auto ret = hwCastStreamPlayer->SetValidAbility(validAbilityList);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("SetValidAbility002 end!");
+}
+
+/**
+ * @tc.name: OnAlbumCoverChanged001
+ * @tc.desc: test OnAlbumCoverChanged
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged001, TestSize.Level1)
+{
+    SLOGI("OnAlbumCoverChanged001 begin!");
+    OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
+    std::shared_ptr<Media::PixelMap> pixelMap = AVSessionPixelMapAdapter::ConvertFromInner(mediaPixelMap);
+    hwCastStreamPlayer->OnAlbumCoverChanged(pixelMap);
+    SLOGI("OnAlbumCoverChanged001 end!");
 }
 } // namespace AVSession
 } // namespace OHOS
