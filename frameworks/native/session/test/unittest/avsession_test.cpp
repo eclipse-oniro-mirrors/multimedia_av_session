@@ -871,7 +871,11 @@ HWTEST_F(AvsessionTest, AddSupportCommand003, TestSize.Level1)
     for (int32_t index = 0; index < cmds.size(); index++) {
         EXPECT_EQ(cmds[index] > AVControlCommand::SESSION_CMD_INVALID, true);
         EXPECT_EQ(cmds[index] < AVControlCommand::SESSION_CMD_MAX, true);
-        EXPECT_EQ(cmds[index], index);
+        if (index >= AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT) {
+            EXPECT_EQ(cmds[index], index + 1);
+        } else {
+            EXPECT_EQ(cmds[index], index);
+        }
     }
     SLOGE("AddSupportCommand003 End");
 }
