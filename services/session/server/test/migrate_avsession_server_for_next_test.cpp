@@ -67,7 +67,9 @@ void MigrateAVSessionServerForNextTest::SetUpTestCase()
 void MigrateAVSessionServerForNextTest::TearDownTestCase()
 {
     SLOGI("MigrateAVSessionServerForNextTest TearDownTestCase");
-    g_MigrateAVSessionServer = nullptr;
+    g_AVSessionService->HandleSessionRelease(g_AVSessionItem->GetSessionId());
+    g_AVControllerItem->Destroy();
+    g_AVSessionItem->Destroy();
 }
 
 void MigrateAVSessionServerForNextTest::SetUp()
@@ -90,6 +92,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive001, T
 {
     std::string sessionId = "";
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
+    sleep(1);
     EXPECT_EQ(sessionId.size(), 0);
 }
 
@@ -106,6 +109,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive002, T
     g_MigrateAVSessionServer->playerIdToControllerCallbackMap_.insert({sessionId, observer});
     g_MigrateAVSessionServer->playerIdToControllerMap_.insert({sessionId, g_AVControllerItem});
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
+    sleep(1);
     EXPECT_EQ(sessionId.size(), 4);
 }
 
@@ -123,6 +127,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive003, T
     g_MigrateAVSessionServer->playerIdToControllerMap_.insert({sessionId, g_AVControllerItem});
     g_MigrateAVSessionServer->isSoftbusConnecting_ = true;
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
+    sleep(1);
     EXPECT_EQ(sessionId.size(), 4);
 }
 
@@ -140,6 +145,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive004, T
     g_MigrateAVSessionServer->playerIdToControllerMap_.insert({sessionId, g_AVControllerItem});
     g_MigrateAVSessionServer->isSoftbusConnecting_ = false;
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
+    sleep(1);
     EXPECT_EQ(sessionId.size(), 4);
 }
 
