@@ -1255,7 +1255,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent009, TestSize.Level1)
     ASSERT_NE(keyEvent, nullptr);
     OHOS::AAFwk::Want bluetoothWant;
     std::string activeAddress = "00:00:00:00:00:00";
-    bluetoothWant.SetParam("deivceId", activeAddress);
+    bluetoothWant.SetParam("deviceId", activeAddress);
     bool ret = avservice_->SendSystemAVKeyEvent(*keyEvent, bluetoothWant);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
