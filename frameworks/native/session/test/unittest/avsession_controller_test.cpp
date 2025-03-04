@@ -18,7 +18,7 @@
 #include "avsession_controller_stub.h"
 #include "avsession_errors.h"
 #include "avsession_manager.h"
-#include "avsession_log.h"
+#include "avsession_item.h"
 #include "accesstoken_kit.h"
 #include "bool_wrapper.h"
 #include "nativetoken_kit.h"
@@ -26,6 +26,7 @@
 #include "iavsession_controller.h"
 #include "iremote_stub.h"
 #include "want_params.h"
+#include "command_send_limit.h"
 #include "ipc_skeleton.h"
 
 using namespace testing::ext;
@@ -893,6 +894,8 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand014, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, SendControlCommand015, TestSize.Level1)
 {
+    SLOGI("SendControlCommand015 in");
+    sleep(1);
     AVControlCommand command;
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE), AVSESSION_SUCCESS);
@@ -903,6 +906,7 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand015, TestSize.Level1)
         avsession_->Activate();
     }
     EXPECT_EQ(controller_->SendControlCommand(command), AVSESSION_SUCCESS);
+    SLOGI("SendControlCommand015 end");
 }
 
 /**
@@ -918,10 +922,12 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
     sleep(1);
-    int ret = controller_->SendCommonCommand(commonCommand, commandArgs);
-    SLOGI("SendCommonCommand001 get ret %{public}d", ret);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    
+    if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
+        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+    } else {
+        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_COMMAND_SEND_EXCEED_MAX);
+    }
+
     SLOGI("SendCommonCommand001 End");
 }
 
@@ -938,9 +944,11 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
     sleep(1);
-    int ret = controller_->SendCommonCommand(commonCommand, commandArgs);
-    SLOGI("SendCommonCommand001 get ret %{public}d", ret);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    if (CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid())) {
+        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), AVSESSION_SUCCESS);
+    } else {
+        EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_COMMAND_SEND_EXCEED_MAX);
+    }
     EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_SESSION_DEACTIVE);
     SLOGI("SendCommonCommand002 End");

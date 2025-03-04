@@ -91,6 +91,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive001, T
     std::string sessionId = "";
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     EXPECT_EQ(sessionId.size(), 0);
+    sleep(1);
 }
 
 /**
@@ -107,6 +108,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive002, T
     g_MigrateAVSessionServer->playerIdToControllerMap_.insert({sessionId, g_AVControllerItem});
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     EXPECT_EQ(sessionId.size(), 4);
+    sleep(1);
 }
 
 /**
@@ -124,6 +126,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive003, T
     g_MigrateAVSessionServer->isSoftbusConnecting_ = true;
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     EXPECT_EQ(sessionId.size(), 4);
+    sleep(1);
 }
 
 /**
@@ -141,6 +144,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive004, T
     g_MigrateAVSessionServer->isSoftbusConnecting_ = false;
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     EXPECT_EQ(sessionId.size(), 4);
+    sleep(1);
 }
 
 /**
