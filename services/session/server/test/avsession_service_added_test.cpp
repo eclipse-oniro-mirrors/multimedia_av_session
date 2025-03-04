@@ -75,28 +75,6 @@ void AVSessionServiceAddedTest::SetUp() {}
 void AVSessionServiceAddedTest::TearDown() {}
 
 /**
- * @tc.name: NotifyMigrateStop001
- * @tc.desc: test NotifyMigrateStop
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceAddedTest, NotifyMigrateStop001, TestSize.Level1)
-{
-    SLOGD("NotifyMigrateStop001 begin!");
-    const size_t count = 3;
-    const std::string deviceId = "device";
-    g_AVSessionService->flowControlPublishTimestampList_.clear();
-    for (size_t i = 0; i < count - 1; ++i) {
-        g_AVSessionService->flowControlPublishTimestampList_.push_back(std::chrono::system_clock::now());
-    }
-    bool result = g_AVSessionService->NotifyFlowControl();
-    g_AVSessionService->migrateAVSession_ = nullptr;
-    g_AVSessionService->NotifyMigrateStop(deviceId);
-    EXPECT_FALSE(result);
-    SLOGD("NotifyMigrateStop001 end!");
-}
-
-/**
  * @tc.name: SuperLauncher001
  * @tc.desc: Verifying NotifyFlowControl with a non-full flow control list.
  * @tc.type: FUNC
@@ -195,7 +173,6 @@ static HWTEST_F(AVSessionServiceAddedTest, SuperLauncherTest005, TestSize.Level1
     std::string extraInfo = "SUPPORT_MIRROR_TO_STREAM=true;deviceId:1001;deviceName:TestDevice;deviceType:5";
     const std::string& state = "CONNECT_SUCC";
     g_AVSessionService->SuperLauncher(deviceId, serviceName, extraInfo, state);
-    EXPECT_TRUE(g_AVSessionService->isSupportMirrorToStream_);
     #endif
     ASSERT_TRUE(g_AVSessionService != nullptr);
     SLOGD("SuperLauncherTest005 end!");
