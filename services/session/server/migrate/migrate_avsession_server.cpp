@@ -119,11 +119,13 @@ void MigrateAVSessionServer::ObserveControllerChanged(const std::string &deviceI
 
 void MigrateAVSessionServer::CreateController(const std::string &sessionId)
 {
-    std::lock_guard lockGuard(migrateControllerLock_);
-    auto it = playerIdToControllerCallbackMap_.find(sessionId);
-    if (it != playerIdToControllerCallbackMap_.end()) {
-        SLOGW("CreateControlller has registered");
-        return;
+    {
+        std::lock_guard lockGuard(migrateControllerLock_);
+        auto it = playerIdToControllerCallbackMap_.find(sessionId);
+        if (it != playerIdToControllerCallbackMap_.end()) {
+            SLOGW("CreateControlller has registered");
+            return;
+        }
     }
     sptr<IRemoteObject> proxyObject;
     int32_t ret = servicePtr_->CreateControllerInner(sessionId, proxyObject);

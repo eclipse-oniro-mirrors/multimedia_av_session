@@ -38,10 +38,10 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
         SLOGE("LocalFrontSessionArrive with sessionId EMPTY");
         return;
     }
+    SLOGI("LocalFrontSessionArrive for sessionId:%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    CreateController(sessionId);
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
         [this, sessionId]() {
-            SLOGI("LocalFrontSessionArrive in");
-            CreateController(sessionId);
             sptr<AVControllerItem> controller = nullptr;
             {
                 std::lock_guard lockGuard(migrateControllerLock_);
