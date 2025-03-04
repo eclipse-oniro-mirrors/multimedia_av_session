@@ -190,6 +190,16 @@ public:
     virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
 
     /**
+     * Send system key command.
+     *
+     * @param keyEvent Key event {@linkKeyEvent}
+     * @param wantParam The wantParam
+     * @return Returns whether the key event was successfully sent to the top session.
+     * @since 9
+    */
+    virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam) = 0;
+
+    /**
      * Send system control command.
      *
      * @param command Relevant commands and parameters of AVSession {@AVControlCommand}

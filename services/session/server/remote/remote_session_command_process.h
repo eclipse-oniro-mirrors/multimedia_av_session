@@ -91,6 +91,11 @@ public:
     {
         return AVSESSION_SUCCESS;
     }
+    
+    int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override
     {

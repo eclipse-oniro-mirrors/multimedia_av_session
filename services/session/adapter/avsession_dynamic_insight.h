@@ -83,8 +83,8 @@ public:
                             AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo = {},
                             StartPlayType startPlayType = StartPlayType::APP);
 
-    void SetStartPlayInfoToParam(AppExecFwk::WantParams &startPlayInfoParam,
-        const StartPlayInfo startPlayInfo, std::shared_ptr<AppExecFwk::WantParams> &wantParam);
+    void SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, StartPlayType startPlayType,
+        std::shared_ptr<AppExecFwk::WantParams> &wantParam);
 
     int32_t StartAVPlayback(AppExecFwk::InsightIntentExecuteParam &executeParam);
 

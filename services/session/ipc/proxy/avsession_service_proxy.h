@@ -70,6 +70,8 @@ public:
 
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
+    int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam) override;
+
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;

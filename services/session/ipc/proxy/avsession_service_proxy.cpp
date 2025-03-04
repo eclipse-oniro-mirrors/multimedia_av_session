@@ -433,6 +433,27 @@ int32_t AVSessionServiceProxy::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEven
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
+int32_t AVSessionServiceProxy::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(keyEvent.WriteToParcel(data), ERR_MARSHALLING, "write keyEvent failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&wantParam), ERR_MARSHALLING, "write wantParam failed");
+    SLOGI("try SendSystemAVKeyEvent with key=%{public}d", keyEvent.GetKeyCode());
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
+}
+
 int32_t AVSessionServiceProxy::SendSystemControlCommand(const AVControlCommand& command)
 {
     MessageParcel data;

@@ -117,9 +117,10 @@ __attribute__((no_sanitize("cfi"))) bool InsightAdapter::IsSupportPlayIntent(con
     return CheckBundleSupport(profile);
 }
 
-void InsightAdapter::SetStartPlayInfoToParam(AppExecFwk::WantParams &startPlayInfoParam,
-    const StartPlayInfo startPlayInfo, std::shared_ptr<AppExecFwk::WantParams> &wantParam)
+void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, StartPlayType startPlayType,
+    std::shared_ptr<AppExecFwk::WantParams> &wantParam)
 {
+    AppExecFwk::WantParams startPlayInfoParam;
     startPlayInfoParam.SetParam("startPlayBundleName", OHOS::AAFwk::String::Box(startPlayInfo.getBundleName()));
     startPlayInfoParam.SetParam("deviceId", OHOS::AAFwk::String::Box(startPlayInfo.getDeviceId()));
         
@@ -128,6 +129,7 @@ void InsightAdapter::SetStartPlayInfoToParam(AppExecFwk::WantParams &startPlayIn
         return;
     }
     wantParam->SetParam("startPlayInfo", OHOS::AAFwk::WantParamWrapper::Box(startPlayInfoParam));
+    wantParam->SetParam("startPlayType", OHOS::AAFwk::String::Box(StartPlayTypeToString.at(startPlayType)));
 }
 
 bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
@@ -168,14 +170,12 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
             sptr<OHOS::AAFwk::IArray> array = new (std::nothrow) OHOS::AAFwk::Array(1, OHOS::AAFwk::g_IID_IWantParams);
             array->Set(0, OHOS::AAFwk::WantParamWrapper::Box(innerParams));
             wantParam->SetParam("items", array);
-            AppExecFwk::WantParams startPlayInfoParam;
-            SetStartPlayInfoToParam(startPlayInfoParam, startPlayInfo, wantParam);
-
-            wantParam->SetParam("startPlayType", OHOS::AAFwk::String::Box(StartPlayTypeToString.at(startPlayType)));
+            SetStartPlayInfoToParam(startPlayInfo, startPlayType, wantParam);
             res = true;
         }
         if (insightName == PLAY_AUDIO) {
             wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(interfaceType, assetId));
+            SetStartPlayInfoToParam(startPlayInfo, startPlayType, wantParam);
             res = true;
         }
         executeParam.insightIntentParam_ = wantParam;
