@@ -664,6 +664,218 @@ enum DeviceType {
     DEVICE_TYPE_BLUETOOTH = 10,
 };
 
+/**
+ * The defination of decoder type.
+ * @enum { string }
+ * @syscap SystemCapability.Multimedia.AVSession.AVCast
+ * @atomicservice
+ * @since 18
+ */
+enum DecoderType {
+    /**
+     * Defination of avc codec type.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    OH_AVCODEC_MIMETYPE_VIDEO_AVC = "video/avc",
+
+    /**
+     * Defination of hevc codec type.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    OH_AVCODEC_MIMETYPE_VIDEO_HEVC = "video/hevc",
+
+    /**
+     * Defination of audio vivid codec type.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    OH_AVCODEC_MIMETYPE_AUDIO_VIVID = "audio/av3a",
+}
+
+/**
+ * The defination of suggested resolution.
+ * @enum { number }
+ * @syscap SystemCapability.Multimedia.AVSession.AVCast
+ * @atomicservice
+ * @since 18
+ */
+enum ResolutionLevel {
+    /**
+     * Defination of 480P which typically resolution is 640*480.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    RESOLUTION_480P = 0,
+
+    /**
+     * Defination of 720P which typically resolution is 1280*720.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    RESOLUTION_720P = 1,
+
+    /**
+     * Defination of 1080P which typically resolution is 1920*1080.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    RESOLUTION_1080P = 2,
+
+    /**
+     * Defination of 2K which typically resolution is 2560*1440.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    RESOLUTION_2K = 3,
+
+    /**
+     * Defination of 4K which typically resolution is 4096*3840.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    RESOLUTION_4K = 4,
+}
+
+/**
+ * Enumerates the HDR Format
+ *
+ * @enum { number }
+ * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+ * @since 11
+ */
+/**
+ * Enumerates the HDR Format
+ *
+ * @enum { number }
+ * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+ * @atomicservice
+ * @since 12
+ */
+enum HDRFormat {
+    /**
+     * Not support HDR.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @since 11
+     */
+    /**
+     * Not support HDR.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    NONE = 0,
+    /**
+     * HLG format supported by video.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @since 11
+     */
+    /**
+     * HLG format supported by video.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    VIDEO_HLG = 1,
+    /**
+     * HDR10 format supported by video.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @since 11
+     */
+    /**
+     * HDR10 format supported by video.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    VIDEO_HDR10 = 2,
+    /**
+     * HDR Vivid format supported by video.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @since 11
+     */
+    /**
+     * HDR Vivid format supported by video.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    VIDEO_HDR_VIVID = 3,
+    /**
+     * HDR Vivid format supported by image, stored in dual JPEG format.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @since 11
+     */
+    /**
+     * HDR Vivid format supported by image, stored in dual JPEG format.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    IMAGE_HDR_VIVID_DUAL = 4,
+    /**
+     * HDR Vivid format supported by image, stored in single HEIF format.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @since 11
+     */
+    /**
+     * HDR Vivid format supported by image, stored in single HEIF format.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    IMAGE_HDR_VIVID_SINGLE = 5,
+    /**
+     * ISO HDR format supported by image, stored in dual JPEG format.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @since 11
+     */
+    /**
+     * ISO HDR format supported by image, stored in dual JPEG format.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    IMAGE_HDR_ISO_DUAL = 6,
+    /**
+     * ISO HDR format supported by image, stored in single HEIF format.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @since 11
+     */
+    /**
+     * ISO HDR format supported by image, stored in single HEIF format.
+     *
+     * @syscap SystemCapability.Graphic.Graphic2D.ColorManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    IMAGE_HDR_ISO_SINGLE = 7,
+}
+
 enum CastEngineConnectState {
     CONNECTING = 0,
     CONNECTED = 1,

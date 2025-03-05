@@ -48,6 +48,10 @@ private:
     static napi_value Prepare(napi_env env, napi_callback_info info);
     static napi_value GetDuration(napi_env env, napi_callback_info info);
     static napi_value GetCastAVPlaybackState(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedDecoders(napi_env env, napi_callback_info info);
+    static napi_value GetRecommendedResolutionLevel(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedHdrCapabilities(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedPlaySpeeds(napi_env env, napi_callback_info info);
     static napi_value GetCurrentItem(napi_env env, napi_callback_info info);
     static napi_value GetValidCommands(napi_env env, napi_callback_info info);
     static napi_value Release(napi_env env, napi_callback_info info);
