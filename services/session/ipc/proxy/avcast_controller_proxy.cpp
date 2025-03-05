@@ -150,6 +150,28 @@ int32_t AVCastControllerProxy::GetCastAVPlaybackState(AVPlaybackState& state)
     return ret;
 }
 
+int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
+        AVSESSION_ERROR, "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_SUPPORT_DECODER, parcel,
+        reply, option) == 0, AVSESSION_ERROR, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        sptr<AVPlaybackState> state_ = reply.ReadParcelable<AVPlaybackState>();
+        CHECK_AND_RETURN_RET_LOG(state_ != nullptr, ERR_UNMARSHALLING, "read AVPlaybackState failed");
+        state = *state_;
+    }
+}
+
 int32_t AVCastControllerProxy::GetCurrentItem(AVQueueItem& currentItem)
 {
     MessageParcel parcel;

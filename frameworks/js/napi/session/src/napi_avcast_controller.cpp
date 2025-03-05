@@ -428,7 +428,7 @@ napi_value NapiAVCastController::GetCastAVPlaybackState(napi_env env, napi_callb
 static napi_value GetSupportedDecoders(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
-        std::vector<DecoderType> decoderTypes;
+        std::vector<std::string> decoderTypes;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
@@ -471,12 +471,9 @@ static napi_value GetSupportedDecoders(napi_env env, napi_callback_info info)
 static napi_value GetRecommendedResolutionLevel(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
-        DecoderType decoderType;
+        std::string decoderType;
         ResolutionLevel resolutionLevel;
     };
-    auto context = std::make_shared<ConcreteContext>();
-    context->GetCbInfo(env, info);
-    context->taskId = NAPI_CAST_CONTROL_GET_SUPPORT_DECODER_ID;
     auto context = std::make_shared<ConcrentContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
@@ -607,7 +604,7 @@ static napi_value GetSupportedPlaySpeeds(napi_env env, napi_callback_info info)
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
-    return NapiAsyncWork::Enqueue(env, context, "GetSupportedHdrCapabilities", executor, complete);
+    return NapiAsyncWork::Enqueue(env, context, "GetSupportedPlaySpeeds", executor, complete);
 }
 
 napi_value NapiAVCastController::GetCurrentItem(napi_env env, napi_callback_info info)
