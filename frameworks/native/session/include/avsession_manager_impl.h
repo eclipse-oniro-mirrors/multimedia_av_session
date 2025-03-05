@@ -133,7 +133,7 @@ private:
     sptr<ServiceStatusListener> serviceListener_ = nullptr;
     static constexpr int userIdForAllUsers_ = -1;
 #ifdef START_STOP_ON_DEMAND_ENABLE
-    const int32_t loadSystemAbilityWaitTimeOut_ = 3;
+    const int32_t loadSystemAbilityWaitTimeOut_ = 30;
 #endif
 };
 
