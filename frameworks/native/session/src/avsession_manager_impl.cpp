@@ -102,10 +102,11 @@ void AVSessionManagerImpl::RegisterServiceStateListener(sptr<ISystemAbilityManag
 
 void AVSessionManagerImpl::OnServiceStart()
 {
-    SLOGI("OnServiceStart enter");
-    if (serviceStartCallback_) {
+    SLOGI("OnServiceStart enter isServiceDie: %{public}d", isServiceDie.load());
+    if (serviceStartCallback_ && isServiceDie.load()) {
         serviceStartCallback_();
     }
+    isServiceDie = false;
 }
 
 void AVSessionManagerImpl::OnServiceDie()
@@ -115,6 +116,7 @@ void AVSessionManagerImpl::OnServiceDie()
     {
         std::lock_guard<std::mutex> lockGuard(lock_);
         service_.clear();
+        isServiceDie = true;
         listenerMapByUserId_.clear();
         deathCallback_ = nullptr;
     }

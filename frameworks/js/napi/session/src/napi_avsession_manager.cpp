@@ -169,15 +169,15 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
         context->status = napi_ok;
     };
     context->GetCbInfo(env, info, inputParser);
+    
+    auto res = AVSessionManager::GetInstance().RegisterServiceStartCallback(HandleServiceStart);
+    SLOGI("RegisterServiceStartCallback res=%{public}d", res);
 
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().CreateSession(context->tag_, context->type_,
                                                                     context->elementName_, context->session_);
         processMsg(context, ret);
     };
-
-    auto res = AVSessionManager::GetInstance().RegisterServiceStartCallback(HandleServiceStart);
-    SLOGI("RegisterServiceStartCallback res=%{public}d", res);
 
     auto complete = [context](napi_value& output) {
         context->status = NapiAVSession::NewInstance(context->env, context->session_, output, napiSession);
@@ -1438,7 +1438,7 @@ void NapiAVSessionManager::HandleServiceStart()
             napiSession->GetSessionElement(), session);
         SLOGI("HandleServiceStart CreateSession ret=%{public}d", ret);
         if (ret == AVSESSION_SUCCESS) {
-            auto res = NapiAVSession::ReCreateInstance(napiSession, session);
+            auto res = NapiAVSession::ReCreateInstance(session);
             SLOGI("HandleServiceStart ReCreateInstance ret=%{public}d", res);
         }
     }

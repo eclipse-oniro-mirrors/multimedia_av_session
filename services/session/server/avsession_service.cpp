@@ -3286,8 +3286,6 @@ void AVSessionService::NotifyDeviceChange()
     }
     if (avQueueInfos.size() >= MININUM_FOR_NOTIFICATION) {
         SLOGI("history bundle name %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
-        NotifySystemUI(&(hisDescriptors[0]), false, false, false);
-        PublishEvent(mediaPlayStateTrue);
     }
 }
 // LCOV_EXCL_STOP
