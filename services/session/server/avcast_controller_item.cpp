@@ -51,7 +51,7 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
 
 void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
-    SLOGI("OnCastPlaybackStateChange state:%{public}d", state.GetState());
+    SLOGI("State:%{public}d", state.GetState());
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
