@@ -227,7 +227,7 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
-    return NapiAsyncWork::Enqueue(env, context, "GetAVPlaybackState", executor, complete);
+    return NapiAsyncWork::Enqueue(env, context, "GetAVPlayback", executor, complete);
 }
 
 napi_value NapiAVSessionController::GetAVPlaybackStateSync(napi_env env, napi_callback_info info)
