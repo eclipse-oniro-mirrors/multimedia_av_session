@@ -30,7 +30,7 @@
 
 #define DECORATOR_HILOG(func, fmt, args...)                                                      \
     do {                                                                                         \
-        (void)func(LOG_CORE, "[%{public}s()-%{public}s:%{public}d] " fmt, __FUNCTION__, AV_SESSION_FILENAME, __LINE__, \
+        (void)func(LOG_CORE, "[%{public}s]" fmt, __FUNCTION__, \
                    ##args); \
     } while (0)
 
