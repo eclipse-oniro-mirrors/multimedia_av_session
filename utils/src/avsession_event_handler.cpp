@@ -35,7 +35,7 @@ AVSessionEventHandler::~AVSessionEventHandler()
 
 bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const std::string &name, int64_t delayTime)
 {
-    SLOGI("AVSessionEventHandler ProxyPostTask: %{public}s", name.c_str());
+    SLOGD("AVSessionEventHandler ProxyPostTask: %{public}s", name.c_str());
     std::lock_guard<std::mutex> lockGuard(handlerLock_);
     if (!handler_) {
         SLOGI("AVSessionEventHandler create new: %{public}s", name.c_str());
