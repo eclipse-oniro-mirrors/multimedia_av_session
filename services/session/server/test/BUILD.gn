@@ -1473,6 +1473,76 @@ ohos_unittest("AVRouterTest") {
   }
 }
 
+ohos_unittest("AVRouterImplTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avrouter_impl_test.cpp" ]
+
+  include_dirs = [
+    "../../ipc/base/",
+    "../../ipc/proxy/",
+    "../../ipc/stub/",
+    "../../server/",
+    "../../server/migrate/",
+    "../../server/softbus/",
+    "../../server/remote/",
+    "../../../../interfaces/inner_api/native/session/include/",
+    "../../../../frameworks/native/session/include",
+    "../../adapter/",
+    "../../../../utils/include/",
+    "../",
+    "../remote",
+  ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = [
+    "../../../../frameworks/common:avsession_common",
+    "../../../../frameworks/native/session:avsession_client_static",
+    "../../../../utils:avsession_utils",
+    "../../../session:avsession_item_static",
+    "../../../session:avsession_service_static",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "access_token:libtokensetproc_shared",
+    "audio_framework:audio_client",
+    "background_task_mgr:bgtaskmgr_innerkits",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "data_object:distributeddataobject_impl",
+    "device_manager:devicemanagersdk",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
+  ]
+
+  if (castplus_cast_engine_enable) {
+    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
+    ]
+    external_deps += [ "cast_engine:cast_engine_client" ]
+  }
+}
+
 if (castplus_cast_engine_enable) {
   ohos_unittest("HwCastSupplementTest") {
     module_out_path = module_output_path
@@ -1748,6 +1818,7 @@ group("av_session_server_unittest") {
   deps = [
     ":AVControllerCallbackProxyTest",
     ":AVControllerCallbackStubTest",
+    ":AVRouterImplTest",
     ":AVRouterTest",
     ":AVSessionCallbackProxyTest",
     ":AVSessionCallbackStubTest",
