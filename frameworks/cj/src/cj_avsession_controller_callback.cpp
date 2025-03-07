@@ -221,14 +221,16 @@ void CJAVControllerCallback::OnAVCallMetaDataChange(const AVCallMetaData& avCall
         SLOGD("onAVCallMetaDataChange null");
         return;
     }
-    CAVCallMetaData cAvCallMetaData;
+    CAVCallMetaData cAvCallMetaData {};
     int ret = CJNO_ERROR;
     ret = ConvertNativeToCJStruct(avCallMetaData, cAvCallMetaData);
     if (ret != CJNO_ERROR) {
+        cjStructHeapFree(cAvCallMetaData);
         return;
     }
     SLOGD("onAVCallMetaDataChange runs");
     onAVCallMetaDataChange(cAvCallMetaData);
+    cjStructHeapFree(cAvCallMetaData);
 }
 
 void CJAVControllerCallback::OnAVCallStateChange(const AVCallState& avCallState)
@@ -266,14 +268,16 @@ void CJAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
         SLOGD("onPlaybackStateChange null");
         return;
     }
-    CAVPlaybackState cAvPlaybackState;
+    CAVPlaybackState cAvPlaybackState {};
     int ret = CJNO_ERROR;
     ret = ConvertNativeToCJStruct(state, cAvPlaybackState);
     if (ret != CJNO_ERROR) {
+        cjStructHeapFree(cAvPlaybackState);
         return;
     }
     SLOGD("onPlaybackStateChange runs");
     onPlaybackStateChange(cAvPlaybackState);
+    cjStructHeapFree(cAvPlaybackState);
 }
 
 void CJAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
@@ -283,14 +287,16 @@ void CJAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
         SLOGD("onMetaDataChange null");
         return;
     }
-    CAVMetaData cAvMetaData;
+    CAVMetaData cAvMetaData {};
     int ret = CJNO_ERROR;
     ret = ConvertNativeToCJStruct(data, cAvMetaData);
     if (ret != CJNO_ERROR) {
+        cjStructHeapFree(cAvMetaData);
         return;
     }
     SLOGD("onMetaDataChange runs");
     onMetaDataChange(cAvMetaData);
+    cjStructHeapFree(cAvMetaData);
 }
 
 void CJAVControllerCallback::OnActiveStateChange(bool isActive)
@@ -311,14 +317,16 @@ void CJAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cm
         SLOGD("onValidCommandChange null");
         return;
     }
-    CArray cCmds;
+    CArray cCmds {};
     int ret = CJNO_ERROR;
     ret = ConvertNativeToCJStruct(cmds, cCmds);
     if (ret != CJNO_ERROR) {
+        cjStructHeapFree(cCmds);
         return;
     }
     SLOGD("onValidCommandChange runs");
     onValidCommandChange(cCmds);
+    cjStructHeapFree(cCmds);
 }
 
 void CJAVControllerCallback::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info)
@@ -328,14 +336,16 @@ void CJAVControllerCallback::OnOutputDeviceChange(const int32_t connectionState,
         SLOGD("onOutputDeviceChange null");
         return;
     }
-    COutputDeviceInfo cOutputDeviceInfo;
+    COutputDeviceInfo cOutputDeviceInfo {};
     int ret = CJNO_ERROR;
     ret = ConvertNativeToCJStruct(info, cOutputDeviceInfo);
     if (ret != CJNO_ERROR) {
+        cjStructHeapFree(cOutputDeviceInfo);
         return;
     }
     SLOGD("onOutputDeviceChange runs");
     onOutputDeviceChange(connectionState, cOutputDeviceInfo);
+    cjStructHeapFree(cOutputDeviceInfo);
 }
 
 void CJAVControllerCallback::OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args)
@@ -354,15 +364,17 @@ void CJAVControllerCallback::OnSessionEventChange(const std::string& event, cons
         return ;
     }
     
-    CArray cArgs;
+    CArray cArgs {};
     ret = ConvertNativeToCJStruct(args, cArgs);
     if (ret != CJNO_ERROR) {
+        free(cEvent);
+        cjStructHeapFreeWant(cArgs);
         SLOGD("AAFwk::WantParams convert to C Type failed");
         return ;
     }
     onSessionEventChange(cEvent, cArgs);
     free(cEvent);
-    cjStructHeapFree(cArgs);
+    cjStructHeapFreeWant(cArgs);
 }
 
 void CJAVControllerCallback::OnQueueItemsChange(const std::vector<AVQueueItem>& items)
@@ -372,14 +384,16 @@ void CJAVControllerCallback::OnQueueItemsChange(const std::vector<AVQueueItem>& 
         SLOGD("onQueueItemsChange null");
         return;
     }
-    CArray cQueueItems;
+    CArray cQueueItems {};
     int ret = CJNO_ERROR;
     ret = ConvertNativeToCJStruct(items, cQueueItems);
     if (ret != CJNO_ERROR) {
+        cjStructHeapFreeAVQueueItem(cQueueItems);
         return;
     }
     SLOGD("onQueueItemsChange runs");
     onQueueItemsChange(cQueueItems);
+    cjStructHeapFreeAVQueueItem(cQueueItems);
 }
 
 void CJAVControllerCallback::OnQueueTitleChange(const std::string& title)
@@ -400,14 +414,15 @@ void CJAVControllerCallback::OnExtrasChange(const AAFwk::WantParams& extras)
         SLOGD("onExtrasChange null");
         return;
     }
-    CArray cExtras;
+    CArray cExtras {};
     int ret = CJNO_ERROR;
     ret = ConvertNativeToCJStruct(extras, cExtras);
     if (ret != CJNO_ERROR) {
+        cjStructHeapFreeWant(cExtras);
         return;
     }
     SLOGD("onExtrasChange runs");
     onExtrasChange(cExtras);
-    cjStructHeapFree(cExtras);
+    cjStructHeapFreeWant(cExtras);
 }
 };

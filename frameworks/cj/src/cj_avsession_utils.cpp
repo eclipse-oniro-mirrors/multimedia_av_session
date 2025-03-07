@@ -532,7 +532,7 @@ void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &co
     }
     cArray.size = size;
     auto ptr = static_cast<CParameters *>(cArray.head);
-    for (auto iter = paramsMap.begin(); iter != paramsMap.end(); iter++, ptr++) {
+    for (auto iter = paramsMap.begin(); iter != paramsMap.end(); iter++, ptr++, count++) {
         ptr->key = MallocCString(iter->first);
         if (ptr->key == nullptr) {
             code = ERR_NO_MEMORY;
@@ -559,7 +559,7 @@ void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &co
             code = InnerWrapWantParamsArray(wantP, array, ptr);
         }
         if (code == ERR_NO_MEMORY || code == AVSESSION_ERROR) {
-            return ClearParametersPtr(reinterpret_cast<CParameters *&>(cArray.head), count, true);
+            return ClearParametersPtr(reinterpret_cast<CParameters *&>(cArray.head), count, false);
         }
     }
 }
@@ -654,8 +654,8 @@ int32_t ConvertNativeToCJStruct(const std::vector<std::string>& native, CArray& 
     if (ret != CJNO_ERROR) {
         return ret;
     }
-    cj.size = native.size();
-    for (size_t i = 0; i < native.size(); i++) {
+    cj.size = 0;
+    for (size_t i = 0; i < native.size(); i++, cj.size++) {
         int32_t errCode = ConvertNativeToCJStruct(native[i], cjArrHead[i]);
         if (errCode != CJNO_ERROR) {
             return errCode;
@@ -681,9 +681,12 @@ int32_t ConvertNativeToCJStruct(const OutputDeviceInfo& native, COutputDeviceInf
     if (ret != CJNO_ERROR) {
         return ret;
     }
-    cj.devices.size = native.deviceInfos_.size();
-    for (uint32_t i = 0; i < native.deviceInfos_.size(); i++) {
-        ConvertNativeToCJStruct(native.deviceInfos_[i], cjArrHead[i]);
+    cj.devices.size = 0;
+    for (uint32_t i = 0; i < native.deviceInfos_.size(); i++, cj.devices.size++) {
+        ret = ConvertNativeToCJStruct(native.deviceInfos_[i], cjArrHead[i]);
+        if (ret != CJNO_ERROR) {
+            return ret;
+        }
     }
     return ret;
 }
@@ -879,8 +882,8 @@ int32_t ConvertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray&c
     if (ret != CJNO_ERROR) {
         return ret;
     }
-    cj.size = native.size();
-    for (size_t i = 0; i < native.size(); i++) {
+    cj.size = 0;
+    for (size_t i = 0; i < native.size(); i++, cj.size++) {
         int32_t errCode = ConvertNativeToCJStruct(native[i], cjArrHead[i]);
         if (errCode != CJNO_ERROR) {
             return errCode;
@@ -1274,11 +1277,33 @@ void cjStructHeapFree(CCastDisplayInfo& cj)
     cj.name = nullptr;
 }
 
+void cjStructHeapFree(CDeviceInfo& cj)
+{
+    free(cj.deviceId);
+    cj.deviceId = nullptr;
+    free(cj.deviceName);
+    cj.deviceName = nullptr;
+
+    char** &cjArrHead = reinterpret_cast<char**&>(cj.supportedDrmCapabilities.head);
+    if (cjArrHead) {
+        for (size_t i = 0; i < cj.supportedDrmCapabilities.size; i++) {
+            free(cjArrHead[i]);
+        }
+        free(cjArrHead);
+        cjArrHead = nullptr;
+    }
+}
+
 void cjStructHeapFree(COutputDeviceInfo& cj)
 {
-    free(cj.devices.head);
-    cj.devices.head = nullptr;
-    cj.devices.size = 0;
+    CDeviceInfo* &cjArrHead = reinterpret_cast<CDeviceInfo*&>(cj.devices.head);
+    if (cjArrHead) {
+        for (size_t i = 0; i < cj.devices.size; i++) {
+            cjStructHeapFree(cjArrHead[i]);
+        }
+        free(cjArrHead);
+        cjArrHead = nullptr;
+    }
 }
 
 void cjStructHeapFree(CArray& cj)
@@ -1286,5 +1311,115 @@ void cjStructHeapFree(CArray& cj)
     free(cj.head);
     cj.head = nullptr;
     cj.size = 0;
+}
+
+void cjStructHeapFree(CAVCallMetaData& cj)
+{
+    free(cj.name);
+    cj.name = nullptr;
+    free(cj.phoneNumber);
+    cj.phoneNumber = nullptr;
+}
+
+void cjStructHeapFree(CAVPlaybackState& cj)
+{
+    cjStructHeapFreeWant(cj.extras);
+}
+
+void cjStructHeapFree(CAVMetaData& cj)
+{
+    free(cj.assetId);
+    cj.assetId = nullptr;
+    free(cj.title);
+    cj.title = nullptr;
+    free(cj.artist);
+    cj.artist = nullptr;
+    free(cj.author);
+    cj.author = nullptr;
+    free(cj.avQueueName);
+    cj.avQueueName = nullptr;
+    free(cj.avQueueId);
+    cj.avQueueId = nullptr;
+    free(cj.album);
+    cj.album = nullptr;
+    free(cj.writer);
+    cj.writer = nullptr;
+    free(cj.composer);
+    cj.composer = nullptr;
+    free(cj.subtitle);
+    cj.subtitle = nullptr;
+    free(cj.description);
+    cj.description = nullptr;
+    free(cj.lyric);
+    cj.lyric = nullptr;
+    free(cj.previousAssetId);
+    cj.previousAssetId = nullptr;
+    free(cj.nextAssetId);
+    cj.nextAssetId = nullptr;
+    free(cj.avQueueImage.string);
+    cj.avQueueImage.string = nullptr;
+    free(cj.mediaImage.string);
+    cj.mediaImage.string = nullptr;
+
+    if (cj.drmSchemes.head) {
+        char** &cjArrHead = reinterpret_cast<char**&>(cj.drmSchemes.head);
+        for (size_t i = 0; i < cj.drmSchemes.size; i++) {
+            free(cjArrHead[i]);
+        }
+        free(cjArrHead);
+        cjArrHead = nullptr;
+    }
+}
+
+void cjStructHeapFreeWant(CArray& cj)
+{
+    auto head = static_cast<CParameters*>(cj.head);
+    if (head == nullptr) {
+        return;
+    }
+    ClearParametersPtr(head, cj.size, true);
+}
+
+void cjStructHeapFree(CAVMediaDescription& cj)
+{
+    free(cj.mediaId);
+    cj.mediaId = nullptr;
+    free(cj.title);
+    cj.title = nullptr;
+    free(cj.subtitle);
+    cj.subtitle = nullptr;
+    free(cj.description);
+    cj.description = nullptr;
+    free(cj.mediaUri);
+    cj.mediaUri = nullptr;
+    free(cj.mediaType);
+    cj.mediaType = nullptr;
+    free(cj.albumTitle);
+    cj.albumTitle = nullptr;
+    free(cj.albumCoverUri);
+    cj.albumCoverUri = nullptr;
+    free(cj.lyricContent);
+    cj.lyricContent = nullptr;
+    free(cj.lyricUri);
+    cj.lyricUri = nullptr;
+    free(cj.artist);
+    cj.artist = nullptr;
+    free(cj.drmScheme);
+    cj.drmScheme = nullptr;
+    free(cj.appName);
+    cj.appName = nullptr;
+    cjStructHeapFreeWant(cj.extras);
+}
+
+void cjStructHeapFreeAVQueueItem(CArray& cj)
+{
+    CAVQueueItem* &cjArrHead = reinterpret_cast<CAVQueueItem*&>(cj.head);
+    if (cjArrHead) {
+        for (size_t i = 0; i < cj.size; i++) {
+            cjStructHeapFree(cjArrHead[i].description);
+        }
+        free(cjArrHead);
+        cjArrHead = nullptr;
+    }
 }
 }  // namespace AVSession::OHOS
