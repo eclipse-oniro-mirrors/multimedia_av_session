@@ -112,6 +112,11 @@ int32_t convertCJStructToNative(const int64_t& cj, std::shared_ptr<AbilityRuntim
 void cjStructHeapFree(COutputDeviceInfo& cj);
 void cjStructHeapFree(CArray& cj);
 void cjStructHeapFree(CCastDisplayInfo& cj);
+void cjStructHeapFree(CAVCallMetaData& cj);
+void cjStructHeapFree(CAVPlaybackState& cj);
+void cjStructHeapFree(CAVMetaData& cj);
+void cjStructHeapFreeWant(CArray& cj);
+void cjStructHeapFreeAVQueueItem(CArray& cj);
 
 
 /* Common Methods */
