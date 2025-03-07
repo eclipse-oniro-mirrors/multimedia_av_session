@@ -3130,8 +3130,6 @@ void AddCapsule(std::string title, bool isCapsuleUpdate, std::shared_ptr<AVSessi
 
     if (!g_isCapsuleLive2) {
         capsule.SetBackgroundColor("#2E3033");
-    } else {
-        content->SetLiveViewType(Notification::NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM);
     }
 
     content->SetCapsule(capsule);
