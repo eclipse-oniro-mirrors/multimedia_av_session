@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,13 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_service.h"
+#include "cast_engine_common.h"
 #include "hw_cast_stream_player.h"
 #include "hw_cast_provider.h"
+#include "i_cast_session.h"
 
 using namespace testing::ext;
+using namespace OHOS::CastEngine;
 namespace OHOS::AVSession {
 
 static std::shared_ptr<AVSessionService> g_AVSessionService;
@@ -87,6 +90,26 @@ public:
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) {}
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) {}
+};
+
+class ICastSessionMock : public CastEngine::ICastSession {
+public:
+    ICastSessionMock() {};
+    virtual ~ICastSessionMock() {};
+    virtual int32_t RegisterListener(std::shared_ptr<ICastSessionListener> listener) { return 0; }
+    virtual int32_t UnregisterListener() { return 0; }
+    virtual int32_t AddDevice(const CastRemoteDevice &remoteDevice) { return 0; }
+    virtual int32_t RemoveDevice(const std::string &deviceId,
+        const DeviceRemoveAction &actionType = DeviceRemoveAction::ACTION_DISCONNECT) { return 0; }
+    virtual int32_t StartAuth(const AuthInfo &authInfo) { return 0; }
+    virtual int32_t GetSessionId(std::string &sessionId) { return 0; }
+    virtual int32_t SetSessionProperty(const CastSessionProperty &property) { return 0; }
+    virtual int32_t CreateMirrorPlayer(std::shared_ptr<IMirrorPlayer> &mirrorPlayer) { return 0; }
+    virtual int32_t CreateStreamPlayer(std::shared_ptr<IStreamPlayer> &streamPlayer) { return 0; }
+    virtual int32_t NotifyEvent(EventId eventId, std::string &jsonParam) { return 0; }
+    virtual int32_t SetCastMode(CastMode mode, std::string &jsonParam) { return 0; }
+    virtual int32_t Release() { return 0; }
+    virtual int32_t GetRemoteDeviceInfo(std::string deviceId, CastRemoteDevice &remoteDevice) { return 0; }
 };
 
 /**
@@ -833,6 +856,99 @@ static HWTEST(HwCastSupplementTest, OnServiceDied001, TestSize.Level1)
     hwCastProvider->castStateListenerList_.push_back(ptr);
     hwCastProvider->OnServiceDied();
     SLOGI("OnServiceDied001 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_HwCastProviderSessionRemoveDevice_001
+ * @tc.desc: create session and set continuePlay to true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_HwCastProviderSessionRemoveDevice_001, TestSize.Level1)
+{
+    SLOGI("HwCastProviderSession_HwCastProviderSessionRemoveDevice_001 begin!");
+    auto session = std::make_shared<ICastSessionMock>();
+    auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    std::string deviceId = "test";
+    EXPECT_EQ(provideSession->RemoveDevice(deviceId), false);
+    SLOGI("HwCastProviderSession_HwCastProviderSessionRemoveDevice_001 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_HwCastProviderSessionRemoveDevice_002
+ * @tc.desc: create session and set continuePlay to false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_HwCastProviderSessionRemoveDevice_002, TestSize.Level1)
+{
+    SLOGI("HwCastProviderSession_HwCastProviderSessionRemoveDevice_002 begin!");
+    auto session = std::make_shared<ICastSessionMock>();
+    auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    std::string deviceId = "test";
+    EXPECT_EQ(provideSession->RemoveDevice(deviceId), false);
+    SLOGI("HwCastProviderSession_HwCastProviderSessionRemoveDevice_002 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_GetRemoteNetWorkId_001
+ * @tc.desc: set sesion to not nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_GetRemoteNetWorkId_001, TestSize.Level1)
+{
+    SLOGI("HwCastProviderSession_GetRemoteNetWorkId_001 begin!");
+    auto session = std::make_shared<ICastSessionMock>();
+    auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    std::string deviceId = "001";
+    std::string networkId = "0.0.0.0";
+    bool ret = provideSession->GetRemoteNetWorkId(deviceId, networkId);
+    EXPECT_EQ(ret, true);
+    SLOGI("HwCastProviderSession_GetRemoteNetWorkId_001 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_RegisterCastSessionStateListener_001
+ * @tc.desc: set nullptr listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_RegisterCastSessionStateListener_001, TestSize.Level1)
+{
+    SLOGI("HwCastProviderSession_RegisterCastSessionStateListener_001 begin!");
+    auto session = std::make_shared<ICastSessionMock>();
+    auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    bool ret = provideSession->RegisterCastSessionStateListener(nullptr);
+    EXPECT_EQ(ret, false);
+    SLOGI("HwCastProviderSession_RegisterCastSessionStateListener_001 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_RegisterCastSessionStateListener_002
+ * @tc.desc: set not nullptr listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_RegisterCastSessionStateListener_002, TestSize.Level1)
+{
+    SLOGI("HwCastProviderSession_RegisterCastSessionStateListener_002 begin!");
+    auto session = std::make_shared<ICastSessionMock>();
+    auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    auto listener = std::make_shared<AVCastSessionStateListenerDemo>();
+    bool ret = provideSession->RegisterCastSessionStateListener(listener);
+    EXPECT_EQ(ret, true);
+    SLOGI("HwCastProviderSession_RegisterCastSessionStateListener_002 end!");
 }
 
 } // OHOS::AVSession

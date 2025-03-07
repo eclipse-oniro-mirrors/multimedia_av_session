@@ -413,41 +413,6 @@ static HWTEST_F(SoftbusSessionManagerTest, OnMessage002, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnBytes001
-* @tc.desc: test OnMessage
-* @tc.type: FUNC
-* @tc.require:
-*/
-static HWTEST_F(SoftbusSessionManagerTest, OnBytes001, TestSize.Level1)
-{
-    SLOGI("OnBytes001 begin");
-    int32_t socket = 1231;
-    void *data = nullptr;
-    int32_t dataLen = 10;
-    EXPECT_TRUE(manager_ != nullptr);
-    manager_->OnMessage(socket, data, dataLen);
-    SLOGI("OnBytes001 end");
-}
-
-/**
-* @tc.name: OnMessage002
-* @tc.desc: test OnMessage
-* @tc.type: FUNC
-* @tc.require:
-*/
-static HWTEST_F(SoftbusSessionManagerTest, OnBytes002, TestSize.Level1)
-{
-    SLOGI("OnBytes002 begin");
-    int32_t socket = 1231;
-    int *ptr = &socket;
-    void *data = static_cast<void*>(ptr);
-    int32_t dataLen = 10;
-    EXPECT_TRUE(manager_ != nullptr);
-    manager_->OnMessage(socket, data, dataLen);
-    SLOGI("OnBytes002 end");
-}
-
-/**
 * @tc.name: CreateServer001
 * @tc.desc: test CreateServer
 * @tc.type: FUNC
@@ -484,4 +449,71 @@ static HWTEST_F(SoftbusSessionManagerTest, ReleaseServer001, TestSize.Level1)
     distributed_->ReleaseServer(server);
     EXPECT_TRUE(server != nullptr);
     SLOGI("ReleaseServer001 end");
+}
+
+/**
+* @tc.name: OnBytes001
+* @tc.desc: set data to nullptr
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(SoftbusSessionManagerTest, OnBytes001, TestSize.Level1)
+{
+    SLOGI("OnBytes001 begin");
+    int32_t socket = 1001;
+    void *data = nullptr;
+    int32_t dataLen = 10;
+    manager_->OnBytes(socket, data, dataLen);
+    EXPECT_TRUE(data == nullptr);
+    SLOGI("OnBytes001 end");
+}
+
+/**
+* @tc.name: OnBytes002
+* @tc.desc: set data to not nullptr
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(SoftbusSessionManagerTest, OnBytes002, TestSize.Level1)
+{
+    SLOGI("OnBytes002 begin");
+    int32_t socket = 1001;
+    int32_t dataArr[] = {1, 0, 1, 0};
+    void *data = static_cast<void*>(dataArr);
+    int32_t dataLen = 10;
+    manager_->OnBytes(socket, data, dataLen);
+    EXPECT_TRUE(data != nullptr);
+    SLOGI("OnBytes002 end");
+}
+
+/**
+* @tc.name: Bind001
+* @tc.desc: the size of peerNetworkId is zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(SoftbusSessionManagerTest, Bind001, TestSize.Level1)
+{
+    SLOGI("Bind001 begin");
+    std::string peerNetworkId = "";
+    std::string pkgName = "";
+    int32_t ret = manager_->Bind(peerNetworkId, pkgName);
+    EXPECT_TRUE(ret == AVSESSION_ERROR);
+    SLOGI("Bind001 end");
+}
+
+/**
+* @tc.name: Bind002
+* @tc.desc: the size of peerNetworkId bigger than zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(SoftbusSessionManagerTest, Bind002, TestSize.Level1)
+{
+    SLOGI("Bind002 begin");
+    std::string peerNetworkId = "0.0.0.0";
+    std::string pkgName = "test";
+    int32_t ret = manager_->Bind(peerNetworkId, pkgName);
+    EXPECT_TRUE(ret == AVSESSION_ERROR);
+    SLOGI("Bind002 end");
 }
