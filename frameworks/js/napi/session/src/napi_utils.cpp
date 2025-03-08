@@ -524,6 +524,16 @@ napi_status NapiUtils::SetValue(napi_env env, AbilityRuntime::WantAgent::WantAge
     return status;
 }
 
+napi_status NapiUtils::SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent* in, napi_value& out)
+{
+    auto status = napi_create_object(env, &out);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    auto finalizecb = [](napi_env env, void* data, void* hint) {};
+    status = napi_wrap(env, out, static_cast<void*>(in), finalizecb, nullptr, nullptr);
+    CHECK_RETURN(status == napi_ok, "wrap object failed", napi_generic_failure);
+    return status;
+}
+
 /* napi_value <-> AAFwk::WantParams */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, AAFwk::WantParams& out)
 {

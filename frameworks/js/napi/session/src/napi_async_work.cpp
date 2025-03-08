@@ -166,6 +166,14 @@ void NapiAsyncWork::GenerateOutput(ContextBase* ctxt)
         napi_delete_reference(ctxt->env, ctxt->callbackRef);
         ctxt->callbackRef = nullptr;
     }
+    if (ctxt->complete != nullptr) {
+        SLOGD("do clear complete");
+        ctxt->complete = nullptr;
+    }
+    if (ctxt->execute != nullptr) {
+        SLOGD("do clear execute");
+        ctxt->execute = nullptr;
+    }
     ctxt->hold.reset(); // release ctxt.
 }
 }
