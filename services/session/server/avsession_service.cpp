@@ -1506,12 +1506,16 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
     }
 
     nlohmann::json sortValues = json::parse(oldSortContent, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!sortValues.is_discarded(), AVSESSION_ERROR, "json object is null");
+    CHECK_AND_RETURN_RET_LOG(!sortValues.is_null() && !sortValues.is_discarded(),
+        AVSESSION_ERROR, "json object is null or discarded");
     for (const auto& value : sortValues) {
+        CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded());
+        CHECK_AND_CONTINUE(value.contains("sessionType"));
         if (value["sessionType"] == "video") {
             SLOGI("GetHistoricalSessionDescriptorsFromFile with no video type session.");
             continue;
         }
+        CHECK_AND_CONTINUE(value.contains("sessionId"));
         auto session = GetContainer().GetSessionById(value["sessionId"]);
         if (session != nullptr) {
             SLOGE("GetHistoricalSessionDescriptorsFromFile find session alive, sessionId=%{public}s",
@@ -1519,6 +1523,8 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
             continue;
         }
         AVSessionDescriptor descriptor;
+        CHECK_AND_CONTINUE(value.contains("bundleName"));
+        CHECK_AND_CONTINUE(value.contains("abilityName"));
         descriptor.sessionId_ = value["sessionId"];
         descriptor.elementName_.SetBundleName(value["bundleName"]);
         descriptor.elementName_.SetAbilityName(value["abilityName"]);
@@ -2004,9 +2010,10 @@ void AVSessionService::HandleEventHandlerCallBack()
             return;
         }
         SLOGI("HandleEventHandlerCallBack proc cmd=%{public}d", cmd.GetCommand());
-        if (!topSession_) {
+        if (!topSession_ || (topSession_->GetBundleName() == "anco_audio" && !topSession_->IsActive())) {
             shouldColdPlay = true;
-            SLOGI("HandleEventHandlerCallBack without topSession_ shouldColdStart=%{public}d", shouldColdPlay);
+            SLOGI("HandleEventHandlerCallBack checkTop:%{public}d|shouldColdStart=%{public}d",
+                static_cast<int>(topSession_ != nullptr), shouldColdPlay);
         } else {
             if (topSession_->GetDescriptor().sessionTag_ == "external_audio") {
                 SLOGI("HandleEventHandlerCallBack this is an external audio");
@@ -2040,7 +2047,7 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
     }
     {
         std::lock_guard lockGuard(sessionServiceLock_);
-        if (topSession_) {
+        if (topSession_ && !(topSession_->GetBundleName() == "anco_audio" && !topSession_->IsActive())) {
             topSession_->HandleMediaKeyEvent(keyEvent);
             return AVSESSION_SUCCESS;
         }
@@ -2096,14 +2103,15 @@ int32_t AVSessionService::ConvertKeyCodeToCommand(int keyCode)
 
 void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId)
 {
-    SLOGI("HandleSystemKeyColdStart cmd=%{public}d without topsession", command.GetCommand());
+    SLOGI("cmd=%{public}d with no topsession", command.GetCommand());
     // try proc command for first front session
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
         std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
         CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
         for (const auto& session : *sessionListForFront) {
-            if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
+            if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call" &&
+                !(session->GetBundleName() == "anco_audio" && !session->IsActive())) {
                 session->ExecuteControllerCommand(command);
                 SLOGI("ExecuteCommand %{public}d for front session: %{public}s", command.GetCommand(),
                       session->GetBundleName().c_str());
@@ -2138,7 +2146,7 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
         std::lock_guard lockGuard(sessionServiceLock_);
         SLOGI("SendSystemControlCommand with cmd:%{public}d, topSession alive:%{public}d",
               command.GetCommand(), static_cast<int>(topSession_ != nullptr));
-        if (topSession_) {
+        if (topSession_ && !(topSession_->GetBundleName() == "anco_audio" && !topSession_->IsActive())) {
             CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
                 ERR_COMMAND_SEND_EXCEED_MAX, "command excuted number exceed max");
             topSession_->ExecuteControllerCommand(command);
