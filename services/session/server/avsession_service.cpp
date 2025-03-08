@@ -762,6 +762,11 @@ void AVSessionService::InitAudio()
         [this] (const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) {
         HandleDeviceChange(desc);
     });
+    queryAllowedPlaybackCallbackFunc_ = GetAllowedPlaybackCallbackFunc();
+    auto ret = AudioAdapter::GetInstance().RegisterAllowedPlaybackCallback(queryAllowedPlaybackCallbackFunc_);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("register query allowed playback callback failed!");
+    }
 }
 
 sptr <AVSessionItem> AVSessionService::SelectSessionByUid(const AudioRendererChangeInfo& info)
@@ -3365,5 +3370,22 @@ void AVSessionService::ReportStartCastEnd(std::string func, const OutputDeviceIn
         info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
         AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
     }
+}
+
+std::function<bool(int32_t, int32_t)> AVSessionService::GetAllowedPlaybackCallbackFunc()
+{
+    return [](int32_t uid, int32_t pid) -> bool {
+        auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        CHECK_AND_RETURN_RET_LOG(mgr != nullptr, true, "SystemAbilityManager is null");
+        auto object = mgr->CheckSystemAbility(APP_MGR_SERVICE_ID);
+        CHECK_AND_RETURN_RET_LOG(object != nullptr, true, "APP_MAGR_SERVICE is null");
+        bool hasSession = GetContainer().UidHasSession(uid);
+        bool isBack = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
+        bool isSystem = PermissionChecker::GetInstance().CheckSystemPermissionByUid(uid);
+        auto ret = hasSession || isSystem || !isBack;
+        SLOGI("avsession uid=%{public}d pid=%{public}d hasSession=%{public}d isBack=%{public}d isSystem=%{public}d",
+            uid, pid, hasSession, isBack, isSystem);
+        return ret;
+    };
 }
 } // namespace OHOS::AVSession

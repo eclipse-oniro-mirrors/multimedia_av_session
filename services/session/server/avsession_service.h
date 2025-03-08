@@ -322,6 +322,8 @@ private:
 
     void OutputDeviceChangeListener(const AudioRendererChangeInfos& infos);
 
+    std::function<bool(int32_t, int32_t)> GetAllowedPlaybackCallbackFunc();
+
     sptr<AVSessionItem> CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                            const AppExecFwk::ElementName& elementName);
 
@@ -551,6 +553,7 @@ private:
     bool isScreenOn_ = false;
     bool isScreenLocked_ = true;
     std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
+    std::function<bool(int32_t, int32_t)> queryAllowedPlaybackCallbackFunc_;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex sessionServiceLock_;
