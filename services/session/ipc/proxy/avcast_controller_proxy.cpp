@@ -150,7 +150,7 @@ int32_t AVCastControllerProxy::GetCastAVPlaybackState(AVPlaybackState& state)
     return ret;
 }
 
-int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes)
+int32_t AVCastControllerProxy::GetSupportedDecoders(std::vector<std::string>& decoderTypes)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
@@ -166,10 +166,79 @@ int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        sptr<AVPlaybackState> state_ = reply.ReadParcelable<AVPlaybackState>();
-        CHECK_AND_RETURN_RET_LOG(state_ != nullptr, ERR_UNMARSHALLING, "read AVPlaybackState failed");
-        state = *state_;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadStringVector(&decoderTypes), ERR_UNMARSHALLING, "read int32 failed");
     }
+    return ret;
+}
+
+int32_t AVCastControllerProxy::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteString(decoderType), ERR_MARSHALLING, "write filter failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_RECOMMEND_RESOLUTION_LEVEL, parcel, reply,
+        option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        int32_t resolutionLevelInt = -1;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(resolutionLevelInt), ERR_UNMARSHALLING, "read int32 failed");
+        resolutionLevel = static_cast<ResolutionLevel> resolutionLevelInt;
+    }
+    return ret;
+}
+
+int32_t AVCastControllerProxy::GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
+        AVSESSION_ERROR, "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_SUPPORT_HDR_CAPABILITIES, parcel,
+        reply, option) == 0, AVSESSION_ERROR, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        std::vector<int32_t> hdrFormatsInt;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32Vector(hdrFormatsInt), ERR_UNMARSHALLING, "read int32 failed");
+        for (auto it = hdrFormatsInt.begin(); it != hdrFormatsInt.end(); it++) {
+            hdrFormats.emplace_back(static_cast<HDRFormat> *it);
+        }
+    }
+    return ret;
+}
+
+int32_t AVCastControllerProxy::GetSupportedPlaySpeeds(std::vector<float>& playSpeeds)
+{
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
+        AVSESSION_ERROR, "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_SUPPORT_PLAY_SPEED, parcel,
+        reply, option) == 0, AVSESSION_ERROR, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(reply.ReadFloatVector(&playSpeeds), ERR_UNMARSHALLING, "read int32 failed");
+    }
+    return ret;
 }
 
 int32_t AVCastControllerProxy::GetCurrentItem(AVQueueItem& currentItem)

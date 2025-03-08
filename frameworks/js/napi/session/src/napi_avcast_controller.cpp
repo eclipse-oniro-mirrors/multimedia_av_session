@@ -567,7 +567,7 @@ static napi_value GetSupportedHdrCapabilities(napi_env env, napi_callback_info i
 static napi_value GetSupportedPlaySpeeds(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
-        std::vector<int32_t> playSpeeds;
+        std::vector<float> playSpeeds;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
