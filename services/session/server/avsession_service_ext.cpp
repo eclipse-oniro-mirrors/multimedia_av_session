@@ -493,15 +493,30 @@ bool AVSessionService::ProcessTargetMigrate(bool isOnline, const OHOS::Distribut
 
 void AVSessionService::DoRemoteAVSessionLoad(std::string remoteDeviceId)
 {
-    SLOGI("DoRemoteAVSessionLoad with deviceId:%{public}s", remoteDeviceId.c_str());
-    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (mgr == nullptr) {
-        SLOGE("DoRemoteAVSessionLoad get SystemAbilityManager fail");
-        return;
-    }
-    abilityLoadCallback_ = new AVSessionSystemAbilityLoadCallback(this);
-    int32_t ret = mgr->LoadSystemAbility(AVSESSION_SERVICE_ID, remoteDeviceId, abilityLoadCallback_);
-    SLOGI("DoRemoteAVSessionLoad LoadSystemAbility with ret:%{public}d", ret);
+    SLOGI("DoRemoteAVSessionLoad async with deviceId:%{public}s", remoteDeviceId.c_str());
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this, remoteDeviceId]() {
+        auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (mgr == nullptr) {
+            SLOGE("DoRemoteAVSessionLoad get SystemAbilityManager fail");
+            return;
+        }
+        abilityLoadCallback_ = new AVSessionSystemAbilityLoadCallback(this);
+        sptr<IRemoteObject> remoteObject = nullptr;
+        uint8_t outOfTime = doRemoteLoadRetryTime;
+        while (remoteObject == nullptr && outOfTime > 0) {
+            outOfTime--;
+            std::this_thread::sleep_for(std::chrono::milliseconds(CLICK_TIMEOUT));
+            remoteObject = mgr->CheckSystemAbility(AVSESSION_SERVICE_ID, remoteDeviceId);
+            if (remoteObject != nullptr) {
+                SLOGI("DoRemoteAVSessionLoad done with remoteObject get");
+                return;
+            } else {
+                SLOGI("DoRemoteAVSessionLoad get null, retryLeftTime:%{public}u", outOfTime);
+            }
+        }
+        },
+        "DoRemoteAVSessionLoad");
 }
 
 void AVSessionService::DoConnectProcessWithMigrate(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)

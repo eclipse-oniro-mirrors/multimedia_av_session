@@ -650,6 +650,7 @@ private:
     const uint32_t MAX_NOTIFICATION_NUM = 3;
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
     const int32_t cancelTimeout = 5000;
+    const uint8_t doRemoteLoadRetryTime = 5;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

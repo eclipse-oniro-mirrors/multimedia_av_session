@@ -96,7 +96,7 @@ void AVSessionManagerTest::TearDownTestCase()
 
 void AVSessionManagerTest::SetUp()
 {
-    system("killall -9 com.example.himusicdemo");
+    system("killall com.example.himusicdemo");
     sleep(1);
 }
 

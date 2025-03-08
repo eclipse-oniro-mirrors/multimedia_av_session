@@ -314,7 +314,7 @@ void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
             jsonValue[MIGRATE_ABILITY_NAME].asString() : DEFAULT_STRING;
         elementName_.SetAbilityName(abilityName);
     }
-    SLOGI("ProcessMetaData with sessionId:%{public}s|bundleName:%{public}s done",
+    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s done",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), elementName_.GetBundleName().c_str());
     if (sessionId.empty() || sessionId == DEFAULT_STRING || sessionId == EMPTY_SESSION) {
         remoteSession_->Deactivate();
