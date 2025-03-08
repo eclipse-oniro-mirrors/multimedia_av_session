@@ -858,7 +858,7 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
 napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
-        AbilityRuntime::WantAgent::WantAgent ability;
+        AbilityRuntime::WantAgent::WantAgent* ability;
     };
     auto context = std::make_shared<ConcreteContext>();
     context->GetCbInfo(env, info);
@@ -872,7 +872,8 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
             context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
             return;
         }
-        int32_t ret = napiController->controller_->GetLaunchAbility(context->ability);
+        int32_t ret = napiController->controller_->GetLaunchAbilityInner(context->ability);
+        SLOGE("GetLaunchAbilityInner check:%{public}d", context->ability != nullptr);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "GetLaunchAbility failed : native session not exist";

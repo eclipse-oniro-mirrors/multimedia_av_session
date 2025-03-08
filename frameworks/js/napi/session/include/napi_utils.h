@@ -124,6 +124,11 @@ public:
     /* napi_value <-> AbilityRuntime::WantAgent::WantAgent */
     static napi_status GetValue(napi_env env, napi_value in, AbilityRuntime::WantAgent::WantAgent*& out);
     static napi_status SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent& in, napi_value& out);
+    static napi_status SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent* in, napi_value& out);
+
+    /* napi_value <-> AAFwk::WantParams */
+    static napi_status GetValue(napi_env env, napi_value in, AAFwk::WantParams& out);
+    static napi_status SetValue(napi_env env, const AAFwk::WantParams& in, napi_value& out);
 
     /* napi_value <-> AAFwk::WantParams */
     static napi_status GetValue(napi_env env, napi_value in, AAFwk::WantParams& out);
