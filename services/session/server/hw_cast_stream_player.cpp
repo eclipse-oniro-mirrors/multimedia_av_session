@@ -395,15 +395,12 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
         }
     } else if (value.contains(audioStr_)) {
         if (value[audioStr_].contains(decodeTypeStr_)) {
-                CHECK_AND_BREAK(value[audioStr_][decodeTypeStr_].is_string());
-                std::string str = value[audioStr_][decodeTypeStr_];
-                SLOGI("%{public}s of %{public}s", decodeTypeStr_.c_str(), str.c_str());
-                jsonCapabilitiesSptr_->decoderTypes_.emplace_back(value[audioStr_][decodeTypeStr_]);
-            } else {
-                SLOGI("%{public}s no contains", decodeOfAudioStr_.c_str());
-            }
+            CHECK_AND_BREAK(value[audioStr_][decodeTypeStr_].is_string());
+            std::string str = value[audioStr_][decodeTypeStr_];
+            SLOGI("%{public}s of %{public}s", decodeTypeStr_.c_str(), str.c_str());
+            jsonCapabilitiesSptr_->decoderTypes_.emplace_back(value[audioStr_][decodeTypeStr_]);
         } else {
-            SLOGI("%{public}s of %{public}s no contains", audioStr_.c_str(), decodeSupportResolutionStr_.c_str());
+            SLOGI("%{public}s of %{public}s no contains", audioStr_.c_str(), decodeTypeStr_.c_str());
         }
     } else {
         SLOGI("%{public}s and %{public}s info no contains", audioStr_.c_str(), videoStr_.c_str());
