@@ -148,11 +148,11 @@ int32_t AVCastControllerStub::HandleGetRecommendedResolutionLevel(MessageParcel&
 {
     std::string decoderType = data.ReadString();
     CHECK_AND_RETURN_RET_LOG(!decoderType.empty(), ERR_NONE, "decoderType is empty");
-    ResolutionLevel resolutionLevel;
+    ResolutionLevel resolutionLevel = ResolutionLevel::RESOLUTION_480P;
     int32_t ret = GetRecommendedResolutionLevel(decoderType, resolutionLevel);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        int32_t resolutionLevelInt = static_cast<int32_t> resolutionLevel;
+        int32_t resolutionLevelInt = static_cast<int32_t>(resolutionLevel);
         CHECK_AND_PRINT_LOG(reply.WriteInt32(resolutionLevelInt), "write CastAVPlaybackState failed");
     }
     return ERR_NONE;
@@ -160,7 +160,7 @@ int32_t AVCastControllerStub::HandleGetRecommendedResolutionLevel(MessageParcel&
 
 int32_t AVCastControllerStub::HandleGetSupportedHdrCapabilities(MessageParcel& data, MessageParcel& reply)
 {
-    std::vector<HDRFormat> hdrFormats
+    std::vector<HDRFormat> hdrFormats;
     int32_t ret = GetSupportedHdrCapabilities(hdrFormats);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
@@ -168,7 +168,7 @@ int32_t AVCastControllerStub::HandleGetSupportedHdrCapabilities(MessageParcel& d
         for (auto it = hdrFormats.begin(); it != hdrFormats.end(); it++) {
             hdrFormatsInt.emplace_back(static_cast<int32_t>(*it));
         }
-        CHECK_AND_PRINT_LOG(reply.ReadInt32Vector(&hdrFormatsInt), "write GetSupportedHdrCapabilities failed");
+        CHECK_AND_PRINT_LOG(reply.WriteInt32Vector(hdrFormatsInt), "write GetSupportedHdrCapabilities failed");
     }
     return ERR_NONE;
 }
@@ -179,7 +179,7 @@ int32_t AVCastControllerStub::HandleGetSupportedPlaySpeeds(MessageParcel& data, 
     int32_t ret = GetSupportedPlaySpeeds(playSpeeds);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_PRINT_LOG(reply.ReadFloatVector(&playSpeeds), "write GetSupportedPlaySpeeds failed");
+        CHECK_AND_PRINT_LOG(reply.WriteFloatVector(playSpeeds), "write GetSupportedPlaySpeeds failed");
     }
     return ERR_NONE;
 }

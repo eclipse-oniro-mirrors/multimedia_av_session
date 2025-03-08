@@ -351,7 +351,7 @@ int32_t AVCastControllerItem::GetCastAVPlaybackState(AVPlaybackState& avPlayback
     return ret;
 }
 
-int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes)
+int32_t AVCastControllerItem::GetSupportedDecoders(std::vector<std::string>& decoderTypes)
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
@@ -361,7 +361,7 @@ int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes)
     return AVSESSION_SUCCESS;
 }
 
-int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel)
+int32_t AVCastControllerItem::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel)
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
@@ -371,7 +371,7 @@ int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel 
     return AVSESSION_SUCCESS;
 }
 
-int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats)
+int32_t AVCastControllerItem::GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats)
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
@@ -381,7 +381,7 @@ int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats)
     return AVSESSION_SUCCESS;
 }
 
-int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds)
+int32_t AVCastControllerItem::GetSupportedPlaySpeeds(std::vector<float>& playSpeeds)
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");

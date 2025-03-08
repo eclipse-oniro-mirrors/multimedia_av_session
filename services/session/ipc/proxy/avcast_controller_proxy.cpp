@@ -190,7 +190,7 @@ int32_t AVCastControllerProxy::GetRecommendedResolutionLevel(std::string& decode
     if (ret == AVSESSION_SUCCESS) {
         int32_t resolutionLevelInt = -1;
         CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(resolutionLevelInt), ERR_UNMARSHALLING, "read int32 failed");
-        resolutionLevel = static_cast<ResolutionLevel> resolutionLevelInt;
+        resolutionLevel = static_cast<ResolutionLevel>(resolutionLevelInt);
     }
     return ret;
 }
@@ -212,7 +212,7 @@ int32_t AVCastControllerProxy::GetSupportedHdrCapabilities(std::vector<HDRFormat
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         std::vector<int32_t> hdrFormatsInt;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32Vector(hdrFormatsInt), ERR_UNMARSHALLING, "read int32 failed");
+        CHECK_AND_RETURN_RET_LOG(reply.ReadInt32Vector(&hdrFormatsInt), ERR_UNMARSHALLING, "read int32 failed");
         for (auto it = hdrFormatsInt.begin(); it != hdrFormatsInt.end(); it++) {
             hdrFormats.emplace_back(static_cast<HDRFormat>(*it));
         }
