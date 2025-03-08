@@ -48,7 +48,7 @@ public:
 
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override;
 
-    int32_t GetSupportedPlaySpeeds(std::vector<float> playSpeeds) override;
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override;
 
     int32_t GetCurrentItem(AVQueueItem& currentItem) override;
 

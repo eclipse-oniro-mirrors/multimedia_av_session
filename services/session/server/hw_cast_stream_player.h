@@ -26,6 +26,11 @@
 #include "avsession_pixel_map_adapter.h"
 
 namespace OHOS::AVSession {
+struct MediaSupportCapabilities
+{
+    std::ve
+};
+
 class HwCastStreamPlayer : public IAVCastControllerProxy, public CastEngine::IStreamPlayerListener,
     public std::enable_shared_from_this<HwCastStreamPlayer> {
 public:
@@ -40,6 +45,10 @@ public:
     int32_t Prepare(const AVQueueItem& avQueueItem) override;
     int32_t GetDuration(int32_t &duration) override;
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override;
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel) override;
+    int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override;
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override;
     int32_t SetDisplaySurface(std::string &surfaceId) override;
     int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) override;
     int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;

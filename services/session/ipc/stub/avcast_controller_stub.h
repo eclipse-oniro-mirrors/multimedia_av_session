@@ -41,6 +41,14 @@ private:
 
     int32_t HandleGetCastAVPlayBackState(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetSupportedDecoders(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetRecommendedResolutionLevel(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetSupportedHdrCapabilities(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetSupportedPlaySpeeds(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetCurrentItem(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetValidCommands(MessageParcel& data, MessageParcel& reply);

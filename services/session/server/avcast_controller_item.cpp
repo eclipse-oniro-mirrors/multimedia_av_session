@@ -351,6 +351,45 @@ int32_t AVCastControllerItem::GetCastAVPlaybackState(AVPlaybackState& avPlayback
     return ret;
 }
 
+int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes)
+{
+    std::lock_guard lockGuard(castControllerLock_);
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
+        "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_->GetSupportedDecoders(decoderTypes) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "GetSupportedDecoders fail");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel)
+{
+    std::lock_guard lockGuard(castControllerLock_);
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
+        "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_->GetRecommendedResolutionLevel(decoderType, resolutionLevel) ==
+        AVSESSION_SUCCESS, AVSESSION_ERROR, "GetRecommendedResolutionLevel fail");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats)
+{
+    std::lock_guard lockGuard(castControllerLock_);
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
+        "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_->GetSupportedHdrCapabilities(hdrFormats) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "GetSupportedHdrCapabilities fail");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds)
+{
+    std::lock_guard lockGuard(castControllerLock_);
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_->GetSupportedPlaySpeeds(playSpeeds) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "GetSupportedPlaySpeeds fail");
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 {
     std::lock_guard lockGuard(castControllerLock_);

@@ -65,7 +65,7 @@ public:
 
     virtual int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) = 0;
 
-    virtual int32_t GetSupportedPlaySpeeds(std::vector<float> playSpeeds) = 0;
+    virtual int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) = 0;
 
     virtual int32_t GetCurrentItem(AVQueueItem& currentItem) = 0;
 
