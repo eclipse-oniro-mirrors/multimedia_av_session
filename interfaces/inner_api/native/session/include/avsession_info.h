@@ -665,39 +665,6 @@ enum DeviceType {
 };
 
 /**
- * The defination of decoder type.
- * @enum { string }
- * @syscap SystemCapability.Multimedia.AVSession.AVCast
- * @atomicservice
- * @since 18
- */
-enum DecoderType {
-    /**
-     * Defination of avc codec type.
-     * @syscap SystemCapability.Multimedia.AVSession.AVCast
-     * @atomicservice
-     * @since 18
-     */
-    OH_AVCODEC_MIMETYPE_VIDEO_AVC = "video/avc",
-
-    /**
-     * Defination of hevc codec type.
-     * @syscap SystemCapability.Multimedia.AVSession.AVCast
-     * @atomicservice
-     * @since 18
-     */
-    OH_AVCODEC_MIMETYPE_VIDEO_HEVC = "video/hevc",
-
-    /**
-     * Defination of audio vivid codec type.
-     * @syscap SystemCapability.Multimedia.AVSession.AVCast
-     * @atomicservice
-     * @since 18
-     */
-    OH_AVCODEC_MIMETYPE_AUDIO_VIVID = "audio/av3a",
-}
-
-/**
  * The defination of suggested resolution.
  * @enum { number }
  * @syscap SystemCapability.Multimedia.AVSession.AVCast
@@ -744,7 +711,7 @@ enum ResolutionLevel {
      * @since 18
      */
     RESOLUTION_4K = 4,
-}
+};
 
 /**
  * Enumerates the HDR Format
@@ -874,7 +841,7 @@ enum HDRFormat {
      * @since 12
      */
     IMAGE_HDR_ISO_SINGLE = 7,
-}
+};
 
 enum CastEngineConnectState {
     CONNECTING = 0,
