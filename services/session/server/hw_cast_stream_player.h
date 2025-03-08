@@ -17,7 +17,7 @@
 #define HW_CAST_STREAM_PLAYER_H
 
 #include <mutex>
-
+#include <nlohmann/json.hpp>
 
 #include "pixel_map.h"
 #include "cast_engine_common.h"
@@ -26,9 +26,12 @@
 #include "avsession_pixel_map_adapter.h"
 
 namespace OHOS::AVSession {
-struct MediaSupportCapabilities
+struct JsonCapabilities
 {
-    std::ve
+    std::vector<std::string> decoderTypes_;
+    std::vector<HDRFormat> hdrFormats_;
+    std::vector<float> playSpeeds_;
+    std::vector<std::map<std::string, ResolutionLevel>> decoderSupportResolutions_;
 };
 
 class HwCastStreamPlayer : public IAVCastControllerProxy, public CastEngine::IStreamPlayerListener,
@@ -84,7 +87,19 @@ private:
         const std::vector<int32_t>& supportedCastCmds, CastEngine::StreamCapability& streamCapability);
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem);
     bool RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription);
+    int32_t GetMediaCapabilities();
 
+    std::shared_ptr<JsonCapabilities> jsonCapabilitiesSptr_ = std::make_shared<JsonCapabilities>();
+    const std::string videoStr_ = "video";
+    const std::string audioStr_ = "audio";
+    const std::string decodeTypeStr_ = "decodeType";
+    const std::string hdrFormatStr_ = "HDRFormat";
+    const std::string decodeSupportResolutionStr_ = "decodeSupportResolution";
+    const std::string drmStr_ = "DRM";
+    const std::string decodeOfVideoHevcStr_ = "video/hevc";
+    const std::string decodeOfVideoAvcStr_ = "video/avc";
+    const std::string decodeOfAudioStr_ = "audio/av3a";
+    const std::string speedStr_ = "speed";
     int32_t castMinTime = 1000;
     std::recursive_mutex streamPlayerLock_;
     std::recursive_mutex curItemLock_;

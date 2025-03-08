@@ -214,7 +214,7 @@ int32_t AVCastControllerProxy::GetSupportedHdrCapabilities(std::vector<HDRFormat
         std::vector<int32_t> hdrFormatsInt;
         CHECK_AND_RETURN_RET_LOG(reply.ReadInt32Vector(hdrFormatsInt), ERR_UNMARSHALLING, "read int32 failed");
         for (auto it = hdrFormatsInt.begin(); it != hdrFormatsInt.end(); it++) {
-            hdrFormats.emplace_back(static_cast<HDRFormat> *it);
+            hdrFormats.emplace_back(static_cast<HDRFormat>(*it));
         }
     }
     return ret;

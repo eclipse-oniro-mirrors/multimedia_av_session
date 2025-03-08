@@ -147,7 +147,7 @@ int32_t AVCastControllerStub::HandleGetSupportedDecoders(MessageParcel& data, Me
 int32_t AVCastControllerStub::HandleGetRecommendedResolutionLevel(MessageParcel& data, MessageParcel& reply)
 {
     std::string decoderType = data.ReadString();
-    CHECK_AND_RETURN_RET_LOG(!decoderType.empty(), ERR_NONE, "read decoderType failed");
+    CHECK_AND_RETURN_RET_LOG(!decoderType.empty(), ERR_NONE, "decoderType is empty");
     ResolutionLevel resolutionLevel;
     int32_t ret = GetRecommendedResolutionLevel(decoderType, resolutionLevel);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
@@ -166,7 +166,7 @@ int32_t AVCastControllerStub::HandleGetSupportedHdrCapabilities(MessageParcel& d
     if (ret == AVSESSION_SUCCESS) {
         std::vector<int32_t> hdrFormatsInt;
         for (auto it = hdrFormats.begin(); it != hdrFormats.end(); it++) {
-            hdrFormatsInt.emplace_back(static_cast<int32_t> *it);
+            hdrFormatsInt.emplace_back(static_cast<int32_t>(*it));
         }
         CHECK_AND_PRINT_LOG(reply.ReadInt32Vector(&hdrFormatsInt), "write GetSupportedHdrCapabilities failed");
     }
