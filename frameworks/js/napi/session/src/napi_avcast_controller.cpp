@@ -425,7 +425,7 @@ napi_value NapiAVCastController::GetCastAVPlaybackState(napi_env env, napi_callb
     return NapiAsyncWork::Enqueue(env, context, "GetCastAVPlaybackState", executor, complete);
 }
 
-static napi_value GetSupportedDecoders(napi_env env, napi_callback_info info)
+napi_value NapiAVCastController::GetSupportedDecoders(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
         std::vector<std::string> decoderTypes;
@@ -468,13 +468,13 @@ static napi_value GetSupportedDecoders(napi_env env, napi_callback_info info)
     return NapiAsyncWork::Enqueue(env, context, "GetSupportedDecoders", executor, complete);
 }
 
-static napi_value GetRecommendedResolutionLevel(napi_env env, napi_callback_info info)
+napi_value NapiAVCastController::GetRecommendedResolutionLevel(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
         std::string decoderType;
         ResolutionLevel resolutionLevel;
     };
-    auto context = std::make_shared<ConcrentContext>();
+    auto context = std::make_shared<ConcreteContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -521,7 +521,7 @@ static napi_value GetRecommendedResolutionLevel(napi_env env, napi_callback_info
     return NapiAsyncWork::Enqueue(env, context, "GetRecommendedResolutionLevel", executor, complete);
 }
 
-static napi_value GetSupportedHdrCapabilities(napi_env env, napi_callback_info info)
+napi_value NapiAVCastController::GetSupportedHdrCapabilities(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
         std::vector<HDRFormat> hdrFormats;
@@ -564,7 +564,7 @@ static napi_value GetSupportedHdrCapabilities(napi_env env, napi_callback_info i
     return NapiAsyncWork::Enqueue(env, context, "GetSupportedHdrCapabilities", executor, complete);
 }
 
-static napi_value GetSupportedPlaySpeeds(napi_env env, napi_callback_info info)
+napi_value NapiAVCastController::GetSupportedPlaySpeeds(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
         std::vector<float> playSpeeds;

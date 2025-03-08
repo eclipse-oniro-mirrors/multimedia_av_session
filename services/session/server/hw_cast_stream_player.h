@@ -26,8 +26,7 @@
 #include "avsession_pixel_map_adapter.h"
 
 namespace OHOS::AVSession {
-struct JsonCapabilities
-{
+struct JsonCapabilities {
     std::vector<std::string> decoderTypes_;
     std::vector<HDRFormat> hdrFormats_;
     std::vector<float> playSpeeds_;
@@ -95,7 +94,6 @@ private:
     const std::string decodeTypeStr_ = "decodeType";
     const std::string hdrFormatStr_ = "HDRFormat";
     const std::string decodeSupportResolutionStr_ = "decodeSupportResolution";
-    const std::string drmStr_ = "DRM";
     const std::string decodeOfVideoHevcStr_ = "video/hevc";
     const std::string decodeOfVideoAvcStr_ = "video/avc";
     const std::string decodeOfAudioStr_ = "audio/av3a";

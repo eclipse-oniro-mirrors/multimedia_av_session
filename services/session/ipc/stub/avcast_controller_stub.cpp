@@ -139,7 +139,7 @@ int32_t AVCastControllerStub::HandleGetSupportedDecoders(MessageParcel& data, Me
     int32_t ret = GetSupportedDecoders(decoderTypes);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_PRINT_LOG(reply.WriteStringVector(&decoderTypes), "write GetSupportedDecoders failed");
+        CHECK_AND_PRINT_LOG(reply.WriteStringVector(decoderTypes), "write GetSupportedDecoders failed");
     }
     return ERR_NONE;
 }

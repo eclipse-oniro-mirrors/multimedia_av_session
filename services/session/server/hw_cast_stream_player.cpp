@@ -349,10 +349,11 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
     SLOGI("GetMediaCapabilities begin");
     std::lock_guard lockGuard(streamPlayerLock_);
     CHECK_AND_RETURN_RET_LOG(!streamPlayer_, AVSESSION_ERROR, "streamPlayer_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(!jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
     std::string supportCapabilities;
     streamPlayer_->GetMediaCapabilities(supportCapabilities);
     nlohmann::json value = nlohmann::json::parse(supportCapabilities);
-    CHECK_AND_RETURN_RET_LOG(value.is_null() && !value.is_discarded(), AVSESSION_ERROR);
+    CHECK_AND_RETURN_RET_LOG(value.is_null() && !value.is_discarded(), AVSESSION_ERROR, "GetMediaCapabilities fail");
     if (value.contains(videoStr_)) {
         if (value[videoStr_].contains(decodeTypeStr_)) {
             for (auto it : value[videoStr_][decodeTypeStr_]) {
@@ -368,14 +369,14 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
             if (value[videoStr_][decodeSupportResolutionStr_].contains(decodeOfVideoHevcStr_)) {
                 ResolutionLevel resolutionLevel = value[videoStr_][decodeSupportResolutionStr_][decodeOfVideoHevcStr_];
                 std::map<std::string, ResolutionLevel> decodeToResolution = {{decodeOfVideoHevcStr_, resolutionLevel}};
-                jsonCapabilitiesSptr_->decoderTypes_.emplace_back(decodeToResolution);
+                jsonCapabilitiesSptr_->decoderSupportResolutions_.emplace_back(decodeToResolution);
             } else {
                 SLOGI("%{public}s no contains", decodeOfVideoHevcStr_.c_str());
             }
             if (value[videoStr_][decodeSupportResolutionStr_].contains(decodeOfVideoAvcStr_)) {
                 ResolutionLevel resolutionLevel = value[videoStr_][decodeSupportResolutionStr_][decodeOfVideoAvcStr_];
                 std::map<std::string, ResolutionLevel> decodeToResolution = {{decodeOfVideoAvcStr_, resolutionLevel}};
-                jsonCapabilitiesSptr_->decoderTypes_.emplace_back(decodeToResolution);
+                jsonCapabilitiesSptr_->decoderSupportResolutions_.emplace_back(decodeToResolution);
             } else {
                 SLOGI("%{public}s no contains", decodeOfVideoAvcStr_.c_str());
             }
@@ -393,11 +394,11 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
             SLOGI("%{public}s of %{public}s no contains", videoStr_.c_str(), hdrFormatStr_.c_str());
         }
     } else if (value.contains(audioStr_)) {
-        if (value[audioStr_].contains(decodeSupportResolutionStr_)) {
-            if (value[audioStr_][decodeSupportResolutionStr_].contains(decodeOfAudioStr_)) {
-                ResolutionLevel resolutionLevel = value[audioStr_][decodeSupportResolutionStr_][decodeOfAudioStr_];
-                std::map<std::string, ResolutionLevel> decodeToResolution = {{decodeOfAudioStr_, resolutionLevel}};
-                jsonCapabilitiesSptr_->decoderTypes_.emplace_back(decodeToResolution);
+        if (value[audioStr_].contains(decodeTypeStr_)) {
+                CHECK_AND_BREAK(value[audioStr_][decodeTypeStr_].is_string());
+                std::string str = value[audioStr_][decodeTypeStr_];
+                SLOGI("%{public}s of %{public}s", decodeTypeStr_.c_str(), str.c_str());
+                jsonCapabilitiesSptr_->decoderTypes_.emplace_back(value[audioStr_][decodeTypeStr_]);
             } else {
                 SLOGI("%{public}s no contains", decodeOfAudioStr_.c_str());
             }

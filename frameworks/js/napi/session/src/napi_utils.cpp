@@ -204,12 +204,6 @@ napi_status NapiUtils::SetValue(napi_env env, const double& in, napi_value& out)
     return napi_create_double(env, in, &out);
 }
 
-/* napi_value <-> float */
-napi_status NapiUtils::SetValue(napi_env env, const float& in, napi_value& out)
-{
-    return napi_create_double(env, in, &out);
-}
-
 /* napi_value <-> std::string */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::string& out)
 {
@@ -1048,10 +1042,10 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<AVQueueInfo>& in
     return status;
 }
 
-/* napi_value <-> std::vector<DecoderType> */
-napi_status NapiUtils::SetValue(napi_env env, const std::vector<DecoderType>& in, napi_value& out)
+/* napi_value <-> std::vector<ResolutionLevel> */
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<ResolutionLevel>& in, napi_value& out)
 {
-    SLOGD("napi_value <- std::vector<DecoderType>  %{public}d", static_cast<int>(in.size()));
+    SLOGD("napi_value <- std::vector<ResolutionLevel>  %{public}d", static_cast<int>(in.size()));
     napi_status status = napi_create_array_with_length(env, in.size(), &out);
     CHECK_RETURN((status == napi_ok), "create_array failed!", status);
     int index = 0;
@@ -1067,6 +1061,21 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<DecoderType>& in
 napi_status NapiUtils::SetValue(napi_env env, const std::vector<HDRFormat>& in, napi_value& out)
 {
     SLOGD("napi_value <- std::vector<HDRFormat>  %{public}d", static_cast<int>(in.size()));
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN((status == napi_ok), "create_array failed!", status);
+    int index = 0;
+    for (const auto& item : in) {
+        napi_value entry = nullptr;
+        SetValue(env, item, entry);
+        napi_set_element(env, out, index++, entry);
+    }
+    return status;
+}
+
+/* napi_value <-> std::vector<float> */
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<float>& in, napi_value& out)
+{
+    SLOGD("napi_value <- std::vector<float>  %{public}d", static_cast<int>(in.size()));
     napi_status status = napi_create_array_with_length(env, in.size(), &out);
     CHECK_RETURN((status == napi_ok), "create_array failed!", status);
     int index = 0;
