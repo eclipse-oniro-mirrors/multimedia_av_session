@@ -25,7 +25,10 @@ ohos_shared_library("avsession_common") {
     debug = false
   }
   sources = [
+    "src/av_data_src_descriptor.cpp",
     "src/av_file_descriptor.cpp",
+    "src/av_shared_memory_base.cpp",
+    "src/av_shared_memory_helper.cpp",
     "src/avcall_meta_data.cpp",
     "src/avcall_state.cpp",
     "src/avcast_control_command.cpp",
@@ -53,6 +56,7 @@ ohos_shared_library("avsession_common") {
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image_native",
+    "ipc:ipc_core",
   ]
 
   subsystem_name = "multimedia"

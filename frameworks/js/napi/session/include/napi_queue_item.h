@@ -29,6 +29,8 @@ public:
     using GetterType = std::function<napi_status(napi_env, napi_value in, AVQueueItem& out)>;
     using SetterType = std::function<napi_status(napi_env env, const AVQueueItem& in, napi_value& out)>;
 
+    static napi_status GetDataSrc(napi_env env, const napi_value in, napi_value* fileSize, napi_value* callback);
+
 private:
     static napi_status GetItemId(napi_env env, napi_value in, AVQueueItem& out);
     static napi_status SetItemId(napi_env env, const AVQueueItem& in, napi_value& out);

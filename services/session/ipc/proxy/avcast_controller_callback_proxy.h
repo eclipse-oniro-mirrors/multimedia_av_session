@@ -18,6 +18,7 @@
 
 #include "iavcast_controller_callback.h"
 #include "iremote_proxy.h"
+#include "av_shared_memory_helper.h"
 
 namespace OHOS::AVSession {
 class AVCastControllerCallbackProxy : public IRemoteProxy<IAVCastControllerCallback> {
@@ -45,6 +46,8 @@ public:
     void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
 
     void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) override;
+
+    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos) override;
 
 private:
     static inline BrokerDelegator<AVCastControllerCallbackProxy> delegator_;

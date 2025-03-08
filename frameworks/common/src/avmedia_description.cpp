@@ -39,7 +39,8 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteString(appName_) &&
         parcel.WriteParcelable(icon_.get()) &&
         parcel.WriteParcelable(extras_.get()) &&
-        parcel.WriteString(drmScheme_);
+        parcel.WriteString(drmScheme_) &&
+        dataSrc_.WriteToParcel(parcel);
 }
 
 AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
@@ -73,6 +74,7 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
         SLOGD("read AVMediaDescription - extras null");
     }
     data.ReadString(result->drmScheme_);
+    result->dataSrc_.ReadFromParcel(data);
     return result;
 }
 
@@ -290,6 +292,16 @@ bool AVMediaDescription::IsValid() const
     return !(mediaId_.empty());
 }
 
+void AVMediaDescription::SetDataSrc(const AVDataSrcDescriptor& dataSrc)
+{
+    dataSrc_ = dataSrc;
+}
+
+AVDataSrcDescriptor AVMediaDescription::GetDataSrc() const
+{
+    return dataSrc_;
+}
+
 void AVMediaDescription::Reset()
 {
     mediaId_ = "";
@@ -314,5 +326,7 @@ void AVMediaDescription::Reset()
     creditsPosition_ = 0;
     appName_ = "";
     drmScheme_ = "";
+    AVDataSrcDescriptor dataSrc;
+    dataSrc_ = dataSrc;
 }
 } // namespace OHOS::AVSession

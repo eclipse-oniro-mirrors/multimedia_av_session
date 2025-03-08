@@ -204,6 +204,10 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
         int napiErr = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
         CheckStartReportRadar((argc == ARGC_ONE), ERR_INVALID_PARAM);
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments", napiErr);
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->callback_ != nullptr) {
+            napiCastController->callback_->saveDataSrc(env, argv[ARGV_FIRST]);
+        }
 
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->avQueueItem_);
         CheckStartReportRadar((context->status == napi_ok), ERR_INVALID_PARAM);
@@ -302,6 +306,10 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->callback_ != nullptr) {
+            napiCastController->callback_->saveDataSrc(env, argv[ARGV_FIRST]);
+        }
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->avQueueItem_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get play queue item failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);

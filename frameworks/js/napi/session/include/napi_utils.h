@@ -37,6 +37,7 @@
 #include "av_file_descriptor.h"
 #include "avqueue_info.h"
 #include "avsession_controller.h"
+#include "av_data_src_descriptor.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -226,6 +227,10 @@ public:
     
     /* napi_value <-> NapiAVCastPickerOptions */
     static napi_status GetValue(napi_env env, napi_value in, NapiAVCastPickerOptions& out);
+
+    /* napi_value <-> AVDataSrcDescriptor */
+    static napi_status GetValue(napi_env env, napi_value in, AVDataSrcDescriptor& out);
+    static napi_status SetValue(napi_env env, const AVDataSrcDescriptor& in, napi_value& out);
 
     /* napi_get_named_property wrapper */
     template <typename T>

@@ -24,6 +24,10 @@
 #include "bundle_status_adapter.h"
 #include "avsession_event_handler.h"
 #include "avsession_utils.h"
+#include "cast_engine_common.h"
+#include "cast_shared_memory_base.h"
+#include "securec.h"
+
 #include <string>
 
 namespace OHOS::AVSession {
@@ -205,6 +209,14 @@ void AVCastControllerItem::OnValidCommandChange(const std::vector<int32_t>& cmds
     HandleCastValidCommandChange(cmds);
 }
 
+int32_t AVCastControllerItem::onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos)
+{
+    if (callback_ != nullptr) {
+        return callback_->onDataSrcRead(mem, length, pos);
+    }
+    return 0;
+}
+
 int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd)
 {
     SLOGI("Call SendControlCommand of cast controller proxy");
@@ -229,6 +241,7 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     AVSessionRadarInfo info("AVCastControllerItem::Start");
+    SetQueueItemDataSrc(avQueueItem);
     int32_t ret = castControllerProxy_->Start(avQueueItem);
     std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "start failed";
     std::string mediaIcon = "false";
@@ -304,6 +317,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     SLOGI("Call prepare of cast controller proxy");
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    SetQueueItemDataSrc(avQueueItem);
     auto ret = castControllerProxy_->Prepare(avQueueItem);
     if (avQueueItem.GetDescription() != nullptr && (avQueueItem.GetDescription()->GetIcon() != nullptr &&
         avQueueItem.GetDescription()->GetIconUri() == "URI_CACHE")) {
@@ -319,6 +333,31 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     ReportPrepare(ret, avQueueItem);
     preparecallback_();
     return AVSESSION_SUCCESS;
+}
+
+void AVCastControllerItem::SetQueueItemDataSrc(const AVQueueItem& avQueueItem)
+{
+    if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetDataSrc().hasCallback) {
+        AVDataSrcDescriptor dataSrc = avQueueItem.GetDescription()->GetDataSrc();
+        AVDataSrcDescriptor dataSrcNew;
+        dataSrcNew.hasCallback = dataSrc.hasCallback;
+        dataSrcNew.fileSize = dataSrc.fileSize;
+        dataSrcNew.callback_ =
+            [this](void* ptr, uint32_t length, int64_t pos) -> int32_t {
+                CastEngine::CastSharedMemoryBase* memPtr = static_cast<CastEngine::CastSharedMemoryBase*>(ptr);
+                SLOGE("called dataSrc callback mem size %{public}d", memPtr->GetSize());
+                std::shared_ptr<AVSharedMemory> mem = AVSharedMemoryBase::CreateFromLocal(memPtr->GetSize(),
+                    memPtr->GetFlags(), memPtr->GetName());
+                int32_t readSize = onDataSrcRead(mem, length, pos);
+                errno_t rc = memcpy_s(memPtr->GetBase(), static_cast<size_t>(mem->GetSize()), mem->GetBase(),
+                    static_cast<size_t>(readSize));
+                if (rc != EOK) {
+                    SLOGE("ReadAt error");
+                }
+                return readSize;
+            };
+        avQueueItem.GetDescription()->SetDataSrc(dataSrcNew);
+    }
 }
 
 int32_t AVCastControllerItem::GetDuration(int32_t& duration)

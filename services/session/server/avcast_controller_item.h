@@ -20,6 +20,7 @@
 #include "avcast_controller_callback_proxy.h"
 #include "avcast_controller_stub.h"
 #include "avcast_control_command.h"
+#include "av_shared_memory_base.h"
 
 namespace OHOS::AVSession {
 class AVCastControllerItem : public AVCastControllerStub, public IAVCastControllerProxyListener,
@@ -54,6 +55,8 @@ public:
     void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override;
 
     void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
+
+    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos) override;
 
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
@@ -92,6 +95,8 @@ public:
     int32_t Destroy() override;
 
     void SetSessionCallbackForCastCap(const std::function<void(std::string, bool, bool)>& callback);
+
+    void SetQueueItemDataSrc(const AVQueueItem& avQueueItem);
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;

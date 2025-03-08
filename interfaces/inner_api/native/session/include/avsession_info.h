@@ -28,6 +28,8 @@
 #include "avsession_descriptor.h"
 #include "key_event.h"
 #include "want_params.h"
+#include "av_shared_memory.h"
+
 /**
  * @brief Listening events for the creation and destruction of sessions
  *     and the latest session changes.
@@ -134,6 +136,8 @@ public:
     virtual void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) = 0;
 
     virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
+
+    virtual int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos) {return 0;};
 
     /**
      * @brief Deconstruct SessionListener.
@@ -436,6 +440,8 @@ public:
     virtual void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) = 0;
 
     virtual void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) = 0;
+
+    virtual int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos) {return 0;};
 
     /**
      * @brief Deconstruct AVControllerCallback.

@@ -19,6 +19,7 @@
 #include <map>
 #include "iavcast_controller_callback.h"
 #include "iremote_stub.h"
+#include "av_shared_memory_helper.h"
 
 namespace OHOS::AVSession {
 class AVCastControllerCallbackStub : public IRemoteStub<IAVCastControllerCallback> {
@@ -49,6 +50,8 @@ private:
 
     int32_t HandleOnCastValidCommandChanged(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleOnDataSrcRead(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
@@ -74,7 +77,9 @@ private:
         {CAST_CONTROLLER_CMD_ON_KEY_REQUEST,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleOnKeyRequest(data, reply); }},
         {CAST_CONTROLLER_CMD_ON_VALID_COMMAND_CHANGED,
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnCastValidCommandChanged(data, reply); }}
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnCastValidCommandChanged(data, reply); }},
+        {CAST_CONTROLLER_CMD_ON_DATA_SRC_READ,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleOnDataSrcRead(data, reply); }}
     };
 };
 }
