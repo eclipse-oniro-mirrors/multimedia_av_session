@@ -102,7 +102,6 @@ public:
     int32_t SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc);
     AudioDeviceDescriptorWithSptr FindRenderDeviceForUsage(const AudioDeviceDescriptorsWithSptr& devices,
         const AudioDeviceDescriptorWithSptr& desc);
-    std::function<bool(int32_t, int32_t)> GetAllowedPlaybackCallbackFunc();
 private:
     static std::shared_ptr<AudioAdapter> instance_;
     static std::once_flag onceFlag_;
@@ -124,7 +123,6 @@ private:
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
     bool is2in1_ {false};
 
-    std::function<bool(int32_t, int32_t)> queryAllowedPlaybackCallbackFunc_;
     std::shared_ptr<AudioAllowedPlaybackCallback> playbackCallback_;
 };
 
