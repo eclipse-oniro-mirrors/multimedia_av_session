@@ -582,7 +582,7 @@ napi_value NapiAVCastController::GetSupportedPlaySpeeds(napi_env env, napi_callb
             context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
             return;
         }
-        int32_t ret = napiCastController->castController_->GetSupportedHdrCapabilities(context->playSpeeds);
+        int32_t ret = napiCastController->castController_->GetSupportedPlaySpeeds(context->playSpeeds);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "GetSupportedPlaySpeeds failed : native session not exist";

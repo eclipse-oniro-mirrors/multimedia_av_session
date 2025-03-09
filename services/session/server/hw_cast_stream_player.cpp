@@ -409,7 +409,7 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
         for (auto speed : value[speedStr_]) {
             CHECK_AND_CONTINUE(speed.is_number());
             float num = speed;
-            SLOGI("support play spped is %{public}f", num);
+            SLOGI("support play speed is %{public}f", num);
             jsonCapabilitiesSptr_->playSpeeds_.emplace_back(speed);
         }
     } else {
