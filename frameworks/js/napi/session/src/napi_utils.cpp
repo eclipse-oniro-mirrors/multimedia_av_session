@@ -1868,6 +1868,41 @@ napi_status NapiUtils::SetValue(
     return status;
 }
 
+/* napi_value -> AVDataSrcDescriptor */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVDataSrcDescriptor& out)
+{
+    napi_value value {};
+    auto status = napi_ok;
+    bool hasFileSize = false;
+    status = napi_has_named_property(env, in, "fileSize", &hasFileSize);
+    CHECK_RETURN(status == napi_ok && hasFileSize, "get fileSize failed!", status);
+    status = napi_get_named_property(env, in, "fileSize", &value);
+    CHECK_RETURN(status == napi_ok, "get fileSize failed", status);
+    status = GetValue(env, value, out.fileSize);
+    CHECK_RETURN(status == napi_ok, "get fileSize value failed", status);
+
+    bool hasCallback = false;
+    status = napi_has_named_property(env, in, "callback", &hasCallback);
+    CHECK_RETURN(status == napi_ok && hasCallback, "get callback failed!", status);
+    out.hasCallback = hasCallback;
+
+    return napi_ok;
+}
+
+/* napi_value <- AVDataSrcDescriptor */
+napi_status NapiUtils::SetValue(napi_env env, const AVDataSrcDescriptor& in, napi_value& out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
+
+    napi_value property = nullptr;
+    status = SetValue(env, in.fileSize, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "fileSize", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    return napi_ok;
+}
+
 napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t napiCode)
 {
     napi_value message = nullptr;

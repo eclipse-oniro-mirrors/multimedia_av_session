@@ -138,6 +138,10 @@ private:
     static void CheckStartReportRadar(bool condition, int32_t error);
     static int32_t DownloadCastImg(std::shared_ptr<AVMediaDescription> description, const std::string& uri);
 
+    static napi_status getDataSrc(napi_env env, napi_value avQueueItem,
+        std::shared_ptr<NapiAVCastControllerCallback> controllerCallback);
+    static napi_value readDataSrc(napi_env env, napi_value fileSize, napi_ref callback);
+
     napi_ref wrapperRef_ {};
     std::shared_ptr<AVCastController> castController_;
     std::shared_ptr<NapiAVCastControllerCallback> callback_;

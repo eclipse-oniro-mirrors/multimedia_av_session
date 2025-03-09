@@ -15,6 +15,7 @@
 
 #include "avcast_controller_callback_proxy.h"
 #include "avsession_log.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 AVCastControllerCallbackProxy::AVCastControllerCallbackProxy(const sptr<IRemoteObject>& impl)
@@ -204,5 +205,26 @@ void AVCastControllerCallbackProxy::OnCastValidCommandChanged(const std::vector<
     CHECK_AND_RETURN_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_VALID_COMMAND_CHANGED, parcel, reply, option) == 0,
         "send request failed");
     SLOGI("OnCastValidCommandChanged in proxy done");
+}
+
+int32_t AVCastControllerCallbackProxy::onDataSrcRead(std::shared_ptr<AVSharedMemory> mem,
+    uint32_t length, int64_t pos)
+{
+    SLOGI("OnDataSrcRead in proxy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), 0, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(WriteAVSharedMemoryToParcel(mem, parcel) == AVSESSION_SUCCESS, 0, "write mem failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(length), 0, "Write length failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt64(pos), 0, "Write pos failed");
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, 0, "get remote service failed");
+    SLOGI("OnDataSrcRead in proxy to send request");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_ON_DATA_SRC_READ, parcel, reply, option) == 0,
+        0, "send request failed");
+    SLOGI("OnDataSrcRead in proxy done");
+    return reply.ReadInt32();
 }
 } // namespace OHOS::AVSession

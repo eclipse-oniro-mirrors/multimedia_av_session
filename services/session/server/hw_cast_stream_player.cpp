@@ -201,6 +201,19 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
+
+    AVDataSrcDescriptor dataSrc = mediaDescription->GetDataSrc();
+    SLOGI("has dataSrc hasCallback %{public}d", dataSrc.hasCallback);
+    if (dataSrc.hasCallback) {
+        if (castDataSrc_ == nullptr) {
+            castDataSrc_ = std::make_shared<AVSession::HwCastDataSourceDescriptor>();
+        }
+        castDataSrc_->SetCallback(dataSrc.callback_);
+        castDataSrc_->SetSize(dataSrc.fileSize);
+        mediaInfo.mediaUrl = "/file";
+        mediaInfo.dataSrc = castDataSrc_;
+    }
+
     std::lock_guard lockGuard(streamPlayerLock_);
     if (!streamPlayer_) {
         SLOGE("Set media info and start failed");
@@ -273,6 +286,19 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
+
+    AVDataSrcDescriptor dataSrc = mediaDescription->GetDataSrc();
+    SLOGI("has dataSrc hasCallback %{public}d", dataSrc.hasCallback);
+    if (dataSrc.hasCallback) {
+        if (castDataSrc_ == nullptr) {
+            castDataSrc_ = std::make_shared<AVSession::HwCastDataSourceDescriptor>();
+        }
+        castDataSrc_->SetCallback(dataSrc.callback_);
+        castDataSrc_->SetSize(dataSrc.fileSize);
+        mediaInfo.mediaUrl = "/file";
+        mediaInfo.dataSrc = castDataSrc_;
+    }
+
     std::lock_guard lockGuard(streamPlayerLock_);
     SLOGI("pass playerlock, check item lock, mediaInfo mediaUrl and albumCoverUrl");
     if (streamPlayer_ && streamPlayer_->Load(mediaInfo) == AVSESSION_SUCCESS) {

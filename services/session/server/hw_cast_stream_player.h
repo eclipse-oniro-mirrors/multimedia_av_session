@@ -24,6 +24,7 @@
 #include "i_stream_player.h"
 #include "i_avcast_controller_proxy.h"
 #include "avsession_pixel_map_adapter.h"
+#include "hw_cast_data_source_descriptor.h"
 
 namespace OHOS::AVSession {
 struct JsonCapabilities {
@@ -108,6 +109,7 @@ private:
     std::recursive_mutex streamPlayerListenerListLock_;
     std::vector<std::shared_ptr<IAVCastControllerProxyListener>> streamPlayerListenerList_;
     AVQueueItem currentAVQueueItem_;
+    std::shared_ptr<HwCastDataSourceDescriptor> castDataSrc_ = nullptr;
     std::map<CastEngine::PlayerStates, int32_t> castPlusStateToString_ = {
         {CastEngine::PlayerStates::PLAYER_STATE_ERROR, AVPlaybackState::PLAYBACK_STATE_ERROR},
         {CastEngine::PlayerStates::PLAYER_IDLE, AVPlaybackState::PLAYBACK_STATE_INITIAL},

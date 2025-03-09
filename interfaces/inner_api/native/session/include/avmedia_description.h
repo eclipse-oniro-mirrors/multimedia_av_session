@@ -25,6 +25,7 @@
 #include "avsession_pixel_map.h"
 #include "want_params.h"
 #include "av_file_descriptor.h"
+#include "av_data_src_descriptor.h"
 
 namespace OHOS::AVSession {
 class AVMediaDescription : public Parcelable {
@@ -51,7 +52,8 @@ public:
         MEDIA_DESCRIPTION_KEY_CREDITS_POSITION = 18,
         MEDIA_DESCRIPTION_KEY_APP_NAME = 19,
         MEDIA_DESCRIPTION_KEY_DRM_SCHEME = 20,
-        MEDIA_DESCRIPTION_KEY_MAX = 21,
+        MEDIA_DESCRIPTION_KEY_DATA_SRC = 21,
+        MEDIA_DESCRIPTION_KEY_MAX = 22,
     };
 
     AVMediaDescription() = default;
@@ -124,6 +126,9 @@ public:
     void SetDrmScheme(const std::string& drmScheme);
     std::string GetDrmScheme() const;
 
+    void SetDataSrc(const AVDataSrcDescriptor& fdSrc);
+    AVDataSrcDescriptor GetDataSrc() const;
+
     bool IsValid() const;
 
     void Reset();
@@ -150,6 +155,7 @@ private:
     int32_t creditsPosition_ = 0;
     std::string appName_ = "";
     std::string drmScheme_ = "";
+    AVDataSrcDescriptor dataSrc_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVMEDIA_DESCRIPTION_H

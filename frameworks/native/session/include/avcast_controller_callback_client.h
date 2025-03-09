@@ -47,6 +47,8 @@ public:
 
     void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override;
 
+    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos) override;
+
     void AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 
 private:

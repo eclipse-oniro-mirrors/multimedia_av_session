@@ -145,4 +145,15 @@ int32_t AVCastControllerCallbackStub::HandleOnCastValidCommandChanged(MessagePar
     OnCastValidCommandChanged(cmds);
     return ERR_NONE;
 }
+
+int32_t AVCastControllerCallbackStub::HandleOnDataSrcRead(MessageParcel& data, MessageParcel& reply)
+{
+    std::shared_ptr<AVSharedMemory> mem = ReadAVSharedMemoryFromParcel(data);
+    uint32_t length = static_cast<uint32_t>(data.ReadInt32());
+    int64_t pos;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt64(pos), ERR_NONE, "read pos failed");
+    int32_t result = onDataSrcRead(mem, length, pos);
+    reply.WriteInt32(result);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession
