@@ -141,7 +141,7 @@ public:
      * @return { int32_t } Whether the operation was successful.
      * @since 18
     */
-    virtual int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel) = 0;
+    virtual int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) = 0;
 
     /**
      * @brief Obtain the hdrFormats of the current media.

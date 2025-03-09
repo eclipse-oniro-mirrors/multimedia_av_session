@@ -361,7 +361,7 @@ int32_t AVCastControllerItem::GetSupportedDecoders(std::vector<std::string>& dec
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVCastControllerItem::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel)
+int32_t AVCastControllerItem::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel)
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,

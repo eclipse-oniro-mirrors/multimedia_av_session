@@ -423,20 +423,20 @@ int32_t HwCastStreamPlayer::GetSupportedDecoders(std::vector<std::string>& decod
 {
     SLOGI("enter GetSupportedDecoders");
     std::lock_guard lockGuard(streamPlayerLock_);
-    CHECK_AND_RETURN_RET_LOG(!jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
     decoderTypes = jsonCapabilitiesSptr_->decoderTypes_;
     return AVSESSION_SUCCESS;
 }
 
-int32_t HwCastStreamPlayer::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel)
+int32_t HwCastStreamPlayer::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel)
 {
     SLOGI("enter GetRecommendedResolutionLevel");
     std::lock_guard lockGuard(streamPlayerLock_);
-    CHECK_AND_RETURN_RET_LOG(!jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
     for (auto& map: jsonCapabilitiesSptr_->decoderSupportResolutions_) {
         auto it = map.find(decoderType);
         if (it != map.end()) {
-            SLOGI("find %{public}s map to %{public}d", decoderType.c_str(), static_cast<int32_t>(resolutionLevel));
+            SLOGI("find %{public}s map to %{public}d", decoderType.c_str(), static_cast<int32_t>(it->second));
             resolutionLevel = it->second;
         } else {
             SLOGI("no find %{public}s map to resolutionLevel", decoderType.c_str());
@@ -450,7 +450,7 @@ int32_t HwCastStreamPlayer::GetSupportedHdrCapabilities(std::vector<HDRFormat>& 
 {
     SLOGI("enter GetSupportedHdrCapabilities");
     std::lock_guard lockGuard(streamPlayerLock_);
-    CHECK_AND_RETURN_RET_LOG(!jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
     hdrFormats = jsonCapabilitiesSptr_->hdrFormats_;
     return AVSESSION_SUCCESS;
 }
@@ -459,7 +459,7 @@ int32_t HwCastStreamPlayer::GetSupportedPlaySpeeds(std::vector<float>& playSpeed
 {
     SLOGI("enter GetSupportedDecoders");
     std::lock_guard lockGuard(streamPlayerLock_);
-    CHECK_AND_RETURN_RET_LOG(!jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
     playSpeeds = jsonCapabilitiesSptr_->playSpeeds_;
     return AVSESSION_SUCCESS;
 }

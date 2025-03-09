@@ -48,7 +48,7 @@ public:
     int32_t GetDuration(int32_t &duration) override;
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
     int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override;
-    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel) override;
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) override;
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override;
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override;
     int32_t SetDisplaySurface(std::string &surfaceId) override;

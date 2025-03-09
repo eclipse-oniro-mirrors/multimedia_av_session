@@ -44,7 +44,7 @@ public:
 
     int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override;
 
-    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel) override;
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) override;
 
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override;
 

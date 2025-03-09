@@ -1052,7 +1052,8 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<ResolutionLevel>
     for (const auto& item : in) {
         napi_value entry = nullptr;
         SetValue(env, item, entry);
-        napi_set_element(env, out, index++, entry);
+        status = napi_set_element(env, out, index++, entry);
+        CHECK_RETURN(status == napi_ok, "napi_set_element failed", status);
     }
     return status;
 }
@@ -1067,7 +1068,8 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<HDRFormat>& in, 
     for (const auto& item : in) {
         napi_value entry = nullptr;
         SetValue(env, item, entry);
-        napi_set_element(env, out, index++, entry);
+        status = napi_set_element(env, out, index++, entry);
+        CHECK_RETURN(status == napi_ok, "napi_set_element failed", status);
     }
     return status;
 }
@@ -1082,7 +1084,8 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<float>& in, napi
     for (const auto& item : in) {
         napi_value entry = nullptr;
         SetValue(env, item, entry);
-        napi_set_element(env, out, index++, entry);
+        status = napi_set_element(env, out, index++, entry);
+        CHECK_RETURN(status == napi_ok, "napi_set_element failed", status);
     }
     return status;
 }

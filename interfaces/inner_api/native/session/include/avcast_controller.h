@@ -61,7 +61,7 @@ public:
 
     virtual int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) = 0;
 
-    virtual int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel) = 0;
+    virtual int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) = 0;
 
     virtual int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) = 0;
 

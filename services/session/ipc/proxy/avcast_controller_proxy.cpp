@@ -171,7 +171,7 @@ int32_t AVCastControllerProxy::GetSupportedDecoders(std::vector<std::string>& de
     return ret;
 }
 
-int32_t AVCastControllerProxy::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel resolutionLevel)
+int32_t AVCastControllerProxy::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel)
 {
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
