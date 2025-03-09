@@ -65,6 +65,14 @@ public:
 
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
 
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override;
+
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) override;
+
+    int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override;
+
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override;
+
     int32_t GetCurrentItem(AVQueueItem& currentItem) override;
 
     int32_t GetValidCommands(std::vector<int32_t>& cmds) override;

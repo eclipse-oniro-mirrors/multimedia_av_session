@@ -59,6 +59,14 @@ public:
 
     virtual int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) = 0;
 
+    virtual int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) = 0;
+
+    virtual int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) = 0;
+
+    virtual int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) = 0;
+
+    virtual int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) = 0;
+
     virtual int32_t GetCurrentItem(AVQueueItem& currentItem) = 0;
 
     virtual int32_t GetValidCommands(std::vector<int32_t>& cmds) = 0;

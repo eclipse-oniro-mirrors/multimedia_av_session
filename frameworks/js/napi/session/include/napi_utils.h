@@ -195,6 +195,15 @@ public:
     /* napi_value <-> std::vector<AVQueueInfo> */
     static napi_status SetValue(napi_env env, const std::vector<AVQueueInfo>& in, napi_value& out);
 
+    /* napi_value <-> std::vector<ResolutionLevel> */
+    static napi_status SetValue(napi_env env, const std::vector<ResolutionLevel>& in, napi_value& out);
+
+    /* napi_value <-> std::vector<HDRFormat> */
+    static napi_status SetValue(napi_env env, const std::vector<HDRFormat>& in, napi_value& out);
+
+    /* napi_value <-> std::vector<float> */
+    static napi_status SetValue(napi_env env, const std::vector<float>& in, napi_value& out);
+
     /* OutputDeviceInfo <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, OutputDeviceInfo& out);
     static napi_status SetValue(napi_env env, const OutputDeviceInfo& in, napi_value& out);

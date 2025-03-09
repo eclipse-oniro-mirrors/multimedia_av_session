@@ -343,6 +343,135 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
     return AVSESSION_SUCCESS;
 }
 
+void HwCastStreamPlayer::GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue)
+{
+    if (videoValue.contains(decodeTypeStr_)) {
+        for (auto decodeType : videoValue[decodeTypeStr_]) {
+            CHECK_AND_CONTINUE(decodeType.is_string());
+            std::string str = decodeType;
+            SLOGI("get %{public}s is %{public}s", decodeTypeStr_.c_str(), str.c_str());
+            jsonCapabilitiesSptr_->decoderTypes_.emplace_back(decodeType);
+        }
+    }
+    if (videoValue.contains(decodeSupportResolutionStr_)) {
+        if (videoValue[decodeSupportResolutionStr_].contains(decodeOfVideoHevcStr_)) {
+            ResolutionLevel resolutionLevel = videoValue[decodeSupportResolutionStr_][decodeOfVideoHevcStr_];
+            std::map<std::string, ResolutionLevel> decodeToResolution = {{decodeOfVideoHevcStr_, resolutionLevel}};
+            jsonCapabilitiesSptr_->decoderSupportResolutions_.emplace_back(decodeToResolution);
+        }
+        if (videoValue[decodeSupportResolutionStr_].contains(decodeOfVideoAvcStr_)) {
+            ResolutionLevel resolutionLevel = videoValue[decodeSupportResolutionStr_][decodeOfVideoAvcStr_];
+            std::map<std::string, ResolutionLevel> decodeToResolution = {{decodeOfVideoAvcStr_, resolutionLevel}};
+            jsonCapabilitiesSptr_->decoderSupportResolutions_.emplace_back(decodeToResolution);
+        }
+    } else {
+        SLOGI("%{public}s of %{public}s no contains", videoStr_.c_str(), decodeSupportResolutionStr_.c_str());
+    }
+    if (videoValue.contains(hdrFormatStr_)) {
+        for (auto hdrFormat: videoValue[hdrFormatStr_]) {
+            CHECK_AND_CONTINUE(hdrFormat.is_number());
+            int num = hdrFormat;
+            SLOGI("get %{public}s is %{public}d", hdrFormatStr_.c_str(), num);
+            jsonCapabilitiesSptr_->hdrFormats_.emplace_back(hdrFormat);
+        }
+    } else {
+        SLOGI("%{public}s of %{public}s no contains", videoStr_.c_str(), hdrFormatStr_.c_str());
+    }
+}
+
+void HwCastStreamPlayer::GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue)
+{
+    if (audioValue.contains(decodeTypeStr_)) {
+        CHECK_AND_BREAK(audioValue[decodeTypeStr_].is_string());
+        std::string str = audioValue[decodeTypeStr_];
+        SLOGI("%{public}s of %{public}s", decodeTypeStr_.c_str(), str.c_str());
+        jsonCapabilitiesSptr_->decoderTypes_.emplace_back(audioValue[decodeTypeStr_]);
+    }
+}
+
+int32_t HwCastStreamPlayer::GetMediaCapabilities()
+{
+    SLOGI("GetMediaCapabilities begin");
+    std::lock_guard lockGuard(streamPlayerLock_);
+    CHECK_AND_RETURN_RET_LOG(streamPlayer_, AVSESSION_ERROR, "streamPlayer_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    std::string supportCapabilities;
+    streamPlayer_->GetMediaCapabilities(supportCapabilities);
+    nlohmann::json value = nlohmann::json::parse(supportCapabilities);
+    CHECK_AND_RETURN_RET_LOG(!value.is_null() && !value.is_discarded(), AVSESSION_ERROR, "GetMediaCapabilities fail");
+    if (value.contains(videoStr_)) {
+        GetMediaCapabilitiesOfVideo(value[videoStr_]);
+    } else if (value.contains(audioStr_)) {
+        GetMediaCapabilitiesOfAudio(value[audioStr_]);
+    }
+    if (value.contains(speedStr_)) {
+        for (auto speed : value[speedStr_]) {
+            CHECK_AND_CONTINUE(speed.is_number());
+            float num = speed;
+            SLOGI("support play speed is %{public}f", num);
+            jsonCapabilitiesSptr_->playSpeeds_.emplace_back(speed);
+        }
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t HwCastStreamPlayer::GetSupportedDecoders(std::vector<std::string>& decoderTypes)
+{
+    SLOGI("enter GetSupportedDecoders");
+    std::lock_guard lockGuard(streamPlayerLock_);
+    CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    if (jsonCapabilitiesSptr_->decoderTypes_.empty()) {
+        GetMediaCapabilities();
+    }
+    decoderTypes = jsonCapabilitiesSptr_->decoderTypes_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t HwCastStreamPlayer::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel)
+{
+    SLOGI("enter GetRecommendedResolutionLevel");
+    std::lock_guard lockGuard(streamPlayerLock_);
+    CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    if (jsonCapabilitiesSptr_->decoderSupportResolutions_.empty()) {
+        GetMediaCapabilities();
+    }
+    for (auto& map: jsonCapabilitiesSptr_->decoderSupportResolutions_) {
+        auto it = map.find(decoderType);
+        if (it != map.end()) {
+            SLOGI("find %{public}s map to %{public}d", decoderType.c_str(), static_cast<int32_t>(it->second));
+            resolutionLevel = it->second;
+        } else {
+            SLOGI("no find %{public}s map to resolutionLevel", decoderType.c_str());
+            return  AVSESSION_ERROR;
+        }
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t HwCastStreamPlayer::GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats)
+{
+    SLOGI("enter GetSupportedHdrCapabilities");
+    std::lock_guard lockGuard(streamPlayerLock_);
+    CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    if (jsonCapabilitiesSptr_->hdrFormats_.empty()) {
+        GetMediaCapabilities();
+    }
+    hdrFormats = jsonCapabilitiesSptr_->hdrFormats_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t HwCastStreamPlayer::GetSupportedPlaySpeeds(std::vector<float>& playSpeeds)
+{
+    SLOGI("enter GetSupportedDecoders");
+    std::lock_guard lockGuard(streamPlayerLock_);
+    CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    if (jsonCapabilitiesSptr_->playSpeeds_.empty()) {
+        GetMediaCapabilities();
+    }
+    playSpeeds = jsonCapabilitiesSptr_->playSpeeds_;
+    return AVSESSION_SUCCESS;
+}
+
 int32_t HwCastStreamPlayer::SetDisplaySurface(std::string &surfaceId)
 {
     SLOGI("SetDisplaySurface begin");

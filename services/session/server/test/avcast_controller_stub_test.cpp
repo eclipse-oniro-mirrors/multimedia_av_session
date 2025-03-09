@@ -115,6 +115,18 @@ public:
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override
         { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; }
 
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override
+        { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; }
+
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) override
+        { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; }
+
+    int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override
+        { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; }
+
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override
+        { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; }
+
     int32_t GetCurrentItem(AVQueueItem& currentItem) override
         { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; }
 

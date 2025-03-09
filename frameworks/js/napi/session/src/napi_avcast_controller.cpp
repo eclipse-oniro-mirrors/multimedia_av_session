@@ -81,6 +81,10 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
         DECLARE_NAPI_FUNCTION("getDuration", GetDuration),
         DECLARE_NAPI_FUNCTION("getAVPlaybackState", GetCastAVPlaybackState),
+        DECLARE_NAPI_FUNCTION("getSupportedDecoders", GetSupportedDecoders),
+        DECLARE_NAPI_FUNCTION("getRecommendedResolutionLevel", GetRecommendedResolutionLevel),
+        DECLARE_NAPI_FUNCTION("getSupportedHdrCapabilities", GetSupportedHdrCapabilities),
+        DECLARE_NAPI_FUNCTION("getSupportedPlaySpeeds", GetSupportedPlaySpeeds),
         DECLARE_NAPI_FUNCTION("getCurrentItem", GetCurrentItem),
         DECLARE_NAPI_FUNCTION("getValidCommands", GetValidCommands),
         DECLARE_NAPI_FUNCTION("release", Release),
@@ -422,6 +426,188 @@ napi_value NapiAVCastController::GetCastAVPlaybackState(napi_env env, napi_callb
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetCastAVPlaybackState", executor, complete);
+}
+
+napi_value NapiAVCastController::GetSupportedDecoders(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<std::string> decoderTypes;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROL_GET_SUPPORT_DECODER_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetSupportedDecoders failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetSupportedDecoders failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetSupportedDecoders(context->decoderTypes);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetSupportedDecoders failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetSupportedDecoders failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetSupportedDecoders failed : native no permission";
+            } else {
+                context->errMessage = "GetSupportedDecoders failed : native server exception";
+            }
+            SLOGE("controller GetSupportedDecoders failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->decoderTypes, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetSupportedDecoders", executor, complete);
+}
+
+napi_value NapiAVCastController::GetRecommendedResolutionLevel(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::string decoderType;
+        ResolutionLevel resolutionLevel;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->decoderType);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_CAST_CONTROL_GET_RECOMMEND_RESOLUTION_LEVEL_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetRecommendedResolutionLevel failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetRecommendedResolutionLevel failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetRecommendedResolutionLevel(
+            context->decoderType, context->resolutionLevel);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetRecommendedResolutionLevel failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetRecommendedResolutionLevel failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetRecommendedResolutionLevel failed : native no permission";
+            } else {
+                context->errMessage = "GetRecommendedResolutionLevel failed : native server exception";
+            }
+            SLOGE("controller GetRecommendedResolutionLevel failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->resolutionLevel, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetRecommendedResolutionLevel", executor, complete);
+}
+
+napi_value NapiAVCastController::GetSupportedHdrCapabilities(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<HDRFormat> hdrFormats;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROL_GET_SUPPORT_HDR_CAPABILITIES_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetSupportedHdrCapabilities failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetSupportedHdrCapabilities failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetSupportedHdrCapabilities(context->hdrFormats);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetSupportedHdrCapabilities failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetSupportedHdrCapabilities failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetSupportedHdrCapabilities failed : native no permission";
+            } else {
+                context->errMessage = "GetSupportedHdrCapabilities failed : native server exception";
+            }
+            SLOGE("controller GetSupportedHdrCapabilities failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->hdrFormats, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetSupportedHdrCapabilities", executor, complete);
+}
+
+napi_value NapiAVCastController::GetSupportedPlaySpeeds(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<float> playSpeeds;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_CONTROL_GET_SUPPORT_PLAY_SPEED_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("GetSupportedPlaySpeeds failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetSupportedPlaySpeeds failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiCastController->castController_->GetSupportedPlaySpeeds(context->playSpeeds);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "GetSupportedPlaySpeeds failed : native session not exist";
+            } else if (ret == ERR_CONTROLLER_NOT_EXIST) {
+                context->errMessage = "GetSupportedPlaySpeeds failed : native controller not exist";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetSupportedPlaySpeeds failed : native no permission";
+            } else {
+                context->errMessage = "GetSupportedPlaySpeeds failed : native server exception";
+            }
+            SLOGE("controller GetSupportedPlaySpeeds failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->playSpeeds, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetSupportedPlaySpeeds", executor, complete);
 }
 
 napi_value NapiAVCastController::GetCurrentItem(napi_env env, napi_callback_info info)

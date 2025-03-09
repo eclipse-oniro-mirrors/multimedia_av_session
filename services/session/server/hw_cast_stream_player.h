@@ -17,7 +17,7 @@
 #define HW_CAST_STREAM_PLAYER_H
 
 #include <mutex>
-
+#include <nlohmann/json.hpp>
 
 #include "pixel_map.h"
 #include "cast_engine_common.h"
@@ -26,6 +26,13 @@
 #include "avsession_pixel_map_adapter.h"
 
 namespace OHOS::AVSession {
+struct JsonCapabilities {
+    std::vector<std::string> decoderTypes_;
+    std::vector<HDRFormat> hdrFormats_;
+    std::vector<float> playSpeeds_;
+    std::vector<std::map<std::string, ResolutionLevel>> decoderSupportResolutions_;
+};
+
 class HwCastStreamPlayer : public IAVCastControllerProxy, public CastEngine::IStreamPlayerListener,
     public std::enable_shared_from_this<HwCastStreamPlayer> {
 public:
@@ -40,6 +47,10 @@ public:
     int32_t Prepare(const AVQueueItem& avQueueItem) override;
     int32_t GetDuration(int32_t &duration) override;
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override;
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) override;
+    int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override;
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override;
     int32_t SetDisplaySurface(std::string &surfaceId) override;
     int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) override;
     int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>) override;
@@ -75,7 +86,20 @@ private:
         const std::vector<int32_t>& supportedCastCmds, CastEngine::StreamCapability& streamCapability);
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem);
     bool RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription);
+    int32_t GetMediaCapabilities();
+    void GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue);
+    void GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue);
 
+    std::shared_ptr<JsonCapabilities> jsonCapabilitiesSptr_ = std::make_shared<JsonCapabilities>();
+    const std::string videoStr_ = "video";
+    const std::string audioStr_ = "audio";
+    const std::string decodeTypeStr_ = "decodeType";
+    const std::string hdrFormatStr_ = "HDRFormat";
+    const std::string decodeSupportResolutionStr_ = "decodeSupportResolution";
+    const std::string decodeOfVideoHevcStr_ = "video/hevc";
+    const std::string decodeOfVideoAvcStr_ = "video/avc";
+    const std::string decodeOfAudioStr_ = "audio/av3a";
+    const std::string speedStr_ = "speed";
     int32_t castMinTime = 1000;
     std::recursive_mutex streamPlayerLock_;
     std::recursive_mutex curItemLock_;

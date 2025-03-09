@@ -41,6 +41,14 @@ private:
 
     int32_t HandleGetCastAVPlayBackState(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetSupportedDecoders(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetRecommendedResolutionLevel(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetSupportedHdrCapabilities(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetSupportedPlaySpeeds(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetCurrentItem(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetValidCommands(MessageParcel& data, MessageParcel& reply);
@@ -73,6 +81,16 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetDuration(data, reply); }},
         {CAST_CONTROLLER_CMD_GET_CAST_AV_PLAYBACK_STATE,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetCastAVPlayBackState(data, reply); }},
+        {CAST_CONTROLLER_CMD_GET_SUPPORT_DECODER,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSupportedDecoders(data, reply); }},
+        {CAST_CONTROLLER_CMD_GET_RECOMMEND_RESOLUTION_LEVEL,
+            [this](MessageParcel& data, MessageParcel& reply)
+            { return HandleGetRecommendedResolutionLevel(data, reply); }},
+        {CAST_CONTROLLER_CMD_GET_SUPPORT_HDR_CAPABILITIES,
+            [this](MessageParcel& data, MessageParcel& reply)
+            { return HandleGetSupportedHdrCapabilities(data, reply); }},
+        {CAST_CONTROLLER_CMD_GET_SUPPORT_PLAY_SPEED,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSupportedPlaySpeeds(data, reply); }},
         {CAST_CONTROLLER_CMD_GET_CURRENT_ITEM,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetCurrentItem(data, reply); }},
         {CAST_CONTROLLER_CMD_GET_VALID_COMMANDS,
@@ -98,6 +116,10 @@ private:
         {CAST_CONTROLLER_CMD_PREPARE, "HandlePrepare"},
         {CAST_CONTROLLER_CMD_GET_DURATION, "HandleGetDuration"},
         {CAST_CONTROLLER_CMD_GET_CAST_AV_PLAYBACK_STATE, "HandleGetCastAVPlayBackState"},
+        {CAST_CONTROLLER_CMD_GET_SUPPORT_DECODER, "HandleGetSupportedDecoders"},
+        {CAST_CONTROLLER_CMD_GET_RECOMMEND_RESOLUTION_LEVEL, "HandleGetRecommendedResolutionLevel"},
+        {CAST_CONTROLLER_CMD_GET_SUPPORT_HDR_CAPABILITIES, "HandleGetSupportedHdrCapabilities"},
+        {CAST_CONTROLLER_CMD_GET_SUPPORT_PLAY_SPEED, "HandleGetSupportedPlaySpeeds"},
         {CAST_CONTROLLER_CMD_GET_CURRENT_ITEM, "HandleGetCurrentItem"},
         {CAST_CONTROLLER_CMD_GET_VALID_COMMANDS, "HandleGetValidCommands"},
         {CAST_CONTROLLER_CMD_SET_DISPLAY_SURFACE, "HandleSetDisplaySurface"},
