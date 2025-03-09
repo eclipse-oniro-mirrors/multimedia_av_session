@@ -37,7 +37,6 @@ int32_t HwCastStreamPlayer::Init()
     SLOGI("Init the HwCastStreamPlayer");
     std::lock_guard lockGuard(streamPlayerLock_);
     if (streamPlayer_) {
-        GetMediaCapabilities();
         SLOGI("register self in streamPlayer");
         return streamPlayer_->RegisterListener(shared_from_this());
     }
@@ -421,6 +420,9 @@ int32_t HwCastStreamPlayer::GetSupportedDecoders(std::vector<std::string>& decod
     SLOGI("enter GetSupportedDecoders");
     std::lock_guard lockGuard(streamPlayerLock_);
     CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    if (jsonCapabilitiesSptr_->decoderTypes_.empty()) {
+        GetMediaCapabilities();
+    }
     decoderTypes = jsonCapabilitiesSptr_->decoderTypes_;
     return AVSESSION_SUCCESS;
 }
@@ -430,6 +432,9 @@ int32_t HwCastStreamPlayer::GetRecommendedResolutionLevel(std::string& decoderTy
     SLOGI("enter GetRecommendedResolutionLevel");
     std::lock_guard lockGuard(streamPlayerLock_);
     CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    if (jsonCapabilitiesSptr_->decoderSupportResolutions_.empty()) {
+        GetMediaCapabilities();
+    }
     for (auto& map: jsonCapabilitiesSptr_->decoderSupportResolutions_) {
         auto it = map.find(decoderType);
         if (it != map.end()) {
@@ -448,6 +453,9 @@ int32_t HwCastStreamPlayer::GetSupportedHdrCapabilities(std::vector<HDRFormat>& 
     SLOGI("enter GetSupportedHdrCapabilities");
     std::lock_guard lockGuard(streamPlayerLock_);
     CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    if (jsonCapabilitiesSptr_->hdrFormats_.empty()) {
+        GetMediaCapabilities();
+    }
     hdrFormats = jsonCapabilitiesSptr_->hdrFormats_;
     return AVSESSION_SUCCESS;
 }
@@ -457,6 +465,9 @@ int32_t HwCastStreamPlayer::GetSupportedPlaySpeeds(std::vector<float>& playSpeed
     SLOGI("enter GetSupportedDecoders");
     std::lock_guard lockGuard(streamPlayerLock_);
     CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
+    if (jsonCapabilitiesSptr_->playSpeeds_.empty()) {
+        GetMediaCapabilities();
+    }
     playSpeeds = jsonCapabilitiesSptr_->playSpeeds_;
     return AVSESSION_SUCCESS;
 }
