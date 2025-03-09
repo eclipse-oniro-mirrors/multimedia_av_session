@@ -87,6 +87,8 @@ private:
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem);
     bool RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription);
     int32_t GetMediaCapabilities();
+    void GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue);
+    void GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue);
 
     std::shared_ptr<JsonCapabilities> jsonCapabilitiesSptr_ = std::make_shared<JsonCapabilities>();
     const std::string videoStr_ = "video";
