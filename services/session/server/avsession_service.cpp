@@ -589,7 +589,7 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t userId)
             UpdateTopSession(session);
             if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
                 topSession_->GetUid() != ancoUid) {
-                AVSessionService::NotifySystemUI(nullptr, true, true, false);
+                AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false);
                 PublishEvent(mediaPlayStateTrue);
             }
             if (topSession_->GetUid() == ancoUid) {
@@ -622,7 +622,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
                     isPlaying, isMediaCardOpen_.load(), hasRemoveEvent_.load());
                 return;
             }
-            AVSessionService::NotifySystemUI(nullptr, true, isPlaying, false);
+            AVSessionService::NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
             PublishEvent(mediaPlayStateTrue);
         }
         if (topSession_->GetUid() == ancoUid) {
@@ -704,7 +704,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             SLOGI("Renderer Running, RepublishNotification for uid=%{public}d", sessionItem->GetUid());
             UpdateTopSession(sessionItem);
             AVSessionDescriptor selectSession = sessionItem->GetDescriptor();
-            NotifySystemUI(&selectSession, true, true, false);
+            NotifySystemUI(&selectSession, true, IsCapsuleNeeded(), false);
             PublishEvent(mediaPlayStateTrue);
         }
     } else {
@@ -1143,7 +1143,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         if (session && topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
             SLOGI("MediaCapsule topsession %{public}s updateImage", topSession_->GetBundleName().c_str());
-            NotifySystemUI(nullptr, true, true, isMediaChange);
+            NotifySystemUI(nullptr, true, IsCapsuleNeeded(), isMediaChange);
         }
     });
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -1199,7 +1199,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
         if (topSession_ && topSession_.GetRefPtr() == session.GetRefPtr()) {
             AVSessionDescriptor selectSession = session->GetDescriptor();
-            NotifySystemUI(&selectSession, true, true, false);
+            NotifySystemUI(&selectSession, true, IsCapsuleNeeded(), false);
         }
     });
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -1408,6 +1408,14 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
     auto res = CreateSessionInner(tag, type, elementName, object);
     CHECK_AND_RETURN_RET_LOG(res == AVSESSION_SUCCESS, nullptr, "create session fail");
     return object;
+}
+
+bool AVSessionService::IsCapsuleNeeded()
+{
+    if (topSession_ != nullptr) {
+        return topSession_->GetSessionType() == "audio";
+    }
+    return false;
 }
 
 // LCOV_EXCL_START
