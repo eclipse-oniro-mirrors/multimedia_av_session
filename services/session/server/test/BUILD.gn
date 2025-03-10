@@ -1770,7 +1770,10 @@ if (castplus_cast_engine_enable) {
 
     configs = [ ":module_private_config_without_third_party" ]
 
-    cflags_cc = [ "-fno-access-control" ]
+    cflags_cc = [
+      "-fno-access-control",
+      "-DCASTPLUS_CAST_ENGINE_ENABLE",
+    ]
 
     deps = [
       "../../../session:avsession_server_static",

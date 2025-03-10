@@ -77,6 +77,30 @@ public:
     ~AVSessionCallbackImpl() override;
 };
 
+class MockIAVCastControllerProxy : public OHOS::AVSession::IAVCastControllerProxy {
+    void Release() override {}
+    int32_t RegisterControllerListener(const
+        std::shared_ptr<IAVCastControllerProxyListener> listener) override { return 0; }
+    int32_t UnRegisterControllerListener(const
+        std::shared_ptr<IAVCastControllerProxyListener> listener) override { return 0; }
+    AVQueueItem GetCurrentItem() override { return AVQueueItem(); }
+    int32_t Start(const AVQueueItem& item) override { return 0; }
+    int32_t Prepare(const AVQueueItem& item) override { return 0; }
+    void SendControlCommand(const AVCastControlCommand cmd) override {}
+    int32_t GetDuration(int32_t& duration) override { return 0; }
+    int32_t GetCastAVPlaybackState(AVPlaybackState& state) override { return 0; }
+    int32_t SetValidAbility(const std::vector<int32_t>& validAbilityList) override { return 0; }
+    int32_t GetValidAbility(std::vector<int32_t>& validAbilityList) override { return 0; }
+    int32_t SetDisplaySurface(std::string& surfaceId) override { return 0; }
+    int32_t ProcessMediaKeyResponse(const
+        std::string& assetId, const std::vector<uint8_t>& response) override { return 0; }
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override { return 0; }
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel)
+        override { return 0; }
+    int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override { return 0; }
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override { return 0; }
+};
+
 void AVsessionItemTest::SetUpTestCase()
 {
     SLOGI("AVsessionItemTest SetUpTestCase");
@@ -367,4 +391,127 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_002, Test
     int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameMapState, deviceInfo);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_RegisterListenerStreamToCast_003
+ * @tc.desc: Test RegisterListenerStreamToCast with castControllerProxy_ and GetDescription() != nullptr.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_003, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_RegisterListenerStreamToCast_003 begin!");
+    g_AVSessionItem->castHandle_ = 0;
+    std::map<std::string, std::string> serviceNameMapState;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "1234567890";
+    deviceInfo.deviceName_ = "TestDevice";
+    deviceInfo.deviceType_ = 1;
+    deviceInfo.networkId_ = "12345";
+    deviceInfo.supportedProtocols_ = 2;
+    
+    auto mockCastControllerProxy = std::make_shared<MockIAVCastControllerProxy>();
+    g_AVSessionItem->castControllerProxy_ = mockCastControllerProxy;
+    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameMapState, deviceInfo);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGD("AVSessionItem_RegisterListenerStreamToCast_003 end!");
+}
+
+
+/**
+ * @tc.name: AVSessionItem_RegisterListenerStreamToCast_004
+ * @tc.desc: Test RegisterListenerStreamToCast with castControllerProxy_ == nullptr and castHandle_ <= 0.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_004, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_RegisterListenerStreamToCast_004 begin!");
+    g_AVSessionItem->castHandle_ = 0;
+    std::map<std::string, std::string> serviceNameMapState;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "1234567890";
+    deviceInfo.deviceName_ = "TestDevice";
+    deviceInfo.deviceType_ = 1;
+    deviceInfo.networkId_ = "12345";
+    deviceInfo.supportedProtocols_ = 2;
+    g_AVSessionItem->castControllerProxy_ = nullptr;
+    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameMapState, deviceInfo);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGD("AVSessionItem_RegisterListenerStreamToCast_004 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_RegisterListenerStreamToCast_005
+ * @tc.desc: Test RegisterListenerStreamToCast with GetCurrentItem().GetDescription() == nullptr and castHandle_ <= 0.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_005, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_RegisterListenerStreamToCast_005 begin!");
+    g_AVSessionItem->castHandle_ = 0;
+    std::map<std::string, std::string> serviceNameMapState;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "1234567890";
+    deviceInfo.deviceName_ = "TestDevice";
+    deviceInfo.deviceType_ = 1;
+    deviceInfo.networkId_ = "12345";
+    deviceInfo.supportedProtocols_ = 2;
+    
+    auto mockCastControllerProxy = std::make_shared<MockIAVCastControllerProxy>();
+    g_AVSessionItem->castControllerProxy_ = mockCastControllerProxy;
+    AVQueueItem item;
+    item.description_ = nullptr;
+    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameMapState, deviceInfo);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGD("AVSessionItem_RegisterListenerStreamToCast_005 end!");
+}
+
+
+/**
+ * @tc.name: AVSessionItem_SetOutputDevice_001
+ * @tc.desc: Test SetOutputDevice with controllers not empty.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_SetOutputDevice_001 begin!");
+    OutputDeviceInfo info;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "DeviceId1";
+    deviceInfo.deviceName_ = "DeviceName1";
+    deviceInfo.deviceType_ = 1;
+    info.deviceInfos_.push_back(deviceInfo);
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(1, g_AVSessionItem);
+    g_AVSessionItem->SetOutputDevice(info);
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceId_ == "DeviceId1");
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ == "DeviceName1");
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceType_ == 1);
+    SLOGD("AVSessionItem_SetOutputDevice_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetOutputDevice_002
+ * @tc.desc: Test SetOutputDevice with controllers empty.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_002, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_SetOutputDevice_002 begin!");
+    OutputDeviceInfo info;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "DeviceId1";
+    deviceInfo.deviceName_ = "DeviceName1";
+    deviceInfo.deviceType_ = 1;
+    info.deviceInfos_.push_back(deviceInfo);
+    g_AVSessionItem->controllers_.clear();
+    g_AVSessionItem->SetOutputDevice(info);
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceId_ == "DeviceId1");
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ == "DeviceName1");
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceType_ == 1);
+    SLOGD("AVSessionItem_SetOutputDevice_002 end!");
 }
