@@ -32,9 +32,11 @@ NapiAVCastControllerCallback::NapiAVCastControllerCallback()
 
 NapiAVCastControllerCallback::~NapiAVCastControllerCallback()
 {
-    napi_ref ref = dataSrcRef_;
-    dataSrcRef_ = nullptr;
-    napi_delete_reference(env_, ref);
+    if (dataSrcRef_ != nullptr) {
+        napi_ref ref = dataSrcRef_;
+        dataSrcRef_ = nullptr;
+        napi_delete_reference(env_, ref);
+    }
     SLOGI("destroy");
 }
 
