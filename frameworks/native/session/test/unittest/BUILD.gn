@@ -336,7 +336,10 @@ if (castplus_cast_engine_enable) {
 
     sources = [ "avcast_controller_test.cpp" ]
 
-    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    cflags = [
+      "-DCASTPLUS_CAST_ENGINE_ENABLE",
+      "-fno-access-control",
+    ]
 
     deps = common_deps_without_third_party
 
