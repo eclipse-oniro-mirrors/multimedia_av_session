@@ -615,7 +615,6 @@ private:
 
     int32_t pressCount_ {};
     int32_t maxHistoryNums_ = 10;
-    int uidForAppStateChange_ = 0;
     bool isFirstPress_ = true;
     bool isSourceInCast_ = false;
     bool isInCast_ = false;

@@ -436,6 +436,7 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceCha
                 SendJsonStringByte(deviceId_, msg);
             },
             "GetPreferredDeviceChangeCallbackFunc");
+        AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
     };
 }
 
@@ -505,7 +506,6 @@ void MigrateAVSessionServer::SwitchAudioDeviceCommand(Json::Value jsonObject)
     device->macAddress_ = macAddress;
 
     AudioAdapter::GetInstance().SelectOutputDevice(device);
-    AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
 }
 }
 
