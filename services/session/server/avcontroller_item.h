@@ -116,6 +116,8 @@ public:
     int32_t RegisterMigrateAVSessionProxyCallback(
         const std::function<int32_t(const std::string&, AAFwk::WantParams&)>& callback);
 
+    int32_t SetImgForMetaData(AVMetaData& data);
+
     bool isFromSession_ = false;
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
