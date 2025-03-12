@@ -18,6 +18,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_service.h"
+#include "hw_cast_provider.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -66,6 +67,19 @@ public:
     virtual void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) {}
 
     virtual ~AVRouterListenerMock() {}
+};
+
+class AVSessionServiceListenerMock : public IAVSessionServiceListener {
+public:
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        void ReleaseCastSession() {}
+        void CreateSessionByCast(const int64_t castHandle) {}
+        void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) {}
+        void NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) {}
+        void NotifyDeviceOffline(const std::string& deviceId) {}
+        void setInCast(bool isInCast) {}
+#endif
+    virtual ~AVSessionServiceListenerMock() {}
 };
 
 /**
@@ -611,6 +625,405 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession005, TestSize.Level1)
     g_AVRouterImpl->DisconnetOtherSession(sessionId, deviceInfo);
     EXPECT_TRUE(castHandleInfo.avRouterListener_ == nullptr);
     SLOGI("DisconnectOtherSession005 end");
+}
+
+/**
+* @tc.name: StartDeviceLogging001
+* @tc.desc: the size of providerManagerMap_ bigger than zero
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, StartDeviceLogging001, TestSize.Level1)
+{
+    SLOGI("StartDeviceLogging001 begin");
+    int32_t fd = 0;
+    uint32_t maxSize = 0;
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    g_AVRouterImpl->providerManagerMap_.insert({fd, avCastProviderManager});
+    g_AVRouterImpl->StartDeviceLogging(fd, maxSize);
+    EXPECT_TRUE(!g_AVRouterImpl->providerManagerMap_.empty());
+    SLOGI("StartDeviceLogging001 end");
+}
+
+/**
+* @tc.name: StopDeviceLogging001
+* @tc.desc: set cacheStartDeviceLogging_ to false
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, StopDeviceLogging001, TestSize.Level1)
+{
+    SLOGI("StopDeviceLogging001 begin");
+    g_AVRouterImpl->cacheStartDeviceLogging_ = false;
+    g_AVRouterImpl->StopDeviceLogging();
+    EXPECT_TRUE(g_AVRouterImpl->cacheStartDeviceLogging_ == false);
+    SLOGI("StopDeviceLogging001 end");
+}
+
+/**
+* @tc.name: StartCastDiscovery001
+* @tc.desc: the size of providerManagerMap_ bigger than zero
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, StartCastDiscovery001, TestSize.Level1)
+{
+    SLOGI("StartCastDiscovery001 begin");
+    int32_t castDeviceCapability = 0;
+    std::vector<std::string> drmSchemes = {"test"};
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    g_AVRouterImpl->providerManagerMap_.insert({castDeviceCapability, avCastProviderManager});
+    g_AVRouterImpl->StartCastDiscovery(castDeviceCapability, drmSchemes);
+    EXPECT_TRUE(!g_AVRouterImpl->providerManagerMap_.empty());
+    SLOGI("StartCastDiscovery001 end");
+}
+
+/**
+* @tc.name: StopCastDiscovery001
+* @tc.desc: set cacheStartDeviceLogging_ to false
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, StopCastDiscovery001, TestSize.Level1)
+{
+    SLOGI("StopCastDiscovery001 begin");
+    g_AVRouterImpl->cacheStartDeviceLogging_ = false;
+    g_AVRouterImpl->StopCastDiscovery();
+    EXPECT_TRUE(g_AVRouterImpl->cacheStartDeviceLogging_ == false);
+    SLOGI("StopCastDiscovery001 end");
+}
+
+/**
+* @tc.name: OnDeviceAvailable001
+* @tc.desc: set servicePtr_ to not nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, OnDeviceAvailable001, TestSize.Level1)
+{
+    SLOGI("OnDeviceAvailable001 begin");
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    auto listener = std::make_shared<AVSessionServiceListenerMock>();
+    g_AVRouterImpl->servicePtr_ = listener.get();
+    g_AVRouterImpl->OnDeviceAvailable(outputDeviceInfo);
+    EXPECT_TRUE(g_AVRouterImpl->servicePtr_ != nullptr);
+    SLOGI("OnDeviceAvailable001 end");
+}
+
+/**
+* @tc.name: OnCastServerDied001
+* @tc.desc: set servicePtr_ to not nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, OnCastServerDied001, TestSize.Level1)
+{
+    SLOGI("OnCastServerDied001 begin");
+    int32_t providerNumber = 0;
+    auto listener = std::make_shared<AVSessionServiceListenerMock>();
+    g_AVRouterImpl->servicePtr_ = listener.get();
+    g_AVRouterImpl->OnCastServerDied(providerNumber);
+    EXPECT_TRUE(g_AVRouterImpl->servicePtr_ != nullptr);
+    SLOGI("OnCastServerDied001 end");
+}
+
+/**
+* @tc.name: GetRemoteController003
+* @tc.desc: fail to get controller by handle
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, GetRemoteController003, TestSize.Level1)
+{
+    SLOGI("GetRemoteController003 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+    int32_t castId = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    int64_t handle = 2000;
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = "12345";
+    castHandleInfo.avRouterListener_ = std::make_shared<AVRouterListenerMock>();
+    g_AVRouterImpl->castHandleToInfoMap_[handle] = castHandleInfo;
+
+    auto controller = g_AVRouterImpl->GetRemoteController(castHandle);
+    EXPECT_TRUE(controller == nullptr);
+    SLOGI("GetRemoteController003 end");
+}
+
+/**
+* @tc.name: GetRemoteController004
+* @tc.desc: fail to get controller by handle
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, GetRemoteController004, TestSize.Level1)
+{
+    SLOGI("GetRemoteController004 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+    int32_t castId = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = "12345";
+    castHandleInfo.avRouterListener_ = std::make_shared<AVRouterListenerMock>();
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+
+    auto controller = g_AVRouterImpl->GetRemoteController(castHandle);
+    EXPECT_TRUE(controller == nullptr);
+    SLOGI("GetRemoteController004 end");
+}
+
+/**
+* @tc.name: StartCast004
+* @tc.desc: the size of providerManagerMap_ bigger than zero
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, StartCast004, TestSize.Level1)
+{
+    SLOGI("StartCast004 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+    
+    std::map<std::string, std::string> serviceNameMapState;
+    std::string sessionId = "1000";
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    castHandleInfo.sessionId_ = sessionId;
+    g_AVRouterImpl->castHandleToInfoMap_[providerNumber] = castHandleInfo;
+
+    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameMapState, "1001");
+    EXPECT_TRUE(ret != AVSESSION_ERROR);
+    SLOGI("StartCast004 end");
+}
+
+/**
+* @tc.name: StartCast005
+* @tc.desc: the size of providerManagerMap_ bigger than zero
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, StartCast005, TestSize.Level1)
+{
+    SLOGI("StartCast005 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+    
+    std::map<std::string, std::string> serviceNameMapState;
+    std::string sessionId = "1000";
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    castHandleInfo.sessionId_ = sessionId;
+    g_AVRouterImpl->castHandleToInfoMap_[providerNumber] = castHandleInfo;
+
+    OutputDeviceInfo outputDeviceInfo2;
+    DeviceInfo deviceInfo2;
+    deviceInfo2.providerId_ = providerNumber + 100;
+    outputDeviceInfo2.deviceInfos_.push_back(deviceInfo2);
+
+    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo2, serviceNameMapState, sessionId);
+    EXPECT_TRUE(ret == AVSESSION_ERROR);
+    SLOGI("StartCast005 end");
+}
+
+/**
+* @tc.name: StartCast006
+* @tc.desc: the size of providerManagerMap_ bigger than zero
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, StartCast006, TestSize.Level1)
+{
+    SLOGI("StartCast006 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+    
+    std::map<std::string, std::string> serviceNameMapState;
+    std::string sessionId = "1000";
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    castHandleInfo.sessionId_ = sessionId;
+    g_AVRouterImpl->castHandleToInfoMap_[providerNumber] = castHandleInfo;
+
+    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameMapState, sessionId);
+    EXPECT_TRUE(ret == AVSESSION_ERROR);
+    SLOGI("StartCast006 end");
+}
+
+/**
+* @tc.name: AddDevice005
+* @tc.desc: success to add device
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, AddDevice005, TestSize.Level1)
+{
+    SLOGI("AddDevice005 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    int32_t castId = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+    
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+
+    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo);
+    EXPECT_TRUE(ret == AVSESSION_SUCCESS);
+    SLOGI("AddDevice005 end");
+}
+
+/**
+* @tc.name: AddDevice006
+* @tc.desc: fail to add device
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, AddDevice006, TestSize.Level1)
+{
+    SLOGI("AddDevice006 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    int32_t castId = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+    
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+
+    int32_t ret = g_AVRouterImpl->AddDevice(castId + 1, outputDeviceInfo);
+    EXPECT_TRUE(ret == ERR_DEVICE_CONNECTION_FAILED);
+    SLOGI("AddDevice006 end");
+}
+
+/**
+* @tc.name: StopCast001
+* @tc.desc: success to stop cast
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, StopCast001, TestSize.Level1)
+{
+    SLOGI("StopCast001 begin");
+    bool continuePlay = true;
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+    int32_t castId = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+    
+    std::string sessionId = "1000";
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    castHandleInfo.sessionId_ = sessionId;
+    g_AVRouterImpl->castHandleToInfoMap_[providerNumber] = castHandleInfo;
+
+    auto ret = g_AVRouterImpl->StopCast(castHandle, continuePlay);
+    EXPECT_TRUE(ret == AVSESSION_SUCCESS);
+    SLOGI("StopCast001 end");
+}
+
+/**
+* @tc.name: StopCastSession001
+* @tc.desc: success to stop cast session
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, StopCastSession001, TestSize.Level1)
+{
+    SLOGI("StopCastSession001 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+    int32_t castId = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    g_AVRouterImpl->castHandleToInfoMap_[providerNumber] = castHandleInfo;
+    g_AVRouterImpl->castHandleToInfoMap_[providerNumber + 100] = castHandleInfo;
+
+    auto ret = g_AVRouterImpl->StopCast(castHandle);
+    EXPECT_TRUE(ret == AVSESSION_SUCCESS);
+    SLOGI("StopCastSession001 end");
 }
 
 } //AVSession
