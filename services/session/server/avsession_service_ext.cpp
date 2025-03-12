@@ -202,12 +202,8 @@ void AVSessionService::ReleaseCastSession()
 void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 {
     SLOGI("AVSessionService CreateSessionByCast in");
-    if (isSourceInCast_) {
-        AVSessionRadarInfo info("AVSessionService::CreateSessionByCast");
-        AVSessionRadar::GetInstance().StartConnect(info);
-        SLOGI("Create Cast in source, return");
-        return;
-    }
+    AVSessionRadarInfo info("AVSessionService::CreateSessionByCast");
+    AVSessionRadar::GetInstance().StartConnect(info);
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName("castBundleName");
     elementName.SetAbilityName("castAbilityName");
@@ -319,7 +315,6 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     ReportStartCastEnd("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_, ret);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGD("StartCast set isSourceInCast");
-    isSourceInCast_ = true;
 
     SLOGI("no set continuous task in service");
     HISYSEVENT_BEHAVIOR("SESSION_CAST",
