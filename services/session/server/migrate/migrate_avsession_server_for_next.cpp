@@ -136,6 +136,13 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
     if (data.GetMetaMask().test(AVMetaData::META_KEY_ARTIST)) {
         metaData[METADATA_ARTIST] = data.GetArtist();
     }
+    {
+        std::lock_guard lockGuard(cacheJsonLock_);
+        if (metaData == metaDataCache_) {
+            SLOGI("DoMetaDataSyncToRemote with repeat title:%{public}s", data.GetTitle().c_str());
+            return;
+        }
+    }
     std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_META_INFO});
     SoftbusSessionUtils::TransferJsonToStr(metaData, msg);
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
@@ -144,6 +151,10 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
         },
         "DoMetaDataSyncToRemote");
     SLOGI("DoMetaDataSyncToRemote async title:%{public}s done", data.GetTitle().c_str());
+    {
+        std::lock_guard lockGuard(cacheJsonLock_);
+        metaDataCache_ = metaData;
+    }
 }
 
 void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionPixelMap> innerPixelMap)
@@ -189,6 +200,14 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
     if (state.GetMask().test(AVPlaybackState::PLAYBACK_KEY_IS_FAVORITE)) {
         playbackState[FAVOR_STATE] = state.GetFavorite();
     }
+    {
+        std::lock_guard lockGuard(cacheJsonLock_);
+        if (playbackState == playbackStateCache_) {
+            SLOGI("DoPlaybackStateSyncToRemote with repeat state:%{public}d|isFavor:%{public}d",
+                state.GetState(), state.GetFavorite());
+            return;
+        }
+    }
     std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_PLAY_STATE});
     SoftbusSessionUtils::TransferJsonToStr(playbackState, msg);
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
@@ -198,6 +217,10 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
         "DoPlaybackStateSyncToRemote");
     SLOGI("DoPlaybackStateSyncToRemote sync state:%{public}d|isFavor:%{public}d done",
         state.GetState(), state.GetFavorite());
+    {
+        std::lock_guard lockGuard(cacheJsonLock_);
+        playbackStateCache_ = playbackState;
+    }
 }
 
 void MigrateAVSessionServer::DoValidCommandsSyncToRemote(const std::vector<int32_t>& commands)
@@ -258,7 +281,7 @@ void MigrateAVSessionServer::DoBundleInfoSyncToRemote(sptr<AVControllerItem> con
 void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerItem> controller)
 {
     CHECK_AND_RETURN_LOG(controller != nullptr, "UpdateFrontSessionInfoToRemote get controller null");
-    SLOGI("UpdateFrontSessionInfoToRemote with sessionId async:%{public}s",
+    SLOGI("UpdateFrontSessionInfoToRemote with sessionId clearCache:%{public}s",
         AVSessionUtils::GetAnonySessionId(controller->GetSessionId()).c_str());
 
     Json::Value sessionInfo;
@@ -274,6 +297,11 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
         },
         "UpdateFrontSessionInfoToRemote");
 
+    {
+        std::lock_guard lockGuard(cacheJsonLock_);
+        metaDataCache_.clear();
+        playbackStateCache_.clear();
+    }
     AVMetaData metaData;
     int32_t ret = controller->GetAVMetaData(metaData);
     if (AVSESSION_SUCCESS == ret || ERR_INVALID_PARAM == ret) {

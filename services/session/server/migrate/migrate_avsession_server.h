@@ -145,6 +145,9 @@ private:
     std::function<void(int32_t)> volumeKeyEventCallbackFunc_;
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
     AudioDeviceDescriptorsCallbackFunc preferredDeviceChangeCallbackFunc_;
+    Json::Value metaDataCache_;
+    Json::Value playbackStateCache_;
+    std::recursive_mutex cacheJsonLock_;
 };
 
 class AVControllerObserver : public AVControllerCallback {
