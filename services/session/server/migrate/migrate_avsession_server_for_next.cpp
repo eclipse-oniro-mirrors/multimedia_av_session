@@ -139,7 +139,7 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
     {
         std::lock_guard lockGuard(cacheJsonLock_);
         if (metaData == metaDataCache_) {
-            SLOGE("DoMetaDataSyncToRemote with repeat title:%{public}s", data.GetTitle().c_str());
+            SLOGI("DoMetaDataSyncToRemote with repeat title:%{public}s", data.GetTitle().c_str());
             return;
         }
     }
@@ -203,7 +203,7 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
     {
         std::lock_guard lockGuard(cacheJsonLock_);
         if (playbackState == playbackStateCache_) {
-            SLOGE("DoPlaybackStateSyncToRemote with repeat state:%{public}d|isFavor:%{public}d",
+            SLOGI("DoPlaybackStateSyncToRemote with repeat state:%{public}d|isFavor:%{public}d",
                 state.GetState(), state.GetFavorite());
             return;
         }
