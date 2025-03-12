@@ -138,6 +138,8 @@ public:
 
     AVPlaybackState GetPlaybackState();
 
+    AVMetaData GetMetaDataWithoutImg();
+
     AVMetaData GetMetaData();
 
     std::vector<AVQueueItem> GetQueueItems();

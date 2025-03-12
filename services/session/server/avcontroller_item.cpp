@@ -108,11 +108,30 @@ int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 }
 // LCOV_EXCL_STOP
 
+int32_t AVControllerItem::SetImgForMetaData(AVMetaData& data)
+{
+    std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+    std::string fileName = sessionId_ + AVSessionUtils::GetFileSuffix();
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
+    data.SetMediaImage(mediaPixelMap);
+    AVSessionUtils::ReadImageFromFile(mediaPixelMap, fileDir, fileName);
+
+    std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "SetImgForMetaData session not exist");
+    std::string avQueueFileName =
+        session_->GetBundleName() + "_" + data.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = data.GetAVQueueImage();
+    AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
 {
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
-    data = session_->GetMetaData();
+    data = session_->GetMetaDataWithoutImg();
+    int32_t ret = SetImgForMetaData(data);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetImgForMetaData with ret:%{public}d", ret);
     if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
         SLOGD("isFromSession %{public}d in metaGet", isFromSession_);
         if (isFromSession_) {

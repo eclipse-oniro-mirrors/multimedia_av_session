@@ -1025,7 +1025,7 @@ void AVSessionService::LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::
     sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
     CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for LowQualityCheck");
 
-    AVMetaData meta = session->GetMetaData();
+    AVMetaData meta = session->GetMetaDataWithoutImg();
     bool hasTitle = !meta.GetTitle().empty();
     bool hasImage = meta.GetMediaImage() != nullptr || !meta.GetMediaImageUri().empty();
     if ((hasTitle || hasImage) && (session->GetSupportCommand().size() != 0)) {
@@ -3220,7 +3220,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         AVQueueItem item;
         topSession_->GetCurrentCastItem(item);
         std::string notifyText = item.GetDescription() ? item.GetDescription()->GetTitle() :
-            topSession_->GetMetaData().GetTitle();
+            topSession_->GetMetaDataWithoutImg().GetTitle();
         AddCapsule(notifyText, isCapsuleUpdate, iPixelMap, localLiveViewContent, &(request));
     }
 

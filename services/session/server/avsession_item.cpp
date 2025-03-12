@@ -1599,6 +1599,12 @@ AVPlaybackState AVSessionItem::GetPlaybackState()
     return playbackState_;
 }
 
+AVMetaData AVSessionItem::GetMetaDataWithoutImg()
+{
+    std::lock_guard lockGuard(avsessionItemLock_);
+    return metaData_;
+}
+
 AVMetaData AVSessionItem::GetMetaData()
 {
     std::lock_guard lockGuard(avsessionItemLock_);
