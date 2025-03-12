@@ -80,6 +80,7 @@ export class AVCastPicker extends ViewPU {
         this.__isPc = new ObservedPropertySimplePU(false, this, 'isPc');
         this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
         this.__restartUECMessage = new ObservedPropertySimplePU(1, this, 'restartUECMessage');
+        this.__isShowLoadingProgress = new ObservedPropertySimplePU(false, this, 'isShowLoadingProgress');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -149,6 +150,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.restartUECMessage !== undefined) {
             this.restartUECMessage = c11.restartUECMessage;
         }
+        if (c11.isShowLoadingProgress !== undefined) {
+            this.isShowLoadingProgress = c11.isShowLoadingProgress;
+        }
     }
 
     updateStateVars(b11) {
@@ -172,6 +176,7 @@ export class AVCastPicker extends ViewPU {
         this.__isPc.purgeDependencyOnElmtId(a11);
         this.__isRTL.purgeDependencyOnElmtId(a11);
         this.__restartUECMessage.purgeDependencyOnElmtId(a11);
+        this.__isShowLoadingProgress.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -192,6 +197,7 @@ export class AVCastPicker extends ViewPU {
         this.__isPc.aboutToBeDeleted();
         this.__isRTL.aboutToBeDeleted();
         this.__restartUECMessage.aboutToBeDeleted();
+        this.__isShowLoadingProgress.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -330,6 +336,14 @@ export class AVCastPicker extends ViewPU {
 
     set restartUECMessage(f1) {
         this.__restartUECMessage.set(f1);
+    }
+
+    get isShowLoadingProgress() {
+        return this.__isShowLoadingProgress.get();
+    }
+
+    set isShowLoadingProgress(g1) {
+        this.__isShowLoadingProgress.set(g1);
     }
 
     MenuStateChange() {
@@ -645,6 +659,11 @@ export class AVCastPicker extends ViewPU {
                     console.info(TAG, `maxFontSizeScale : ${l8.maxFontSizeScale}`);
                     this.maxFontSizeScale = l8.maxFontSizeScale;
                 }
+
+                if (JSON.stringify(l8.isShowLoadingProgress) !== undefined) {
+                    console.info(TAG, `isShowLoadingProgress : ${l8.isShowLoadingProgress}`);
+                    this.isShowLoadingProgress = l8.isShowLoadingProgress;
+                }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
             UIExtensionComponent.bindMenu(this.isMenuShow, { builder: () => { this.deviceMenu.call(this); }}, {
@@ -729,7 +748,25 @@ export class AVCastPicker extends ViewPU {
             Column.size({ width: '100%', height: '100%' });
             Column.zIndex(0);
         }, Column);
-        this.customPicker.bind(this)();
+        this.observeComponentCreation2((c7, s7) => {
+            If.create();
+            if (this.isShowLoadingProgress) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((c7, s7) => {
+                        LoadingProgress.create();
+                        LoadingProgress.color({'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'});
+                        LoadingProgress.width('20vp');
+                        LoadingProgress.height('20vp');
+                    }, LoadingProgress);
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.customPicker.bind(this)();
+                });
+            }
+        }, If);
+        If.pop();
         Column.pop();
         this.observeComponentCreation2((w7, x7) => {
             Column.create();

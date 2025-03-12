@@ -189,6 +189,7 @@ export struct AVCastPicker {
   @State isPc: boolean = false;
   @State isRTL: boolean = false;
   @State restartUECMessage: number = 1;
+  @State isShowLoadingProgress: boolean = false;
 
   MenuStateChange() {
     if (this.extensionProxy != null) {
@@ -418,6 +419,11 @@ export struct AVCastPicker {
           console.info(TAG, `maxFontSizeScale : ${JSON.stringify(data['maxFontSizeScale'])}`);
           this.maxFontSizeScale = data['maxFontSizeScale'] as number;
         }
+
+        if (JSON.stringify(data['isShowLoadingProgress']) !== undefined) {
+          console.info(TAG, `isShowLoadingProgress : ${JSON.stringify(data['isShowLoadingProgress'])}`);
+          this.isShowLoadingProgress = data['isShowLoadingProgress'] as boolean;
+        }
       })
       .size({ width: '100%', height: '100%' })
       .bindMenu(this.isMenuShow, this.deviceMenu(), {
@@ -494,7 +500,14 @@ export struct AVCastPicker {
   private buildCustomPicker() {
     Stack({ alignContent: Alignment.Center}) {
       Column() {
-        this.customPicker();
+        if (isShowLoadingProgress) {
+          LoadingProgress()
+            .color($r('sys.color.icon_secondary'))
+            .width('20vp')
+            .height('20vp')
+        } else {
+          this.customPicker();
+        }
       }
       .alignItems(HorizontalAlign.Center)
       .justifyContent(FlexAlign.Center)
