@@ -127,9 +127,8 @@ void AVSessionService::RemoveInnerSessionListener(SessionListener *listener)
 void AVSessionService::HandleAppStateChange(int uid, int state)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    SLOGD("uidForAppStateChange_ = %{public}d, uid = %{public}d, state = %{public}d",
-        uidForAppStateChange_, uid, state);
-    if (uidForAppStateChange_ == uid) {
+    SLOGD("uid = %{public}d, state = %{public}d", uid, state);
+    if (topSession_ != nullptr && topSession_->GetUid() == uid) {
         if (state == appState) {
             return;
         }
@@ -351,7 +350,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 void AVSessionService::NotifyMirrorToStreamCast()
 {
     for (auto& session : GetContainer().GetAllSessions()) {
-        if (session != nullptr && session->GetUid() == uidForAppStateChange_ && isSupportMirrorToStream_ &&
+        if (session && topSession_ && (session.GetRefPtr() == topSession_.GetRefPtr()) && isSupportMirrorToStream_ &&
             !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
             MirrorToStreamCast(session);
         }

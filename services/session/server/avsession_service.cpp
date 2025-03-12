@@ -1206,7 +1206,6 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "Session not exist");
-        uidForAppStateChange_ = session->GetUid();
         if (isSupportMirrorToStream_ &&
             !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
             MirrorToStreamCast(session);
