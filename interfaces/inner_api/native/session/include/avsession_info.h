@@ -614,7 +614,7 @@ enum DistributedSessionType {
      * @systemapi
      * @since 16
      */
-    TYPE_SESSION_MAX = 1,
+    TYPE_SESSION_MAX = 3,
 };
 
 /**

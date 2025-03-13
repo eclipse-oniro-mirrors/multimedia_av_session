@@ -1099,9 +1099,9 @@ napi_value NapiAVSession::GetOutputDeviceSync(napi_env env, napi_callback_info i
 
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiSession->session_ == nullptr) {
-        context->status = napi_generic_failure;
-        context->errMessage = "GetOutputDeviceSync failed : session is nullptr";
-        context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+        SLOGE("NapiAVSession GetOutputDeviceSync fail:session nullptr");
+        NapiUtils::ThrowError(env, "NapiAVSession GetOutputDeviceSync failed : session is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
