@@ -70,26 +70,26 @@ public:
         const std::string& fileDir, const std::string& fileName)
     {
         if (innerPixelMap == nullptr) {
-            SLOGE("innerPixelMap is nullptr");
+            SLOGE("PixelMap nullptr");
             return;
         }
 
         char realPath[PATH_MAX] = { 0x00 };
         if (realpath(fileDir.c_str(), realPath) == nullptr) {
-            SLOGE("ReadImageFromFile check path failed %{public}s", fileDir.c_str());
+            SLOGE("check path fail:%{public}s", fileDir.c_str());
             return;
         }
         std::string filePath = fileDir + fileName;
 
         std::ifstream ifile(filePath.c_str(), std::ios::binary | std::ios::in);
         if (!ifile.is_open()) {
-            SLOGE("open file error, filePath=%{public}s", filePath.c_str());
+            SLOGE("open file err:Path=%{public}s", filePath.c_str());
             return;
         }
 
         size_t imgBufferSize;
         ifile.read((char*)&imgBufferSize, sizeof(size_t));
-        SLOGI("imgBufferSize=%{public}zu", imgBufferSize);
+        SLOGD("imgBufferSize=%{public}zu", imgBufferSize);
         if (imgBufferSize > MAX_FILE_SIZE || imgBufferSize <= 0) {
             SLOGE("error, dataSize larger than %{public}d or invalid", MAX_FILE_SIZE);
             ifile.close();
@@ -99,7 +99,7 @@ public:
         ifile.read((char*)&imgBuffer[0], imgBufferSize);
         SLOGD("imgBuffer prepare set");
         innerPixelMap->SetInnerImgBuffer(imgBuffer);
-        SLOGI("imgBuffer SetInnerImgBuffer done");
+        SLOGD("imgBuffer SetInnerImgBuffer done");
         ifile.close();
     }
 

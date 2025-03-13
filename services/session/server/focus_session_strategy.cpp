@@ -119,8 +119,8 @@ bool FocusSessionStrategy::IsFocusSession(const int32_t uid)
         HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", uid,
             "AUDIO_INFO_RENDERER_STATE", AudioStandard::RendererState::RENDERER_RUNNING,
             "DETAILED_MSG", "focussessionstrategy selectfocussession, current focus session info");
+        SLOGI("IsFocusSession uid=%{public}d isFocusTRUE", uid);
     }
-    SLOGI("IsFocusSession uid=%{public}d isFocus=%{public}d", uid, isFocus);
     return isFocus;
 }
 
@@ -147,7 +147,9 @@ bool FocusSessionStrategy::CheckFocusSessionStop(const int32_t uid)
     }
 
     lastStates_[uid] = currentStates_[uid];
-    SLOGI("CheckFocusSessionStop uid=%{public}d isFocusStop=%{public}d", uid, isFocusStop);
+    if (isFocusStop) {
+        SLOGI("CheckFocusSessionStop uid=%{public}d isFocusStopTRUE", uid);
+    }
     return isFocusStop;
 }
 
