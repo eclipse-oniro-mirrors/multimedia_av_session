@@ -610,20 +610,24 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     }
     napiAvSession->metaData_ = context->metaData;
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
-    if (napiAvSession->latestMetadataUri_ != napiAvSession->metaData_.GetMediaImageUri() ||
+    if (napiAvSession->latestMetadataAssetId_ != napiAvSession->metaData_.GetAssetId() ||
+        napiAvSession->latestMetadataUri_ != napiAvSession->metaData_.GetMediaImageUri() ||
         !napiAvSession->metaData_.GetMediaImageUri().empty() || napiAvSession->metaData_.GetMediaImage() != nullptr) {
         context->metadataTs = std::chrono::system_clock::now();
         napiAvSession->latestMetadataUri_ = napiAvSession->metaData_.GetMediaImageUri();
+        napiAvSession->latestMetadataAssetId_ = napiAvSession->metaData_.GetAssetId();
         reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
     }
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        bool isRepeatDownload = napiSession->latestDownloadedUri_ == napiSession->latestMetadataUri_;
+        bool isRepeatDownload = napiSession->latestDownloadedAssetId_ == napiSession->latestMetadataAssetId_ &&
+            napiSession->latestDownloadedUri_ == napiSession->latestMetadataUri_;
         bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData, isRepeatDownload);
         bool timeAvailable = context->metadataTs >= napiSession->latestMetadataTs_;
         SLOGI("doMetaDataSet res:%{public}d, time:%{public}d", static_cast<int>(res), static_cast<int>(timeAvailable));
         if (res && timeAvailable && napiSession->session_ != nullptr) {
             napiSession->latestDownloadedUri_ = context->metaData.GetMediaImageUri();
+            napiSession->latestDownloadedAssetId_ = context->metaData.GetAssetId();
             napiSession->session_->SetAVMetaData(context->metaData);
         }
         context->metaData.Reset();
